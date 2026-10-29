@@ -1,0 +1,148 @@
+#!/usr/bin/env node
+// npm run chequeos — las reglas del proyecto, verificadas contra la base
+// y los archivos. Sale con código 1 si alguna falla.
+//
+// Base: DB_PRUEBAS_URL, o SUPABASE_DB_URL de .env.local, o --url.
+
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import pg from "pg";
+
+const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
+if (existsSync(join(raiz, ".env.local"))) process.loadEnvFile(join(raiz, ".env.local"));
+const iUrl = process.argv.indexOf("--url");
+const url = iUrl >= 0 ? process.argv[iUrl + 1] : process.env.DB_PRUEBAS_URL || process.env.SUPABASE_DB_URL;
+
+// ── Listas cerradas de excepciones (docs/SCHEMA.md § Excepciones) ────
+const SIN_GIMNASIO_ID = new Set(["gimnasios", "administradores_plataforma", "plataforma_planes", "eventos_webhook", "documentos_legales"]);
+const UNIQUE_GLOBAL = new Set([
+  "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key",
+]);
+const EJECUTABLES = {
+  anon: new Set(["public.gimnasio_por_host"]),
+  authenticated: new Set([
+    "public.gimnasio_por_host", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
+    "public.congelar", "public.aplicar_cierre",
+    "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
+    "privado.mis_socios", "privado.sin_acentos",
+  ]),
+};
+
+const resultados = [];
+const chequeo = (nombre, problemas) => resultados.push({ nombre, problemas });
+
+// ── Archivos ─────────────────────────────────────────────────────────
+const carpetaMig = join(raiz, "supabase", "migrations");
+const migraciones = readdirSync(carpetaMig).filter((f) => f.endsWith(".sql")).sort();
+const conTodo = [], conTransaccion = [], malNombre = [];
+for (const f of migraciones) {
+  const sql = readFileSync(join(carpetaMig, f), "utf8");
+  if (/\b(TODO|FIXME|XXX)\b/.test(sql)) conTodo.push(f);
+  if (/^\s*(begin|commit)\s*;/im.test(sql.replace(/\$\$[\s\S]*?\$\$/g, ""))) conTransaccion.push(f);
+  if (!/^\d{14}_[a-z0-9_]+\.sql$/.test(f)) malNombre.push(f);
+}
+chequeo("Ningún TODO en migraciones", conTodo);
+chequeo("Ninguna migración abre su propia transacción", conTransaccion);
+chequeo("Migraciones con nombre AAAAMMDDHHMMSS_nombre.sql", malNombre);
+
+const telefonosReales = [];
+const carpetaDatos = join(raiz, "scripts", "datos");
+for (const f of readdirSync(carpetaDatos)) {
+  const texto = readFileSync(join(carpetaDatos, f), "utf8");
+  for (const m of texto.matchAll(/\+?54\s?9?\s?(\d[\d\s-]{7,})/g)) {
+    const digitos = m[0].replace(/\D/g, "");
+    if (!/^5490{3}/.test(digitos) && !/^540{3}/.test(digitos)) telefonosReales.push(`${f}: ${m[0].trim()}`);
+  }
+}
+chequeo("Datos de prueba sin teléfonos con pinta de reales (+549000…)", telefonosReales);
+
+// ── Base ─────────────────────────────────────────────────────────────
+if (!url) {
+  chequeo("Conexión a la base", ["Falta DB_PRUEBAS_URL o SUPABASE_DB_URL: no se revisó la base"]);
+} else {
+  const db = new pg.Client({ connectionString: url });
+  await db.connect();
+  const q = async (sql) => (await db.query(sql)).rows;
+
+  chequeo("RLS activa en toda tabla de public", (await q(`
+    select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind in ('r','p') and not c.relrowsecurity order by 1`)).map((r) => r.relname));
+
+  chequeo("gimnasio_id en toda tabla (salvo la lista de excepciones)", (await q(`
+    select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind = 'r'
+       and not exists (select 1 from pg_attribute a where a.attrelid = c.oid and a.attname = 'gimnasio_id' and not a.attisdropped)
+     order by 1`)).map((r) => r.relname).filter((t) => !SIN_GIMNASIO_ID.has(t)));
+
+  chequeo("FK entre tablas con gimnasio_id son compuestas (incluyen gimnasio_id)", (await q(`
+    select con.conname, c.relname as tabla, r.relname as ref
+      from pg_constraint con
+      join pg_class c on c.oid = con.conrelid join pg_namespace n on n.oid = c.relnamespace
+      join pg_class r on r.oid = con.confrelid join pg_namespace rn on rn.oid = r.relnamespace
+     where con.contype = 'f' and n.nspname = 'public' and rn.nspname = 'public'
+       and r.relname <> 'gimnasios'
+       and exists (select 1 from pg_attribute a where a.attrelid = c.oid and a.attname = 'gimnasio_id')
+       and exists (select 1 from pg_attribute a where a.attrelid = r.oid and a.attname = 'gimnasio_id')
+       and not exists (select 1 from unnest(con.conkey) k join pg_attribute a on a.attrelid = c.oid and a.attnum = k
+                        where a.attname = 'gimnasio_id')
+     order by 1`)).map((r) => `${r.tabla} → ${r.ref} (${r.conname})`));
+
+  chequeo("Ninguna fecha 'timestamp' sin zona", (await q(`
+    select table_name || '.' || column_name as col from information_schema.columns
+     where table_schema in ('public','privado') and data_type = 'timestamp without time zone' order by 1`)).map((r) => r.col));
+
+  chequeo("Plata en numeric(12,2)", (await q(`
+    select table_name || '.' || column_name || ' (' || data_type || coalesce('(' || numeric_precision || ',' || numeric_scale || ')', '') || ')' as col
+      from information_schema.columns
+     where table_schema = 'public'
+       and column_name ~ '^(monto|precio|descuento|para_regularizar)' and column_name !~ '_motivo$'
+       and not (data_type = 'numeric' and numeric_precision = 12 and numeric_scale = 2)
+     order by 1`)).map((r) => r.col));
+
+  chequeo("Toda función con search_path fijo", (await q(`
+    select n.nspname || '.' || p.proname as f from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname in ('public','privado') and p.prokind = 'f'
+       and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')
+     order by 1`)).map((r) => r.f));
+
+  const ejecutables = await q(`
+    select distinct rol, n.nspname || '.' || p.proname as f
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      cross join (values ('anon'), ('authenticated')) as r(rol)
+     where n.nspname in ('public','privado') and p.prokind = 'f'
+       and has_schema_privilege(rol, n.oid, 'usage')
+       and has_function_privilege(rol, p.oid, 'execute')
+     order by 1, 2`);
+  chequeo("Solo se ejecuta lo que está en la lista blanca (REVOKE en el resto)",
+    ejecutables.filter((r) => !EJECUTABLES[r.rol].has(r.f)).map((r) => `${r.rol}: ${r.f}`));
+
+  chequeo("Todo unique es por gimnasio (salvo la lista de excepciones)", (await q(`
+    select i.relname as indice, c.relname as tabla
+      from pg_index x
+      join pg_class i on i.oid = x.indexrelid
+      join pg_class c on c.oid = x.indrelid join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and x.indisunique and not x.indisprimary
+       and exists (select 1 from pg_attribute a where a.attrelid = c.oid and a.attname = 'gimnasio_id')
+       and not exists (select 1 from unnest(x.indkey) k join pg_attribute a on a.attrelid = c.oid and a.attnum = k
+                        where a.attname = 'gimnasio_id')
+     order by 1`)).map((r) => `${r.tabla}: ${r.indice}`).filter((s) => !UNIQUE_GLOBAL.has(s.split(": ")[1])));
+
+  chequeo("Gimnasios demo sin teléfonos con pinta de reales", (await q(`
+    select s.telefono from public.socios s join public.gimnasios g on g.id = s.gimnasio_id
+     where g.es_demo and s.telefono is not null and s.telefono not like '+549000%' limit 20`)).map((r) => r.telefono));
+
+  await db.end();
+}
+
+// ── Reporte ──────────────────────────────────────────────────────────
+let fallas = 0;
+for (const r of resultados) {
+  const ok = r.problemas.length === 0;
+  if (!ok) fallas++;
+  console.log(`${ok ? "✓" : "✗"} ${r.nombre}`);
+  for (const p of r.problemas.slice(0, 15)) console.log(`    ${p}`);
+  if (r.problemas.length > 15) console.log(`    … y ${r.problemas.length - 15} más`);
+}
+console.log(fallas ? `\n${fallas} chequeo(s) en rojo.` : "\nTodo en verde.");
+process.exit(fallas ? 1 : 0);

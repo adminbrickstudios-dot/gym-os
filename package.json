@@ -6,14 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src",
+    "db:aplicar": "node scripts/db/aplicar.mjs",
+    "db:prevuelo": "node scripts/db/aplicar.mjs --prevuelo",
+    "db:types": "supabase gen types typescript --db-url \"$SUPABASE_DB_URL\" --schema public > src/tipos/base.ts",
+    "db:local": "scripts/db/local.sh nueva",
+    "db:pruebas": "DB_PRUEBAS_URL=$(scripts/db/local.sh url) node --test \"supabase/pruebas/*.test.mjs\"",
+    "sembrar:demo": "node scripts/datos/sembrar-demo.mjs",
+    "chequeos": "node scripts/chequeos.mjs",
+    "verificar": "npm run lint && npm run typecheck && npm test && npm run db:pruebas && npm run chequeos && npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "next": "15.5.28",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,5 +39,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

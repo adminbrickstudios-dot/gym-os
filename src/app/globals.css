@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+/* Lenguaje visual de Gym OS. El acento y el fondo de cada gimnasio
+   vienen de configuracion_gimnasio y pisan estas variables en su layout. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --fondo: #faf7f0;          /* crema, nunca blanco puro */
+  --tarjeta: #ffffff;
+  --texto: #1c1917;
+  --texto-suave: #78716c;
+  --borde: #e7e2d8;
+  --acento: #16a34a;          /* un solo acento: la acción principal */
+  --acento-texto: #ffffff;
+  --radio: 16px;
+  --alto-minimo: 52px;
+  --verde: #16a34a;
+  --amarillo: #ca8a04;
+  --naranja: #ea580c;
+  --rojo: #dc2626;
+  --gris: #78716c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-fondo: var(--fondo);
+  --color-tarjeta: var(--tarjeta);
+  --color-texto: var(--texto);
+  --color-acento: var(--acento);
+  --radius-gym: var(--radio);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tarjeta {
+  background: var(--tarjeta);
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+}
+
+.texto-suave { color: var(--texto-suave); }
+
+/* Botones: alto mínimo 52px y press state en CSS puro (:active), no React. */
+.boton {
+  min-height: var(--alto-minimo);
+  border-radius: var(--radio);
+  padding: 0 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  transition: transform 60ms ease, filter 60ms ease;
+}
+.boton:active { transform: scale(0.97); filter: brightness(0.95); }
+.boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+
+/* Títulos de grupo de la barra lateral: mayúsculas chicas y gris. */
+.titulo-grupo {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  font-weight: 600;
 }

@@ -40,7 +40,7 @@ create table if not exists public.turnos_caja (
   foreign key (gimnasio_id, cerrado_por) references public.equipo (gimnasio_id, id),
   check ((cerrado_en is null) = (monto_contado is null) and (cerrado_en is null) = (cerrado_por is null))
 );
-create unique index if not exists turnos_caja_uno_abierto on public.turnos_caja (caja_id) where cerrado_en is null;
+create unique index if not exists turnos_caja_uno_abierto on public.turnos_caja (gimnasio_id, caja_id) where cerrado_en is null;
 select privado.politicas_estandar('public.turnos_caja', array['dueno','encargado','recepcion'], '{}');
 
 create table if not exists public.movimientos_caja (
