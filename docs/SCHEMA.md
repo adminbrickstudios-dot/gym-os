@@ -5,57 +5,69 @@
 
 ## Estado (29/10/2026)
 
-**Construido y probado contra Postgres 16** (migraciones 0001–0005,
-base local con la simulación de Supabase): todo lo de acceso. Lo demás
-sigue siendo propuesta.
+**Construido y probado contra Postgres 16** (migraciones 0001–0007, base
+local con la simulación de Supabase, 80 pruebas): acceso, habilitaciones,
+períodos y precios, cobro de cuotas y administración de la membresía.
+Lo demás sigue siendo propuesta (§4).
 
-| Módulo | Tablas | Estado |
-|---|---|---|
-| Base | gimnasios, sedes, dominios_gimnasio, configuracion_gimnasio, administradores_plataforma, equipo | Construido |
-| Socios y planes | socios, planes, plan_sedes, precios_plan | Construido |
-| Plata | cajas, turnos_caja, movimientos_caja, ventas, venta_items, pagos | Construido (sin RPC de cobro todavía) |
-| Habilitaciones | suscripciones, coberturas, congelamientos, suspensiones, pases_diarios, packs, consumos_pack, cierres | Construido |
-| Acceso | dispositivos, dispositivos_tokens, ingresos + `calcular_acceso`, `registrar_ingreso`, `anular_ingreso`, `congelar`, `aplicar_cierre` | Construido |
-| Plataforma BRIK, legal, MercadoPago, clases, rutinas, comunicación, operación | — | Propuesta (§4) |
+| Migración | Qué tiene |
+|---|---|
+| 0001 base | gimnasios, sedes, dominios, configuración, admins de plataforma, equipo, equipo_pines (cerrada), helpers de RLS |
+| 0002 socios y planes | socios, planes, plan_sedes, precios_plan |
+| 0003 plata | cajas, turnos_caja, movimientos_caja, ventas, venta_items, pagos |
+| 0004 habilitaciones | suscripciones, cierres, congelamientos, coberturas, suspensiones, pases_diarios, packs, consumos_pack |
+| 0005 períodos y precios | `precio_para`, `proximo_periodo`, `cuotas_para_cubrir`, meses con ancla |
+| 0006 acceso | dispositivos, dispositivos_tokens (cerrada), ingresos, compensación de días, `calcular_acceso` y sus vías, RPC de ingreso, congelamiento y cierre |
+| 0007 cobro | `confirmar_venta`, `cobrar_cuota`, `anular_venta`, `asignar_plan`, `cambiar_plan`, `dar_de_baja` |
 
-**Cambios respecto de la propuesta original**, surgidos del catálogo
-de funciones y de construirlo:
+**Cambios respecto de la propuesta original**
 
-1. **Sedes desde el día 1.** `sedes` existe y cada gimnasio nace con una
-   (trigger). Lo que pasa en un lugar lleva `sede_id`: ingresos, cajas,
-   ventas, pases, dispositivos, cierres. Socios y planes son del
-   gimnasio; un plan dice en qué sedes vale (`todas_las_sedes` +
-   `plan_sedes`).
-2. **El teléfono del socio no es único.** La madre y sus hijos comparten
-   número; un usuario (el teléfono que hace login) puede ver varios
-   socios. El DNI sí es único por gimnasio. `tutor_socio_id` para menores.
-3. **Precio según medio y día de pago.** `precios_plan` tiene
-   `medio_pago` y `pago_hasta_dia` opcionales. Precio base = los dos en
-   null. Aumentos programados = filas con `vigente_desde` futuro.
-4. **Congelamientos con categoría cerrada** (viaje, personal, económico,
-   otro): "lesión" sería dato de salud.
-5. **Cierres del gimnasio** (`cierres` + `aplicar_cierre`): compensan
-   los días a cada membresía cubierta con una cobertura de origen
-   `cierre`.
-6. **Hechos inmutables por trigger.** Coberturas e ingresos no se editan
-   ni se borran: solo se completan las columnas de anulación.
-7. **Token de los dispositivos en tabla cerrada** (`dispositivos_tokens`,
-   RLS sin políticas). Un REVOKE de columna no alcanza cuando la tabla
-   ya tiene SELECT para `authenticated`.
-8. **Funciones en dos esquemas.** `privado` (no expuesto por la API) para
-   el cálculo y los helpers; `public` solo para las RPC con chequeo de
-   rol, que llaman a las de `privado`.
-9. **Reingreso del mismo día**: `reingreso_mismo_dia_consume` (por
-   defecto false) en vez de `permite_reingreso_mismo_dia`. El tope
-   semanal cuenta días distintos, no ingresos.
+1. **Sedes desde el día 1.** Cada gimnasio nace con una (trigger). Lo que
+   pasa en un lugar lleva `sede_id`. Un plan dice en qué sedes vale
+   (`todas_las_sedes` + `plan_sedes`), para membresías y packs. Una
+   persona del equipo asignada a una sede solo opera en esa sede.
+2. **El teléfono del socio no es único** (familias que comparten número).
+   El DNI sí, por gimnasio. `tutor_socio_id` para menores. Solo el dueño
+   o el servidor vinculan un login a un socio (trigger).
+3. **Precios por lista.** Las filas con el mismo `vigente_desde` son una
+   lista; rige la última. Dentro de la lista, si hay filas de la sede,
+   mandan esas, y el socio paga el **menor** monto entre las que le
+   aplican (medio de pago, día del mes). La deuda usa el precio base.
+4. **Renovación con ancla.** Cada cobertura pagada guarda `ancla_dia`:
+   31/01 → 28/02 → 31/03 → 30/04. Día fijo alinea desde la primera cuota.
+   La deuda que ve la recepción sale de la misma secuencia de períodos
+   que genera el cobro.
+5. **Compensación calculada, no cargada.** Los días cubiertos que caen en
+   un congelamiento o un cierre se devuelven en los primeros días libres
+   siguientes. `privado.recalcular_compensacion` la rehace entera por
+   trigger cada vez que cambia una cobertura, un congelamiento, un
+   cierre o un ingreso en un día en pausa. No importa el orden (pagar
+   antes o después de congelar da lo mismo), congelamiento y cierre el
+   mismo día cuentan una vez, un día en que el socio igual entró no se
+   devuelve, y anular un pago se lleva sus días devueltos.
+6. **Escritura solo por RPC** en lo que decide el acceso: suscripciones,
+   coberturas, congelamientos, cierres, pases, packs, consumos. Todas
+   inmutables por trigger salvo sus columnas de anulación o cierre.
+7. **Congelamiento con categoría cerrada** (viaje, personal, económico,
+   otro). La recepción solo congela desde hoy; con fecha pasada, el
+   dueño o el encargado. `descongelar` = volvió antes.
+8. **Baja del socio**: sin vía membresía aunque la suscripción haya
+   quedado abierta. `dar_de_baja` cierra las dos cosas.
+9. **Modo aviso** deja pasar todo salvo a un suspendido. Lo prende solo
+   el dueño (la configuración es del dueño).
+10. **Ingresos**: el momento se toma después del lock
+    (`clock_timestamp`), así dos lecturas casi simultáneas no se
+    descuentan dos veces (probado con dos conexiones reales).
+11. **Tablas cerradas** (RLS sin políticas): `equipo_pines`,
+    `dispositivos_tokens`. Ni anon ni authenticated tienen TRUNCATE,
+    REFERENCES ni TRIGGER.
+12. **Funciones en dos esquemas**: `privado` (no expuesto) para el
+    cálculo; `public` solo para RPC que chequean rol y llaman a `privado`.
 
-**Medido con 3.000 socios y 80.000 ingresos:** un `registrar_ingreso`
-tarda ~12 ms; la búsqueda por nombre usa el índice trigram (<2 ms).
-Calcular el estado de los 3.000 de una vez tarda ~2,1 s: las listas de
-retención (S8) necesitan una versión por lotes, no llamar a
-`calcular_acceso` socio por socio.
-
----
+**Medido con 3.000 socios y 80.000 ingresos:** `registrar_ingreso` ~9 ms;
+búsqueda por nombre con índice trigram (<2 ms); un cierre que recalcula
+la compensación de todo el gimnasio ~0,5 s; el estado de los 3.000 de
+una vez ~2,6 s (las listas de retención necesitan una versión por lotes).
 
 ## 0 · El principio que ordena todo
 
@@ -172,7 +184,7 @@ cubierto, esté donde esté el servidor.
 `eventos_webhook` (el gimnasio se resuelve después de recibir).
 
 **Excepciones a "unique por gimnasio"** (lista cerrada):
-`gimnasios.slug`, `dominios_gimnasio.host`,
+`gimnasios.slug`, `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,
 `mp_cuentas_gimnasio.mp_user_id`,
 `eventos_webhook (origen, tipo, id_externo)`,
 `plataforma_pagos.mp_pago_id`.

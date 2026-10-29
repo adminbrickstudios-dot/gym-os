@@ -67,6 +67,25 @@ drop trigger if exists socios_numerar on public.socios;
 create trigger socios_numerar before insert on public.socios
   for each row execute function privado.numerar_socio();
 
+-- Vincular un login a un socio le da acceso a sus pagos y coberturas:
+-- lo hace el servidor (flujo de login por teléfono) o el dueño, nunca la
+-- recepción con un UPDATE directo.
+create or replace function privado.proteger_usuario_socio() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if new.usuario_id is not null
+     and (tg_op = 'INSERT' or new.usuario_id is distinct from old.usuario_id)
+     and current_user = 'authenticated'
+     and not (new.gimnasio_id in (select privado.mis_gimnasios(array['dueno']))) then
+    raise exception 'Solo el dueño (o el login del socio) vincula una cuenta a un socio' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+revoke all on function privado.proteger_usuario_socio() from public;
+drop trigger if exists socios_proteger_usuario on public.socios;
+create trigger socios_proteger_usuario before insert or update of usuario_id on public.socios
+  for each row execute function privado.proteger_usuario_socio();
+
 -- Ahora sí: los socios vinculados a mi usuario (el login del socio).
 create or replace function privado.mis_socios() returns setof uuid
 language sql stable security definer set search_path = '' as $$
@@ -156,16 +175,6 @@ select privado.politicas_estandar('public.precios_plan', null, array['dueno','en
 drop policy if exists socio_lee on public.precios_plan;
 create policy socio_lee on public.precios_plan for select to authenticated
   using (gimnasio_id in (select s.gimnasio_id from public.socios s where s.id in (select privado.mis_socios())));
-
--- Precio base vigente de un plan en un momento.
-create or replace function privado.precio_base(p_plan_id uuid, p_momento timestamptz) returns numeric
-language sql stable set search_path = '' as $$
-  select p.monto from public.precios_plan p
-   where p.plan_id = p_plan_id and p.vigente_desde <= p_momento
-     and p.medio_pago is null and p.pago_hasta_dia is null and p.sede_id is null
-   order by p.vigente_desde desc limit 1
-$$;
-revoke all on function privado.precio_base(uuid, timestamptz) from public;
 
 -- ── Verificación final ─────────────────────────────────────────────
 do $$

@@ -2,9 +2,12 @@
 -- 0004 · Lo que habilita a entrar. Son HECHOS, nunca estados:
 --   suscripciones · coberturas · congelamientos · suspensiones
 --   pases_diarios · packs · consumos_pack · cierres
--- Un hecho no se pisa ni se borra: se anula con fecha, persona y motivo.
+-- Un hecho no se pisa ni se borra: se anula con fecha y motivo (trigger).
 -- Los días calendario son intervalos [desde, hasta) con límites en la
 -- medianoche local del gimnasio: "vence el 14/11" = hasta 15/11 00:00.
+-- Las tablas de las que depende el acceso se escriben SOLO por RPC
+-- (sin política de escritura): suscripciones, coberturas, congelamientos,
+-- cierres, pases, packs y consumos.
 -- ═══════════════════════════════════════════════════════════════════
 
 do $$
@@ -12,7 +15,7 @@ begin
   if to_regclass('public.venta_items') is null then raise exception 'Guarda: falta la migración 0003'; end if;
 end $$;
 
--- Impide UPDATE (salvo las columnas de anulación) y DELETE en tablas de hechos.
+-- Impide UPDATE (salvo las columnas que se pasan como argumento) y DELETE.
 create or replace function privado.hecho_inmutable() returns trigger
 language plpgsql set search_path = '' as $$
 declare
@@ -25,7 +28,7 @@ begin
   viejo := to_jsonb(old); nuevo := to_jsonb(new);
   for k in select jsonb_object_keys(nuevo) loop
     if (viejo -> k) is distinct from (nuevo -> k) and not (k = any (permitidas)) then
-      raise exception 'En % solo se puede cambiar: %', tg_table_name, array_to_string(permitidas, ', ')
+      raise exception 'En % solo se puede cambiar: %', tg_table_name, coalesce(array_to_string(permitidas, ', '), 'nada')
         using errcode = 'check_violation';
     end if;
   end loop;
@@ -35,6 +38,8 @@ revoke all on function privado.hecho_inmutable() from public;
 
 -- ── Suscripciones ──────────────────────────────────────────────────
 -- "Juan está anotado en el Plan Full desde el 01/03". Una activa por socio.
+-- Cambiar de plan = dar de baja esta y crear otra (public.cambiar_plan),
+-- nunca un UPDATE de plan_id.
 create table if not exists public.suscripciones (
   id           uuid primary key default gen_random_uuid(),
   gimnasio_id  uuid not null references public.gimnasios(id),
@@ -49,10 +54,14 @@ create table if not exists public.suscripciones (
   unique (gimnasio_id, id, socio_id),
   foreign key (gimnasio_id, socio_id) references public.socios (gimnasio_id, id),
   foreign key (gimnasio_id, plan_id) references public.planes (gimnasio_id, id),
-  check (baja_en is null or baja_en >= inicio)
+  check (baja_en is null or baja_en >= inicio),
+  check ((baja_en is null) = (motivo_baja is null))
 );
 create unique index if not exists suscripciones_una_activa on public.suscripciones (gimnasio_id, socio_id) where baja_en is null;
-select privado.politicas_estandar('public.suscripciones', array['dueno','encargado','recepcion'], array['dueno','encargado','recepcion'], true);
+select privado.politicas_estandar('public.suscripciones', array['dueno','encargado','recepcion'], '{}', true);
+drop trigger if exists suscripciones_inmutable on public.suscripciones;
+create trigger suscripciones_inmutable before update or delete on public.suscripciones
+  for each row execute function privado.hecho_inmutable('baja_en', 'motivo_baja');
 
 create or replace function privado.suscripcion_valida() returns trigger
 language plpgsql set search_path = '' as $$
@@ -64,28 +73,35 @@ begin
 end $$;
 revoke all on function privado.suscripcion_valida() from public;
 drop trigger if exists suscripciones_valida on public.suscripciones;
-create trigger suscripciones_valida before insert or update of plan_id on public.suscripciones
+create trigger suscripciones_valida before insert on public.suscripciones
   for each row execute function privado.suscripcion_valida();
 
 -- ── Cierres del gimnasio ───────────────────────────────────────────
--- "Cerramos del 1 al 15 de enero". Si compensa, cada membresía activa
--- recibe esos días como cobertura (privado.aplicar_cierre).
+-- "Cerramos del 1 al 15 de enero". Si compensa, cada membresía recibe los
+-- días cubiertos que caen en el cierre (cálculo en 0006, por trigger).
 create table if not exists public.cierres (
-  id           uuid primary key default gen_random_uuid(),
-  gimnasio_id  uuid not null references public.gimnasios(id),
-  sede_id      uuid,
-  desde        timestamptz not null,
-  hasta        timestamptz not null,
-  motivo       text not null check (length(trim(motivo)) > 0),
-  compensa     boolean not null default true,
-  aplicado_en  timestamptz,
-  creado_en    timestamptz not null default now(),
-  creado_por   uuid references auth.users(id),
+  id              uuid primary key default gen_random_uuid(),
+  gimnasio_id     uuid not null references public.gimnasios(id),
+  sede_id         uuid,
+  desde           timestamptz not null,
+  hasta           timestamptz not null,
+  motivo          text not null check (length(trim(motivo)) > 0),
+  compensa        boolean not null default true,
+  anulado_en      timestamptz,
+  anulado_motivo  text,
+  creado_en       timestamptz not null default now(),
+  creado_por      uuid references auth.users(id),
   unique (gimnasio_id, id),
   foreign key (gimnasio_id, sede_id) references public.sedes (gimnasio_id, id),
-  check (hasta > desde)
+  check (hasta > desde),
+  check ((anulado_en is null) = (anulado_motivo is null)),
+  -- Compensar un cierre de UNA sede exige decidir qué planes alcanza: todavía no.
+  check (sede_id is null or not compensa)
 );
-select privado.politicas_estandar('public.cierres', null, array['dueno','encargado']);
+select privado.politicas_estandar('public.cierres', null, '{}');
+drop trigger if exists cierres_inmutable on public.cierres;
+create trigger cierres_inmutable before update or delete on public.cierres
+  for each row execute function privado.hecho_inmutable('anulado_en', 'anulado_motivo');
 
 -- ── Congelamientos ─────────────────────────────────────────────────
 -- Las categorías no incluyen "lesión": sería un dato de salud.
@@ -100,18 +116,28 @@ create table if not exists public.congelamientos (
   categoria        text not null check (categoria in ('viaje', 'personal', 'economico', 'otro')),
   nota             text,
   anulado_en       timestamptz,
+  anulado_motivo   text,
   creado_en        timestamptz not null default now(),
   creado_por       uuid references auth.users(id),
   unique (gimnasio_id, id),
   foreign key (gimnasio_id, suscripcion_id, socio_id) references public.suscripciones (gimnasio_id, id, socio_id),
   check (hasta_prevista > desde),
-  check (hasta_real is null or hasta_real >= desde)
+  check (hasta_real is null or (hasta_real > desde and hasta_real <= hasta_prevista)),
+  check ((anulado_en is null) = (anulado_motivo is null))
 );
-create index if not exists congelamientos_socio on public.congelamientos (gimnasio_id, socio_id, desde);
+create index if not exists congelamientos_suscripcion on public.congelamientos (suscripcion_id, desde);
 select privado.politicas_estandar('public.congelamientos', array['dueno','encargado','recepcion'], '{}', true);
+drop trigger if exists congelamientos_inmutable on public.congelamientos;
+create trigger congelamientos_inmutable before update or delete on public.congelamientos
+  for each row execute function privado.hecho_inmutable('hasta_real', 'anulado_en', 'anulado_motivo');
 
 -- ── Coberturas ─────────────────────────────────────────────────────
 -- El corazón: "este período quedó cubierto, y por esto".
+--   pago, importacion, cortesia, ajuste, traspaso → los pone una persona o una venta
+--   compensacion → la calcula privado.recalcular_compensacion (días devueltos
+--                  por congelamientos y cierres); nunca se carga a mano
+-- ancla_dia: día del mes al que se alinean las renovaciones (31 sigue
+-- siendo 31 aunque febrero lo recorte a 28).
 create table if not exists public.coberturas (
   id                uuid primary key default gen_random_uuid(),
   gimnasio_id       uuid not null references public.gimnasios(id),
@@ -119,10 +145,9 @@ create table if not exists public.coberturas (
   socio_id          uuid not null,
   desde             timestamptz not null,
   hasta             timestamptz not null,
-  origen            text not null check (origen in ('pago', 'congelamiento', 'cierre', 'cortesia', 'importacion', 'ajuste')),
+  origen            text not null check (origen in ('pago', 'importacion', 'cortesia', 'ajuste', 'traspaso', 'compensacion')),
+  ancla_dia         int check (ancla_dia between 1 and 31),
   venta_item_id     uuid,
-  congelamiento_id  uuid,
-  cierre_id         uuid,
   importacion_id    uuid,
   motivo            text,
   anulada_en        timestamptz,
@@ -133,13 +158,9 @@ create table if not exists public.coberturas (
   unique (gimnasio_id, id),
   foreign key (gimnasio_id, suscripcion_id, socio_id) references public.suscripciones (gimnasio_id, id, socio_id),
   foreign key (gimnasio_id, venta_item_id) references public.venta_items (gimnasio_id, id),
-  foreign key (gimnasio_id, congelamiento_id) references public.congelamientos (gimnasio_id, id),
-  foreign key (gimnasio_id, cierre_id) references public.cierres (gimnasio_id, id),
   check (hasta > desde),
   check (origen <> 'pago' or venta_item_id is not null),
-  check (origen <> 'congelamiento' or congelamiento_id is not null),
-  check (origen <> 'cierre' or cierre_id is not null),
-  check (origen not in ('cortesia', 'ajuste') or motivo is not null),
+  check (origen not in ('cortesia', 'ajuste', 'traspaso', 'compensacion') or motivo is not null),
   check ((anulada_en is null) = (anulada_motivo is null))
 );
 create index if not exists coberturas_vigentes on public.coberturas (suscripcion_id, hasta desc) where anulada_en is null;
@@ -166,6 +187,9 @@ create table if not exists public.suspensiones (
   check (hasta is null or hasta > desde)
 );
 select privado.politicas_estandar('public.suspensiones', array['dueno','encargado','recepcion'], array['dueno','encargado']);
+drop trigger if exists suspensiones_inmutable on public.suspensiones;
+create trigger suspensiones_inmutable before update or delete on public.suspensiones
+  for each row execute function privado.hecho_inmutable('levantada_en', 'levantada_por');
 
 -- ── Pases diarios ──────────────────────────────────────────────────
 create table if not exists public.pases_diarios (
@@ -189,6 +213,9 @@ create table if not exists public.pases_diarios (
 );
 create index if not exists pases_socio on public.pases_diarios (gimnasio_id, socio_id, desde desc);
 select privado.politicas_estandar('public.pases_diarios', array['dueno','encargado','recepcion'], '{}', true);
+drop trigger if exists pases_inmutable on public.pases_diarios;
+create trigger pases_inmutable before update or delete on public.pases_diarios
+  for each row execute function privado.hecho_inmutable('usado_en_ingreso_id', 'anulado_en');
 
 -- ── Packs ──────────────────────────────────────────────────────────
 -- Restantes = cantidad − consumos no anulados. Nunca una columna.
@@ -211,6 +238,9 @@ create table if not exists public.packs (
 );
 create index if not exists packs_socio on public.packs (gimnasio_id, socio_id, desde desc);
 select privado.politicas_estandar('public.packs', array['dueno','encargado','recepcion'], '{}', true);
+drop trigger if exists packs_inmutable on public.packs;
+create trigger packs_inmutable before update or delete on public.packs
+  for each row execute function privado.hecho_inmutable('anulado_en');
 
 create table if not exists public.consumos_pack (
   id             uuid primary key default gen_random_uuid(),
@@ -229,6 +259,9 @@ create table if not exists public.consumos_pack (
 );
 create index if not exists consumos_pack_pack on public.consumos_pack (pack_id) where anulado_en is null;
 select privado.politicas_estandar('public.consumos_pack', array['dueno','encargado','recepcion'], '{}', true);
+drop trigger if exists consumos_inmutable on public.consumos_pack;
+create trigger consumos_inmutable before update or delete on public.consumos_pack
+  for each row execute function privado.hecho_inmutable('anulado_en');
 
 do $$
 declare faltan text;

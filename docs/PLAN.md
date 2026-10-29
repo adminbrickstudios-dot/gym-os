@@ -13,10 +13,11 @@
 **LISTO SI:** el dominio raíz responde la página de Gym OS.
 
 ## S1 · Núcleo del schema y cálculo de acceso
-- [x] Migraciones 0001–0005 con RLS, FK compuestas y verificación final
-- [x] `calcular_acceso` por vías + `registrar_ingreso` idempotente con lock
-- [x] Congelamiento y cierre con compensación de días
-- [x] 21 casos testigo compartidos entre seed y pruebas; 39 pruebas
+- [x] Migraciones 0001–0007 con RLS, FK compuestas y verificación final
+- [x] `calcular_acceso` por vías + `registrar_ingreso` idempotente con lock (probado con dos conexiones)
+- [x] Congelamiento, descongelamiento y cierre con compensación recalculada por trigger
+- [x] 21 casos testigo compartidos entre seed y pruebas; 80 pruebas de base
+- [x] Revisión independiente: 17 errores confirmados, todos corregidos con prueba de regresión
 - [x] `npm run chequeos`
 - [ ] Aplicado en el Supabase real (pre-vuelo + aplicar + `db:types`)
 **LISTO SI:** `npm run db:pruebas` y `npm run chequeos` en verde contra
@@ -35,6 +36,8 @@ probado con sesión real.
 ## S5 · Socios e importador (duplicados, deshacer)
 ## S6 · Entrada — LISTO SI: con 3.000 socios, ingreso en < 2 s de punta a punta
 ## S7 · Vender, cobrar, caja (comprobante de transferencia, arqueo ciego)
+- [x] Base: precio por lista, períodos con ancla, `cobrar_cuota`, `anular_venta`, cambio de plan y baja
+- [ ] Pase y pack en el mostrador, comprobante de transferencia, caja con arqueo ciego, pantallas
 ## S8 · Retención (cálculo por lotes, socios nuevos, plata en riesgo)
 ## S9 · Clases y reservas (lista de espera, cierres)
 ## S10 · App del socio (teléfono + código con límite, QR rotativo, pagar)

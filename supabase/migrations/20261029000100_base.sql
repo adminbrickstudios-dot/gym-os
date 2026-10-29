@@ -15,6 +15,10 @@ begin
   end if;
 end $$;
 
+-- Supabase otorga por defecto todo sobre las tablas de public a anon y
+-- authenticated. TRUNCATE saltea RLS y los triggers por fila: se saca.
+alter default privileges in schema public revoke truncate, references, trigger on tables from anon, authenticated;
+
 create schema if not exists extensions;
 create extension if not exists pg_trgm  with schema extensions;
 create extension if not exists unaccent with schema extensions;
@@ -183,15 +187,33 @@ create table if not exists public.equipo (
   sede_id      uuid,                       -- null = todas las sedes
   nombre       text not null check (length(trim(nombre)) > 0),
   rol          text not null check (rol in ('dueno', 'encargado', 'recepcion', 'profe')),
-  pin_hash     text,                       -- PIN de 4 a 6 dígitos para la PC compartida
   activo       boolean not null default true,
   creado_en    timestamptz not null default now(),
   unique (gimnasio_id, id),
   foreign key (gimnasio_id, sede_id) references public.sedes (gimnasio_id, id)
 );
+-- PIN de 4 a 6 dígitos para la PC compartida de recepción. Tabla cerrada
+-- (RLS sin políticas): un PIN así se rompe offline en segundos si alguien
+-- del equipo puede leer su hash.
+create table if not exists public.equipo_pines (
+  gimnasio_id  uuid not null references public.gimnasios(id),
+  equipo_id    uuid not null,
+  pin_hash     text not null,
+  creado_en    timestamptz not null default now(),
+  primary key (gimnasio_id, equipo_id)
+);
+alter table public.equipo_pines enable row level security;
+
 create unique index if not exists equipo_usuario_por_gimnasio on public.equipo (gimnasio_id, usuario_id) where usuario_id is not null;
 create index if not exists equipo_usuario on public.equipo (usuario_id) where usuario_id is not null;
 alter table public.equipo enable row level security;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'equipo_pines_equipo_fk') then
+    alter table public.equipo_pines add constraint equipo_pines_equipo_fk
+      foreign key (gimnasio_id, equipo_id) references public.equipo (gimnasio_id, id);
+  end if;
+end $$;
 
 -- ── Helpers de RLS ─────────────────────────────────────────────────
 create or replace function privado.mis_gimnasios(p_roles text[] default null) returns setof uuid
@@ -269,7 +291,7 @@ create policy admin_escribe on public.gimnasios for all to authenticated
 
 select privado.politicas_estandar('public.sedes', null, array['dueno']);
 select privado.politicas_estandar('public.dominios_gimnasio', array['dueno','encargado'], '{}');
-select privado.politicas_estandar('public.configuracion_gimnasio', null, array['dueno','encargado']);
+select privado.politicas_estandar('public.configuracion_gimnasio', null, array['dueno']);
 select privado.politicas_estandar('public.equipo', null, array['dueno']);
 
 drop policy if exists se_lee_a_si_mismo on public.administradores_plataforma;
@@ -297,7 +319,7 @@ begin
   select string_agg(c.relname, ', ') into faltan
     from pg_class c join pg_namespace n on n.oid = c.relnamespace
    where n.nspname = 'public' and c.relkind = 'r'
-     and c.relname in ('gimnasios','sedes','dominios_gimnasio','configuracion_gimnasio','administradores_plataforma','equipo')
+     and c.relname in ('gimnasios','sedes','dominios_gimnasio','configuracion_gimnasio','administradores_plataforma','equipo','equipo_pines')
      and not c.relrowsecurity;
   if faltan is not null then raise exception 'Verificación: tablas sin RLS: %', faltan; end if;
 end $$;

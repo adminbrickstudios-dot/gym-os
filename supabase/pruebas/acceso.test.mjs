@@ -117,14 +117,14 @@ test("al volver del congelamiento tiene los días devueltos", async () => {
   const v = await acceso(ctx.socios.congelada, await en(sumarDias(HOY, 10), "10:00:00"));
   assert.equal(v.color, "verde");
   assert.match(v.texto, /vence el 15\/12$/);
-  const [c] = await q(`select origen, motivo from public.coberturas where socio_id = $1 and origen = 'congelamiento'`,
+  const [c] = await q(`select origen, motivo from public.coberturas where socio_id = $1 and origen = 'compensacion' and anulada_en is null`,
     [ctx.socios.congelada]);
-  assert.equal(c.origen, "congelamiento");
+  assert.equal(c.origen, "compensacion");
 });
 
 test("no se puede congelar dos veces las mismas fechas", async () => {
   const [{ id }] = await q(`select id from public.suscripciones where socio_id = $1`, [ctx.socios.congelada]);
-  await falla(() => q(`select privado.congelar($1, $2::date, $3::date, 'viaje', null, null)`,
+  await falla(() => q(`select privado.congelar($1, $2::date, $3::date, 'viaje', null, null, true)`,
     [id, sumarDias(HOY, 0), sumarDias(HOY, 3)]), /Ya hay un congelamiento/);
 });
 
@@ -200,13 +200,11 @@ test("modo aviso deja pasar pero conserva color y motivo", async () => {
 // ── Cierre del gimnasio ──────────────────────────────────────────────
 test("un cierre compensa los días a cada membresía cubierta", async () => {
   await db.query("savepoint cierre");
-  const [{ id }] = await q(
+  await q(
     `insert into public.cierres (gimnasio_id, desde, hasta, motivo) values ($1, $2, $3, 'Vacaciones') returning id`,
     [g, await en(sumarDias(HOY, 1), "00:00:00"), await en(sumarDias(HOY, 4), "00:00:00")]);
-  const [{ n }] = await q(`select privado.aplicar_cierre($1, null) as n`, [id]);
   const v = await acceso(ctx.socios.al_dia);
   await db.query("rollback to savepoint cierre");
-  assert.ok(n >= 1);
   assert.match(v.texto, /vence el 27\/11$/); // 24/11 + 3 días
 });
 

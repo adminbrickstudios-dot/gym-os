@@ -23,7 +23,9 @@ const EJECUTABLES = {
   anon: new Set(["public.gimnasio_por_host"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
-    "public.congelar", "public.aplicar_cierre", "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta",
+    "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
+    "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta", "public.asignar_plan", "public.cambiar_plan",
+    "public.dar_de_baja",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),
@@ -127,6 +129,14 @@ if (!url) {
        and not exists (select 1 from unnest(x.indkey) k join pg_attribute a on a.attrelid = c.oid and a.attnum = k
                         where a.attname = 'gimnasio_id')
      order by 1`)).map((r) => `${r.tabla}: ${r.indice}`).filter((s) => !UNIQUE_GLOBAL.has(s.split(": ")[1])));
+
+  chequeo("Nadie del lado del cliente tiene TRUNCATE, REFERENCES ni TRIGGER", (await q(`
+    select rol || ': ' || c.relname || ' ' || priv as p
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      cross join (values ('anon'), ('authenticated')) r(rol)
+      cross join (values ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) x(priv)
+     where n.nspname = 'public' and c.relkind = 'r' and has_table_privilege(rol, c.oid, priv)
+     order by 1`)).map((r) => r.p));
 
   chequeo("Gimnasios demo sin teléfonos con pinta de reales", (await q(`
     select s.telefono from public.socios s join public.gimnasios g on g.id = s.gimnasio_id

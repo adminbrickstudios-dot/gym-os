@@ -13,6 +13,33 @@
 | **Resend** | Mails transaccionales (invitaciones al equipo, recibos, avisos a gimnasios) | Cuando se necesite | Free alcanza al principio | La verificación del dominio tarda: arrancarla temprano, no bloquea |
 | **Google OAuth** | Login del equipo (dueño, recepción) | Sección de auth | — | Opcional; mail + link mágico también sirve |
 
+## Lo que salió de investigar (28/10/2026)
+
+- **Factura ARCA:** la RG 5866 pide un comprobante por cada cuota
+  cobrada; los gimnasios no pueden hacer uno mensual por cliente. Se
+  integra un servicio (AFIP SDK o TusFacturas). Cada gimnasio delega el
+  web service de facturación al CUIT de BRIK en el Administrador de
+  Relaciones de ARCA: es un paso del alta que hay que acompañar.
+- **MercadoPago OAuth:** el `refresh_token` dura 6 meses. Si no se
+  renueva solo, los cobros del gimnasio se cortan sin aviso: hace falta
+  un proceso que lo renueve y una alerta si falla.
+- **MercadoPago Suscripciones** no documenta comisión de plataforma: BRIK
+  le factura al gimnasio aparte; no se descuenta de cada cuota.
+- **Wellhub (ex Gympass)** tiene gimnasios asociados en Salta. Sin
+  integración, la recepción valida cada check-in a mano en su portal
+  dentro de 20 minutos. La integración es su Access Control API (v2).
+- **Apto físico:** CABA (Ley 139) y Provincia de Buenos Aires (Ley
+  12.329) lo exigen y el gimnasio lo archiva. En la ciudad de Salta, la
+  Ordenanza 12.215 (2004) fue reemplazada en 2019 por otra cuyo número y
+  texto no se encontraron. Pedirla al Concejo Deliberante y consultar a
+  un abogado antes de decidir qué se guarda.
+- **Ley 25.326:** al terminar el contrato, BRIK (encargado de
+  tratamiento) tiene que destruir los datos del gimnasio salvo
+  autorización. La baja de un gimnasio es exportar y después borrar.
+
+Fuentes en el doc "Gym OS — Catálogo de funciones", sección Competencia
+y reglas argentinas.
+
 ## Variables
 
 Ver `.env.local.example` — cada una con para qué es y de dónde se saca.

@@ -201,7 +201,7 @@ export async function sembrarCasos(db, { gimnasioId, sedeId, hoy, telefonoBase =
           [gimnasioId, su.id, s.id, desde, hasta, item]);
       }
       if (c.congelamiento) {
-        await db.query("select privado.congelar($1, $2::date, $3::date, $4, null, null)",
+        await db.query("select privado.congelar($1, $2::date, $3::date, $4, null, null, true)",
           [su.id, sumarDias(hoy, c.congelamiento.desde), sumarDias(hoy, c.congelamiento.hasta), c.congelamiento.categoria]);
       }
     }
