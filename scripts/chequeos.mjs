@@ -23,7 +23,7 @@ const EJECUTABLES = {
   anon: new Set(["public.gimnasio_por_host"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
-    "public.congelar", "public.aplicar_cierre",
+    "public.congelar", "public.aplicar_cierre", "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),

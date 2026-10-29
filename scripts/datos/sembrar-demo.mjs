@@ -102,8 +102,8 @@ try {
       const desde = await medianoche(sumarDias(hoy, d)), hasta = await medianoche(sumarDias(hoy, h));
       const [{ id: v }] = await q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, estado, origen, confirmada_en, creado_en)
                                    values ($1,$2,$3,'confirmada','recepcion',$4,$4) returning id`, [g, sede, s, desde]);
-      const [{ id: it }] = await q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, descripcion, precio_unitario)
-                                    values ($1,$2,'cuota',$3,'Cuota mensual',$4) returning id`, [g, v, planes[plan], precio[plan]]);
+      const [{ id: it }] = await q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, suscripcion_id, descripcion, precio_unitario)
+                                    values ($1,$2,'cuota',$3,$4,'Cuota mensual',$5) returning id`, [g, v, planes[plan], su, precio[plan]]);
       const medio = uno(["transferencia", "transferencia", "mercadopago", "debito"]);
       await q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, mp_pago_id, aprobado_en, creado_en)
                values ($1,$2,$3,$4,'aprobado',$5,$6,$6)`,

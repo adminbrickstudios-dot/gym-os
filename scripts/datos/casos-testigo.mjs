@@ -155,7 +155,7 @@ export async function sembrarCasos(db, { gimnasioId, sedeId, hoy, telefonoBase =
     );
   }
 
-  const ventaPagada = async (socioId, planClave, descripcion, momento) => {
+  const ventaPagada = async (socioId, planClave, descripcion, momento, suscripcionId = null) => {
     const plan = PLANES_TESTIGO.find((p) => p.clave === planClave);
     const { rows: [v] } = await db.query(
       `insert into public.ventas (gimnasio_id, sede_id, socio_id, estado, origen, confirmada_en, creado_en)
@@ -163,9 +163,9 @@ export async function sembrarCasos(db, { gimnasioId, sedeId, hoy, telefonoBase =
       [gimnasioId, sedeId, socioId, momento]);
     const tipo = plan.tipo === "membresia" ? "cuota" : plan.tipo === "pack" ? "pack" : "pase";
     const { rows: [it] } = await db.query(
-      `insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, descripcion, precio_unitario)
-       values ($1,$2,$3,$4,$5,$6) returning id`,
-      [gimnasioId, v.id, tipo, planes[planClave], descripcion, plan.precio]);
+      `insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, suscripcion_id, descripcion, precio_unitario)
+       values ($1,$2,$3,$4,$5,$6,$7) returning id`,
+      [gimnasioId, v.id, tipo, planes[planClave], suscripcionId, descripcion, plan.precio]);
     await db.query(
       `insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, aprobado_en, creado_en)
        values ($1,$2,'transferencia',$3,'aprobado',$4,$4)`,
@@ -194,7 +194,7 @@ export async function sembrarCasos(db, { gimnasioId, sedeId, hoy, telefonoBase =
       for (const cb of c.coberturas ?? []) {
         const desde = await medianoche(sumarDias(hoy, cb.desde));
         const hasta = await medianoche(sumarDias(hoy, cb.hasta));
-        const item = await ventaPagada(s.id, c.suscripcion, "Cuota", desde);
+        const item = await ventaPagada(s.id, c.suscripcion, "Cuota", desde, su.id);
         await db.query(
           `insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, venta_item_id)
            values ($1,$2,$3,$4,$5,'pago',$6)`,

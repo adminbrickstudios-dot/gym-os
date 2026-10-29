@@ -1,8 +1,59 @@
-# Gym OS — Schema propuesto
+# Gym OS — Schema
 
-> Propuesta para revisar **antes** de escribir la primera migración.
 > Pendiente de cruzar con `LECCIONES` y `CONVENCIONES` (no estaban
 > adjuntos cuando se escribió).
+
+## Estado (29/10/2026)
+
+**Construido y probado contra Postgres 16** (migraciones 0001–0005,
+base local con la simulación de Supabase): todo lo de acceso. Lo demás
+sigue siendo propuesta.
+
+| Módulo | Tablas | Estado |
+|---|---|---|
+| Base | gimnasios, sedes, dominios_gimnasio, configuracion_gimnasio, administradores_plataforma, equipo | Construido |
+| Socios y planes | socios, planes, plan_sedes, precios_plan | Construido |
+| Plata | cajas, turnos_caja, movimientos_caja, ventas, venta_items, pagos | Construido (sin RPC de cobro todavía) |
+| Habilitaciones | suscripciones, coberturas, congelamientos, suspensiones, pases_diarios, packs, consumos_pack, cierres | Construido |
+| Acceso | dispositivos, dispositivos_tokens, ingresos + `calcular_acceso`, `registrar_ingreso`, `anular_ingreso`, `congelar`, `aplicar_cierre` | Construido |
+| Plataforma BRIK, legal, MercadoPago, clases, rutinas, comunicación, operación | — | Propuesta (§4) |
+
+**Cambios respecto de la propuesta original**, surgidos del catálogo
+de funciones y de construirlo:
+
+1. **Sedes desde el día 1.** `sedes` existe y cada gimnasio nace con una
+   (trigger). Lo que pasa en un lugar lleva `sede_id`: ingresos, cajas,
+   ventas, pases, dispositivos, cierres. Socios y planes son del
+   gimnasio; un plan dice en qué sedes vale (`todas_las_sedes` +
+   `plan_sedes`).
+2. **El teléfono del socio no es único.** La madre y sus hijos comparten
+   número; un usuario (el teléfono que hace login) puede ver varios
+   socios. El DNI sí es único por gimnasio. `tutor_socio_id` para menores.
+3. **Precio según medio y día de pago.** `precios_plan` tiene
+   `medio_pago` y `pago_hasta_dia` opcionales. Precio base = los dos en
+   null. Aumentos programados = filas con `vigente_desde` futuro.
+4. **Congelamientos con categoría cerrada** (viaje, personal, económico,
+   otro): "lesión" sería dato de salud.
+5. **Cierres del gimnasio** (`cierres` + `aplicar_cierre`): compensan
+   los días a cada membresía cubierta con una cobertura de origen
+   `cierre`.
+6. **Hechos inmutables por trigger.** Coberturas e ingresos no se editan
+   ni se borran: solo se completan las columnas de anulación.
+7. **Token de los dispositivos en tabla cerrada** (`dispositivos_tokens`,
+   RLS sin políticas). Un REVOKE de columna no alcanza cuando la tabla
+   ya tiene SELECT para `authenticated`.
+8. **Funciones en dos esquemas.** `privado` (no expuesto por la API) para
+   el cálculo y los helpers; `public` solo para las RPC con chequeo de
+   rol, que llaman a las de `privado`.
+9. **Reingreso del mismo día**: `reingreso_mismo_dia_consume` (por
+   defecto false) en vez de `permite_reingreso_mismo_dia`. El tope
+   semanal cuenta días distintos, no ingresos.
+
+**Medido con 3.000 socios y 80.000 ingresos:** un `registrar_ingreso`
+tarda ~12 ms; la búsqueda por nombre usa el índice trigram (<2 ms).
+Calcular el estado de los 3.000 de una vez tarda ~2,1 s: las listas de
+retención (S8) necesitan una versión por lotes, no llamar a
+`calcular_acceso` socio por socio.
 
 ---
 

@@ -3,7 +3,8 @@
 Sistema de gestión multi-tenant para gimnasios. Línea BRIK.
 Stack: Next.js (App Router) + Supabase + Vercel.
 
-**Antes de tocar permisos, migraciones o webhooks: leer `docs/LECCIONES.md`.**
+**Antes de tocar permisos, migraciones o webhooks: leer `docs/LECCIONES.md`**
+(pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
 **Por dónde se avanza: `docs/PLAN.md`.**
@@ -145,6 +146,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - **Nunca `vercel --prod` con cambios sin commitear** (el hook lo
   bloquea).
 - `git branch -r` dice más que `git log` de main.
+
+## Cómo se prueba (comandos)
+
+```
+scripts/db/local.sh nueva      # Postgres local + simulación de Supabase + migraciones
+npm run db:pruebas             # pruebas de la base (transacción que revierte)
+npm run sembrar:demo -- --url "$(scripts/db/local.sh url)"   # gimnasio demo, 300 socios
+npm run chequeos               # reglas del proyecto contra la base y los archivos
+npm test                       # pruebas unitarias (vitest)
+npm run verificar              # todo lo anterior + lint + typecheck + build
+```
+
+La base local necesita un Postgres 15+ con `pg_trgm` y `unaccent`
+(PGHOST/PGPORT/PGUSER). `supabase/local/simular-supabase.sql` reproduce
+roles, `auth.uid()` y permisos por defecto: **nunca se aplica en
+Supabase**. `scripts/db/postgrest-minimo.mjs` imita la RPC de Supabase
+para probar el middleware sin proyecto real.
 
 ## Datos de prueba
 
