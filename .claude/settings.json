@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production)",
+      "Read(./.env.development)",
+      "Edit(./.env.local)",
+      "Edit(./.claude/BASE_CON_DATOS_REALES)",
+      "Edit(./.claude/hooks/**)",
+      "Edit(./.claude/settings.json)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/bloquear-peligroso.mjs"],
+            "onFailure": "block",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

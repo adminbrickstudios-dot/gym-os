@@ -1,0 +1,17 @@
+# Worktrees: cada uno duplica el proyecto entero y el deploy sube gigas
+.claude/
+.worktrees/
+worktrees/
+
+# Local, nunca a Vercel
+.env*.local
+docs/ESTADO.md
+supabase/.temp/
+supabase/.branches/
+
+# Artefactos de prueba y capturas
+capturas/
+coverage/
+playwright-report/
+test-results/
+*.log
