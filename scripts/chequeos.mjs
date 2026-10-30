@@ -25,7 +25,11 @@ const EJECUTABLES = {
     "public.gimnasio_por_host", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
     "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta", "public.asignar_plan", "public.cambiar_plan",
-    "public.dar_de_baja",
+    "public.dar_de_baja", "public.abrir_caja", "public.cerrar_caja", "public.resumen_caja", "public.movimiento_caja",
+    "public.vender", "public.informar_transferencia", "public.aprobar_pago", "public.rechazar_pago", "public.pagos_por_aprobar",
+    "public.retencion", "public.retencion_resumen", "public.registrar_contacto",
+    "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
+    "public.lista_clase",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),
@@ -98,7 +102,7 @@ if (!url) {
     select table_name || '.' || column_name || ' (' || data_type || coalesce('(' || numeric_precision || ',' || numeric_scale || ')', '') || ')' as col
       from information_schema.columns
      where table_schema = 'public'
-       and column_name ~ '^(monto|precio|descuento|para_regularizar)' and column_name !~ '_motivo$'
+       and column_name ~ '^(monto|precio|descuento|para_regularizar)' and column_name !~ '(_motivo|_max_recepcion)$'
        and not (data_type = 'numeric' and numeric_precision = 12 and numeric_scale = 2)
      order by 1`)).map((r) => r.col));
 
