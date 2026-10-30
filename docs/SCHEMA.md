@@ -3,11 +3,11 @@
 > Pendiente de cruzar con `LECCIONES` y `CONVENCIONES` (no estaban
 > adjuntos cuando se escribió).
 
-## Estado (29/10/2026)
+## Estado (30/10/2026)
 
-**Construido y probado contra Postgres 16** (migraciones 0001–0007, base
-local con la simulación de Supabase, 80 pruebas): acceso, habilitaciones,
-períodos y precios, cobro de cuotas y administración de la membresía.
+**Construido y probado contra Postgres 16** (migraciones 0001–0011, base
+local con la simulación de Supabase, 147 pruebas): acceso, habilitaciones,
+períodos y precios, cobro, landing, caja y venta, retención y clases.
 Lo demás sigue siendo propuesta (§4).
 
 | Migración | Qué tiene |
@@ -19,6 +19,16 @@ Lo demás sigue siendo propuesta (§4).
 | 0005 períodos y precios | `precio_para`, `proximo_periodo`, `cuotas_para_cubrir`, meses con ancla |
 | 0006 acceso | dispositivos, dispositivos_tokens (cerrada), ingresos, compensación de días, `calcular_acceso` y sus vías, RPC de ingreso, congelamiento y cierre |
 | 0007 cobro | `confirmar_venta`, `cobrar_cuota`, `anular_venta`, `asignar_plan`, `cambiar_plan`, `dar_de_baja` |
+| 0008 landing | landing_gimnasio, landing_secciones, `landing_publica`, bucket `marcas` |
+| 0009 caja y venta | **corrige 0003 y 0007** (arqueo ciego: turnos, movimientos, ítems y pagos solo los lee dueño/encargado; `cobrar_cuota` bloquea el turno; `anular_venta` con caja de devolución), productos, abrir/cerrar caja, `caja_abierta`, `vender`, transferencias con comprobante, bucket `comprobantes` |
+| 0010 retención | plantillas_mensaje, contactos_retencion, `retencion`, `retencion_resumen`, `registrar_contacto` |
+| 0011 clases | actividades, plan_actividades, horarios_clase, clases, reservas, asistencias, avisos_pendientes, reservar, lista de espera, presente y su anulación |
+
+**Regla:** una migración ya entregada no se edita. Lo que cambia de ella va
+en la siguiente (así 0009 corrige 0003 y 0007), para que llegue también a
+una base donde ya esté aplicada. Probado: base con 0001–0008 tal como se
+entregaron + 0009–0011 nuevas = mismo schema, políticas y permisos que
+una base desde cero, y las 147 pruebas pasan en las dos.
 
 **Cambios respecto de la propuesta original**
 

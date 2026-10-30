@@ -86,6 +86,11 @@ Siempre:
    `npm run db:types`.
 8. **Nunca pegar SQL en el editor de Supabase** — rompe los acentos.
 9. **Ningún TODO dentro de una migración.**
+10. **Una migración ya entregada no se edita.** Lo que cambia va en una
+    migración nueva (el aplicador saltea las que ya registró por nombre:
+    el cambio nunca llegaría). Si cambia la firma de una función, la
+    vieja se borra en la misma migración: dos versiones con defaults
+    hacen ambigua la llamada.
 
 ---
 

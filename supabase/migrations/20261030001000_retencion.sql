@@ -11,12 +11,13 @@
 --   nuevo      → se anotó hace menos de 4 semanas y faltó la última semana
 --   no_viene   → está al día pero no viene hace N días
 -- Congelados y suspendidos no aparecen: no están en riesgo, están en pausa.
+-- Socios que solo compran packs o pases todavía no aparecen (v1.5).
 -- ═══════════════════════════════════════════════════════════════════
 
 do $$
 begin
-  if to_regprocedure('privado.cuotas_para_cubrir(uuid,timestamptz)') is null then
-    raise exception 'Guarda: falta la migración 0005';
+  if to_regprocedure('privado.via_membresia(uuid,timestamptz,uuid,text,public.configuracion_gimnasio)') is null then
+    raise exception 'Guarda: falta la migración 0006';
   end if;
 end $$;
 
@@ -112,8 +113,9 @@ language sql stable set search_path = '' as $$
 with
 g as (select gi.id, gi.nombre, gi.zona_horaria as zona, c.* from public.gimnasios gi
        join public.configuracion_gimnasio c on c.gimnasio_id = gi.id where gi.id = p_gimnasio_id),
+cfg as (select c from public.configuracion_gimnasio c where c.gimnasio_id = p_gimnasio_id),
 hoy as (select privado.dia_local(p_momento, g.zona) as d from g),
--- La membresía de cada socio: la activa, o la última si se dio de baja hace poco.
+-- La membresía que importa de cada socio: la activa, o la última si se cerró hace poco.
 sus as (
   select distinct on (s.socio_id) s.*
     from public.suscripciones s, g
@@ -121,30 +123,35 @@ sus as (
      and (s.baja_en is null or s.baja_en > p_momento - make_interval(days => g.retencion_dias_se_fue))
    order by s.socio_id, (s.baja_en is null) desc, s.inicio desc
 ),
--- Islas de coberturas contiguas por suscripción (gaps and islands).
+-- Desde cuándo es socio: su primera membresía (un cambio de plan no lo hace "nuevo").
+antiguedad as (
+  select s.socio_id, min(s.inicio) as primer_inicio from public.suscripciones s
+   where s.gimnasio_id = p_gimnasio_id group by s.socio_id
+),
+-- Islas de coberturas contiguas POR SOCIO, sumando todas sus membresías
+-- (lo pagado en el plan viejo cuenta para ver desde cuándo debe).
 cob as (
-  select c.suscripcion_id, c.desde, c.hasta,
-         max(c.hasta) over (partition by c.suscripcion_id order by c.desde, c.hasta
+  select c.socio_id, c.desde, c.hasta,
+         max(c.hasta) over (partition by c.socio_id order by c.desde, c.hasta
                             rows between unbounded preceding and 1 preceding) as hasta_previo
     from public.coberturas c
-   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null
-     and c.suscripcion_id in (select id from sus)
+   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus s)
 ),
 islas_marcadas as (
   select *, sum(case when hasta_previo is null or desde > hasta_previo then 1 else 0 end)
-              over (partition by suscripcion_id order by desde, hasta) as isla
+              over (partition by socio_id order by desde, hasta) as isla
     from cob
 ),
 islas as (
-  select suscripcion_id, min(desde) as desde, max(hasta) as hasta from islas_marcadas group by suscripcion_id, isla
+  select socio_id, min(desde) as desde, max(hasta) as hasta from islas_marcadas group by socio_id, isla
 ),
 estado as (
-  select s.id as suscripcion_id,
+  select s.socio_id,
          max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
          max(i.hasta) filter (where i.hasta <= p_momento) as ultimo_fin,
          coalesce(bool_or(i.desde > p_momento), false) as tiene_futuro
-    from sus s left join islas i on i.suscripcion_id = s.id
-   group by s.id
+    from sus s left join islas i on i.socio_id = s.socio_id
+   group by s.socio_id
 ),
 precios as (
   select p.id as plan_id, privado.precio_base(p.id, p_momento) as precio
@@ -158,8 +165,7 @@ visitas as (
 ),
 frecuencia as (
   -- días distintos con ingreso en las 8 semanas anteriores a su última visita
-  select i.socio_id, count(distinct privado.dia_local(i.momento, g.zona))::numeric / 8 as por_semana,
-         count(*) filter (where i.momento >= p_momento - make_interval(days => g.retencion_dias_nuevo)) as recientes
+  select i.socio_id, count(distinct privado.dia_local(i.momento, g.zona))::numeric / 8 as por_semana
     from public.ingresos i join visitas v on v.socio_id = i.socio_id, g
    where i.gimnasio_id = p_gimnasio_id and i.anulado_en is null and i.resultado <> 'rechazado'
      and i.momento > v.ultimo - interval '56 days' and i.momento <= v.ultimo
@@ -167,9 +173,8 @@ frecuencia as (
 ),
 base as (
   select so.id as socio_id, trim(so.nombre || ' ' || so.apellido) as nombre, so.nombre as nombre_pila, so.telefono,
-         so.dado_de_baja_en, so.motivo_baja, su.id as suscripcion_id, su.inicio, su.baja_en, su.plan_id,
-         e.fin_actual, e.ultimo_fin, e.tiene_futuro, v.ultimo as ultimo_ingreso, f.por_semana,
-         pl.duracion_meses, pl.tolerancia_dias,
+         so.dado_de_baja_en, so.motivo_baja, su.id as suscripcion_id, su.baja_en, su.plan_id,
+         an.primer_inicio, e.fin_actual, e.ultimo_fin, e.tiene_futuro, v.ultimo as ultimo_ingreso, f.por_semana,
          round(pr.precio / pl.duracion_meses, 2) as monto_mensual,
          exists (select 1 from public.congelamientos c where c.suscripcion_id = su.id and c.anulado_en is null
                   and c.desde <= p_momento and coalesce(c.hasta_real, c.hasta_prevista) > p_momento) as congelado,
@@ -177,7 +182,8 @@ base as (
                   and (x.hasta is null or x.hasta > p_momento) and (x.levantada_en is null or x.levantada_en > p_momento)) as suspendido
     from public.socios so
     join sus su on su.socio_id = so.id
-    join estado e on e.suscripcion_id = su.id
+    join antiguedad an on an.socio_id = so.id
+    join estado e on e.socio_id = so.id
     join public.planes pl on pl.id = su.plan_id
     left join precios pr on pr.plan_id = su.plan_id
     left join visitas v on v.socio_id = so.id
@@ -186,62 +192,75 @@ base as (
 ),
 clasificado as (
   select b.*, hoy.d as hoy_d,
+    -- desde cuándo no está cubierto: el fin de lo último que pagó, o su alta si nunca pagó
+    coalesce(b.ultimo_fin, b.primer_inicio) as sin_cubrir_desde,
     case
       when b.suspendido or b.congelado then null
       when b.dado_de_baja_en is not null and b.dado_de_baja_en <= p_momento then 'se_fue'
       when b.baja_en is not null and b.baja_en <= p_momento then 'se_fue'
-      when b.fin_actual is null and not b.tiene_futuro and b.ultimo_fin is not null
-           and hoy.d - privado.dia_local(b.ultimo_fin, g.zona) > g.retencion_dias_vencido then 'se_fue'
-      when b.fin_actual is null and not b.tiene_futuro and b.ultimo_fin is not null then 'vencido'
+      when b.fin_actual is null and not b.tiene_futuro
+           and hoy.d - privado.dia_local(coalesce(b.ultimo_fin, b.primer_inicio), g.zona) > g.retencion_dias_vencido then 'se_fue'
+      when b.fin_actual is null and not b.tiene_futuro then 'vencido'
       when b.fin_actual is not null
            and privado.dia_local(b.fin_actual - interval '1 microsecond', g.zona) - hoy.d <= g.dias_aviso then 'por_vencer'
-      when b.fin_actual is not null and b.inicio > p_momento - make_interval(days => g.retencion_dias_nuevo)
-           and coalesce(b.ultimo_ingreso, b.inicio) <= p_momento - interval '7 days' then 'nuevo'
+      when b.fin_actual is not null and b.primer_inicio > p_momento - make_interval(days => g.retencion_dias_nuevo)
+           and coalesce(b.ultimo_ingreso, b.primer_inicio) <= p_momento - interval '7 days' then 'nuevo'
       when b.fin_actual is not null
-           and coalesce(b.ultimo_ingreso, b.inicio) <= p_momento - make_interval(days => g.retencion_dias_ausencia) then 'no_viene'
+           and coalesce(b.ultimo_ingreso, b.primer_inicio) <= p_momento - make_interval(days => g.retencion_dias_ausencia) then 'no_viene'
     end as lista
     from base b, g, hoy
 ),
-con_texto as (
+-- materialized: sin esto Postgres copia via_membresia en cada (vm).campo y
+-- la llama varias veces por socio (1,3 s → 0,5 s con 3.000 socios).
+con_texto as materialized (
   select c.*,
+    -- Vencidos: el texto y la deuda salen de la misma función que usa la puerta.
+    case when c.lista = 'vencido' then privado.via_membresia(c.socio_id, p_momento, null, g.zona, (select cfg.c from cfg)) end as vm,
     case c.lista
-      when 'se_fue' then coalesce(c.dado_de_baja_en, c.baja_en, c.ultimo_fin)
+      when 'se_fue' then coalesce(c.dado_de_baja_en, c.baja_en, c.ultimo_fin, c.primer_inicio)
       when 'vencido' then c.ultimo_fin
-      when 'por_vencer' then c.fin_actual
       else c.fin_actual end as vence,
-    case c.lista
-      when 'vencido' then c.monto_mensual * c.duracion_meses * privado.cuotas_para_cubrir(c.suscripcion_id, p_momento)
-    end as debe,
     case
-      when c.lista in ('no_viene', 'nuevo') then c.hoy_d - privado.dia_local(coalesce(c.ultimo_ingreso, c.inicio), g.zona)
-      when c.lista in ('vencido', 'se_fue') then c.hoy_d - privado.dia_local(coalesce(c.dado_de_baja_en, c.baja_en, c.ultimo_fin), g.zona)
+      when c.lista in ('no_viene', 'nuevo') then c.hoy_d - privado.dia_local(coalesce(c.ultimo_ingreso, c.primer_inicio), g.zona)
+      when c.lista in ('vencido', 'se_fue') then c.hoy_d - privado.dia_local(coalesce(c.dado_de_baja_en, c.baja_en, c.sin_cubrir_desde), g.zona)
       when c.lista = 'por_vencer' then privado.dia_local(c.fin_actual - interval '1 microsecond', g.zona) - c.hoy_d
     end as dias
     from clasificado c, g
    where c.lista is not null
+),
+final as (
+  select t.*,
+    case when t.lista = 'vencido' then
+      coalesce((t.vm).para_regularizar,
+               (select pr.precio from precios pr where pr.plan_id = t.plan_id) * privado.cuotas_para_cubrir(t.suscripcion_id, p_momento))
+    end as debe
+    from con_texto t
 )
 select t.socio_id, t.nombre, t.telefono, t.lista,
   case t.lista
     when 'no_viene' then case when t.ultimo_ingreso is null then 'No vino nunca · se anotó hace ' || t.dias || ' días'
                               else 'No viene hace ' || t.dias || ' días' end
                          || case when t.por_semana >= 0.5 then ' · venía ' || round(t.por_semana) || ' veces por semana' else '' end
-    when 'nuevo' then 'Se anotó el ' || privado.fecha_corta(t.inicio, g.zona) || ' · '
+    when 'nuevo' then 'Se anotó el ' || privado.fecha_corta(t.primer_inicio, g.zona) || ' · '
                       || case when t.ultimo_ingreso is null then 'todavía no vino' else 'no viene hace ' || t.dias || ' días' end
     when 'por_vencer' then case t.dias when 0 then 'Vence hoy' when 1 then 'Vence mañana'
                                        else 'Vence el ' || privado.ultimo_dia(t.fin_actual, g.zona) end
-    when 'vencido' then 'Venció el ' || privado.ultimo_dia(t.ultimo_fin, g.zona) || coalesce(' · debe ' || privado.formato_pesos(t.debe), '')
+    when 'vencido' then case when (t.vm).motivo in ('vencida', 'sin_pago') then (t.vm).texto
+                             else 'Venció el ' || privado.ultimo_dia(t.ultimo_fin, g.zona)
+                                  || coalesce(' · debe ' || privado.formato_pesos(t.debe), '') end
     when 'se_fue' then case when t.dado_de_baja_en is not null
                             then 'Se dio de baja el ' || privado.fecha_corta(t.dado_de_baja_en, g.zona) || coalesce(' · ' || replace(t.motivo_baja, '_', ' '), '')
+                            when t.ultimo_fin is null then 'Nunca pagó · se anotó el ' || privado.fecha_corta(t.primer_inicio, g.zona)
                             else 'Dejó de pagar el ' || privado.ultimo_dia(t.ultimo_fin, g.zona) end
   end,
   t.dias, t.vence, t.monto_mensual, t.debe, t.ultimo_ingreso, round(t.por_semana, 1),
   uc.creado_en, uc.quien, uc.resultado,
   replace(replace(replace(replace(replace(pm.texto,
     '{nombre}', t.nombre_pila), '{gimnasio}', g.nombre),
-    '{vence}', coalesce(case when t.lista in ('vencido', 'por_vencer') then privado.ultimo_dia(t.vence, g.zona) end, '')),
+    '{vence}', coalesce(case when t.lista in ('vencido', 'por_vencer') and t.vence is not null then privado.ultimo_dia(t.vence, g.zona) end, 'hace poco')),
     '{dias}', coalesce(t.dias::text, '')),
-    '{monto}', coalesce(privado.formato_pesos(coalesce(t.debe, t.monto_mensual)), ''))
-from con_texto t
+    '{monto}', coalesce(privado.formato_pesos(coalesce(t.debe, t.monto_mensual)), 'la cuota'))
+from final t
 cross join g
 left join public.plantillas_mensaje pm on pm.gimnasio_id = g.id and pm.clave = t.lista
 left join lateral (

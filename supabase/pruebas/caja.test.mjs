@@ -126,7 +126,8 @@ test("el socio informa su transferencia con comprobante; queda pendiente", async
   pagoPendiente = r.pago_id;
   assert.equal(Number(r.monto), 25000);
   assert.equal((await acceso(t.ctx.socios.en_tolerancia)).color, "naranja", "pendiente no habilita");
-  await como(uSocio, () => t.falla(() => t.q(`select public.informar_transferencia($1, $2)`, [t.ctx.socios.en_tolerancia, ruta]), /esperando aprobación/));
+  await como(uSocio, () => t.falla(() => t.q(`select public.informar_transferencia($1, $2)`, [t.ctx.socios.en_tolerancia, ruta]), /ya se usó/));
+  await como(uSocio, () => t.falla(() => t.q(`select public.informar_transferencia($1, $2)`, [t.ctx.socios.en_tolerancia, ruta.replace(".jpg", "-2.jpg")]), /esperando aprobación/));
   await como(uSocio, () => t.falla(() => t.q(`select public.informar_transferencia($1, $2)`, [s, `${t.g}/${t.ctx.socios.en_tolerancia}/x.jpg`]), /carpeta del socio/));
   await como(uSocio, () => t.falla(() => t.q(`select public.informar_transferencia($1, $2)`, [t.ctx.socios.al_dia, `${t.g}/${t.ctx.socios.al_dia}/x.jpg`]), /Sin permiso/));
 });

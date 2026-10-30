@@ -15,6 +15,83 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-10-30 · S7 + S8 + S9 (base) · Caja, venta, retención y clases, con segunda revisión
+
+**QUÉ HICE**
+- **0009 caja y venta.**
+  - Caja por turno: se abre con un monto y se cierra contando. Lo esperado se calcula y al cerrar queda la foto con la diferencia.
+  - Carrito del mostrador: cuota, pase, pack, producto u otro. Acepta pagos mixtos que tienen que sumar exacto, y el precio siempre lo pone la base. La recepción tiene tope de descuento y el motivo es obligatorio.
+  - Transferencia con comprobante: el socio la informa y el equipo la aprueba o la rechaza.
+- **0010 retención.** Una sola consulta para todo el gimnasio.
+  - Separa a los socios en vencido, por vencer, nuevo, no viene y se fue, con el porqué.
+  - Muestra la frecuencia con que venía, la plata en riesgo, el mensaje armado desde plantillas editables y el último contacto.
+- **0011 clases.**
+  - Actividades y grilla semanal. Las clases se crean a demanda.
+  - Reservas con cupo y lock, y lista de espera.
+  - Presente con ventana horaria; se puede anular y devuelve la clase.
+  - Packs que se descuentan por asistencia. Lista de la clase para el profe.
+- **Segunda revisión independiente de 0009–0011.** Un agente que no había visto el código lo probó ejecutando y confirmó 21 errores. Los arreglé todos, cada uno con su prueba de regresión (`revision2.test.mjs`).
+  - **Plata:**
+    - se podía vender en efectivo en una caja que se estaba cerrando;
+    - anular una venta de una caja ya cerrada le cambiaba el arqueo;
+    - un turno de otra sede se aceptaba si no había efectivo;
+    - la recepción podía reconstruir lo esperado con un SELECT, así que el arqueo no era ciego;
+    - el mismo comprobante servía para dos pagos;
+    - alguien del equipo podía aprobar su propio pago;
+    - un 100% de descuento no se podía registrar;
+    - el carrito aceptaba 50 cuotas.
+  - **Retención:**
+    - faltaban los que se anotaron y nunca pagaron, y los vencidos que cambiaron de plan;
+    - un socio viejo que cambiaba de plan aparecía como "nuevo";
+    - la deuda de los planes de varios meses no coincidía con la de la puerta;
+    - sin precio cargado, el mensaje quedaba con un hueco.
+  - **Clases:**
+    - un pack se descontaba dos veces con dos presentes a la vez;
+    - se descontaba aunque la membresía ya cubría la clase;
+    - no respetaba sus actividades;
+    - con 1 clase se reservaban varias;
+    - cancelar una clase pasada devolvía clases de pack;
+    - un cierre cargado después no cancelaba las clases ya creadas;
+    - la lista de espera ascendía a socios suspendidos;
+    - el presente no tenía ventana, ni chequeo, ni forma de anularse;
+    - editar un horario duplicaba clases;
+    - un login con varios socios veía la posición de otro;
+    - la lista de la clase repetía gente;
+    - una actividad no se podía quitar de un plan.
+- **Carreras con dos conexiones reales** (`concurrencia-caja-clases.test.mjs`):
+  - una venta en efectivo que llega mientras se cierra la caja espera y se rechaza, y no entra plata a un turno ya contado;
+  - dos presentes a la vez con un pack de 1 clase dejan un solo consumo.
+- **Verificado:** `npm run verificar` con exit 0. Incluye lint, tipos, 25 unitarias, **147 pruebas de base**, chequeos y build.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- **Había editado 0003 y 0007, que ya te había entregado en el zip.** Si las corriste en Supabase, esos cambios no te iban a llegar nunca: el aplicador saltea por nombre lo que ya registró. Además tocan permisos y plata. Lo resolví así:
+  - Devolví 0003 y 0007 byte por byte a lo entregado y pasé los cambios a 0009.
+  - Borro la firma vieja de `anular_venta`. Si convivían las dos, la llamada era ambigua.
+  - 0009 verifica al final que no quedó la firma vieja ni la recepción leyendo pagos.
+  - Probado: una base con 0001–0008 tal como se entregaron + las 0009–0011 nuevas queda con el mismo schema, políticas y permisos que una base desde cero, y las 147 pruebas pasan en las dos.
+  - Lo agregué como regla 10 de migraciones en `CLAUDE.md`.
+- **Retención con 3.000 socios.**
+  - El commit anterior decía ~0,4 s, pero los arreglos (deuda igual a la de la puerta) la llevaron a 1,3 s.
+  - La causa: Postgres copiaba `via_membresia` en cada `(vm).campo`, así que la llamaba varias veces por socio. Con la subconsulta materializada baja a **0,5 s**, con el mismo resultado byte por byte.
+  - Con estadísticas viejas, recién cargados los datos, tardaba **11 s**. Supabase las actualiza solo, pero el importador de socios (S5) tiene que correr `analyze` al terminar. Anotado para S5.
+
+**QUÉ CORRÉS VOS**
+- Nada nuevo todavía. Cuando hagas `docs/ARRANQUE.md`, `npm run db:aplicar` aplica 0001–0011, o solo 0009–0011 si ya corriste el zip anterior.
+
+**QUÉ CONFIGURÁS VOS**
+- Nada nuevo.
+
+**SIN ARREGLAR**
+- Pantallas de caja, venta, retención y clases: esperan tus cambios de diseño.
+- Los avisos (`avisos_pendientes`) quedan escritos pero nadie los manda todavía. Eso es S10/S14 (WhatsApp y push).
+
+**LO QUE NO PUDE VERIFICAR**
+- Bucket `comprobantes` y sus políticas de Storage: el código está escrito según la documentación, pero no está ejecutado. La base local no tiene el esquema `storage`.
+- Nada de esto corrió contra un Supabase real, solo contra Postgres 16 con la simulación de roles y `auth.uid()`.
+- `npm run db:types`: el código está escrito según la documentación, pero no está ejecutado.
+
+---
+
 ## 2026-10-30 · S13 (primera parte) · Landing editable por gimnasio
 
 **QUÉ HICE**

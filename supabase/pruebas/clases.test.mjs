@@ -84,14 +84,15 @@ test("asistencia: con pack 'se descuenta en la clase', descuenta una", async () 
   const [{ id: s }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido) values ($1,'Clase','Suelta') returning id`, [t.g]);
   await t.q(`insert into public.packs (gimnasio_id, socio_id, plan_id, cantidad, desde, vence_en)
              values ($1,$2,$3,8,$4,$4::timestamptz + interval '60 days')`, [t.g, s, pl, momento]);
-  const [{ r }] = await t.q(`select privado.tomar_asistencia($1, $2, $3) as r`, [clase, s, profe]);
+  const enClase = await t.en(MANIANA, "19:05:00");
+  const [{ r }] = await t.q(`select privado.tomar_asistencia($1, $2, $3, $4, false) as r`, [clase, s, profe, enClase]);
   assert.equal(r["descontó_pack"], true);
-  await t.falla(() => t.q(`select privado.tomar_asistencia($1, $2, $3)`, [clase, s, profe]), /Ya tiene el presente/);
+  await t.falla(() => t.q(`select privado.tomar_asistencia($1, $2, $3, $4, false)`, [clase, s, profe, enClase]), /Ya tiene el presente/);
 });
 
 test("cancelar la clase: avisa a todos, cancela las reservas y devuelve la clase del pack", async () => {
   await t.db.query("savepoint cc");
-  const [{ n }] = await t.q(`select privado.cancelar_clase($1, 'Se cortó la luz') as n`, [clase]);
+  const [{ n }] = await t.q(`select privado.cancelar_clase($1, 'Se cortó la luz', false) as n`, [clase]);
   const avisos = await t.q(`select texto from public.avisos_pendientes where clase_id = $1 and tipo = 'clase_cancelada'`, [clase]);
   const [{ devueltos }] = await t.q(`select count(*)::int devueltos from public.consumos_pack where asistencia_id is not null and anulado_en is not null`);
   await t.db.query("rollback to savepoint cc");
@@ -133,8 +134,9 @@ test("permisos: el profe ve y toma lista solo en sus clases; el socio reserva so
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [t.ctx.socios.cumple, uSocio]);
   await t.comoUsuario(uSocio, async () => {
     await t.falla(() => t.q(`select public.reservar($1, $2)`, [clase, t.ctx.socios.al_dia]), /Sin permiso/);
-    const dia = await t.q(`select * from public.clases_del_dia($1, $2::date)`, [t.sede, MANIANA]);
-    assert.equal(dia.length, 1);
-    assert.equal(dia[0].actividad, "Spinning");
+    // El socio ve hoy y los próximos días; no puede pedir cualquier fecha (ni crear clases de 2099).
+    await t.q(`select * from public.clases_del_dia($1, current_date)`, [t.sede]);
+    await t.falla(() => t.q(`select * from public.clases_del_dia($1, '2099-01-04'::date)`, [t.sede]), /próximos 7 días/);
+    await t.falla(() => t.q(`select * from public.clases_del_dia($1, current_date, $2)`, [t.sede, t.ctx.socios.al_dia]), /Sin permiso/);
   });
 });
