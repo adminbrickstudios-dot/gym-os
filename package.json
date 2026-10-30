@@ -11,7 +11,7 @@
     "test": "vitest run src",
     "db:aplicar": "node scripts/db/aplicar.mjs",
     "db:prevuelo": "node scripts/db/aplicar.mjs --prevuelo",
-    "db:types": "supabase gen types typescript --db-url \"$SUPABASE_DB_URL\" --schema public > src/tipos/base.ts",
+    "db:types": "node scripts/db/tipos.mjs",
     "db:local": "scripts/db/local.sh nueva",
     "db:pruebas": "DB_PRUEBAS_URL=$(scripts/db/local.sh url) node --test \"supabase/pruebas/*.test.mjs\"",
     "sembrar:demo": "node scripts/datos/sembrar-demo.mjs",

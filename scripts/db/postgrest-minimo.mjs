@@ -10,7 +10,11 @@ import pg from "pg";
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
 const pool = new pg.Pool({ connectionString: arg("url", process.env.DB_PRUEBAS_URL) });
-const PERMITIDAS = { gimnasio_por_host: ["p_host"] };
+// args: parámetros con nombre · escalar: la función devuelve un valor (PostgREST lo devuelve sin envolver)
+const PERMITIDAS = {
+  gimnasio_por_host: { args: ["p_host"], escalar: false },
+  landing_publica: { args: ["p_host"], escalar: true },
+};
 
 http.createServer(async (req, res) => {
   const m = req.url?.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
@@ -18,7 +22,7 @@ http.createServer(async (req, res) => {
   let cuerpo = "";
   for await (const parte of req) cuerpo += parte;
   const params = JSON.parse(cuerpo || "{}");
-  const nombres = PERMITIDAS[m[1]];
+  const { args: nombres, escalar } = PERMITIDAS[m[1]];
   const cliente = await pool.connect();
   try {
     await cliente.query("begin; set local role anon");
@@ -26,7 +30,8 @@ http.createServer(async (req, res) => {
       `select * from public.${m[1]}(${nombres.map((n, i) => `${n} => $${i + 1}`).join(", ")})`,
       nombres.map((n) => params[n]));
     await cliente.query("commit");
-    res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(rows));
+    const cuerpoRespuesta = escalar ? rows[0]?.[m[1]] ?? null : rows;
+    res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(cuerpoRespuesta));
   } catch (e) {
     await cliente.query("rollback");
     res.writeHead(400, { "Content-Type": "application/json" }).end(JSON.stringify({ message: e.message }));

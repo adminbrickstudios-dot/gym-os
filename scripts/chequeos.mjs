@@ -20,9 +20,9 @@ const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key",
 ]);
 const EJECUTABLES = {
-  anon: new Set(["public.gimnasio_por_host"]),
+  anon: new Set(["public.gimnasio_por_host", "public.landing_publica"]),
   authenticated: new Set([
-    "public.gimnasio_por_host", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
+    "public.gimnasio_por_host", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
     "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta", "public.asignar_plan", "public.cambiar_plan",
     "public.dar_de_baja",

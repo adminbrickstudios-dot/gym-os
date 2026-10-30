@@ -2,7 +2,7 @@
 // Siembra el gimnasio demo: datos OBVIAMENTE ficticios, para probar con
 // volumen real, para las capturas y para mostrarle el sistema a un prospecto.
 //
-//   node scripts/datos/sembrar-demo.mjs --url postgres://... [--socios 300] [--hoy 2026-11-14]
+//   node scripts/datos/sembrar-demo.mjs --url postgres://... [--socios 300] [--hoy 2026-11-14] [--dominio midominio.com]
 //
 // Crea: el gimnasio "Gimnasio Demo" (slug demo, es_demo = true), los
 // planes testigo, los casos testigo (un socio por respuesta posible) y
@@ -16,12 +16,15 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { sembrarCasos, sumarDias, PLANES_TESTIGO } from "./casos-testigo.mjs";
+import { sembrarLanding, LANDING_DEMO } from "./landing-demo.mjs";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 if (existsSync(join(raiz, ".env.local"))) process.loadEnvFile(join(raiz, ".env.local"));
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
 const url = arg("url", process.env.DB_PRUEBAS_URL || process.env.SUPABASE_DB_URL);
 const cantidad = Number(arg("socios", "300"));
+// Dominio base de los demos: demo.<dominio> y demo-box.<dominio>. Con el dominio real, --dominio midominio.com
+const dominio = arg("dominio", "localhost").toLowerCase();
 const ZONA = "America/Argentina/Buenos_Aires";
 const hoy = arg("hoy", new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(new Date()));
 
@@ -56,9 +59,42 @@ try {
   const [{ id: sede }] = await q("select id from public.sedes where gimnasio_id = $1", [g]);
   await q(`update public.configuracion_gimnasio set cobra_pack = true, accesos_activos = array['recepcion','qr_socio','kiosco'],
              alias_transferencia = 'GIMNASIO.DEMO.EJEMPLO', titular_cuenta = 'Gimnasio Demo (ficticio)' where gimnasio_id = $1`, [g]);
-  await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, 'demo.localhost', 'subdominio')`, [g]);
+  await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio')`, [g, `demo.${dominio}`]);
 
   const { planes, socios: testigos } = await sembrarCasos(db, { gimnasioId: g, sedeId: sede, hoy, telefonoBase: 5490000100000 });
+  await sembrarLanding(db, g);
+  // Los planes testigo son para probar; en la landing quedan los que vende un gimnasio real.
+  await q(`update public.planes set visible_en_landing = false where gimnasio_id = $1 and nombre in ('Pack 5 clases')`, [g]);
+  await q(`update public.planes set descripcion = case nombre
+             when 'Plan Full' then 'Pase libre a todo, todos los días.'
+             when 'Plan Mañana' then 'De 7 a 12, ideal si entrenás antes de trabajar.'
+             when 'Plan 3 veces' then 'Tres días por semana, los que elijas.'
+             when 'Pase diario' then 'Un día, sin compromiso.'
+             when 'Pack 10 clases' then 'Diez clases para usar en dos meses.' end,
+             orden = case nombre when 'Plan Full' then 1 when 'Plan 3 veces' then 2 when 'Plan Mañana' then 3
+                                 when 'Pack 10 clases' then 4 else 5 end
+           where gimnasio_id = $1`, [g]);
+  await q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde, medio_pago) values ($1, $2, 22000, '2020-01-01', 'efectivo')`,
+    [g, planes.full]);
+
+  // Segundo gimnasio demo, con otra marca: muestra que cada landing es propia.
+  const [{ id: g2 }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo-box', 'Box Norte Demo', true) returning id`);
+  await q(`update public.configuracion_gimnasio set color_acento = '#7c3aed', color_fondo = '#f6f3fb' where gimnasio_id = $1`, [g2]);
+  await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio')`, [g2, `demo-box.${dominio}`]);
+  await sembrarLanding(db, g2, {
+    ...LANDING_DEMO,
+    portada: { ...LANDING_DEMO.portada, titulo: "Funcional y boxeo en grupos chicos",
+               bajada: "Clases de 50 minutos con cupo de 12 personas. Reservás desde el celular.", whatsapp: "+5490000333444" },
+    secciones: { ...LANDING_DEMO.secciones, actividades: { items: [
+      { emoji: "🥊", nombre: "Boxeo recreativo", descripcion: "Técnica, bolsa y guantes, sin contacto." },
+      { emoji: "🔥", nombre: "Funcional", descripcion: "Fuerza y cardio en circuito." },
+    ] } },
+  });
+  for (const [nombre, monto, desc] of [["Libre mensual", 32000, "Todas las clases que quieras."], ["8 clases por mes", 24000, "Dos por semana."]]) {
+    const [{ id: p }] = await q(`insert into public.planes (gimnasio_id, tipo, nombre, descripcion, duracion_meses, renovacion)
+                                 values ($1,'membresia',$2,$3,1,'continua') returning id`, [g2, nombre, desc]);
+    await q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde) values ($1,$2,$3,'2020-01-01')`, [g2, p, monto]);
+  }
 
   const medianoche = async (dia) => (await q("select privado.medianoche($1::date, $2) as t", [dia, ZONA]))[0].t;
   const precio = Object.fromEntries(PLANES_TESTIGO.map((p) => [p.clave, p.precio]));

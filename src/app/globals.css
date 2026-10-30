@@ -35,6 +35,8 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* En @layer components: las utilidades de Tailwind (hidden, w-full, mt-*) pueden pisarlas. */
+@layer components {
 .tarjeta {
   background: var(--tarjeta);
   border-radius: var(--radio);
@@ -67,4 +69,5 @@ body {
   text-transform: uppercase;
   color: var(--texto-suave);
   font-weight: 600;
+}
 }

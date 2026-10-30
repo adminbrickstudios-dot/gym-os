@@ -4,7 +4,7 @@
 > secciones de Mateo) cuando esté en el repo. Si choca, manda el de Mateo.
 > Una casilla se marca solo con la definición de TERMINADO de `CLAUDE.md`.
 
-## S0 · Arranque
+## S0 · Arranque — paso a paso en `docs/ARRANQUE.md`
 - [ ] Repo en GitHub (privado) y push
 - [ ] Proyecto Supabase en São Paulo, contraseña solo letras y números
 - [ ] Dominio comprado
@@ -20,8 +20,8 @@
 - [x] Revisión independiente: 17 errores confirmados, todos corregidos con prueba de regresión
 - [x] `npm run chequeos`
 - [ ] Aplicado en el Supabase real (pre-vuelo + aplicar + `db:types`)
-**LISTO SI:** `npm run db:pruebas` y `npm run chequeos` en verde contra
-la base de Supabase, no solo la local.
+**LISTO SI:** `npm run chequeos` en verde contra la base de Supabase
+(las pruebas corren solo en la base local: se niegan a tocar Supabase).
 
 ## S2 · Multi-tenant y equipo
 - [x] Middleware host → gimnasio, sin fallback (probado con un PostgREST mínimo local)
@@ -44,6 +44,11 @@ probado con sesión real.
 ## S11 · Rutinas
 ## S12 · MercadoPago del gimnasio (OAuth con renovación del refresh token, webhook firmado e idempotente)
 ## S13 · Página pública y alta online
+- [x] Landing por gimnasio desde la base: portada, 8 secciones editables y reordenables, planes y precios, sedes (migración 0008)
+- [x] Marca por gimnasio: colores, logo, favicon y título de la pestaña
+- [x] Probada con capturas en celular y compu, con dos gimnasios de marcas distintas
+- [ ] Editor de la landing en el panel del dueño (necesita S2: login)
+- [ ] Clase de prueba y alta online desde la landing
 ## S14 · Automatizaciones y resumen diario al dueño
 ## S15 · Plataforma BRIK (alta, suscripción, suspensión gradual, salud del cliente)
 ## S16 · Legal, exportación, primeros pasos

@@ -15,6 +15,55 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-10-30 · S13 (primera parte) · Landing editable por gimnasio
+
+**QUÉ HICE**
+- **Migración 0008, landing.** La verifiqué aplicándola con pre-vuelo y con 8 pruebas. Tiene:
+  - `landing_gimnasio`: portada, contacto y si muestra precios.
+  - `landing_secciones`: 8 tipos (quiénes somos, actividades, planes, horarios, galería, profes, preguntas, ubicación), que se pueden ordenar, prender y apagar.
+  - Validación del contenido de cada sección, con mensajes de error claros.
+  - La función pública `landing_publica(host)`.
+  - El bucket de Storage `marcas`, con políticas por carpeta del gimnasio.
+  - Que cada gimnasio nuevo nazca con su landing armada.
+- **Qué devuelve `landing_publica`:**
+  - Sin publicar, solo la marca: la página dice "próximamente".
+  - Publicada: los planes con su precio de lista vigente y las variantes más baratas ("$22.000 pagando en efectivo").
+  - No devuelve nada de socios: una prueba lo comprueba buscando sus teléfonos y mails en la respuesta.
+- **Permisos:** anon lee la landing solo a través de la función, nunca las tablas. Recepción no puede editarla; encargado y dueño sí.
+- **Página en Next.**
+  - Raíz por host: si es la plataforma muestra la página de Gym OS; si es un gimnasio, su landing.
+  - Título, descripción y favicon por gimnasio.
+  - Colores de la marca, con el color de texto del botón calculado por contraste.
+  - Botón fijo de WhatsApp en el celular, con el mensaje armado. Cada plan tiene su "Lo quiero" con el nombre del plan.
+  - Una sección vacía no se muestra.
+  - Verificado levantando la app contra la base local y sacando capturas: Gimnasio Demo en celular y compu, Box Norte Demo con otra marca, y un gimnasio sin publicar.
+- **Seed:** dos gimnasios demo con marcas distintas y landing completa. `--dominio` sirve para sembrarlos en el dominio real.
+- **`docs/ARRANQUE.md`:** el paso a paso de GitHub, Supabase, Vercel y dominio.
+- **Total verificado:** 88 pruebas de base, 25 unitarias, chequeos, lint, tipos y build en verde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Las clases `.boton` y `.tarjeta` estaban fuera de una capa de CSS, así que le ganaban a las utilidades de Tailwind: `hidden` no ocultaba un botón en el celular. Las pasé a `@layer components`.
+- Repetía el nombre del gimnasio dos veces arriba (en la barra y en una etiqueta). Saqué la etiqueta: lo vacío está vacío.
+- `vitest` no resolvía el alias `@/`. Agregué `vitest.config.mts`.
+- `npm run db:types` con `--db-url` necesita Docker. Ahora usa `--project-id` (`scripts/db/tipos.mjs`).
+
+**QUÉ CORRÉS VOS**
+- `docs/ARRANQUE.md`, pasos 1 a 4.
+
+**QUÉ CONFIGURÁS VOS**
+- Dominio, proyecto de Supabase, variables en Vercel. El detalle está en `docs/ARRANQUE.md`.
+
+**SIN ARREGLAR**
+- El editor de la landing en el panel. Necesita el login del equipo (S2): por ahora se edita con SQL o con el seed.
+- Las fotos todavía no se suben desde la app. El bucket y sus políticas están, falta la pantalla.
+
+**LO QUE NO PUDE VERIFICAR**
+- El bucket `marcas` y sus políticas de Storage: el código está escrito según la documentación, pero no está ejecutado. La base local no tiene el esquema `storage`.
+- La landing contra el Supabase real: se probó con un imitador local de su RPC.
+- `npm run db:types` con `--project-id`: el código está escrito según la documentación, pero no está ejecutado.
+
+---
+
 ## 2026-10-29 · S1 + base de S7 · Núcleo de acceso y cobro, en Postgres real
 
 **QUÉ HICE**
