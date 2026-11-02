@@ -35,7 +35,7 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   if (!data.user && esProtegida(ruta)) {
     const destino = req.nextUrl.clone();
     destino.pathname = "/ingresar";
-    destino.search = `?siguiente=${encodeURIComponent(ruta + req.nextUrl.search)}`;
+    destino.search = `?siguiente=${encodeURIComponent(ruta + req.nextUrl.search)}${ruta.startsWith("/app") ? "&modo=socio" : ""}`;
     return NextResponse.redirect(destino);
   }
   return respuesta;

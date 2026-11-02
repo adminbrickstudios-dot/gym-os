@@ -3,12 +3,15 @@ import { headers } from "next/headers";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { iniciales } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
+import Link from "next/link";
 import { FormularioIngreso } from "./FormularioIngreso";
+import { IngresoSocio } from "./IngresoSocio";
 
 export const metadata: Metadata = { title: "Ingresar" };
 
-export default async function Ingresar({ searchParams }: { searchParams: Promise<{ siguiente?: string }> }) {
-  const { siguiente } = await searchParams;
+export default async function Ingresar({ searchParams }: { searchParams: Promise<{ siguiente?: string; modo?: string }> }) {
+  const { siguiente, modo } = await searchParams;
+  const socio = modo === "socio";
   const h = await headers();
   const host = h.get("x-gimnasio-host");
   const landing = h.get("x-gymos-contexto") === "gimnasio" && host ? await traerLanding(host) : null;
@@ -33,9 +36,15 @@ export default async function Ingresar({ searchParams }: { searchParams: Promise
           )}
           <span className="titulo text-2xl">{marca?.nombre ?? "Gym OS"}</span>
         </div>
-        <h1 className="titular text-6xl mt-12">{marca ? "Entrá al panel" : "Entrada de BRIK"}</h1>
-        <p className="texto-suave text-lg mt-3">{marca ? "Con el mail y la contraseña que te dio el gimnasio." : "Solo para administradores de la plataforma."}</p>
-        <FormularioIngreso siguiente={siguiente ?? null} />
+        {marca && (
+          <nav className="flex gap-2 mt-10" aria-label="Quién entra">
+            <Link href="/ingresar?modo=socio" className={`boton flex-1 ${socio ? "!border-[var(--acento)]" : "opacity-70"}`}>💪 Soy socio</Link>
+            <Link href="/ingresar" className={`boton flex-1 ${!socio ? "!border-[var(--acento)]" : "opacity-70"}`}>🛎️ Soy del equipo</Link>
+          </nav>
+        )}
+        <h1 className="titular text-6xl mt-10">{!marca ? "Entrada de BRIK" : socio ? "Tu gimnasio" : "Entrá al panel"}</h1>
+        <p className="texto-suave text-lg mt-3">{!marca ? "Solo para administradores de la plataforma." : socio ? "Con tu celular: te mandamos un código." : "Con el mail y la contraseña que te dio el gimnasio."}</p>
+        {marca && socio ? <IngresoSocio /> : <FormularioIngreso siguiente={siguiente ?? null} />}
       </div>
     </main>
   );

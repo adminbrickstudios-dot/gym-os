@@ -197,3 +197,23 @@ test("usuario_por_mail: solo el servidor puede averiguar si un mail tiene cuenta
   await t.db.query("rollback to savepoint s2");
   assert.equal(id, u.admin);
 });
+
+test("app del socio: ve su estado sin indicaciones para la recepción; otro login no lo ve; vincular por teléfono es del servidor", async () => {
+  const s = t.ctx.socios.vence_hoy;
+  const [{ id: usuario }] = await t.q(`insert into auth.users (phone, phone_confirmed_at) values ('+5490000777001', now()) returning id`);
+  await t.q(`update public.socios set telefono = '+5490000777001' where id = $1`, [s]);
+  await t.comoUsuario(usuario, () => t.falla(() => t.q(`select public.mi_socio($1)`, [t.g]), /no es de ningún socio/));
+  await t.comoUsuario(usuario, () => t.falla(() => t.q(`select public.vincular_socios_por_telefono($1, $2)`, [t.g, usuario]), /permission denied|servidor/));
+  await t.db.query("savepoint v");
+  await t.db.query("set local role service_role");
+  await t.q(`select set_config('request.jwt.claims', '{"role":"service_role"}', true)`);
+  const [{ n }] = await t.q(`select public.vincular_socios_por_telefono($1, $2) as n`, [t.g, usuario]);
+  await t.db.query("reset role");
+  assert.equal(n, 1);
+  const [{ r }] = await t.comoUsuario(usuario, () => t.q(`select public.mi_socio($1) as r`, [t.g]));
+  assert.equal(r.socio.socio_id, s);
+  assert.doesNotMatch(r.acceso.texto, /avisale/);
+  assert.ok(r.zona);
+  await t.comoUsuario(u.recepcion, () => t.falla(() => t.q(`select public.mi_socio($1, $2)`, [t.g, s]), /no es de ningún socio/));
+  await t.db.query("rollback to savepoint v");
+});

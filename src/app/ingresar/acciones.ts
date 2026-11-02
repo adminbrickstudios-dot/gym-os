@@ -43,3 +43,45 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
   await supabase.auth.signOut();
   return { error: "Tu usuario no es de este gimnasio. Revisá la dirección o pedile acceso al dueño.", email };
 }
+
+// ── Socios: entrar con el celular y un código ───────────────────────
+/** "387 555-1234" → "+5493875551234". Si ya trae +, se respeta. */
+function normalizarCelular(t: string) {
+  const d = t.replace(/[^\d+]/g, "");
+  if (d.startsWith("+")) return d;
+  return `+549${d.replace(/^0/, "").replace(/^549?/, "").replace(/^(\d{2,4})15/, "$1")}`;
+}
+
+export type EstadoCodigo = { error?: string; telefono?: string; enviado?: boolean; destino?: string };
+
+export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
+  const telefono = normalizarCelular(String(form.get("telefono") ?? ""));
+  if (!/^\+\d{10,15}$/.test(telefono)) return { error: "Escribí tu celular con código de área (ej: 387 555-1234)" };
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.auth.signInWithOtp({ phone: telefono });
+  if (error) return { error: `No pudimos mandarte el código: ${error.message}`, telefono };
+  return { enviado: true, telefono };
+}
+
+/**
+ * Verifica el código y vincula la cuenta a los socios de ESTE gimnasio con
+ * ese celular (lo hace el servidor: un usuario no se vincula solo).
+ */
+export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
+  const telefono = String(form.get("telefono") ?? "");
+  const codigo = String(form.get("codigo") ?? "").replace(/\D/g, "");
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.auth.verifyOtp({ phone: telefono, token: codigo, type: "sms" });
+  if (error || !data.user) return { error: "El código no es correcto o venció. Pedí uno nuevo.", telefono, enviado: true };
+
+  const gimnasioId = (await headers()).get("x-gimnasio-id");
+  if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", telefono };
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const { error: errVincula } = await clienteServicio().rpc("vincular_socios_por_telefono", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
+  if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, telefono };
+
+  const { data: sesion } = await supabase.rpc("mi_sesion");
+  if ((sesion as MiSesion | null)?.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
+  await supabase.auth.signOut();
+  return { error: "Tu celular no está cargado en este gimnasio. Pedile a recepción que lo agregue a tu ficha.", telefono };
+}
