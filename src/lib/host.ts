@@ -6,9 +6,9 @@ export type ClaseHost =
   | { tipo: "plataforma" }
   | { tipo: "gimnasio"; host: string };
 
-/** Minúsculas, sin puerto, sin punto final. */
+/** Minúsculas, sin protocolo, sin ruta, sin puerto, sin punto final ("https://Ejemplo.com/" → "ejemplo.com"). */
 export function normalizarHost(crudo: string | null | undefined): string {
-  return (crudo ?? "").trim().toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
+  return (crudo ?? "").trim().toLowerCase().replace(/^[a-z]+:\/\//, "").replace(/\/.*$/, "").replace(/:\d+$/, "").replace(/\.$/, "");
 }
 
 /**

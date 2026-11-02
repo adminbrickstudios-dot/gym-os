@@ -25,3 +25,8 @@ test("desarrollo local: demo.localhost es un gimnasio", () => {
   expect(clasificarHost("demo.localhost:3000", "localhost", "localhost")).toEqual({ tipo: "gimnasio", host: "demo.localhost" });
   expect(clasificarHost("localhost:3000", "localhost", "localhost")).toEqual({ tipo: "plataforma" });
 });
+
+test("las variables de dominio aceptan protocolo y barra final (como se suelen pegar en Vercel)", () => {
+  expect(normalizarHost("https://gym-os-pied.vercel.app/")).toBe("gym-os-pied.vercel.app");
+  expect(clasificarHost("gym-os-pied.vercel.app", "https://gym-os-pied.vercel.app/", " gym-os-pied.vercel.app ")).toEqual({ tipo: "plataforma" });
+});
