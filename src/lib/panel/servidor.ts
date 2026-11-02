@@ -53,3 +53,10 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
 export function exigirRol(panel: PanelGimnasio, roles: Rol[]) {
   if (!roles.includes(panel.yo.rol)) throw new ErrorDatos("Tu rol no tiene acceso a esta pantalla", "42501", 403);
 }
+
+/** Una sección que el gimnasio apagó no se ve en ningún panel, ni entrando por la dirección. */
+export function exigirSeccion(panel: PanelGimnasio, clave: string) {
+  if (panel.secciones_apagadas.includes(clave)) {
+    throw new ErrorDatos("Esta sección está apagada en este gimnasio. La prende el dueño desde Configuración.", "apagada", 404);
+  }
+}

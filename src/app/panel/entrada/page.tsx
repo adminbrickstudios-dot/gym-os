@@ -4,7 +4,7 @@ import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Puerta } from "./Puerta";
 
@@ -16,6 +16,7 @@ const ETIQUETA: Record<string, string> = { entro: "Entró", entro_modo_aviso: "E
 export default async function Entrada({ searchParams }: { searchParams: Promise<{ sede?: string }> }) {
   return intentar(async () => {
     const panel = await contextoPanel();
+    exigirSeccion(panel, "entrada");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, (await searchParams).sede);
     const hoy = await rpc<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id });

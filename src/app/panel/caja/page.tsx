@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Resumen } from "./acciones";
 import { AbrirCaja, TurnoAbierto } from "./Turno";
@@ -14,6 +14,7 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   return intentar(async () => {
     const panel = await contextoPanel();
+    exigirSeccion(panel, "caja");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const cajas = (await rpc<Caja[]>("cajas_sede", { p_sede_id: sede.id })).filter((c) => c.activa);

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -13,6 +13,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
   const q = ((await searchParams).q ?? "").trim();
   return intentar(async () => {
     const panel = await contextoPanel();
+    exigirSeccion(panel, "socios");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const filas = await rpc<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60 });
     return (

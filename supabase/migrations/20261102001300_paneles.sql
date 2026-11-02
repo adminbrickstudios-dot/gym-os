@@ -184,6 +184,19 @@ begin
       jsonb_build_object('clave', 'vencen', 'emoji', '⏰', 'etiqueta', 'Vencen hoy', 'valor', vencen),
       jsonb_build_object('clave', 'cobrado', 'emoji', '💵', 'etiqueta', 'Cobrado hoy', 'valor', cobrado, 'formato', 'pesos'),
       jsonb_build_object('clave', 'al_dia', 'emoji', '✅', 'etiqueta', 'Socios al día', 'valor', al_dia));
+  elsif e.rol = 'profe' then
+    -- El profe ve lo suyo: sus clases de hoy, cuántos anotados y cuántos presentes.
+    numeros := (
+      select jsonb_build_array(
+        jsonb_build_object('clave', 'mis_clases', 'emoji', '🗓️', 'etiqueta', 'Mis clases hoy', 'valor', count(*)),
+        jsonb_build_object('clave', 'anotados', 'emoji', '📝', 'etiqueta', 'Anotados', 'valor',
+          coalesce(sum((select count(*) from public.reservas r where r.clase_id = k.id and r.estado = 'confirmada')), 0)),
+        jsonb_build_object('clave', 'presentes', 'emoji', '✅', 'etiqueta', 'Presentes', 'valor',
+          coalesce(sum((select count(*) from public.asistencias a where a.clase_id = k.id and a.anulada_en is null)), 0)),
+        jsonb_build_object('clave', 'faltan', 'emoji', '⏳', 'etiqueta', 'Me quedan hoy', 'valor', count(*) filter (where k.inicio > now())))
+        from public.clases k
+       where k.gimnasio_id = p_gimnasio_id and k.profe_id = e.id and k.cancelada_en is null
+         and k.inicio >= desde and k.inicio < hasta);
   else
     numeros := jsonb_build_array(
       jsonb_build_object('clave', 'entraron', 'emoji', '🚪', 'etiqueta', 'Entraron hoy', 'valor', entraron),

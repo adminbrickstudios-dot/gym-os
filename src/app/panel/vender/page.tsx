@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Ficha } from "../socios/[id]/tipos";
 import { Carrito } from "./Carrito";
@@ -15,6 +15,7 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
   const sp = await searchParams;
   return intentar(async () => {
     const panel = await contextoPanel();
+    exigirSeccion(panel, "vender");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const [precios, cajas, ficha] = await Promise.all([

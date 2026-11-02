@@ -70,7 +70,7 @@ export function Navegacion(props: Props) {
         <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} /></div>
         <Menu props={props} actual={actual} />
         <div className="mt-auto pt-8 space-y-3">
-          <p className="px-3 text-sm"><span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></p>
+          <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
           <Salir />
         </div>
       </aside>
@@ -114,7 +114,7 @@ export function Navegacion(props: Props) {
           </div>
           <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} />
           <div className="mt-8 space-y-3">
-            <p className="px-3 text-sm"><span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></p>
+            <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
             <Salir />
           </div>
         </div>

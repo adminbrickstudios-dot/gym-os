@@ -77,6 +77,26 @@ try {
   await q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde, medio_pago) values ($1, $2, 22000, '2020-01-01', 'efectivo')`,
     [g, planes.full]);
 
+  // Clases con reserva: actividades y una grilla de lunes a sábado (las clases de cada día se crean solas).
+  await q(`update public.configuracion_gimnasio set modo_clases = 'reserva' where gimnasio_id = $1`, [g]);
+  const actividades = {};
+  for (const [nombre, emoji, descripcion] of [["Spinning", "🚴", "45 minutos a pura música"], ["Funcional", "🔥", "Fuerza y cardio en circuito"],
+                                               ["Yoga", "🧘", "Movilidad y respiración"], ["Crossfit", "🏋️", "WOD del día, en equipo"]]) {
+    [{ id: actividades[nombre] }] = await q(`insert into public.actividades (gimnasio_id, nombre, emoji, descripcion) values ($1,$2,$3,$4) returning id`,
+      [g, nombre, emoji, descripcion]);
+  }
+  // El profe existe antes que la grilla (un horario no se edita); usuarios-demo le vincula el login.
+  const [{ id: diego }] = await q(`insert into public.equipo (gimnasio_id, nombre, rol) values ($1, 'Diego', 'profe') returning id`, [g]);
+  const grilla = [["Spinning", "08:00", 45, 15], ["Funcional", "09:00", 60, 20], ["Yoga", "10:30", 60, 12],
+                  ["Crossfit", "18:00", 60, 16], ["Spinning", "19:00", 45, 15], ["Funcional", "20:00", 60, 20]];
+  for (let dia = 1; dia <= 6; dia++) {
+    for (const [act, hora, dur, cupo] of grilla) {
+      if (dia === 6 && hora > "12:00") continue;   // los sábados, solo a la mañana
+      await q(`insert into public.horarios_clase (gimnasio_id, sede_id, actividad_id, dia_semana, hora_inicio, duracion_min, cupo, profe_id, vigente_desde)
+               values ($1,$2,$3,$4,$5,$6,$7,$8,'2026-01-01')`, [g, sede, actividades[act], dia, hora, dur, cupo, ["Funcional", "Crossfit"].includes(act) ? diego : null]);
+    }
+  }
+
   // Segundo gimnasio demo, con otra marca: muestra que cada landing es propia.
   const [{ id: g2 }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo-box', 'Box Norte Demo', true) returning id`);
   await q(`update public.configuracion_gimnasio set color_acento = '#a78bfa', color_fondo = '#16121f' where gimnasio_id = $1`, [g2]);

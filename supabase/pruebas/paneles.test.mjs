@@ -56,6 +56,12 @@ test("panel_inicio: la recepción no ve lo cobrado; el dueño sí; otro gimnasio
   await t.comoUsuario(u.ajeno, () => t.falla(() => t.q(`select public.panel_inicio($1)`, [t.g]), /Sin permiso/));
 });
 
+test("panel_inicio: el profe ve sus clases, no la plata ni los vencimientos", async () => {
+  const { r } = await uno(u.profe, `select public.panel_inicio($1) as r`, [t.g]);
+  assert.deepEqual(r.numeros.map((n) => n.clave), ["mis_clases", "anotados", "presentes", "faltan"]);
+  assert.ok(!r.ahora.some((a) => ["vencen", "transferencias", "caja"].includes(a.tipo)));
+});
+
 test("panel_inicio: una recepción de otra sede no puede mirar la principal", async () => {
   const [{ id: sedeB }] = await t.q(`insert into public.sedes (gimnasio_id, nombre) values ($1,'Sede B') returning id`, [t.g]);
   const { usuario } = await persona("recepcion", sedeB);
@@ -164,4 +170,30 @@ test("ingresos_del_dia: la entrada ve lo de hoy; el profe no", async () => {
     assert.ok(lista.some((x) => x.socio_id === s.socio_id));
   });
   await t.comoUsuario(u.profe, () => t.falla(() => t.q(`select * from public.ingresos_del_dia($1)`, [t.g]), /Sin permiso/));
+});
+
+test("grilla: el encargado arma actividades y horarios; cerrar un horario cancela sus clases futuras", async () => {
+  await t.q(`update public.configuracion_gimnasio set modo_clases = 'reserva' where gimnasio_id = $1`, [t.g]);
+  await t.comoUsuario(u.encargado, async () => {
+    const [{ id: act }] = await t.q(`select public.guardar_actividad($1, null, 'Box', '🥊') as id`, [t.g]);
+    const [{ id: h }] = await t.q(`select public.agregar_horario($1, $2, extract(isodow from current_date + 1)::int, '23:00', 60, 10) as id`, [t.sede, act]);
+    const [{ id: c }] = await t.q(`select clase_id as id from public.clases_del_dia($1, current_date + 1) where actividad = 'Box'`, [t.sede]);
+    const [{ d }] = await t.q(`select public.clase_detalle($1) as d`, [c]);
+    assert.equal(d.actividad, "Box");
+    await t.q(`select public.cerrar_horario($1)`, [h]);
+    const [{ x }] = await t.q(`select public.clase_detalle($1) as x`, [c]);
+    assert.equal(x.cancelada, true);
+    await t.falla(() => t.q(`select public.agregar_horario($1, $2, 9, '10:00', 60)`, [t.sede, act]), /Elegí el día/);
+  });
+  await t.comoUsuario(u.recepcion, () => t.falla(() => t.q(`select public.guardar_actividad($1, null, 'X', null)`, [t.g]), /Sin permiso/));
+});
+
+test("usuario_por_mail: solo el servidor puede averiguar si un mail tiene cuenta", async () => {
+  await t.comoUsuario(u.dueno, () => t.falla(() => t.q(`select public.usuario_por_mail('admin-prueba@ejemplo.invalid')`), /permission denied|servidor/));
+  await t.db.query("savepoint s2");
+  await t.db.query("set local role service_role");
+  await t.q(`select set_config('request.jwt.claims', '{"role":"service_role"}', true)`);
+  const [{ id }] = await t.q(`select public.usuario_por_mail('ADMIN-prueba@ejemplo.invalid') as id`);
+  await t.db.query("rollback to savepoint s2");
+  assert.equal(id, u.admin);
 });
