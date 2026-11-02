@@ -15,6 +15,99 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-02 · S2–S10, S15 · Diseño oscuro y todos los paneles, probados con sesión real
+
+**QUÉ HICE**
+- **Diseño oscuro, modo gimnasio.**
+  - Todo sale del fondo y del color principal de cada gimnasio (datos). Si el fondo es oscuro, los textos son claros y las superficies más claras; con un fondo claro, al revés.
+  - Títulos en Archivo angosta y pesada, emojis en cada sección, colores de estado de los discos olímpicos.
+  - Rehice la landing, la página de la plataforma y la de "no encontramos este gimnasio".
+- **Login y panel.**
+  - El middleware renueva la sesión y protege `/panel`, `/app` y `/admin`.
+  - `/ingresar` tiene dos modos: equipo con mail y contraseña, socio con celular y código.
+  - Barra lateral agrupada, con una línea que explica cada sección. Ctrl+K busca secciones y socios.
+  - En el celular, cuatro principales abajo y el resto en el menú.
+  - Inicio: saludo, accesos rápidos que cada persona elige, cuatro números según su rol, y "ahora y lo que sigue".
+- **Pantallas.**
+  - Entrada.
+  - Socios: lista, alta, edición y ficha.
+  - Vender, Caja (arqueo ciego) y Transferencias.
+  - Vencen hoy y Retención.
+  - Clases, con la grilla para armarlas.
+  - Planes y precios, Equipo, Configuración y Mi cuenta.
+  - App del socio y super admin de BRIK.
+- **Base, 0012–0017.**
+  - Colores oscuros por defecto.
+  - Las funciones que leen los paneles.
+  - Una caja por sede.
+  - Precios del mostrador y vencen hoy.
+  - Grilla de clases.
+  - Cuentas del equipo.
+  - App del socio.
+
+  Todas validan rol y gimnasio, y fallan con un error, nunca con una lista vacía. 16 pruebas nuevas.
+- **Para probar con sesión real, sin un Supabase:**
+  - `scripts/local/supabase-local.mjs` imita las llamadas a funciones de PostgREST (el rol sale del JWT) y el login de GoTrue.
+  - `levantar.sh` levanta todo; `usuarios-demo` crea los logins por la API de administración.
+- **Probado con Playwright, logueado de verdad:**
+  - recepción busca, ve el porqué y anota la entrada;
+  - abre la caja con $5.000, cobra $22.000 en efectivo a un socio que no podía entrar (queda "Al día"), cierra contando $30.000 y ve "Sobran $3.000";
+  - la dueña crea un plan;
+  - la dueña suma a Lucas con contraseña provisoria; Lucas entra y la cambia;
+  - la dueña apaga Caja y Lucas deja de verla, ni entrando por la dirección;
+  - el admin crea "Olympo Gym" y la dueña nueva entra a su panel;
+  - un socio entra con su celular y el código y reserva una clase;
+  - la recepción entra a Retención y ve "no tenés acceso".
+- **Verificado:**
+  - `npm run verificar` con exit 0: 163 pruebas de base, 36 unitarias, chequeos, lint, tipos y build.
+  - Base con 0001–0011 tal como se entregaron + 0012–0017 = 163/163.
+- **GitHub Actions:**
+  - "Base de datos" (prevuelo, aplicar, chequeos, hacer-admin), con el secreto `SUPABASE_DB_URL` y disparado a mano.
+  - "Verificar" en cada push.
+- **`docs/ARRANQUE.md`** rehecho: sin instalar nada en la compu.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- **Ningún gimnasio tenía caja.** No se podía abrir un turno ni cobrar en efectivo. 0014 crea una por sede (trigger) y completa las sedes que ya existen.
+- **El login fallaba por dentro.** Redirigir desde la acción de login renderizaba `/panel` sin los encabezados del gimnasio. Ahora la acción devuelve a dónde ir y navega el navegador.
+- **En producción, Next oculta el texto de los errores del servidor.** "No tenés acceso" se iba a ver como un error genérico. Cada pantalla corre en `intentar()` y muestra el mensaje de la base.
+- **El resultado del arqueo desaparecía** al refrescar la pantalla, antes de que se viera. Ahora queda hasta tocar "Listo".
+- **El socio leía "· avisale"** en su app: es la indicación para la recepción. `mi_socio` la saca, y el veredicto sigue siendo el de la puerta.
+- **El profe veía "vencen hoy" y transferencias** en su inicio. Ahora ve sus clases, anotados y presentes.
+- **La zona horaria estaba escrita a mano** en la app del socio. Ahora viene del gimnasio.
+
+**QUÉ CORRÉS VOS**
+- `docs/ARRANQUE.md`, pasos 1 a 4. Todo desde el navegador.
+
+**QUÉ CONFIGURÁS VOS**
+- GitHub: el secreto `SUPABASE_DB_URL`.
+- Vercel: las cinco variables de `docs/ARRANQUE.md`.
+- Supabase, para el ingreso de socios por celular: un proveedor de SMS (Twilio u otro) en Authentication → Providers → Phone.
+
+**SIN ARREGLAR** (anotado; los tres primeros tocan permisos y no los cambié solo)
+- **La recepción puede dejar pasar a cualquiera escribiendo un motivo, incluso a un suspendido.** ¿Debería poder forzar solo el dueño o el encargado, o nadie cuando hay suspensión?
+- **La recepción no puede anotar "le escribí"** en Vencen hoy (`registrar_contacto` es solo de dueño y encargado). Le manda el WhatsApp pero no queda registrado.
+- **El profe no puede buscar socios** para sumar a alguien que vino sin reservar (`buscar_socios` es del mostrador). En modo "sin reserva", su lista empieza vacía.
+- No se puede anular un presente desde la pantalla: `lista_clase` no devuelve el id de la asistencia.
+- Faltan:
+  - QR del socio, kiosco y molinete;
+  - PIN de recepción;
+  - importador de socios;
+  - editor de la landing y subida de logo y fotos;
+  - MercadoPago;
+  - rutinas;
+  - avisos automáticos;
+  - suscripción BRIK.
+- Para "Sacar" un horario de la grilla, el confirm usa el diálogo del navegador. Funciona, pero no tiene el estilo.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada corrió contra un Supabase real. Login, sesión y funciones se probaron contra `supabase-local`, que imita PostgREST y GoTrue; el código está escrito según la documentación, pero no está ejecutado contra Supabase.
+- Subir el comprobante desde la app y abrirlo con link firmado (Storage): el código está escrito según la documentación, pero no está ejecutado. La base local no tiene Storage.
+- El SMS real del código: el código está escrito según la documentación, pero no está ejecutado. En local el código se lee de un archivo.
+- Los workflows de GitHub Actions: el código está escrito según la documentación, pero no está ejecutado. Sí corrí localmente los mismos comandos que corren ellos (`aplicar`, `chequeos`, `hacer-admin`, build con las variables de ejemplo).
+- El deploy en Vercel y `npm run db:types`: el código está escrito según la documentación, pero no está ejecutado.
+
+---
+
 ## 2026-10-30 · S7 + S8 + S9 (base) · Caja, venta, retención y clases, con segunda revisión
 
 **QUÉ HICE**

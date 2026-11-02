@@ -161,7 +161,21 @@ npm run sembrar:demo -- --url "$(scripts/db/local.sh url)"   # gimnasio demo, 30
 npm run chequeos               # reglas del proyecto contra la base y los archivos
 npm test                       # pruebas unitarias (vitest)
 npm run verificar              # todo lo anterior + lint + typecheck + build
+scripts/local/levantar.sh      # base + supabase-local + app con los demos (sesión real)
 ```
+
+**Probar una pantalla = abrirla con sesión real.** `scripts/local/levantar.sh`
+levanta `scripts/local/supabase-local.mjs`, que imita la RPC de PostgREST
+(el rol sale del JWT y los permisos los decide Postgres) y el auth de
+GoTrue (contraseña, código por SMS/mail, crear usuarios) contra la base
+local. Los códigos quedan en `.local/codigos.json`. Usuarios demo:
+`scripts/datos/usuarios-demo.mjs` (contraseña `demo-gymos`). Las
+pantallas solo usan RPC: si una necesita leer una tabla directo, hay
+que sumarlo a supabase-local o escribir la función.
+
+**Errores en pantalla:** cada página corre dentro de `intentar()`, que
+muestra el mensaje de la base. En producción Next oculta el texto de los
+errores del servidor: un error que llega a `error.tsx` se ve genérico.
 
 La base local necesita un Postgres 15+ con `pg_trgm` y `unaccent`
 (PGHOST/PGPORT/PGUSER). `supabase/local/simular-supabase.sql` reproduce

@@ -1,0 +1,57 @@
+# Base de datos de producción, con un botón: Actions → "Base de datos" → Run workflow.
+# Necesita el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions).
+#
+#   prevuelo   corre las migraciones pendientes en una transacción que se revierte
+#   aplicar    prevuelo + aplica + chequeos del proyecto contra la base real
+#   chequeos   solo los chequeos (RLS, permisos, search_path…)
+#   hacer-admin  da super admin a la cuenta del mail indicado
+#
+# Nunca corre solo: siempre lo dispara una persona. Cuando haya gimnasios
+# reales, este botón es el "yo la corro" de las reglas del proyecto.
+name: Base de datos
+
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: "Qué hacer"
+        type: choice
+        options: [prevuelo, aplicar, chequeos, hacer-admin]
+        default: prevuelo
+      email:
+        description: "Mail (solo para hacer-admin)"
+        required: false
+
+concurrency:
+  group: base-de-datos
+  cancel-in-progress: false
+
+jobs:
+  base:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Falta el secreto
+        if: env.SUPABASE_DB_URL == ''
+        run: |
+          echo "::error::Falta el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions)"
+          exit 1
+      - name: Pre-vuelo (transacción que se revierte)
+        if: inputs.accion == 'prevuelo' || inputs.accion == 'aplicar'
+        run: node scripts/db/aplicar.mjs --prevuelo
+      - name: Aplicar migraciones
+        if: inputs.accion == 'aplicar'
+        run: node scripts/db/aplicar.mjs
+      - name: Chequeos del proyecto contra la base real
+        if: inputs.accion == 'aplicar' || inputs.accion == 'chequeos'
+        run: node scripts/chequeos.mjs
+      - name: Hacer super admin
+        if: inputs.accion == 'hacer-admin'
+        run: node scripts/datos/hacer-admin.mjs --email "${{ inputs.email }}"

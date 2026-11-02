@@ -1,122 +1,130 @@
 # Gym OS — Arranque paso a paso
 
-Cuatro pasos, en este orden. Cada uno termina con algo que se verifica.
-Tiempo total: ~40 minutos.
+Cinco pasos, en este orden. Cada uno termina con algo que se verifica.
+Tiempo total: ~30 minutos. **No hace falta instalar nada en tu compu**:
+todo se hace desde GitHub, Supabase y Vercel en el navegador.
 
-Antes de empezar necesitás: Node 22+, git, una cuenta de GitHub, una de
-Supabase y una de Vercel.
-
----
-
-## Paso 1 · El repo en GitHub (5 min)
-
-```bash
-git clone gym-os.bundle gym-os
-cd gym-os
-git remote remove origin           # el bundle trae su origen local; se saca
-npm install
-```
-
-Crear el repo privado y subirlo. Con la CLI de GitHub:
-
-```bash
-gh repo create gym-os --private --source=. --push
-```
-
-Sin la CLI: en github.com → New repository → `gym-os`, privado, **sin**
-README. Después:
-
-```bash
-git remote add origin https://github.com/TU_USUARIO/gym-os.git
-git push -u origin main
-```
-
-**LISTO SI:** `git log origin/main --oneline -3` muestra los commits.
+Las claves **nunca** van por el chat: solo en GitHub (Secrets) y en Vercel.
 
 ---
 
-## Paso 2 · Supabase (10 min)
+## Paso 1 · El repo en GitHub (2 min)
+
+github.com → New repository → `gym-os`, **privado**, **sin README ni nada**.
+
+Pasale el nombre exacto (`tu-usuario/gym-os`) al agente: lo conecta y
+sube todo desde su lado.
+
+**LISTO SI:** en el repo se ven las carpetas `src`, `supabase`, `docs`.
+
+---
+
+## Paso 2 · Supabase (5 min)
 
 1. supabase.com → New project.
    - **Región: South America (São Paulo)**.
    - **Contraseña de la base: solo letras y números.** Un `@` o un `#`
      rompe la cadena de conexión y el error no lo dice.
-2. Copiar `.env.local.example` a `.env.local` y completar:
-   - Project Settings → API: `NEXT_PUBLIC_SUPABASE_URL`,
-     `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-   - Project Settings → General: `SUPABASE_PROJECT_ID`.
-   - Project Settings → Database → Connection string → **Session pooler**:
-     `SUPABASE_DB_URL` (con la contraseña adentro).
-   - `NEXT_PUBLIC_DOMINIO_BASE` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA`: el
-     dominio del paso 3. Si todavía no lo tenés, dejá `localhost`.
-3. Aplicar las migraciones. **Nunca pegarlas en el editor SQL de
-   Supabase**: rompe los acentos.
+2. En el repo de GitHub → Settings → Secrets and variables → Actions →
+   **New repository secret**:
+   - Nombre `SUPABASE_DB_URL`
+   - Valor: Supabase → Project Settings → Database → Connection string →
+     **Session pooler** (pegá la contraseña donde dice `[YOUR-PASSWORD]`).
+3. Aplicar las migraciones: en GitHub → **Actions** → **Base de datos** →
+   **Run workflow** → `prevuelo`. Si sale en verde, otra vez con `aplicar`.
+   **Nunca pegar SQL en el editor de Supabase**: rompe los acentos.
 
-```bash
-npm run db:prevuelo     # las corre en una transacción que se revierte
-npm run db:aplicar      # ahora sí
-npm run chequeos        # las reglas del proyecto, contra la base real
-npx supabase login      # una sola vez
-npm run db:types
-```
-
-**LISTO SI:** `npm run chequeos` dice "Todo en verde".
+**LISTO SI:** el workflow `aplicar` termina en verde y el último paso
+dice "Todo en verde".
 
 ---
 
-## Paso 3 · Dominio y Vercel (15 min)
+## Paso 3 · Vercel (5 min)
 
-1. **Dominio.** Comprarlo en Vercel (Domains → Buy) es lo más simple: el
-   DNS queda en Vercel solo. Hace falta para los subdominios: Vercel no
-   permite `*.vercel.app`.
-2. vercel.com → Add New → Project → Import `gym-os` desde GitHub.
-   Framework: Next.js (lo detecta solo).
-3. **Antes del primer deploy**, en Environment Variables:
+1. vercel.com → Add New → Project → Import `gym-os`. Framework: Next.js.
+2. **Antes de Deploy**, en Environment Variables:
 
-| Variable | Entornos |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Production, Preview, Development |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production, Preview, Development |
-| `SUPABASE_SERVICE_ROLE_KEY` | Production |
-| `NEXT_PUBLIC_DOMINIO_BASE` | Production, Preview, Development |
-| `NEXT_PUBLIC_DOMINIO_PLATAFORMA` | Production, Preview, Development |
+| Variable | De dónde | Entornos |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL | todos |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | misma pantalla → `anon` `public` | todos |
+| `SUPABASE_SERVICE_ROLE_KEY` | misma pantalla → `service_role` | **solo Production** |
+| `NEXT_PUBLIC_DOMINIO_BASE` | tu dominio, sin `https://` (ej: `gymos.com.ar`) | todos |
+| `NEXT_PUBLIC_DOMINIO_PLATAFORMA` | donde vive el panel de BRIK (ej: `app.gymos.com.ar`) | todos |
 
    `NEXT_PUBLIC_*` se graba en el build: si la cambiás después, hay que
    **redeployar**.
-4. Deploy.
-5. Settings → Domains: agregar los tres.
-   ```
-   midominio.com
-   www.midominio.com
-   *.midominio.com
-   ```
-   El comodín necesita que el dominio use los nameservers de Vercel (si
-   lo compraste ahí, ya los usa).
+3. Deploy.
 
-**LISTO SI:** `https://midominio.com` muestra la página de Gym OS.
+**Sin dominio todavía:** poné en las dos `NEXT_PUBLIC_DOMINIO_*` el
+`tu-proyecto.vercel.app` que te da Vercel. Vas a ver la página de Gym OS
+y el super admin, pero **no los gimnasios**: cada gimnasio vive en un
+subdominio (`olympo.tudominio.com`) y Vercel no da subdominios de
+`.vercel.app`. Para probar un gimnasio antes de comprar el dominio,
+avisale al agente y lo conecta a otra dirección de Vercel.
+
+**LISTO SI:** la dirección de Vercel muestra "Gym OS · Ingresar".
 
 ---
 
-## Paso 4 · Los gimnasios demo (5 min)
+## Paso 4 · Tu usuario de super admin (3 min)
+
+1. Supabase → Authentication → Users → **Add user** → con tu mail y una
+   contraseña. Tildá "Auto Confirm User".
+2. GitHub → Actions → **Base de datos** → Run workflow → `hacer-admin`,
+   con tu mail.
+3. Entrá a `https://<dominio de la plataforma>/ingresar` con ese mail.
+
+**LISTO SI:** ves la pantalla "Gimnasios" y podés crear uno.
+
+---
+
+## Paso 5 · Dominio (cuando lo tengas, 10 min)
+
+1. Comprarlo en Vercel (Domains → Buy) es lo más simple: el DNS queda
+   en Vercel solo.
+2. Vercel → el proyecto → Settings → Domains → agregar:
+   ```
+   tudominio.com
+   www.tudominio.com
+   *.tudominio.com
+   app.tudominio.com
+   ```
+   El comodín necesita que el dominio use los nameservers de Vercel.
+3. Cambiar `NEXT_PUBLIC_DOMINIO_BASE` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA`
+   y **redeployar**.
+
+**LISTO SI:** creás un gimnasio desde el super admin y su dirección
+(`nombre.tudominio.com`) muestra su página.
+
+---
+
+## Para que funcione todo (cuando lo necesites)
+
+| Qué | Dónde | Para qué |
+|---|---|---|
+| Proveedor de SMS (Twilio u otro) | Supabase → Authentication → Providers → Phone | Que los socios entren con su celular y un código |
+| Nada (lo crea la migración 0009) | Supabase → Storage → `comprobantes` | Que los socios suban el comprobante de transferencia. Verificá que el bucket exista después de aplicar |
+| Nada (lo crea la migración 0008) | Supabase → Storage → `marcas` | Logos y fotos de la landing |
+
+---
+
+## Probar en tu compu (opcional)
+
+Con Node 22 y un Postgres 15+ instalados:
 
 ```bash
-node scripts/datos/sembrar-demo.mjs --dominio midominio.com
+scripts/local/levantar.sh nueva
 ```
 
-Crea dos gimnasios con datos obviamente ficticios y sus landings.
-
-**LISTO SI:**
-- `https://demo.midominio.com` → landing verde del Gimnasio Demo
-- `https://demo-box.midominio.com` → landing violeta del Box Norte Demo
-- `https://cualquiera.midominio.com` → "No encontramos este gimnasio"
+Levanta la base, una imitación local de Supabase (login y funciones) y la
+app con dos gimnasios demo. Abrí `http://demo.localhost:3123` y entrá a
+`/ingresar` con `duena@ejemplo.invalid` / `demo-gymos` (los demás
+usuarios los imprime al final).
 
 ---
 
-## Después
+## Cuando cargues el primer gimnasio real
 
-Desde acá trabaja Claude Code en tu compu, sobre este repo, sección por
-sección de `docs/PLAN.md`. `CLAUDE.md` le dice cómo.
-
-Cuando cargues el **primer gimnasio real**: crear el archivo
-`.claude/BASE_CON_DATOS_REALES`. Desde ese momento el agente escribe
-las migraciones y vos las corrés.
+Crear el archivo `.claude/BASE_CON_DATOS_REALES`. Desde ese momento el
+agente escribe las migraciones y vos las corrés con el botón de Actions.

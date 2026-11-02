@@ -1,0 +1,29 @@
+# En cada push y pull request: lint, tipos, pruebas unitarias y build.
+# Las pruebas de la base (npm run db:pruebas) necesitan Postgres local y
+# corren en tu compu o en el agente, no acá.
+name: Verificar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: clave-de-build
+      NEXT_PUBLIC_DOMINIO_BASE: ejemplo.com
+      NEXT_PUBLIC_DOMINIO_PLATAFORMA: app.ejemplo.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

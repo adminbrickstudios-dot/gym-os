@@ -3,11 +3,12 @@
 > Pendiente de cruzar con `LECCIONES` y `CONVENCIONES` (no estaban
 > adjuntos cuando se escribió).
 
-## Estado (30/10/2026)
+## Estado (02/11/2026)
 
-**Construido y probado contra Postgres 16** (migraciones 0001–0011, base
-local con la simulación de Supabase, 147 pruebas): acceso, habilitaciones,
-períodos y precios, cobro, landing, caja y venta, retención y clases.
+**Construido y probado contra Postgres 16** (migraciones 0001–0017, base
+local con la simulación de Supabase, 163 pruebas): acceso, habilitaciones,
+períodos y precios, cobro, landing, caja y venta, retención, clases y lo
+que leen los paneles.
 Lo demás sigue siendo propuesta (§4).
 
 | Migración | Qué tiene |
@@ -23,6 +24,17 @@ Lo demás sigue siendo propuesta (§4).
 | 0009 caja y venta | **corrige 0003 y 0007** (arqueo ciego: turnos, movimientos, ítems y pagos solo los lee dueño/encargado; `cobrar_cuota` bloquea el turno; `anular_venta` con caja de devolución), productos, abrir/cerrar caja, `caja_abierta`, `vender`, transferencias con comprobante, bucket `comprobantes` |
 | 0010 retención | plantillas_mensaje, contactos_retencion, `retencion`, `retencion_resumen`, `registrar_contacto` |
 | 0011 clases | actividades, plan_actividades, horarios_clase, clases, reservas, asistencias, avisos_pendientes, reservar, lista de espera, presente y su anulación |
+| 0012 estilo oscuro | fondo grafito y verde por defecto para gimnasios nuevos |
+| 0013 paneles | equipo.preferencias; mi_sesion, panel_gimnasio, panel_inicio (números por rol), buscar_socios, ficha_socio, guardar_socio, planes y precios, productos, ingresos_del_dia, configuración (secciones válidas), equipo, super admin |
+| 0014 mostrador | una caja por sede (trigger + backfill), cajas_sede, precios_venta, vencen_hoy |
+| 0015 grilla | actividades_gimnasio, guardar_actividad, horarios_gimnasio, agregar_horario, cerrar_horario, clase_detalle |
+| 0016 cuentas del equipo | usuario_por_mail (solo servidor), una cuenta una vez por gimnasio |
+| 0017 app del socio | mi_socio, vincular_socios_por_telefono (solo servidor) |
+
+**Las pantallas leen y escriben solo por funciones de `public`**, que
+validan rol y gimnasio y fallan con error (nunca una lista vacía). Las
+lecturas directas de tablas por RLS quedan para la app del socio y como
+segunda barrera.
 
 **Regla:** una migración ya entregada no se edita. Lo que cambia de ella va
 en la siguiente (así 0009 corrige 0003 y 0007), para que llegue también a
