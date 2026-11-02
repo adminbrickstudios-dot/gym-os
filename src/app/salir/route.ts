@@ -8,5 +8,7 @@ export async function POST(req: NextRequest) {
   const destino = req.nextUrl.clone();
   destino.pathname = "/ingresar";
   destino.search = "";
-  return NextResponse.redirect(destino, { status: 303 });
+  const r = NextResponse.redirect(destino, { status: 303 });
+  r.cookies.delete("gymos_gimnasio");
+  return r;
 }

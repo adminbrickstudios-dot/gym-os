@@ -6,6 +6,9 @@ import { clasificarHost, normalizarHost } from "@/lib/host";
 // borran: nadie puede elegir su gimnasio mandando un header.
 const CABECERAS = ["x-gymos-contexto", "x-gimnasio-id", "x-gimnasio-slug", "x-gimnasio-host"] as const;
 
+/** Cookie con el slug del gimnasio elegido al entrar desde la dirección de la plataforma. No da permisos. */
+export const COOKIE_GIMNASIO = "gymos_gimnasio";
+
 // Rutas que piden sesión. El resto (landing, ingresar) es público.
 const PROTEGIDAS = ["/panel", "/app", "/admin"];
 const esProtegida = (ruta: string) => PROTEGIDAS.some((p) => ruta === p || ruta.startsWith(`${p}/`));
@@ -57,8 +60,47 @@ export async function middleware(req: NextRequest) {
   const cabeceras = new Headers(req.headers);
   CABECERAS.forEach((c) => cabeceras.delete(c));
 
+  const resolver = async (funcion: "gimnasio_por_host" | "gimnasio_por_slug", args: Record<string, string>) => {
+    const r = await fetch(`${supabaseUrl}/rest/v1/rpc/${funcion}`, {
+      method: "POST",
+      headers: { apikey: anon, Authorization: `Bearer ${anon}`, "Content-Type": "application/json" },
+      body: JSON.stringify(args),
+      cache: "no-store",
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return ((await r.json()) as { gimnasio_id: string; slug: string }[])[0];
+  };
+
   const clase = clasificarHost(host, base, plataforma);
   if (clase.tipo === "plataforma") {
+    // El panel también se usa desde la dirección de la plataforma: el
+    // gimnasio sale de la cookie que se puso al entrar. Los permisos los
+    // valida cada función de la base, no esta cookie.
+    const ruta = req.nextUrl.pathname;
+    if (ruta === "/panel" || ruta.startsWith("/panel/")) {
+      const slug = req.cookies.get(COOKIE_GIMNASIO)?.value;
+      let elegido: { gimnasio_id: string; slug: string } | undefined;
+      if (slug) {
+        try {
+          elegido = await resolver("gimnasio_por_slug", { p_slug: slug });
+        } catch (e) {
+          return new NextResponse(`No se pudo resolver el gimnasio ${slug}: ${(e as Error).message}`, { status: 503 });
+        }
+      }
+      if (!elegido) {
+        const destino = req.nextUrl.clone();
+        destino.pathname = "/ingresar";
+        destino.search = `?siguiente=${encodeURIComponent(ruta)}`;
+        const r = NextResponse.redirect(destino);
+        if (slug) r.cookies.delete(COOKIE_GIMNASIO);
+        return r;
+      }
+      cabeceras.set("x-gymos-contexto", "gimnasio");
+      cabeceras.set("x-gimnasio-id", elegido.gimnasio_id);
+      cabeceras.set("x-gimnasio-slug", elegido.slug);
+      cabeceras.set("x-gimnasio-host", host);
+      return conSesion(req, cabeceras, supabaseUrl, anon);
+    }
     cabeceras.set("x-gymos-contexto", "plataforma");
     return conSesion(req, cabeceras, supabaseUrl, anon);
   }
@@ -69,14 +111,7 @@ export async function middleware(req: NextRequest) {
 
   let gimnasio: { gimnasio_id: string; slug: string } | undefined;
   try {
-    const r = await fetch(`${supabaseUrl}/rest/v1/rpc/gimnasio_por_host`, {
-      method: "POST",
-      headers: { apikey: anon, Authorization: `Bearer ${anon}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_host: host }),
-      cache: "no-store",
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    [gimnasio] = (await r.json()) as { gimnasio_id: string; slug: string }[];
+    gimnasio = await resolver("gimnasio_por_host", { p_host: host });
   } catch (e) {
     // No es "no existe": es que no pudimos preguntar. Se dice así.
     return new NextResponse(`No se pudo resolver el gimnasio de ${host}: ${(e as Error).message}`, { status: 503 });

@@ -42,8 +42,8 @@ export default async function Ingresar({ searchParams }: { searchParams: Promise
             <Link href="/ingresar" className={`boton flex-1 ${!socio ? "!border-[var(--acento)]" : "opacity-70"}`}>🛎️ Soy del equipo</Link>
           </nav>
         )}
-        <h1 className="titular text-6xl mt-10">{!marca ? "Entrada de BRIK" : socio ? "Tu gimnasio" : "Entrá al panel"}</h1>
-        <p className="texto-suave text-lg mt-3">{!marca ? "Solo para administradores de la plataforma." : socio ? "Con tu celular: te mandamos un código." : "Con el mail y la contraseña que te dio el gimnasio."}</p>
+        <h1 className="titular text-6xl mt-10">{!marca ? "Entrá a tu gimnasio" : socio ? "Tu gimnasio" : "Entrá al panel"}</h1>
+        <p className="texto-suave text-lg mt-3">{!marca ? "Con el mail y la contraseña de tu cuenta." : socio ? "Con tu celular: te mandamos un código." : "Con el mail y la contraseña que te dio el gimnasio."}</p>
         {marca && socio ? <IngresoSocio /> : <FormularioIngreso siguiente={siguiente ?? null} />}
       </div>
     </main>

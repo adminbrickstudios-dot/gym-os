@@ -14,8 +14,9 @@ type Gimnasio = { gimnasio_id: string; slug: string; nombre: string; es_demo: bo
 export default async function Admin() {
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   let gimnasios: Gimnasio[];
+  let yo: MiSesion;
   try {
-    const yo = await rpc<MiSesion>("mi_sesion");
+    yo = await rpc<MiSesion>("mi_sesion");
     if (!yo.es_admin) throw new ErrorDatos("Solo para administradores de BRIK", "42501", 403);
     gimnasios = await rpc<Gimnasio[]>("admin_gimnasios");
   } catch (e) {
@@ -33,6 +34,14 @@ export default async function Admin() {
         </div>
         <form action="/salir" method="post"><button className="boton">🚪 Salir</button></form>
       </header>
+      {yo.equipo.length > 0 && (
+        <section>
+          <p className="titulo-grupo mb-2">Mis gimnasios</p>
+          <div className="flex flex-wrap gap-2">
+            {yo.equipo.map((e) => <a key={e.equipo_id} href={`/entrar/${e.slug}`} className="boton boton-principal">🏋️ Entrar a {e.gimnasio}</a>)}
+          </div>
+        </section>
+      )}
       <AltaGimnasio dominio={process.env.NEXT_PUBLIC_DOMINIO_BASE ?? ""} />
       <ul className="space-y-2">
         {gimnasios.map((g) => (

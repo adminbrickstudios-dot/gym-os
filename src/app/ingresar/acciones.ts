@@ -1,5 +1,5 @@
 "use server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
 
@@ -34,9 +34,23 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
   const siguiente = String(form.get("siguiente") ?? "") || null;
 
   if (h.get("x-gymos-contexto") === "plataforma") {
-    if (yo.es_admin) return { destino: destinoSeguro(siguiente, "/admin") };
+    // Desde la dirección de Gym OS: el admin va al super admin; el equipo de
+    // un gimnasio, a su panel (el gimnasio queda en una cookie; los permisos
+    // los valida la base en cada pantalla).
+    if (yo.es_admin && !siguiente?.startsWith("/panel")) return { destino: destinoSeguro(siguiente, "/admin") };
+    if (yo.equipo.length === 1) {
+      await elegirGimnasio(yo.equipo[0].slug);
+      return { destino: "/panel" };
+    }
+    if (yo.equipo.length > 1) return { destino: "/elegir" };
+    if (yo.es_admin) return { destino: "/admin" };
     await supabase.auth.signOut();
-    return { error: "Esta es la entrada de BRIK. Entrá desde la dirección de tu gimnasio.", email };
+    return {
+      error: yo.socios.length
+        ? "Sos socio: entrá desde la app de tu gimnasio."
+        : "Tu cuenta no tiene ningún gimnasio. Pedile acceso al dueño.",
+      email,
+    };
   }
   if (yo.equipo.some((e) => e.gimnasio_id === gimnasioId)) return { destino: destinoSeguro(siguiente, "/panel") };
   if (yo.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
@@ -84,4 +98,11 @@ export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<
   if ((sesion as MiSesion | null)?.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
   await supabase.auth.signOut();
   return { error: "Tu celular no está cargado en este gimnasio. Pedile a recepción que lo agregue a tu ficha.", telefono };
+}
+
+/** Recuerda en qué gimnasio trabaja la persona cuando entra desde la dirección de la plataforma. */
+async function elegirGimnasio(slug: string) {
+  (await cookies()).set("gymos_gimnasio", slug, {
+    httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365,
+  });
 }
