@@ -34,7 +34,7 @@ const EJECUTABLES = {
     "public.buscar_socios", "public.ficha_socio", "public.guardar_socio", "public.planes_gimnasio", "public.guardar_plan",
     "public.programar_precio", "public.productos_gimnasio", "public.guardar_producto", "public.ingresos_del_dia",
     "public.configuracion_panel", "public.guardar_configuracion", "public.equipo_gimnasio", "public.guardar_equipo",
-    "public.admin_gimnasios", "public.admin_crear_gimnasio",
+    "public.admin_gimnasios", "public.admin_crear_gimnasio", "public.cajas_sede", "public.precios_venta", "public.vencen_hoy",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),
