@@ -40,8 +40,14 @@ jobs:
       - run: npm ci
       - name: Falta el secreto
         if: env.SUPABASE_DB_URL == ''
+        env:
+          COMO_VARIABLE: ${{ vars.SUPABASE_DB_URL != '' }}
         run: |
-          echo "::error::Falta el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions)"
+          if [ "$COMO_VARIABLE" = "true" ]; then
+            echo "::error::SUPABASE_DB_URL está cargado como VARIABLE (se ve en texto plano). Borralo de la pestaña Variables y cargalo en la pestaña Secrets → New repository secret."
+          else
+            echo "::error::GitHub no le pasa SUPABASE_DB_URL a este workflow. Tiene que estar en Settings → Secrets and variables → Actions → pestaña Secrets → 'Repository secrets' (no en Environments, Codespaces ni Dependabot), con ese nombre exacto."
+          fi
           exit 1
       - name: Pre-vuelo (transacción que se revierte)
         if: inputs.accion == 'prevuelo' || inputs.accion == 'aplicar'
