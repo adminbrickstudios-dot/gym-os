@@ -52,6 +52,35 @@ if (pendientes.length === 0) {
 }
 
 let fallo = false;
+
+// Solo pre-vuelo: TODAS las pendientes en una sola transacción, en orden, y
+// al final se revierte. Una por una no sirve: cada una depende de las
+// anteriores (sus guardas de entrada fallarían en una base vacía).
+if (soloPrevuelo) {
+  await cliente.query("begin");
+  for (const archivo of pendientes) {
+    const sql = readFileSync(join(carpeta, archivo), "utf8");
+    if (/\b(begin|commit)\s*;/i.test(sql.replace(/\$\$[\s\S]*?\$\$/g, ""))) {
+      console.error(`✗ ${archivo}: tiene BEGIN/COMMIT propio. El aplicador ya abre la transacción.`);
+      fallo = true;
+      break;
+    }
+    try {
+      await cliente.query(`savepoint antes_de_${archivo.slice(0, 14)}`);
+      await cliente.query(sql);
+      console.log(`✓ pre-vuelo ${archivo}`);
+    } catch (e) {
+      console.error(`✗ pre-vuelo ${archivo}\n  ${e.message}${e.where ? `\n  ${e.where}` : ""}`);
+      fallo = true;
+      break;
+    }
+  }
+  await cliente.query("rollback");
+  await cliente.end();
+  console.log(fallo ? "Pre-vuelo con errores: no se aplicó nada." : `Pre-vuelo OK (${pendientes.length} migraciones). No se aplicó nada: todo se revirtió.`);
+  process.exit(fallo ? 1 : 0);
+}
+
 for (const archivo of pendientes) {
   const version = archivo.slice(0, 14);
   const nombre = archivo.slice(15, -4);
