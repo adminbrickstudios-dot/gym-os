@@ -46,3 +46,6 @@ docs/ESTADO.md
 .claude/settings.local.json
 supabase/.temp/
 capturas/
+
+# supabase-local: códigos de verificación de prueba
+.local/

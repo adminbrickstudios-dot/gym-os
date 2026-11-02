@@ -9,14 +9,14 @@ export default async function GimnasioNoEncontrado({
 }) {
   const { host } = await searchParams;
   return (
-    <main className="min-h-dvh flex items-center justify-center px-4">
-      <div className="tarjeta max-w-md w-full p-8 text-center">
-        <p className="text-5xl mb-4" aria-hidden>🔍</p>
-        <h1 className="text-2xl font-semibold mb-2">No encontramos este gimnasio</h1>
-        <p className="texto-suave mb-6">
-          La dirección <strong className="break-all">{host || "(sin dirección)"}</strong> no corresponde a ningún gimnasio.
+    <main className="min-h-dvh flex items-center px-4 py-16">
+      <div className="mx-auto w-full max-w-xl">
+        <p className="text-6xl mb-8" aria-hidden>🔍</p>
+        <h1 className="titular text-5xl sm:text-6xl">No encontramos este gimnasio</h1>
+        <p className="texto-suave text-lg mt-6">
+          La dirección <strong className="text-[var(--texto)] break-all">{host || "(sin dirección)"}</strong> no corresponde a ningún gimnasio.
         </p>
-        <p className="texto-suave text-sm">Revisá que esté bien escrita o pedile el link correcto a tu gimnasio.</p>
+        <p className="texto-suave text-lg mt-2">Revisá que esté bien escrita o pedile el link a tu gimnasio.</p>
       </div>
     </main>
   );

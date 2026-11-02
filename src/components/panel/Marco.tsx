@@ -1,0 +1,52 @@
+import type { ReactNode } from "react";
+import { propsMarca } from "@/lib/marca";
+import { GRUPOS, NOMBRE_ROL, principalesCelular, seccionesPara } from "@/lib/panel/secciones";
+import type { PanelGimnasio } from "@/lib/panel/servidor";
+import { Navegacion } from "./Navegacion";
+
+/** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
+export function Marco({ panel, children }: { panel: PanelGimnasio; children: ReactNode }) {
+  const { rol } = panel.yo;
+  const secciones = seccionesPara(rol, panel.secciones_apagadas);
+  return (
+    <div {...propsMarca(panel.marca)} className="min-h-dvh">
+      <Navegacion
+        gimnasio={panel.gimnasio.nombre}
+        persona={panel.yo.nombre}
+        rol={NOMBRE_ROL[rol]}
+        secciones={secciones}
+        grupos={GRUPOS}
+        principales={principalesCelular(rol, panel.secciones_apagadas)}
+        buscaSocios={rol !== "profe" && !panel.secciones_apagadas.includes("socios")}
+      />
+      <div className="lg:pl-72">
+        <main className="mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+/** Encabezado de una pantalla: emoji, título grande y una línea que explica qué es. */
+export function Encabezado({ emoji, titulo, bajada, accion }: { emoji: string; titulo: string; bajada?: ReactNode; accion?: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div className="min-w-0">
+        <p className="text-4xl mb-3" aria-hidden>{emoji}</p>
+        <h1 className="titular text-5xl sm:text-6xl">{titulo}</h1>
+        {bajada && <p className="texto-suave text-lg mt-2">{bajada}</p>}
+      </div>
+      {accion}
+    </div>
+  );
+}
+
+/** Cuando algo falla o no hay permiso: se dice qué pasó, nunca una pantalla vacía. */
+export function Aviso({ emoji = "⚠️", titulo, children }: { emoji?: string; titulo: string; children?: ReactNode }) {
+  return (
+    <div className="tarjeta p-6 sm:p-8 max-w-xl">
+      <p className="text-4xl mb-4" aria-hidden>{emoji}</p>
+      <p className="titulo text-3xl">{titulo}</p>
+      {children && <div className="texto-suave text-lg mt-2">{children}</div>}
+    </div>
+  );
+}

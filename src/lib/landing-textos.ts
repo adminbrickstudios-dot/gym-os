@@ -51,17 +51,4 @@ export function iniciales(nombre: string): string {
   return nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("");
 }
 
-/**
- * Color de texto sobre el acento de la marca (#rrggbb). Blanco si llega a
- * contraste 3:1 (WCAG AA para texto grande y en negrita: los botones usan
- * 18px bold); si no, casi negro. Un verde de marca típico queda en blanco,
- * un amarillo queda en negro.
- */
-export function textoSobre(hex: string): string {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
-  if (!m) return "#ffffff";
-  const n = parseInt(m[1], 16);
-  const canal = (c: number) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
-  const l = 0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255);
-  return 1.05 / (l + 0.05) >= 3 ? "#ffffff" : "#1c1917";
-}
+export { textoSobre } from "@/lib/marca";

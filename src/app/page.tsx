@@ -39,11 +39,14 @@ export default async function Inicio() {
     return r.landing.publicada ? <LandingGimnasio landing={r.landing} /> : <LandingProximamente marca={r.landing.marca} />;
   }
   return (
-    <main className="min-h-dvh flex items-center justify-center px-4">
-      <div className="text-center">
-        <p className="text-6xl mb-4" aria-hidden>🏋️</p>
-        <h1 className="text-3xl font-semibold">Gym OS</h1>
-        <p className="texto-suave mt-2">Sistema de gestión para gimnasios.</p>
+    <main className="min-h-dvh flex flex-col justify-center px-4 py-16">
+      <div className="mx-auto w-full max-w-5xl">
+        <p className="text-6xl mb-8" aria-hidden>🏋️</p>
+        <h1 className="titular text-[clamp(3.5rem,14vw,8rem)]">Gym OS</h1>
+        <p className="texto-suave text-xl sm:text-2xl mt-6 max-w-[30ch]">
+          El sistema para tu gimnasio: quién entra, quién paga y quién dejó de venir.
+        </p>
+        <a href="/ingresar" className="boton boton-principal text-lg px-8 mt-10">🔑 Ingresar</a>
       </div>
     </main>
   );

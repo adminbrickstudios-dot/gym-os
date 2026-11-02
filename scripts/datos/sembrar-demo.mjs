@@ -79,7 +79,7 @@ try {
 
   // Segundo gimnasio demo, con otra marca: muestra que cada landing es propia.
   const [{ id: g2 }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo-box', 'Box Norte Demo', true) returning id`);
-  await q(`update public.configuracion_gimnasio set color_acento = '#7c3aed', color_fondo = '#f6f3fb' where gimnasio_id = $1`, [g2]);
+  await q(`update public.configuracion_gimnasio set color_acento = '#a78bfa', color_fondo = '#16121f' where gimnasio_id = $1`, [g2]);
   await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio')`, [g2, `demo-box.${dominio}`]);
   await sembrarLanding(db, g2, {
     ...LANDING_DEMO,

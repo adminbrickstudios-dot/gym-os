@@ -21,6 +21,16 @@ create table if not exists auth.users (
   phone text,
   created_at timestamptz not null default now()
 );
+-- Columnas que usa supabase-local (scripts/local): mismos nombres que en Supabase.
+alter table auth.users add column if not exists encrypted_password text;
+alter table auth.users add column if not exists email_confirmed_at timestamptz;
+alter table auth.users add column if not exists phone_confirmed_at timestamptz;
+alter table auth.users add column if not exists last_sign_in_at timestamptz;
+alter table auth.users add column if not exists raw_app_meta_data jsonb not null default '{}'::jsonb;
+alter table auth.users add column if not exists raw_user_meta_data jsonb not null default '{}'::jsonb;
+alter table auth.users add column if not exists updated_at timestamptz not null default now();
+create unique index if not exists users_email_unico on auth.users (lower(email)) where email is not null;
+create unique index if not exists users_phone_unico on auth.users (phone) where phone is not null;
 
 create or replace function auth.jwt() returns jsonb
 language sql stable as $$

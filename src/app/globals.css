@@ -1,73 +1,200 @@
 @import "tailwindcss";
+@import "@fontsource-variable/archivo/wdth.css";
 
-/* Lenguaje visual de Gym OS. El acento y el fondo de cada gimnasio
-   vienen de configuracion_gimnasio y pisan estas variables en su layout. */
+/* ═══════════════════════════════════════════════════════════════════
+   Lenguaje visual de Gym OS: oscuro, modo gym, minimalista, con emojis.
+
+   Todo sale de dos colores que viven en los datos de cada gimnasio
+   (configuracion_gimnasio.color_fondo y color_acento). El wrapper de
+   cada pantalla los pone en --fondo y --acento, y dice si el fondo es
+   oscuro o claro (data-tono): las superficies y los textos se derivan.
+   Un gimnasio que elige un fondo claro también se ve bien.
+
+   Los colores de estado son los de los discos olímpicos: verde, amarillo,
+   rojo, azul. Son los que ve el que está en la entrada.
+   ═══════════════════════════════════════════════════════════════════ */
+
 :root {
-  --fondo: #faf7f0;          /* crema, nunca blanco puro */
-  --tarjeta: #ffffff;
-  --texto: #1c1917;
-  --texto-suave: #78716c;
-  --borde: #e7e2d8;
-  --acento: #16a34a;          /* un solo acento: la acción principal */
-  --acento-texto: #ffffff;
+  --fondo: #14161b;            /* grafito: el piso de goma del gimnasio */
+  --acento: #2fbf5b;           /* un solo acento: la acción principal */
+  --acento-texto: #0d1a11;
+
   --radio: 16px;
+  --radio-grande: 24px;
   --alto-minimo: 52px;
-  --verde: #16a34a;
-  --amarillo: #ca8a04;
-  --naranja: #ea580c;
-  --rojo: #dc2626;
-  --gris: #78716c;
+
+  --verde: #2fbf5b;
+  --amarillo: #f5c518;
+  --rojo: #ef4444;
+  --azul: #3b82f6;
+  --naranja: #f97316;
+
+  --fuente: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Superficies y textos, derivados del fondo. */
+:root, [data-tono="oscuro"] {
+  --tarjeta: color-mix(in oklab, var(--fondo), white 5%);
+  --tarjeta-alta: color-mix(in oklab, var(--fondo), white 10%);
+  --borde: color-mix(in oklab, var(--fondo), white 11%);
+  --texto: #f3f4f6;
+  --texto-suave: color-mix(in oklab, #f3f4f6, var(--fondo) 40%);
+  --texto-tenue: color-mix(in oklab, #f3f4f6, var(--fondo) 62%);
+  color-scheme: dark;
+}
+[data-tono="claro"] {
+  --tarjeta: color-mix(in oklab, var(--fondo), white 70%);
+  --tarjeta-alta: color-mix(in oklab, var(--fondo), black 5%);
+  --borde: color-mix(in oklab, var(--fondo), black 10%);
+  --texto: #16181d;
+  --texto-suave: color-mix(in oklab, #16181d, var(--fondo) 38%);
+  --texto-tenue: color-mix(in oklab, #16181d, var(--fondo) 58%);
+  color-scheme: light;
 }
 
 @theme inline {
   --color-fondo: var(--fondo);
   --color-tarjeta: var(--tarjeta);
+  --color-tarjeta-alta: var(--tarjeta-alta);
+  --color-borde: var(--borde);
   --color-texto: var(--texto);
+  --color-suave: var(--texto-suave);
+  --color-tenue: var(--texto-tenue);
   --color-acento: var(--acento);
+  --color-verde: var(--verde);
+  --color-amarillo: var(--amarillo);
+  --color-rojo: var(--rojo);
+  --color-azul: var(--azul);
   --radius-gym: var(--radio);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-gym-grande: var(--radio-grande);
+  --font-sans: var(--fuente);
 }
 
+html { background: var(--fondo); }
 body {
   background: var(--fondo);
   color: var(--texto);
-  font-family: var(--font-sans);
+  font-family: var(--fuente);
+  font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* En @layer components: las utilidades de Tailwind (hidden, w-full, mt-*) pueden pisarlas. */
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* En @layer components: las utilidades de Tailwind (hidden, w-full, mt-*) las pueden pisar. */
 @layer components {
-.tarjeta {
-  background: var(--tarjeta);
-  border-radius: var(--radio);
-  border: 1px solid var(--borde);
-}
+  /* Títulos: Archivo angosta y pesada, como la cartelería de un gimnasio. */
+  .titular {
+    font-stretch: 68%;
+    font-weight: 820;
+    line-height: 0.95;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+  .titulo {
+    font-stretch: 78%;
+    font-weight: 760;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  /* Números grandes (precios, contadores): angostos y con cifras tabulares. */
+  .numero {
+    font-stretch: 72%;
+    font-weight: 780;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
 
-.texto-suave { color: var(--texto-suave); }
+  .tarjeta {
+    background: var(--tarjeta);
+    border-radius: var(--radio);
+    border: 1px solid var(--borde);
+  }
 
-/* Botones: alto mínimo 52px y press state en CSS puro (:active), no React. */
-.boton {
-  min-height: var(--alto-minimo);
-  border-radius: var(--radio);
-  padding: 0 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  background: var(--tarjeta);
-  border: 1px solid var(--borde);
-  transition: transform 60ms ease, filter 60ms ease;
-}
-.boton:active { transform: scale(0.97); filter: brightness(0.95); }
-.boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  .texto-suave { color: var(--texto-suave); }
+  .texto-tenue { color: var(--texto-tenue); }
 
-/* Títulos de grupo de la barra lateral: mayúsculas chicas y gris. */
-.titulo-grupo {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--texto-suave);
-  font-weight: 600;
-}
+  /* Botones: alto mínimo 52px y press state en CSS puro (:active). */
+  .boton {
+    min-height: var(--alto-minimo);
+    border-radius: var(--radio);
+    padding: 0 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-weight: 650;
+    background: var(--tarjeta-alta);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    transition: transform 60ms ease, filter 60ms ease, background 120ms ease;
+    cursor: pointer;
+    user-select: none;
+  }
+  .boton:hover { background: color-mix(in oklab, var(--tarjeta-alta), var(--texto) 6%); }
+  .boton:active { transform: scale(0.97); filter: brightness(0.92); }
+  .boton:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
+  .boton-peligro { background: color-mix(in oklab, var(--rojo), var(--fondo) 70%); color: #fecaca; border-color: color-mix(in oklab, var(--rojo), var(--fondo) 50%); }
+
+  /* Ícono emoji en su cuadrado: el color lo pone el emoji, el cuadrado no compite. */
+  .icono {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 14px;
+    background: var(--tarjeta-alta);
+    font-size: 1.4rem;
+    line-height: 1;
+    flex: none;
+  }
+
+  .campo {
+    min-height: var(--alto-minimo);
+    width: 100%;
+    border-radius: var(--radio);
+    background: var(--tarjeta);
+    border: 1px solid var(--borde);
+    padding: 0 1rem;
+    color: var(--texto);
+    font-size: 1rem;
+  }
+  .campo::placeholder { color: var(--texto-tenue); }
+  .campo:focus { outline: 2px solid var(--acento); outline-offset: 0; border-color: transparent; }
+  textarea.campo { padding: 0.85rem 1rem; min-height: 6rem; }
+
+  .etiqueta { font-size: 0.875rem; font-weight: 600; color: var(--texto-suave); }
+
+  /* Títulos de grupo de la barra lateral: mayúsculas chicas y tenues (como yadeportes). */
+  .titulo-grupo {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-tenue);
+    font-weight: 650;
+  }
+
+  /* Píldora de estado: el color del disco + el texto. Nunca solo color. */
+  .pildora {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 650;
+    background: color-mix(in oklab, var(--color, var(--texto-suave)), var(--fondo) 82%);
+    color: color-mix(in oklab, var(--color, var(--texto-suave)), var(--texto) 30%);
+  }
+  .pildora-verde { --color: var(--verde); }
+  .pildora-amarillo { --color: var(--amarillo); }
+  .pildora-rojo { --color: var(--rojo); }
+  .pildora-azul { --color: var(--azul); }
+  .pildora-naranja { --color: var(--naranja); }
 }
