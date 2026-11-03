@@ -1,5 +1,6 @@
 "use server";
 import { cookies, headers } from "next/headers";
+import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO } from "@/lib/cookie-gimnasio";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
 
@@ -102,7 +103,5 @@ export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<
 
 /** Recuerda en qué gimnasio trabaja la persona cuando entra desde la dirección de la plataforma. */
 async function elegirGimnasio(slug: string) {
-  (await cookies()).set("gymos_gimnasio", slug, {
-    httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365,
-  });
+  (await cookies()).set(COOKIE_GIMNASIO, slug, OPCIONES_COOKIE_GIMNASIO);
 }

@@ -5,7 +5,7 @@ import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
-export function Marco({ panel, children }: { panel: PanelGimnasio; children: ReactNode }) {
+export function Marco({ panel, children, enPlataforma = false }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
   return (
@@ -18,6 +18,7 @@ export function Marco({ panel, children }: { panel: PanelGimnasio; children: Rea
         grupos={GRUPOS}
         principales={principalesCelular(rol, panel.secciones_apagadas)}
         buscaSocios={rol !== "profe" && !panel.secciones_apagadas.includes("socios")}
+        cambiarGimnasio={enPlataforma}
       />
       <div className="lg:pl-72">
         <main className="mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">{children}</main>

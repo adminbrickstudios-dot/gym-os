@@ -23,6 +23,9 @@ export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
       <button type="submit" disabled={yendo} className="boton boton-principal text-lg w-full !mt-6">
         {yendo ? "Entrando…" : "🔑 Entrar"}
       </button>
+      <p className="texto-tenue text-sm text-center">
+        ¿Te olvidaste la contraseña? Pedile una nueva al dueño de tu gimnasio (si sos el dueño, a BRIK).
+      </p>
     </form>
   );
 }

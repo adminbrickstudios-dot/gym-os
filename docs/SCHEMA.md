@@ -3,9 +3,9 @@
 > Pendiente de cruzar con `LECCIONES` y `CONVENCIONES` (no estaban
 > adjuntos cuando se escribió).
 
-## Estado (02/11/2026)
+## Estado (03/11/2026)
 
-**Construido y probado contra Postgres 16** (migraciones 0001–0017, base
+**Construido y probado contra Postgres 16** (migraciones 0001–0019, base
 local con la simulación de Supabase, 163 pruebas): acceso, habilitaciones,
 períodos y precios, cobro, landing, caja y venta, retención, clases y lo
 que leen los paneles.
@@ -30,6 +30,8 @@ Lo demás sigue siendo propuesta (§4).
 | 0015 grilla | actividades_gimnasio, guardar_actividad, horarios_gimnasio, agregar_horario, cerrar_horario, clase_detalle |
 | 0016 cuentas del equipo | usuario_por_mail (solo servidor), una cuenta una vez por gimnasio |
 | 0017 app del socio | mi_socio, vincular_socios_por_telefono (solo servidor) |
+| 0018 gimnasio por slug | gimnasio_por_slug (anon): el panel desde la dirección de la plataforma |
+| 0019 super admin | equipo.es_soporte; gimnasio_por_slug devuelve una dirección; admin_gimnasios (+ estoy_dentro, dueños sin cuenta), admin_entrar_gimnasio / admin_salir_gimnasio (Soporte BRIK), admin_gimnasio, admin_agregar_persona, admin_agregar_dominio / admin_quitar_dominio; claves: cuenta_para_nueva_clave, persona_para_dar_acceso |
 
 **Las pantallas leen y escriben solo por funciones de `public`**, que
 validan rol y gimnasio y fallan con error (nunca una lista vacía). Las

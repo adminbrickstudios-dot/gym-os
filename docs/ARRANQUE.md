@@ -57,11 +57,21 @@ dice "Todo en verde".
 3. Deploy.
 
 **Sin dominio todavía:** poné en las dos `NEXT_PUBLIC_DOMINIO_*` el
-`tu-proyecto.vercel.app` que te da Vercel. Vas a ver la página de Gym OS
-y el super admin, pero **no los gimnasios**: cada gimnasio vive en un
-subdominio (`olympo.tudominio.com`) y Vercel no da subdominios de
-`.vercel.app`. Para probar un gimnasio antes de comprar el dominio,
-avisale al agente y lo conecta a otra dirección de Vercel.
+`tu-proyecto.vercel.app` que te da Vercel (sin `https://` ni barra).
+Vercel no da subdominios de `.vercel.app`, así que todo se usa desde esa
+misma dirección:
+
+- **Panel de un gimnasio:** super admin → **Entrar al panel** (entrás como
+  "Soporte BRIK"). El dueño y su equipo entran en `/ingresar` con su mail.
+- **Página del gimnasio y app del socio:** `/g/<dirección>` (ej:
+  `/g/olympo-gym`). Desde ahí, "Soy socio" lleva a la app.
+- **Una dirección propia gratis:** en Vercel → Settings → Domains sumá
+  `olympo-gym.vercel.app` (si está libre) y cargala en el super admin →
+  el gimnasio → Direcciones.
+
+Para tener un gimnasio con datos y mostrarlo: Actions → **Base de datos** →
+`sembrar-demo`, con el dominio `tu-proyecto.vercel.app`. Crea el "Gimnasio
+Demo" con 300 socios ficticios.
 
 **LISTO SI:** la dirección de Vercel muestra "Gym OS · Ingresar".
 

@@ -1,13 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO as OPCIONES_COOKIE } from "@/lib/cookie-gimnasio";
 import { clasificarHost, normalizarHost } from "@/lib/host";
 
 // Encabezados que solo pone este middleware. Si vienen del navegador se
 // borran: nadie puede elegir su gimnasio mandando un header.
 const CABECERAS = ["x-gymos-contexto", "x-gimnasio-id", "x-gimnasio-slug", "x-gimnasio-host"] as const;
 
-/** Cookie con el slug del gimnasio elegido al entrar desde la dirección de la plataforma. No da permisos. */
-export const COOKIE_GIMNASIO = "gymos_gimnasio";
+
 
 // Rutas que piden sesión. El resto (landing, ingresar) es público.
 const PROTEGIDAS = ["/panel", "/app", "/admin"];
@@ -73,16 +73,61 @@ export async function middleware(req: NextRequest) {
 
   const clase = clasificarHost(host, base, plataforma);
   if (clase.tipo === "plataforma") {
-    // El panel también se usa desde la dirección de la plataforma: el
-    // gimnasio sale de la cookie que se puso al entrar. Los permisos los
-    // valida cada función de la base, no esta cookie.
     const ruta = req.nextUrl.pathname;
-    if (ruta === "/panel" || ruta.startsWith("/panel/")) {
-      const slug = req.cookies.get(COOKIE_GIMNASIO)?.value;
-      let elegido: { gimnasio_id: string; slug: string } | undefined;
+    type Elegido = { gimnasio_id: string; slug: string; host: string | null };
+    const marcarGimnasio = (g: Elegido) => {
+      // El host del gimnasio (no el de la plataforma): con él se busca su
+      // página y su marca. Los permisos los valida cada función de la base.
+      cabeceras.set("x-gymos-contexto", "gimnasio");
+      cabeceras.set("x-gimnasio-id", g.gimnasio_id);
+      cabeceras.set("x-gimnasio-slug", g.slug);
+      cabeceras.set("x-gimnasio-host", g.host ?? host);
+    };
+    const porSlug = async (slug: string) => (await resolver("gimnasio_por_slug", { p_slug: slug })) as Elegido | undefined;
+
+    // /g/<slug>: la página de un gimnasio que todavía no tiene dirección
+    // propia. Queda elegido (cookie) para que "Soy socio" y /app sigan en él.
+    const g = /^\/g\/([a-z0-9-]{1,42})(\/.*)?$/.exec(ruta);
+    if (g) {
+      let elegido: Elegido | undefined;
+      try {
+        elegido = await porSlug(g[1]);
+      } catch (e) {
+        return new NextResponse(`No se pudo resolver el gimnasio ${g[1]}: ${(e as Error).message}`, { status: 503 });
+      }
+      if (!elegido) {
+        const destino = req.nextUrl.clone();
+        destino.pathname = "/gimnasio-no-encontrado";
+        destino.search = `?host=${encodeURIComponent(`${host}/g/${g[1]}`)}`;
+        return NextResponse.rewrite(destino, { status: 404 });
+      }
+      const resto = g[2] && g[2] !== "/" ? g[2] : null;
+      let r: NextResponse;
+      if (resto) {
+        const destino = req.nextUrl.clone();
+        destino.pathname = resto;
+        r = NextResponse.redirect(destino);
+      } else {
+        marcarGimnasio(elegido);
+        const destino = req.nextUrl.clone();
+        destino.pathname = "/";
+        r = NextResponse.rewrite(destino, { request: { headers: cabeceras } });
+      }
+      r.cookies.set(COOKIE_GIMNASIO, elegido.slug, OPCIONES_COOKIE);
+      return r;
+    }
+
+    // El panel, la app del socio y su ingreso también se usan desde la
+    // dirección de la plataforma: el gimnasio sale de la cookie que se puso
+    // al entrar. La cookie no da permisos.
+    const socioIngresando = ruta === "/ingresar" && req.nextUrl.searchParams.get("modo") === "socio";
+    const delGimnasio = ruta === "/panel" || ruta.startsWith("/panel/") || ruta === "/app" || ruta.startsWith("/app/");
+    const slug = req.cookies.get(COOKIE_GIMNASIO)?.value;
+    if (delGimnasio || (socioIngresando && slug)) {
+      let elegido: Elegido | undefined;
       if (slug) {
         try {
-          elegido = await resolver("gimnasio_por_slug", { p_slug: slug });
+          elegido = await porSlug(slug);
         } catch (e) {
           return new NextResponse(`No se pudo resolver el gimnasio ${slug}: ${(e as Error).message}`, { status: 503 });
         }
@@ -95,10 +140,7 @@ export async function middleware(req: NextRequest) {
         if (slug) r.cookies.delete(COOKIE_GIMNASIO);
         return r;
       }
-      cabeceras.set("x-gymos-contexto", "gimnasio");
-      cabeceras.set("x-gimnasio-id", elegido.gimnasio_id);
-      cabeceras.set("x-gimnasio-slug", elegido.slug);
-      cabeceras.set("x-gimnasio-host", host);
+      marcarGimnasio(elegido);
       return conSesion(req, cabeceras, supabaseUrl, anon);
     }
     cabeceras.set("x-gymos-contexto", "plataforma");

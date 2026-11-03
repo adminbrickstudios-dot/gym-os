@@ -1,5 +1,6 @@
 "use client";
 import { useActionState, useState, useTransition } from "react";
+import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { agregarPersona, editarPersona, type Resultado } from "./acciones";
 
@@ -37,6 +38,10 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
                   {m.activo ? "Sacar acceso" : "Devolver acceso"}
                 </button>
               </div>
+            )}
+            {puedeEditar && !m.soy_yo && m.activo && (
+              // A otro dueño no se le cambia la contraseña (eso lo hace BRIK); acceso sí se le puede dar.
+              <AccesoPersona equipoId={m.equipo_id} nombre={m.nombre} tieneCuenta={m.tiene_acceso} puedeNuevaClave={m.rol !== "dueno"} />
             )}
           </li>
         ))}

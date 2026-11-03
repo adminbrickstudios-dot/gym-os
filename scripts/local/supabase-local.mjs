@@ -171,6 +171,19 @@ async function auth(req, res, ruta, q, cuerpo) {
     }
     return enviar(res, 200, await sesionPara(u));
   }
+  // Admin (solo service_role): cambiar la contraseña de un usuario (updateUserById).
+  const porId = /^\/admin\/users\/([0-9a-f-]{36})$/.exec(ruta);
+  if (porId && req.method === "PUT") {
+    if (claims?.role !== "service_role") return errorAuth(res, 403, "not_admin", "User not allowed");
+    let u = await traerUsuario("id", porId[1]);
+    if (!u) return errorAuth(res, 404, "user_not_found", "User not found");
+    if (cuerpo.password) {
+      if (String(cuerpo.password).length < 6) return errorAuth(res, 422, "weak_password", "Password should be at least 6 characters.");
+      await pool.query(`update auth.users set encrypted_password = $2, updated_at = now() where id = $1`, [u.id, hashContrasena(cuerpo.password)]);
+      u = await traerUsuario("id", u.id);
+    }
+    return enviar(res, 200, usuarioPublico(u));
+  }
   // Admin (solo service_role): invitar y crear usuarios.
   if (ruta === "/invite" || ruta === "/admin/users") {
     if (claims?.role !== "service_role") return errorAuth(res, 403, "not_admin", "User not allowed");

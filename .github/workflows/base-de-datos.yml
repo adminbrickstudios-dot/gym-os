@@ -5,6 +5,8 @@
 #   aplicar    prevuelo + aplica + chequeos del proyecto contra la base real
 #   chequeos   solo los chequeos (RLS, permisos, search_path…)
 #   hacer-admin  da super admin a la cuenta del mail indicado
+#   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
+#   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
 #
 # Nunca corre solo: siempre lo dispara una persona. Cuando haya gimnasios
 # reales, este botón es el "yo la corro" de las reglas del proyecto.
@@ -16,10 +18,13 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin]
+        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, sembrar-demo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
+        required: false
+      dominio:
+        description: "Dominio de los gimnasios (solo para sembrar-demo, ej: gym-os-pied.vercel.app)"
         required: false
 
 concurrency:
@@ -60,4 +65,17 @@ jobs:
         run: node scripts/chequeos.mjs
       - name: Hacer super admin
         if: inputs.accion == 'hacer-admin'
-        run: node scripts/datos/hacer-admin.mjs --email "${{ inputs.email }}"
+        env:
+          EMAIL: ${{ inputs.email }}
+        run: node scripts/datos/hacer-admin.mjs --email "$EMAIL"
+      - name: Estado de la base
+        if: inputs.accion == 'estado'
+        run: node scripts/datos/estado-base.mjs
+      - name: Sembrar el gimnasio demo
+        if: inputs.accion == 'sembrar-demo'
+        env:
+          DOMINIO: ${{ inputs.dominio }}
+        run: |
+          if [ -z "$DOMINIO" ]; then echo "::error::Falta el dominio (ej: gym-os-pied.vercel.app)"; exit 1; fi
+          node scripts/datos/sembrar-demo.mjs --dominio "$DOMINIO"
+          node scripts/datos/estado-base.mjs

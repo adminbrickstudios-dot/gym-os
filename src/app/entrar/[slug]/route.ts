@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO } from "@/lib/cookie-gimnasio";
 import type { MiSesion } from "@/lib/panel/servidor";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 
@@ -17,6 +18,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   }
   destino.pathname = "/panel";
   const r = NextResponse.redirect(destino);
-  r.cookies.set("gymos_gimnasio", slug, { httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365 });
+  r.cookies.set(COOKIE_GIMNASIO, slug, OPCIONES_COOKIE_GIMNASIO);
   return r;
 }

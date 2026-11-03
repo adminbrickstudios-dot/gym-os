@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { Marco } from "@/components/panel/Marco";
+import { dominioPlataforma } from "@/lib/dominios";
+import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
 import { contextoPanel, ErrorDatos } from "@/lib/panel/servidor";
 
@@ -16,6 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LayoutPanel({ children }: { children: ReactNode }) {
+  // En la dirección de la plataforma (sin subdominio) se puede volver a elegir gimnasio.
+  const enPlataforma = normalizarHost((await headers()).get("host")) === dominioPlataforma();
   let panel;
   try {
     panel = await contextoPanel();
@@ -26,7 +32,10 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
           <div className="mx-auto w-full max-w-xl">
             <Aviso emoji="🔒" titulo="No tenés acceso a este gimnasio">
               Tu usuario no es parte del equipo acá. Si debería serlo, pedile al dueño que te agregue.
-              <form action="/salir" method="post" className="mt-6"><button className="boton">🚪 Cerrar sesión</button></form>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {enPlataforma && <Link href="/elegir" className="boton boton-principal">🔁 Elegir otro gimnasio</Link>}
+                <form action="/salir" method="post"><button className="boton">🚪 Cerrar sesión</button></form>
+              </div>
             </Aviso>
           </div>
         </main>
@@ -34,5 +43,5 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     }
     throw e;
   }
-  return <Marco panel={panel}>{children}</Marco>;
+  return <Marco panel={panel} enPlataforma={enPlataforma}>{children}</Marco>;
 }

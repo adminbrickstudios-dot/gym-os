@@ -13,6 +13,8 @@ type Props = {
   grupos: Grupo[];
   principales: Acceso[];
   buscaSocios: boolean;
+  /** Desde la dirección de la plataforma: volver a elegir gimnasio (y al super admin). */
+  cambiarGimnasio?: boolean;
 };
 
 const activa = (actual: string, ruta: string) => (ruta === "/panel" ? actual === "/panel" : actual === ruta || actual.startsWith(`${ruta}/`));
@@ -71,6 +73,7 @@ export function Navegacion(props: Props) {
         <Menu props={props} actual={actual} />
         <div className="mt-auto pt-8 space-y-3">
           <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
+          {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}
           <Salir />
         </div>
       </aside>
@@ -115,6 +118,7 @@ export function Navegacion(props: Props) {
           <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} />
           <div className="mt-8 space-y-3">
             <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
+            {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}
             <Salir />
           </div>
         </div>

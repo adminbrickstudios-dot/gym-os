@@ -1,41 +1,120 @@
 "use server";
-import { randomInt } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { requerir } from "@/lib/entorno";
+import { darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
+import { dominioBase } from "@/lib/dominios";
 import { rpc } from "@/lib/panel/servidor";
-import { clienteServicio } from "@/lib/supabase/servicio";
 
-export type EstadoAlta = { error?: string; ok?: { host: string; email?: string; contrasena?: string; aviso: string } };
+// Todas las acciones del super admin siguen el mismo orden: primero la base
+// valida con la sesión de quien pide (admin_* / *_para_*), recién después el
+// servidor usa la clave de servicio. Ningún error se pierde: todo vuelve como
+// texto a la pantalla.
 
-/**
- * Alta de un gimnasio. La base valida que quien lo pide es admin de la
- * plataforma (admin_crear_gimnasio con su sesión); recién después el
- * servidor crea o vincula la cuenta del dueño con la clave de servicio.
- */
+export type EstadoAlta = {
+  error?: string;
+  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string };
+};
+
 export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoAlta> {
   const slug = String(f.get("slug") ?? "").trim().toLowerCase();
   const nombre = String(f.get("nombre") ?? "").trim();
   const dueno = String(f.get("dueno") ?? "").trim();
   const email = String(f.get("email") ?? "").trim().toLowerCase();
+  if (email && !mailValido(email)) return { error: "El mail del dueño no es válido" };
+  const base = dominioBase();
+  if (!base) return { error: "Falta NEXT_PUBLIC_DOMINIO_BASE en Vercel (Settings → Environment Variables) y redeployar." };
+
   let r: { gimnasio_id: string; equipo_id: string; host: string };
   try {
-    r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: requerir("NEXT_PUBLIC_DOMINIO_BASE", process.env.NEXT_PUBLIC_DOMINIO_BASE), p_dueno_nombre: dueno });
-  } catch (e) { return { error: (e as Error).message }; }
-  revalidatePath("/admin");
-  if (!email) return { ok: { host: r.host, aviso: `${nombre} está creado. Falta darle acceso al dueño (cargá su mail).` } };
-
-  const servicio = clienteServicio();
-  const { data: existente, error: e1 } = await servicio.rpc("usuario_por_mail", { p_email: email });
-  if (e1) return { error: `El gimnasio se creó, pero no se pudo dar acceso al dueño: ${e1.message}` };
-  let usuario = existente as string | null;
-  let contrasena: string | undefined;
-  if (!usuario) {
-    contrasena = `brik-${randomInt(100000, 999999)}`;
-    const { data, error } = await servicio.auth.admin.createUser({ email, password: contrasena, email_confirm: true, user_metadata: { nombre: dueno } });
-    if (error) return { error: `El gimnasio se creó, pero no la cuenta del dueño: ${error.message}` };
-    usuario = data.user.id;
+    r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
+  } catch (e) {
+    return { error: (e as Error).message };
   }
-  const { error: e2 } = await servicio.rpc("vincular_usuario_equipo", { p_equipo_id: r.equipo_id, p_usuario_id: usuario });
-  if (e2) return { error: `El gimnasio se creó, pero no se pudo vincular al dueño: ${e2.message}` };
-  return { ok: { host: r.host, email, contrasena, aviso: contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya." } };
+  revalidatePath("/admin");
+  const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
+  if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.` } };
+  try {
+    const { contrasena } = await darAcceso(r.equipo_id, email, dueno);
+    return { ok: { ...creado, email, contrasena, aviso: contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya." } };
+  } catch (e) {
+    return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
+  }
+}
+
+export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string };
+
+/** Alta de una persona en el equipo de un gimnasio, con acceso si se carga el mail. */
+export async function agregarPersona(_: Resultado, f: FormData): Promise<Resultado> {
+  const gimnasioId = String(f.get("gimnasio_id") ?? "");
+  const nombre = String(f.get("nombre") ?? "").trim();
+  const rol = String(f.get("rol") ?? "");
+  const email = String(f.get("email") ?? "").trim().toLowerCase();
+  if (email && !mailValido(email)) return { error: "El mail no es válido" };
+  let equipoId: string;
+  try {
+    equipoId = await rpc<string>("admin_agregar_persona", { p_gimnasio_id: gimnasioId, p_nombre: nombre, p_rol: rol });
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  revalidatePath(`/admin/${gimnasioId}`);
+  if (!email) return { aviso: `${nombre} quedó en el equipo, sin acceso al sistema.` };
+  try {
+    const { contrasena } = await darAcceso(equipoId, email, nombre);
+    return contrasena
+      ? { email, contrasena, aviso: `Pasale a ${nombre} su mail y esta contraseña provisoria.` }
+      : { email, aviso: `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
+  } catch (e) {
+    return { error: `${nombre} quedó en el equipo, pero sin acceso: ${(e as Error).message}` };
+  }
+}
+
+/** Primer acceso para alguien del equipo que no tenía cuenta. Sirve igual desde el super admin y desde el panel del dueño. */
+export async function darAccesoPersona(_: Resultado, f: FormData): Promise<Resultado> {
+  const equipoId = String(f.get("equipo_id") ?? "");
+  const email = String(f.get("email") ?? "").trim().toLowerCase();
+  if (!mailValido(email)) return { error: "Escribí un mail válido" };
+  try {
+    const p = await rpc<{ nombre: string }>("persona_para_dar_acceso", { p_equipo_id: equipoId });
+    const { contrasena } = await darAcceso(equipoId, email, p.nombre);
+    revalidatePath("/admin", "layout");
+    revalidatePath("/panel/equipo");
+    return contrasena
+      ? { email, contrasena, aviso: `Pasale a ${p.nombre} su mail y esta contraseña provisoria.` }
+      : { email, aviso: `${email} ya tenía cuenta: ${p.nombre} entra con su contraseña de siempre.` };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+/** Contraseña provisoria nueva para alguien que se la olvidó. */
+export async function nuevaClavePersona(_: Resultado, f: FormData): Promise<Resultado> {
+  const equipoId = String(f.get("equipo_id") ?? "");
+  try {
+    const c = await rpc<{ usuario_id: string; email: string | null; nombre: string }>("cuenta_para_nueva_clave", { p_equipo_id: equipoId });
+    const contrasena = await nuevaContrasena(c.usuario_id);
+    return { email: c.email ?? undefined, contrasena, aviso: `Contraseña nueva para ${c.nombre}. La anterior ya no sirve.` };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function agregarDominio(_: Resultado, f: FormData): Promise<Resultado> {
+  const gimnasioId = String(f.get("gimnasio_id") ?? "");
+  const host = String(f.get("host") ?? "");
+  try {
+    await rpc("admin_agregar_dominio", { p_gimnasio_id: gimnasioId, p_host: host });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return { aviso: "Dirección agregada. Sumala también en Vercel → Settings → Domains para que abra." };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function quitarDominio(gimnasioId: string, dominioId: string): Promise<{ error?: string }> {
+  try {
+    await rpc("admin_quitar_dominio", { p_dominio_id: dominioId });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return {};
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }

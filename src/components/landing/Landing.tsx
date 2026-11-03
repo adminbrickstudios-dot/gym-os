@@ -261,7 +261,10 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
             <Logo marca={marca} />
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
-          {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
+          <nav className="flex gap-2 shrink-0" aria-label="Accesos">
+            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
+            <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
+          </nav>
         </div>
       </header>
 
@@ -329,6 +332,10 @@ export function LandingProximamente({ marca }: { marca: Marca }) {
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
         <p className="texto-suave mt-4 text-lg">🚧 Estamos armando nuestra página. Volvé pronto.</p>
+        <div className="mt-10 flex flex-wrap justify-center gap-2">
+          <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
+          <a href="/ingresar" className="boton">🛎️ Soy del equipo</a>
+        </div>
       </div>
     </div>
   );

@@ -15,6 +15,53 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-03 · Super admin completo, claves y gimnasios sin subdominio
+
+**QUÉ HICE**
+- **Por qué "no hacía nada" en producción:**
+  - El gimnasio se creaba en `nombre.gym-os-pied.vercel.app`, y Vercel no da esos subdominios: el link no abría.
+  - El admin no tenía cómo entrar a un gimnasio que no fuera suyo.
+  - El dominio base iba crudo a la base (con `https://` o una barra, fallaba con "Dominio base no válido").
+  - Un error después de crear (por ejemplo, sin la clave de servicio) rompía la pantalla sin decir nada.
+- **Super admin (`/admin`):**
+  - Estado de la plataforma: dominios, clave de servicio cargada y respondiendo (sin mostrarla), aviso de "sin dominio propio".
+  - Alta de gimnasio con el resultado accionable: Entrar al panel, Equipo y claves, Ver su página. Todo error vuelve como texto.
+  - Cada gimnasio: **Entrar al panel** (como "Soporte BRIK", queda en su equipo y el dueño lo ve), **Equipo, claves y direcciones**, **Ver su página** (`/g/<slug>`).
+  - Detalle (`/admin/<id>`): equipo con mail y último ingreso, **nueva contraseña** para cualquiera (menos cuentas de BRIK), **dar acceso** a quien no tiene cuenta, sumar personas, sumar y quitar direcciones propias, dejar el equipo.
+  - Cambiar la contraseña propia.
+- **Claves del lado del dueño:** en Equipo, nueva contraseña para su equipo (no para otros dueños ni para Soporte BRIK) y dar acceso a quien no tenía. En `/ingresar`: "¿Te olvidaste la contraseña? Pedile una nueva al dueño (si sos el dueño, a BRIK)".
+- **Sin subdominio:** `/g/<slug>` muestra la página del gimnasio desde la dirección de la plataforma y lo deja elegido (cookie, sin permisos); `/app` y el ingreso del socio usan ese gimnasio, igual que `/panel`. En el panel, "Cambiar de gimnasio".
+- **La página del gimnasio no tenía cómo entrar el socio:** botón "💪 Soy socio" (y en la de "próximamente", socio y equipo).
+- **Base, 0019:** `equipo.es_soporte`, `gimnasio_por_slug` con una dirección, `admin_gimnasios` (+ estoy adentro, dueños sin acceso), `admin_entrar/salir_gimnasio`, `admin_gimnasio`, `admin_agregar_persona`, `admin_agregar/quitar_dominio`, `cuenta_para_nueva_clave`, `persona_para_dar_acceso`. La base decide quién puede tocar la cuenta de quién; el servidor usa la clave de servicio recién después.
+- **GitHub Actions → Base de datos:** `estado` (qué hay en producción, sin datos personales) y `sembrar-demo` (gimnasio demo con 300 socios ficticios).
+- **Verificado:**
+  - 8 pruebas de base nuevas (entrar/salir, quién cambia la clave de quién, direcciones, anon resuelve el slug).
+  - Playwright con sesiones reales, 18 pasos: crear gimnasio con dueño → entrar como soporte → nueva contraseña (la vieja deja de servir, la nueva entra) → sumar recepción y darle acceso → sumar y quitar dirección → el dueño ve a Soporte BRIK y le cambia la clave a su recepción → página del demo por `/g/demo` → socio entra con código a la app desde la plataforma → `/g/no-existe` da 404.
+  - Barrido de las 15 pantallas del panel con dueña, encargado, recepción y profe: ningún error de servidor.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Al "dar acceso", la pantalla se refrescaba y la contraseña recién creada nunca se mostraba (la persona ya figuraba con cuenta). Arreglado: el resultado se muestra primero.
+- El workflow pegaba el mail de `hacer-admin` directo en el comando de la terminal. Ahora va por variable de entorno.
+- `npm run lint` fallaba en `/elegir` (un `<a>` a `/admin`). Arreglado.
+
+**QUÉ CORRÉS VOS**
+- Nada: la migración 0019 la aplicó el agente con el workflow (pre-vuelo y aplicar) y sembró el demo en producción.
+
+**QUÉ CONFIGURÁS VOS**
+- Vercel: `NEXT_PUBLIC_DOMINIO_BASE` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA` sin `https://` ni barra (el super admin avisa si no).
+- Para que el socio entre por celular en producción: un proveedor de SMS en Supabase → Authentication → Providers → Phone.
+
+**SIN ARREGLAR**
+- Suspender un gimnasio desde el super admin: la columna existe pero no corta nada. Qué debería bloquear (¿el panel?, ¿la puerta?) es una decisión de permisos y plata.
+- Lo anotado el 02/11 sigue igual (permisos de la recepción para forzar entrada y anotar contactos, el profe sin buscar socios, presente sin anular, QR/kiosco, importador, MercadoPago).
+
+**LO QUE NO PUDE VERIFICAR**
+- `npm run db:types`: necesita `SUPABASE_PROJECT_ID` y el proyecto real; el código está escrito según la documentación, pero no está ejecutado.
+- Crear cuentas y cambiar contraseñas contra el GoTrue real de Supabase (`auth.admin.createUser` / `updateUserById`): probado con el imitador local; contra Supabase, el código está escrito según la documentación, pero no está ejecutado.
+- El ingreso del socio por SMS en producción: no hay proveedor de SMS configurado.
+
+---
+
 ## 2026-11-02 · S2–S10, S15 · Diseño oscuro y todos los paneles, probados con sesión real
 
 **QUÉ HICE**

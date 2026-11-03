@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NOMBRE_ROL } from "@/lib/panel/secciones";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
@@ -27,7 +28,7 @@ export default async function Elegir() {
               </a>
             </li>
           ))}
-          {yo.es_admin && <li><a href="/admin" className="boton w-full text-lg">🧱 Super admin de BRIK</a></li>}
+          {yo.es_admin && <li><Link href="/admin" className="boton w-full text-lg">🧱 Super admin de BRIK</Link></li>}
         </ul>
         {yo.equipo.length === 0 && !yo.es_admin && <p className="texto-suave mt-6">Tu cuenta no tiene ningún gimnasio.</p>}
         <form action="/salir" method="post" className="mt-8"><button className="text-sm texto-tenue min-h-11">Salir</button></form>
