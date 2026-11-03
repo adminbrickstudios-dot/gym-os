@@ -100,7 +100,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
   );
 
   return (
-    <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 items-start [&>*]:min-w-0">
       <div className="space-y-8">
         {/* ¿Para quién? */}
         <section>

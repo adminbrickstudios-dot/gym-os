@@ -77,6 +77,11 @@ try {
   await q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde, medio_pago) values ($1, $2, 22000, '2020-01-01', 'efectivo')`,
     [g, planes.full]);
 
+  // Lo que se vende en el mostrador además de los planes.
+  for (const [i, [nombre, precio]] of [["Agua 500 ml", 1500], ["Bebida isotónica", 2800], ["Barrita proteica", 3200], ["Candado para locker", 6500]].entries()) {
+    await q(`insert into public.productos (gimnasio_id, nombre, precio, orden) values ($1,$2,$3,$4)`, [g, nombre, precio, i]);
+  }
+
   // Clases con reserva: actividades y una grilla de lunes a sábado (las clases de cada día se crean solas).
   await q(`update public.configuracion_gimnasio set modo_clases = 'reserva' where gimnasio_id = $1`, [g]);
   const actividades = {};

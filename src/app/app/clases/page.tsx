@@ -39,7 +39,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             <li key={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="numero text-2xl w-14">{hora(c.inicio)}</span>
               <span className="text-2xl" aria-hidden>{c.emoji ?? "🗓️"}</span>
-              <span className="flex-1 min-w-0"><span className="block font-semibold">{c.actividad}</span>
+              <span className="grow basis-36 min-w-0"><span className="block font-semibold">{c.actividad}</span>
                 <span className="block text-sm texto-suave">{c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo"}{c.profe ? ` · ${c.profe}` : ""}</span></span>
               {c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
