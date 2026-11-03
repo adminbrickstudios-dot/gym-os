@@ -13,13 +13,17 @@ const q = async (sql) => (await db.query(sql)).rows;
 const [m] = await q(`select count(*)::int as n from supabase_migrations.schema_migrations`).catch(() => [{ n: "?" }]);
 const [a] = await q(`select count(*)::int as n from public.administradores_plataforma`);
 console.log(`Migraciones aplicadas: ${m.n} · super admins: ${a.n}`);
+// Antes de la migración 0019 no existe equipo.es_soporte: el script sirve antes y después.
+const [{ hay }] = await q(`select exists (select 1 from information_schema.columns where table_schema = 'public'
+                             and table_name = 'equipo' and column_name = 'es_soporte') as hay`);
+const noSoporte = hay ? "not e.es_soporte" : "true";
 const gs = await q(`
   select g.slug, g.nombre, g.es_demo,
          array(select d.host from public.dominios_gimnasio d where d.gimnasio_id = g.id order by d.tipo desc, d.host) as hosts,
          (select count(*)::int from public.socios s where s.gimnasio_id = g.id and s.dado_de_baja_en is null) as socios,
-         (select count(*)::int from public.equipo e where e.gimnasio_id = g.id and e.activo and not coalesce(e.es_soporte, false)) as equipo,
+         (select count(*)::int from public.equipo e where e.gimnasio_id = g.id and e.activo and ${noSoporte}) as equipo,
          (select count(*)::int from public.equipo e where e.gimnasio_id = g.id and e.activo and e.rol = 'dueno'
-             and not coalesce(e.es_soporte, false) and e.usuario_id is not null) as duenos_con_acceso
+             and ${noSoporte} and e.usuario_id is not null) as duenos_con_acceso
     from public.gimnasios g order by g.creado_en`);
 if (!gs.length) console.log("No hay ningún gimnasio todavía.");
 for (const g of gs) {
