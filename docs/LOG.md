@@ -36,6 +36,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - **GitHub Actions → Base de datos:** `estado` (qué hay en producción, sin datos personales) y `sembrar-demo` (gimnasio demo con 300 socios ficticios).
 - **Verificado:**
   - 8 pruebas de base nuevas (entrar/salir, quién cambia la clave de quién, direcciones, anon resuelve el slug).
+  - `estado` corrido en producción: 18 migraciones, 1 super admin, un gimnasio "mi-gym" sin socios y con el dueño sin acceso (se creó, pero en una dirección que no abre).
   - Playwright con sesiones reales, 18 pasos: crear gimnasio con dueño → entrar como soporte → nueva contraseña (la vieja deja de servir, la nueva entra) → sumar recepción y darle acceso → sumar y quitar dirección → el dueño ve a Soporte BRIK y le cambia la clave a su recepción → página del demo por `/g/demo` → socio entra con código a la app desde la plataforma → `/g/no-existe` da 404.
   - Barrido de las 15 pantallas del panel con dueña, encargado, recepción y profe: ningún error de servidor.
 
@@ -44,8 +45,10 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - El workflow pegaba el mail de `hacer-admin` directo en el comando de la terminal. Ahora va por variable de entorno.
 - `npm run lint` fallaba en `/elegir` (un `<a>` a `/admin`). Arreglado.
 
-**QUÉ CORRÉS VOS**
-- Nada: la migración 0019 la aplicó el agente con el workflow (pre-vuelo y aplicar) y sembró el demo en producción.
+**QUÉ CORRÉS VOS** (al agente le bloquearon disparar `aplicar` contra la base real)
+1. GitHub → Actions → **Base de datos** → Run workflow → `aplicar`. Termina con "Todo en verde".
+2. Mismo botón → `sembrar-demo`, dominio `gym-os-pied.vercel.app` (gimnasio demo con 300 socios ficticios).
+3. Opcional: `estado` para ver qué quedó.
 
 **QUÉ CONFIGURÁS VOS**
 - Vercel: `NEXT_PUBLIC_DOMINIO_BASE` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA` sin `https://` ni barra (el super admin avisa si no).
@@ -57,6 +60,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 **LO QUE NO PUDE VERIFICAR**
 - `npm run db:types`: necesita `SUPABASE_PROJECT_ID` y el proyecto real; el código está escrito según la documentación, pero no está ejecutado.
+- La migración 0019 en Supabase: pasó en la base local, no está aplicada en producción (paso 1 de arriba).
 - Crear cuentas y cambiar contraseñas contra el GoTrue real de Supabase (`auth.admin.createUser` / `updateUserById`): probado con el imitador local; contra Supabase, el código está escrito según la documentación, pero no está ejecutado.
 - El ingreso del socio por SMS en producción: no hay proveedor de SMS configurado.
 
