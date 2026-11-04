@@ -130,7 +130,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
 
 ### 1 · Configuración y primeros pasos
-- [ ] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
+- [~] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
 - [ ] CFG-1 · 🟢 · Configuración en pestañas, todo explicado
 - [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
