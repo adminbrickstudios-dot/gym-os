@@ -30,8 +30,8 @@ function FilaPlan({ p, fecha }: { p: Plan; fecha: (d: string) => string }) {
         <p className="numero text-3xl">{p.precio != null ? formatearPesos(p.precio) : "Sin precio"}</p>
       </div>
       <div className="flex flex-wrap gap-2 mt-4">
-        {!precio && <button type="button" className="boton !min-h-10" onClick={() => setPrecio(true)}>💲 Cambiar precio</button>}
-        <button type="button" className="boton !min-h-10 texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, p.nombre, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
+        {!precio && <button type="button" className="boton boton-chico" onClick={() => setPrecio(true)}>💲 Cambiar precio</button>}
+        <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, p.nombre, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
       </div>
       {precio && (
         <form className="grid sm:grid-cols-[1fr_1fr_auto_auto] gap-2 mt-4" onSubmit={(e) => { e.preventDefault(); correr(() => cambiarPrecio(p.plan_id, monto, desde)); }}>
@@ -88,7 +88,7 @@ function Productos({ productos }: { productos: Producto[] }) {
           <li key={p.producto_id} className={`tarjeta flex items-center gap-3 px-4 py-3 ${p.activo ? "" : "opacity-55"}`}>
             <span className="flex-1 font-semibold">{p.nombre}</span>
             <span className="numero text-xl">{formatearPesos(p.precio)}</span>
-            <button type="button" className="text-sm texto-tenue min-h-10" disabled={ocupado} onClick={() => correr(() => guardarProducto(p.producto_id, p.nombre, String(p.precio), !p.activo))}>{p.activo ? "Ocultar" : "Mostrar"}</button>
+            <button type="button" className="boton-texto" disabled={ocupado} onClick={() => correr(() => guardarProducto(p.producto_id, p.nombre, String(p.precio), !p.activo))}>{p.activo ? "Ocultar" : "Mostrar"}</button>
           </li>
         ))}
       </ul>

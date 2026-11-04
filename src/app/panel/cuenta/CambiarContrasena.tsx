@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { cambiarContrasena } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export function CambiarContrasena() {
   const [a, setA] = useState(""); const [b, setB] = useState("");
@@ -15,7 +16,7 @@ export function CambiarContrasena() {
       <p className="titulo text-2xl">🔑 Cambiar contraseña</p>
       <input type="password" autoComplete="new-password" className="campo" placeholder="Nueva (8 caracteres o más)" value={a} onChange={(e) => setA(e.target.value)} />
       <input type="password" autoComplete="new-password" className="campo" placeholder="Repetila" value={b} onChange={(e) => setB(e.target.value)} />
-      {msj.texto && <p role="status" className={`pildora ${msj.ok ? "pildora-verde" : "pildora-rojo"}`}>{msj.texto}</p>}
+      {msj.texto && <Mensaje tipo={msj.ok ? "exito" : "error"}>{msj.texto}</Mensaje>}
       <button type="submit" disabled={ocupado || a.length < 8} className="boton boton-principal">Guardar</button>
     </form>
   );

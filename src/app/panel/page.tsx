@@ -8,6 +8,18 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 type Numero = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" };
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
 type Inicio = { hoy: string; numeros: Numero[]; ahora: Ahora[] };
+const DETALLE: Record<string, { ruta: string; seccion: string }> = {
+  entraron: { ruta: "/panel/entrada", seccion: "entrada" },
+  cobrado: { ruta: "/panel/caja", seccion: "caja" },
+  vencen: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
+  al_dia: { ruta: "/panel/socios", seccion: "socios" },
+  por_aprobar: { ruta: "/panel/transferencias", seccion: "transferencias" },
+  mis_clases: { ruta: "/panel/clases", seccion: "clases" },
+  anotados: { ruta: "/panel/clases", seccion: "clases" },
+  presentes: { ruta: "/panel/clases", seccion: "clases" },
+  faltan: { ruta: "/panel/clases", seccion: "clases" },
+  clases: { ruta: "/panel/clases", seccion: "clases" },
+};
 
 // Las rutas que devuelve la base son relativas al panel.
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
@@ -31,12 +43,19 @@ export default async function Inicio() {
 
         <section aria-label="Números de hoy">
           <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
-            {datos.numeros.map((n) => (
-              <div key={n.clave}>
-                <dd className="numero text-5xl sm:text-6xl">{n.formato === "pesos" ? formatearPesos(n.valor) : formatearNumero(n.valor)}</dd>
-                <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}</dt>
-              </div>
-            ))}
+            {datos.numeros.map((n) => {
+              const cuerpo = (
+                <>
+                  <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}</dt>
+                  <dd className="numero text-5xl sm:text-6xl">{n.formato === "pesos" ? formatearPesos(n.valor) : formatearNumero(n.valor)}</dd>
+                </>
+              );
+              // Cada número lleva a su detalle (si la sección está prendida).
+              const href = DETALLE[n.clave];
+              return href && !panel.secciones_apagadas.includes(href.seccion)
+                ? <Link key={n.clave} href={href.ruta} className="flex flex-col-reverse rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
+                : <div key={n.clave} className="flex flex-col-reverse">{cuerpo}</div>;
+            })}
           </dl>
         </section>
 

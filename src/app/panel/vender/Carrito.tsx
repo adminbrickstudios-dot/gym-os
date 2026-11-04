@@ -118,7 +118,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
             <div className="space-y-2">
               <input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} className="campo !min-h-14 !text-lg" placeholder="🔍 Buscar socio (o vendé sin socio: productos)" aria-label="Buscar socio" />
               {encontrados.map((s) => (
-                <button key={s.socio_id} type="button" onClick={() => elegirSocio(s)} className="tarjeta w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--tarjeta-alta)]">
+                <button key={s.socio_id} type="button" onClick={() => elegirSocio(s)} className="fila gap-3">
                   <PuntoEstado color={s.color} />
                   <span className="font-semibold flex-1 truncate">{s.nombre}</span>
                   <span className="texto-tenue text-sm truncate">{s.texto}</span>
@@ -190,14 +190,14 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
                     <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
-                      ? <button type="button" className="text-sm texto-tenue ml-auto min-h-9" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
-                      : <button type="button" className="text-sm texto-tenue ml-auto min-h-9" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
+                      ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
+                      : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
                   </div>
                   {l.descuento != null && (
                     <div className="grid grid-cols-[110px_1fr] gap-2 mt-2">
-                      <input className="campo !min-h-10" inputMode="decimal" placeholder="$" value={l.descuento || ""}
+                      <input className="campo" inputMode="decimal" placeholder="$" value={l.descuento || ""}
                         onChange={(e) => cambiar(l.clave, { descuento: Number(e.target.value.replace(",", ".")) || 0 })} aria-label="Monto del descuento" />
-                      <input className="campo !min-h-10" placeholder="Motivo (obligatorio)" value={l.descuento_motivo ?? ""}
+                      <input className="campo" placeholder="Motivo (obligatorio)" value={l.descuento_motivo ?? ""}
                         onChange={(e) => cambiar(l.clave, { descuento_motivo: e.target.value })} aria-label="Motivo del descuento" />
                     </div>
                   )}
@@ -232,7 +232,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
               {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
             </div>
           )}
-          <button type="button" className="text-sm texto-tenue mt-2 min-h-9" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>
+          <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>
           {mixto && <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>}
         </div>
 

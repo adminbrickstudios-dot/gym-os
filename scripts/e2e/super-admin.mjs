@@ -63,7 +63,7 @@ try {
   await p.fill("input[type=email]", `olympo${s}@ejemplo.invalid`);
   await p.fill("input[type=password]", clave1);
   await p.click("button[type=submit]");
-  await p.locator("p[role=alert]", { hasText: "no son correctos" }).waitFor({ timeout: 30000 });
+  await p.locator("[role=alert]", { hasText: "no son correctos" }).waitFor({ timeout: 30000 });
   ok("la contraseña vieja ya no sirve");
   await entrar(p, `olympo${s}@ejemplo.invalid`, clave2, B);
   await p.waitForURL(/\/panel/, { timeout: 60000 });

@@ -126,7 +126,7 @@ que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 0 · Base
-- [~] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`)
+- [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
 - [ ] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`)
 
 ### 1 · Configuración y primeros pasos

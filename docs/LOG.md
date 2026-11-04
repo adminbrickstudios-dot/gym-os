@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · DIS-0 · Sistema visual común
+
+**QUÉ HICE**
+- Componentes que faltaban, en `src/components/ui/`: `Mensaje` (error, éxito, aviso, info; con role alert/status), `Vacio` (emoji, qué pasa, qué hacer), `Dato`, `Interruptor`, `Pestanas`. Clases nuevas en `globals.css`: `.boton-chico`, `.boton-texto`, `.mensaje-*`, `.fila`, `.pestanas`, `.interruptor`, `.vacio`, animación `subir` y `tilde`.
+- Todos los errores y resultados hechos a mano (16) pasan a `Mensaje`; los botones chicos y de texto, a sus clases; las filas para elegir socio, a `.fila`.
+- Estados vacíos con acción en Socios (y en la búsqueda sin resultados), Transferencias, Clases del día y la lista de una clase.
+- Los 4 números de Inicio llevan a su detalle (si la sección está prendida).
+- `docs/DISENO.md`: con qué se arma cada pantalla.
+- Verificado: `scripts/e2e/dis-0.mjs` (14 pasos en compu y celu: vacíos con su acción, números que llevan a su detalle, error de ingreso con el componente común), `npm run e2e:admin` (17 pasos), barrido de las 15 pantallas con los 4 roles en compu y celu (120 pasos), `npm run verificar` en verde (171 pruebas de base, 40 unitarias, chequeos, lint, tipos, build). Capturas mirándolas.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En Socios vacío había dos botones verdes (el de arriba y el del vacío): el del vacío pasó a normal (un solo principal por pantalla).
+- Los números de Inicio tenían la etiqueta antes del número en el código; ahora el orden del HTML es el correcto (etiqueta y valor) y se ve igual que antes.
+
+**QUÉ CORRÉS VOS**
+- Nada para esta vuelta (sin migraciones).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Los vacíos secundarios (lista de entradas de hoy, últimas entradas de la ficha, actividades de la grilla, super admin) quedan como texto: se pulen en su DIS de cada panel.
+
+**LO QUE NO PUDE VERIFICAR**
+- `npm run db:types`: necesita el proyecto real de Supabase; el código está escrito según la documentación, pero no está ejecutado (esta vuelta no cambia la base).
+
+---
+
 ## 2026-11-03 · Super admin completo, claves y gimnasios sin subdominio
 
 **QUÉ HICE**

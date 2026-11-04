@@ -16,7 +16,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
         <div className="mx-auto max-w-lg px-4 h-14 flex items-center justify-between">
           <a href="/app" className="titulo text-xl truncate">{landing.marca.nombre}</a>
-          <form action="/salir" method="post"><button className="text-sm texto-tenue min-h-11 px-2">Salir</button></form>
+          <form action="/salir" method="post"><button className="boton-texto">Salir</button></form>
         </div>
       </header>
       <main className="mx-auto max-w-lg px-4 pt-6 pb-16">{children}</main>

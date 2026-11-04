@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { propsMarca } from "@/lib/marca";
 import { guardarConfiguracion } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -55,7 +56,7 @@ export function Ajustes({ inicial, puedeEditar }: { inicial: Config; puedeEditar
   return (
     <fieldset disabled={!puedeEditar} className="space-y-4">
       {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la configuración.</p>}
-      {(msj.ok || msj.error) && <p role="status" className={`pildora ${msj.error ? "pildora-rojo" : "pildora-verde"} sticky top-16 lg:top-4 z-10`}>{msj.error ? `⚠️ ${msj.error}` : msj.ok}</p>}
+      {(msj.ok || msj.error) && <Mensaje tipo={msj.error ? "error" : "exito"} className="sticky top-16 lg:top-4 z-10">{msj.error ?? msj.ok}</Mensaje>}
 
       <Bloque emoji="🎨" titulo="Marca" ayuda="El nombre y los colores se ven en la página, en el panel y en la app." onGuardar={g && (() => g(["nombre", "color_fondo", "color_acento"]))} ocupado={ocupado}>
         <label className="block space-y-1"><span className="etiqueta">Nombre del gimnasio</span><input className="campo" value={c.nombre} onChange={(e) => set("nombre", e.target.value)} /></label>

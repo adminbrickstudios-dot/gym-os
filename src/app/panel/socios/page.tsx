@@ -4,6 +4,7 @@ import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -24,7 +25,9 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
         </form>
         {filas.length === 0 ? (
-          <p className="texto-suave text-lg">{q ? <>Nadie con “{q}”. <Link href="/panel/socios/nuevo" className="underline">Darlo de alta</Link></> : "Todavía no hay socios. Empezá por dar de alta al primero."}</p>
+          q
+            ? <Vacio emoji="🔍" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
+            : <Vacio emoji="👥" titulo="Todavía no hay socios" acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Cargar el primero</Link>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
           <ul className="space-y-2">
             {filas.map((s) => (

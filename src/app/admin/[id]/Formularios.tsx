@@ -3,6 +3,7 @@ import { useActionState, useState, useTransition } from "react";
 import { ContrasenaNueva } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { agregarDominio, agregarPersona, quitarDominio, type Resultado } from "../acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
   const [estado, accion, guardando] = useActionState<Resultado, FormData>(agregarPersona, {});
@@ -33,7 +34,7 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
           <li key={d.dominio_id} className="tarjeta p-4 flex flex-wrap items-center gap-3">
             <span className="flex-1 min-w-0 break-all"><strong>{d.host}</strong> <span className="texto-tenue text-sm">· {d.tipo === "propio" ? "dirección propia" : "subdominio de Gym OS"}</span></span>
             {d.tipo === "propio" && (
-              <button type="button" className="boton !min-h-10 texto-suave" disabled={ocupado}
+              <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
                 onClick={() => { if (confirm(`¿Quitar ${d.host}? El gimnasio deja de abrir en esa dirección.`)) empezar(async () => setError((await quitarDominio(gimnasioId, d.dominio_id)).error ?? null)); }}>
                 Quitar
               </button>
@@ -41,7 +42,7 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
           </li>
         ))}
       </ul>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
       <form action={accion} className="tarjeta p-5 space-y-3">
         <p className="titulo text-xl">➕ Sumar una dirección</p>
         <p className="texto-suave text-sm">

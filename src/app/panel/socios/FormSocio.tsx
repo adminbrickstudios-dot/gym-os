@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 import { guardarSocio, type EstadoForm } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 type Socio = Partial<Record<"nombre" | "apellido" | "dni" | "telefono" | "email" | "fecha_nacimiento" | "contacto_emergencia_nombre" | "contacto_emergencia_telefono" | "notas", string | null>>;
 
@@ -40,7 +41,7 @@ export function FormSocio({ socioId, socio }: { socioId: string | null; socio?: 
         <textarea name="notas" defaultValue={socio?.notas ?? ""} className="campo" placeholder="Horario que prefiere, objetivo…" />
         <span className="block text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</span>
       </label>
-      {estado.error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {estado.error}</p>}
+      {estado.error && <Mensaje tipo="error">{estado.error}</Mensaje>}
       <div className="flex gap-2">
         <button type="submit" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</button>
         <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>

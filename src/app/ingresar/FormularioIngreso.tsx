@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useEffect } from "react";
 import { ingresar, type EstadoIngreso } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
   const [estado, accion, enviando] = useActionState<EstadoIngreso, FormData>(ingresar, {});
@@ -18,7 +19,7 @@ export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
         <input className="campo" type="password" name="contrasena" autoComplete="current-password" required />
       </label>
       {estado.error && (
-        <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {estado.error}</p>
+        <Mensaje tipo="error">{estado.error}</Mensaje>
       )}
       <button type="submit" disabled={yendo} className="boton boton-principal text-lg w-full !mt-6">
         {yendo ? "Entrando…" : "🔑 Entrar"}

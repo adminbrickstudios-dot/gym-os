@@ -10,6 +10,7 @@ import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
 type Gimnasio = {
@@ -45,7 +46,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
       </header>
 
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
       <EstadoPlataforma />
       <AltaGimnasio dominio={dominioBase()} />
 

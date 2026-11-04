@@ -3,6 +3,7 @@ import { useActionState, useState, useTransition } from "react";
 import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { agregarPersona, editarPersona, type Resultado } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export type Miembro = { equipo_id: string; nombre: string; rol: Rol; sede_id: string | null; sede: string | null; activo: boolean; tiene_acceso: boolean; soy_yo: boolean };
 const EMOJI: Record<Rol, string> = { dueno: "👑", encargado: "🧭", recepcion: "🛎️", profe: "💪" };
@@ -29,11 +30,11 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
             </span>
             {puedeEditar && !m.soy_yo && (
               <div className="flex gap-2">
-                <select aria-label={`Rol de ${m.nombre}`} className="campo !min-h-10 !w-auto" value={m.rol} disabled={ocupado}
+                <select aria-label={`Rol de ${m.nombre}`} className="campo !w-auto" value={m.rol} disabled={ocupado}
                   onChange={(e) => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, e.target.value, m.sede_id, m.activo); setError(r.error ?? null); })}>
                   {(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]}</option>)}
                 </select>
-                <button type="button" className="boton !min-h-10 texto-suave" disabled={ocupado}
+                <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
                   onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, m.rol, m.sede_id, !m.activo); setError(r.error ?? null); })}>
                   {m.activo ? "Sacar acceso" : "Devolver acceso"}
                 </button>
@@ -59,10 +60,10 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
             <select name="sede" className="campo"><option value="">Todas</option>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
           {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-2xl !px-4 !py-3">⚠️ {estado.error}</p>}
           {estado.aviso && (
-            <div role="status" className="sm:col-span-2 tarjeta !bg-[var(--tarjeta-alta)] p-4">
-              <p>✅ {estado.aviso}</p>
-              {estado.contrasena && <p className="mt-2">📧 <strong>{estado.email}</strong> · 🔑 <strong className="numero text-2xl select-all">{estado.contrasena}</strong></p>}
-            </div>
+            <Mensaje tipo="exito" className="sm:col-span-2">
+              <p>{estado.aviso}</p>
+              {estado.contrasena && <p className="mt-2 text-[var(--texto)]">📧 <strong className="break-all">{estado.email}</strong> · 🔑 <strong className="numero text-2xl select-all">{estado.contrasena}</strong></p>}
+            </Mensaje>
           )}
           <div className="sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal">{guardando ? "Sumando…" : "➕ Sumar al equipo"}</button></div>
         </form>

@@ -3,6 +3,7 @@ import { useRef, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { informarPago } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 /** Datos para transferir y subir el comprobante. El pago queda pendiente hasta que el gimnasio lo aprueba. */
 export function Pagar({ gimnasioId, socioId, monto, datos }: { gimnasioId: string; socioId: string; monto: number | null; datos: { alias: string | null; cbu: string | null; titular: string | null } }) {
@@ -37,7 +38,7 @@ export function Pagar({ gimnasioId, socioId, monto, datos }: { gimnasioId: strin
       <button type="button" disabled={subiendo || estado.ok} onClick={() => archivo.current?.click()} className="boton boton-principal w-full text-lg">
         {subiendo ? "Subiendo…" : "📸 Ya transferí: subir comprobante"}
       </button>
-      {estado.texto && <p role="status" className={`pildora ${estado.ok ? "pildora-verde" : "pildora-rojo"} !rounded-2xl !px-4 !py-3 w-full`}>{estado.texto}</p>}
+      {estado.texto && <Mensaje tipo={estado.ok ? "exito" : "error"}>{estado.texto}</Mensaje>}
     </section>
   );
 }

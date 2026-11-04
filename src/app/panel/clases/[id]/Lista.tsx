@@ -3,6 +3,8 @@ import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { anotar, cancelarClase, presente } from "../acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
+import { Vacio } from "@/components/ui/Vacio";
 
 type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean };
 const ESTADO: Record<string, string> = { confirmada: "Reservó", espera: "En espera", sin_reserva: "Vino sin reservar" };
@@ -24,8 +26,8 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
 
   return (
     <div className="space-y-8">
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
-      {filas.length === 0 ? <p className="texto-suave text-lg">Todavía no se anotó nadie.</p> : (
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
+      {filas.length === 0 ? <Vacio emoji="🙋" titulo="Todavía no se anotó nadie">Los socios se anotan desde su app; también los podés sumar desde la recepción.</Vacio> : (
         <ul className="space-y-2">
           {filas.map((f) => (
             <li key={f.socio_id} className="tarjeta flex items-center gap-4 px-4 py-3 min-h-[64px]">
@@ -49,8 +51,8 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
               <li key={s.socio_id} className="flex items-center gap-3 px-2 py-2">
                 <PuntoEstado color={s.color} />
                 <span className="flex-1 truncate font-semibold">{s.nombre}</span>
-                {reserva && <button type="button" disabled={ocupado} className="boton !min-h-10" onClick={() => correr(() => anotar(claseId, s.socio_id))}>Reservar</button>}
-                <button type="button" disabled={ocupado} className="boton boton-principal !min-h-10" onClick={() => correr(() => presente(claseId, s.socio_id))}>Presente</button>
+                {reserva && <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => anotar(claseId, s.socio_id))}>Reservar</button>}
+                <button type="button" disabled={ocupado} className="boton boton-principal boton-chico" onClick={() => correr(() => presente(claseId, s.socio_id))}>Presente</button>
               </li>
             ))}
           </ul>

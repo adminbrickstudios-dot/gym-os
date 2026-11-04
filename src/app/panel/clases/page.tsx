@@ -5,6 +5,7 @@ import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
+import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Clases" };
 type Clase = { clase_id: string; actividad: string; emoji: string | null; color: string | null; inicio: string; fin: string; profe: string | null;
@@ -41,7 +42,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               className={`boton !min-h-12 whitespace-nowrap first-letter:uppercase ${d === dia ? "!border-[var(--acento)]" : "opacity-75"}`}>{nombreDia(d, i)}</Link>
           ))}
         </nav>
-        {clases.length === 0 ? <p className="texto-suave text-lg">No hay clases este día.</p> : (
+        {clases.length === 0 ? <Vacio emoji="🗓️" titulo="No hay clases este día">Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
           <ul className="space-y-2">
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;

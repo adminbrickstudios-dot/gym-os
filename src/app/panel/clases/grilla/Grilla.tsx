@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { agregarHorario, cerrarHorario, guardarActividad } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean; horarios: number };
 export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null };
@@ -18,7 +19,7 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
 
   return (
     <div className="space-y-10">
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       <section>
         <h2 className="titulo text-3xl mb-4">💪 Actividades</h2>
@@ -52,7 +53,7 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
                       <span className="block font-semibold truncate">{x.actividad}</span>
                       <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}</span>
                     </span>
-                    <button type="button" className="boton !min-h-10 texto-suave" disabled={ocupado}
+                    <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
                       onClick={() => { if (confirm(`¿Sacar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}? Las clases desde hoy se cancelan y se avisa a los anotados.`)) correr(() => cerrarHorario(x.horario_id)); }}>Sacar</button>
                   </li>
                 ))}

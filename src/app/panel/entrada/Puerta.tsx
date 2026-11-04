@@ -5,6 +5,7 @@ import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { registrarEntrada, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -62,13 +63,13 @@ export function Puerta({ sedeId }: { sedeId: string }) {
           </p>
         </div>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       {!elegido && socios.length > 0 && (
         <ul className="space-y-2">
           {socios.map((s) => (
             <li key={s.socio_id}>
-              <button type="button" onClick={() => elegir(s)} className="tarjeta w-full text-left flex items-center gap-4 px-4 py-3 min-h-[68px] hover:bg-[var(--tarjeta-alta)]">
+              <button type="button" onClick={() => elegir(s)} className="fila">
                 <PuntoEstado color={s.color} grande />
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-lg truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>

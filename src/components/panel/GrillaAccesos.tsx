@@ -31,7 +31,7 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
         {perdidos.length > 0 && (
           <p className="pildora pildora-amarillo mt-3">⚠️ {perdidos.length === 1 ? "Un acceso que tenías ya no está disponible" : `${perdidos.length} accesos que tenías ya no están disponibles`}: elegí de nuevo.</p>
         )}
-        <button type="button" onClick={() => setEditando(true)} className="mt-3 text-sm texto-tenue hover:text-[var(--texto)] px-1 min-h-11">✏️ Elegir mis accesos</button>
+        <button type="button" onClick={() => setEditando(true)} className="boton-texto mt-3">✏️ Elegir mis accesos</button>
       </section>
     );
   }
