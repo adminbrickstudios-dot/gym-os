@@ -2,6 +2,8 @@ export type Precios = { lista: number | null; efectivo: number | null; transfere
 export type Medio = "efectivo" | "transferencia" | "debito" | "credito";
 export type PreciosVenta = {
   tope_descuento: number | null;
+  /** Medios que acepta el gimnasio para cobrar acá (sin Caja, sin efectivo). */
+  medios: Medio[];
   cuota: { plan_id: string; plan: string; duracion_meses: number; precios: Precios } | null;
   pases: { plan_id: string; nombre: string; precios: Precios }[];
   packs: { plan_id: string; nombre: string; cantidad_clases: number; precios: Precios }[];

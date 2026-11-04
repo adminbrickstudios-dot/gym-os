@@ -14,6 +14,7 @@ export type Config = {
   modo_clases: string; tolerancia_dias: number; dias_aviso: number; secciones_apagadas: string[]; alias_transferencia: string | null;
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
+  medios_aceptados: string[]; banco_transferencia: string | null;
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -25,6 +26,12 @@ export type DatosGimnasio = {
 type Campo = keyof Config;
 type Respuesta = { ok?: string; error?: string; n: number };
 
+const MEDIOS: [string, string, string][] = [
+  ["efectivo", "💵 Efectivo", "Se cobra con la caja abierta y entra en el arqueo."],
+  ["transferencia", "🏦 Transferencia", "En el mostrador, o el socio desde la app subiendo el comprobante."],
+  ["debito", "💳 Débito", "Con tu posnet o lector."],
+  ["credito", "💳 Crédito", "Con tu posnet o lector."],
+];
 const FONDOS = ["#14161b", "#101418", "#16121f", "#1a1512", "#0f1a14", "#faf7f0"];
 const ACENTOS = ["#2fbf5b", "#f5c518", "#3b82f6", "#a78bfa", "#ef4444", "#f97316", "#14b8a6"];
 const SECCIONES: [string, string, string][] = [
@@ -33,7 +40,7 @@ const SECCIONES: [string, string, string][] = [
   ["socios", "👥 Socios", "Fichas, altas y búsqueda."],
   ["retencion", "📉 Retención", "Los que dejaron de venir, para llamarlos antes de perderlos."],
   ["vender", "🛒 Vender", "Cobrar membresías, pases y productos."],
-  ["caja", "💵 Caja", "Abrir y cerrar caja. Sin caja no se cobra en efectivo: Vender ofrece solo transferencia y tarjeta."],
+  ["caja", "💵 Caja", "Abrir y cerrar caja. Sin caja no se cobra en efectivo: Vender ofrece los otros medios de pago."],
   ["transferencias", "🧾 Transferencias", "Aprobar los comprobantes que mandan los socios."],
 ];
 
@@ -50,7 +57,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 /** Qué campos de la configuración guarda cada pestaña. Gimnasio guarda aparte (otra función). */
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
-  cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "alias_transferencia", "cbu", "titular_cuenta"],
+  cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "retencion_dias_ausencia"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
@@ -74,6 +81,10 @@ function problema(c: Config, campos: Campo[]): string | null {
   }
   if (campos.includes("cobra_membresia") && !c.cobra_membresia && !c.cobra_pase && !c.cobra_pack)
     return "Dejá prendida al menos una forma de cobrar (membresía, pase diario o pack de clases).";
+  if (campos.includes("medios_aceptados") && c.medios_aceptados.length === 0) return "Dejá prendido al menos un medio de pago.";
+  const sinCaja = c.secciones_apagadas.includes("caja");
+  if ((campos.includes("medios_aceptados") || campos.includes("secciones_apagadas")) && sinCaja && c.medios_aceptados.every((m) => m === "efectivo"))
+    return "Sin Caja no se cobra en efectivo, y es el único medio prendido: prendé otro medio de pago o dejá Caja prendida.";
   if (campos.includes("alias_transferencia") && c.alias_transferencia?.trim() && !/^[A-Za-z0-9.-]{6,20}$/.test(c.alias_transferencia.trim()))
     return "El alias tiene que tener de 6 a 20 caracteres: letras, números, puntos o guiones, sin espacios.";
   if (campos.includes("cbu") && c.cbu?.trim()) {
@@ -335,8 +346,22 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
               <Interruptor etiqueta="🎟️ Packs de clases" ayuda="Compra una cantidad de clases y las va usando." checked={c.cobra_pack} onChange={(e) => set("cobra_pack", e.target.checked)} />
             </div>
           </Tarjeta>
+          <Tarjeta emoji="💳" titulo="Medios de pago" ayuda="Con qué te pueden pagar. Lo que apagues no se ofrece en Vender ni en la app.">
+            <div className="divide-y divide-[var(--borde)]">
+              {MEDIOS.map(([k, t, ayuda]) => (
+                <Interruptor key={k} etiqueta={t}
+                  ayuda={k === "efectivo" && c.secciones_apagadas.includes("caja") ? "Tenés Caja apagada: sin caja no se cobra en efectivo." : ayuda}
+                  checked={c.medios_aceptados.includes(k)}
+                  onChange={(e) => set("medios_aceptados", e.target.checked ? [...c.medios_aceptados, k] : c.medios_aceptados.filter((x) => x !== k))} />
+              ))}
+              <Interruptor etiqueta="📲 Mercado Pago" ayuda="Cobrar con link o QR de Mercado Pago, que se acredita solo. Todavía no está disponible: lo vas a poder prender cuando conectemos tu cuenta." checked={false} disabled readOnly />
+            </div>
+          </Tarjeta>
           <Tarjeta emoji="🏦" titulo="Transferencias" ayuda="Lo que ve el socio para pagarte por transferencia.">
-            <div className="grid sm:grid-cols-3 gap-3">
+            {!c.medios_aceptados.includes("transferencia")
+              ? <Mensaje tipo="info">Apagaste las transferencias: estos datos no se le muestran a nadie.</Mensaje>
+              : !c.alias_transferencia?.trim() && !c.cbu?.trim() && <Mensaje tipo="aviso">Sin alias ni CBU, la app no le ofrece al socio pagar por transferencia.</Mensaje>}
+            <div className="grid sm:grid-cols-2 gap-3">
               <Campo etiqueta="Alias" ayuda="6 a 20: letras, números, puntos o guiones.">
                 <input className="campo" maxLength={20} autoCapitalize="none" spellCheck={false} value={c.alias_transferencia ?? ""} onChange={(e) => set("alias_transferencia", e.target.value)} />
               </Campo>
@@ -345,6 +370,9 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
               </Campo>
               <Campo etiqueta="Titular" ayuda="A nombre de quién está la cuenta.">
                 <input className="campo" maxLength={80} value={c.titular_cuenta ?? ""} onChange={(e) => set("titular_cuenta", e.target.value)} />
+              </Campo>
+              <Campo etiqueta="Banco o billetera" ayuda="Para que el socio sepa a dónde transfiere. Podés dejarlo vacío.">
+                <input className="campo" maxLength={60} value={c.banco_transferencia ?? ""} onChange={(e) => set("banco_transferencia", e.target.value)} />
               </Campo>
             </div>
           </Tarjeta>

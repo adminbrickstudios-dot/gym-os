@@ -81,6 +81,9 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-1 | Teléfonos: se aceptan como los escribe la gente ("11 1234-5678", "011…", "+54 9…") y se guardan +54… Diez números sin característica de país se toman como celular de Argentina (+549). | Es como los escribe un dueño argentino; el formato de la base no cambia. | `privado.telefono_normalizado`. |
 | 2026-11-04 | CFG-2 | Logo, ícono y fotos los cambia solo el dueño, y se suben por el servidor (la base decide, el servidor sube con la clave de servicio). Se sacaron las políticas que dejaban al dueño y al encargado escribir directo en el bucket `marcas`. | Con escritura directa, un encargado podía pisar el logo con cualquier archivo. Es dar menos acceso, nunca más. | Migración nueva con una política de storage. |
 | 2026-11-04 | CFG-2 | Límites: logo y fotos 2 MB, ícono 512 KB; logo PNG/JPG/SVG/WEBP, ícono PNG/SVG, fotos JPG/PNG/WEBP. El tipo se mira en los bytes del archivo, no en el nombre. Un SVG con scripts, eventos o links se rechaza (no se "limpia"). | Un SVG con código se ejecuta si alguien abre su link. 2 MB alcanza para una foto web. | `privado.reglas_imagen_marca` y `src/lib/imagenes.ts`. |
+| 2026-11-04 | CFG-3 | El recargo o descuento por medio de pago no se hizo como un % aparte en Configuración: el precio por medio ya existe en cada plan (`precios_plan`, el que usa Vender) y su pantalla es PLA-5. Dos lugares para lo mismo darían dos precios distintos para el mismo cobro. | Plata: una sola fuente para el precio. | Si querés un % general (ej. crédito +10% en todo, también productos), es un ítem nuevo que toca `vender`. |
+| 2026-11-04 | CFG-3 | La base hace cumplir los medios: `vender` rechaza un medio no aceptado, `informar_transferencia` rechaza si no se reciben transferencias, y no se puede dejar el efectivo como único medio con Caja apagada. | Si solo lo hiciera la pantalla, un pedido directo cobraría por un medio que el dueño apagó. | `guardar_configuracion` y los envoltorios públicos de `vender` e `informar_transferencia`. |
+| 2026-11-04 | CFG-3 | Mercado Pago aparece en la lista, apagado y sin poder prenderse, con la explicación. | Lo pide el ítem (🔌 apagado hasta conectar), y así el dueño sabe que va a estar. | Se prende con el ítem de Mercado Pago. |
 
 ---
 
@@ -143,7 +146,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
 - [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
 - [x] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel — verificado: e2e:cfg-2 (24 pasos con archivos de verdad: PNG, SVG, JPG, rechazos, orden, página pública, app del socio), db:pruebas 180 con la 0022, npm run e2e completo y verificar en verde
-- [~] CFG-3 · 🟢 · Medios de pago y datos de transferencia
+- [x] CFG-3 · 🟢 · Medios de pago y datos de transferencia — verificado: e2e:cfg-3 (13 pasos: Vender y app del socio con los medios prendidos), db:pruebas 184 con la 0023 (la base rechaza medios no aceptados), npm run e2e completo y verificar en verde
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
 - [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio

@@ -29,7 +29,7 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
       <>
         <Encabezado emoji="🛒" titulo="Vender" bajada="Cuotas, pases, packs y productos. El precio lo pone el sistema." />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/vender" />}
-        <Carrito sedeId={sede.id} turnoId={turno} socioInicial={socio} preciosIniciales={precios} sinCaja={panel.secciones_apagadas.includes("caja")} />
+        <Carrito sedeId={sede.id} turnoId={turno} socioInicial={socio} preciosIniciales={precios} />
       </>
     );
   });

@@ -19,11 +19,12 @@
     "verificar": "npm run lint && npm run typecheck && npm test && npm run db:pruebas && npm run chequeos && node scripts/mapa-pantallas.mjs --verificar && npm run build",
     "e2e:barrido": "node scripts/e2e/barrido.mjs",
     "e2e:admin": "node scripts/e2e/super-admin.mjs",
-    "e2e": "node scripts/e2e/super-admin.mjs && node scripts/e2e/dis-0.mjs && node scripts/e2e/panel-configuracion.mjs && node scripts/e2e/cfg-2.mjs && node scripts/e2e/barrido.mjs",
+    "e2e": "node scripts/e2e/super-admin.mjs && node scripts/e2e/dis-0.mjs && node scripts/e2e/panel-configuracion.mjs && node scripts/e2e/cfg-2.mjs && node scripts/e2e/cfg-3.mjs && node scripts/e2e/barrido.mjs",
     "e2e:dis-0": "node scripts/e2e/dis-0.mjs",
     "mapa": "node scripts/mapa-pantallas.mjs",
     "e2e:configuracion": "node scripts/e2e/panel-configuracion.mjs",
-    "e2e:cfg-2": "node scripts/e2e/cfg-2.mjs"
+    "e2e:cfg-2": "node scripts/e2e/cfg-2.mjs",
+    "e2e:cfg-3": "node scripts/e2e/cfg-3.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

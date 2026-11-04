@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-3 · Medios de pago y datos de transferencia
+
+**QUÉ HICE**
+- Configuración → Cobros: 💳 Medios de pago (efectivo, transferencia, débito, crédito, cada uno con su explicación; Mercado Pago apagado hasta conectar) y en Transferencias el banco o billetera. Si las transferencias están apagadas o falta alias y CBU, la pestaña lo avisa.
+- Migración `20261104002300_medios_de_pago.sql`: `medios_aceptados` (al menos uno) y `banco_transferencia` en `configuracion_gimnasio`; `guardar_configuracion`, `configuracion_panel`, `precios_venta`, `vender`, `informar_transferencia` y `mi_socio` reescritas (misma firma, copiadas de su última versión con el cambio) para que la base haga cumplir los medios. Verificado: `supabase/pruebas/medios-de-pago.test.mjs` (4 pruebas: guardar y validar, Caja apagada con solo efectivo en los dos órdenes, Vender rechaza medios no aceptados y precios_venta ofrece solo los aceptados, app sin transferencias); db:pruebas 184 en verde.
+- Vender ofrece solo los medios que dice la base; con uno solo no ofrece "pagar con dos"; sin ninguno, avisa y no deja cobrar. La app del socio muestra el banco y no ofrece transferir si el gimnasio no las recibe.
+- `scripts/e2e/cfg-3.mjs` (13 pasos). Verificado: `npm run e2e` completo en verde (17 + 14 + 40 + 24 + 13 + 120), capturas revisadas, `npm run verificar` en verde sobre base limpia, `npm run mapa` sin funciones faltantes.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El recargo o descuento por medio que pide el ítem ya existe por plan (`precios_plan` con `medio_pago`), y su pantalla es PLA-5. No hice un segundo sistema de % en Configuración: lo dejé anotado en "Decisiones que tomó el agente". Si querés un recargo general (por ejemplo crédito +10% también en productos), es un ítem nuevo que toca el cobro.
+- Con Caja apagada y el efectivo como único medio, Vender quedaba sin cómo cobrar: ahora la base no deja llegar a esa combinación, guardes primero una cosa o la otra.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0023). Los gimnasios que ya existen quedan con los cuatro medios prendidos (como hasta ahora).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Mercado Pago: necesita la cuenta conectada (ítem 🔌).
+- Precio distinto por medio desde la pantalla: PLA-5.
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0023 contra la base real: probada en la base local con las mismas migraciones (pre-vuelo, aplicada, pruebas). Reescribe seis funciones copiadas de su última versión; si producción tuviera una versión distinta de alguna (no debería: todas salen de este repo), se pisaría.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-2 · Subir logo, favicon y fotos desde el panel
 
 **QUÉ HICE**

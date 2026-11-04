@@ -16,18 +16,18 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCaja = false }: {
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta;
-  /** El gimnasio apagó Caja: el efectivo necesita una caja abierta, así que no se ofrece. */
-  sinCaja?: boolean;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
   const [lineas, setLineas] = useState<Linea[]>([]);
-  const medios = sinCaja ? MEDIOS.filter((m) => m.medio !== "efectivo") : MEDIOS;
-  const [medio, setMedio] = useState<Medio>(medios[0].medio);
+  // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
+  const medios = MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio));
+  const [medio, setMedio] = useState<Medio | null>(medios[0]?.medio ?? null);
   const [mixto, setMixto] = useState(false);
-  const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>([{ medio: medios[0].medio, monto: "" }, { medio: medios[1].medio, monto: "" }]);
+  const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>(
+    medios.slice(0, 2).map((m) => ({ medio: m.medio, monto: "" })));
   const [buscando, setBuscando] = useState(!socioInicial);
   const [texto, setTexto] = useState("");
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
@@ -59,6 +59,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCa
   const quitar = (clave: string) => setLineas((ls) => ls.filter((l) => l.clave !== clave));
 
   const medioPrecio = mixto ? null : medio;
+  const sinMedios = medios.length === 0;
   const total = useMemo(() => totalCarrito(lineas, medioPrecio), [lineas, medioPrecio]);
   const sumaMixto = partes.reduce((s, p) => s + (Number(p.monto) || 0), 0);
   const usaEfectivo = mixto ? partes.some((p) => p.medio === "efectivo" && Number(p.monto) > 0) : medio === "efectivo";
@@ -69,7 +70,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCa
     if (total == null) { setError("Hay algo en el carrito sin precio cargado"); return; }
     const pagos = total === 0 ? [] : mixto
       ? partes.filter((p) => Number(p.monto) > 0).map((p) => ({ medio: p.medio, monto: Number(p.monto) }))
-      : [{ medio, monto: total }];
+      : medio ? [{ medio, monto: total }] : [];
     const items = lineas.map((l) => ({
       tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
       descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" ? l.precio_fijo : undefined,
@@ -235,7 +236,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCa
               {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
             </div>
           )}
-          <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>
+          {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>}
+          {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {mixto && <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>}
         </div>
 
@@ -245,7 +247,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCa
         </div>
         {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-2xl !px-4 !py-3">💵 Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
         {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
-        <button type="button" onClick={confirmar} disabled={ocupado || lineas.length === 0 || total == null || faltaCaja || (mixto && sumaMixto !== total)}
+        <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (mixto && sumaMixto !== total)}
           className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `✅ Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
       </aside>
     </div>
