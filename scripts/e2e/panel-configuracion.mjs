@@ -14,7 +14,7 @@ try {
   await entrar(p, "duena@ejemplo.invalid");
   await p.goto(`${G}/panel/configuracion`);
   const cont = p.locator("fieldset[data-pestana-activa]");
-  const ir = async (clave) => { await p.locator(`button[data-pestana="${clave}"]`).click(); await p.locator(`fieldset[data-pestana-activa="${clave}"]`).waitFor(); };
+  const ir = async (clave) => { await p.locator(`button[data-pestana="${clave}"]`).click(); await p.locator(`fieldset[data-pestana-activa="${clave}"]`).waitFor({ state: "attached" }); };
   const pie = (clave) => p.locator(`[data-pie="${clave}"]`);
   const guardarDe = (clave) => pie(clave).locator('button:has-text("Guardar")');
   const mensajeDe = async (clave) => (await pie(clave).locator(".mensaje").first().innerText({ timeout: 15000 })).replace(/\s+/g, " ").trim();
@@ -30,7 +30,7 @@ try {
   await capturar(p, "cfg1-compu-gimnasio", true);
 
   // ── Pestañas: todas abren, y sin cambios ningún Guardar está activo ──
-  const claves = ["gimnasio", "marca", "pagina", "cobros", "reglas", "clases", "secciones", "direccion"];
+  const claves = ["gimnasio", "marca", "pagina", "cobros", "reglas", "horarios", "clases", "secciones", "direccion"];
   let abren = 0, activos = 0;
   for (const k of claves) {
     await ir(k); abren++;
@@ -216,7 +216,7 @@ try {
   let anchoMax = 0;
   for (const k of claves) {
     await c.locator(`button[data-pestana="${k}"]`).click();
-    await c.locator(`fieldset[data-pestana-activa="${k}"]`).waitFor();
+    await c.locator(`fieldset[data-pestana-activa="${k}"]`).waitFor({ state: "attached" });
     anchoMax = Math.max(anchoMax, await c.evaluate(() => document.documentElement.scrollWidth));
   }
   chequear(anchoMax <= CELU.width, `celular: ninguna pestaña desborda (${anchoMax}px)`, `celular: una pestaña mide ${anchoMax}px`);
@@ -231,7 +231,7 @@ try {
   await c.context().close();
   ok("Configuración recorrida pestaña por pestaña");
 } catch (e) {
-  falla(`se cortó: ${e.message.split("\n")[0]}`);
+  falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 }
 await b.close();
 resultado();

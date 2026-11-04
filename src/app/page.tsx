@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingProximamente } from "@/components/landing/Landing";
-import { traerLanding, urlMarca } from "@/lib/landing";
+import { traerAgenda, traerLanding, urlMarca } from "@/lib/landing";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
 //   plataforma → la página de Gym OS
@@ -14,9 +14,9 @@ const landingDelHost = cache(async () => {
   if (h.get("x-gymos-contexto") !== "gimnasio") return { tipo: "plataforma" as const };
   const host = h.get("x-gimnasio-host");
   if (!host) throw new Error("El middleware marcó un gimnasio pero no pasó el host.");
-  const landing = await traerLanding(host);
+  const [landing, agenda] = await Promise.all([traerLanding(host), traerAgenda(host)]);
   if (!landing) notFound();
-  return { tipo: "gimnasio" as const, landing };
+  return { tipo: "gimnasio" as const, landing, agenda };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Inicio() {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
-    return r.landing.publicada ? <LandingGimnasio landing={r.landing} /> : <LandingProximamente marca={r.landing.marca} />;
+    return r.landing.publicada ? <LandingGimnasio landing={r.landing} agenda={r.agenda} /> : <LandingProximamente marca={r.landing.marca} />;
   }
   return (
     <main className="min-h-dvh flex flex-col justify-center px-4 py-16">

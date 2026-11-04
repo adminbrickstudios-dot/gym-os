@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
+import type { Agenda } from "@/lib/horarios";
 
 // Forma de lo que devuelve public.landing_publica (migración 0008).
 export type Marca = {
@@ -56,6 +57,14 @@ export async function traerLanding(host: string): Promise<Landing | null> {
   const { data, error } = await supabase.rpc("landing_publica", { p_host: host });
   if (error) throw new Error(`No se pudo leer la página del gimnasio: ${error.message}`);
   return (data as Landing | null) ?? null;
+}
+
+/** Horarios, "abierto ahora" y próximos cierres del gimnasio del host (agenda_publica, sin sesión). */
+export async function traerAgenda(host: string): Promise<Agenda | null> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("agenda_publica", { p_host: host });
+  if (error) throw new Error(`No se pudieron leer los horarios del gimnasio: ${error.message}`);
+  return (data as Agenda | null) ?? null;
 }
 
 // urlMarca vive aparte para poder usarla también en el navegador.

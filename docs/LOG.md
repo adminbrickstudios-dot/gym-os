@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-4 · Horarios del gimnasio, feriados y cierres
+
+**QUÉ HICE**
+- Configuración → ⏰ Horarios: cuándo abre cada sede, día por día, con turno partido (hasta 3 franjas), "Lunes a viernes igual que el lunes", cierre a medianoche (00:00), y "Ahora: Abierto · cierra 22:00" calculado por la base. Debajo, 🚫 Días que cierra: desde, hasta (último día cerrado), motivo, devolver los días a los socios, sede; lista de próximos y recientes con cuántas clases canceló; anular pide el motivo.
+- Migración `20261104002400_horarios_y_cierres.sql`: tabla `horarios_apertura` (RLS, FK compuesta a sedes), `privado.agenda` (una sola cuenta de "abierto ahora", próxima apertura salteando cierres, próximos cierres), `agenda_publica(host)` para la página y la app, `horarios_apertura_panel`, `guardar_horarios_apertura`, `cierres_panel`, y `crear_cierre` con errores que se entienden (misma firma). Verificado: `supabase/pruebas/horarios-cierres.test.mjs` (4 pruebas con momentos fijos, nunca `now()`); db:pruebas 188 en verde.
+- Página del gimnasio: la sección Horarios sale de lo cargado ("Lunes a viernes 7:00 a 22:00", "Domingo Cerrado"), con "abierto ahora" en la portada y aviso de los próximos cierres arriba. App del socio: "Hoy: Abierto · cierra 22:00" y los cierres. El demo trae horarios.
+- `src/lib/horarios.ts` (agrupar días y texto de cierres) con pruebas unitarias. `scripts/e2e/cfg-4.mjs` (18 pasos). Verificado: `npm run e2e` completo en verde (17 + 14 + 40 + 24 + 13 + 18 + 120), capturas revisadas, `npm run verificar` en verde sobre base limpia, `npm run mapa` (77 funciones usadas, ninguna faltante).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En la página, el logo se recortaba en un cuadrado (`object-cover`): un logo apaisado quedaba cortado. Ahora se ve entero.
+- Las pruebas que escriben en un campo apenas carga la página a veces escribían antes de que React tomara la pantalla y lo escrito se perdía. La pestaña Horarios marca `data-listo` cuando ya responde y la prueba lo espera. (A una persona no le pasa: no escribe en 50 ms.)
+- En el navegador de prueba los campos de hora se ven en formato AM/PM porque el sistema está en inglés; en una compu o celular en castellano se ven 07:00.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0024).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- El conteo "canceló N clases" cuenta las clases ya creadas de esos días; las que se crean después (se crean solas al abrir cada día) nacen canceladas igual, pero no suman al número.
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0024 contra la base real: probada en la base local con las mismas migraciones.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-3 · Medios de pago y datos de transferencia
 
 **QUÉ HICE**

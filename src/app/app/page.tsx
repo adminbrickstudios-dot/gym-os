@@ -1,8 +1,11 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { colorVar } from "@/components/panel/Estado";
 import { Aviso } from "@/components/panel/Marco";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
+import { traerAgenda } from "@/lib/landing";
+import { textoCierre } from "@/lib/horarios";
 import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
 import { Pagar } from "./Pagar";
@@ -12,7 +15,8 @@ const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranj
 export default async function AppSocio({ searchParams }: { searchParams: Promise<{ socio?: string }> }) {
   const pedido = (await searchParams).socio;
   return intentar(async () => {
-    const { g, yo } = await miSocio(pedido);
+    const host = (await headers()).get("x-gimnasio-host");
+    const [{ g, yo }, agenda] = await Promise.all([miSocio(pedido), host ? traerAgenda(host) : null]);
     if (yo.elegir) {
       return (
         <>
@@ -44,6 +48,20 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           {v.vence_en && v.puede && <p className="texto-suave mt-1">Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}</p>}
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
+
+        {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (
+          <section className="space-y-2" aria-label="Horarios del gimnasio" data-agenda-app>
+            {agenda.sedes.filter((x) => x.texto).map((x) => (
+              <p key={x.sede_id} className="flex items-center gap-2 texto-suave">
+                <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: x.abierto ? "var(--verde)" : "var(--texto-tenue)" }} />
+                {agenda.sedes.length > 1 ? `${x.sede}: ` : "Hoy: "}{x.texto}
+              </p>
+            ))}
+            {agenda.cierres.slice(0, 3).map((c) => (
+              <p key={`${c.desde}-${c.sede ?? ""}`} className="mensaje mensaje-aviso" data-cierre>🚫 Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}</p>
+            ))}
+          </section>
+        )}
 
         {yo.pendiente && (
           <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full">🧾 Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>

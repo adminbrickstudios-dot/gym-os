@@ -102,6 +102,12 @@ try {
     }
   }
 
+  // Horarios de apertura: lunes a viernes de 7 a 23, sábados de 9 a 14 (domingo cerrado).
+  for (let dia = 1; dia <= 6; dia++) {
+    await q(`insert into public.horarios_apertura (gimnasio_id, sede_id, dia, abre, cierra) values ($1,$2,$3,$4,$5)`,
+      [g, sede, dia, dia === 6 ? "09:00" : "07:00", dia === 6 ? "14:00" : "23:00"]);
+  }
+
   // Segundo gimnasio demo, con otra marca: muestra que cada landing es propia.
   const [{ id: g2 }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo-box', 'Box Norte Demo', true) returning id`);
   await q(`update public.configuracion_gimnasio set color_acento = '#a78bfa', color_fondo = '#16121f' where gimnasio_id = $1`, [g2]);

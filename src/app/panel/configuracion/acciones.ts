@@ -87,3 +87,50 @@ export async function ordenarFotos(rutas: string[]): Promise<{ error?: string; d
     return { datos: await rpc("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Horarios y cierres ──────────────────────────────────────────────
+export async function guardarHorarios(sedeId: string, franjas: { dia: number; abre: string; cierra: string }[]): Promise<{ error?: string; agenda?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("guardar_horarios_apertura", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sedeId, p_franjas: franjas });
+    revalidatePath("/", "layout");
+    return { agenda: await rpc("horarios_apertura_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** El día siguiente a una fecha AAAA-MM-DD (la base guarda el cierre como [desde, hasta)). */
+function diaSiguiente(fecha: string): string {
+  const [a, m, d] = fecha.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
+async function listasDeCierres(gimnasioId: string) {
+  const [cierres, agenda] = await Promise.all([
+    rpc("cierres_panel", { p_gimnasio_id: gimnasioId }),
+    rpc("horarios_apertura_panel", { p_gimnasio_id: gimnasioId }),
+  ]);
+  return { cierres, agenda };
+}
+
+export async function crearCierre(c: { desde: string; hasta: string; motivo: string; compensa: boolean; sedeId: string | null }): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+  const panel = await contextoPanel();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(c.desde) || !/^\d{4}-\d{2}-\d{2}$/.test(c.hasta)) return { error: "Elegí las fechas del cierre." };
+  if (c.hasta < c.desde) return { error: "El último día no puede ser antes del primero." };
+  try {
+    await rpc("crear_cierre", {
+      p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_motivo: c.motivo,
+      p_compensa: c.compensa, p_sede_id: c.sedeId,
+    });
+    revalidatePath("/", "layout");
+    return await listasDeCierres(panel.gimnasio.id);
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function anularCierre(cierreId: string, motivo: string): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("anular_cierre", { p_cierre_id: cierreId, p_motivo: motivo });
+    revalidatePath("/", "layout");
+    return await listasDeCierres(panel.gimnasio.id);
+  } catch (e) { return { error: (e as Error).message }; }
+}

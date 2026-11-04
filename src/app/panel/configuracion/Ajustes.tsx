@@ -7,6 +7,8 @@ import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
 import { PESTANAS, type ClavePestana } from "./pestanas";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
+import { HorariosYCierres, type CierrePanel } from "./Horarios";
+import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 
 export type Config = {
@@ -127,8 +129,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccionPagina }: {
-  inicial: Config; datos: DatosGimnasio; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
+export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaInicial, direccionPagina }: {
+  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
 }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
@@ -146,8 +148,10 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
   const setSede = (i: number, k: keyof Sede, v: string) => setD((x) => ({ ...x, sedes: x.sedes.map((s, j) => (j === i ? { ...s, [k]: v } : s)) }));
   const responder = (p: ClavePestana, r: Omit<Respuesta, "n">) => setMsj((m) => ({ ...m, [p]: { ...r, n: (m[p]?.n ?? 0) + 1 } }));
 
+  const [horariosSucio, setHorariosSucio] = useState(false);
   const sucio = (p: ClavePestana): boolean => {
     if (!puedeEditar) return false;
+    if (p === "horarios") return horariosSucio;
     if (p === "gimnasio") return CAMPOS_GIMNASIO.some((k) => !igual(d[k], dGuardado[k])) || !sedesIguales(d.sedes, dGuardado.sedes);
     return (CAMPOS[p] ?? []).some((k) => !igual(c[k], guardado[k]));
   };
@@ -425,6 +429,8 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
           {pie("secciones")}
         </>}
 
+        {pestana === "horarios" && !puedeEditar && <p className="texto-suave">Los horarios los cambia el dueño. Los días que cierra los podés cargar vos.</p>}
+
         {pestana === "direccion" && (
           <Tarjeta emoji="🔗" titulo="Dirección" ayuda="Dónde se abren tu página, tu panel y la app de tus socios.">
             <ul className="divide-y divide-[var(--borde)]">
@@ -444,6 +450,10 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
           </Tarjeta>
         )}
       </fieldset>
+      {/* Fuera del fieldset: los cierres los carga también el encargado (la base lo permite). */}
+      {pestana === "horarios" && (
+        <HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} />
+      )}
     </div>
   );
 }

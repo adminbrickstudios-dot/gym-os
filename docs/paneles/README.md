@@ -8,23 +8,23 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | Ruta | Tipo | Quién la ve | Se apaga con | Funciones de la base | Lleva a |
 |---|---|---|---|---|---|
 | `(middleware)` | cada pedido |  |  | `gimnasio_por_host`, `gimnasio_por_slug` |  |
-| `/` | pantalla |  |  | `landing_publica` | `/ingresar` |
+| `/` | pantalla |  |  | `agenda_publica`, `landing_publica` | `/ingresar` |
 | `/admin` | pantalla |  |  | `admin_agregar_dominio`, `admin_agregar_persona`, `admin_crear_gimnasio`, `admin_gimnasios`, `admin_quitar_dominio`, `cuenta_para_nueva_clave`, `mi_sesion`, `panel_gimnasio`, `persona_para_dar_acceso`, `usuario_por_mail`, `vincular_usuario_equipo` | `/admin/` `/g/` |
 | `/admin/[id]` | pantalla |  |  | `admin_gimnasio`, `panel_gimnasio` | `/admin` `/g/` |
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
-| `/app` | pantalla |  |  | `cancelar_reserva`, `informar_transferencia`, `landing_publica`, `mi_socio`, `panel_gimnasio`, `reservar` | `/app/clases` |
+| `/app` | pantalla |  |  | `agenda_publica`, `cancelar_reserva`, `informar_transferencia`, `landing_publica`, `mi_socio`, `panel_gimnasio`, `reservar` | `/app/clases` |
 | `/app/clases` | pantalla |  |  | `clases_del_dia`, `mi_socio`, `panel_gimnasio` | `/app` |
 | `/elegir` | pantalla |  |  | `mi_sesion`, `panel_gimnasio` | `/admin` `/entrar/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion`, `panel_gimnasio` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
-| `/ingresar` | pantalla |  |  | `landing_publica`, `mi_sesion`, `panel_gimnasio`, `vincular_socios_por_telefono` |  |
-| `/panel` | pantalla |  |  | `buscar_socios`, `guardar_accesos_rapidos`, `landing_publica`, `panel_gimnasio`, `panel_inicio` | `/elegir` |
+| `/ingresar` | pantalla |  |  | `agenda_publica`, `landing_publica`, `mi_sesion`, `panel_gimnasio`, `vincular_socios_por_telefono` |  |
+| `/panel` | pantalla |  |  | `agenda_publica`, `buscar_socios`, `guardar_accesos_rapidos`, `landing_publica`, `panel_gimnasio`, `panel_inicio` | `/elegir` |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_sede`, `cerrar_caja`, `movimiento_caja`, `panel_gimnasio`, `resumen_caja` |  |
 | `/panel/clases` | pantalla |  | clases | `cancelar_clase`, `clases_del_dia`, `panel_gimnasio`, `reservar`, `tomar_asistencia` | `/panel/clases/` `/panel/clases/grilla` |
 | `/panel/clases/[id]` | pantalla |  | clases | `clase_detalle`, `lista_clase`, `panel_gimnasio` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `panel_gimnasio` | `/panel/clases` |
-| `/panel/configuracion` | pantalla | 👑 🧭 |  | `configuracion_panel`, `confirmar_imagen_marca`, `datos_gimnasio_panel`, `guardar_configuracion`, `guardar_datos_gimnasio`, `ordenar_fotos`, `panel_gimnasio`, `preparar_imagen_marca`, `quitar_imagen_marca` |  |
+| `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `cierres_panel`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_horarios_apertura`, `horarios_apertura_panel`, `ordenar_fotos`, `panel_gimnasio`, `preparar_imagen_marca`, `quitar_imagen_marca` |  |
 | `/panel/cuenta` | pantalla |  |  | `panel_gimnasio` |  |
 | `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `estado_acceso`, `ingresos_del_dia`, `panel_gimnasio`, `registrar_ingreso` | `/panel/socios/` `/panel/socios/nuevo` `/panel/vender` |
 | `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `panel_gimnasio`, `usuario_por_mail`, `vincular_usuario_equipo` |  |
@@ -44,7 +44,6 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas a pantalla nueva o a revisar):
 
 - `anular_asistencia`
-- `anular_cierre`
 - `anular_congelamiento`
 - `anular_venta`
 - `asignar_plan`
@@ -52,6 +51,5 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `cambiar_plan`
 - `cobrar_cuota`
 - `congelar`
-- `crear_cierre`
 - `descongelar`
 - `precio_cuota`
