@@ -8,6 +8,7 @@ import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
 import { PESTANAS, type ClavePestana } from "./pestanas";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
 import { HorariosYCierres, type CierrePanel } from "./Horarios";
+import { Mensajes, type MensajePanel } from "./Mensajes";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 
@@ -129,8 +130,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaInicial, direccionPagina }: {
-  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar, pestanaInicial, direccionPagina }: {
+  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
 }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
@@ -149,7 +150,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaI
   const responder = (p: ClavePestana, r: Omit<Respuesta, "n">) => setMsj((m) => ({ ...m, [p]: { ...r, n: (m[p]?.n ?? 0) + 1 } }));
 
   const [horariosSucio, setHorariosSucio] = useState(false);
+  const [mensajesSucio, setMensajesSucio] = useState(false);
   const sucio = (p: ClavePestana): boolean => {
+    if (p === "mensajes") return mensajesSucio;   // los mensajes los edita también el encargado
     if (!puedeEditar) return false;
     if (p === "horarios") return horariosSucio;
     if (p === "gimnasio") return CAMPOS_GIMNASIO.some((k) => !igual(d[k], dGuardado[k])) || !sedesIguales(d.sedes, dGuardado.sedes);
@@ -187,7 +190,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaI
         // La base normaliza teléfonos e Instagram: lo que queda en pantalla es lo guardado.
         const nuevo = r.datos as DatosGimnasio;
         setD(nuevo); setDGuardado(nuevo);
-        responder(p, { ok: "Guardado ✅" });
+        responder(p, { ok: "Guardado" });
       });
       return;
     }
@@ -201,7 +204,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaI
       setEnCurso(null);
       if (r.error) { responder(p, { error: r.error }); return; }
       setGuardado((g) => ({ ...g, ...datosAGuardar }));
-      responder(p, { ok: "Guardado ✅" });
+      responder(p, { ok: "Guardado" });
     });
   };
   const pie = (p: ClavePestana) => puedeEditar && (
@@ -237,7 +240,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaI
 
   return (
     <div className="space-y-5">
-      {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la configuración.</p>}
+      {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la configuración. Los mensajes y los días que cierra los podés cambiar vos.</p>}
       <Pestanas pestanas={pestanas} activa={pestana} alCambiar={cambiarPestana} etiqueta="Partes de la configuración" />
 
       <fieldset disabled={!puedeEditar} className="space-y-4" data-pestana-activa={pestana}>
@@ -454,6 +457,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, puedeEditar, pestanaI
       {pestana === "horarios" && (
         <HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} />
       )}
+      {pestana === "mensajes" && <Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} />}
     </div>
   );
 }

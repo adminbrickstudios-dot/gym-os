@@ -134,3 +134,28 @@ export async function anularCierre(cierreId: string, motivo: string): Promise<{ 
     return await listasDeCierres(panel.gimnasio.id);
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Mensajes ────────────────────────────────────────────────────────
+export async function guardarMensaje(clave: string, texto: string): Promise<{ error?: string; mensajes?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("guardar_mensaje", { p_gimnasio_id: panel.gimnasio.id, p_clave: clave, p_texto: texto });
+    return { mensajes: await rpc("mensajes_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function restaurarMensaje(clave: string): Promise<{ error?: string; mensajes?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("restaurar_mensaje", { p_gimnasio_id: panel.gimnasio.id, p_clave: clave });
+    return { mensajes: await rpc("mensajes_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Cómo queda un texto (sin guardar) con un socio real. */
+export async function vistaPreviaMensaje(clave: string, texto: string): Promise<{ error?: string; vista?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    return { vista: await rpc("vista_previa_mensaje", { p_gimnasio_id: panel.gimnasio.id, p_clave: clave, p_texto: texto }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}

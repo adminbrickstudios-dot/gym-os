@@ -61,7 +61,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
       const nueva = r.agenda as Agenda;
       setAgenda(nueva);
       setSemana(aSemana(nueva.sedes.find((x) => x.sede_id === sede.sede_id)?.franjas ?? []));
-      setMsjH((m) => ({ ok: "Guardado ✅", n: m.n + 1 }));
+      setMsjH((m) => ({ ok: "Guardado", n: m.n + 1 }));
     });
   };
 

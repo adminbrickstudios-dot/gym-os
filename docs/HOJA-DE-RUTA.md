@@ -87,6 +87,9 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-4 | Los horarios los cambia el dueño; los cierres los carga y anula también el encargado (como ya permitía la base desde 0006). Recepción ve los horarios, no los cierres del panel. | Un feriado lo carga quien está en el día a día; el horario es una decisión del dueño. No se dio acceso nuevo. | `guardar_horarios_apertura` / `crear_cierre`. |
 | 2026-11-04 | CFG-4 | Horarios y próximos cierres son públicos (`agenda_publica`, sin sesión, por la dirección del gimnasio, como la página). | Los publica el gimnasio para que la gente sepa cuándo ir; no hay datos de socios ni de plata. | Sacar el grant a anon. |
 | 2026-11-04 | CFG-4 | Un cierre dura hasta 3 meses, no se superpone con otro, y desde la pantalla solo se cargan desde hoy (la base acepta pasados, que devuelven días hacia atrás). | Un cierre cargado tarde devuelve días a todos: es plata; mejor que no sea un clic al pasar. | Quitar el `min` del campo. |
+| 2026-11-04 | CFG-5 | Los mensajes los edita el dueño y también el encargado (las plantillas ya eran de los dos desde 0010). Recepción no los ve. | Es el que más contacta socios; no se dio acceso nuevo. | `guardar_mensaje`. |
+| 2026-11-04 | CFG-5 | Mensajes: los 5 de retención + bienvenida, cumpleaños y comprobante rechazado. "Comprobante" se tomó como el rechazado (el aprobado no necesita mensaje: la app ya muestra que puede entrar). Los tres nuevos dicen en pantalla que todavía no los manda ninguna pantalla. | Quedan listos para la bandeja de avisos (AVI-1) sin prometer algo que hoy no pasa. | Catálogo en `privado.mensajes_catalogo`. |
+| 2026-11-04 | CFG-5 | Una variable que ese mensaje no tiene (ej. {dias} en cumpleaños) es un error al guardar, no un hueco en blanco. | Un mensaje con "{cosa}" o un espacio vacío le llega así al socio. | `privado.validar_mensaje`. |
 
 ---
 
@@ -151,7 +154,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel — verificado: e2e:cfg-2 (24 pasos con archivos de verdad: PNG, SVG, JPG, rechazos, orden, página pública, app del socio), db:pruebas 180 con la 0022, npm run e2e completo y verificar en verde
 - [x] CFG-3 · 🟢 · Medios de pago y datos de transferencia — verificado: e2e:cfg-3 (13 pasos: Vender y app del socio con los medios prendidos), db:pruebas 184 con la 0023 (la base rechaza medios no aceptados), npm run e2e completo y verificar en verde
 - [x] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres — verificado: e2e:cfg-4 (18 pasos: un feriado cancela las 6 clases del día, se ve en la app y la página, anularlo las devuelve), db:pruebas 188 con la 0024, npm run e2e completo y verificar en verde
-- [~] CFG-5 · 🟢 · Mensajes editables con vista previa
+- [x] CFG-5 · 🟢 · Mensajes editables con vista previa — verificado: e2e:cfg-5 (16 pasos: el cambio se ve en los links de Retención y Vencen hoy, volver al original), db:pruebas 193 con la 0025, npm run e2e completo y verificar en verde
 - [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
 - [ ] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención
 - [ ] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras

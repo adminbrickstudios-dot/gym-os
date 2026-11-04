@@ -15,6 +15,33 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-5 · Mensajes editables con vista previa
+
+**QUÉ HICE**
+- Configuración → 💬 Mensajes: los 8 mensajes que el gimnasio les manda a sus socios (vence pronto, venció, no viene, nuevo que no viene, se fue, bienvenida, cumpleaños, comprobante rechazado). Cada uno dice cuándo se usa y en qué pantalla, se edita con chips de variables que se insertan donde está el cursor, muestra cómo lo recibe un socio real mientras escribís (sin guardar), avisa cambios sin guardar y tiene "Volver al original".
+- Migración `20261104002500_mensajes.sql`: `privado.mensajes_catalogo` (un solo lugar con los mensajes, sus variables y su texto original), `privado.armar_mensaje` (reemplaza {variables}), `privado.retencion_con` (el cálculo de retención de 0010, con plantillas opcionales sin guardar para la vista previa; `privado.retencion` queda como envoltorio, misma salida), `mensajes_panel`, `guardar_mensaje`, `restaurar_mensaje`, `vista_previa_mensaje`. Variables nuevas {plan} y {debe}; {monto} sigue andando. Verificado: `supabase/pruebas/mensajes.test.mjs` (5 pruebas: catálogo, un cambio se ve en la retención con fecha fija, validación, vista previa que no guarda, permisos).
+- `scripts/e2e/cfg-5.mjs` (16 pasos): el mensaje cambiado aparece en los 49 links de WhatsApp de Retención y en los 15 de Vencen hoy; "Volver al original" los devuelve; el encargado también edita.
+- Los mensajes de éxito ya no repiten el ✅ (el componente ya lo pone).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El contenedor de la nube se reinició en medio de la verificación (se cortó un comando largo): se perdió la base local, no el código. Volví a levantar todo y verificar desde cero.
+- "Vence pronto" con alguien que vence hoy dice "vence el 04/11" (la fecha de hoy). Se entiende, pero "vence hoy" sería mejor: es la variable {vence} de la retención, que no toqué para no cambiar los textos que ya existen.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0025). Los gimnasios que ya existen reciben los 3 mensajes nuevos con su texto original; los que ya editaron los suyos los conservan.
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Bienvenida, cumpleaños y comprobante rechazado quedan listos pero ninguna pantalla los manda todavía: es la bandeja de avisos (AVI-1).
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0025 contra la base real: probada en la base local con las mismas migraciones. Reescribe el cálculo de retención copiándolo de 0010 con un solo cambio (el armado del mensaje); si producción tuviera otra versión (no debería), se pisaría.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-4 · Horarios del gimnasio, feriados y cierres
 
 **QUÉ HICE**

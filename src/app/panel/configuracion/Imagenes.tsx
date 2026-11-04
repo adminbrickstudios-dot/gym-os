@@ -58,7 +58,7 @@ export function UnaImagen({ tipo, ruta, reglas, puedeEditar, alListo, vista }: {
     if (!f) return;
     const mal = problemaArchivo(f, reglas);
     if (mal) { setError(mal); return; }
-    correr(() => subir(tipo, f), tipo === "logo" ? "Logo listo ✅" : "Ícono listo ✅");
+    correr(() => subir(tipo, f), tipo === "logo" ? "Logo listo" : "Ícono listo");
   };
   return (
     <div className="space-y-3" data-imagen={tipo}>
@@ -97,12 +97,12 @@ export function Fotos({ fotos, reglas, puedeEditar, nombre, alListo }: {
       let ultimo: Resultado = {};
       for (const f of archivos) { ultimo = await subir("foto", f); if (ultimo.error) return ultimo; }
       return ultimo;
-    }, archivos.length === 1 ? "Foto sumada ✅" : `${archivos.length} fotos sumadas ✅`);
+    }, archivos.length === 1 ? "Foto sumada" : `${archivos.length} fotos sumadas`);
   };
   const mover = (i: number, a: number) => {
     const nuevo = [...fotos];
     [nuevo[i], nuevo[a]] = [nuevo[a], nuevo[i]];
-    correr(() => ordenarFotos(nuevo), "Orden guardado ✅");
+    correr(() => ordenarFotos(nuevo), "Orden guardado");
   };
   return (
     <div className="space-y-3" data-fotos={fotos.length}>
