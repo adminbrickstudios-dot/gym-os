@@ -7,7 +7,10 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 (pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
-**Por dónde se avanza: `docs/PLAN.md`.**
+**Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
+Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
+**Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche
+`scripts/noche/noche.sh`): `docs/CLAUDE-CODE.md`.**
 
 ---
 
@@ -146,6 +149,11 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ## Git
 
+- **Nunca se trabaja directo en `main`.** De día, rama `dia/<fecha>`; de noche,
+  `noche/<fecha>`. Mateo aplica las migraciones nuevas desde Actions con esa
+  rama (prevuelo → aplicar) y recién después mergea el PR: así producción nunca
+  tiene código que espera una migración que no está.
+
 - Commit y push al cerrar cada capa, no al final de todo.
 - El mensaje dice qué cambió y por qué. Nunca "fix".
 - **Nunca `vercel --prod` con cambios sin commitear** (el hook lo
@@ -162,6 +170,8 @@ npm run chequeos               # reglas del proyecto contra la base y los archiv
 npm test                       # pruebas unitarias (vitest)
 npm run verificar              # todo lo anterior + lint + typecheck + build
 scripts/local/levantar.sh      # base + supabase-local + app con los demos (sesión real)
+npm run e2e                    # pantallas con sesión real (con levantar.sh corriendo)
+npm run e2e:barrido            # cada rol abre cada pantalla, compu y celular
 ```
 
 **Probar una pantalla = abrirla con sesión real.** `scripts/local/levantar.sh`
