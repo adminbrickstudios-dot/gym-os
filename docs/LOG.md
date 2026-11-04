@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · AUD-0 · Mapa de pantallas, funciones y conexiones
+
+**QUÉ HICE**
+- `scripts/mapa-pantallas.mjs` (`npm run mapa`): arma `docs/paneles/README.md` desde el código. Por cada ruta (y el middleware): quién la ve, qué sección la apaga, qué funciones de la base llama (incluidas las de los componentes compartidos que importa) y a qué pantallas lleva. Contra la base, lista las funciones habilitadas que ninguna pantalla usa.
+- `npm run verificar` corre `mapa --verificar`: falla si una pantalla llama a una función que no existe en la base (un botón que se rompería en producción).
+- Las vueltas regeneran el mapa al terminar (PROMPT, paso 7).
+- Verificado: el mapa contra la base local (31 rutas, 65 funciones usadas, ninguna faltante) y `npm run verificar` en verde con el chequeo nuevo.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- 12 funciones de la base sin pantalla. Las que faltan de verdad pasaron a la COLA: anular una venta (VEN-6, `anular_venta`) y anular un presente (CLA-7, `anular_asistencia`). Pausas (`congelar`…), cierres (`crear_cierre`…) y cambio de plan ya estaban (SOC-9, CFG-4, PLA-6).
+- `cobrar_cuota`, `precio_cuota`, `caja_abierta` y `asignar_plan` son de la primera versión del cobro y siguen habilitadas para el equipo sin pantalla. Toca permisos: no lo cambié al pasar. Queda como SEG-7 (confirmar que Vender las reemplaza y sacarles el acceso, nunca dar más).
+
+**QUÉ CORRÉS VOS**
+- Nada (sin migraciones).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Lo de arriba, en la COLA.
+
+**LO QUE NO PUDE VERIFICAR**
+- Contra la base real de Supabase: el mapa compara contra la base local con las mismas migraciones; si producción no tiene alguna migración aplicada, el chequeo no lo ve.
+
+---
+
 ## 2026-11-04 · DIS-0 · Sistema visual común
 
 **QUÉ HICE**

@@ -16,11 +16,12 @@
     "db:pruebas": "DB_PRUEBAS_URL=$(scripts/db/local.sh url) node --test \"supabase/pruebas/*.test.mjs\"",
     "sembrar:demo": "node scripts/datos/sembrar-demo.mjs",
     "chequeos": "node scripts/chequeos.mjs",
-    "verificar": "npm run lint && npm run typecheck && npm test && npm run db:pruebas && npm run chequeos && npm run build",
+    "verificar": "npm run lint && npm run typecheck && npm test && npm run db:pruebas && npm run chequeos && node scripts/mapa-pantallas.mjs --verificar && npm run build",
     "e2e:barrido": "node scripts/e2e/barrido.mjs",
     "e2e:admin": "node scripts/e2e/super-admin.mjs",
     "e2e": "node scripts/e2e/super-admin.mjs && node scripts/e2e/dis-0.mjs && node scripts/e2e/barrido.mjs",
-    "e2e:dis-0": "node scripts/e2e/dis-0.mjs"
+    "e2e:dis-0": "node scripts/e2e/dis-0.mjs",
+    "mapa": "node scripts/mapa-pantallas.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

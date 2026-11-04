@@ -23,6 +23,7 @@ Las variables PGHOST, PGPORT, PGUSER y DB_PRUEBAS_URL ya están cargadas.
    - El recorrido del ítem con sesión real: escribilo en `scripts/e2e/<id-en-minúscula>.mjs` usando `scripts/e2e/comun.mjs`, y sumalo al script `e2e` de `package.json`. Después corré `npm run e2e`.
    - Capturas de compu y de celular de lo nuevo (`capturar()` de `comun.mjs`, quedan en `.local/capturas/`), y **miralas con Read**: si algo se ve mal o se desborda, arreglalo y volvé a probar.
    - `npm run build`
+   - `npm run mapa` (regenera `docs/paneles/README.md`; si cambió, va en el commit)
 8. Si todo pasa:
    - En la COLA cambiá `[~]` por `[x]` y agregá al final de la línea: ` — verificado: <cómo, en una línea>`.
    - En `docs/producto/paneles/*.md`, pasá a ✅ las filas que quedaron hechas.

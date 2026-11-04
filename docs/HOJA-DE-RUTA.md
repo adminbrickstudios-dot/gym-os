@@ -127,7 +127,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 0 · Base
 - [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
-- [~] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`)
+- [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
 
 ### 1 · Configuración y primeros pasos
 - [ ] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
@@ -189,6 +189,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] VEN-4 · 🟢 · Productos con stock
 - [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
 - [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
+- [ ] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
 - [ ] CAJ-1 · 🟢 · Historial de turnos de caja
 - [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
 - [ ] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
@@ -223,6 +224,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
 - [ ] CLA-5 · 🟢 · Ocupación por horario
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
+- [ ] CLA-7 · 🟢 · Anular un presente marcado por error
 - [ ] DIS-9 · 🟢 · Pulido: Clases
 
 ### 10 · Retención
@@ -275,6 +277,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
 - [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
 - [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización
+- [ ] SEG-7 · 🟢 · Funciones viejas sin pantalla (cobrar_cuota, precio_cuota, caja_abierta, asignar_plan): confirmar que Vender las reemplazó y sacarles el acceso del equipo
 - [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
 
 ### 17 · Segunda pasada (todo de nuevo, con ojos nuevos)
@@ -338,9 +341,14 @@ LISTO SI: e2e de cada uno.
 
 **REV-1 … REV-6 · Segunda pasada.** Cada una es un recorrido e2e largo (`scripts/e2e/rev-<n>.mjs`) que hace lo que dice el título, con capturas mirándolas, y compara contra `docs/producto/` y `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila. Lo chico se arregla en la misma vuelta; lo grande va al bloque 18 con su LISTO SI.
 
+**VEN-6 · Anular una venta.** La base ya lo tiene (`anular_venta`, solo dueño o encargado) y ninguna pantalla lo usa. Botón en la venta (Caja → mis ventas / ficha → pagos) con motivo obligatorio; la venta queda tachada, nunca se borra; la cobertura que generó se anula; aviso al dueño (CAJ-4). La recepción ve "Pedir anulación" (queda pendiente para el encargado).
+**CLA-7 · Anular un presente.** `anular_asistencia` existe y no tiene botón: en la lista de la clase, deshacer el presente con motivo (el profe, dentro del día; encargado y dueño siempre).
+**SEG-7 · Funciones viejas.** `cobrar_cuota`, `precio_cuota`, `caja_abierta` y `asignar_plan` quedaron de la primera versión del cobro y siguen habilitadas para el equipo sin pantalla. Confirmar con pruebas que Vender cubre todo lo que hacían, y en una migración nueva sacarles el `grant` a `authenticated` (menos acceso, nunca más). Si alguna sirve, se usa desde su pantalla en vez de sacarla.
+LISTO SI (los tres): pruebas de base por rol y e2e; `node scripts/mapa-pantallas.mjs` deja de listarlas como "sin pantalla".
+
 ### AUD · Auditoría botón por botón (cada panel)
 
-**AUD-0 · Mapa.** `docs/paneles/README.md`: cada pantalla con su ruta, qué
+**AUD-0 · Mapa.** `docs/paneles/README.md` (lo genera `npm run mapa` desde el código; `verificar` falla si una pantalla llama a una función que no existe): cada pantalla con su ruta, qué
 roles la ven, qué funciones de la base llama, qué sección la apaga, y a qué
 otras pantallas lleva. Es la base de las auditorías.
 
