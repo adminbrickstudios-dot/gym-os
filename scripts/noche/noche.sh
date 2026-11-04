@@ -48,10 +48,17 @@ bien() { echo "✓ $*"; }
 command -v claude >/dev/null && bien "Claude Code $(claude --version 2>/dev/null | head -1)" || mal "Falta Claude Code (docs/CLAUDE-CODE.md, paso 1)"
 claude --help 2>/dev/null | grep -q -- "--permission-prompts" && bien "Claude Code sabe correr sin nadie mirando" || mal "Claude Code viejo: actualizalo (claude update)"
 node -e 'process.exit(+process.versions.node.split(".")[0] >= 22 ? 0 : 1)' 2>/dev/null && bien "Node $(node -v)" || mal "Falta Node 22 o más nuevo"
-command -v gh >/dev/null && gh auth status >/dev/null 2>&1 && bien "GitHub CLI con sesión" || mal "Falta gh o su sesión: gh auth login"
-command -v psql >/dev/null && psql -d postgres -Atc "select 1" >/dev/null 2>&1 && bien "Postgres local (${PGHOST:-localhost}:${PGPORT:-5432})" \
-  || mal "No llego al Postgres local: revisá PGHOST/PGPORT/PGUSER (docs/CLAUDE-CODE.md, paso 3)"
-psql -d postgres -Atc "select 1 from pg_available_extensions where name in ('pg_trgm','unaccent') having count(*) = 2" 2>/dev/null | grep -q 1 \
+# Ningún chequeo se queda esperando: sin límite de tiempo, gh o psql pueden pedir algo en silencio.
+espera() { if command -v timeout >/dev/null; then timeout 20 "$@"; else "$@"; fi; }
+command -v gh >/dev/null && espera gh auth status </dev/null >/dev/null 2>&1 && bien "GitHub CLI con sesión" || mal "Falta gh o su sesión: gh auth login"
+if [[ -z "${PGUSER:-}" ]]; then
+  mal "No están las variables de la base: corré  source ~/.bashrc  (o volvé a correr bash scripts/instalar.sh)"
+elif command -v psql >/dev/null && espera psql -w -d postgres -Atc "select 1" </dev/null >/dev/null 2>&1; then
+  bien "Postgres local (${PGHOST:-localhost}:${PGPORT:-5432})"
+else
+  mal "No llego al Postgres local. En Ubuntu: sudo service postgresql start  y después  source ~/.bashrc"
+fi
+espera psql -w -d postgres -Atc "select 1 from pg_available_extensions where name in ('pg_trgm','unaccent') having count(*) = 2" </dev/null 2>/dev/null | grep -q 1 \
   && bien "Postgres con pg_trgm y unaccent" || mal "Al Postgres le faltan pg_trgm o unaccent"
 [[ -d node_modules ]] || { echo "Instalando dependencias…"; npm install --silent; }
 node -e 'import("playwright").then(({chromium}) => chromium.launch()).then((b) => b.close()).catch(() => process.exit(1))' 2>/dev/null \
