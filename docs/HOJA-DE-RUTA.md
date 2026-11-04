@@ -147,7 +147,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
 - [x] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel — verificado: e2e:cfg-2 (24 pasos con archivos de verdad: PNG, SVG, JPG, rechazos, orden, página pública, app del socio), db:pruebas 180 con la 0022, npm run e2e completo y verificar en verde
 - [x] CFG-3 · 🟢 · Medios de pago y datos de transferencia — verificado: e2e:cfg-3 (13 pasos: Vender y app del socio con los medios prendidos), db:pruebas 184 con la 0023 (la base rechaza medios no aceptados), npm run e2e completo y verificar en verde
-- [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
+- [~] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
 - [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
 - [ ] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención
