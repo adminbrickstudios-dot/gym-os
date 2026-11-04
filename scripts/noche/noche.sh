@@ -57,6 +57,7 @@ psql -d postgres -Atc "select 1 from pg_available_extensions where name in ('pg_
 node -e 'import("playwright").then(({chromium}) => chromium.launch()).then((b) => b.close()).catch(() => process.exit(1))' 2>/dev/null \
   && bien "Navegador de Playwright" || mal "Falta el navegador de Playwright: npx playwright install chromium"
 [[ -z "$(git status --porcelain)" ]] && bien "Repo sin cambios sueltos" || mal "Hay cambios sin commitear: commitealos o guardalos antes de la noche"
+git config user.email >/dev/null && bien "git firma como $(git config user.name)" || mal "git no tiene nombre ni mail: corré bash scripts/instalar.sh"
 git remote get-url origin >/dev/null 2>&1 && bien "Remoto: $(git remote get-url origin)" || mal "El repo no tiene remoto origin"
 if [[ -f .env.local ]] && grep -q "SERVICE_ROLE" .env.local 2>/dev/null; then
   echo "• Aviso: hay un .env.local con claves. La noche no lo necesita (todo corre contra la base local)."

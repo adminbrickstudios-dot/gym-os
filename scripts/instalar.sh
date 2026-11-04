@@ -47,6 +47,18 @@ grep -q "PGUSER=postgres" "$PERFIL" 2>/dev/null || echo "$LINEA_PG" >> "$PERFIL"
 eval "$LINEA_PG"
 psql -d postgres -Atc "select 1" >/dev/null && echo "✓ Postgres responde"
 
+paso "Tu nombre en los commits (sale de tu cuenta de GitHub)"
+if ! git config --global user.email >/dev/null; then
+  if gh auth status >/dev/null 2>&1; then
+    login="$(gh api user -q .login)"; id="$(gh api user -q .id)"; nombre="$(gh api user -q '.name // .login')"
+    git config --global user.name "$nombre"
+    git config --global user.email "${id}+${login}@users.noreply.github.com"
+  else
+    echo "Falta la sesión de GitHub: corré gh auth login y volvé a correr este script."; exit 1
+  fi
+fi
+echo "✓ git firma como $(git config --global user.name) <$(git config --global user.email)>"
+
 paso "Claude Code"
 if ! tiene claude && [[ ! -x "$HOME/.local/bin/claude" ]]; then curl -fsSL https://claude.ai/install.sh | bash; fi
 export PATH="$HOME/.local/bin:$PATH"
