@@ -15,6 +15,38 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · AUD-1 · Auditoría botón por botón: Configuración
+
+**QUÉ HICE**
+- Abrí Configuración como dueña y como encargado, en compu y celular, e hice clic en cada muestra de color, interruptor, modo de clases, campo y Guardar. Inventario completo en `docs/paneles/configuracion.md` (cada elemento: qué hace, si anda, qué le falta, con qué se conecta).
+- Migración `20261104002000_configuracion_validada.sql`: `guardar_configuracion` (misma firma) valida cada campo antes de escribir y dice qué campo y qué poner ("Días de tolerancia: tiene que estar entre 0 y 60"), en vez del error crudo de Postgres. Suma: alias de 6 a 20 caracteres, CBU con 22 números (limpia espacios y guiones, dice cuántos puso), nombre hasta 60 letras, no se pueden apagar las tres formas de cobro, no se puede dejar sin formas de entrada. Verificado: 20 casos nuevos en `supabase/pruebas/paneles.test.mjs` con sesión de dueño; db:pruebas 172 en verde.
+- Configuración: cada bloque marca "• Cambios sin guardar", su Guardar solo se prende con cambios, el resultado aparece en el mismo bloque, el navegador avisa antes de irse con cambios, un número vacío ya no se guarda como 0, y los interruptores son el componente común con una línea que explica cada uno.
+- Vender con Caja apagada no ofrece efectivo (antes pedía abrir una caja en una pantalla apagada).
+- `scripts/e2e/panel-configuracion.mjs` (27 pasos), sumado a `npm run e2e`. Verificado: `npm run e2e` completo en verde (17 + 14 + 27 + 120), capturas revisadas, `npm run verificar` en verde sobre base limpia, `npm run mapa` sin cambios.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Con fondo claro (el crema del demo), los títulos y todo texto sin color propio salían casi blancos sobre crema en todas las pantallas del gimnasio: el texto se heredaba ya calculado del `:root` oscuro. Lo arreglé en `globals.css` (`[data-tono] { color: var(--texto) }`) porque bloqueaba revisar las capturas; afecta a todo el sistema, para bien.
+- El alias del gimnasio demo (`GIMNASIO.DEMO.EJEMPLO`, 21 caracteres) no es un alias válido: pasó a `GYM.DEMO.EJEMPLO` en el seed.
+- `npm run build` pisaba `.next` mientras corría `next dev` y la app local quedaba sin estilos ni scripts; y `levantar.sh parar` dejaba vivo el `next dev`. Ahora dev usa `.next-dev` (`NEXT_DIST_DIR`) y `levantar.sh` libera los puertos.
+- Campos que la base ya guarda y ninguna pantalla muestra (formas de entrada, reingreso el mismo día, tres días de retención): CFG-6. Dependencias entre secciones: CFG-7. Historial de cambios: CFG-8. Contraste de colores: CFG-9. Las cuatro decisiones que tomé están en "Decisiones que tomó el agente".
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (aplica la 0020; si todavía no aplicaste la 0019 de main, va junto).
+- Después, mergeás el PR.
+- Si un gimnasio real tiene un alias de más de 20 caracteres, sigue guardado; solo al tocar Guardar en Transferencias le va a pedir uno válido.
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- CFG-6 a CFG-9, en la COLA con su LISTO SI.
+
+**LO QUE NO PUDE VERIFICAR**
+- `npm run db:types`: necesita el proyecto real de Supabase. La firma de `guardar_configuracion` no cambió y las funciones nuevas son de `privado`, así que los tipos no deberían cambiar, pero no está corrido.
+- La migración 0020 contra la base real: está probada en la base local con las mismas migraciones (pre-vuelo, aplicada, pruebas), no en Supabase.
+
+---
+
 ## 2026-11-04 · AUD-0 · Mapa de pantallas, funciones y conexiones
 
 **QUÉ HICE**

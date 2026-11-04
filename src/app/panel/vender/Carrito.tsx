@@ -16,15 +16,18 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, sinCaja = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta;
+  /** El gimnasio apagó Caja: el efectivo necesita una caja abierta, así que no se ofrece. */
+  sinCaja?: boolean;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
   const [lineas, setLineas] = useState<Linea[]>([]);
-  const [medio, setMedio] = useState<Medio>("efectivo");
+  const medios = sinCaja ? MEDIOS.filter((m) => m.medio !== "efectivo") : MEDIOS;
+  const [medio, setMedio] = useState<Medio>(medios[0].medio);
   const [mixto, setMixto] = useState(false);
-  const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>([{ medio: "efectivo", monto: "" }, { medio: "transferencia", monto: "" }]);
+  const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>([{ medio: medios[0].medio, monto: "" }, { medio: medios[1].medio, monto: "" }]);
   const [buscando, setBuscando] = useState(!socioInicial);
   const [texto, setTexto] = useState("");
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
@@ -214,7 +217,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
           <p className="etiqueta mb-2">¿Cómo paga?</p>
           {!mixto ? (
             <div className="grid grid-cols-2 gap-2">
-              {MEDIOS.map((m) => (
+              {medios.map((m) => (
                 <button key={m.medio} type="button" aria-pressed={medio === m.medio} onClick={() => setMedio(m.medio)}
                   className={`boton !min-h-12 text-[15px] ${medio === m.medio ? "!border-[var(--acento)] !bg-[color-mix(in_oklab,var(--acento),var(--fondo)_82%)]" : ""}`}>{m.texto}</button>
               ))}
@@ -224,7 +227,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
               {partes.map((p, i) => (
                 <div key={i} className="grid grid-cols-[1fr_120px] gap-2">
                   <select className="campo !min-h-12" value={p.medio} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, medio: e.target.value as Medio } : x)))}>
-                    {MEDIOS.map((m) => <option key={m.medio} value={m.medio}>{m.texto}</option>)}
+                    {medios.map((m) => <option key={m.medio} value={m.medio}>{m.texto}</option>)}
                   </select>
                   <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value.replace(",", ".") } : x)))} />
                 </div>

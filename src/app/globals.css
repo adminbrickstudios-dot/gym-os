@@ -51,6 +51,9 @@
   --texto-tenue: color-mix(in oklab, #16181d, var(--fondo) 58%);
   color-scheme: light;
 }
+/* El texto se hereda ya calculado: sin esto, una pantalla de fondo claro dentro
+   de un body oscuro (el :root) deja los títulos casi blancos sobre crema. */
+[data-tono] { color: var(--texto); }
 
 @theme inline {
   --color-fondo: var(--fondo);

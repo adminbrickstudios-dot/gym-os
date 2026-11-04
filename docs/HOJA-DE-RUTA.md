@@ -71,6 +71,10 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 
 | Fecha | Ítem | Qué decidió | Por qué | Cómo se cambia |
 |---|---|---|---|---|
+| 2026-11-04 | AUD-1 | Con Caja apagada, Vender no ofrece efectivo (solo transferencia, débito y crédito). | El efectivo sin caja no queda en ningún arqueo: es plata que nadie controla. Lo prudente es no cobrarlo. | Prender Caja en Configuración. |
+| 2026-11-04 | AUD-1 | No se pueden apagar las tres formas de cobro a la vez. | Sin ninguna, Vender queda vacío y el gimnasio no puede cobrar. | Migración nueva sobre `guardar_configuracion`. |
+| 2026-11-04 | AUD-1 | El alias de transferencia se valida como en los bancos: 6 a 20 caracteres, letras, números, puntos o guiones. | Un alias mal escrito manda al socio a transferirle a otro. | Migración nueva sobre `guardar_configuracion`. |
+| 2026-11-04 | AUD-1 | El nombre del gimnasio tiene hasta 60 letras. | Se muestra en la barra, el saludo y la página; más largo rompe el diseño. | Ídem. |
 
 ---
 
@@ -130,13 +134,17 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
 
 ### 1 · Configuración y primeros pasos
-- [~] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
+- [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
 - [ ] CFG-1 · 🟢 · Configuración en pestañas, todo explicado
 - [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
 - [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
+- [ ] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención
+- [ ] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras
+- [ ] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo)
+- [ ] CFG-9 · 🟢 · Aviso de contraste al elegir colores
 
 ### 2 · Página del gimnasio
 - [ ] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio
@@ -424,6 +432,18 @@ LISTO SI: cargar un feriado cancela las clases de ese día y lo muestra en la ap
 **CFG-5.** Mensajes editables (vence pronto, venció, no viene, cumpleaños, bienvenida, comprobante) con variables `{nombre}` `{plan}` `{vence}` `{debe}` `{gimnasio}`, vista previa con un socio real, y "volver al original". Las plantillas de retención ya existen: unificarlas acá.
 LISTO SI: un cambio de plantilla se ve en Retención, Vencen hoy y la bandeja de avisos.
 
+
+**CFG-6.** (Salió de AUD-1.) La base ya tiene `accesos_activos`, `reingreso_mismo_dia_consume`, `retencion_dias_nuevo`, `retencion_dias_vencido` y `retencion_dias_se_fue`, y `guardar_configuracion` ya los acepta, pero ninguna pantalla los muestra. Sumarlos a Configuración: las formas de entrada con interruptores que explican qué hace falta para cada una (QR en la pared: imprimir el cartel; kiosco: una tablet; tarjeta y molinete: 🔌 hardware), el reingreso con un ejemplo ("Juan entra a las 8 y vuelve a las 19: ¿gasta otra clase?"), y los tres días de retención en Reglas.
+LISTO SI: cada campo se cambia desde la pantalla y se ve el efecto (una forma de entrada apagada no aparece en Entrada ni en la app; reingreso probado con `estado_acceso` en la base; la lista de retención cambia con los días); no se puede dejar sin ninguna forma de entrada (la base ya lo frena desde 0020); e2e en `panel-configuracion.mjs`.
+
+**CFG-7.** (Salió de AUD-1.) Apagar una sección no avisa qué pasa en las otras. Caja ya está resuelto (Vender sin efectivo). Falta pensarlo para el resto, por ejemplo: Socios apagado con Entrada prendida (¿recepción puede buscar socios?), Vender apagado con Transferencias prendida, Entrada apagada con QR del socio prendido, Vencen hoy apagado con los avisos. Al apagar, el interruptor muestra en una línea qué cambia; si apagar algo deja otra pantalla sin salida, se arregla esa pantalla (como Vender sin Caja), no se prohíbe apagar.
+LISTO SI: una tabla de dependencias en `docs/paneles/configuracion.md`; cada combinación probada abriendo las pantallas con la sección apagada (e2e); ninguna pantalla prendida manda a una apagada.
+
+**CFG-8.** (Salió de AUD-1.) Historial de cambios de configuración: quién cambió qué campo, de qué valor a qué valor y cuándo (tabla nueva con RLS, escrita por `guardar_configuracion`, nunca desde el navegador). Lo ve el dueño (y el encargado, solo lectura) al pie de Configuración y el super admin en el detalle del gimnasio. Sirve para "¿quién subió el descuento máximo de recepción?" y para soporte.
+LISTO SI: cada guardado deja una fila por campo cambiado (no por campo enviado); probado en la base con sesión de dueño; recepción no lo lee (error, no lista vacía); e2e que cambia algo y lo ve en el historial.
+
+**CFG-9.** (Salió de AUD-1.) Con "Otro color" se puede elegir un color principal que no se lee sobre el fondo (amarillo sobre crema, gris sobre gris). La vista previa ya lo muestra, pero no avisa. Calcular el contraste con `luminancia()` de `src/lib/marca.ts` y avisar en el bloque ("Este color se ve poco sobre este fondo") sin prohibirlo.
+LISTO SI: prueba unitaria del cálculo; el aviso aparece y desaparece en el e2e al elegir colores malos y buenos.
 ### PAG · Página del gimnasio
 
 **PAG-1.** Editor en el panel de las secciones de la página (ya existen en la base, 0008: portada, planes, horarios, sedes, fotos, etc.): texto, foto, mostrar u ocultar, ordenar. Vista previa en vivo al costado (en celular, botón "ver cómo queda").

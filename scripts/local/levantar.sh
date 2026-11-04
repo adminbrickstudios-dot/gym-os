@@ -21,13 +21,23 @@ PUERTO_SUPABASE="${PUERTO_SUPABASE:-54321}"
 parar() {
   if [[ -f ".local/$1.pid" ]]; then kill "$(cat ".local/$1.pid")" 2>/dev/null || true; rm -f ".local/$1.pid"; fi
 }
+# Matar el pid de npx no alcanza: `next dev` (hijo) sigue vivo con el puerto tomado y
+# la app vieja seguía respondiendo. Se libera el puerto, sea quien sea que lo tenga.
+liberar_puerto() {
+  local pids=""
+  if command -v lsof >/dev/null; then pids="$(lsof -ti "tcp:$1" 2>/dev/null || true)"
+  elif command -v fuser >/dev/null; then pids="$(fuser "$1/tcp" 2>/dev/null || true)"
+  else pids="$(pgrep -f "next dev -p $1" || true) $(pgrep -f "next-server" || true)"; fi
+  [[ -n "${pids// /}" ]] && kill $pids 2>/dev/null || true
+  for _ in $(seq 1 20); do curl -s -o /dev/null "http://localhost:$1/" || return 0; sleep 0.5; done
+}
 esperar() {   # esperar <url> <nombre>
   for _ in $(seq 1 60); do curl -s -o /dev/null "$1" && return 0; sleep 0.5; done
   echo "✗ $2 no respondió en $1 (ver .local/$2.log)"; exit 1
 }
 
 case "${1:-}" in
-  parar) parar supabase; parar app; echo "Apagado."; exit 0 ;;
+  parar) parar supabase; parar app; liberar_puerto "$PUERTO_APP"; liberar_puerto "$PUERTO_SUPABASE"; echo "Apagado."; exit 0 ;;
   nueva) scripts/db/local.sh nueva ;;
 esac
 
@@ -35,6 +45,7 @@ URL="$(scripts/db/local.sh url)"
 eval "$(node scripts/local/supabase-local.mjs claves | sed 's/^/export /')"
 
 parar supabase
+liberar_puerto "$PUERTO_SUPABASE"
 node scripts/local/supabase-local.mjs --url "$URL" --puerto "$PUERTO_SUPABASE" > .local/supabase.log 2>&1 &
 echo $! > .local/supabase.pid
 esperar "http://127.0.0.1:$PUERTO_SUPABASE/" supabase
@@ -45,6 +56,8 @@ fi
 node scripts/datos/usuarios-demo.mjs --url "$URL" --supabase "http://127.0.0.1:$PUERTO_SUPABASE" --servicio "$SUPABASE_SERVICE_ROLE_KEY"
 
 parar app
+liberar_puerto "$PUERTO_APP"
+NEXT_DIST_DIR=.next-dev \
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SUPABASE" \
 NEXT_PUBLIC_DOMINIO_BASE=localhost \
 NEXT_PUBLIC_DOMINIO_PLATAFORMA=localhost \

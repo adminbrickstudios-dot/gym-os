@@ -58,7 +58,7 @@ try {
   const [{ id: g }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo', 'Gimnasio Demo', true) returning id`);
   const [{ id: sede }] = await q("select id from public.sedes where gimnasio_id = $1", [g]);
   await q(`update public.configuracion_gimnasio set cobra_pack = true, accesos_activos = array['recepcion','qr_socio','kiosco'],
-             alias_transferencia = 'GIMNASIO.DEMO.EJEMPLO', titular_cuenta = 'Gimnasio Demo (ficticio)' where gimnasio_id = $1`, [g]);
+             alias_transferencia = 'GYM.DEMO.EJEMPLO', titular_cuenta = 'Gimnasio Demo (ficticio)' where gimnasio_id = $1`, [g]);
   await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio')`, [g, `demo.${dominio}`]);
 
   const { planes, socios: testigos } = await sembrarCasos(db, { gimnasioId: g, sedeId: sede, hoy, telefonoBase: 5490000100000 });
