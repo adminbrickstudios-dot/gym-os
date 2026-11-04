@@ -75,6 +75,10 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | AUD-1 | No se pueden apagar las tres formas de cobro a la vez. | Sin ninguna, Vender queda vacío y el gimnasio no puede cobrar. | Migración nueva sobre `guardar_configuracion`. |
 | 2026-11-04 | AUD-1 | El alias de transferencia se valida como en los bancos: 6 a 20 caracteres, letras, números, puntos o guiones. | Un alias mal escrito manda al socio a transferirle a otro. | Migración nueva sobre `guardar_configuracion`. |
 | 2026-11-04 | AUD-1 | El nombre del gimnasio tiene hasta 60 letras. | Se muestra en la barra, el saludo y la página; más largo rompe el diseño. | Ídem. |
+| 2026-11-04 | CFG-1 | La pestaña Mensajes no se armó todavía: queda para CFG-5, que es el ítem que la hace andar. Equipo es un link a su pantalla. | Una pestaña vacía promete algo que no existe. | Se suma con CFG-5. |
+| 2026-11-04 | CFG-1 | Clases se prende y apaga desde Secciones; la pestaña Clases (con reserva o sin reserva, y sus plazos) solo aparece con clases prendidas. | "Un gimnasio sin clases no ve nada de clases", y el dueño necesita un lugar donde prenderlas. | Mover el interruptor. |
+| 2026-11-04 | CFG-1 | La zona horaria se muestra pero no la cambia el dueño: se la pide a soporte. | Cambiarla corre el principio y fin de cada día (vencimientos, pases ya vendidos). | Una función de super admin. |
+| 2026-11-04 | CFG-1 | Teléfonos: se aceptan como los escribe la gente ("11 1234-5678", "011…", "+54 9…") y se guardan +54… Diez números sin característica de país se toman como celular de Argentina (+549). | Es como los escribe un dueño argentino; el formato de la base no cambia. | `privado.telefono_normalizado`. |
 
 ---
 
@@ -135,7 +139,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 1 · Configuración y primeros pasos
 - [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
-- [~] CFG-1 · 🟢 · Configuración en pestañas, todo explicado
+- [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
 - [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres

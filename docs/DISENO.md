@@ -49,7 +49,7 @@ Siempre con emoji delante cuando es una acción de las de todos los días
 | `Vacio` | `ui/Vacio.tsx` | Lista o pantalla sin nada: emoji, título, qué va a aparecer, `acciones` |
 | `Dato` | `ui/Dato.tsx` | Número grande con etiqueta; con `href` lleva al detalle |
 | `Interruptor` | `ui/Interruptor.tsx` | Prender / apagar algo, con su línea de ayuda |
-| `Pestanas` | `ui/Pestanas.tsx` | Pestañas; con `href` cada una es una ruta |
+| `Pestanas` | `ui/Pestanas.tsx` | Pestañas; con `href` cada una es una ruta (`recargar`: navegación completa, para que una pantalla con cambios sin guardar avise); `marca` pone un • (cambios sin guardar). En el celular se deslizan; en compu bajan de renglón |
 | `PildoraEstado` / `PuntoEstado` | `panel/Estado.tsx` | El semáforo, siempre con su texto |
 | `GrillaAccesos` | `panel/GrillaAccesos.tsx` | Los botones grandes de Inicio, editables |
 | `Buscador` | `panel/Buscador.tsx` | Ctrl+K |

@@ -15,6 +15,36 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-1 · Configuración en pestañas, todo explicado
+
+**QUÉ HICE**
+- Configuración en pestañas: 🏠 Gimnasio · 🎨 Marca · 🌐 Página · 💵 Cobros · 📏 Reglas · 🗓️ Clases (solo con clases prendidas) · 🧩 Secciones · 🔗 Dirección · 👥 Equipo (link). Cada campo con su línea de ayuda; cada pestaña con su Guardar (solo se prende con cambios) y "Guardado ✅". Lo escrito sobrevive al cambiar de pestaña, la pestaña con cambios queda marcada con •, y salir con cambios pregunta antes. `?pestana=cobros` abre directo (para mandar el link o para ONB-1).
+- Migración `20261104002100_datos_gimnasio.sql`: `datos_gimnasio_panel` (dueño y encargado leen) y `guardar_datos_gimnasio` (solo el dueño): nombre, WhatsApp, Instagram, mail de contacto y, de cada sede, nombre, dirección, teléfono y mapa. Todo o nada, con errores que dicen qué dato y cómo escribirlo. Los teléfonos se aceptan como los escribe la gente y se guardan +54…; Instagram acepta "@usuario" o el link. Verificado: `supabase/pruebas/datos-gimnasio.test.mjs` (3 pruebas: guardar y normalizar, cada error, permisos: encargado lee y no guarda, recepción y otro gimnasio reciben error, nadie toca la sede de otro gimnasio). db:pruebas 175 en verde.
+- Página: si está publicada, el link (bien armado desde la plataforma o desde la dirección del gimnasio), Ver mi página, Copiar link y Mandar por WhatsApp. Dirección: las direcciones del gimnasio y si el dominio propio ya funciona.
+- `Pestanas`: pestaña con navegación completa (`recargar`) y marca de cambios sin guardar; en compu bajan de renglón en vez de cortarse.
+- `scripts/e2e/panel-configuracion.mjs` reescrito para las pestañas (40 pasos). Verificado: `npm run e2e` completo en verde (17 + 14 + 40 + 120), capturas de compu y celular revisadas, `npm run verificar` en verde sobre base limpia, `npm run mapa` (67 funciones usadas, ninguna faltante).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `levantar.sh` no liberaba el puerto en este contenedor (lsof no ve los procesos; fuser sí): quedaba vivo un `next dev` viejo y el login de los e2e se colgaba. Ahora junta lo que encuentran las dos herramientas, fuerza si hace falta y, si el puerto sigue ocupado, lo dice y corta en vez de seguir.
+- Las sedes no se pueden sumar ni cerrar desde el panel (solo editar las que existen, desde esta vuelta). Para un gimnasio con varias sedes hace falta. No lo agregué a la COLA porque no salió de una auditoría: queda acá para que lo sumes.
+- `next dev` agregó `.next-dev/types` a `tsconfig.json` (por el cambio de carpeta de la vuelta anterior). Es inofensivo y va en el commit.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (aplica la 0020 y la 0021).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Pestaña Mensajes: llega con CFG-5. Logo y fotos en Marca: CFG-2. Formas de entrada: CFG-6. Sumar o cerrar sedes: ver arriba.
+
+**LO QUE NO PUDE VERIFICAR**
+- `npm run db:types`: necesita el proyecto real de Supabase. Las dos funciones nuevas se llaman con `rpc()` tipado a mano en la pantalla, así que el build no depende de esos tipos, pero no está corrido.
+- "Copiar link": en el navegador de prueba el portapapeles no tiene permiso, así que el botón está, pero copiar no está probado. "Mandar por WhatsApp" está probado hasta el link armado, no abriendo WhatsApp.
+- La migración 0021 contra la base real: probada en la base local con las mismas migraciones.
+
+---
+
 ## 2026-11-04 · AUD-1 · Auditoría botón por botón: Configuración
 
 **QUÉ HICE**

@@ -24,12 +24,16 @@ parar() {
 # Matar el pid de npx no alcanza: `next dev` (hijo) sigue vivo con el puerto tomado y
 # la app vieja seguía respondiendo. Se libera el puerto, sea quien sea que lo tenga.
 liberar_puerto() {
-  local pids=""
-  if command -v lsof >/dev/null; then pids="$(lsof -ti "tcp:$1" 2>/dev/null || true)"
-  elif command -v fuser >/dev/null; then pids="$(fuser "$1/tcp" 2>/dev/null || true)"
-  else pids="$(pgrep -f "next dev -p $1" || true) $(pgrep -f "next-server" || true)"; fi
+  # Junta lo que encuentre cada herramienta: en algunos contenedores lsof no ve los procesos y fuser sí.
+  local pids
+  pids="$(lsof -ti "tcp:$1" 2>/dev/null || true) $(fuser "$1/tcp" 2>/dev/null || true)"
+  [[ "$1" == "$PUERTO_APP" ]] && pids="$pids $(pgrep -f "next dev -p $1" || true)"
+  pids="$(echo $pids | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -u | tr '\n' ' ' || true)"
   [[ -n "${pids// /}" ]] && kill $pids 2>/dev/null || true
   for _ in $(seq 1 20); do curl -s -o /dev/null "http://localhost:$1/" || return 0; sleep 0.5; done
+  [[ -n "${pids// /}" ]] && kill -9 $pids 2>/dev/null || true
+  sleep 1
+  if curl -s -o /dev/null "http://localhost:$1/"; then echo "✗ El puerto $1 sigue ocupado por otro proceso: cerralo y volvé a correr esto."; exit 1; fi
 }
 esperar() {   # esperar <url> <nombre>
   for _ in $(seq 1 60); do curl -s -o /dev/null "$1" && return 0; sleep 0.5; done

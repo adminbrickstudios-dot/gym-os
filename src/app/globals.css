@@ -239,6 +239,8 @@ body {
   /* Pestañas: en el celular se deslizan de costado. */
   .pestanas { display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.25rem; }
   .pestanas::-webkit-scrollbar { display: none; }
+  /* En compu entran todas: se acomodan en dos renglones en vez de cortarse. En el celular se deslizan. */
+  @media (min-width: 640px) { .pestanas { flex-wrap: wrap; overflow-x: visible; } }
   .pestana {
     flex: none; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.4rem;
     font-weight: 650; color: var(--texto-suave); background: transparent; border: 1px solid var(--borde); cursor: pointer;
