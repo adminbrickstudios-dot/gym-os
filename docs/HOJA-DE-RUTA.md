@@ -1,6 +1,7 @@
 # Gym OS — Hoja de ruta, panel por panel
 
-Este archivo manda sobre qué se hace y en qué orden. Lo leen Mateo, las
+Este archivo manda sobre **en qué orden** se hace. **Qué** se hace (cada panel,
+cada botón, cada regla) está en `docs/producto/`: leerlo antes de tocar algo. Lo leen Mateo, las
 sesiones de Claude Code de día y el loop de la noche (`scripts/noche/noche.sh`).
 `docs/PLAN.md` queda como historia de lo ya construido.
 
@@ -142,6 +143,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
 - [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
 - [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
+- [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
 - [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
 
 ### 3 · Socios
@@ -165,6 +167,9 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
 - [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
 - [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
+- [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
+- [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
+- [ ] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
 - [ ] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
@@ -186,6 +191,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
 - [ ] CAJ-1 · 🟢 · Historial de turnos de caja
 - [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
+- [ ] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
+- [ ] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
 - [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
 - [ ] DIS-4 · 🟢 · Pulido: Vender
 - [ ] DIS-5 · 🟢 · Pulido: Caja
@@ -195,12 +202,18 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy
 - [ ] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito)
 - [ ] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy
+- [ ] AVI-5 · 🟢 · Campana de avisos en la app del socio y en el panel
+- [ ] AVI-6 · 🟢 · Resumen diario y semanal del dueño en la app
+- [ ] PUSH-1 · 🟢 · Notificaciones push (web push con claves propias, sin costo)
 - [ ] DIS-7 · 🟢 · Pulido: Vencen hoy
 
 ### 8 · Resultado (la plata)
 - [ ] RES-1 · 🟢 · Resultado: la plata del mes, clara
 - [ ] RES-2 · 🟢 · Exportar para el contador
 - [ ] RES-3 · 🟢 · Gastos y ganancia
+
+### 8b · Pagos online
+- [ ] PAY-1 · 🟢 · Pagos online listos para MercadoPago: proveedor por gimnasio, "Pagar ahora" en la app y en el alta, webhook firmado e idempotente, probado con eventos simulados firmados (`docs/producto/05-ALTA-Y-PAGOS.md`)
 
 ### 9 · Clases
 - [ ] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades)
@@ -224,6 +237,10 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio)
 - [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
 - [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
+- [ ] APP-7 · 🟢 · Racha y entradas del mes
+- [ ] APP-8 · 🟢 · Pedir pausa o baja desde la app
+- [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)
+- [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)
 - [ ] DIS-12 · 🟢 · Pulido: App del socio
 
 ### 12 · Equipo y cuentas
@@ -246,6 +263,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio
 - [ ] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear
 - [ ] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin
+- [ ] ADM-5 · 🟢 · Demo para vender: link "Probá Gym OS" y reiniciar el demo
+- [ ] ADM-6 · 🟢 · Novedades de Gym OS para todos los dueños
 - [ ] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio
 - [ ] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK
 - [ ] DIS-15 · 🟢 · Pulido: Super admin
@@ -255,7 +274,21 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] SEG-1 · 🟢 · Límite de pedidos de código por celular
 - [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
 - [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
+- [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización
 - [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
+
+### 17 · Segunda pasada (todo de nuevo, con ojos nuevos)
+Cada una vuelve a abrir todo el panel con su rol, lo compara con `docs/producto/`
+y con `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila, y suma lo que falte al
+bloque 18.
+- [ ] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja)
+- [ ] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular)
+- [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
+- [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
+- [ ] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando
+- [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
+
+### 18 · Lo que encontró la segunda pasada
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
@@ -271,6 +304,40 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ## Detalle por panel
 
+### Ítems que salieron de la especificación (`docs/producto/`)
+
+**REG-1 · Hacete socio online.** Flujo de `05-ALTA-Y-PAGOS.md` pasos 1 a 7: plan con precio por medio, datos, reglamento (texto en Configuración, se guarda versión y fecha), forma de pago (MercadoPago si está conectado → PAY-1; transferencia con comprobante; en el mostrador → pendiente), cuenta creada, aviso al gimnasio. DNI repetido no duplica. Interruptor para apagar altas online.
+LISTO SI: e2e de un visitante que se hace socio por cada forma de pago, y la recepción lo ve como corresponde en Entrada.
+
+**ENT-6 · Kiosco con QR en pantalla (A4).** Tablet autorizada (token revocable) muestra un QR que cambia cada 30 s; el socio lo escanea desde su app (cámara del celular) → la tablet muestra su veredicto con nombre y foto. Mismo cálculo y registro que todas las entradas.
+**ENT-7 · Llavero o tarjeta (A5).** Número de llavero por socio (único por gimnasio); el lector USB escribe en el buscador de Entrada o del kiosco y entra directo. Asignar y anular llavero desde la ficha.
+**INV-1 · Invitados.** Pase de invitado desde Entrada o desde la app del socio: nombre y DNI del invitado, socio que invita, límite por socio y por mes (configurable), nunca anónimo; el invitado sale en el resumen del dueño.
+LISTO SI (los tres): pruebas de base (QR vencido, repetido, de otro gimnasio; llavero anulado; tope de invitados) y e2e.
+
+**CAJ-4 · Alertas de caja.** Diferencia al cerrar fuera del margen, retiro (con foto opcional del ticket en Storage privado), anulación y descuento mayor a lo configurado → aviso al dueño (en la app con AVI-5; push con PUSH-1).
+**CAJ-5 · Caja olvidada.** A la hora de cierre del gimnasio, si hay caja abierta → aviso a quien la abrió y al dueño; no se abre otra caja de esa persona sin cerrar la vieja (se calcula al intentar abrir, no con un cron).
+LISTO SI: pruebas de base y e2e de cierre con diferencia y de caja olvidada.
+
+**AVI-5 · Campana de avisos.** Avisos en la app del socio y en el panel (por rol), leídos/no leídos, con el link a lo que hay que hacer.
+**AVI-6 · Resumen del dueño.** Diario y semanal, calculado al abrirlo (lo de `06-CAJA-Y-CONTROL.md` punto 11), en Inicio y como aviso.
+**PUSH-1 · Notificaciones push.** Web push con claves VAPID (variables de entorno, nunca en el código), suscripción por dispositivo, el usuario elige qué recibir; en iPhone, instrucciones para agregar a inicio. Probado con el envío real a un navegador de Playwright.
+LISTO SI (los tres): e2e de un aviso que llega a la campana y a la notificación.
+
+**PAY-1 · Pagos online.** Tabla de proveedores de pago por gimnasio (credenciales en Supabase Vault, nunca en texto plano), creación de preferencia de pago, webhook firmado e idempotente por ID externo (`eventos_webhook`), acreditación como cobertura, "Confirmando tu pago…" con actualización sola. Probado con eventos simulados firmados con un secreto de prueba; la conexión real a MercadoPago (MP-1) es 🔌.
+LISTO SI: webhook con firma válida acredita una vez; repetido no acredita dos veces; firma inválida se rechaza; e2e del socio que paga y vuelve.
+
+**APP-7 · Racha.** Entradas del mes y semanas seguidas, en el inicio de la app.
+**APP-8 · Pedir pausa o baja.** Formulario con motivo → aviso al encargado y al dueño → lo resuelven desde la ficha.
+**APP-9 · Entrar con mail.** Código por mail (además del celular) y opción de crear contraseña; vincula por mail igual que por teléfono.
+**REF-1 · Invitá a un amigo.** Link personal → el amigo deja sus datos → prospecto con origen "referido de X" y pase de prueba; si se hace socio, el premio que configure el dueño (días gratis o nada).
+LISTO SI: e2e de cada uno.
+
+**ADM-5 · Demo para vender.** Link público "Probá Gym OS" que entra al gimnasio demo con un usuario de solo lectura; botón para reiniciar el demo (vuelve a sembrar).
+**ADM-6 · Novedades para dueños.** BRIK escribe una novedad y aparece en el Inicio de todos los dueños hasta que la cierran.
+**SEG-6 · Datos personales.** El socio descarga sus datos desde su perfil; la baja definitiva anonimiza (nombre, DNI, contacto) y deja los pagos para la contabilidad.
+
+**REV-1 … REV-6 · Segunda pasada.** Cada una es un recorrido e2e largo (`scripts/e2e/rev-<n>.mjs`) que hace lo que dice el título, con capturas mirándolas, y compara contra `docs/producto/` y `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila. Lo chico se arregla en la misma vuelta; lo grande va al bloque 18 con su LISTO SI.
+
 ### AUD · Auditoría botón por botón (cada panel)
 
 **AUD-0 · Mapa.** `docs/paneles/README.md`: cada pantalla con su ruta, qué
@@ -282,24 +349,27 @@ cada tipo de gimnasio (tabla de arriba) y cada rol que usa ese panel.
 
 1. **Abrirlo de verdad.** Con cada rol que lo ve, en compu y celular, con datos
    y vacío (un gimnasio recién creado). Capturas en `.local/capturas/aud-<n>-*`.
-2. **Inventario botón por botón** en `docs/paneles/<panel>.md`: una fila por
+2. **Comparar con la especificación**: `docs/producto/paneles/<rol>.md` y las
+   filas de `docs/producto/10-DIA-A-DIA-Y-CASOS-RAROS.md` que tocan ese panel.
+   Cada fila tiene que estar hecha o en la COLA.
+3. **Inventario botón por botón** en `docs/paneles/<panel>.md`: una fila por
    cada botón, link, campo, filtro y acción, con: qué hace hoy · si anda
    (probado haciendo clic, no leyendo) · qué le falta para servir de verdad ·
    con qué otras pantallas y funciones se conecta · si es configurable por
    gimnasio y si debería serlo.
-3. **Pensar lo que falta**, en cadena: "para hacer X el dueño necesita Y, y
+4. **Pensar lo que falta**, en cadena: "para hacer X el dueño necesita Y, y
    sin Y no anda Z". Qué botón falta, cuál sobra, cuál confunde, cuál debería
    estar al lado de cuál, qué atajo ahorra trabajo, qué debería poder
    personalizar cada gimnasio (textos, colores, orden, qué se muestra), qué
    necesita cada rol (por ejemplo: cambiar su contraseña, ver solo lo suyo).
-4. **Arreglar ya** lo roto que sea chico (un botón que no hace nada, un texto
+5. **Arreglar ya** lo roto que sea chico (un botón que no hace nada, un texto
    que confunde, un desborde, un error sin salida), con su prueba.
-5. **Lo grande va a la COLA**: ítems nuevos al final del bloque de ese panel
+6. **Lo grande va a la COLA**: ítems nuevos al final del bloque de ese panel
    (`- [ ] <SIGLA>-<n> · 🟢 · título`), con su detalle y su LISTO SI en
    "Detalle por panel". Si un ítem nuevo pide una decisión de permisos o
    plata, el agente la toma (la más prudente) y la anota en "Decisiones que
    tomó el agente".
-6. **Un recorrido e2e que hace clic en cada botón** del panel
+7. **Un recorrido e2e que hace clic en cada botón** del panel
    (`scripts/e2e/panel-<panel>.mjs`), sumado a `npm run e2e`.
 
 LISTO SI: el inventario está completo (ningún botón sin probar), lo chico
