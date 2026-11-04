@@ -121,7 +121,7 @@ while (( hechas < VUELTAS )); do
   claude -p "$PROMPT" \
     --permission-mode acceptEdits --permission-prompts none \
     --settings .local/noche/permisos.json \
-    --output-format json > "$base.json" 2> "$base.err"
+    --output-format json < /dev/null > "$base.json" 2> "$base.err"
   salida=$?
   set -e
   final="$(node -e '
