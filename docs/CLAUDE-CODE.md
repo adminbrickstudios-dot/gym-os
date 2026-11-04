@@ -11,6 +11,41 @@ Producción se toca solo desde GitHub Actions y Vercel, como hasta ahora.
 
 ---
 
+## Rápido: copiar y pegar
+
+**Mac** (Terminal), de a una línea:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
+brew install gh && gh auth login
+gh repo clone adminbrickstudios-dot/gym-os ~/gym-os && cd ~/gym-os && bash scripts/instalar.sh
+source ~/.zshrc && claude
+```
+
+**Windows**: PowerShell como administrador → `wsl --install` → reiniciar →
+abrir **Ubuntu** y ahí:
+
+```bash
+sudo apt update && sudo apt install -y gh git && gh auth login
+gh repo clone adminbrickstudios-dot/gym-os ~/gym-os && cd ~/gym-os && bash scripts/instalar.sh
+source ~/.bashrc && claude
+```
+
+`gh auth login`: GitHub.com → HTTPS → Login with a web browser.
+`claude`: iniciá sesión con tu cuenta y salí con `/exit`.
+
+**Largar la noche** (con la compu enchufada):
+
+```bash
+cd ~/gym-os && git pull && scripts/noche/noche.sh --prueba
+caffeinate -i scripts/noche/noche.sh        # en Windows/Ubuntu: scripts/noche/noche.sh
+```
+
+Lo que sigue es lo mismo explicado paso por paso.
+
+---
+
 ## Paso 1 · Instalar las herramientas (una sola vez, ~15 min)
 
 ### Mac

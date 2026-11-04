@@ -4,7 +4,7 @@
 # cada uno en una vuelta nueva (contexto limpio), en la rama noche/<fecha>.
 # Nunca toca main ni producción. A la mañana queda un PR para revisar.
 #
-#   scripts/noche/noche.sh               hasta 12 vueltas o hasta que no quede nada
+#   scripts/noche/noche.sh               hasta que no quede nada (máximo 60 vueltas)
 #   scripts/noche/noche.sh --vueltas 4
 #   scripts/noche/noche.sh --prueba      solo chequea que esté todo listo
 #
@@ -23,7 +23,7 @@ if [[ -z "${NOCHE_COPIA:-}" ]]; then
 fi
 cd "$(dirname "$0")/../.."
 
-VUELTAS=12
+VUELTAS=60
 PRUEBA=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -79,6 +79,8 @@ fi
 dice "Rama $RAMA lista. Hasta $VUELTAS vueltas."
 
 # ── 3. Permisos de la noche (se suman a .claude/settings.json; lo prohibido gana) ──
+# Las migraciones que ya están en main no se tocan: se bloquean una por una.
+CONGELADAS="$(ls supabase/migrations/*.sql | sed 's|^|"Edit(./|; s|$|)"|' | paste -sd, -)"
 cat > .local/noche/permisos.json <<JSON
 {
   "permissions": {
@@ -97,8 +99,7 @@ cat > .local/noche/permisos.json <<JSON
       "Bash(git switch main*)", "Bash(git checkout main*)", "Bash(git merge *)", "Bash(git rebase *)", "Bash(git reset *)",
       "Bash(vercel *)", "Bash(npx vercel *)", "Bash(gh *)", "Bash(supabase *)", "Bash(npx supabase *)", "Bash(npm run db:types*)",
       "Read(./.env)", "Read(./.env.*)", "Edit(./.env*)", "Edit(./.claude/**)", "Edit(./scripts/noche/**)",
-      "Edit(./supabase/migrations/20261029*)", "Edit(./supabase/migrations/20261030*)",
-      "Edit(./supabase/migrations/20261102*)", "Edit(./supabase/migrations/20261103*)"
+      $CONGELADAS
     ]
   }
 }

@@ -35,30 +35,41 @@ sesiones de Claude Code de día y el loop de la noche (`scripts/noche/noche.sh`)
 
 ---
 
-## Decisiones (Mateo marca ✅ o escribe otra cosa)
+## Decisiones
 
-Lo que toca **permisos o plata** necesita tu OK. Abajo va lo que recomiendo; si
-estás de acuerdo poné ✅ en la columna, si no, escribí cómo lo querés.
-Sin ✅ el loop saltea esos ítems.
+Lo que toca **permisos o plata** necesita el OK de Mateo. **El 03/11/2026 Mateo
+autorizó todo**: van todas con ✅ y se hacen como dice la recomendación. Si
+quiere cambiar una, borra el ✅ y escribe cómo la quiere (el loop la saltea
+mientras no tenga ✅).
 
 | # | Decisión | Lo que recomiendo | Mateo |
 |---|---|---|---|
-| D1 | ¿A quién puede dejar pasar la recepción? (hoy: a cualquiera, con motivo, incluso suspendidos) | Recepción deja pasar con motivo a vencidos o sin clases, con un tope por día que pone el dueño (por defecto 5). A suspendidos y dados de baja, solo encargado o dueño. Cada "dejar pasar" aparece en el resumen del dueño. | |
-| D2 | ¿La recepción anota contactos de retención? (hoy no puede) | Sí: es la que habla con el socio. Ve la lista de retención sin la plata en riesgo. | |
-| D3 | ¿El profe busca socios? (hoy no puede) | Sí, solo nombre, foto y semáforo. Sin plata ni teléfono. | |
-| D4 | ¿Permisos configurables? | Roles fijos y además interruptores por gimnasio: la recepción ve lo cobrado del día · la recepción hace descuentos (con tope) · la recepción vende productos · el profe ve el teléfono del socio · el encargado ve el Resultado. Nada de permisos sueltos persona por persona. | |
-| D5 | ¿Se puede fiar (deuda / cuenta corriente)? | Apagado por defecto. Si el gimnasio lo prende: tope en $ por socio, la puerta muestra amarillo "debe $X" y la deuda se cobra en Vender. | |
-| D6 | Cambio de plan a mitad de mes | Sin plata automática: el plan nuevo arranca hoy y lo que quedaba del viejo se convierte en días a favor. Si el dueño quiere cobrar la diferencia, lo hace en Vender. | |
-| D7 | Pausas (congelar) | Las da el dueño o el encargado (la recepción las pide). Motivos: viaje, trabajo, estudio u otro (nunca "lesión": no se guardan datos de salud). Máximo de días por año configurable (por defecto 30). | |
-| D8 | Recargo por pagar tarde | Configurable y apagado por defecto: % o monto fijo después de N días vencido, siempre visible antes de cobrar. | |
-| D9 | Apto físico | Guardar solo "presentó apto: sí/no, vence el …". Sin archivo ni contenido médico. ¿Lo querés o lo dejamos afuera? | |
-| D10 | Socios menores de edad | Se cargan con un adulto responsable (nombre y celular). El menor no entra a la app; entra el responsable. | |
-| D11 | Gimnasio que no le paga a BRIK | Aviso 7 días antes. Después, el panel queda en solo lectura (no vende ni edita), pero la puerta y la página siguen andando: ningún socio queda afuera por una deuda del gimnasio con BRIK. | |
-| D12 | Avisos automáticos: ¿por dónde? | Primero una "bandeja de avisos" con el WhatsApp ya escrito (gratis, se manda a mano en 2 toques). Después, mail automático (🔌 Resend, gratis hasta 3.000 por mes). WhatsApp automático oficial al final (cobra por mensaje). | |
-| D13 | Precio de Gym OS para los gimnasios | Lo definís vos (no lo invento). | |
-| D14 | Convenios y descuentos automáticos | Un convenio (estudiante, empresa X, familiar) tiene un % o un monto; se asigna al socio y Vender lo aplica solo, mostrado como una línea aparte. Tiene vencimiento opcional. | |
-| D15 | PIN de 4 dígitos para el equipo en la PC de recepción | Sí: la PC queda con la sesión del gimnasio y cada uno pone su PIN para que quede registrado quién cobró. El PIN no reemplaza la contraseña para entrar desde otra compu. | |
-| D16 | Faltar a una clase reservada | Configurable: nada (por defecto), o descontar la clase del pack, o no dejar reservar por N días. Siempre avisado en la app al reservar. | |
+| D1 | ¿A quién puede dejar pasar la recepción? (hoy: a cualquiera, con motivo, incluso suspendidos) | Recepción deja pasar con motivo a vencidos o sin clases, con un tope por día que pone el dueño (por defecto 5). A suspendidos y dados de baja, solo encargado o dueño. Cada "dejar pasar" aparece en el resumen del dueño. | ✅ |
+| D2 | ¿La recepción anota contactos de retención? (hoy no puede) | Sí: es la que habla con el socio. Ve la lista de retención sin la plata en riesgo. | ✅ |
+| D3 | ¿El profe busca socios? (hoy no puede) | Sí, solo nombre, foto y semáforo. Sin plata ni teléfono. | ✅ |
+| D4 | ¿Permisos configurables? | Roles fijos y además interruptores por gimnasio: la recepción ve lo cobrado del día · la recepción hace descuentos (con tope) · la recepción vende productos · el profe ve el teléfono del socio · el encargado ve el Resultado. Nada de permisos sueltos persona por persona. | ✅ |
+| D5 | ¿Se puede fiar (deuda / cuenta corriente)? | Apagado por defecto. Si el gimnasio lo prende: tope en $ por socio, la puerta muestra amarillo "debe $X" y la deuda se cobra en Vender. | ✅ |
+| D6 | Cambio de plan a mitad de mes | Sin plata automática: el plan nuevo arranca hoy y lo que quedaba del viejo se convierte en días a favor. Si el dueño quiere cobrar la diferencia, lo hace en Vender. | ✅ |
+| D7 | Pausas (congelar) | Las da el dueño o el encargado (la recepción las pide). Motivos: viaje, trabajo, estudio u otro (nunca "lesión": no se guardan datos de salud). Máximo de días por año configurable (por defecto 30). | ✅ |
+| D8 | Recargo por pagar tarde | Configurable y apagado por defecto: % o monto fijo después de N días vencido, siempre visible antes de cobrar. | ✅ |
+| D9 | Apto físico | Guardar solo "presentó apto: sí/no, vence el …". Sin archivo ni contenido médico. ¿Lo querés o lo dejamos afuera? | ✅ |
+| D10 | Socios menores de edad | Se cargan con un adulto responsable (nombre y celular). El menor no entra a la app; entra el responsable. | ✅ |
+| D11 | Gimnasio que no le paga a BRIK | Aviso 7 días antes. Después, el panel queda en solo lectura (no vende ni edita), pero la puerta y la página siguen andando: ningún socio queda afuera por una deuda del gimnasio con BRIK. | ✅ |
+| D12 | Avisos automáticos: ¿por dónde? | Primero una "bandeja de avisos" con el WhatsApp ya escrito (gratis, se manda a mano en 2 toques). Después, mail automático (🔌 Resend, gratis hasta 3.000 por mes). WhatsApp automático oficial al final (cobra por mensaje). | ✅ |
+| D13 | Precio de Gym OS para los gimnasios | El precio es un dato que carga Mateo en el super admin (por plan de BRIK); el código no inventa ninguno. | ✅ |
+| D14 | Convenios y descuentos automáticos | Un convenio (estudiante, empresa X, familiar) tiene un % o un monto; se asigna al socio y Vender lo aplica solo, mostrado como una línea aparte. Tiene vencimiento opcional. | ✅ |
+| D15 | PIN de 4 dígitos para el equipo en la PC de recepción | Sí: la PC queda con la sesión del gimnasio y cada uno pone su PIN para que quede registrado quién cobró. El PIN no reemplaza la contraseña para entrar desde otra compu. | ✅ |
+| D16 | Faltar a una clase reservada | Configurable: nada (por defecto), o descontar la clase del pack, o no dejar reservar por N días. Siempre avisado en la app al reservar. | ✅ |
+
+### Decisiones que tomó el agente
+
+Las auditorías y los ítems van a encontrar preguntas nuevas. Sin nadie para
+preguntar, el agente elige y lo anota acá para que Mateo lo revise a la mañana.
+En permisos y plata elige siempre lo más prudente (nunca da más acceso del que
+había, nunca cobra más de lo que el dueño ve antes de cobrar).
+
+| Fecha | Ítem | Qué decidió | Por qué | Cómo se cambia |
+|---|---|---|---|---|
 
 ---
 
@@ -109,118 +120,198 @@ Cada gimnasio prende lo que usa. Al crear uno, el super admin elige el tipo
 
 ## COLA — el orden en que se hace
 
-El loop toma el primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅). El detalle de
-cada ítem está más abajo, en su panel.
+Panel por panel. Cada panel arranca con su **auditoría botón por botón (AUD)**,
+que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
+primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
-### Tanda 1 — Lo que necesita el primer gimnasio real
+### 0 · Base
 - [ ] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`)
-- [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
+- [ ] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`)
+
+### 1 · Configuración y primeros pasos
+- [ ] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
 - [ ] CFG-1 · 🟢 · Configuración en pestañas, todo explicado
 - [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
-- [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
-- [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
-- [ ] SOC-1 · 🟢 · Importar socios desde Excel o CSV
-- [ ] RES-1 · 🟢 · Resultado: la plata del mes, clara
-- [ ] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
-- [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
-- [ ] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito)
-- [ ] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy
-- [ ] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
-- [ ] PLA-4 · 🟢 · Aumento de precios masivo y programado
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
+- [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
 
-### Tanda 2 — Socios contentos que vuelven
+### 2 · Página del gimnasio
+- [ ] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio
+- [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
+- [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
+- [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
+- [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
+
+### 3 · Socios
+- [ ] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha)
+- [ ] SOC-1 · 🟢 · Importar socios desde Excel o CSV
 - [ ] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas)
 - [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
 - [ ] SOC-4 · 🟢 · Exportar la lista de socios
 - [ ] SOC-6 · 🟢 · Cumpleaños
 - [ ] SOC-7 · 🟢 · Foto del socio desde la cámara
 - [ ] SOC-8 · 🟢 · Encontrar y unir socios duplicados
-- [ ] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio)
-- [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
-- [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
-- [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
-- [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
-- [ ] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia)
-- [ ] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo
 - [ ] SOC-5 · 🟢 · Grupo familiar
+- [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
+- [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
+- [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
+- [ ] DIS-3 · 🟢 · Pulido: Socios
 
-### Tanda 3 — Clases y rutinas
+### 4 · Entrada
+- [ ] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
+- [ ] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
+- [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
+- [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
+- [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
+- [ ] DIS-2 · 🟢 · Pulido: Entrada
+
+### 5 · Planes y precios
+- [ ] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos
+- [ ] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
+- [ ] PLA-4 · 🟢 · Aumento de precios masivo y programado
+- [ ] PLA-1 · 🟢 · Planes trimestral, semestral y anual
+- [ ] PLA-2 · 🟢 · Planes por horario y por días por semana
+- [ ] PLA-3 · 🟢 · Matrícula / inscripción
+- [ ] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
+- [ ] PLA-7 · 🟡 D8 · Recargo por pagar tarde
+- [ ] DIS-10 · 🟢 · Pulido: Planes y productos
+
+### 6 · Vender, Caja y Transferencias
+- [ ] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
+- [ ] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
+- [ ] VEN-4 · 🟢 · Productos con stock
+- [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
+- [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
+- [ ] CAJ-1 · 🟢 · Historial de turnos de caja
+- [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
+- [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
+- [ ] DIS-4 · 🟢 · Pulido: Vender
+- [ ] DIS-5 · 🟢 · Pulido: Caja
+- [ ] DIS-6 · 🟢 · Pulido: Transferencias
+
+### 7 · Vencen hoy y avisos
+- [ ] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy
+- [ ] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito)
+- [ ] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy
+- [ ] DIS-7 · 🟢 · Pulido: Vencen hoy
+
+### 8 · Resultado (la plata)
+- [ ] RES-1 · 🟢 · Resultado: la plata del mes, clara
+- [ ] RES-2 · 🟢 · Exportar para el contador
+- [ ] RES-3 · 🟢 · Gastos y ganancia
+
+### 9 · Clases
+- [ ] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades)
+- [ ] CLA-1 · 🟡 D16 · Políticas de reserva y faltas
 - [ ] CLA-2 · 🟢 · Turnos fijos (abono a un horario)
 - [ ] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados
 - [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
 - [ ] CLA-5 · 🟢 · Ocupación por horario
+- [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
+- [ ] DIS-9 · 🟢 · Pulido: Clases
+
+### 10 · Retención
+- [ ] AUD-10 · 🟢 · Auditoría botón por botón: Retención
+- [ ] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia)
+- [ ] RET-2 · 🟡 D2 · La recepción anota contactos
+- [ ] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo
+- [ ] DIS-8 · 🟢 · Pulido: Retención
+
+### 11 · App del socio
+- [ ] AUD-11 · 🟢 · Auditoría botón por botón: App del socio
+- [ ] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio)
+- [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
+- [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
+- [ ] DIS-12 · 🟢 · Pulido: App del socio
+
+### 12 · Equipo y cuentas
+- [ ] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta
+- [ ] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio
+- [ ] EQU-2 · 🟡 D3 · El profe busca socios
+- [ ] EQU-3 · 🟢 · Qué hizo cada uno (auditoría)
+- [ ] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta
+
+### 13 · Rutinas
 - [ ] RUT-1 · 🟢 · Ejercicios y rutinas del gimnasio
 - [ ] RUT-2 · 🟢 · Asignar rutina; el socio la ve y anota sus pesos
 - [ ] RUT-3 · 🟢 · Marcas personales y progreso
 
-### Tanda 4 — Operación fina
-- [ ] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
-- [ ] VEN-4 · 🟢 · Productos con stock
-- [ ] CAJ-1 · 🟢 · Historial de turnos de caja
-- [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
-- [ ] EQU-3 · 🟢 · Qué hizo cada uno (auditoría)
-- [ ] RES-2 · 🟢 · Exportar para el contador
-- [ ] RES-3 · 🟢 · Gastos y ganancia
-- [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
+### 14 · Inicio (al final: junta todo lo anterior)
+- [ ] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol
+- [ ] DIS-1 · 🟢 · Pulido: Inicio
+
+### 15 · Super admin y plataforma
+- [ ] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio
 - [ ] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear
 - [ ] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin
+- [ ] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio
+- [ ] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK
+- [ ] DIS-15 · 🟢 · Pulido: Super admin
+- [ ] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado
+
+### 16 · Cierre
 - [ ] SEG-1 · 🟢 · Límite de pedidos de código por celular
 - [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
 - [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
-- [ ] PLA-1 · 🟢 · Planes trimestral, semestral y anual
-- [ ] PLA-2 · 🟢 · Planes por horario y por días por semana
-- [ ] PLA-3 · 🟢 · Matrícula / inscripción
-
-### Tanda 5 — Pulido panel por panel (lo que no tocó ninguna tanda anterior)
-- [ ] DIS-1 · 🟢 · Inicio
-- [ ] DIS-2 · 🟢 · Entrada
-- [ ] DIS-3 · 🟢 · Socios (lista, alta, ficha)
-- [ ] DIS-4 · 🟢 · Vender
-- [ ] DIS-5 · 🟢 · Caja
-- [ ] DIS-6 · 🟢 · Transferencias
-- [ ] DIS-7 · 🟢 · Vencen hoy
-- [ ] DIS-8 · 🟢 · Retención
-- [ ] DIS-9 · 🟢 · Clases (día, lista, grilla)
-- [ ] DIS-10 · 🟢 · Planes y productos
-- [ ] DIS-11 · 🟢 · Equipo y Mi cuenta
-- [ ] DIS-12 · 🟢 · App del socio
-- [ ] DIS-13 · 🟢 · Página del gimnasio
-- [ ] DIS-14 · 🟢 · Ingresar, elegir gimnasio, no encontrado
-- [ ] DIS-15 · 🟢 · Super admin
-
-### Esperan decisión (se hacen cuando Mateo marca ✅)
-- [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
-- [ ] RET-2 · 🟡 D2 · La recepción anota contactos
-- [ ] EQU-2 · 🟡 D3 · El profe busca socios
-- [ ] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio
-- [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
-- [ ] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
-- [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
-- [ ] PLA-7 · 🟡 D8 · Recargo por pagar tarde
-- [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
-- [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
-- [ ] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio
-- [ ] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK
-- [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
-- [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
-- [ ] CLA-1 · 🟡 D16 · Políticas de reserva y faltas
+- [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
-- [ ] AVI-4 · 🔌 · Resumen diario al dueño por mail (en Inicio, sin 🔌, va en AVI-1)
+- [ ] AVI-4 · 🔌 · Resumen diario al dueño por mail
 - [ ] MP-1 · 🔌 · Conectar MercadoPago del gimnasio
 - [ ] MP-2 · 🔌 · Pagar la cuota con link de MercadoPago (webhook firmado e idempotente)
 - [ ] MP-3 · 🔌 · Débito automático mensual
 - [ ] AVI-3 · 🔌 · WhatsApp automático oficial
 - [ ] ENT-5 · 🔌 · Molinete o lector de tarjeta
-- [ ] SEG-5 · 🟢 · Entrada sin internet (después: es grande)
+- [ ] SEG-5 · 🟢 · Entrada sin internet (después de todo lo demás: es grande)
 
 ---
 
 ## Detalle por panel
+
+### AUD · Auditoría botón por botón (cada panel)
+
+**AUD-0 · Mapa.** `docs/paneles/README.md`: cada pantalla con su ruta, qué
+roles la ven, qué funciones de la base llama, qué sección la apaga, y a qué
+otras pantallas lleva. Es la base de las auditorías.
+
+**AUD-n · Auditoría de un panel.** La hace el agente como si fuera el dueño de
+cada tipo de gimnasio (tabla de arriba) y cada rol que usa ese panel.
+
+1. **Abrirlo de verdad.** Con cada rol que lo ve, en compu y celular, con datos
+   y vacío (un gimnasio recién creado). Capturas en `.local/capturas/aud-<n>-*`.
+2. **Inventario botón por botón** en `docs/paneles/<panel>.md`: una fila por
+   cada botón, link, campo, filtro y acción, con: qué hace hoy · si anda
+   (probado haciendo clic, no leyendo) · qué le falta para servir de verdad ·
+   con qué otras pantallas y funciones se conecta · si es configurable por
+   gimnasio y si debería serlo.
+3. **Pensar lo que falta**, en cadena: "para hacer X el dueño necesita Y, y
+   sin Y no anda Z". Qué botón falta, cuál sobra, cuál confunde, cuál debería
+   estar al lado de cuál, qué atajo ahorra trabajo, qué debería poder
+   personalizar cada gimnasio (textos, colores, orden, qué se muestra), qué
+   necesita cada rol (por ejemplo: cambiar su contraseña, ver solo lo suyo).
+4. **Arreglar ya** lo roto que sea chico (un botón que no hace nada, un texto
+   que confunde, un desborde, un error sin salida), con su prueba.
+5. **Lo grande va a la COLA**: ítems nuevos al final del bloque de ese panel
+   (`- [ ] <SIGLA>-<n> · 🟢 · título`), con su detalle y su LISTO SI en
+   "Detalle por panel". Si un ítem nuevo pide una decisión de permisos o
+   plata, el agente la toma (la más prudente) y la anota en "Decisiones que
+   tomó el agente".
+6. **Un recorrido e2e que hace clic en cada botón** del panel
+   (`scripts/e2e/panel-<panel>.mjs`), sumado a `npm run e2e`.
+
+LISTO SI: el inventario está completo (ningún botón sin probar), lo chico
+está arreglado con prueba, lo grande quedó en la COLA con LISTO SI, y el e2e
+del panel está en verde.
+
+**AUD-16 · Como un cliente.** `scripts/e2e/cliente.mjs`: el super admin crea un
+gimnasio desde cero → el dueño entra, hace los primeros pasos, carga planes,
+importa socios, publica la página → un prospecto deja sus datos → la
+recepción vende, cobra en la puerta, cierra la caja → un socio entra a la app,
+reserva y paga por transferencia → el dueño ve el Resultado. Todo en verde, en
+compu y celular.
 
 ### DIS · Diseño (todas las pantallas)
 

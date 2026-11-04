@@ -13,7 +13,7 @@ for (const m of texto.matchAll(/^\|\s*(D\d+)\s*\|.*\|\s*([^|]*?)\s*\|\s*$/gm)) {
   if (m[2].includes("✅")) aprobadas.add(m[1]);
 }
 const cola = texto.slice(texto.indexOf("## COLA"), texto.indexOf("## Detalle por panel"));
-const items = [...cola.matchAll(/^- \[(.)\] ([A-Z]+-\d+) · ([^·]+?) · (.+)$/gm)].map((m) => ({
+const items = [...cola.matchAll(/^- \[(.)\] ([A-Z]+-[A-Z0-9]+) · ([^·]+?) · (.+)$/gm)].map((m) => ({
   marca: m[1], id: m[2], tipo: m[3].trim(), titulo: m[4].trim(),
 }));
 const sePuede = (i) => {

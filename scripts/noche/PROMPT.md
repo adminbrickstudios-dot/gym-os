@@ -9,6 +9,8 @@ Las variables PGHOST, PGPORT, PGUSER y DB_PRUEBAS_URL ya están cargadas.
 2. Corré `node scripts/noche/pendientes.mjs --siguiente`. Ese es tu ítem. Si imprime `NADA`, respondé exactamente `NADA MÁS` y terminá.
 3. Marcalo `[~]` en la COLA, commit "Empieza <ID>" y `git push origin {{RAMA}}`.
 4. Antes de cambiar nada, leé el código que vas a tocar y buscá lo que ya existe: no rehagas lo que está.
+   - Si el ítem es una auditoría (`AUD-*`), seguí al pie de la letra "AUD · Auditoría botón por botón" en el detalle de la hoja de ruta: abrir con cada rol, inventario de cada botón probado haciendo clic, pensar lo que falta en cadena, arreglar lo chico, sumar lo grande a la COLA al final del bloque de ese panel (con su detalle y LISTO SI) y un e2e que hace clic en cada botón.
+   - Si el ítem tiene preguntas abiertas, no pares: elegí lo que mejor sirva al dueño y al socio (en permisos y plata, siempre lo más prudente) y anotalo en "Decisiones que tomó el agente".
 5. Primero la base, si el ítem cambia datos:
    - Una migración nueva en `supabase/migrations/`. El nombre lleva la fecha de hoy y el número que sigue al último (ej: `20261104002000_onboarding.sql` → 0020).
    - Con todas las reglas de `CLAUDE.md`: guarda de entrada, verificación al final, `search_path = ''`, revoke/grant, RLS, FK compuesta, sin TODO, todo en castellano.
@@ -36,7 +38,7 @@ Las variables PGHOST, PGPORT, PGUSER y DB_PRUEBAS_URL ya están cargadas.
 - Tocar `main`: ni switch, ni merge, ni push. Todo va a `{{RAMA}}`.
 - Usar `vercel`, `gh`, `supabase` ni nada del proyecto real. Leer `.env*`.
 - Editar migraciones que ya estaban en `main` (cualquiera de antes de esta noche), ni `.claude/`, ni `scripts/noche/`.
-- Cambiar la hoja de ruta más allá de la marca de tu ítem. Si ves algo que falta, anotalo en el LOG bajo "LO QUE ENCONTRÉ SIN PEDIRTELO".
-- Tocar permisos o plata más allá de lo que dice el ítem. Si algo de permisos o plata está roto, se reporta, no se arregla.
+- Cambiar en la hoja de ruta otra cosa que: la marca de tu ítem, los ítems nuevos de una auditoría (en el bloque de su panel) y filas nuevas en "Decisiones que tomó el agente". Nunca borres ni reordenes ítems de otros, ni toques la tabla de decisiones de Mateo.
+- Dar más acceso del que dice el ítem o su decisión, o cobrar algo que el dueño no vea antes de cobrar. Si algo de permisos o plata está roto y el ítem no lo cubre, se reporta en el LOG y se suma a la COLA; no se arregla al pasar.
 - Reintentar de otra forma un comando denegado. Buscá otro camino legítimo o marcá el ítem `[!]`.
 - Marcar `[x]` algo que no probaste ejecutando.
