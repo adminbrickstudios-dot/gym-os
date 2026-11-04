@@ -140,7 +140,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 1 · Configuración y primeros pasos
 - [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
 - [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
-- [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
+- [~] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
