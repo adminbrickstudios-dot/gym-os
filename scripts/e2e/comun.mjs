@@ -41,6 +41,8 @@ export async function pagina(b, viewport = COMPU) {
   p.on("pageerror", (e) => p.errores.push(`error en la página: ${e.message.slice(0, 200)}`));
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
   p.on("dialog", (d) => d.accept());
+  // E2E_CONSOLA=1: muestra los errores y advertencias de la consola del navegador (para investigar).
+  if (process.env.E2E_CONSOLA) p.on("console", (m) => { if (["error", "warning"].includes(m.type())) console.log(`  [consola ${m.type()}] ${p.url()} ${m.text().slice(0, Number(process.env.E2E_CONSOLA) > 1 ? 4000 : 300)}`); });
   return p;
 }
 

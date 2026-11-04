@@ -6,6 +6,8 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
 import { PESTANAS, type ClavePestana } from "./pestanas";
+import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
+import { urlMarca } from "@/lib/url-marca";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -17,6 +19,8 @@ export type Sede = { id: string; nombre: string; direccion: string | null; telef
 export type DatosGimnasio = {
   nombre: string; slug: string; zona_horaria: string; whatsapp: string | null; instagram: string | null; email_contacto: string | null;
   publicada: boolean; sedes: Sede[]; dominios: { host: string; tipo: string; verificado: boolean }[];
+  logo_path: string | null; favicon_path: string | null; fotos: string[];
+  reglas_imagenes: { logo: Reglas; favicon: Reglas; foto: Reglas };
 };
 type Campo = keyof Config;
 type Respuesta = { ok?: string; error?: string; n: number };
@@ -209,6 +213,12 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
     try { await navigator.clipboard.writeText(direccionPagina); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
   };
   const gracia = Number(c.tolerancia_dias) || 0;
+  // Las imágenes se guardan al subirlas: actualizan lo guardado sin tocar lo que se está escribiendo.
+  const imagenesListas = (x: Imagenes) => {
+    const im = { logo_path: x.logo_path, favicon_path: x.favicon_path, fotos: x.fotos };
+    setD((v) => ({ ...v, ...im })); setDGuardado((v) => ({ ...v, ...im }));
+  };
+  const logo = urlMarca(d.logo_path);
 
   return (
     <div className="space-y-5">
@@ -259,6 +269,23 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
         </>}
 
         {pestana === "marca" && <>
+          <Tarjeta emoji="🖼️" titulo="Logo" ayuda="Sale en tu página, arriba en el panel y en la app del socio. Mejor cuadrado o apaisado, con fondo transparente.">
+            <UnaImagen tipo="logo" ruta={d.logo_path} reglas={d.reglas_imagenes.logo} puedeEditar={puedeEditar} alListo={imagenesListas}
+              vista={(url) => url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-xl p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
+                : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
+          </Tarjeta>
+          <Tarjeta emoji="🔖" titulo="Ícono de la pestaña" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
+            <UnaImagen tipo="favicon" ruta={d.favicon_path} reglas={d.reglas_imagenes.favicon} puedeEditar={puedeEditar} alListo={imagenesListas}
+              vista={(url) => (
+                <div className="inline-flex items-center gap-2 rounded-t-xl border border-b-0 border-[var(--borde)] bg-[var(--tarjeta-alta)] px-3 py-2 max-w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {(url ?? logo) ? <img src={(url ?? logo)!} alt="" className="size-5 object-contain" /> : <span aria-hidden>🌐</span>}
+                  <span className="text-sm truncate">{d.nombre}</span>
+                </div>
+              )} />
+          </Tarjeta>
           <Tarjeta emoji="🎨" titulo="Colores" ayuda="Se ven en tu página, en el panel y en la app del socio.">
             <div><p className="etiqueta mb-2">Fondo</p><div className="flex flex-wrap gap-2">
               {FONDOS.map((f) => <button key={f} type="button" aria-label={f} aria-pressed={c.color_fondo === f} onClick={() => set("color_fondo", f)} className="size-11 rounded-xl border-2" style={{ background: f, borderColor: c.color_fondo === f ? "var(--acento)" : "var(--borde)" }} />)}
@@ -269,7 +296,11 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
               <input type="color" aria-label="Otro color" value={c.color_acento} onChange={(e) => set("color_acento", e.target.value)} className="size-11 rounded-xl bg-transparent" />
             </div><p className="text-sm texto-tenue mt-1">El de la acción principal de cada pantalla. Usá el de tu logo.</p></div>
             <div {...propsMarca(c)} className="rounded-[var(--radio)] p-5 border border-[var(--borde)]">
-              <p className="titulo text-2xl">{d.nombre || "Tu gimnasio"}</p>
+              <p className="titulo text-2xl flex items-center gap-3 min-w-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {logo && <img src={logo} alt="" className="h-10 w-auto max-w-28 flex-none rounded-lg object-contain" />}
+                <span className="truncate">{d.nombre || "Tu gimnasio"}</span>
+              </p>
               <p className="texto-suave">Así se ve.</p>
               <span className="boton boton-principal mt-3">🔥 Botón principal</span>
             </div>
@@ -277,7 +308,7 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
           {pie("marca")}
         </>}
 
-        {pestana === "pagina" && (
+        {pestana === "pagina" && <>
           <Tarjeta emoji="🌐" titulo="Tu página" ayuda="La que comparte la gente para conocerte, ver precios y escribirte.">
             <p>{d.publicada
               ? <span className="pildora pildora-verde">✅ Publicada</span>
@@ -291,7 +322,10 @@ export function Ajustes({ inicial, datos, puedeEditar, pestanaInicial, direccion
             </div>
             <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y precios.</p>
           </Tarjeta>
-        )}
+          <Tarjeta emoji="📸" titulo="Fotos" ayuda="Las que ve la gente en tu página. La primera es la que más se ve: ordenalas con las flechas.">
+            <Fotos fotos={d.fotos} reglas={d.reglas_imagenes.foto} puedeEditar={puedeEditar} nombre={d.nombre} alListo={imagenesListas} />
+          </Tarjeta>
+        </>}
 
         {pestana === "cobros" && <>
           <Tarjeta emoji="💵" titulo="Qué cobrás" ayuda="Lo que no cobrás no aparece al vender. Tiene que quedar al menos uno.">

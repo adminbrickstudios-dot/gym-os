@@ -79,6 +79,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-1 | Clases se prende y apaga desde Secciones; la pestaña Clases (con reserva o sin reserva, y sus plazos) solo aparece con clases prendidas. | "Un gimnasio sin clases no ve nada de clases", y el dueño necesita un lugar donde prenderlas. | Mover el interruptor. |
 | 2026-11-04 | CFG-1 | La zona horaria se muestra pero no la cambia el dueño: se la pide a soporte. | Cambiarla corre el principio y fin de cada día (vencimientos, pases ya vendidos). | Una función de super admin. |
 | 2026-11-04 | CFG-1 | Teléfonos: se aceptan como los escribe la gente ("11 1234-5678", "011…", "+54 9…") y se guardan +54… Diez números sin característica de país se toman como celular de Argentina (+549). | Es como los escribe un dueño argentino; el formato de la base no cambia. | `privado.telefono_normalizado`. |
+| 2026-11-04 | CFG-2 | Logo, ícono y fotos los cambia solo el dueño, y se suben por el servidor (la base decide, el servidor sube con la clave de servicio). Se sacaron las políticas que dejaban al dueño y al encargado escribir directo en el bucket `marcas`. | Con escritura directa, un encargado podía pisar el logo con cualquier archivo. Es dar menos acceso, nunca más. | Migración nueva con una política de storage. |
+| 2026-11-04 | CFG-2 | Límites: logo y fotos 2 MB, ícono 512 KB; logo PNG/JPG/SVG/WEBP, ícono PNG/SVG, fotos JPG/PNG/WEBP. El tipo se mira en los bytes del archivo, no en el nombre. Un SVG con scripts, eventos o links se rechaza (no se "limpia"). | Un SVG con código se ejecuta si alguien abre su link. 2 MB alcanza para una foto web. | `privado.reglas_imagen_marca` y `src/lib/imagenes.ts`. |
 
 ---
 
@@ -140,7 +142,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 1 · Configuración y primeros pasos
 - [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
 - [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
-- [~] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
+- [x] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel — verificado: e2e:cfg-2 (24 pasos con archivos de verdad: PNG, SVG, JPG, rechazos, orden, página pública, app del socio), db:pruebas 180 con la 0022, npm run e2e completo y verificar en verde
 - [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
 - [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
 - [ ] CFG-5 · 🟢 · Mensajes editables con vista previa

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
+import { urlMarca } from "@/lib/url-marca";
 import { GRUPOS, NOMBRE_ROL, principalesCelular, seccionesPara } from "@/lib/panel/secciones";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
@@ -12,6 +13,7 @@ export function Marco({ panel, children, enPlataforma = false }: { panel: PanelG
     <div {...propsMarca(panel.marca)} className="min-h-dvh">
       <Navegacion
         gimnasio={panel.gimnasio.nombre}
+        logo={urlMarca(panel.marca.logo_path)}
         persona={panel.yo.nombre}
         rol={NOMBRE_ROL[rol]}
         secciones={secciones}

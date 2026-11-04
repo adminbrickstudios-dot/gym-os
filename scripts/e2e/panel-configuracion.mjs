@@ -62,11 +62,14 @@ try {
 
   // ── Marca: cada muestra; guardar cambia el panel ──
   await ir("marca");
+  // Las muestras incluyen fondos: se guarda el fondo de antes para dejarlo igual.
+  const fondoOrig = await cont.locator('input[aria-label="Otro fondo"]').inputValue();
   const acentos = cont.locator('button[aria-label^="#"]');
   const n = await acentos.count();
   let elegidos = 0;
   for (let i = 0; i < n; i++) { await acentos.nth(i).click(); if ((await acentos.nth(i).getAttribute("aria-pressed")) === "true") elegidos++; }
   chequear(elegidos === n, `las ${n} muestras de color se eligen`, `${n - elegidos} muestras no se marcan`);
+  await cont.locator('input[aria-label="Otro fondo"]').fill(fondoOrig);
   await cont.locator('button[aria-label="#3b82f6"]').click(); await guardar("marca");
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   const acento = await p.evaluate(() => getComputedStyle(document.querySelector("[style*='--acento']") ?? document.body).getPropertyValue("--acento").trim().toLowerCase());

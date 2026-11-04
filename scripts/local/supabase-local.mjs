@@ -10,6 +10,9 @@
 //                                   y los permisos los decide Postgres
 //   /auth/v1/token, /user, /logout, /otp, /verify, /invite, /admin/users
 //                                   como GoTrue, con usuarios en auth.users
+//   /storage/v1/object/…            como Storage, en .local/storage: subir y
+//                                   borrar solo con la clave de servicio (así
+//                                   sube el panel), leer los buckets públicos
 //
 // Las pantallas leen y escriben solo por RPC, así que no hace falta
 // imitar las lecturas de tablas: un GET a una tabla devuelve 404.
@@ -260,6 +263,63 @@ async function rpc(req, res, nombre, cuerpo) {
   } finally { c.release(); }
 }
 
+// ── Storage (en disco) ──────────────────────────────────────────────
+// Los mismos límites que los buckets de las migraciones. Con sesión de
+// usuario no se sube: en Supabase lo deciden las políticas de storage.objects,
+// que la base local no tiene.
+const BUCKETS = {
+  marcas: { publico: true, max: 2 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] },
+  comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
+};
+const CARPETA_STORAGE = path.join(CARPETA, "storage");
+function archivoDe(bucket, ruta) {
+  const base = path.join(CARPETA_STORAGE, bucket);
+  const f = path.resolve(base, ruta);
+  if (!f.startsWith(base + path.sep)) return null;
+  return f;
+}
+const errorStorage = (res, estado, error, message) => enviar(res, estado, { statusCode: String(estado), error, message });
+
+async function storage(req, res, ruta, crudo) {
+  const claims = claimsDe(req);
+  const publico = /^\/object\/public\/([a-z_]+)\/(.+)$/.exec(ruta);
+  if (publico && req.method === "GET") {
+    const b = BUCKETS[publico[1]];
+    const f = b?.publico && archivoDe(publico[1], decodeURIComponent(publico[2]));
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+    res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size, "Access-Control-Allow-Origin": "*" });
+    return res.end(fs.readFileSync(f));
+  }
+  const objeto = /^\/object\/([a-z_]+)(?:\/(.+))?$/.exec(ruta);
+  if (!objeto || !BUCKETS[objeto[1]]) return errorStorage(res, 404, "not_found", `supabase-local no imita ${req.method} /storage/v1${ruta}`);
+  if (claims?.role !== "service_role") return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio sube o borra (con sesión lo deciden las políticas de Supabase)");
+  const [bucket, rutaObjeto] = [objeto[1], objeto[2] && decodeURIComponent(objeto[2])];
+  const b = BUCKETS[bucket];
+  if (req.method === "POST" && rutaObjeto) {
+    const f = archivoDe(bucket, rutaObjeto);
+    if (!f) return errorStorage(res, 400, "InvalidKey", "Invalid key");
+    const tipo = String(req.headers["content-type"] ?? "").split(";")[0];
+    if (!b.tipos.includes(tipo)) return errorStorage(res, 415, "invalid_mime_type", `mime type ${tipo} is not supported`);
+    if (crudo.length > b.max) return errorStorage(res, 413, "Payload too large", "The object exceeded the maximum allowed size");
+    if (fs.existsSync(f) && req.headers["x-upsert"] !== "true") return errorStorage(res, 409, "Duplicate", "The resource already exists");
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    fs.writeFileSync(f, crudo);
+    fs.writeFileSync(`${f}.meta.json`, JSON.stringify({ tipo }));
+    return enviar(res, 200, { Id: crypto.randomUUID(), Key: `${bucket}/${rutaObjeto}` });
+  }
+  if (req.method === "DELETE" && !rutaObjeto) {
+    const { prefixes = [] } = crudo.length ? JSON.parse(crudo.toString()) : {};
+    const borrados = [];
+    for (const r of prefixes) {
+      const f = archivoDe(bucket, r);
+      if (f && fs.existsSync(f)) { fs.rmSync(f); fs.rmSync(`${f}.meta.json`, { force: true }); borrados.push({ name: r, bucket_id: bucket }); }
+    }
+    return enviar(res, 200, borrados);
+  }
+  return errorStorage(res, 404, "not_found", `supabase-local no imita ${req.method} /storage/v1${ruta}`);
+}
+
 // ── Servidor ────────────────────────────────────────────────────────
 http.createServer(async (req, res) => {
   try {
@@ -267,8 +327,11 @@ http.createServer(async (req, res) => {
       return enviar(res, 204, undefined, { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS" });
     }
     const url = new URL(req.url, "http://local");
-    let texto = "";
-    for await (const parte of req) texto += parte;
+    const partes = [];
+    for await (const parte of req) partes.push(parte);
+    const crudo = Buffer.concat(partes);
+    if (url.pathname.startsWith("/storage/v1/")) return await storage(req, res, url.pathname.slice("/storage/v1".length), crudo);
+    const texto = crudo.toString("utf8");
     const cuerpo = texto ? JSON.parse(texto) : {};
     if (url.pathname.startsWith("/auth/v1/")) return await auth(req, res, url.pathname.slice("/auth/v1".length), url.searchParams, cuerpo);
     const m = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_][a-z0-9_]*)$/);
@@ -276,7 +339,7 @@ http.createServer(async (req, res) => {
       const args = req.method === "GET" ? Object.fromEntries(url.searchParams) : cuerpo;
       return await rpc(req, res, m[1], args);
     }
-    return enviar(res, 404, { message: `supabase-local solo imita RPC y auth (pedido: ${req.method} ${url.pathname})` });
+    return enviar(res, 404, { message: `supabase-local solo imita RPC, auth y storage (pedido: ${req.method} ${url.pathname})` });
   } catch (e) {
     console.error(e);
     return enviar(res, 500, { message: e.message });

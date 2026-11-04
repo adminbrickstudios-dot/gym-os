@@ -24,7 +24,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/clases` | pantalla |  | clases | `cancelar_clase`, `clases_del_dia`, `panel_gimnasio`, `reservar`, `tomar_asistencia` | `/panel/clases/` `/panel/clases/grilla` |
 | `/panel/clases/[id]` | pantalla |  | clases | `clase_detalle`, `lista_clase`, `panel_gimnasio` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `panel_gimnasio` | `/panel/clases` |
-| `/panel/configuracion` | pantalla | 👑 🧭 |  | `configuracion_panel`, `datos_gimnasio_panel`, `guardar_configuracion`, `guardar_datos_gimnasio`, `panel_gimnasio` |  |
+| `/panel/configuracion` | pantalla | 👑 🧭 |  | `configuracion_panel`, `confirmar_imagen_marca`, `datos_gimnasio_panel`, `guardar_configuracion`, `guardar_datos_gimnasio`, `ordenar_fotos`, `panel_gimnasio`, `preparar_imagen_marca`, `quitar_imagen_marca` |  |
 | `/panel/cuenta` | pantalla |  |  | `panel_gimnasio` |  |
 | `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `estado_acceso`, `ingresos_del_dia`, `panel_gimnasio`, `registrar_ingreso` | `/panel/socios/` `/panel/socios/nuevo` `/panel/vender` |
 | `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `panel_gimnasio`, `usuario_por_mail`, `vincular_usuario_equipo` |  |

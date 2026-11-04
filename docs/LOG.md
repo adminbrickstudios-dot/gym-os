@@ -15,6 +15,40 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-2 · Subir logo, favicon y fotos desde el panel
+
+**QUÉ HICE**
+- Marca: 🖼️ Logo e 🔖 Ícono de la pestaña, con vista previa (el logo sobre el fondo del gimnasio, el ícono en una pestaña de navegador), Subir / Cambiar / Quitar. Página: 📸 Fotos, hasta 12, se suman varias juntas, se ordenan con ◀ ▶ y se quitan.
+- El logo aparece en la barra del panel (compu y celular), en la vista previa de Marca, en la página y en la app del socio; el ícono, en la pestaña del panel, de la página y de la app.
+- Migración `20261104002200_imagenes_marca.sql`: `preparar_imagen_marca` (permiso, tipo, tamaño, cupo de 12; da la ruta), `confirmar_imagen_marca` (la ruta es de este gimnasio y, en Supabase, el archivo está; devuelve la anterior para borrarla), `quitar_imagen_marca`, `ordenar_fotos`; `datos_gimnasio_panel` suma las imágenes y sus reglas. El bucket `marcas` baja a 2 MB y pierde la escritura directa. Verificado: `supabase/pruebas/imagenes-marca.test.mjs` (5 pruebas); db:pruebas 180 en verde.
+- Servidor: mira los bytes del archivo (no el nombre) y rechaza SVG con código (`src/lib/imagenes.ts`, con pruebas unitarias); sube con la clave de servicio solo después de que la base dijo que sí; si la base rechaza al confirmar, borra lo subido; al reemplazar o quitar, borra el archivo viejo.
+- `supabase-local` imita Storage en disco (`.local/storage`): subir y borrar con la clave de servicio, leer los buckets públicos, con los mismos límites de tamaño y tipo.
+- `scripts/e2e/cfg-2.mjs` (24 pasos) con imágenes de verdad dibujadas en el navegador. Verificado: `npm run e2e` completo en verde (17 + 14 + 40 + 24 + 120), capturas de compu, celular y app del socio revisadas, `npm run verificar` en verde sobre base limpia, `npm run mapa` (71 funciones usadas, ninguna faltante).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El ícono de todas las pestañas era el de Next.js (el triángulo de Vercel, `src/app/favicon.ico` que trae la plantilla), y en el panel convivía con el del gimnasio. Lo moví a `public/`: ya no se agrega solo, y cada pantalla del gimnasio pone el suyo. Falta un ícono de Gym OS / BRIK para las pantallas de la plataforma (es un archivo tuyo).
+- La app del socio no ponía el ícono del gimnasio en la pestaña: ahora sí.
+- El e2e de Configuración tocaba también las muestras de fondo y dejaba el demo en crema: ahora deja el fondo como estaba.
+- En modo desarrollo, una captura de Playwright antes de terminar de cargar la página genera un aviso de React ("hydration mismatch" por `caret-color`). Lo pone Playwright al sacar la foto, no la app. `E2E_CONSOLA=1` muestra la consola del navegador en cualquier e2e para investigar estas cosas.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020, 0021 y 0022).
+- Nada más: el bucket `marcas` ya existe en Supabase (0008); la 0022 le cambia el límite y saca las políticas de escritura.
+
+**QUÉ CONFIGURÁS VOS**
+- Nada nuevo. La subida usa `SUPABASE_SERVICE_ROLE_KEY`, que ya está en Vercel (la usan las contraseñas y los comprobantes).
+
+**SIN ARREGLAR**
+- Foto de portada de la página: va con el editor de la página (PAG-1).
+- Ícono propio de Gym OS para las pantallas de la plataforma: falta el archivo.
+
+**LO QUE NO PUDE VERIFICAR**
+- La subida contra Supabase Storage real: está probada contra la imitación de `supabase-local` (mismos pedidos que hace `@supabase/storage-js`, mismos límites), no contra Supabase. Tampoco está corrido el chequeo de "el archivo está subido" de `confirmar_imagen_marca`, que solo corre donde existe `storage.objects`.
+- Que en Supabase se borren de verdad las políticas viejas del bucket: la verificación de la migración lo comprueba al aplicarla, pero acá no hay esquema storage.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-1 · Configuración en pestañas, todo explicado
 
 **QUÉ HICE**

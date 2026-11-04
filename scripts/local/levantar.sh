@@ -42,7 +42,7 @@ esperar() {   # esperar <url> <nombre>
 
 case "${1:-}" in
   parar) parar supabase; parar app; liberar_puerto "$PUERTO_APP"; liberar_puerto "$PUERTO_SUPABASE"; echo "Apagado."; exit 0 ;;
-  nueva) scripts/db/local.sh nueva ;;
+  nueva) scripts/db/local.sh nueva; rm -rf .local/storage ;;   # base nueva: sin archivos de antes
 esac
 
 URL="$(scripts/db/local.sh url)"

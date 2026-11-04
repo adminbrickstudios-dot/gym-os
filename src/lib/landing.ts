@@ -58,9 +58,5 @@ export async function traerLanding(host: string): Promise<Landing | null> {
   return (data as Landing | null) ?? null;
 }
 
-/** URL pública de un archivo del bucket "marcas". */
-export function urlMarca(ruta: string | null | undefined): string | null {
-  if (!ruta) return null;
-  if (/^https:\/\//.test(ruta)) return ruta;
-  return `${supabaseUrl()}/storage/v1/object/public/marcas/${ruta.split("/").map(encodeURIComponent).join("/")}`;
-}
+// urlMarca vive aparte para poder usarla también en el navegador.
+export { urlMarca } from "@/lib/url-marca";
