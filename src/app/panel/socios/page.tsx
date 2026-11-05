@@ -11,20 +11,38 @@ export const metadata: Metadata = { title: "Socios" };
 type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean };
 
 type Etiqueta = { id: string; nombre: string; socios: number };
+type Filtros = Record<"todos" | "al_dia" | "por_vencer" | "vencidos" | "en_pausa" | "sin_plan" | "nuevos" | "bajas", number> & { planes: { plan_id: string; nombre: string; socios: number }[] };
 
-export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string }> }) {
+// Las píldoras de estado: el grupo sale del veredicto de la puerta (la base agrupa).
+const ESTADOS = [
+  ["al_dia", "🟢 Al día"], ["por_vencer", "🟡 Por vencer"], ["vencidos", "🔴 Vencidos"], ["en_pausa", "⏸️ En pausa"],
+  ["sin_plan", "⚪ Sin plan"], ["nuevos", "🆕 Nuevos (30 días)"], ["bajas", "👋 Dados de baja"],
+] as const;
+type Estado = (typeof ESTADOS)[number][0];
+const uuid = (x?: string) => (/^[0-9a-f-]{36}$/.test(x ?? "") ? x! : null);
+
+export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string; estado?: string; plan?: string }> }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
-  const etiqueta = /^[0-9a-f-]{36}$/.test(sp.etiqueta ?? "") ? sp.etiqueta! : null;
+  const etiqueta = uuid(sp.etiqueta), plan = uuid(sp.plan);
+  const estado: Estado | null = ESTADOS.find(([k]) => k === sp.estado)?.[0] ?? null;
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "socios");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const [filas, etiquetas] = await Promise.all([
-      rpc<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta }),
+    const [filas, etiquetas, filtros] = await Promise.all([
+      rpc<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan }),
       rpc<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
-    const con = (e: string | null) => { const u = new URLSearchParams(); if (q) u.set("q", q); if (e) u.set("etiqueta", e); const x = u.toString(); return `/panel/socios${x ? `?${x}` : ""}`; };
+    // Un link con los filtros de ahora, cambiando uno (null lo saca).
+    const con = (cambio: { etiqueta?: string | null; estado?: string | null; plan?: string | null }) => {
+      const v = { etiqueta, estado, plan, ...cambio };
+      const u = new URLSearchParams(); if (q) u.set("q", q);
+      for (const k of ["estado", "plan", "etiqueta"] as const) if (v[k]) u.set(k, v[k]!);
+      const x = u.toString(); return `/panel/socios${x ? `?${x}` : ""}`;
+    };
+    const filtrado = !!(estado || plan || etiqueta);
     return (
       <>
         <Encabezado emoji="👥" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
@@ -34,23 +52,41 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
             {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/duplicados" className="boton">🔎 Duplicados</Link>}
             {panel.yo.rol !== "recepcion" && filas.length > 0 && (
               // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
-              <a href={`/panel/socios/exportar${con(etiqueta).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>
+              <a href={`/panel/socios/exportar${con({ estado: null, plan: null }).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>
             )}
           </div>} />
         <form className="mb-4" role="search">
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
           {etiqueta && <input type="hidden" name="etiqueta" value={etiqueta} />}
+          {estado && <input type="hidden" name="estado" value={estado} />}
+          {plan && <input type="hidden" name="plan" value={plan} />}
         </form>
-        {etiquetas.length > 0 && (
-          <nav className="flex flex-wrap gap-2 mb-6" aria-label="Filtrar por etiqueta" data-filtro-etiquetas>
-            <Link href={con(null)} className="pestana" aria-current={!etiqueta ? "page" : undefined}>Todos</Link>
+        {filtros.todos + filtros.bajas > 0 && (
+          <nav className="pestanas mb-3" aria-label="Filtrar por estado" data-filtro-estados>
+            <Link href={con({ estado: null })} className="pestana" aria-current={!estado ? "page" : undefined}>Todos <span className="texto-tenue">{filtros.todos}</span></Link>
+            {ESTADOS.filter(([k]) => filtros[k] > 0 || estado === k).map(([k, t]) => (
+              <Link key={k} href={con({ estado: estado === k ? null : k })} className="pestana" aria-current={estado === k ? "page" : undefined} data-estado={k}>
+                {t} <span className="texto-tenue">{filtros[k]}</span>
+              </Link>
+            ))}
+          </nav>
+        )}
+        {(filtros.planes.length > 1 || etiquetas.length > 0) && (
+          <nav className="pestanas mb-6" aria-label="Filtrar por plan o etiqueta" data-filtro-etiquetas>
+            {filtros.planes.length > 1 && filtros.planes.map((p) => (
+              <Link key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
+                📋 {p.nombre} <span className="texto-tenue">{p.socios}</span>
+              </Link>
+            ))}
             {etiquetas.map((e) => (
-              <Link key={e.id} href={con(e.id)} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></Link>
+              <Link key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></Link>
             ))}
           </nav>
         )}
         {filas.length === 0 ? (
-          q
+          filtrado && !q
+            ? <Vacio emoji="🔍" titulo="Nadie con ese filtro" acciones={<Link href="/panel/socios" className="boton">Ver todos</Link>}>Probá con otro, o sacá el filtro.</Vacio>
+            : q
             ? <Vacio emoji="🔍" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
             : <Vacio emoji="👥" titulo="Todavía no hay socios" acciones={<>
                 <Link href="/panel/socios/nuevo" className="boton">➕ Cargar el primero</Link>

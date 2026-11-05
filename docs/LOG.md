@@ -15,6 +15,25 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-12 · Filtros de Socios por estado y plan
+
+**QUÉ HICE**
+- Arriba de la lista: píldoras 🟢 Al día, 🟡 Por vencer, 🔴 Vencidos, ⏸️ En pausa, ⚪ Sin plan, 🆕 Nuevos (30 días), 👋 Dados de baja, cada una con su cuenta; abajo, una por plan (si hay más de uno) y las etiquetas. Se combinan con la búsqueda; tocar la activa la saca. Las que están en 0 no se muestran. En el celular la fila se desliza.
+- Migración `20261104004500_filtros_socios.sql`: `privado.grupo_estado` agrupa el color y el motivo de `calcular_acceso` (no hay otro cálculo); `buscar_socios` suma `p_estado` y `p_plan` (la firma vieja se borra); `filtros_socios` da las cuentas.
+- `supabase/pruebas/filtros-socios.test.mjs` (las cuentas suman el total y coinciden con la lista; cada fila es de su grupo) y `scripts/e2e/soc-12.mjs` (8 pasos). Pasan soc-3, soc-4 y panel-socios con la lista nueva.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- "Exportar" sigue llevando la búsqueda y la etiqueta, no el estado ni el plan.
+- Con miles de socios, filtrar por estado calcula el veredicto de todos (no está guardado, a propósito). Con 330 tarda menos de un segundo; si un gimnasio grande lo nota, se cachea por minuto.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0045).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0045 contra la base real (probada local).
+
+---
+
 ## 2026-11-05 · SOC-11 · Apto físico, solo sí/no y vencimiento (D9)
 
 **QUÉ HICE**
