@@ -13,6 +13,7 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 | Elemento | Qué hace hoy | Anda | Qué le falta | Se conecta con | Configurable |
 |---|---|---|---|---|---|
 | Buscador | Arranca con foco y vuelve a tenerlo después de cada entrada. Nombre, DNI, teléfono o número; desde 2 letras. Enter elige al primero, Esc limpia. | ✅ | Lector de llavero/QR (ENT-2, ENT-7) | `buscar_socios` | — |
+| 📷 Leer QR | Si el gimnasio prendió "QR del socio": abre la cámara y lee el QR de la app; un lector USB escribe el código en el buscador y Enter. La base dice de quién es, si venció, si ya se usó o si es de otro gimnasio. Si puede entrar, se anota solo (forma "con QR"); si no, queda el veredicto. (ENT-2) | ✅ | — | `leer_qr`, `estado_acceso`, `registrar_ingreso` | Sí (Reglas → QR del socio) |
 | Resultados | Punto de color, nombre, #número y el porqué. | ✅ | — | — | — |
 | No lo encuentra | "No encontramos a … · Darlo de alta". | ✅ | Pase de invitado o de prueba desde acá (INV-1, CLA-6) | Alta | — |
 | Veredicto | A pantalla completa del color: emoji, foto (si tiene), nombre grande, el porqué, avisos, "para ponerse al día $…". Suena distinto si entra o no. Enter anota (solo si puede), Esc vuelve a buscar, escribir busca a otro. (ENT-1) | ✅ | — | `estado_acceso` | 🔊/🔇 por compu |

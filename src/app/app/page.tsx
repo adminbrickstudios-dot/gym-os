@@ -9,6 +9,8 @@ import { textoCierre } from "@/lib/horarios";
 import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
 import { Pagar } from "./Pagar";
+import { MiQR } from "./MiQR";
+import { rpc } from "@/lib/panel/servidor";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -32,6 +34,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const zona = yo.zona!;
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
+    // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
+    const qr = await rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
       <div className="space-y-6">
@@ -48,6 +52,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           {v.vence_en && v.puede && <p className="texto-suave mt-1">Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}</p>}
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
+
+        {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (
           <section className="space-y-2" aria-label="Horarios del gimnasio" data-agenda-app>

@@ -1,10 +1,11 @@
 "use client";
 import { LinkPanel } from "@/components/panel/LinkPanel";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { Camara } from "./Camara";
 import { Mensaje } from "@/components/ui/Mensaje";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -27,7 +28,11 @@ function sonar(color: string) {
 const CLAVE_SONIDO = "gymos.entrada.sonido";
 
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
-export function Puerta({ sedeId }: { sedeId: string }) {
+const ES_QR = /^GYMOS1\./;
+
+export function Puerta({ sedeId, conQr = false }: { sedeId: string; conQr?: boolean }) {
+  const [camara, setCamara] = useState(false);
+  const [via, setVia] = useState<"recepcion" | "qr_socio">("recepcion");
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
@@ -46,7 +51,7 @@ export function Puerta({ sedeId }: { sedeId: string }) {
 
   useEffect(() => { campo.current?.focus(); }, []);
   useEffect(() => {
-    if (texto.trim().length < 2) { setSocios([]); return; }
+    if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
     const t = setTimeout(async () => {
       const r = await buscarSociosRapido(texto.trim());
       setSocios(r.socios ?? []);
@@ -57,10 +62,29 @@ export function Puerta({ sedeId }: { sedeId: string }) {
 
   const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
   const elegir = (s: ResultadoSocio) => empezar(async () => {
-    setElegido(s); setHecho(null); setError(null); setForzando(false);
+    setElegido(s); setHecho(null); setError(null); setForzando(false); setVia("recepcion");
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); if (sonido) sonar(r.v!.color); }
   });
+  // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
+  const porQr = useCallback((codigo: string) => empezar(async () => {
+    setCamara(false); setTexto(""); setHecho(null); setForzando(false);
+    const q = await leerQR(codigo.trim());
+    if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer el QR"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
+    const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
+    const r = await veredicto(s.socio_id, sedeId);
+    if (r.error) { setError(r.error); return; }
+    setError(null);
+    if (sonido) sonar(r.v!.color);
+    if (r.v!.puede) {
+      const e = await registrarEntrada(s.socio_id, sedeId, undefined, "qr_socio");
+      if (e.error) { setError(e.error); return; }
+      setHecho({ ...e.r!, nombre: s.nombre });
+      campo.current?.focus();
+      return;
+    }
+    setElegido(s); setVia("qr_socio"); setV(r.v!); setApto(r.apto ?? null);
+  }), [sedeId, sonido]);
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
     const r = await terminarPausa(elegido.socio_id, sedeId);
@@ -73,7 +97,7 @@ export function Puerta({ sedeId }: { sedeId: string }) {
   });
   const anotar = (forzar?: string) => empezar(async () => {
     if (!elegido) return;
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar);
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via);
     if (r.error) { setError(r.error); return; }
     setHecho({ ...r.r!, nombre: elegido.nombre });
     reiniciar();
@@ -99,10 +123,15 @@ export function Puerta({ sedeId }: { sedeId: string }) {
     <div className="space-y-5">
       <input
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); }}
-        onKeyDown={(e) => { if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]); if (e.key === "Escape") reiniciar(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && ES_QR.test(texto.trim())) { e.preventDefault(); porQr(texto); return; }   // lector USB
+          if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]);
+          if (e.key === "Escape") reiniciar();
+        }}
         placeholder="🔍 Nombre, DNI o número de socio" className="campo !min-h-16 !text-xl" aria-label="Buscar socio" autoComplete="off"
       />
-      <div className="flex justify-end -mt-3">
+      <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
+        {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto">📷 Leer QR</button>}
         <button type="button" onClick={cambiarSonido} className="text-sm texto-suave underline" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
           {sonido ? "🔊 Con sonido" : "🔇 Sin sonido"}
         </button>
@@ -183,6 +212,7 @@ export function Puerta({ sedeId }: { sedeId: string }) {
           </div>
         </section>
       )}
+      {camara && <Camara alLeer={porQr} alCerrar={() => { setCamara(false); campo.current?.focus(); }} />}
       {elegido && !v && ocupado && <div className="h-48 rounded-[var(--radio-grande)] bg-[var(--tarjeta)] animate-pulse" />}
     </div>
   );

@@ -15,6 +15,36 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-2 · QR del socio, rotativo, y lector con cámara
+
+**QUÉ HICE**
+- Configuración → Reglas → "Cómo entra la gente": "📱 QR del socio" ya se puede prender (antes decía "todavía no disponible").
+- App del socio: "📱 Tu QR para entrar". El código cambia cada 30 segundos y lo firma la base (HMAC con un secreto por socio que no sale de la base), así una captura vieja no sirve. Fondo blanco siempre, para que la cámara lo lea.
+- Entrada:
+  - "📷 Leer QR" abre la cámara y lee con jsQR.
+  - Un lector USB que escribe el código y Enter también anda.
+  - Si puede entrar, se anota solo como "con QR"; si no, queda el veredicto con el porqué.
+- Migración `20261104004800_qr_socio.sql`:
+  - `mi_qr` (solo el socio de esa cuenta), `leer_qr` (mostrador) y `formas_de_entrada`.
+  - Los secretos y los usos viven en `privado` (no se exponen; al unir socios se van con el que se va).
+  - Vale la ventana actual y la anterior (un minuto como mucho), una sola vez, solo en su gimnasio.
+- Pruebas:
+  - `supabase/pruebas/qr-socio.test.mjs`: apagado, una vez, ventana anterior, vencido, firma falsa, otro gimnasio, el profe no, otro usuario no lo saca.
+  - `scripts/e2e/ent-2.mjs` (8 pasos): la cámara de prueba de Chrome filma el QR (un .y4m hecho con ffmpeg) y la recepción lo lee de verdad.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La verificación completa con la app compilada (`next build` + `start`, más liviana que `next dev`) mostró que las pruebas tocaban botones antes de que React los tomara: onb-1, soc-7 y soc-8 fallaban solo ahí. Ahora la página marca `html[data-hidratado]` y las pruebas lo esperan después de cada carga.
+- soc-2 seguía buscando el link de notas de antes de SOC-3: lo actualicé.
+- Dependencias nuevas: `qrcode` (dibuja el QR) y `jsqr` (lo lee).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0048). Usa `pgcrypto`, que Supabase ya tiene en `extensions`.
+
+**LO QUE NO PUDE VERIFICAR**
+- La cámara de un celular real con la luz de una recepción: se probó con la cámara de prueba de Chrome filmando el QR.
+
+---
+
 ## 2026-11-05 · ENT-1 · Veredicto a pantalla completa, con sonido y teclado
 
 **QUÉ HICE**

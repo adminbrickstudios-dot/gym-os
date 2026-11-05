@@ -77,7 +77,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
-  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto",
+  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
@@ -463,8 +463,12 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <Tarjeta emoji="🚪" titulo="Cómo entra la gente" ayuda="La recepción busca al socio por nombre, DNI o número y le marca la entrada.">
             <div className="divide-y divide-[var(--borde)]" data-accesos>
               <Interruptor etiqueta="🛎️ Recepción" ayuda="Siempre prendida: es la forma de respaldo cuando falla todo lo demás." checked disabled readOnly />
-              {[["📱 QR del socio", "El socio muestra un QR en su app y la recepción lo lee con la cámara."],
-                ["📲 Tablet en la puerta", "El socio entra solo, sin pasar por la recepción."],
+              <Interruptor etiqueta="📱 QR del socio" checked={c.accesos_activos.includes("qr_socio")}
+                ayuda={c.accesos_activos.includes("qr_socio")
+                  ? "Prendido: el socio ve en su app un QR que cambia cada 30 segundos, y en Entrada aparece “📷 Leer QR” (cámara o lector). Si puede entrar, se anota solo."
+                  : "Apagado: la app no muestra el QR y en Entrada no está la cámara."}
+                onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_socio"])] : c.accesos_activos.filter((x) => x !== "qr_socio"))} />
+              {[["📲 Tablet en la puerta", "El socio entra solo, sin pasar por la recepción."],
                 ["🔑 Llavero o tarjeta", "Con un lector USB en la recepción."]].map(([t, a]) => (
                 <Interruptor key={t} etiqueta={t} ayuda={`${a} Todavía no está disponible.`} checked={false} disabled readOnly />
               ))}

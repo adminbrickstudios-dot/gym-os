@@ -70,8 +70,9 @@ try {
   const otros = acc.locator('input[role="switch"]');
   let apagadosBloqueados = 0;
   for (let i = 1; i < await otros.count(); i++) if (!(await otros.nth(i).isChecked()) && await otros.nth(i).isDisabled()) apagadosBloqueados++;
-  chequear(await recepcion.isChecked() && await recepcion.isDisabled() && apagadosBloqueados === 3,
-    "Recepción prendida siempre; QR, tablet y llavero aparecen como todavía no disponibles", "las formas de entrada no se ven como corresponde");
+  const qr = acc.locator("label", { hasText: "QR del socio" }).locator('input[role="switch"]');
+  chequear(await recepcion.isChecked() && await recepcion.isDisabled() && apagadosBloqueados === 2 && await qr.isEnabled(),
+    "Recepción prendida siempre; el QR se puede prender (ENT-2); tablet y llavero, todavía no disponibles", "las formas de entrada no se ven como corresponde");
   await capturar(p, "cfg6-compu-reglas", true);
   if (p.errores.length) falla(`dueña: ${p.errores.join(" | ")}`);
   await p.context().close();

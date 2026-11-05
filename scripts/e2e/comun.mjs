@@ -29,9 +29,11 @@ export const resultado = () => {
 };
 
 /** Navegador con *.localhost resuelto a la compu (demo.localhost, box.localhost…). */
-export async function navegador({ camara = false } = {}) {
+export async function navegador({ camara = false, video = null } = {}) {
   // camara: una cámara de mentira (Chrome dibuja un patrón) que da permiso sola, para probar las fotos.
-  const extra = camara ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [];
+  // video: lo que "filma" esa cámara (un .y4m; el .mjpeg Chrome no lo toma), por ejemplo un QR para el lector de la Entrada.
+  const extra = camara || video ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [];
+  if (video) extra.push(`--use-file-for-fake-video-capture=${video}`);
   return chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
 }
 
@@ -40,6 +42,15 @@ export async function pagina(b, viewport = COMPU) {
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
   p.errores = [];
+  // Con la app compilada el HTML llega antes que React: después de cada carga se espera a que los botones anden.
+  for (const metodo of ["goto", "reload"]) {
+    const original = p[metodo].bind(p);
+    p[metodo] = async (...a) => {
+      const r = await original(...a);
+      await p.waitForFunction(() => document.documentElement.dataset.hidratado === "1", null, { timeout: 20000 }).catch(() => {});
+      return r;
+    };
+  }
   p.on("pageerror", (e) => p.errores.push(`error en la página: ${e.message.slice(0, 200)}`));
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
   p.on("dialog", (d) => d.accept());

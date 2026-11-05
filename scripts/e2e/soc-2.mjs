@@ -40,7 +40,7 @@ try {
 
   await p.locator('a.pestana:has-text("Notas")').click();
   await p.locator("[data-notas]").waitFor({ timeout: 30000 });
-  chequear(await p.locator('[data-notas] a:has-text("nota")').count() === 1, "Notas: la nota y el botón para escribirla", "Notas sin botón");
+  chequear(await p.locator('[data-notas] button:has-text("Guardar nota")').count() === 1, "Notas: el lugar para escribir una nota (SOC-3)", "Notas sin botón");
   if (p.errores.length) falla(`dueña: ${p.errores.join(" | ")}`);
   await p.context().close();
 

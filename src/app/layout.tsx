@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Hidratado } from "@/components/Hidratado";
 
 // El título y el favicon de cada gimnasio salen de sus datos, en el
 // layout de sus paneles. Este es el de la plataforma.
@@ -17,7 +18,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-AR">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">{children}<Hidratado /></body>
     </html>
   );
 }

@@ -39,12 +39,19 @@ export async function terminarPausa(socioId: string, sedeId: string): Promise<{ 
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string): Promise<{ r?: ResultadoIngreso; error?: string }> {
+/** Un QR de socio (cámara o lector): la base dice de quién es, si vale y si ya se usó. */
+export async function leerQR(codigo: string): Promise<{ socio?: { socio_id: string; nombre: string; numero: number }; error?: string }> {
+  const panel = await contextoPanel();
+  try { return { socio: await rpc("leer_qr", { p_gimnasio_id: panel.gimnasio.id, p_codigo: codigo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" = "recepcion"): Promise<{ r?: ResultadoIngreso; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
     const r = await rpc<ResultadoIngreso>("registrar_ingreso", {
-      p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: "recepcion", p_forzar_motivo: forzarMotivo?.trim() || null,
+      p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: via, p_forzar_motivo: forzarMotivo?.trim() || null,
     });
     revalidatePath("/panel/entrada");
     revalidatePath("/panel");

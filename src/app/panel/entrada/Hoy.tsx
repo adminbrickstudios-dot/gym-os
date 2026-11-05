@@ -9,7 +9,7 @@ import { anularEntrada } from "./acciones";
 
 export type Ingreso = { ingreso_id: string; momento: string; socio_id: string; socio: string; numero: number; resultado: string; color: string; texto: string; via_acceso: string; registrado_por: string | null };
 const ETIQUETA: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
-const VIA: Record<string, string> = { recepcion: "", qr: " · con QR", kiosco: " · en la tablet", tarjeta: " · con llavero", molinete: " · molinete" };
+const VIA: Record<string, string> = { recepcion: "", qr_socio: " · con QR", qr_pared: " · QR de la pared", kiosco: " · en la tablet", nfc: " · con llavero", molinete: " · molinete" };
 
 export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
   const [anulando, setAnulando] = useState<string | null>(null);
