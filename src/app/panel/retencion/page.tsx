@@ -8,6 +8,7 @@ import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
+import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 
 export const metadata: Metadata = { title: "Retención" };
 
@@ -44,7 +45,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     // D2 (RET-2): la recepción también, sin la plata.
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const gestion = panel.yo.rol !== "recepcion";
-    const [resumen, todas, etiquetas, conEtiqueta, tablero, riesgoTodos] = await Promise.all([
+    const [resumen, todas, etiquetas, conEtiqueta, tablero, riesgoTodos, numeros] = await Promise.all([
       rpc<Resumen>("retencion_resumen", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Fila[]>("retencion", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<{ id: string; nombre: string; socios: number }[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -52,6 +53,8 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
       // RET-1: socios al día (12 semanas), altas y bajas del mes.
       gestion ? rpc<Tablero>("tablero_retencion", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
       rpc<Riesgo[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id }),
+      // COM-5: los números con sus nombres (dueño y encargado).
+      gestion ? rpc<NumerosRetencion>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
     ]);
     const hoyAlDia = tablero?.semanas.at(-1)?.al_dia ?? 0;
     const hace4 = tablero?.semanas.at(-5)?.al_dia ?? hoyAlDia;
@@ -85,6 +88,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">👋 Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.bajas_mes}</dd></div>
           <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">💸 Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
         </dl>}
+        {numeros && <NumerosDeRetencion n={numeros} />}
         <nav aria-label="Listas" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
           {LISTAS.map((l) => (
             <Link key={l.clave} href={url(l.clave, etiqueta)} aria-current={l.clave === lista.clave ? "page" : undefined}

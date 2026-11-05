@@ -6,6 +6,7 @@ import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { Gastos, type GastosMes } from "./Gastos";
+import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -27,12 +28,14 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const [r, gastos, motivos] = await Promise.all([
+    const [r, gastos, motivos, numeros] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
       panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
       // RET-3: por qué se fue la gente este mes.
       rpc<{ motivo: string; cantidad: number }[]>("motivos_baja_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
+      // COM-5: la retención en números (es de hoy: solo se muestra en el mes en curso).
+      pedido ? Promise.resolve(null) : rpc<NumerosRetencion>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
@@ -109,6 +112,13 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             )}
           </section>
         </div>
+
+        {numeros && r.en_curso && (
+          <section aria-labelledby="socios-numeros">
+            <h2 id="socios-numeros" className="titulo text-2xl mb-3">Socios</h2>
+            <NumerosDeRetencion n={numeros} />
+          </section>
+        )}
 
         {motivos.length > 0 && (
           <section aria-labelledby="motivos" data-motivos-baja>

@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-5 · Retención en números
+
+**QUÉ HICE**
+- En Retención (dueño y encargado) y en Resultado (mes en curso), tres números que se abren con la lista de nombres: el neto del mes (altas y bajas, con el motivo de cada baja), de los que se anotaron hace 3 meses cuántos siguen al día (y quiénes se fueron), y qué parte de los al día vino menos de 4 días en los últimos 30.
+- Migración 0125 (`retencion_numeros`, mismas cuentas de altas y bajas que el tablero). Prueba de base; 0,1 s con 3.000 socios.
+
+**PARA QUE MIRES VOS**
+- "Pocas visitas" usa los últimos 30 días y no el mes calendario: a principio de mes, todos darían "menos de 4".
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-5).
+
+---
+
 ## 2026-11-05 · COM-4 · Tareas del equipo
 
 **QUÉ HICE**

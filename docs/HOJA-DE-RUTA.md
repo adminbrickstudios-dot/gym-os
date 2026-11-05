@@ -407,7 +407,7 @@ bloque 18.
 - [x] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino — verificado: db (primer-mes: ficha, avisos de los días 1, 7 y 30, riesgo de la primera semana, meta 1 a 60; 360 pruebas en verde), e2e:com-2 (en la tanda)
 - [x] COM-3 · 🟢 · Avisar a todos los anotados de una clase — verificado: db (avisar-clase: un mensaje por persona con nombre, clase y día; queda anotado; el profe solo en las suyas y sin teléfonos si no tiene permiso; vacío no), e2e:com-3 (en la tanda). Mail: cuando exista AVI-2
 - [x] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio — verificado: db (tareas: cada uno las suyas, dueño todas, otra persona no la toca, reabrir), vitest (menú), e2e:com-4 (en la tanda)
-- [ ] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas
+- [x] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas — verificado: db (retencion-numeros: altas, bajas con motivo, cohorte de hace 3 meses, pocas visitas, la recepción no), 0,1 s con 3.000 socios, e2e:com-5 (en la tanda). "Pocas visitas" mira los últimos 30 días (el mes calendario daría todos "pocos" a principio de mes)
 - [ ] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada
 - [ ] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre
 - [ ] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago
