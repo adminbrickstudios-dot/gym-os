@@ -15,6 +15,27 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · VEN-5 · Deuda / cuenta corriente
+
+**QUÉ HICE**
+- Configuración → Cobros: "📒 Fiar (cuenta corriente)" con tope por socio. Viene apagado.
+- Vender, con un socio elegido, agrega el medio "📒 A cuenta" y dice cuánto más se le puede fiar. Si el socio debe, aparece "📒 Pagar lo que debe a cuenta".
+- La puerta deja entrar al que debe y lo pone en amarillo con "Debe $X a cuenta".
+- Migración `20261104006700_cuenta_corriente.sql`:
+  - Columnas `fiado_activo` y `fiado_tope`.
+  - Medio `cuenta_corriente` y tipo de ítem `deuda`.
+  - `privado.deuda_socio`.
+  - Copias de `privado.calcular_acceso` (0006), `public.vender` (0023), `privado.vender` y `precios_venta` (0066), configuración (0061) y `panel_inicio` (0013, para que "Cobrado hoy" no cuente lo fiado).
+- `supabase/pruebas/cuenta-corriente.test.mjs` (2 pruebas: tope, sin socio no, amarillo, pagar, no pagar deuda a cuenta, anular). `scripts/e2e/ven-5.mjs` (5 pasos; al final apaga el fiado).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En la base local con el gimnasio demo cargado, `acceso.test` y `clases.test` fallan porque los mails de prueba chocan con los de los usuarios demo. Ya estaba anotado; en una base limpia (la verificación completa) pasan.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió, se fió, se vio en la puerta y se pagó.
+
+---
+
 ## 2026-11-05 · VEN-3 · Convenios y descuentos automáticos
 
 **QUÉ HICE**

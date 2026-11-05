@@ -138,6 +138,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | VEN-6 | Anulan el dueño y el encargado (desde la ficha, desde Vender recién cobrado o desde el pedido en Inicio). La recepción pide solo ventas que cobró ella hoy. Si había efectivo de una caja ya cerrada, la devolución sale como retiro de la caja abierta de esa sede (si no hay ninguna abierta, no deja anular y lo dice). | Anular toca plata; el arqueo de una caja contada no se reabre. | — |
 | 2026-11-05 | VEN-4 | El stock se calcula (entradas + conteos − ventas no anuladas), no se guarda. Cada producto elige si lleva stock; al prenderlo se cuenta lo que hay. Vender muestra cuántos quedan y avisa, pero no frena una venta. Cargan mercadería y cuentan el dueño y el encargado; la recepción lo ve. | Una venta frenada por un número mal contado es peor que un stock negativo, que avisa que hay que contar. | Frenar la venta sin stock. |
 | 2026-11-05 | VEN-3 | El convenio se aplica solo a la cuota (no a pases, packs ni productos), por cuota, y nunca más que su precio. Lo crean, asignan y quitan el dueño y el encargado; la recepción lo ve. Un socio tiene uno a la vez; asignar otro reemplaza al anterior. Se guarda como descuento de la cuota con motivo "Convenio X" y no cuenta para el tope de la recepción. | D14: lo aplica Vender solo; que la recepción no pueda inventar descuentos y el dueño vea por qué se cobró menos. | Aplicarlo también a pases y packs. |
+| 2026-11-05 | VEN-5 | "A cuenta" es un medio de pago más en Vender: solo con socio, hasta el tope (deuda anterior + lo nuevo) y nunca para pagar deuda. La deuda sale de los pagos a cuenta menos los pagos de deuda (ventas no anuladas); no se guarda. La puerta deja entrar al que debe y lo pone en amarillo con "Debe $X a cuenta" (también si después se apaga el fiado). "Cobrado hoy" no suma lo fiado: la plata entra cuando paga la deuda. | D5. Si lo fiado contara como cobrado, el pago de la deuda se contaría dos veces. | Que deber deje afuera. |
 
 ---
 
@@ -266,7 +267,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
 - [x] VEN-4 · 🟢 · Productos con stock
 - [x] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
-- [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
+- [x] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
 - [x] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
 - [ ] CAJ-1 · 🟢 · Historial de turnos de caja
 - [ ] CAJ-2 · 🟢 · Cierre de caja para compartir

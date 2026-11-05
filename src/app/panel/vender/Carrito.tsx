@@ -36,7 +36,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
          precio_fijo: Number(preciosIniciales.matricula.monto), cantidad: 1 }] : []),
        ...(preciosIniciales.recargo ? [lineaRecargo(preciosIniciales.recargo)] : [])] : []);
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
-  const medios = MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio));
+  // VEN-5: "A cuenta" aparece si el gimnasio fía y hay socio elegido.
+  const medios = [...MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio)),
+    ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "📒 A cuenta" }] : [])];
   // Sin caja abierta no arranca en efectivo (no se podría cobrar, y mostraría su precio).
   const [medio, setMedio] = useState<Medio | null>((turnoId ? medios[0] : medios.find((m) => m.medio !== "efectivo") ?? medios[0])?.medio ?? null);
   const [mixto, setMixto] = useState(false);
@@ -79,7 +81,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const cambiar = (clave: string, cambio: Partial<Linea>) => setLineas((ls) => ls.map((l) => (l.clave === clave ? { ...l, ...cambio } : l)));
   const quitar = (clave: string) => setLineas((ls) => conRecargo(ls.filter((l) => l.clave !== clave)));
 
-  const medioPrecio = mixto ? null : medio;
+  const medioOk = medio && medios.some((m) => m.medio === medio) ? medio : (medios[0]?.medio ?? null);
+  const medioPrecio = mixto ? null : medioOk;
   const sinMedios = medios.length === 0;
   const total = useMemo(() => totalCarrito(lineas, medioPrecio, precios.convenio), [lineas, medioPrecio, precios.convenio]);
   // Montos escritos a mano: "1.500" es mil quinientos, no 1,5 (AUD-6).
@@ -93,10 +96,10 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     if (total == null) { setError("Hay algo en el carrito sin precio cargado"); return; }
     const pagos = total === 0 ? [] : mixto
       ? partes.filter((p) => monto(p.monto) > 0).map((p) => ({ medio: p.medio, monto: monto(p.monto) }))
-      : medio ? [{ medio, monto: total }] : [];
+      : medioOk ? [{ medio: medioOk, monto: total }] : [];
     const items = lineas.map((l) => ({
       tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
-      descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" ? l.precio_fijo : undefined,
+      descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" || l.tipo === "deuda" ? l.precio_fijo : undefined,
       descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
     }));
     const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos });
@@ -186,6 +189,10 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
               <Boton emoji="🏷️" titulo={`Cuota ${precios.cuota.plan}`} precio={precioUnitario({ clave: "", tipo: "cuota", nombre: "", cantidad: 1, precios: precios.cuota.precios }, medioPrecio)}
                 onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />
             )}
+            {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && (
+              <Boton emoji="📒" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
+                onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />
+            )}
             {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && (
               <Boton emoji="📝" titulo={`Matrícula ${precios.matricula.plan}`} precio={Number(precios.matricula.monto)}
                 onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />
@@ -244,7 +251,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                   <div className="flex items-center gap-2 mt-2">
                     <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo"} title={l.tipo === "recargo" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "deuda"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
@@ -271,8 +278,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           {!mixto ? (
             <div className="grid grid-cols-2 gap-2">
               {medios.map((m) => (
-                <button key={m.medio} type="button" aria-pressed={medio === m.medio} onClick={() => setMedio(m.medio)}
-                  className={`boton !min-h-12 text-[15px] ${medio === m.medio ? "!border-[var(--acento)] !bg-[color-mix(in_oklab,var(--acento),var(--fondo)_82%)]" : ""}`}>{m.texto}</button>
+                <button key={m.medio} type="button" aria-pressed={medioOk === m.medio} onClick={() => setMedio(m.medio)}
+                  className={`boton !min-h-12 text-[15px] ${medioOk === m.medio ? "!border-[var(--acento)] !bg-[color-mix(in_oklab,var(--acento),var(--fondo)_82%)]" : ""}`}>{m.texto}</button>
               ))}
             </div>
           ) : (
@@ -291,6 +298,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>}
           {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {mixto && <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>}
+          {precios.fiado && (medioOk === "cuenta_corriente" || mixto) && (
+            <p className="text-sm texto-suave mt-2" data-fiado>📒 Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
+          )}
         </div>
 
         <div className="flex items-baseline justify-between mt-6 pt-5 border-t border-[var(--borde)]">

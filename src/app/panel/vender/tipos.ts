@@ -1,5 +1,5 @@
 export type Precios = { lista: number | null; efectivo: number | null; transferencia: number | null; debito: number | null; credito: number | null };
-export type Medio = "efectivo" | "transferencia" | "debito" | "credito";
+export type Medio = "efectivo" | "transferencia" | "debito" | "credito" | "cuenta_corriente";
 export type PreciosVenta = {
   tope_descuento: number | null;
   /** Medios que acepta el gimnasio para cobrar acá (sin Caja, sin efectivo). */
@@ -11,13 +11,16 @@ export type PreciosVenta = {
   recargo?: { monto: number; atraso: number; dias: number } | null;
   /** Convenio vigente del socio (VEN-3): la base lo descuenta solo de la cuota. */
   convenio?: Convenio | null;
+  /** VEN-5: lo que debe a cuenta, y cuánto más se le puede fiar (si el gimnasio fía). */
+  deuda?: number | null;
+  fiado?: { tope: number; disponible: number } | null;
   pases: { plan_id: string; nombre: string; precios: Precios }[];
   packs: { plan_id: string; nombre: string; cantidad_clases: number; precios: Precios }[];
   productos: { producto_id: string; nombre: string; precio: number }[];
 };
 export type Linea = {
   clave: string;
-  tipo: "cuota" | "pase" | "pack" | "producto" | "matricula" | "recargo" | "otro";
+  tipo: "cuota" | "pase" | "pack" | "producto" | "matricula" | "recargo" | "deuda" | "otro";
   nombre: string;
   plan_id?: string;
   producto_id?: string;
@@ -33,7 +36,8 @@ export type Linea = {
 export function precioUnitario(l: Linea, medio: Medio | null): number | null {
   if (l.precio_fijo != null) return l.precio_fijo;
   if (!l.precios) return null;
-  return (medio ? l.precios[medio] : null) ?? l.precios.lista;
+  // "A cuenta" no tiene precio propio: rige el de lista.
+  return (medio && medio !== "cuenta_corriente" ? l.precios[medio] : null) ?? l.precios.lista;
 }
 
 export type Convenio = { nombre: string; tipo: "porcentaje" | "monto"; valor: number };

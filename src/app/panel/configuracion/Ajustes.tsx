@@ -24,6 +24,7 @@ export type Config = {
   medios_aceptados: string[]; banco_transferencia: string | null;
   reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
+  fiado_activo: boolean; fiado_tope: number;
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -82,7 +83,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia",
-           "recargo_tipo", "recargo_valor", "recargo_dias"],
+           "recargo_tipo", "recargo_valor", "recargo_dias", "fiado_activo", "fiado_tope"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
@@ -448,6 +449,16 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 </Campo>
                 {num("recargo_dias", "Con más de cuántos días de atraso", `Ej.: con ${c.recargo_dias || 10}, el que paga el día ${(c.recargo_dias || 10) + 1} de atraso o después lo paga`)}
               </div>
+            )}
+          </Tarjeta>
+          <Tarjeta emoji="📒" titulo="Fiar (cuenta corriente)" ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
+            <Interruptor etiqueta="📒 Se puede cobrar a cuenta" ayuda={c.fiado_activo ? "Prendido: hasta el tope de abajo por socio." : "Apagado: nadie queda debiendo."}
+              checked={c.fiado_activo} onChange={(e) => set("fiado_activo", e.target.checked)} />
+            {c.fiado_activo && (
+              <Campo etiqueta="Tope por socio ($)" ayuda="Lo máximo que puede deber cada uno">
+                <input type="number" inputMode="numeric" min={0} className="campo" aria-label="Tope para fiar" value={Number.isNaN(c.fiado_tope) ? "" : c.fiado_tope}
+                  onChange={(e) => set("fiado_tope", (e.target.value === "" ? "" : Number(e.target.value)) as never)} />
+              </Campo>
             )}
           </Tarjeta>
           {pie("cobros")}
