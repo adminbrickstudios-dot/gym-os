@@ -26,14 +26,22 @@ for (const rol of Object.keys(PROHIBIDO)) {
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
     // Si el navegador se cae (pasa con la máquina cargada), se abre otro y se vuelve a entrar.
     const abrir = async () => {
-      if (!b.isConnected()) b = await navegador();
-      const x = await pagina(b, viewport);
-      await entrar(x, `${rol}@ejemplo.invalid`);
-      return x;
+      for (let intento = 1; ; intento++) {
+        try {
+          if (!b.isConnected()) b = await navegador();
+          const x = await pagina(b, viewport);
+          await entrar(x, `${rol}@ejemplo.invalid`);
+          return x;
+        } catch (e) { if (intento >= 2) throw e; }
+      }
     };
-    let p = await abrir();
+    let p;
+    try { p = await abrir(); }
+    catch (e) { falla(`${rol} · ${tam}: no pudo entrar (${e.message.split("\n")[0]})`); continue; }
     for (const ruta of RUTAS) {
-      if (p.isClosed() || !b.isConnected()) p = await abrir();
+      if (p.isClosed() || !b.isConnected()) {
+        try { p = await abrir(); } catch (e) { falla(`${rol} · ${tam} · ${ruta}: no pudo volver a entrar (${e.message.split("\n")[0]})`); break; }
+      }
       const antes = p.errores.length;
       // Una navegación cortada o lenta (con el servidor de desarrollo cargado) se reintenta una vez;
       // si vuelve a fallar, se anota esa ruta y el barrido sigue con las demás.
