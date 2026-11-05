@@ -314,7 +314,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CLA-1 · 🟡 D16 · Políticas de reserva y faltas — verificado: db (faltas-clases: apagada nada, lo de antes no cuenta, bloquea N días, la recepción anota igual, con presente no es falta), e2e:cla-1 (configurar, la app avisa y frena, la ficha lo muestra). "Descontar del pack" quedó como CLA-9
 - [x] CLA-2 · 🟢 · Turnos fijos (abono a un horario) — verificado: db (turnos-fijos: apagados no, abonarse reserva, cancelar una semana se respeta, al que no puede no se le reserva, tope = cupo, quitar), e2e:cla-2 (prender, el socio lo elige y lo quita, la ficha lo muestra)
 - [x] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados — verificado: db (bandeja-avisos: el anotado con el mensaje armado, primero, avisado ✓; mensajes: 11), e2e:cla-3 (la recepción cancela, Avisos de hoy y la campana del socio)
-- [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
+- [x] CLA-4 · 🟢 · WOD / rutina del día en la clase — verificado: db (wod: el profe en su clase, no en otra, la recepción no, vacío lo borra, lo ve el anotado), e2e:cla-4
 - [x] CLA-5 · 🟢 · Ocupación por horario — verificado: db (ocupacion: promedio de los que vinieron contra el cupo, canceladas no cuentan, la recepción no), e2e:clases (la sección en la grilla)
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
 - [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)

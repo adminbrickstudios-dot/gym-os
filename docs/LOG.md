@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-4 · WOD de la clase
+
+**QUÉ HICE**
+- En la clase (panel): "🏋️ WOD de esta clase". Lo escriben el profe (en sus clases), el encargado o el dueño, y queda quién lo escribió. La recepción lo ve, no lo edita. Vacío lo borra.
+- App del socio (Reservar): debajo de cada clase que reservó, el WOD si lo hay.
+- Migración 0085 (`clases.wod`, `guardar_wod`, `wods_socio`, copia de `clase_detalle`), prueba de base `wod`, `e2e:cla-4`.
+
+---
+
 ## 2026-11-05 · CLA-3 · Cancelar una clase avisando a los anotados
 
 **QUÉ HICE**

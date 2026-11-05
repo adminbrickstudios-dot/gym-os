@@ -14,3 +14,5 @@ export const cancelarClase = async (claseId: string, motivo: string) =>
 /** CLA-7: deshacer un presente marcado por error (con motivo; las reglas de quién y hasta cuándo, en la base). */
 export const deshacerPresente = async (claseId: string, socioId: string, motivo: string) =>
   r(() => rpc("anular_presente", { p_clase_id: claseId, p_socio_id: socioId, p_motivo: motivo }), claseId);
+/** CLA-4: el WOD de la clase (vacío lo borra). */
+export const guardarWod = async (claseId: string, texto: string) => r(() => rpc("guardar_wod", { p_clase_id: claseId, p_texto: texto }), claseId);

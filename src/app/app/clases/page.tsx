@@ -20,14 +20,17 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
     if (!sede) throw new Error("El gimnasio no tiene sedes activas");
-    const [todas, politica, turnos, horarios] = await Promise.all([
+    const [todas, politica, turnos, horarios, wods] = await Promise.all([
       rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
       // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.
       rpc<{ reglas: string[]; bloqueo: { texto: string } | null }>("politica_reservas", { p_socio_id: yo.socio.socio_id }),
       // CLA-2: sus turnos fijos (si el gimnasio los usa) y los horarios para elegir.
       rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: yo.socio.socio_id }),
       rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: yo.socio.socio_id }),
+      // CLA-4: el WOD de las clases que reservó.
+      rpc<{ clase_id: string; wod: string }[]>("wods_socio", { p_socio_id: yo.socio.socio_id }),
     ]);
+    const wodDe = new Map(wods.map((w) => [w.clase_id, w.wod]));
     const clases = todas.filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
     const reservaDe = new Map((yo.reservas ?? []).map((r) => [r.clase_id, r.reserva_id]));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -54,6 +57,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
               {c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
                 : <Reservar claseId={c.clase_id} socioId={yo.socio!.socio_id} lleno={c.cupo != null && c.confirmadas >= c.cupo} />}
+              {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio>🏋️ {wodDe.get(c.clase_id)}</p>}
             </li>
           ))}</ul>
         )}
