@@ -15,6 +15,26 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CAJ-1, CAJ-2 · Historial de turnos y cierre para compartir
+
+**QUÉ HICE**
+- **CAJ-1:** Caja → "🗂️ Turnos anteriores" (dueño y encargado). Cada turno muestra:
+  - quién abrió y quién cerró;
+  - inicial, efectivo cobrado, ingresos menos retiros, cuánto tenía que haber y cuánto se contó;
+  - Justa, Sobraron o Faltaron;
+  - los otros medios;
+  - cada movimiento con su motivo;
+  - las ventas y las anuladas.
+  - Migración `20261104006800_historial_caja.sql` (`historial_caja`). `supabase/pruebas/historial-caja.test.mjs`.
+- **CAJ-2:** al cerrar, "📲 Mandar el cierre por WhatsApp" con el cierre escrito. También "📲 Compartir" en cada turno del historial. El texto lo arma `src/lib/caja.ts` (con vitest), con lo que ya calculó la base.
+- La caja abierta muestra "📒 A cuenta" entre los otros medios.
+- `scripts/e2e/caj-1.mjs` (7 pasos, incluye que la recepción no ve el historial).
+
+**LO QUE NO PUDE VERIFICAR**
+- Que WhatsApp lo abra en un celular. Verifiqué el link, no el teléfono.
+
+---
+
 ## 2026-11-05 · VEN-5 · Deuda / cuenta corriente
 
 **QUÉ HICE**

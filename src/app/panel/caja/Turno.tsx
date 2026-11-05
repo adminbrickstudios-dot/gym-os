@@ -1,10 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { linkCompartir, textoCierre } from "@/lib/caja";
 import { formatearPesos } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
 
-const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago" };
+const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago", cuenta_corriente: "📒 A cuenta" };
 
 export function AbrirCaja({ cajaId, nombre }: { cajaId: string; nombre: string }) {
   const [monto, setMonto] = useState("");
@@ -44,7 +45,13 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
           <div><dt className="texto-tenue text-sm">Tenía que haber</dt><dd className="numero text-3xl">{formatearPesos(cierre.esperado)}</dd></div>
         </dl>
         <OtrosMedios r={cierre} />
-        <button type="button" className="boton boton-principal mt-8" onClick={() => router.refresh()}>👍 Listo</button>
+        <div className="flex flex-wrap gap-2 mt-8">
+          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}>👍 Listo</button>
+          {/* CAJ-2: el cierre, escrito, para mandárselo al dueño. */}
+          <a className="boton" data-compartir-cierre target="_blank" rel="noopener noreferrer"
+            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
+            📲 Mandar el cierre por WhatsApp</a>
+        </div>
       </section>
     );
   }

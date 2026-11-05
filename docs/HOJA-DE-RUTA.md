@@ -269,8 +269,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
 - [x] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
 - [x] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
-- [ ] CAJ-1 · 🟢 · Historial de turnos de caja
-- [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
+- [x] CAJ-1 · 🟢 · Historial de turnos de caja
+- [x] CAJ-2 · 🟢 · Cierre de caja para compartir
 - [ ] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
 - [ ] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
 - [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción

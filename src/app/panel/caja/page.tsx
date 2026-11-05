@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
@@ -23,7 +24,8 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="💵" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata." />
+        <Encabezado emoji="💵" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
+          accion={ve ? <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton">🗂️ Turnos anteriores</Link> : undefined} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja" />}
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
         <div className="space-y-4">
