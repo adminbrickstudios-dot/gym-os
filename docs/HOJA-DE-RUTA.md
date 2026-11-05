@@ -337,7 +337,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-11 · 🟢 · Auditoría botón por botón: App del socio — verificado: e2e:app (pendiente de la tanda final); inventario en docs/paneles/app.md
 - [x] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio) — verificado: e2e:push-1 (manifest con la marca y service worker), e2e:app-1 (la invitación a instalar). Sin verificar: instalar en un celular real
 - [x] APP-3 · 🟢 · Historial de pagos y asistencia en la app — verificado: db (historial-socio: pagos y entradas, lo nuevo primero, otro socio no), e2e:app-3
-- [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
+- [x] APP-6 · 🟢 · Novedades del gimnasio en la app — verificado: db (novedades-gimnasio: publicar, la app la ve, quitar, recepción no publica, máximo 3, otro no), e2e:app-6 (pendiente de la tanda final). Sin foto todavía
 - [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
 - [x] APP-8 · 🟢 · Pedir pausa o baja desde la app — verificado: db (pedidos-socio), e2e:app-8 (pendiente de la tanda final)
 - [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)

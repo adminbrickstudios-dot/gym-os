@@ -8,6 +8,7 @@ Probado haciendo clic con `npm run e2e:app` (`scripts/e2e/panel-app.mjs`) y los 
 |---|---|---|---|---|---|
 | Logo y nombre (arriba) | Vuelve al inicio. | ✅ (ahora `<Link>`, antes recargaba la página) | — | — | Logo y nombre |
 | Salir | Cierra la sesión. | ✅ | — | `/salir` | — |
+| 📣 Novedades | Lo que publicó el gimnasio, arriba del semáforo, hasta el día elegido. | ✅ (APP-6) | Foto opcional | `novedades_socio` | Avisos de hoy → En la app |
 | ¿Quién entrena hoy? | Si la cuenta tiene varios socios (familia), elige uno; el resto de las pantallas lo recuerda en `?socio=`. | ✅ | — | `mi_socio` | — |
 | 🔔 Campana | Novedades con el número sin ver. | ✅ (AVI-5) | — | `campana_socio` | — |
 | Semáforo | "Podés entrar / No podés entrar", el porqué y hasta cuándo está cubierto. | ✅ | — | `estado_acceso` vía `mi_socio` | Reglas de vencimiento |
@@ -26,5 +27,4 @@ Probado haciendo clic con `npm run e2e:app` (`scripts/e2e/panel-app.mjs`) y los 
 
 ## Lo que se pensó en cadena
 
-- Novedades del gimnasio publicadas por el dueño (APP-6) van arriba del semáforo cuando existan.
 - Entrar con mail y código (APP-9) cambia `/ingresar`, no la app.

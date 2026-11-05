@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-6 · Novedades del gimnasio en la app
+
+**QUÉ HICE**
+- 📬 Avisos de hoy → "📣 En la app de los socios": el dueño o el encargado escriben un aviso corto (hasta 280 letras) y hasta qué día se ve (máximo 60 días, hasta 3 a la vez); lo quitan cuando quieran. La recepción las ve, no publica.
+- En la app, arriba del semáforo, las novedades vigentes.
+- Migración 0096 (`novedades_gimnasio` con RLS y FK compuesta; `novedades_panel`, `publicar_novedad`, `quitar_novedad`, `novedades_socio`), prueba de base `novedades-gimnasio`, `e2e:app-6`.
+
+**SIN ARREGLAR**
+- La foto opcional del pedido original no está: pide subir imágenes por el servidor como las de la marca (CFG-2). Anotado en `docs/paneles/app.md`.
+
+---
+
 ## 2026-11-05 · AUD-11 · App del socio botón por botón
 
 **QUÉ HICE**

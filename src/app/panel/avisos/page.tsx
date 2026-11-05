@@ -5,6 +5,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { FilaAviso, type Aviso } from "./Aviso";
 import { TandaAvisos } from "./Tanda";
+import { Novedades, type Novedad } from "./Novedades";
 
 export const metadata: Metadata = { title: "Avisos de hoy" };
 
@@ -17,7 +18,10 @@ export default async function Avisos() {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const avisos = await rpc<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id });
+    const [avisos, novedades] = await Promise.all([
+      rpc<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<Novedad[]>("novedades_panel", { p_gimnasio_id: panel.gimnasio.id }),
+    ]);
     const zona = panel.gimnasio.zona_horaria;
     const hora = (m: string | null) => (m ? new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m)) : null);
     const faltan = avisos.filter((a) => !a.avisado_en).length;
@@ -26,6 +30,8 @@ export default async function Avisos() {
       <>
         <Encabezado emoji="📬" titulo="Avisos de hoy"
           bajada={faltan ? `${faltan === 1 ? "Falta avisarle a 1 persona" : `Falta avisarles a ${faltan} personas`}. El mensaje ya está escrito: tocá WhatsApp y queda anotado.` : "A quién escribirle hoy, con el mensaje ya escrito."} />
+        <Novedades gimnasioId={panel.gimnasio.id} novedades={novedades} puede={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"}
+          hoy={new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date())} />
         {avisos.length === 0 ? <Vacio emoji="✨" titulo="Hoy no hay a quién avisar">Cuando a alguien se le termine la cuota, deje de venir o cumpla años, aparece acá con el mensaje listo.</Vacio> : (
           <div className="space-y-10">
             {grupos.map(([k, lista]) => (

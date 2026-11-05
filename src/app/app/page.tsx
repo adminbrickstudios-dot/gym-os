@@ -39,7 +39,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha, novedades] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -49,6 +49,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ disponible: boolean; monto?: number; descripcion?: string }>("pago_online_disponible", { p_socio_id: s.socio_id }).catch(() => null),
       // APP-7: cuántas veces vino este mes y cuántas semanas seguidas.
       rpc<{ semanas_seguidas: number; entradas_mes: number; entradas_mes_anterior: number; vino_esta_semana: boolean }>("racha_socio", { p_socio_id: s.socio_id }).catch(() => null),
+      // APP-6: lo que publicó el gimnasio.
+      rpc<{ id: string; texto: string }[]>("novedades_socio", { p_socio_id: s.socio_id }).catch(() => []),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -71,6 +73,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
             </Link>
           )}
         </header>
+
+        {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app>📣 {n.texto}</p>)}
 
         <section className="rounded-[var(--radio-grande)] p-6 border"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 82%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
