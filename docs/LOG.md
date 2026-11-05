@@ -15,6 +15,24 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-5 · Entrada sin internet
+
+**QUÉ HICE**
+- Diseño (corto, porque toca la puerta): la copia la calcula la base con `calcular_acceso` (nada se reimplementa en el navegador); sin internet solo se anota "entró" a los que la copia dice que pueden; al volver, cada entrada se registra con `privado.registrar_ingreso` —la misma función de siempre— en el momento en que pasó, así que la base vuelve a decidir y descuenta el pack o el pase como siempre. Si dice que no podía, queda **rechazado** y la pantalla lo muestra con nombre y motivo: nadie entra gratis en silencio. Sin internet no se puede "dejar pasar" (el tope de la recepción no se puede controlar).
+- Entrada: "📴 ¿Se te corta internet? Guardar una copia en esta compu" (se prende por compu, no por gimnasio: la copia tiene nombres y DNI y no tiene que quedar en cualquier celular). Prendido, baja la copia cada 15 minutos; vale hasta la medianoche del gimnasio. Se da cuenta sola de que no hay internet (aviso del navegador + una prueba cada 20 s) o con "Usarla ahora".
+- Sin internet: buscar por nombre, número o DNI en la copia; "✅ Entró" o "⛔ sin internet no se deja pasar". Lo anotado queda guardado en la compu y se registra solo al volver; reintentar no duplica (cada entrada lleva un id de la compu, tabla `ingresos_sin_internet`).
+- Migración 0135 (`ingresos_sin_internet` con RLS, `copia_entrada`, `sincronizar_sin_internet`: hora entre 3 días atrás y ahora, socio del gimnasio, hasta 500 por vez). Prueba de base sin-internet (la copia es exactamente calcular_acceso; el que no podía queda rechazado; reintentar no duplica; hora futura y socio ajeno, error), vitest de la búsqueda y la vigencia, e2e seg-5 con el navegador cortado de verdad.
+- Medido en la base grande (2.639 socios activos): la copia tarda 2,4 s en la base y pesa ~430 KB sin comprimir.
+
+**PARA QUE MIRES VOS**
+- Si alguien entró sin internet y después entró de nuevo con internet antes de sincronizar, la regla de siempre de "doble toque" (60 s) puede tomar la entrada posterior como la misma: queda una sola. Raro, y nunca da acceso de más.
+- La copia guarda nombre, número, DNI y estado de cada socio en el navegador de esa compu (se borra al apagarla).
+
+**LO QUE NO PUDE VERIFICAR**
+- La pantalla: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (seg-5, que corta la red del navegador con Playwright). Un corte real (router apagado) no lo probé.
+
+---
+
 ## 2026-11-05 · COM-14 · TV de la sala
 
 **QUÉ HICE**

@@ -6,6 +6,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Puerta } from "./Puerta";
+import { SinInternet } from "./SinInternet";
 import { Hoy, type Ingreso } from "./Hoy";
 import type { ResultadoSocio } from "@/app/panel/acciones";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
@@ -38,7 +39,11 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
           accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
-          <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
+          <div className="flex flex-col gap-6">
+            {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
+            <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
+          </div>
           <div>
             <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />
             <Invitados sedeId={sede.id} inicial={invitados} zona={panel.gimnasio.zona_horaria} />

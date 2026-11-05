@@ -166,6 +166,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | COM-12 | El lugar se elige en un paso aparte después de reservar (no se tocó `reservar`); lo garantiza un índice único sobre las reservas confirmadas. En espera no se elige. La recepción también puede asignarlo; el profe solo mira. | Reservar sigue igual; el índice frena a dos que tocan a la vez. | Pasar el lugar dentro de `reservar` (una sola llamada). |
 | 2026-11-05 | COM-13 | Grados: el profe puede otorgarlos (toma el examen); anular, solo dueño o encargado; la recepción solo mira. "Listos para rendir" se calcula con asistencias y meses desde el grado actual, o desde la primera clase si no tiene. | Es la persona que evalúa; anular deshace un hecho y queda para los que gestionan. | Migración nueva sobre `otorgar_grado`. |
 | 2026-11-05 | COM-14 | La TV muestra los nombres con la inicial del apellido y usa su propio token (otra tabla que la tablet): solo sirve para mirar, no da entrada. "La de ahora" incluye la que empieza en 15 minutos. | Una pantalla en la sala la ve cualquiera; un token de TV filtrado no tiene que abrir la puerta. | Migración nueva sobre `privado.clase_tv`. |
+| 2026-11-05 | SEG-5 | Sin internet solo se anota a los que la copia dice que pueden (no hay "dejar pasar"); al volver, la base registra cada entrada con la función de siempre en la hora en que pasó y, si no podía, queda rechazada y se muestra. La copia se prende por compu (tiene nombres y DNI) y vale hasta la medianoche. | La puerta nunca decide en el navegador; nadie entra gratis en silencio; el tope de la recepción no se puede controlar sin internet. | Permitir "dejar pasar" sin internet (con el tope chequeado al volver). |
 
 ---
 
@@ -439,7 +440,7 @@ bloque 18.
 - [ ] MP-3 · 🔌 · Débito automático mensual
 - [ ] AVI-3 · 🔌 · WhatsApp automático oficial
 - [ ] ENT-5 · 🔌 · Molinete o lector de tarjeta
-- [ ] SEG-5 · 🟢 · Entrada sin internet (después de todo lo demás: es grande)
+- [x] SEG-5 · 🟢 · Entrada sin internet (después de todo lo demás: es grande) — verificado: db (sin-internet: la copia es calcular_acceso fila por fila, sincronizar registra con la función de siempre en la hora en que pasó, el que no podía queda rechazado, reintentar no duplica, hora imposible y socio ajeno fallan), vitest (buscarEnCopia, copiaVigente), e2e:seg-5 (en la tanda)
 
 ---
 

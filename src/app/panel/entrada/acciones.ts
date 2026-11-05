@@ -103,3 +103,23 @@ export async function confirmarInvitado(id: string, sedeId: string): Promise<{ e
     return { invitados: await invitadosHoy() };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** SEG-5: la copia de quién puede entrar hoy (la calcula la base), para cuando se corte internet. */
+export type CopiaEntrada = { generada_en: string; valida_hasta: string; socios: { s: string; n: string; num: number; dni: string | null; p: boolean; c: string; t: string }[] };
+export async function copiaEntrada(sedeId: string): Promise<{ copia?: CopiaEntrada; error?: string }> {
+  try { return { copia: await rpc<CopiaEntrada>("copia_entrada", { p_sede_id: sedeId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** SEG-5: lo anotado sin internet. La base vuelve a decidir con la hora en que pasó; reintentar no duplica. */
+export type EntradaSinInternet = { id_local: string; socio_id: string; momento: string; nombre: string };
+export type Sincronizada = { id_local: string; nombre: string; resultado: string; color: string; texto: string; ya_estaba: boolean };
+export async function sincronizarSinInternet(sedeId: string, entradas: EntradaSinInternet[]): Promise<{ r?: Sincronizada[]; error?: string }> {
+  try {
+    const r = await rpc<Sincronizada[]>("sincronizar_sin_internet", {
+      p_sede_id: sedeId, p_entradas: entradas.map(({ id_local, socio_id, momento }) => ({ id_local, socio_id, momento })),
+    });
+    revalidatePath("/panel/entrada");
+    return { r };
+  } catch (e) { return { error: (e as Error).message }; }
+}
