@@ -95,7 +95,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
-        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} />}
+        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (

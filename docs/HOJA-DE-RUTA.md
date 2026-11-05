@@ -343,7 +343,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1) — verificado: db (entrar-con-mail: vincula por mail verificado, menores no, ya vinculado lo dice, solo el servidor), e2e:app-9 (pendiente de la tanda final). Falta la plantilla del mail en Supabase
 - [x] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link) — verificado: db (referidos: código fijo, el pedido entra como referido, uno ajeno no cuenta, sin página no hay link, otro socio no), e2e:ref-1 (pendiente de la tanda final). Sin pase ni premio: REF-2
 - [ ] REF-2 · 🟡 · Pase de prueba y premio del referido (días gratis al que recomendó) — tocan quién entra y plata: decide Mateo (junto con CLA-6)
-- [ ] DIS-12 · 🟢 · Pulido: App del socio
+- [x] DIS-12 · 🟢 · Pulido: App del socio — verificado: e2e:dis-12 (pendiente de la tanda final: 5 pantallas en el celular, un verde)
 
 ### 12 · Equipo y cuentas
 - [ ] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta

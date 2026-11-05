@@ -5,7 +5,8 @@ import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/Camara";
 import { escanearEntrada } from "./acciones";
 
-export function EscanearEntrada({ gimnasioId, socioId }: { gimnasioId: string; socioId: string }) {
+/** principal: el verde de la pantalla solo si es lo que tiene que hacer ahora (si debe pagar, el verde es pagar). */
+export function EscanearEntrada({ gimnasioId, socioId, principal = true }: { gimnasioId: string; socioId: string; principal?: boolean }) {
   const [abierta, setAbierta] = useState(false);
   const [r, setR] = useState<{ resultado?: string; color?: string; texto?: string; error?: string } | null>(null);
   const [ocupado, empezar] = useTransition();
@@ -13,7 +14,7 @@ export function EscanearEntrada({ gimnasioId, socioId }: { gimnasioId: string; s
   const entro = r && !r.error && (r.resultado === "entro" || r.resultado === "entro_modo_aviso");
   return (
     <section className="space-y-3" data-escanear-entrada>
-      <button type="button" className="boton boton-principal w-full !min-h-16 text-lg" disabled={ocupado} onClick={() => { setR(null); setAbierta(true); }}>
+      <button type="button" className={`boton ${principal ? "boton-principal" : ""} w-full !min-h-16 text-lg`} disabled={ocupado} onClick={() => { setR(null); setAbierta(true); }}>
         {ocupado ? "Entrando…" : "📷 Escanear el QR de la entrada"}
       </button>
       {r && (

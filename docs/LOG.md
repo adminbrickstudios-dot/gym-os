@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-12 · Pulido de la app del socio
+
+**QUÉ HICE**
+- Un solo verde por pantalla: en el inicio, "📷 Escanear el QR" es verde solo si puede entrar sin deber (si debe, el verde es pagar); "Invitar para hoy" y "Mandar por WhatsApp" dejan de ser verdes. En Clases, cada "Reservar" deja de ser verde (eran todos). En Mi membresía, el motivo de baja elegido se marca con el borde, no en verde.
+- `e2e:dis-12`: inicio, clases, novedades, historial y mi membresía en el celular (sin desborde, botones de 44 px o más, a lo sumo un verde), con capturas `dis12-*`.
+
+---
+
 ## 2026-11-05 · REF-1 · Invitá a un amigo
 
 **QUÉ HICE**

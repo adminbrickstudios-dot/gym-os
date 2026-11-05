@@ -16,7 +16,7 @@ export function Referir({ datos }: { datos: LinkReferido }) {
       <h2 className="titulo text-2xl">🤝 Invitá a un amigo</h2>
       <p className="texto-suave">Mandale tu link: deja sus datos y el gimnasio le escribe para que pruebe una clase.</p>
       <div className="flex flex-wrap gap-2">
-        <a href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener noreferrer" className="boton boton-principal flex-1">💬 Mandar por WhatsApp</a>
+        <a href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener noreferrer" className="boton flex-1">💬 Mandar por WhatsApp</a>
         <button type="button" className="boton" onClick={copiar} data-copiar-link={link}>{copiado ? "✓ Copiado" : "🔗 Copiar link"}</button>
       </div>
       {datos.invitados > 0 && (

@@ -23,7 +23,7 @@ export function Invitar({ gimnasioId, socioId, datos }: { gimnasioId: string; so
           <input className="campo" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre y apellido" aria-label="Nombre de tu invitado" required />
           <input className="campo" value={dni} onChange={(e) => setDni(e.target.value)} inputMode="numeric" placeholder="DNI" aria-label="DNI de tu invitado" required />
           <div className="flex gap-2">
-            <button type="submit" className="boton boton-principal" disabled={ocupado}>{ocupado ? "Invitando…" : "Invitar para hoy"}</button>
+            <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Invitando…" : "Invitar para hoy"}</button>
             <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
           </div>
         </form>

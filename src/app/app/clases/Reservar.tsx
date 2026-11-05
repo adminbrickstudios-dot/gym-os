@@ -7,7 +7,7 @@ export function Reservar({ claseId, socioId, lleno }: { claseId: string; socioId
   const [ocupado, empezar] = useTransition();
   return (
     <>
-      <button type="button" disabled={ocupado || msj.ok} className={`boton !min-h-11 ${lleno ? "" : "boton-principal"}`}
+      <button type="button" disabled={ocupado || msj.ok} className={`boton !min-h-11 ${lleno ? "texto-suave" : ""}`}
         onClick={() => empezar(async () => { const r = await reservarClase(claseId, socioId); setMsj(r.error ? { texto: r.error } : { ok: true }); })}>
         {msj.ok ? "✅" : lleno ? "Anotarme en espera" : "Reservar"}
       </button>

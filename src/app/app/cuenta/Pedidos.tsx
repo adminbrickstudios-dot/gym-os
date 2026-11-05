@@ -67,7 +67,7 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
       </div>
       <fieldset className="grid grid-cols-2 gap-2"><legend className="text-sm texto-suave mb-1">¿Por qué te vas?</legend>
         {MOTIVOS.map(([v, t]) => (
-          <label key={v} className={`boton !justify-start cursor-pointer ${motivo === v ? "boton-principal" : ""}`}>
+          <label key={v} className={`boton !justify-start cursor-pointer ${motivo === v ? "!border-[var(--acento)] font-bold" : "opacity-80"}`}>
             <input type="radio" name="motivo" value={v} checked={motivo === v} onChange={() => setMotivo(v)} className="sr-only" />{t}
           </label>
         ))}
