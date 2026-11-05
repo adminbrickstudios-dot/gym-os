@@ -1,0 +1,17 @@
+"use server";
+import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/formato";
+import { contextoPanel, rpc } from "@/lib/panel/servidor";
+
+const r = async (f: () => Promise<unknown>): Promise<{ error?: string }> => {
+  try { await f(); revalidatePath("/panel/resultado"); return {}; } catch (e) { return { error: (e as Error).message }; }
+};
+
+/** RES-3: un gasto del mes (solo el dueño: lo decide la base). */
+export async function agregarGasto(mes: string, categoria: string, detalle: string, monto: string) {
+  const n = leerMonto(monto);
+  if (!(n > 0)) return { error: "Escribí el monto, por ejemplo 250.000" };
+  return r(async () => { const p = await contextoPanel(); await rpc("guardar_gasto", { p_gimnasio_id: p.gimnasio.id, p_mes: mes, p_categoria: categoria, p_detalle: detalle, p_monto: n }); });
+}
+export const quitarGasto = async (id: string) => r(() => rpc("quitar_gasto", { p_gasto_id: id }));
+export const repetirGastos = async (mes: string) => r(async () => { const p = await contextoPanel(); await rpc("repetir_gastos", { p_gimnasio_id: p.gimnasio.id, p_mes: mes }); });

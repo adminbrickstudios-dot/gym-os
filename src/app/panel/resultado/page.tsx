@@ -5,6 +5,7 @@ import { MEDIO } from "@/lib/caja";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { Gastos, type GastosMes } from "./Gastos";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -25,7 +26,11 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const r = await rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });
+    const [r, gastos] = await Promise.all([
+      rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
+      // RES-3: los gastos (hay sueldos) los ve solo el dueño.
+      panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
+    ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -101,6 +106,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             )}
           </section>
         </div>
+
+        {gastos && <Gastos g={gastos} />}
 
         <section aria-labelledby="contador">
           <h2 id="contador" className="titulo text-2xl mb-1">Para el contador</h2>

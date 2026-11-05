@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RES-3 · Gastos y ganancia
+
+**QUÉ HICE**
+- En Resultado, para el dueño: "Gastos y ganancia" del mes. Muestra cobrado − gastos = ganancia (en rojo si es pérdida). Se cargan gastos (alquiler, sueldos, servicios, otros; con detalle y monto escrito como sea: "250.000", "1.234,50"). Se quitan, y en la base quedan anulados. Si el mes está vacío, hay un botón "🔁 Repetir los gastos del mes pasado".
+- El encargado ve el Resultado sin gastos (hay sueldos).
+- Migración 0078 (`gastos`, `gastos_mes`, `guardar_gasto`, `quitar_gasto`, `repetir_gastos`), prueba de base `gastos`, e2e `e2e:res-3`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada fuera de lo de arriba.
+
+---
+
 ## 2026-11-05 · RES-2 · Exportar el mes para el contador
 
 **QUÉ HICE**
