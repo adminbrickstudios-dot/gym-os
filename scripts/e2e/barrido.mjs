@@ -28,9 +28,12 @@ for (const rol of Object.keys(PROHIBIDO)) {
     await entrar(p, `${rol}@ejemplo.invalid`);
     for (const ruta of RUTAS) {
       const antes = p.errores.length;
-      // Una navegación cortada por la anterior (ERR_ABORTED, con el servidor de desarrollo cargado) se reintenta una vez.
+      // Una navegación cortada o lenta (con el servidor de desarrollo cargado) se reintenta una vez;
+      // si vuelve a fallar, se anota esa ruta y el barrido sigue con las demás.
       const ir = () => p.goto(`${GIMNASIO()}${ruta}`, { timeout: 120000 });
-      const r = await ir().catch(async (e) => { if (!/ERR_ABORTED/.test(e.message)) throw e; await p.waitForTimeout(1000); return ir(); });
+      let r;
+      try { r = await ir().catch(async () => { await p.waitForTimeout(2000); return ir(); }); }
+      catch (e) { falla(`${rol} · ${tam} · ${ruta}: no cargó (${e.message.split("\n")[0]})`); continue; }
       await p.waitForLoadState("networkidle").catch(() => {});
       const texto = await p.locator("body").innerText().catch(() => "");
       const nombre = `${rol}-${tam}${ruta.replaceAll("/", "-")}`;

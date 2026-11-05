@@ -39,7 +39,7 @@ test("apagada no pasa nada; prendida, lo de antes no cuenta", async () => {
   const p = await politica();
   assert.equal(p.bloqueo, null, "la falta de antes de prender la regla no bloquea");
   assert.ok(p.reglas.some((r) => /no podés reservar por 3 días/.test(r)));
-  await como(u.dueno, () => t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { falta_politica: "descontar" }]), /Faltas: elegí/));
+  await como(u.dueno, () => t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { falta_politica: "multar" }]), /Faltas: elegí/));
 });
 
 test("faltó sin cancelar: el socio no reserva por 3 días; la recepción lo anota igual; con presente no es falta", async () => {
