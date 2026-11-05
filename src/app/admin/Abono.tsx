@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { anularPagoBrik, asignarPlanBrik, guardarPlanBrik, registrarPagoBrik } from "./acciones";
 
@@ -48,6 +48,8 @@ export function PlanesBrik({ planes }: { planes: PlanBrik[] }) {
 /** El abono de un gimnasio: su plan, los pagos que registra BRIK y hasta cuándo cubren. */
 export function AbonoGimnasio({ gimnasioId, abono, planes }: { gimnasioId: string; abono: EstadoAbono; planes: PlanBrik[] }) {
   const [monto, setMonto] = useState(abono.precio_mensual ? String(abono.precio_mensual) : "");
+  // Al asignar el plan después de abrir la página, el monto se completa con su precio.
+  useEffect(() => { if (abono.precio_mensual) setMonto((m) => m || String(abono.precio_mensual)); }, [abono.precio_mensual]);
   const [hasta, setHasta] = useState("");
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);

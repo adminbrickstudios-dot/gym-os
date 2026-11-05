@@ -35,6 +35,7 @@ try {
   await ab.locator("select").selectOption(await ab.locator("option", { hasText: `Plan e2e ${s}` }).getAttribute("value"));
   await ab.locator('[data-abono="al_dia"]').waitFor({ timeout: 30000 });
   ok("le asigna el plan: “✅ Al día” (14 días hasta el primer pago)");
+  await ab.locator("input[inputmode=decimal]").fill("30000");
   await ab.locator('input[type="date"]').fill(new Date(Date.now() + 40 * 86400000).toISOString().slice(0, 10));
   await ab.getByRole("button", { name: /Registrar pago/ }).click();
   await ab.getByText(/cubre hasta/).first().waitFor({ timeout: 30000 });
