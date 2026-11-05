@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-1 · App del socio instalable
+
+**QUÉ HICE**
+- Lo grueso ya estaba de PUSH-1: `manifest.webmanifest` con el nombre, el ícono y los colores del gimnasio (abre en `/app`, pantalla completa) y el service worker.
+- En la app del socio, "📲 Tené a tu gimnasio en tu pantalla de inicio":
+  - en Android/Chrome, con botón "Instalar";
+  - en iPhone, con el cómo (Compartir → Agregar a inicio);
+  - ya instalada no aparece; "Ahora no" la esconde en ese celular.
+- `scripts/e2e/app-1.mjs`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Instalarla en un celular real (Chrome o Safari de verdad).
+
+---
+
 ## 2026-11-05 · DIS-8 · Pulido de Retención
 
 **QUÉ HICE**

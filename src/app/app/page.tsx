@@ -10,6 +10,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
 import { Pagar } from "./Pagar";
 import { PagarOnline } from "./PagarOnline";
+import { Instalar } from "./Instalar";
 import { MiQR } from "./MiQR";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
@@ -104,6 +105,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
 
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
+        <Instalar />
 
         {yo.plan && (
           <section className="tarjeta p-5">

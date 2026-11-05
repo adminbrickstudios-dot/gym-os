@@ -333,7 +333,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 11 · App del socio
 - [ ] AUD-11 · 🟢 · Auditoría botón por botón: App del socio
-- [ ] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio)
+- [x] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio) — verificado: e2e:push-1 (manifest con la marca y service worker), e2e:app-1 (la invitación a instalar). Sin verificar: instalar en un celular real
 - [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
 - [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
 - [ ] APP-7 · 🟢 · Racha y entradas del mes

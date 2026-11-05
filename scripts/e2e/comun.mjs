@@ -38,8 +38,9 @@ export async function navegador({ camara = false, video = null } = {}) {
 }
 
 /** Página nueva que junta errores de la página y respuestas 5xx. */
-export async function pagina(b, viewport = COMPU) {
-  const ctx = await b.newContext({ viewport, deviceScaleFactor: 1 });
+export async function pagina(b, viewport = COMPU, opciones = {}) {
+  // opciones: más del contexto (por ejemplo el userAgent de un iPhone).
+  const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...opciones });
   const p = await ctx.newPage();
   p.errores = [];
   // Con la app compilada el HTML llega antes que React, y el contenido de la pantalla (que viene en
