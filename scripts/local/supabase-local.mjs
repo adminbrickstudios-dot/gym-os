@@ -13,6 +13,7 @@
 //   /storage/v1/object/…            como Storage, en .local/storage: subir y
 //                                   borrar solo con la clave de servicio (así
 //                                   sube el panel), leer los buckets públicos
+//                                   y bajar los privados con la clave de servicio
 //
 // Las pantallas leen y escriben solo por RPC, así que no hace falta
 // imitar las lecturas de tablas: un GET a una tabla devuelve 404.
@@ -270,6 +271,7 @@ async function rpc(req, res, nombre, cuerpo) {
 const BUCKETS = {
   marcas: { publico: true, max: 2 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] },
   comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
+  fotos_socios: { publico: false, max: 512 * 1024, tipos: ["image/jpeg"] },
 };
 const CARPETA_STORAGE = path.join(CARPETA, "storage");
 function archivoDe(bucket, ruta) {
@@ -296,6 +298,14 @@ async function storage(req, res, ruta, crudo) {
   if (claims?.role !== "service_role") return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio sube o borra (con sesión lo deciden las políticas de Supabase)");
   const [bucket, rutaObjeto] = [objeto[1], objeto[2] && decodeURIComponent(objeto[2])];
   const b = BUCKETS[bucket];
+  // Bajar un objeto (download) con la clave de servicio: así el panel sirve los buckets privados.
+  if (req.method === "GET" && rutaObjeto) {
+    const f = archivoDe(bucket, rutaObjeto);
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+    res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size });
+    return res.end(fs.readFileSync(f));
+  }
   if (req.method === "POST" && rutaObjeto) {
     const f = archivoDe(bucket, rutaObjeto);
     if (!f) return errorStorage(res, 400, "InvalidKey", "Invalid key");

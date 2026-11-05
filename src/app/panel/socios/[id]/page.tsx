@@ -9,6 +9,7 @@ import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { Calendario, type Asistencia } from "./Calendario";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
+import { Foto } from "./Foto";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -37,11 +38,12 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes, asistencia, ne] = await Promise.all([
+    const [f, planes, asistencia, ne, foto] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
       rpc<NotasYEtiquetas>("notas_y_etiquetas", { p_socio_id: id }),
+      rpc<string | null>("foto_socio", { p_socio_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -54,10 +56,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         <header>
           <Link href="/panel/socios" className="texto-suave hover:text-[var(--texto)]">← Socios</Link>
           <div className="flex items-start gap-4 mt-4">
-            <span className="size-16 sm:size-20 rounded-3xl grid place-items-center titulo text-3xl flex-none"
-              style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 75%)` }}>
-              {(s.nombre[0] ?? "") + (s.apellido[0] ?? "")}
-            </span>
+            <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
+              version={foto ? foto.slice(-36, -4) : null} />
             <div className="min-w-0">
               <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
               <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.tiene_app ? " · 📱 usa la app" : ""}</p>

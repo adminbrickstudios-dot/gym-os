@@ -64,3 +64,35 @@ export async function agregarNota(socioId: string, texto: string) { return hacer
 export async function borrarNota(socioId: string, notaId: string) { return hacer(socioId, () => rpc("borrar_nota", { p_nota_id: notaId })); }
 export async function ponerEtiqueta(socioId: string, nombre: string) { return hacer(socioId, () => rpc("poner_etiqueta", { p_socio_id: socioId, p_nombre: nombre })); }
 export async function sacarEtiqueta(socioId: string, etiquetaId: string) { return hacer(socioId, () => rpc("sacar_etiqueta", { p_socio_id: socioId, p_etiqueta_id: etiquetaId })); }
+
+// ── Foto (SOC-7) ────────────────────────────────────────────────────
+// La base arma la ruta y la confirma; el servidor sube con la clave de servicio
+// (el bucket es privado y nadie sube con su sesión) y borra la foto anterior.
+export async function guardarFoto(socioId: string, form: FormData): Promise<{ error?: string }> {
+  const archivo = form.get("foto");
+  if (!(archivo instanceof Blob) || archivo.size === 0) return { error: "No llegó la foto." };
+  if (archivo.type !== "image/jpeg" || archivo.size > 512 * 1024) return { error: "La foto tiene que ser JPG de hasta 512 KB." };
+  try {
+    const ruta = await rpc<string>("preparar_foto_socio", { p_socio_id: socioId });
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const sb = clienteServicio().storage.from("fotos_socios");
+    const { error } = await sb.upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: "image/jpeg", upsert: false });
+    if (error) return { error: `No se pudo subir la foto: ${error.message}` };
+    const anterior = await rpc<string | null>("confirmar_foto_socio", { p_socio_id: socioId, p_ruta: ruta });
+    if (anterior) await sb.remove([anterior]);
+    revalidatePath(`/panel/socios/${socioId}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function quitarFoto(socioId: string): Promise<{ error?: string }> {
+  try {
+    const anterior = await rpc<string | null>("confirmar_foto_socio", { p_socio_id: socioId, p_ruta: null });
+    if (anterior) {
+      const { clienteServicio } = await import("@/lib/supabase/servicio");
+      await clienteServicio().storage.from("fotos_socios").remove([anterior]);
+    }
+    revalidatePath(`/panel/socios/${socioId}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

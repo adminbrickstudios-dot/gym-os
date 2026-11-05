@@ -87,7 +87,13 @@ export function Puerta({ sedeId }: { sedeId: string }) {
       {elegido && v && (
         <section aria-live="polite" className="rounded-[var(--radio-grande)] p-6 sm:p-8 border"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 84%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-          <p className="text-5xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
+          <div className="flex items-center gap-4">
+            <p className="text-5xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
+            {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-entrada
+              className="size-24 sm:size-28 rounded-3xl object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          </div>
           <p className="titular text-5xl sm:text-6xl mt-4">{elegido.nombre}</p>
           <p className="text-2xl mt-3 font-semibold" style={{ color: `color-mix(in oklab, ${colorVar(v.color)}, var(--texto) 35%)` }}>{v.texto}</p>
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}

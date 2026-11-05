@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-7 · Foto del socio con la cámara
+
+**QUÉ HICE**
+- Ficha: tocar el cuadrado con las iniciales abre "📷 Foto del socio": cámara (compu o celular) con "📸 Sacar foto", o "🖼️ Elegir una imagen"; "Quitar la foto". Se recorta cuadrada a 480 px en el navegador.
+- Entrada: al elegir al socio se ve su foto junto al veredicto.
+- Migración `20261104003900_foto_socio.sql`: `preparar_foto_socio` (la ruta la arma la base), `confirmar_foto_socio` (solo esa ruta; devuelve la anterior para borrarla), `foto_socio` (equipo, también profe); bucket privado `fotos_socios` (512 KB, JPG). La sube el servidor con la clave de servicio; `/panel/socios/<id>/foto` la sirve después de preguntar a la base.
+- `supabase-local` baja objetos privados con la clave de servicio (como Supabase) y conoce el bucket nuevo. Las pruebas e2e pueden usar la cámara de prueba de Chrome (`navegador({ camara: true })`).
+- `supabase/pruebas/foto-socio.test.mjs` y `scripts/e2e/soc-7.mjs` (6 pasos).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0039). El bucket `fotos_socios` lo crea la migración en Supabase.
+
+**LO QUE NO PUDE VERIFICAR**
+- Con una cámara real y en Supabase de verdad (probado con la cámara de prueba de Chrome y el storage local).
+
+---
+
 ## 2026-11-04 · SOC-6 · Cumpleaños
 
 **QUÉ HICE**

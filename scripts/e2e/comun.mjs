@@ -29,8 +29,10 @@ export const resultado = () => {
 };
 
 /** Navegador con *.localhost resuelto a la compu (demo.localhost, box.localhost…). */
-export async function navegador() {
-  return chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1"] });
+export async function navegador({ camara = false } = {}) {
+  // camara: una cámara de mentira (Chrome dibuja un patrón) que da permiso sola, para probar las fotos.
+  const extra = camara ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [];
+  return chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
 }
 
 /** Página nueva que junta errores de la página y respuestas 5xx. */
