@@ -28,7 +28,8 @@ try {
   await baja.getByText("El precio").click();
   await baja.locator("input:not([type=radio])").fill("Prueba e2e");
   await baja.getByRole("button", { name: "Pedir la baja" }).click();
-  await s.locator("[data-pedido-baja-ok]").waitFor({ timeout: 30000 });
+  // Al guardar, la página se refresca y el formulario pasa a "Pediste la baja" (puede ganarle al mensaje).
+  await s.locator("[data-pedido-baja-ok], [data-baja-pendiente]").first().waitFor({ timeout: 30000 });
   chequear(true, "baja pedida: “el gimnasio te va a contactar”");
   await s.reload();
   chequear(await s.locator("[data-baja-pendiente]").isVisible(), "al volver: “Pediste la baja”, sin el formulario");
