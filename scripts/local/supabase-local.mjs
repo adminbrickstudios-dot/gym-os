@@ -250,7 +250,9 @@ async function rpc(req, res, nombre, cuerpo) {
   const c = await pool.connect();
   try {
     await c.query("begin");
-    await c.query(`select set_config('role', $1, true), set_config('request.jwt.claims', $2, true)`, [rol, JSON.stringify(claims)]);
+    // Como PostgREST: los encabezados de la llamada en request.headers (el PIN del equipo viaja así, CAJ-3).
+    await c.query(`select set_config('role', $1, true), set_config('request.jwt.claims', $2, true), set_config('request.headers', $3, true)`,
+      [rol, JSON.stringify(claims), JSON.stringify(Object.fromEntries(Object.entries(req.headers).filter(([k]) => k.startsWith("x-"))))]);
     const { rows } = await c.query(sql, params);
     await c.query("commit");
     if (f.es_void) return enviar(res, 204);

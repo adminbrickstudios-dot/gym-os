@@ -8,7 +8,7 @@ import { Navegacion } from "./Navegacion";
 import { ProveedorSecciones } from "./LinkPanel";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
-export function Marco({ panel, children, enPlataforma = false }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean }) {
+export function Marco({ panel, children, enPlataforma = false, atiende = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
   return (
@@ -26,6 +26,10 @@ export function Marco({ panel, children, enPlataforma = false }: { panel: PanelG
       />
       <div className="lg:pl-72">
         <main className="mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
+          {/* CAJ-3: en esta compu alguien puso su PIN: lo que se haga queda a su nombre. */}
+          {atiende && (
+            <p className="pildora mb-6 !text-base" data-atiende={atiende}>👤 Atiende {atiende} · <Link href="/panel/pin" className="underline">Cambiar</Link></p>
+          )}
           <ProveedorSecciones rol={rol} apagadas={panel.secciones_apagadas}>{children}</ProveedorSecciones>
         </main>
       </div>

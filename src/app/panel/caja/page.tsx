@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BotonPin } from "@/components/panel/BotonPin";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
@@ -29,7 +30,8 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     return (
       <>
         <Encabezado emoji="💵" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
-          accion={ve ? <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton">🗂️ Turnos anteriores</Link> : undefined} />
+          accion={<div className="flex flex-wrap gap-2"><BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/caja" />
+            {ve && <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton">🗂️ Turnos anteriores</Link>}</div>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja" />}
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
         <div className="space-y-4">

@@ -15,6 +15,45 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CAJ-3 · PIN del equipo en la recepción
+
+**QUÉ HICE**
+- Mi cuenta → "🔢 Mi PIN para la recepción" (4 números).
+- En la compu del mostrador:
+  - Vender y Caja muestran "🔢 ¿Quién atiende?" cuando alguien del equipo tiene PIN.
+  - Se pone el PIN y arriba de todo aparece "👤 Atiende Martín · Cambiar".
+  - Lo que se hace queda a su nombre: la venta, la caja, quién dejó pasar.
+  - "Salir" vuelve a la sesión sola.
+- Cómo funciona por dentro:
+  - La base firma un token de 12 horas.
+  - El panel lo guarda en una cookie que solo lee el servidor y lo manda como encabezado `x-gymos-operador`.
+  - `privado.exigir_rol` y `privado.exigir_equipo` lo leen. Sin encabezado, todo funciona como antes.
+- Migración `20261104007100_pin_equipo.sql`:
+  - Tablas `privado.pines_equipo`, `privado.secretos_operador` y `privado.intentos_pin`.
+  - Funciones `privado.operador`, `guardar_mi_pin`, `entrar_con_pin`, `operador_actual`.
+  - Copias de `exigir_rol` (0006) y `exigir_equipo` (0013).
+- `supabase-local` pasa los encabezados `x-…` en `request.headers`, como PostgREST.
+- `supabase/pruebas/pin-equipo.test.mjs` (3 pruebas):
+  - queda anotado quien puso el PIN;
+  - el PIN de la dueña en la sesión de la recepción no da permisos de dueña, y al revés tampoco;
+  - un token adulterado da error;
+  - 5 errores bloquean;
+  - el hash no se lee.
+- `scripts/e2e/caj-3.mjs` (5 pasos: la ficha dice "cobró Martín" con la sesión de Ana). Al empezar borra los intentos de corridas anteriores en la base local.
+- `npm run db:pruebas` completo: las únicas fallas son las 16 de siempre (mails que chocan con el demo).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Si un PIN equivocado diera error de la base, se desharía el intento anotado y nunca se bloquearía. Por eso devuelve `{ error, quedan }` en vez de error.
+- Si después de poner el PIN la página se redirige desde el servidor, a veces se pinta mal: una vez apareció la pantalla de ingresar, y el aviso "Atiende …" no se actualizaba. Lo resolví navegando la página entera.
+
+**PARA QUE REVISES**
+- Toca permisos: `exigir_rol` y `exigir_equipo` los usan todas las funciones. El cambio solo puede achicar permisos (intersección) y anotar a otra persona del mismo gimnasio. Las pruebas de base y de pantalla pasan. Igual conviene que lo mires antes de mergear.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que PostgREST de Supabase pase el encabezado `x-gymos-operador` en `request.headers`. Según la documentación lo hace, pero no está ejecutado contra Supabase. Si no lo pasara, el PIN no anota a nadie, no rompe nada.
+
+---
+
 ## 2026-11-05 · CAJ-5 · Caja olvidada abierta
 
 **QUÉ HICE**

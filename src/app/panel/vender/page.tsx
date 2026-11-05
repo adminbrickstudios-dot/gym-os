@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BotonPin } from "@/components/panel/BotonPin";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
@@ -28,7 +29,8 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
     const socio = ficha ? { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), color: ficha.acceso.color, texto: ficha.acceso.texto } : null;
     return (
       <>
-        <Encabezado emoji="🛒" titulo="Vender" bajada="Cuotas, pases, packs y productos. El precio lo pone el sistema." />
+        <Encabezado emoji="🛒" titulo="Vender" bajada="Cuotas, pases, packs y productos. El precio lo pone el sistema."
+          accion={<BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/vender" />} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/vender" />}
         <Carrito sedeId={sede.id} turnoId={turno} socioInicial={socio} preciosIniciales={precios} conCuota={!!socio && sp.cuota === "1"} desdeEntrada={sp.desde === "entrada"}
           puedeAnular={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} stockInicial={stock} />

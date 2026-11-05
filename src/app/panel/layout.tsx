@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
@@ -43,5 +43,6 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     }
     throw e;
   }
-  return <Marco panel={panel} enPlataforma={enPlataforma}>{children}</Marco>;
+  const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
+  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null}>{children}</Marco>;
 }

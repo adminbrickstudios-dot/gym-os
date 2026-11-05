@@ -3,12 +3,26 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 
+export const COOKIE_OPERADOR = "gymos_operador";
+
+/**
+ * CAJ-3: si en esta compu alguien puso su PIN, cada llamada lleva su token
+ * (firmado por la base) para que quede anotado quién operó. Uno vencido no se
+ * manda (la base lo rechazaría y trabaría todo el panel): queda la sesión sola.
+ */
+function encabezadoOperador(valor: string | undefined): Record<string, string> {
+  const partes = valor?.split(".");
+  if (!valor || partes?.length !== 3 || Number(partes[1]) * 1000 < Date.now() + 60_000) return {};
+  return { "x-gymos-operador": valor };
+}
+
 // Cliente de Supabase para Server Components, Server Actions y Route
 // Handlers. @supabase/ssr en todo el flujo de auth: guarda la sesión (y el
 // verificador PKCE) en cookies, que el servidor sí puede leer.
 export async function crearClienteServidor() {
   const almacen = await cookies();
   return createServerClient(supabaseUrl(), supabaseAnon(), {
+    global: { headers: encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value) },
     cookies: {
       getAll: () => almacen.getAll(),
       setAll: (lista) => {
