@@ -39,7 +39,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -47,6 +47,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       // PAY-1: si el gimnasio conectó MercadoPago, cuánto sale pagar ahora.
       rpc<{ disponible: boolean; monto?: number; descripcion?: string }>("pago_online_disponible", { p_socio_id: s.socio_id }).catch(() => null),
+      // APP-7: cuántas veces vino este mes y cuántas semanas seguidas.
+      rpc<{ semanas_seguidas: number; entradas_mes: number; entradas_mes_anterior: number; vino_esta_semana: boolean }>("racha_socio", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -78,6 +80,13 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           {v.vence_en && v.puede && <p className="texto-suave mt-1">Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}</p>}
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
+
+        {racha && (racha.entradas_mes > 0 || racha.semanas_seguidas > 0) && (
+          <section className="grid grid-cols-2 gap-3" data-racha>
+            <div className="tarjeta p-4"><p className="numero text-4xl">{racha.entradas_mes}</p><p className="texto-suave text-sm">{racha.entradas_mes === 1 ? "vez" : "veces"} este mes{racha.entradas_mes_anterior ? ` · ${racha.entradas_mes_anterior} el anterior` : ""}</p></div>
+            <div className="tarjeta p-4"><p className="numero text-4xl">{racha.semanas_seguidas >= 2 ? "🔥 " : ""}{racha.semanas_seguidas}</p><p className="texto-suave text-sm">{racha.semanas_seguidas === 1 ? "semana" : "semanas"} seguidas{racha.semanas_seguidas > 0 && !racha.vino_esta_semana ? " · vení esta semana para seguir" : ""}</p></div>
+          </section>
+        )}
 
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}

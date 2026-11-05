@@ -336,7 +336,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio) — verificado: e2e:push-1 (manifest con la marca y service worker), e2e:app-1 (la invitación a instalar). Sin verificar: instalar en un celular real
 - [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
 - [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
-- [ ] APP-7 · 🟢 · Racha y entradas del mes
+- [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
 - [ ] APP-8 · 🟢 · Pedir pausa o baja desde la app
 - [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)
 - [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)

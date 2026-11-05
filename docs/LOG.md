@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-7 · Racha y entradas del mes
+
+**QUÉ HICE**
+- App del socio, debajo del semáforo, dos números:
+  - cuántas veces vino este mes (y el anterior);
+  - 🔥 semanas seguidas, con "vení esta semana para seguir" si todavía no vino.
+- Sin entradas, no aparece.
+- Migración 0091 (`racha_socio`), prueba de base `racha`, `e2e:app-7`.
+
+---
+
 ## 2026-11-05 · APP-1 · App del socio instalable
 
 **QUÉ HICE**
