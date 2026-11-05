@@ -41,6 +41,8 @@ try {
   await esperar(logoBox, /Logo listo/);
   const src = await logoBox.locator("img").getAttribute("src");
   chequear(/\/storage\/v1\/object\/public\/marcas\/.+\/marca\/logo-[0-9a-f]{32}\.png$/.test(src ?? ""), "subir un PNG lo guarda en el bucket con una ruta del gimnasio", `el logo quedó en ${src}`);
+  // Solo la carpeta de este gimnasio: otras bases locales anteriores pudieron dejar archivos con otro id.
+  const carpeta = (src ?? "").match(/\/marcas\/([^/]+)\/marca\//)?.[1] ?? "sin-gimnasio";
   const vista = await p.context().newPage();
   const r = await vista.goto(src);
   chequear(r.status() === 200 && r.headers()["content-type"] === "image/png", "el logo se puede ver desde su link público", `el link del logo dio ${r.status()} ${r.headers()["content-type"]}`);
@@ -54,7 +56,7 @@ try {
   await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.svg", mimeType: "image/svg+xml", buffer: svg });
   await esperar(logoBox, /Logo listo/);
   const src2 = await logoBox.locator("img").getAttribute("src");
-  const logos = archivosEn("").filter((f) => /logo-/.test(String(f)));
+  const logos = archivosEn(carpeta).filter((f) => /logo-/.test(String(f)));
   chequear(src2 !== src && /\.svg$/.test(src2) && logos.length === 1, "cambiar el logo deja un solo archivo (el viejo se borra)", `quedaron ${logos.length} logos: ${logos.join(", ")}`);
 
   // ── Lo que no se acepta ──
@@ -81,7 +83,7 @@ try {
   // ── Quitar el logo ──
   await logoBox.locator('button:has-text("Quitar")').click();
   await esperar(logoBox, /sin logo/);
-  chequear(archivosEn("").filter((f) => /logo-/.test(String(f))).length === 0, "quitar el logo borra el archivo", "quitar el logo dejó el archivo");
+  chequear(archivosEn(carpeta).filter((f) => /logo-/.test(String(f))).length === 0, "quitar el logo borra el archivo", "quitar el logo dejó el archivo");
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   chequear(await p.locator("aside img").count() === 0, "sin logo, la barra muestra solo el nombre", "la barra sigue con una imagen");
   // Vuelve a dejar un logo para el resto (página y app).
@@ -115,7 +117,7 @@ try {
   await p.locator('button[aria-label="Quitar la foto 3"]').click();
   await esperar(fotos, /Foto quitada/);
   chequear(await fotos.getAttribute("data-fotos") === "2", "quitar una foto deja 2", `quedaron ${await fotos.getAttribute("data-fotos")}`);
-  chequear(archivosEn("").filter((f) => /foto-/.test(String(f))).length === 2, "la foto quitada se borra del bucket", "quedó el archivo de la foto quitada");
+  chequear(archivosEn(carpeta).filter((f) => /foto-/.test(String(f))).length === 2, "la foto quitada se borra del bucket", "quedó el archivo de la foto quitada");
   const once = await Promise.all(Array.from({ length: 11 }, (_, i) => imagen(p, { ancho: 40, alto: 40, color: "#a78bfa", texto: String(i) }).then((buffer) => ({ name: `x${i}.png`, mimeType: "image/png", buffer }))));
   await p.setInputFiles('input[aria-label="Elegir fotos"]', once);
   m = await esperar(fotos, /queda lugar para 10/);
