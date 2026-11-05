@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-13 · Grados y cinturones
+
+**QUÉ HICE**
+- Clases → "🥋 Grados" (para todo el equipo; no ocupa lugar en el menú de los gimnasios que no los usan). El dueño o el encargado arman los grados de cada actividad en orden, con color y lo que pide cada uno: clases y meses desde el grado anterior.
+- "✅ Listos para rendir": se calcula (no se guarda) con las asistencias y el tiempo desde el grado actual, o desde su primera clase de esa actividad si todavía no tiene. El profe, el encargado o el dueño tocan "🥋 Rindió: Amarillo" y queda anotado quién lo dio y cuándo.
+- Ficha del socio: su grado por actividad, lo que le falta para el próximo, el historial y "Rindió"; el dueño o el encargado lo anulan con motivo (no se borra). App del socio: "🥋 Tu grado" con lo que le falta.
+- Migración 0133 (`grados`, `grados_socio` con RLS; `grados_panel`, `guardar_grado`, `archivar_grado`, `otorgar_grado`, `anular_grado_socio`, `grados_socio`). Prueba de base grados, vitest de `textoRequisitos`, e2e com-13 (deja todo como estaba), barrido con /panel/grados.
+
+**PARA QUE MIRES VOS**
+- Decisión mía: el profe puede otorgar grados (es el que toma el examen); anularlos, solo el dueño o el encargado. La recepción los ve, no los da.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-13).
+
+---
+
 ## 2026-11-05 · COM-12 · Lugar puntual en la sala
 
 **QUÉ HICE**

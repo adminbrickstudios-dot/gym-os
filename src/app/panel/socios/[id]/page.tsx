@@ -21,6 +21,8 @@ import { Llavero, type DatosLlavero } from "./Llavero";
 import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
+import { GradosFicha } from "./GradosFicha";
+import type { GradosSocio } from "@/lib/clases/grados";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
@@ -49,7 +51,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -78,6 +80,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ dia: number; de: number; entradas: number; meta: number; primera_semana_floja: boolean } | null>("primer_mes_socio", { p_socio_id: id }) : Promise.resolve(null),
       // COM-6: lo que firmó y lo que le falta firmar (se firma acá, en el mostrador).
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ pendientes: Pendiente[]; firmados: { titulo: string; version: number; nombre: string; via: string; firmado_en: string; vigente: boolean }[] }>("documentos_socio", { p_socio_id: id }) : Promise.resolve(null),
+      // COM-13: su grado en las actividades con grados (cinturones).
+      pestana === "resumen" && !panel.secciones_apagadas.includes("clases") ? rpc<GradosSocio>("grados_socio", { p_socio_id: id }) : Promise.resolve([] as GradosSocio),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -117,6 +121,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               ))}
             </section>
           )}
+          {!s.dado_de_baja_en && grados.length > 0 && <GradosFicha socioId={s.id} grados={grados} zona={zona}
+            puedeOtorgar={panel.yo.rol !== "recepcion"} puedeAnular={["dueno", "encargado"].includes(panel.yo.rol)} />}
           {!s.dado_de_baja_en && llavero.usa && <div className="mt-3"><Llavero socioId={s.id} datos={llavero} /></div>}
           {!s.dado_de_baja_en && pestana === "resumen" && (
             <div className="mt-3"><Convenio socioId={s.id} actual={convenio} opciones={convenios} zona={zona}

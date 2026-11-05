@@ -163,6 +163,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | COM-7 | Los habituales en la tablet vienen apagados; prendidos, tocar el nombre pide los últimos 3 números del DNI (y cuenta para el freno de 30 intentos por minuto). | Sin eso, cualquiera entraría tocando un nombre ajeno: la tablet no tiene a nadie mirando. Nombre e inicial del apellido, nada más. | Entrar solo con tocar el nombre. |
 | 2026-11-05 | COM-8 | Un evento es un producto con stock = cupo (más su fecha, para quién y descripción): se vende en Vender sin tocar el cobro y los anotados son sus ventas no anuladas. El nombre del producto lleva la fecha. | Cero cambios en `vender` (plata). Cancelar o terminar lo saca de Vender; lo vendido queda. | Un tipo de ítem nuevo en Vender. |
 | 2026-11-05 | COM-9 | El cupón no toca `vender`: Vender carga el descuento en cada línea que corresponde (cuotas, pases y packs de sus planes; nunca productos) con motivo "Cupón X", y al cobrar registra el uso (la base exige que la venta tenga ese descuento). El tope de la recepción sigue valiendo. Monto fijo: una vez por venta. | Cero cambios en el cobro; el uso se cuenta de ventas no anuladas. | Que el cupón saltee el tope de la recepción (es darle más permiso). |
+| 2026-11-05 | COM-12 | El lugar se elige en un paso aparte después de reservar (no se tocó `reservar`); lo garantiza un índice único sobre las reservas confirmadas. En espera no se elige. La recepción también puede asignarlo; el profe solo mira. | Reservar sigue igual; el índice frena a dos que tocan a la vez. | Pasar el lugar dentro de `reservar` (una sola llamada). |
+| 2026-11-05 | COM-13 | Grados: el profe puede otorgarlos (toma el examen); anular, solo dueño o encargado; la recepción solo mira. "Listos para rendir" se calcula con asistencias y meses desde el grado actual, o desde la primera clase si no tiene. | Es la persona que evalúa; anular deshace un hecho y queda para los que gestionan. | Migración nueva sobre `otorgar_grado`. |
 
 ---
 
@@ -419,10 +421,10 @@ bloque 18.
 - [ ] COM-8b · 🟡 · Que Vender frene un evento lleno o "solo socios" vendido sin socio — hoy avisa (como el stock) y no frena: tocar el cobro, decide Mateo
 - [x] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento) — verificado: db (cupones: crear y validar, vencido y agotado frenan, uso anotado solo si la venta lleva el descuento, panel con usos y socios), vitest (aplicarCupon), e2e:com-9 (en la tanda). Alta online y "¿saltea el tope de la recepción?": COM-9b
 - [ ] COM-9b · 🟡 · Cupón en el alta online, y si el cupón puede pasar el tope de descuento de la recepción (hoy no: es un descuento más) — plata y permisos: decide Mateo
-- [x] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos
-- [x] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)
-- [x] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala
-- [ ] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir"
+- [x] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos — verificado: db (resena-encuesta: link solo https, aviso de reseña en la bandeja tras la entrada 10, encuesta pendiente a los 10 días o al mes, una respuesta cada 90 días, promotores con link; mensajes con 14 plantillas), e2e:com-10 (en la tanda)
+- [x] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código) — verificado: db (medicion: solo IDs válidos —código libre rechazado—, solo el dueño, la página los da solo publicada), e2e:com-11 (en la tanda)
+- [x] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala — verificado: db (lugares-sala: numerar, fuera de servicio, dos no tienen el mismo lugar por índice único, en espera no elige, cancelar libera, profe solo sus clases), vitest (leerNumeros), e2e:com-12 (en la tanda)
+- [x] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir" — verificado: db (grados: armar, listos para rendir, profe otorga, fecha futura no, socio ve su progreso, anular vuelve al grado anterior), vitest (textoRequisitos), e2e:com-13 (en la tanda)
 - [ ] COM-14 · 🟢 · TV de la sala: clase de ahora, WOD y anotados en grande
 - [ ] COM-15 · 🟡 · Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
 - [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)

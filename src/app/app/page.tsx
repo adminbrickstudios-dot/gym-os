@@ -19,6 +19,7 @@ import { rpc } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import type { EventoPublico } from "@/lib/landing";
 import { Encuesta } from "./Encuesta";
+import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -43,7 +44,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos, encuesta] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos, encuesta, grados] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -65,6 +66,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<(EventoPublico & { anotado: boolean })[]>("eventos_socio", { p_socio_id: s.socio_id }),
       // COM-10: la pregunta del 0 al 10 (después de 10 entradas o del primer mes; cada 90 días).
       rpc<{ pendiente: boolean }>("encuesta_socio", { p_socio_id: s.socio_id }),
+      // COM-13: su grado (cinturón) en las actividades que los usan.
+      rpc<GradosSocio>("grados_socio", { p_socio_id: s.socio_id }),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -124,6 +127,17 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
 
         {encuesta.pendiente && <Encuesta socioId={s.socio_id} />}
+        {grados.length > 0 && (
+          <section className="space-y-2" data-grados-app={grados.length}>
+            <p className="titulo text-2xl">🥋 Tu grado</p>
+            {grados.map((a) => (
+              <div key={a.actividad_id} className="tarjeta p-4">
+                <p className="font-semibold">{a.actividad}: {a.actual?.nombre ?? "sin grado todavía"}</p>
+                {a.proximo && <p className="texto-suave text-sm">Para {a.proximo.nombre}: {textoRequisitos(a)}{a.listo ? " · ✅ ya podés rendir" : ""}</p>}
+              </div>
+            ))}
+          </section>
+        )}
         {eventos.length > 0 && (
           <section className="space-y-2" data-eventos-app={eventos.length}>
             <p className="titulo text-2xl">🎟️ Próximos eventos</p>
