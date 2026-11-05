@@ -76,6 +76,8 @@ try {
   await horario.getByRole("button", { name: "Sí, sacar" }).click();
   await horario.waitFor({ state: "detached", timeout: 30000 });
   ok("Sacar → “Sí, sacar” en pantalla (sin diálogo del navegador): ya no está");
+  const ocup = d.locator("[data-ocupacion] li");
+  ok(await ocup.count() ? `📊 Ocupación de las últimas 4 semanas (${await ocup.count()} horarios, ej: “${(await ocup.first().innerText()).replace(/\s+/g, " ")}”)` : "sin clases pasadas todavía: la ocupación no aparece (lo vacío está vacío)");
 
   const p = await pagina(b, CELU);
   await entrar(p, "profe@ejemplo.invalid");

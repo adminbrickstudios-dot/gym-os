@@ -314,7 +314,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CLA-2 · 🟢 · Turnos fijos (abono a un horario) — verificado: db (turnos-fijos: apagados no, abonarse reserva, cancelar una semana se respeta, al que no puede no se le reserva, tope = cupo, quitar), e2e:cla-2 (prender, el socio lo elige y lo quita, la ficha lo muestra)
 - [ ] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados
 - [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
-- [ ] CLA-5 · 🟢 · Ocupación por horario
+- [x] CLA-5 · 🟢 · Ocupación por horario — verificado: db (ocupacion: promedio de los que vinieron contra el cupo, canceladas no cuentan, la recepción no), e2e:clases (la sección en la grilla)
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
 - [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)
 - [ ] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9)

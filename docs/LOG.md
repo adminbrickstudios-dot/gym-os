@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-5 · Ocupación por horario
+
+**QUÉ HICE**
+- En la Grilla, "📊 Ocupación": cada horario con cuántos vinieron en promedio en las últimas 4 semanas, como % del cupo y con el fondo más intenso cuanto más lleno. Sin clases pasadas no aparece.
+- Migración 0083 (`ocupacion_horarios`, dueño y encargado), prueba de base `ocupacion`, paso en `e2e:clases`.
+
+---
+
 ## 2026-11-05 · CLA-7 · Deshacer un presente
 
 **QUÉ HICE**
