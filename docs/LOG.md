@@ -15,6 +15,13 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-14 · Pulido de Ingresar, Elegir y No encontrado
+
+**QUÉ HICE**
+- `e2e:dis-14`: Ingresar (gimnasio, socio, plataforma), Gimnasio no encontrado y Elegir en el celular (sin desborde, botones altos, un verde), capturas `dis14-*`. Con AUD-15 ya se sumaron el loading y los gimnasios del socio en Elegir; no hizo falta más código.
+
+---
+
 ## 2026-11-05 · DIS-15 · Pulido del super admin
 
 **QUÉ HICE**

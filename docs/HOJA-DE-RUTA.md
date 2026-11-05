@@ -372,7 +372,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio — verificado: db (abono-brik: vencido no vende ni edita, la puerta sigue, el admin sí, pagar destraba; db:pruebas completo con los triggers), e2e:adm-3 (pendiente de la tanda final)
 - [x] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK — verificado: db (abono-brik: planes solo el admin, 14 días de gracia, por vencer, montos solo al dueño), e2e:adm-3 (pendiente de la tanda final)
 - [x] DIS-15 · 🟢 · Pulido: Super admin — verificado: e2e:dis-15 (pendiente de la tanda final)
-- [ ] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado
+- [x] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado — verificado: e2e:dis-14 (pendiente de la tanda final)
 
 ### 16 · Cierre
 - [ ] SEG-1 · 🟢 · Límite de pedidos de código por celular
