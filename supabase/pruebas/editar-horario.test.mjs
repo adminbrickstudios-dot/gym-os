@@ -60,3 +60,12 @@ test("el cupo no baja de lo reservado", async () => {
   await t.q(`insert into public.reservas (gimnasio_id, clase_id, socio_id, estado) values ($1,$2,$3,'confirmada')`, [t.g, c.id, otro]);
   await como(u.dueno, () => t.falla(() => t.q(`select public.editar_horario($1, '10:00', 60, 1, null)`, [c.horario_id]), /ya tiene 2 reservas: el cupo no puede bajar de 2/));
 });
+
+test("0087: un horario sacado (aunque se haya creado hoy) ya no aparece en la grilla", async () => {
+  const [{ id: hoyH }] = await t.q(`insert into public.horarios_clase (gimnasio_id, sede_id, actividad_id, dia_semana, hora_inicio, duracion_min, vigente_desde)
+    values ($1,$2,$3, 7, '23:15', 60, privado.dia_local(now(), $4)) returning id`, [t.g, t.sede, act, t.ctx.zona]);
+  const ids = async () => (await como(u.dueno, () => t.q(`select horario_id from public.horarios_gimnasio($1)`, [t.g]))).map((r) => r.horario_id);
+  assert.ok((await ids()).includes(hoyH));
+  await como(u.dueno, () => t.q(`select public.cerrar_horario($1)`, [hoyH]));
+  assert.ok(!(await ids()).includes(hoyH));
+});

@@ -70,7 +70,7 @@ try {
   // Asignar plan
   await p.locator('button:has-text("Asignar plan")').click();
   const planBtn = p.locator("main .tarjeta button.boton").first();
-  const planNombre = (await planBtn.innerText()).trim();
+  const planNombre = (await planBtn.innerText()).trim().split("\n")[0].trim();   // el botón también muestra el precio
   await planBtn.click();
   await p.locator("main", { hasText: planNombre }).locator("dd", { hasText: planNombre }).first().waitFor({ timeout: 30000 });
   ok(`Asignar plan → ${planNombre} en la ficha`);

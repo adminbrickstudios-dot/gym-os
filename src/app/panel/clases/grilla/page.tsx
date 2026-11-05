@@ -27,7 +27,7 @@ export default async function PaginaGrilla() {
       <>
         <Link href="/panel/clases" className="texto-suave hover:text-[var(--texto)]">← Clases</Link>
         <div className="mt-4"><Encabezado emoji="🧩" titulo="Grilla" bajada="Las actividades y en qué horarios se dan. Las clases de cada día salen de acá." /></div>
-        <Grilla actividades={actividades} horarios={horarios} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))}
+        <Grilla hoy={new Intl.DateTimeFormat("en-CA", { timeZone: panel.gimnasio.zona_horaria }).format(new Date())} actividades={actividades} horarios={horarios} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))}
           profes={equipo.filter((e) => e.activo).map((e) => ({ id: e.equipo_id, nombre: e.nombre }))} />
         {conDatos.length > 0 && (
           <section className="mt-12" aria-labelledby="ocupacion" data-ocupacion>

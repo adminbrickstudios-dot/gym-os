@@ -4,12 +4,12 @@ import { agregarHorario, cerrarHorario, editarActividad, editarHorario, guardarA
 import { Mensaje } from "@/components/ui/Mensaje";
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean; horarios: number };
-export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null; profe_id: string | null };
+export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null; profe_id: string | null; vigente_desde: string; vigente_hasta: string | null };
 type Opcion = { id: string; nombre: string };
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-export function Grilla({ actividades, horarios, sedes, profes }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[] }) {
+export function Grilla({ actividades, horarios, sedes, profes, hoy }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[]; hoy: string }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [nueva, setNueva] = useState({ nombre: "", emoji: "" });
@@ -69,7 +69,7 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
                     <span aria-hidden className="text-xl">{x.emoji ?? "🗓️"}</span>
                     <span className="flex-1 min-w-0">
                       <span className="block font-semibold truncate">{x.actividad}</span>
-                      <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}</span>
+                      <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}{x.vigente_hasta ? ` · hasta el ${x.vigente_hasta.slice(8, 10)}/${x.vigente_hasta.slice(5, 7)}` : ""}{x.vigente_desde > hoy ? ` · desde el ${x.vigente_desde.slice(8, 10)}/${x.vigente_desde.slice(5, 7)}` : ""}</span>
                     </span>
                     {editando?.id !== x.horario_id && sacando !== x.horario_id && (
                       <button type="button" className="boton boton-chico" onClick={() => setEditando({ id: x.horario_id, hora: x.hora_inicio.slice(0, 5), duracion: x.duracion_min, cupo: x.cupo ? String(x.cupo) : "", profe: x.profe_id ?? "" })}
