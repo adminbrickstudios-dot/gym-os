@@ -137,3 +137,14 @@ export async function moverStock(productoId: string, tipo: "entrada" | "conteo",
     return listo();
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+export type Convenio = { convenio_id: string; nombre: string; tipo: "porcentaje" | "monto"; valor: number; activo: boolean; socios: number };
+
+/** VEN-3: crear o editar un convenio (dueño y encargado). */
+export async function guardarConvenio(id: string | null, nombre: string, tipo: string, valor: string, activo = true): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  const v = leerMonto(valor.replace("%", ""));
+  if (Number.isNaN(v)) return { error: tipo === "porcentaje" ? "Escribí el porcentaje, por ejemplo 15" : MAL_MONTO };
+  try { await rpc("guardar_convenio", { p_gimnasio_id: panel.gimnasio.id, p_convenio_id: id, p_nombre: nombre, p_tipo: tipo, p_valor: v, p_activo: activo }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}

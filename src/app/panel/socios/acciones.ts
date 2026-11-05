@@ -141,3 +141,13 @@ export async function anularApto(socioId: string, aptoId: string) { return hacer
 // ── Llavero (ENT-7) ─────────────────────────────────────────────────
 export async function asignarLlavero(socioId: string, codigo: string) { return hacer(socioId, () => rpc("asignar_llavero", { p_socio_id: socioId, p_codigo: codigo })); }
 export async function quitarLlavero(socioId: string) { return hacer(socioId, () => rpc("quitar_llavero", { p_socio_id: socioId })); }
+
+/** VEN-3: asignar (reemplaza) o quitar el convenio del socio. Dueño y encargado. */
+export async function asignarConvenio(socioId: string, convenioId: string, hasta: string): Promise<{ error?: string }> {
+  try { await rpc("asignar_convenio", { p_socio_id: socioId, p_convenio_id: convenioId, p_hasta: hasta || null }); revalidatePath(`/panel/socios/${socioId}`); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+export async function quitarConvenio(socioId: string): Promise<{ error?: string }> {
+  try { await rpc("quitar_convenio", { p_socio_id: socioId }); revalidatePath(`/panel/socios/${socioId}`); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}

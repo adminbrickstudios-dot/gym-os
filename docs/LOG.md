@@ -15,6 +15,27 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · VEN-3 · Convenios y descuentos automáticos
+
+**QUÉ HICE**
+- Planes → "🤝 Convenios": crear, editar y desactivar (% o $ fijo por cuota), con cuántos socios tiene cada uno.
+- Ficha → Resumen: "🤝 Asignar convenio", con vencimiento opcional. Lo hacen el dueño y el encargado.
+- Vender muestra "🤝 Convenio X −$…" debajo de la cuota. La base lo aplica igual, aunque el navegador no lo mande. Va como descuento con motivo y no cuenta para el tope de la recepción.
+- De paso, el error del tope dice "10 %" y no "10.00 %" (quedó anotado en AUD-6). Actualicé `caja.test`.
+- Migración `20261104006600_convenios.sql`:
+  - Tablas `convenios` y `socio_convenios` (RLS, FK compuestas, uno activo por socio).
+  - Funciones `convenios_gimnasio`, `guardar_convenio`, `asignar_convenio`, `quitar_convenio`, `convenio_socio`.
+  - Copias de `privado.vender` y `precios_venta`.
+- `supabase/pruebas/convenios.test.mjs` (3 pruebas). vitest: `descuentoConvenio` hace la misma cuenta que la base. `scripts/e2e/ven-3.mjs`: la base cobró exactamente el total que calculó la pantalla.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Desde la sesión de la recepción, en las pruebas de base, `venta_items` de una venta recién hecha devolvió 0 filas. Puede ser una política de lectura más estricta de lo que dice el schema. No lo toqué (permisos); queda para revisar en la segunda pasada.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se cobró.
+
+---
+
 ## 2026-11-05 · VEN-4 · Productos con stock
 
 **QUÉ HICE**

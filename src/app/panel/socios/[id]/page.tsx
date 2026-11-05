@@ -17,6 +17,7 @@ import { Pausas, type DatosPausas } from "./Pausas";
 import { AptoFisico, type DatosApto } from "./AptoFisico";
 import { Origen, type DatosOrigen } from "./Origen";
 import { Llavero, type DatosLlavero } from "./Llavero";
+import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -45,7 +46,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -58,6 +59,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       rpc<DatosLlavero>("llavero_socio", { p_socio_id: id }),
       // VEN-6: las ventas con su estado y "Anular" (dueño y encargado).
       veVentas ? rpc<Venta[]>("ventas_socio", { p_socio_id: id }) : Promise.resolve(null),
+      // VEN-3: el convenio del socio y los del gimnasio para elegir.
+      pestana === "resumen" ? rpc<ConvenioSocio>("convenio_socio", { p_socio_id: id }) : Promise.resolve(null),
+      pestana === "resumen" ? rpc<{ convenio_id: string; nombre: string; tipo: string; valor: number; activo: boolean }[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve([]),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -86,6 +90,10 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           </div>
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && llavero.usa && <div className="mt-3"><Llavero socioId={s.id} datos={llavero} /></div>}
+          {!s.dado_de_baja_en && pestana === "resumen" && (
+            <div className="mt-3"><Convenio socioId={s.id} actual={convenio} opciones={convenios} zona={zona}
+              puede={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} hoy={new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date())} /></div>
+          )}
           <div className="mt-4"><Etiquetas socioId={s.id} etiquetas={ne.etiquetas} todas={ne.todas} /></div>
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>

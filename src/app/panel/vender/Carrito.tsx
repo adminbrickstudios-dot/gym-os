@@ -8,7 +8,7 @@ import { formatearPesos, leerMonto } from "@/lib/formato";
 import { cobrar, comprobante, preciosPara, type Venta } from "./acciones";
 import { anularVenta, pedirAnulacion } from "../ventas-acciones";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
-import { lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { descuentoConvenio, lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
   { medio: "efectivo", texto: "💵 Efectivo" },
@@ -81,7 +81,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
 
   const medioPrecio = mixto ? null : medio;
   const sinMedios = medios.length === 0;
-  const total = useMemo(() => totalCarrito(lineas, medioPrecio), [lineas, medioPrecio]);
+  const total = useMemo(() => totalCarrito(lineas, medioPrecio, precios.convenio), [lineas, medioPrecio, precios.convenio]);
   // Montos escritos a mano: "1.500" es mil quinientos, no 1,5 (AUD-6).
   const monto = (x: string) => { const n = leerMonto(x); return Number.isNaN(n) ? 0 : n; };
   const sumaMixto = partes.reduce((s, p) => s + monto(p.monto), 0);
@@ -235,6 +235,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     <span className="flex-1 font-semibold">{l.nombre}</span>
                     <span className="numero text-lg">{p == null ? "—" : formatearPesos(p * l.cantidad - (l.descuento ?? 0))}</span>
                   </div>
+                  {descuentoConvenio(l, medioPrecio, precios.convenio) > 0 && (
+                    <div className="flex items-start gap-2 mt-1 texto-suave" data-convenio>
+                      <span className="flex-1">🤝 Convenio {precios.convenio!.nombre}</span>
+                      <span className="numero">−{formatearPesos(descuentoConvenio(l, medioPrecio, precios.convenio))}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 mt-2">
                     <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo"} title={l.tipo === "recargo" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>

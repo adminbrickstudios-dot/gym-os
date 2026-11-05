@@ -9,6 +9,8 @@ export type PreciosVenta = {
   matricula?: { plan_id: string; plan: string; monto: number; anual: boolean } | null;
   /** Recargo por pagar tarde, si corresponde hoy (PLA-7). Va siempre con la cuota. */
   recargo?: { monto: number; atraso: number; dias: number } | null;
+  /** Convenio vigente del socio (VEN-3): la base lo descuenta solo de la cuota. */
+  convenio?: Convenio | null;
   pases: { plan_id: string; nombre: string; precios: Precios }[];
   packs: { plan_id: string; nombre: string; cantidad_clases: number; precios: Precios }[];
   productos: { producto_id: string; nombre: string; precio: number }[];
@@ -34,14 +36,26 @@ export function precioUnitario(l: Linea, medio: Medio | null): number | null {
   return (medio ? l.precios[medio] : null) ?? l.precios.lista;
 }
 
-export function totalCarrito(lineas: Linea[], medio: Medio | null): number | null {
+export type Convenio = { nombre: string; tipo: "porcentaje" | "monto"; valor: number };
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Lo que descuenta el convenio en una línea de cuota: la misma cuenta que vender() en la base. */
+export function descuentoConvenio(l: Linea, medio: Medio | null, c: Convenio | null | undefined): number {
+  if (!c || l.tipo !== "cuota") return 0;
+  const p = precioUnitario(l, medio);
+  if (p == null) return 0;
+  const unidad = c.tipo === "porcentaje" ? r2((p * Number(c.valor)) / 100) : r2(Number(c.valor));
+  return Math.max(0, Math.min(r2(p * l.cantidad - (l.descuento ?? 0)), r2(unidad * l.cantidad)));
+}
+
+export function totalCarrito(lineas: Linea[], medio: Medio | null, convenio?: Convenio | null): number | null {
   let t = 0;
   for (const l of lineas) {
     const p = precioUnitario(l, medio);
     if (p == null) return null;
-    t += Math.round((p * l.cantidad - (l.descuento ?? 0)) * 100) / 100;
+    t += r2(p * l.cantidad - (l.descuento ?? 0) - descuentoConvenio(l, medio, convenio));
   }
-  return Math.round(t * 100) / 100;
+  return r2(t);
 }
 
 /** La línea del recargo por pagar tarde (PLA-7): la base la exige junto con la cuota. */
