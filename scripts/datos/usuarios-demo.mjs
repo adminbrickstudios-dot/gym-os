@@ -6,6 +6,7 @@
 // el proyecto real. El equipo y el admin de plataforma se cargan en la base.
 //
 //   node scripts/datos/usuarios-demo.mjs --url postgres://… --supabase http://127.0.0.1:54321 --servicio <service_role key>
+//   … --sin-admin --contrasena <otra>   en producción: sin el super admin demo (el super admin real es tu cuenta, con hacer-admin)
 //
 // Solo mails @ejemplo.invalid y teléfonos +54 9 000…: datos obviamente ficticios.
 import pg from "pg";
@@ -16,6 +17,7 @@ const url = arg("url", process.env.DB_PRUEBAS_URL);
 const supabaseUrl = arg("supabase", process.env.NEXT_PUBLIC_SUPABASE_URL);
 const servicio = arg("servicio", process.env.SUPABASE_SERVICE_ROLE_KEY);
 const contrasena = arg("contrasena", "demo-gymos");
+const sinAdmin = process.argv.includes("--sin-admin");
 if (!url || !supabaseUrl || !servicio) {
   console.error("Uso: --url <base> --supabase <url de supabase> --servicio <service_role key>");
   process.exit(1);
@@ -37,6 +39,7 @@ const q = async (s, p) => (await db.query(s, p)).rows;
 const supabase = createClient(supabaseUrl, servicio, { auth: { persistSession: false, autoRefreshToken: false } });
 
 for (const u of USUARIOS_DEMO) {
+  if (u.admin && sinAdmin) continue;
   let [existente] = await q(`select id from auth.users where lower(email) = lower($1)`, [u.email]).catch(() => []);
   let usuarioId = existente?.id;
   if (!usuarioId) {
@@ -67,4 +70,4 @@ for (const u of USUARIOS_DEMO) {
 }
 await db.end();
 console.log(`Usuarios demo listos (contraseña: ${contrasena}):`);
-for (const u of USUARIOS_DEMO) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);
+for (const u of USUARIOS_DEMO.filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);

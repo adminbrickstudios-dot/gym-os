@@ -7,6 +7,9 @@
 #   hacer-admin  da super admin a la cuenta del mail indicado
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
 #   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
+#   usuarios-demo crea los logins del demo (dueña, encargado, recepción, profe, socio) con la
+#                 contraseña que pongas; NO crea un super admin demo. Necesita los secretos
+#                 SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY.
 #
 # Nunca corre solo: siempre lo dispara una persona. Cuando haya gimnasios
 # reales, este botón es el "yo la corro" de las reglas del proyecto.
@@ -18,13 +21,16 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, sembrar-demo]
+        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, sembrar-demo, usuarios-demo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
         required: false
       dominio:
         description: "Dominio de los gimnasios (solo para sembrar-demo, ej: gym-os-pied.vercel.app)"
+        required: false
+      contrasena:
+        description: "Contraseña de los usuarios demo (solo para usuarios-demo, 10 o más letras)"
         required: false
 
 concurrency:
@@ -79,3 +85,14 @@ jobs:
           if [ -z "$DOMINIO" ]; then echo "::error::Falta el dominio (ej: gym-os-pied.vercel.app)"; exit 1; fi
           node scripts/datos/sembrar-demo.mjs --dominio "$DOMINIO"
           node scripts/datos/estado-base.mjs
+      - name: Usuarios del demo
+        if: inputs.accion == 'usuarios-demo'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CONTRASENA: ${{ inputs.contrasena }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then echo "::error::Faltan los secretos SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (Settings → Secrets and variables → Actions → Secrets)"; exit 1; fi
+          if [ ${#CONTRASENA} -lt 10 ]; then echo "::error::Poné una contraseña de 10 o más letras para los usuarios demo"; exit 1; fi
+          echo "::add-mask::$CONTRASENA"
+          node scripts/datos/usuarios-demo.mjs --url "$SUPABASE_DB_URL" --supabase "$SUPABASE_URL" --servicio "$SUPABASE_SERVICE_ROLE_KEY" --contrasena "$CONTRASENA" --sin-admin

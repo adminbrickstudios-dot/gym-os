@@ -32,11 +32,12 @@ try {
     await fila.waitFor({ timeout: 30000 });
     const nombre = (await fila.locator("span.font-semibold").innerText()).trim();
     await fila.getByRole("button", { name: "Presente" }).click();
-    await r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first().waitFor({ timeout: 30000 }).catch(async () => {
-      const aviso = await r.getByRole("alert").innerText().catch(() => "");
-      if (!/presente/i.test(aviso)) throw new Error(`no quedó presente: ${aviso}`);
-    });
-    ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
+    // O queda ✅, o la base dice por qué no (fuera del horario de la clase, no puede tomarla, ya estaba).
+    const presente = r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first();
+    const aviso = r.locator('main [role="alert"]').first();
+    await presente.or(aviso).waitFor({ timeout: 30000 });
+    if (await presente.isVisible()) ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
+    else chequear(/una hora antes|No puede tomar la clase|Ya tiene el presente/.test(await aviso.innerText()), `Presente fuera de regla: la base dice por qué (“${await aviso.innerText()}”)`, await aviso.innerText());
   }
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 
