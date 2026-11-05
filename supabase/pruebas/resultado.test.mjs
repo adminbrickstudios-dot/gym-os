@@ -55,3 +55,16 @@ test("un mes que no empezó da error; la recepción no lo ve", async () => {
   assert.equal(r.en_curso, true);
   assert.ok(Number.isFinite(Number(r.recurrente)));
 });
+
+test("exportar el mes para el contador: ventas y pagos, fila por fila; la recepción no", async () => {
+  const exp = (que) => como(u.dueno, async () => (await t.q(`select public.exportar_mes($1, '2026-03-01', $2) as r`, [t.g, que]))[0].r);
+  const ventas = await exp("ventas");
+  assert.equal(ventas.length, 3);
+  assert.equal(ventas[0].fecha, "02/03/2026 10:00");
+  assert.equal(Number(ventas[0].total), 20000);
+  const pagos = await exp("pagos");
+  assert.deepEqual(pagos.map((p) => p.medio), ["transferencia", "debito", "cuenta_corriente"]);
+  assert.deepEqual(await exp("caja"), []);
+  await como(u.dueno, () => t.falla(() => t.q(`select public.exportar_mes($1, null, 'socios')`, [t.g]), /ventas, pagos o caja/));
+  await como(u.recepcion, () => t.falla(() => t.q(`select public.exportar_mes($1, null, 'ventas')`, [t.g]), /permiso/i));
+});

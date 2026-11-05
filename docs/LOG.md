@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RES-2 · Exportar el mes para el contador
+
+**QUÉ HICE**
+- En Resultado, "Para el contador": 🧾 Ventas, 💳 Pagos y 💵 Caja del mes que se está mirando, en CSV para Excel (punto y coma, acentos bien, montos con coma decimal, fechas en la hora del gimnasio).
+- Ventas: fecha, socio, detalle, bruto, descuento, total, estado, quién cobró, sede y si se anuló. Pagos: fecha, socio, medio, monto, estado, quién. Caja: aperturas, ingresos, retiros y cierres con lo esperado y la diferencia.
+- Migración 0077 (`exportar_mes`), prueba en `resultado`, e2e `e2e:res-2`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que el contador lo abra en su Excel: se verificó el archivo, no un Excel.
+
+---
+
 ## 2026-11-05 · RES-1 · Resultado: la plata del mes
 
 **QUÉ HICE**

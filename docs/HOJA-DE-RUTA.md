@@ -298,7 +298,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 8 · Resultado (la plata)
 - [x] RES-1 · 🟢 · Resultado: la plata del mes, clara — verificado: db (resultado: cobrado sin fiado, por medio, por concepto, por día, contra el anterior, permisos), e2e:res-1 (menú → Resultado, mes anterior, celular, recepción no)
-- [ ] RES-2 · 🟢 · Exportar para el contador
+- [x] RES-2 · 🟢 · Exportar para el contador — verificado: db (resultado: ventas y pagos fila por fila, la recepción no), e2e:res-2 (baja los tres CSV, la recepción recibe 403 con el motivo)
 - [ ] RES-3 · 🟢 · Gastos y ganancia
 
 ### 8b · Pagos online

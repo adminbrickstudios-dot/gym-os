@@ -102,6 +102,16 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           </section>
         </div>
 
+        <section aria-labelledby="contador">
+          <h2 id="contador" className="titulo text-2xl mb-1">Para el contador</h2>
+          <p className="texto-suave mb-3">El mes fila por fila, en planillas que se abren con Excel.</p>
+          <div className="flex flex-wrap gap-2" data-exportar>
+            {[["ventas", "🧾 Ventas"], ["pagos", "💳 Pagos"], ["caja", "💵 Caja"]].map(([q, t]) => (
+              <a key={q} href={`/panel/resultado/exportar?que=${q}&mes=${r.mes.slice(0, 7)}`} className="boton" download>{t}</a>
+            ))}
+          </div>
+        </section>
+
         <section aria-labelledby="horas">
           <h2 id="horas" className="titulo text-2xl mb-1">Horas pico</h2>
           <p className="texto-suave mb-3">{Math.max(...r.horas) ? `La hora con más gente: de ${pico} a ${pico + 1} h.` : "Sin entradas registradas este mes."}</p>
