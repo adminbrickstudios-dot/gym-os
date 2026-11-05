@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
@@ -33,7 +34,8 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
 
     return (
       <>
-        <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué." />
+        <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
+          accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
           <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />

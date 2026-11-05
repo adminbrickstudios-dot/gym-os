@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-8 · Control de la puerta
+
+**QUÉ HICE**
+- Entrada → "🔎 Control de la puerta" (dueño y encargado; también desde Inicio, "Ver la semana"):
+  - A quién dejaron pasar: quién, motivo, por qué no podía y si después se anuló.
+  - Las entradas anuladas: quién y por qué.
+  - La cuenta por persona del equipo.
+  - Por semana, con ◀ ▶.
+- Migración `20261104005400_control_entrada.sql`: `control_entrada` (sale de `ingresos`; no guarda nada).
+- `supabase/pruebas/control-entrada.test.mjs` y `scripts/e2e/ent-8.mjs` (7 pasos; la recepción no lo ve).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0054).
+
+---
+
 ## 2026-11-05 · ENT-9 · Cobrar desde la Entrada, con la cuota cargada
 
 **QUÉ HICE**

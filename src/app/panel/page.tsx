@@ -116,7 +116,7 @@ export default async function Inicio() {
         {dejados.length > 0 && (
           <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>
             <h2 id="dejados" className="titulo text-3xl mb-1">🚪 Dejados pasar hoy</h2>
-            <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué.</p>
+            <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué. <LinkPanel href="/panel/entrada/control" siNoEsta="texto" className="underline">Ver la semana</LinkPanel></p>
             <ul className="space-y-2">
               {dejados.map((x) => (
                 <li key={x.ingreso_id}>
