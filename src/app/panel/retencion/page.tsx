@@ -14,6 +14,7 @@ export const metadata: Metadata = { title: "Retención" };
 type Fila = { socio_id: string; nombre: string; telefono: string | null; lista: string; texto: string; debe: number | null; monto_mensual: number | null;
   visitas_por_semana: number | null; ultimo_contacto_en: string | null; ultimo_contacto_por: string | null; ultimo_contacto_resultado: string | null; mensaje: string | null };
 type Resumen = { plata_en_riesgo: number; listas: Record<string, number> };
+type Tablero = { semanas: { dia: string; al_dia: number }[]; altas_mes: number; bajas_mes: number; altas_mes_anterior: number; bajas_mes_anterior: number };
 
 const LISTAS = [
   { clave: "vencido", emoji: "🔴", titulo: "Vencidos", ayuda: "Les venció y no pagaron" },
@@ -38,12 +39,17 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const panel = await contextoPanel();
     exigirSeccion(panel, "retencion");
     exigirRol(panel, ["dueno", "encargado"]);
-    const [resumen, todas, etiquetas, conEtiqueta] = await Promise.all([
+    const [resumen, todas, etiquetas, conEtiqueta, tablero] = await Promise.all([
       rpc<Resumen>("retencion_resumen", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Fila[]>("retencion", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<{ id: string; nombre: string; socios: number }[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       etiqueta ? rpc<string[]>("socios_con_etiqueta", { p_gimnasio_id: panel.gimnasio.id, p_etiqueta_id: etiqueta }) : Promise.resolve(null),
+      // RET-1: socios al día (12 semanas), altas y bajas del mes.
+      rpc<Tablero>("tablero_retencion", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
+    const hoyAlDia = tablero.semanas.at(-1)?.al_dia ?? 0;
+    const hace4 = tablero.semanas.at(-5)?.al_dia ?? hoyAlDia;
+    const maxSemana = Math.max(1, ...tablero.semanas.map((x) => x.al_dia));
     // Filtrar por etiqueta solo elige filas: quién está en cada lista lo sigue diciendo la base.
     const ids = conEtiqueta ? new Set(conEtiqueta) : null;
     const filas = ids ? todas.filter((f) => ids.has(f.socio_id)) : todas;
@@ -57,7 +63,20 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     return (
       <>
         <Encabezado emoji="📉" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
-        <p className="mb-8"><span className="numero text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</span> <span className="texto-suave text-lg">por mes en riesgo</span></p>
+        <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 mb-10" data-tablero-retencion>
+          <div className="flex flex-col-reverse">
+            <dt className="texto-suave mt-2 text-[15px]">👥 Al día <span className="block text-sm texto-tenue">{hoyAlDia === hace4 ? "igual que hace 4 semanas" : `${hoyAlDia > hace4 ? "↑" : "↓"} ${Math.abs(hoyAlDia - hace4)} contra hace 4 semanas`}</span></dt>
+            <dd>
+              <span className="numero text-5xl">{hoyAlDia}</span>
+              <span className="flex items-end gap-[2px] h-8 mt-2" role="img" aria-label="Socios al día, últimas 12 semanas">
+                {tablero.semanas.map((x) => <span key={x.dia} className="flex-1 rounded-t-sm" style={{ height: `${Math.max(8, (x.al_dia / maxSemana) * 100)}%`, background: "var(--acento)", opacity: 0.35 + 0.65 * (x.al_dia / maxSemana) }} title={`${x.dia.slice(8, 10)}/${x.dia.slice(5, 7)}: ${x.al_dia}`} />)}
+              </span>
+            </dd>
+          </div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">🌱 Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.altas_mes}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">👋 Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.bajas_mes}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">💸 Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
+        </dl>
         <nav aria-label="Listas" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
           {LISTAS.map((l) => (
             <Link key={l.clave} href={url(l.clave, etiqueta)} aria-current={l.clave === lista.clave ? "page" : undefined}

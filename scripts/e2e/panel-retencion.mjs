@@ -12,7 +12,9 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/retencion?lista=vencido`);
   await d.locator("main h1").waitFor({ timeout: 60000 });
-  chequear(/\$[\d.]+/.test(await d.getByText("por mes en riesgo").locator("..").innerText()), "arriba: la plata por mes en riesgo", "sin plata en riesgo");
+  const tablero = d.locator("[data-tablero-retencion]");
+  const tt = await tablero.innerText();
+  chequear(/Al día/.test(tt) && /Altas del mes/.test(tt) && /Bajas del mes/.test(tt) && /\$[\d.]+/.test(tt), "arriba: al día con 12 semanas, altas, bajas y la plata en riesgo (RET-1)", tt.slice(0, 160));
   const tabs = d.locator('nav[aria-label="Listas"] a');
   chequear(await tabs.count() === 5, "5 listas con su número", `${await tabs.count()} listas`);
   const filas = d.locator("main ul > li");

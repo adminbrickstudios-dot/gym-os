@@ -7,7 +7,7 @@ Probado haciendo clic con `npm run e2e:retencion` (`scripts/e2e/panel-retencion.
 
 | Elemento | Qué hace hoy | Anda | Qué le falta | Se conecta con | Configurable |
 |---|---|---|---|---|---|
-| Plata en riesgo | Lo que se deja de cobrar por mes si se van los de las listas. | ✅ | Tendencia de activos, bajas y altas del mes (RET-1) | `retencion_resumen` | — |
+| Tablero | Al día (12 semanas), altas y bajas del mes, plata por mes en riesgo. | ✅ (RET-1) | — | `tablero_retencion`, `retencion_resumen` | — |
 | Listas | Vencidos, Por vencer, Nuevos que no vienen, No vienen, Se fueron; cada una con su número. Abre la primera con gente. | ✅ | — | `retencion` | Días de cada lista (Configuración → Reglas) |
 | Filtro por etiqueta | Solo elige filas; quién está en cada lista lo dice la base. | ✅ | — | `socios_con_etiqueta` | Etiquetas |
 | 💬 WhatsApp | Mensaje de Configuración → Mensajes ya escrito; tocarlo anota "le escribió". | ✅ | — | `registrar_contacto` | Mensajes |

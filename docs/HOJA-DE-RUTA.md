@@ -325,7 +325,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 10 · Retención
 - [x] AUD-10 · 🟢 · Auditoría botón por botón: Retención — verificado: e2e:retencion (plata en riesgo, listas, WhatsApp, Dice que vuelve, Cobrar, vacía, celular, recepción no); inventario en docs/paneles/retencion.md
-- [ ] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia)
+- [x] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia) — verificado: db (tablero-retencion: 12 semanas, la última igual a los al día de hoy, altas, recepción no), e2e:retencion
 - [ ] RET-2 · 🟡 D2 · La recepción anota contactos
 - [ ] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo
 - [ ] DIS-8 · 🟢 · Pulido: Retención

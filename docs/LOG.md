@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RET-1 · Tablero de retención
+
+**QUÉ HICE**
+- Arriba de Retención, cuatro números:
+  - 👥 Al día, con las barras de las últimas 12 semanas y la diferencia contra hace 4;
+  - 🌱 Altas del mes y 👋 Bajas del mes, con el mes pasado al lado;
+  - 💸 Por mes en riesgo.
+- Migración 0088 (`tablero_retencion`), prueba de base `tablero-retencion`, paso en `e2e:retencion`.
+
+---
+
 ## 2026-11-05 · AUD-10 · Auditoría de Retención
 
 **QUÉ HICE**
