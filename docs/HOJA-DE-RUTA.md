@@ -362,7 +362,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-1 · 🟢 · Pulido: Inicio — verificado: e2e:dis-1 (pendiente de la tanda final); sin cambios de código
 
 ### 15 · Super admin y plataforma
-- [ ] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio
+- [x] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio — verificado: e2e:acceso y e2e:admin (pendiente de la tanda final); inventario en docs/paneles/acceso.md
 - [ ] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear
 - [ ] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin
 - [ ] ADM-5 · 🟢 · Demo para vender: link "Probá Gym OS" y reiniciar el demo

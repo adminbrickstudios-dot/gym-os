@@ -30,7 +30,16 @@ export default async function Elegir() {
           ))}
           {yo.es_admin && <li><Link href="/admin" className="boton w-full text-lg">🧱 Super admin de BRIK</Link></li>}
         </ul>
-        {yo.equipo.length === 0 && !yo.es_admin && <p className="texto-suave mt-6">Tu cuenta no tiene ningún gimnasio.</p>}
+        {/* AUD-15: el socio no tiene panel: va a la app de su gimnasio. */}
+        {yo.socios.length > 0 && (
+          <div className="mt-8 space-y-2" data-elegir-socio>
+            <p className="texto-suave">Como socio:</p>
+            {[...new Map(yo.socios.map((s) => [s.slug, s])).values()].map((s) => (
+              <a key={s.slug} href={`/g/${s.slug}/app`} className="boton w-full !justify-between text-lg"><span>💪 {s.gimnasio}</span><span className="texto-tenue text-sm">Mi app</span></a>
+            ))}
+          </div>
+        )}
+        {yo.equipo.length === 0 && !yo.es_admin && yo.socios.length === 0 && <p className="texto-suave mt-6">Tu cuenta no tiene ningún gimnasio.</p>}
         <form action="/salir" method="post" className="mt-8"><button className="boton-texto">Salir</button></form>
       </div>
     </main>

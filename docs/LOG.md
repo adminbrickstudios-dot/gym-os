@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-15 · Super admin, Ingresar y Elegir gimnasio
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/acceso.md` y `e2e:acceso` (contraseña mala, soy socio, la dueña en /admin sin acceso, el admin al super admin, dirección inexistente).
+- Arreglado: un socio que entraba desde la dirección de Gym OS veía "Tu cuenta no tiene ningún gimnasio": ahora ve sus gimnasios con link a su app. Faltaba `loading.tsx` en Ingresar y Elegir.
+
+---
+
 ## 2026-11-05 · DIS-1 · Pulido de Inicio
 
 **QUÉ HICE**
