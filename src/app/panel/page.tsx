@@ -28,6 +28,7 @@ const DETALLE: Record<string, { ruta: string; seccion: string }> = {
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
 
 type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumple: number; mensaje: string };
+type InvitadoHoy = { id: string; nombre: string; socio: string; entro_en: string | null };
 type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string };
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
@@ -36,7 +37,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -45,6 +46,8 @@ export default async function Inicio() {
       rol === "dueno" || rol === "encargado" ? rpc<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // D1: cada "dejar pasar" de hoy, a la vista del dueño y del encargado.
       rol === "dueno" || rol === "encargado" ? rpc<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // INV-1: los invitados de hoy, en el resumen del dueño.
+      rol === "dueno" || rol === "encargado" ? rpc<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
@@ -126,6 +129,15 @@ export default async function Inicio() {
                   </LinkPanel>
                 </li>
               ))}
+            </ul>
+          </section>
+        )}
+
+        {invitados.length > 0 && (
+          <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
+            <h2 id="invitados-hoy" className="titulo text-3xl mb-4">👥 Invitados hoy</h2>
+            <ul className="space-y-1">
+              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✅" : "⏳"} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
           </section>
         )}

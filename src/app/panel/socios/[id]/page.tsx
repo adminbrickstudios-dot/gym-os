@@ -14,6 +14,7 @@ import { Familia, type Familiar } from "./Familia";
 import { Pausas, type DatosPausas } from "./Pausas";
 import { AptoFisico, type DatosApto } from "./AptoFisico";
 import { Origen, type DatosOrigen } from "./Origen";
+import { Llavero, type DatosLlavero } from "./Llavero";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -42,7 +43,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -52,6 +53,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       rpc<DatosPausas>("pausas_socio", { p_socio_id: id }),
       rpc<DatosApto>("apto_socio", { p_socio_id: id }),
       rpc<DatosOrigen>("origen_socio", { p_socio_id: id }),
+      rpc<DatosLlavero>("llavero_socio", { p_socio_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -79,6 +81,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
           </div>
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
+          {!s.dado_de_baja_en && llavero.usa && <div className="mt-3"><Llavero socioId={s.id} datos={llavero} /></div>}
           <div className="mt-4"><Etiquetas socioId={s.id} etiquetas={ne.etiquetas} todas={ne.todas} /></div>
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>

@@ -14,6 +14,8 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 |---|---|---|---|---|---|
 | Buscador | Arranca con foco y vuelve a tenerlo después de cada entrada. Nombre, DNI, teléfono o número; desde 2 letras. Enter elige al primero, Esc limpia. | ✅ | Lector de llavero/QR (ENT-2, ENT-7) | `buscar_socios` | — |
 | 📷 Leer QR | Si el gimnasio prendió "QR del socio": abre la cámara y lee el QR de la app; un lector USB escribe el código en el buscador y Enter. La base dice de quién es, si venció, si ya se usó o si es de otro gimnasio. Si puede entrar, se anota solo (forma "con QR"); si no, queda el veredicto. (ENT-2) | ✅ | — | `leer_qr`, `estado_acceso`, `registrar_ingreso` | Sí (Reglas → QR del socio) |
+| 🔑 Llavero (lector USB) | Si el gimnasio usa llaveros: el lector escribe el código y Enter; si es de alguien, entra directo ("con llavero"); si no, es una búsqueda común. (ENT-7) | ✅ | — | `leer_llavero` | Sí (Reglas → Llavero) |
+| 👥 Invitados | "➕ Invitado": nombre, DNI y el socio que invita (al día); pasa enseguida. Los que invitó un socio desde la app esperan con "✅ Entró". Límite por mes, por socio y por DNI. (INV-1) | ✅ | — | `registrar_invitado`, `confirmar_invitado`, `invitados_de_hoy` | Sí (Reglas → invitados) |
 | Resultados | Punto de color, nombre, #número y el porqué. | ✅ | — | — | — |
 | No lo encuentra | "No encontramos a … · Darlo de alta". | ✅ | Pase de invitado o de prueba desde acá (INV-1, CLA-6) | Alta | — |
 | Veredicto | A pantalla completa del color: emoji, foto (si tiene), nombre grande, el porqué, avisos, "para ponerse al día $…". Suena distinto si entra o no. Enter anota (solo si puede), Esc vuelve a buscar, escribir busca a otro. (ENT-1) | ✅ | — | `estado_acceso` | 🔊/🔇 por compu |
@@ -47,3 +49,4 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 | 📷 Mostrar mi QR | Si el gimnasio usa QR: la cámara de adelante lo lee. | ✅ (cámara de prueba) | — | `privado.validar_qr` | QR del socio |
 | Revocar | La tablet deja de andar al instante. | ✅ | — | `revocar_tablet` | — |
 | Sin autorizar / apagada | "Tablet sin autorizar" y dónde se autoriza. | ✅ | — | `kiosco_estado` | — |
+| QR en la tablet (ENT-6) | Con "🔳 QR en la tablet" prendido, la tablet muestra un QR que cambia cada 30 s; el socio lo escanea con su app ("📷 Escanear el QR de la entrada") y entra; la tablet muestra "¡Pasá, …!". | ✅ (cámara de prueba) | — | `kiosco_qr`, `entrar_por_qr_pared`, `kiosco_ultimo` | Sí |

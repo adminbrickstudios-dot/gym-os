@@ -15,6 +15,37 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-6, ENT-7, INV-1 · QR en la tablet, llavero e invitados
+
+**QUÉ HICE**
+- **ENT-6, QR en la tablet** (Reglas → "🔳 QR en la tablet", aparece con la tablet prendida):
+  - La tablet muestra un QR firmado que cambia cada 30 segundos.
+  - El socio toca "📷 Escanear el QR de la entrada" en su app: entra (o ve por qué no), y la tablet muestra "¡Pasá, …!".
+  - Migración `20261104005100_qr_pared.sql`: `kiosco_qr`, `kiosco_ultimo`, `entrar_por_qr_pared`, `usa_qr_pared`; `kiosco_estado` dice si muestra el QR.
+- **ENT-7, llavero o tarjeta** (Reglas → "🔑 Llavero o tarjeta"):
+  - En la ficha: "Asignar llavero" (se pasa por el lector), Cambiar, Quitar. Único por gimnasio.
+  - En Entrada el lector escribe el código y Enter: entra directo ("con llavero"). En la tablet también.
+  - Migración `20261104005200_llavero.sql`: `asignar_llavero`, `quitar_llavero`, `llavero_socio`, `leer_llavero`; `kiosco_entrar` acepta llaveros.
+- **INV-1, invitados** (Reglas → "Invitados por socio por mes", 2 por defecto; 0 = sin invitados):
+  - En Entrada, "➕ Invitado": nombre, DNI y quién invita; pasa enseguida.
+  - El socio invita desde su app ("👥 Traé a un amigo") y la recepción lo ve esperando con "✅ Entró".
+  - Límite por socio y por DNI. Un DNI de socio no es invitado. Solo invita quien puede entrar hoy. En Inicio del dueño, "👥 Invitados hoy".
+  - Migración `20261104005300_invitados.sql`: tabla `invitados`, `registrar_invitado`, `invitar`, `confirmar_invitado`, `anular_invitado`, `invitados_de_hoy`, `mis_invitados`; `guardar_configuracion` y `configuracion_panel` copiados de 0049.
+- Pruebas:
+  - Base: `qr-pared`, `llavero` e `invitados` (vencido, falso, revocado, de otro socio, apagado, duplicado, topes).
+  - e2e: `ent-6` (4 pasos, la cámara de prueba filma el QR de la tablet), `ent-7` (5) e `inv-1` (6).
+  - Los e2e que cambian Reglas ya no se traban si el valor ya estaba (el botón Guardar queda apagado).
+- Decisiones nuevas en la tabla del agente.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0053).
+
+**LO QUE NO PUDE VERIFICAR**
+- Un lector USB de llaveros real: se probó escribiendo el código y Enter, que es lo que hace el lector.
+- Un celular de verdad escaneando una tablet de verdad.
+
+---
+
 ## 2026-11-05 · ENT-3 · Tablet en la puerta (modo kiosco)
 
 **QUÉ HICE**

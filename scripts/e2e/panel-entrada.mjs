@@ -21,6 +21,7 @@ async function tope(d, n) {
   await d.locator('fieldset[data-pestana-activa="reglas"]').waitFor({ timeout: 60000 }); await d.waitForTimeout(500);
   await d.locator("fieldset[data-pestana-activa] label", { hasText: "Dejar pasar: tope" }).locator("input").fill(String(n));
   const pie = d.locator('[data-pie="reglas"]'); const k = Number(await pie.getAttribute("data-respuestas"));
+  if (await pie.locator('button:has-text("Guardar")').isDisabled()) return;   // ya estaba así
   await pie.locator('button:has-text("Guardar")').click();
   await d.waitForFunction((k) => Number(document.querySelector('[data-pie="reglas"]')?.getAttribute("data-respuestas")) > k, k, { timeout: 30000 });
 }

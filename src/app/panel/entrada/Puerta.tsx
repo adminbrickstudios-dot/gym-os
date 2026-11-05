@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, cupoDejarPasar, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { Camara } from "./Camara";
 import { Mensaje } from "@/components/ui/Mensaje";
 
@@ -32,10 +32,10 @@ const ES_QR = /^GYMOS1\./;
 
 const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
 
-export function Puerta({ sedeId, conQr = false, esRecepcion = false }: { sedeId: string; conQr?: boolean; esRecepcion?: boolean }) {
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false }: { sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean }) {
   const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
   const [camara, setCamara] = useState(false);
-  const [via, setVia] = useState<"recepcion" | "qr_socio">("recepcion");
+  const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
@@ -70,24 +70,34 @@ export function Puerta({ sedeId, conQr = false, esRecepcion = false }: { sedeId:
     if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); if (sonido) sonar(r.v!.color); }
   });
   // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
-  const porQr = useCallback((codigo: string) => empezar(async () => {
-    setCamara(false); setTexto(""); setHecho(null); setForzando(false);
-    const q = await leerQR(codigo.trim());
-    if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer el QR"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
+  // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
+  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
+    if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
     const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); return; }
     setError(null);
     if (sonido) sonar(r.v!.color);
     if (r.v!.puede) {
-      const e = await registrarEntrada(s.socio_id, sedeId, undefined, "qr_socio");
+      const e = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
       if (e.error) { setError(e.error); return; }
       setHecho({ ...e.r!, nombre: s.nombre });
       campo.current?.focus();
       return;
     }
-    setElegido(s); setVia("qr_socio"); setV(r.v!); setApto(r.apto ?? null);
-  }), [sedeId, sonido]);
+    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null);
+  }, [sedeId, sonido]);
+  const porQr = useCallback((codigo: string) => empezar(async () => {
+    setCamara(false); setTexto(""); setHecho(null); setForzando(false);
+    await directo(await leerQR(codigo.trim()), "qr_socio");
+  }), [directo]);
+  // Lo que escribió el lector de llaveros (sin espacios): si es el llavero de alguien, entra directo; si no, búsqueda normal.
+  const porLlavero = (codigo: string, siNo: () => void) => empezar(async () => {
+    const l = await leerLlavero(codigo.trim());
+    if (!l.socio && !l.error) { siNo(); return; }
+    setTexto(""); setHecho(null); setForzando(false);
+    await directo(l, "nfc");
+  });
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
     const r = await terminarPausa(elegido.socio_id, sedeId);
@@ -128,6 +138,9 @@ export function Puerta({ sedeId, conQr = false, esRecepcion = false }: { sedeId:
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && ES_QR.test(texto.trim())) { e.preventDefault(); porQr(texto); return; }   // lector USB
+          if (e.key === "Enter" && !elegido && conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(texto.trim())) {
+            e.preventDefault(); const primero = socios[0]; porLlavero(texto, () => { if (primero) elegir(primero); }); return;
+          }
           if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]);
           if (e.key === "Escape") reiniciar();
         }}

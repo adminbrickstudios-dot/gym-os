@@ -125,6 +125,9 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | ENT-2 | El QR vale la ventana actual y la anterior (como mucho un minuto), una sola vez, y si puede entrar se anota solo, sin tocar nada. | Hora pico sin tipear; una captura vieja no sirve. | `leer_qr` / `Puerta.tsx`. |
 | 2026-11-05 | ENT-4 | El tope de "dejar pasar" es por persona y por día (no del gimnasio entero). Dueño y encargado no tienen tope. Tope 0 = la recepción no deja pasar. Si el socio igual puede entrar, no cuenta. | Cada uno responde por lo suyo; D1 dice "un tope por día". | `privado.puede_dejar_pasar`. |
 | 2026-11-05 | ENT-3 | La tablet la autoriza solo el dueño (el encargado ve la lista). En la tablet se muestra solo el nombre de pila y el porqué, sin montos ni datos; nadie deja pasar desde ahí. 30 intentos por minuto por tablet. El token vive en una cookie httpOnly por 400 días. | Es una pantalla pública en la puerta: lo mínimo. | `kiosco_entrar` / `autorizar_tablet`. |
+| 2026-11-05 | ENT-6 | El QR de la tablet lo firma un secreto de esa tablet (sale del hash de su token); vale un minuto como mucho. Si el socio puede entrar, entra; si no, la app y la tablet le dicen por qué. Nadie deja pasar desde ahí. | Un QR fotografiado de lejos sirve un minuto, no para siempre. | `entrar_por_qr_pared`. |
+| 2026-11-05 | ENT-7 | El llavero lo asigna cualquiera del mostrador desde la ficha; es único por gimnasio y se guarda en mayúsculas sin guiones. En la recepción, un código sin espacios se prueba primero como llavero; si no es de nadie, es una búsqueda común. | El lector escribe el código igual que una persona: así anda con cualquier lector USB. | `asignar_llavero` / `leer_llavero`. |
+| 2026-11-05 | INV-1 | Invita solo un socio que puede entrar hoy. El límite (2 por mes por defecto) es por socio que invita y también por DNI invitado. Un DNI de socio no puede ser invitado. El invitado no cuenta como entrada del socio ni se cobra. | Que nadie entrene gratis rotando de anfitrión; "nunca anónimo". | `privado.validar_invitado`. |
 
 ---
 
@@ -230,9 +233,9 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
 - [x] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
 - [x] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
-- [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
-- [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
-- [ ] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
+- [x] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
+- [x] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
+- [x] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
 - [ ] ENT-8 · 🟢 · Control de "dejar pasar": a quién, quién y por qué, por día y semana
 - [ ] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
 - [ ] DIS-2 · 🟢 · Pulido: Entrada

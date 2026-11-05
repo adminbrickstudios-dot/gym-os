@@ -46,7 +46,14 @@ export async function leerQR(codigo: string): Promise<{ socio?: { socio_id: stri
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" = "recepcion"): Promise<{ r?: ResultadoIngreso; error?: string }> {
+/** Lo que escribió el lector de llaveros: el socio de ese llavero, o nada (ENT-7). */
+export async function leerLlavero(codigo: string): Promise<{ socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }> {
+  const panel = await contextoPanel();
+  try { return { socio: await rpc("leer_llavero", { p_gimnasio_id: panel.gimnasio.id, p_codigo: codigo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" | "nfc" = "recepcion"): Promise<{ r?: ResultadoIngreso; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
@@ -71,4 +78,25 @@ export async function anularEntrada(ingresoId: string, motivo: string): Promise<
 export async function cupoDejarPasar(): Promise<{ sin_tope: boolean; tope: number; usados: number } | null> {
   const panel = await contextoPanel();
   try { return await rpc("cupo_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }); } catch { return null; }
+}
+
+// ── Invitados (INV-1) ───────────────────────────────────────────────
+export type Invitado = { id: string; nombre: string; dni: string; socio_id: string; socio: string; entro_en: string | null; desde_la_app: boolean };
+const invitadosHoy = async () => { const panel = await contextoPanel(); return rpc<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }); };
+export async function registrarInvitado(sedeId: string, socioId: string, nombre: string, dni: string): Promise<{ error?: string; invitados?: Invitado[] }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    await rpc("registrar_invitado", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id, p_socio_id: socioId, p_nombre: nombre, p_dni: dni });
+    revalidatePath("/panel");
+    return { invitados: await invitadosHoy() };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function confirmarInvitado(id: string, sedeId: string): Promise<{ error?: string; invitados?: Invitado[] }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    await rpc("confirmar_invitado", { p_invitado_id: id, p_sede_id: sede.id });
+    return { invitados: await invitadosHoy() };
+  } catch (e) { return { error: (e as Error).message }; }
 }

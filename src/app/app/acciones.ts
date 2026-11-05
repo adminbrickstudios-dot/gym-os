@@ -16,3 +16,18 @@ export async function codigoQR(gimnasioId: string, socioId: string): Promise<{ c
   try { return await rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: gimnasioId, p_socio_id: socioId }); }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+/** El socio escaneó el QR de la tablet de la entrada (ENT-6): la base valida el código y anota la entrada. */
+export async function escanearEntrada(gimnasioId: string, socioId: string, codigo: string): Promise<{ resultado?: string; color?: string; texto?: string; error?: string }> {
+  try {
+    const r = await rpc<{ resultado: string; color: string; texto: string }>("entrar_por_qr_pared", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_codigo: codigo });
+    revalidatePath("/app");
+    return r;
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Invitar a alguien hoy (INV-1): la recepción confirma cuando llega. */
+export async function invitarHoy(gimnasioId: string, socioId: string, nombre: string, dni: string): Promise<{ error?: string }> {
+  try { await rpc("invitar", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_nombre: nombre, p_dni: dni }); revalidatePath("/app"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}

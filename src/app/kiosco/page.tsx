@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function PaginaKiosco({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const token = (await cookies()).get(COOKIE_TABLET)?.value;
   const { error: errorLink } = await searchParams;
-  let estado: { tablet: string; sede: string; gimnasio: string; con_qr: boolean } | null = null;
+  let estado: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean } | null = null;
   let problema = errorLink ? "El link para autorizar la tablet está incompleto. Copialo de nuevo desde Configuración → Reglas." : null;
   if (token && !problema) {
     const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });

@@ -22,7 +22,7 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
-  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[];
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
@@ -72,6 +72,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   retencion_dias_se_fue: [7, 365, "Los que se fueron se muestran durante"],
   pausa_dias_por_anio: [0, 365, "Pausa: máximo de días por año"],
   tope_dejar_pasar: [0, 50, "Dejar pasar: tope por día de la recepción"],
+  invitados_por_mes: [0, 10, "Invitados por socio por mes"],
   reserva_dias_anticipacion: [0, 60, "Se reserva con hasta"],
   cancelacion_horas_limite: [0, 72, "Cancelar hasta"],
 };
@@ -80,7 +81,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
-  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar",
+  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
@@ -440,6 +441,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 : "Cuando se le termina la cuota, ya no entra hasta pagar")}
               {num("dias_aviso", "Avisar que vence (días antes)", "Aparece en amarillo en la entrada")}
               {num("descuento_max_recepcion", "Descuento máximo de la recepción (%)", "Más que eso lo autoriza el dueño")}
+              {num("invitados_por_mes", "Invitados por socio por mes", c.invitados_por_mes > 0
+                ? "Cada socio al día puede traer a alguien (con DNI); la misma persona tampoco viene más veces"
+                : "En 0 no se reciben invitados")}
               {num("tope_dejar_pasar", "Dejar pasar: tope por día de la recepción", c.tope_dejar_pasar > 0
                 ? "Por persona. A suspendidos y dados de baja los deja pasar solo el dueño o el encargado"
                 : "En 0 la recepción no deja pasar a nadie")}
@@ -478,13 +482,22 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 ayuda={c.accesos_activos.includes("kiosco")
                   ? "Prendido: una tablet autorizada en la puerta; el socio escribe su DNI (o muestra su QR) y, si puede, entra solo. Si no puede, la tablet le dice por qué y que pase por recepción."
                   : "Apagado: ninguna tablet deja entrar."}
-                onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "kiosco"])] : c.accesos_activos.filter((x) => x !== "kiosco"))} />
+                onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "kiosco"])] : c.accesos_activos.filter((x) => x !== "kiosco" && x !== "qr_pared"))} />
+              {c.accesos_activos.includes("kiosco") && (
+                <Interruptor etiqueta="🔳 QR en la tablet (el socio lo escanea)" checked={c.accesos_activos.includes("qr_pared")}
+                  ayuda={c.accesos_activos.includes("qr_pared")
+                    ? "Prendido: la tablet muestra un QR que cambia cada 30 segundos; el socio lo escanea desde su app y entra (o ve por qué no)."
+                    : "Apagado: en la tablet solo se escribe el DNI."}
+                  onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_pared"])] : c.accesos_activos.filter((x) => x !== "qr_pared"))} />
+              )}
               {guardado.accesos_activos.includes("kiosco") && (
                 <Tablets inicial={tablets} sedes={datos.sedes} esDueno={puedeEditar} zona={datos.zona_horaria} />
               )}
-              {[["🔑 Llavero o tarjeta", "Con un lector USB en la recepción."]].map(([t, a]) => (
-                <Interruptor key={t} etiqueta={t} ayuda={`${a} Todavía no está disponible.`} checked={false} disabled readOnly />
-              ))}
+              <Interruptor etiqueta="🔑 Llavero o tarjeta" checked={c.accesos_activos.includes("nfc")}
+                ayuda={c.accesos_activos.includes("nfc")
+                  ? "Prendido: en la ficha de cada socio se le asigna su llavero; el lector USB lo escribe en Entrada (o en la tablet) y entra directo."
+                  : "Apagado: los llaveros no se usan."}
+                onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "nfc"])] : c.accesos_activos.filter((x) => x !== "nfc"))} />
             </div>
           </Tarjeta>
           {pie("reglas")}

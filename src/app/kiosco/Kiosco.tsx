@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/Camara";
-import { entrarEnKiosco, type Resultado } from "./acciones";
+import { entrarEnKiosco, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
+import QRCode from "qrcode";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
 
@@ -20,7 +21,39 @@ function sonar(ok: boolean) {
   } catch { /* sin audio */ }
 }
 
-export function Kiosco({ gimnasio, sede, con_qr }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean }) {
+/** El QR que la tablet muestra para que el socio lo escanee con su app (ENT-6). Se renueva solo. */
+function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
+  const [qr, setQr] = useState<{ codigo: string; vence_en: string } | null>(null);
+  const [svg, setSvg] = useState<string | null>(null);
+  const desde = useRef(new Date().toISOString());
+  useEffect(() => {
+    let vivo = true, t: ReturnType<typeof setTimeout>;
+    const traer = async () => {
+      const r = await qrDeLaTablet();
+      if (!vivo) return;
+      if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await QRCode.toString(r.codigo, { type: "svg", margin: 1 })); }
+      t = setTimeout(traer, r.vence_en ? Math.max(1000, Date.parse(r.vence_en) - Date.now() - 1500) : 5000);
+    };
+    void traer();
+    return () => { vivo = false; clearTimeout(t); };
+  }, []);
+  // Cada segundo y medio: ¿entró alguien escaneando?
+  useEffect(() => {
+    const i = setInterval(async () => {
+      const u = await ultimoDeLaTablet(desde.current);
+      if (u && "momento" in u) { desde.current = (u as Resultado & { momento: string }).momento; alEntrar(u); }
+    }, 1500);
+    return () => clearInterval(i);
+  }, [alEntrar]);
+  return (
+    <div className="tarjeta p-5 space-y-3" data-qr-pared={qr?.codigo ?? ""}>
+      <p className="text-xl font-semibold">📱 O escaneá este QR con tu app</p>
+      <div className="mx-auto w-56 aspect-square bg-white rounded-2xl p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
+    </div>
+  );
+}
+
+export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean }) {
   const [dni, setDni] = useState("");
   const [r, setR] = useState<Resultado | null>(null);
   const [camara, setCamara] = useState(false);
@@ -33,6 +66,7 @@ export function Kiosco({ gimnasio, sede, con_qr }: { tablet: string; sede: strin
     setR(x); setDni("");
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   }), []);
+  const mostrar = useCallback((x: Resultado) => { setR(x); sonar(x.resultado === "entro" || x.resultado === "entro_modo_aviso"); }, []);
   // Vuelve solo al inicio, para el que sigue.
   useEffect(() => {
     if (!r) { campo.current?.focus(); return; }
@@ -81,6 +115,7 @@ export function Kiosco({ gimnasio, sede, con_qr }: { tablet: string; sede: strin
       </div>
       {con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}>📷 Mostrar mi QR</button>}
       {camara && <Camara frente alLeer={mandar} alCerrar={() => setCamara(false)} />}
+      {qr_pared && <QrPared alEntrar={mostrar} />}
     </div>
   );
 }

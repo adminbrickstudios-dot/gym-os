@@ -10,6 +10,8 @@ import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
 import { Pagar } from "./Pagar";
 import { MiQR } from "./MiQR";
+import { EscanearEntrada } from "./EscanearEntrada";
+import { Invitar, type MisInvitados } from "./Invitar";
 import { rpc } from "@/lib/panel/servidor";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -35,7 +37,11 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const qr = await rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null);
+    const [qr, qrPared, invitados] = await Promise.all([
+      rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
+      rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
+      rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
+    ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
       <div className="space-y-6">
@@ -53,6 +59,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
 
+        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (
@@ -75,6 +82,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {!yo.pendiente && debePagar && yo.transferencia && (
           <Pagar gimnasioId={g.id} socioId={s.socio_id} monto={yo.plan?.precio_transferencia ?? null} datos={yo.transferencia} />
         )}
+
+        {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
 
         {yo.plan && (
           <section className="tarjeta p-5">

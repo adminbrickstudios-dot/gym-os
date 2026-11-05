@@ -128,3 +128,7 @@ export async function anularPausa(socioId: string, pausaId: string, motivo: stri
 // ── Apto físico (SOC-11) ────────────────────────────────────────────
 export async function cargarApto(socioId: string, vence: string) { return hacer(socioId, () => rpc("cargar_apto", { p_socio_id: socioId, p_vence: vence })); }
 export async function anularApto(socioId: string, aptoId: string) { return hacer(socioId, () => rpc("anular_apto", { p_apto_id: aptoId })); }
+
+// ── Llavero (ENT-7) ─────────────────────────────────────────────────
+export async function asignarLlavero(socioId: string, codigo: string) { return hacer(socioId, () => rpc("asignar_llavero", { p_socio_id: socioId, p_codigo: codigo })); }
+export async function quitarLlavero(socioId: string) { return hacer(socioId, () => rpc("quitar_llavero", { p_socio_id: socioId })); }

@@ -15,3 +15,18 @@ export async function entrarEnKiosco(codigo: string): Promise<Resultado> {
   if (error) return { error: error.message };
   return data as Resultado;
 }
+
+const cliente = () => createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+const token = async () => (await cookies()).get(COOKIE_TABLET)?.value ?? "";
+
+/** El QR que muestra la tablet para que el socio lo escanee (ENT-6). Lo firma la base. */
+export async function qrDeLaTablet(): Promise<{ codigo?: string; vence_en?: string; error?: string }> {
+  const { data, error } = await cliente().rpc("kiosco_qr", { p_token: await token() });
+  return error ? { error: error.message } : data;
+}
+
+/** Quién entró por esta tablet escaneando su QR, desde un momento. */
+export async function ultimoDeLaTablet(desde: string): Promise<Resultado | null> {
+  const { data, error } = await cliente().rpc("kiosco_ultimo", { p_token: await token(), p_desde: desde });
+  return error || !data ? null : (data as Resultado & { momento: string });
+}
