@@ -199,7 +199,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 3 · Socios
 - [x] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha) — verificado: e2e:socios (16 pasos), db (volver-a-dar-de-alta, paneles con teléfonos nuevos), inventario en docs/paneles/socios.md, migración 0033 aplicada local
 - [x] SOC-1 · 🟢 · Importar socios desde Excel o CSV — verificado: db (importar-socios, 4 pruebas: errores por fila, vence como cobertura, deshacer y no con movimientos, 3.000 filas en 8,9 s), vitest (importar: CSV y columnas), e2e:soc-1 (12 pasos: CSV con errores, importar, deshacer, Excel, recepción sin permiso)
-- [ ] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas)
+- [x] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas) — verificado: db (asistencia-socio: días en hora local, sin rechazos, profe no), e2e:soc-2 (8 pasos: cada pestaña, calendario = veces, mes anterior, recepción sin Pagos, celular)
 - [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
 - [ ] SOC-4 · 🟢 · Exportar la lista de socios
 - [ ] SOC-6 · 🟢 · Cumpleaños

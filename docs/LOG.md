@@ -15,6 +15,27 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-2 · Ficha del socio en pestañas
+
+**QUÉ HICE**
+- La ficha tiene pestañas (con link propio, `?pestana=`): 👤 Resumen (plan, contacto, últimas entradas), 💵 Pagos (dueño y encargado), 📅 Asistencia y 📝 Notas. Arriba siguen el semáforo y los botones grandes (Cobrar, WhatsApp, Editar, plan, baja).
+- Asistencia: veces en el mes, el mes anterior y semanas seguidas viniendo, con el calendario del mes (días que vino marcados, ◀ ▶ entre meses). Migración `20261104003500_asistencia_socio.sql` (`asistencia_socio`, sale de los ingresos; hora del gimnasio; los rechazos no cuentan).
+- `supabase/pruebas/asistencia-socio.test.mjs` y `scripts/e2e/soc-2.mjs` (8 pasos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Nada.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0035).
+
+**QUÉ CONFIGURÁS VOS** / **SIN ARREGLAR**
+- Nada. Notas con autor y fecha, y etiquetas: SOC-3.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0035 contra la base real (probada local).
+
+---
+
 ## 2026-11-04 · SOC-1 · Importar socios desde Excel o CSV
 
 **QUÉ HICE**

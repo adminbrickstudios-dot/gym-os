@@ -6,6 +6,8 @@ import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
+import { Pestanas } from "@/components/ui/Pestanas";
+import { Calendario, type Asistencia } from "./Calendario";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -19,15 +21,25 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor?: React.ReactNode }
   return <div><dt className="text-sm texto-tenue">{etiqueta}</dt><dd className="text-lg">{valor}</dd></div>;
 }
 
-export default async function FichaSocio({ params }: { params: Promise<{ id: string }> }) {
+const PESTANAS = [
+  { clave: "resumen", texto: "Resumen", emoji: "👤" }, { clave: "pagos", texto: "Pagos", emoji: "💵" },
+  { clave: "asistencia", texto: "Asistencia", emoji: "📅" }, { clave: "notas", texto: "Notas", emoji: "📝" },
+] as const;
+type Pestana = (typeof PESTANAS)[number]["clave"];
+
+export default async function FichaSocio({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; mes?: string }> }) {
   const { id } = await params;
+  const sp = await searchParams;
+  const pestana: Pestana = PESTANAS.find((p) => p.clave === sp.pestana)?.clave ?? "resumen";
+  const mes = /^\d{4}-\d{2}$/.test(sp.mes ?? "") ? `${sp.mes}-01` : null;
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes] = await Promise.all([
+    const [f, planes, asistencia] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -72,6 +84,10 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
           )}
         </header>
 
+        <Pestanas etiqueta="Partes de la ficha" activa={pestana}
+          pestanas={PESTANAS.filter((p) => p.clave !== "pagos" || f.pagos).map((p) => ({ ...p, href: `/panel/socios/${s.id}?pestana=${p.clave}` }))} />
+
+        {pestana === "resumen" && <>
         <section className="grid sm:grid-cols-2 gap-3">
           <div className="tarjeta p-6">
             <p className="titulo text-2xl mb-4">🏷️ Plan</p>
@@ -94,7 +110,6 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
               <Dato etiqueta="Mail" valor={s.email} />
               <Dato etiqueta="DNI" valor={s.dni} />
               <Dato etiqueta="Emergencia" valor={s.contacto_emergencia_nombre ? `${s.contacto_emergencia_nombre} · ${s.contacto_emergencia_telefono ?? ""}` : null} />
-              <Dato etiqueta="Notas" valor={s.notas} />
             </dl>
             {!s.telefono && !s.email && !s.dni && <p className="texto-suave">Sin datos de contacto.</p>}
           </div>
@@ -115,7 +130,9 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
           )}
         </section>
 
-        {f.pagos && (
+        </>}
+
+        {pestana === "pagos" && f.pagos && (
           <section>
             <h2 className="titulo text-3xl mb-4">💵 Pagos</h2>
             {f.pagos.length === 0 ? <p className="texto-suave">Sin pagos registrados.</p> : (
@@ -132,6 +149,17 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
                 ))}
               </ul>
             )}
+          </section>
+                )}
+        {pestana === "pagos" && !f.pagos && <p className="texto-suave">Los pagos los ven el dueño y el encargado.</p>}
+
+        {pestana === "asistencia" && asistencia && <Calendario a={asistencia} socioId={s.id} />}
+
+        {pestana === "notas" && (
+          <section className="tarjeta p-6 space-y-3" data-notas>
+            {s.notas ? <p className="text-lg whitespace-pre-line">{s.notas}</p> : <p className="texto-suave">Todavía no hay notas.</p>}
+            <p className="text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</p>
+            <Link href={`/panel/socios/${s.id}/editar`} className="boton w-fit">✏️ {s.notas ? "Cambiar la nota" : "Escribir una nota"}</Link>
           </section>
         )}
       </div>
