@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · EQU-3 · Qué hizo cada uno
+
+**QUÉ HICE**
+- Equipo → "📋 Qué hizo cada uno" (`/panel/equipo/actividad`, día por día): por persona, ventas y cuánto, descuentos, anulaciones, entradas (y cuántas dejó pasar sin poder) y cierres de caja con su diferencia. Abajo, "👀 Para mirar": cada descuento, anulación, dejado pasar y caja que no cerró justa, con la hora y el motivo.
+- Se calcula de los hechos (nada se guarda aparte). Lo ve el dueño; el encargado si ve el Resultado (es plata: mismo interruptor de EQU-1); la recepción no.
+- Migración 0102 (`actividad_equipo`), prueba de base `actividad-equipo`, `e2e:equ-3`.
+
+---
+
 ## 2026-11-05 · EQU-2 · El profe busca socios (D3)
 
 **QUÉ HICE**

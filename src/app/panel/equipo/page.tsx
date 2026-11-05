@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
@@ -17,7 +18,8 @@ export default async function PaginaEquipo() {
     ]);
     return (
       <>
-        <Encabezado emoji="🧑‍🤝‍🧑" titulo="Equipo" bajada="Quién trabaja en el gimnasio y qué puede hacer cada uno." />
+        <Encabezado emoji="🧑‍🤝‍🧑" titulo="Equipo" bajada="Quién trabaja en el gimnasio y qué puede hacer cada uno."
+          accion={(panel.yo.rol === "dueno" || panel.permisos.encargado_ve_resultado) ? <Link href="/panel/equipo/actividad" className="boton" data-link-actividad>📋 Qué hizo cada uno</Link> : undefined} />
         <div className="space-y-10">
           <Equipo miembros={miembros} sedes={panel.sedes} puedeEditar={panel.yo.rol === "dueno"} />
           <PermisosEquipo inicial={permisos} puedeEditar={panel.yo.rol === "dueno"} />

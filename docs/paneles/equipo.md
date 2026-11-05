@@ -13,6 +13,7 @@ Probado haciendo clic con `npm run e2e:equipo` (`scripts/e2e/panel-equipo.mjs`).
 | ➕ Sumar a alguien | Nombre, mail opcional, rol (con qué hace cada uno) y sede si hay varias. | ✅ | — | `guardar_equipo` | — |
 | Editar nombre o sede | No se puede: hay que sacarlo y sumarlo de nuevo. | ❌ | Editar en el lugar | — | — |
 | 🔐 Qué puede hacer cada rol | Cuatro interruptores del dueño (D4): la recepción ve lo cobrado, la recepción vende productos, el profe ve el teléfono, el encargado ve el Resultado. | ✅ (EQU-1) | — | `permisos_equipo`, `guardar_permisos_equipo` | — |
+| 📋 Qué hizo cada uno | Por día: ventas, descuentos, anulaciones, entradas, cierres de caja por persona, y lo que conviene mirar. | ✅ (EQU-3) | — | `actividad_equipo` | El encargado lo ve si ve el Resultado |
 | Encargado | Ve la lista sin botones. | ✅ | — | — | — |
 | Mi cuenta · Contraseña | Cambiarla (las dos tienen que coincidir); los campos tienen nombre para lectores de pantalla. | ✅ (arreglado) | — | Supabase Auth | — |
 | Mi cuenta · PIN | Su PIN para la compu compartida (D15). | ✅ | — | `guardar_mi_pin` | — |
@@ -22,4 +23,3 @@ Probado haciendo clic con `npm run e2e:equipo` (`scripts/e2e/panel-equipo.mjs`).
 
 ## Lo que se pensó en cadena
 
-- "Qué hizo cada uno" (EQU-3) cuelga de cada persona.
