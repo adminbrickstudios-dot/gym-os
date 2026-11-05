@@ -57,3 +57,14 @@ test("vencido: el panel no vende ni edita; el admin sí; pagar lo destraba; por 
   const [{ a }] = await como(admin, () => t.q(`select public.admin_abonos() a`));
   assert.equal(a[t.g].pagos.length, 1);
 });
+
+test("SEG-2: el dueño exporta cada tabla de su gimnasio (sin rutas internas); la recepción no; una tabla fuera de la lista, tampoco", async () => {
+  const tablas = (await t.q(`select unnest(privado.tablas_exportables()) t`)).map((x) => x.t);
+  await como(uDueno, async () => {
+    for (const tb of tablas) await t.q(`select public.exportar_gimnasio($1, $2)`, [t.g, tb]);
+    const [{ r }] = await t.q(`select public.exportar_gimnasio($1, 'socios') r`, [t.g]);
+    assert.ok(r.length >= 5); assert.ok(!("foto_path" in r[0]) && !("gimnasio_id" in r[0]));
+    await t.falla(() => t.q(`select public.exportar_gimnasio($1, 'administradores_plataforma')`, [t.g]), /no se exporta/);
+  });
+  await como(uRec, () => t.falla(() => t.q(`select public.exportar_gimnasio($1, 'socios')`, [t.g]), /permiso|rol|acceso/i));
+});

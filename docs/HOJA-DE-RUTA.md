@@ -376,7 +376,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 16 · Cierre
 - [x] SEG-1 · 🟢 · Límite de pedidos de código por celular — verificado: db (limite-codigos: 5 por destino, 20 por IP, hash, solo el servidor), e2e:seg-1 (pendiente de la tanda final)
-- [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
+- [x] SEG-2 · 🟢 · Exportar todos los datos del gimnasio — verificado: db (cada tabla, sin rutas internas, recepción no), e2e:seg-2 (pendiente de la tanda final)
 - [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
 - [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización
 - [ ] SEG-7 · 🟢 · Funciones viejas sin pantalla (cobrar_cuota, precio_cuota, caja_abierta, asignar_plan): confirmar que Vender las reemplazó y sacarles el acceso del equipo

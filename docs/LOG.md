@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-2 · Exportar todos los datos del gimnasio
+
+**QUÉ HICE**
+- Configuración → Gimnasio → "📦 Tus datos" → "Descargar todos los datos": un zip con un CSV por tabla (socios, membresías, coberturas, pausas, packs, ventas y sus ítems, pagos, entradas, caja, equipo, clases, reservas, asistencias, prospectos, productos, gastos, rutinas…), para abrir con Excel. Sin columnas internas (rutas de archivos, preferencias, `gimnasio_id`).
+- Solo el dueño (lo decide la base); la recepción recibe 403 "No se pudo exportar".
+- Migración 0113 (`exportar_gimnasio`, lista cerrada de tablas), caso en la prueba de base `abono-brik`, `e2e:seg-2`. Dependencia nueva: `fflate` (arma el zip; ya venía de otra dependencia).
+
+---
+
 ## 2026-11-05 · SEG-1 · Límite de pedidos de código
 
 **QUÉ HICE**

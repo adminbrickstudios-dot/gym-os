@@ -616,6 +616,14 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       )}
       {pestana === "mensajes" && <Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} />}
       {pestana === "cambios" && <Historial cambios={cambios} />}
+      {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
+      {pestana === "gimnasio" && puedeEditar && (
+        <section className="tarjeta p-5 mt-8 space-y-2" data-exportar-todo>
+          <h2 className="titulo text-2xl">📦 Tus datos</h2>
+          <p className="texto-suave">Todo lo de tu gimnasio (socios, pagos, entradas, caja, clases…), un archivo por tema, para abrir con Excel.</p>
+          <a href="/panel/exportar" className="boton" download>⬇️ Descargar todos los datos</a>
+        </section>
+      )}
     </div>
   );
 }
