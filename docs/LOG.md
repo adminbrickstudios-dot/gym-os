@@ -25,6 +25,8 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
   - Las que ya tienen reservas conservan su hora.
   - El cupo no baja de lo reservado; si sube, entra la espera.
 - Migración 0086 (`editar_horario`), prueba de base `editar-horario`, paso en `e2e:clases`.
+- Arreglado de paso (0087): "Sacar" un horario creado hoy lo cerraba desde mañana pero seguía en la grilla hasta el otro día; parecía que no se había sacado. La grilla muestra lo que sigue después de hoy (hora del gimnasio) y dice "hasta el …" / "desde el …" cuando corresponde.
+- Las pruebas: panel-socios esperaba el nombre del plan solo y el botón ahora también muestra el precio; cla-2 tocaba un interruptor que esperaba a la base para cambiar (ahora cambia al toque y vuelve atrás si falla).
 - CLA-6 (clase de prueba para prospectos) quedó sin hacer. Pide reservar sin ser socio, y hoy toda reserva es de un socio y cuenta para el cupo en varias funciones. No lo empecé a medias.
 
 ---
