@@ -20,6 +20,7 @@ import { Origen, type DatosOrigen } from "./Origen";
 import { Llavero, type DatosLlavero } from "./Llavero";
 import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
+import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
@@ -48,7 +49,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -75,6 +76,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ nivel: "alto" | "medio"; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }) : Promise.resolve([]),
       // COM-2: los primeros 30 días del socio nuevo.
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ dia: number; de: number; entradas: number; meta: number; primera_semana_floja: boolean } | null>("primer_mes_socio", { p_socio_id: id }) : Promise.resolve(null),
+      // COM-6: lo que firmó y lo que le falta firmar (se firma acá, en el mostrador).
+      pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ pendientes: Pendiente[]; firmados: { titulo: string; version: number; nombre: string; via: string; firmado_en: string; vigente: boolean }[] }>("documentos_socio", { p_socio_id: id }) : Promise.resolve(null),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -102,6 +105,18 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
           </div>
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
+          {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (
+            <section className="mt-6 space-y-3" data-documentos-ficha={documentos.pendientes.length}>
+              <p className="titulo-grupo">✍️ Documentos</p>
+              {documentos.pendientes.map((d) => (
+                <Firmar key={d.documento_id} socioId={s.id} doc={d} textoBoton="✍️ Firmó en recepción"
+                  nombreSugerido={d.clave === "menores" ? (s.responsable_nombre ?? "") : `${s.nombre} ${s.apellido}`.trim()} />
+              ))}
+              {documentos.firmados.map((f) => (
+                <p key={`${f.titulo}${f.version}`} className={`text-sm ${f.vigente ? "texto-suave" : "texto-tenue"}`}>✅ {f.titulo} (v{f.version}) · firmó {f.nombre} el {fechaCorta(f.firmado_en, zona)} {f.via === "app" ? "en la app" : "en recepción"}{f.vigente ? "" : " · versión anterior"}</p>
+              ))}
+            </section>
+          )}
           {!s.dado_de_baja_en && llavero.usa && <div className="mt-3"><Llavero socioId={s.id} datos={llavero} /></div>}
           {!s.dado_de_baja_en && pestana === "resumen" && (
             <div className="mt-3"><Convenio socioId={s.id} actual={convenio} opciones={convenios} zona={zona}

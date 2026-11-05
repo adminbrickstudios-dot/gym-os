@@ -408,7 +408,8 @@ bloque 18.
 - [x] COM-3 · 🟢 · Avisar a todos los anotados de una clase — verificado: db (avisar-clase: un mensaje por persona con nombre, clase y día; queda anotado; el profe solo en las suyas y sin teléfonos si no tiene permiso; vacío no), e2e:com-3 (en la tanda). Mail: cuando exista AVI-2
 - [x] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio — verificado: db (tareas: cada uno las suyas, dueño todas, otra persona no la toca, reabrir), vitest (menú), e2e:com-4 (en la tanda)
 - [x] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas — verificado: db (retencion-numeros: altas, bajas con motivo, cohorte de hace 3 meses, pocas visitas, la recepción no), 0,1 s con 3.000 socios, e2e:com-5 (en la tanda). "Pocas visitas" mira los últimos 30 días (el mes calendario daría todos "pocos" a principio de mes)
-- [ ] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada
+- [x] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada — verificado: db (documentos: versiones, firma en la app y en recepción, el de menores solo a menores, la versión vieja no se firma, la recepción no publica), e2e:com-6 (en la tanda). Que bloquee la entrada: COM-6b
+- [ ] COM-6b · 🟡 · Que "falta firmar" frene la entrada si el gimnasio lo elige — cambia quién entra (el cálculo de acceso): decide Mateo
 - [ ] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre
 - [ ] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago
 - [ ] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento)

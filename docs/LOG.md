@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-6 · Documentos para firmar
+
+**QUÉ HICE**
+- "✍️ Documentos para firmar" (desde Configuración → Reglas): el dueño escribe el reglamento, el deslinde y la autorización del responsable para menores. Editar un texto publica una versión nueva: lo firmado queda con su versión y a todos se les vuelve a pedir. "Dejar de pedirlo" no borra lo firmado.
+- El socio firma en la app ("✍️ Para firmar": lee, pone su nombre, tilda "Leí y acepto"); la recepción, en la ficha ("Firmó en recepción"). Se guarda versión, fecha, cómo y quién lo registró. El de menores solo se le pide a un menor, con el nombre del responsable.
+- En la Entrada: "✍️ Falta firmar: Reglamento" en amarillo, como el apto físico. **No cambia quién entra.**
+- Migración 0126 (`documentos` y `firmas_documento` con RLS y las funciones), prueba de base, e2e com-6 (deja el demo sin documentos pedidos) y el barrido con /panel/documentos.
+
+**PARA QUE MIRES VOS**
+- Que "falta firmar" frene la entrada (si el gimnasio lo elige) es meterse en el cálculo de acceso: lo dejé como COM-6b para que lo decidas.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-6).
+
+---
+
 ## 2026-11-05 · REV-5 · BRIK da de alta un gimnasio de cada tipo
 
 **QUÉ HICE**

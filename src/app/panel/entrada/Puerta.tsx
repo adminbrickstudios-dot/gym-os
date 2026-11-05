@@ -44,6 +44,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const [v, setV] = useState<Veredicto | null>(null);
   const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string }) | null>(null);
   const [apto, setApto] = useState<string | null>(null);
+  const [firmar, setFirmar] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -71,11 +72,11 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     return () => clearTimeout(t);
   }, [texto]);
 
-  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
+  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
   const elegir = (s: ResultadoSocio) => empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia("recepcion");
     const r = await veredicto(s.socio_id, sedeId);
-    if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); if (sonido) sonar(r.v!.color); }
+    if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); if (sonido) sonar(r.v!.color); }
   });
   // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
   // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
@@ -93,7 +94,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       campo.current?.focus();
       return;
     }
-    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null);
+    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
   }, [sedeId, sonido]);
   const porQr = useCallback((codigo: string) => empezar(async () => {
     setCamara(false); setTexto(""); setHecho(null); setForzando(false);
@@ -208,6 +209,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
+          {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
           {v.para_regularizar ? <p className="mt-2 texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
 
           <div className="flex flex-wrap gap-2 mt-7">

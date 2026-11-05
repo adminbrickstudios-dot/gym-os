@@ -473,6 +473,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         </>}
 
         {pestana === "reglas" && <>
+          {/* COM-6: los textos que firman los socios viven en su pantalla. */}
+          <p><Link href="/panel/documentos" className="boton" data-ir-documentos>✍️ Documentos para firmar (reglamento, deslinde, menores)</Link></p>
           <Tarjeta emoji="📏" titulo="Reglas" ayuda="Cómo se calcula si alguien puede entrar, y qué puede hacer la recepción.">
             <div className="grid sm:grid-cols-2 gap-3">
               {num("tolerancia_dias", "Días de gracia al vencer", gracia > 0
