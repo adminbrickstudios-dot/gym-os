@@ -15,6 +15,24 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-8 · El estado de muchos socios juntos, más rápido
+
+**QUÉ HICE**
+- No hice una segunda versión "en lote" del cálculo de acceso: serían dos cálculos que pueden decir cosas distintas (la regla es uno solo). Medí dónde se iba el tiempo y lo saqué sin tocar el cálculo:
+  - La suscripción vigente se buscaba recorriendo toda la tabla: el índice de 0114 es parcial (`baja_en is null`) y la búsqueda pide también las bajas futuras. Índice nuevo `(socio_id, inicio desc)`, y otro para el precio por plan. Calcular el acceso de 3.019 socios: 2,9 s → 1,0 s.
+  - Socios con filtro de estado ("al día", "vencidos"…) calculaba a todos y después cortaba en 30. Ahora los candidatos llegan ordenados y Postgres deja de calcular apenas junta los 30: 1.716 ms → 63 ms.
+  - La retención (Inicio, Avisos, Vencen hoy, Retención) llamaba una función por cada ingreso de las últimas 8 semanas para la frecuencia (58 mil llamadas): ahora es la misma cuenta escrita en la consulta. −200 ms.
+- Migración 0117. Mismos resultados: la retención del demo grande da exactamente lo mismo antes y después (comparado fila por fila), y el filtro devuelve los mismos socios (salvo cuál de dos con el mismo nombre). Las 355 pruebas de la base en verde.
+- Con 3.000 socios y la máquina corriendo la tanda de pantallas al mismo tiempo: Inicio 613 ms, Retención 667, Avisos 693, Vencen hoy 812, Retención (resumen) 807 (antes 1,0–1,3 s), Socios "al día" 63 (antes 2,6 s).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La prueba "15" de la segunda revisión usaba `caja_abierta`, que SEG-7 le sacó al equipo: ahora prueba con `cajas_sede` (lo que usa la pantalla).
+
+**SIN ARREGLAR**
+- Lo que queda de la retención es el precio de cada vencido (`privado.precio_para`, una función SQL con `search_path` fijo que Postgres no puede expandir: ~0,4 ms por llamada) y armar los mensajes. Bajarlo pide reescribir la función del precio: es plata, no lo toqué.
+
+---
+
 ## 2026-11-05 · SEG-7 · Funciones viejas sin pantalla
 
 **QUÉ HICE**
