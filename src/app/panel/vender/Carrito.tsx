@@ -34,7 +34,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
        ...(preciosIniciales.recargo ? [lineaRecargo(preciosIniciales.recargo)] : [])] : []);
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
   const medios = MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio));
-  const [medio, setMedio] = useState<Medio | null>(medios[0]?.medio ?? null);
+  // Sin caja abierta no arranca en efectivo (no se podría cobrar, y mostraría su precio).
+  const [medio, setMedio] = useState<Medio | null>((turnoId ? medios[0] : medios.find((m) => m.medio !== "efectivo") ?? medios[0])?.medio ?? null);
   const [mixto, setMixto] = useState(false);
   const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>(
     medios.slice(0, 2).map((m) => ({ medio: m.medio, monto: "" })));
@@ -142,7 +143,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
             </div>
           ) : (
             <div className="space-y-2">
-              <input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} className="campo !min-h-14 !text-lg" placeholder="🔍 Buscar socio (o vendé sin socio: productos)" aria-label="Buscar socio" />
+              <input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} className="campo !min-h-14 !text-lg" placeholder="🔍 Buscar socio (sin socio: solo productos)" aria-label="Buscar socio" />
               {encontrados.map((s) => (
                 <button key={s.socio_id} type="button" onClick={() => elegirSocio(s)} className="fila gap-3">
                   <PuntoEstado color={s.color} />

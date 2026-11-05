@@ -15,6 +15,25 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-6 · Vender, Caja y Transferencias botón por botón
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/vender.md`. `npm run e2e:vender` (12 pasos): caja ciega, montos con punto y coma, tope de descuento, dos medios y cierre "Caja justa" con la cuenta exacta.
+- Arreglado:
+  - Montos en Vender y Caja con `leerMonto()`.
+  - Sin caja abierta, Vender ya no arranca en efectivo (mostraba ese precio y no se podía cobrar).
+  - "Ver comprobante" en el celular.
+  - Texto del buscador más corto.
+- Anular ventas (VEN-6) quedó en la entrada del bloque 5.
+
+**SIN ARREGLAR**
+- "Tu descuento máximo es 10.00 %": sale con dos decimales. Es texto de `privado.vender`; lo arreglo la próxima vez que se toque esa función.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: todo se abrió con sesión real.
+
+---
+
 ## 2026-11-05 · Bloque 5 (Planes y precios) y VEN-6 · AUD-5, PLA-1 a PLA-7, DIS-10, VEN-6
 
 **QUÉ HICE**

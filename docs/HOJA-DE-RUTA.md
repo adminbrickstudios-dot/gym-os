@@ -260,7 +260,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-10 · 🟢 · Pulido: Planes y productos
 
 ### 6 · Vender, Caja y Transferencias
-- [ ] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
+- [x] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
 - [ ] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
 - [ ] VEN-4 · 🟢 · Productos con stock
 - [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
