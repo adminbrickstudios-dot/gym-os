@@ -17,6 +17,8 @@ export async function archivarDocumento(clave: string): Promise<{ error?: string
 
 /** Firma en el mostrador (o desde la app: la base sabe quién es por la sesión). */
 export async function firmarDocumento(documentoId: string, socioId: string, nombre: string): Promise<{ error?: string }> {
-  try { await rpc("firmar_documento", { p_documento_id: documentoId, p_socio_id: socioId, p_nombre: nombre }); revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/app"); return {}; }
+  // Sin revalidar: si la página se vuelve a pedir, el documento ya no está pendiente y el
+  // "Firmado" desaparece antes de que se lea. La próxima vez que se abra ya viene sin él.
+  try { await rpc("firmar_documento", { p_documento_id: documentoId, p_socio_id: socioId, p_nombre: nombre }); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }

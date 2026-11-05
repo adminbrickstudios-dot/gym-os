@@ -5,10 +5,20 @@
 // recepción lo firma con él en la ficha. Al final se deja de pedir (el demo
 // queda como estaba).
 //   npm run e2e:com-6            (con scripts/local/levantar.sh corriendo)
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const s = Date.now().toString().slice(-5);
+// "Otro socio" para la Entrada: uno del demo, mayor, en verde, que no sea un testigo (el socio de la app ya firmó).
+const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
+await db.connect();
+const [otro] = (await db.query(`select s.id from public.socios s join public.gimnasios g on g.id = s.gimnasio_id
+  where g.slug = 'demo' and s.dado_de_baja_en is null and s.usuario_id is null and s.nombre <> 'Testigo'
+    and coalesce(s.fecha_nacimiento < now() - interval '18 years', true) and (privado.calcular_acceso(s.id, now(), null)).color = 'verde'
+  order by s.numero limit 1`)).rows;
+await db.end();
 const b = await navegador();
 let d;
 try {
@@ -44,9 +54,8 @@ try {
   const r = await pagina(b, COMPU);
   r.setDefaultNavigationTimeout(120000);
   await entrar(r, "recepcion@ejemplo.invalid");
-  await r.goto(`${G}/panel/entrada`);
-  await r.locator('input[aria-label="Buscar socio"]').fill("Testigo Al Dia");
-  await r.locator("button.fila", { hasText: /Testigo Al D[ií]a/ }).first().click();
+  if (!otro) throw new Error("el demo no tiene otro socio en verde");
+  await r.goto(`${G}/panel/entrada?socio=${otro.id}`);
   const aviso = r.locator("[data-aviso-firmar]");
   chequear(await aparece(aviso, 30000) && /Falta firmar: Reglamento/.test(await aviso.innerText()) && await r.locator('[data-veredicto="verde"]').count() === 1,
     "en la Entrada: “✍️ Falta firmar: Reglamento”, y sigue en verde (no lo frena)", `Entrada: ${await aviso.innerText().catch(() => "sin aviso")}`);

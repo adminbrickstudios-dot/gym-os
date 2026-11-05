@@ -33,3 +33,20 @@ test("sus pagos y entradas, lo más nuevo primero; otro socio no", async () => {
   assert.equal(h.entradas.length, 1); assert.equal(h.entradas[0].tipo, "entrada");
   await como(uOtro, () => t.falla(() => t.q(`select public.mi_historial($1)`, [socio]), /permiso/i));
 });
+
+// 0136: rechazar un comprobante anula la venta, pero el socio tiene que ver el rechazo y el motivo.
+test("la transferencia rechazada aparece con su motivo; la venta anulada sin rechazo no", async () => {
+  const [{ id: uDueno }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`d${Math.random()}@ejemplo.invalid`]);
+  const [{ id: dueno }] = await t.q(`insert into public.equipo (gimnasio_id, usuario_id, rol, nombre) values ($1,$2,'dueno','Dueña') returning id`, [t.g, uDueno]);
+  for (const [estado, motivo] of [["rechazado", "El monto no coincide"], ["anulado", null]]) {
+    const [{ id: v }] = await t.q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, origen, estado, creado_en) values ($1,$2,$3,'app','pendiente', now() - interval '2 days') returning id`, [t.g, t.sede, socio]);
+    await t.q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, descripcion, cantidad, precio_unitario) values ($1,$2,'otro','Cuota',1,7000)`, [t.g, v]);
+    await t.q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, rechazado_en, rechazado_motivo) values ($1,$2,'transferencia',7000,$3, case when $3 = 'rechazado' then now() - interval '2 days' end, $4)`, [t.g, v, estado, motivo]);
+    await t.q(`update public.ventas set estado = 'anulada', anulada_en = now(), anulada_motivo = 'x', anulada_por = $2 where id = $1`, [v, dueno]);
+  }
+  const [{ h }] = await como(uSocio, () => t.q(`select public.mi_historial($1) as h`, [socio]));
+  const rechazados = h.pagos.filter((p) => Number(p.monto) === 7000);
+  assert.equal(rechazados.length, 1);
+  assert.equal(rechazados[0].estado, "rechazado");
+  assert.equal(rechazados[0].motivo, "El monto no coincide");
+});

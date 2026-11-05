@@ -60,7 +60,7 @@ try {
   const pagar = a.locator("section", { hasText: "Pagar por transferencia" });
   await pagar.waitFor({ timeout: 60000 });
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png", buffer: PNG });
-  await pagar.getByText("el gimnasio lo revisa").waitFor({ timeout: 30000 });
+  await a.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });  // el aviso, o la app ya re-pintada con "Informaste…"
   ok("entra a la app con su celular y sube el comprobante");
 
   // ── Se lo rechazan con motivo ──
@@ -70,21 +70,22 @@ try {
   await mia.locator('button:has-text("Rechazar")').first().click();
   await mia.locator('input[placeholder^="Motivo"]').fill("El monto no coincide");
   await mia.locator('button[type="submit"]:has-text("Rechazar")').click();
-  await d.locator("li", { hasText: `Rechazada · Sofía Rev${s}` }).waitFor({ timeout: 30000 });
+  // Al rechazar, la fila dice "✕ Rechazada" y la lista se vuelve a pedir: puede irse antes de verla. Vale que ya no esté pendiente.
+  await d.locator("li", { hasText: `Sofía Rev${s}` }).filter({ has: d.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
   await a.goto(`${G}/app/historial`);
   chequear(await aparece(a.getByText(/rechazado: El monto no coincide/), 60000), "le rechazan la transferencia: en la app ve “❌ rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
   await a.goto(`${G}/app`);
   const otra = a.locator("section", { hasText: "Pagar por transferencia" });
   chequear(await aparece(otra, 60000), "y la app le vuelve a ofrecer subir otro comprobante", "no puede subir otro");
   await otra.locator('input[type="file"]').setInputFiles({ name: "comprobante2.png", mimeType: "image/png", buffer: PNG });
-  await otra.getByText("el gimnasio lo revisa").waitFor({ timeout: 30000 });
+  await a.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });
 
   // ── Se lo aprueban y entra ──
   await d.goto(`${G}/panel/transferencias`);
   const segunda = d.locator("li", { hasText: `Rev${s}` }).first();
   await segunda.waitFor({ timeout: 60000 });
   await segunda.locator('button:has-text("Aprobar")').click();
-  await d.locator("li", { hasText: `Aprobada · Sofía Rev${s}` }).waitFor({ timeout: 30000 });
+  await d.locator("li", { hasText: `Sofía Rev${s}` }).filter({ has: d.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
   await d.goto(`${G}/panel/entrada?socio=${socio}`);
   const ver = d.locator('[data-veredicto="verde"]');
   await ver.waitFor({ timeout: 60000 });
@@ -99,7 +100,7 @@ try {
     await reservar.click();
     const r = await Promise.race([
       a.getByText("✅ Reservada").first().waitFor({ timeout: 30000 }).then(() => "ok"),
-      a.getByRole("alert").first().waitFor({ timeout: 30000 }).then(async () => await a.getByRole("alert").first().innerText()),
+      a.locator('main [role="alert"]').first().waitFor({ timeout: 30000 }).then(async () => await a.locator('main [role="alert"]').first().innerText()),
     ]);
     chequear(r === "ok" || /no cubre|tu plan/i.test(r), r === "ok" ? "reserva una clase de mañana desde la app" : `reservar: la base dice por qué no (“${r}”)`, `al reservar: ${r}`);
   } else ok("mañana no hay clases con reserva en el demo: nada para reservar");

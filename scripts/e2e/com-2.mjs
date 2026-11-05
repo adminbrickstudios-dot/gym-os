@@ -13,7 +13,7 @@ const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execS
 await db.connect();
 const [{ id: gim, sede }] = (await db.query(`select g.id, (select s.id from public.sedes s where s.gimnasio_id = g.id and s.es_principal) sede from public.gimnasios g where g.slug = 'demo'`)).rows;
 const s5 = Date.now().toString().slice(-5);
-const [{ id: socio }] = (await db.query(`insert into public.socios (gimnasio_id, nombre, apellido) values ($1, 'Nuevita', $2) returning id`, [gim, `Mes${s5}`])).rows;
+const [{ id: socio }] = (await db.query(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) values ($1, 'Nuevita', $2, $3) returning id`, [gim, `Mes${s5}`, `+5490006${s5}1`])).rows;
 const [{ id: su }] = (await db.query(`insert into public.suscripciones (gimnasio_id, socio_id, plan_id, inicio)
   select $1, $2, p.id, now() - interval '8 days' from public.planes p where p.gimnasio_id = $1 and p.nombre = 'Plan Full' returning id`, [gim, socio])).rows;
 await db.query(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, motivo)

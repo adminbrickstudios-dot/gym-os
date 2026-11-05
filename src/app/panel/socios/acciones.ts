@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
-export type EstadoForm = { error?: string; destino?: string };
+export type EstadoForm = { error?: string; destino?: string; valores?: Record<string, string> };
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
 
@@ -24,7 +24,7 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
     }
     revalidatePath("/panel/socios");
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: (e as Error).message, valores: datos };
   }
   // Desde un prospecto se va directo a la ficha desde el servidor: la página del alta
   // ya no sirve (el prospecto pasó a socio) y volver a dibujarla daría error.

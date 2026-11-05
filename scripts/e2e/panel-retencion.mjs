@@ -16,8 +16,8 @@ try {
   const tt = await tablero.innerText();
   chequear(/Al día/.test(tt) && /Altas del mes/.test(tt) && /Bajas del mes/.test(tt) && /\$[\d.]+/.test(tt), "arriba: al día con 12 semanas, altas, bajas y la plata en riesgo (RET-1)", tt.slice(0, 160));
   const tabs = d.locator('nav[aria-label="Listas"] a');
-  chequear(await tabs.count() === 5, "5 listas con su número", `${await tabs.count()} listas`);
-  const filas = d.locator("main ul > li");
+  chequear(await tabs.count() === 6, "6 listas con su número (En riesgo primero)", `${await tabs.count()} listas`);
+  const filas = d.locator("[data-lista-retencion] > li");
   if (await filas.count()) {
     const f = filas.first();
     chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "vencidos: cada fila con “💵 Cobrar”", "sin Cobrar");
@@ -30,10 +30,10 @@ try {
       ok("“🙌 Dice que vuelve” queda anotado");
     }
   }
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     await tabs.nth(i).click();
     await d.waitForLoadState("networkidle").catch(() => {});
-    if (await d.locator("main ul > li").count() === 0) {
+    if (await d.locator("[data-lista-retencion] > li").count() === 0) {
       chequear(await d.getByText("Nadie en esta lista").count() === 1, `lista vacía (${(await tabs.nth(i).innerText()).split("\n")[0]}): lo dice y lleva a otra`, "vacía sin texto");
       break;
     }

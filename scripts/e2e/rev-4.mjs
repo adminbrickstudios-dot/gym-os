@@ -64,7 +64,7 @@ try {
       const deshacer = p.getByRole("button", { name: /Deshacer el presente de Testigo Al D[ií]a/ });
       const r = await Promise.race([
         deshacer.waitFor({ timeout: 30000 }).then(() => "ok"),
-        p.getByRole("alert").first().waitFor({ timeout: 30000 }).then(async () => await p.getByRole("alert").first().innerText()),
+        p.locator('main [role="alert"]').first().waitFor({ timeout: 30000 }).then(async () => await p.locator('main [role="alert"]').first().innerText()),
       ]);
       if (r === "ok") {
         ok("vino sin reservar: lo suma a la clase y queda ✅ Presente");

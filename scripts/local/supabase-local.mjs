@@ -354,7 +354,15 @@ async function storage(req, res, ruta, crudo, consulta = new URLSearchParams()) 
   if (req.method === "POST" && rutaObjeto) {
     const f = archivoDe(bucket, rutaObjeto);
     if (!f) return errorStorage(res, 400, "InvalidKey", "Invalid key");
-    const tipo = String(req.headers["content-type"] ?? "").split(";")[0];
+    let tipo = String(req.headers["content-type"] ?? "").split(";")[0];
+    // Desde el navegador, storage-js manda el archivo en un multipart (como Supabase, vale el tipo del archivo).
+    if (tipo === "multipart/form-data") {
+      const fd = await new Response(crudo, { headers: { "content-type": req.headers["content-type"] } }).formData();
+      const archivo = [...fd.values()].find((v) => typeof v === "object" && "arrayBuffer" in v);
+      if (!archivo) return errorStorage(res, 400, "InvalidRequest", "El multipart no trae un archivo");
+      tipo = archivo.type;
+      crudo = Buffer.from(await archivo.arrayBuffer());
+    }
     if (!b.tipos.includes(tipo)) return errorStorage(res, 415, "invalid_mime_type", `mime type ${tipo} is not supported`);
     if (crudo.length > b.max) return errorStorage(res, 413, "Payload too large", "The object exceeded the maximum allowed size");
     if (fs.existsSync(f) && req.headers["x-upsert"] !== "true") return errorStorage(res, 409, "Duplicate", "The resource already exists");

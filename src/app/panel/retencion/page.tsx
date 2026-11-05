@@ -109,7 +109,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
             {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>.</> : "Los que pagan vienen como siempre. Se vuelve a calcular cada vez que abrís."}
           </Vacio>
         ) : (
-          <ul className="space-y-2" data-riesgo={riesgo.length}>
+          <ul className="space-y-2" data-riesgo={riesgo.length} data-lista-retencion>
             {riesgo.map((r) => (
               <FilaContacto key={r.socio_id} socioId={r.socio_id} nombre={r.nombre} lista="no_viene"
                 texto={`${r.nivel === "alto" ? "🔴 Riesgo alto" : "🟡 Riesgo medio"} · ${r.porque[0]}`}
@@ -122,7 +122,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
             {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>: ahí sí hay a quién escribirle.</> : "Nadie se está yendo. Volvé mañana: se calcula sola."}
           </Vacio>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2" data-lista-retencion>
             {visibles.map((f) => (
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={f.lista}
                 detalle={venia(f.visitas_por_semana)}

@@ -15,6 +15,29 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · Tanda completa · AUD-16, REV-3, REV-4, REV-6 y lo que rompía
+
+**QUÉ HICE**
+- Corrí la tanda entera (base nueva, verificar, mapa, 25 e2e y el barrido de 232 pantallas) contra todo hasta la 0135. Base y mapa en verde. Lo que falló lo seguí uno por uno y lo volví a correr solo, hasta verde.
+- **El historial del socio no mostraba la transferencia rechazada** (migración 0136): rechazar un comprobante anula la venta y `mi_historial` salteaba las ventas anuladas, así que el socio nunca veía "❌ rechazado: el monto no coincide". Ahora el pago rechazado aparece con su motivo; lo anulado de verdad sigue afuera. Mismos permisos. Prueba de base nueva en historial-socio.
+- **Alta de socio: un error borraba todo lo escrito.** React vacía el formulario al volver la acción; con "WhatsApp: escribilo con característica" la recepción perdía nombre, apellido y DNI. Ahora el form vuelve con lo que se había escrito.
+- **Firmar un documento: el "Firmado" no se llegaba a ver.** La acción volvía a pedir la página y el documento, ya firmado, desaparecía con su confirmación. Ya no la vuelve a pedir: queda "Firmado: Reglamento" y la próxima vez que se abre ya no está.
+- supabase-local: el navegador ahora sube el comprobante en un multipart (versión nueva de storage-js); la imitación de Storage lo lee igual que Supabase (vale el tipo del archivo). Era lo que cortaba cliente, rev-3 y rev-6.
+- Retención: las dos listas llevan `data-lista-retencion` (la prueba agarraba la lista escondida de nombres del tablero).
+- Pruebas que esperaban mal: rev-3 y cliente (el aviso de "lo revisa" o la app ya re-pintada con "Informaste…"; la fila aprobada/rechazada puede irse antes de verla), rev-3/rev-4 (el `role="alert"` vacío de Next no es un error), panel-retencion (6 listas desde COM-1), com-2 (el socio nuevo sin celular no tiene WhatsApp), com-6 (la Entrada miraba al mismo socio que acababa de firmar; ahora es otro en verde).
+- Verificado ejecutando: cliente 20, rev-3 8, rev-4 7, rev-6 7, com-2 4, com-3 2, com-6 5, com-13 4, panel-retencion 7 pasos en verde; db historial-socio; typecheck, lint y chequeos en verde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Lo del formulario que se vacía con un error puede pasar en otros formularios con `useActionState` que no devuelven los valores. Arreglé el de alta de socio (el que más se usa); los demás no los revisé uno por uno.
+- REV-4 sigue anotando dos faltantes del documento: fotos en la lista de la clase y sumar a alguien desde la lista.
+
+**SIN ARREGLAR**
+- REV-6a (dos personas cobran la misma cuota a la vez → 2 ventas): toca plata, decide Mateo.
+- El barrido llegó a las 232 pantallas con 1 caída: el navegador se cerró por carga en "encargado · compu · /panel/socios" (la pantalla abrió bien en las otras corridas).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0136 en Supabase: el código está escrito según la documentación, pero no está ejecutado ahí; se aplica con prevuelo → aplicar.
+
 ## 2026-11-05 · SEG-5 · Entrada sin internet
 
 **QUÉ HICE**

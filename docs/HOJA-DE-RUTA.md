@@ -389,7 +389,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización — verificado: db (mis_datos, anonimizar: solo ex socios, BORRAR, quedan pagos, solo el dueño), e2e:seg-6 (pendiente de la tanda final)
 - [x] SEG-7 · 🟢 · Funciones viejas sin pantalla (cobrar_cuota, precio_cuota, caja_abierta, asignar_plan): confirmar que Vender las reemplazó y sacarles el acceso del equipo — verificado: db (cobro con Vender, la vieja sin permiso; pin-equipo). asignar_plan queda: tiene pantalla
 - [x] SEG-8 · 🟢 · Calcular el estado de todos los socios juntos (retención, Vencen hoy, Inicio, Avisos, filtro "al día") para bajar de 1 s con 3.000 socios — toca el cálculo de acceso: con las pruebas de acceso al lado — verificado: db (355 en verde), retención idéntica fila por fila en el demo grande, npm run medir: todo por debajo de 1 s (Socios "al día" 2,6 s → 63 ms). Sin un segundo cálculo: índices + cortar temprano
-- [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
+- [x] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta — verificado: e2e:cliente 20 pasos en verde (BRIK crea el gimnasio → precio, alias, grilla, importar, publicar, recepción → caja → cobro → entrada verde → socio reserva → transferencia con comprobante → la dueña aprueba → Resultado $60.000 → otra sede con su caja → celular sin desborde)
 
 ### 17 · Segunda pasada (todo de nuevo, con ojos nuevos)
 Cada una vuelve a abrir todo el panel con su rol, lo compara con `docs/producto/`
@@ -397,10 +397,10 @@ y con `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila, y suma lo que falte al
 bloque 18.
 - [x] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja) — verificado: e2e:rev-1 (12 pasos, en el orden del documento); lo que falta, en el bloque 18 (REV-1a…d)
 - [x] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular) — verificado: e2e:rev-2 (contra la app local; la contraseña por WhatsApp corre en la tanda); lo que falta: REV-2a
-- [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
-- [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
+- [x] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar) — verificado: e2e:rev-3 8 pasos en verde (el rechazo con su motivo en el historial, migración 0136), db (historial-socio)
+- [x] REV-4 · 🟢 · Segunda pasada: un día como profe — verificado: e2e:rev-4 7 pasos en verde (faltan, anotados en el LOG: fotos en la lista de la clase y sumar a alguien desde la lista)
 - [x] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando — verificado: e2e:rev-5 (15 pasos: los 8 tipos; el dueño entra, ve sus planes y actividades, Clases según el tipo, pone el primer precio, celular sin desbordes)
-- [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
+- [x] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros) — verificado: e2e:rev-6 7 pasos en verde (dos personas cobrando la misma cuota a la vez sigue en REV-6a, decide Mateo)
 
 ### 18 · Lo que encontró la segunda pasada
 - [x] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado — verificado: db (prometieron-pagar: hoy y ayer, sale solo al pagar, la recepción ve los suyos), e2e:rev-1 (en la tanda)

@@ -192,7 +192,7 @@ try {
   chequear((await pagar.innerText()).includes(`cliente.${s}.mp`), "el otro socio ve el alias del gimnasio para transferir", await pagar.innerText());
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png",
     buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", "base64") });
-  await pagar.getByText("el gimnasio lo revisa").waitFor({ timeout: 30000 });
+  await s2.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });  // el aviso, o la app ya re-pintada con "Informaste…"
   ok("sube el comprobante: “el gimnasio lo revisa y te habilita”");
 
   // ── 6. El dueño aprueba y ve la plata ──
