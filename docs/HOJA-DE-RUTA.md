@@ -115,6 +115,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | AUD-3 | El teléfono se normaliza en la base para todo el sistema (entiende el 15 del celular, el 0 de la característica, 0054, +54 9). | Un solo lugar; la pantalla armaba números mal. | — |
 | 2026-11-04 | SOC-1 | Importan dueño y encargado (recepción no). Lo que tiene error no entra (se informa por fila); el resto entra junto. "Vence el" es una cobertura de origen importación desde hoy hasta ese día; sin fecha, queda con el plan y sin pagar. | Nadie entra gratis por un archivo mal cargado: lo que entra es lo que dice la planilla del dueño. | Rechazar todo el archivo si una fila tiene error. |
 | 2026-11-04 | SOC-1 | Deshacer borra la importación entera (socios, planes y coberturas) dentro de 24 h y solo si esos socios no tienen movimientos; es la única forma en que se borra un hecho, y solo desde esa función. | Que un archivo mal mapeado se pueda volver a importar bien sin dejar fantasmas. | Anularlos y dejarlos dados de baja. |
+| 2026-11-04 | SOC-3 | Notas y etiquetas: las ponen dueño, encargado y recepción; una nota la borra quien la escribió o el dueño/encargado (queda borrada, no se pierde de la base). Una etiqueta que nadie tiene desaparece sola. | Es el trabajo de todos los días del mostrador. | — |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -200,7 +201,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha) — verificado: e2e:socios (16 pasos), db (volver-a-dar-de-alta, paneles con teléfonos nuevos), inventario en docs/paneles/socios.md, migración 0033 aplicada local
 - [x] SOC-1 · 🟢 · Importar socios desde Excel o CSV — verificado: db (importar-socios, 4 pruebas: errores por fila, vence como cobertura, deshacer y no con movimientos, 3.000 filas en 8,9 s), vitest (importar: CSV y columnas), e2e:soc-1 (12 pasos: CSV con errores, importar, deshacer, Excel, recepción sin permiso)
 - [x] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas) — verificado: db (asistencia-socio: días en hora local, sin rechazos, profe no), e2e:soc-2 (8 pasos: cada pestaña, calendario = veces, mes anterior, recepción sin Pagos, celular)
-- [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
+- [x] SOC-3 · 🟢 · Notas y etiquetas, con filtros — verificado: db (notas-etiquetas: autor, quién borra, etiquetas sin repetir, filtro, profe no), e2e:soc-3 (6 pasos: etiqueta en dos socios, nota con autor y hora, filtro en Socios y Retención, la dueña borra, la etiqueta desaparece)
 - [ ] SOC-4 · 🟢 · Exportar la lista de socios
 - [ ] SOC-6 · 🟢 · Cumpleaños
 - [ ] SOC-7 · 🟢 · Foto del socio desde la cámara

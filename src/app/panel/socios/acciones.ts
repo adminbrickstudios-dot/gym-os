@@ -54,3 +54,13 @@ export async function volverADarDeAlta(socioId: string): Promise<{ error?: strin
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Notas y etiquetas (SOC-3) ───────────────────────────────────────
+async function hacer(socioId: string, fn: () => Promise<unknown>): Promise<{ error?: string }> {
+  try { await fn(); revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel/socios"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+export async function agregarNota(socioId: string, texto: string) { return hacer(socioId, () => rpc("agregar_nota", { p_socio_id: socioId, p_texto: texto })); }
+export async function borrarNota(socioId: string, notaId: string) { return hacer(socioId, () => rpc("borrar_nota", { p_nota_id: notaId })); }
+export async function ponerEtiqueta(socioId: string, nombre: string) { return hacer(socioId, () => rpc("poner_etiqueta", { p_socio_id: socioId, p_nombre: nombre })); }
+export async function sacarEtiqueta(socioId: string, etiquetaId: string) { return hacer(socioId, () => rpc("sacar_etiqueta", { p_socio_id: socioId, p_etiqueta_id: etiquetaId })); }

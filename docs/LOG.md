@@ -15,6 +15,28 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-3 · Notas y etiquetas, con filtros
+
+**QUÉ HICE**
+- Ficha: etiquetas debajo del estado ("+ etiqueta" con las que ya existen para elegir; ✕ para sacarla). Pestaña Notas: escribir una nota (recordatorio de no anotar salud), lista con autor y fecha, "Borrar" para quien la escribió y para dueño/encargado. La nota vieja de la ficha sigue a la vista.
+- Socios y Retención: filtro por etiqueta en píldoras (con su cuenta en Socios).
+- Migración `20261104003600_notas_y_etiquetas.sql`: tablas `notas_socio`, `etiquetas`, `socio_etiquetas` (RLS, sin escritura directa), `notas_y_etiquetas`, `agregar_nota`, `borrar_nota`, `poner_etiqueta`, `sacar_etiqueta`, `etiquetas_gimnasio`, `socios_con_etiqueta`; `buscar_socios` suma `p_etiqueta` (la firma vieja se borra en la misma migración).
+- `supabase/pruebas/notas-etiquetas.test.mjs` y `scripts/e2e/soc-3.mjs` (6 pasos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Con la base local, `supabase-local` guarda la lista de funciones al arrancar: después de cambiar la firma de una función hay que reiniciarlo (`scripts/local/levantar.sh`). En Supabase se recarga solo.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0036). Ojo: esta cambia la firma de `buscar_socios`: aplicá antes de mergear (como siempre).
+
+**QUÉ CONFIGURÁS VOS** / **SIN ARREGLAR**
+- Nada.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0036 contra la base real (probada local).
+
+---
+
 ## 2026-11-04 · SOC-2 · Ficha del socio en pestañas
 
 **QUÉ HICE**

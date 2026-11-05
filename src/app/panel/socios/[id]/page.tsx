@@ -8,6 +8,7 @@ import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servid
 import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { Calendario, type Asistencia } from "./Calendario";
+import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -36,10 +37,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes, asistencia] = await Promise.all([
+    const [f, planes, asistencia, ne] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
+      rpc<NotasYEtiquetas>("notas_y_etiquetas", { p_socio_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -65,6 +67,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             {s.dado_de_baja_en ? <span className="pildora">👋 Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
           </div>
+          <div className="mt-4"><Etiquetas socioId={s.id} etiquetas={ne.etiquetas} todas={ne.todas} /></div>
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>
               <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
@@ -155,13 +158,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
 
         {pestana === "asistencia" && asistencia && <Calendario a={asistencia} socioId={s.id} />}
 
-        {pestana === "notas" && (
-          <section className="tarjeta p-6 space-y-3" data-notas>
-            {s.notas ? <p className="text-lg whitespace-pre-line">{s.notas}</p> : <p className="texto-suave">Todavía no hay notas.</p>}
-            <p className="text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</p>
-            <Link href={`/panel/socios/${s.id}/editar`} className="boton w-fit">✏️ {s.notas ? "Cambiar la nota" : "Escribir una nota"}</Link>
-          </section>
-        )}
+        {pestana === "notas" && <Notas socioId={s.id} notas={ne.notas} zona={zona} notaVieja={s.notas} />}
       </div>
     );
   });
