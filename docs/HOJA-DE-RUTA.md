@@ -219,7 +219,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-3 · 🟢 · Pulido: Socios
 
 ### 4 · Entrada
-- [ ] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
+- [x] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
 - [ ] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
 - [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
 - [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
@@ -227,6 +227,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
 - [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
 - [ ] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
+- [ ] ENT-8 · 🟢 · Control de "dejar pasar": a quién, quién y por qué, por día y semana
+- [ ] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
 - [ ] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
@@ -548,6 +550,12 @@ LISTO SI: prueba de la base y e2e con un alta online.
 **ENT-2.** QR en la app del socio, rotativo (cambia cada 30 s, firmado, no sirve una captura vieja) y lector con la cámara en Entrada. La validación es la misma función de acceso: nada se calcula en TypeScript.
 **ENT-3.** Modo kiosco para una tablet en la puerta: pantalla sin menú, el socio escanea su QR o escribe su DNI y ve su semáforo. Sin sesión de una persona: un dispositivo autorizado por el dueño (token revocable).
 LISTO SI: pruebas de base del QR (vencido, de otro gimnasio, repetido) y e2e de la recepción y del kiosco.
+
+**ENT-8.** (Salió de AUD-4.) Para el dueño y el encargado: la lista de entradas "dejadas pasar" y anuladas de un día o una semana, con quién lo hizo y el motivo, y la cuenta por persona del equipo. Desde Entrada ("ver otro día") y desde Inicio del dueño si hubo alguna hoy. Sale de `ingresos` (no se guarda nada nuevo).
+LISTO SI: prueba de base (la recepción no la ve si es solo para el dueño y el encargado; cuenta bien con anuladas) y e2e.
+
+**ENT-9.** (Salió de AUD-4.) "💵 Cobrar" desde el veredicto rojo o amarillo abre Vender con la cuota de su plan ya en el carrito (como "Dar de alta y cobrar", SOC-13), y al cobrar vuelve a la Entrada con el socio elegido y el veredicto nuevo.
+LISTO SI: e2e: rojo → Cobrar → cobrar en efectivo → vuelve verde y "Anotar entrada".
 
 ### VEN · Vender · CAJ · Caja · TRF · Transferencias
 

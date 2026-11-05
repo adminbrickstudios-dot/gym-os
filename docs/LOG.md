@@ -15,6 +15,26 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-4 · Auditoría botón por botón: Entrada
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/entrada.md`: cada botón probado haciendo clic con `scripts/e2e/panel-entrada.mjs` (`npm run e2e:entrada`, 12 pasos, recepción en compu y celular).
+- Arreglado (chico):
+  - Después de anotar dice "Entró <nombre>" y tiene "↩️ Deshacer".
+  - En "Hoy", cada entrada tiene "⋯ Anular" con motivo; la base decide quién puede (la recepción, los primeros 5 minutos). La función ya existía pero no tenía pantalla.
+  - "Hoy" dice la forma de entrada y quién dejó pasar.
+  - En pausa, el veredicto ofrecía "Cobrar". Ahora ofrece "🏃 Volvió antes", que termina la pausa y deja entrar.
+  - Si el gimnasio pide apto y el socio no lo presentó o le venció, avisa en amarillo. No frena.
+- A la cola: ENT-8 (control de "dejar pasar" para el dueño) y ENT-9 (cobrar desde la Entrada con la cuota en el carrito).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Una pausa que empezó hoy no se puede terminar con "volvió antes": la base pide anularla, y eso lo hace el dueño o el encargado. El mensaje lo dice; no lo cambié (toca permisos).
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se hizo clic.
+
+---
+
 ## 2026-11-05 · DIS-3 · Pulido: Socios
 
 **QUÉ HICE**

@@ -19,7 +19,7 @@
     "verificar": "npm run lint && npm run typecheck && npm test && npm run db:pruebas && npm run chequeos && node scripts/mapa-pantallas.mjs --verificar && npm run build",
     "e2e:barrido": "node scripts/e2e/barrido.mjs",
     "e2e:admin": "node scripts/e2e/super-admin.mjs",
-    "e2e": "node scripts/e2e/super-admin.mjs && node scripts/e2e/dis-0.mjs && node scripts/e2e/panel-configuracion.mjs && node scripts/e2e/cfg-2.mjs && node scripts/e2e/cfg-3.mjs && node scripts/e2e/cfg-4.mjs && node scripts/e2e/cfg-5.mjs && node scripts/e2e/onb-1.mjs && node scripts/e2e/cfg-6.mjs && node scripts/e2e/cfg-7.mjs && node scripts/e2e/cfg-8.mjs && node scripts/e2e/cfg-9.mjs && node scripts/e2e/panel-pagina.mjs && node scripts/e2e/pag-1.mjs && node scripts/e2e/pag-2.mjs && node scripts/e2e/pag-3.mjs && node scripts/e2e/reg-1.mjs && node scripts/e2e/pag-4.mjs && node scripts/e2e/panel-socios.mjs && node scripts/e2e/soc-1.mjs && node scripts/e2e/soc-2.mjs && node scripts/e2e/soc-3.mjs && node scripts/e2e/soc-4.mjs && node scripts/e2e/soc-5.mjs && node scripts/e2e/soc-6.mjs && node scripts/e2e/soc-7.mjs && node scripts/e2e/soc-8.mjs && node scripts/e2e/soc-9.mjs && node scripts/e2e/soc-10.mjs && node scripts/e2e/soc-11.mjs && node scripts/e2e/soc-12.mjs && node scripts/e2e/soc-13.mjs && node scripts/e2e/soc-14.mjs && node scripts/e2e/dis-3.mjs && node scripts/e2e/barrido.mjs",
+    "e2e": "node scripts/e2e/super-admin.mjs && node scripts/e2e/dis-0.mjs && node scripts/e2e/panel-configuracion.mjs && node scripts/e2e/cfg-2.mjs && node scripts/e2e/cfg-3.mjs && node scripts/e2e/cfg-4.mjs && node scripts/e2e/cfg-5.mjs && node scripts/e2e/onb-1.mjs && node scripts/e2e/cfg-6.mjs && node scripts/e2e/cfg-7.mjs && node scripts/e2e/cfg-8.mjs && node scripts/e2e/cfg-9.mjs && node scripts/e2e/panel-pagina.mjs && node scripts/e2e/pag-1.mjs && node scripts/e2e/pag-2.mjs && node scripts/e2e/pag-3.mjs && node scripts/e2e/reg-1.mjs && node scripts/e2e/pag-4.mjs && node scripts/e2e/panel-socios.mjs && node scripts/e2e/soc-1.mjs && node scripts/e2e/soc-2.mjs && node scripts/e2e/soc-3.mjs && node scripts/e2e/soc-4.mjs && node scripts/e2e/soc-5.mjs && node scripts/e2e/soc-6.mjs && node scripts/e2e/soc-7.mjs && node scripts/e2e/soc-8.mjs && node scripts/e2e/soc-9.mjs && node scripts/e2e/soc-10.mjs && node scripts/e2e/soc-11.mjs && node scripts/e2e/soc-12.mjs && node scripts/e2e/soc-13.mjs && node scripts/e2e/soc-14.mjs && node scripts/e2e/dis-3.mjs && node scripts/e2e/panel-entrada.mjs && node scripts/e2e/barrido.mjs",
     "e2e:dis-0": "node scripts/e2e/dis-0.mjs",
     "mapa": "node scripts/mapa-pantallas.mjs",
     "e2e:configuracion": "node scripts/e2e/panel-configuracion.mjs",
@@ -29,7 +29,8 @@
     "e2e:cfg-5": "node scripts/e2e/cfg-5.mjs",
     "e2e:onb-1": "node scripts/e2e/onb-1.mjs",
     "e2e:cfg-6": "node scripts/e2e/cfg-6.mjs",
-    "e2e:cfg-7": "node scripts/e2e/cfg-7.mjs"
+    "e2e:cfg-7": "node scripts/e2e/cfg-7.mjs",
+    "e2e:entrada": "node scripts/e2e/panel-entrada.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

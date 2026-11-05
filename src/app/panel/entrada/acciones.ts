@@ -9,11 +9,33 @@ export type Veredicto = {
 };
 export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; veredicto?: Veredicto };
 
-export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; error?: string }> {
+type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
+
+/** El veredicto de la puerta, y aparte lo que el mostrador tiene que saber (no cambia si entra): el apto físico, si el gimnasio lo pide. */
+export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; apto?: string | null; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
-    return { v: await rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }) };
+    const [v, a] = await Promise.all([
+      rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }),
+      rpc<Apto>("apto_socio", { p_socio_id: socioId }),
+    ]);
+    const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+    const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
+    return { v, apto };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Volvió antes de la pausa: termina hoy (desde hoy entra) y devuelve el veredicto nuevo. */
+export async function terminarPausa(socioId: string, sedeId: string): Promise<{ v?: Veredicto; error?: string }> {
+  try {
+    const p = await rpc<{ pausas: { id: string; estado: string }[] }>("pausas_socio", { p_socio_id: socioId });
+    const enCurso = p.pausas.find((x) => x.estado === "en_curso");
+    if (!enCurso) return { error: "No tiene una pausa en curso." };
+    await rpc("descongelar", { p_congelamiento_id: enCurso.id });
+    revalidatePath(`/panel/socios/${socioId}`);
+    const r = await veredicto(socioId, sedeId);
+    return { v: r.v, error: r.error };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

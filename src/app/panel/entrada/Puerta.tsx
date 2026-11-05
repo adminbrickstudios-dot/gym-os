@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { registrarEntrada, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -15,7 +15,8 @@ export function Puerta({ sedeId }: { sedeId: string }) {
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
-  const [hecho, setHecho] = useState<ResultadoIngreso | null>(null);
+  const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string }) | null>(null);
+  const [apto, setApto] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -33,17 +34,27 @@ export function Puerta({ sedeId }: { sedeId: string }) {
     return () => clearTimeout(t);
   }, [texto]);
 
-  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
+  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
   const elegir = (s: ResultadoSocio) => empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false);
     const r = await veredicto(s.socio_id, sedeId);
-    if (r.error) setError(r.error); else setV(r.v!);
+    if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); }
+  });
+  const volvioAntes = () => empezar(async () => {
+    if (!elegido) return;
+    const r = await terminarPausa(elegido.socio_id, sedeId);
+    if (r.error) setError(r.error); else { setError(null); setV(r.v!); }
+  });
+  const deshacer = () => empezar(async () => {
+    if (!hecho) return;
+    const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
+    if (r.error) setError(r.error); else setHecho(null);
   });
   const anotar = (forzar?: string) => empezar(async () => {
     if (!elegido) return;
     const r = await registrarEntrada(elegido.socio_id, sedeId, forzar);
     if (r.error) { setError(r.error); return; }
-    setHecho(r.r!);
+    setHecho({ ...r.r!, nombre: elegido.nombre });
     reiniciar();
   });
 
@@ -56,11 +67,12 @@ export function Puerta({ sedeId }: { sedeId: string }) {
       />
 
       {hecho && (
-        <div role="status" className="tarjeta p-5 flex items-center gap-4" style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : "verde") }}>
+        <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : "verde") }}>
           <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : "✅"}</span>
-          <p className="text-lg font-semibold">
-            {hecho.repetido ? "Ya estaba anotado hace un momento" : hecho.resultado === "forzado" ? "Entrada anotada (dejada pasar)" : hecho.resultado === "rechazado" ? "Anotado: no pudo entrar" : "Entrada anotada"}
+          <p className="text-lg font-semibold min-w-0 flex-1">
+            {hecho.repetido ? `${hecho.nombre} ya estaba anotado hace un momento` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : `Entró ${hecho.nombre}`}
           </p>
+          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
         </div>
       )}
       {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -97,6 +109,7 @@ export function Puerta({ sedeId }: { sedeId: string }) {
           <p className="titular text-5xl sm:text-6xl mt-4">{elegido.nombre}</p>
           <p className="text-2xl mt-3 font-semibold" style={{ color: `color-mix(in oklab, ${colorVar(v.color)}, var(--texto) 35%)` }}>{v.texto}</p>
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
+          {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {v.para_regularizar ? <p className="mt-2 texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
 
           <div className="flex flex-wrap gap-2 mt-7">
@@ -104,7 +117,10 @@ export function Puerta({ sedeId }: { sedeId: string }) {
               <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8">✅ Anotar entrada</button>
             ) : (
               <>
-                <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>
+                {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
+                {v.motivo === "congelada"
+                  ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
+                  : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
                 {!forzando && <button type="button" onClick={() => setForzando(true)} className="boton">🚪 Dejar pasar igual</button>}
               </>
             )}
