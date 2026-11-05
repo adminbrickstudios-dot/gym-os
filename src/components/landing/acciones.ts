@@ -14,7 +14,7 @@ export async function quieroProbar(_: EstadoProbar, form: FormData): Promise<Est
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
-  const { error } = await supabase.rpc("quiero_probar", { p_host: host, p_nombre: datos.nombre, p_telefono: datos.telefono, p_interes: datos.interes || null });
+  const { error } = await supabase.rpc("quiero_probar", { p_host: host, p_nombre: datos.nombre, p_telefono: datos.telefono, p_interes: datos.interes || null, p_ref: String(form.get("ref") ?? "") || null });
   if (error) return { error: error.message, datos };
   return { ok: true, nombre: datos.nombre.split(" ")[0] };
 }

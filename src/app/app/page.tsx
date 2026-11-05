@@ -14,6 +14,7 @@ import { Instalar } from "./Instalar";
 import { MiQR } from "./MiQR";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
+import { Referir, type LinkReferido } from "./Referir";
 import { rpc } from "@/lib/panel/servidor";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -39,7 +40,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha, novedades] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha, novedades, referido] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -51,6 +52,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ semanas_seguidas: number; entradas_mes: number; entradas_mes_anterior: number; vino_esta_semana: boolean }>("racha_socio", { p_socio_id: s.socio_id }).catch(() => null),
       // APP-6: lo que publicó el gimnasio.
       rpc<{ id: string; texto: string }[]>("novedades_socio", { p_socio_id: s.socio_id }).catch(() => []),
+      // REF-1: su link para invitar (null si la página no recibe pedidos).
+      rpc<LinkReferido | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -118,6 +121,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
 
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
+        {referido && <Referir datos={referido} />}
         <p className="text-center"><Link href={`/app/historial${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-historial>🧾 Mis pagos y cuándo vine</Link>
           <span className="texto-tenue"> · </span><Link href={`/app/cuenta${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-cuenta>⏸️ Pausar o dar de baja</Link></p>
         <Instalar />

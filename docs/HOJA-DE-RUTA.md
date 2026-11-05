@@ -341,7 +341,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
 - [x] APP-8 · 🟢 · Pedir pausa o baja desde la app — verificado: db (pedidos-socio), e2e:app-8 (pendiente de la tanda final)
 - [x] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1) — verificado: db (entrar-con-mail: vincula por mail verificado, menores no, ya vinculado lo dice, solo el servidor), e2e:app-9 (pendiente de la tanda final). Falta la plantilla del mail en Supabase
-- [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)
+- [x] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link) — verificado: db (referidos: código fijo, el pedido entra como referido, uno ajeno no cuenta, sin página no hay link, otro socio no), e2e:ref-1 (pendiente de la tanda final). Sin pase ni premio: REF-2
+- [ ] REF-2 · 🟡 · Pase de prueba y premio del referido (días gratis al que recomendó) — tocan quién entra y plata: decide Mateo (junto con CLA-6)
 - [ ] DIS-12 · 🟢 · Pulido: App del socio
 
 ### 12 · Equipo y cuentas

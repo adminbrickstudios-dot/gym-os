@@ -9,7 +9,7 @@ import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { agregarProspecto, cambiarEstado } from "./acciones";
 
 export type Prospecto = {
-  id: string; nombre: string; telefono: string; interes: string | null; origen: "pagina" | "recepcion" | "referido";
+  id: string; nombre: string; telefono: string; interes: string | null; origen: "pagina" | "recepcion" | "referido"; referido_por?: string | null;
   estado: "nuevo" | "contactado" | "vino" | "socio" | "no"; nota: string | null; socio_id: string | null;
   creado_en: string; actualizado_en: string; mensaje: string;
 };
@@ -69,7 +69,7 @@ export function Prospectos({ lista, zona, puedeAltas }: { lista: Prospecto[]; zo
                 <li key={p.id} className="tarjeta p-4 sm:p-5 space-y-3" data-prospecto={p.estado}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="font-semibold text-lg">{p.nombre}</p>
-                    <p className="text-sm texto-tenue">{ORIGEN[p.origen]} · {fechaCorta(p.creado_en, zona)}</p>
+                    <p className="text-sm texto-tenue">{ORIGEN[p.origen]}{p.referido_por ? ` por ${p.referido_por}` : ""} · {fechaCorta(p.creado_en, zona)}</p>
                   </div>
                   {p.interes && <p className="texto-suave">“{p.interes}”</p>}
                   {p.nota && <p className="text-sm texto-tenue">📝 {p.nota}</p>}

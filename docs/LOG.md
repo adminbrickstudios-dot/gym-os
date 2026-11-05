@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REF-1 · Invitá a un amigo
+
+**QUÉ HICE**
+- App del socio → "🤝 Invitá a un amigo": su link (`/?ref=CÓDIGO#probar`) para mandar por WhatsApp o copiar, y cuántos amigos dejaron sus datos y cuántos se hicieron socios.
+- El amigo abre la página, ve "🤝 Te invitó un amigo" en "Probá una clase" y deja sus datos: entra a Prospectos como "🤝 Recomendado por …". Un código que no es del gimnasio no cuenta (y no frena el pedido). Sin la página recibiendo pedidos, la tarjeta no aparece.
+- Migración 0099 (`socios.codigo_referido` único por gimnasio, `prospectos.referido_por` con FK compuesta, `mi_link_referido`; copias de `quiero_probar` con `p_ref` —se borra la firma vieja— y `prospectos_panel`), prueba de base `referidos`, `e2e:ref-1`.
+
+**SIN ARREGLAR**
+- El **pase de prueba** y el **premio** (días gratis al que recomendó) no están: tocan quién entra y plata. Quedan como REF-2, esperando tu decisión (va junto con CLA-6).
+
+---
+
 ## 2026-11-05 · APP-9 · Entrar con mail y código, o con contraseña
 
 **QUÉ HICE**

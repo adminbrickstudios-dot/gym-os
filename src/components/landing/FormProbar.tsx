@@ -1,11 +1,14 @@
 "use client";
 // "Probá una clase": nombre, WhatsApp y qué le interesa. Lo recibe la base
 // (quiero_probar, sin sesión) y aparece en Prospectos del panel.
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { quieroProbar, type EstadoProbar } from "./acciones";
 
 export function FormProbar() {
   const [estado, accion, enviando] = useActionState<EstadoProbar, FormData>(quieroProbar, {});
+  // REF-1: el link de un socio trae ?ref=código.
+  const [ref, setRef] = useState("");
+  useEffect(() => { setRef(new URLSearchParams(window.location.search).get("ref")?.slice(0, 12) ?? ""); }, []);
   if (estado.ok) {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-probar-listo>
@@ -16,6 +19,7 @@ export function FormProbar() {
   }
   return (
     <form action={accion} className="tarjeta p-6 space-y-4" data-form-probar>
+      {ref && <><input type="hidden" name="ref" value={ref} /><p className="pildora pildora-azul" data-referido>🤝 Te invitó un amigo</p></>}
       <label className="block space-y-1"><span className="etiqueta">Tu nombre</span>
         <input name="nombre" required maxLength={80} autoComplete="name" className="campo" defaultValue={estado.datos?.nombre} /></label>
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
