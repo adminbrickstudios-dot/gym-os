@@ -20,13 +20,20 @@ const PROHIBIDO = {
 const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso/i;
 const soloRol = process.argv.find((a) => a.startsWith("--rol="))?.slice(6);
 
-const b = await navegador();
+let b = await navegador();
 for (const rol of Object.keys(PROHIBIDO)) {
   if (soloRol && rol !== soloRol) continue;
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
-    const p = await pagina(b, viewport);
-    await entrar(p, `${rol}@ejemplo.invalid`);
+    // Si el navegador se cae (pasa con la máquina cargada), se abre otro y se vuelve a entrar.
+    const abrir = async () => {
+      if (!b.isConnected()) b = await navegador();
+      const x = await pagina(b, viewport);
+      await entrar(x, `${rol}@ejemplo.invalid`);
+      return x;
+    };
+    let p = await abrir();
     for (const ruta of RUTAS) {
+      if (p.isClosed() || !b.isConnected()) p = await abrir();
       const antes = p.errores.length;
       // Una navegación cortada o lenta (con el servidor de desarrollo cargado) se reintenta una vez;
       // si vuelve a fallar, se anota esa ruta y el barrido sigue con las demás.
@@ -50,8 +57,8 @@ for (const rol of Object.keys(PROHIBIDO)) {
       if (problemas.length) { falla(`${rol} · ${tam} · ${ruta}: ${problemas.join(" | ")}`); await capturar(p, `ROTA-${nombre}`, true); }
       else ok(`${rol} · ${tam} · ${ruta}`);
     }
-    await p.context().close();
+    await p.context().close().catch(() => {});
   }
 }
-await b.close();
+await b.close().catch(() => {});
 resultado();
