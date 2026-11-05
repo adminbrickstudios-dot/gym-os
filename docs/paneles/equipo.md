@@ -12,6 +12,7 @@ Probado haciendo clic con `npm run e2e:equipo` (`scripts/e2e/panel-equipo.mjs`).
 | Dar acceso / Nueva contraseña | Crea o vincula la cuenta por mail; contraseña provisoria a la vista. A otro dueño no se le cambia la contraseña. | ✅ | — | `darAcceso` (servidor) | — |
 | ➕ Sumar a alguien | Nombre, mail opcional, rol (con qué hace cada uno) y sede si hay varias. | ✅ | — | `guardar_equipo` | — |
 | Editar nombre o sede | No se puede: hay que sacarlo y sumarlo de nuevo. | ❌ | Editar en el lugar | — | — |
+| 🔐 Qué puede hacer cada rol | Cuatro interruptores del dueño (D4): la recepción ve lo cobrado, la recepción vende productos, el profe ve el teléfono, el encargado ve el Resultado. | ✅ (EQU-1) | — | `permisos_equipo`, `guardar_permisos_equipo` | — |
 | Encargado | Ve la lista sin botones. | ✅ | — | — | — |
 | Mi cuenta · Contraseña | Cambiarla (las dos tienen que coincidir); los campos tienen nombre para lectores de pantalla. | ✅ (arreglado) | — | Supabase Auth | — |
 | Mi cuenta · PIN | Su PIN para la compu compartida (D15). | ✅ | — | `guardar_mi_pin` | — |
@@ -21,5 +22,4 @@ Probado haciendo clic con `npm run e2e:equipo` (`scripts/e2e/panel-equipo.mjs`).
 
 ## Lo que se pensó en cadena
 
-- Interruptores de permisos por gimnasio (EQU-1, D4) van en esta pantalla.
 - "Qué hizo cada uno" (EQU-3) cuelga de cada persona.

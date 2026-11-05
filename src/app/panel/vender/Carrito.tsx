@@ -19,10 +19,12 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {} }: {
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {}, sinProductos = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
   /** Dueño y encargado anulan; la recepción pide (VEN-6). */
   puedeAnular?: boolean;
+  /** EQU-1: la recepción no vende productos si el dueño lo apagó. */
+  sinProductos?: boolean;
   stockInicial?: Record<string, { stock: number; minimo: number | null }>;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
@@ -214,7 +216,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
               <Boton key={p.plan_id} emoji="🎟️" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pack", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
-            {precios.productos.map((p) => (
+            {!sinProductos && precios.productos.map((p) => (
               <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}

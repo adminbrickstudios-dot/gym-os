@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · EQU-1 · Interruptores de permisos por gimnasio (D4)
+
+**QUÉ HICE**
+- Equipo → "🔐 Qué puede hacer cada rol" (el dueño los cambia; el encargado los ve). Se guardan al tocar y quedan en el historial de configuración:
+  - 🛎️ la recepción ve lo cobrado del día ("Cobrado hoy" en su Inicio) — apagado por defecto;
+  - 🛎️ la recepción vende productos — prendido por defecto; apagado, Vender no le muestra productos y la base no la deja;
+  - 💪 el profe ve el teléfono del socio en la lista de su clase (con link a WhatsApp) — apagado por defecto;
+  - 🧭 el encargado ve el Resultado — prendido por defecto; apagado, no está en su menú y la base no le da ni el Resultado ni la exportación.
+  - El descuento de la recepción ya tenía su tope (Configuración → Cobros): se muestra ahí con el link.
+- Los valores por defecto dejan todo como estaba.
+- Migración 0100 (cuatro columnas en `configuracion_gimnasio`; `permisos_equipo`, `guardar_permisos_equipo`, `privado.exigir_resultado`; copias de `panel_gimnasio`, `panel_inicio`, `public.vender`, `lista_clase` —cambia lo que devuelve: se borra y se crea—, `resultado_mes`, `exportar_mes`, `etiqueta_campo`), prueba de base `permisos-equipo`, `e2e:equ-1`.
+
+**PARA QUE MIRES VOS**
+- Toca permisos. Está aprobado en D4 y por defecto no cambia nada, pero revisalo.
+
+---
+
 ## 2026-11-05 · AUD-12 · Equipo y Mi cuenta botón por botón
 
 **QUÉ HICE**

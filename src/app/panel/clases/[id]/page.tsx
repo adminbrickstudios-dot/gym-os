@@ -6,7 +6,7 @@ import { Lista } from "./Lista";
 import { Wod } from "./Wod";
 
 export const metadata: Metadata = { title: "Clase" };
-type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean };
+type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean; telefono?: string | null };
 type Clase = { clase_id: string; actividad: string; emoji: string | null; inicio: string; fin: string; profe: string | null; cupo: number | null; confirmadas: number; cancelada: boolean; cancelada_motivo: string | null; wod: string | null; wod_por: string | null };
 
 export default async function DetalleClase({ params }: { params: Promise<{ id: string }> }) {

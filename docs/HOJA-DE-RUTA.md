@@ -347,7 +347,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 12 · Equipo y cuentas
 - [x] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta — verificado: e2e:equipo (pendiente de la tanda final); inventario en docs/paneles/equipo.md
-- [ ] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio
+- [x] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio — verificado: db (permisos-equipo: por defecto como antes, solo el dueño, cada interruptor cambia lo que deja la base), e2e:equ-1 (pendiente de la tanda final)
 - [ ] EQU-2 · 🟡 D3 · El profe busca socios
 - [ ] EQU-3 · 🟢 · Qué hizo cada uno (auditoría)
 - [ ] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta

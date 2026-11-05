@@ -33,7 +33,8 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
           accion={<BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/vender" />} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/vender" />}
         <Carrito sedeId={sede.id} turnoId={turno} socioInicial={socio} preciosIniciales={precios} conCuota={!!socio && sp.cuota === "1"} desdeEntrada={sp.desde === "entrada"}
-          puedeAnular={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} stockInicial={stock} />
+          puedeAnular={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} stockInicial={stock}
+          sinProductos={panel.yo.rol === "recepcion" && !panel.permisos.recepcion_vende_productos} />
       </>
     );
   });

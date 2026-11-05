@@ -42,3 +42,13 @@ export async function editarPersona(equipoId: string, nombre: string, rol: strin
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** EQU-1 (D4): un interruptor de permisos del gimnasio (solo el dueño; lo valida la base). */
+export async function guardarPermiso(clave: string, valor: boolean): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("guardar_permisos_equipo", { p_gimnasio_id: panel.gimnasio.id, p_datos: { [clave]: valor } });
+    revalidatePath("/panel", "layout");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

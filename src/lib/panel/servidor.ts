@@ -30,6 +30,8 @@ export type PanelGimnasio = {
   secciones_apagadas: string[];
   modo_clases: "reserva" | "sin_reserva" | "ninguno";
   cobra: { membresia: boolean; pase: boolean; pack: boolean };
+  /** EQU-1 (D4): los interruptores del dueño. */
+  permisos: { recepcion_ve_cobrado: boolean; recepcion_vende_productos: boolean; profe_ve_telefono: boolean; encargado_ve_resultado: boolean };
   sedes: { id: string; nombre: string; es_principal: boolean }[];
 };
 
