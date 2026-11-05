@@ -51,6 +51,9 @@
   --texto-tenue: color-mix(in oklab, #16181d, var(--fondo) 58%);
   color-scheme: light;
 }
+/* El texto se hereda ya calculado: sin esto, una pantalla de fondo claro dentro
+   de un body oscuro (el :root) deja los títulos casi blancos sobre crema. */
+[data-tono] { color: var(--texto); }
 
 @theme inline {
   --color-fondo: var(--fondo);
@@ -197,4 +200,77 @@ body {
   .pildora-rojo { --color: var(--rojo); }
   .pildora-azul { --color: var(--azul); }
   .pildora-naranja { --color: var(--naranja); }
+
+  /* Botón chico (acciones secundarias dentro de una fila) y botón de texto
+     (Salir, Cancelar, Descuento): siempre ≥ 44px de alto para el dedo. */
+  .boton-chico { min-height: 2.75rem; padding: 0 0.9rem; font-size: 0.95rem; border-radius: 12px; }
+  .boton-texto {
+    min-height: 2.75rem; padding: 0 0.5rem; display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.9rem; color: var(--texto-tenue); background: none; border: 0; cursor: pointer; border-radius: 10px;
+  }
+  .boton-texto:hover { color: var(--texto); }
+  .boton-texto:active { transform: scale(0.97); }
+  .boton-texto:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Mensaje: resultado de una acción o un error, con su color y su texto. */
+  .mensaje {
+    display: flex; align-items: flex-start; gap: 0.6rem; width: 100%;
+    padding: 0.85rem 1rem; border-radius: var(--radio); font-weight: 550; line-height: 1.35;
+    background: color-mix(in oklab, var(--color, var(--azul)), var(--fondo) 80%);
+    border: 1px solid color-mix(in oklab, var(--color, var(--azul)), var(--fondo) 55%);
+    color: color-mix(in oklab, var(--color, var(--azul)), var(--texto) 72%);
+    animation: subir 180ms ease-out;
+  }
+  .mensaje-error { --color: var(--rojo); }
+  .mensaje-exito { --color: var(--verde); }
+  .mensaje-aviso { --color: var(--amarillo); }
+  .mensaje-info { --color: var(--azul); }
+
+  /* Fila de una lista que se toca entera (buscar socio, elegir algo). */
+  .fila {
+    width: 100%; text-align: left; display: flex; align-items: center; gap: 1rem;
+    min-height: 4.25rem; padding: 0.75rem 1rem; border-radius: var(--radio);
+    background: var(--tarjeta); border: 1px solid var(--borde); cursor: pointer;
+    transition: background 120ms ease, transform 60ms ease;
+  }
+  .fila:hover { background: var(--tarjeta-alta); }
+  .fila:active { transform: scale(0.99); }
+
+  /* Pestañas: en el celular se deslizan de costado. */
+  .pestanas { display: flex; min-width: 0; max-width: 100%; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.25rem; }
+  .pestanas::-webkit-scrollbar { display: none; }
+  /* En compu entran todas: se acomodan en dos renglones en vez de cortarse. En el celular se deslizan. */
+  @media (min-width: 640px) { .pestanas { flex-wrap: wrap; overflow-x: visible; } }
+  .pestana {
+    flex: none; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.4rem;
+    font-weight: 650; color: var(--texto-suave); background: transparent; border: 1px solid var(--borde); cursor: pointer;
+  }
+  .pestana[aria-selected="true"], .pestana[aria-current="page"] { background: var(--texto); color: var(--fondo); border-color: transparent; }
+
+  /* Interruptor (prender / apagar): un checkbox con forma de switch. */
+  .interruptor {
+    appearance: none; flex: none; width: 3.25rem; height: 1.9rem; border-radius: 999px; position: relative; cursor: pointer;
+    background: var(--tarjeta-alta); border: 1px solid var(--borde); transition: background 150ms ease;
+  }
+  .interruptor::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 1.4rem; height: 1.4rem; border-radius: 999px;
+    background: var(--texto-suave); transition: transform 150ms ease, background 150ms ease;
+  }
+  .interruptor:checked { background: var(--acento); border-color: transparent; }
+  .interruptor:checked::after { transform: translateX(1.35rem); background: var(--acento-texto); }
+  .interruptor:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Estado vacío: lo vacío está vacío, con una frase y qué hacer. */
+  .vacio { text-align: center; padding: 2.5rem 1.25rem; display: grid; justify-items: center; gap: 0.6rem; }
+
+  .animar-subir { animation: subir 200ms ease-out both; }
+}
+
+@keyframes subir {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tilde {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
 }

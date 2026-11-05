@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useEffect } from "react";
 import { ingresar, type EstadoIngreso } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
   const [estado, accion, enviando] = useActionState<EstadoIngreso, FormData>(ingresar, {});
@@ -18,13 +19,15 @@ export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
         <input className="campo" type="password" name="contrasena" autoComplete="current-password" required />
       </label>
       {estado.error && (
-        <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {estado.error}</p>
+        <Mensaje tipo="error">{estado.error}</Mensaje>
       )}
       <button type="submit" disabled={yendo} className="boton boton-principal text-lg w-full !mt-6">
         {yendo ? "Entrando…" : "🔑 Entrar"}
       </button>
       <p className="texto-tenue text-sm text-center">
-        ¿Te olvidaste la contraseña? Pedile una nueva al dueño de tu gimnasio (si sos el dueño, a BRIK).
+        {siguiente === "/app"
+          ? "¿No tenés contraseña o te la olvidaste? Entrá con un código y creala en “Mi membresía”."
+          : "¿Te olvidaste la contraseña? Pedile una nueva al dueño de tu gimnasio (si sos el dueño, a BRIK)."}
       </p>
     </form>
   );

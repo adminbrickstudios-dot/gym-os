@@ -71,6 +71,102 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 
 | Fecha | Ítem | Qué decidió | Por qué | Cómo se cambia |
 |---|---|---|---|---|
+| 2026-11-04 | AUD-1 | Con Caja apagada, Vender no ofrece efectivo (solo transferencia, débito y crédito). | El efectivo sin caja no queda en ningún arqueo: es plata que nadie controla. Lo prudente es no cobrarlo. | Prender Caja en Configuración. |
+| 2026-11-04 | AUD-1 | No se pueden apagar las tres formas de cobro a la vez. | Sin ninguna, Vender queda vacío y el gimnasio no puede cobrar. | Migración nueva sobre `guardar_configuracion`. |
+| 2026-11-04 | AUD-1 | El alias de transferencia se valida como en los bancos: 6 a 20 caracteres, letras, números, puntos o guiones. | Un alias mal escrito manda al socio a transferirle a otro. | Migración nueva sobre `guardar_configuracion`. |
+| 2026-11-04 | AUD-1 | El nombre del gimnasio tiene hasta 60 letras. | Se muestra en la barra, el saludo y la página; más largo rompe el diseño. | Ídem. |
+| 2026-11-04 | CFG-1 | La pestaña Mensajes no se armó todavía: queda para CFG-5, que es el ítem que la hace andar. Equipo es un link a su pantalla. | Una pestaña vacía promete algo que no existe. | Se suma con CFG-5. |
+| 2026-11-04 | CFG-1 | Clases se prende y apaga desde Secciones; la pestaña Clases (con reserva o sin reserva, y sus plazos) solo aparece con clases prendidas. | "Un gimnasio sin clases no ve nada de clases", y el dueño necesita un lugar donde prenderlas. | Mover el interruptor. |
+| 2026-11-04 | CFG-1 | La zona horaria se muestra pero no la cambia el dueño: se la pide a soporte. | Cambiarla corre el principio y fin de cada día (vencimientos, pases ya vendidos). | Una función de super admin. |
+| 2026-11-04 | CFG-1 | Teléfonos: se aceptan como los escribe la gente ("11 1234-5678", "011…", "+54 9…") y se guardan +54… Diez números sin característica de país se toman como celular de Argentina (+549). | Es como los escribe un dueño argentino; el formato de la base no cambia. | `privado.telefono_normalizado`. |
+| 2026-11-04 | CFG-2 | Logo, ícono y fotos los cambia solo el dueño, y se suben por el servidor (la base decide, el servidor sube con la clave de servicio). Se sacaron las políticas que dejaban al dueño y al encargado escribir directo en el bucket `marcas`. | Con escritura directa, un encargado podía pisar el logo con cualquier archivo. Es dar menos acceso, nunca más. | Migración nueva con una política de storage. |
+| 2026-11-04 | CFG-2 | Límites: logo y fotos 2 MB, ícono 512 KB; logo PNG/JPG/SVG/WEBP, ícono PNG/SVG, fotos JPG/PNG/WEBP. El tipo se mira en los bytes del archivo, no en el nombre. Un SVG con scripts, eventos o links se rechaza (no se "limpia"). | Un SVG con código se ejecuta si alguien abre su link. 2 MB alcanza para una foto web. | `privado.reglas_imagen_marca` y `src/lib/imagenes.ts`. |
+| 2026-11-04 | CFG-3 | El recargo o descuento por medio de pago no se hizo como un % aparte en Configuración: el precio por medio ya existe en cada plan (`precios_plan`, el que usa Vender) y su pantalla es PLA-5. Dos lugares para lo mismo darían dos precios distintos para el mismo cobro. | Plata: una sola fuente para el precio. | Si querés un % general (ej. crédito +10% en todo, también productos), es un ítem nuevo que toca `vender`. |
+| 2026-11-04 | CFG-3 | La base hace cumplir los medios: `vender` rechaza un medio no aceptado, `informar_transferencia` rechaza si no se reciben transferencias, y no se puede dejar el efectivo como único medio con Caja apagada. | Si solo lo hiciera la pantalla, un pedido directo cobraría por un medio que el dueño apagó. | `guardar_configuracion` y los envoltorios públicos de `vender` e `informar_transferencia`. |
+| 2026-11-04 | CFG-3 | Mercado Pago aparece en la lista, apagado y sin poder prenderse, con la explicación. | Lo pide el ítem (🔌 apagado hasta conectar), y así el dueño sabe que va a estar. | Se prende con el ítem de Mercado Pago. |
+| 2026-11-04 | CFG-4 | Los horarios los cambia el dueño; los cierres los carga y anula también el encargado (como ya permitía la base desde 0006). Recepción ve los horarios, no los cierres del panel. | Un feriado lo carga quien está en el día a día; el horario es una decisión del dueño. No se dio acceso nuevo. | `guardar_horarios_apertura` / `crear_cierre`. |
+| 2026-11-04 | CFG-4 | Horarios y próximos cierres son públicos (`agenda_publica`, sin sesión, por la dirección del gimnasio, como la página). | Los publica el gimnasio para que la gente sepa cuándo ir; no hay datos de socios ni de plata. | Sacar el grant a anon. |
+| 2026-11-04 | CFG-4 | Un cierre dura hasta 3 meses, no se superpone con otro, y desde la pantalla solo se cargan desde hoy (la base acepta pasados, que devuelven días hacia atrás). | Un cierre cargado tarde devuelve días a todos: es plata; mejor que no sea un clic al pasar. | Quitar el `min` del campo. |
+| 2026-11-04 | CFG-5 | Los mensajes los edita el dueño y también el encargado (las plantillas ya eran de los dos desde 0010). Recepción no los ve. | Es el que más contacta socios; no se dio acceso nuevo. | `guardar_mensaje`. |
+| 2026-11-04 | CFG-5 | Mensajes: los 5 de retención + bienvenida, cumpleaños y comprobante rechazado. "Comprobante" se tomó como el rechazado (el aprobado no necesita mensaje: la app ya muestra que puede entrar). Los tres nuevos dicen en pantalla que todavía no los manda ninguna pantalla. | Quedan listos para la bandeja de avisos (AVI-1) sin prometer algo que hoy no pasa. | Catálogo en `privado.mensajes_catalogo`. |
+| 2026-11-04 | CFG-5 | Una variable que ese mensaje no tiene (ej. {dias} en cumpleaños) es un error al guardar, no un hueco en blanco. | Un mensaje con "{cosa}" o un espacio vacío le llega así al socio. | `privado.validar_mensaje`. |
+| 2026-11-04 | ONB-1 | Para que el paso "Publicar tu página" no sea un callejón sin salida, sumé el botón Publicar / Pasar a borrador en Configuración → Página (solo el dueño). Copiar el link, mandarlo por WhatsApp y la vista al compartir ya estaban. Lo que queda de PAG-2 es poco. | Una página nueva quedaba en "Estamos armando nuestra página" para siempre: solo se publicaba desde la base. | `publicar_pagina`. |
+| 2026-11-04 | ONB-1 | Los pasos son 8: datos y dirección, logo, planes con precio, horarios (y grilla si da clases), cómo le pagan, equipo, socios, página publicada. "Equipo" cuenta hecho con una persona más que el dueño; si trabaja solo, puede ocultar la tarjeta. Importar socios desde Excel no existe todavía: el paso lleva al alta. | Cada uno sale de un dato real; nada se marca a mano. | `privado.primeros_pasos`. |
+| 2026-11-04 | CFG-6 | Formas de entrada: hoy solo existe la recepción, así que se muestra prendida y bloqueada (es el respaldo); QR del socio, tablet en la puerta y llavero aparecen apagados como "todavía no disponible". Cada ítem ENT que los construya prende su interruptor. El punto del LISTO SI "una forma apagada no aparece en Entrada ni en la app" queda para esos ítems: hoy no hay ninguna otra forma que esconder. | No se muestra un interruptor que no hace nada. | Interruptores en Configuración → Reglas. |
+| 2026-11-04 | CFG-7 | Con la sección Transferencias apagada, la app ya no pide comprobantes y la base no los acepta; el mostrador sigue cobrando por transferencia. | Nadie podía aprobarlos: el socio pagaba y quedaba sin acreditar. Es restringir, nunca dar más. | Prender Transferencias. |
+| 2026-11-04 | CFG-7 | Apagar una sección no se prohíbe nunca: se arreglan las pantallas que llevaban a ella (un nombre queda sin link, un botón desaparece). | Lo pide el ítem; cada gimnasio decide qué usa. | `LinkPanel` / `rutaDisponible`. |
+| 2026-11-04 | CFG-8 | El historial lo escriben triggers en las tablas de configuración (configuración, nombre, página, sedes, mensajes), no `guardar_configuracion`. | Así queda todo cambio, venga de la pantalla, de soporte o de otra función; y una guardada que no cambia nada no deja fila. | Escribirlo desde cada función de guardado. |
+| 2026-11-04 | CFG-8 | El historial va en su propia pestaña "🕓 Cambios" (la última de Configuración), no al pie de cada pestaña. | Con diez pestañas, "al pie" quedaba en una sola o repetido en todas. | Mostrar los últimos cambios de cada pestaña al pie de esa pestaña. |
+| 2026-11-04 | CFG-8 | El historial no se puede borrar ni editar desde ningún panel, ni por el dueño; la pantalla muestra los últimos 100 y el super admin los últimos 20. | Es un registro: si el dueño lo pudiera borrar no serviría para "¿quién subió el descuento?". | Dejar que el dueño lo limpie. |
+| 2026-11-04 | CFG-8 | Lo que cambió sin una persona (el armado del demo, migraciones) aparece como "El sistema"; alguien que ya no está en el equipo, como tal. | No inventar un autor. | — |
+| 2026-11-04 | PAG-1 | La página la edita el dueño; el encargado la ve sin poder cambiarla (igual que el resto de la configuración). | Lo más prudente; la tabla permitía escribir al encargado pero ninguna pantalla lo usaba. | Que el encargado también edite. |
+| 2026-11-04 | PAG-1 | La foto de portada se elige entre las fotos del gimnasio (no hay una subida aparte); si esa foto se quita, la portada queda sin foto. | Un solo lugar para subir fotos y nunca un link roto. | Subida propia de la portada. |
+| 2026-11-04 | PAG-3 | Prospectos los ven y mueven dueño, encargado y recepción (como dice 03-ROLES); el profe no. Nadie escribe la tabla directo: todo por funciones. Un visitante sin sesión solo puede dejar su pedido. | Lo que pide la especificación, sin dar más. | — |
+| 2026-11-04 | PAG-3 | Contra el spam: el mismo celular no se duplica (actualiza su pedido), hasta 30 pedidos por hora por gimnasio desde la página y un campo escondido para robots. No hay captcha. | Suficiente para un gimnasio; un captcha espanta a la gente. | Captcha. |
+| 2026-11-04 | PAG-3 | "Se hizo socio" no se marca a mano: solo al darlo de alta desde "Hacerlo socio" (queda atado a su ficha). | Que el número de conversiones sea verdad. | Marcarlo a mano. |
+| 2026-11-04 | PAG-3 | Prospectos no se apaga por separado: con "Probá una clase" oculta en la página, igual sirve para anotar a los que preguntan en el mostrador. | Es la herramienta de recepción para los que preguntan. | Sumarla a Secciones. |
+| 2026-11-04 | REG-1 | Las altas online arrancan apagadas y no se prenden sin reglamento; las prende solo el dueño. | Es la puerta de entrada de gente y plata: la decide el dueño. | Prendidas por defecto. |
+| 2026-11-04 | REG-1 | El que se anota online queda socio con el plan asignado y sin cobertura: la Entrada dice "Todavía no pagó…" hasta que la recepción cobra o aprueba el comprobante. Ningún pago se crea en el alta. | Nadie entra gratis por anotarse; la plata entra por donde siempre (Vender, Transferencias). | Darle días de cortesía. |
+| 2026-11-04 | REG-1 | Si el DNI o el celular ya son de un socio, no se toca nada y se le dice "Ya sos socio, entrá con tu celular". | No duplicar ni pisar datos de alguien desde una página pública. | Actualizar sus datos. |
+| 2026-11-04 | REG-1 | Menores de 18 no se anotan online: "el alta la hace un adulto responsable en el gimnasio" (D10 pide datos del responsable). | Lo más prudente con menores. | Pedir los datos del adulto en el formulario. |
+| 2026-11-04 | REG-1 | Un pase o un pack elegido online no se asigna (no son suscripciones): queda anotado como socio y la nota dice qué quiere comprar. | Se compran como siempre, en Vender. | — |
+| 2026-11-04 | REG-1 | El aviso al gimnasio es la fila en Prospectos → "Se hicieron socios" con cómo va a pagar (hasta que exista la bandeja de avisos, AVI-1). | Ya existe y la ven recepción, encargado y dueño. | — |
+| 2026-11-04 | AUD-3 | "Volver a darlo de alta" lo hacen dueño, encargado y recepción (los mismos que dan de baja); la baja queda guardada en `historial_bajas` y vuelve sin plan: no recupera días de la suscripción vieja. | Volver no da días gratis; la plata entra como siempre. Si había pagado de más, se arregla al cobrar. | Reabrir la suscripción vieja. |
+| 2026-11-04 | AUD-3 | El teléfono se normaliza en la base para todo el sistema (entiende el 15 del celular, el 0 de la característica, 0054, +54 9). | Un solo lugar; la pantalla armaba números mal. | — |
+| 2026-11-04 | SOC-1 | Importan dueño y encargado (recepción no). Lo que tiene error no entra (se informa por fila); el resto entra junto. "Vence el" es una cobertura de origen importación desde hoy hasta ese día; sin fecha, queda con el plan y sin pagar. | Nadie entra gratis por un archivo mal cargado: lo que entra es lo que dice la planilla del dueño. | Rechazar todo el archivo si una fila tiene error. |
+| 2026-11-04 | SOC-1 | Deshacer borra la importación entera (socios, planes y coberturas) dentro de 24 h y solo si esos socios no tienen movimientos; es la única forma en que se borra un hecho, y solo desde esa función. | Que un archivo mal mapeado se pueda volver a importar bien sin dejar fantasmas. | Anularlos y dejarlos dados de baja. |
+| 2026-11-04 | SOC-3 | Notas y etiquetas: las ponen dueño, encargado y recepción; una nota la borra quien la escribió o el dueño/encargado (queda borrada, no se pierde de la base). Una etiqueta que nadie tiene desaparece sola. | Es el trabajo de todos los días del mostrador. | — |
+| 2026-11-04 | SOC-7 | La foto del socio la sacan dueño, encargado y recepción; la ven también los profes (para reconocerlo en clase). Bucket privado: el panel la sirve solo a quien la base dice que es del equipo. | Es para la puerta; nunca pública. | Bucket público con ruta difícil de adivinar. |
+| 2026-11-04 | SOC-8 | Unir fichas lo hace solo el dueño (mueve pagos, cuotas y la cuenta de la app); el encargado ve los posibles duplicados. No se deshace; queda registrado en `uniones_socios`. Con DNI distinto, dos membresías activas, la misma clase o dos cuentas de app, no se une y dice qué resolver. | Mueve plata: lo más prudente. | Que el encargado también una. |
+| 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
+| 2026-11-05 | SOC-9 | La recepción ya no congela: pide la pausa y la aprueba el dueño o el encargado (D7). El máximo de días es por socio y por año calendario; una pausa que cruza el año se cuenta en cada uno. Los motivos viejos (personal, económico) siguen valiendo para lo ya cargado. | Es lo que dice D7; es dar menos acceso, nunca más. | `public.congelar` / `privado.validar_pausa`. |
+| 2026-11-05 | SOC-10 | Menor = menos de 18 años el día de hoy según la fecha de nacimiento (no se guarda). Sin fecha de nacimiento se toma como adulto. Un menor que ya estaba vinculado a su propia cuenta antes de 0043 sigue vinculado. | D10 pide responsable para menores; desvincular cuentas existentes toca permisos: no lo hice solo. | `privado.es_menor` / `vincular_socios_por_telefono`. |
+| 2026-11-05 | SOC-11 | El apto físico no frena la entrada: es un aviso (en la ficha y en el veredicto). Lo carga y lo quita la recepción también. | D9 pide solo sí/no y vencimiento; frenar la entrada es una decisión del dueño que no estaba. | Que `calcular_acceso` lo mire (decisión tuya). |
+| 2026-11-05 | ENT-2 | El QR vale la ventana actual y la anterior (como mucho un minuto), una sola vez, y si puede entrar se anota solo, sin tocar nada. | Hora pico sin tipear; una captura vieja no sirve. | `leer_qr` / `Puerta.tsx`. |
+| 2026-11-05 | ENT-4 | El tope de "dejar pasar" es por persona y por día (no del gimnasio entero). Dueño y encargado no tienen tope. Tope 0 = la recepción no deja pasar. Si el socio igual puede entrar, no cuenta. | Cada uno responde por lo suyo; D1 dice "un tope por día". | `privado.puede_dejar_pasar`. |
+| 2026-11-05 | ENT-3 | La tablet la autoriza solo el dueño (el encargado ve la lista). En la tablet se muestra solo el nombre de pila y el porqué, sin montos ni datos; nadie deja pasar desde ahí. 30 intentos por minuto por tablet. El token vive en una cookie httpOnly por 400 días. | Es una pantalla pública en la puerta: lo mínimo. | `kiosco_entrar` / `autorizar_tablet`. |
+| 2026-11-05 | ENT-6 | El QR de la tablet lo firma un secreto de esa tablet (sale del hash de su token); vale un minuto como mucho. Si el socio puede entrar, entra; si no, la app y la tablet le dicen por qué. Nadie deja pasar desde ahí. | Un QR fotografiado de lejos sirve un minuto, no para siempre. | `entrar_por_qr_pared`. |
+| 2026-11-05 | ENT-7 | El llavero lo asigna cualquiera del mostrador desde la ficha; es único por gimnasio y se guarda en mayúsculas sin guiones. En la recepción, un código sin espacios se prueba primero como llavero; si no es de nadie, es una búsqueda común. | El lector escribe el código igual que una persona: así anda con cualquier lector USB. | `asignar_llavero` / `leer_llavero`. |
+| 2026-11-05 | INV-1 | Invita solo un socio que puede entrar hoy. El límite (2 por mes por defecto) es por socio que invita y también por DNI invitado. Un DNI de socio no puede ser invitado. El invitado no cuenta como entrada del socio ni se cobra. | Que nadie entrene gratis rotando de anfitrión; "nunca anónimo". | `privado.validar_invitado`. |
+| 2026-11-05 | AUD-5 | Editar un plan cambia solo lo que se manda; el tipo y la duración no se editan (cambiarían lo ya vendido: para eso, un plan nuevo). | "Dejar de vender" borraba las veces por semana y el horario: el plan quedaba libre en la puerta. | — |
+| 2026-11-05 | PLA-5 | Los precios especiales (por medio o por pagar antes de un día del mes) solo pueden ser más baratos que el general, y el día va del 1 al 28. Se edita la lista entera: un precio nuevo arma una lista nueva y lo que no está deja de regir. La deuda y la página muestran el general. | Cobrar ya usa el menor que aplica (0005): uno más caro nunca se usaría y confundiría. Con la lista entera, subir el general no borra sin avisar el de efectivo. | Recargo por medio (ej. crédito +10%) sería otra regla. |
+| 2026-11-05 | PLA-4 | El aumento aplica el mismo % o monto al general y a los precios especiales; redondeo a $1, 10, 50, 100, 500 o 1.000; más de 200% se rechaza. El aviso a los socios es un texto para copiar a WhatsApp hasta que exista la bandeja (AVI-1). | Lo que se ve en la vista previa es lo que se guarda (misma cuenta en la base). | — |
+| 2026-11-05 | PLA-2 | Horario y veces por semana solo en membresías; las clases incluidas (ninguna tildada = todas) en cualquier plan y solo si el gimnasio usa clases. | La puerta ya los calculaba (0006); faltaba dónde cargarlos. | — |
+| 2026-11-05 | PLA-3 | Matrícula solo en membresías: única o una vez por año. Se cobra en el mostrador (Vender la suma con la cuota); el pago por transferencia desde la app todavía cobra solo la cuota. Una venta anulada la vuelve a deber. | Lo debido sale de lo cobrado, no de una marca. | Sumarla en la app cuando se toque el pago desde la app (PAY-1). |
+| 2026-11-05 | PLA-6 | Cambiar de plan pasa los días pagos 1 a 1 al plan nuevo, aunque cueste distinto; la ficha muestra la diferencia por mes y deja ir a Vender. | D6: sin plata automática. | Prorratear en plata. |
+| 2026-11-05 | PLA-7 | Recargo: el atraso cuenta desde el primer día sin cubrir; con "más de N días" (N de 1 a 60), % de la cuota (hasta 50%) o monto fijo; quien nunca pagó no tiene atraso. La base lo exige junto con la cuota: no cobrarlo es un descuento con motivo, con el tope de la recepción. El pago por transferencia desde la app todavía no lo suma. | D8: siempre visible antes de cobrar, y que la recepción no lo saque sin dejar rastro. | Que la recepción pueda sacarlo libre. |
+| 2026-11-05 | VEN-6 | Anulan el dueño y el encargado (desde la ficha, desde Vender recién cobrado o desde el pedido en Inicio). La recepción pide solo ventas que cobró ella hoy. Si había efectivo de una caja ya cerrada, la devolución sale como retiro de la caja abierta de esa sede (si no hay ninguna abierta, no deja anular y lo dice). | Anular toca plata; el arqueo de una caja contada no se reabre. | — |
+| 2026-11-05 | VEN-4 | El stock se calcula (entradas + conteos − ventas no anuladas), no se guarda. Cada producto elige si lleva stock; al prenderlo se cuenta lo que hay. Vender muestra cuántos quedan y avisa, pero no frena una venta. Cargan mercadería y cuentan el dueño y el encargado; la recepción lo ve. | Una venta frenada por un número mal contado es peor que un stock negativo, que avisa que hay que contar. | Frenar la venta sin stock. |
+| 2026-11-05 | VEN-3 | El convenio se aplica solo a la cuota (no a pases, packs ni productos), por cuota, y nunca más que su precio. Lo crean, asignan y quitan el dueño y el encargado; la recepción lo ve. Un socio tiene uno a la vez; asignar otro reemplaza al anterior. Se guarda como descuento de la cuota con motivo "Convenio X" y no cuenta para el tope de la recepción. | D14: lo aplica Vender solo; que la recepción no pueda inventar descuentos y el dueño vea por qué se cobró menos. | Aplicarlo también a pases y packs. |
+| 2026-11-05 | VEN-5 | "A cuenta" es un medio de pago más en Vender: solo con socio, hasta el tope (deuda anterior + lo nuevo) y nunca para pagar deuda. La deuda sale de los pagos a cuenta menos los pagos de deuda (ventas no anuladas); no se guarda. La puerta deja entrar al que debe y lo pone en amarillo con "Debe $X a cuenta" (también si después se apaga el fiado). "Cobrado hoy" no suma lo fiado: la plata entra cuando paga la deuda. | D5. Si lo fiado contara como cobrado, el pago de la deuda se contaría dos veces. | Que deber deje afuera. |
+| 2026-11-05 | CAJ-4 | Las alertas no se guardan: se calculan de los últimos 7 días (cajas cerradas con diferencia, retiros, ventas anuladas, descuentos mayores al tope de la recepción sin contar convenios) y no se muestran las que hizo quien mira. Las ven el dueño y el encargado en Inicio, hasta que existan la campana (AVI-5) y las notificaciones (PUSH-1). La diferencia avisa desde $1 (no hay margen configurable). El ticket del retiro es opcional; lo sube quien anotó el retiro y no se cambia. | Que "nada que importe dependa de un cron" y que el dueño no reciba avisos de lo que hizo él. | Un margen de diferencia en Configuración. |
+| 2026-11-05 | CAJ-5 | "Olvidada" = abierta desde otro día, o hoy después de la última hora de cierre de esa sede (sin horarios cargados, solo el cambio de día). Nadie puede tener dos cajas abiertas a la vez (olvidada o no). El aviso lo ven en Inicio quien la abrió, el dueño y el encargado. | Sin cron: se calcula al mirar o al abrir. | Cerrarla sola (no: alguien tiene que contar la plata). |
+| 2026-11-05 | CAJ-3 | El PIN nunca da más permisos: con PIN puesto, solo se puede lo que pueden a la vez la sesión de la compu y quien puso el PIN, y queda anotado quien lo puso. Vale 12 horas en esa compu (cookie solo-servidor con un token firmado por la base). Un token vencido no se manda; uno adulterado o de otro gimnasio da error (nunca se anota a otro en silencio). PIN de 4 números, distinto entre los del equipo, sin los obvios (1234, 0000…); 5 equivocados en 10 minutos bloquean esa sesión. El hash vive en `privado` (nadie lo lee). Se cambia en Mi cuenta, sin PIN puesto. | D15, sin abrir una puerta: 4 números se adivinan, así que no pueden subir permisos. | Que el PIN del dueño habilite cosas de dueño en la compu de la recepción (pediría algo más fuerte que 4 números). |
+| 2026-11-05 | AVI-1 | La bandeja junta: vence en los próximos días (lo de Retención), venció hace 1 a 3 días, no viene (la lista de Retención), cumple años y comprobante rechazado en los últimos 3 días. “Avisado ✓” se guarda con a qué se refiere (el vencimiento, el último día que vino, el año del cumpleaños, el pago): ese aviso no vuelve, uno nuevo del mismo socio sí. Tocar WhatsApp ya lo marca. La ven dueño, encargado y recepción. | Se calcula al abrirla (sin cron) con las mismas cuentas de Retención y Cumpleaños. | Avisar por push o mail sin que nadie toque (PUSH-1). |
+| 2026-11-05 | VEH-1 | "Avisar a todos" va de a uno: cada toque abre un WhatsApp (el navegador no deja abrir varios de una) y lo marca avisado en la bandeja; se puede saltear o terminar. Está en Vencen hoy y en cada grupo de la bandeja. Tocar WhatsApp en una fila de Vencen hoy también marca (la recepción incluida). | El avisado es el mismo que el de la bandeja: nunca dos registros distintos de "ya le escribí". | — |
+| 2026-11-05 | AVI-5 | La campana no guarda avisos: los calcula de los hechos (comprobantes para revisar, cajas abiertas, alertas de caja, pedidos de anular y de pausa, dejados pasar, stock para reponer; a la recepción, lo que pidió anular ya resuelto; al profe, sus clases canceladas; al socio, si hoy no está al día, sus comprobantes y sus clases). Solo se guarda qué vio cada usuario. Lo que lleva a una pantalla apagada o que el rol no ve no aparece. El número se pide después de pintar la pantalla. | Sin cron y sin una tabla que se desincronice de los hechos. | Que el aviso llegue sin abrir la app (PUSH-1). |
+| 2026-11-05 | AVI-6 | El resumen es de un día o de una semana (lunes a domingo), siempre comparado con el período anterior del mismo largo. Cobrado = pagos aprobados en ese período por medio y por quien cobró (los de la app: quien aprobó; sin nadie, "Online"); lo fiado aparte. Llega a la campana del dueño y del encargado: el del día desde las 22 h (antes, el de ayer) y el de la semana pasada desde el lunes. Mail cuando esté conectado (fuera de esta tanda). | Se calcula al abrirlo, sin cron, con las mismas tablas que Caja e Inicio. | Mandarlo por mail o push a una hora fija (PUSH-1 y mail). |
+| 2026-11-05 | PUSH-1 | Push para: comprobante informado (dueño, encargado, recepción de esa sede), pago aprobado o rechazado (el socio), caja con diferencia y retiros (dueño y encargado, menos quien lo hizo), pedido de anular (dueño y encargado), clase cancelada (los socios anotados). Cada dispositivo elige dentro de lo de su rol; por defecto, todo. El texto y a quién lo decide la base; cada hecho se manda una vez. Se manda después de responder (la acción no espera). El profe todavía no tiene avisos. En iPhone, solo con la app agregada a inicio (se explica en pantalla); por eso hay manifest con la marca. | Sin costo ni servicio externo (claves VAPID propias en Vercel). Si no llega, todo está en la campana. | Push de "no viene hace 10 días" o "vence mañana" al socio: necesita un envío programado (cron), y nada importante puede depender de uno. |
+| 2026-11-05 | RES-1 | Cobrado = pagos aprobados en el mes, sin lo fiado (igual que Inicio y el Resumen). Un mes en curso se compara con los mismos días del anterior. "De dónde" sale de lo vendido (ventas no anuladas), por plan, productos, matrícula, recargos o deuda: puede no coincidir con lo cobrado (transferencias pendientes, fiado). Recurrente = precio de hoy de cada membresía al día, dividido por su duración en meses. Horas pico: entradas que pasaron, de 6 a 23 h. | Todo de la base, con las mismas reglas que el resto. | Gráficos con una librería: con barras simples alcanza y no suma peso. |
+| 2026-11-05 | RES-3 | Gastos en cuatro categorías (alquiler, sueldos, servicios, otros), por mes, con detalle opcional. Los ve y los carga solo el dueño (hay sueldos): el encargado ve el Resultado sin gastos ni ganancia. Ganancia = cobrado del mes (sin fiado) menos gastos. Quitar un gasto lo deja anulado. "Repetir los del mes pasado" copia todos si el mes está vacío. | Simple: alcanza para saber si el mes dio, sin hacer contabilidad. | Gastos con comprobante, proveedores o cuotas: es otro producto. |
+| 2026-11-05 | PAY-1 | Hasta que exista el OAuth (MP-1), el dueño pega el Access Token y la clave del webhook de su aplicación de MercadoPago en Configuración → Cobros; van a Vault y no se vuelven a mostrar. Modo prueba o producción. El socio paga la cuota de su plan al precio del medio "mercadopago" (si no tiene uno propio, el general); al día, la puede adelantar. Un pago pendiente de la última hora se reusa. El aviso viene a `/api/webhooks/mercadopago?g=<gimnasio>`, se verifica la firma con la clave del gimnasio, y estado y monto se leen de la API de MercadoPago con su token (no del aviso). Se acredita solo si el monto coincide al centavo. Rechazado o devuelto: el pago queda rechazado con el motivo. Los medios del mostrador no cambian. | El webhook manda (CLAUDE.md), idempotente por ID externo. | Débito automático (MP-3) y alta online con pago (sigue en la app después del alta). |
+| 2026-11-05 | CLA-1 | Falta = reserva confirmada de una clase que terminó sin presente (y sin cancelar); se calcula. Opciones hoy: no pasa nada (por defecto) o el socio no puede reservar por N días (1 a 60) desde el día de la clase; cuenta desde que se prende la regla; la recepción, el encargado y el dueño lo pueden anotar igual. La app muestra las reglas (cancelar hasta y faltas) y el motivo si está bloqueado. Las faltas se ven en la ficha (Asistencia). "Descontar del pack" quedó como CLA-9: pide cambiar cómo se cuentan los packs. | Calculado y prudente: nadie queda bloqueado por algo de antes de la regla. | Descontar del pack ahora (CLA-9). |
+| 2026-11-05 | CLA-2 | Los turnos fijos se prenden por gimnasio (Configuración → Clases, solo con reserva). Los toma el socio desde la app o el mostrador desde la ficha. Tope: el cupo del horario. Sin cron: al mirar las clases de un día se reserva a los abonados que pueden tomar la clase (dentro de la ventana de reserva) y se libera el lugar de los que ya no pueden (sube la espera). Si una semana el socio cancela, esa semana no se vuelve a reservar. Quitar el turno cancela las próximas que había reservado solo. | Nada depende de un cron; el lugar del que no paga no queda tomado. | Avisarle al socio que se liberó su lugar fijo (va por la campana cuando sume ese aviso). |
+| 2026-11-05 | CLA-3 | La recepción ve "Cancelar esta clase" (la base ya la dejaba). Los anotados aparecen primero en Avisos de hoy durante 2 días, con el mensaje nuevo "Clase cancelada" (editable, variables {clase} {dia} {motivo}); además les llega por la campana y el push. Los packs no se tocan: reservar no gasta clase. La vista previa de los mensajes usa ejemplos para las variables que no son del socio. | Lo urgente primero, con el mensaje listo. | — |
+| 2026-11-05 | CLA-8 | Editar un horario respeta "un horario no se edita" (0011): se crea uno nuevo y se cierra el viejo, llevando las clases futuras. Las que ya tienen reservas conservan su hora (nadie pierde su lugar) y toman cupo y profe; si cambió la hora, el nuevo arranca después de la última reservada (no hay dos clases el mismo día). El cupo no baja de lo ya reservado (se dice qué clase lo impide); si sube, entra la espera. Un horario que arranca hoy no se edita: se saca y se agrega. Actividades: nombre, emoji y apagarla. | Nadie pierde su reserva por un cambio de grilla. | Pasar a espera a los que sobran si baja el cupo (hoy se impide). |
+| 2026-11-05 | CLA-8 (0094, 0097) | Corrige la fila anterior: un horario que arranca hoy o más adelante sí se edita y se saca entero (0097: un horario puede quedar vacío, sin ninguna clase). Las clases de los días en que el viejo sigue vigente se quedan en él con su hora (antes se movían y al mirar el día aparecía otra). | Corregir un horario recién cargado es el caso más común. | — |
+| 2026-11-05 | CLA-9 | La falta se descuenta del pack que respaldaba la reserva (cada reserva con pack ya guarda cuál). Se calcula, no se guarda: si se apaga la regla, esas faltas dejan de contar. No es falta si ese día entró por la puerta. | Lo mismo en todos lados y sin cron; nadie paga dos veces. | Mostrar en la ficha "se descontó del pack" al lado de cada falta. |
+| 2026-11-05 | ADM-1 | Los planes de ejemplo de cada plantilla van sin precio: el dueño los pone antes de vender (no se inventan precios). La plantilla se aplica solo a un gimnasio sin planes. | No arrancar con precios que nadie eligió. | Precios sugeridos por zona, si BRIK quiere cargarlos. |
+| 2026-11-05 | ADM-2/ADM-3 | El abono se calcula de los pagos que registra BRIK (hasta qué día cubren). Al asignar un plan hay 14 días hasta el primer pago. Vencido: solo lectura hecha cumplir en la base con un trigger que frena solo al equipo del gimnasio (el socio, la página y la puerta siguen; el admin de BRIK puede igual). | D11 y D13, sin trabar a nadie por error. | Cobrar el abono con MercadoPago (MP-3, 🔌). |
+| 2026-11-05 | RET-3 | Los motivos de baja quedan con la lista fija que ya tenía la base (precio, horario, se mudó, otro gimnasio, sin tiempo, no le gustó, otro): hacerla editable por gimnasio cambiaría una restricción de la tabla de socios y cómo se agrupan en el Resultado. La pausa se ofrece si tiene plan y el motivo no es "se mudó" ni "otro gimnasio"; el botón lleva a Pausas de la ficha. Los motivos del mes se ven en el Resultado. | Lo prudente sin tocar datos existentes. | Lista de motivos editable por gimnasio. |
+| 2026-11-05 | REV-1a | "Le prometieron pagar": dueño y encargado ven a todos los que dejaron pasar ayer u hoy y siguen sin poder entrar; la recepción, solo los que dejó pasar ella. Sale solo cuando la puerta lo deja pasar. | Calculado de las entradas forzadas y de la misma función de la puerta; la recepción no ve nada que no viera. | Guardar "prometió pagar" como estado. |
+| 2026-11-05 | COM-7 | Los habituales en la tablet vienen apagados; prendidos, tocar el nombre pide los últimos 3 números del DNI (y cuenta para el freno de 30 intentos por minuto). | Sin eso, cualquiera entraría tocando un nombre ajeno: la tablet no tiene a nadie mirando. Nombre e inicial del apellido, nada más. | Entrar solo con tocar el nombre. |
+| 2026-11-05 | COM-8 | Un evento es un producto con stock = cupo (más su fecha, para quién y descripción): se vende en Vender sin tocar el cobro y los anotados son sus ventas no anuladas. El nombre del producto lleva la fecha. | Cero cambios en `vender` (plata). Cancelar o terminar lo saca de Vender; lo vendido queda. | Un tipo de ítem nuevo en Vender. |
+| 2026-11-05 | COM-9 | El cupón no toca `vender`: Vender carga el descuento en cada línea que corresponde (cuotas, pases y packs de sus planes; nunca productos) con motivo "Cupón X", y al cobrar registra el uso (la base exige que la venta tenga ese descuento). El tope de la recepción sigue valiendo. Monto fijo: una vez por venta. | Cero cambios en el cobro; el uso se cuenta de ventas no anuladas. | Que el cupón saltee el tope de la recepción (es darle más permiso). |
+| 2026-11-05 | COM-12 | El lugar se elige en un paso aparte después de reservar (no se tocó `reservar`); lo garantiza un índice único sobre las reservas confirmadas. En espera no se elige. La recepción también puede asignarlo; el profe solo mira. | Reservar sigue igual; el índice frena a dos que tocan a la vez. | Pasar el lugar dentro de `reservar` (una sola llamada). |
+| 2026-11-05 | COM-13 | Grados: el profe puede otorgarlos (toma el examen); anular, solo dueño o encargado; la recepción solo mira. "Listos para rendir" se calcula con asistencias y meses desde el grado actual, o desde la primera clase si no tiene. | Es la persona que evalúa; anular deshace un hecho y queda para los que gestionan. | Migración nueva sobre `otorgar_grado`. |
+| 2026-11-05 | COM-14 | La TV muestra los nombres con la inicial del apellido y usa su propio token (otra tabla que la tablet): solo sirve para mirar, no da entrada. "La de ahora" incluye la que empieza en 15 minutos. | Una pantalla en la sala la ve cualquiera; un token de TV filtrado no tiene que abrir la puerta. | Migración nueva sobre `privado.clase_tv`. |
+| 2026-11-05 | SEG-5 | Sin internet solo se anota a los que la copia dice que pueden (no hay "dejar pasar"); al volver, la base registra cada entrada con la función de siempre en la hora en que pasó y, si no podía, queda rechazada y se muestra. La copia se prende por compu (tiene nombres y DNI) y vale hasta la medianoche. | La puerta nunca decide en el navegador; nadie entra gratis en silencio; el tope de la recepción no se puede controlar sin internet. | Permitir "dejar pasar" sin internet (con el tope chequeado al volver). |
 
 ---
 
@@ -126,169 +222,215 @@ que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 0 · Base
-- [ ] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`)
-- [ ] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`)
+- [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
+- [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
 
 ### 1 · Configuración y primeros pasos
-- [ ] AUD-1 · 🟢 · Auditoría botón por botón: Configuración
-- [ ] CFG-1 · 🟢 · Configuración en pestañas, todo explicado
-- [ ] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel
-- [ ] CFG-3 · 🟢 · Medios de pago y datos de transferencia
-- [ ] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres
-- [ ] CFG-5 · 🟢 · Mensajes editables con vista previa
-- [ ] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
+- [x] AUD-1 · 🟢 · Auditoría botón por botón: Configuración — verificado: e2e:configuracion (27 pasos, dueña/encargado, compu y celu), db:pruebas 172 en verde con la 0020, npm run e2e completo y verificar en verde
+- [x] CFG-1 · 🟢 · Configuración en pestañas, todo explicado — verificado: e2e:configuracion (40 pasos: 8 pestañas, dueña/encargado, compu y celu), db:pruebas 175 con la 0021, npm run e2e completo y verificar en verde
+- [x] CFG-2 · 🟢 · Subir logo, favicon y fotos desde el panel — verificado: e2e:cfg-2 (24 pasos con archivos de verdad: PNG, SVG, JPG, rechazos, orden, página pública, app del socio), db:pruebas 180 con la 0022, npm run e2e completo y verificar en verde
+- [x] CFG-3 · 🟢 · Medios de pago y datos de transferencia — verificado: e2e:cfg-3 (13 pasos: Vender y app del socio con los medios prendidos), db:pruebas 184 con la 0023 (la base rechaza medios no aceptados), npm run e2e completo y verificar en verde
+- [x] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres — verificado: e2e:cfg-4 (18 pasos: un feriado cancela las 6 clases del día, se ve en la app y la página, anularlo las devuelve), db:pruebas 188 con la 0024, npm run e2e completo y verificar en verde
+- [x] CFG-5 · 🟢 · Mensajes editables con vista previa — verificado: e2e:cfg-5 (16 pasos: el cambio se ve en los links de Retención y Vencen hoy, volver al original), db:pruebas 193 con la 0025, npm run e2e completo y verificar en verde
+- [x] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio — verificado: e2e:onb-1 (12 pasos: subir el logo marca su paso, publicar la página, ocultar/mostrar), db:pruebas 196 con la 0026, npm run e2e completo y verificar en verde
+- [x] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención — verificado: e2e:cfg-6 (9 pasos: reingreso, 1 día mueve 47 vencidos a “se fue”, formas de entrada), db:pruebas 198, npm run e2e completo y verificar en verde
+- [x] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras — verificado: e2e:cfg-7 (18 pasos: cada sección apagada, 14 pantallas sin links a ella, app sin comprobantes), db:pruebas 200 con la 0027, npm run e2e completo y verificar en verde
+- [x] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo) — verificado: e2e:cfg-8 (11 pasos: cambio con quién y cuándo, guardar sin cambio real no suma filas, encargado, super admin, celular), db:pruebas con la 0028, npm run e2e completo (cfg-8 cortó una vez esperando que el modo desarrollo compile el super admin: subí la espera; solo pasa en verde) y verificar en verde
+- [x] CFG-9 · 🟢 · Aviso de contraste al elegir colores — verificado: pruebas unitarias de contraste()/seLeePoco() (vitest), e2e:cfg-9 (6 pasos: amarillo sobre crema y gris sobre grafito avisan, violeta oscuro y verde no, con aviso se guarda igual, celular)
 
 ### 2 · Página del gimnasio
-- [ ] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio
-- [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
-- [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
-- [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
-- [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
-- [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
+- [x] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio — verificado: e2e:pagina (16 pasos: cada link de la página publicada en compu y celular, borrador → próximamente con WhatsApp → publicar, gimnasio nuevo), inventario en docs/paneles/pagina.md, migración 0029 aplicada local
+- [x] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa — verificado: db (editor-pagina, 4 pruebas: guardar, errores con dónde, foto de portada, permisos; landing sigue en verde), e2e:pag-1 (17 pasos: vista previa en vivo, ocultar, ordenar, agregar pregunta, error, foto, página pública, encargado, celular)
+- [x] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla — verificado: e2e:pag-2 (10 pasos: estado, copiar link, WhatsApp con el link, og:title/description/image + /og se abre, borrador → próximamente → publicar, encargado comparte sin publicar, celular)
+- [x] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página — verificado: db (prospectos, 4 pruebas: sin sesión solo publicada y visible, sin duplicar, tope 30/h, permisos y "socio" solo al dar de alta), e2e:pag-3 (16 pasos, el de punta a punta de PAG-1 a 3: editar → publicar → visitante en celular → Prospectos → escribirle → vino → Hacerlo socio → ficha)
+- [x] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`) — verificado: db (alta-online, 4 pruebas: apagado por defecto y sin reglamento no prende, alta sin cobertura con reglamento aceptado, sin duplicar DNI ni celular, menores al gimnasio, transferencia solo si el gimnasio la recibe, versiones, anon no lee), e2e:reg-1 (13 pasos: transferencia y mostrador desde la página, Entrada no lo deja pasar sin pagar con su motivo, Prospectos, apagar); MercadoPago queda para MP-1/MP-2 (🔌)
+- [x] DIS-13 · 🟢 · Pulido: Página del gimnasio — verificado: capturas antes/después (dis13-*), botones ≥ 52 px medidos, un solo verde por pantalla, loading con la forma real en Hacete socio, Tu página y Prospectos, foco visible al elegir con teclado; barrido en verde
+- [x] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots — verificado: vitest (datos-estructurados, 2), e2e:pag-4 (9 pasos: JSON-LD coincide con dirección y horarios, robots y sitemap por dirección, panel noindex, sin publicar noindex y robots que dice que no)
 
 ### 3 · Socios
-- [ ] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha)
-- [ ] SOC-1 · 🟢 · Importar socios desde Excel o CSV
-- [ ] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas)
-- [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
-- [ ] SOC-4 · 🟢 · Exportar la lista de socios
-- [ ] SOC-6 · 🟢 · Cumpleaños
-- [ ] SOC-7 · 🟢 · Foto del socio desde la cámara
-- [ ] SOC-8 · 🟢 · Encontrar y unir socios duplicados
-- [ ] SOC-5 · 🟢 · Grupo familiar
-- [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
-- [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
-- [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
-- [ ] DIS-3 · 🟢 · Pulido: Socios
+- [x] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha) — verificado: e2e:socios (16 pasos), db (volver-a-dar-de-alta, paneles con teléfonos nuevos), inventario en docs/paneles/socios.md, migración 0033 aplicada local
+- [x] SOC-1 · 🟢 · Importar socios desde Excel o CSV — verificado: db (importar-socios, 4 pruebas: errores por fila, vence como cobertura, deshacer y no con movimientos, 3.000 filas en 8,9 s), vitest (importar: CSV y columnas), e2e:soc-1 (12 pasos: CSV con errores, importar, deshacer, Excel, recepción sin permiso)
+- [x] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas) — verificado: db (asistencia-socio: días en hora local, sin rechazos, profe no), e2e:soc-2 (8 pasos: cada pestaña, calendario = veces, mes anterior, recepción sin Pagos, celular)
+- [x] SOC-3 · 🟢 · Notas y etiquetas, con filtros — verificado: db (notas-etiquetas: autor, quién borra, etiquetas sin repetir, filtro, profe no), e2e:soc-3 (6 pasos: etiqueta en dos socios, nota con autor y hora, filtro en Socios y Retención, la dueña borra, la etiqueta desaparece)
+- [x] SOC-4 · 🟢 · Exportar la lista de socios — verificado: vitest (csv: punto y coma, BOM, comillas, sin fórmulas), e2e:soc-4 (5 pasos: CSV con el mismo filtro, recepción sin botón y con “Sin permiso” en la dirección directa)
+- [x] SOC-6 · 🟢 · Cumpleaños — verificado: db (cumpleanos: momento fijo, 29/2 el 28/2 en años no bisiestos, bajas no, mensaje), e2e:soc-6 (3 pasos: Inicio con “Saludar” armado, edad, el profe no); la bandeja de avisos la suma AVI-1
+- [x] SOC-7 · 🟢 · Foto del socio desde la cámara — verificado: db (foto-socio: ruta de la base, otra ruta no, el profe la ve, un ajeno no), e2e:soc-7 (6 pasos con la cámara de prueba de Chrome: ficha 480×480, bucket privado, Entrada, sin sesión no, cambiar borra la anterior, quitar)
+- [x] SOC-8 · 🟢 · Encontrar y unir socios duplicados — verificado: db (unir-socios: encuentra por celular, mueve entradas, cuota (queda verde), notas y etiquetas sin repetir, registro; frena membresías dobles y DNI distinto; solo dueño; los hechos siguen fijos), e2e:soc-8 (7 pasos)
+- [x] SOC-5 · 🟢 · Grupo familiar
+- [x] SOC-9 · 🟡 D7 · Pausas desde la ficha
+- [x] SOC-10 · 🟡 D10 · Menores con adulto responsable
+- [x] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
+- [x] SOC-12 · 🟢 · Filtros de la lista de socios por estado y plan
+- [x] SOC-13 · 🟢 · Alta en un paso: datos, plan y "Guardar y cobrar"
+- [x] SOC-14 · 🟢 · La ficha dice cómo llegó y qué reglamento aceptó
+- [x] SOC-15 · 🟢 · Los avisos por WhatsApp de un menor van al responsable
+- [x] DIS-3 · 🟢 · Pulido: Socios
 
 ### 4 · Entrada
-- [ ] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
-- [ ] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
-- [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
-- [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
-- [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
-- [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
-- [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
-- [ ] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
-- [ ] DIS-2 · 🟢 · Pulido: Entrada
+- [x] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
+- [x] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
+- [x] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
+- [x] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
+- [x] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
+- [x] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
+- [x] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
+- [x] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
+- [x] ENT-8 · 🟢 · Control de "dejar pasar": a quién, quién y por qué, por día y semana
+- [x] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
+- [x] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
-- [ ] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos
-- [ ] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
-- [ ] PLA-4 · 🟢 · Aumento de precios masivo y programado
-- [ ] PLA-1 · 🟢 · Planes trimestral, semestral y anual
-- [ ] PLA-2 · 🟢 · Planes por horario y por días por semana
-- [ ] PLA-3 · 🟢 · Matrícula / inscripción
-- [ ] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
-- [ ] PLA-7 · 🟡 D8 · Recargo por pagar tarde
-- [ ] DIS-10 · 🟢 · Pulido: Planes y productos
+- [x] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos
+- [x] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
+- [x] PLA-4 · 🟢 · Aumento de precios masivo y programado
+- [x] PLA-1 · 🟢 · Planes trimestral, semestral y anual
+- [x] PLA-2 · 🟢 · Planes por horario y por días por semana
+- [x] PLA-3 · 🟢 · Matrícula / inscripción
+- [x] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
+- [x] PLA-7 · 🟡 D8 · Recargo por pagar tarde
+- [x] DIS-10 · 🟢 · Pulido: Planes y productos
 
 ### 6 · Vender, Caja y Transferencias
-- [ ] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
-- [ ] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
-- [ ] VEN-4 · 🟢 · Productos con stock
-- [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
-- [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
-- [ ] CAJ-1 · 🟢 · Historial de turnos de caja
-- [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
-- [ ] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
-- [ ] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
-- [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
-- [ ] DIS-4 · 🟢 · Pulido: Vender
-- [ ] DIS-5 · 🟢 · Pulido: Caja
-- [ ] DIS-6 · 🟢 · Pulido: Transferencias
+- [x] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
+- [x] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
+- [x] VEN-4 · 🟢 · Productos con stock
+- [x] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
+- [x] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
+- [x] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
+- [x] CAJ-1 · 🟢 · Historial de turnos de caja
+- [x] CAJ-2 · 🟢 · Cierre de caja para compartir
+- [x] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
+- [x] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
+- [x] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
+- [x] DIS-4 · 🟢 · Pulido: Vender
+- [x] DIS-5 · 🟢 · Pulido: Caja
+- [x] DIS-6 · 🟢 · Pulido: Transferencias
 
 ### 7 · Vencen hoy y avisos
-- [ ] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy
-- [ ] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito)
-- [ ] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy
-- [ ] AVI-5 · 🟢 · Campana de avisos en la app del socio y en el panel
-- [ ] AVI-6 · 🟢 · Resumen diario y semanal del dueño en la app
-- [ ] PUSH-1 · 🟢 · Notificaciones push (web push con claves propias, sin costo)
-- [ ] DIS-7 · 🟢 · Pulido: Vencen hoy
+- [x] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy — verificado: e2e:vencen (Cobrar abre Vender con la cuota; la recepción no anota; celular sin desborde); inventario en docs/paneles/vencen-hoy.md
+- [x] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito) — verificado: db (bandeja-avisos: momento de cada lista, avisado no vuelve, uno nuevo sí, permisos), e2e:avi-1 (marcar ✓, al volver “Avisado por Ana”, celular)
+- [x] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy — verificado: e2e:veh-1 (uno tras otro: abre su WhatsApp, pasa al siguiente, queda “Avisado por Martín”)
+- [x] AVI-5 · 🟢 · Campana de avisos en la app del socio y en el panel — verificado: db (campana: cada rol lo suyo, visto por usuario, el socio sus comprobantes, nadie lee la de otro), e2e:avi-5 (🔔 con el número, lista, visto al volver, profe sin plata, socio)
+- [x] AVI-6 · 🟢 · Resumen diario y semanal del dueño en la app — verificado: db (resumen-dueno: por medio y por persona, fiado aparte, período anterior, permisos, en la campana), e2e:avi-6 (Inicio → resumen, semana pasada, aviso en la campana, celular, recepción no)
+- [x] PUSH-1 · 🟢 · Notificaciones push (web push con claves propias, sin costo) — verificado: db (push: cada uno elige dentro de lo suyo, a quién va cada hecho, una sola vez, solo la clave de servicio ve destinos), vitest (push.test: el navegador descifra el mensaje y la firma VAPID es la nuestra), e2e:push-1 (dónde activarlas, profe no, sw y manifest). Sin verificar: la entrega real en un navegador (el servicio de push no es alcanzable desde acá)
+- [x] DIS-7 · 🟢 · Pulido: Vencen hoy — verificado: e2e:dis-7 (recepción y dueña en celular: Vencen hoy, Avisos, Novedades, Resumen sin desborde, botones altos, un verde), capturas dis7-*
 
 ### 8 · Resultado (la plata)
-- [ ] RES-1 · 🟢 · Resultado: la plata del mes, clara
-- [ ] RES-2 · 🟢 · Exportar para el contador
-- [ ] RES-3 · 🟢 · Gastos y ganancia
+- [x] RES-1 · 🟢 · Resultado: la plata del mes, clara — verificado: db (resultado: cobrado sin fiado, por medio, por concepto, por día, contra el anterior, permisos), e2e:res-1 (menú → Resultado, mes anterior, celular, recepción no)
+- [x] RES-2 · 🟢 · Exportar para el contador — verificado: db (resultado: ventas y pagos fila por fila, la recepción no), e2e:res-2 (baja los tres CSV, la recepción recibe 403 con el motivo)
+- [x] RES-3 · 🟢 · Gastos y ganancia — verificado: db (gastos: cargar, ganancia, quitar = anulado, repetir el mes pasado, el encargado no), e2e:res-3 (agrega $1.234,50 y la ganancia baja lo mismo, quitar, encargado sin gastos)
 
 ### 8b · Pagos online
-- [ ] PAY-1 · 🟢 · Pagos online listos para MercadoPago: proveedor por gimnasio, "Pagar ahora" en la app y en el alta, webhook firmado e idempotente, probado con eventos simulados firmados (`docs/producto/05-ALTA-Y-PAGOS.md`)
+- [x] PAY-1 · 🟢 · Pagos online listos para MercadoPago: proveedor por gimnasio, "Pagar ahora" en la app y en el alta, webhook firmado e idempotente, probado con eventos simulados firmados (`docs/producto/05-ALTA-Y-PAGOS.md`) — verificado: db (pagos-online: conectar solo el dueño y en Vault, el socio inicia y se reusa, acredita con monto exacto una vez, evento repetido reconocido, solo la clave de servicio acredita), e2e:pay-1 con el simulador de MercadoPago (conecta, paga, vuelve “¡Pago acreditado!”, aviso repetido no acredita dos veces, firma inválida 401). Sin verificar: contra MercadoPago real (MP-1)
 
 ### 9 · Clases
-- [ ] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades)
-- [ ] CLA-1 · 🟡 D16 · Políticas de reserva y faltas
-- [ ] CLA-2 · 🟢 · Turnos fijos (abono a un horario)
-- [ ] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados
-- [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
-- [ ] CLA-5 · 🟢 · Ocupación por horario
-- [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
-- [ ] DIS-9 · 🟢 · Pulido: Clases
+- [x] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades) — verificado: e2e:clases (días, presente desde la búsqueda, grilla: actividad, horario y sacar con confirmación en pantalla, profe sin grilla, celular); inventario en docs/paneles/clases.md
+- [x] CLA-1 · 🟡 D16 · Políticas de reserva y faltas — verificado: db (faltas-clases: apagada nada, lo de antes no cuenta, bloquea N días, la recepción anota igual, con presente no es falta), e2e:cla-1 (configurar, la app avisa y frena, la ficha lo muestra). "Descontar del pack" quedó como CLA-9
+- [x] CLA-2 · 🟢 · Turnos fijos (abono a un horario) — verificado: db (turnos-fijos: apagados no, abonarse reserva, cancelar una semana se respeta, al que no puede no se le reserva, tope = cupo, quitar), e2e:cla-2 (prender, el socio lo elige y lo quita, la ficha lo muestra)
+- [x] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados — verificado: db (bandeja-avisos: el anotado con el mensaje armado, primero, avisado ✓; mensajes: 11), e2e:cla-3 (la recepción cancela, Avisos de hoy y la campana del socio)
+- [x] CLA-4 · 🟢 · WOD / rutina del día en la clase — verificado: db (wod: el profe en su clase, no en otra, la recepción no, vacío lo borra, lo ve el anotado), e2e:cla-4
+- [x] CLA-5 · 🟢 · Ocupación por horario — verificado: db (ocupacion: promedio de los que vinieron contra el cupo, canceladas no cuentan, la recepción no), e2e:clases (la sección en la grilla)
+- [!] CLA-6 · 🟢 · Clase de prueba para prospectos — trabado: hoy toda reserva es de un socio y la clase de prueba da entrada sin pagar (toca "¿puede entrar?"). Decidí: ¿se lo da de alta como socio sin plan con una clase gratis, o se anota el prospecto sin ser socio? ¿y la puerta lo deja pasar ese día?
+- [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)
+- [x] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9) — verificado: db (editar-horario: cupo y profe a las clases futuras, la reservada conserva la hora, sin duplicados, el cupo no baja de lo reservado), e2e:clases (editar hora y cupo)
+- [x] CLA-9 · 🟢 · Faltas: descontar la clase del pack (tercera opción de D16) — verificado: db (faltas-pack: puerta, reserva, ficha; presente, entró ese día y regla en "nada" no cuentan; presente tarde), e2e:cla-9 (pendiente de la tanda final)
+- [x] DIS-9 · 🟢 · Pulido: Clases — verificado: e2e:dis-9 (día, clase y grilla en el celular: sin desborde, botones altos, un verde), capturas dis9-*
 
 ### 10 · Retención
-- [ ] AUD-10 · 🟢 · Auditoría botón por botón: Retención
-- [ ] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia)
-- [ ] RET-2 · 🟡 D2 · La recepción anota contactos
-- [ ] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo
-- [ ] DIS-8 · 🟢 · Pulido: Retención
+- [x] AUD-10 · 🟢 · Auditoría botón por botón: Retención — verificado: e2e:retencion (plata en riesgo, listas, WhatsApp, Dice que vuelve, Cobrar, vacía, celular, recepción no); inventario en docs/paneles/retencion.md
+- [x] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia) — verificado: db (tablero-retencion: 12 semanas, la última igual a los al día de hoy, altas, recepción no), e2e:retencion
+- [x] RET-2 · 🟡 D2 · La recepción anota contactos — verificado: db (retencion: la recepción ve las listas sin monto ni plata en riesgo y anota), vitest (secciones), e2e:retencion y e2e:vencen
+- [x] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo — verificado: db (motivos de baja del mes), e2e:socios (con plan, “¿le ofreciste una pausa?” antes de confirmar)
+- [x] DIS-8 · 🟢 · Pulido: Retención — verificado: e2e:dis-8 (tres listas, dueña y recepción en el celular: sin desborde, botones altos, un verde), capturas dis8-*
 
 ### 11 · App del socio
-- [ ] AUD-11 · 🟢 · Auditoría botón por botón: App del socio
-- [ ] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio)
-- [ ] APP-3 · 🟢 · Historial de pagos y asistencia en la app
-- [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
-- [ ] APP-7 · 🟢 · Racha y entradas del mes
-- [ ] APP-8 · 🟢 · Pedir pausa o baja desde la app
-- [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)
-- [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)
-- [ ] DIS-12 · 🟢 · Pulido: App del socio
+- [x] AUD-11 · 🟢 · Auditoría botón por botón: App del socio — verificado: e2e:app (pendiente de la tanda final); inventario en docs/paneles/app.md
+- [x] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio) — verificado: e2e:push-1 (manifest con la marca y service worker), e2e:app-1 (la invitación a instalar). Sin verificar: instalar en un celular real
+- [x] APP-3 · 🟢 · Historial de pagos y asistencia en la app — verificado: db (historial-socio: pagos y entradas, lo nuevo primero, otro socio no), e2e:app-3
+- [x] APP-6 · 🟢 · Novedades del gimnasio en la app — verificado: db (novedades-gimnasio: publicar, la app la ve, quitar, recepción no publica, máximo 3, otro no), e2e:app-6 (pendiente de la tanda final). Sin foto todavía
+- [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
+- [x] APP-8 · 🟢 · Pedir pausa o baja desde la app — verificado: db (pedidos-socio), e2e:app-8 (pendiente de la tanda final)
+- [x] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1) — verificado: db (entrar-con-mail: vincula por mail verificado, menores no, ya vinculado lo dice, solo el servidor), e2e:app-9 (pendiente de la tanda final). Falta la plantilla del mail en Supabase
+- [x] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link) — verificado: db (referidos: código fijo, el pedido entra como referido, uno ajeno no cuenta, sin página no hay link, otro socio no), e2e:ref-1 (pendiente de la tanda final). Sin pase ni premio: REF-2
+- [ ] REF-2 · 🟡 · Pase de prueba y premio del referido (días gratis al que recomendó) — tocan quién entra y plata: decide Mateo (junto con CLA-6)
+- [x] DIS-12 · 🟢 · Pulido: App del socio — verificado: e2e:dis-12 (pendiente de la tanda final: 5 pantallas en el celular, un verde)
 
 ### 12 · Equipo y cuentas
-- [ ] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta
-- [ ] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio
-- [ ] EQU-2 · 🟡 D3 · El profe busca socios
-- [ ] EQU-3 · 🟢 · Qué hizo cada uno (auditoría)
-- [ ] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta
+- [x] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta — verificado: e2e:equipo (pendiente de la tanda final); inventario en docs/paneles/equipo.md
+- [x] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio — verificado: db (permisos-equipo: por defecto como antes, solo el dueño, cada interruptor cambia lo que deja la base), e2e:equ-1 (pendiente de la tanda final)
+- [x] EQU-2 · 🟡 D3 · El profe busca socios — verificado: db (profe-busca-socios: solo nombre, foto y semáforo genérico, sin bajas, de afuera no), e2e:equ-2 (pendiente de la tanda final)
+- [x] EQU-3 · 🟢 · Qué hizo cada uno (auditoría) — verificado: db (actividad-equipo: ventas, descuentos, anulaciones, dejados pasar, caja con diferencia; recepción no; encargado según el permiso), e2e:equ-3 (pendiente de la tanda final)
+- [x] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta — verificado: e2e:dis-11 (pendiente de la tanda final)
 
 ### 13 · Rutinas
-- [ ] RUT-1 · 🟢 · Ejercicios y rutinas del gimnasio
-- [ ] RUT-2 · 🟢 · Asignar rutina; el socio la ve y anota sus pesos
-- [ ] RUT-3 · 🟢 · Marcas personales y progreso
+- [x] RUT-1 · 🟢 · Ejercicios y rutinas del gimnasio — verificado: db (rutinas: el profe carga, nombre único, video https, la recepción no, guardar reemplaza, archivar), vitest (secciones), e2e:rut-1 (pendiente de la tanda final)
+- [x] RUT-2 · 🟢 · Asignar rutina; el socio la ve y anota sus pesos — verificado: db (rutina-socio: asignar, ver con lo último, anotar con límites, anular, otro socio no, reemplazar y quitar), e2e:rut-2 (pendiente de la tanda final)
+- [x] RUT-3 · 🟢 · Marcas personales y progreso — verificado: db (rutina-socio: la marca es el mayor peso, el progreso, el profe lo ve, otro socio no), e2e:rut-2 (pendiente de la tanda final)
 
 ### 14 · Inicio (al final: junta todo lo anterior)
-- [ ] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol
-- [ ] DIS-1 · 🟢 · Pulido: Inicio
+- [x] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol — verificado: e2e:inicio (pendiente de la tanda final), db (pedidos-socio: bajas pendientes); inventario en docs/paneles/inicio.md
+- [x] DIS-1 · 🟢 · Pulido: Inicio — verificado: e2e:dis-1 (pendiente de la tanda final); sin cambios de código
 
 ### 15 · Super admin y plataforma
-- [ ] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio
-- [ ] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear
-- [ ] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin
-- [ ] ADM-5 · 🟢 · Demo para vender: link "Probá Gym OS" y reiniciar el demo
-- [ ] ADM-6 · 🟢 · Novedades de Gym OS para todos los dueños
-- [ ] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio
-- [ ] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK
-- [ ] DIS-15 · 🟢 · Pulido: Super admin
-- [ ] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado
+- [x] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio — verificado: e2e:acceso y e2e:admin (pendiente de la tanda final); inventario en docs/paneles/acceso.md
+- [x] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear — verificado: db (plantillas-gimnasio: box completo, las 8, una sola vez, solo el admin), e2e:adm-1 (pendiente de la tanda final). Planes sin precio
+- [x] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin — verificado: db (último acceso, ventas, solo el admin), e2e:adm-1 (pendiente de la tanda final)
+- [!] ADM-5 · 🟢 · Demo para vender: link "Probá Gym OS" y reiniciar el demo — trabado: "solo lectura" pide un rol nuevo que la base respete en cada escritura (toca permisos), y "reiniciar" pide borrar hechos que hoy son inmutables (pagos, entradas) o un gimnasio demo nuevo por visita. Decidí: ¿demo compartido que se puede tocar y se rehace de noche desde Actions, o uno nuevo por visitante?
+- [x] ADM-6 · 🟢 · Novedades de Gym OS para todos los dueños — verificado: db (publicar, el dueño la ve hasta cerrarla, retirar, recepción no, solo el admin publica), e2e:adm-6 (pendiente de la tanda final)
+- [x] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio — verificado: db (abono-brik: vencido no vende ni edita, la puerta sigue, el admin sí, pagar destraba; db:pruebas completo con los triggers), e2e:adm-3 (pendiente de la tanda final)
+- [x] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK — verificado: db (abono-brik: planes solo el admin, 14 días de gracia, por vencer, montos solo al dueño), e2e:adm-3 (pendiente de la tanda final)
+- [x] DIS-15 · 🟢 · Pulido: Super admin — verificado: e2e:dis-15 (pendiente de la tanda final)
+- [x] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado — verificado: e2e:dis-14 (pendiente de la tanda final)
 
 ### 16 · Cierre
-- [ ] SEG-1 · 🟢 · Límite de pedidos de código por celular
-- [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
-- [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
-- [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización
-- [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
+- [x] SEG-1 · 🟢 · Límite de pedidos de código por celular — verificado: db (limite-codigos: 5 por destino, 20 por IP, hash, solo el servidor), e2e:seg-1 (pendiente de la tanda final)
+- [x] SEG-2 · 🟢 · Exportar todos los datos del gimnasio — verificado: db (cada tabla, sin rutas internas, recepción no), e2e:seg-2 (pendiente de la tanda final)
+- [x] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas — medido (npm run medir): 13 índices (0114) bajaron lo lento de 5–16 s a 1–2,6 s; lo que queda arriba de 1 s pasa a SEG-8
+- [x] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización — verificado: db (mis_datos, anonimizar: solo ex socios, BORRAR, quedan pagos, solo el dueño), e2e:seg-6 (pendiente de la tanda final)
+- [x] SEG-7 · 🟢 · Funciones viejas sin pantalla (cobrar_cuota, precio_cuota, caja_abierta, asignar_plan): confirmar que Vender las reemplazó y sacarles el acceso del equipo — verificado: db (cobro con Vender, la vieja sin permiso; pin-equipo). asignar_plan queda: tiene pantalla
+- [x] SEG-8 · 🟢 · Calcular el estado de todos los socios juntos (retención, Vencen hoy, Inicio, Avisos, filtro "al día") para bajar de 1 s con 3.000 socios — toca el cálculo de acceso: con las pruebas de acceso al lado — verificado: db (355 en verde), retención idéntica fila por fila en el demo grande, npm run medir: todo por debajo de 1 s (Socios "al día" 2,6 s → 63 ms). Sin un segundo cálculo: índices + cortar temprano
+- [x] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta — verificado: e2e:cliente 20 pasos en verde (BRIK crea el gimnasio → precio, alias, grilla, importar, publicar, recepción → caja → cobro → entrada verde → socio reserva → transferencia con comprobante → la dueña aprueba → Resultado $60.000 → otra sede con su caja → celular sin desborde)
 
 ### 17 · Segunda pasada (todo de nuevo, con ojos nuevos)
 Cada una vuelve a abrir todo el panel con su rol, lo compara con `docs/producto/`
 y con `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila, y suma lo que falte al
 bloque 18.
-- [ ] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja)
-- [ ] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular)
-- [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
-- [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
-- [ ] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando
-- [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
+- [x] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja) — verificado: e2e:rev-1 (12 pasos, en el orden del documento); lo que falta, en el bloque 18 (REV-1a…d)
+- [x] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular) — verificado: e2e:rev-2 (contra la app local; la contraseña por WhatsApp corre en la tanda); lo que falta: REV-2a
+- [x] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar) — verificado: e2e:rev-3 8 pasos en verde (el rechazo con su motivo en el historial, migración 0136), db (historial-socio)
+- [x] REV-4 · 🟢 · Segunda pasada: un día como profe — verificado: e2e:rev-4 7 pasos en verde (faltan, anotados en el LOG: fotos en la lista de la clase y sumar a alguien desde la lista)
+- [x] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando — verificado: e2e:rev-5 (15 pasos: los 8 tipos; el dueño entra, ve sus planes y actividades, Clases según el tipo, pone el primer precio, celular sin desbordes)
+- [x] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros) — verificado: e2e:rev-6 7 pasos en verde (dos personas cobrando la misma cuota a la vez sigue en REV-6a, decide Mateo)
 
 ### 18 · Lo que encontró la segunda pasada
+- [x] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado — verificado: db (prometieron-pagar: hoy y ayer, sale solo al pagar, la recepción ve los suyos), e2e:rev-1 (en la tanda)
+- [x] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio — hecho sin tocar la plantilla: el link va abajo del mensaje, solo si la página está publicada (verificado: e2e:rev-1, en la tanda)
+- [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
+- [ ] REV-1d · 🟡 · Retiro de caja para el proveedor: sumar el stock en el mismo paso (la foto del ticket ya estaba, CAJ-4). La entrada de mercadería hoy la cargan solo el dueño y el encargado: ¿la recepción también, cuando paga al proveedor? — decide Mateo (es darle un permiso)
+- [x] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla — verificado: db (sumar-sede: caja sola, repetida y vacía avisan, encargado y recepción no), e2e:cliente (en la tanda)
+- [ ] REV-6a · 🟡 · Dos personas cobran la cuota del mismo socio a la vez: hoy quedan las dos ventas (cubre dos meses). El día a día pide que la segunda vea "ya se cobró hace 10 s" — toca plata: decide Mateo cómo (frenar la segunda cuota del mismo período en unos segundos, o avisar y dejar)
+
+### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
+- [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
+- [x] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino — verificado: db (primer-mes: ficha, avisos de los días 1, 7 y 30, riesgo de la primera semana, meta 1 a 60; 360 pruebas en verde), e2e:com-2 (en la tanda)
+- [x] COM-3 · 🟢 · Avisar a todos los anotados de una clase — verificado: db (avisar-clase: un mensaje por persona con nombre, clase y día; queda anotado; el profe solo en las suyas y sin teléfonos si no tiene permiso; vacío no), e2e:com-3 (en la tanda). Mail: cuando exista AVI-2
+- [x] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio — verificado: db (tareas: cada uno las suyas, dueño todas, otra persona no la toca, reabrir), vitest (menú), e2e:com-4 (en la tanda)
+- [x] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas — verificado: db (retencion-numeros: altas, bajas con motivo, cohorte de hace 3 meses, pocas visitas, la recepción no), 0,1 s con 3.000 socios, e2e:com-5 (en la tanda). "Pocas visitas" mira los últimos 30 días (el mes calendario daría todos "pocos" a principio de mes)
+- [x] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada — verificado: db (documentos: versiones, firma en la app y en recepción, el de menores solo a menores, la versión vieja no se firma, la recepción no publica), e2e:com-6 (en la tanda). Que bloquee la entrada: COM-6b
+- [ ] COM-6b · 🟡 · Que "falta firmar" frene la entrada si el gimnasio lo elige — cambia quién entra (el cálculo de acceso): decide Mateo
+- [x] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre — verificado: db (kiosco-habituales: apagado por defecto, nombre con inicial, DNI equivocado no entra, el que ya entró no aparece), e2e:com-7 (en la tanda). Tocar el nombre pide los últimos 3 del DNI
+- [x] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago — verificado: db (eventos: crear, vender como producto, anotados y lugares, página y app, cerrar lo saca de Vender), e2e:com-8 (en la tanda). "Solo socios" y el cupo se muestran pero Vender no los frena (como el stock): COM-8b
+- [ ] COM-8b · 🟡 · Que Vender frene un evento lleno o "solo socios" vendido sin socio — hoy avisa (como el stock) y no frena: tocar el cobro, decide Mateo
+- [x] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento) — verificado: db (cupones: crear y validar, vencido y agotado frenan, uso anotado solo si la venta lleva el descuento, panel con usos y socios), vitest (aplicarCupon), e2e:com-9 (en la tanda). Alta online y "¿saltea el tope de la recepción?": COM-9b
+- [ ] COM-9b · 🟡 · Cupón en el alta online, y si el cupón puede pasar el tope de descuento de la recepción (hoy no: es un descuento más) — plata y permisos: decide Mateo
+- [x] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos — verificado: db (resena-encuesta: link solo https, aviso de reseña en la bandeja tras la entrada 10, encuesta pendiente a los 10 días o al mes, una respuesta cada 90 días, promotores con link; mensajes con 14 plantillas), e2e:com-10 (en la tanda)
+- [x] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código) — verificado: db (medicion: solo IDs válidos —código libre rechazado—, solo el dueño, la página los da solo publicada), e2e:com-11 (en la tanda)
+- [x] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala — verificado: db (lugares-sala: numerar, fuera de servicio, dos no tienen el mismo lugar por índice único, en espera no elige, cancelar libera, profe solo sus clases), vitest (leerNumeros), e2e:com-12 (en la tanda)
+- [x] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir" — verificado: db (grados: armar, listos para rendir, profe otorga, fecha futura no, socio ve su progreso, anular vuelve al grado anterior), vitest (textoRequisitos), e2e:com-13 (en la tanda)
+- [x] COM-14 · 🟢 · TV de la sala: clase de ahora, WOD y anotados en grande — verificado: db (tv-sala: solo dueño/encargado crea, token se ve una vez y no se lee la tabla, clase de ahora con WOD y anotados con inicial, el que vino sin reservar aparece presente, el token no sirve de tablet, revocada no ve), e2e:com-14 (en la tanda)
+- [ ] COM-15 · 🟡 · Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
+- [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)
+- [ ] COM-17 · 🔌 · Wellhub y TotalPass: el check-in de la plataforma cuenta como entrada
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
@@ -298,7 +440,7 @@ bloque 18.
 - [ ] MP-3 · 🔌 · Débito automático mensual
 - [ ] AVI-3 · 🔌 · WhatsApp automático oficial
 - [ ] ENT-5 · 🔌 · Molinete o lector de tarjeta
-- [ ] SEG-5 · 🟢 · Entrada sin internet (después de todo lo demás: es grande)
+- [x] SEG-5 · 🟢 · Entrada sin internet (después de todo lo demás: es grande) — verificado: db (sin-internet: la copia es calcular_acceso fila por fila, sincronizar registra con la función de siempre en la hora en que pasó, el que no podía queda rechazado, reintentar no duplica, hora imposible y socio ajeno fallan), vitest (buscarEnCopia, copiaVigente), e2e:seg-5 (en la tanda)
 
 ---
 
@@ -338,9 +480,14 @@ LISTO SI: e2e de cada uno.
 
 **REV-1 … REV-6 · Segunda pasada.** Cada una es un recorrido e2e largo (`scripts/e2e/rev-<n>.mjs`) que hace lo que dice el título, con capturas mirándolas, y compara contra `docs/producto/` y `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila. Lo chico se arregla en la misma vuelta; lo grande va al bloque 18 con su LISTO SI.
 
+**VEN-6 · Anular una venta.** La base ya lo tiene (`anular_venta`, solo dueño o encargado) y ninguna pantalla lo usa. Botón en la venta (Caja → mis ventas / ficha → pagos) con motivo obligatorio; la venta queda tachada, nunca se borra; la cobertura que generó se anula; aviso al dueño (CAJ-4). La recepción ve "Pedir anulación" (queda pendiente para el encargado).
+**CLA-7 · Anular un presente.** `anular_asistencia` existe y no tiene botón: en la lista de la clase, deshacer el presente con motivo (el profe, dentro del día; encargado y dueño siempre).
+**SEG-7 · Funciones viejas.** `cobrar_cuota`, `precio_cuota`, `caja_abierta` y `asignar_plan` quedaron de la primera versión del cobro y siguen habilitadas para el equipo sin pantalla. Confirmar con pruebas que Vender cubre todo lo que hacían, y en una migración nueva sacarles el `grant` a `authenticated` (menos acceso, nunca más). Si alguna sirve, se usa desde su pantalla en vez de sacarla.
+LISTO SI (los tres): pruebas de base por rol y e2e; `node scripts/mapa-pantallas.mjs` deja de listarlas como "sin pantalla".
+
 ### AUD · Auditoría botón por botón (cada panel)
 
-**AUD-0 · Mapa.** `docs/paneles/README.md`: cada pantalla con su ruta, qué
+**AUD-0 · Mapa.** `docs/paneles/README.md` (lo genera `npm run mapa` desde el código; `verificar` falla si una pantalla llama a una función que no existe): cada pantalla con su ruta, qué
 roles la ven, qué funciones de la base llama, qué sección la apaga, y a qué
 otras pantallas lleva. Es la base de las auditorías.
 
@@ -416,12 +563,26 @@ LISTO SI: cargar un feriado cancela las clases de ese día y lo muestra en la ap
 **CFG-5.** Mensajes editables (vence pronto, venció, no viene, cumpleaños, bienvenida, comprobante) con variables `{nombre}` `{plan}` `{vence}` `{debe}` `{gimnasio}`, vista previa con un socio real, y "volver al original". Las plantillas de retención ya existen: unificarlas acá.
 LISTO SI: un cambio de plantilla se ve en Retención, Vencen hoy y la bandeja de avisos.
 
+
+**CFG-6.** (Salió de AUD-1.) La base ya tiene `accesos_activos`, `reingreso_mismo_dia_consume`, `retencion_dias_nuevo`, `retencion_dias_vencido` y `retencion_dias_se_fue`, y `guardar_configuracion` ya los acepta, pero ninguna pantalla los muestra. Sumarlos a Configuración: las formas de entrada con interruptores que explican qué hace falta para cada una (QR en la pared: imprimir el cartel; kiosco: una tablet; tarjeta y molinete: 🔌 hardware), el reingreso con un ejemplo ("Juan entra a las 8 y vuelve a las 19: ¿gasta otra clase?"), y los tres días de retención en Reglas.
+LISTO SI: cada campo se cambia desde la pantalla y se ve el efecto (una forma de entrada apagada no aparece en Entrada ni en la app; reingreso probado con `estado_acceso` en la base; la lista de retención cambia con los días); no se puede dejar sin ninguna forma de entrada (la base ya lo frena desde 0020); e2e en `panel-configuracion.mjs`.
+
+**CFG-7.** (Salió de AUD-1.) Apagar una sección no avisa qué pasa en las otras. Caja ya está resuelto (Vender sin efectivo). Falta pensarlo para el resto, por ejemplo: Socios apagado con Entrada prendida (¿recepción puede buscar socios?), Vender apagado con Transferencias prendida, Entrada apagada con QR del socio prendido, Vencen hoy apagado con los avisos. Al apagar, el interruptor muestra en una línea qué cambia; si apagar algo deja otra pantalla sin salida, se arregla esa pantalla (como Vender sin Caja), no se prohíbe apagar.
+LISTO SI: una tabla de dependencias en `docs/paneles/configuracion.md`; cada combinación probada abriendo las pantallas con la sección apagada (e2e); ninguna pantalla prendida manda a una apagada.
+
+**CFG-8.** (Salió de AUD-1.) Historial de cambios de configuración: quién cambió qué campo, de qué valor a qué valor y cuándo (tabla nueva con RLS, escrita por `guardar_configuracion`, nunca desde el navegador). Lo ve el dueño (y el encargado, solo lectura) al pie de Configuración y el super admin en el detalle del gimnasio. Sirve para "¿quién subió el descuento máximo de recepción?" y para soporte.
+LISTO SI: cada guardado deja una fila por campo cambiado (no por campo enviado); probado en la base con sesión de dueño; recepción no lo lee (error, no lista vacía); e2e que cambia algo y lo ve en el historial.
+
+**CFG-9.** (Salió de AUD-1.) Con "Otro color" se puede elegir un color principal que no se lee sobre el fondo (amarillo sobre crema, gris sobre gris). La vista previa ya lo muestra, pero no avisa. Calcular el contraste con `luminancia()` de `src/lib/marca.ts` y avisar en el bloque ("Este color se ve poco sobre este fondo") sin prohibirlo.
+LISTO SI: prueba unitaria del cálculo; el aviso aparece y desaparece en el e2e al elegir colores malos y buenos.
 ### PAG · Página del gimnasio
 
 **PAG-1.** Editor en el panel de las secciones de la página (ya existen en la base, 0008: portada, planes, horarios, sedes, fotos, etc.): texto, foto, mostrar u ocultar, ordenar. Vista previa en vivo al costado (en celular, botón "ver cómo queda").
 **PAG-2.** Estado de la página: borrador / publicada (si no está publicada, se ve "próximamente"). Botón publicar, link para copiar y compartir por WhatsApp, y Open Graph (título, descripción y foto al compartir el link).
 **PAG-3.** Formulario "Quiero probar una clase" (nombre, celular, qué le interesa) → sección **Prospectos** en el panel: lista, estado (nuevo, contactado, vino, se hizo socio, no), WhatsApp armado y "convertir en socio" (abre el alta con los datos). Con límite contra spam.
 LISTO SI (los tres): e2e de punta a punta (editar → publicar → un visitante deja sus datos → aparece en Prospectos → se convierte en socio).
+**PAG-4.** (Salió de AUD-2.) Que el gimnasio aparezca bien en Google: la página publicada lleva datos estructurados (`ExerciseGym` de schema.org con nombre, logo, dirección de cada sede, teléfono, horarios de apertura y link de Instagram), `sitemap.xml` y `robots.txt` por host (la página sin publicar y el panel no se indexan). Todo sale de los datos que ya carga el dueño.
+LISTO SI: prueba que lee el JSON-LD de la página demo y coincide con la agenda y las sedes; `robots.txt` de un gimnasio sin publicar dice que no; el panel tiene `noindex`.
 
 ### SOC · Socios
 
@@ -429,6 +590,14 @@ LISTO SI (los tres): e2e de punta a punta (editar → publicar → un visitante 
 LISTO SI: 3.000 filas importadas en < 30 s, duplicados detectados, deshacer probado, pruebas de base.
 
 **SOC-2.** Ficha en pestañas: **Resumen** (semáforo y por qué, plan, vence, packs, acciones grandes: cobrar, WhatsApp, editar) · **Pagos** · **Asistencia** (calendario del mes) · **Notas**.
+**SOC-12.** (Salió de AUD-3.) Filtros en píldoras arriba de la lista: al día, por vencer, vencidos, en pausa, nuevos (30 días), dados de baja, y por plan; cada uno con su cuenta. Salen de `estado_acceso` (nunca un cálculo aparte).
+LISTO SI: e2e que toca cada filtro y ve solo los que corresponden.
+**SOC-13.** (Salió de AUD-3.) Alta en un paso: en el mismo formulario, elegir plan y "✅ Guardar y cobrar" (va a Vender con el socio y el plan elegidos) o "Guardar" solo.
+LISTO SI: e2e de alta con plan que termina cobrado.
+**SOC-14.** (Salió de AUD-3.) La ficha dice cómo llegó (alta online, prospecto, importado, mostrador) y, si aceptó el reglamento, qué versión y cuándo (para mostrarle al socio).
+
+**SOC-15.** (Salió de SOC-10.) Retención, Vencen hoy, Cumplen hoy y los mensajes armados usan `socios.telefono`: para un menor tienen que ir al celular del responsable (la ficha ya lo hace). Una sola función de la base que diga "a qué celular se le escribe a este socio", y que la usen todas.
+LISTO SI: prueba de la base y e2e con un alta online.
 **SOC-3.** Notas con fecha y autor, y etiquetas libres por gimnasio (turno mañana, estudiante…) para filtrar la lista y la retención.
 **SOC-4.** Exportar la lista filtrada a CSV/Excel (solo dueño y encargado).
 **SOC-5.** Grupo familiar: vincular socios (sin descuento automático: eso es D14).
@@ -442,6 +611,12 @@ LISTO SI: 3.000 filas importadas en < 30 s, duplicados detectados, deshacer prob
 **ENT-2.** QR en la app del socio, rotativo (cambia cada 30 s, firmado, no sirve una captura vieja) y lector con la cámara en Entrada. La validación es la misma función de acceso: nada se calcula en TypeScript.
 **ENT-3.** Modo kiosco para una tablet en la puerta: pantalla sin menú, el socio escanea su QR o escribe su DNI y ve su semáforo. Sin sesión de una persona: un dispositivo autorizado por el dueño (token revocable).
 LISTO SI: pruebas de base del QR (vencido, de otro gimnasio, repetido) y e2e de la recepción y del kiosco.
+
+**ENT-8.** (Salió de AUD-4.) Para el dueño y el encargado: la lista de entradas "dejadas pasar" y anuladas de un día o una semana, con quién lo hizo y el motivo, y la cuenta por persona del equipo. Desde Entrada ("ver otro día") y desde Inicio del dueño si hubo alguna hoy. Sale de `ingresos` (no se guarda nada nuevo).
+LISTO SI: prueba de base (la recepción no la ve si es solo para el dueño y el encargado; cuenta bien con anuladas) y e2e.
+
+**ENT-9.** (Salió de AUD-4.) "💵 Cobrar" desde el veredicto rojo o amarillo abre Vender con la cuota de su plan ya en el carrito (como "Dar de alta y cobrar", SOC-13), y al cobrar vuelve a la Entrada con el socio elegido y el veredicto nuevo.
+LISTO SI: e2e: rojo → Cobrar → cobrar en efectivo → vuelve verde y "Anotar entrada".
 
 ### VEN · Vender · CAJ · Caja · TRF · Transferencias
 
@@ -466,6 +641,8 @@ LISTO SI: pruebas de base del QR (vencido, de otro gimnasio, repetido) y e2e de 
 **CLA-3.** El profe o la recepción cancela una clase con motivo: los anotados ven "cancelada" en la app y aparecen en la bandeja de avisos con el mensaje armado; los packs no se descuentan.
 **CLA-4.** WOD / rutina del día cargado por el profe en la clase; lo ven los anotados en la app.
 **CLA-5.** Ocupación: % por horario de la semana (mapa de calor), para decidir horarios.
+**CLA-8.** (de AUD-9) Actividades: cambiar nombre y emoji, y apagarla (sus horarios dejan de generar clases). Horarios: cambiar hora, duración, cupo y profe desde la grilla; lo que cambia vale desde la próxima clase sin reservas tomadas, y si una clase ya tiene reservas y baja el cupo, los que sobran pasan a espera con aviso. LISTO SI: prueba de base (cambio de cupo con reservas) y e2e.
+**CLA-9.** (de CLA-1) Tercera opción de D16: la falta descuenta la clase del pack. Hoy un consumo de pack necesita un ingreso o un presente; hay que sumar "falta" como hecho (consumo con reserva_id) sin cron: se anota la primera vez que algo mira el pack de ese socio después de la clase, y la cuenta de clases que le quedan tiene que dar igual en la puerta, la app y la ficha. LISTO SI: prueba de base con momento fijo y e2e.
 **CLA-6.** Clase de prueba: un prospecto (PAG-3) reserva una clase gratis una vez, con cupo, sin ser socio.
 **RUT-1.** Biblioteca de ejercicios del gimnasio (nombre, grupo muscular, video opcional por link) y rutinas plantilla (días, ejercicios, series, repeticiones).
 **RUT-2.** Asignar rutina a un socio; en la app la ve por día y anota peso y repeticiones (peso levantado sí se guarda; nada de salud).
@@ -494,6 +671,56 @@ LISTO SI: pruebas de base del QR (vencido, de otro gimnasio, repetido) y e2e de 
 **APP-1.** Instalable (manifest y service worker mínimo) con nombre, ícono y colores del gimnasio; "agregar a inicio" explicado.
 **APP-3.** Historial: pagos (con comprobante, VEN-1) y asistencia del mes.
 **APP-6.** Novedades: el dueño publica un aviso (texto y foto opcional, con vencimiento) y se ve arriba en la app.
+
+### COM · Lo que tiene la competencia (`docs/producto/12-COMPETENCIA.md`)
+
+**COM-1 · Riesgo de baja.** Por socio, un nivel (alto, medio, bajo) armado con reglas en SQL, sin IA: viene menos que su promedio de las últimas 8 semanas, dejó de reservar, venció y no renovó, no abre la app, pidió pausa. Cada socio en riesgo dice el porqué en una línea ("venía 3 veces por semana, las últimas 2 no vino") y al lado el WhatsApp armado. Se calcula, no se guarda. Va en Retención (primera lista) y en la ficha. Lo tienen Glofox, Wodify, Fitco y Virtuagym.
+LISTO SI: pruebas de la base con un socio por regla (momento fijo); la lista en Retención con su porqué; e2e.
+
+**COM-2 · Socio nuevo.** Los primeros 30 días: meta de entradas configurable (por defecto 8), aviso en Retención si en la primera semana vino menos de 2 veces, y mensajes sugeridos los días 1, 7 y 30 (plantillas editables de CFG-5). En la ficha, "Día 12 de 30 · 4 entradas".
+LISTO SI: prueba de la base con fechas fijas; aparece en Retención y en la ficha; e2e.
+
+**COM-3 · Avisar a los anotados.** Desde la lista de una clase, "Avisar a todos": texto con plantilla, un WhatsApp armado por persona (y mail cuando AVI-2 esté). Queda anotado en la clase.
+LISTO SI: e2e desde Clases de hoy.
+
+**COM-4 · Tareas del equipo.** Una tarea tiene qué, sobre qué socio (opcional), para quién y para cuándo. Se crea desde la ficha, Retención o Inicio; las de hoy y vencidas aparecen en Inicio de quien la tiene. Cada uno ve las suyas; dueño y encargado ven todas.
+LISTO SI: tabla con RLS y pruebas de permisos; e2e de crear, ver en Inicio y completar.
+
+**COM-5 · Retención en números.** En Retención y en Resultado: altas y bajas del mes (movimiento neto), de los que entraron hace 3 meses cuántos siguen, y % de socios activos con menos de 4 entradas en el mes. Cada número abre la lista con nombres.
+LISTO SI: pruebas de la base con datos armados; e2e que toca cada número y ve la lista.
+
+**COM-6 · Documentos para firmar.** El gimnasio carga sus textos (reglamento, deslinde, autorización del responsable para menores), cada uno con versión. El socio firma con nombre y tilde en la app o en recepción; se guarda versión, fecha y quién. En la entrada, "falta firmar" es un aviso amarillo, no bloquea (el gimnasio puede elegir que bloquee). Nunca datos de salud en los textos que se guardan firmados.
+LISTO SI: pruebas de la base (versión nueva pide firmar de nuevo); e2e firma desde la app y aviso en la entrada.
+
+**COM-7 · Kiosco con habituales.** La tablet de la puerta muestra los que suelen venir a esta hora (nombre e inicial del apellido) para tocar en vez de escribir; se puede apagar en Configuración.
+LISTO SI: e2e en el kiosco.
+
+**COM-8 · Eventos.** Un evento suelto (seminario, clase especial) con fecha, cupo, precio y quién puede anotarse; se vende en Vender y se muestra en la página y la app.
+LISTO SI: e2e crear → anotarse → cobrar.
+
+**COM-9 · Cupones.** Código, descuento (% o monto), tope de usos, vencimiento, planes a los que aplica; se usa en Vender y en el alta online. El Resultado dice cuántos socios trajo cada código.
+LISTO SI: pruebas de la base (tope y vencimiento); e2e.
+
+**COM-10 · Reseña y encuesta.** Después de la entrada 10 o del primer mes, la bandeja de avisos sugiere pedir la reseña de Google (link que carga el dueño) y una encuesta de una pregunta (0 a 10). Los 9 y 10 se marcan para invitar a traer a un amigo.
+LISTO SI: e2e en la bandeja.
+
+**COM-11 · Píxel y Analytics.** En Configuración → Página, el dueño pega su ID de píxel de Meta y de Google Analytics; la página publicada los carga. Validado (solo dígitos o `G-…`), nunca código libre.
+LISTO SI: e2e que ve el script con el ID en la página publicada y no en la sin publicar.
+
+**COM-12 · Lugar puntual.** Para clases con máquinas: la sala tiene lugares numerados (con uno fuera de servicio), el socio elige el suyo al reservar.
+LISTO SI: pruebas de la base (dos no reservan el mismo lugar); e2e.
+
+**COM-13 · Grados.** Para artes marciales: grados por actividad con requisitos (clases y tiempo), el grado de cada socio y la lista de listos para rendir.
+LISTO SI: pruebas de la base; e2e.
+
+**COM-14 · TV de la sala.** Una dirección para una TV: la clase de ahora, los anotados con nombre grande, el WOD del día (RUT) y la próxima clase. Se actualiza sola.
+LISTO SI: e2e que abre la TV y ve aparecer a un anotado nuevo.
+
+**COM-15 · Liquidación de profes.** Toca plata: espera decisión de Mateo (por clase, por presente o fijo; comisión por packs).
+
+**COM-16 · Factura ARCA.** Necesita el certificado de cada gimnasio. Espera respuesta de P3.
+
+**COM-17 · Wellhub y TotalPass.** Necesita la cuenta de partner de cada plataforma.
 
 ### ADM · Super admin (BRIK)
 

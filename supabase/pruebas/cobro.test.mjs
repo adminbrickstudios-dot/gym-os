@@ -139,14 +139,26 @@ test("anular una venta: la recepción no puede; el dueño sí, y el socio vuelve
   assert.equal(despues.color, "naranja");
 });
 
-test("la recepción cobra por RPC; un socio no puede cobrarse", async () => {
+test("SEG-7: la recepción cobra la cuota con Vender; la función vieja ya no es del equipo; un socio no se cobra", async () => {
   const [{ id: u }] = await t.q(`insert into auth.users (email) values ('caja@ejemplo.invalid') returning id`);
   await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1, $2, 'Caja', 'recepcion')`, [t.g, u]);
   await t.comoUsuario(u, async () => {
-    const [{ r }] = await t.q(`select public.cobrar_cuota($1, $2, 'transferencia') as r`, [t.ctx.socios.por_vencer, t.sede]);
+    const [{ r }] = await t.q(`select public.vender($1, '[{"tipo":"cuota"}]'::jsonb, $2::jsonb, $3) as r`,
+      [t.sede, JSON.stringify([{ medio: "transferencia", monto: Number((await t.q(`select public.precios_venta($1, $2) p`, [t.sede, t.ctx.socios.por_vencer]))[0].p.cuota.precios.transferencia) }]), t.ctx.socios.por_vencer]);
     assert.ok(r.venta_id);
+    await t.falla(() => t.q(`select public.cobrar_cuota($1, $2, 'transferencia')`, [t.ctx.socios.por_vencer, t.sede]), /permission denied/);
   });
   const [{ id: us }] = await t.q(`insert into auth.users (phone) values ('+5490000777777') returning id`);
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [t.ctx.socios.vence_hoy, us]);
-  await t.comoUsuario(us, () => t.falla(() => t.q(`select public.cobrar_cuota($1, $2, 'transferencia')`, [t.ctx.socios.vence_hoy, t.sede]), /Sin permiso/));
+  await t.comoUsuario(us, () => t.falla(() => t.q(`select public.vender($1, '[{"tipo":"cuota"}]'::jsonb, '[{"medio":"transferencia","monto":1}]'::jsonb, $2)`, [t.sede, t.ctx.socios.vence_hoy]), /permiso/i));
+});
+
+test("trimestral (PLA-1): una cuota cubre 3 meses", async () => {
+  const [{ id: p }] = await t.q(`insert into public.planes (gimnasio_id, tipo, nombre, duracion_meses, renovacion)
+                                 values ($1, 'membresia', 'Trimestral', 3, 'desde_pago') returning id`, [t.g]);
+  await t.q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde) values ($1, $2, 81000, '2020-01-01')`, [t.g, p]);
+  const s = await socioConPlan("Trimestral", p, []);
+  const r = await cobrar(s);
+  assert.match(r.veredicto.texto, /vence el 13\/02$/);  // 14/11 + 3 meses, último día 13/02
+  assert.equal((await estado(s, await t.en(sumarDias(HOY, 80)))).color, "verde");
 });

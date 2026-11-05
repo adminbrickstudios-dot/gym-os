@@ -1,21 +1,27 @@
 "use client";
 import { useActionState, useState } from "react";
 import { darAccesoPersona, nuevaClavePersona, type Resultado } from "@/app/admin/acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 /** La contraseña provisoria se muestra una sola vez, grande y fácil de copiar. */
 export function ContrasenaNueva({ r }: { r: Resultado }) {
-  if (r.error) return <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 basis-full w-full">⚠️ {r.error}</p>;
+  if (r.error) return <Mensaje tipo="error" className="basis-full">{r.error}</Mensaje>;
   if (!r.aviso) return null;
   return (
-    <div role="status" className="tarjeta !bg-[var(--tarjeta-alta)] p-4 basis-full w-full space-y-1">
-      <p>✅ {r.aviso}</p>
+    <Mensaje tipo="exito" className="basis-full">
+      <p>{r.aviso}</p>
       {r.contrasena && (
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[var(--texto)]">
           {r.email && <span>📧 <strong className="break-all">{r.email}</strong></span>}
           <span>🔑 <strong className="numero text-2xl select-all">{r.contrasena}</strong></span>
+          {/* Se arma en el navegador recién acá; el texto sale hacia WhatsApp solo si se toca (contraseña provisoria por WhatsApp, 10-DIA-A-DIA). */}
+          <a className="boton boton-chico" target="_blank" rel="noopener noreferrer" data-compartir-clave
+             href={`https://wa.me/?text=${encodeURIComponent(`Tu acceso a Gym OS: entrá en ${window.location.origin}/ingresar${r.email ? ` con ${r.email}` : ""} y la contraseña ${r.contrasena}. Después cambiala en “Mi cuenta”.`)}`}>
+            📲 Mandar por WhatsApp
+          </a>
         </p>
       )}
-    </div>
+    </Mensaje>
   );
 }
 
@@ -37,7 +43,7 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
       <>
         <form action={pedirClave} onSubmit={(e) => { if (!confirm(`¿Darle a ${nombre} una contraseña nueva? La que tiene deja de servir.`)) e.preventDefault(); }}>
           <input type="hidden" name="equipo_id" value={equipoId} />
-          <button className="boton !min-h-10" disabled={cambiando}>{cambiando ? "Generando…" : "🔑 Nueva contraseña"}</button>
+          <button className="boton boton-chico" disabled={cambiando}>{cambiando ? "Generando…" : "🔑 Nueva contraseña"}</button>
         </form>
         <ContrasenaNueva r={clave} />
       </>
@@ -48,11 +54,11 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
       {abierto ? (
         <form action={darAcceso} className="flex flex-wrap gap-2 basis-full sm:basis-auto">
           <input type="hidden" name="equipo_id" value={equipoId} />
-          <input name="email" type="email" required autoFocus className="campo !min-h-10 sm:!w-64" placeholder={`Mail de ${nombre}`} aria-label={`Mail de ${nombre}`} />
-          <button className="boton boton-principal !min-h-10" disabled={dando}>{dando ? "Dando acceso…" : "Dar acceso"}</button>
+          <input name="email" type="email" required autoFocus className="campo sm:!w-64" placeholder={`Mail de ${nombre}`} aria-label={`Mail de ${nombre}`} />
+          <button className="boton boton-principal boton-chico" disabled={dando}>{dando ? "Dando acceso…" : "Dar acceso"}</button>
         </form>
       ) : (
-        <button type="button" className="boton !min-h-10" onClick={() => setAbierto(true)}>✉️ Dar acceso</button>
+        <button type="button" className="boton boton-chico" onClick={() => setAbierto(true)}>✉️ Dar acceso</button>
       )}
       {acceso.error && <ContrasenaNueva r={acceso} />}
     </>

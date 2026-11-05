@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { propsMarca, textoSobre, tonoDeFondo } from "./marca";
+import { contraste, propsMarca, seLeePoco, textoSobre, tonoDeFondo } from "./marca";
 
 test("tono del fondo: grafito y violeta oscuro son oscuros, crema es claro", () => {
   expect(tonoDeFondo("#14161b")).toBe("oscuro");
@@ -19,4 +19,18 @@ test("propsMarca pone las variables y el tono", () => {
   const p = propsMarca({ color_acento: "#7c3aed", color_fondo: "#faf7f0" });
   expect(p["data-tono"]).toBe("claro");
   expect(p.style).toMatchObject({ "--acento": "#7c3aed", "--acento-texto": "#ffffff", "--fondo": "#faf7f0" });
+});
+
+test("contraste: blanco y negro dan 21, un color consigo mismo da 1, inválido da null", () => {
+  expect(contraste("#ffffff", "#000000")).toBeCloseTo(21, 5);
+  expect(contraste("#2fbf5b", "#2fbf5b")).toBe(1);
+  expect(contraste("#2fbf5b", "verde")).toBeNull();
+});
+
+test("se lee poco: amarillo sobre crema y gris sobre gris sí; verde sobre grafito y violeta sobre crema no", () => {
+  expect(seLeePoco("#f5c518", "#faf7f0")).toBe(true);
+  expect(seLeePoco("#3a3d44", "#14161b")).toBe(true);
+  expect(seLeePoco("#2fbf5b", "#14161b")).toBe(false);
+  expect(seLeePoco("#7c3aed", "#faf7f0")).toBe(false);
+  expect(seLeePoco("cualquier cosa", "#faf7f0")).toBe(false);
 });

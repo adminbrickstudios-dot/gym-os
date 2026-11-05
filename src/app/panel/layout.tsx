@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco } from "@/components/panel/Marco";
+import { Marco, type Abono } from "@/components/panel/Marco";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
-import { contextoPanel, ErrorDatos } from "@/lib/panel/servidor";
+import { contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const p = await contextoPanel();
     const icono = urlMarca(p.marca.favicon_path ?? p.marca.logo_path);
-    return { title: { default: p.gimnasio.nombre, template: `%s · ${p.gimnasio.nombre}` }, icons: icono ? { icon: icono } : undefined };
+    return { title: { default: p.gimnasio.nombre, template: `%s · ${p.gimnasio.nombre}` }, icons: icono ? { icon: icono } : undefined, robots: { index: false, follow: false } };
   } catch {
-    return { title: "Panel" };
+    return { title: "Panel", robots: { index: false, follow: false } };
   }
 }
 
@@ -43,5 +43,8 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     }
     throw e;
   }
-  return <Marco panel={panel} enPlataforma={enPlataforma}>{children}</Marco>;
+  const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
+  // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
+  const abono = await rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono}>{children}</Marco>;
 }

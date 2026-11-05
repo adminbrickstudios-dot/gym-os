@@ -104,7 +104,10 @@ test("guardar_socio: alta con número, validaciones claras, DNI único, sin dato
     assert.ok(s.f.socio.numero > 0);
     assert.equal(s.f.pagos, null, "la recepción no ve el historial de pagos");
     await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "Otra", dni: "30111222" }]), /Ya hay un socio con el DNI/);
-    await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "X", telefono: "3875551234" }]), /código de país/);
+    // Desde 0033 el teléfono se escribe como lo dice la gente; lo inválido sigue con error claro.
+    const [{ id: x }] = await t.q(`select public.guardar_socio($1, null, $2) as id`, [t.g, { nombre: "X", telefono: "387 15 555-1239" }]);
+    assert.equal((await t.q(`select telefono from public.socios where id = $1`, [x]))[0].telefono, "+5493875551239");
+    await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "X", telefono: "123" }]), /característica/);
     await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "" }]), /obligatorio/);
   });
   await t.comoUsuario(u.ajeno, () => t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "Z" }]), /Sin permiso/));
@@ -132,9 +135,53 @@ test("configuración: solo el dueño; campos desconocidos y secciones inventadas
     assert.equal(c.tolerancia_dias, 3);
     await t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { ultimo_numero_socio: 1 }]), /no se pueden cambiar/);
     await t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { secciones_apagadas: ["inventada"] }]), /desconocida/);
-    await t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { color_fondo: "negro" }]), /check/i);
+    await t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { color_fondo: "negro" }]), /Color de fondo: tiene que ser un color/);
   });
   await t.comoUsuario(u.encargado, () => t.falla(() => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, { tolerancia_dias: 1 }]), /Sin permiso/));
+});
+
+test("configuración (0020): cada valor imposible dice qué campo y qué poner, nunca el error crudo de la base", async () => {
+  const guardar = (datos) => t.q(`select public.guardar_configuracion($1, $2)`, [t.g, datos]);
+  await t.comoUsuario(u.dueno, async () => {
+    const casos = [
+      [{ tolerancia_dias: 999 }, /Días de tolerancia: tiene que estar entre 0 y 60/],
+      [{ tolerancia_dias: "" }, /Días de tolerancia: no puede quedar vacío/],
+      [{ tolerancia_dias: "tres" }, /número entero entre 0 y 60/],
+      [{ dias_aviso: 31 }, /aviso.*entre 0 y 30/],
+      [{ descuento_max_recepcion: 150 }, /Descuento máximo de recepción: tiene que estar entre 0 y 100 %/],
+      [{ descuento_max_recepcion: "" }, /Descuento.*no puede quedar vacío/],
+      [{ retencion_dias_ausencia: 1 }, /sin venir.*entre 3 y 90/],
+      [{ reserva_dias_anticipacion: 61 }, /anticipación.*entre 0 y 60/],
+      [{ cancelacion_horas_limite: 100 }, /cancelar.*entre 0 y 72/],
+      [{ alias_transferencia: "alias con espacios!!" }, /alias tiene que tener de 6 a 20/],
+      [{ alias_transferencia: "abc" }, /alias tiene que tener de 6 a 20/],
+      [{ cbu: "123" }, /22 números.*tiene 3/],
+      [{ color_acento: "#12345" }, /Color principal: tiene que ser un color/],
+      [{ modo_clases: "a veces" }, /cómo funcionan las clases/],
+      [{ nombre: "   " }, /nombre del gimnasio es obligatorio/],
+      [{ nombre: "x".repeat(61) }, /hasta 60 letras/],
+      [{ cobra_membresia: "si" }, /Membresía: tiene que ser sí o no/],
+      [{ accesos_activos: [] }, /al menos una forma de entrar/],
+      [{ accesos_activos: ["telepatia"] }, /Forma de entrada desconocida/],
+      [{ cobra_membresia: false, cobra_pase: false, cobra_pack: false }, /al menos una forma de cobrar/],
+    ];
+    for (const [datos, patron] of casos) await t.falla(() => guardar(datos), patron);
+
+    // Lo válido se guarda; el CBU con espacios y guiones se limpia; vacío borra el alias.
+    await guardar({ tolerancia_dias: "5", alias_transferencia: "gym.norte-ok", cbu: "0000003 100 0999 9000-0001", descuento_max_recepcion: "12.5" });
+    let [{ c }] = await t.q(`select public.configuracion_panel($1) as c`, [t.g]);
+    assert.equal(c.tolerancia_dias, 5);
+    assert.equal(c.alias_transferencia, "gym.norte-ok");
+    assert.equal(c.cbu, "0000003100099990000001");
+    assert.equal(Number(c.descuento_max_recepcion), 12.5);
+    await guardar({ alias_transferencia: "", cbu: "" });
+    [{ c }] = await t.q(`select public.configuracion_panel($1) as c`, [t.g]);
+    assert.equal(c.alias_transferencia, null);
+    assert.equal(c.cbu, null);
+    // Apagar dos formas de cobro está bien mientras quede una.
+    await guardar({ cobra_membresia: true, cobra_pase: false, cobra_pack: false });
+    await guardar({ cobra_pase: true, cobra_pack: true });
+  });
 });
 
 test("equipo: el dueño agrega gente; no se puede quedar sin dueño; vincular el login es solo del servidor", async () => {

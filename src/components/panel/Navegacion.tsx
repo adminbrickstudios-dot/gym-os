@@ -7,12 +7,16 @@ import { Buscador } from "./Buscador";
 
 type Props = {
   gimnasio: string;
+  /** URL del logo del gimnasio, si cargó uno. */
+  logo?: string | null;
   persona: string;
   rol: string;
   secciones: Seccion[];
   grupos: Grupo[];
   principales: Acceso[];
   buscaSocios: boolean;
+  /** EQU-2 (D3): el profe ve nombre, foto y semáforo, sin abrir la ficha. */
+  soloVerSocios?: boolean;
   /** Desde la dirección de la plataforma: volver a elegir gimnasio (y al super admin). */
   cambiarGimnasio?: boolean;
 };
@@ -59,6 +63,12 @@ function Salir() {
   );
 }
 
+function Logo({ url, tam }: { url?: string | null; tam: string }) {
+  if (!url) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt="" className={`${tam} w-auto flex-none rounded-lg object-contain`} />;
+}
+
 export function Navegacion(props: Props) {
   const actual = usePathname();
   const [abierto, setAbierto] = useState(false);
@@ -68,8 +78,8 @@ export function Navegacion(props: Props) {
     <>
       {/* Compu: barra lateral fija */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
-        <p className="titulo text-2xl px-3 truncate">{props.gimnasio}</p>
-        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} /></div>
+        <p className="titulo text-2xl px-3 flex items-center gap-3 min-w-0"><Logo url={props.logo} tam="h-10 max-w-28" /><span className="truncate">{props.gimnasio}</span></p>
+        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} /></div>
         <Menu props={props} actual={actual} />
         <div className="mt-auto pt-8 space-y-3">
           <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
@@ -81,8 +91,8 @@ export function Navegacion(props: Props) {
       {/* Celular: barra de arriba */}
       <header className="lg:hidden sticky top-0 z-30 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
         <div className="flex items-center gap-3 px-4 h-14">
-          <p className="titulo text-xl truncate flex-1">{props.gimnasio}</p>
-          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} compacto />
+          <p className="titulo text-xl flex-1 flex items-center gap-2 min-w-0"><Logo url={props.logo} tam="h-8 max-w-24" /><span className="truncate">{props.gimnasio}</span></p>
+          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} compacto />
         </div>
       </header>
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fechaCorta, fechaLarga, formatearNumero, formatearPesos, saludo, ultimoDia } from "./formato";
+import { fechaCorta, fechaLarga, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
 
 describe("formatearPesos", () => {
   test.each([
@@ -42,5 +42,23 @@ describe("fechas en la zona del gimnasio", () => {
   });
   test("fecha larga", () => {
     expect(fechaLarga(new Date("2026-10-26T18:00:00Z"))).toBe("Lunes 26/10");
+  });
+});
+
+describe("leerMonto", () => {
+  test("lo que se escribe en Argentina", () => {
+    expect(leerMonto("84.500,50")).toBe(84500.5);
+    expect(leerMonto("84500,5")).toBe(84500.5);
+    expect(leerMonto("$ 84.500")).toBe(84500);
+    expect(leerMonto("1.234.567")).toBe(1234567);
+    expect(leerMonto("1500")).toBe(1500);
+  });
+  test("un punto con 1 o 2 cifras al final es decimal, no miles", () => {
+    expect(leerMonto("1500.50")).toBe(1500.5);
+    expect(leerMonto("1500.5")).toBe(1500.5);
+    expect(leerMonto("1.500")).toBe(1500);
+  });
+  test("lo que no se entiende es NaN", () => {
+    for (const x of ["", "abc", "1.50.0", "1,5,0", "12.34,5,6", "1.5000"]) expect(leerMonto(x)).toBeNaN();
   });
 });

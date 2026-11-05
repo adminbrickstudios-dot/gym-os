@@ -15,6 +15,24 @@ export function formatearPesos(monto: number | string | null | undefined): strin
   return `${n < 0 ? "-" : ""}$${conPuntos}${resto ? `,${resto.toString().padStart(2, "0")}` : ""}`;
 }
 
+/**
+ * Lee un monto escrito a mano: "84.500,50", "84500,5", "$ 84.500", "1500.50", "1500".
+ * Coma = decimales y punto = miles, salvo un único punto seguido de 1 o 2 cifras al
+ * final ("1500.50"), que es decimal. Lo que no se entiende da NaN, nunca un número
+ * cualquiera: "1500.50" no puede volverse 150.050.
+ */
+export function leerMonto(texto: string | null | undefined): number {
+  const t = String(texto ?? "").replace(/[$\s]/g, "");
+  if (!t) return NaN;
+  if (t.includes(",")) {
+    if (!/^-?\d{1,3}(\.\d{3})*(,\d{1,2})?$|^-?\d+(,\d{1,2})?$/.test(t)) return NaN;
+    return Number(t.replace(/\./g, "").replace(",", "."));
+  }
+  if (/^-?\d+\.\d{1,2}$/.test(t)) return Number(t);
+  if (/^-?\d{1,3}(\.\d{3})+$|^-?\d+$/.test(t)) return Number(t.replace(/\./g, ""));
+  return NaN;
+}
+
 /** 1.234 · 1.234,5 */
 export function formatearNumero(n: number, decimales = 0): string {
   const [ent, dec] = Math.abs(n).toFixed(decimales).split(".");

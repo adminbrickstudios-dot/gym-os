@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import { urlMarca, type LandingPublicada, type Marca, type PlanPublico, type Seccion, type Sede } from "@/lib/landing";
+import type { EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import { urlMarca } from "@/lib/url-marca";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
+import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
+import { FormProbar } from "./FormProbar";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -18,6 +21,7 @@ const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
   equipo: "👥",
   preguntas: "💬",
   ubicacion: "📍",
+  probar: "🙋",
 };
 
 function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
@@ -25,7 +29,7 @@ function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
   const tam = grande ? "size-20 text-3xl rounded-3xl" : "size-10 text-base rounded-xl";
   if (url) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={`Logo de ${marca.nombre}`} className={`${tam} object-cover`} />;
+    return <img src={url} alt={`Logo de ${marca.nombre}`} className={`${tam} !w-auto max-w-40 object-contain`} />;
   }
   return (
     <span aria-hidden className={`${tam} grid place-items-center titulo`}
@@ -76,8 +80,8 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
   return (
     <Bloque id="actividades" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {items.map((a) => (
-          <li key={a.nombre} className="tarjeta p-5 sm:p-6">
+        {items.map((a, i) => (
+          <li key={`${i}-${a.nombre}`} className="tarjeta p-5 sm:p-6">
             <p className="text-4xl sm:text-5xl mb-5" aria-hidden>{a.emoji || "💪"}</p>
             <p className="titulo text-2xl">{a.nombre}</p>
             {a.descripcion && <p className="texto-suave mt-1.5 text-[15px] leading-snug">{a.descripcion}</p>}
@@ -88,7 +92,7 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
   );
 }
 
-function TarjetaPlan({ p, whatsapp, mostrarPrecio }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean }) {
+function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean; altas: boolean }) {
   const condiciones = condicionesPlan(p);
   const variantes = mostrarPrecio ? variantesPlan(p) : [];
   const link = linkWhatsapp(whatsapp, `Hola! Me interesa el plan ${p.nombre}.`);
@@ -110,7 +114,12 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio }: { p: PlanPublico; whatsapp:
           {condiciones.map((c) => <li key={c} className="pildora">{c}</li>)}
         </ul>
       )}
-      {link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
+      {altas && p.id
+        ? <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a href={`/hacete-socio?plan=${p.id}`} className="boton">💪 Elegir este</a>
+            {link && <a href={link} target="_blank" rel="noopener noreferrer" className="texto-suave underline underline-offset-4">Consultar</a>}
+          </div>
+        : link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
     </li>
   );
 }
@@ -121,27 +130,80 @@ function Planes({ s, landing }: { s: Extract<Seccion, { tipo: "planes" }>; landi
     <Bloque id="planes" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {landing.planes.map((p) => (
-          <TarjetaPlan key={p.nombre} p={p} whatsapp={landing.contacto.whatsapp} mostrarPrecio={landing.mostrar_precios} />
+          <TarjetaPlan key={p.id ?? p.nombre} p={p} whatsapp={landing.contacto.whatsapp} mostrarPrecio={landing.mostrar_precios} altas={!!landing.altas_online} />
         ))}
       </ul>
     </Bloque>
   );
 }
 
-function Horarios({ s }: { s: Extract<Seccion, { tipo: "horarios" }> }) {
+/** "🟢 Abierto · cierra 22:00": la misma cuenta que la app y el panel (privado.agenda). */
+function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolean }) {
+  if (!texto) return null;
+  return (
+    <span className={`pildora ${abierto ? "pildora-verde" : ""}`} data-abierto={abierto}>
+      <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: abierto ? "var(--verde)" : "var(--texto-tenue)" }} />
+      {texto}
+    </span>
+  );
+}
+
+function Horarios({ s, agenda }: { s: Extract<Seccion, { tipo: "horarios" }>; agenda: Agenda | null }) {
+  // Con horarios cargados en el panel, salen de ahí (y dicen si está abierto); si no, el texto libre de la sección.
+  const sedes = (agenda?.sedes ?? []).filter((x) => x.franjas.length);
   const filas = s.contenido.filas ?? [];
-  if (!filas.length) return null;
+  if (!sedes.length && !filas.length) return null;
   return (
     <Bloque id="horarios" tipo={s.tipo} titulo={s.titulo}>
-      <dl className="tarjeta max-w-2xl divide-y divide-[var(--borde)]">
-        {filas.map((f) => (
-          <div key={f.dias} className="flex justify-between items-baseline gap-4 px-6 py-5">
-            <dt className="texto-suave text-lg">{f.dias}</dt>
-            <dd className="numero text-2xl text-right">{f.horas}</dd>
-          </div>
-        ))}
-      </dl>
+      {sedes.length ? (
+        <div className="grid gap-4 md:grid-cols-2 max-w-4xl">
+          {sedes.map((x) => (
+            <div key={x.sede_id} className="tarjeta" data-horarios-sede={x.sede}>
+              {(sedes.length > 1 || x.texto) && (
+                <div className="flex flex-wrap items-center justify-between gap-2 px-6 pt-5">
+                  {sedes.length > 1 && <p className="titulo text-2xl">📍 {x.sede}</p>}
+                  <EstadoAhora texto={x.texto} abierto={x.abierto} />
+                </div>
+              )}
+              <dl className="divide-y divide-[var(--borde)]">
+                {resumirHorarios(x.franjas).map((f) => (
+                  <div key={f.dias} className="flex justify-between items-baseline gap-4 px-6 py-4">
+                    <dt className="texto-suave text-lg">{f.dias}</dt>
+                    <dd className={`text-right ${f.horas === "Cerrado" ? "texto-tenue" : "numero text-xl"}`}>{f.horas}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <dl className="tarjeta max-w-2xl divide-y divide-[var(--borde)]">
+          {filas.map((f) => (
+            <div key={f.dias} className="flex justify-between items-baseline gap-4 px-6 py-5">
+              <dt className="texto-suave text-lg">{f.dias}</dt>
+              <dd className="numero text-2xl text-right">{f.horas}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </Bloque>
+  );
+}
+
+/** Los próximos cierres, arriba de todo: que nadie viaje al gimnasio cerrado. */
+function AvisoCierres({ agenda }: { agenda: Agenda | null }) {
+  const cierres = agenda?.cierres ?? [];
+  if (!cierres.length) return null;
+  return (
+    <div className="px-4 pt-3">
+      <ul className="mx-auto max-w-5xl space-y-2" aria-label="Días que cierra el gimnasio">
+        {cierres.slice(0, 3).map((c) => (
+          <li key={`${c.desde}-${c.sede ?? ""}`} className="mensaje mensaje-aviso" data-cierre>
+            🚫 Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -168,10 +230,10 @@ function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
   return (
     <Bloque id="equipo" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {personas.map((p) => {
+        {personas.map((p, i) => {
           const foto = urlMarca(p.foto);
           return (
-            <li key={p.nombre} className="tarjeta p-5 sm:p-6">
+            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6">
               {foto ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={foto} alt={p.nombre} className="size-16 rounded-2xl object-cover" />
@@ -196,8 +258,8 @@ function Preguntas({ s }: { s: Extract<Seccion, { tipo: "preguntas" }> }) {
   return (
     <Bloque id="preguntas" tipo={s.tipo} titulo={s.titulo}>
       <div className="space-y-2 max-w-3xl">
-        {items.map((q) => (
-          <details key={q.pregunta} className="tarjeta group">
+        {items.map((q, i) => (
+          <details key={`${i}-${q.pregunta}`} className="tarjeta group">
             <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-6 min-h-[64px] text-lg font-semibold">
               {q.pregunta}
               <span aria-hidden className="text-2xl texto-suave transition-transform group-open:rotate-45">+</span>
@@ -231,27 +293,68 @@ function Ubicacion({ s, sedes }: { s: Extract<Seccion, { tipo: "ubicacion" }>; s
   );
 }
 
-function SeccionLanding({ s, landing }: { s: Seccion; landing: LandingPublicada }) {
+function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPublicada; agenda: Agenda | null }) {
   switch (s.tipo) {
     case "sobre_nosotros": return <SobreNosotros s={s} />;
     case "actividades": return <Actividades s={s} />;
     case "planes": return <Planes s={s} landing={landing} />;
-    case "horarios": return <Horarios s={s} />;
+    case "horarios": return <Horarios s={s} agenda={agenda} />;
     case "galeria": return <Galeria s={s} nombre={landing.marca.nombre} />;
     case "equipo": return <Equipo s={s} />;
     case "preguntas": return <Preguntas s={s} />;
     case "ubicacion": return <Ubicacion s={s} sedes={landing.sedes} />;
+    case "probar": return (
+      <Bloque id="probar" tipo={s.tipo} titulo={s.titulo}>
+        <div className="max-w-xl space-y-6">
+          {s.contenido.texto && <p className="text-lg texto-suave">{s.contenido.texto}</p>}
+          <FormProbar />
+        </div>
+      </Bloque>
+    );
   }
 }
 
 // ── Página ──────────────────────────────────────────────────────────
 
-export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
+/** COM-8: los eventos que vienen, con fecha, precio y lugares. Se anotan escribiendo o en recepción. */
+function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: string | null }) {
+  const cuando = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+  return (
+    <section aria-labelledby="eventos" className="px-4 py-12 sm:py-20" data-eventos-landing={eventos.length}>
+      <div className="mx-auto max-w-5xl">
+        <h2 id="eventos" className="flex items-center gap-4 mb-8 sm:mb-10 scroll-mt-24">
+          <span className="icono" aria-hidden>🎟️</span>
+          <span className="titulo text-4xl sm:text-5xl">Próximos eventos</span>
+        </h2>
+        <ul className="grid sm:grid-cols-2 gap-4">
+          {eventos.map((e) => (
+            <li key={e.evento_id} className="tarjeta p-6 space-y-2">
+              <p className="titulo text-2xl">{e.nombre}</p>
+              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}</p>
+              {e.descripcion && <p>{e.descripcion}</p>}
+              <p className="flex flex-wrap items-center gap-3 pt-2">
+                <span className="numero text-3xl">{Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"}</span>
+                <span className={`pildora ${e.quedan === 0 ? "pildora-rojo" : ""}`}>{e.quedan === 0 ? "Sin lugares" : `Quedan ${e.quedan} ${e.quedan === 1 ? "lugar" : "lugares"}`}</span>
+                {e.para === "socios" && <span className="pildora">Para socios</span>}
+              </p>
+              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Quiero anotarme</a>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
   const { marca, portada, contacto } = landing;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
   const hayPlanes = landing.planes.length > 0 && landing.secciones.some((s) => s.tipo === "planes");
+  const hayProbar = landing.secciones.some((s) => s.tipo === "probar");
   const accion = whatsapp ?? (hayPlanes ? "#planes" : contacto.email ? `mailto:${contacto.email}` : null);
   const foto = urlMarca(portada.foto_path);
+  // "Abierto ahora" en la portada solo con una sede (con varias, va en Horarios, por sede).
+  const ahora = agenda?.sedes.length === 1 ? agenda.sedes[0] : null;
 
   return (
     <div {...propsMarca(marca)} className="min-h-dvh">
@@ -262,11 +365,13 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
+            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Hacete socio</a>}
             {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
             <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           </nav>
         </div>
       </header>
+      <AvisoCierres agenda={agenda} />
 
       {foto ? (
         <section className="px-4 pt-4 pb-6">
@@ -277,7 +382,12 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
             <div className="relative p-6 sm:p-12 text-white">
               <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/80 max-w-[36ch]">{portada.bajada}</p>}
-              {accion && <BotonPrincipal href={accion} className={`mt-8 px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {ahora?.texto && <p className="mt-5"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
+              <div className="mt-8 flex flex-wrap gap-3">
+                {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
+                {hayProbar && <a href="#probar" className="boton text-lg px-8 bg-white/15 text-white border-white/30">🙋 Probá una clase</a>}
+              </div>
             </div>
           </div>
         </section>
@@ -286,9 +396,12 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
           <div className="mx-auto max-w-5xl">
             <h1 className="titular text-[clamp(3.5rem,15vw,8.5rem)] max-w-[11ch]">{portada.titulo}</h1>
             {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
+            {ahora?.texto && <p className="mt-6"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
+              {hayProbar && <a href="#probar" className="boton text-lg px-8 w-full sm:w-auto">🙋 Probá una clase</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>
@@ -296,7 +409,8 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
       )}
 
       <main>
-        {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} />)}
+        {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
+        {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
 
       <footer className="px-4 pt-12 pb-32 sm:pb-14 mt-8 border-t border-[var(--borde)]">
@@ -313,7 +427,10 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
             {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
           </div>
         </div>
-        <p className="mx-auto max-w-5xl mt-10 text-sm texto-tenue">Página hecha con Gym OS</p>
+        <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm texto-tenue">Página hecha con Gym OS</p>
+          <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4">🛎️ Soy del equipo</a>
+        </div>
       </footer>
 
       {whatsapp && (
@@ -325,13 +442,15 @@ export function LandingGimnasio({ landing }: { landing: LandingPublicada }) {
   );
 }
 
-export function LandingProximamente({ marca }: { marca: Marca }) {
+export function LandingProximamente({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
+  const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
   return (
     <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4">
       <div className="text-center">
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
         <p className="texto-suave mt-4 text-lg">🚧 Estamos armando nuestra página. Volvé pronto.</p>
+        {whatsapp && <div className="mt-8 flex justify-center"><BotonPrincipal href={whatsapp} className="px-8">💬 Escribinos por WhatsApp</BotonPrincipal></div>}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
           <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           <a href="/ingresar" className="boton">🛎️ Soy del equipo</a>

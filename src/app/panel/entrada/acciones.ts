@@ -9,20 +9,59 @@ export type Veredicto = {
 };
 export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; veredicto?: Veredicto };
 
-export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; error?: string }> {
+type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
+
+/** El veredicto de la puerta, y aparte lo que el mostrador tiene que saber (no cambia si entra): el apto físico, si el gimnasio lo pide. */
+export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; apto?: string | null; firmar?: string | null; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
-    return { v: await rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }) };
+    const [v, a, docs] = await Promise.all([
+      rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }),
+      rpc<Apto>("apto_socio", { p_socio_id: socioId }),
+      // COM-6: lo que le falta firmar (un aviso: no cambia si entra).
+      rpc<{ pendientes: { titulo: string }[] }>("documentos_socio", { p_socio_id: socioId }),
+    ]);
+    const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+    const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
+    const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
+    return { v, apto, firmar };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string): Promise<{ r?: ResultadoIngreso; error?: string }> {
+/** Volvió antes de la pausa: termina hoy (desde hoy entra) y devuelve el veredicto nuevo. */
+export async function terminarPausa(socioId: string, sedeId: string): Promise<{ v?: Veredicto; error?: string }> {
+  try {
+    const p = await rpc<{ pausas: { id: string; estado: string }[] }>("pausas_socio", { p_socio_id: socioId });
+    const enCurso = p.pausas.find((x) => x.estado === "en_curso");
+    if (!enCurso) return { error: "No tiene una pausa en curso." };
+    await rpc("descongelar", { p_congelamiento_id: enCurso.id });
+    revalidatePath(`/panel/socios/${socioId}`);
+    const r = await veredicto(socioId, sedeId);
+    return { v: r.v, error: r.error };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Un QR de socio (cámara o lector): la base dice de quién es, si vale y si ya se usó. */
+export async function leerQR(codigo: string): Promise<{ socio?: { socio_id: string; nombre: string; numero: number }; error?: string }> {
+  const panel = await contextoPanel();
+  try { return { socio: await rpc("leer_qr", { p_gimnasio_id: panel.gimnasio.id, p_codigo: codigo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Lo que escribió el lector de llaveros: el socio de ese llavero, o nada (ENT-7). */
+export async function leerLlavero(codigo: string): Promise<{ socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }> {
+  const panel = await contextoPanel();
+  try { return { socio: await rpc("leer_llavero", { p_gimnasio_id: panel.gimnasio.id, p_codigo: codigo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" | "nfc" = "recepcion"): Promise<{ r?: ResultadoIngreso; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
     const r = await rpc<ResultadoIngreso>("registrar_ingreso", {
-      p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: "recepcion", p_forzar_motivo: forzarMotivo?.trim() || null,
+      p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: via, p_forzar_motivo: forzarMotivo?.trim() || null,
     });
     revalidatePath("/panel/entrada");
     revalidatePath("/panel");
@@ -35,5 +74,52 @@ export async function anularEntrada(ingresoId: string, motivo: string): Promise<
     await rpc("anular_ingreso", { p_ingreso_id: ingresoId, p_motivo: motivo });
     revalidatePath("/panel/entrada");
     return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Cuántas veces puede dejar pasar hoy quien está en la recepción (el tope lo pone el dueño; D1). */
+export async function cupoDejarPasar(): Promise<{ sin_tope: boolean; tope: number; usados: number } | null> {
+  const panel = await contextoPanel();
+  try { return await rpc("cupo_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }); } catch { return null; }
+}
+
+// ── Invitados (INV-1) ───────────────────────────────────────────────
+export type Invitado = { id: string; nombre: string; dni: string; socio_id: string; socio: string; entro_en: string | null; desde_la_app: boolean };
+const invitadosHoy = async () => { const panel = await contextoPanel(); return rpc<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }); };
+export async function registrarInvitado(sedeId: string, socioId: string, nombre: string, dni: string): Promise<{ error?: string; invitados?: Invitado[] }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    await rpc("registrar_invitado", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id, p_socio_id: socioId, p_nombre: nombre, p_dni: dni });
+    revalidatePath("/panel");
+    return { invitados: await invitadosHoy() };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function confirmarInvitado(id: string, sedeId: string): Promise<{ error?: string; invitados?: Invitado[] }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    await rpc("confirmar_invitado", { p_invitado_id: id, p_sede_id: sede.id });
+    return { invitados: await invitadosHoy() };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** SEG-5: la copia de quién puede entrar hoy (la calcula la base), para cuando se corte internet. */
+export type CopiaEntrada = { generada_en: string; valida_hasta: string; socios: { s: string; n: string; num: number; dni: string | null; p: boolean; c: string; t: string }[] };
+export async function copiaEntrada(sedeId: string): Promise<{ copia?: CopiaEntrada; error?: string }> {
+  try { return { copia: await rpc<CopiaEntrada>("copia_entrada", { p_sede_id: sedeId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** SEG-5: lo anotado sin internet. La base vuelve a decidir con la hora en que pasó; reintentar no duplica. */
+export type EntradaSinInternet = { id_local: string; socio_id: string; momento: string; nombre: string };
+export type Sincronizada = { id_local: string; nombre: string; resultado: string; color: string; texto: string; ya_estaba: boolean };
+export async function sincronizarSinInternet(sedeId: string, entradas: EntradaSinInternet[]): Promise<{ r?: Sincronizada[]; error?: string }> {
+  try {
+    const r = await rpc<Sincronizada[]>("sincronizar_sin_internet", {
+      p_sede_id: sedeId, p_entradas: entradas.map(({ id_local, socio_id, momento }) => ({ id_local, socio_id, momento })),
+    });
+    revalidatePath("/panel/entrada");
+    return { r };
   } catch (e) { return { error: (e as Error).message }; }
 }

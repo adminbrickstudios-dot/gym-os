@@ -3,9 +3,10 @@ import { useRef, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { informarPago } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 /** Datos para transferir y subir el comprobante. El pago queda pendiente hasta que el gimnasio lo aprueba. */
-export function Pagar({ gimnasioId, socioId, monto, datos }: { gimnasioId: string; socioId: string; monto: number | null; datos: { alias: string | null; cbu: string | null; titular: string | null } }) {
+export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }: { gimnasioId: string; socioId: string; monto: number | null; datos: { alias: string | null; cbu: string | null; titular: string | null; banco?: string | null }; secundario?: boolean }) {
   const [copiado, setCopiado] = useState<string | null>(null);
   const [estado, setEstado] = useState<{ ok?: boolean; texto?: string }>({});
   const [subiendo, empezar] = useTransition();
@@ -32,12 +33,12 @@ export function Pagar({ gimnasioId, socioId, monto, datos }: { gimnasioId: strin
           <span className="text-sm texto-suave">{copiado === v ? "✅ Copiado" : "📋 Copiar"}</span>
         </button>
       ))}
-      {datos.titular && <p className="texto-suave text-sm">A nombre de {datos.titular}</p>}
+      {(datos.titular || datos.banco) && <p className="texto-suave text-sm">{[datos.titular && `A nombre de ${datos.titular}`, datos.banco].filter(Boolean).join(" · ")}</p>}
       <input ref={archivo} type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && subir(e.target.files[0])} />
-      <button type="button" disabled={subiendo || estado.ok} onClick={() => archivo.current?.click()} className="boton boton-principal w-full text-lg">
+      <button type="button" disabled={subiendo || estado.ok} onClick={() => archivo.current?.click()} className={`boton ${secundario ? "" : "boton-principal"} w-full text-lg`}>
         {subiendo ? "Subiendo…" : "📸 Ya transferí: subir comprobante"}
       </button>
-      {estado.texto && <p role="status" className={`pildora ${estado.ok ? "pildora-verde" : "pildora-rojo"} !rounded-2xl !px-4 !py-3 w-full`}>{estado.texto}</p>}
+      {estado.texto && <Mensaje tipo={estado.ok ? "exito" : "error"}>{estado.texto}</Mensaje>}
     </section>
   );
 }

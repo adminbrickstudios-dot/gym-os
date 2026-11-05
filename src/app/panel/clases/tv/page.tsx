@@ -1,0 +1,24 @@
+import type { Metadata } from "next";
+import { Encabezado } from "@/components/panel/Marco";
+import { intentar } from "@/lib/panel/intentar";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { Tvs, type TvPanel } from "./Tvs";
+
+export const metadata: Metadata = { title: "TV de la sala" };
+
+/** COM-14: las TVs de la sala. Cada una muestra la clase de ahora, los anotados, el WOD y la que sigue. */
+export default async function PaginaTvs() {
+  return intentar(async () => {
+    const panel = await contextoPanel();
+    exigirSeccion(panel, "clases");
+    exigirRol(panel, ["dueno", "encargado"]);
+    const tvs = await rpc<TvPanel[]>("tvs_panel", { p_gimnasio_id: panel.gimnasio.id });
+    return (
+      <>
+        <Encabezado emoji="📺" titulo="TV de la sala" volver={{ href: "/panel/clases", texto: "Clases" }}
+          bajada="Una pantalla en la sala con la clase de ahora, los anotados con nombre grande, el WOD y la que sigue. Se actualiza sola, sin que nadie inicie sesión." />
+        <Tvs gimnasioId={panel.gimnasio.id} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))} tvs={tvs} />
+      </>
+    );
+  });
+}

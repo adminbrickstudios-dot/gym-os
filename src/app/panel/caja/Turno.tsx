@@ -1,10 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { linkCompartir, textoCierre } from "@/lib/caja";
 import { formatearPesos } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
 
-const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago" };
+const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago", cuenta_corriente: "📒 A cuenta" };
 
 export function AbrirCaja({ cajaId, nombre }: { cajaId: string; nombre: string }) {
   const [monto, setMonto] = useState("");
@@ -23,7 +24,7 @@ export function AbrirCaja({ cajaId, nombre }: { cajaId: string; nombre: string }
   );
 }
 
-export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: string; nombre: string; desde: string; resumen: Resumen | null }) {
+export function TurnoAbierto({ turnoId, nombre, desde, resumen, olvidada = false }: { turnoId: string; nombre: string; desde: string; resumen: Resumen | null; olvidada?: boolean }) {
   const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar">("nada");
   const [monto, setMonto] = useState("");
   const [motivo, setMotivo] = useState("");
@@ -44,7 +45,13 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
           <div><dt className="texto-tenue text-sm">Tenía que haber</dt><dd className="numero text-3xl">{formatearPesos(cierre.esperado)}</dd></div>
         </dl>
         <OtrosMedios r={cierre} />
-        <button type="button" className="boton boton-principal mt-8" onClick={() => router.refresh()}>👍 Listo</button>
+        <div className="flex flex-wrap gap-2 mt-8">
+          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}>👍 Listo</button>
+          {/* CAJ-2: el cierre, escrito, para mandárselo al dueño. */}
+          <a className="boton" data-compartir-cierre target="_blank" rel="noopener noreferrer"
+            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
+            📲 Mandar el cierre por WhatsApp</a>
+        </div>
       </section>
     );
   }
@@ -55,6 +62,8 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
         <p className="titulo text-2xl">🔓 {nombre} abierta</p>
         <p className="texto-suave">{desde}</p>
       </div>
+      {/* CAJ-5: abierta de otro día o pasada la hora de cierre. */}
+      {olvidada && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 whitespace-normal" data-olvidada>⏰ Esta caja quedó abierta. Contá la plata y cerrala: hasta que se cierre, quien la abrió no puede abrir otra.</p>}
       {resumen ? (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div><dt className="texto-tenue text-sm">Inicial</dt><dd className="numero text-2xl">{formatearPesos(resumen.monto_inicial)}</dd></div>
@@ -75,12 +84,17 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
         </div>
       )}
       {(modo === "ingreso" || modo === "retiro") && (
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await moverCaja(turnoId, modo, monto, motivo); if (r.error) setError(r.error); else reiniciar(); }); }}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); empezar(async () => { const r = await moverCaja(turnoId, modo, monto, motivo, modo === "retiro" ? f : null); if (r.error) setError(r.error); else reiniciar(); }); }}>
           <p className="font-semibold">{modo === "ingreso" ? "➕ Entra plata a la caja" : "➖ Sale plata de la caja"}</p>
           <div className="grid sm:grid-cols-[160px_1fr] gap-2">
             <input autoFocus className="campo" inputMode="decimal" placeholder="$" value={monto} onChange={(e) => setMonto(e.target.value)} />
             <input className="campo" placeholder={modo === "ingreso" ? "Motivo (ej: cambio)" : "Motivo (ej: pago al proveedor)"} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           </div>
+          {modo === "retiro" && (
+            <label className="flex flex-wrap items-center gap-2 text-sm texto-suave">📷 Foto del ticket (opcional)
+              <input type="file" name="ticket" accept="image/jpeg,image/png,image/webp" capture="environment" className="text-sm" aria-label="Foto del ticket" />
+            </label>
+          )}
           {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
           <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Anotar</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>

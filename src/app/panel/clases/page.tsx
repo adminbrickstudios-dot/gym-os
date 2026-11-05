@@ -5,6 +5,7 @@ import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
+import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Clases" };
 type Clase = { clase_id: string; actividad: string; emoji: string | null; color: string | null; inicio: string; fin: string; profe: string | null;
@@ -33,7 +34,11 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
     return (
       <>
         <Encabezado emoji="🗓️" titulo="Clases" bajada={panel.modo_clases === "reserva" ? "Cupos, reservas y lista de espera. Tocá una clase para tomar presente." : "Tocá una clase para tomar presente."}
-          accion={["dueno", "encargado"].includes(panel.yo.rol) ? <Link href="/panel/clases/grilla" className="boton">🧩 Armar la grilla</Link> : undefined} />
+          accion={<span className="flex flex-wrap gap-2">
+            {["dueno", "encargado"].includes(panel.yo.rol) && <Link href="/panel/clases/grilla" className="boton">🧩 Armar la grilla</Link>}
+            {["dueno", "encargado"].includes(panel.yo.rol) && <Link href="/panel/clases/tv" className="boton" data-ir-tv>📺 TV de la sala</Link>}
+            <Link href="/panel/grados" className="boton" data-ir-grados>🥋 Grados</Link>
+          </span>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/clases" />}
         <nav aria-label="Día" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
           {dias.map((d, i) => (
@@ -41,14 +46,16 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               className={`boton !min-h-12 whitespace-nowrap first-letter:uppercase ${d === dia ? "!border-[var(--acento)]" : "opacity-75"}`}>{nombreDia(d, i)}</Link>
           ))}
         </nav>
-        {clases.length === 0 ? <p className="texto-suave text-lg">No hay clases este día.</p> : (
+        {clases.length === 0 ? <Vacio emoji="🗓️" titulo="No hay clases este día">Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
           <ul className="space-y-2">
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
               const pasada = new Date(c.fin).getTime() < ahora;
-              return (
-                <li key={c.clase_id}>
-                  <Link href={`/panel/clases/${c.clase_id}`} className={`tarjeta flex items-center gap-4 px-4 py-4 hover:bg-[var(--tarjeta-alta)] ${c.cancelada || pasada ? "opacity-55" : ""}`}>
+              // REV-4: el profe ve toda la grilla del día, pero solo abre la lista de sus clases (la base no le deja ver las otras).
+              const ajena = panel.yo.rol === "profe" && c.profe !== panel.yo.nombre;
+              const estilo = `tarjeta flex items-center gap-4 px-4 py-4 ${ajena ? "" : "hover:bg-[var(--tarjeta-alta)]"} ${c.cancelada || pasada || ajena ? "opacity-55" : ""}`;
+              const contenido = (
+                <>
                     <span className="numero text-3xl w-20">{hora(c.inicio)}</span>
                     <span className="icono" aria-hidden>{c.emoji ?? "🗓️"}</span>
                     <span className="min-w-0 flex-1">
@@ -60,7 +67,13 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
                         {c.confirmadas}{c.cupo != null ? `/${c.cupo}` : ""}{c.en_espera ? ` · ${c.en_espera} en espera` : ""}
                       </span>
                     )}
-                  </Link>
+                </>
+              );
+              return (
+                <li key={c.clase_id}>
+                  {ajena
+                    ? <div className={estilo} data-clase-ajena>{contenido}</div>
+                    : <Link href={`/panel/clases/${c.clase_id}`} className={estilo}>{contenido}</Link>}
                 </li>
               );
             })}

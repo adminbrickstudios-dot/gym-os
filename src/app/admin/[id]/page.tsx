@@ -9,6 +9,8 @@ import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { ErrorDatos, rpc } from "@/lib/panel/servidor";
 import { BotonEntrar } from "../BotonEntrar";
 import { AgregarPersona, Direcciones } from "./Formularios";
+import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
+import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasio" };
 
@@ -26,9 +28,14 @@ const fecha = (iso: string | null) => iso
 export default async function GimnasioAdmin({ params }: { params: Promise<{ id: string }> }) {
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { id } = await params;
-  let g: Detalle;
+  let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
   try {
-    g = await rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id });
+    [g, cambios, abonos, planes] = await Promise.all([
+      rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
+      rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
+      rpc<Record<string, EstadoAbono>>("admin_abonos"),
+      rpc<PlanBrik[]>("admin_planes_brik"),
+    ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
     throw e;
@@ -76,6 +83,13 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3">
         <p className="titulo-grupo">Direcciones</p>
         <Direcciones gimnasioId={g.gimnasio_id} dominios={g.dominios} />
+      </section>
+
+      {abonos[g.gimnasio_id] && !g.es_demo && <AbonoGimnasio gimnasioId={g.gimnasio_id} abono={abonos[g.gimnasio_id]} planes={planes} />}
+
+      <section className="space-y-3" data-admin-cambios>
+        <p className="titulo-grupo">Últimos cambios de configuración</p>
+        <Historial cambios={cambios} />
       </section>
     </main>
   );

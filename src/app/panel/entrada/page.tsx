@@ -1,56 +1,53 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Puerta } from "./Puerta";
+import { SinInternet } from "./SinInternet";
+import { Hoy, type Ingreso } from "./Hoy";
+import type { ResultadoSocio } from "@/app/panel/acciones";
+import type { Ficha } from "@/app/panel/socios/[id]/tipos";
+import { Invitados } from "./Invitados";
+import type { Invitado } from "./acciones";
 
 export const metadata: Metadata = { title: "Entrada" };
 
-type Ingreso = { ingreso_id: string; momento: string; socio_id: string; socio: string; numero: number; resultado: string; color: string; texto: string; registrado_por: string | null };
-const ETIQUETA: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
 
-export default async function Entrada({ searchParams }: { searchParams: Promise<{ sede?: string }> }) {
+export default async function Entrada({ searchParams }: { searchParams: Promise<{ sede?: string; socio?: string }> }) {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "entrada");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const { sede, puedeCambiar } = sedeActiva(panel, (await searchParams).sede);
-    const hoy = await rpc<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id });
-    const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
-    const entraron = new Set(hoy.filter((i) => i.resultado !== "rechazado").map((i) => i.socio_id)).size;
+    const sp = await searchParams;
+    const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
+    const [hoy, formas, invitados] = await Promise.all([
+      rpc<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
+      rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+    ]);
+    // ?socio= (al volver de cobrar): se abre su veredicto.
+    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
+    const vuelto: ResultadoSocio | null = ficha ? { socio_id: ficha.socio.id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(),
+      color: ficha.acceso.color, texto: ficha.acceso.texto, puede: ficha.acceso.puede, dado_de_baja: !!ficha.socio.dado_de_baja_en } : null;
 
     return (
       <>
-        <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué." />
+        <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
+          accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
-          <Puerta sedeId={sede.id} />
-          <section aria-labelledby="hoy">
-            <h2 id="hoy" className="titulo text-2xl mb-1">Hoy</h2>
-            <p className="texto-suave mb-4">{entraron === 1 ? "Entró 1 socio" : `Entraron ${entraron} socios`}</p>
-            {hoy.length === 0 ? (
-              <p className="texto-tenue">Todavía no entró nadie.</p>
-            ) : (
-              <ul className="space-y-1">
-                {hoy.slice(0, 40).map((i) => (
-                  <li key={i.ingreso_id}>
-                    <Link href={`/panel/socios/${i.socio_id}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[var(--tarjeta)]">
-                      <span className="numero text-lg w-12 texto-suave">{hora(i.momento)}</span>
-                      <PuntoEstado color={i.resultado === "rechazado" ? "rojo" : i.resultado === "forzado" ? "naranja" : i.color} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-semibold truncate">{i.socio}</span>
-                        <span className="block text-sm texto-tenue truncate">{ETIQUETA[i.resultado] ?? i.resultado}{i.resultado !== "entro" ? ` · ${i.texto}` : ""}</span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          <div className="flex flex-col gap-6">
+            {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
+            <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
+          </div>
+          <div>
+            <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />
+            <Invitados sedeId={sede.id} inicial={invitados} zona={panel.gimnasio.zona_horaria} />
+          </div>
         </div>
       </>
     );

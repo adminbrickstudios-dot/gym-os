@@ -7,7 +7,7 @@ export function CancelarReserva({ reservaId }: { reservaId: string }) {
   const [ocupado, empezar] = useTransition();
   return (
     <>
-      <button type="button" disabled={ocupado} className="text-sm texto-tenue min-h-11 px-2" onClick={() => empezar(async () => { const r = await cancelarReserva(reservaId); setError(r.error ?? null); })}>Cancelar</button>
+      <button type="button" disabled={ocupado} className="boton-texto" onClick={() => empezar(async () => { const r = await cancelarReserva(reservaId); setError(r.error ?? null); })}>Cancelar</button>
       {error && <p role="alert" className="pildora pildora-rojo w-full">⚠️ {error}</p>}
     </>
   );

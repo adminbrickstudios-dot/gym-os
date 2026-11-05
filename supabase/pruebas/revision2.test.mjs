@@ -103,7 +103,7 @@ test("15: la recepción no puede reconstruir lo esperado (no lee pagos, ítems, 
       const filas = await t.q(`select * from public.${tabla}`);
       assert.equal(filas.length, 0, tabla);
     }
-    const abiertas = await t.q(`select * from public.caja_abierta($1)`, [t.sede]);
+    const abiertas = await t.q(`select * from public.cajas_sede($1)`, [t.sede]);
     assert.ok(Array.isArray(abiertas));
   });
 });

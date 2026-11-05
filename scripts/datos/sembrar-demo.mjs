@@ -58,7 +58,7 @@ try {
   const [{ id: g }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo', 'Gimnasio Demo', true) returning id`);
   const [{ id: sede }] = await q("select id from public.sedes where gimnasio_id = $1", [g]);
   await q(`update public.configuracion_gimnasio set cobra_pack = true, accesos_activos = array['recepcion','qr_socio','kiosco'],
-             alias_transferencia = 'GIMNASIO.DEMO.EJEMPLO', titular_cuenta = 'Gimnasio Demo (ficticio)' where gimnasio_id = $1`, [g]);
+             alias_transferencia = 'GYM.DEMO.EJEMPLO', titular_cuenta = 'Gimnasio Demo (ficticio)' where gimnasio_id = $1`, [g]);
   await q(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio')`, [g, `demo.${dominio}`]);
 
   const { planes, socios: testigos } = await sembrarCasos(db, { gimnasioId: g, sedeId: sede, hoy, telefonoBase: 5490000100000 });
@@ -102,6 +102,12 @@ try {
     }
   }
 
+  // Horarios de apertura: lunes a viernes de 7 a 23, sábados de 9 a 14 (domingo cerrado).
+  for (let dia = 1; dia <= 6; dia++) {
+    await q(`insert into public.horarios_apertura (gimnasio_id, sede_id, dia, abre, cierra) values ($1,$2,$3,$4,$5)`,
+      [g, sede, dia, dia === 6 ? "09:00" : "07:00", dia === 6 ? "14:00" : "23:00"]);
+  }
+
   // Segundo gimnasio demo, con otra marca: muestra que cada landing es propia.
   const [{ id: g2 }] = await q(`insert into public.gimnasios (slug, nombre, es_demo) values ('demo-box', 'Box Norte Demo', true) returning id`);
   await q(`update public.configuracion_gimnasio set color_acento = '#a78bfa', color_fondo = '#16121f' where gimnasio_id = $1`, [g2]);
@@ -132,7 +138,7 @@ try {
       `insert into public.socios (gimnasio_id, nombre, apellido, telefono, email, fecha_nacimiento, creado_en)
        values ($1,$2,$3,$4,$5,$6,$7) returning id`,
       [g, nombre, apellido, `+549000${String(2000000 + i)}`, `socio${i}@ejemplo.invalid`,
-       `${entre(1965, 2008)}-${String(entre(1, 12)).padStart(2, "0")}-${String(entre(1, 28)).padStart(2, "0")}`,
+       `${entre(1965, 2006)}-${String(entre(1, 12)).padStart(2, "0")}-${String(entre(1, 28)).padStart(2, "0")}`,
        await medianoche(sumarDias(hoy, -entre(10, 700)))]);
 
     // Perfil: dónde termina su cobertura respecto de hoy.
@@ -191,6 +197,20 @@ try {
                values ${valores}`, [g, sede, s, ...filas.flat()]);
       nIngresos += filas.length;
     }
+  }
+
+  // Prospectos: los que dejaron sus datos para probar (teléfonos 000, ficticios).
+  const prospectos = [
+    ["Valentina Ruiz", "+5490000200001", "Funcional a la mañana", "pagina", "nuevo", 0],
+    ["Tomás Ibarra", "+5490000200002", "Musculación", "pagina", "nuevo", 1],
+    ["Micaela Sosa", "+5490000200003", "Spinning", "recepcion", "contactado", 2],
+    ["Joaquín Paz", "+5490000200004", null, "referido", "vino", 4],
+    ["Florencia Díaz", "+5490000200005", "Pilates", "pagina", "no", 9],
+  ];
+  for (const [nombre, telefono, interes, origen, estado, dias] of prospectos) {
+    await q(`insert into public.prospectos (gimnasio_id, nombre, telefono, interes, origen, estado, creado_en, actualizado_en)
+             values ($1,$2,$3,$4,$5,$6, now() - make_interval(days => $7), now() - make_interval(days => $7))`,
+      [g, nombre, telefono, interes, origen, estado, dias]);
   }
 
   await db.query("commit");

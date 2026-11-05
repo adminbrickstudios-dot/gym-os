@@ -5,6 +5,7 @@ export type Ficha = {
     id: string; numero: number; nombre: string; apellido: string; dni: string | null; telefono: string | null; email: string | null;
     fecha_nacimiento: string | null; contacto_emergencia_nombre: string | null; contacto_emergencia_telefono: string | null;
     notas: string | null; dado_de_baja_en: string | null; motivo_baja: string | null; creado_en: string; tiene_app: boolean;
+    responsable_nombre: string | null; responsable_telefono: string | null; es_menor: boolean;
   };
   acceso: Veredicto;
   membresia: { suscripcion_id: string; plan_id: string; plan: string; tipo: string; inicio: string; precio: number | null } | null;

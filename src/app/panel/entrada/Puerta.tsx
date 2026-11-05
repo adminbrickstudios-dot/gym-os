@@ -1,29 +1,69 @@
 "use client";
-import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { LinkPanel } from "@/components/panel/LinkPanel";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { registrarEntrada, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { Camara } from "./Camara";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
+/** Un sonido por color, para no tener que mirar: agudo y corto si entra, grave y doble si no. */
+function sonar(color: string) {
+  try {
+    const c = new AudioContext();
+    const tonos: [number, number][] = color === "verde" ? [[880, 0.12]] : color === "rojo" || color === "gris" ? [[220, 0.18], [180, 0.28]] : [[560, 0.16], [560, 0.16]];
+    let t = c.currentTime;
+    for (const [f, d] of tonos) {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = color === "verde" ? "sine" : "square"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + d);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + d); t += d + 0.06;
+    }
+    setTimeout(() => void c.close(), 1500);
+  } catch { /* sin audio: no pasa nada */ }
+}
+const CLAVE_SONIDO = "gymos.entrada.sonido";
+
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
-export function Puerta({ sedeId }: { sedeId: string }) {
+const ES_QR = /^GYMOS1\./;
+
+const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
+
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null }: {
+  sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null;
+}) {
+  const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
+  const [camara, setCamara] = useState(false);
+  const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
-  const [hecho, setHecho] = useState<ResultadoIngreso | null>(null);
+  const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string }) | null>(null);
+  const [apto, setApto] = useState<string | null>(null);
+  const [firmar, setFirmar] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [ocupado, empezar] = useTransition();
   const campo = useRef<HTMLInputElement>(null);
+  // El sonido se prende o apaga por compu (es del mostrador, no del gimnasio).
+  const [sonido, setSonido] = useState(true);
+  useEffect(() => { try { setSonido(localStorage.getItem(CLAVE_SONIDO) !== "no"); } catch { /* sin almacenamiento */ } }, []);
+  const cambiarSonido = () => setSonido((x) => { try { localStorage.setItem(CLAVE_SONIDO, x ? "no" : "si"); } catch { /* sin almacenamiento */ } return !x; });
 
-  useEffect(() => { campo.current?.focus(); }, []);
+  // Volviendo de cobrar (ENT-9): abre el veredicto nuevo de ese socio.
+  const abrioInicial = useRef(false);
   useEffect(() => {
-    if (texto.trim().length < 2) { setSocios([]); return; }
+    campo.current?.focus();
+    if (socioInicial && !abrioInicial.current) { abrioInicial.current = true; elegir(socioInicial); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
     const t = setTimeout(async () => {
       const r = await buscarSociosRapido(texto.trim());
       setSocios(r.socios ?? []);
@@ -32,43 +72,112 @@ export function Puerta({ sedeId }: { sedeId: string }) {
     return () => clearTimeout(t);
   }, [texto]);
 
-  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
+  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
   const elegir = (s: ResultadoSocio) => empezar(async () => {
-    setElegido(s); setHecho(null); setError(null); setForzando(false);
+    setElegido(s); setHecho(null); setError(null); setForzando(false); setVia("recepcion");
     const r = await veredicto(s.socio_id, sedeId);
-    if (r.error) setError(r.error); else setV(r.v!);
+    if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); if (sonido) sonar(r.v!.color); }
+  });
+  // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
+  // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
+  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
+    if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
+    const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
+    const r = await veredicto(s.socio_id, sedeId);
+    if (r.error) { setError(r.error); return; }
+    setError(null);
+    if (sonido) sonar(r.v!.color);
+    if (r.v!.puede) {
+      const e = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
+      if (e.error) { setError(e.error); return; }
+      setHecho({ ...e.r!, nombre: s.nombre });
+      campo.current?.focus();
+      return;
+    }
+    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+  }, [sedeId, sonido]);
+  const porQr = useCallback((codigo: string) => empezar(async () => {
+    setCamara(false); setTexto(""); setHecho(null); setForzando(false);
+    await directo(await leerQR(codigo.trim()), "qr_socio");
+  }), [directo]);
+  // Lo que escribió el lector de llaveros (sin espacios): si es el llavero de alguien, entra directo; si no, búsqueda normal.
+  const porLlavero = (codigo: string, siNo: () => void) => empezar(async () => {
+    const l = await leerLlavero(codigo.trim());
+    if (!l.socio && !l.error) { siNo(); return; }
+    setTexto(""); setHecho(null); setForzando(false);
+    await directo(l, "nfc");
+  });
+  const volvioAntes = () => empezar(async () => {
+    if (!elegido) return;
+    const r = await terminarPausa(elegido.socio_id, sedeId);
+    if (r.error) setError(r.error); else { setError(null); setV(r.v!); }
+  });
+  const deshacer = () => empezar(async () => {
+    if (!hecho) return;
+    const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
+    if (r.error) setError(r.error); else setHecho(null);
   });
   const anotar = (forzar?: string) => empezar(async () => {
     if (!elegido) return;
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar);
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via);
     if (r.error) { setError(r.error); return; }
-    setHecho(r.r!);
+    setHecho({ ...r.r!, nombre: elegido.nombre });
     reiniciar();
+  });
+
+  // Con el veredicto abierto: Enter anota (si puede), Esc vuelve, y escribir arranca otra búsqueda
+  // (así el lector de DNI o llavero sigue andando sin tocar nada).
+  useEffect(() => {
+    if (!elegido || !v) return;
+    const tecla = (e: KeyboardEvent) => {
+      // El motivo de "dejar pasar" se escribe tranquilo; el buscador (aunque tenga el foco) no cuenta.
+      if (forzando || ((e.target as HTMLElement)?.tagName === "INPUT" && e.target !== campo.current)) return;
+      if (e.key === "Escape") { e.preventDefault(); reiniciar(); }
+      else if (e.key === "Enter" && v.puede && !ocupado && (e.target as HTMLElement)?.tagName !== "BUTTON" && (e.target as HTMLElement)?.tagName !== "A") { e.preventDefault(); anotar(); }
+      // Una letra con el foco en otro lado: va al buscador, reemplazando lo que había (el onChange cierra el veredicto).
+      else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== campo.current) { campo.current?.focus(); campo.current?.select(); }
+    };
+    window.addEventListener("keydown", tecla);
+    return () => window.removeEventListener("keydown", tecla);
   });
 
   return (
     <div className="space-y-5">
       <input
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); }}
-        onKeyDown={(e) => { if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]); if (e.key === "Escape") reiniciar(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && ES_QR.test(texto.trim())) { e.preventDefault(); porQr(texto); return; }   // lector USB
+          if (e.key === "Enter" && !elegido && conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(texto.trim())) {
+            e.preventDefault(); const primero = socios[0]; porLlavero(texto, () => { if (primero) elegir(primero); }); return;
+          }
+          if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]);
+          if (e.key === "Escape") reiniciar();
+        }}
         placeholder="🔍 Nombre, DNI o número de socio" className="campo !min-h-16 !text-xl" aria-label="Buscar socio" autoComplete="off"
       />
+      <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
+        {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto">📷 Leer QR</button>}
+        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-xl text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
+          {sonido ? "🔊 Con sonido" : "🔇 Sin sonido"}
+        </button>
+      </div>
 
       {hecho && (
-        <div role="status" className="tarjeta p-5 flex items-center gap-4" style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : "verde") }}>
+        <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : "verde") }}>
           <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : "✅"}</span>
-          <p className="text-lg font-semibold">
-            {hecho.repetido ? "Ya estaba anotado hace un momento" : hecho.resultado === "forzado" ? "Entrada anotada (dejada pasar)" : hecho.resultado === "rechazado" ? "Anotado: no pudo entrar" : "Entrada anotada"}
+          <p className="text-lg font-semibold min-w-0 flex-1">
+            {hecho.repetido ? `${hecho.nombre} ya estaba anotado hace un momento` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : `Entró ${hecho.nombre}`}
           </p>
+          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
         </div>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       {!elegido && socios.length > 0 && (
         <ul className="space-y-2">
           {socios.map((s) => (
             <li key={s.socio_id}>
-              <button type="button" onClick={() => elegir(s)} className="tarjeta w-full text-left flex items-center gap-4 px-4 py-3 min-h-[68px] hover:bg-[var(--tarjeta-alta)]">
+              <button type="button" onClick={() => elegir(s)} className="fila">
                 <PuntoEstado color={s.color} grande />
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-lg truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>
@@ -80,16 +189,27 @@ export function Puerta({ sedeId }: { sedeId: string }) {
         </ul>
       )}
       {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
-        <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <Link href="/panel/socios/nuevo" className="underline">Darlo de alta</Link></p>
+        <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
       )}
 
       {elegido && v && (
-        <section aria-live="polite" className="rounded-[var(--radio-grande)] p-6 sm:p-8 border"
-          style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 84%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-          <p className="text-5xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
-          <p className="titular text-5xl sm:text-6xl mt-4">{elegido.nombre}</p>
-          <p className="text-2xl mt-3 font-semibold" style={{ color: `color-mix(in oklab, ${colorVar(v.color)}, var(--texto) 35%)` }}>{v.texto}</p>
+        // El color ocupa la pantalla: se ve desde lejos. Enter confirma (si puede entrar), Esc vuelve a buscar.
+        <section aria-live="polite" role="dialog" aria-label={`Veredicto: ${elegido.nombre}`} data-veredicto={v.color}
+          className="fixed inset-0 z-50 overflow-y-auto p-6 sm:p-12 flex"
+          style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 62%)` }}>
+          <div className="m-auto w-full max-w-3xl">
+          <div className="flex items-center gap-4">
+            <p className="text-7xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
+            {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-entrada
+              className="size-28 sm:size-36 rounded-3xl object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          </div>
+          <p className="titular text-6xl sm:text-8xl mt-4 break-words">{elegido.nombre}</p>
+          <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
+          {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
+          {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
           {v.para_regularizar ? <p className="mt-2 texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
 
           <div className="flex flex-wrap gap-2 mt-7">
@@ -97,22 +217,42 @@ export function Puerta({ sedeId }: { sedeId: string }) {
               <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8">✅ Anotar entrada</button>
             ) : (
               <>
-                <Link href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</Link>
-                {!forzando && <button type="button" onClick={() => setForzando(true)} className="boton">🚪 Dejar pasar igual</button>}
+                {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
+                {v.motivo === "congelada"
+                  ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
+                  : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
+                {/* D1: a un suspendido o dado de baja lo deja pasar el dueño o el encargado (la base lo frena igual). */}
+                {!forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
+                  ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>
+                  : <button type="button" onClick={() => { setForzando(true); void cupoDejarPasar().then(setCupo); }} className="boton">🚪 Dejar pasar igual</button>)}
               </>
             )}
-            <Link href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</Link>
+            <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>
             <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
           </div>
 
           {forzando && (
-            <form className="mt-5 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
-              <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" />
-              <button type="submit" disabled={!motivo.trim() || ocupado} className="boton boton-peligro">Dejar pasar</button>
+            <form className="mt-5 space-y-3" data-dejar-pasar onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
+              <div className="flex flex-wrap gap-2" aria-label="Motivos frecuentes">
+                {MOTIVOS_PASAR.map((m) => <button key={m} type="button" className={`pestana ${motivo === m ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`} onClick={() => setMotivo(m)}>{m}</button>)}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" aria-label="Motivo para dejar pasar" />
+                <button type="submit" disabled={!motivo.trim() || ocupado || (!!cupo && !cupo.sin_tope && cupo.usados >= cupo.tope)} className="boton boton-peligro">Dejar pasar</button>
+              </div>
+              {cupo && !cupo.sin_tope && (
+                <p className="text-sm texto-suave" data-cupo={cupo.tope - cupo.usados}>
+                  {cupo.usados >= cupo.tope ? `Ya dejaste pasar a ${cupo.usados} hoy (el tope es ${cupo.tope}): que lo autorice el dueño o el encargado.`
+                    : `Te ${cupo.tope - cupo.usados === 1 ? "queda" : "quedan"} ${cupo.tope - cupo.usados} de ${cupo.tope} hoy. Lo ve el dueño.`}
+                </p>
+              )}
             </form>
           )}
+          <p className="mt-6 text-sm texto-suave">{v.puede ? "Enter anota la entrada · " : ""}Esc vuelve a buscar · escribí para buscar a otro</p>
+          </div>
         </section>
       )}
+      {camara && <Camara alLeer={porQr} alCerrar={() => { setCamara(false); campo.current?.focus(); }} />}
       {elegido && !v && ocupado && <div className="h-48 rounded-[var(--radio-grande)] bg-[var(--tarjeta)] animate-pulse" />}
     </div>
   );

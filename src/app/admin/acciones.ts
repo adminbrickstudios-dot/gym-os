@@ -30,11 +30,18 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     return { error: (e as Error).message };
   }
   revalidatePath("/admin");
+  // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde).
+  const tipo = String(f.get("tipo") ?? "");
+  let avisoPlantilla = "";
+  if (tipo) {
+    try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
+    catch (e) { avisoPlantilla = ` No se pudo aplicar la plantilla: ${(e as Error).message}.`; }
+  }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
-  if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.` } };
+  if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
     const { contrasena } = await darAcceso(r.equipo_id, email, dueno);
-    return { ok: { ...creado, email, contrasena, aviso: contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya." } };
+    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla } };
   } catch (e) {
     return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
   }
@@ -118,3 +125,26 @@ export async function quitarDominio(gimnasioId: string, dominioId: string): Prom
     return { error: (e as Error).message };
   }
 }
+
+/** ADM-6: una novedad para todos los dueños (la ven en Inicio hasta cerrarla). */
+export async function publicarNovedadPlataforma(titulo: string, texto: string, link: string): Promise<{ error?: string }> {
+  try { await rpc("admin_publicar_novedad", { p_titulo: titulo, p_texto: texto, p_link: link || null }); revalidatePath("/admin"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+export async function retirarNovedadPlataforma(id: string): Promise<{ error?: string }> {
+  try { await rpc("admin_retirar_novedad", { p_id: id }); revalidatePath("/admin"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── ADM-3 (D13): el abono de cada gimnasio a BRIK. El precio lo carga Mateo. ──
+const hechoAdmin = async (f: () => Promise<unknown>, rutas: string[]) => {
+  try { await f(); for (const r of rutas) revalidatePath(r); return {}; } catch (e) { return { error: (e as Error).message }; }
+};
+export const guardarPlanBrik = async (id: string | null, nombre: string, precio: number, activo = true) =>
+  hechoAdmin(() => rpc("admin_guardar_plan_brik", { p_id: id, p_nombre: nombre, p_precio: precio, p_activo: activo }), ["/admin"]);
+export const asignarPlanBrik = async (gimnasioId: string, planId: string | null) =>
+  hechoAdmin(() => rpc("admin_asignar_plan_brik", { p_gimnasio_id: gimnasioId, p_plan_id: planId }), ["/admin", `/admin/${gimnasioId}`]);
+export const registrarPagoBrik = async (gimnasioId: string, monto: number, cubreHasta: string, nota: string) =>
+  hechoAdmin(() => rpc("admin_registrar_pago_brik", { p_gimnasio_id: gimnasioId, p_monto: monto, p_cubre_hasta: cubreHasta, p_nota: nota || null }), ["/admin", `/admin/${gimnasioId}`]);
+export const anularPagoBrik = async (gimnasioId: string, pagoId: string) =>
+  hechoAdmin(() => rpc("admin_anular_pago_brik", { p_pago_id: pagoId }), ["/admin", `/admin/${gimnasioId}`]);

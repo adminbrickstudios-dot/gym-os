@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
+import type { Agenda } from "@/lib/horarios";
 
 // Forma de lo que devuelve public.landing_publica (migración 0008).
 export type Marca = {
@@ -13,6 +14,7 @@ export type Marca = {
 };
 
 export type PlanPublico = {
+  id?: string;
   nombre: string;
   tipo: "membresia" | "pase_diario" | "pack";
   descripcion: string | null;
@@ -33,7 +35,8 @@ export type Seccion =
   | { tipo: "galeria"; titulo: string; contenido: { fotos?: string[] } }
   | { tipo: "equipo"; titulo: string; contenido: { personas?: { nombre: string; rol?: string; foto?: string }[] } }
   | { tipo: "preguntas"; titulo: string; contenido: { items?: { pregunta: string; respuesta: string }[] } }
-  | { tipo: "ubicacion"; titulo: string; contenido: Record<string, never> };
+  | { tipo: "ubicacion"; titulo: string; contenido: Record<string, never> }
+  | { tipo: "probar"; titulo: string; contenido: { texto?: string } };
 
 export type Sede = { nombre: string; direccion: string | null; mapa_url: string | null; telefono: string | null };
 
@@ -43,12 +46,16 @@ export type LandingPublicada = {
   portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string };
   contacto: { whatsapp: string | null; mensaje_whatsapp: string; instagram: string | null; email: string | null };
   mostrar_precios: boolean;
+  /** Se puede hacer socio desde la página (0032). */
+  altas_online?: boolean;
   secciones: Seccion[];
   planes: PlanPublico[];
   sedes: Sede[];
 };
 
-export type Landing = LandingPublicada | { publicada: false; marca: Marca };
+/** Sin publicar: la marca y el WhatsApp (0029), para el "Próximamente". */
+export type LandingSinPublicar = { publicada: false; marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } };
+export type Landing = LandingPublicada | LandingSinPublicar;
 
 /** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
 export async function traerLanding(host: string): Promise<Landing | null> {
@@ -58,9 +65,34 @@ export async function traerLanding(host: string): Promise<Landing | null> {
   return (data as Landing | null) ?? null;
 }
 
-/** URL pública de un archivo del bucket "marcas". */
-export function urlMarca(ruta: string | null | undefined): string | null {
-  if (!ruta) return null;
-  if (/^https:\/\//.test(ruta)) return ruta;
-  return `${supabaseUrl()}/storage/v1/object/public/marcas/${ruta.split("/").map(encodeURIComponent).join("/")}`;
+/** Horarios, "abierto ahora" y próximos cierres del gimnasio del host (agenda_publica, sin sesión). */
+export async function traerAgenda(host: string): Promise<Agenda | null> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("agenda_publica", { p_host: host });
+  if (error) throw new Error(`No se pudieron leer los horarios del gimnasio: ${error.message}`);
+  return (data as Agenda | null) ?? null;
+}
+
+// urlMarca vive aparte para poder usarla también en el navegador.
+export { urlMarca } from "@/lib/url-marca";
+
+/** COM-8: un evento suelto (seminario, clase especial) tal como se muestra afuera. */
+export type EventoPublico = { evento_id: string; nombre: string; inicio: string; precio: number; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string };
+
+/** Los eventos que vienen del gimnasio del host (solo con la página publicada). */
+export async function traerEventos(host: string): Promise<EventoPublico[]> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("eventos_publicos", { p_host: host });
+  if (error) throw new Error(`No se pudieron leer los eventos del gimnasio: ${error.message}`);
+  return (data as EventoPublico[]) ?? [];
+}
+
+/** COM-11: los IDs de medición que cargó el dueño (solo con la página publicada; la base los valida). */
+export type Medicion = { pixel_meta?: string | null; google_analytics?: string | null };
+
+export async function traerMedicion(host: string): Promise<Medicion> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
+  if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
+  return (data as Medicion) ?? {};
 }

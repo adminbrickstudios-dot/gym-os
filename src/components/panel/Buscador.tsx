@@ -9,7 +9,7 @@ import { PuntoEstado } from "./Estado";
 const sinAcentos = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 /** Ctrl+K: ir a una sección o abrir la ficha de un socio. */
-export function Buscador({ secciones, buscaSocios, compacto = false }: { secciones: Seccion[]; buscaSocios: boolean; compacto?: boolean }) {
+export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = false }: { secciones: Seccion[]; buscaSocios: boolean; compacto?: boolean; soloVer?: boolean }) {
   const [abierto, setAbierto] = useState(false);
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
@@ -42,7 +42,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false }: { seccion
   const q = sinAcentos(texto.trim());
   const secc = q ? secciones.filter((s) => sinAcentos(`${s.titulo} ${s.descripcion}`).includes(q)) : secciones;
   const opciones: { ruta: string; clave: string }[] = [
-    ...socios.map((s) => ({ ruta: `/panel/socios/${s.socio_id}`, clave: s.socio_id })),
+    ...(soloVer ? [] : socios.map((s) => ({ ruta: `/panel/socios/${s.socio_id}`, clave: s.socio_id }))),
     ...secc.map((s) => ({ ruta: s.ruta, clave: s.clave })),
   ];
   useEffect(() => setMarcado(0), [texto, socios.length]);
@@ -77,12 +77,25 @@ export function Buscador({ secciones, buscaSocios, compacto = false }: { seccion
             <div className="max-h-[60vh] overflow-y-auto p-2">
               {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-xl w-full">⚠️ {error}</p>}
               {socios.length > 0 && <p className="titulo-grupo px-3 pt-2 pb-1">Socios</p>}
-              {socios.map((s, i) => (
+              {soloVer && socios.map((s) => (
+                // EQU-2: el profe ve nombre, foto y semáforo; no abre la ficha.
+                <div key={s.socio_id} className="flex items-center gap-3 rounded-xl px-3 min-h-[56px]" data-socio-profe>
+                  {s.tiene_foto
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={`/panel/socios/${s.socio_id}/foto`} alt="" className="size-10 rounded-full object-cover flex-none" />
+                    : <PuntoEstado color={s.color} />}
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold truncate">{s.nombre}</span>
+                    <span className="block text-sm texto-suave truncate">{s.tiene_foto && <PuntoEstado color={s.color} />} {s.texto}</span>
+                  </span>
+                </div>
+              ))}
+              {!soloVer && socios.map((s, i) => (
                 <Link key={s.socio_id} href={`/panel/socios/${s.socio_id}`} onClick={() => setAbierto(false)}
                   className={`flex items-center gap-3 rounded-xl px-3 min-h-[56px] ${marcado === i ? "bg-[var(--tarjeta-alta)]" : ""}`}>
                   <PuntoEstado color={s.color} />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>
+                    <span className="block font-semibold truncate">{s.nombre} {s.numero != null && <span className="texto-tenue font-normal">#{s.numero}</span>}</span>
                     <span className="block text-sm texto-suave truncate">{s.texto}</span>
                   </span>
                 </Link>
@@ -91,7 +104,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false }: { seccion
               {secc.length > 0 && <p className="titulo-grupo px-3 pt-3 pb-1">Secciones</p>}
               {secc.map((s, i) => (
                 <Link key={s.clave} href={s.ruta} onClick={() => setAbierto(false)}
-                  className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marcado === socios.length + i ? "bg-[var(--tarjeta-alta)]" : ""}`}>
+                  className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marcado === (soloVer ? 0 : socios.length) + i ? "bg-[var(--tarjeta-alta)]" : ""}`}>
                   <span className="text-xl w-7 text-center" aria-hidden>{s.emoji}</span>
                   <span className="font-semibold">{s.titulo}</span>
                   <span className="texto-tenue text-sm truncate">{s.descripcion}</span>

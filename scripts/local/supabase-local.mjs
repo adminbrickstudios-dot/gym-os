@@ -10,6 +10,10 @@
 //                                   y los permisos los decide Postgres
 //   /auth/v1/token, /user, /logout, /otp, /verify, /invite, /admin/users
 //                                   como GoTrue, con usuarios en auth.users
+//   /storage/v1/object/…            como Storage, en .local/storage (también links firmados): subir y
+//                                   borrar solo con la clave de servicio (así
+//                                   sube el panel), leer los buckets públicos
+//                                   y bajar los privados con la clave de servicio
 //
 // Las pantallas leen y escriben solo por RPC, así que no hace falta
 // imitar las lecturas de tablas: un GET a una tabla devuelve 404.
@@ -168,6 +172,10 @@ async function auth(req, res, ruta, q, cuerpo) {
     if (!u) {
       u = (await pool.query(`insert into auth.users (email, phone, ${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"})
                              values ($1, $2, now()) returning *`, [cuerpo.email ? destino : null, cuerpo.email ? null : destino])).rows[0];
+    } else {
+      // Como GoTrue: verificar el código confirma el mail o el teléfono.
+      u = (await pool.query(`update auth.users set ${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"} = coalesce(${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"}, now())
+                             where id = $1 returning *`, [u.id])).rows[0];
     }
     return enviar(res, 200, await sesionPara(u));
   }
@@ -246,7 +254,9 @@ async function rpc(req, res, nombre, cuerpo) {
   const c = await pool.connect();
   try {
     await c.query("begin");
-    await c.query(`select set_config('role', $1, true), set_config('request.jwt.claims', $2, true)`, [rol, JSON.stringify(claims)]);
+    // Como PostgREST: los encabezados de la llamada en request.headers (el PIN del equipo viaja así, CAJ-3).
+    await c.query(`select set_config('role', $1, true), set_config('request.jwt.claims', $2, true), set_config('request.headers', $3, true)`,
+      [rol, JSON.stringify(claims), JSON.stringify(Object.fromEntries(Object.entries(req.headers).filter(([k]) => k.startsWith("x-"))))]);
     const { rows } = await c.query(sql, params);
     await c.query("commit");
     if (f.es_void) return enviar(res, 204);
@@ -260,6 +270,119 @@ async function rpc(req, res, nombre, cuerpo) {
   } finally { c.release(); }
 }
 
+// ── Storage (en disco) ──────────────────────────────────────────────
+// Los mismos límites que los buckets de las migraciones. Con sesión de
+// usuario solo se imita una política: el socio sube su comprobante (las demás
+// subidas las hace el servidor con la clave de servicio).
+const BUCKETS = {
+  marcas: { publico: true, max: 2 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] },
+  comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
+  fotos_socios: { publico: false, max: 512 * 1024, tipos: ["image/jpeg"] },
+  tickets_caja: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
+};
+const CARPETA_STORAGE = path.join(CARPETA, "storage");
+function archivoDe(bucket, ruta) {
+  const base = path.join(CARPETA_STORAGE, bucket);
+  const f = path.resolve(base, ruta);
+  if (!f.startsWith(base + path.sep)) return null;
+  return f;
+}
+const errorStorage = (res, estado, error, message) => enviar(res, estado, { statusCode: String(estado), error, message });
+
+/** La política comprobantes_socio_sube, preguntada a la base con el rol y el JWT del usuario. */
+async function politicaComprobante(claims, rutaObjeto) {
+  const [gim, socio] = rutaObjeto.split("/");
+  if (!/^[0-9a-f-]{36}$/.test(gim ?? "") || !/^[0-9a-f-]{36}$/.test(socio ?? "")) return false;
+  const c = await pool.connect();
+  try {
+    await c.query("begin");
+    await c.query(`select set_config('role', 'authenticated', true), set_config('request.jwt.claims', $1, true)`, [JSON.stringify(claims)]);
+    const { rows } = await c.query(`select $2::uuid in (select privado.mis_socios()) and $1::uuid = (select s.gimnasio_id from public.socios s where s.id = $2::uuid) as ok`, [gim, socio]);
+    await c.query("rollback");
+    return rows[0]?.ok === true;
+  } catch { await c.query("rollback").catch(() => {}); return false; } finally { c.release(); }
+}
+
+async function storage(req, res, ruta, crudo, consulta = new URLSearchParams()) {
+  const claims = claimsDe(req);
+  // Links firmados (createSignedUrl): los pide el panel con la clave de servicio y los abre cualquiera mientras no venzan.
+  const firmado = /^\/object\/sign\/([a-z_]+)\/(.+)$/.exec(ruta);
+  if (firmado) {
+    const [bucket, rutaObjeto] = [firmado[1], decodeURIComponent(firmado[2])];
+    const f = BUCKETS[bucket] && archivoDe(bucket, rutaObjeto);
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    if (req.method === "POST") {
+      if (claims?.role !== "service_role") return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio firma links");
+      const { expiresIn = 60 } = crudo.length ? JSON.parse(crudo.toString()) : {};
+      const token = firmar({ url: `${bucket}/${rutaObjeto}`, exp: Math.floor(Date.now() / 1000) + Number(expiresIn) });
+      return enviar(res, 200, { signedURL: `/object/sign/${bucket}/${firmado[2]}?token=${token}` });
+    }
+    if (req.method === "GET") {
+      const p = verificar(consulta.get("token"));
+      if (!p || p.url !== `${bucket}/${rutaObjeto}`) return errorStorage(res, 400, "InvalidSignature", "The signature is invalid or expired");
+      const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+      res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size });
+      return res.end(fs.readFileSync(f));
+    }
+  }
+  const publico = /^\/object\/public\/([a-z_]+)\/(.+)$/.exec(ruta);
+  if (publico && req.method === "GET") {
+    const b = BUCKETS[publico[1]];
+    const f = b?.publico && archivoDe(publico[1], decodeURIComponent(publico[2]));
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+    res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size, "Access-Control-Allow-Origin": "*" });
+    return res.end(fs.readFileSync(f));
+  }
+  const objeto = /^\/object\/([a-z_]+)(?:\/(.+))?$/.exec(ruta);
+  if (!objeto || !BUCKETS[objeto[1]]) return errorStorage(res, 404, "not_found", `supabase-local no imita ${req.method} /storage/v1${ruta}`);
+  const [bucket, rutaObjeto] = [objeto[1], objeto[2] && decodeURIComponent(objeto[2])];
+  // La única subida con sesión de usuario: el socio sube su comprobante. Imita la política
+  // comprobantes_socio_sube (0009): <gimnasio>/<socio>/… con un socio de su cuenta y de ese gimnasio.
+  const subeComprobante = claims?.role === "authenticated" && bucket === "comprobantes" && req.method === "POST" && rutaObjeto
+    && await politicaComprobante(claims, rutaObjeto);
+  if (claims?.role !== "service_role" && !subeComprobante) return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio sube o borra (salvo el comprobante del socio, como la política de Supabase)");
+  const b = BUCKETS[bucket];
+  // Bajar un objeto (download) con la clave de servicio: así el panel sirve los buckets privados.
+  if (req.method === "GET" && rutaObjeto) {
+    const f = archivoDe(bucket, rutaObjeto);
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+    res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size });
+    return res.end(fs.readFileSync(f));
+  }
+  if (req.method === "POST" && rutaObjeto) {
+    const f = archivoDe(bucket, rutaObjeto);
+    if (!f) return errorStorage(res, 400, "InvalidKey", "Invalid key");
+    let tipo = String(req.headers["content-type"] ?? "").split(";")[0];
+    // Desde el navegador, storage-js manda el archivo en un multipart (como Supabase, vale el tipo del archivo).
+    if (tipo === "multipart/form-data") {
+      const fd = await new Response(crudo, { headers: { "content-type": req.headers["content-type"] } }).formData();
+      const archivo = [...fd.values()].find((v) => typeof v === "object" && "arrayBuffer" in v);
+      if (!archivo) return errorStorage(res, 400, "InvalidRequest", "El multipart no trae un archivo");
+      tipo = archivo.type;
+      crudo = Buffer.from(await archivo.arrayBuffer());
+    }
+    if (!b.tipos.includes(tipo)) return errorStorage(res, 415, "invalid_mime_type", `mime type ${tipo} is not supported`);
+    if (crudo.length > b.max) return errorStorage(res, 413, "Payload too large", "The object exceeded the maximum allowed size");
+    if (fs.existsSync(f) && req.headers["x-upsert"] !== "true") return errorStorage(res, 409, "Duplicate", "The resource already exists");
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    fs.writeFileSync(f, crudo);
+    fs.writeFileSync(`${f}.meta.json`, JSON.stringify({ tipo }));
+    return enviar(res, 200, { Id: crypto.randomUUID(), Key: `${bucket}/${rutaObjeto}` });
+  }
+  if (req.method === "DELETE" && !rutaObjeto) {
+    const { prefixes = [] } = crudo.length ? JSON.parse(crudo.toString()) : {};
+    const borrados = [];
+    for (const r of prefixes) {
+      const f = archivoDe(bucket, r);
+      if (f && fs.existsSync(f)) { fs.rmSync(f); fs.rmSync(`${f}.meta.json`, { force: true }); borrados.push({ name: r, bucket_id: bucket }); }
+    }
+    return enviar(res, 200, borrados);
+  }
+  return errorStorage(res, 404, "not_found", `supabase-local no imita ${req.method} /storage/v1${ruta}`);
+}
+
 // ── Servidor ────────────────────────────────────────────────────────
 http.createServer(async (req, res) => {
   try {
@@ -267,8 +390,11 @@ http.createServer(async (req, res) => {
       return enviar(res, 204, undefined, { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS" });
     }
     const url = new URL(req.url, "http://local");
-    let texto = "";
-    for await (const parte of req) texto += parte;
+    const partes = [];
+    for await (const parte of req) partes.push(parte);
+    const crudo = Buffer.concat(partes);
+    if (url.pathname.startsWith("/storage/v1/")) return await storage(req, res, url.pathname.slice("/storage/v1".length), crudo, url.searchParams);
+    const texto = crudo.toString("utf8");
     const cuerpo = texto ? JSON.parse(texto) : {};
     if (url.pathname.startsWith("/auth/v1/")) return await auth(req, res, url.pathname.slice("/auth/v1".length), url.searchParams, cuerpo);
     const m = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_][a-z0-9_]*)$/);
@@ -276,7 +402,7 @@ http.createServer(async (req, res) => {
       const args = req.method === "GET" ? Object.fromEntries(url.searchParams) : cuerpo;
       return await rpc(req, res, m[1], args);
     }
-    return enviar(res, 404, { message: `supabase-local solo imita RPC y auth (pedido: ${req.method} ${url.pathname})` });
+    return enviar(res, 404, { message: `supabase-local solo imita RPC, auth y storage (pedido: ${req.method} ${url.pathname})` });
   } catch (e) {
     console.error(e);
     return enviar(res, 500, { message: e.message });

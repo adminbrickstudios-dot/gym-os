@@ -79,7 +79,7 @@ test("descuento: la recepción tiene tope y necesita motivo; el encargado no tie
   const prod = await producto();
   const item = (d, m) => JSON.stringify([{ tipo: "producto", producto_id: prod, cantidad: 10, descuento: d, descuento_motivo: m }]);
   await como(uRec, () => t.falla(() => t.q(`select public.vender($1, $2, $3)`, [t.sede, item(500, null), JSON.stringify([{ medio: "transferencia", monto: 14500 }])]), /necesita un motivo/));
-  await como(uRec, () => t.falla(() => t.q(`select public.vender($1, $2, $3)`, [t.sede, item(3000, "Amigo"), JSON.stringify([{ medio: "transferencia", monto: 12000 }])]), /descuento máximo es 10\.00 %/));
+  await como(uRec, () => t.falla(() => t.q(`select public.vender($1, $2, $3)`, [t.sede, item(3000, "Amigo"), JSON.stringify([{ medio: "transferencia", monto: 12000 }])]), /descuento máximo es 10 %/));
   const ok = await como(uRec, async () => (await t.q(`select public.vender($1, $2, $3) as r`, [t.sede, item(1500, "Promo"), JSON.stringify([{ medio: "transferencia", monto: 13500 }])]))[0].r);
   assert.equal(Number(ok.total), 13500);
   const enc = await como(uEnc, async () => (await t.q(`select public.vender($1, $2, $3) as r`, [t.sede, item(7500, "Sponsor"), JSON.stringify([{ medio: "transferencia", monto: 7500 }])]))[0].r);

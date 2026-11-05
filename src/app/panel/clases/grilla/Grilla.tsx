@@ -1,33 +1,52 @@
 "use client";
 import { useState, useTransition } from "react";
-import { agregarHorario, cerrarHorario, guardarActividad } from "./acciones";
+import { agregarHorario, cerrarHorario, editarActividad, editarHorario, guardarActividad } from "./acciones";
+import { Mensaje } from "@/components/ui/Mensaje";
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean; horarios: number };
-export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null };
+export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null; profe_id: string | null; vigente_desde: string; vigente_hasta: string | null };
 type Opcion = { id: string; nombre: string };
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-export function Grilla({ actividades, horarios, sedes, profes }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[] }) {
+export function Grilla({ actividades, horarios, sedes, profes, hoy }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[]; hoy: string }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [nueva, setNueva] = useState({ nombre: "", emoji: "" });
+  // AUD-9: confirmar sin el diálogo del navegador (se ve feo y frena todo): el botón pasa a "¿Sacar? Sí / No".
+  const [sacando, setSacando] = useState<string | null>(null);
+  // CLA-8: editar un horario o una actividad en el lugar.
+  const [editando, setEditando] = useState<{ id: string; hora: string; duracion: number; cupo: string; profe: string } | null>(null);
+  const [actEdit, setActEdit] = useState<{ id: string; nombre: string; emoji: string; activa: boolean } | null>(null);
   const activas = actividades.filter((a) => a.activa);
   const [h, setH] = useState({ sede: sedes[0]?.id ?? "", actividad: activas[0]?.actividad_id ?? "", dia: 1, hora: "19:00", duracion: 60, cupo: "", profe: "" });
   const correr = (f: () => Promise<{ error?: string }>, despues?: () => void) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) despues?.(); });
 
   return (
     <div className="space-y-10">
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       <section>
         <h2 className="titulo text-3xl mb-4">💪 Actividades</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {actividades.map((a) => (
-            <span key={a.actividad_id} className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`}>{a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.horarios} horarios</span></span>
+            <button key={a.actividad_id} type="button" onClick={() => setActEdit({ id: a.actividad_id, nombre: a.nombre, emoji: a.emoji ?? "", activa: a.activa })}
+              className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`} aria-label={`Editar ${a.nombre}`}>
+              {a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
+            </button>
           ))}
           {actividades.length === 0 && <p className="texto-suave">Todavía no hay actividades. Empezá por una (ej: 🚴 Spinning).</p>}
         </div>
+        {actEdit && (
+          <form className="tarjeta p-4 mb-4 flex flex-wrap items-center gap-2" data-editar-actividad onSubmit={(e) => { e.preventDefault(); correr(() => editarActividad(actEdit.id, actEdit.nombre, actEdit.emoji, actEdit.activa), () => setActEdit(null)); }}>
+            <input className="campo !w-20 text-center text-xl" value={actEdit.emoji} onChange={(e) => setActEdit({ ...actEdit, emoji: e.target.value })} aria-label="Emoji de la actividad" />
+            <input className="campo !w-auto flex-1 min-w-48" value={actEdit.nombre} onChange={(e) => setActEdit({ ...actEdit, nombre: e.target.value })} aria-label="Nombre (editar)" />
+            <label className="flex items-center gap-2 min-h-11"><input type="checkbox" className="size-5" checked={actEdit.activa} onChange={(e) => setActEdit({ ...actEdit, activa: e.target.checked })} /> Activa</label>
+            <button type="submit" className="boton" disabled={ocupado || !actEdit.nombre.trim()}>Guardar</button>
+            <button type="button" className="boton-texto texto-suave" onClick={() => setActEdit(null)}>Cancelar</button>
+            {!actEdit.activa && <p className="basis-full text-sm texto-tenue">Apagada: sus horarios dejan de generar clases nuevas.</p>}
+          </form>
+        )}
         <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => guardarActividad(null, nueva.nombre, nueva.emoji), () => setNueva({ nombre: "", emoji: "" })); }}>
           <input className="campo !w-20 text-center text-xl" placeholder="🚴" value={nueva.emoji} onChange={(e) => setNueva({ ...nueva, emoji: e.target.value })} aria-label="Emoji" />
           <input className="campo !w-auto flex-1 min-w-48" placeholder="Nombre de la actividad" value={nueva.nombre} onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })} aria-label="Nombre de la actividad" />
@@ -45,15 +64,39 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
               <p className="titulo-grupo mb-2">{d}</p>
               <ul className="space-y-1.5">
                 {del.map((x) => (
-                  <li key={x.horario_id} className="tarjeta flex items-center gap-4 px-4 py-3">
+                  <li key={x.horario_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3">
                     <span className="numero text-2xl w-16">{x.hora_inicio.slice(0, 5)}</span>
                     <span aria-hidden className="text-xl">{x.emoji ?? "🗓️"}</span>
                     <span className="flex-1 min-w-0">
                       <span className="block font-semibold truncate">{x.actividad}</span>
-                      <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}</span>
+                      <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}{x.vigente_hasta ? ` · hasta el ${x.vigente_hasta.slice(8, 10)}/${x.vigente_hasta.slice(5, 7)}` : ""}{x.vigente_desde > hoy ? ` · desde el ${x.vigente_desde.slice(8, 10)}/${x.vigente_desde.slice(5, 7)}` : ""}</span>
                     </span>
-                    <button type="button" className="boton !min-h-10 texto-suave" disabled={ocupado}
-                      onClick={() => { if (confirm(`¿Sacar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}? Las clases desde hoy se cancelan y se avisa a los anotados.`)) correr(() => cerrarHorario(x.horario_id)); }}>Sacar</button>
+                    {editando?.id !== x.horario_id && sacando !== x.horario_id && (
+                      <button type="button" className="boton boton-chico" onClick={() => setEditando({ id: x.horario_id, hora: x.hora_inicio.slice(0, 5), duracion: x.duracion_min, cupo: x.cupo ? String(x.cupo) : "", profe: x.profe_id ?? "" })}
+                        aria-label={`Editar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}`}>Editar</button>
+                    )}
+                    {editando?.id === x.horario_id ? (
+                      <form className="basis-full grid grid-cols-2 sm:grid-cols-5 gap-2 items-end" data-editar-horario onSubmit={(e) => {
+                        e.preventDefault();
+                        correr(() => editarHorario(x.horario_id, { hora: editando.hora, duracion: editando.duracion, cupo: editando.cupo ? Number(editando.cupo) : null, profe: editando.profe || null }), () => setEditando(null));
+                      }}>
+                        <label className="space-y-1"><span className="etiqueta">Hora</span><input type="time" className="campo" value={editando.hora} onChange={(e) => setEditando({ ...editando, hora: e.target.value })} /></label>
+                        <label className="space-y-1"><span className="etiqueta">Minutos</span><input type="number" min={10} max={300} className="campo" value={editando.duracion} onChange={(e) => setEditando({ ...editando, duracion: Number(e.target.value) })} /></label>
+                        <label className="space-y-1"><span className="etiqueta">Cupo</span><input type="number" min={1} className="campo" placeholder="Sin cupo" value={editando.cupo} onChange={(e) => setEditando({ ...editando, cupo: e.target.value })} /></label>
+                        <label className="space-y-1"><span className="etiqueta">Profe</span><select className="campo" value={editando.profe} onChange={(e) => setEditando({ ...editando, profe: e.target.value })}><option value="">Sin asignar</option>{profes.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></label>
+                        <span className="flex gap-2"><button type="submit" className="boton" disabled={ocupado}>Guardar</button><button type="button" className="boton-texto texto-suave" onClick={() => setEditando(null)}>Cancelar</button></span>
+                        <p className="col-span-2 sm:col-span-5 text-sm texto-tenue">Vale para las próximas clases. Las que ya tienen reservas conservan su hora; nadie pierde su lugar.</p>
+                      </form>
+                    ) : sacando === x.horario_id ? (
+                      <span className="flex flex-wrap items-center gap-2" role="group" aria-label="Confirmar">
+                        <span className="text-sm texto-suave">Se cancelan las clases desde hoy y se avisa a los anotados.</span>
+                        <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado} onClick={() => correr(() => cerrarHorario(x.horario_id), () => setSacando(null))}>Sí, sacar</button>
+                        <button type="button" className="boton boton-chico" onClick={() => setSacando(null)}>No</button>
+                      </span>
+                    ) : (
+                      <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => setSacando(x.horario_id)}
+                        aria-label={`Sacar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}`}>Sacar</button>
+                    )}
                   </li>
                 ))}
               </ul>
