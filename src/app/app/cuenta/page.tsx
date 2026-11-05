@@ -28,6 +28,8 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
         {yo.plan && <p className="texto-suave text-lg">🏷️ {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}
         <CrearContrasena email={usuario.data.user?.email || null} />
+        {/* SEG-6: lo que el gimnasio guarda de él. */}
+        <p><a href={`/app/mis-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" download data-mis-datos>⬇️ Descargar mis datos</a></p>
         {baja
           ? <p className="mensaje mensaje-info" data-baja-pendiente>👋 Pediste la baja: el gimnasio te va a contactar.</p>
           : <PedirBaja socioId={s.socio_id} ofrecePausa={!!yo.plan} />}

@@ -80,3 +80,27 @@ test("AUD-14: los pedidos de baja pendientes, para Inicio (la recepción tambié
   assert.ok(p.some((x) => x.socio_id === s2 && x.motivo === "horario" && x.nota === "No llego"));
   await como(uOtro, () => t.falla(() => t.q(`select public.pedidos_baja_pendientes($1)`, [t.g]), /permiso|equipo|acceso/i));
 });
+
+test("SEG-6: el socio baja sus datos; el dueño borra los de un ex socio y quedan los pagos", async () => {
+  const [{ id: uD }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`d${Math.random()}@ejemplo.invalid`]);
+  await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Dueña','dueno')`, [t.g, uD]);
+  const [{ id: uS }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`x${Math.random()}@ejemplo.invalid`]);
+  const [{ id: s }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido, dni, telefono, email, usuario_id) values ($1,'Ana','Borrable','30111222','+5490000555111','ana@ejemplo.invalid',$2) returning id`, [t.g, uS]);
+  const [{ id: v }] = await t.q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, origen, estado, confirmada_en) values ($1,$2,$3,'recepcion','confirmada',now()) returning id`, [t.g, t.sede, s]);
+  await t.q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, aprobado_en) values ($1,$2,'transferencia',9000,'aprobado',now())`, [t.g, v]);
+  const [{ d }] = await como(uS, () => t.q(`select public.mis_datos($1) d`, [s]));
+  assert.equal(d.socio.dni, "30111222"); assert.equal(d.pagos.length, 1); assert.ok(!("foto_path" in d.socio));
+  await como(uOtro, () => t.falla(() => t.q(`select public.mis_datos($1)`, [s]), /permiso/i));
+  await como(uD, async () => {
+    await t.falla(() => t.q(`select public.anonimizar_socio($1, 'BORRAR')`, [s]), /Primero dalo de baja/);
+    await t.q(`select public.dar_de_baja($1, 'mudanza')`, [s]);
+    await t.falla(() => t.q(`select public.anonimizar_socio($1, 'si')`, [s]), /escribí BORRAR/);
+    await t.q(`select public.anonimizar_socio($1, 'BORRAR')`, [s]);
+  });
+  await como(uRec, () => t.falla(() => t.q(`select public.anonimizar_socio($1, 'BORRAR')`, [s]), /permiso|rol|acceso|ya estaban/i));
+  const [x] = await t.q(`select nombre, apellido, dni, telefono, email, usuario_id from public.socios where id = $1`, [s]);
+  assert.equal(x.nombre, "Socio"); assert.match(x.apellido, /^borrado #\d+$/);
+  assert.deepEqual([x.dni, x.telefono, x.email, x.usuario_id], [null, null, null, null]);
+  const [{ n }] = await t.q(`select count(*)::int n from public.pagos p join public.ventas v on v.id = p.venta_id where v.socio_id = $1`, [s]);
+  assert.equal(n, 1, "los pagos quedan");
+});

@@ -160,3 +160,12 @@ export async function resolverPedidoBaja(socioId: string, pedidoId: string, darD
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** SEG-6: borrar los datos personales de un ex socio (solo el dueño; quedan los pagos). */
+export async function anonimizarSocio(socioId: string, confirmo: string): Promise<{ error?: string }> {
+  try {
+    await rpc("anonimizar_socio", { p_socio_id: socioId, p_confirmo: confirmo });
+    revalidatePath(`/panel/socios/${socioId}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

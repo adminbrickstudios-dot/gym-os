@@ -5,7 +5,7 @@ import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado"
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
-import { CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
+import { BorrarDatos, CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
 import { FilaVenta } from "@/components/panel/Venta";
 import type { Venta } from "@/app/panel/ventas-acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -108,6 +108,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <div className="mt-6 space-y-2" data-dado-de-baja>
               <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
               <VolverADarDeAlta socioId={s.id} />
+              {panel.yo.rol === "dueno" && !(s.nombre === "Socio" && /^borrado #/.test(s.apellido)) && <BorrarDatos socioId={s.id} />}
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}

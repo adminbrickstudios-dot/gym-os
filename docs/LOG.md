@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-6 · Datos personales
+
+**QUÉ HICE**
+- App del socio → Mi membresía → "⬇️ Descargar mis datos": un JSON con lo que el gimnasio guarda de él (sus datos, membresías, coberturas, pagos, entradas, reservas y pesos anotados).
+- Ficha de un **ex socio** (dado de baja), solo el dueño: "🗑️ Borrar sus datos personales" (escribiendo BORRAR). Se borran nombre, DNI, teléfono, mail, nacimiento, foto, contacto de emergencia, responsable, llavero, notas del equipo y su prospecto; quedan los pagos y las entradas a nombre de "Socio borrado #N". No se deshace.
+- Migración 0115 (`socios.anonimizado_en`, `mis_datos`, `anonimizar_socio`), caso en la prueba de base `pedidos-socio`, `e2e:seg-6`.
+
+**SIN ARREGLAR**
+- La foto en el bucket no se borra (se borra la referencia): queda para cuando se limpie Storage.
+
+---
+
 ## 2026-11-05 · SEG-4 · Rendimiento con 3.000 socios
 
 **QUÉ HICE**

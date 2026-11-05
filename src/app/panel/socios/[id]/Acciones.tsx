@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { formatearPesos } from "@/lib/formato";
-import { asignarPlan, darDeBaja, resolverPedidoBaja, vistaCambioPlan, volverADarDeAlta, type VistaCambio } from "../acciones";
+import { anonimizarSocio, asignarPlan, darDeBaja, resolverPedidoBaja, vistaCambioPlan, volverADarDeAlta, type VistaCambio } from "../acciones";
 
 type Plan = { plan_id: string; nombre: string; precio: number | null };
 const MOTIVOS: [string, string][] = [
@@ -125,6 +125,27 @@ export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { ped
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado} className="boton" onClick={() => resolver(false)}>💪 Se queda</button>
         <button type="button" disabled={ocupado} className="boton boton-peligro" onClick={() => resolver(true)}>Darle la baja</button>
+      </div>
+      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+    </div>
+  );
+}
+
+/** SEG-6: a un ex socio que lo pide, el dueño le borra los datos personales (no se deshace; quedan los pagos). */
+export function BorrarDatos({ socioId }: { socioId: string }) {
+  const [abierto, setAbierto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [ocupado, empezar] = useTransition();
+  if (!abierto) return <button type="button" className="boton-texto texto-suave" onClick={() => setAbierto(true)}>🗑️ Borrar sus datos personales</button>;
+  return (
+    <div className="tarjeta p-4 space-y-3 w-full" data-borrar-datos>
+      <p className="font-semibold">Se borran nombre, DNI, teléfono, mail, nacimiento, foto y notas. Quedan los pagos y las entradas, a nombre de “Socio borrado”. No se deshace.</p>
+      <input className="campo" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Escribí BORRAR" aria-label="Escribí BORRAR para confirmar" />
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="boton boton-peligro" disabled={ocupado || texto !== "BORRAR"}
+          onClick={() => empezar(async () => { const r = await anonimizarSocio(socioId, texto); setError(r.error ?? null); if (!r.error) setAbierto(false); })}>Borrar sus datos</button>
+        <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
       </div>
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
     </div>
