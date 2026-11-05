@@ -48,7 +48,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -73,6 +73,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       rpc<{ pedido_id: string; motivo: string; nota: string | null } | null>("pedido_baja_socio", { p_socio_id: id }),
       // COM-1: si está en riesgo de irse, el porqué (los mismos que ven Retención).
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ nivel: "alto" | "medio"; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }) : Promise.resolve([]),
+      // COM-2: los primeros 30 días del socio nuevo.
+      pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ dia: number; de: number; entradas: number; meta: number; primera_semana_floja: boolean } | null>("primer_mes_socio", { p_socio_id: id }) : Promise.resolve(null),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -114,6 +116,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {primerMes && !s.dado_de_baja_en && (
+            <p className="pildora mt-6 !text-base" data-primer-mes={primerMes.dia}>
+              🌱 Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? " ✅" : ""}
+            </p>
+          )}
           {riesgo[0] && (
             <p className={`mensaje ${riesgo[0].nivel === "alto" ? "mensaje-error" : "mensaje-aviso"} mt-6`} data-riesgo-ficha={riesgo[0].nivel}>
               🎯 <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>

@@ -24,7 +24,7 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
-  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; meta_primer_mes: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
   fiado_activo: boolean; fiado_tope: number;
   falta_politica: "nada" | "bloquear" | "descontar"; falta_bloqueo_dias: number;
@@ -72,6 +72,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   descuento_max_recepcion: [0, 100, "Descuento máximo de la recepción"],
   retencion_dias_ausencia: [3, 90, "“No viene” después de"],
   retencion_dias_nuevo: [7, 90, "Socio nuevo durante"],
+  meta_primer_mes: [1, 60, "Meta de entradas del primer mes"],
   retencion_dias_vencido: [1, 120, "Vencido pasa a “se fue” después de"],
   retencion_dias_se_fue: [7, 365, "Los que se fueron se muestran durante"],
   pausa_dias_por_anio: [0, 365, "Pausa: máximo de días por año"],
@@ -89,7 +90,7 @@ const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia",
            "recargo_tipo", "recargo_valor", "recargo_dias", "fiado_activo", "fiado_tope"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
-           "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
+           "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue", "meta_primer_mes"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite", "falta_politica", "falta_bloqueo_dias"],
   secciones: ["secciones_apagadas", "modo_clases"],
 };
@@ -504,6 +505,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             <div className="grid sm:grid-cols-2 gap-3">
               {num("retencion_dias_ausencia", "“No viene” después de (días)", "Paga pero no aparece: entra en la lista “No viene”")}
               {num("retencion_dias_nuevo", "Socio nuevo durante (días)", "Si no viene en sus primeros días, va a “Nuevo que no viene”")}
+              {num("meta_primer_mes", "Meta del primer mes (entradas)", "La ficha del socio nuevo muestra cuánto lleva; en la primera semana, menos de 2 entradas lo marca en riesgo")}
               {num("retencion_dias_vencido", "Vencido pasa a “se fue” después de (días)", "Mientras tanto está en “Venció”, para cobrarle")}
               {num("retencion_dias_se_fue", "Los que se fueron se muestran durante (días)", "Después dejan de aparecer en “Se fue”")}
             </div>

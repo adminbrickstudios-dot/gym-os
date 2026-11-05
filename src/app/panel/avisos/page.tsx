@@ -10,7 +10,7 @@ import { Novedades, type Novedad } from "./Novedades";
 export const metadata: Metadata = { title: "Avisos de hoy" };
 
 const GRUPO: Record<string, string> = {
-  clase_cancelada: "❌ Clase cancelada", por_vencer: "⏰ Vence pronto", vencido: "⛔ Venció hace poco", comprobante_rechazado: "🧾 Comprobante rechazado", cumpleanos: "🎂 Cumple años", no_viene: "👀 No viene",
+  clase_cancelada: "❌ Clase cancelada", por_vencer: "⏰ Vence pronto", vencido: "⛔ Venció hace poco", comprobante_rechazado: "🧾 Comprobante rechazado", cumpleanos: "🎂 Cumple años", no_viene: "👀 No viene", bienvenida: "🎉 Bienvenida", primera_semana: "🌱 Primera semana", primer_mes: "🎉 Primer mes",
 };
 
 /** AVI-1: la bandeja del día. Se calcula al abrirla (sin cron); los mensajes salen de Configuración → Mensajes. */

@@ -404,7 +404,7 @@ bloque 18.
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
-- [ ] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino
+- [x] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino — verificado: db (primer-mes: ficha, avisos de los días 1, 7 y 30, riesgo de la primera semana, meta 1 a 60; 360 pruebas en verde), e2e:com-2 (en la tanda)
 - [ ] COM-3 · 🟢 · Avisar a todos los anotados de una clase
 - [ ] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio
 - [ ] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas

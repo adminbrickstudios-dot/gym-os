@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-2 · El primer mes del socio nuevo
+
+**QUÉ HICE**
+- Ficha: "🌱 Día 9 de 30 · 1 entrada (meta 8)" durante los primeros 30 días (✅ si llegó a la meta).
+- Avisos de hoy: "🎉 Bienvenida" (días 1 y 2 desde que se anotó), "🌱 Primera semana" (días 7 a 9) y "🎉 Primer mes" (30 a 33), con su WhatsApp; los dos nuevos mensajes se editan en Configuración → Mensajes como los demás (13 en total).
+- Retención → En riesgo: el nuevo que en su primera semana vino menos de 2 veces ("Primera semana: vino 1 vez (la meta del mes es 8)").
+- La meta se cambia en Configuración → Reglas (1 a 60, por defecto 8).
+- Migración 0122 (todo calculado de suscripciones e ingresos; copias de guardar_configuracion, configuracion_panel, mensajes, bandeja, marcar_avisado, vista previa y riesgo_baja). Prueba de base; e2e com-2. cfg-5 y la prueba de mensajes pasan a 13 mensajes.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-2, cfg-5).
+
+---
+
 ## 2026-11-05 · COM-1 · Riesgo de baja
 
 **QUÉ HICE**
