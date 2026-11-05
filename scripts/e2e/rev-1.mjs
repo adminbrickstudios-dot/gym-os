@@ -91,12 +91,13 @@ try {
   // 15:00 · Proveedor de agua.
   await r.goto(`${G}/panel/caja`);
   await r.locator('button:has-text("Sale plata")').click();
+  chequear(await r.locator('input[aria-label="Foto del ticket"]').count() === 1, "15:00 · el retiro ofrece sacarle foto al ticket", "el retiro no tiene foto del ticket");
   await r.locator('input[placeholder="$"]').fill("3.000");
   await r.locator('input[placeholder^="Motivo"]').fill(`Proveedor agua ${s}`);
   await r.locator('button:has-text("Anotar")').click();
   await r.locator('button:has-text("Sale plata")').waitFor({ timeout: 30000 });
-  ok("15:00 · retiro de $3.000 con motivo “Proveedor agua”");
-  falta("15:00 · foto del ticket en el retiro y que el stock suba con la compra al proveedor");
+  ok("15:00 · retiro de $3.000 con motivo “Proveedor agua” (con lugar para la foto del ticket, CAJ-4)");
+  falta("15:00 · que el stock suba en el mismo paso: la entrada de mercadería la cargan el dueño o el encargado (REV-1d, decide Mateo)");
 
   // 19:00 · Transferencias.
   await r.goto(`${G}/panel/transferencias`);

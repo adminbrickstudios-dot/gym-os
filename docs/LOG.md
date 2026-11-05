@@ -91,7 +91,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 | 9:30 | Prospecto en 10 s + link de la página | ⚠️ WhatsApp sin el link → REV-1b |
 | 10:00 | Pase de prueba gratis una vez por DNI | ❌ → REV-1c (da acceso sin pagar: decide Mateo) |
 | 14:00 | Cambio de turno, arqueo ciego, aviso a la dueña | ✅ |
-| 15:00 | Retiro con foto del ticket; stock sube | ⚠️ retiro sí; foto y stock en el mismo paso no → REV-1d |
+| 15:00 | Retiro con foto del ticket; stock sube | ✅ foto (CAJ-4); ⚠️ el stock en el mismo paso pide que la recepción cargue mercadería → REV-1d (decide Mateo) |
 | 18:00 | Cancelar clase con aviso | ✅ (cla-3) |
 | 19:00 | Aprobar transferencia | ✅ |
 | 21:00 | Baja: motivo + ofrecer pausa | ✅ |
