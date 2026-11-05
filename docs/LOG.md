@@ -15,6 +15,16 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ADM-1 · Plantillas por tipo de gimnasio al crear
+
+**QUÉ HICE**
+- Super admin → Nuevo gimnasio → "Tipo de gimnasio" (los 8 de la tabla de la hoja de ruta, o sin plantilla). Prende el modo de clases, qué cobra (membresía, pase, pack) y turnos fijos; crea actividades y planes de ejemplo.
+- Los planes de ejemplo van **sin precio**: no se venden hasta que el dueño los pone (Primeros pasos se lo pide). No invento precios.
+- Solo el admin, y solo en un gimnasio sin planes. Si la plantilla fallara, el gimnasio queda creado y se dice.
+- Migración 0107 (`privado.plantillas_gimnasio`, `admin_aplicar_plantilla`), prueba de base `plantillas-gimnasio` (las 8 se aplican), `e2e:adm-1`.
+
+---
+
 ## 2026-11-05 · AUD-15 · Super admin, Ingresar y Elegir gimnasio
 
 **QUÉ HICE**

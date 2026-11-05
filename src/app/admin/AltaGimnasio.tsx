@@ -4,6 +4,12 @@ import { useActionState, useState } from "react";
 import { crearGimnasio, type EstadoAlta } from "./acciones";
 import { BotonEntrar } from "./BotonEntrar";
 
+// ADM-1: el tipo de gimnasio prende lo que corresponde y crea planes de ejemplo (sin precio).
+const TIPOS: [string, string][] = [
+  ["", "Sin plantilla (todo apagado)"], ["musculacion", "🏋️ Musculación de barrio"], ["grande", "🏢 Gimnasio grande o cadena"],
+  ["box", "🔥 Box de crossfit o funcional"], ["yoga", "🧘 Yoga o pilates"], ["artes", "🥋 Artes marciales o escuela deportiva"],
+  ["natacion", "🏊 Natación"], ["personal", "💪 Entrenador personal o estudio chico"], ["24h", "🌙 24 horas o sin recepción"],
+];
 const aSlug = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 42);
 
 export function AltaGimnasio({ dominio }: { dominio: string }) {
@@ -48,6 +54,9 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
           <label className="space-y-1"><span className="etiqueta">Mail del dueño</span>
             <input name="email" type="email" className="campo" placeholder="Para crearle la cuenta" />
             <span className="block text-sm texto-tenue">Si lo dejás vacío, le das acceso después.</span></label>
+          <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Tipo de gimnasio</span>
+            <select name="tipo" className="campo" defaultValue="musculacion">{TIPOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select>
+            <span className="block text-sm texto-tenue">Prende las clases y lo que cobra, y deja planes de ejemplo sin precio: el dueño los ajusta.</span></label>
           {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-2xl !px-4 !py-3">⚠️ {estado.error}</p>}
           <div className="sm:col-span-2"><button type="submit" disabled={creando} className="boton boton-principal">{creando ? "Creando…" : "🏋️ Crear gimnasio"}</button></div>
         </form>

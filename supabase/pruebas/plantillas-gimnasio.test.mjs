@@ -1,0 +1,44 @@
+// ADM-1 (0107): al crear un gimnasio, la plantilla del tipo prende el modo de
+// clases y lo que cobra, crea actividades y planes de ejemplo SIN precio
+// (no se venden hasta que el dueño los pone); solo el admin, solo una vez.
+import { test, before, after } from "node:test";
+import assert from "node:assert/strict";
+import { abrir } from "./_comun.mjs";
+
+let t, admin, dueno;
+before(async () => {
+  t = await abrir("prueba-plantillas");
+  [{ id: admin }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`a${Math.random()}@ejemplo.invalid`]);
+  await t.q(`insert into public.administradores_plataforma (usuario_id) values ($1)`, [admin]);
+  [{ id: dueno }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`d${Math.random()}@ejemplo.invalid`]);
+});
+after(async () => t && t.cerrar());
+const crear = async (slug) => (await t.q(`select public.admin_crear_gimnasio($1, 'Prueba', 'ejemplo.invalid', 'Dueño') r`, [slug]))[0].r;
+
+test("box: reserva, packs y actividades; planes sin precio", async () => {
+  await t.comoUsuario(admin, async () => {
+    const [{ r }] = await t.q(`select public.admin_crear_gimnasio($1, 'Box Prueba', 'ejemplo.invalid', 'Dueño') r`, [`box-${Date.now()}`]);
+    await t.q(`select public.admin_aplicar_plantilla($1, 'box')`, [r.gimnasio_id]);
+    const [c] = await t.q(`select modo_clases, cobra_pack, cobra_membresia from public.configuracion_gimnasio where gimnasio_id = $1`, [r.gimnasio_id]);
+    assert.deepEqual([c.modo_clases, c.cobra_pack, c.cobra_membresia], ["reserva", true, true]);
+    const planes = await t.q(`select nombre, tipo, consume_en, (select count(*)::int from public.precios_plan pp where pp.plan_id = p.id) precios from public.planes p where gimnasio_id = $1 order by orden`, [r.gimnasio_id]);
+    assert.deepEqual(planes.map((p) => [p.nombre, p.tipo, p.precios]), [["Libre mensual", "membresia", 0], ["Pack 8 clases", "pack", 0], ["Pack 12 clases", "pack", 0]]);
+    assert.equal(planes[1].consume_en, "asistencia");
+    const acts = await t.q(`select nombre from public.actividades where gimnasio_id = $1 order by nombre`, [r.gimnasio_id]);
+    assert.deepEqual(acts.map((a) => a.nombre), ["CrossFit", "Funcional"]);
+    await t.falla(() => t.q(`select public.admin_aplicar_plantilla($1, 'yoga')`, [r.gimnasio_id]), /ya tiene planes/);
+    await t.falla(() => t.q(`select public.admin_aplicar_plantilla($1, 'bowling')`, [r.gimnasio_id]), /desconocido/);
+  });
+});
+
+test("todas las plantillas se aplican; alguien que no es admin no", async () => {
+  const tipos = (await t.q(`select jsonb_object_keys(privado.plantillas_gimnasio()) k`)).map((x) => x.k);
+  assert.equal(tipos.length, 8);
+  await t.comoUsuario(admin, async () => {
+    for (const tipo of tipos) {
+      const r = await crear(`p-${tipo.replace(/\W/g, "")}-${Date.now()}`);
+      await t.q(`select public.admin_aplicar_plantilla($1, $2)`, [r.gimnasio_id, tipo]);
+    }
+  });
+  await t.comoUsuario(dueno, () => t.falla(() => t.q(`select public.admin_aplicar_plantilla($1, 'box')`, [t.g]), /administradores/));
+});

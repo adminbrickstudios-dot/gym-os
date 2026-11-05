@@ -30,11 +30,18 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     return { error: (e as Error).message };
   }
   revalidatePath("/admin");
+  // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde).
+  const tipo = String(f.get("tipo") ?? "");
+  let avisoPlantilla = "";
+  if (tipo) {
+    try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
+    catch (e) { avisoPlantilla = ` No se pudo aplicar la plantilla: ${(e as Error).message}.`; }
+  }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
-  if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.` } };
+  if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
     const { contrasena } = await darAcceso(r.equipo_id, email, dueno);
-    return { ok: { ...creado, email, contrasena, aviso: contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya." } };
+    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla } };
   } catch (e) {
     return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
   }
