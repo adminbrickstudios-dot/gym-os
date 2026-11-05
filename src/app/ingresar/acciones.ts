@@ -60,11 +60,19 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
 }
 
 // ── Socios: entrar con el celular y un código ───────────────────────
-/** "387 555-1234" → "+5493875551234". Si ya trae +, se respeta. */
-function normalizarCelular(t: string) {
-  const d = t.replace(/[^\d+]/g, "");
-  if (d.startsWith("+")) return d;
-  return `+549${d.replace(/^0/, "").replace(/^549?/, "").replace(/^(\d{2,4})15/, "$1")}`;
+/**
+ * "387 15 555-1234" → "+5493875551234", con la misma regla que la ficha del
+ * socio (privado.telefono_normalizado): si no, un socio cargado o importado
+ * con otro formato no coincide y no puede entrar. null si no es un celular.
+ */
+async function normalizarCelular(t: string): Promise<string | null> {
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const { data, error } = await clienteServicio().rpc("telefono_para_ingresar", { p_texto: t });
+  if (error) {
+    if (error.code === "22023") return null;
+    throw new Error(`No pudimos leer el celular: ${error.message}`);
+  }
+  return data as string | null;
 }
 
 
@@ -79,8 +87,8 @@ async function limiteCodigos(destino: string): Promise<string | null> {
 export type EstadoCodigo = { error?: string; telefono?: string; enviado?: boolean; destino?: string };
 
 export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
-  const telefono = normalizarCelular(String(form.get("telefono") ?? ""));
-  if (!/^\+\d{10,15}$/.test(telefono)) return { error: "Escribí tu celular con código de área (ej: 387 555-1234)" };
+  const telefono = await normalizarCelular(String(form.get("telefono") ?? ""));
+  if (!telefono) return { error: "Escribí tu celular con código de área (ej: 387 555-1234)" };
   const limite = await limiteCodigos(telefono);
   if (limite) return { error: limite, telefono };
   const supabase = await crearClienteServidor();

@@ -28,3 +28,19 @@ test("5 por destino, 20 por IP; guarda el hash; no lo llama un usuario", async (
   const [{ id: u }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`u${Math.random()}@ejemplo.invalid`]);
   await t.comoUsuario(u, () => t.falla(() => t.q(`select public.registrar_pedido_codigo('x@ejemplo.invalid', null)`), /permission denied|servidor/));
 });
+
+test("0118: el celular del ingreso se normaliza como la ficha (el importado con 000 entra); no lo llama un usuario", async () => {
+  const [{ id: s }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) values ($1, 'Imp', 'Tel', privado.telefono_normalizado('000 8330311', 'x')) returning id`, [t.g]);
+  const [{ telefono }] = await t.q(`select telefono from public.socios where id = $1`, [s]);
+  await servidor(async () => {
+    for (const escrito of ["000 8330311", "0008330311", "000-833-0311"]) {
+      const [{ r }] = await t.q(`select public.telefono_para_ingresar($1) r`, [escrito]);
+      assert.equal(r, telefono, `"${escrito}" tiene que dar el de la ficha`);
+    }
+    const [{ r }] = await t.q(`select public.telefono_para_ingresar('0387 15 555-1234') r`);
+    assert.equal(r, "+5493875551234");
+    await t.falla(() => t.q(`select public.telefono_para_ingresar('12')`), /característica/);
+  });
+  const [{ id: u }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`u${Math.random()}@ejemplo.invalid`]);
+  await t.comoUsuario(u, () => t.falla(() => t.q(`select public.telefono_para_ingresar('3875551234')`), /permission denied/));
+});
