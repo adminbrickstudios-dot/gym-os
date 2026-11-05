@@ -73,12 +73,12 @@ try {
   await f.locator('input[name="apellido"]').fill(`O'Brien-${s}`);
   await f.locator('input[name="dni"]').fill("abc123");
   await f.locator('input[name="telefono"]').fill("12");
-  await d.locator('button:has-text("Solo dar de alta")').click();
+  await f.locator('button[type="submit"]').first().click();   // sin plan: "✅ Dar de alta"
   const error = d.locator('main [role="alert"]').first();
   chequear(await aparece(error, 30000) && !/\/panel\/socios\/[0-9a-f-]{36}$/.test(d.url()), `DNI con letras y celular corto: no da de alta y dice qué arreglar (“${(await error.innerText().catch(() => "")).slice(0, 90)}”)`, "dio de alta con datos inválidos");
   await f.locator('input[name="dni"]').fill(`9${s}1`);
   await f.locator('input[name="telefono"]').fill(`000 4${s}1`);
-  await d.locator('button:has-text("Solo dar de alta")').click();
+  await f.locator('button[type="submit"]').first().click();   // sin plan: "✅ Dar de alta"
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 60000 });
   chequear(/🦄 Ñandú/.test(await d.locator("main h1").innerText()), "con emoji, eñe y apóstrofo en el nombre: se da de alta y se ve igual", await d.locator("main h1").innerText());
   for (const raro of ["'; drop table socios; --", "%_\\", "🦄"]) {
@@ -98,6 +98,9 @@ try {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
   for (const [i, p] of paginas.entries()) await capturar(p, `ROTA-rev6-${i}`, true).catch(() => {});
 } finally {
+  // Los socios que creó esta prueba quedan dados de baja (no ensucian las listas del demo).
+  await db.query(`update public.socios set dado_de_baja_en = now(), motivo_baja = 'otro'
+                   where gimnasio_id = $1 and dado_de_baja_en is null and (apellido = $2 or apellido = $3)`, [gim, `Cobro${s}`, `O'Brien-${s}`]).catch(() => {});
   await db.end();
 }
 await b.close();

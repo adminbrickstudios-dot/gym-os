@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-6 · Lo que encontró "intentar romperlo"
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Doble clic en "✅ Cobrar": una sola venta ✅. Sin internet: "📡 Sin conexión" aparece y se va solo ✅.
+- **Dos personas cobrando la cuota del mismo socio a la vez quedan como dos ventas** (le cubre dos meses). El día a día pide que la segunda vea "ya se cobró hace 10 s". Toca plata: no lo arreglé, quedó como REV-6a para que decidas cómo.
+- La prueba de datos raros buscaba el botón "Solo dar de alta", que solo aparece con plan: ahora usa el de dar de alta. Los socios que crea la prueba quedan dados de baja al final.
+
+---
+
 ## 2026-11-05 · COM-6 · Documentos para firmar
 
 **QUÉ HICE**

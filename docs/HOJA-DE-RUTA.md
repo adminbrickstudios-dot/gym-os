@@ -401,6 +401,7 @@ bloque 18.
 - [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟡 · Retiro de caja para el proveedor: sumar el stock en el mismo paso (la foto del ticket ya estaba, CAJ-4). La entrada de mercadería hoy la cargan solo el dueño y el encargado: ¿la recepción también, cuando paga al proveedor? — decide Mateo (es darle un permiso)
 - [x] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla — verificado: db (sumar-sede: caja sola, repetida y vacía avisan, encargado y recepción no), e2e:cliente (en la tanda)
+- [ ] REV-6a · 🟡 · Dos personas cobran la cuota del mismo socio a la vez: hoy quedan las dos ventas (cubre dos meses). El día a día pide que la segunda vea "ya se cobró hace 10 s" — toca plata: decide Mateo cómo (frenar la segunda cuota del mismo período en unos segundos, o avisar y dejar)
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
