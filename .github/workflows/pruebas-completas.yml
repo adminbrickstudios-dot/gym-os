@@ -1,0 +1,93 @@
+# Las pruebas que una compu con Windows no puede correr: la base de prueba
+# (Postgres con la simulación de Supabase), sus pruebas, los chequeos contra
+# la base y las pantallas con sesión real (e2e + barrido).
+# Corre sola en cada pull request; a mano: Actions → Pruebas completas.
+# El agente la mira con:  gh run list --workflow pruebas-completas.yml
+name: Pruebas completas
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      pantallas:
+        description: "Correr también las pantallas (e2e y barrido, ~1 h)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: pruebas-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  base:
+    name: Base (migraciones, pruebas y chequeos)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva con todas las migraciones
+        run: scripts/db/local.sh nueva
+      - name: Pruebas de la base
+        run: npm run db:pruebas
+      - name: Chequeos del proyecto
+        run: DB_PRUEBAS_URL="$(scripts/db/local.sh url)" npm run chequeos
+      - name: El demo se siembra
+        run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost
+
+  pantallas:
+    name: Pantallas (e2e y barrido)
+    needs: base
+    if: github.event_name == 'pull_request' || inputs.pantallas
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Levantar la app con la imitación de Supabase
+        run: scripts/local/levantar.sh
+      - name: Pantallas (e2e)
+        run: npm run e2e
+      - name: Barrido (cada rol abre cada pantalla)
+        if: always()
+        run: node scripts/e2e/barrido.mjs
+      - name: Guardar capturas y logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pantallas
+          path: |
+            .local/*.log
+            capturas/
+          if-no-files-found: ignore
+          retention-days: 7
