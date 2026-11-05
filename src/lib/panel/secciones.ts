@@ -31,6 +31,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "prospectos", ruta: "/panel/prospectos", emoji: "🌱", titulo: "Prospectos", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR },
   { clave: "vender", ruta: "/panel/vender", emoji: "🛒", titulo: "Vender", descripcion: "Cuotas, pases, packs y productos", grupo: "Plata", roles: MOSTRADOR, apagable: "vender" },
   { clave: "caja", ruta: "/panel/caja", emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
+  { clave: "resultado", ruta: "/panel/resultado", emoji: "📈", titulo: "Resultado", descripcion: "La plata del mes: cuánto entró, de dónde y contra el anterior", grupo: "Plata", roles: GESTION },
   { clave: "resumen", ruta: "/panel/resumen", emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
   { clave: "transferencias", ruta: "/panel/transferencias", emoji: "🧾", titulo: "Transferencias", descripcion: "Comprobantes de socios para aprobar", grupo: "Plata", roles: MOSTRADOR, apagable: "transferencias" },
   { clave: "planes", ruta: "/panel/planes", emoji: "🏷️", titulo: "Planes y precios", descripcion: "Lo que vendés y cuánto cuesta", grupo: "Gimnasio", roles: GESTION },

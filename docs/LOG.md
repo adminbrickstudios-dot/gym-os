@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RES-1 · Resultado: la plata del mes
+
+**QUÉ HICE**
+- 📈 Resultado (`/panel/resultado`, grupo PLATA, dueño y encargado), con flechas para ir de mes en mes:
+  - cobrado del mes y contra el anterior (si el mes está en curso, contra los mismos días);
+  - socios al día, altas, bajas y el recurrente por mes estimado;
+  - día por día (barras), de dónde (por plan, productos, matrícula…), cómo pagaron, horas pico.
+- Migración 0076 (`privado.cobrado_entre`, `resultado_mes`), prueba de base `resultado`, e2e `e2e:res-1`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada fuera de lo de arriba.
+
+---
+
 ## 2026-11-05 · DIS-7 · Pulido de Vencen hoy
 
 **QUÉ HICE**
