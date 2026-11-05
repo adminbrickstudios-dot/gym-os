@@ -28,7 +28,7 @@ try {
   await p.locator("select[name=tipo]").selectOption("");
   await p.click('button:has-text("Crear gimnasio")');
   await p.getByText(/está creado/).first().waitFor({ timeout: 60000 });
-  await p.getByRole("link", { name: /Equipo, claves y direcciones/ }).click();
+  await p.locator("a[data-alta-equipo]").click();
   await p.waitForURL(/\/admin\/[0-9a-f-]{36}/, { timeout: 30000 });
   const gid = p.url().split("/").pop();
   const ab = p.locator("[data-abono-gimnasio]");

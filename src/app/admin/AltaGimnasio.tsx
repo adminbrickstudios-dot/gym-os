@@ -36,7 +36,7 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
           )}
           <div className="flex flex-wrap gap-2">
             <BotonEntrar gimnasioId={ok.gimnasio_id} />
-            <Link href={`/admin/${ok.gimnasio_id}`} className="boton">⚙️ Equipo, claves y direcciones</Link>
+            <Link href={`/admin/${ok.gimnasio_id}`} className="boton" data-alta-equipo>⚙️ Equipo, claves y direcciones</Link>
             <a href={`/g/${ok.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
             <button type="button" className="boton texto-suave" onClick={() => window.location.reload()}>➕ Crear otro</button>
           </div>

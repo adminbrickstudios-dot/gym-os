@@ -14,7 +14,8 @@ try {
     await p.goto(`${G}/ingresar?modo=socio`);
     await p.fill("input[name=telefono]", TEL);
     await p.click('button:has-text("código")');
-    await p.locator('input[name=codigo], [role="alert"], .mensaje-error').first().waitFor({ timeout: 30000 });
+    // Ojo: Next pone su propio role=alert (el anunciador de rutas) fuera de <main>.
+    await p.locator('main input[name=codigo], main [role="alert"]').first().waitFor({ timeout: 30000 });
     ultimo = await p.locator("main").innerText();
   }
   chequear(/Pediste muchos códigos/.test(ultimo), "el sexto pedido del mismo celular: “Pediste muchos códigos: esperá una hora”", ultimo.slice(0, 200));
