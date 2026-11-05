@@ -12,6 +12,7 @@ import { TandaAvisos } from "@/app/panel/avisos/Tanda";
 import type { Aviso } from "@/app/panel/avisos/Aviso";
 
 export const metadata: Metadata = { title: "Vencen hoy" };
+type Prometio = { socio_id: string; socio: string; momento: string; motivo: string | null; por: string | null; texto: string | null; telefono: string | null };
 type Fila = { socio_id: string; nombre: string; telefono: string | null; texto: string; ultimo_ingreso: string | null; ultimo_contacto_en: string | null; ultimo_contacto_por: string | null; mensaje: string | null };
 
 export default async function VencenHoy() {
@@ -19,9 +20,10 @@ export default async function VencenHoy() {
     const panel = await contextoPanel();
     exigirSeccion(panel, "vencen_hoy");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const [filas, bandeja] = await Promise.all([
+    const [filas, bandeja, prometieron] = await Promise.all([
       rpc<Fila[]>("vencen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<Prometio[]>("prometieron_pagar", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     // VEH-1: el "avisado ✓" es el de la bandeja (misma cuenta). Si no está en la bandeja, ya se le avisó otro día por este vencimiento.
     const avisos = new Map(bandeja.filter((b) => b.clave === "por_vencer").map((b) => [b.socio_id, b]));
@@ -39,6 +41,19 @@ export default async function VencenHoy() {
         <Encabezado emoji="⏰" titulo="Vencen hoy" bajada={filas.length
           ? `${filas.length === 1 ? "A 1 socio se le termina" : `A ${filas.length} socios se les termina`} la cuota hoy. Un mensaje ahora evita que se vayan; si vienen, cobrales desde acá.`
           : "Hoy es su último día cubierto. Un mensaje ahora evita que se vayan."} />
+        {/* REV-1a: a los que dejaron pasar sin poder entrar, se les recuerda hoy y mañana (sale solo cuando pagan). */}
+        {prometieron.length > 0 && (
+          <section className="mb-8 space-y-3" aria-labelledby="prometieron" data-prometieron={prometieron.length}>
+            <h2 id="prometieron" className="titulo text-2xl">🤝 Le prometieron pagar</h2>
+            <ul className="space-y-2">
+              {prometieron.map((p) => (
+                <FilaContacto key={p.socio_id} socioId={p.socio_id} nombre={p.socio} texto={p.texto ?? ""} lista="vencido"
+                  detalle={`Pasó el ${fechaCorta(p.momento, zona)} a las ${hora(p.momento)}${p.por ? ` (lo dejó pasar ${p.por})` : ""}${p.motivo ? `: “${p.motivo}”` : ""}`}
+                  whatsapp={linkWhatsappSocio(p.telefono, null)} ultimo={null} puedeAnotar={false} cobrar={puedeCobrar} />
+              ))}
+            </ul>
+          </section>
+        )}
         {filas.length === 0 ? (
           <Vacio emoji="🎉" titulo="Hoy no vence nadie">
             {rutaDisponible("/panel/retencion", panel.yo.rol, panel.secciones_apagadas)

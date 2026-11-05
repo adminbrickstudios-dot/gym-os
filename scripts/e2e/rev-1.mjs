@@ -65,7 +65,12 @@ try {
       chequear(/tope|autoriz/i.test(t), `7:10 · llegó al tope del día: “${t.slice(0, 120)}”`, `no lo dejó pasar: ${t.slice(0, 200)}`);
     }
   }
-  falta("7:10 · “le prometió pagar” en la bandeja de la tarde: la dueña lo ve en Inicio (dejados pasar), pero nada le recuerda a la tarde cobrarle");
+  // REV-1a: a la tarde, Vencen hoy se lo recuerda (mientras siga sin pagar).
+  await r.goto(`${G}/panel/vencen-hoy`);
+  await r.locator("main h1").waitFor({ timeout: 60000 });
+  const prometio = r.locator("[data-prometieron] li", { hasText: "Testigo Sin Pago" });
+  chequear(await aparece(prometio, 15000) && /Paga a la tarde|Paga mañana/.test(await prometio.first().innerText()),
+    "a la tarde, Vencen hoy: “🤝 Le prometieron pagar” con quién lo dejó pasar y el motivo", "Vencen hoy no recuerda al que prometió pagar");
 
   // 9:30 · Alguien pregunta precios: prospecto en 10 segundos.
   await r.goto(`${G}/panel/prospectos`);

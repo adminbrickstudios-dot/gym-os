@@ -159,6 +159,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | ADM-1 | Los planes de ejemplo de cada plantilla van sin precio: el dueño los pone antes de vender (no se inventan precios). La plantilla se aplica solo a un gimnasio sin planes. | No arrancar con precios que nadie eligió. | Precios sugeridos por zona, si BRIK quiere cargarlos. |
 | 2026-11-05 | ADM-2/ADM-3 | El abono se calcula de los pagos que registra BRIK (hasta qué día cubren). Al asignar un plan hay 14 días hasta el primer pago. Vencido: solo lectura hecha cumplir en la base con un trigger que frena solo al equipo del gimnasio (el socio, la página y la puerta siguen; el admin de BRIK puede igual). | D11 y D13, sin trabar a nadie por error. | Cobrar el abono con MercadoPago (MP-3, 🔌). |
 | 2026-11-05 | RET-3 | Los motivos de baja quedan con la lista fija que ya tenía la base (precio, horario, se mudó, otro gimnasio, sin tiempo, no le gustó, otro): hacerla editable por gimnasio cambiaría una restricción de la tabla de socios y cómo se agrupan en el Resultado. La pausa se ofrece si tiene plan y el motivo no es "se mudó" ni "otro gimnasio"; el botón lleva a Pausas de la ficha. Los motivos del mes se ven en el Resultado. | Lo prudente sin tocar datos existentes. | Lista de motivos editable por gimnasio. |
+| 2026-11-05 | REV-1a | "Le prometieron pagar": dueño y encargado ven a todos los que dejaron pasar ayer u hoy y siguen sin poder entrar; la recepción, solo los que dejó pasar ella. Sale solo cuando la puerta lo deja pasar. | Calculado de las entradas forzadas y de la misma función de la puerta; la recepción no ve nada que no viera. | Guardar "prometió pagar" como estado. |
 
 ---
 
@@ -395,7 +396,7 @@ bloque 18.
 - [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
 
 ### 18 · Lo que encontró la segunda pasada
-- [ ] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado
+- [x] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado — verificado: db (prometieron-pagar: hoy y ayer, sale solo al pagar, la recepción ve los suyos), e2e:rev-1 (en la tanda)
 - [x] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio — hecho sin tocar la plantilla: el link va abajo del mensaje, solo si la página está publicada (verificado: e2e:rev-1, en la tanda)
 - [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟢 · Retiro de caja para el proveedor: foto del ticket y, si es mercadería, sumar el stock en el mismo paso

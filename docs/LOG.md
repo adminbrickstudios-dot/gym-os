@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-1a · "Le prometieron pagar"
+
+**QUÉ HICE**
+- Vencen hoy tiene arriba "🤝 Le prometieron pagar": los que dejaron pasar ayer u hoy sin poder entrar, con quién los dejó pasar, el motivo, lo que dice la puerta ahora, WhatsApp y Cobrar. Sale solo cuando pagan (usa el mismo cálculo de la puerta; no se guarda nada).
+- Migración 0120 (`prometieron_pagar`): el dueño y el encargado ven todos; la recepción, los que dejó pasar ella (no ve más de lo que ya veía). Prueba de base.
+
+**PARA QUE MIRES VOS**
+- Que la recepción vea solo los suyos fue decisión mía, para no darle más acceso: si querés que vea todos, es un cambio de una línea.
+
+**LO QUE NO PUDE VERIFICAR**
+- La pantalla: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (rev-1).
+
+---
+
 ## 2026-11-05 · REV-2a · Sumar una sede
 
 **QUÉ HICE**
