@@ -160,6 +160,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | ADM-2/ADM-3 | El abono se calcula de los pagos que registra BRIK (hasta qué día cubren). Al asignar un plan hay 14 días hasta el primer pago. Vencido: solo lectura hecha cumplir en la base con un trigger que frena solo al equipo del gimnasio (el socio, la página y la puerta siguen; el admin de BRIK puede igual). | D11 y D13, sin trabar a nadie por error. | Cobrar el abono con MercadoPago (MP-3, 🔌). |
 | 2026-11-05 | RET-3 | Los motivos de baja quedan con la lista fija que ya tenía la base (precio, horario, se mudó, otro gimnasio, sin tiempo, no le gustó, otro): hacerla editable por gimnasio cambiaría una restricción de la tabla de socios y cómo se agrupan en el Resultado. La pausa se ofrece si tiene plan y el motivo no es "se mudó" ni "otro gimnasio"; el botón lleva a Pausas de la ficha. Los motivos del mes se ven en el Resultado. | Lo prudente sin tocar datos existentes. | Lista de motivos editable por gimnasio. |
 | 2026-11-05 | REV-1a | "Le prometieron pagar": dueño y encargado ven a todos los que dejaron pasar ayer u hoy y siguen sin poder entrar; la recepción, solo los que dejó pasar ella. Sale solo cuando la puerta lo deja pasar. | Calculado de las entradas forzadas y de la misma función de la puerta; la recepción no ve nada que no viera. | Guardar "prometió pagar" como estado. |
+| 2026-11-05 | COM-7 | Los habituales en la tablet vienen apagados; prendidos, tocar el nombre pide los últimos 3 números del DNI (y cuenta para el freno de 30 intentos por minuto). | Sin eso, cualquiera entraría tocando un nombre ajeno: la tablet no tiene a nadie mirando. Nombre e inicial del apellido, nada más. | Entrar solo con tocar el nombre. |
 
 ---
 
@@ -411,7 +412,7 @@ bloque 18.
 - [x] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas — verificado: db (retencion-numeros: altas, bajas con motivo, cohorte de hace 3 meses, pocas visitas, la recepción no), 0,1 s con 3.000 socios, e2e:com-5 (en la tanda). "Pocas visitas" mira los últimos 30 días (el mes calendario daría todos "pocos" a principio de mes)
 - [x] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada — verificado: db (documentos: versiones, firma en la app y en recepción, el de menores solo a menores, la versión vieja no se firma, la recepción no publica), e2e:com-6 (en la tanda). Que bloquee la entrada: COM-6b
 - [ ] COM-6b · 🟡 · Que "falta firmar" frene la entrada si el gimnasio lo elige — cambia quién entra (el cálculo de acceso): decide Mateo
-- [ ] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre
+- [x] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre — verificado: db (kiosco-habituales: apagado por defecto, nombre con inicial, DNI equivocado no entra, el que ya entró no aparece), e2e:com-7 (en la tanda). Tocar el nombre pide los últimos 3 del DNI
 - [ ] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago
 - [ ] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento)
 - [ ] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos

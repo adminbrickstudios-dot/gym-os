@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/Camara";
-import { entrarEnKiosco, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
+import { entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
@@ -59,11 +59,21 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
   const [camara, setCamara] = useState(false);
   const [ocupado, empezar] = useTransition();
   const campo = useRef<HTMLInputElement>(null);
+  // COM-7: los habituales de esta hora (vacío si el gimnasio no lo usa) y el que tocó su nombre.
+  const [habituales, setHabituales] = useState<{ socio_id: string; nombre: string }[]>([]);
+  const [elegido, setElegido] = useState<{ socio_id: string; nombre: string } | null>(null);
+  useEffect(() => {
+    if (r) return;
+    let vivo = true;
+    void habitualesDeLaTablet().then((h) => { if (vivo) setHabituales(h); });
+    const i = setInterval(() => void habitualesDeLaTablet().then((h) => { if (vivo) setHabituales(h); }), 120000);
+    return () => { vivo = false; clearInterval(i); };
+  }, [r]);
 
   const mandar = useCallback((codigo: string) => empezar(async () => {
     setCamara(false);
     const x = await entrarEnKiosco(codigo);
-    setR(x); setDni("");
+    setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   }), []);
   const mostrar = useCallback((x: Resultado) => { setR(x); sonar(x.resultado === "entro" || x.resultado === "entro_modo_aviso"); }, []);
@@ -74,10 +84,16 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
     return () => clearTimeout(t);
   }, [r]);
 
+  const conHabitual = (fin: string) => empezar(async () => {
+    const x = await entrarHabitual(elegido!.socio_id, fin);
+    setR(x); setDni(""); setElegido(null);
+    sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
+  });
+  const largo = elegido ? 3 : 9;
   const tecla = (k: string) => {
     if (k === "⌫") setDni((d) => d.slice(0, -1));
-    else if (k === "✓") { if (dni.length >= 6) mandar(dni); }
-    else setDni((d) => (d.length < 9 ? d + k : d));
+    else if (k === "✓") { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6) mandar(dni); }
+    else setDni((d) => (d.length < largo ? d + k : d));
   };
 
   if (r) {
@@ -99,21 +115,29 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
     <div className="w-full max-w-md space-y-6 text-center" data-kiosco="listo">
       <div>
         <p className="texto-suave text-lg">{gimnasio}{sede ? ` · ${sede}` : ""}</p>
-        <h1 className="titular text-5xl mt-2">¡Hola! 👋</h1>
-        <p className="text-xl mt-2">Escribí tu DNI{con_qr ? " o mostrá tu QR" : ""}</p>
+        <h1 className="titular text-5xl mt-2">{elegido ? `¡Hola, ${elegido.nombre}!` : "¡Hola! 👋"}</h1>
+        <p className="text-xl mt-2">{elegido ? "Los últimos 3 números de tu DNI" : `Escribí tu DNI${con_qr ? " o mostrá tu QR" : ""}${habituales.length ? ", o tocá tu nombre" : ""}`}</p>
       </div>
-      <form onSubmit={(e) => { e.preventDefault(); if (dni.length >= 6 || /^GYMOS1\./.test(dni)) mandar(dni); }}>
-        <input ref={campo} value={dni} onChange={(e) => setDni(e.target.value.startsWith("GYMOS1.") ? e.target.value : e.target.value.replace(/\D/g, "").slice(0, 9))}
-          inputMode="numeric" autoComplete="off" aria-label="Tu DNI" placeholder="Tu DNI"
+      {!elegido && habituales.length > 0 && (
+        <div className="grid grid-cols-2 gap-2" data-habituales={habituales.length} aria-label="Los que suelen venir a esta hora">
+          {habituales.map((h) => (
+            <button key={h.socio_id} type="button" className="boton !min-h-16 text-xl" onClick={() => { setElegido(h); setDni(""); }}>{h.nombre}</button>
+          ))}
+        </div>
+      )}
+      {elegido && <button type="button" className="boton-texto texto-suave" onClick={() => { setElegido(null); setDni(""); }}>← No soy {elegido.nombre}</button>}
+      <form onSubmit={(e) => { e.preventDefault(); if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6 || /^GYMOS1\./.test(dni)) mandar(dni); }}>
+        <input ref={campo} value={dni} onChange={(e) => setDni(!elegido && e.target.value.startsWith("GYMOS1.") ? e.target.value : e.target.value.replace(/\D/g, "").slice(0, largo))}
+          inputMode="numeric" autoComplete="off" aria-label={elegido ? "Últimos 3 números de tu DNI" : "Tu DNI"} placeholder={elegido ? "···" : "Tu DNI"}
           className="campo !min-h-20 !text-4xl text-center tracking-widest numero" />
       </form>
       <div className="grid grid-cols-3 gap-3" aria-label="Teclado">
         {TECLAS.map((k) => (
-          <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "✓" && dni.length < 6)}
+          <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "✓" && (elegido ? dni.length !== 3 : dni.length < 6))}
             className={`boton !min-h-20 !text-3xl ${k === "✓" ? "boton-principal" : ""}`} aria-label={k === "⌫" ? "Borrar" : k === "✓" ? "Entrar" : k}>{k}</button>
         ))}
       </div>
-      {con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}>📷 Mostrar mi QR</button>}
+      {!elegido && con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}>📷 Mostrar mi QR</button>}
       {camara && <Camara frente alLeer={mandar} alCerrar={() => setCamara(false)} />}
       {qr_pared && <QrPared alEntrar={mostrar} />}
     </div>

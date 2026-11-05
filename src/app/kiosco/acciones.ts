@@ -30,3 +30,17 @@ export async function ultimoDeLaTablet(desde: string): Promise<Resultado | null>
   const { data, error } = await cliente().rpc("kiosco_ultimo", { p_token: await token(), p_desde: desde });
   return error || !data ? null : (data as Resultado & { momento: string });
 }
+
+/** COM-7: los que suelen venir a esta hora (si el dueño lo prendió). */
+export async function habitualesDeLaTablet(): Promise<{ socio_id: string; nombre: string }[]> {
+  const { data, error } = await cliente().rpc("kiosco_habituales", { p_token: await token() });
+  return error || !data ? [] : data;
+}
+
+/** Tocó su nombre: entra con los últimos 3 números del DNI (lo decide la base, igual que con el DNI entero). */
+export async function entrarHabitual(socioId: string, dniFin: string): Promise<Resultado> {
+  const t = await token();
+  if (!t) return { error: "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas." };
+  const { data, error } = await cliente().rpc("kiosco_entrar_habitual", { p_token: t, p_socio_id: socioId, p_dni_fin: dniFin });
+  return error ? { error: error.message } : (data as Resultado);
+}

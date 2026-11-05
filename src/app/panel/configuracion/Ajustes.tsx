@@ -24,7 +24,7 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
-  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; meta_primer_mes: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; meta_primer_mes: number; kiosco_habituales: boolean; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
   fiado_activo: boolean; fiado_tope: number;
   falta_politica: "nada" | "bloquear" | "descontar"; falta_bloqueo_dias: number;
@@ -90,7 +90,7 @@ const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia",
            "recargo_tipo", "recargo_valor", "recargo_dias", "fiado_activo", "fiado_tope"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
-           "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue", "meta_primer_mes"],
+           "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue", "meta_primer_mes", "kiosco_habituales"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite", "falta_politica", "falta_bloqueo_dias"],
   secciones: ["secciones_apagadas", "modo_clases"],
 };
@@ -531,6 +531,13 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                     ? "Prendido: la tablet muestra un QR que cambia cada 30 segundos; el socio lo escanea desde su app y entra (o ve por qué no)."
                     : "Apagado: en la tablet solo se escribe el DNI."}
                   onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_pared"])] : c.accesos_activos.filter((x) => x !== "qr_pared"))} />
+              )}
+              {c.accesos_activos.includes("kiosco") && (
+                <Interruptor etiqueta="👋 Los habituales de esta hora en la tablet" checked={c.kiosco_habituales}
+                  ayuda={c.kiosco_habituales
+                    ? "Prendido: la tablet muestra a los que suelen venir a esta hora (nombre e inicial del apellido); tocan su nombre y ponen los últimos 3 números del DNI."
+                    : "Apagado: la tablet no muestra nombres (se escribe el DNI entero)."}
+                  onChange={(e) => set("kiosco_habituales", e.target.checked)} />
               )}
               {guardado.accesos_activos.includes("kiosco") && (
                 <Tablets inicial={tablets} sedes={datos.sedes} esDueno={puedeEditar} zona={datos.zona_horaria} />

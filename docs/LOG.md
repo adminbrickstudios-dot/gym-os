@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-7 · Kiosco con los habituales
+
+**QUÉ HICE**
+- Configuración → Reglas (con la tablet prendida): "👋 Los habituales de esta hora en la tablet", apagado de fábrica. Prendido, la tablet muestra hasta 12 socios que vinieron al menos 3 días en las últimas 4 semanas a esta hora (±45 min) y todavía no entraron hoy, con nombre e inicial del apellido.
+- Tocar el nombre pide **los últimos 3 números del DNI**; después es lo mismo que escribir el DNI (mismo cálculo, mismo registro, mismo freno de intentos). Con otros números: "Probá de nuevo".
+- Migración 0127 (`kiosco_habituales`, `kiosco_entrar_habitual`; copia de guardar_configuracion y configuracion_panel), prueba de base, e2e com-7 (deja todo como estaba).
+
+**PARA QUE MIRES VOS**
+- Pedir los 3 números fue decisión mía (fila en "Decisiones que tomó el agente"): sin eso, cualquiera entra tocando un nombre ajeno.
+
+**LO QUE NO PUDE VERIFICAR**
+- La tablet: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-7).
+
+---
+
 ## 2026-11-05 · REV-6 · Lo que encontró "intentar romperlo"
 
 **LO QUE ENCONTRÉ SIN PEDIRTELO**
