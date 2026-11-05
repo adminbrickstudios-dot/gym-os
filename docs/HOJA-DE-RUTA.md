@@ -238,7 +238,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
 - [x] ENT-8 · 🟢 · Control de "dejar pasar": a quién, quién y por qué, por día y semana
 - [x] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
-- [ ] DIS-2 · 🟢 · Pulido: Entrada
+- [x] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
 - [ ] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos

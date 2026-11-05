@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-2 · Pulido de la Entrada
+
+**QUÉ HICE**
+- El botón "🔊 Con sonido" era un link de texto de 20px: ahora es un botón de 44px, fácil de tocar.
+- `/panel/entrada/loading.tsx` con la forma real: título, buscador grande y la lista de hoy.
+- Revisé lo demás y ya estaba bien: el vacío de "Hoy" dice "Todavía no entró nadie"; "no lo encuentro" ofrece darlo de alta; Esc y Enter funcionan; cada error dice qué pasó.
+- Medido antes y después en compu (1440) y celular (390): sin desborde, ningún botón bajo, ningún verde de más.
+- `scripts/e2e/dis-2.mjs` (5 pasos) en verde; `panel-entrada` (12 pasos) sigue en verde.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: todo se abrió con sesión real.
+
+---
+
 ## 2026-11-05 · ENT-8 · Control de la puerta
 
 **QUÉ HICE**
