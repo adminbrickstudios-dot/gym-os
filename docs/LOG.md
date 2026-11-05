@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-4 · Exportar la lista de socios
+
+**QUÉ HICE**
+- Socios → "📤 Exportar" (dueño y encargado): descarga un CSV que abre bien en Excel (punto y coma, acentos) con número, nombre, apellido, DNI, celular, mail, nacimiento, plan, estado, cubierto hasta, alta, baja y etiquetas. Usa el mismo filtro que la lista (búsqueda y etiqueta).
+- Migración `20261104003700_exportar_socios.sql` (`exportar_socios`, solo dueño y encargado; el estado sale de la misma cuenta que la Entrada). `src/lib/csv.ts` con pruebas: una celda que empieza con "=" no se vuelve fórmula al abrirla.
+- Recepción: no ve el botón; si abre la dirección, "Sin permiso" (403), nunca un archivo vacío.
+- `scripts/e2e/soc-4.mjs` (5 pasos).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0037).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0037 contra la base real (probada local).
+
+---
+
 ## 2026-11-04 · SOC-3 · Notas y etiquetas, con filtros
 
 **QUÉ HICE**

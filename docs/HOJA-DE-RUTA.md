@@ -202,7 +202,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-1 · 🟢 · Importar socios desde Excel o CSV — verificado: db (importar-socios, 4 pruebas: errores por fila, vence como cobertura, deshacer y no con movimientos, 3.000 filas en 8,9 s), vitest (importar: CSV y columnas), e2e:soc-1 (12 pasos: CSV con errores, importar, deshacer, Excel, recepción sin permiso)
 - [x] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas) — verificado: db (asistencia-socio: días en hora local, sin rechazos, profe no), e2e:soc-2 (8 pasos: cada pestaña, calendario = veces, mes anterior, recepción sin Pagos, celular)
 - [x] SOC-3 · 🟢 · Notas y etiquetas, con filtros — verificado: db (notas-etiquetas: autor, quién borra, etiquetas sin repetir, filtro, profe no), e2e:soc-3 (6 pasos: etiqueta en dos socios, nota con autor y hora, filtro en Socios y Retención, la dueña borra, la etiqueta desaparece)
-- [ ] SOC-4 · 🟢 · Exportar la lista de socios
+- [x] SOC-4 · 🟢 · Exportar la lista de socios — verificado: vitest (csv: punto y coma, BOM, comillas, sin fórmulas), e2e:soc-4 (5 pasos: CSV con el mismo filtro, recepción sin botón y con “Sin permiso” en la dirección directa)
 - [ ] SOC-6 · 🟢 · Cumpleaños
 - [ ] SOC-7 · 🟢 · Foto del socio desde la cámara
 - [ ] SOC-8 · 🟢 · Encontrar y unir socios duplicados
