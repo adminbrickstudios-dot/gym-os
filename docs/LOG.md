@@ -15,6 +15,30 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-2 · Segunda pasada: una semana como dueña (celular)
+
+**QUÉ HICE**
+- `scripts/e2e/rev-2.mjs` (`npm run e2e:rev-2`): la dueña, en el celular, recorre la tabla "Dueño" del día a día: Inicio con sus 4 números, el resumen de la semana, contrata a alguien, le saca el acceso, mira los permisos del encargado, prepara un aumento, publica y quita una novedad, abre la campaña, Resultado contra el mes anterior y exportar el mes; Retención y Vencen hoy. Ninguna pantalla se desborda.
+- Arreglado en la misma vuelta: la contraseña provisoria (al dar acceso o generar una nueva) ahora tiene "📲 Mandar por WhatsApp" con el mail, la contraseña y dónde entrar, como pide el documento ("contraseña provisoria por WhatsApp"). El texto se arma en el navegador y sale solo si se toca.
+
+**Fila por fila (Dueño)**
+| Caso | Ahora |
+|---|---|
+| ¿Me roban? | ✅ Resumen del día y de la semana, cruces de caja |
+| Vacaciones | ✅ permisos del encargado (EQU-2) |
+| Contrata a alguien | ✅ (desde hoy con WhatsApp) |
+| Echa a alguien | ✅ Sacar acceso; su historia queda |
+| Abre otra sede | ❌ no se puede sumar una sede desde el panel → REV-2a |
+| Cambia los precios | ✅ aumento programado |
+| El contador | ✅ exportar el mes |
+| Aviso a todos | ✅ novedad en la app + campaña |
+| ¿Cómo vengo? | ✅ Resultado contra el mes anterior |
+
+**LO QUE NO PUDE VERIFICAR**
+- El botón de WhatsApp de la contraseña: el código está escrito, pero no está ejecutado; corre en la tanda (rev-2 y cliente).
+
+---
+
 ## 2026-11-05 · REV-1 · Segunda pasada: un día entero como recepción
 
 **QUÉ HICE**

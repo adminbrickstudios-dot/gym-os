@@ -14,6 +14,11 @@ export function ContrasenaNueva({ r }: { r: Resultado }) {
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[var(--texto)]">
           {r.email && <span>📧 <strong className="break-all">{r.email}</strong></span>}
           <span>🔑 <strong className="numero text-2xl select-all">{r.contrasena}</strong></span>
+          {/* Se arma en el navegador recién acá; el texto sale hacia WhatsApp solo si se toca (contraseña provisoria por WhatsApp, 10-DIA-A-DIA). */}
+          <a className="boton boton-chico" target="_blank" rel="noopener noreferrer" data-compartir-clave
+             href={`https://wa.me/?text=${encodeURIComponent(`Tu acceso a Gym OS: entrá en ${window.location.origin}/ingresar${r.email ? ` con ${r.email}` : ""} y la contraseña ${r.contrasena}. Después cambiala en “Mi cuenta”.`)}`}>
+            📲 Mandar por WhatsApp
+          </a>
         </p>
       )}
     </Mensaje>

@@ -388,7 +388,7 @@ Cada una vuelve a abrir todo el panel con su rol, lo compara con `docs/producto/
 y con `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila, y suma lo que falte al
 bloque 18.
 - [x] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja) — verificado: e2e:rev-1 (12 pasos, en el orden del documento); lo que falta, en el bloque 18 (REV-1a…d)
-- [ ] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular)
+- [x] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular) — verificado: e2e:rev-2 (contra la app local; la contraseña por WhatsApp corre en la tanda); lo que falta: REV-2a
 - [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
 - [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
 - [ ] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando
@@ -399,6 +399,7 @@ bloque 18.
 - [ ] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio (variable {link} en la plantilla "prospecto")
 - [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟢 · Retiro de caja para el proveedor: foto del ticket y, si es mercadería, sumar el stock en el mismo paso
+- [ ] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [ ] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado
