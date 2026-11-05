@@ -2,7 +2,7 @@
 // CFG-5 · Mensajes editables con vista previa: un cambio de plantilla se ve
 // en Retención y en Vencen hoy; "Volver al original" lo deshace.
 //   npm run e2e:cfg-5            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const NUEVO = "Che {nombre}, tu {plan} vence el {vence}. Son {debe}.";
@@ -47,7 +47,7 @@ try {
   await vista("por_vencer").locator("p", { hasText: "Che " }).waitFor({ timeout: 15000 });
   const previa = (await vista("por_vencer").innerText()).replace(/\s+/g, " ");
   chequear(/Así lo recibe .+ \(.+\):/.test(previa) && !/[{}]/.test(previa.split(":").slice(1).join(":")), `vista previa: “${previa}”`, `la vista previa quedó: ${previa}`);
-  chequear(await tarjeta("por_vencer").locator("[data-sin-guardar]").isVisible(), "avisa cambios sin guardar", "no avisa cambios sin guardar");
+  chequear(await aparece(tarjeta("por_vencer").locator("[data-sin-guardar]")), "avisa cambios sin guardar", "no avisa cambios sin guardar");
   chequear(await p.locator('button[data-pestana="mensajes"] [aria-label="cambios sin guardar"]').count() === 1, "la pestaña Mensajes queda marcada con •", "la pestaña no marca los cambios");
   let m = await esperarRespuesta("por_vencer", () => tarjeta("por_vencer").locator('button:has-text("Guardar")').click());
   chequear(/Guardado/.test(m), "guardar el mensaje", `guardar dio “${m}”`);

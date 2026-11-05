@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import Link from "next/link";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { CambiarPlan, DarDeBaja } from "./Acciones";
 import type { Ficha } from "./tipos";
 
@@ -23,6 +24,7 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
+    exigirSeccion(panel, "socios");
     const [f, planes] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -54,8 +56,8 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
           {!s.dado_de_baja_en && (
             <div className="flex flex-wrap gap-2 mt-6">
               {!v.puede || v.color === "amarillo"
-                ? <Link href={`/panel/vender?socio=${s.id}`} className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</Link>
-                : <Link href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</Link>}
+                ? <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</LinkPanel>
+                : <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>}
               {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
               <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />

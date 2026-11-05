@@ -2,7 +2,7 @@ import Link from "next/link";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
 import { fechaLarga, formatearNumero, formatearPesos, saludo } from "@/lib/formato";
-import { accesosDisponibles, accesosElegidos } from "@/lib/panel/secciones";
+import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
@@ -36,6 +36,8 @@ export default async function Inicio() {
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
+    // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
+    const ahora = datos.ahora.filter((a) => !a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas));
 
     return (
       <div className="space-y-10 sm:space-y-12">
@@ -68,11 +70,11 @@ export default async function Inicio() {
 
         <section aria-labelledby="ahora">
           <h2 id="ahora" className="titulo text-3xl mb-4">Ahora y lo que sigue</h2>
-          {datos.ahora.length === 0 ? (
+          {ahora.length === 0 ? (
             <p className="texto-suave text-lg">Nada pendiente por ahora. ✨</p>
           ) : (
             <ul className="space-y-2">
-              {datos.ahora.map((a, i) => {
+              {ahora.map((a, i) => {
                 const contenido = (
                   <>
                     <span className="icono" aria-hidden>{a.emoji}</span>

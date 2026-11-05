@@ -84,3 +84,16 @@ export function principalesCelular(rol: Rol, apagadas: string[]): Acceso[] {
 }
 
 export const NOMBRE_ROL: Record<Rol, string> = { dueno: "Dueño", encargado: "Encargado", recepcion: "Recepción", profe: "Profe" };
+
+/**
+ * ¿Esta ruta del panel la puede abrir este rol con estas secciones apagadas?
+ * Se busca la sección dueña de la ruta (el prefijo más largo); una ruta que
+ * no es de ninguna sección (Inicio, Mi cuenta) siempre está. Sirve para no
+ * mostrar un botón que lleva a una pantalla apagada o que el rol no ve.
+ */
+export function rutaDisponible(ruta: string, rol: Rol, apagadas: string[]): boolean {
+  const camino = ruta.split(/[?#]/)[0];
+  const duena = [...ACCESOS].sort((a, b) => b.ruta.length - a.ruta.length)
+    .find((s) => camino === s.ruta || camino.startsWith(`${s.ruta}/`));
+  return !duena || visible(duena.roles, duena.apagable, rol, apagadas);
+}

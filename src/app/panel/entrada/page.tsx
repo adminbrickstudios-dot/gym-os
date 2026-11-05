@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
@@ -38,14 +38,14 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
               <ul className="space-y-1">
                 {hoy.slice(0, 40).map((i) => (
                   <li key={i.ingreso_id}>
-                    <Link href={`/panel/socios/${i.socio_id}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[var(--tarjeta)]">
+                    <LinkPanel href={`/panel/socios/${i.socio_id}`} siNoEsta="texto" className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[var(--tarjeta)]" textoClassName="flex items-center gap-3 rounded-xl px-2 py-2">
                       <span className="numero text-lg w-12 texto-suave">{hora(i.momento)}</span>
                       <PuntoEstado color={i.resultado === "rechazado" ? "rojo" : i.resultado === "forzado" ? "naranja" : i.color} />
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold truncate">{i.socio}</span>
                         <span className="block text-sm texto-tenue truncate">{ETIQUETA[i.resultado] ?? i.resultado}{i.resultado !== "entro" ? ` · ${i.texto}` : ""}</span>
                       </span>
-                    </Link>
+                    </LinkPanel>
                   </li>
                 ))}
               </ul>

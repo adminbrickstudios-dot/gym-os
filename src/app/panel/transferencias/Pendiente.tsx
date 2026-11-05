@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { aprobar, rechazar, verComprobante } from "./acciones";
@@ -19,7 +19,7 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
       <div className="flex flex-wrap items-start gap-4">
         <div className="min-w-0 flex-1">
           <p className="numero text-4xl">{formatearPesos(p.monto)}</p>
-          <Link href={`/panel/socios/${p.socio_id}`} className="font-semibold text-lg hover:underline">{p.socio}</Link>
+          <LinkPanel href={`/panel/socios/${p.socio_id}`} siNoEsta="texto" className="font-semibold text-lg hover:underline" textoClassName="font-semibold text-lg block">{p.socio}</LinkPanel>
           <p className="texto-suave">{p.descripcion ?? "Transferencia"} · {cuando}</p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -4,6 +4,7 @@ import { urlMarca } from "@/lib/url-marca";
 import { GRUPOS, NOMBRE_ROL, principalesCelular, seccionesPara } from "@/lib/panel/secciones";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
+import { ProveedorSecciones } from "./LinkPanel";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
 export function Marco({ panel, children, enPlataforma = false }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean }) {
@@ -23,7 +24,9 @@ export function Marco({ panel, children, enPlataforma = false }: { panel: PanelG
         cambiarGimnasio={enPlataforma}
       />
       <div className="lg:pl-72">
-        <main className="mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
+          <ProveedorSecciones rol={rol} apagadas={panel.secciones_apagadas}>{children}</ProveedorSecciones>
+        </main>
       </div>
     </div>
   );

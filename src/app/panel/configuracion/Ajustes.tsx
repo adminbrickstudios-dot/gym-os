@@ -39,14 +39,22 @@ const MEDIOS: [string, string, string][] = [
 ];
 const FONDOS = ["#14161b", "#101418", "#16121f", "#1a1512", "#0f1a14", "#faf7f0"];
 const ACENTOS = ["#2fbf5b", "#f5c518", "#3b82f6", "#a78bfa", "#ef4444", "#f97316", "#14b8a6"];
-const SECCIONES: [string, string, string][] = [
-  ["entrada", "🚪 Entrada", "Recepción busca al socio y le marca la entrada."],
-  ["vencen_hoy", "⏰ Vencen hoy", "La lista de los que vencen y a quién avisar."],
-  ["socios", "👥 Socios", "Fichas, altas y búsqueda."],
-  ["retencion", "📉 Retención", "Los que dejaron de venir, para llamarlos antes de perderlos."],
-  ["vender", "🛒 Vender", "Cobrar membresías, pases y productos."],
-  ["caja", "💵 Caja", "Abrir y cerrar caja. Sin caja no se cobra en efectivo: Vender ofrece los otros medios de pago."],
-  ["transferencias", "🧾 Transferencias", "Aprobar los comprobantes que mandan los socios."],
+/** [clave, nombre, qué es, qué cambia si se apaga] — el aviso se ve apenas se apaga, antes de guardar. */
+const SECCIONES: [string, string, string, string][] = [
+  ["entrada", "🚪 Entrada", "Recepción busca al socio y le marca la entrada.",
+    "Nadie marca entradas desde el panel. El semáforo de cada socio se sigue viendo en su ficha."],
+  ["vencen_hoy", "⏰ Vencen hoy", "La lista de los que vencen y a quién avisar.",
+    "Los que vencen siguen apareciendo en Retención → Vence pronto."],
+  ["socios", "👥 Socios", "Fichas, altas y búsqueda.",
+    "No hay lista ni fichas ni altas desde el panel. Entrada, Vender y Retención muestran al socio sin abrir su ficha."],
+  ["retencion", "📉 Retención", "Los que dejaron de venir, para llamarlos antes de perderlos.",
+    "Las listas de los que se van no se ven. Los que vencen hoy siguen en Vencen hoy."],
+  ["vender", "🛒 Vender", "Cobrar membresías, pases y productos.",
+    "No se cobra desde el panel: desaparecen los botones Cobrar y Vender. Los socios pueden pagar por transferencia desde la app."],
+  ["caja", "💵 Caja", "Abrir y cerrar caja, y contar la plata.",
+    "No se cobra en efectivo: Vender ofrece los otros medios de pago."],
+  ["transferencias", "🧾 Transferencias", "Aprobar los comprobantes que mandan los socios.",
+    "Los socios no pueden mandar comprobantes desde la app (no habría quién los apruebe). En el mostrador se sigue cobrando por transferencia."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */
@@ -470,8 +478,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
             <div className="grid sm:grid-cols-2 gap-x-6 divide-y divide-[var(--borde)] sm:divide-y-0">
               <Interruptor etiqueta="🗓️ Clases" ayuda="Clases con horario, cupo y asistencia. Apagadas, no aparecen en ningún panel ni en la app."
                 checked={conClases} onChange={(e) => set("modo_clases", e.target.checked ? (guardado.modo_clases !== "ninguno" ? guardado.modo_clases : "reserva") : "ninguno")} />
-              {SECCIONES.map(([k, t, ayuda]) => (
-                <Interruptor key={k} etiqueta={t} ayuda={ayuda} checked={!c.secciones_apagadas.includes(k)}
+              {SECCIONES.map(([k, t, ayuda, alApagar]) => (
+                <Interruptor key={k} etiqueta={t} ayuda={c.secciones_apagadas.includes(k) ? <span data-al-apagar={k}>⚠️ Apagada: {alApagar}</span> : ayuda}
+                  checked={!c.secciones_apagadas.includes(k)}
                   onChange={(e) => set("secciones_apagadas", e.target.checked ? c.secciones_apagadas.filter((x) => x !== k) : [...c.secciones_apagadas, k])} />
               ))}
             </div>

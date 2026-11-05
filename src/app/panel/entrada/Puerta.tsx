@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
@@ -81,7 +81,7 @@ export function Puerta({ sedeId }: { sedeId: string }) {
         </ul>
       )}
       {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
-        <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <Link href="/panel/socios/nuevo" className="underline">Darlo de alta</Link></p>
+        <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
       )}
 
       {elegido && v && (
@@ -98,11 +98,11 @@ export function Puerta({ sedeId }: { sedeId: string }) {
               <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8">✅ Anotar entrada</button>
             ) : (
               <>
-                <Link href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</Link>
+                <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>
                 {!forzando && <button type="button" onClick={() => setForzando(true)} className="boton">🚪 Dejar pasar igual</button>}
               </>
             )}
-            <Link href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</Link>
+            <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>
             <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
           </div>
 

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useState, useTransition } from "react";
 import { anotarContacto } from "@/app/panel/retencion/acciones";
 
@@ -22,7 +22,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
     <li className="tarjeta p-4 sm:p-5">
       <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1">
-          <Link href={`/panel/socios/${socioId}`} className="font-semibold text-lg hover:underline">{nombre}</Link>
+          <LinkPanel href={`/panel/socios/${socioId}`} siNoEsta="texto" className="font-semibold text-lg hover:underline" textoClassName="font-semibold text-lg">{nombre}</LinkPanel>
           <p className="texto-suave">{texto}</p>
           {detalle && <p className="text-sm texto-tenue mt-0.5">{detalle}</p>}
           {(anotado || ultimo) && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}>✓ {anotado ? "Anotado recién" : ultimo}</p>}

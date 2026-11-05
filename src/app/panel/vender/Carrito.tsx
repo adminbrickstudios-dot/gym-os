@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
@@ -88,8 +89,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         <div className="flex flex-wrap gap-2 mt-8">
           <button type="button" className="boton boton-principal" onClick={() => { setVenta(null); setSocio(null); setBuscando(true); }}>🛒 Nueva venta</button>
-          {socio && <Link href={`/panel/socios/${socio.socio_id}`} className="boton">👤 Ver ficha</Link>}
-          <Link href="/panel/entrada" className="boton">🚪 Ir a la entrada</Link>
+          {socio && <LinkPanel href={`/panel/socios/${socio.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>}
+          <LinkPanel href="/panel/entrada" className="boton">🚪 Ir a la entrada</LinkPanel>
         </div>
       </section>
     );
@@ -130,7 +131,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
               ))}
               {socio && <button type="button" className="boton" onClick={() => setBuscando(false)}>Seguir con {socio.nombre}</button>}
               {!socio && texto.trim().length >= 2 && encontrados.length === 0 && (
-                <p className="texto-suave">No está. <Link className="underline" href="/panel/socios/nuevo">Darlo de alta</Link> y volver.</p>
+                <p className="texto-suave">No está.<LinkPanel href="/panel/socios/nuevo" className="underline"> Darlo de alta y volver.</LinkPanel></p>
               )}
             </div>
           )}

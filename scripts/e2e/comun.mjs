@@ -74,5 +74,8 @@ export async function capturar(p, nombre, completa = false) {
   await p.screenshot({ path: join(CAPTURAS, `${nombre}.jpg`), type: "jpeg", quality: 80, fullPage: completa });
 }
 
+/** true si el elemento aparece dentro de unos segundos (React puede tardar un instante en pintar). */
+export const aparece = (loc, ms = 5000) => loc.first().waitFor({ timeout: ms }).then(() => true, () => false);
+
 /** Texto que delata una pantalla rota (error de Next o boundary). */
 export const PANTALLA_ROTA = /Application error|Something went wrong|Algo salió mal|Unhandled Runtime Error/i;

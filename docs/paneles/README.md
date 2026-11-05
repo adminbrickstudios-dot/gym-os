@@ -31,8 +31,8 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/planes` | pantalla | 👑 🧭 |  | `guardar_plan`, `guardar_producto`, `panel_gimnasio`, `planes_gimnasio`, `productos_gimnasio`, `programar_precio` |  |
 | `/panel/retencion` | pantalla | 👑 🧭 | retencion | `panel_gimnasio`, `registrar_contacto`, `retencion`, `retencion_resumen` | `/panel/socios/` |
 | `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `buscar_socios`, `dar_de_baja`, `guardar_socio`, `panel_gimnasio` | `/panel/socios/` `/panel/socios/nuevo` |
-| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ |  | `ficha_socio`, `panel_gimnasio`, `planes_gimnasio` | `/panel/socios` `/panel/socios/` `/panel/vender` |
-| `/panel/socios/[id]/editar` | pantalla | 👑 🧭 🛎️ |  | `ficha_socio`, `panel_gimnasio` |  |
+| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `panel_gimnasio`, `planes_gimnasio` | `/panel/socios` `/panel/socios/` `/panel/vender` |
+| `/panel/socios/[id]/editar` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `panel_gimnasio` |  |
 | `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `panel_gimnasio` |  |
 | `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `pagos_por_aprobar`, `panel_gimnasio`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy | `panel_gimnasio`, `vencen_hoy` | `/panel/socios/` |

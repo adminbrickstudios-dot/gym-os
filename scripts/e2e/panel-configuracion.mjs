@@ -5,7 +5,7 @@
 // gimnasio (teléfono como lo escribe la gente); la página y su link; Caja
 // apagada → Vender sin efectivo; encargado de solo lectura; celular sin desborde.
 //   npm run e2e:configuracion            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -81,7 +81,7 @@ try {
   const tol = cont.locator("input").nth(0);
   const tolOrig = await tol.inputValue();
   await tol.fill("9");
-  chequear(await pie("reglas").locator("[data-sin-guardar]").isVisible(), "Reglas avisa “Cambios sin guardar”", "Reglas no avisa");
+  chequear(await aparece(pie("reglas").locator("[data-sin-guardar]")), "Reglas avisa “Cambios sin guardar”", "Reglas no avisa");
   await ir("cobros");
   chequear(await p.locator('button[data-pestana="reglas"] [aria-label="cambios sin guardar"]').count() === 1,
     "la pestaña Reglas queda marcada con • al irse a otra", "la pestaña Reglas no marca los cambios");

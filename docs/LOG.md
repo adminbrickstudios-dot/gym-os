@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-7 · Apagar una sección avisa qué deja de andar en las otras
+
+**QUÉ HICE**
+- Configuración → Secciones: al apagar una sección, su interruptor dice al instante qué deja de andar y qué sigue ("⚠️ Apagada: …"), antes de guardar.
+- `LinkPanel` + `rutaDisponible`: los links y botones que llevan a otra pantalla aparecen solo si esa pantalla está prendida para el gimnasio y el rol. Se usó en Entrada (Cobrar, Ver ficha, Darlo de alta, últimas entradas), Vender (Ver ficha, Ir a la entrada, Darlo de alta), la ficha (Cobrar/Vender), Retención/Vencen hoy (nombre) y Transferencias (nombre). Inicio no muestra avisos que llevan a una pantalla apagada. La ficha y Editar socio exigen la sección Socios (antes se abrían por la dirección con Socios apagada).
+- Migración `20261104002700_transferencias_apagada.sql`: con Transferencias apagada, la app no pide comprobantes y la base no los acepta (antes el socio pagaba y su comprobante quedaba sin nadie que lo aprobara). El mostrador sigue cobrando por transferencia. Verificado: `supabase/pruebas/secciones-cfg7.test.mjs` (2 pruebas).
+- Tabla de dependencias en `docs/paneles/configuracion.md`.
+- `scripts/e2e/cfg-7.mjs` (18 pasos): cada una de las 8 secciones se apaga desde la pantalla, se abren 14 pantallas (con una ficha) buscando links a ella, se prueba la app con Transferencias apagada y la Entrada sin Socios, y se vuelve a prender. Pruebas unitarias de `rutaDisponible`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Con Socios apagada, la ficha de un socio se seguía abriendo escribiendo la dirección: ahora dice que la sección está apagada.
+- Con Transferencias apagada, la app seguía pidiendo comprobantes que nadie podía aprobar: plata del socio sin acreditar. Lo corregí en la base (es restringir, no dar más acceso) y lo anoté en "Decisiones que tomó el agente".
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0027).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Nada de este ítem.
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0027 contra la base real: probada en la base local. Reescribe `informar_transferencia` y `mi_socio` copiadas de 0023 con un solo cambio.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-6 · Formas de entrada, reingreso y días de retención en Configuración
 
 **QUÉ HICE**

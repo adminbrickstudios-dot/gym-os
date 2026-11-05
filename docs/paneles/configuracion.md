@@ -66,3 +66,25 @@ Van en CFG-6.
 - Con fondo claro, los títulos de todas las pantallas del gimnasio salían
   casi blancos sobre crema (el color de texto se heredaba del fondo oscuro de
   la raíz). Arreglado en `globals.css` para todo el sistema.
+
+## Qué pasa al apagar cada sección (CFG-7)
+
+Ninguna pantalla prendida lleva a una apagada: los links y botones a otra
+pantalla usan `LinkPanel` (`src/components/panel/LinkPanel.tsx`), que solo
+aparece si esa pantalla está prendida para el gimnasio y el rol
+(`rutaDisponible` en `src/lib/panel/secciones.ts`). Un nombre que llevaba a
+la ficha queda como texto; un botón, desaparece. Inicio no muestra avisos
+("3 vencen hoy", "transferencias para aprobar", "la caja está cerrada") que
+llevan a una pantalla apagada. Probado con `npm run e2e:cfg-7`: cada sección
+apagada, 14 pantallas abiertas buscando links a ella.
+
+| Sección apagada | Qué deja de andar | Qué sigue andando | Ajustes que hizo falta |
+|---|---|---|---|
+| Entrada | Marcar entradas desde el panel | El semáforo en la ficha; Vender sin "Ir a la entrada" | — |
+| Vencen hoy | La lista del día y su aviso en Inicio | Retención → Vence pronto (mismo cálculo) | Inicio oculta "N vencen hoy" |
+| Socios | Lista, fichas (también al entrar por la dirección), altas | Entrada busca y marca; Vender busca; Retención, Vencen hoy y Transferencias muestran el nombre sin link | Ficha y Editar exigen la sección; "Darlo de alta" y "Ver ficha" desaparecen |
+| Retención | Las listas de los que se van | Vencen hoy | — |
+| Vender | Cobrar desde el panel | La app del socio (transferencia); aprobar transferencias | "Cobrar" y "Vender" de la ficha y la entrada desaparecen |
+| Caja | Efectivo | Vender con los otros medios; la base rechaza efectivo (0023) | Inicio no muestra "la caja está cerrada" (ya lo hacía la base) |
+| Transferencias | Aprobar comprobantes | Cobrar por transferencia en el mostrador | La app no pide comprobantes y la base no los acepta (0027) |
+| Clases (en Secciones) | Clases en el menú, Inicio, la app y la pestaña de Configuración | Todo lo demás | — (ya estaba) |
