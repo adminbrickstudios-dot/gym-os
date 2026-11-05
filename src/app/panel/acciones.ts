@@ -38,3 +38,10 @@ export async function ocultarPrimerosPasos(ocultar: boolean): Promise<{ error?: 
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** ADM-6: el dueño cierra una novedad de Gym OS (no vuelve a aparecerle). */
+export async function cerrarNovedadGymOS(id: string): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try { await rpc("cerrar_novedad_plataforma", { p_gimnasio_id: panel.gimnasio.id, p_id: id }); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}

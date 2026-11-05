@@ -1,3 +1,4 @@
+import { NovedadesGymOS, type NovedadGymOS } from "@/components/panel/NovedadesGymOS";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import Link from "next/link";
@@ -42,7 +43,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -65,6 +66,8 @@ export default async function Inicio() {
       rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpc<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // AUD-14: los que pidieron la baja desde la app (APP-8).
       rol !== "profe" ? rpc<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // ADM-6: lo que cuenta BRIK a los dueños.
+      rol === "dueno" ? rpc<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
     ]);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
@@ -80,6 +83,7 @@ export default async function Inicio() {
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
+        <NovedadesGymOS novedades={novedadesGymOS} />
         {pasos && <PrimerosPasos datos={pasos} />}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />

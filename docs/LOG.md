@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ADM-6 · Novedades de Gym OS para todos los dueños
+
+**QUÉ HICE**
+- Super admin → "📣 Novedades para los dueños": título, texto y link opcional; cuántos la cerraron; Retirar.
+- Cada dueño la ve arriba en su Inicio hasta tocar "Entendido" (por persona y gimnasio).
+- Migración 0109 (`novedades_plataforma` —sin `gimnasio_id`: es de la plataforma, sumada a la lista de excepciones de SCHEMA y chequeos— y `novedades_plataforma_cerradas` con `gimnasio_id`; cinco funciones), caso en la prueba de base `plantillas-gimnasio`, `e2e:adm-6`.
+
+---
+
 ## 2026-11-05 · ADM-4 · Salud de cada gimnasio en el super admin
 
 **QUÉ HICE**

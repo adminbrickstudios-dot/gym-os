@@ -125,3 +125,13 @@ export async function quitarDominio(gimnasioId: string, dominioId: string): Prom
     return { error: (e as Error).message };
   }
 }
+
+/** ADM-6: una novedad para todos los dueños (la ven en Inicio hasta cerrarla). */
+export async function publicarNovedadPlataforma(titulo: string, texto: string, link: string): Promise<{ error?: string }> {
+  try { await rpc("admin_publicar_novedad", { p_titulo: titulo, p_texto: texto, p_link: link || null }); revalidatePath("/admin"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+export async function retirarNovedadPlataforma(id: string): Promise<{ error?: string }> {
+  try { await rpc("admin_retirar_novedad", { p_id: id }); revalidatePath("/admin"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}

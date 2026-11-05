@@ -205,7 +205,9 @@ cubierto, esté donde esté el servidor.
 **Excepciones a `gimnasio_id`** (lista cerrada, la usa `npm run chequeos`):
 `gimnasios`, `administradores_plataforma`, `plataforma_planes`,
 `documentos_legales` (puede ser null: los de BRIK son globales),
-`eventos_webhook` (el gimnasio se resuelve después de recibir).
+`eventos_webhook` (el gimnasio se resuelve después de recibir),
+`novedades_plataforma` (las escribe BRIK para todos los dueños; lo que cierra
+cada dueño va en `novedades_plataforma_cerradas`, con `gimnasio_id`).
 
 **Excepciones a "unique por gimnasio"** (lista cerrada):
 `gimnasios.slug`, `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,

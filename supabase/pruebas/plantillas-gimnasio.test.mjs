@@ -53,3 +53,28 @@ test("ADM-4: salud de cada gimnasio (último acceso del equipo, ventas y entrada
   assert.equal(typeof mio.ventas_7_dias, "number");
   await t.comoUsuario(dueno, () => t.falla(() => t.q(`select public.admin_salud_gimnasios()`), /administradores/));
 });
+
+test("ADM-6: BRIK publica una novedad, el dueño la ve hasta cerrarla; retirada no se ve; la recepción no", async () => {
+  const [{ id: eqDueno }] = await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Dueño','dueno') returning id`, [t.g, dueno]);
+  void eqDueno;
+  const [{ id: rec }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`r${Math.random()}@ejemplo.invalid`]);
+  await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Rec','recepcion')`, [t.g, rec]);
+  await t.db.query("savepoint nov");
+  await t.q(`set local role authenticated`);
+  await t.q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: admin, role: "authenticated" })]);
+  const [{ id }] = await t.q(`select public.admin_publicar_novedad('MercadoPago', 'Ya podés cobrar online', 'https://ejemplo.invalid/mp') id`);
+  await t.falla(() => t.q(`select public.admin_publicar_novedad('x', 'y')`), /3 a 80/);
+  await t.q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: dueno, role: "authenticated" })]);
+  await t.falla(() => t.q(`select public.admin_publicar_novedad('Hola dueños', 'Texto largo')`), /administradores/);
+  assert.deepEqual((await t.q(`select public.novedades_dueno($1) n`, [t.g]))[0].n.map((x) => x.titulo), ["MercadoPago"]);
+  await t.q(`select public.cerrar_novedad_plataforma($1, $2)`, [t.g, id]);
+  assert.deepEqual((await t.q(`select public.novedades_dueno($1) n`, [t.g]))[0].n, []);
+  await t.q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: rec, role: "authenticated" })]);
+  await t.falla(() => t.q(`select public.novedades_dueno($1)`, [t.g]), /permiso|rol|acceso/i);
+  await t.q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: admin, role: "authenticated" })]);
+  const [{ l }] = await t.q(`select public.admin_novedades() l`);
+  assert.equal(l[0].cerraron, 1);
+  await t.q(`select public.admin_retirar_novedad($1)`, [id]);
+  assert.deepEqual((await t.q(`select public.admin_novedades() l`))[0].l, []);
+  await t.db.query("rollback to savepoint nov");
+});

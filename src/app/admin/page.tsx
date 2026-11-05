@@ -10,6 +10,7 @@ import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
+import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
 import { Mensaje } from "@/components/ui/Mensaje";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
@@ -28,11 +29,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const { error } = await searchParams;
   let gimnasios: Gimnasio[];
   let salud: Record<string, Salud> = {};
+  let novedades: NovedadPlataforma[] = [];
   let yo: MiSesion;
   try {
     yo = await rpc<MiSesion>("mi_sesion");
     if (!yo.es_admin) throw new ErrorDatos("Solo para administradores de BRIK", "42501", 403);
-    [gimnasios, salud] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios")]);
+    [gimnasios, salud, novedades] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios"), rpc<NovedadPlataforma[]>("admin_novedades")]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
@@ -54,6 +56,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <EstadoPlataforma />
       <AltaGimnasio dominio={dominioBase()} />
+      <NovedadesDuenos novedades={novedades} />
 
       <section className="space-y-3">
         <p className="titulo-grupo">Todos los gimnasios</p>
