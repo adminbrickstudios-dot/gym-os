@@ -54,6 +54,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 **QUÉ HICE**
 - Revisé Inicio en el celular con la captura de la dueña (primeros pasos, accesos, números, "Ahora y lo que sigue"): la lista de primeros pasos ya arranca cerrada, un solo verde (el primer acceso), números de a dos. No hizo falta cambiar código.
+- La tanda lo encontró en la recepción: cuando una etiqueta ocupa dos renglones ("Transferencias por aprobar"), su número quedaba más arriba que el de al lado. Ahora los números de una fila arrancan a la misma altura.
 - `e2e:dis-1` lo mide para los cuatro roles (sin desborde, botones de 44 px o más, un verde, números en dos filas), capturas `dis1-celu-*`.
 
 ---
@@ -134,6 +135,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
   - 🧭 el encargado ve el Resultado — prendido por defecto; apagado, no está en su menú y la base no le da ni el Resultado ni la exportación.
   - El descuento de la recepción ya tenía su tope (Configuración → Cobros): se muestra ahí con el link.
 - Los valores por defecto dejan todo como estaba.
+- La tanda encontró que el menú del encargado seguía mostrando Resultado con el permiso apagado (la base ya no se lo daba): el menú ahora oculta una sección que la base manda apagada aunque no sea de las que el gimnasio apaga (vitest nuevo).
 - Migración 0100 (cuatro columnas en `configuracion_gimnasio`; `permisos_equipo`, `guardar_permisos_equipo`, `privado.exigir_resultado`; copias de `panel_gimnasio`, `panel_inicio`, `public.vender`, `lista_clase` —cambia lo que devuelve: se borra y se crea—, `resultado_mes`, `exportar_mes`, `etiqueta_campo`), prueba de base `permisos-equipo`, `e2e:equ-1`.
 
 **PARA QUE MIRES VOS**

@@ -27,3 +27,8 @@ test("en el celular hay cuatro principales, Inicio primero", () => {
   expect(p).toHaveLength(4);
   expect(p[0].clave).toBe("inicio");
 });
+
+test("EQU-1: el Resultado mandado apagado para el encargado no aparece en su menú ni en sus accesos", () => {
+  expect(seccionesPara("encargado", ["resultado"]).map((s) => s.clave)).not.toContain("resultado");
+  expect(seccionesPara("encargado", []).map((s) => s.clave)).toContain("resultado");
+});

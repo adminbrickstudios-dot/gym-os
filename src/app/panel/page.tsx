@@ -100,8 +100,8 @@ export default async function Inicio() {
               // Cada número lleva a su detalle (si la sección está prendida).
               const href = DETALLE[n.clave];
               return href && !panel.secciones_apagadas.includes(href.seccion)
-                ? <Link key={n.clave} href={href.ruta} className="flex flex-col-reverse rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
-                : <div key={n.clave} className="flex flex-col-reverse">{cuerpo}</div>;
+                ? <Link key={n.clave} href={href.ruta} className="flex flex-col-reverse justify-end rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
+                : <div key={n.clave} className="flex flex-col-reverse justify-end">{cuerpo}</div>;
             })}
           </dl>
           {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}

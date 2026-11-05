@@ -57,15 +57,17 @@ const ACCESOS_INICIALES: Record<Rol, string[]> = {
   profe: ["clases", "rutinas"],
 };
 
-const visible = (roles: Rol[], apagable: string | undefined, rol: Rol, apagadas: string[]) =>
-  roles.includes(rol) && !(apagable && apagadas.includes(apagable));
+// Una sección sin "apagable" igual se oculta si la base la manda apagada para esta persona
+// (EQU-1: el Resultado del encargado sin permiso).
+const visible = (roles: Rol[], apagable: string | undefined, rol: Rol, apagadas: string[], clave?: string) =>
+  roles.includes(rol) && !apagadas.includes(apagable ?? clave ?? "");
 
 export function seccionesPara(rol: Rol, apagadas: string[]): Seccion[] {
-  return SECCIONES.filter((s) => visible(s.roles, s.apagable, rol, apagadas));
+  return SECCIONES.filter((s) => visible(s.roles, s.apagable, rol, apagadas, s.clave));
 }
 
 export function accesosDisponibles(rol: Rol, apagadas: string[]): Acceso[] {
-  return ACCESOS.filter((a) => visible(a.roles, a.apagable, rol, apagadas));
+  return ACCESOS.filter((a) => visible(a.roles, a.apagable, rol, apagadas, a.clave));
 }
 
 /**
@@ -101,5 +103,5 @@ export function rutaDisponible(ruta: string, rol: Rol, apagadas: string[]): bool
   const camino = ruta.split(/[?#]/)[0];
   const duena = [...ACCESOS].sort((a, b) => b.ruta.length - a.ruta.length)
     .find((s) => camino === s.ruta || camino.startsWith(`${s.ruta}/`));
-  return !duena || visible(duena.roles, duena.apagable, rol, apagadas);
+  return !duena || visible(duena.roles, duena.apagable, rol, apagadas, duena.clave);
 }
