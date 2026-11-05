@@ -14,6 +14,7 @@ export type Marca = {
 };
 
 export type PlanPublico = {
+  id?: string;
   nombre: string;
   tipo: "membresia" | "pase_diario" | "pack";
   descripcion: string | null;
@@ -45,6 +46,8 @@ export type LandingPublicada = {
   portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string };
   contacto: { whatsapp: string | null; mensaje_whatsapp: string; instagram: string | null; email: string | null };
   mostrar_precios: boolean;
+  /** Se puede hacer socio desde la página (0032). */
+  altas_online?: boolean;
   secciones: Seccion[];
   planes: PlanPublico[];
   sedes: Sede[];

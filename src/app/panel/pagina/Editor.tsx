@@ -104,7 +104,7 @@ function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicad
   );
 }
 
-export function Editor({ inicial, agenda, puedeEditar, direccion }: { inicial: PaginaPanel; agenda: Agenda | null; puedeEditar: boolean; direccion: string }) {
+export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { inicial: PaginaPanel; agenda: Agenda | null; puedeEditar: boolean; direccion: string; altas?: ReactNode }) {
   const [guardado, setGuardado] = useState(inicial);
   const [portada, setPortada] = useState(inicial.portada);
   const [secciones, setSecciones] = useState(inicial.secciones);
@@ -180,6 +180,7 @@ export function Editor({ inicial, agenda, puedeEditar, direccion }: { inicial: P
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-start" data-editor-pagina data-listo={listo}>
       <div className="space-y-4 min-w-0">
         <Estado publicadaInicial={inicial.vista.publicada} direccion={direccion} nombre={inicial.vista.marca.nombre} puedeEditar={puedeEditar} />
+        {altas}
         {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la página.</p>}
         <fieldset disabled={!puedeEditar} className="space-y-4 min-w-0">
           <section className="tarjeta p-5 sm:p-6 space-y-4" data-bloque="portada">

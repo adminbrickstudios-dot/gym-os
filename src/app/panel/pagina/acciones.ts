@@ -11,3 +11,13 @@ export async function guardarPagina(portada: unknown, secciones: unknown): Promi
     return { pagina };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** Altas online y reglamento: la base no deja prenderlas sin reglamento. */
+export async function guardarAltas(prendidas: boolean, reglamento: string): Promise<{ error?: string; altas?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    const altas = await rpc("guardar_altas", { p_gimnasio_id: panel.gimnasio.id, p_altas_online: prendidas, p_reglamento: reglamento });
+    revalidatePath("/", "layout");
+    return { altas };
+  } catch (e) { return { error: (e as Error).message }; }
+}

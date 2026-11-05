@@ -182,7 +182,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa — verificado: db (editor-pagina, 4 pruebas: guardar, errores con dónde, foto de portada, permisos; landing sigue en verde), e2e:pag-1 (17 pasos: vista previa en vivo, ocultar, ordenar, agregar pregunta, error, foto, página pública, encargado, celular)
 - [x] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla — verificado: e2e:pag-2 (10 pasos: estado, copiar link, WhatsApp con el link, og:title/description/image + /og se abre, borrador → próximamente → publicar, encargado comparte sin publicar, celular)
 - [x] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página — verificado: db (prospectos, 4 pruebas: sin sesión solo publicada y visible, sin duplicar, tope 30/h, permisos y "socio" solo al dar de alta), e2e:pag-3 (16 pasos, el de punta a punta de PAG-1 a 3: editar → publicar → visitante en celular → Prospectos → escribirle → vino → Hacerlo socio → ficha)
-- [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
+- [~] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
 - [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
 - [ ] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots
 

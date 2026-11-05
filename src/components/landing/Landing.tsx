@@ -92,7 +92,7 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
   );
 }
 
-function TarjetaPlan({ p, whatsapp, mostrarPrecio }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean }) {
+function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean; altas: boolean }) {
   const condiciones = condicionesPlan(p);
   const variantes = mostrarPrecio ? variantesPlan(p) : [];
   const link = linkWhatsapp(whatsapp, `Hola! Me interesa el plan ${p.nombre}.`);
@@ -114,7 +114,12 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio }: { p: PlanPublico; whatsapp:
           {condiciones.map((c) => <li key={c} className="pildora">{c}</li>)}
         </ul>
       )}
-      {link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
+      {altas && p.id
+        ? <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a href={`/hacete-socio?plan=${p.id}`} className="boton boton-principal">💪 Elegir este</a>
+            {link && <a href={link} target="_blank" rel="noopener noreferrer" className="texto-suave underline underline-offset-4">Consultar</a>}
+          </div>
+        : link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
     </li>
   );
 }
@@ -125,7 +130,7 @@ function Planes({ s, landing }: { s: Extract<Seccion, { tipo: "planes" }>; landi
     <Bloque id="planes" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {landing.planes.map((p) => (
-          <TarjetaPlan key={p.nombre} p={p} whatsapp={landing.contacto.whatsapp} mostrarPrecio={landing.mostrar_precios} />
+          <TarjetaPlan key={p.id ?? p.nombre} p={p} whatsapp={landing.contacto.whatsapp} mostrarPrecio={landing.mostrar_precios} altas={!!landing.altas_online} />
         ))}
       </ul>
     </Bloque>
@@ -330,6 +335,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
+            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton boton-principal">💪 Hacete socio</a>}
             {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
             <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           </nav>
@@ -349,6 +355,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
               {ahora?.texto && <p className="mt-5"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
               <div className="mt-8 flex flex-wrap gap-3">
                 {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
                 {hayProbar && <a href="#probar" className="boton text-lg px-8 bg-white/15 text-white border-white/30">🙋 Probá una clase</a>}
               </div>
             </div>
@@ -363,6 +370,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
               {hayProbar && <a href="#probar" className="boton text-lg px-8 w-full sm:w-auto">🙋 Probá una clase</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
