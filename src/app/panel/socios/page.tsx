@@ -77,23 +77,25 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
         </form>
         {filtros.todos + filtros.bajas > 0 && (
           <nav className="pestanas mb-3" aria-label="Filtrar por estado" data-filtro-estados>
-            <Link href={con({ estado: null })} className="pestana" aria-current={!estado ? "page" : undefined}>Todos <span className="texto-tenue">{filtros.todos}</span></Link>
+            {/* Filtros: links comunes (recargan la lista). Con la app compilada, la navegación de <Link> a la misma
+                lista con otro filtro a veces se cortaba (ERR_ABORTED) y no cambiaba nada: así siempre anda. */}
+            <a href={con({ estado: null })} className="pestana" aria-current={!estado ? "page" : undefined}>Todos <span className="texto-tenue">{filtros.todos}</span></a>
             {ESTADOS.filter(([k]) => filtros[k] > 0 || estado === k).map(([k, t]) => (
-              <Link key={k} href={con({ estado: estado === k ? null : k })} className="pestana" aria-current={estado === k ? "page" : undefined} data-estado={k}>
+              <a key={k} href={con({ estado: estado === k ? null : k })} className="pestana" aria-current={estado === k ? "page" : undefined} data-estado={k}>
                 {t} <span className="texto-tenue">{filtros[k]}</span>
-              </Link>
+              </a>
             ))}
           </nav>
         )}
         {(filtros.planes.length > 1 || etiquetas.length > 0) && (
           <nav className="pestanas mb-6" aria-label="Filtrar por plan o etiqueta" data-filtro-etiquetas>
             {filtros.planes.length > 1 && filtros.planes.map((p) => (
-              <Link key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
+              <a key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
                 📋 {p.nombre} <span className="texto-tenue">{p.socios}</span>
-              </Link>
+              </a>
             ))}
             {etiquetas.map((e) => (
-              <Link key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></Link>
+              <a key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></a>
             ))}
           </nav>
         )}

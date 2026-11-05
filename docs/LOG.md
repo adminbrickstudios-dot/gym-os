@@ -15,6 +15,42 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-3 · Tablet en la puerta (modo kiosco)
+
+**QUÉ HICE**
+- Configuración → Reglas → "📲 Tablet en la puerta" se puede prender. El dueño autoriza cada tablet (nombre y sede) y recibe un link con su QR que se ve una sola vez; la base guarda solo el hash del token. Se puede revocar.
+- `/kiosco`: el link guarda el token en una cookie que el navegador no lee y lo saca de la dirección.
+  - Pantalla sin menú: "¡Hola! Escribí tu DNI", teclado grande y "📷 Mostrar mi QR" si el gimnasio usa QR.
+  - Si puede entrar: "¡Pasá, Juan!" y queda anotado como "en la tablet". Si no: "hoy no podés pasar", el porqué sin montos, y que pase por recepción.
+  - Vuelve sola al inicio.
+- Migración `20261104005000_kiosco.sql`:
+  - `autorizar_tablet`, `revocar_tablet`, `tablets_panel`.
+  - `kiosco_estado` y `kiosco_entrar`: sin sesión, el token autoriza adentro de la función; 30 intentos por minuto.
+  - `privado.validar_qr`: la validación del QR, que ahora usan la recepción y la tablet.
+  - Se sacó el permiso de leer la tabla de tokens.
+- Pruebas:
+  - `supabase/pruebas/kiosco.test.mjs`: el token no se guarda ni se lee; DNI; rojo sin plata en pantalla; DNI inexistente; token inventado; revocada; apagada.
+  - `scripts/e2e/ent-3.mjs` (8 pasos, tablet 820 px).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La verificación completa con la app compilada (`next build` + `start`) dio fallas que con `next dev` no aparecen. Lo que encontré:
+  - Las pruebas tocaban antes de que el contenido de la pantalla (que llega después que el marco) estuviera listo. Ahora cada pantalla del panel marca cuándo está lista y las pruebas lo esperan.
+  - Algunas navegaciones de `<Link>` en Socios se cortaban (ERR_ABORTED) y no pasaba nada. No encontré la causa. Las píldoras de filtro de Socios pasaron a links comunes (recargan la lista) y ya andan siempre.
+  - La verificación volvió a correr con `next dev`, como dice CLAUDE.md.
+- Las pantallas y acciones de este turno pasan con `next dev`.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0050).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada. En Vercel, después de mergear, conviene tocar un par de botones de Socios (filtros, pestañas de la ficha, guardar una nota) para confirmar que la app publicada responde.
+
+**LO QUE NO PUDE VERIFICAR**
+- El problema de `<Link>` con la app compilada en local: no sé si pasa en Vercel.
+- Una tablet de verdad: se probó con un navegador del tamaño de una tablet.
+
+---
+
 ## 2026-11-05 · ENT-4 · Reglas de "dejar pasar" (D1)
 
 **QUÉ HICE**

@@ -2,6 +2,7 @@ import "server-only";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { ErrorDatos } from "@/lib/panel/servidor";
+import { PaginaHidratada } from "@/components/Hidratado";
 
 /**
  * Corre una pantalla y, si la base dijo que no (sin permiso, dato inválido),
@@ -12,7 +13,7 @@ import { ErrorDatos } from "@/lib/panel/servidor";
  */
 export async function intentar(pantalla: () => Promise<ReactNode>): Promise<ReactNode> {
   try {
-    return await pantalla();
+    return <>{await pantalla()}<PaginaHidratada /></>;
   } catch (e) {
     if (!(e instanceof ErrorDatos)) throw e;
     if (e.codigo === "apagada") return <Aviso emoji="🧩" titulo="Esta sección está apagada"><p>{e.message}</p></Aviso>;

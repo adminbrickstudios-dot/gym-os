@@ -42,14 +42,16 @@ export async function pagina(b, viewport = COMPU) {
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
   p.errores = [];
-  // Con la app compilada el HTML llega antes que React: después de cada carga se espera a que los botones anden.
-  for (const metodo of ["goto", "reload"]) {
+  // Con la app compilada el HTML llega antes que React, y el contenido de la pantalla (que viene en
+  // streaming) se hidrata después que el marco: un clic en ese momento se pierde. Después de cada
+  // carga o cambio de dirección se espera a que React tome la página y a que la red se calme.
+  const listo = async () => {
+    await p.waitForFunction(() => document.documentElement.dataset.hidratado === "1" && !document.querySelector('[data-pagina-hidratada="0"]'),
+      null, { timeout: 20000 }).catch(() => {});
+  };
+  for (const metodo of ["goto", "reload", "waitForURL"]) {
     const original = p[metodo].bind(p);
-    p[metodo] = async (...a) => {
-      const r = await original(...a);
-      await p.waitForFunction(() => document.documentElement.dataset.hidratado === "1", null, { timeout: 20000 }).catch(() => {});
-      return r;
-    };
+    p[metodo] = async (...a) => { const r = await original(...a); await listo(); return r; };
   }
   p.on("pageerror", (e) => p.errores.push(`error en la página: ${e.message.slice(0, 200)}`));
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });

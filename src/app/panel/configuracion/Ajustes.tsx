@@ -9,6 +9,8 @@ import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
 import { PESTANAS, type ClavePestana } from "./pestanas";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
 import { HorariosYCierres, type CierrePanel } from "./Horarios";
+import { Tablets } from "./Tablets";
+import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
 import type { Agenda } from "@/lib/horarios";
@@ -148,8 +150,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina }: {
-  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets }: {
+  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[];
 }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
@@ -472,8 +474,15 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                   ? "Prendido: el socio ve en su app un QR que cambia cada 30 segundos, y en Entrada aparece “📷 Leer QR” (cámara o lector). Si puede entrar, se anota solo."
                   : "Apagado: la app no muestra el QR y en Entrada no está la cámara."}
                 onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_socio"])] : c.accesos_activos.filter((x) => x !== "qr_socio"))} />
-              {[["📲 Tablet en la puerta", "El socio entra solo, sin pasar por la recepción."],
-                ["🔑 Llavero o tarjeta", "Con un lector USB en la recepción."]].map(([t, a]) => (
+              <Interruptor etiqueta="📲 Tablet en la puerta" checked={c.accesos_activos.includes("kiosco")}
+                ayuda={c.accesos_activos.includes("kiosco")
+                  ? "Prendido: una tablet autorizada en la puerta; el socio escribe su DNI (o muestra su QR) y, si puede, entra solo. Si no puede, la tablet le dice por qué y que pase por recepción."
+                  : "Apagado: ninguna tablet deja entrar."}
+                onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "kiosco"])] : c.accesos_activos.filter((x) => x !== "kiosco"))} />
+              {guardado.accesos_activos.includes("kiosco") && (
+                <Tablets inicial={tablets} sedes={datos.sedes} esDueno={puedeEditar} zona={datos.zona_horaria} />
+              )}
+              {[["🔑 Llavero o tarjeta", "Con un lector USB en la recepción."]].map(([t, a]) => (
                 <Interruptor key={t} etiqueta={t} ayuda={`${a} Todavía no está disponible.`} checked={false} disabled readOnly />
               ))}
             </div>

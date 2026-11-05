@@ -4,7 +4,8 @@
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 
-export function Camara({ alLeer, alCerrar }: { alLeer: (codigo: string) => void; alCerrar: () => void }) {
+/** `frente`: la cámara de adelante (la tablet mira al socio); si no, la de atrás (la recepción apunta al celular). */
+export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: string) => void; alCerrar: () => void; frente?: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
   const [estado, setEstado] = useState<"pidiendo" | "leyendo" | "sin">("pidiendo");
   const leido = useRef(false);
@@ -27,12 +28,12 @@ export function Camara({ alLeer, alCerrar }: { alLeer: (codigo: string) => void;
       cuadro = requestAnimationFrame(mirar);
     };
     if (!navigator.mediaDevices?.getUserMedia) { setEstado("sin"); return; }
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? "user" : "environment" }, audio: false })
       .then((s) => { flujo = s; if (!vivo) { s.getTracks().forEach((t) => t.stop()); return; }
         if (video.current) { video.current.srcObject = s; void video.current.play(); } setEstado("leyendo"); cuadro = requestAnimationFrame(mirar); })
       .catch(() => setEstado("sin"));
     return () => { vivo = false; cancelAnimationFrame(cuadro); flujo?.getTracks().forEach((t) => t.stop()); };
-  }, [alLeer]);
+  }, [alLeer, frente]);
 
   useEffect(() => {
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") alCerrar(); };
@@ -47,7 +48,7 @@ export function Camara({ alLeer, alCerrar }: { alLeer: (codigo: string) => void;
         {estado === "sin"
           ? <p className="texto-suave">No hay cámara disponible (o no diste permiso). Buscalo por nombre o DNI.</p>
           : <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" />}
-        <p className="text-sm texto-tenue">Que el socio muestre el QR de su app frente a la cámara.</p>
+        <p className="text-sm texto-tenue">{frente ? "Mostrá el QR de tu app frente a la cámara." : "Que el socio muestre el QR de su app frente a la cámara."}</p>
         <button type="button" className="boton w-full" onClick={alCerrar}>Cancelar</button>
       </div>
     </div>

@@ -36,3 +36,14 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
   (QR o tablet): ENT-2, ENT-3, ENT-6 ya están en la cola.
 - Para cobrar en la puerta sin pasos de más, Cobrar tiene que llegar con la
   cuota en el carrito: ENT-9.
+
+## Tablet en la puerta (`/kiosco`, ENT-3)
+
+| Elemento | Qué hace hoy | Anda | Qué le falta | Se conecta con | Configurable |
+|---|---|---|---|---|---|
+| Autorizar (Configuración → Reglas) | Con "📲 Tablet en la puerta" prendida, el dueño autoriza una tablet: nombre y sede, y un link (con su QR) que se ve una sola vez. La base guarda solo el hash del token. | ✅ | — | `autorizar_tablet`, `tablets_panel` | Sí |
+| Abrir el link en la tablet | Guarda el token en una cookie que no lee el navegador y lo saca de la dirección. | ✅ | — | `/kiosco/activar` | — |
+| DNI con teclado grande | Entra si puede (forma "en la tablet"); si no, nombre de pila, el porqué y "pasá por recepción". Nada de DNI, teléfono ni plata en pantalla. Vuelve sola al inicio. Hasta 30 intentos por minuto. | ✅ | — | `kiosco_entrar` | — |
+| 📷 Mostrar mi QR | Si el gimnasio usa QR: la cámara de adelante lo lee. | ✅ (cámara de prueba) | — | `privado.validar_qr` | QR del socio |
+| Revocar | La tablet deja de andar al instante. | ✅ | — | `revocar_tablet` | — |
+| Sin autorizar / apagada | "Tablet sin autorizar" y dónde se autoriza. | ✅ | — | `kiosco_estado` | — |

@@ -124,6 +124,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | SOC-11 | El apto físico no frena la entrada: es un aviso (en la ficha y en el veredicto). Lo carga y lo quita la recepción también. | D9 pide solo sí/no y vencimiento; frenar la entrada es una decisión del dueño que no estaba. | Que `calcular_acceso` lo mire (decisión tuya). |
 | 2026-11-05 | ENT-2 | El QR vale la ventana actual y la anterior (como mucho un minuto), una sola vez, y si puede entrar se anota solo, sin tocar nada. | Hora pico sin tipear; una captura vieja no sirve. | `leer_qr` / `Puerta.tsx`. |
 | 2026-11-05 | ENT-4 | El tope de "dejar pasar" es por persona y por día (no del gimnasio entero). Dueño y encargado no tienen tope. Tope 0 = la recepción no deja pasar. Si el socio igual puede entrar, no cuenta. | Cada uno responde por lo suyo; D1 dice "un tope por día". | `privado.puede_dejar_pasar`. |
+| 2026-11-05 | ENT-3 | La tablet la autoriza solo el dueño (el encargado ve la lista). En la tablet se muestra solo el nombre de pila y el porqué, sin montos ni datos; nadie deja pasar desde ahí. 30 intentos por minuto por tablet. El token vive en una cookie httpOnly por 400 días. | Es una pantalla pública en la puerta: lo mínimo. | `kiosco_entrar` / `autorizar_tablet`. |
 
 ---
 
@@ -228,7 +229,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
 - [x] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
 - [x] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
-- [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
+- [x] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
 - [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
 - [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
 - [ ] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite

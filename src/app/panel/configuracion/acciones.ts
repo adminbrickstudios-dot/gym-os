@@ -169,3 +169,21 @@ export async function publicarPagina(publicada: boolean): Promise<{ error?: stri
     return { datos: await rpc("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Tablets en la puerta (ENT-3) ────────────────────────────────────
+export type Tablet = { id: string; nombre: string; sede: string; ultimo_uso: string | null; creado_en: string; revocado: boolean };
+/** La base genera el token y guarda solo su hash: se ve una sola vez, acá. */
+export async function autorizarTablet(sedeId: string, nombre: string): Promise<{ error?: string; token?: string; tablets?: Tablet[] }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ token: string }>("autorizar_tablet", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sedeId, p_nombre: nombre });
+    return { token: r.token, tablets: await rpc<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function revocarTablet(id: string): Promise<{ error?: string; tablets?: Tablet[] }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("revocar_tablet", { p_dispositivo_id: id });
+    return { tablets: await rpc<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
