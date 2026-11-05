@@ -46,7 +46,7 @@ try {
 
   // El que pagó hasta 2030 entra; el que no tiene fecha queda sin pagar.
   await p.goto(`${G}/panel/socios?q=Importado${s}`);
-  const filas = p.locator('main a[href^="/panel/socios/"]:not([href$="/nuevo"]):not([href$="/importar"])');
+  const filas = p.locator('main ul a[href^="/panel/socios/"]');
   await filas.first().waitFor({ timeout: 30000 });
   const textos = (await filas.allInnerTexts()).map((x) => x.replace(/\s+/g, " "));
   chequear(textos.length === 2 && textos.some((x) => /Uno/.test(x) && !/no pagó|Venció|Sin plan/i.test(x)) && textos.some((x) => /Dos/.test(x) && /pag|plan/i.test(x)),

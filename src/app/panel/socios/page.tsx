@@ -31,6 +31,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           accion={<div className="flex flex-wrap gap-2">
             <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>
             {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar</Link>}
+            {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/duplicados" className="boton">🔎 Duplicados</Link>}
             {panel.yo.rol !== "recepcion" && filas.length > 0 && (
               // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
               <a href={`/panel/socios/exportar${con(etiqueta).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>

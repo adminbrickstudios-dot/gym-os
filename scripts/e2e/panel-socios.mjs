@@ -14,7 +14,7 @@ try {
   const buscar = async (texto) => {
     await p.goto(`${G}/panel/socios${texto ? `?q=${encodeURIComponent(texto)}` : ""}`);
     await p.locator("main").waitFor();
-    return p.locator('main a[href^="/panel/socios/"]:not([href$="/nuevo"]):not([href$="/importar"])');
+    return p.locator('main ul a[href^="/panel/socios/"]');
   };
 
   // ── Lista y búsqueda ──

@@ -117,6 +117,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | SOC-1 | Deshacer borra la importación entera (socios, planes y coberturas) dentro de 24 h y solo si esos socios no tienen movimientos; es la única forma en que se borra un hecho, y solo desde esa función. | Que un archivo mal mapeado se pueda volver a importar bien sin dejar fantasmas. | Anularlos y dejarlos dados de baja. |
 | 2026-11-04 | SOC-3 | Notas y etiquetas: las ponen dueño, encargado y recepción; una nota la borra quien la escribió o el dueño/encargado (queda borrada, no se pierde de la base). Una etiqueta que nadie tiene desaparece sola. | Es el trabajo de todos los días del mostrador. | — |
 | 2026-11-04 | SOC-7 | La foto del socio la sacan dueño, encargado y recepción; la ven también los profes (para reconocerlo en clase). Bucket privado: el panel la sirve solo a quien la base dice que es del equipo. | Es para la puerta; nunca pública. | Bucket público con ruta difícil de adivinar. |
+| 2026-11-04 | SOC-8 | Unir fichas lo hace solo el dueño (mueve pagos, cuotas y la cuenta de la app); el encargado ve los posibles duplicados. No se deshace; queda registrado en `uniones_socios`. Con DNI distinto, dos membresías activas, la misma clase o dos cuentas de app, no se une y dice qué resolver. | Mueve plata: lo más prudente. | Que el encargado también una. |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -206,7 +207,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-4 · 🟢 · Exportar la lista de socios — verificado: vitest (csv: punto y coma, BOM, comillas, sin fórmulas), e2e:soc-4 (5 pasos: CSV con el mismo filtro, recepción sin botón y con “Sin permiso” en la dirección directa)
 - [x] SOC-6 · 🟢 · Cumpleaños — verificado: db (cumpleanos: momento fijo, 29/2 el 28/2 en años no bisiestos, bajas no, mensaje), e2e:soc-6 (3 pasos: Inicio con “Saludar” armado, edad, el profe no); la bandeja de avisos la suma AVI-1
 - [x] SOC-7 · 🟢 · Foto del socio desde la cámara — verificado: db (foto-socio: ruta de la base, otra ruta no, el profe la ve, un ajeno no), e2e:soc-7 (6 pasos con la cámara de prueba de Chrome: ficha 480×480, bucket privado, Entrada, sin sesión no, cambiar borra la anterior, quitar)
-- [ ] SOC-8 · 🟢 · Encontrar y unir socios duplicados
+- [x] SOC-8 · 🟢 · Encontrar y unir socios duplicados — verificado: db (unir-socios: encuentra por celular, mueve entradas, cuota (queda verde), notas y etiquetas sin repetir, registro; frena membresías dobles y DNI distinto; solo dueño; los hechos siguen fijos), e2e:soc-8 (7 pasos)
 - [ ] SOC-5 · 🟢 · Grupo familiar
 - [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
 - [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable

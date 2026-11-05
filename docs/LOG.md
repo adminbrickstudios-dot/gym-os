@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-8 · Encontrar y unir socios duplicados
+
+**QUÉ HICE**
+- Socios → "🔎 Duplicados" (dueño y encargado): pares con el mismo celular o con nombre casi igual (sin acentos; con DNI distinto no se proponen). Cada par lado a lado; el dueño elige "Quedarse con #N", confirma ("no se puede deshacer") y listo.
+- Migración `20261104004000_unir_socios.sql`: `posibles_duplicados`, `unir_socios` (solo dueño), tabla `uniones_socios`. Mueve todo lo que tiene `socio_id` (se descubre solo: pagos, ventas, cuotas, entradas, reservas, asistencias, packs, notas, etiquetas sin repetir, prospectos…), completa los datos que le faltan al que queda y borra al otro. Las dos claves (cuota/congelamiento → suscripción) pasan a revisarse al final de la transacción; `hecho_inmutable` deja cambiar solo el `socio_id` del que se va al que queda durante la unión.
+- `supabase/pruebas/unir-socios.test.mjs` (la cuota del duplicado queda en el que queda y entra verde) y `scripts/e2e/soc-8.mjs` (7 pasos).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0040).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0040 contra la base real (probada local): recrea dos claves foráneas (coberturas y congelamientos → suscripciones) como diferibles; con muchos datos tarda lo que tarda revisarlas una vez.
+
+---
+
 ## 2026-11-04 · SOC-7 · Foto del socio con la cámara
 
 **QUÉ HICE**
