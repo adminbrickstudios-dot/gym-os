@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // AUD-10 · Retención botón por botón: la plata en riesgo, cada lista, el
 // WhatsApp armado, "Dice que vuelve" que queda anotado, "💵 Cobrar" en los
-// vencidos, la lista vacía con camino a otra; la recepción no entra; celular.
+// vencidos, la lista vacía con camino a otra; la recepción entra sin plata (D2); celular.
 //   npm run e2e:retencion            (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
@@ -51,8 +51,10 @@ try {
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/retencion`);
-  await r.locator("main").waitFor({ timeout: 60000 });
-  chequear(/acceso|permiso/i.test(await r.locator("main").innerText()), "la recepción no entra (decisión D2 pendiente: RET-2)", "la recepción ve Retención");
+  await r.locator("main h1").waitFor({ timeout: 60000 });
+  chequear(await r.locator('nav[aria-label="Listas"] a').count() === 5 && await r.locator("[data-tablero-retencion]").count() === 0 && !/en riesgo/.test(await r.locator("main").innerText()),
+    "la recepción ve las listas, sin la plata en riesgo ni el tablero (D2)", "la recepción ve plata o no ve las listas");
+  if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 }

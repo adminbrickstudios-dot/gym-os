@@ -19,7 +19,7 @@ try {
     chequear(/se les? termina la cuota hoy/.test(await r.locator("main").innerText()), "dice cuántos vencen hoy", "no dice cuántos");
     const f = filas.first();
     chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "cada fila tiene “💵 Cobrar”", "no hay Cobrar");
-    chequear(await f.locator('button:has-text("Dice que vuelve")').count() === 0, "la recepción no anota contactos (lo hace dueño o encargado)", "la recepción anota");
+    chequear(await f.locator('button:has-text("Dice que vuelve")').count() === 1, "la recepción también anota “Dice que vuelve” (D2)", "la recepción no puede anotar");
     await f.locator('a:has-text("Cobrar")').click();
     await r.waitForURL(/\/panel\/vender\?socio=.*cuota=1/, { timeout: 30000 });
     await r.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });

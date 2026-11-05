@@ -12,7 +12,7 @@ const RUTAS = ["/panel", "/panel/entrada", "/panel/clases", "/panel/clases/grill
 const PROHIBIDO = {
   duena: [],
   encargado: [],
-  recepcion: ["/panel/retencion", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado"],
+  recepcion: ["/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado"],
   profe: ["/panel/entrada", "/panel/vencen-hoy", "/panel/socios", "/panel/socios/nuevo", "/panel/retencion", "/panel/vender",
           "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla",
           "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado"],

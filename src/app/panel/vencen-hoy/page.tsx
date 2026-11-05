@@ -54,7 +54,7 @@ export default async function VencenHoy() {
                 detalle={f.ultimo_ingreso ? `Vino por última vez el ${fechaCorta(f.ultimo_ingreso, zona)}` : "Nunca vino"}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
                 ultimo={f.ultimo_contacto_en ? `Le escribió ${f.ultimo_contacto_por ?? "alguien"} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : marcado(f.socio_id)}
-                puedeAnotar={panel.yo.rol !== "recepcion"} cobrar={puedeCobrar}
+                puedeAnotar cobrar={puedeCobrar}
                 aviso={avisos.get(f.socio_id) ? { clave: "por_vencer", referencia: avisos.get(f.socio_id)!.referencia } : null} />
             ))}
           </ul>

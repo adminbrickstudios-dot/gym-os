@@ -9,7 +9,8 @@ describe("rutaDisponible", () => {
     expect(rutaDisponible("/panel/vender?socio=1", "dueno", ["caja"])).toBe(true);
   });
   it("respeta el rol y deja pasar lo que no es de ninguna sección", () => {
-    expect(rutaDisponible("/panel/retencion", "recepcion", [])).toBe(false);
+    expect(rutaDisponible("/panel/planes", "recepcion", [])).toBe(false);
+    expect(rutaDisponible("/panel/retencion", "recepcion", [])).toBe(true);   // D2
     expect(rutaDisponible("/panel/socios/1", "profe", [])).toBe(false);
     expect(rutaDisponible("/panel/cuenta", "profe", ["socios"])).toBe(true);
     expect(rutaDisponible("/panel", "recepcion", [])).toBe(true);

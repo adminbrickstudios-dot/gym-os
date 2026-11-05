@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RET-2 · La recepción anota contactos (D2)
+
+**QUÉ HICE**
+- Como dice D2: la recepción ve Retención (en el menú, grupo SOCIOS). Ve las listas, el WhatsApp armado y "Dice que vuelve" (también en Vencen hoy).
+- No ve plata: ni la plata en riesgo ni cuánto paga cada uno (la base se lo devuelve vacío), ni el tablero de altas y bajas.
+- Migración 0090 (copias de `retencion`, `retencion_resumen` y `registrar_contacto`). Prueba de base `retencion` actualizada, vitest de secciones, `e2e:retencion` y `e2e:vencen`. El barrido ya no la tiene como prohibida.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada fuera de lo de arriba. Es un cambio de permisos aprobado (D2 ✅): revisalo igual.
+
+---
+
 ## 2026-11-05 · RET-3 · Antes de la baja, ofrecer pausa
 
 **QUÉ HICE**

@@ -104,7 +104,7 @@ test("plata en riesgo = suma mensual de vencidos, por vencer, nuevos y no vienen
   assert.equal(r.listas.vencido, filas.filter((f) => f.lista === "vencido").length);
 });
 
-test("ya le escribió alguien: aparece quién y cuándo; la recepción no ve la retención", async () => {
+test("ya le escribió alguien: aparece quién y cuándo; la recepción ve las listas sin la plata (D2) y anota", async () => {
   const [{ id: uDue }] = await t.q(`insert into auth.users (email) values ('due-ret@ejemplo.invalid') returning id`);
   const [{ id: uRec }] = await t.q(`insert into auth.users (email) values ('rec-ret@ejemplo.invalid') returning id`);
   await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Caro','dueno'), ($1,$3,'Rec','recepcion')`, [t.g, uDue, uRec]);
@@ -116,5 +116,14 @@ test("ya le escribió alguien: aparece quién y cuándo; la recepción no ve la 
   await recalcular();
   await t.db.query("rollback to savepoint c");
   assert.equal(fila(t.ctx.socios.vencida).ultimo_contacto_por, "Caro");
-  await t.comoUsuario(uRec, () => t.falla(() => t.q(`select * from public.retencion($1)`, [t.g]), /Sin permiso/));
+  // RET-2 (0090): la recepción ve las listas y anota contactos, pero no la plata.
+  await t.comoUsuario(uRec, async () => {
+    const filas = await t.q(`select * from public.retencion($1)`, [t.g]);
+    assert.ok(filas.length > 0);
+    assert.ok(filas.every((f) => f.monto_mensual === null), "sin cuánto paga cada uno");
+    const [{ r }] = await t.q(`select public.retencion_resumen($1) as r`, [t.g]);
+    assert.equal(r.plata_en_riesgo, null, "sin plata en riesgo");
+    assert.ok(Object.keys(r.listas).length > 0);
+    await t.q(`select public.registrar_contacto($1, 'vencido', 'whatsapp', 'vuelve')`, [t.ctx.socios.vencida]);
+  });
 });

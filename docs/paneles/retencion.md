@@ -1,7 +1,6 @@
 # Retención · inventario botón por botón (AUD-10)
 
-Ruta `/panel/retencion`. La ven dueño y encargado (la recepción, no: D2 /
-RET-2). Se apaga por gimnasio (`retencion`).
+Ruta `/panel/retencion`. La ven dueño, encargado y recepción (D2 / RET-2: la recepción sin la plata). Se apaga por gimnasio (`retencion`).
 
 Probado haciendo clic con `npm run e2e:retencion` (`scripts/e2e/panel-retencion.mjs`).
 

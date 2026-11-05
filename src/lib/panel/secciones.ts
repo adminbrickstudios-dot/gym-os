@@ -27,7 +27,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "avisos", ruta: "/panel/avisos", emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: "/panel/vencen-hoy", emoji: "⏰", titulo: "Vencen hoy", descripcion: "A quién avisarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy" },
   { clave: "socios", ruta: "/panel/socios", emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
-  { clave: "retencion", ruta: "/panel/retencion", emoji: "📉", titulo: "Retención", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: GESTION, apagable: "retencion" },
+  { clave: "retencion", ruta: "/panel/retencion", emoji: "📉", titulo: "Retención", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion" },
   { clave: "prospectos", ruta: "/panel/prospectos", emoji: "🌱", titulo: "Prospectos", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR },
   { clave: "vender", ruta: "/panel/vender", emoji: "🛒", titulo: "Vender", descripcion: "Cuotas, pases, packs y productos", grupo: "Plata", roles: MOSTRADOR, apagable: "vender" },
   { clave: "caja", ruta: "/panel/caja", emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
