@@ -19,7 +19,7 @@ try {
   await mp.getByRole("button", { name: /Conectar MercadoPago|Cambiar credenciales/ }).click();
   await mp.getByLabel("Access Token").fill("mi-token");
   await mp.getByLabel("Clave secreta del webhook").fill(SECRETO);
-  await mp.getByLabel(/^Prueba/).check();
+  await mp.locator("label", { hasText: /^\s*Prueba\s*$/ }).click();
   await mp.getByRole("button", { name: "Guardar y conectar" }).click();
   await mp.getByRole("alert").waitFor({ timeout: 30000 });
   chequear(/APP_USR-/.test(await mp.getByRole("alert").innerText()), "un token que no es token: dice dónde está el bueno", await mp.getByRole("alert").innerText());

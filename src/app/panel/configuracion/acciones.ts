@@ -206,3 +206,13 @@ export async function desconectarMercadoPago(): Promise<{ error?: string }> {
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Turnos fijos (CLA-2): se guarda en el momento ──
+export async function guardarTurnosFijos(prendido: boolean): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_turnos_fijos", { p_gimnasio_id: panel.gimnasio.id, p_prendido: prendido });
+    revalidatePath("/panel/configuracion");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

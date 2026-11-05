@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-2 · Turnos fijos
+
+**QUÉ HICE**
+- Configuración → Clases: "📌 Turnos fijos" (prender o apagar, se guarda al tocar).
+- App del socio (Reservar): "📌 Mis turnos fijos". Elige un horario (con los lugares fijos que quedan) → "Dejarlo fijo"; "Quitar".
+- Ficha → Resumen: lo mismo desde el mostrador.
+- Cada semana se reserva solo mientras pueda tomar la clase. Se hace al mirar las clases de ese día, sin cron (`materializar_dia` sincroniza los turnos). Al que dejó de estar al día se le libera el lugar y sube la espera. Si cancela una semana, se respeta.
+- Migración 0081 (`turnos_fijos`, `reservas.turno_fijo_id`, `sincronizar_turnos`, copia de `materializar_dia`, `abonar_turno`, `quitar_turno`, `turnos_socio`, `horarios_para_turno`, `guardar_turnos_fijos`, `config_turnos_fijos`). Prueba de base `turnos-fijos` y e2e `e2e:cla-2`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En mi base local, volver a correr `simular-supabase.sql` (para sumar Vault) volvía a dar TRUNCATE por defecto a las tablas nuevas; `chequeos` lo marcó. Es solo de la base local (en una nueva el orden es el correcto). La migración igual le saca esos permisos a `turnos_fijos` explícitamente.
+
+---
+
 ## 2026-11-05 · CLA-1 · Faltas a clases reservadas
 
 **QUÉ HICE**

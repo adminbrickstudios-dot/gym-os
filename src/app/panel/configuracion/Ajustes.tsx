@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
 import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina, type EstadoMP } from "./acciones";
 import { MercadoPago } from "./MercadoPago";
+import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
@@ -157,9 +158,9 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago }: {
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos }: {
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[];
-  mercadopago: EstadoMP;
+  mercadopago: EstadoMP; turnosFijos: boolean;
 }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
@@ -570,6 +571,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             )}
           </Tarjeta>
           {pie("clases")}
+          {guardado.modo_clases === "reserva" && <TurnosFijosConfig inicial={turnosFijos} puedeEditar={puedeEditar} />}
         </>}
 
         {pestana === "secciones" && <>

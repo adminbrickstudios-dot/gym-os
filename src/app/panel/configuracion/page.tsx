@@ -17,7 +17,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
-    const [config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, { pestana }] = await Promise.all([
+    const [config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, { pestana }] = await Promise.all([
       rpc<Config>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<DatosGimnasio>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Agenda>("horarios_apertura_panel", { p_gimnasio_id: panel.gimnasio.id }),
@@ -26,6 +26,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }),
       rpc<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<EstadoMP>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<boolean>("config_turnos_fijos", { p_gimnasio_id: panel.gimnasio.id }),
       searchParams,
     ]);
     const inicial: ClavePestana = PESTANAS.find((p) => p.clave === pestana)?.clave ?? "gimnasio";
@@ -33,7 +34,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
       <>
         <Encabezado emoji="⚙️" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
         <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambios} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
-          direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} />
+          direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos} />
       </>
     );
   });

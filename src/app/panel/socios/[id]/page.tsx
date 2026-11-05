@@ -10,6 +10,7 @@ import { FilaVenta } from "@/components/panel/Venta";
 import type { Venta } from "@/app/panel/ventas-acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { Calendario, type Asistencia } from "./Calendario";
+import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import { Foto } from "./Foto";
 import { Familia, type Familiar } from "./Familia";
@@ -46,7 +47,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas] = await Promise.all([
+    const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -64,6 +66,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" ? rpc<{ convenio_id: string; nombre: string; tipo: string; valor: number; activo: boolean }[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve([]),
       // CLA-1: las clases que reservó y no vino (sin cancelar), últimos 60 días.
       pestana === "asistencia" && panel.modo_clases === "reserva" ? rpc<{ clase_id: string; actividad: string; inicio: string }[]>("faltas_socio", { p_socio_id: id }) : Promise.resolve([]),
+      // CLA-2: turnos fijos (si el gimnasio los usa), desde el mostrador.
+      pestana === "resumen" && mostrador ? rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: id }) : Promise.resolve(null),
+      pestana === "resumen" && mostrador ? rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: id }) : Promise.resolve([]),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -165,6 +170,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </ul>
           )}
         </section>
+        {turnos?.prendido && !s.dado_de_baja_en && <TurnosFijos socioId={s.id} turnos={turnos.turnos} horarios={horariosTurno} quien="equipo" />}
 
         </>}
 

@@ -15,6 +15,7 @@ try {
   await gan.waitFor({ timeout: 60000 });
   const leer = async () => { const t = await gan.innerText(); return (/pérdida/.test(t) ? -1 : 1) * Math.abs(pesos(t.split(" de ")[0])); };
   const antes = await leer();
+  const antesTxt = (await gan.innerText()).split(" ")[0];
   const detalle = `Prueba e2e ${Date.now() % 100000}`;
   await d.locator("[data-gastos] select").selectOption("otros");
   await d.getByLabel("Detalle (opcional)").fill(detalle);
@@ -22,7 +23,7 @@ try {
   await d.locator("[data-gastos] button[type=submit]").click();
   const fila = d.locator("[data-gastos] li", { hasText: detalle });
   await fila.waitFor({ timeout: 30000 });
-  await d.waitForFunction((a) => { const t = document.querySelector("[data-ganancia]")?.textContent ?? ""; return !t.includes(a); }, (await gan.innerText()).split(" ")[0], { timeout: 30000 });
+  await d.waitForFunction((a) => { const t = document.querySelector("[data-ganancia]")?.textContent ?? ""; return !t.startsWith(a); }, antesTxt, { timeout: 30000 });
   const despues = await leer();
   chequear(Math.abs((antes - despues) - 1234.5) < 0.01, `gasto “${detalle}” de $1.234,50: la ganancia baja lo mismo`, `${antes} → ${despues}`);
   await fila.getByRole("button", { name: /Quitar/ }).click();

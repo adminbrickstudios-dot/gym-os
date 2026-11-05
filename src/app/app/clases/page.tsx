@@ -4,6 +4,7 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Reservar } from "./Reservar";
+import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 
 type Clase = { clase_id: string; actividad: string; emoji: string | null; inicio: string; profe: string | null; cupo: number | null;
   confirmadas: number; cancelada: boolean; mi_reserva: string | null; mi_posicion: number | null };
@@ -19,10 +20,13 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
     if (!sede) throw new Error("El gimnasio no tiene sedes activas");
-    const [todas, politica] = await Promise.all([
+    const [todas, politica, turnos, horarios] = await Promise.all([
       rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
       // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.
       rpc<{ reglas: string[]; bloqueo: { texto: string } | null }>("politica_reservas", { p_socio_id: yo.socio.socio_id }),
+      // CLA-2: sus turnos fijos (si el gimnasio los usa) y los horarios para elegir.
+      rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: yo.socio.socio_id }),
+      rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: yo.socio.socio_id }),
     ]);
     const clases = todas.filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
     const reservaDe = new Map((yo.reservas ?? []).map((r) => [r.clase_id, r.reserva_id]));
@@ -53,6 +57,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </li>
           ))}</ul>
         )}
+        {turnos.prendido && <div className="mt-8"><TurnosFijos socioId={yo.socio.socio_id} turnos={turnos.turnos} horarios={horarios} /></div>}
         {politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}>ℹ️ {r}</li>)}</ul>}
       </>
     );
