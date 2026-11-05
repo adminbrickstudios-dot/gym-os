@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
@@ -22,11 +23,11 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
     <div {...propsMarca(landing.marca)} className="min-h-dvh">
       <header className="sticky top-0 z-20 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
         <div className="mx-auto max-w-lg px-4 h-14 flex items-center justify-between">
-          <a href="/app" className="titulo text-xl flex items-center gap-2 min-w-0">
+          <Link href="/app" className="titulo text-xl flex items-center gap-2 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {logo && <img src={logo} alt="" className="h-8 w-auto max-w-24 flex-none rounded-lg object-contain" />}
             <span className="truncate">{landing.marca.nombre}</span>
-          </a>
+          </Link>
           <form action="/salir" method="post"><button className="boton-texto">Salir</button></form>
         </div>
       </header>

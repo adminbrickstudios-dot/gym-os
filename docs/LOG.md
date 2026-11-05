@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-11 · App del socio botón por botón
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/app.md` y `e2e:app` (celular: semáforo, campana, historial, mi membresía y "Volver", días de Reservar, el logo vuelve al inicio, Salir; y con clases "sin reserva").
+- Arreglado:
+  - con clases **sin reserva**, la app mostraba "➕ Reservar" y la reserva fallaba al tocar: ahora "🗓️ Ver horarios", "No hace falta reservar: vení directo" y la lista sin botones;
+  - "← Volver" en Clases perdía el socio elegido (cuentas con varios socios);
+  - el logo de arriba recargaba toda la página (`<a>`): ahora `<Link>`;
+  - faltaba `loading.tsx` en el inicio de la app y en Clases.
+
+**LO QUE NO PUDE VERIFICAR**
+- `e2e:app` se corre en la tanda final (el servidor de pruebas estaba ocupado con la tanda anterior).
+
+---
+
 ## 2026-11-05 · CLA-9 · Faltas que se descuentan del pack
 
 **QUÉ HICE**

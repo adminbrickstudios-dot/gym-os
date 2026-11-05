@@ -134,10 +134,10 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {yo.modo_clases !== "ninguno" && (
           <section>
             <div className="flex items-end justify-between mb-3">
-              <h2 className="titulo text-3xl">🗓️ Mis clases</h2>
-              <Link href={`/app/clases${q}`} className="boton !min-h-11">➕ Reservar</Link>
+              <h2 className="titulo text-3xl">🗓️ {yo.modo_clases === "reserva" ? "Mis clases" : "Clases"}</h2>
+              <Link href={`/app/clases${q}`} className="boton !min-h-11">{yo.modo_clases === "reserva" ? "➕ Reservar" : "🗓️ Ver horarios"}</Link>
             </div>
-            {!yo.reservas?.length ? <p className="texto-suave">No tenés clases reservadas.</p> : (
+            {yo.modo_clases !== "reserva" ? <p className="texto-suave">No hace falta reservar: vení directo.</p> : !yo.reservas?.length ? <p className="texto-suave">No tenés clases reservadas.</p> : (
               <ul className="space-y-2">{yo.reservas.map((r) => (
                 <li key={r.reserva_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
                   <span className="icono" aria-hidden>{r.emoji ?? "🗓️"}</span>

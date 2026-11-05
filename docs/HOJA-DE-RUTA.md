@@ -334,7 +334,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-8 · 🟢 · Pulido: Retención — verificado: e2e:dis-8 (tres listas, dueña y recepción en el celular: sin desborde, botones altos, un verde), capturas dis8-*
 
 ### 11 · App del socio
-- [ ] AUD-11 · 🟢 · Auditoría botón por botón: App del socio
+- [x] AUD-11 · 🟢 · Auditoría botón por botón: App del socio — verificado: e2e:app (pendiente de la tanda final); inventario en docs/paneles/app.md
 - [x] APP-1 · 🟢 · App del socio instalable (con el ícono y los colores del gimnasio) — verificado: e2e:push-1 (manifest con la marca y service worker), e2e:app-1 (la invitación a instalar). Sin verificar: instalar en un celular real
 - [x] APP-3 · 🟢 · Historial de pagos y asistencia en la app — verificado: db (historial-socio: pagos y entradas, lo nuevo primero, otro socio no), e2e:app-3
 - [ ] APP-6 · 🟢 · Novedades del gimnasio en la app

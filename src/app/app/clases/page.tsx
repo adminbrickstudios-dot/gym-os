@@ -15,6 +15,8 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const { yo } = await miSocio(sp.socio);
     if (yo.elegir || !yo.socio) return <Link href="/app" className="boton">Elegí el socio</Link>;
     const ZONA = yo.zona!;
+    // AUD-11: con "sin reserva" se muestran los horarios, sin botones de reservar.
+    const reserva = yo.modo_clases === "reserva";
     const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(new Date());
     const dias = Array.from({ length: 7 }, (_, i) => { const d = new Date(`${hoy}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + i); return d.toISOString().slice(0, 10); });
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
@@ -37,8 +39,9 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const q = (d: string) => `/app/clases?dia=${d}${yo.socios.length > 1 ? `&socio=${yo.socio!.socio_id}` : ""}`;
     return (
       <>
-        <Link href="/app" className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl mt-4">Reservar</h1>
+        <Link href={`/app${yo.socios.length > 1 ? `?socio=${yo.socio.socio_id}` : ""}`} className="texto-suave">← Volver</Link>
+        <h1 className="titular text-5xl mt-4">{reserva ? "Reservar" : "Clases"}</h1>
+        {!reserva && <p className="texto-suave text-lg mt-2" data-sin-reserva>No hace falta reservar: vení directo.</p>}
         <nav className="flex gap-2 overflow-x-auto -mx-4 px-4 py-4">
           {dias.map((d, i) => (
             <Link key={d} href={q(d)} className={`boton !min-h-11 whitespace-nowrap ${d === dia ? "!border-[var(--acento)]" : "opacity-70"}`}>
@@ -46,23 +49,23 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </Link>
           ))}
         </nav>
-        {politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas>⛔ {politica.bloqueo.texto}</p>}
+        {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas>⛔ {politica.bloqueo.texto}</p>}
         {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.</p> : (
           <ul className="space-y-2">{clases.map((c) => (
             <li key={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="numero text-2xl w-14">{hora(c.inicio)}</span>
               <span className="text-2xl" aria-hidden>{c.emoji ?? "🗓️"}</span>
               <span className="grow basis-36 min-w-0"><span className="block font-semibold">{c.actividad}</span>
-                <span className="block text-sm texto-suave">{c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo"}{c.profe ? ` · ${c.profe}` : ""}</span></span>
-              {c.mi_reserva && reservaDe.get(c.clase_id)
+                <span className="block text-sm texto-suave">{reserva ? (c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo") : ""}{c.profe ? `${reserva ? " · " : ""}${c.profe}` : ""}</span></span>
+              {!reserva ? null : c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
                 : <Reservar claseId={c.clase_id} socioId={yo.socio!.socio_id} lleno={c.cupo != null && c.confirmadas >= c.cupo} />}
               {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio>🏋️ {wodDe.get(c.clase_id)}</p>}
             </li>
           ))}</ul>
         )}
-        {turnos.prendido && <div className="mt-8"><TurnosFijos socioId={yo.socio.socio_id} turnos={turnos.turnos} horarios={horarios} /></div>}
-        {politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}>ℹ️ {r}</li>)}</ul>}
+        {reserva && turnos.prendido && <div className="mt-8"><TurnosFijos socioId={yo.socio.socio_id} turnos={turnos.turnos} horarios={horarios} /></div>}
+        {reserva && politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}>ℹ️ {r}</li>)}</ul>}
       </>
     );
   });
