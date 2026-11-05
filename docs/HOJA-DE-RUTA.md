@@ -61,6 +61,14 @@ mientras no tenga ✅).
 | D14 | Convenios y descuentos automáticos | Un convenio (estudiante, empresa X, familiar) tiene un % o un monto; se asigna al socio y Vender lo aplica solo, mostrado como una línea aparte. Tiene vencimiento opcional. | ✅ |
 | D15 | PIN de 4 dígitos para el equipo en la PC de recepción | Sí: la PC queda con la sesión del gimnasio y cada uno pone su PIN para que quede registrado quién cobró. El PIN no reemplaza la contraseña para entrar desde otra compu. | ✅ |
 | D16 | Faltar a una clase reservada | Configurable: nada (por defecto), o descontar la clase del pack, o no dejar reservar por N días. Siempre avisado en la app al reservar. | ✅ |
+| D17 | ¿Cómo se abre la Entrada? (05/11, `docs/v2/`) | Las tres formas juntas y adaptándose entre sí: se abre sola al tipear un número, botón (grande en Inicio, chico en el resto) y barra fija opcional. Configurable. | ✅ |
+| D18 | Día fijo y alguien que se anota a mitad de mes | Paga proporcional hasta el día fijo y entra al ciclo (en Configuración también: mes entero o gratis hasta el día fijo). | ✅ |
+| D19 | ¿Cuánto puede fiar la recepción? | Los tres modos, elegibles en Configuración: hasta N días sola y más con PIN del dueño · siempre con PIN · libre con registro. Siempre anotado con nombre y motivo. | ✅ |
+| D20 | Cierre de caja | Por turno; una caja de un día anterior queda "cerrada sin contar" (se calcula, sin cron) y la revisa el dueño. | ✅ |
+| D21 | Vender | Productos y stock. Cuotas y pases se cobran con "Cobrar" desde la Entrada, la ficha, Vencen y el alta. | ✅ |
+| D22 | Prospectos | Pasa a Socios como "Interesados", con "darlo de alta". | ✅ |
+| D23 | ¿Con qué entra el socio? | Google, mail y contraseña, código por mail y código por SMS/WhatsApp. | ✅ |
+| D24 | Reingreso | Una visita dura 5 h (configurable): dentro de la ventana, volver a pasar es "ya entró" y no cuenta ni consume; anti-préstamo configurable. | ✅ |
 
 ### Decisiones que tomó el agente
 
@@ -431,6 +439,41 @@ bloque 18.
 - [ ] COM-15 · 🟡 · Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
 - [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)
 - [ ] COM-17 · 🔌 · Wellhub y TotalPass: el check-in de la plataforma cuenta como entrada
+
+### 20 · Gym OS v2 (VD-*): dueño, recepción y socio (pedido de Mateo, 05/11 · `docs/v2/`, detalle y LISTO SI en `docs/v2/08-PLAN.md`)
+- [ ] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores)
+- [ ] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón
+- [ ] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable
+- [ ] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas
+- [ ] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K)
+- [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
+- [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
+- [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
+- [ ] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z
+- [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
+- [ ] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones
+- [ ] VD-12 · 🟢 · Inicio del dueño y de la recepción
+- [ ] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app
+- [ ] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales
+- [ ] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones
+- [ ] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata)
+- [ ] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad)
+- [ ] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería)
+- [ ] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in)
+- [ ] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso
+- [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo
+- [ ] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada
+- [ ] VD-22B · 🔌 · Credenciales de Google para el ingreso del socio (las crea Mateo)
+- [ ] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida
+- [ ] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar"
+- [ ] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp)
+- [ ] VD-26 · 🟢 · Página de Gym OS para vender
+- [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
+- [ ] VD-28 · 🟢 · Navegación con memoria y Volver al origen
+- [ ] VD-29 · 🟢 · Ctrl+K con acciones
+- [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
+- [ ] VD-31 · 🟢 · Ayuda y onboarding por pantalla
+- [ ] VD-32 · 🟢 · Segunda pasada v2: un día del dueño, de la recepción y un mes del socio
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)

@@ -1,12 +1,15 @@
 # Las pruebas que una compu con Windows no puede correr: la base de prueba
 # (Postgres con la simulación de Supabase), sus pruebas, los chequeos contra
 # la base y las pantallas con sesión real (e2e + barrido).
-# Corre sola en cada pull request; a mano: Actions → Pruebas completas.
+# Corre sola en cada push a una rama noche/** o dia/** (la base, ~5 min).
+# Las pantallas (~1-2 h) corren si el mensaje del commit dice [pantallas],
+# o a mano: Actions → Pruebas completas → Run workflow.
 # El agente la mira con:  gh run list --workflow pruebas-completas.yml
 name: Pruebas completas
 
 on:
-  pull_request:
+  push:
+    branches: ["noche/**", "dia/**"]
   workflow_dispatch:
     inputs:
       pantallas:
@@ -15,7 +18,7 @@ on:
         default: true
 
 concurrency:
-  group: pruebas-${{ github.head_ref || github.ref }}
+  group: pruebas-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[pantallas]') }}
   cancel-in-progress: true
 
 env:
@@ -54,7 +57,7 @@ jobs:
   pantallas:
     name: Pantallas (e2e y barrido)
     needs: base
-    if: github.event_name == 'pull_request' || inputs.pantallas
+    if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
     runs-on: ubuntu-latest
     timeout-minutes: 180
     services:
