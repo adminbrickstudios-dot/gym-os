@@ -100,3 +100,17 @@ export async function quitarFoto(socioId: string): Promise<{ error?: string }> {
 // ── Grupo familiar (SOC-5) ──────────────────────────────────────────
 export async function vincularFamilia(socioId: string, otroId: string) { return hacer(socioId, async () => { await rpc("vincular_familia", { p_socio_id: socioId, p_otro_id: otroId }); revalidatePath(`/panel/socios/${otroId}`); }); }
 export async function sacarDeFamilia(socioId: string, quienId: string) { return hacer(socioId, async () => { await rpc("sacar_de_familia", { p_socio_id: quienId }); revalidatePath(`/panel/socios/${quienId}`); }); }
+
+// ── Pausas (SOC-9) ──────────────────────────────────────────────────
+// El dueño o el encargado la dan; la recepción la pide. La base decide quién puede.
+export async function darPausa(socioId: string, suscripcionId: string, desde: string, vuelve: string, motivo: string, nota: string) {
+  return hacer(socioId, async () => { await rpc("congelar", { p_suscripcion_id: suscripcionId, p_desde: desde, p_hasta: vuelve, p_categoria: motivo, p_nota: nota || null }); revalidatePath("/panel"); });
+}
+export async function pedirPausa(socioId: string, suscripcionId: string, desde: string, vuelve: string, motivo: string, nota: string) {
+  return hacer(socioId, async () => { await rpc("pedir_pausa", { p_suscripcion_id: suscripcionId, p_desde: desde, p_hasta: vuelve, p_categoria: motivo, p_nota: nota || null }); revalidatePath("/panel"); });
+}
+export async function resolverPedidoPausa(socioId: string, pedidoId: string, aprobar: boolean) {
+  return hacer(socioId, async () => { await rpc("resolver_pedido_pausa", { p_pedido_id: pedidoId, p_aprobar: aprobar }); revalidatePath("/panel"); });
+}
+export async function volvioAntes(socioId: string, pausaId: string) { return hacer(socioId, () => rpc("descongelar", { p_congelamiento_id: pausaId })); }
+export async function anularPausa(socioId: string, pausaId: string, motivo: string) { return hacer(socioId, () => rpc("anular_congelamiento", { p_congelamiento_id: pausaId, p_motivo: motivo })); }

@@ -114,7 +114,7 @@ test("A5 la recepción no congela hacia atrás; el dueño sí, sin devolver día
   const u = await usuario("recepcion");
   await sp("a5");
   await como(u);
-  await t.falla(() => t.q(`select public.congelar($1, $2::date, $3::date, 'viaje')`, [su, D(-20), D(0)]), /fecha pasada/);
+  await t.falla(() => t.q(`select public.congelar($1, $2::date, $3::date, 'viaje')`, [su, D(-20), D(0)]), /Pedir pausa/);
   await t.db.query("reset role");
   await rb("a5");
   await congelar(su, D(-20), D(0));                                                 // el dueño: 20 días, 10 usados

@@ -15,6 +15,27 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-9 · Pausas desde la ficha (D7)
+
+**QUÉ HICE**
+- Ficha → Resumen → "⏸️ Pausas": cuántos días usó en el año, las pausas (programada, en pausa, terminó, anulada) y el formulario (desde, vuelve el, motivo viaje/trabajo/estudio/otro, nota). Cuenta los días mientras se eligen.
+- El dueño y el encargado pausan; la recepción ve "📨 Pedir una pausa" y el pedido queda esperando. En Inicio, el dueño y el encargado ven "⏸️ Pausas para aprobar" y desde la ficha aprueban o rechazan. "🏃 Volvió antes" (cualquiera del mostrador) y "Anular" con motivo (dueño/encargado).
+- Configuración → Reglas: "Pausa: máximo de días por año" (por socio, por defecto 30; en 0 no se dan). Una pausa que cruza el año se cuenta en cada uno.
+- Migración `20261104004200_pausas.sql`: `pedidos_pausa`, `pedir_pausa`, `resolver_pedido_pausa`, `pausas_socio`, `pedidos_pausa_pendientes`, `privado.validar_pausa` y `dias_de_pausa`; `congelar` (misma firma) ahora valida motivo y máximo; `guardar_configuracion` y `configuracion_panel` copiados de 0023 con el campo nuevo.
+- `supabase/pruebas/pausas.test.mjs` (3) y `scripts/e2e/soc-9.mjs` (9 pasos: recepción en el celular pide, encargado aprueba desde Inicio, dueña anula).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Toca permisos, y es lo que dice D7: **la recepción ya no puede congelar** (antes podía, con fecha de hoy en adelante). Ahora la pide. La prueba A5 de `revision.test.mjs` se actualizó para eso.
+- Los motivos viejos ("personal", "económico") siguen valiendo para lo ya cargado; los nuevos se eligen entre los cuatro de D7.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0042).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0042 contra la base real (probada local). `npm run db:types` necesita el proyecto de Supabase: no corrió acá.
+
+---
+
 ## 2026-11-04 · SOC-5 · Grupo familiar
 
 **QUÉ HICE**

@@ -28,16 +28,20 @@ const DETALLE: Record<string, { ruta: string; seccion: string }> = {
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
 
 type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumple: number; mensaje: string };
+type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
+const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
 export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
       rol === "profe" ? [] : rpc<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      // Las pausas que pidió la recepción esperan al dueño o al encargado.
+      rol === "dueno" || rol === "encargado" ? rpc<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
@@ -102,6 +106,25 @@ export default async function Inicio() {
             </ul>
           )}
         </section>
+
+        {pedidosPausa.length > 0 && (
+          <section aria-labelledby="pedidos-pausa" data-pedidos-pausa={pedidosPausa.length}>
+            <h2 id="pedidos-pausa" className="titulo text-3xl mb-4">⏸️ Pausas para aprobar</h2>
+            <ul className="space-y-2">
+              {pedidosPausa.map((x) => (
+                <li key={x.id}>
+                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-lg truncate">{x.nombre}</span>
+                      <span className="block texto-suave">Del {diaCorto(x.desde)}, vuelve el {diaCorto(x.vuelve)} · {x.categoria}</span>
+                    </span>
+                    <span className="texto-suave">Revisar</span>
+                  </LinkPanel>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {cumples.length > 0 && (
           <section aria-labelledby="cumples" data-cumplen-hoy={cumples.length}>

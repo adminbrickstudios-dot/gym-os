@@ -11,6 +11,7 @@ import { Calendario, type Asistencia } from "./Calendario";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import { Foto } from "./Foto";
 import { Familia, type Familiar } from "./Familia";
+import { Pausas, type DatosPausas } from "./Pausas";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -39,13 +40,14 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes, asistencia, ne, foto, familia] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
       rpc<NotasYEtiquetas>("notas_y_etiquetas", { p_socio_id: id }),
       rpc<string | null>("foto_socio", { p_socio_id: id }),
       rpc<Familiar[]>("familia_socio", { p_socio_id: id }),
+      rpc<DatosPausas>("pausas_socio", { p_socio_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -118,6 +120,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </dl>
             {!s.telefono && !s.email && !s.dni && <p className="texto-suave">Sin datos de contacto.</p>}
           </div>
+          {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
           <Familia socioId={s.id} familia={familia} />
         </section>
 
