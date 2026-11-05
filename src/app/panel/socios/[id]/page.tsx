@@ -52,7 +52,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
     const momento = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
-    const wa = s.telefono ? `https://wa.me/${s.telefono.replace(/\D/g, "")}` : null;
+    // Un menor (D10): se le escribe al responsable.
+    const celular = s.es_menor ? s.responsable_telefono : s.telefono;
+    const wa = celular ? `https://wa.me/${celular.replace(/\D/g, "")}` : null;
     const membresias = planes.filter((p) => p.tipo === "membresia" && p.activo);
 
     return (
@@ -64,7 +66,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               version={foto ? foto.slice(-36, -4) : null} />
             <div className="min-w-0">
               <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
-              <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.tiene_app ? " · 📱 usa la app" : ""}</p>
+              <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · 👧 menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · 📱 el responsable usa la app" : " · 📱 usa la app") : ""}</p>
             </div>
           </div>
           <div className="mt-6">
@@ -113,12 +115,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           <div className="tarjeta p-6">
             <p className="titulo text-2xl mb-4">📱 Contacto</p>
             <dl className="space-y-3">
-              <Dato etiqueta="WhatsApp" valor={s.telefono} />
+              {s.responsable_nombre && <Dato etiqueta={s.es_menor ? "👨‍👧 Responsable (es menor)" : "Responsable"} valor={`${s.responsable_nombre} · ${s.responsable_telefono ?? ""}`} />}
+              <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono} />
               <Dato etiqueta="Mail" valor={s.email} />
               <Dato etiqueta="DNI" valor={s.dni} />
               <Dato etiqueta="Emergencia" valor={s.contacto_emergencia_nombre ? `${s.contacto_emergencia_nombre} · ${s.contacto_emergencia_telefono ?? ""}` : null} />
             </dl>
-            {!s.telefono && !s.email && !s.dni && <p className="texto-suave">Sin datos de contacto.</p>}
+            {!s.telefono && !s.email && !s.dni && !s.responsable_nombre && <p className="texto-suave">Sin datos de contacto.</p>}
           </div>
           {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
           <Familia socioId={s.id} familia={familia} />

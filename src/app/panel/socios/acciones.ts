@@ -5,7 +5,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
 export type EstadoForm = { error?: string; destino?: string };
 
-const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas"] as const;
+const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
 
 export async function guardarSocio(socioId: string | null, _: EstadoForm, form: FormData): Promise<EstadoForm> {
   const panel = await contextoPanel();

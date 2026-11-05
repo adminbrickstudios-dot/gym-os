@@ -1,10 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { guardarSocio, type EstadoForm } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 
-type Socio = Partial<Record<"nombre" | "apellido" | "dni" | "telefono" | "email" | "fecha_nacimiento" | "contacto_emergencia_nombre" | "contacto_emergencia_telefono" | "notas", string | null>>;
+type Socio = Partial<Record<"nombre" | "apellido" | "dni" | "telefono" | "email" | "fecha_nacimiento" | "contacto_emergencia_nombre" | "contacto_emergencia_telefono" | "notas" | "responsable_nombre" | "responsable_telefono", string | null>>;
 
 function Campo({ nombre, etiqueta, valor, tipo = "text", ayuda, ...resto }: { nombre: string; etiqueta: string; valor?: string | null; tipo?: string; ayuda?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -16,10 +16,20 @@ function Campo({ nombre, etiqueta, valor, tipo = "text", ayuda, ...resto }: { no
   );
 }
 
+function esMenor(nacimiento: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(nacimiento)) return false;
+  const hoy = new Date(), [a, m, d] = nacimiento.split("-").map(Number);
+  const cumple18 = new Date(a + 18, m - 1, d);
+  return cumple18 > hoy;
+}
+
 export function FormSocio({ socioId, socio, prospectoId }: { socioId: string | null; socio?: Socio; prospectoId?: string }) {
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
   useEffect(() => { if (estado.destino) router.push(estado.destino); }, [estado.destino, router]);
+  // Menor de 18 (D10): aparece el adulto responsable. La base lo exige igual.
+  const [nacimiento, setNacimiento] = useState(socio?.fecha_nacimiento ?? "");
+  const menor = esMenor(nacimiento);
   return (
     <form action={accion} className="max-w-2xl space-y-8">
       {prospectoId && <input type="hidden" name="prospecto" value={prospectoId} />}
@@ -29,8 +39,16 @@ export function FormSocio({ socioId, socio, prospectoId }: { socioId: string | n
         <Campo nombre="nombre" etiqueta="Nombre" valor={socio?.nombre} required autoFocus autoComplete="off" />
         <Campo nombre="apellido" etiqueta="Apellido" valor={socio?.apellido} autoComplete="off" />
         <Campo nombre="dni" etiqueta="DNI" valor={socio?.dni} inputMode="numeric" ayuda="Solo números, sin puntos" />
-        <Campo nombre="fecha_nacimiento" etiqueta="Fecha de nacimiento" valor={socio?.fecha_nacimiento} tipo="date" />
+        <Campo nombre="fecha_nacimiento" etiqueta="Fecha de nacimiento" valor={socio?.fecha_nacimiento} tipo="date" onChange={(e) => setNacimiento(e.target.value)} />
       </fieldset>
+      {(menor || socio?.responsable_nombre) && (
+        <fieldset className="grid sm:grid-cols-2 gap-4" data-responsable>
+          <legend className="titulo text-2xl mb-1">👨‍👧 Adulto responsable</legend>
+          <p className="sm:col-span-2 texto-suave -mt-1 mb-2">{menor ? "Es menor de 18: se carga con un adulto responsable. Es quien entra a la app y a quien se le avisa." : "Ya es mayor de edad: podés dejarlo o borrarlo."}</p>
+          <Campo nombre="responsable_nombre" etiqueta="Nombre del responsable" valor={socio?.responsable_nombre} required={menor} autoComplete="off" />
+          <Campo nombre="responsable_telefono" etiqueta="Celular del responsable" valor={socio?.responsable_telefono} tipo="tel" required={menor} placeholder="387 555-1234" />
+        </fieldset>
+      )}
       <fieldset className="grid sm:grid-cols-2 gap-4">
         <legend className="titulo text-2xl mb-4">📱 Contacto</legend>
         <Campo nombre="telefono" etiqueta="WhatsApp" valor={socio?.telefono} tipo="tel" placeholder="387 555-1234" ayuda="Para avisarle cuándo vence" />

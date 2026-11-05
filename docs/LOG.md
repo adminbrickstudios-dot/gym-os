@@ -15,6 +15,28 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-10 · Menores con adulto responsable (D10)
+
+**QUÉ HICE**
+- Alta y edición: al poner una fecha de nacimiento de menor de 18 aparece "👨‍👧 Adulto responsable" (nombre y celular, obligatorios; la base también lo exige). Un adulto no lo pide. Menor se calcula de la fecha de nacimiento; no se guarda.
+- Ficha: "· 👧 menor de edad" en la cabecera, el responsable con su celular en Contacto, y el botón de WhatsApp va al responsable.
+- App: al verificar el celular, la cuenta del responsable queda vinculada al menor (elige a quién mirar, como una familia); el celular del menor no vincula nada.
+- Migración `20261104004300_menores.sql`: `socios.responsable_nombre` / `responsable_telefono`, `privado.es_menor`, y `ficha_socio`, `guardar_socio`, `vincular_socios_por_telefono` (mismas firmas). Rechaza fechas de nacimiento futuras.
+- `supabase/pruebas/menores.test.mjs` (2) y `scripts/e2e/soc-10.mjs` (6 pasos, celular).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Toca permisos de la app (quién entra por quién), según D10: un menor que ya estaba vinculado a su propia cuenta antes de esta migración sigue vinculado; no lo desvinculé (lo hace el dueño si hace falta).
+- Retención, Vencen hoy y Cumplen hoy le escriben al celular del menor: queda anotado como SOC-15.
+- El demo podía sembrar socios de 17 años sin responsable: ahora nacen hasta 2006.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0043).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0043 contra la base real (probada local). El login del responsable por SMS de punta a punta en la app (probado el vínculo en la base).
+
+---
+
 ## 2026-11-05 · SOC-9 · Pausas desde la ficha (D7)
 
 **QUÉ HICE**

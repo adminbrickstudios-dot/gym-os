@@ -210,11 +210,12 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-8 · 🟢 · Encontrar y unir socios duplicados — verificado: db (unir-socios: encuentra por celular, mueve entradas, cuota (queda verde), notas y etiquetas sin repetir, registro; frena membresías dobles y DNI distinto; solo dueño; los hechos siguen fijos), e2e:soc-8 (7 pasos)
 - [x] SOC-5 · 🟢 · Grupo familiar
 - [x] SOC-9 · 🟡 D7 · Pausas desde la ficha
-- [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
+- [x] SOC-10 · 🟡 D10 · Menores con adulto responsable
 - [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
 - [ ] SOC-12 · 🟢 · Filtros de la lista de socios por estado y plan
 - [ ] SOC-13 · 🟢 · Alta en un paso: datos, plan y "Guardar y cobrar"
 - [ ] SOC-14 · 🟢 · La ficha dice cómo llegó y qué reglamento aceptó
+- [ ] SOC-15 · 🟢 · Los avisos por WhatsApp de un menor van al responsable
 - [ ] DIS-3 · 🟢 · Pulido: Socios
 
 ### 4 · Entrada
@@ -531,6 +532,8 @@ LISTO SI: e2e que toca cada filtro y ve solo los que corresponden.
 **SOC-13.** (Salió de AUD-3.) Alta en un paso: en el mismo formulario, elegir plan y "✅ Guardar y cobrar" (va a Vender con el socio y el plan elegidos) o "Guardar" solo.
 LISTO SI: e2e de alta con plan que termina cobrado.
 **SOC-14.** (Salió de AUD-3.) La ficha dice cómo llegó (alta online, prospecto, importado, mostrador) y, si aceptó el reglamento, qué versión y cuándo (para mostrarle al socio).
+
+**SOC-15.** (Salió de SOC-10.) Retención, Vencen hoy, Cumplen hoy y los mensajes armados usan `socios.telefono`: para un menor tienen que ir al celular del responsable (la ficha ya lo hace). Una sola función de la base que diga "a qué celular se le escribe a este socio", y que la usen todas.
 LISTO SI: prueba de la base y e2e con un alta online.
 **SOC-3.** Notas con fecha y autor, y etiquetas libres por gimnasio (turno mañana, estudiante…) para filtrar la lista y la retención.
 **SOC-4.** Exportar la lista filtrada a CSV/Excel (solo dueño y encargado).

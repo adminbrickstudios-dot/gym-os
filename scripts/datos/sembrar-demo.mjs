@@ -138,7 +138,7 @@ try {
       `insert into public.socios (gimnasio_id, nombre, apellido, telefono, email, fecha_nacimiento, creado_en)
        values ($1,$2,$3,$4,$5,$6,$7) returning id`,
       [g, nombre, apellido, `+549000${String(2000000 + i)}`, `socio${i}@ejemplo.invalid`,
-       `${entre(1965, 2008)}-${String(entre(1, 12)).padStart(2, "0")}-${String(entre(1, 28)).padStart(2, "0")}`,
+       `${entre(1965, 2006)}-${String(entre(1, 12)).padStart(2, "0")}-${String(entre(1, 28)).padStart(2, "0")}`,
        await medianoche(sumarDias(hoy, -entre(10, 700)))]);
 
     // Perfil: dónde termina su cobertura respecto de hoy.
