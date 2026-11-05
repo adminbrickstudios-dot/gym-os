@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-7 · Funciones viejas sin pantalla
+
+**QUÉ HICE**
+- `cobrar_cuota`, `precio_cuota` y `caja_abierta` (la primera versión del cobro) ya no se pueden llamar desde el equipo: Vender (`vender`, `precios_venta`, `cajas_sede`) hace todo lo que hacían y ninguna pantalla las usaba. Siguen para el servidor. `asignar_plan` queda: lo usan el alta de un socio y la ficha.
+- Migración 0116 (solo `revoke`); las pruebas `cobro` (ahora cobra la cuota con Vender y la vieja da "permission denied") y `pin-equipo` (prueba el PIN con `cajas_sede`).
+
+**PARA QUE MIRES VOS**
+- Toca permisos, pero para sacar acceso (lo que pide el ítem).
+
+---
+
 ## 2026-11-05 · SEG-6 · Datos personales
 
 **QUÉ HICE**

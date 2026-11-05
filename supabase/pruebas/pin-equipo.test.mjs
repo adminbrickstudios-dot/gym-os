@@ -55,7 +55,7 @@ test("token adulterado o vencido: error, nunca se anota a otro en silencio; 5 er
   const ana = await como(uPc, async () => (await t.q(`select public.entrar_con_pin($1, '4827') as r`, [t.g]))[0].r);
   const [id, vence, firma] = ana.token.split(".");
   const malo = `${id}.${Number(vence) + 999}.${firma}`;
-  await como(uPc, () => t.falla(() => t.q(`select * from public.caja_abierta($1)`, [t.sede]), /no es válido/), malo);
+  await como(uPc, () => t.falla(() => t.q(`select * from public.cajas_sede($1)`, [t.sede]), /no es válido/), malo);
   await como(uPc, async () => {
     for (let i = 0; i < 5; i++) {
       const [{ r }] = await t.q(`select public.entrar_con_pin($1, '0001') as r`, [t.g]);

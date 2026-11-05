@@ -139,16 +139,18 @@ test("anular una venta: la recepción no puede; el dueño sí, y el socio vuelve
   assert.equal(despues.color, "naranja");
 });
 
-test("la recepción cobra por RPC; un socio no puede cobrarse", async () => {
+test("SEG-7: la recepción cobra la cuota con Vender; la función vieja ya no es del equipo; un socio no se cobra", async () => {
   const [{ id: u }] = await t.q(`insert into auth.users (email) values ('caja@ejemplo.invalid') returning id`);
   await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1, $2, 'Caja', 'recepcion')`, [t.g, u]);
   await t.comoUsuario(u, async () => {
-    const [{ r }] = await t.q(`select public.cobrar_cuota($1, $2, 'transferencia') as r`, [t.ctx.socios.por_vencer, t.sede]);
+    const [{ r }] = await t.q(`select public.vender($1, '[{"tipo":"cuota"}]'::jsonb, $2::jsonb, $3) as r`,
+      [t.sede, JSON.stringify([{ medio: "transferencia", monto: Number((await t.q(`select public.precios_venta($1, $2) p`, [t.sede, t.ctx.socios.por_vencer]))[0].p.cuota.precios.transferencia) }]), t.ctx.socios.por_vencer]);
     assert.ok(r.venta_id);
+    await t.falla(() => t.q(`select public.cobrar_cuota($1, $2, 'transferencia')`, [t.ctx.socios.por_vencer, t.sede]), /permission denied/);
   });
   const [{ id: us }] = await t.q(`insert into auth.users (phone) values ('+5490000777777') returning id`);
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [t.ctx.socios.vence_hoy, us]);
-  await t.comoUsuario(us, () => t.falla(() => t.q(`select public.cobrar_cuota($1, $2, 'transferencia')`, [t.ctx.socios.vence_hoy, t.sede]), /Sin permiso/));
+  await t.comoUsuario(us, () => t.falla(() => t.q(`select public.vender($1, '[{"tipo":"cuota"}]'::jsonb, '[{"medio":"transferencia","monto":1}]'::jsonb, $2)`, [t.sede, t.ctx.socios.vence_hoy]), /permiso/i));
 });
 
 test("trimestral (PLA-1): una cuota cubre 3 meses", async () => {
