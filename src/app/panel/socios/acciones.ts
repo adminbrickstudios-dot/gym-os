@@ -114,3 +114,7 @@ export async function resolverPedidoPausa(socioId: string, pedidoId: string, apr
 }
 export async function volvioAntes(socioId: string, pausaId: string) { return hacer(socioId, () => rpc("descongelar", { p_congelamiento_id: pausaId })); }
 export async function anularPausa(socioId: string, pausaId: string, motivo: string) { return hacer(socioId, () => rpc("anular_congelamiento", { p_congelamiento_id: pausaId, p_motivo: motivo })); }
+
+// ── Apto físico (SOC-11) ────────────────────────────────────────────
+export async function cargarApto(socioId: string, vence: string) { return hacer(socioId, () => rpc("cargar_apto", { p_socio_id: socioId, p_vence: vence })); }
+export async function anularApto(socioId: string, aptoId: string) { return hacer(socioId, () => rpc("anular_apto", { p_apto_id: aptoId })); }

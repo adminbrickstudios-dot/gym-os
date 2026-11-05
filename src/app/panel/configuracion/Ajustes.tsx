@@ -20,7 +20,7 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
-  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean;
   accesos_activos: string[];
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
@@ -77,7 +77,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
-  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio",
+  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
@@ -446,6 +446,11 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 ? "Prendido: si alguien con pack entra a las 8 y vuelve a las 19, se le descuenta otra clase; con pase diario, la segunda vez ya no entra."
                 : "Apagado: si alguien con pack entra a las 8 y vuelve a las 19, no se le descuenta otra clase; con pase diario, vuelve a entrar."}
               checked={c.reingreso_mismo_dia_consume} onChange={(e) => set("reingreso_mismo_dia_consume", e.target.checked)} />
+            <Interruptor etiqueta="🩺 Pedir apto físico"
+              ayuda={c.pide_apto
+                ? "Prendido: en la ficha de cada socio se anota si presentó el apto y hasta cuándo vale (nada médico, sin subir el papel). No frena la entrada."
+                : "Apagado: no aparece en ningún lado."}
+              checked={c.pide_apto} onChange={(e) => set("pide_apto", e.target.checked)} />
           </Tarjeta>
           <Tarjeta emoji="📉" titulo="Retención" ayuda="Cuándo alguien aparece en cada lista de Retención, para llamarlo a tiempo.">
             <div className="grid sm:grid-cols-2 gap-3">

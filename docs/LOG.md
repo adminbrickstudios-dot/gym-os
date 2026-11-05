@@ -15,6 +15,25 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-11 · Apto físico, solo sí/no y vencimiento (D9)
+
+**QUÉ HICE**
+- Configuración → Reglas: "🩺 Pedir apto físico" (apagado por defecto; apagado no aparece en ningún lado).
+- Prendido, la ficha muestra "🩺 Sin apto físico" (amarillo), "Apto hasta el …" (verde) o "Apto vencido el …" (rojo). La recepción lo carga con "vale hasta" y lo quita si fue un error. No frena la entrada: es un aviso.
+- Migración `20261104004400_apto_fisico.sql`: tabla `aptos_fisicos` (solo socio, hasta cuándo vale, quién y cuándo lo cargó; la verificación falla si alguien le suma columnas), `apto_socio`, `cargar_apto`, `anular_apto`, `configuracion.pide_apto`; `guardar_configuracion` y `configuracion_panel` copiados de 0042 con el campo.
+- `supabase/pruebas/apto-fisico.test.mjs` y `scripts/e2e/soc-11.mjs` (6 pasos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- No lo puse en la Entrada ni en una lista de "aptos por vencer": D9 no lo pide. Si lo querés en la puerta, es un aviso más en el veredicto (decisión tuya: ¿frena o solo avisa?).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0044).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0044 contra la base real (probada local).
+
+---
+
 ## 2026-11-05 · SOC-10 · Menores con adulto responsable (D10)
 
 **QUÉ HICE**

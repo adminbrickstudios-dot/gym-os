@@ -211,7 +211,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-5 · 🟢 · Grupo familiar
 - [x] SOC-9 · 🟡 D7 · Pausas desde la ficha
 - [x] SOC-10 · 🟡 D10 · Menores con adulto responsable
-- [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
+- [x] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
 - [ ] SOC-12 · 🟢 · Filtros de la lista de socios por estado y plan
 - [ ] SOC-13 · 🟢 · Alta en un paso: datos, plan y "Guardar y cobrar"
 - [ ] SOC-14 · 🟢 · La ficha dice cómo llegó y qué reglamento aceptó
