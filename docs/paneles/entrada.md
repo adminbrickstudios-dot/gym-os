@@ -22,7 +22,7 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 | ↩️ Deshacer | Después de anotar: la anula ("Anotada por error"). La recepción, dentro de los 5 minutos. | ✅ (nuevo, AUD-4) | — | `anular_ingreso` | — |
 | 💵 Cobrar | Rojo o amarillo: abre Vender con el socio. | ✅ | Con la cuota del plan ya en el carrito (como el alta, SOC-13) | Vender | Se va con Vender apagado |
 | 🏃 Volvió antes | En pausa: en vez de Cobrar, termina la pausa hoy y el veredicto se actualiza. | ✅ (nuevo, AUD-4) | Si la pausa empezó hoy, la base pide anularla (lo hace dueño o encargado) | `descongelar` | — |
-| 🚪 Dejar pasar igual | Pide el motivo (texto) y lo anota como "Lo dejaron pasar". | ✅ | Lista de motivos y tope del día (ENT-4, D1) | `registrar_ingreso` | ENT-4 |
+| 🚪 Dejar pasar igual | Motivos frecuentes de un toque o texto libre; lo anota como "Lo dejaron pasar". La recepción tiene un tope por día (dice cuántos le quedan); a suspendidos y dados de baja solo los deja pasar el dueño o el encargado. Lo controla la base. (ENT-4, D1) | ✅ | — | `registrar_ingreso`, `cupo_dejar_pasar` | Sí (Reglas → tope) |
 | 👤 Ver ficha · ✕ Otro socio | Abre la ficha; vuelve a buscar. | ✅ | — | Ficha | — |
 | Hoy | Cuántos entraron (personas, no entradas) y las últimas 40: hora, color, resultado, forma (QR, tablet…) y quién dejó pasar. Toca → ficha. | ✅ | Ver un día anterior y filtrar "los que dejaron pasar" (ENT-8) | `ingresos_del_dia` | — |
 | Hoy · ⋯ Anular | Con motivo. La recepción solo en los primeros 5 minutos; dueño y encargado siempre (lo decide la base y lo dice). | ✅ (nuevo, AUD-4) | — | `anular_ingreso` | — |

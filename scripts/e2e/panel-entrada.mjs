@@ -15,7 +15,19 @@ async function primero(p, estado) {
   await a.waitFor({ timeout: 30000 });
   return { href: await a.getAttribute("href"), nombre: (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim() };
 }
+// El tope de "dejar pasar" (ENT-4) es por persona y por día: con la base usada todo el día, se sube para la prueba.
+async function tope(d, n) {
+  await d.goto(`${G}/panel/configuracion?pestana=reglas`);
+  await d.locator('fieldset[data-pestana-activa="reglas"]').waitFor({ timeout: 60000 }); await d.waitForTimeout(500);
+  await d.locator("fieldset[data-pestana-activa] label", { hasText: "Dejar pasar: tope" }).locator("input").fill(String(n));
+  const pie = d.locator('[data-pie="reglas"]'); const k = Number(await pie.getAttribute("data-respuestas"));
+  await pie.locator('button:has-text("Guardar")').click();
+  await d.waitForFunction((k) => Number(document.querySelector('[data-pie="reglas"]')?.getAttribute("data-respuestas")) > k, k, { timeout: 30000 });
+}
 try {
+  const d0 = await pagina(b, COMPU);
+  await entrar(d0, "duena@ejemplo.invalid");
+  await tope(d0, 50);
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
   const verde = await primero(r, "al_dia"), rojo = await primero(r, "vencidos");
@@ -125,6 +137,8 @@ try {
   await sw.click(); await guardar();
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();
+  await tope(d0, 5);
+  await d0.context().close();
   await r.context().close();
 
   // ── Celular ──

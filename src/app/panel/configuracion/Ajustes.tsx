@@ -20,7 +20,7 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
-  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number;
   accesos_activos: string[];
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
@@ -69,6 +69,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   retencion_dias_vencido: [1, 120, "Vencido pasa a “se fue” después de"],
   retencion_dias_se_fue: [7, 365, "Los que se fueron se muestran durante"],
   pausa_dias_por_anio: [0, 365, "Pausa: máximo de días por año"],
+  tope_dejar_pasar: [0, 50, "Dejar pasar: tope por día de la recepción"],
   reserva_dias_anticipacion: [0, 60, "Se reserva con hasta"],
   cancelacion_horas_limite: [0, 72, "Cancelar hasta"],
 };
@@ -77,7 +78,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
-  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos",
+  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
@@ -437,6 +438,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 : "Cuando se le termina la cuota, ya no entra hasta pagar")}
               {num("dias_aviso", "Avisar que vence (días antes)", "Aparece en amarillo en la entrada")}
               {num("descuento_max_recepcion", "Descuento máximo de la recepción (%)", "Más que eso lo autoriza el dueño")}
+              {num("tope_dejar_pasar", "Dejar pasar: tope por día de la recepción", c.tope_dejar_pasar > 0
+                ? "Por persona. A suspendidos y dados de baja los deja pasar solo el dueño o el encargado"
+                : "En 0 la recepción no deja pasar a nadie")}
               {num("pausa_dias_por_anio", "Pausa: máximo de días por año", c.pausa_dias_por_anio > 0
                 ? "Por socio. La da el dueño o el encargado; la recepción la pide"
                 : "En 0 no se dan pausas")}

@@ -66,3 +66,9 @@ export async function anularEntrada(ingresoId: string, motivo: string): Promise<
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** Cuántas veces puede dejar pasar hoy quien está en la recepción (el tope lo pone el dueño; D1). */
+export async function cupoDejarPasar(): Promise<{ sin_tope: boolean; tope: number; usados: number } | null> {
+  const panel = await contextoPanel();
+  try { return await rpc("cupo_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }); } catch { return null; }
+}

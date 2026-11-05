@@ -28,6 +28,7 @@ const DETALLE: Record<string, { ruta: string; seccion: string }> = {
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
 
 type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumple: number; mensaje: string };
+type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string };
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
@@ -35,13 +36,15 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
       rol === "profe" ? [] : rpc<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
       // Las pausas que pidió la recepción esperan al dueño o al encargado.
       rol === "dueno" || rol === "encargado" ? rpc<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // D1: cada "dejar pasar" de hoy, a la vista del dueño y del encargado.
+      rol === "dueno" || rol === "encargado" ? rpc<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
@@ -106,6 +109,26 @@ export default async function Inicio() {
             </ul>
           )}
         </section>
+
+        {dejados.length > 0 && (
+          <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>
+            <h2 id="dejados" className="titulo text-3xl mb-1">🚪 Dejados pasar hoy</h2>
+            <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué.</p>
+            <ul className="space-y-2">
+              {dejados.map((x) => (
+                <li key={x.ingreso_id}>
+                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                    <span className="numero text-lg texto-suave w-12 flex-none">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.momento))}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-lg truncate">{x.socio}</span>
+                      <span className="block texto-suave truncate">{x.por ?? "El equipo"}: “{x.motivo}” · {x.porque_no}</span>
+                    </span>
+                  </LinkPanel>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {pedidosPausa.length > 0 && (
           <section aria-labelledby="pedidos-pausa" data-pedidos-pausa={pedidosPausa.length}>

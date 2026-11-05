@@ -119,6 +119,11 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | SOC-7 | La foto del socio la sacan dueño, encargado y recepción; la ven también los profes (para reconocerlo en clase). Bucket privado: el panel la sirve solo a quien la base dice que es del equipo. | Es para la puerta; nunca pública. | Bucket público con ruta difícil de adivinar. |
 | 2026-11-04 | SOC-8 | Unir fichas lo hace solo el dueño (mueve pagos, cuotas y la cuenta de la app); el encargado ve los posibles duplicados. No se deshace; queda registrado en `uniones_socios`. Con DNI distinto, dos membresías activas, la misma clase o dos cuentas de app, no se une y dice qué resolver. | Mueve plata: lo más prudente. | Que el encargado también una. |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
+| 2026-11-05 | SOC-9 | La recepción ya no congela: pide la pausa y la aprueba el dueño o el encargado (D7). El máximo de días es por socio y por año calendario; una pausa que cruza el año se cuenta en cada uno. Los motivos viejos (personal, económico) siguen valiendo para lo ya cargado. | Es lo que dice D7; es dar menos acceso, nunca más. | `public.congelar` / `privado.validar_pausa`. |
+| 2026-11-05 | SOC-10 | Menor = menos de 18 años el día de hoy según la fecha de nacimiento (no se guarda). Sin fecha de nacimiento se toma como adulto. Un menor que ya estaba vinculado a su propia cuenta antes de 0043 sigue vinculado. | D10 pide responsable para menores; desvincular cuentas existentes toca permisos: no lo hice solo. | `privado.es_menor` / `vincular_socios_por_telefono`. |
+| 2026-11-05 | SOC-11 | El apto físico no frena la entrada: es un aviso (en la ficha y en el veredicto). Lo carga y lo quita la recepción también. | D9 pide solo sí/no y vencimiento; frenar la entrada es una decisión del dueño que no estaba. | Que `calcular_acceso` lo mire (decisión tuya). |
+| 2026-11-05 | ENT-2 | El QR vale la ventana actual y la anterior (como mucho un minuto), una sola vez, y si puede entrar se anota solo, sin tocar nada. | Hora pico sin tipear; una captura vieja no sirve. | `leer_qr` / `Puerta.tsx`. |
+| 2026-11-05 | ENT-4 | El tope de "dejar pasar" es por persona y por día (no del gimnasio entero). Dueño y encargado no tienen tope. Tope 0 = la recepción no deja pasar. Si el socio igual puede entrar, no cuenta. | Cada uno responde por lo suyo; D1 dice "un tope por día". | `privado.puede_dejar_pasar`. |
 
 ---
 
@@ -222,7 +227,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
 - [x] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
 - [x] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
-- [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
+- [x] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
 - [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)
 - [ ] ENT-6 · 🟢 · Kiosco con QR en pantalla: el socio lo escanea con su app (A4)
 - [ ] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)

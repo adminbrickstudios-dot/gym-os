@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { Camara } from "./Camara";
 import { Mensaje } from "@/components/ui/Mensaje";
 
@@ -30,7 +30,10 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-export function Puerta({ sedeId, conQr = false }: { sedeId: string; conQr?: boolean }) {
+const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
+
+export function Puerta({ sedeId, conQr = false, esRecepcion = false }: { sedeId: string; conQr?: boolean; esRecepcion?: boolean }) {
+  const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio">("recepcion");
   const [texto, setTexto] = useState("");
@@ -195,7 +198,10 @@ export function Puerta({ sedeId, conQr = false }: { sedeId: string; conQr?: bool
                 {v.motivo === "congelada"
                   ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
                   : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
-                {!forzando && <button type="button" onClick={() => setForzando(true)} className="boton">🚪 Dejar pasar igual</button>}
+                {/* D1: a un suspendido o dado de baja lo deja pasar el dueño o el encargado (la base lo frena igual). */}
+                {!forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
+                  ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>
+                  : <button type="button" onClick={() => { setForzando(true); void cupoDejarPasar().then(setCupo); }} className="boton">🚪 Dejar pasar igual</button>)}
               </>
             )}
             <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>
@@ -203,9 +209,20 @@ export function Puerta({ sedeId, conQr = false }: { sedeId: string; conQr?: bool
           </div>
 
           {forzando && (
-            <form className="mt-5 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
-              <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" />
-              <button type="submit" disabled={!motivo.trim() || ocupado} className="boton boton-peligro">Dejar pasar</button>
+            <form className="mt-5 space-y-3" data-dejar-pasar onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
+              <div className="flex flex-wrap gap-2" aria-label="Motivos frecuentes">
+                {MOTIVOS_PASAR.map((m) => <button key={m} type="button" className={`pestana ${motivo === m ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`} onClick={() => setMotivo(m)}>{m}</button>)}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" aria-label="Motivo para dejar pasar" />
+                <button type="submit" disabled={!motivo.trim() || ocupado || (!!cupo && !cupo.sin_tope && cupo.usados >= cupo.tope)} className="boton boton-peligro">Dejar pasar</button>
+              </div>
+              {cupo && !cupo.sin_tope && (
+                <p className="text-sm texto-suave" data-cupo={cupo.tope - cupo.usados}>
+                  {cupo.usados >= cupo.tope ? `Ya dejaste pasar a ${cupo.usados} hoy (el tope es ${cupo.tope}): que lo autorice el dueño o el encargado.`
+                    : `Te ${cupo.tope - cupo.usados === 1 ? "queda" : "quedan"} ${cupo.tope - cupo.usados} de ${cupo.tope} hoy. Lo ve el dueño.`}
+                </p>
+              )}
             </form>
           )}
           <p className="mt-6 text-sm texto-suave">{v.puede ? "Enter anota la entrada · " : ""}Esc vuelve a buscar · escribí para buscar a otro</p>

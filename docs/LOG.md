@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-4 · Reglas de "dejar pasar" (D1)
+
+**QUÉ HICE**
+- La base controla quién deja pasar (`public.registrar_ingreso`, misma firma):
+  - La recepción tiene un tope por día y por persona; lo pone la dueña en Reglas (por defecto 5; en 0 la recepción no deja pasar).
+  - A un suspendido o a un dado de baja lo deja pasar solo el dueño o el encargado. Dueño y encargado no tienen tope.
+- Entrada:
+  - "Dejar pasar igual" ofrece motivos frecuentes de un toque ("Paga mañana", "Clase de prueba"…) o texto libre, y dice "te quedan N de 5 hoy". En el tope se apaga.
+  - Con un suspendido, la recepción ve "🔒 A este socio lo deja pasar el dueño o el encargado".
+- Inicio del dueño y del encargado: "🚪 Dejados pasar hoy", con quién, el motivo y por qué no podía entrar.
+- Migración `20261104004900_dejar_pasar.sql`: `privado.puede_dejar_pasar`, `cupo_dejar_pasar`, `dejados_pasar`, `configuracion.tope_dejar_pasar`; `guardar_configuracion` y `configuracion_panel` copiados de 0044.
+- Pruebas:
+  - `supabase/pruebas/dejar-pasar.test.mjs` (3).
+  - `scripts/e2e/ent-4.mjs` (7 pasos).
+  - `panel-entrada` sube el tope para la prueba y lo devuelve a 5 al final.
+- Decisiones nuevas en la tabla del agente (SOC-9, SOC-10, SOC-11, ENT-2, ENT-4).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `acceso.test` falla en la base local con el demo sembrado ("users_email_unico"): es lo de siempre (pasa en una base limpia, que es la que usa `verificar`).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0049).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0049 contra la base real (probada local).
+
+---
+
 ## 2026-11-05 · ENT-2 · QR del socio, rotativo, y lector con cámara
 
 **QUÉ HICE**

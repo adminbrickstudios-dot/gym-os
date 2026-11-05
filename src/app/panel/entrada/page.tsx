@@ -26,7 +26,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
         <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué." />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
-          <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} />
+          <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} esRecepcion={panel.yo.rol === "recepcion"} />
           <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />
         </div>
       </>
