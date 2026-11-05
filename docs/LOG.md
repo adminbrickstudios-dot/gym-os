@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-15 · Los avisos por WhatsApp de un menor van al responsable
+
+**QUÉ HICE**
+- `privado.celular_aviso` decide a qué celular se le escribe a un socio (menor → responsable). La usan Retención (y con ella Vencen hoy) y Cumplen hoy. La ficha ya lo hacía (SOC-10).
+- Migración `20261104004700_avisos_menores.sql` (copias de `retencion_con` de 0025 y `cumplen_hoy` de 0038 con ese cambio). `supabase/pruebas/avisos-menores.test.mjs`; pasan retencion, cumpleanos y mensajes. Abiertas con sesión Retención (dueña), Vencen hoy e Inicio.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El mensaje sigue diciendo "Hola Tomi": le llega al responsable con el nombre del chico. Se entiende, pero si querés "Hola, te escribimos por Tomi" es un mensaje más para editar en Configuración.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0047).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0047 contra la base real (probada local).
+
+---
+
 ## 2026-11-05 · SOC-14 · La ficha dice cómo llegó y qué reglamento aceptó
 
 **QUÉ HICE**
