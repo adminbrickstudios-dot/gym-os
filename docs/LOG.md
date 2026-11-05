@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-14 · TV de la sala
+
+**QUÉ HICE**
+- Clases → "📺 TV de la sala" (dueño y encargado): crear una TV da un link que se abre una vez en el navegador de la TV (queda en una cookie que solo lee el servidor, como la tablet); "Sacar" la deja sin acceso.
+- `/tv`: sin menú y sin sesión. La clase de ahora (o la que empieza en 15 minutos) con los anotados en grande (nombre e inicial del apellido; ✅ si ya está presente, también los que vinieron sin reservar), cuántos de cuántos, el WOD al costado, y abajo la que sigue con sus anotados. La hora arriba. Pregunta cada 15 segundos; sin conexión, sigue mostrando lo último y lo avisa.
+- El token de una TV solo sirve para mirar: va en otra tabla, no en la de tablets, así que no da entrada por la puerta. La tabla no se lee directo (ni el dueño): todo por funciones.
+- Migración 0134 (`pantallas_tv` con RLS cerrada; `crear_tv`, `revocar_tv`, `tvs_panel`, `tv_estado` para la TV). Prueba de base tv-sala, e2e com-14 (abre la TV y ve aparecer a un anotado nuevo), barrido con /panel/clases/tv.
+
+**PARA QUE MIRES VOS**
+- El WOD de la clase que sigue no se muestra hasta que empieza (para no adelantarlo).
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-14). No la probé en una TV real (el navegador de algunos Smart TV es viejo).
+
+---
+
 ## 2026-11-05 · COM-13 · Grados y cinturones
 
 **QUÉ HICE**

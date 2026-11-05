@@ -36,6 +36,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
         <Encabezado emoji="🗓️" titulo="Clases" bajada={panel.modo_clases === "reserva" ? "Cupos, reservas y lista de espera. Tocá una clase para tomar presente." : "Tocá una clase para tomar presente."}
           accion={<span className="flex flex-wrap gap-2">
             {["dueno", "encargado"].includes(panel.yo.rol) && <Link href="/panel/clases/grilla" className="boton">🧩 Armar la grilla</Link>}
+            {["dueno", "encargado"].includes(panel.yo.rol) && <Link href="/panel/clases/tv" className="boton" data-ir-tv>📺 TV de la sala</Link>}
             <Link href="/panel/grados" className="boton" data-ir-grados>🥋 Grados</Link>
           </span>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/clases" />}

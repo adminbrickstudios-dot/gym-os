@@ -29,3 +29,15 @@ export async function avisarClase(claseId: string, texto: string): Promise<{ err
 /** COM-12: numerar la sala de esta actividad en esta sede (0 = sin lugares numerados). */
 export const guardarLugares = async (claseId: string, cantidad: number, etiqueta: string, fuera: number[]) =>
   r(() => rpc("guardar_lugares", { p_clase_id: claseId, p_cantidad: cantidad, p_etiqueta: etiqueta, p_fuera_servicio: fuera }), claseId);
+/** COM-14: crear una TV de la sala (el token se ve una sola vez) y sacarla. */
+export async function crearTv(gimnasioId: string, sedeId: string, nombre: string): Promise<{ error?: string; token?: string }> {
+  try {
+    const r = await rpc<{ id: string; token: string }>("crear_tv", { p_gimnasio_id: gimnasioId, p_sede_id: sedeId, p_nombre: nombre });
+    revalidatePath("/panel/clases/tv");
+    return { token: r.token };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function revocarTv(id: string): Promise<{ error?: string }> {
+  try { await rpc("revocar_tv", { p_id: id }); revalidatePath("/panel/clases/tv"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
