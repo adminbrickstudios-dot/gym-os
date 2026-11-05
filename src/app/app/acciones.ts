@@ -89,3 +89,12 @@ export async function crearContrasena(clave: string): Promise<{ error?: string }
   const { error } = await supabase.auth.updateUser({ password: clave });
   return error ? { error: `No se pudo guardar: ${error.message}` } : {};
 }
+
+/** RUT-2: el socio anota peso y repeticiones de un ejercicio de su rutina. */
+export async function anotarEjercicio(socioId: string, ejercicioId: string, peso: number | null, repeticiones: number | null): Promise<{ error?: string }> {
+  try {
+    await rpc("anotar_ejercicio", { p_socio_id: socioId, p_ejercicio_id: ejercicioId, p_peso: peso, p_repeticiones: repeticiones });
+    revalidatePath("/app/rutina");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

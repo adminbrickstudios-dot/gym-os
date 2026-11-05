@@ -354,7 +354,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 13 · Rutinas
 - [x] RUT-1 · 🟢 · Ejercicios y rutinas del gimnasio — verificado: db (rutinas: el profe carga, nombre único, video https, la recepción no, guardar reemplaza, archivar), vitest (secciones), e2e:rut-1 (pendiente de la tanda final)
-- [ ] RUT-2 · 🟢 · Asignar rutina; el socio la ve y anota sus pesos
+- [x] RUT-2 · 🟢 · Asignar rutina; el socio la ve y anota sus pesos — verificado: db (rutina-socio: asignar, ver con lo último, anotar con límites, anular, otro socio no, reemplazar y quitar), e2e:rut-2 (pendiente de la tanda final)
 - [ ] RUT-3 · 🟢 · Marcas personales y progreso
 
 ### 14 · Inicio (al final: junta todo lo anterior)

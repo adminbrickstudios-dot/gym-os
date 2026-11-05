@@ -30,3 +30,9 @@ export async function archivarRutina(id: string): Promise<{ error?: string }> {
   try { await rpc("archivar_rutina", { p_rutina_id: id }); return listo(); }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+/** RUT-2: asignar la rutina a un socio (reemplaza la que tenía). */
+export async function asignarRutina(socioId: string, rutinaId: string): Promise<{ error?: string }> {
+  try { await rpc("asignar_rutina", { p_socio_id: socioId, p_rutina_id: rutinaId }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}

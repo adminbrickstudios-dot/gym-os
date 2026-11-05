@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RUT-2 · Asignar rutina; el socio la ve y anota sus pesos
+
+**QUÉ HICE**
+- En una rutina, "👤 Asignar a un socio": se busca por nombre (el profe con su búsqueda de nombre y semáforo) y se asigna; si tenía otra, se reemplaza (las anteriores quedan como historia).
+- App del socio: "💪 Mi rutina" (aparece si tiene una), día por día, cada ejercicio con series × repeticiones, nota y video; "✍️ Anotar" kilos y repeticiones, y queda como "Última: 60 kg × 10 · 5/11". Cada registro es un hecho (no se edita; se puede anular).
+- Migración 0104 (`rutinas_socio`, `registros_ejercicio` con RLS, FK compuestas y trigger de hecho inmutable; `asignar_rutina`, `quitar_rutina_socio`, `rutina_de_socio`, `anotar_ejercicio`, `anular_registro`), prueba de base `rutina-socio`, `e2e:rut-2`.
+
+**SIN ARREGLAR**
+- La ficha del socio todavía no muestra su rutina (el profe no abre fichas; se asigna desde la rutina).
+
+---
+
 ## 2026-11-05 · RUT-1 · Ejercicios y rutinas del gimnasio
 
 **QUÉ HICE**

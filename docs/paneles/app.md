@@ -19,6 +19,7 @@ Probado haciendo clic con `npm run e2e:app` (`scripts/e2e/panel-app.mjs`) y los 
 | Invitar | Pase para un invitado. | ✅ (INV-1) | — | `mis_invitados` | Invitados por mes |
 | 🧾 Mis pagos y cuándo vine | Historial. | ✅ (APP-3) | Comprobante de cada pago | `mi_historial` | — |
 | 🔑 Mi contraseña | En Mi membresía: crearla o cambiarla para entrar con mail y contraseña. | ✅ (APP-9) | — | Supabase Auth | — |
+| 💪 Mi rutina | Si el profe le asignó una: por día, series × repeticiones, video y "Anotar" kilos y repeticiones. | ✅ (RUT-2) | — | `rutina_de_socio`, `anotar_ejercicio` | Sección Rutinas |
 | ⏸️ Pausar o dar de baja | Pide la pausa o la baja. | ✅ (APP-8) | — | `pedir_pausa_socio`, `pedir_baja_socio` | Máximo de pausa |
 | Instalar | Instalar en el celular (Android directo; iPhone con los pasos). | ✅ (APP-1) | Probar en un teléfono real | — | — |
 | Mis clases / Reservar | Sus reservas con Cancelar; Reservar abre los próximos 7 días. | ✅ | — | `clases_del_dia`, `reservar` | Modo de clases, ventana, cancelación, faltas |

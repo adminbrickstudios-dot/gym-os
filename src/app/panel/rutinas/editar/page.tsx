@@ -6,6 +6,7 @@ import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servid
 import type { ItemRutina } from "../acciones";
 import type { Ejercicio } from "../tipos";
 import { Editor } from "./Editor";
+import { AsignarRutina } from "./Asignar";
 
 export const metadata: Metadata = { title: "Rutina" };
 
@@ -23,7 +24,10 @@ export default async function EditarRutina({ searchParams }: { searchParams: Pro
       <>
         <Link href="/panel/rutinas" className="texto-suave">← Rutinas</Link>
         <Encabezado emoji="📋" titulo={r ? r.nombre : "Nueva rutina"} bajada="Por días: en cada uno, los ejercicios con series y repeticiones." />
-        <Editor id={id ?? null} ejercicios={ejercicios} inicial={{ nombre: r?.nombre ?? "", descripcion: r?.descripcion ?? "", items: r?.items ?? [] }} />
+        <div className="space-y-10">
+          {id && r && <AsignarRutina rutinaId={id} />}
+          <Editor id={id ?? null} ejercicios={ejercicios} inicial={{ nombre: r?.nombre ?? "", descripcion: r?.descripcion ?? "", items: r?.items ?? [] }} />
+        </div>
       </>
     );
   });
