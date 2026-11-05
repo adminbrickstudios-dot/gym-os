@@ -375,7 +375,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado — verificado: e2e:dis-14 (pendiente de la tanda final)
 
 ### 16 · Cierre
-- [ ] SEG-1 · 🟢 · Límite de pedidos de código por celular
+- [x] SEG-1 · 🟢 · Límite de pedidos de código por celular — verificado: db (limite-codigos: 5 por destino, 20 por IP, hash, solo el servidor), e2e:seg-1 (pendiente de la tanda final)
 - [ ] SEG-2 · 🟢 · Exportar todos los datos del gimnasio
 - [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
 - [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización

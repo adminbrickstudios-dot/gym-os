@@ -207,7 +207,9 @@ cubierto, esté donde esté el servidor.
 `documentos_legales` (puede ser null: los de BRIK son globales),
 `eventos_webhook` (el gimnasio se resuelve después de recibir),
 `novedades_plataforma` (las escribe BRIK para todos los dueños; lo que cierra
-cada dueño va en `novedades_plataforma_cerradas`, con `gimnasio_id`).
+cada dueño va en `novedades_plataforma_cerradas`, con `gimnasio_id`),
+`pedidos_codigo` (el límite de códigos por celular, mail o IP: llega antes
+de saber de qué gimnasio es; guarda el destino como hash y dura 24 h).
 
 **Excepciones a "unique por gimnasio"** (lista cerrada):
 `gimnasios.slug`, `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,

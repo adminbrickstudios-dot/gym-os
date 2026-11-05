@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-1 · Límite de pedidos de código
+
+**QUÉ HICE**
+- Antes de mandar un código (SMS o mail), el servidor le pregunta a la base: hasta 5 por celular o mail y 20 por conexión (IP) en una hora; si no, "Pediste muchos códigos: esperá una hora y probá de nuevo". El destino se guarda como hash (no el número ni el mail) y se borra a las 24 h, en el mismo pedido (sin cron).
+- Migración 0112 (`pedidos_codigo` sin acceso directo y sin `gimnasio_id` —sumada a las excepciones—; `registrar_pedido_codigo`, solo el servidor), prueba de base `limite-codigos`, `e2e:seg-1`.
+
+**LO QUE NO PUDE VERIFICAR**
+- La IP real detrás de Vercel (`x-forwarded-for`): el código está escrito según la documentación, pero no está ejecutado en Vercel.
+
+---
+
 ## 2026-11-05 · DIS-14 · Pulido de Ingresar, Elegir y No encontrado
 
 **QUÉ HICE**

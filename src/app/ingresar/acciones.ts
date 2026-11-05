@@ -67,11 +67,22 @@ function normalizarCelular(t: string) {
   return `+549${d.replace(/^0/, "").replace(/^549?/, "").replace(/^(\d{2,4})15/, "$1")}`;
 }
 
+
+/** SEG-1: antes de mandar un código, la base cuenta los pedidos (5 por destino y 20 por IP en una hora). */
+async function limiteCodigos(destino: string): Promise<string | null> {
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const { error } = await clienteServicio().rpc("registrar_pedido_codigo", { p_destino: destino, p_ip: ip });
+  return error ? error.message : null;
+}
+
 export type EstadoCodigo = { error?: string; telefono?: string; enviado?: boolean; destino?: string };
 
 export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
   const telefono = normalizarCelular(String(form.get("telefono") ?? ""));
   if (!/^\+\d{10,15}$/.test(telefono)) return { error: "Escribí tu celular con código de área (ej: 387 555-1234)" };
+  const limite = await limiteCodigos(telefono);
+  if (limite) return { error: limite, telefono };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ phone: telefono });
   if (error) return { error: `No pudimos mandarte el código: ${error.message}`, telefono };
@@ -112,6 +123,8 @@ export type EstadoCodigoMail = { error?: string; email?: string; enviado?: boole
 export async function pedirCodigoMail(_: EstadoCodigoMail, form: FormData): Promise<EstadoCodigoMail> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Escribí tu mail (el que diste en el gimnasio)", email };
+  const limite = await limiteCodigos(email);
+  if (limite) return { error: limite, email };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
   if (error) return { error: `No pudimos mandarte el código: ${error.message}`, email };
