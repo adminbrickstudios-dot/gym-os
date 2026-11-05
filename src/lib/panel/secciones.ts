@@ -28,6 +28,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "vencen_hoy", ruta: "/panel/vencen-hoy", emoji: "⏰", titulo: "Vencen hoy", descripcion: "A quién avisarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy" },
   { clave: "socios", ruta: "/panel/socios", emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
   { clave: "retencion", ruta: "/panel/retencion", emoji: "📉", titulo: "Retención", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion" },
+  { clave: "rutinas", ruta: "/panel/rutinas", emoji: "💪", titulo: "Rutinas", descripcion: "Ejercicios y rutinas para los socios", grupo: "Socios", roles: ["dueno", "encargado", "profe"], apagable: "rutinas" },
   { clave: "prospectos", ruta: "/panel/prospectos", emoji: "🌱", titulo: "Prospectos", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR },
   { clave: "vender", ruta: "/panel/vender", emoji: "🛒", titulo: "Vender", descripcion: "Cuotas, pases, packs y productos", grupo: "Plata", roles: MOSTRADOR, apagable: "vender" },
   { clave: "caja", ruta: "/panel/caja", emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
@@ -53,7 +54,7 @@ const ACCESOS_INICIALES: Record<Rol, string[]> = {
   dueno: ["entrada", "vender", "nuevo_socio", "socios", "caja", "retencion"],
   encargado: ["entrada", "vender", "nuevo_socio", "socios", "caja", "retencion"],
   recepcion: ["entrada", "vender", "nuevo_socio", "socios", "caja", "clases"],
-  profe: ["clases"],
+  profe: ["clases", "rutinas"],
 };
 
 const visible = (roles: Rol[], apagable: string | undefined, rol: Rol, apagadas: string[]) =>

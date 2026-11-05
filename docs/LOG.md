@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RUT-1 · Ejercicios y rutinas del gimnasio
+
+**QUÉ HICE**
+- Sección nueva **💪 Rutinas** (grupo Socios; dueño, encargado y profe; se puede apagar): la biblioteca de ejercicios (nombre, grupo muscular, video por link) y las rutinas plantilla por días ("Día 1", "Día 2"…), cada día con sus ejercicios, series, repeticiones y nota.
+- El profe la tiene en su menú y en sus accesos de Inicio.
+- Migración 0103 (`ejercicios`, `rutinas`, `rutina_ejercicios` con RLS, FK compuestas y unique por gimnasio; seis funciones), prueba de base `rutinas`, `e2e:rut-1`, inventario `docs/paneles/rutinas.md`, el barrido suma las rutas nuevas.
+
+---
+
 ## 2026-11-05 · DIS-11 · Pulido de Equipo y Mi cuenta
 
 **QUÉ HICE**
