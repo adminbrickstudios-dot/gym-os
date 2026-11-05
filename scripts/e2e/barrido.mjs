@@ -51,6 +51,8 @@ for (const rol of Object.keys(PROHIBIDO)) {
       catch (e) { falla(`${rol} · ${tam} · ${ruta}: no cargó (${e.message.split("\n")[0]})`); continue; }
       await p.waitForLoadState("networkidle").catch(() => {});
       const texto = await p.locator("body").innerText().catch(() => "");
+      // Con la máquina cargada el navegador a veces se cae a mitad de una ruta: eso no es la pantalla.
+      if (p.isClosed() || !b.isConnected()) { falla(`${rol} · ${tam} · ${ruta}: se cerró el navegador (máquina cargada)`); continue; }
       const nombre = `${rol}-${tam}${ruta.replaceAll("/", "-")}`;
       const problemas = [...p.errores.slice(antes)];
       if (r && r.status() >= 500) problemas.push(`HTTP ${r.status()}`);
@@ -62,7 +64,7 @@ for (const rol of Object.keys(PROHIBIDO)) {
         const ancho = await p.evaluate(() => document.documentElement.scrollWidth);
         if (ancho > CELU.width + 1) problemas.push(`se desborda a lo ancho (${ancho}px en un celu de ${CELU.width})`);
       }
-      if (problemas.length) { falla(`${rol} · ${tam} · ${ruta}: ${problemas.join(" | ")}`); await capturar(p, `ROTA-${nombre}`, true); }
+      if (problemas.length) { falla(`${rol} · ${tam} · ${ruta}: ${problemas.join(" | ")}`); await capturar(p, `ROTA-${nombre}`, true).catch(() => {}); }
       else ok(`${rol} · ${tam} · ${ruta}`);
     }
     await p.context().close().catch(() => {});
