@@ -20,7 +20,7 @@ const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key",
 ]);
 const EJECUTABLES = {
-  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica"]),
+  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.quiero_probar"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
@@ -39,6 +39,7 @@ const EJECUTABLES = {
     "public.guardar_horarios_apertura", "public.cierres_panel", "public.mensajes_panel", "public.guardar_mensaje",
     "public.restaurar_mensaje", "public.vista_previa_mensaje", "public.primeros_pasos", "public.ocultar_primeros_pasos",
     "public.publicar_pagina", "public.historial_configuracion", "public.pagina_panel", "public.guardar_pagina",
+    "public.quiero_probar", "public.prospectos_panel", "public.crear_prospecto", "public.actualizar_prospecto", "public.prospecto_es_socio",
     "public.admin_gimnasios", "public.admin_crear_gimnasio", "public.cajas_sede", "public.precios_venta", "public.vencen_hoy",
     "public.actividades_gimnasio", "public.guardar_actividad", "public.horarios_gimnasio", "public.agregar_horario",
     "public.cerrar_horario", "public.clase_detalle", "public.mi_socio",

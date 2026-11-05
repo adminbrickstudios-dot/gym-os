@@ -5,6 +5,7 @@ import { urlMarca } from "@/lib/url-marca";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
+import { FormProbar } from "./FormProbar";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -20,6 +21,7 @@ const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
   equipo: "👥",
   preguntas: "💬",
   ubicacion: "📍",
+  probar: "🙋",
 };
 
 function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
@@ -296,6 +298,14 @@ function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPu
     case "equipo": return <Equipo s={s} />;
     case "preguntas": return <Preguntas s={s} />;
     case "ubicacion": return <Ubicacion s={s} sedes={landing.sedes} />;
+    case "probar": return (
+      <Bloque id="probar" tipo={s.tipo} titulo={s.titulo}>
+        <div className="max-w-xl space-y-6">
+          {s.contenido.texto && <p className="text-lg texto-suave">{s.contenido.texto}</p>}
+          <FormProbar />
+        </div>
+      </Bloque>
+    );
   }
 }
 
@@ -305,6 +315,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
   const { marca, portada, contacto } = landing;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
   const hayPlanes = landing.planes.length > 0 && landing.secciones.some((s) => s.tipo === "planes");
+  const hayProbar = landing.secciones.some((s) => s.tipo === "probar");
   const accion = whatsapp ?? (hayPlanes ? "#planes" : contacto.email ? `mailto:${contacto.email}` : null);
   const foto = urlMarca(portada.foto_path);
   // "Abierto ahora" en la portada solo con una sede (con varias, va en Horarios, por sede).
@@ -336,7 +347,10 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
               <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/80 max-w-[36ch]">{portada.bajada}</p>}
               {ahora?.texto && <p className="mt-5"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
-              {accion && <BotonPrincipal href={accion} className={`mt-8 px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              <div className="mt-8 flex flex-wrap gap-3">
+                {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+                {hayProbar && <a href="#probar" className="boton text-lg px-8 bg-white/15 text-white border-white/30">🙋 Probá una clase</a>}
+              </div>
             </div>
           </div>
         </section>
@@ -349,6 +363,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {hayProbar && <a href="#probar" className="boton text-lg px-8 w-full sm:w-auto">🙋 Probá una clase</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>

@@ -18,7 +18,7 @@ type Item = Record<string, string | undefined>;
 export type PaginaPanel = { portada: Portada; secciones: SeccionPanel[]; fotos: string[]; vista: LandingPublicada | (Omit<LandingPublicada, "publicada"> & { publicada: false }) };
 
 const EMOJI: Record<Seccion["tipo"], string> = {
-  sobre_nosotros: "🏋️", actividades: "💪", planes: "🔥", horarios: "⏰", galeria: "📸", equipo: "👥", preguntas: "💬", ubicacion: "📍",
+  sobre_nosotros: "🏋️", actividades: "💪", planes: "🔥", horarios: "⏰", galeria: "📸", equipo: "👥", preguntas: "💬", ubicacion: "📍", probar: "🙋",
 };
 /** Lo que no se edita acá, y dónde se cambia. */
 const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
@@ -26,6 +26,7 @@ const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
   horarios: "Los horarios salen de Configuración → Horarios.",
   galeria: "Las fotos se suben en Configuración → Marca.",
   ubicacion: "Las direcciones salen de Configuración → Gimnasio (sedes).",
+  probar: "Un formulario corto (nombre, WhatsApp y qué le interesa): lo que deja la gente llega a Prospectos. Arriba de todo aparece el botón “🙋 Probá una clase”.",
 };
 /** Los campos de cada lista: [clave, etiqueta, máximo, obligatorio, área de texto]. */
 const LISTAS: Partial<Record<Seccion["tipo"], { clave: "items" | "personas"; nombre: string; campos: [string, string, number, boolean, boolean?][] }>> = {
@@ -232,6 +233,12 @@ export function Editor({ inicial, agenda, puedeEditar, direccion }: { inicial: P
                 </div>
                 <Interruptor etiqueta="Se muestra en la página" checked={s.visible} onChange={(e) => setS(i, { visible: e.target.checked })} />
                 {DE_OTRO_LADO[s.tipo] && <p className="text-sm texto-tenue">{DE_OTRO_LADO[s.tipo]}</p>}
+                {s.tipo === "probar" && (
+                  <Campo etiqueta="Texto arriba del formulario" ayuda={`${((s.contenido as { texto?: string }).texto ?? "").length} de 300 · opcional`}>
+                    <textarea className="campo min-h-20" maxLength={300} placeholder="La primera clase es sin cargo. Dejanos tus datos y te escribimos."
+                      value={(s.contenido as { texto?: string }).texto ?? ""} onChange={(e) => setS(i, { contenido: { texto: e.target.value } } as Partial<SeccionPanel>)} />
+                  </Campo>
+                )}
                 {s.tipo === "sobre_nosotros" && (
                   <Campo etiqueta="Texto" ayuda={`${((s.contenido as { texto?: string }).texto ?? "").length} de 1.500`}>
                     <textarea className="campo min-h-32" maxLength={1500} value={(s.contenido as { texto?: string }).texto ?? ""}

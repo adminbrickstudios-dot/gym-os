@@ -101,6 +101,10 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-8 | Lo que cambió sin una persona (el armado del demo, migraciones) aparece como "El sistema"; alguien que ya no está en el equipo, como tal. | No inventar un autor. | — |
 | 2026-11-04 | PAG-1 | La página la edita el dueño; el encargado la ve sin poder cambiarla (igual que el resto de la configuración). | Lo más prudente; la tabla permitía escribir al encargado pero ninguna pantalla lo usaba. | Que el encargado también edite. |
 | 2026-11-04 | PAG-1 | La foto de portada se elige entre las fotos del gimnasio (no hay una subida aparte); si esa foto se quita, la portada queda sin foto. | Un solo lugar para subir fotos y nunca un link roto. | Subida propia de la portada. |
+| 2026-11-04 | PAG-3 | Prospectos los ven y mueven dueño, encargado y recepción (como dice 03-ROLES); el profe no. Nadie escribe la tabla directo: todo por funciones. Un visitante sin sesión solo puede dejar su pedido. | Lo que pide la especificación, sin dar más. | — |
+| 2026-11-04 | PAG-3 | Contra el spam: el mismo celular no se duplica (actualiza su pedido), hasta 30 pedidos por hora por gimnasio desde la página y un campo escondido para robots. No hay captcha. | Suficiente para un gimnasio; un captcha espanta a la gente. | Captcha. |
+| 2026-11-04 | PAG-3 | "Se hizo socio" no se marca a mano: solo al darlo de alta desde "Hacerlo socio" (queda atado a su ficha). | Que el número de conversiones sea verdad. | Marcarlo a mano. |
+| 2026-11-04 | PAG-3 | Prospectos no se apaga por separado: con "Probá una clase" oculta en la página, igual sirve para anotar a los que preguntan en el mostrador. | Es la herramienta de recepción para los que preguntan. | Sumarla a Secciones. |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -177,7 +181,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio — verificado: e2e:pagina (16 pasos: cada link de la página publicada en compu y celular, borrador → próximamente con WhatsApp → publicar, gimnasio nuevo), inventario en docs/paneles/pagina.md, migración 0029 aplicada local
 - [x] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa — verificado: db (editor-pagina, 4 pruebas: guardar, errores con dónde, foto de portada, permisos; landing sigue en verde), e2e:pag-1 (17 pasos: vista previa en vivo, ocultar, ordenar, agregar pregunta, error, foto, página pública, encargado, celular)
 - [x] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla — verificado: e2e:pag-2 (10 pasos: estado, copiar link, WhatsApp con el link, og:title/description/image + /og se abre, borrador → próximamente → publicar, encargado comparte sin publicar, celular)
-- [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
+- [x] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página — verificado: db (prospectos, 4 pruebas: sin sesión solo publicada y visible, sin duplicar, tope 30/h, permisos y "socio" solo al dar de alta), e2e:pag-3 (16 pasos, el de punta a punta de PAG-1 a 3: editar → publicar → visitante en celular → Prospectos → escribirle → vino → Hacerlo socio → ficha)
 - [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
 - [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
 - [ ] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots

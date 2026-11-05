@@ -16,12 +16,14 @@ function Campo({ nombre, etiqueta, valor, tipo = "text", ayuda, ...resto }: { no
   );
 }
 
-export function FormSocio({ socioId, socio }: { socioId: string | null; socio?: Socio }) {
+export function FormSocio({ socioId, socio, prospectoId }: { socioId: string | null; socio?: Socio; prospectoId?: string }) {
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
   useEffect(() => { if (estado.destino) router.push(estado.destino); }, [estado.destino, router]);
   return (
     <form action={accion} className="max-w-2xl space-y-8">
+      {prospectoId && <input type="hidden" name="prospecto" value={prospectoId} />}
+      {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
       <fieldset className="grid sm:grid-cols-2 gap-4">
         <legend className="titulo text-2xl mb-4">👤 Datos</legend>
         <Campo nombre="nombre" etiqueta="Nombre" valor={socio?.nombre} required autoFocus autoComplete="off" />

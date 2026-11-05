@@ -26,7 +26,7 @@ const guardar = async (portada, secciones) => (await t.q(`select public.guardar_
 test("el dueño guarda portada, orden, visibilidad y contenido; lo ve la página pública", async () => {
   await t.comoUsuario(u.dueno, async () => {
     const p = await leer();
-    assert.equal(p.secciones.length, 8);
+    assert.equal(p.secciones.length, 9);
     const secciones = [...p.secciones].reverse().map((s) => ({ ...s }));
     const preguntas = secciones.find((s) => s.tipo === "preguntas");
     preguntas.titulo = "  Dudas  ";
@@ -45,7 +45,7 @@ test("el dueño guarda portada, orden, visibilidad y contenido; lo ve la página
     const [{ l }] = await t.q(`select public.landing_publica($1) as l`, [HOST]);
     assert.equal(l.portada.titulo, "Entrená distinto");
     assert.ok(!l.secciones.some((s) => s.tipo === "equipo"), "la sección oculta no sale en la página");
-    assert.equal(l.secciones[0].tipo, "ubicacion", "la página respeta el orden");
+    assert.equal(l.secciones[0].tipo, "probar", "la página respeta el orden");
   });
 });
 

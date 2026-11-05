@@ -15,6 +15,36 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · PAG-3 · "Probá una clase": prospectos desde la página
+
+**QUÉ HICE**
+- Página: sección nueva "🙋 Probá una clase" (se edita, oculta y ordena en Tu página) con un formulario de nombre, WhatsApp y qué le interesa; botón "🙋 Probá una clase" en la portada. Al enviar: "¡Listo, Lucía! Te escribimos por WhatsApp…". Los errores no borran lo escrito.
+- Panel: "🌱 Prospectos" (grupo Socios; dueño, encargado y recepción). Filtros Nuevos / Contactados / Vinieron / Se hicieron socios / No les interesó con su cuenta; "💬 Escribirle" con el mensaje armado (lo pasa a Contactados), "Vino a probar", "Hacerlo socio" (abre el alta con nombre, apellido y WhatsApp; al guardar queda atado a la ficha), "No le interesó", "Anotar uno que preguntó" en el mostrador.
+- Mensaje nuevo editable "🌱 Quiere probar" en Configuración → Mensajes.
+- Migración `20261104003100_prospectos.sql`: tabla `prospectos` (RLS, FK compuesta al socio, sin escritura directa, un visitante sin sesión no la ve), `quiero_probar` (sin sesión: solo página publicada con la sección visible; mismo celular no se duplica; hasta 30 por hora), `prospectos_panel`, `crear_prospecto`, `actualizar_prospecto`, `prospecto_es_socio`; la sección "probar" en todas las páginas y en las nuevas.
+- El demo trae 5 prospectos en distintos estados.
+- `supabase/pruebas/prospectos.test.mjs` (4) y `scripts/e2e/pag-3.mjs` (16 pasos): el recorrido completo de PAG-1 a PAG-3.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Un WhatsApp escrito "000 148 1439" (o cualquier celular que empiece con 00) se guardaba como "+01481439", un número que no existe, y el mismo celular escrito con +54 quedaba duplicado. Arreglado en la 0031: diez números son siempre un celular argentino y ningún número puede empezar con +0. Lo usan todos los teléfonos del sistema (gimnasio, sedes, prospectos).
+- "Hacerlo socio" volvía a dibujar el alta después de guardar y daba error (el prospecto ya era socio): ahora va a la ficha desde el servidor.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0031).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Inicio no muestra todavía "N prospectos nuevos" (va con el ítem de Inicio).
+- Prospecto sin contestar en 24 h a la bandeja de avisos: va con AVI-1.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0031 contra la base real: probada en la base local. `npm run db:types` necesita el proyecto real.
+- `npm run db:pruebas` con el demo cargado en la misma base da choques de mails de usuarios de prueba (pasa en base limpia; lo corre `verificar`).
+
+---
+
 ## 2026-11-04 · PAG-2 · Publicar, pasar a borrador y compartir la página
 
 **QUÉ HICE**
@@ -138,7 +168,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - Nada.
 
 **SIN ARREGLAR**
-- WhatsApp con "00" adelante se guarda mal (ver arriba): hace falta una migración nueva que lo rechace con un mensaje ("escribilo con característica, sin 00").
+- WhatsApp con "00" adelante se guardaba mal (ver arriba). Arreglado después, en la 0031 (PAG-3).
 
 **LO QUE NO PUDE VERIFICAR**
 - La migración 0028 contra la base real: probada en la base local.

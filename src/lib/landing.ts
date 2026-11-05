@@ -34,7 +34,8 @@ export type Seccion =
   | { tipo: "galeria"; titulo: string; contenido: { fotos?: string[] } }
   | { tipo: "equipo"; titulo: string; contenido: { personas?: { nombre: string; rol?: string; foto?: string }[] } }
   | { tipo: "preguntas"; titulo: string; contenido: { items?: { pregunta: string; respuesta: string }[] } }
-  | { tipo: "ubicacion"; titulo: string; contenido: Record<string, never> };
+  | { tipo: "ubicacion"; titulo: string; contenido: Record<string, never> }
+  | { tipo: "probar"; titulo: string; contenido: { texto?: string } };
 
 export type Sede = { nombre: string; direccion: string | null; mapa_url: string | null; telefono: string | null };
 

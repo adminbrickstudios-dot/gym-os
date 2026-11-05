@@ -19,10 +19,10 @@ after(async () => t && t.cerrar());
 const lista = async () => (await t.q(`select public.mensajes_panel($1) as m`, [t.g]))[0].m;
 const retencion = async () => t.q(`select * from privado.retencion($1, $2)`, [t.g, await t.en(HOY, "12:00:00")]);
 
-test("los 8 mensajes, con su texto original y dónde se usan", async () => {
+test("los 9 mensajes, con su texto original y dónde se usan", async () => {
   await t.comoUsuario(u.encargado, async () => {
     const m = await lista();
-    assert.deepEqual(m.map((x) => x.clave), ["por_vencer", "vencido", "no_viene", "nuevo", "se_fue", "bienvenida", "cumpleanos", "comprobante_rechazado"]);
+    assert.deepEqual(m.map((x) => x.clave), ["por_vencer", "vencido", "no_viene", "nuevo", "se_fue", "bienvenida", "cumpleanos", "comprobante_rechazado", "prospecto"]);
     assert.ok(m.every((x) => x.texto === x.original && x.modificado === false));
     assert.deepEqual(m.find((x) => x.clave === "por_vencer").usado_en, ["Retención", "Vencen hoy"]);
   });

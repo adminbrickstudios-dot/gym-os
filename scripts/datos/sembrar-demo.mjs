@@ -199,6 +199,20 @@ try {
     }
   }
 
+  // Prospectos: los que dejaron sus datos para probar (teléfonos 000, ficticios).
+  const prospectos = [
+    ["Valentina Ruiz", "+5490000200001", "Funcional a la mañana", "pagina", "nuevo", 0],
+    ["Tomás Ibarra", "+5490000200002", "Musculación", "pagina", "nuevo", 1],
+    ["Micaela Sosa", "+5490000200003", "Spinning", "recepcion", "contactado", 2],
+    ["Joaquín Paz", "+5490000200004", null, "referido", "vino", 4],
+    ["Florencia Díaz", "+5490000200005", "Pilates", "pagina", "no", 9],
+  ];
+  for (const [nombre, telefono, interes, origen, estado, dias] of prospectos) {
+    await q(`insert into public.prospectos (gimnasio_id, nombre, telefono, interes, origen, estado, creado_en, actualizado_en)
+             values ($1,$2,$3,$4,$5,$6, now() - make_interval(days => $7), now() - make_interval(days => $7))`,
+      [g, nombre, telefono, interes, origen, estado, dias]);
+  }
+
   await db.query("commit");
   const [{ n }] = await q("select count(*)::int as n from public.socios where gimnasio_id = $1", [g]);
   console.log(`Gimnasio demo sembrado en ${((Date.now() - t0) / 1000).toFixed(1)} s (hoy = ${hoy}):`);
