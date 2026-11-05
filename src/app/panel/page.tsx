@@ -39,7 +39,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -52,7 +52,13 @@ export default async function Inicio() {
       rol === "dueno" || rol === "encargado" ? rpc<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // VEN-6: ventas que la recepción pidió anular.
       rol === "dueno" || rol === "encargado" ? rpc<Venta[]>("pedidos_anulacion_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // VEN-4: productos que llegaron a su mínimo.
+      rol === "dueno" || rol === "encargado" ? rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id })
+        : ({} as Record<string, { stock: number; minimo: number | null }>),
+      rol === "dueno" || rol === "encargado" ? rpc<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
+    const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
+      || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
@@ -142,6 +148,19 @@ export default async function Inicio() {
             <h2 id="invitados-hoy" className="titulo text-3xl mb-4">👥 Invitados hoy</h2>
             <ul className="space-y-1">
               {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✅" : "⏳"} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {reponer.length > 0 && rutaDisponible("/panel/planes", rol, panel.secciones_apagadas) && (
+          <section aria-labelledby="reponer" data-reponer={reponer.length}>
+            <h2 id="reponer" className="titulo text-3xl mb-4">📦 Por reponer</h2>
+            <ul className="flex flex-wrap gap-2">
+              {reponer.map((p) => (
+                <li key={p.producto_id}>
+                  <LinkPanel href="/panel/planes" siNoEsta="texto" className="pildora pildora-amarillo !text-base !px-4 !py-2">{p.nombre}: {stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`}</LinkPanel>
+                </li>
+              ))}
             </ul>
           </section>
         )}

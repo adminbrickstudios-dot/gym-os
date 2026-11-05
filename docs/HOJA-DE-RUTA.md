@@ -136,6 +136,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | PLA-6 | Cambiar de plan pasa los días pagos 1 a 1 al plan nuevo, aunque cueste distinto; la ficha muestra la diferencia por mes y deja ir a Vender. | D6: sin plata automática. | Prorratear en plata. |
 | 2026-11-05 | PLA-7 | Recargo: el atraso cuenta desde el primer día sin cubrir; con "más de N días" (N de 1 a 60), % de la cuota (hasta 50%) o monto fijo; quien nunca pagó no tiene atraso. La base lo exige junto con la cuota: no cobrarlo es un descuento con motivo, con el tope de la recepción. El pago por transferencia desde la app todavía no lo suma. | D8: siempre visible antes de cobrar, y que la recepción no lo saque sin dejar rastro. | Que la recepción pueda sacarlo libre. |
 | 2026-11-05 | VEN-6 | Anulan el dueño y el encargado (desde la ficha, desde Vender recién cobrado o desde el pedido en Inicio). La recepción pide solo ventas que cobró ella hoy. Si había efectivo de una caja ya cerrada, la devolución sale como retiro de la caja abierta de esa sede (si no hay ninguna abierta, no deja anular y lo dice). | Anular toca plata; el arqueo de una caja contada no se reabre. | — |
+| 2026-11-05 | VEN-4 | El stock se calcula (entradas + conteos − ventas no anuladas), no se guarda. Cada producto elige si lleva stock; al prenderlo se cuenta lo que hay. Vender muestra cuántos quedan y avisa, pero no frena una venta. Cargan mercadería y cuentan el dueño y el encargado; la recepción lo ve. | Una venta frenada por un número mal contado es peor que un stock negativo, que avisa que hay que contar. | Frenar la venta sin stock. |
 
 ---
 
@@ -262,7 +263,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 6 · Vender, Caja y Transferencias
 - [x] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
 - [x] VEN-1 · 🟢 · Comprobante de pago por WhatsApp
-- [ ] VEN-4 · 🟢 · Productos con stock
+- [x] VEN-4 · 🟢 · Productos con stock
 - [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
 - [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
 - [x] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)

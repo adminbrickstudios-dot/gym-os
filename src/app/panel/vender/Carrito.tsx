@@ -19,13 +19,15 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false }: {
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {} }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
   /** Dueño y encargado anulan; la recepción pide (VEN-6). */
   puedeAnular?: boolean;
+  stockInicial?: Record<string, { stock: number; minimo: number | null }>;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
+  const [stock, setStock] = useState(stockInicial);
   // Recién dado de alta con plan (SOC-13): arranca con la primera cuota en el carrito.
   // Si debe la matrícula de su plan (PLA-3), va también.
   const [lineas, setLineas] = useState<Linea[]>(() => conCuota && preciosIniciales.cuota
@@ -98,7 +100,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
     }));
     const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos });
-    if (r.error) setError(r.error); else { setVenta(r.venta!); setLineas([]); }
+    if (r.error) setError(r.error);
+    else {
+      // Lo vendido sale del stock que se muestra (la base lo calcula igual).
+      setStock((st) => Object.fromEntries(Object.entries(st).map(([id, x]) => [id, { ...x, stock: x.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0) }])));
+      setVenta(r.venta!); setLineas([]);
+    }
   });
 
   if (venta) {
@@ -120,13 +127,23 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     );
   }
 
-  const Boton = ({ onClick, emoji, titulo, precio, deshabilitado }: { onClick: () => void; emoji: string; titulo: string; precio: number | null; deshabilitado?: string }) => (
+  const Boton = ({ onClick, emoji, titulo, precio, deshabilitado, nota }: { onClick: () => void; emoji: string; titulo: string; precio: number | null; deshabilitado?: string; nota?: { texto: string; alerta: boolean } }) => (
     <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null} title={deshabilitado}
       className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
       <span className="flex items-center gap-2"><span aria-hidden className="text-xl">{emoji}</span><span>{titulo}</span></span>
-      <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
+      <span className="flex flex-wrap items-baseline gap-x-2">
+        <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
+        {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
+      </span>
     </button>
   );
+  // VEN-4: cuántos quedan (avisa; no frena la venta). Lo del carrito ya se descuenta.
+  const notaStock = (id: string) => {
+    const s = stock[id];
+    if (!s) return undefined;
+    const quedan = s.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0);
+    return { texto: quedan <= 0 ? "Sin stock" : `Quedan ${quedan}`, alerta: quedan <= 0 || (s.minimo != null && quedan <= s.minimo) };
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 items-start [&>*]:min-w-0">
@@ -182,7 +199,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {precios.productos.map((p) => (
-              <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio}
+              <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}
             <button type="button" className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px]" onClick={() => setOtro({ descripcion: "", monto: "" })}>

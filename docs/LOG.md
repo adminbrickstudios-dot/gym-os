@@ -15,6 +15,28 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · VEN-4 · Productos con stock
+
+**QUÉ HICE**
+- Planes → Productos → "📦 Stock":
+  - Llevar stock: al prenderlo se cuenta lo que hay.
+  - "➕ Entró mercadería".
+  - "🔢 Conté: ajustar".
+  - Avisar cuando queden N.
+  - Dejar de llevar stock.
+- Vender muestra "Quedan N" en cada producto, descontando lo que ya está en el carrito. "Sin stock" avisa pero no frena.
+- Inicio del dueño y del encargado: "📦 Por reponer".
+- Migración `20261104006500_stock.sql`:
+  - Tabla `movimientos_stock` (RLS, FK compuestas).
+  - `privado.stock_producto`, que calcula el stock.
+  - `stock_productos`, `configurar_stock`, `entrada_stock`, `contar_stock`, `movimientos_stock_producto`.
+- `supabase/pruebas/stock.test.mjs` cubre conteo inicial, entrada, venta, anulación y permisos. `scripts/e2e/ven-4.mjs` (6 pasos).
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se hizo clic.
+
+---
+
 ## 2026-11-05 · VEN-1 · Comprobante de pago por WhatsApp
 
 **QUÉ HICE**

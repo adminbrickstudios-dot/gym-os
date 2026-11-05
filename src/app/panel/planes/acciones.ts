@@ -112,3 +112,28 @@ export async function aplicarAumento(a: Aumento): Promise<{ error?: string; n?: 
   try { const n = await rpc<number>("aplicar_aumento", argsAumento(panel.gimnasio.id, a)); listo(); revalidatePath("/panel/planes/aumento"); return { n }; }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+export type Stock = { controla: boolean; stock: number; minimo: number | null };
+
+/** VEN-4: prender/apagar el stock de un producto; al prenderlo, se cuenta lo que hay. */
+export async function configurarStock(productoId: string, controla: boolean, minimo: string, contado?: string): Promise<{ error?: string }> {
+  const m = minimo.trim() === "" ? null : Number(minimo);
+  if (m != null && !Number.isInteger(m)) return { error: "Avisar desde: un número entero (vacío = no avisar)" };
+  const c = contado?.trim() ? Number(contado) : null;
+  if (controla && contado !== undefined && (c == null || !Number.isInteger(c))) return { error: "Contá cuántos hay ahora (un número entero)" };
+  try {
+    await rpc("configurar_stock", { p_producto_id: productoId, p_controla: controla, p_minimo: m });
+    if (controla && c != null) await rpc("contar_stock", { p_producto_id: productoId, p_contado: c });
+    return listo();
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function moverStock(productoId: string, tipo: "entrada" | "conteo", cantidad: string, motivo = ""): Promise<{ error?: string }> {
+  const n = Number(cantidad);
+  if (!cantidad.trim() || !Number.isInteger(n)) return { error: "Un número entero" };
+  try {
+    await rpc(tipo === "entrada" ? "entrada_stock" : "contar_stock", tipo === "entrada"
+      ? { p_producto_id: productoId, p_cantidad: n, p_motivo: motivo || null } : { p_producto_id: productoId, p_contado: n });
+    return listo();
+  } catch (e) { return { error: (e as Error).message }; }
+}
