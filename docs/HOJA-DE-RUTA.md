@@ -150,6 +150,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | RES-1 | Cobrado = pagos aprobados en el mes, sin lo fiado (igual que Inicio y el Resumen). Un mes en curso se compara con los mismos días del anterior. "De dónde" sale de lo vendido (ventas no anuladas), por plan, productos, matrícula, recargos o deuda: puede no coincidir con lo cobrado (transferencias pendientes, fiado). Recurrente = precio de hoy de cada membresía al día, dividido por su duración en meses. Horas pico: entradas que pasaron, de 6 a 23 h. | Todo de la base, con las mismas reglas que el resto. | Gráficos con una librería: con barras simples alcanza y no suma peso. |
 | 2026-11-05 | RES-3 | Gastos en cuatro categorías (alquiler, sueldos, servicios, otros), por mes, con detalle opcional. Los ve y los carga solo el dueño (hay sueldos): el encargado ve el Resultado sin gastos ni ganancia. Ganancia = cobrado del mes (sin fiado) menos gastos. Quitar un gasto lo deja anulado. "Repetir los del mes pasado" copia todos si el mes está vacío. | Simple: alcanza para saber si el mes dio, sin hacer contabilidad. | Gastos con comprobante, proveedores o cuotas: es otro producto. |
 | 2026-11-05 | PAY-1 | Hasta que exista el OAuth (MP-1), el dueño pega el Access Token y la clave del webhook de su aplicación de MercadoPago en Configuración → Cobros; van a Vault y no se vuelven a mostrar. Modo prueba o producción. El socio paga la cuota de su plan al precio del medio "mercadopago" (si no tiene uno propio, el general); al día, la puede adelantar. Un pago pendiente de la última hora se reusa. El aviso viene a `/api/webhooks/mercadopago?g=<gimnasio>`, se verifica la firma con la clave del gimnasio, y estado y monto se leen de la API de MercadoPago con su token (no del aviso). Se acredita solo si el monto coincide al centavo. Rechazado o devuelto: el pago queda rechazado con el motivo. Los medios del mostrador no cambian. | El webhook manda (CLAUDE.md), idempotente por ID externo. | Débito automático (MP-3) y alta online con pago (sigue en la app después del alta). |
+| 2026-11-05 | CLA-1 | Falta = reserva confirmada de una clase que terminó sin presente (y sin cancelar); se calcula. Opciones hoy: no pasa nada (por defecto) o el socio no puede reservar por N días (1 a 60) desde el día de la clase; cuenta desde que se prende la regla; la recepción, el encargado y el dueño lo pueden anotar igual. La app muestra las reglas (cancelar hasta y faltas) y el motivo si está bloqueado. Las faltas se ven en la ficha (Asistencia). "Descontar del pack" quedó como CLA-9: pide cambiar cómo se cuentan los packs. | Calculado y prudente: nadie queda bloqueado por algo de antes de la regla. | Descontar del pack ahora (CLA-9). |
 
 ---
 
@@ -308,7 +309,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 9 · Clases
 - [x] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades) — verificado: e2e:clases (días, presente desde la búsqueda, grilla: actividad, horario y sacar con confirmación en pantalla, profe sin grilla, celular); inventario en docs/paneles/clases.md
-- [ ] CLA-1 · 🟡 D16 · Políticas de reserva y faltas
+- [x] CLA-1 · 🟡 D16 · Políticas de reserva y faltas — verificado: db (faltas-clases: apagada nada, lo de antes no cuenta, bloquea N días, la recepción anota igual, con presente no es falta), e2e:cla-1 (configurar, la app avisa y frena, la ficha lo muestra). "Descontar del pack" quedó como CLA-9
 - [ ] CLA-2 · 🟢 · Turnos fijos (abono a un horario)
 - [ ] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados
 - [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
@@ -316,6 +317,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
 - [ ] CLA-7 · 🟢 · Anular un presente marcado por error
 - [ ] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9)
+- [ ] CLA-9 · 🟢 · Faltas: descontar la clase del pack (tercera opción de D16)
 - [ ] DIS-9 · 🟢 · Pulido: Clases
 
 ### 10 · Retención
@@ -613,6 +615,7 @@ LISTO SI: e2e: rojo → Cobrar → cobrar en efectivo → vuelve verde y "Anotar
 **CLA-4.** WOD / rutina del día cargado por el profe en la clase; lo ven los anotados en la app.
 **CLA-5.** Ocupación: % por horario de la semana (mapa de calor), para decidir horarios.
 **CLA-8.** (de AUD-9) Actividades: cambiar nombre y emoji, y apagarla (sus horarios dejan de generar clases). Horarios: cambiar hora, duración, cupo y profe desde la grilla; lo que cambia vale desde la próxima clase sin reservas tomadas, y si una clase ya tiene reservas y baja el cupo, los que sobran pasan a espera con aviso. LISTO SI: prueba de base (cambio de cupo con reservas) y e2e.
+**CLA-9.** (de CLA-1) Tercera opción de D16: la falta descuenta la clase del pack. Hoy un consumo de pack necesita un ingreso o un presente; hay que sumar "falta" como hecho (consumo con reserva_id) sin cron: se anota la primera vez que algo mira el pack de ese socio después de la clase, y la cuenta de clases que le quedan tiene que dar igual en la puerta, la app y la ficha. LISTO SI: prueba de base con momento fijo y e2e.
 **CLA-6.** Clase de prueba: un prospecto (PAG-3) reserva una clase gratis una vez, con cupo, sin ser socio.
 **RUT-1.** Biblioteca de ejercicios del gimnasio (nombre, grupo muscular, video opcional por link) y rutinas plantilla (días, ejercicios, series, repeticiones).
 **RUT-2.** Asignar rutina a un socio; en la app la ve por día y anota peso y repeticiones (peso levantado sí se guarda; nada de salud).

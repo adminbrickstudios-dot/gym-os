@@ -46,7 +46,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -62,6 +62,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       // VEN-3: el convenio del socio y los del gimnasio para elegir.
       pestana === "resumen" ? rpc<ConvenioSocio>("convenio_socio", { p_socio_id: id }) : Promise.resolve(null),
       pestana === "resumen" ? rpc<{ convenio_id: string; nombre: string; tipo: string; valor: number; activo: boolean }[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve([]),
+      // CLA-1: las clases que reservó y no vino (sin cancelar), últimos 60 días.
+      pestana === "asistencia" && panel.modo_clases === "reserva" ? rpc<{ clase_id: string; actividad: string; inicio: string }[]>("faltas_socio", { p_socio_id: id }) : Promise.resolve([]),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -177,6 +179,14 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         {pestana === "pagos" && !ventas && <p className="texto-suave">Los pagos los ven el dueño y el encargado.</p>}
 
         {pestana === "asistencia" && asistencia && <Calendario a={asistencia} socioId={s.id} />}
+        {pestana === "asistencia" && faltas.length > 0 && (
+          <section className="mt-8" data-faltas-socio>
+            <h2 className="titulo text-2xl mb-2">🙈 Reservó y no vino</h2>
+            <ul className="space-y-1">{faltas.map((x) => (
+              <li key={x.clase_id} className="texto-suave">{x.actividad} · <span className="first-letter:uppercase">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.inicio))}</span></li>
+            ))}</ul>
+          </section>
+        )}
 
         {pestana === "notas" && <Notas socioId={s.id} notas={ne.notas} zona={zona} notaVieja={s.notas} />}
       </div>

@@ -26,6 +26,7 @@ export type Config = {
   reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
   fiado_activo: boolean; fiado_tope: number;
+  falta_politica: "nada" | "bloquear"; falta_bloqueo_dias: number;
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -78,6 +79,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   recargo_dias: [1, 60, "Recargo: con más de cuántos días de atraso"],
   reserva_dias_anticipacion: [0, 60, "Se reserva con hasta"],
   cancelacion_horas_limite: [0, 72, "Cancelar hasta"],
+  falta_bloqueo_dias: [1, 60, "Faltas: días sin poder reservar"],
 };
 
 /** Qué campos de la configuración guarda cada pestaña. Gimnasio guarda aparte (otra función). */
@@ -87,7 +89,7 @@ const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
            "recargo_tipo", "recargo_valor", "recargo_dias", "fiado_activo", "fiado_tope"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
-  clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
+  clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite", "falta_politica", "falta_bloqueo_dias"],
   secciones: ["secciones_apagadas", "modo_clases"],
 };
 const CAMPOS_GIMNASIO = ["nombre", "whatsapp", "instagram", "email_contacto"] as const;
@@ -551,6 +553,21 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               {num("reserva_dias_anticipacion", "Se reserva con hasta (días)", "Cuántos días antes se abre la reserva")}
               {num("cancelacion_horas_limite", "Cancelar hasta (horas antes)", "Después de eso la reserva cuenta igual")}
             </div>}
+            {c.modo_clases === "reserva" && (
+              <div className="space-y-3" data-faltas>
+                <p className="font-semibold">Si reserva y no viene (sin cancelar)</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {([["nada", "🙂 No pasa nada", "Queda anotado en su ficha."], ["bloquear", "⛔ No puede reservar por unos días", "La recepción lo puede anotar igual. Cuenta desde que lo prendés."]] as const).map(([v, t, a]) => (
+                    <button key={v} type="button" aria-pressed={c.falta_politica === v} onClick={() => set("falta_politica", v)}
+                      className={`boton !flex-col !items-start !h-auto py-3 ${c.falta_politica === v ? "!border-[var(--acento)]" : "opacity-70"}`}>
+                      <span>{t}</span><span className="text-sm texto-tenue font-normal">{a}</span>
+                    </button>
+                  ))}
+                </div>
+                {c.falta_politica === "bloquear" && <div className="grid sm:grid-cols-2 gap-3">{num("falta_bloqueo_dias", "Días sin poder reservar", "Desde el día de la clase a la que faltó")}</div>}
+                <p className="text-sm texto-tenue">El socio lo ve en la app antes de reservar.</p>
+              </div>
+            )}
           </Tarjeta>
           {pie("clases")}
         </>}

@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-1 · Faltas a clases reservadas
+
+**QUÉ HICE**
+- Configuración → Clases, si se reserva: "Si reserva y no viene (sin cancelar)": 🙂 No pasa nada, o ⛔ No puede reservar por N días (la recepción lo puede anotar igual; cuenta desde que se prende).
+- App del socio (Reservar): abajo, las reglas ("Podés cancelar hasta 2 h antes", "Si reservás y no venís…"). Si está bloqueado: "⛔ No podés reservar hasta el 08/11: faltaste a Spinning del 05/11 sin cancelar." La base lo frena igual si toca Reservar.
+- Ficha → Asistencia: "🙈 Reservó y no vino" (últimos 60 días).
+- Migración 0080 (`privado.faltas`, `privado.bloqueo_reservas`, `faltas_socio`, `politica_reservas`, copia de `public.reservar` y de la configuración). Prueba de base `faltas-clases` y e2e `e2e:cla-1`.
+- "Descontar del pack" (la tercera opción de D16) quedó como CLA-9: cambia cómo se cuentan las clases del pack en la puerta.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Corrijo lo que anoté en AUD-9: la base SÍ deja a la recepción cancelar clases (`cancelar_clase` la incluye). Es la pantalla la que esconde el botón. No lo cambié (CLA-3).
+
+---
+
 ## 2026-11-05 · AUD-9 · Auditoría de Clases
 
 **QUÉ HICE**
@@ -25,7 +39,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - A la cola: CLA-8 (editar actividades y horarios sin sacarlos).
 
 **LO QUE ENCONTRÉ SIN PEDIRTELO**
-- CLA-3 dice que la recepción también cancela clases. Hoy la base no la deja (dueño, encargado y profe). Toca permisos: no lo cambié. Queda anotado para CLA-3.
+- CLA-3 dice que la recepción también cancela clases. La pantalla no le muestra el botón (la base sí la deja, ver CLA-1). Toca permisos: no lo cambié. Queda anotado para CLA-3.
 
 ---
 

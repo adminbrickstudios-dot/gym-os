@@ -19,7 +19,12 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
     if (!sede) throw new Error("El gimnasio no tiene sedes activas");
-    const clases = (await rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id })).filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
+    const [todas, politica] = await Promise.all([
+      rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
+      // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.
+      rpc<{ reglas: string[]; bloqueo: { texto: string } | null }>("politica_reservas", { p_socio_id: yo.socio.socio_id }),
+    ]);
+    const clases = todas.filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
     const reservaDe = new Map((yo.reservas ?? []).map((r) => [r.clase_id, r.reserva_id]));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const q = (d: string) => `/app/clases?dia=${d}${yo.socios.length > 1 ? `&socio=${yo.socio!.socio_id}` : ""}`;
@@ -34,6 +39,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </Link>
           ))}
         </nav>
+        {politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas>⛔ {politica.bloqueo.texto}</p>}
         {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.</p> : (
           <ul className="space-y-2">{clases.map((c) => (
             <li key={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
@@ -47,6 +53,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </li>
           ))}</ul>
         )}
+        {politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}>ℹ️ {r}</li>)}</ul>}
       </>
     );
   });
