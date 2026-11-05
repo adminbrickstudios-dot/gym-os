@@ -15,6 +15,24 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-6 · Cumpleaños
+
+**QUÉ HICE**
+- Inicio (dueño, encargado, recepción): "🎂 Cumplen hoy" con el nombre (a la ficha), cuántos cumple y "💬 Saludar" con el mensaje "Cumpleaños" de Configuración → Mensajes. Sin cumpleaños, no aparece nada.
+- Migración `20261104003800_cumpleanos.sql` (`cumplen_hoy(gimnasio, momento)`: fecha del gimnasio, el 29/2 se festeja el 28/2 en años no bisiestos, sin dados de baja).
+- `supabase/pruebas/cumpleanos.test.mjs` y `scripts/e2e/soc-6.mjs`.
+
+**SIN ARREGLAR**
+- La bandeja de avisos (AVI-1) todavía no existe: cuando esté, los cumpleaños van ahí también.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0038).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0038 contra la base real (probada local).
+
+---
+
 ## 2026-11-04 · SOC-4 · Exportar la lista de socios
 
 **QUÉ HICE**

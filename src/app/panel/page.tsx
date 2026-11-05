@@ -1,3 +1,5 @@
+import { LinkPanel } from "@/components/panel/LinkPanel";
+import { linkWhatsappSocio } from "@/lib/whatsapp";
 import Link from "next/link";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
@@ -25,14 +27,17 @@ const DETALLE: Record<string, { ruta: string; seccion: string }> = {
 // Las rutas que devuelve la base son relativas al panel.
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
 
+type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumple: number; mensaje: string };
+
 export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos] = await Promise.all([
+    const [datos, pasos, cumples] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
+      rol === "profe" ? [] : rpc<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
@@ -97,6 +102,27 @@ export default async function Inicio() {
             </ul>
           )}
         </section>
+
+        {cumples.length > 0 && (
+          <section aria-labelledby="cumples" data-cumplen-hoy={cumples.length}>
+            <h2 id="cumples" className="titulo text-3xl mb-4">🎂 Cumplen hoy</h2>
+            <ul className="space-y-2">
+              {cumples.map((c) => {
+                const wa = linkWhatsappSocio(c.telefono, c.mensaje);
+                return (
+                  <li key={c.socio_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
+                    <span className="text-2xl" aria-hidden>🎉</span>
+                    <span className="min-w-0 flex-1">
+                      <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
+                      <span className="block texto-suave">Cumple {c.cumple}</span>
+                    </span>
+                    {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 Saludar</a>}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
       </div>
     );
   });
