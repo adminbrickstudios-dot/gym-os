@@ -78,6 +78,11 @@ try {
   // Dar de baja y volver
   await p.locator('button:has-text("Dar de baja")').click();
   await p.locator('button:has-text("Precio")').click();
+  // RET-3: con plan, antes de confirmar ofrece una pausa.
+  const oferta = p.locator("[data-ofrecer-pausa]");
+  await oferta.waitFor({ timeout: 30000 });
+  ok("antes de la baja: “¿le ofreciste una pausa?” con el link a Pausas");
+  await oferta.getByRole("button", { name: /Dar de baja igual/ }).click();
   await p.locator("[data-dado-de-baja]").waitFor({ timeout: 30000 });
   chequear(await p.locator('main a:has-text("Editar")').count() === 0, "dado de baja: “Dado de baja el …” y ofrece volver a darlo de alta", "dado de baja sigue con botones");
   await capturar(p, "aud3-compu-baja");

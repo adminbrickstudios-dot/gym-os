@@ -116,7 +116,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
               <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
-              <DarDeBaja socioId={s.id} />
+              <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
             </div>
           )}
         </header>

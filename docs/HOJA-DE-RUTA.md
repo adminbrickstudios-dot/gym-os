@@ -154,6 +154,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | CLA-2 | Los turnos fijos se prenden por gimnasio (Configuración → Clases, solo con reserva). Los toma el socio desde la app o el mostrador desde la ficha. Tope: el cupo del horario. Sin cron: al mirar las clases de un día se reserva a los abonados que pueden tomar la clase (dentro de la ventana de reserva) y se libera el lugar de los que ya no pueden (sube la espera). Si una semana el socio cancela, esa semana no se vuelve a reservar. Quitar el turno cancela las próximas que había reservado solo. | Nada depende de un cron; el lugar del que no paga no queda tomado. | Avisarle al socio que se liberó su lugar fijo (va por la campana cuando sume ese aviso). |
 | 2026-11-05 | CLA-3 | La recepción ve "Cancelar esta clase" (la base ya la dejaba). Los anotados aparecen primero en Avisos de hoy durante 2 días, con el mensaje nuevo "Clase cancelada" (editable, variables {clase} {dia} {motivo}); además les llega por la campana y el push. Los packs no se tocan: reservar no gasta clase. La vista previa de los mensajes usa ejemplos para las variables que no son del socio. | Lo urgente primero, con el mensaje listo. | — |
 | 2026-11-05 | CLA-8 | Editar un horario respeta "un horario no se edita" (0011): se crea uno nuevo y se cierra el viejo, llevando las clases futuras. Las que ya tienen reservas conservan su hora (nadie pierde su lugar) y toman cupo y profe; si cambió la hora, el nuevo arranca después de la última reservada (no hay dos clases el mismo día). El cupo no baja de lo ya reservado (se dice qué clase lo impide); si sube, entra la espera. Un horario que arranca hoy no se edita: se saca y se agrega. Actividades: nombre, emoji y apagarla. | Nadie pierde su reserva por un cambio de grilla. | Pasar a espera a los que sobran si baja el cupo (hoy se impide). |
+| 2026-11-05 | RET-3 | Los motivos de baja quedan con la lista fija que ya tenía la base (precio, horario, se mudó, otro gimnasio, sin tiempo, no le gustó, otro): hacerla editable por gimnasio cambiaría una restricción de la tabla de socios y cómo se agrupan en el Resultado. La pausa se ofrece si tiene plan y el motivo no es "se mudó" ni "otro gimnasio"; el botón lleva a Pausas de la ficha. Los motivos del mes se ven en el Resultado. | Lo prudente sin tocar datos existentes. | Lista de motivos editable por gimnasio. |
 
 ---
 
@@ -327,7 +328,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AUD-10 · 🟢 · Auditoría botón por botón: Retención — verificado: e2e:retencion (plata en riesgo, listas, WhatsApp, Dice que vuelve, Cobrar, vacía, celular, recepción no); inventario en docs/paneles/retencion.md
 - [x] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia) — verificado: db (tablero-retencion: 12 semanas, la última igual a los al día de hoy, altas, recepción no), e2e:retencion
 - [ ] RET-2 · 🟡 D2 · La recepción anota contactos
-- [ ] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo
+- [x] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo — verificado: db (motivos de baja del mes), e2e:socios (con plan, “¿le ofreciste una pausa?” antes de confirmar)
 - [ ] DIS-8 · 🟢 · Pulido: Retención
 
 ### 11 · App del socio

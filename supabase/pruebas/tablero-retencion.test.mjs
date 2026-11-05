@@ -27,3 +27,11 @@ test("12 semanas; la última coincide con los al día de hoy; altas del mes", as
   assert.ok(r.altas_mes >= 1, "los socios del gimnasio de prueba se crearon hoy");
   await como(u.recepcion, () => t.falla(() => t.q(`select public.tablero_retencion($1)`, [t.g]), /permiso/i));
 });
+
+test("RET-3: motivos de baja del mes, del más común al menos", async () => {
+  const ids = (await t.q(`select id from public.socios where gimnasio_id = $1 and dado_de_baja_en is null order by numero limit 3`, [t.g])).map((r) => r.id);
+  for (const [id, m] of [[ids[0], "precio"], [ids[1], "precio"], [ids[2], "horario"]]) await t.q(`select privado.dar_de_baja($1, $2, now())`, [id, m]);
+  const [{ r }] = await como(u.dueno, () => t.q(`select public.motivos_baja_mes($1) as r`, [t.g]));
+  assert.deepEqual(r.slice(0, 2).map((x) => [x.motivo, x.cantidad]), [["precio", 2], ["horario", 1]]);
+  await como(u.recepcion, () => t.falla(() => t.q(`select public.motivos_baja_mes($1)`, [t.g]), /permiso/i));
+});

@@ -61,18 +61,35 @@ export function CambiarPlan({ socioId, actual, planes }: { socioId: string; actu
   );
 }
 
-export function DarDeBaja({ socioId }: { socioId: string }) {
+export function DarDeBaja({ socioId, ofrecePausa = false }: { socioId: string; ofrecePausa?: boolean }) {
   const [abierto, setAbierto] = useState(false);
+  // RET-3: antes de confirmar, si tiene sentido, ofrecer una pausa.
+  const [motivo, setMotivo] = useState<[string, string] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  const baja = (v: string) => empezar(async () => { const r = await darDeBaja(socioId, v); if (r.error) setError(r.error); else { setAbierto(false); setMotivo(null); } });
   if (!abierto) return <button type="button" className="boton texto-suave" onClick={() => setAbierto(true)}>👋 Dar de baja</button>;
+  if (motivo) {
+    return (
+      <div className="tarjeta p-4 w-full space-y-3" data-ofrecer-pausa>
+        <p className="font-semibold">Antes de darlo de baja: ¿le ofreciste una pausa?</p>
+        <p className="texto-suave">Si se toma un tiempo, no pierde su plan ni sus días, y es más fácil que vuelva.</p>
+        <div className="flex flex-wrap gap-2">
+          <a href="#pausa" className="boton" onClick={() => { setAbierto(false); setMotivo(null); }}>⏸️ Ofrecerle una pausa</a>
+          <button type="button" disabled={ocupado} className="boton boton-peligro" onClick={() => baja(motivo[0])}>Dar de baja igual ({motivo[1]})</button>
+          <button type="button" className="boton-texto texto-suave" onClick={() => setMotivo(null)}>Volver</button>
+        </div>
+        {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      </div>
+    );
+  }
   return (
     <div className="tarjeta p-4 w-full space-y-3">
       <p className="font-semibold">¿Por qué se va? Sirve para saber qué mejorar.</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {MOTIVOS.map(([v, t]) => (
           <button key={v} type="button" disabled={ocupado} className="boton"
-            onClick={() => empezar(async () => { const r = await darDeBaja(socioId, v); if (r.error) setError(r.error); else setAbierto(false); })}>{t}</button>
+            onClick={() => (ofrecePausa && !["mudanza", "otro_gimnasio"].includes(v) ? setMotivo([v, t]) : baja(v))}>{t}</button>
         ))}
       </div>
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}

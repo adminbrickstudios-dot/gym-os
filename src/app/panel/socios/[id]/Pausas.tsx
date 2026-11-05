@@ -37,7 +37,7 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
 
   if (!p.suscripcion_id && p.pausas.length === 0 && p.pedidos.length === 0) return null;
   return (
-    <div className="tarjeta p-6 sm:col-span-2 space-y-4 min-w-0" data-pausas={p.pausas.filter((x) => x.estado !== "anulada").length} data-pedidos={p.pedidos.length}>
+    <div id="pausa" className="tarjeta p-6 sm:col-span-2 space-y-4 min-w-0 scroll-mt-6" data-pausas={p.pausas.filter((x) => x.estado !== "anulada").length} data-pedidos={p.pedidos.length}>
       <div>
         <p className="titulo text-2xl">⏸️ Pausas</p>
         <p className="texto-suave mt-1">

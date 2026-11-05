@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RET-3 · Antes de la baja, ofrecer pausa
+
+**QUÉ HICE**
+- Ficha → Dar de baja: después de elegir el motivo, si tiene plan (y no se mudó ni se va a otro gimnasio): "Antes de darlo de baja: ¿le ofreciste una pausa?" con "⏸️ Ofrecerle una pausa" (lleva a Pausas de la ficha) o "Dar de baja igual".
+- Resultado: "Por qué se fueron" del mes.
+- Migración 0089 (`motivos_baja_mes`), prueba en `tablero-retencion`, paso en `e2e:socios`.
+
+---
+
 ## 2026-11-05 · RET-1 · Tablero de retención
 
 **QUÉ HICE**

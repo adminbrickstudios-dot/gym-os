@@ -15,6 +15,7 @@ type Resultado = {
   por_dia: { dia: string; total: number }[]; activos: number; altas: number; bajas: number; recurrente: number; horas: number[];
 };
 
+const MOTIVO_BAJA: Record<string, string> = { precio: "💸 Precio", horario: "⏰ Horario", mudanza: "📦 Se mudó", otro_gimnasio: "🏋️ Otro gimnasio", sin_tiempo: "⌛ Sin tiempo", insatisfecho: "😕 No le gustó", otro: "Otro" };
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const nombreMes = (d: string) => `${MESES[Number(d.slice(5, 7)) - 1]} ${d.slice(0, 4)}`;
 const moverMes = (d: string, n: number) => { const x = new Date(Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1 + n, 1)); return x.toISOString().slice(0, 10); };
@@ -26,10 +27,12 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const [r, gastos] = await Promise.all([
+    const [r, gastos, motivos] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
       panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
+      // RET-3: por qué se fue la gente este mes.
+      rpc<{ motivo: string; cantidad: number }[]>("motivos_baja_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
     ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
@@ -106,6 +109,15 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             )}
           </section>
         </div>
+
+        {motivos.length > 0 && (
+          <section aria-labelledby="motivos" data-motivos-baja>
+            <h2 id="motivos" className="titulo text-2xl mb-3">Por qué se fueron</h2>
+            <ul className="tarjeta divide-y divide-[var(--borde)]">{motivos.map((m) => (
+              <li key={m.motivo} className="flex justify-between gap-3 px-4 py-3"><span>{MOTIVO_BAJA[m.motivo] ?? m.motivo}</span><span className="numero">{m.cantidad}</span></li>
+            ))}</ul>
+          </section>
+        )}
 
         {gastos && <Gastos g={gastos} />}
 
