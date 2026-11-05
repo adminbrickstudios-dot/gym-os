@@ -22,7 +22,7 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 | Aviso de apto | Si el gimnasio pide apto y no lo presentó o venció: "🩺 …" en amarillo. No frena. | ✅ (nuevo, AUD-4) | — | `apto_socio`, Reglas | Sí (Reglas → Pedir apto) |
 | ✅ Anotar entrada | Anota y muestra "Entró <nombre>". Repetido en el momento: "ya estaba anotado". | ✅ | — | `registrar_ingreso` | Reingreso (Reglas) |
 | ↩️ Deshacer | Después de anotar: la anula ("Anotada por error"). La recepción, dentro de los 5 minutos. | ✅ (nuevo, AUD-4) | — | `anular_ingreso` | — |
-| 💵 Cobrar | Rojo o amarillo: abre Vender con el socio. | ✅ | Con la cuota del plan ya en el carrito (como el alta, SOC-13) | Vender | Se va con Vender apagado |
+| 💵 Cobrar | Rojo: abre Vender con el socio y, si debe, la cuota de su plan ya en el carrito; después de cobrar, "🚪 Volver a la entrada con …" abre su veredicto nuevo. (ENT-9) | ✅ | — | Vender | Se va con Vender apagado |
 | 🏃 Volvió antes | En pausa: en vez de Cobrar, termina la pausa hoy y el veredicto se actualiza. | ✅ (nuevo, AUD-4) | Si la pausa empezó hoy, la base pide anularla (lo hace dueño o encargado) | `descongelar` | — |
 | 🚪 Dejar pasar igual | Motivos frecuentes de un toque o texto libre; lo anota como "Lo dejaron pasar". La recepción tiene un tope por día (dice cuántos le quedan); a suspendidos y dados de baja solo los deja pasar el dueño o el encargado. Lo controla la base. (ENT-4, D1) | ✅ | — | `registrar_ingreso`, `cupo_dejar_pasar` | Sí (Reglas → tope) |
 | 👤 Ver ficha · ✕ Otro socio | Abre la ficha; vuelve a buscar. | ✅ | — | Ficha | — |

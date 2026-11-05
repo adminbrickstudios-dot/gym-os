@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-9 · Cobrar desde la Entrada, con la cuota cargada
+
+**QUÉ HICE**
+- "💵 Cobrar" en el veredicto rojo abre Vender con el socio y, si debe, la cuota de su plan ya en el carrito.
+- Después de cobrar, "🚪 Volver a la entrada con …" abre la Entrada con su veredicto nuevo (`/panel/entrada?socio=`), listo para Enter.
+- Sin migración. `scripts/e2e/ent-9.mjs` (4 pasos: alta con plan sin pagar → no entra → Cobrar → transferencia → vuelve verde → Enter).
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se hizo clic de punta a punta.
+
+---
+
 ## 2026-11-05 · ENT-6, ENT-7, INV-1 · QR en la tablet, llavero e invitados
 
 **QUÉ HICE**

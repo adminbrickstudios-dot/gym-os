@@ -32,7 +32,9 @@ const ES_QR = /^GYMOS1\./;
 
 const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
 
-export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false }: { sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean }) {
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null }: {
+  sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null;
+}) {
   const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
@@ -52,7 +54,13 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   useEffect(() => { try { setSonido(localStorage.getItem(CLAVE_SONIDO) !== "no"); } catch { /* sin almacenamiento */ } }, []);
   const cambiarSonido = () => setSonido((x) => { try { localStorage.setItem(CLAVE_SONIDO, x ? "no" : "si"); } catch { /* sin almacenamiento */ } return !x; });
 
-  useEffect(() => { campo.current?.focus(); }, []);
+  // Volviendo de cobrar (ENT-9): abre el veredicto nuevo de ese socio.
+  const abrioInicial = useRef(false);
+  useEffect(() => {
+    campo.current?.focus();
+    if (socioInicial && !abrioInicial.current) { abrioInicial.current = true; elegir(socioInicial); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
     const t = setTimeout(async () => {
@@ -210,7 +218,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
                 {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
                 {v.motivo === "congelada"
                   ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
-                  : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
+                  : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
                 {/* D1: a un suspendido o dado de baja lo deja pasar el dueño o el encargado (la base lo frena igual). */}
                 {!forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
                   ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>

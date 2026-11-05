@@ -17,8 +17,8 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false }: {
-  sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean;
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false }: {
+  sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
@@ -90,9 +90,11 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         <div className="flex flex-wrap gap-2 mt-8">
-          <button type="button" className="boton boton-principal" onClick={() => { setVenta(null); setSocio(null); setBuscando(true); }}>🛒 Nueva venta</button>
+          {/* Vino de la Entrada (ENT-9): vuelve con el socio y su veredicto nuevo, para anotarlo. */}
+          {desdeEntrada && socio && <LinkPanel href={`/panel/entrada?socio=${socio.socio_id}`} className="boton boton-principal">🚪 Volver a la entrada con {socio.nombre.split(" ")[0]}</LinkPanel>}
+          <button type="button" className={`boton ${desdeEntrada && socio ? "" : "boton-principal"}`} onClick={() => { setVenta(null); setSocio(null); setBuscando(true); }}>🛒 Nueva venta</button>
           {socio && <LinkPanel href={`/panel/socios/${socio.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>}
-          <LinkPanel href="/panel/entrada" className="boton">🚪 Ir a la entrada</LinkPanel>
+          {!(desdeEntrada && socio) && <LinkPanel href="/panel/entrada" className="boton">🚪 Ir a la entrada</LinkPanel>}
         </div>
       </section>
     );

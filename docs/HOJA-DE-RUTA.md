@@ -237,7 +237,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ENT-7 · 🟢 · Llavero o tarjeta con lector USB (A5)
 - [x] INV-1 · 🟢 · Invitados y pases de cortesía con DNI y límite
 - [ ] ENT-8 · 🟢 · Control de "dejar pasar": a quién, quién y por qué, por día y semana
-- [ ] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
+- [x] ENT-9 · 🟢 · Cobrar desde la Entrada con la cuota ya en el carrito
 - [ ] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
