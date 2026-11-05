@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-13 · Alta en un paso: datos, plan y cobrar
+
+**QUÉ HICE**
+- "Nuevo socio" suma "🏷️ Plan" (las membresías activas, con precio). Con plan elegido aparecen "✅ Dar de alta y cobrar" (va a Vender con el socio y la primera cuota ya en el carrito) y "Solo dar de alta" (queda con el plan asignado). Sin plan, el botón de siempre. Si Vender está apagado o el rol no lo ve, no aparece "cobrar".
+- Si el plan no se puede asignar, el socio igual queda dado de alta y la ficha lo avisa ("asignalo con 🏷️ Asignar plan"). Funciona también desde "Hacerlo socio" de Prospectos.
+- Sin migración (usa `guardar_socio` y `asignar_plan`). `scripts/e2e/soc-13.mjs` (4 pasos, celular); pasan soc-10 y pag-3.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que alta y plan sean una sola transacción: son dos llamadas. Si la segunda falla, queda el socio sin plan y se avisa (no se duplica).
+
+---
+
 ## 2026-11-05 · SOC-12 · Filtros de Socios por estado y plan
 
 **QUÉ HICE**

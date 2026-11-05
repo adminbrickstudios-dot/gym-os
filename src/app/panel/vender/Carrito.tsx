@@ -17,12 +17,14 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales }: {
-  sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta;
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false }: {
+  sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
-  const [lineas, setLineas] = useState<Linea[]>([]);
+  // Recién dado de alta con plan (SOC-13): arranca con la primera cuota en el carrito.
+  const [lineas, setLineas] = useState<Linea[]>(() => conCuota && preciosIniciales.cuota
+    ? [{ clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${preciosIniciales.cuota.plan}`, precios: preciosIniciales.cuota.precios, cantidad: 1 }] : []);
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
   const medios = MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio));
   const [medio, setMedio] = useState<Medio | null>(medios[0]?.medio ?? null);

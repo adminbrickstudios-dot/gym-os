@@ -12,6 +12,9 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   const datos = Object.fromEntries(CAMPOS.map((c) => [c, String(form.get(c) ?? "").trim()]));
   // Los teléfonos van como los escribió (387 15 555-1234, 011…): los normaliza la base.
   const prospecto = socioId ? "" : String(form.get("prospecto") ?? "");
+  // Alta en un paso (SOC-13): el plan y, si se eligió, ir directo a cobrar.
+  const plan = socioId ? "" : String(form.get("plan_id") ?? "");
+  const cobrar = !!plan && form.get("despues") === "cobrar";
   let id: string;
   try {
     id = await rpc<string>("guardar_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: socioId, p_datos: datos });
@@ -25,8 +28,15 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   }
   // Desde un prospecto se va directo a la ficha desde el servidor: la página del alta
   // ya no sirve (el prospecto pasó a socio) y volver a dibujarla daría error.
-  if (prospecto) redirect(`/panel/socios/${id}`);
-  return { destino: `/panel/socios/${id}` };
+  // El socio ya quedó dado de alta: si el plan no se pudo asignar, se sigue en la ficha (ahí se asigna).
+  let conPlan = false;
+  if (plan) {
+    try { await rpc("asignar_plan", { p_socio_id: id, p_plan_id: plan }); conPlan = true; revalidatePath(`/panel/socios/${id}`); }
+    catch { conPlan = false; }
+  }
+  const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;
+  if (prospecto) redirect(destino);
+  return { destino };
 }
 
 export async function asignarPlan(socioId: string, planId: string, cambiar: boolean): Promise<{ error?: string }> {

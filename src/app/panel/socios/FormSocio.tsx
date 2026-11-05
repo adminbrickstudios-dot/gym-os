@@ -3,6 +3,9 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { guardarSocio, type EstadoForm } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { formatearPesos } from "@/lib/formato";
+
+export type PlanAlta = { plan_id: string; nombre: string; precio: number | null };
 
 type Socio = Partial<Record<"nombre" | "apellido" | "dni" | "telefono" | "email" | "fecha_nacimiento" | "contacto_emergencia_nombre" | "contacto_emergencia_telefono" | "notas" | "responsable_nombre" | "responsable_telefono", string | null>>;
 
@@ -23,7 +26,10 @@ function esMenor(nacimiento: string) {
   return cumple18 > hoy;
 }
 
-export function FormSocio({ socioId, socio, prospectoId }: { socioId: string | null; socio?: Socio; prospectoId?: string }) {
+export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobrar = false }: {
+  socioId: string | null; socio?: Socio; prospectoId?: string; planes?: PlanAlta[]; puedeCobrar?: boolean;
+}) {
+  const [plan, setPlan] = useState("");
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
   useEffect(() => { if (estado.destino) router.push(estado.destino); }, [estado.destino, router]);
@@ -61,9 +67,23 @@ export function FormSocio({ socioId, socio, prospectoId }: { socioId: string | n
         <textarea name="notas" defaultValue={socio?.notas ?? ""} className="campo" placeholder="Horario que prefiere, objetivo…" />
         <span className="block text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</span>
       </label>
+      {!socioId && planes.length > 0 && (
+        <fieldset className="space-y-2" data-plan-alta>
+          <legend className="titulo text-2xl mb-2">🏷️ Plan</legend>
+          <select name="plan_id" value={plan} onChange={(e) => setPlan(e.target.value)} className="campo" aria-label="Plan">
+            <option value="">Sin plan por ahora (viene con pase o pack)</option>
+            {planes.map((p) => <option key={p.plan_id} value={p.plan_id}>{p.nombre}{p.precio != null ? ` · ${formatearPesos(p.precio)}` : ""}</option>)}
+          </select>
+        </fieldset>
+      )}
       {estado.error && <Mensaje tipo="error">{estado.error}</Mensaje>}
-      <div className="flex gap-2">
-        <button type="submit" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</button>
+      <div className="flex flex-wrap gap-2">
+        {!socioId && plan && puedeCobrar
+          ? <>
+              <button type="submit" name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "✅ Dar de alta y cobrar"}</button>
+              <button type="submit" disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</button>
+            </>
+          : <button type="submit" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</button>}
         <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
       </div>
     </form>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
-import { FormSocio } from "../FormSocio";
+import { FormSocio, type PlanAlta } from "../FormSocio";
+import { rutaDisponible } from "@/lib/panel/secciones";
 
 export const metadata: Metadata = { title: "Nuevo socio" };
 
@@ -20,10 +21,13 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
       : null;
     if (prospectoId && !prospecto) throw new Error("Ese prospecto no existe o ya es socio. Volvé a Prospectos.");
     const [nombre, ...resto] = (prospecto?.nombre ?? "").split(" ");
+    const planes = (await rpc<(PlanAlta & { tipo: string; activo: boolean })[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }))
+      .filter((p) => p.tipo === "membresia" && p.activo);
+    const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
     return (
       <>
         <Encabezado emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
-        <FormSocio socioId={null} prospectoId={prospecto?.id} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono } : undefined} />
+        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono } : undefined} />
       </>
     );
   });
