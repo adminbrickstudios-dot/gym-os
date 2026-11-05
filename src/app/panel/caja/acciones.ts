@@ -1,4 +1,5 @@
 "use server";
+import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
 import { rpc } from "@/lib/panel/servidor";
@@ -29,6 +30,7 @@ export async function moverCaja(turnoId: string, tipo: "ingreso" | "retiro", mon
   try {
     const id = await rpc<string>("movimiento_caja", { p_turno_id: turnoId, p_tipo: tipo, p_monto: num(monto), p_motivo: motivo });
     revalidatePath("/panel/caja");
+    if (tipo === "retiro") notificarDespues("caja_retiro", id);   // PUSH-1
     // CAJ-4: la foto del ticket va después (la base arma la ruta); si falla, el retiro ya quedó anotado.
     if (conFoto) {
       const ext = foto.type === "image/png" ? "png" : foto.type === "image/webp" ? "webp" : "jpg";
@@ -62,6 +64,7 @@ export async function cerrarCaja(turnoId: string, contado: string, nota: string)
     // Sin revalidar: si la página se vuelve a pintar, el turno ya cerrado desaparece
     // antes de que se vea el resultado del arqueo. La pantalla refresca al tocar "Listo".
     const resumen = await rpc<Resumen>("cerrar_caja", { p_turno_id: turnoId, p_monto_contado: num(contado), p_nota: nota || null });
+    notificarDespues("caja_diferencia", turnoId);   // PUSH-1: la base decide si hubo diferencia
     return { resumen };
   } catch (e) { return { error: (e as Error).message }; }
 }

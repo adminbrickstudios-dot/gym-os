@@ -1,4 +1,5 @@
 "use server";
+import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { rpc } from "@/lib/panel/servidor";
 
@@ -18,7 +19,7 @@ export async function anularVenta(ventaId: string, motivo: string, socioId?: str
 
 /** La recepción la pide (ventas suyas de hoy). */
 export async function pedirAnulacion(ventaId: string, motivo: string): Promise<{ error?: string }> {
-  try { await rpc("pedir_anulacion", { p_venta_id: ventaId, p_motivo: motivo }); refrescar(); return {}; }
+  try { notificarDespues("pedido_anulacion", await rpc<string>("pedir_anulacion", { p_venta_id: ventaId, p_motivo: motivo })); refrescar(); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
 

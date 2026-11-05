@@ -4,6 +4,7 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MarcarLeidas } from "./Leidos";
+import { ActivarPush } from "@/components/ActivarPush";
 
 export const metadata: Metadata = { title: "Novedades" };
 type Item = { clave: string; emoji: string; titulo: string; detalle: string | null; href: string; en: string | null; leido: boolean };
@@ -40,6 +41,11 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
             ))}
           </ul>
         )}
+        <section className="tarjeta p-5 space-y-3" aria-labelledby="push">
+          <h2 id="push" className="titulo text-xl">🔔 Que me lleguen al celular</h2>
+          <p className="texto-suave">Cuando aprueben tu pago o se cancele una clase tuya, te llega un aviso aunque no tengas la app abierta.</p>
+          <ActivarPush />
+        </section>
       </div>
     );
   });

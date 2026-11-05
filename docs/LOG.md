@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · PUSH-1 · Notificaciones push
+
+**QUÉ HICE**
+- Mi cuenta (dueño, encargado, recepción) y Novedades en la app del socio: "🔔 Activar en este dispositivo", qué recibir (según el rol), "Mandarme una de prueba" y "Apagar". Sin soporte, sin claves o en un iPhone sin instalar, lo dice (en iPhone: Compartir → Agregar a inicio).
+- Llegan: comprobante para revisar, pago aprobado/rechazado (socio), caja con diferencia, retiros, pedido de anular, clase cancelada (socios anotados). A quién y con qué texto lo decide la base (`destinos_push`, solo con la clave de servicio); cada hecho se manda una vez; un dispositivo dado de baja por el navegador se borra solo.
+- `public/sw.js` (muestra la notificación y al tocarla abre la pantalla), `manifest.webmanifest` con el nombre y colores del gimnasio (para instalar la app).
+- Migración 0075, prueba de base `push`, `src/lib/push.test.ts` (un "navegador" descifra lo que arma el servidor y se verifica la firma VAPID), e2e `e2e:push-1`. Dependencia nueva: `web-push`.
+
+**QUÉ CONFIGURÁS VOS**
+- Generar las claves una vez: `npx web-push generate-vapid-keys`.
+- En Vercel (Production y Preview): `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (la pública), `VAPID_PRIVATE_KEY` (la privada), `VAPID_SUJETO=mailto:<tu mail>`. Después, redeploy. Sin ellas, la pantalla dice "todavía no están configuradas" y no se manda nada.
+
+**LO QUE NO PUDE VERIFICAR**
+- La entrega real a un navegador: desde acá no se llega al servicio de push de Chrome/Firefox/Apple. El código está escrito según la documentación de web-push, el cifrado y la firma están probados, pero la entrega no está ejecutada. Para probarla: activarlas en Mi cuenta desde Chrome y tocar "Mandarme una de prueba".
+
+---
+
 ## 2026-11-05 · AVI-6 · Resumen del dueño, del día y de la semana
 
 **QUÉ HICE**

@@ -1,4 +1,5 @@
 "use server";
+import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { clienteServicio } from "@/lib/supabase/servicio";
@@ -22,11 +23,11 @@ export async function verComprobante(pagoId: string): Promise<{ url?: string; er
 }
 
 export async function aprobar(pagoId: string): Promise<{ error?: string }> {
-  try { await rpc("aprobar_pago", { p_pago_id: pagoId }); revalidatePath("/panel/transferencias"); revalidatePath("/panel"); return {}; }
+  try { await rpc("aprobar_pago", { p_pago_id: pagoId }); notificarDespues("pago_resuelto", pagoId); revalidatePath("/panel/transferencias"); revalidatePath("/panel"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
 
 export async function rechazar(pagoId: string, motivo: string): Promise<{ error?: string }> {
-  try { await rpc("rechazar_pago", { p_pago_id: pagoId, p_motivo: motivo }); revalidatePath("/panel/transferencias"); return {}; }
+  try { await rpc("rechazar_pago", { p_pago_id: pagoId, p_motivo: motivo }); notificarDespues("pago_resuelto", pagoId); revalidatePath("/panel/transferencias"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
