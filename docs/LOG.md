@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-14 · Inicio de cada rol, botón por botón
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/inicio.md` y `e2e:inicio`: los cuatro roles abren Inicio (saludo, 4 números, "Ahora y lo que sigue") y cada acceso rápido abre su pantalla sin error; la dueña elige accesos.
+- **Encontrado**: los socios que piden la baja desde la app (APP-8) estaban en la campana y en la ficha, pero no en Inicio (donde están las pausas para aprobar y las ventas para anular). Ahora "👋 Pidieron la baja" con el motivo, para dueño, encargado y recepción. Migración 0106 (`pedidos_baja_pendientes`), caso nuevo en `pedidos-socio`.
+
+---
+
 ## 2026-11-05 · RUT-3 · Marcas personales y progreso
 
 **QUÉ HICE**

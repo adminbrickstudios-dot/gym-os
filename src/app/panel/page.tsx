@@ -34,13 +34,15 @@ type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumpl
 type InvitadoHoy = { id: string; nombre: string; socio: string; entro_en: string | null };
 type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string };
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
+type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo: string; nota: string | null; pedido_en: string };
+const MOTIVO_BAJA: Record<string, string> = { precio: "el precio", horario: "los horarios", mudanza: "se muda", otro_gimnasio: "otro gimnasio", sin_tiempo: "no tiene tiempo", insatisfecho: "no le gustó", otro: "otra cosa" };
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
 export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -61,6 +63,8 @@ export default async function Inicio() {
       (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpc<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
       // CAJ-5: cajas que quedaron abiertas (al dueño y al encargado todas; a la recepción las suyas).
       rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpc<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // AUD-14: los que pidieron la baja desde la app (APP-8).
+      rol !== "profe" ? rpc<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
@@ -199,6 +203,26 @@ export default async function Inicio() {
           <section aria-labelledby="pedidos-anulacion" data-pedidos-anulacion={anular.length}>
             <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4">↩️ Ventas para anular</h2>
             <ul className="space-y-2">{anular.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} conSocio />)}</ul>
+          </section>
+        )}
+
+        {pedidosBaja.length > 0 && (
+          <section aria-labelledby="pedidos-baja" data-pedidos-baja-inicio={pedidosBaja.length}>
+            <h2 id="pedidos-baja" className="titulo text-3xl mb-1">👋 Pidieron la baja</h2>
+            <p className="texto-suave mb-4">Desde la app. Hablales antes: a veces una pausa o un cambio de plan alcanza.</p>
+            <ul className="space-y-2">
+              {pedidosBaja.map((x) => (
+                <li key={x.pedido_id}>
+                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-lg truncate">{x.nombre}</span>
+                      <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}</span>
+                    </span>
+                    <span className="texto-suave">Resolver</span>
+                  </LinkPanel>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

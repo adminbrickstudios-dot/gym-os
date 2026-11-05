@@ -358,7 +358,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] RUT-3 · 🟢 · Marcas personales y progreso — verificado: db (rutina-socio: la marca es el mayor peso, el progreso, el profe lo ve, otro socio no), e2e:rut-2 (pendiente de la tanda final)
 
 ### 14 · Inicio (al final: junta todo lo anterior)
-- [ ] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol
+- [x] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol — verificado: e2e:inicio (pendiente de la tanda final), db (pedidos-socio: bajas pendientes); inventario en docs/paneles/inicio.md
 - [ ] DIS-1 · 🟢 · Pulido: Inicio
 
 ### 15 · Super admin y plataforma

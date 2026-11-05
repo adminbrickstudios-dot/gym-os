@@ -72,3 +72,11 @@ test("baja: el socio la pide con motivo; campana; la recepción resuelve 'se que
   const [s] = await t.q(`select dado_de_baja_en is not null as b, motivo_baja from public.socios where id = $1`, [socio]);
   assert.equal(s.b, true); assert.equal(s.motivo_baja, "mudanza");
 });
+
+test("AUD-14: los pedidos de baja pendientes, para Inicio (la recepción también; el socio no)", async () => {
+  const [{ id: s2 }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido, usuario_id) values ($1,'Se','Va',$2) returning id`, [t.g, uOtro]);
+  await como(uOtro, () => t.q(`select public.pedir_baja_socio($1, 'horario', 'No llego')`, [s2]));
+  const [{ p }] = await como(uRec, () => t.q(`select public.pedidos_baja_pendientes($1) p`, [t.g]));
+  assert.ok(p.some((x) => x.socio_id === s2 && x.motivo === "horario" && x.nota === "No llego"));
+  await como(uOtro, () => t.falla(() => t.q(`select public.pedidos_baja_pendientes($1)`, [t.g]), /permiso|equipo|acceso/i));
+});
