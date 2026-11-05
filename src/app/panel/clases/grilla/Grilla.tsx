@@ -13,6 +13,8 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [nueva, setNueva] = useState({ nombre: "", emoji: "" });
+  // AUD-9: confirmar sin el diálogo del navegador (se ve feo y frena todo): el botón pasa a "¿Sacar? Sí / No".
+  const [sacando, setSacando] = useState<string | null>(null);
   const activas = actividades.filter((a) => a.activa);
   const [h, setH] = useState({ sede: sedes[0]?.id ?? "", actividad: activas[0]?.actividad_id ?? "", dia: 1, hora: "19:00", duracion: 60, cupo: "", profe: "" });
   const correr = (f: () => Promise<{ error?: string }>, despues?: () => void) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) despues?.(); });
@@ -53,8 +55,16 @@ export function Grilla({ actividades, horarios, sedes, profes }: { actividades: 
                       <span className="block font-semibold truncate">{x.actividad}</span>
                       <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}</span>
                     </span>
-                    <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
-                      onClick={() => { if (confirm(`¿Sacar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}? Las clases desde hoy se cancelan y se avisa a los anotados.`)) correr(() => cerrarHorario(x.horario_id)); }}>Sacar</button>
+                    {sacando === x.horario_id ? (
+                      <span className="flex flex-wrap items-center gap-2" role="group" aria-label="Confirmar">
+                        <span className="text-sm texto-suave">Se cancelan las clases desde hoy y se avisa a los anotados.</span>
+                        <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado} onClick={() => correr(() => cerrarHorario(x.horario_id), () => setSacando(null))}>Sí, sacar</button>
+                        <button type="button" className="boton boton-chico" onClick={() => setSacando(null)}>No</button>
+                      </span>
+                    ) : (
+                      <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => setSacando(x.horario_id)}
+                        aria-label={`Sacar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}`}>Sacar</button>
+                    )}
                   </li>
                 ))}
               </ul>

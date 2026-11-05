@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-9 · Auditoría de Clases
+
+**QUÉ HICE**
+- Inventario botón por botón en `docs/paneles/clases.md`.
+- Arreglado: "Sacar" un horario usaba el diálogo del navegador (`confirm`). Ahora confirma en pantalla con "Sí, sacar / No" y dice qué pasa.
+- `loading.tsx` con la forma real en el día, la lista y la grilla (no tenían).
+- `scripts/e2e/panel-clases.mjs` (`e2e:clases`): días, presente desde la búsqueda, grilla (actividad, horario, sacar) y el profe en el celular. Si aparece un diálogo del navegador, falla.
+- A la cola: CLA-8 (editar actividades y horarios sin sacarlos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- CLA-3 dice que la recepción también cancela clases. Hoy la base no la deja (dueño, encargado y profe). Toca permisos: no lo cambié. Queda anotado para CLA-3.
+
+---
+
 ## 2026-11-05 · PAY-1 · Pagos online listos para MercadoPago
 
 **QUÉ HICE**

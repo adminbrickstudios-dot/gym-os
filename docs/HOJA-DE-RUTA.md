@@ -307,7 +307,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] PAY-1 · 🟢 · Pagos online listos para MercadoPago: proveedor por gimnasio, "Pagar ahora" en la app y en el alta, webhook firmado e idempotente, probado con eventos simulados firmados (`docs/producto/05-ALTA-Y-PAGOS.md`) — verificado: db (pagos-online: conectar solo el dueño y en Vault, el socio inicia y se reusa, acredita con monto exacto una vez, evento repetido reconocido, solo la clave de servicio acredita), e2e:pay-1 con el simulador de MercadoPago (conecta, paga, vuelve “¡Pago acreditado!”, aviso repetido no acredita dos veces, firma inválida 401). Sin verificar: contra MercadoPago real (MP-1)
 
 ### 9 · Clases
-- [ ] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades)
+- [x] AUD-9 · 🟢 · Auditoría botón por botón: Clases (día, lista, grilla, actividades) — verificado: e2e:clases (días, presente desde la búsqueda, grilla: actividad, horario y sacar con confirmación en pantalla, profe sin grilla, celular); inventario en docs/paneles/clases.md
 - [ ] CLA-1 · 🟡 D16 · Políticas de reserva y faltas
 - [ ] CLA-2 · 🟢 · Turnos fijos (abono a un horario)
 - [ ] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados
@@ -315,6 +315,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] CLA-5 · 🟢 · Ocupación por horario
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
 - [ ] CLA-7 · 🟢 · Anular un presente marcado por error
+- [ ] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9)
 - [ ] DIS-9 · 🟢 · Pulido: Clases
 
 ### 10 · Retención
@@ -611,6 +612,7 @@ LISTO SI: e2e: rojo → Cobrar → cobrar en efectivo → vuelve verde y "Anotar
 **CLA-3.** El profe o la recepción cancela una clase con motivo: los anotados ven "cancelada" en la app y aparecen en la bandeja de avisos con el mensaje armado; los packs no se descuentan.
 **CLA-4.** WOD / rutina del día cargado por el profe en la clase; lo ven los anotados en la app.
 **CLA-5.** Ocupación: % por horario de la semana (mapa de calor), para decidir horarios.
+**CLA-8.** (de AUD-9) Actividades: cambiar nombre y emoji, y apagarla (sus horarios dejan de generar clases). Horarios: cambiar hora, duración, cupo y profe desde la grilla; lo que cambia vale desde la próxima clase sin reservas tomadas, y si una clase ya tiene reservas y baja el cupo, los que sobran pasan a espera con aviso. LISTO SI: prueba de base (cambio de cupo con reservas) y e2e.
 **CLA-6.** Clase de prueba: un prospecto (PAG-3) reserva una clase gratis una vez, con cupo, sin ser socio.
 **RUT-1.** Biblioteca de ejercicios del gimnasio (nombre, grupo muscular, video opcional por link) y rutinas plantilla (días, ejercicios, series, repeticiones).
 **RUT-2.** Asignar rutina a un socio; en la app la ve por día y anota peso y repeticiones (peso levantado sí se guarda; nada de salud).
