@@ -17,10 +17,6 @@ on:
         type: boolean
         default: true
 
-concurrency:
-  group: pruebas-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[pantallas]') }}
-  cancel-in-progress: true
-
 env:
   PGHOST: localhost
   PGPORT: "5432"
@@ -30,6 +26,10 @@ jobs:
   base:
     name: Base (migraciones, pruebas y chequeos)
     runs-on: ubuntu-latest
+    # Un push nuevo cancela la base del anterior (solo importa la última).
+    concurrency:
+      group: base-${{ github.ref }}
+      cancel-in-progress: true
     timeout-minutes: 30
     services:
       postgres:
@@ -56,7 +56,10 @@ jobs:
 
   pantallas:
     name: Pantallas (e2e y barrido)
-    needs: base
+    # Las pantallas no se cancelan con un push normal: hacen cola.
+    concurrency:
+      group: pantallas-${{ github.ref }}
+      cancel-in-progress: false
     if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
     runs-on: ubuntu-latest
     timeout-minutes: 180
