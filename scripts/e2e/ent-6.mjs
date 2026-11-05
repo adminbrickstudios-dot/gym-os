@@ -56,7 +56,7 @@ try {
   chequear(await res.getAttribute("data-resultado-escaneo") === "entro", `el socio escanea y entra: “${(await res.innerText()).replace(/\s+/g, " ").slice(0, 60)}”`, `dice: ${await res.innerText()}`);
   await capturar(s, "ent6-celu-app");
   const pasa = t.locator("[data-kiosco-resultado]");
-  await pasa.waitFor({ timeout: 15000 });
+  await pasa.waitFor({ timeout: 30000 });   // la tablet pregunta cada pocos segundos; con la compu cargada tarda más
   chequear(/¡Pasá, Testigo!/.test(await pasa.innerText()), "la tablet muestra “¡Pasá, Testigo!”", `la tablet dice: ${await pasa.innerText()}`);
   if (s.errores.length) falla(`socio: ${s.errores.join(" | ")}`);
 

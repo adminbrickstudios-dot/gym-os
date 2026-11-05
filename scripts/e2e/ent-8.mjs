@@ -36,7 +36,7 @@ try {
   chequear(await d.locator("[data-por-persona] li").count() >= 1, "la cuenta por persona del equipo", "no hay cuenta por persona");
   await capturar(d, "ent8-compu-control");
   const semana = await d.locator("[data-semana]").getAttribute("data-semana");
-  await d.locator('a:has-text("Anterior")').click();
+  await d.locator('nav[aria-label="Semana"] a:has-text("Anterior")').first().click();
   await d.waitForFunction((s) => document.querySelector("[data-semana]")?.getAttribute("data-semana") !== s, semana, { timeout: 30000 });
   ok("◀ Anterior muestra la semana de antes");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
