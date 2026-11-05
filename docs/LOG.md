@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-3 · Pulido: Socios
+
+**QUÉ HICE**
+- Medí cada pantalla de Socios (lista, filtro, ficha y sus 4 pestañas, editar, nuevo, importar, duplicados) con la dueña, en compu y en el celular: ninguna desbordaba, ningún botón bajo 44 px, como mucho un verde.
+- Celular: Importar, Duplicados y Exportar pasaron a "⋯ Más". La búsqueda subió de ~400 a ~317 px. En compu siguen a la vista.
+- "← Socios" / "← Ficha del socio" arriba en Nuevo, Editar, Importar y Duplicados (`Encabezado` suma `volver`).
+- `loading.tsx` con la forma real en la lista, la ficha, nuevo, editar, importar, duplicados y el reglamento aceptado. Antes usaban el genérico del panel.
+- Capturas en `.local/capturas/dis3-antes-*` y `dis3-despues-*`. `scripts/e2e/dis-3.mjs` (10 pasos). Pasan soc-1, soc-4 y soc-8, ahora con `:visible` porque los botones están dos veces en la página.
+
+**SIN ARREGLAR**
+- Los celulares se muestran crudos (+5490002000160). Un formato lindo necesita saber dónde termina la característica, que en Argentina varía. Queda para después.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se midió.
+
+---
+
 ## 2026-11-05 · SOC-15 · Los avisos por WhatsApp de un menor van al responsable
 
 **QUÉ HICE**

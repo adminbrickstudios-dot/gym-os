@@ -26,7 +26,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
     return (
       <>
-        <Encabezado emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
+        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
         <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono } : undefined} />
       </>
     );

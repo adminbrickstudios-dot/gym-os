@@ -216,7 +216,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-13 · 🟢 · Alta en un paso: datos, plan y "Guardar y cobrar"
 - [x] SOC-14 · 🟢 · La ficha dice cómo llegó y qué reglamento aceptó
 - [x] SOC-15 · 🟢 · Los avisos por WhatsApp de un menor van al responsable
-- [ ] DIS-3 · 🟢 · Pulido: Socios
+- [x] DIS-3 · 🟢 · Pulido: Socios
 
 ### 4 · Entrada
 - [ ] AUD-4 · 🟢 · Auditoría botón por botón: Entrada

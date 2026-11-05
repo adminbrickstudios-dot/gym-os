@@ -14,7 +14,7 @@ try {
   const filas = p.locator('main ul a[href^="/panel/socios/"]');
   await filas.first().waitFor({ timeout: 30000 });
   const enLista = await filas.count();
-  const [descarga] = await Promise.all([p.waitForEvent("download", { timeout: 30000 }), p.locator('main a:has-text("Exportar")').click()]);
+  const [descarga] = await Promise.all([p.waitForEvent("download", { timeout: 30000 }), p.locator('main a:visible:has-text("Exportar")').click()]);
   const texto = readFileSync(await descarga.path(), "utf8");
   const lineas = texto.trim().split(/\r\n/);
   chequear(texto.startsWith("﻿") && lineas[0].replace("﻿", "").startsWith("Número;Nombre;Apellido;DNI;Celular"), `CSV para Excel: ${descarga.suggestedFilename()}`, `encabezado: ${lineas[0]}`);

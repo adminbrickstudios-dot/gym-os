@@ -46,15 +46,29 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     return (
       <>
         <Encabezado emoji="👥" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
-          accion={<div className="flex flex-wrap gap-2">
-            <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>
-            {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar</Link>}
-            {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/duplicados" className="boton">🔎 Duplicados</Link>}
-            {panel.yo.rol !== "recepcion" && filas.length > 0 && (
-              // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
-              <a href={`/panel/socios/exportar${con({ estado: null, plan: null }).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>
-            )}
-          </div>} />
+          accion={(() => {
+            const extra = panel.yo.rol !== "recepcion" && <>
+              <Link href="/panel/socios/importar" className="boton">📥 Importar</Link>
+              <Link href="/panel/socios/duplicados" className="boton">🔎 Duplicados</Link>
+              {filas.length > 0 && (
+                // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
+                <a href={`/panel/socios/exportar${con({ estado: null, plan: null }).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>
+              )}
+            </>;
+            return (
+              <div className="flex flex-wrap items-start gap-2">
+                <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>
+                {extra && <div className="hidden sm:flex flex-wrap gap-2">{extra}</div>}
+                {/* En el celular lo que se usa poco va en "Más", así la búsqueda queda arriba. */}
+                {extra && (
+                  <details className="sm:hidden" data-mas>
+                    <summary className="boton list-none cursor-pointer">⋯ Más</summary>
+                    <div className="flex flex-wrap gap-2 mt-2">{extra}</div>
+                  </details>
+                )}
+              </div>
+            );
+          })()} />
         <form className="mb-4" role="search">
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
           {etiqueta && <input type="hidden" name="etiqueta" value={etiqueta} />}

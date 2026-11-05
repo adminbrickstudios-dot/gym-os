@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
@@ -33,10 +34,12 @@ export function Marco({ panel, children, enPlataforma = false }: { panel: PanelG
 }
 
 /** Encabezado de una pantalla: emoji, título grande y una línea que explica qué es. */
-export function Encabezado({ emoji, titulo, bajada, accion }: { emoji: string; titulo: string; bajada?: ReactNode; accion?: ReactNode }) {
+/** `volver`: el link para subir un nivel (“← Socios”), arriba de todo. */
+export function Encabezado({ emoji, titulo, bajada, accion, volver }: { emoji: string; titulo: string; bajada?: ReactNode; accion?: ReactNode; volver?: { href: string; texto: string } }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
       <div className="min-w-0">
+        {volver && <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>}
         <p className="text-4xl mb-3" aria-hidden>{emoji}</p>
         <h1 className="titular text-5xl sm:text-6xl">{titulo}</h1>
         {bajada && <p className="texto-suave text-lg mt-2">{bajada}</p>}

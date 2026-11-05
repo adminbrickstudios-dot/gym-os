@@ -41,7 +41,7 @@ try {
 
   // Dueña: une
   await d.goto(`${G}/panel/socios`);
-  await d.locator('main a:has-text("Duplicados")').click();
+  await d.locator('main a:visible:has-text("Duplicados")').click();
   const par = d.locator("[data-par]", { hasText: `Repetido${s}` });
   await par.waitFor({ timeout: 30000 });
   chequear(/Mismo celular/.test(await par.innerText()), "aparece como “Mismo celular”", "no aparece el par");

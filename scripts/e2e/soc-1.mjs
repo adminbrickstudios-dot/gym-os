@@ -22,7 +22,7 @@ try {
   const p = await pagina(b, COMPU);
   await entrar(p, "duena@ejemplo.invalid");
   await p.goto(`${G}/panel/socios`);
-  await p.locator('main a:has-text("Importar")').click();
+  await p.locator('main a:visible:has-text("Importar")').click();
   await p.waitForURL(/\/panel\/socios\/importar/, { timeout: 30000 });
   const imp = p.locator("[data-importador]");
   await imp.waitFor({ timeout: 60000 });
