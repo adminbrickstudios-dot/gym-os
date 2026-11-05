@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-7 · Pulido de Vencen hoy
+
+**QUÉ HICE**
+- Un solo verde: en Vencen hoy es "📣 Avisar a todos"; el WhatsApp de cada fila pasó a botón blanco (también en Retención, que usa la misma fila).
+- Lo demás ya quedó en AUD-7: cuántos vencen en la bajada, vacío con camino a Retención, `loading.tsx` con la forma real.
+- `scripts/e2e/dis-7.mjs`: mide Vencen hoy, Avisos de hoy, Novedades y Resumen en el celular (recepción y dueña) y deja capturas `dis7-*`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Capturas "antes": la pantalla se tocó en AUD-7 antes de este ítem; hay solo "después".
+
+---
+
 ## 2026-11-05 · PUSH-1 · Notificaciones push
 
 **QUÉ HICE**

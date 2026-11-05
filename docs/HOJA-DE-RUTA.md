@@ -293,7 +293,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] AVI-5 · 🟢 · Campana de avisos en la app del socio y en el panel — verificado: db (campana: cada rol lo suyo, visto por usuario, el socio sus comprobantes, nadie lee la de otro), e2e:avi-5 (🔔 con el número, lista, visto al volver, profe sin plata, socio)
 - [x] AVI-6 · 🟢 · Resumen diario y semanal del dueño en la app — verificado: db (resumen-dueno: por medio y por persona, fiado aparte, período anterior, permisos, en la campana), e2e:avi-6 (Inicio → resumen, semana pasada, aviso en la campana, celular, recepción no)
 - [x] PUSH-1 · 🟢 · Notificaciones push (web push con claves propias, sin costo) — verificado: db (push: cada uno elige dentro de lo suyo, a quién va cada hecho, una sola vez, solo la clave de servicio ve destinos), vitest (push.test: el navegador descifra el mensaje y la firma VAPID es la nuestra), e2e:push-1 (dónde activarlas, profe no, sw y manifest). Sin verificar: la entrega real en un navegador (el servicio de push no es alcanzable desde acá)
-- [ ] DIS-7 · 🟢 · Pulido: Vencen hoy
+- [x] DIS-7 · 🟢 · Pulido: Vencen hoy — verificado: e2e:dis-7 (recepción y dueña en celular: Vencen hoy, Avisos, Novedades, Resumen sin desborde, botones altos, un verde), capturas dis7-*
 
 ### 8 · Resultado (la plata)
 - [ ] RES-1 · 🟢 · Resultado: la plata del mes, clara

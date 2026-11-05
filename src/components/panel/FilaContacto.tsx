@@ -34,7 +34,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
         </div>
         <div className="flex flex-wrap gap-2">
           {whatsapp
-            ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton boton-principal !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}>💬 WhatsApp</a>
+            ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}>💬 WhatsApp</a>
             : <span className="pildora">📵 Sin teléfono</span>}
           {cobrar && <LinkPanel href={`/panel/vender?socio=${socioId}&cuota=1`} className="boton !min-h-11">💵 Cobrar</LinkPanel>}
           {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}

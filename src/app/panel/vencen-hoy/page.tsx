@@ -47,7 +47,7 @@ export default async function VencenHoy() {
           </Vacio>
         ) : (
           <div className="space-y-3">
-          <TandaAvisos avisos={tanda} />
+          <TandaAvisos avisos={tanda} principal />
           <ul className="space-y-2">
             {filas.map((f) => (
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista="por_vencer"

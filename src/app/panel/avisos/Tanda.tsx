@@ -10,7 +10,7 @@ import type { Aviso } from "./Aviso";
  * mensaje y lo deja "avisado ✓" (el navegador abre una ventana por toque: no
  * se pueden abrir todas juntas). Los que no tienen teléfono no entran.
  */
-export function TandaAvisos({ avisos, etiqueta = "Avisar a todos" }: { avisos: Aviso[]; etiqueta?: string }) {
+export function TandaAvisos({ avisos, etiqueta = "Avisar a todos", principal = false }: { avisos: Aviso[]; etiqueta?: string; principal?: boolean }) {
   const router = useRouter();
   // La cola se congela al abrir: cada "avisado" recarga la página y no tiene que correr la fila.
   const pendientes = avisos.filter((a) => !a.avisado_en && linkWhatsappSocio(a.telefono, a.mensaje));
@@ -24,7 +24,7 @@ export function TandaAvisos({ avisos, etiqueta = "Avisar a todos" }: { avisos: A
   const cerrar = () => { setAbierto(false); router.refresh(); };
   if (!abierto) {
     return (
-      <button type="button" className="boton !min-h-11" data-tanda onClick={() => { setCola(pendientes); setAbierto(true); setI(0); setAvisados(0); }}>
+      <button type="button" className={`boton !min-h-11 ${principal ? "boton-principal" : ""}`} data-tanda onClick={() => { setCola(pendientes); setAbierto(true); setI(0); setAvisados(0); }}>
         📣 {etiqueta} ({pendientes.length})
       </button>
     );
