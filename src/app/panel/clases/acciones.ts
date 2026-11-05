@@ -11,3 +11,6 @@ export const presente = async (claseId: string, socioId: string) => r(() => rpc(
 export const anotar = async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }), claseId);
 export const cancelarClase = async (claseId: string, motivo: string) =>
   r(async () => { await rpc("cancelar_clase", { p_clase_id: claseId, p_motivo: motivo }); notificarDespues("clase_cancelada", claseId); }, claseId);
+/** CLA-7: deshacer un presente marcado por error (con motivo; las reglas de quién y hasta cuándo, en la base). */
+export const deshacerPresente = async (claseId: string, socioId: string, motivo: string) =>
+  r(() => rpc("anular_presente", { p_clase_id: claseId, p_socio_id: socioId, p_motivo: motivo }), claseId);

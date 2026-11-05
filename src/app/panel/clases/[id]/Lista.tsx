@@ -2,7 +2,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
-import { anotar, cancelarClase, presente } from "../acciones";
+import { anotar, cancelarClase, deshacerPresente, presente } from "../acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Vacio } from "@/components/ui/Vacio";
 
@@ -16,6 +16,9 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
   const [cancelando, setCancelando] = useState(false);
   const [motivo, setMotivo] = useState("");
+  // CLA-7: deshacer un presente (se pide el motivo en la misma fila).
+  const [deshaciendo, setDeshaciendo] = useState<string | null>(null);
+  const [porQue, setPorQue] = useState("");
   const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) { setTexto(""); setEncontrados([]); } });
 
   useEffect(() => {
@@ -30,12 +33,23 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
       {filas.length === 0 ? <Vacio emoji="🙋" titulo="Todavía no se anotó nadie">Los socios se anotan desde su app; también los podés sumar desde la recepción.</Vacio> : (
         <ul className="space-y-2">
           {filas.map((f) => (
-            <li key={f.socio_id} className="tarjeta flex items-center gap-4 px-4 py-3 min-h-[64px]">
+            <li key={f.socio_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3 min-h-[64px]">
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-lg truncate">{f.nombre}</span>
                 <span className="block texto-suave text-sm">{f.estado === "espera" && f.posicion ? `${f.posicion}° en espera` : ESTADO[f.estado] ?? f.estado}</span>
               </span>
-              {f.presente ? <span className="pildora pildora-verde">✅ Presente</span>
+              {f.presente && deshaciendo === f.socio_id ? (
+                <form className="flex flex-wrap items-center gap-2 basis-full sm:basis-auto" onSubmit={(e) => { e.preventDefault(); if (porQue.trim()) correr(() => deshacerPresente(claseId, f.socio_id, porQue)); setDeshaciendo(null); setPorQue(""); }}>
+                  <input autoFocus className="campo !w-auto flex-1 min-w-40" value={porQue} onChange={(e) => setPorQue(e.target.value)} placeholder="¿Por qué? Ej: lo marqué por error" aria-label={`Por qué se deshace el presente de ${f.nombre}`} />
+                  <button type="submit" className="boton !min-h-11" disabled={!porQue.trim() || ocupado}>Deshacer</button>
+                  <button type="button" className="boton-texto texto-suave" onClick={() => setDeshaciendo(null)}>Volver</button>
+                </form>
+              ) : f.presente ? (
+                <span className="flex items-center gap-2">
+                  <span className="pildora pildora-verde">✅ Presente</span>
+                  <button type="button" className="boton-texto texto-suave text-sm" onClick={() => setDeshaciendo(f.socio_id)} aria-label={`Deshacer el presente de ${f.nombre}`}>↩️ Deshacer</button>
+                </span>
+              )
                 : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton boton-principal !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id))}>✅ Presente</button>}
             </li>
           ))}

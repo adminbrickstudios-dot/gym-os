@@ -36,7 +36,16 @@ try {
     const presente = r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first();
     const aviso = r.locator('main [role="alert"]').first();
     await presente.or(aviso).waitFor({ timeout: 30000 });
-    if (await presente.isVisible()) ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
+    if (await presente.isVisible()) {
+      ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
+      // CLA-7: deshacerlo, con motivo.
+      const filaLista = r.locator("main ul li", { hasText: nombre }).first();
+      await filaLista.getByRole("button", { name: /Deshacer el presente/ }).click();
+      await filaLista.getByRole("textbox").fill("Lo marqué por error (e2e)");
+      await filaLista.getByRole("button", { name: "Deshacer" }).click();
+      await r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first().waitFor({ state: "detached", timeout: 30000 });
+      ok("↩️ Deshacer con motivo: el presente se va (y si gastó una clase del pack, vuelve)");
+    }
     else chequear(/una hora antes|No puede tomar la clase|Ya tiene el presente/.test(await aviso.innerText()), `Presente fuera de regla: la base dice por qué (“${await aviso.innerText()}”)`, await aviso.innerText());
   }
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);

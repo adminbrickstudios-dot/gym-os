@@ -316,7 +316,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] CLA-4 · 🟢 · WOD / rutina del día en la clase
 - [ ] CLA-5 · 🟢 · Ocupación por horario
 - [ ] CLA-6 · 🟢 · Clase de prueba para prospectos
-- [ ] CLA-7 · 🟢 · Anular un presente marcado por error
+- [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)
 - [ ] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9)
 - [ ] CLA-9 · 🟢 · Faltas: descontar la clase del pack (tercera opción de D16)
 - [ ] DIS-9 · 🟢 · Pulido: Clases

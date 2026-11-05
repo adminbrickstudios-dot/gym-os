@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-7 · Deshacer un presente
+
+**QUÉ HICE**
+- En la lista de la clase, al lado de "✅ Presente": "↩️ Deshacer". Pide el motivo en la misma fila. Valen las reglas de la base (`anular_asistencia`): el profe y la recepción dentro del día, el profe solo en sus clases, dueño y encargado siempre. Si el presente había gastado una clase del pack, vuelve.
+- Migración 0082 (`anular_presente(clase, socio, motivo)`), prueba de base `anular-presente`, paso nuevo en `e2e:clases`.
+
+---
+
 ## 2026-11-05 · CLA-2 · Turnos fijos
 
 **QUÉ HICE**
