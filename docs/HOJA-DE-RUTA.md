@@ -399,7 +399,7 @@ bloque 18.
 - [x] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio — hecho sin tocar la plantilla: el link va abajo del mensaje, solo si la página está publicada (verificado: e2e:rev-1, en la tanda)
 - [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟢 · Retiro de caja para el proveedor: foto del ticket y, si es mercadería, sumar el stock en el mismo paso
-- [ ] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla
+- [x] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla — verificado: db (sumar-sede: caja sola, repetida y vacía avisan, encargado y recepción no), e2e:cliente (en la tanda)
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [ ] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado

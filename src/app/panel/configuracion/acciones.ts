@@ -216,3 +216,13 @@ export async function guardarTurnosFijos(prendido: boolean): Promise<{ error?: s
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** REV-2a: suma una sede (la base valida: solo el dueño, nombre único) y devuelve los datos como quedaron. */
+export async function sumarSede(nombre: string): Promise<{ error?: string; datos?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("sumar_sede", { p_gimnasio_id: panel.gimnasio.id, p_nombre: nombre });
+    revalidatePath("/panel", "layout");
+    return { datos: await rpc("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}

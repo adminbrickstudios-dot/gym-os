@@ -207,6 +207,15 @@ try {
   chequear(/\$60\.000/.test(await d.locator("main").innerText()), "Resultado: $60.000 del mes (efectivo y transferencia)", (await d.locator("main").innerText()).slice(0, 300));
   await capturar(d, "cliente-compu-resultado");
 
+  // Abre otra sede (REV-2a): con su caja, sin tocar nada de la primera.
+  await d.goto(`${G}/panel/configuracion`);
+  await d.locator("[data-sumar-sede]").click();
+  await d.locator("[data-sumar-sede-form] input").fill("Sucursal Norte");
+  await d.locator('[data-sumar-sede-form] button[type="submit"]').click();
+  await d.locator("[data-sede]").nth(1).waitFor({ timeout: 30000 });
+  const [{ n: cajas }] = (await db.query(`select count(*)::int n from public.cajas where gimnasio_id = $1`, [gim])).rows;
+  chequear(cajas === 2, "abre otra sede desde Configuración y la sede trae su caja", `quedaron ${cajas} cajas`);
+
   const dc = await nueva(CELU);
   await entrar(dc, MAIL_DUENO, claveDueno, G);
   await dc.locator("h1").first().waitFor({ timeout: 60000 });

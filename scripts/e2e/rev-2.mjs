@@ -10,7 +10,6 @@ import { CELU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, 
 
 const G = GIMNASIO();
 const s = Date.now().toString().slice(-5);
-const falta = (m) => console.log(`ℹ️ falta: ${m}`);
 const b = await navegador();
 const d = await pagina(b, CELU);
 d.setDefaultNavigationTimeout(120000);
@@ -65,8 +64,8 @@ try {
     "se va de vacaciones: los permisos del encargado se ajustan desde Equipo", "Equipo no muestra los permisos del encargado");
   await d.goto(`${G}/panel/configuracion`);
   await d.locator("main h1").waitFor({ timeout: 60000 });
-  if (!(await aparece(d.getByRole("button", { name: /Sumar (una )?sede|Nueva sede|Otra sede/ }), 3000)))
-    falta("abre otra sede: Configuración edita las sedes que hay, pero no se puede sumar una (cada una traería su caja, su entrada y su grilla)");
+  // Sumarla de verdad lo hace cliente.mjs en un gimnasio nuevo (acá cambiaría el demo para las demás pruebas).
+  chequear(await aparece(d.locator("[data-sumar-sede]"), 10000), "abre otra sede: “➕ Sumar una sede” en Configuración", "no se puede sumar una sede");
   await ancho("Configuración");
 
   // Viernes: prepara el aumento (sin aplicarlo).

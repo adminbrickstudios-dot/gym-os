@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-2a · Sumar una sede
+
+**QUÉ HICE**
+- Configuración → Gimnasio: "➕ Sumar una sede" (solo el dueño). Pide el nombre; la sede se crea con su caja (el trigger que ya existía) y queda abajo para completar dirección y teléfono. Lo que no se guardó de las otras sedes no se pierde.
+- Migración 0119 (`sumar_sede`, solo dueño, nombre único sin importar mayúsculas) y prueba de base.
+- El recorrido del cliente (AUD-16) suma una sede en su gimnasio nuevo; rev-2 solo comprueba el botón (sumar una en el demo cambiaría las demás pruebas).
+
+**LO QUE NO PUDE VERIFICAR**
+- La pantalla: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda.
+
+---
+
 ## 2026-11-05 · REV-1b · El WhatsApp al prospecto lleva la página
 
 **QUÉ HICE**

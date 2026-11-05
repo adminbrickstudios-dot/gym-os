@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
-import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina, type EstadoMP } from "./acciones";
+import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
 import { MercadoPago } from "./MercadoPago";
 import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -320,6 +320,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 </div>
               </div>
             ))}
+            {puedeEditar && <SumarSede alSumar={(sedes) => { setD((x) => ({ ...x, sedes: [...x.sedes, ...sedes.filter((n) => !x.sedes.some((v) => v.id === n.id))] })); setDGuardado((x) => ({ ...x, sedes })); }} />}
           </Tarjeta>
           {pie("gimnasio")}
         </>}
@@ -625,5 +626,31 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         </section>
       )}
     </div>
+  );
+}
+
+/** REV-2a: otra sede. Se crea al toque con su caja; dirección y teléfono se completan arriba. */
+function SumarSede({ alSumar }: { alSumar: (sedes: Sede[]) => void }) {
+  const [abierto, setAbierto] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [sumando, empezar] = useTransition();
+  if (!abierto) return <button type="button" className="boton" onClick={() => setAbierto(true)} data-sumar-sede>➕ Sumar una sede</button>;
+  return (
+    <form className="pt-4 border-t border-[var(--borde)] space-y-3" data-sumar-sede-form
+      onSubmit={(e) => { e.preventDefault(); empezar(async () => {
+        const r = await sumarSede(nombre);
+        if (r.error) { setError(r.error); return; }
+        alSumar((r.datos as { sedes: Sede[] }).sedes); setAbierto(false); setNombre(""); setError(null);
+      }); }}>
+      <Campo etiqueta="Nombre de la sede nueva" ayuda="Tiene su caja, su entrada y su grilla. La dirección y el teléfono los completás arriba.">
+        <input className="campo" maxLength={60} autoFocus value={nombre} onChange={(e) => setNombre(e.target.value)} />
+      </Campo>
+      {error && <Mensaje tipo="error">{error}</Mensaje>}
+      <div className="flex gap-2">
+        <button type="submit" className="boton boton-principal" disabled={sumando || !nombre.trim()}>{sumando ? "Sumando…" : "Sumar sede"}</button>
+        <button type="button" className="boton" onClick={() => { setAbierto(false); setError(null); }}>Cancelar</button>
+      </div>
+    </form>
   );
 }
