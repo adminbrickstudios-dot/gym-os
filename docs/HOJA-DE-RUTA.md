@@ -277,9 +277,9 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
 - [x] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
 - [x] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
-- [ ] DIS-4 · 🟢 · Pulido: Vender
-- [ ] DIS-5 · 🟢 · Pulido: Caja
-- [ ] DIS-6 · 🟢 · Pulido: Transferencias
+- [x] DIS-4 · 🟢 · Pulido: Vender
+- [x] DIS-5 · 🟢 · Pulido: Caja
+- [x] DIS-6 · 🟢 · Pulido: Transferencias
 
 ### 7 · Vencen hoy y avisos
 - [ ] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy

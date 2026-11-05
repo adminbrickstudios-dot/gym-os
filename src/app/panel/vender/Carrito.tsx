@@ -28,6 +28,15 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
   const [stock, setStock] = useState(stockInicial);
+  // DIS-4: la barra del celular se esconde cuando el carrito ya está a la vista.
+  const [carritoVisible, setCarritoVisible] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById("carrito");
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const o = new IntersectionObserver(([e]) => setCarritoVisible(e.isIntersecting), { threshold: 0.15 });
+    o.observe(el);
+    return () => o.disconnect();
+  }, []);
   // Recién dado de alta con plan (SOC-13): arranca con la primera cuota en el carrito.
   // Si debe la matrícula de su plan (PLA-3), va también.
   const [lineas, setLineas] = useState<Linea[]>(() => conCuota && preciosIniciales.cuota
@@ -230,7 +239,15 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       </div>
 
       {/* El ticket */}
-      <aside data-carrito className="tarjeta p-5 sm:p-6 lg:sticky lg:top-6">
+      {/* DIS-4: en el celular el carrito queda abajo de todo: una barra con el total lleva hasta él. */}
+      {lineas.length > 0 && !carritoVisible && (
+        <a href="#carrito" data-barra-carrito
+          className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(76px+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] shadow-lg">
+          <span>🛒 {lineas.reduce((n, l) => n + l.cantidad, 0)} · {total == null ? "—" : formatearPesos(total)}</span>
+          <span>Cobrar ↓</span>
+        </a>
+      )}
+      <aside id="carrito" data-carrito className="tarjeta p-5 sm:p-6 lg:sticky lg:top-6 scroll-mt-4">
         <h2 className="titulo text-2xl">🧾 Ticket</h2>
         {lineas.length === 0 ? <p className="texto-tenue mt-4">Tocá lo que se lleva.</p> : (
           <ul className="mt-4 divide-y divide-[var(--borde)]">

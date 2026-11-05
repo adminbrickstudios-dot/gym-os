@@ -15,6 +15,19 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-4, DIS-5, DIS-6 · Pulido de Vender, Caja y Transferencias
+
+**QUÉ HICE**
+- Vender en el celular: con algo en el carrito aparece abajo una barra "🛒 N · $total · Cobrar ↓" que lleva al ticket. Se esconde cuando el ticket ya está a la vista y no es verde, así hay un solo verde por pantalla.
+- `loading.tsx` con la forma real en Vender, Caja, Transferencias y PIN. Antes usaban el genérico.
+- Lo demás ya estaba medido en AUD-6 (`aud6-*`): sin desborde, botones altos, un solo verde.
+- `scripts/e2e/dis-4.mjs` (6 pasos).
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se midió.
+
+---
+
 ## 2026-11-05 · CAJ-3 · PIN del equipo en la recepción
 
 **QUÉ HICE**
