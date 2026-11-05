@@ -406,7 +406,7 @@ bloque 18.
 - [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
 - [x] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino — verificado: db (primer-mes: ficha, avisos de los días 1, 7 y 30, riesgo de la primera semana, meta 1 a 60; 360 pruebas en verde), e2e:com-2 (en la tanda)
 - [x] COM-3 · 🟢 · Avisar a todos los anotados de una clase — verificado: db (avisar-clase: un mensaje por persona con nombre, clase y día; queda anotado; el profe solo en las suyas y sin teléfonos si no tiene permiso; vacío no), e2e:com-3 (en la tanda). Mail: cuando exista AVI-2
-- [ ] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio
+- [x] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio — verificado: db (tareas: cada uno las suyas, dueño todas, otra persona no la toca, reabrir), vitest (menú), e2e:com-4 (en la tanda)
 - [ ] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas
 - [ ] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada
 - [ ] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre

@@ -11,6 +11,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { FilaVenta } from "@/components/panel/Venta";
 import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
+import { FilaTarea, type Tarea } from "./tareas/Tareas";
 
 type Numero = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" };
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
@@ -43,7 +44,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -68,6 +69,8 @@ export default async function Inicio() {
       rol !== "profe" ? rpc<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // ADM-6: lo que cuenta BRIK a los dueños.
       rol === "dueno" ? rpc<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
+      // COM-4: las tareas de hoy y las atrasadas de quien mira.
+      rpc<{ hoy: string; tareas: Tarea[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
@@ -139,6 +142,17 @@ export default async function Inicio() {
             </ul>
           )}
         </section>
+
+        {(() => {
+          const mias = tareas.tareas.filter((t) => t.mia && !t.hecha_en && t.dia <= tareas.hoy);
+          return mias.length > 0 && (
+            <section aria-labelledby="tareas-hoy" data-tareas-inicio={mias.length}>
+              <h2 id="tareas-hoy" className="titulo text-3xl mb-1">📌 Tus tareas de hoy</h2>
+              <p className="texto-suave mb-4">Las de hoy y las que quedaron atrasadas. <LinkPanel href="/panel/tareas" siNoEsta="texto" className="underline">Ver todas</LinkPanel></p>
+              <ul className="space-y-2">{mias.map((t) => <FilaTarea key={t.id} t={t} hoy={tareas.hoy} />)}</ul>
+            </section>
+          );
+        })()}
 
         {dejados.length > 0 && (
           <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>

@@ -110,7 +110,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
               <FilaContacto key={r.socio_id} socioId={r.socio_id} nombre={r.nombre} lista="no_viene"
                 texto={`${r.nivel === "alto" ? "🔴 Riesgo alto" : "🟡 Riesgo medio"} · ${r.porque[0]}`}
                 detalle={r.porque.slice(1).join(" · ") || null}
-                whatsapp={linkWhatsappSocio(r.telefono, r.mensaje)} puedeAnotar />
+                whatsapp={linkWhatsappSocio(r.telefono, r.mensaje)} puedeAnotar tarea />
             ))}
           </ul>
         )) : visibles.length === 0 ? (
@@ -124,7 +124,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
                 detalle={venia(f.visitas_por_semana)}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
                 ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : null}
-                puedeAnotar cobrar={puedeCobrar} />
+                puedeAnotar cobrar={puedeCobrar} tarea />
             ))}
           </ul>
         )}

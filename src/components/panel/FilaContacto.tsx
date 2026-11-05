@@ -8,13 +8,15 @@ import { marcarAvisado } from "@/app/panel/avisos/acciones";
  * Un socio para contactar: el porqué, el mensaje armado por WhatsApp y,
  * si la persona puede, anotar que se le escribió (así nadie le escribe dos veces).
  */
-export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista, ultimo, puedeAnotar, cobrar = false, aviso }: {
+export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista, ultimo, puedeAnotar, cobrar = false, aviso, tarea = false }: {
   socioId: string; nombre: string; texto: string; detalle?: string | null; whatsapp: string | null; lista: string;
   ultimo?: string | null; puedeAnotar: boolean;
   /** AUD-7: "💵 Cobrar" lleva a Vender con su cuota cargada (si Vender está prendido y el rol cobra). */
   cobrar?: boolean;
   /** VEH-1: tocar WhatsApp también deja "avisado ✓" en la bandeja (la recepción incluida). */
   aviso?: { clave: string; referencia: string } | null;
+  /** COM-4: "📌 Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
+  tarea?: boolean;
 }) {
   const [anotado, setAnotado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
             : <span className="pildora">📵 Sin teléfono</span>}
           {cobrar && <LinkPanel href={`/panel/vender?socio=${socioId}&cuota=1`} className="boton !min-h-11">💵 Cobrar</LinkPanel>}
           {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}
+          {tarea && <LinkPanel href={`/panel/tareas?socio=${socioId}`} className="boton !min-h-11">📌 Tarea</LinkPanel>}
         </div>
       </div>
       {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}

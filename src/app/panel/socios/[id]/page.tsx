@@ -116,6 +116,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {!s.dado_de_baja_en && panel.yo.rol !== "profe" && (
+            <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico">📌 Anotar una tarea sobre este socio</LinkPanel></p>
+          )}
           {primerMes && !s.dado_de_baja_en && (
             <p className="pildora mt-6 !text-base" data-primer-mes={primerMes.dia}>
               🌱 Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? " ✅" : ""}

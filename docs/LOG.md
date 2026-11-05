@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-4 · Tareas del equipo
+
+**QUÉ HICE**
+- "📌 Tareas" en el menú (grupo Hoy, todos los roles): qué, para quién, para qué día y, si es sobre un socio, cuál. "➕ Nueva tarea" desde la pantalla, desde la ficha ("📌 Anotar una tarea sobre este socio") y desde cada fila de Retención ("📌 Tarea").
+- En el Inicio de cada uno: "📌 Tus tareas de hoy" (las de hoy y las atrasadas) con su tilde. Hechas: quedan con quién y cuándo, y se pueden reabrir.
+- Cada uno ve las suyas y las que creó; dueño y encargado ven las de todo el equipo. Migración 0124 (`tareas` con RLS, `tareas_panel`, `crear_tarea`, `marcar_tarea`), prueba de base, el barrido suma /panel/tareas.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-4 y el barrido).
+
+---
+
 ## 2026-11-05 · COM-3 · Avisar a los anotados de una clase
 
 **QUÉ HICE**
