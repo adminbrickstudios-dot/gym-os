@@ -25,8 +25,20 @@ try {
   // Llega y no sabe quién viene: abre una clase.
   await p.goto(`${G}/panel/clases`);
   await p.locator("main h1").waitFor({ timeout: 60000 });
-  const clase = p.locator('main a[href^="/panel/clases/"]').filter({ hasNotText: /grilla/i }).first();
-  if (!(await aparece(clase, 15000))) throw new Error("el profe no tiene clases para abrir hoy en el demo");
+  // Las clases de otros profes se ven pero no se abren (la base no le deja ver su lista).
+  const ajenas = await p.locator("[data-clase-ajena]").count();
+  const linksA = await p.locator('main ul a[href^="/panel/clases/"]').count();
+  ok(`ve la grilla del día: ${linksA} clases suyas para abrir, ${ajenas} de otros profes que no se abren`);
+  // Busca un día con una clase suya (hoy o los próximos).
+  const dias = await p.locator('nav[aria-label="Día"] a').evaluateAll((xs) => xs.map((x) => x.getAttribute("href")));
+  let clase = null;
+  for (const d of dias) {
+    await p.goto(`${G}${d}`);
+    await p.locator("main h1").waitFor({ timeout: 60000 });
+    const l = p.locator('main ul a[href^="/panel/clases/"]').first();
+    if (await aparece(l, 3000)) { clase = l; break; }
+  }
+  if (!clase) throw new Error("el profe no tiene clases suyas esta semana en el demo");
   await clase.click();
   await p.waitForURL(/\/panel\/clases\/[0-9a-f-]{36}/, { timeout: 60000 });
   await p.locator("main h1").waitFor({ timeout: 60000 });

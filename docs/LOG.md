@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-4 · Lo que encontró el día del profe
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El profe ve en "Clases" todas las clases del día (está bien: es la grilla), pero las de otros profes eran links y al abrirlas decía "No tenés acceso a esta pantalla · Solo podés ver la lista de tus clases". Ahora las ajenas se ven atenuadas y no se abren; las suyas, igual que antes. La base ya lo frenaba: no había nada expuesto.
+- rev-4 busca en la semana un día con una clase suya (el profe del demo no siempre tiene hoy).
+
+---
+
 ## 2026-11-05 · COM-5 · Retención en números
 
 **QUÉ HICE**

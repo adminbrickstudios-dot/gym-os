@@ -47,9 +47,11 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
               const pasada = new Date(c.fin).getTime() < ahora;
-              return (
-                <li key={c.clase_id}>
-                  <Link href={`/panel/clases/${c.clase_id}`} className={`tarjeta flex items-center gap-4 px-4 py-4 hover:bg-[var(--tarjeta-alta)] ${c.cancelada || pasada ? "opacity-55" : ""}`}>
+              // REV-4: el profe ve toda la grilla del día, pero solo abre la lista de sus clases (la base no le deja ver las otras).
+              const ajena = panel.yo.rol === "profe" && c.profe !== panel.yo.nombre;
+              const estilo = `tarjeta flex items-center gap-4 px-4 py-4 ${ajena ? "" : "hover:bg-[var(--tarjeta-alta)]"} ${c.cancelada || pasada || ajena ? "opacity-55" : ""}`;
+              const contenido = (
+                <>
                     <span className="numero text-3xl w-20">{hora(c.inicio)}</span>
                     <span className="icono" aria-hidden>{c.emoji ?? "🗓️"}</span>
                     <span className="min-w-0 flex-1">
@@ -61,7 +63,13 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
                         {c.confirmadas}{c.cupo != null ? `/${c.cupo}` : ""}{c.en_espera ? ` · ${c.en_espera} en espera` : ""}
                       </span>
                     )}
-                  </Link>
+                </>
+              );
+              return (
+                <li key={c.clase_id}>
+                  {ajena
+                    ? <div className={estilo} data-clase-ajena>{contenido}</div>
+                    : <Link href={`/panel/clases/${c.clase_id}`} className={estilo}>{contenido}</Link>}
                 </li>
               );
             })}
