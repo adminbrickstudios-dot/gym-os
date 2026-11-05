@@ -13,9 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const p = await contextoPanel();
     const icono = urlMarca(p.marca.favicon_path ?? p.marca.logo_path);
-    return { title: { default: p.gimnasio.nombre, template: `%s · ${p.gimnasio.nombre}` }, icons: icono ? { icon: icono } : undefined };
+    return { title: { default: p.gimnasio.nombre, template: `%s · ${p.gimnasio.nombre}` }, icons: icono ? { icon: icono } : undefined, robots: { index: false, follow: false } };
   } catch {
-    return { title: "Panel" };
+    return { title: "Panel", robots: { index: false, follow: false } };
   }
 }
 

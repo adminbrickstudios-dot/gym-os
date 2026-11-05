@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = (await headers()).get("x-gimnasio-host");
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const icono = urlMarca(landing?.marca.favicon_path ?? landing?.marca.logo_path);
-  return { title: landing ? `Mi gimnasio · ${landing.marca.nombre}` : "Mi gimnasio", icons: icono ? { icon: icono, apple: icono } : undefined };
+  return { title: landing ? `Mi gimnasio · ${landing.marca.nombre}` : "Mi gimnasio", icons: icono ? { icon: icono, apple: icono } : undefined, robots: { index: false, follow: false } };
 }
 
 // La app del socio: celular primero, la marca del gimnasio, una sola columna.

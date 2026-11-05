@@ -7,7 +7,7 @@ import Link from "next/link";
 import { FormularioIngreso } from "./FormularioIngreso";
 import { IngresoSocio } from "./IngresoSocio";
 
-export const metadata: Metadata = { title: "Ingresar" };
+export const metadata: Metadata = { title: "Ingresar", robots: { index: false, follow: true } };
 
 export default async function Ingresar({ searchParams }: { searchParams: Promise<{ siguiente?: string; modo?: string }> }) {
   const { siguiente, modo } = await searchParams;

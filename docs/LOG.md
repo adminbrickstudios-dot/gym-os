@@ -15,6 +15,24 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · PAG-4 · Aparecer en Google
+
+**QUÉ HICE**
+- La página publicada lleva los datos del gimnasio para Google (schema.org `ExerciseGym`, una entrada por sede): nombre, frase, logo, teléfono, mail, dirección, mapa, Instagram y horarios de apertura por día. Sale de `src/lib/datos-estructurados.ts` (pruebas en vitest) con los mismos datos que se ven.
+- `robots.txt` y `sitemap.xml` por dirección: la página publicada se indexa (y Hacete socio si hay altas); panel, app, admin e ingreso no. Sin publicar: robots dice que no y la página lleva `noindex`. Panel y app llevan `noindex` siempre. Dirección canónica en la página.
+- `scripts/e2e/pag-4.mjs` (9 pasos). El barrido con Tu página y Prospectos dio 136 pasos en verde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** / **QUÉ CORRÉS VOS** / **QUÉ CONFIGURÁS VOS**
+- Nada. (Cuando el gimnasio tenga dominio propio, conviene darlo de alta en Google Search Console: es del dueño.)
+
+**SIN ARREGLAR**
+- Nada de este ítem.
+
+**LO QUE NO PUDE VERIFICAR**
+- Cómo lo lee Google de verdad (la prueba de resultados enriquecidos necesita la dirección pública).
+
+---
+
 ## 2026-11-04 · DIS-13 · Pulido: Página del gimnasio
 
 **QUÉ HICE**

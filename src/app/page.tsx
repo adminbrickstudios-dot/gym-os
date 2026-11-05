@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingProximamente } from "@/components/landing/Landing";
 import { traerAgenda, traerLanding, urlMarca } from "@/lib/landing";
+import { datosEstructurados } from "@/lib/datos-estructurados";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
 //   plataforma → la página de Gym OS
@@ -41,13 +42,27 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: { type: "website", title: titulo, description: descripcion, siteName: marca.nombre, locale: "es_AR",
                  images: [{ url: imagen, width: foto ? undefined : 1200, height: foto ? undefined : 630, alt: marca.nombre }] },
     twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
+    // Sin publicar no se indexa: Google no guarda un "Estamos armando nuestra página".
+    robots: r.landing.publicada ? { index: true, follow: true } : { index: false, follow: false },
+    alternates: { canonical: `${origen}/` },
   };
 }
 
 export default async function Inicio() {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
-    return r.landing.publicada ? <LandingGimnasio landing={r.landing} agenda={r.agenda} /> : <LandingProximamente marca={r.landing.marca} contacto={r.landing.contacto} />;
+    if (!r.landing.publicada) return <LandingProximamente marca={r.landing.marca} contacto={r.landing.contacto} />;
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+    const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
+    const ld = datosEstructurados(r.landing, r.agenda, origen, urlMarca(r.landing.marca.logo_path));
+    return (
+      <>
+        {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
+        <LandingGimnasio landing={r.landing} agenda={r.agenda} />
+      </>
+    );
   }
   return (
     <main className="min-h-dvh flex flex-col justify-center px-4 py-16">
