@@ -272,8 +272,8 @@ async function rpc(req, res, nombre, cuerpo) {
 
 // ── Storage (en disco) ──────────────────────────────────────────────
 // Los mismos límites que los buckets de las migraciones. Con sesión de
-// usuario no se sube: en Supabase lo deciden las políticas de storage.objects,
-// que la base local no tiene.
+// usuario solo se imita una política: el socio sube su comprobante (las demás
+// subidas las hace el servidor con la clave de servicio).
 const BUCKETS = {
   marcas: { publico: true, max: 2 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] },
   comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
@@ -288,6 +288,20 @@ function archivoDe(bucket, ruta) {
   return f;
 }
 const errorStorage = (res, estado, error, message) => enviar(res, estado, { statusCode: String(estado), error, message });
+
+/** La política comprobantes_socio_sube, preguntada a la base con el rol y el JWT del usuario. */
+async function politicaComprobante(claims, rutaObjeto) {
+  const [gim, socio] = rutaObjeto.split("/");
+  if (!/^[0-9a-f-]{36}$/.test(gim ?? "") || !/^[0-9a-f-]{36}$/.test(socio ?? "")) return false;
+  const c = await pool.connect();
+  try {
+    await c.query("begin");
+    await c.query(`select set_config('role', 'authenticated', true), set_config('request.jwt.claims', $1, true)`, [JSON.stringify(claims)]);
+    const { rows } = await c.query(`select $2::uuid in (select privado.mis_socios()) and $1::uuid = (select s.gimnasio_id from public.socios s where s.id = $2::uuid) as ok`, [gim, socio]);
+    await c.query("rollback");
+    return rows[0]?.ok === true;
+  } catch { await c.query("rollback").catch(() => {}); return false; } finally { c.release(); }
+}
 
 async function storage(req, res, ruta, crudo, consulta = new URLSearchParams()) {
   const claims = claimsDe(req);
@@ -322,8 +336,12 @@ async function storage(req, res, ruta, crudo, consulta = new URLSearchParams()) 
   }
   const objeto = /^\/object\/([a-z_]+)(?:\/(.+))?$/.exec(ruta);
   if (!objeto || !BUCKETS[objeto[1]]) return errorStorage(res, 404, "not_found", `supabase-local no imita ${req.method} /storage/v1${ruta}`);
-  if (claims?.role !== "service_role") return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio sube o borra (con sesión lo deciden las políticas de Supabase)");
   const [bucket, rutaObjeto] = [objeto[1], objeto[2] && decodeURIComponent(objeto[2])];
+  // La única subida con sesión de usuario: el socio sube su comprobante. Imita la política
+  // comprobantes_socio_sube (0009): <gimnasio>/<socio>/… con un socio de su cuenta y de ese gimnasio.
+  const subeComprobante = claims?.role === "authenticated" && bucket === "comprobantes" && req.method === "POST" && rutaObjeto
+    && await politicaComprobante(claims, rutaObjeto);
+  if (claims?.role !== "service_role" && !subeComprobante) return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio sube o borra (salvo el comprobante del socio, como la política de Supabase)");
   const b = BUCKETS[bucket];
   // Bajar un objeto (download) con la clave de servicio: así el panel sirve los buckets privados.
   if (req.method === "GET" && rutaObjeto) {

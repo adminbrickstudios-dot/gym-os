@@ -178,7 +178,7 @@ npm run e2e:barrido            # cada rol abre cada pantalla, compu y celular
 levanta `scripts/local/supabase-local.mjs`, que imita la RPC de PostgREST
 (el rol sale del JWT y los permisos los decide Postgres) y el auth de
 GoTrue (contraseña, código por SMS/mail, crear usuarios) contra la base
-local. Los códigos quedan en `.local/codigos.json`. También imita Storage en disco (`.local/storage`): sube y borra solo con la clave de servicio, como lo hace el panel, y sirve los buckets públicos. Usuarios demo:
+local. Los códigos quedan en `.local/codigos.json`. También imita Storage en disco (`.local/storage`): sube y borra solo con la clave de servicio, como lo hace el panel (salvo el comprobante del socio, que imita la política de Supabase), y sirve los buckets públicos. Usuarios demo:
 `scripts/datos/usuarios-demo.mjs` (contraseña `demo-gymos`). Las
 pantallas solo usan RPC: si una necesita leer una tabla directo, hay
 que sumarlo a supabase-local o escribir la función.
