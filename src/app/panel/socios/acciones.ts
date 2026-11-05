@@ -151,3 +151,12 @@ export async function quitarConvenio(socioId: string): Promise<{ error?: string 
   try { await rpc("quitar_convenio", { p_socio_id: socioId }); revalidatePath(`/panel/socios/${socioId}`); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+/** APP-8: el socio pidió la baja desde la app; se habló y se queda, o se le da la baja con su motivo. */
+export async function resolverPedidoBaja(socioId: string, pedidoId: string, darDeBaja: boolean): Promise<{ error?: string }> {
+  try {
+    await rpc("resolver_pedido_baja", { p_pedido_id: pedidoId, p_dar_de_baja: darDeBaja });
+    revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

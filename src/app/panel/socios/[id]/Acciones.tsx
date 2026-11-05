@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { formatearPesos } from "@/lib/formato";
-import { asignarPlan, darDeBaja, vistaCambioPlan, volverADarDeAlta, type VistaCambio } from "../acciones";
+import { asignarPlan, darDeBaja, resolverPedidoBaja, vistaCambioPlan, volverADarDeAlta, type VistaCambio } from "../acciones";
 
 type Plan = { plan_id: string; nombre: string; precio: number | null };
 const MOTIVOS: [string, string][] = [
@@ -107,6 +107,25 @@ export function VolverADarDeAlta({ socioId }: { socioId: string }) {
         onClick={() => empezar(async () => { const r = await volverADarDeAlta(socioId); setError(r.error ?? null); })}>
         {ocupado ? "Guardando…" : "↩️ Volver a darlo de alta"}
       </button>
+      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+    </div>
+  );
+}
+
+/** APP-8: el socio pidió la baja desde la app. Se habla con él: se queda, o se le da la baja con el motivo que dio. */
+export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { pedido_id: string; motivo: string; nota: string | null } }) {
+  const [error, setError] = useState<string | null>(null);
+  const [ocupado, empezar] = useTransition();
+  const motivo = MOTIVOS.find(([v]) => v === pedido.motivo)?.[1] ?? pedido.motivo;
+  const resolver = (baja: boolean) => empezar(async () => { const r = await resolverPedidoBaja(socioId, pedido.pedido_id, baja); setError(r.error ?? null); });
+  return (
+    <div className="mensaje mensaje-aviso mt-4 space-y-3" data-pedido-baja>
+      <p><span className="font-semibold">👋 Pidió la baja desde la app</span> · {motivo}{pedido.nota ? `: “${pedido.nota}”` : ""}</p>
+      <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza.</p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" disabled={ocupado} className="boton" onClick={() => resolver(false)}>💪 Se queda</button>
+        <button type="button" disabled={ocupado} className="boton boton-peligro" onClick={() => resolver(true)}>Darle la baja</button>
+      </div>
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
     </div>
   );

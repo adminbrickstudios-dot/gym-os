@@ -15,6 +15,19 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-8 · Pedir pausa o baja desde la app
+
+**QUÉ HICE**
+- App del socio → "⏸️ Pausar o dar de baja" (`/app/cuenta`):
+  - **pausa**: fechas y motivo (viaje, trabajo, estudio, otro); entra a los pedidos de pausa que ya existían (D7: los aprueban el dueño o el encargado, en Inicio y en la ficha). Mismas reglas que desde el mostrador (máximo por año, sin salud, no en fechas pasadas ni pisadas).
+  - **baja**: con el motivo (la misma lista de la ficha) y una nota. **No da de baja**: avisa. Aparece en la campana del dueño y del encargado ("… pidió la baja") y en la ficha un aviso con "💪 Se queda" o "Darle la baja" (con el motivo que dio). Lo pueden resolver dueño, encargado y recepción (los mismos que dan de baja).
+- Migración 0093 (`pedidos_baja` con RLS y FK compuesta, `pedir_pausa_socio`, `pedir_baja_socio`, `pedido_baja_socio`, `resolver_pedido_baja`; copia de `campana`), prueba de base `pedidos-socio` (otro socio no puede pedir por él, no se repite, "se queda" no da de baja, "darle la baja" guarda el motivo), `e2e:app-8`.
+
+**LO QUE NO PUDE VERIFICAR**
+- `npm run db:types` necesita `SUPABASE_PROJECT_ID` (igual que en las capas anteriores).
+
+---
+
 ## 2026-11-05 · APP-3 · Historial en la app del socio
 
 **QUÉ HICE**

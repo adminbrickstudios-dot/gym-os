@@ -337,7 +337,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] APP-3 · 🟢 · Historial de pagos y asistencia en la app — verificado: db (historial-socio: pagos y entradas, lo nuevo primero, otro socio no), e2e:app-3
 - [ ] APP-6 · 🟢 · Novedades del gimnasio en la app
 - [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
-- [ ] APP-8 · 🟢 · Pedir pausa o baja desde la app
+- [x] APP-8 · 🟢 · Pedir pausa o baja desde la app — verificado: db (pedidos-socio), e2e:app-8 (pendiente de la tanda final)
 - [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)
 - [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)
 - [ ] DIS-12 · 🟢 · Pulido: App del socio

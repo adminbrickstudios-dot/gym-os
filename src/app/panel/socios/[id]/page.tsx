@@ -5,7 +5,7 @@ import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado"
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
-import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
+import { CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
 import { FilaVenta } from "@/components/panel/Venta";
 import type { Venta } from "@/app/panel/ventas-acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -48,7 +48,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -69,6 +69,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       // CLA-2: turnos fijos (si el gimnasio los usa), desde el mostrador.
       pestana === "resumen" && mostrador ? rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: id }) : Promise.resolve(null),
       pestana === "resumen" && mostrador ? rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: id }) : Promise.resolve([]),
+      // APP-8: si pidió la baja desde la app.
+      rpc<{ pedido_id: string; motivo: string; nota: string | null } | null>("pedido_baja_socio", { p_socio_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -108,6 +110,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               <VolverADarDeAlta socioId={s.id} />
             </div>
           )}
+          {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
           {!s.dado_de_baja_en && (
             <div className="flex flex-wrap gap-2 mt-6">
               {!v.puede || v.color === "amarillo"

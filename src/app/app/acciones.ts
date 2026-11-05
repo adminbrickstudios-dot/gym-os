@@ -72,3 +72,9 @@ export async function estadoPagoOnline(pagoId: string): Promise<{ estado?: strin
     return { estado: r.estado, motivo: r.rechazado_motivo };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** APP-8: el socio pide una pausa (la aprueba el gimnasio) o la baja (la da el gimnasio). */
+export const pedirPausaSocio = async (socioId: string, desde: string, hasta: string, categoria: string, nota: string) =>
+  r(async () => { await rpc("pedir_pausa_socio", { p_socio_id: socioId, p_desde: desde, p_hasta: hasta, p_categoria: categoria, p_nota: nota || null }); revalidatePath("/app/cuenta"); });
+export const pedirBajaSocio = async (socioId: string, motivo: string, nota: string) =>
+  r(async () => { await rpc("pedir_baja_socio", { p_socio_id: socioId, p_motivo: motivo, p_nota: nota || null }); revalidatePath("/app/cuenta"); });
