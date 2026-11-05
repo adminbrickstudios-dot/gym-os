@@ -15,6 +15,19 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SEG-4 · Rendimiento con 3.000 socios
+
+**QUÉ HICE**
+- Base aparte con el demo de 3.019 socios, 17.896 cuotas y 80.409 entradas; `npm run medir -- URL` (`scripts/medir-rendimiento.mjs`) mide 24 funciones de pantalla como la dueña.
+- Lo lento: todo lo que calcula el estado de cada socio (retención, Vencen hoy, Inicio, Avisos, el filtro "al día" de Socios). Buscaban por socio o por venta con índices que empezaban por `gimnasio_id`, o sin índice. Migración 0114: 13 índices (solo índices; no cambia ningún resultado).
+- Antes → después (ms, con la máquina ocupada corriendo la tanda de pantallas al mismo tiempo): Socios filtro "al día" 16.424 → 2.579 · Inicio 6.392 → 1.248 · Retención (resumen) 5.683 → 1.347 · Vencen hoy 5.564 → 1.238 · Avisos 5.371 → 1.057 · Retención 5.097 → 1.103 · buscar texto 472 → 74. El resto ya estaba por debajo de 1 s (ficha 37, estado de acceso 6, clases del día 2).
+
+**SIN ARREGLAR**
+- Seis funciones siguen entre 1 y 2,6 s con 3.000 socios (con la máquina cargada): calculan el acceso socio por socio. Bajarlas pide calcular el estado de todos juntos (una versión "en lote" del cálculo de acceso): toca el corazón del sistema, lo anoté como SEG-8 para hacerlo con cuidado y con las pruebas de acceso al lado.
+- La descarga de todos los datos tarda 2 s en armar las entradas (80 mil filas): es una descarga, queda así.
+
+---
+
 ## 2026-11-05 · SEG-2 · Exportar todos los datos del gimnasio
 
 **QUÉ HICE**

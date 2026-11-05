@@ -377,7 +377,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 16 · Cierre
 - [x] SEG-1 · 🟢 · Límite de pedidos de código por celular — verificado: db (limite-codigos: 5 por destino, 20 por IP, hash, solo el servidor), e2e:seg-1 (pendiente de la tanda final)
 - [x] SEG-2 · 🟢 · Exportar todos los datos del gimnasio — verificado: db (cada tabla, sin rutas internas, recepción no), e2e:seg-2 (pendiente de la tanda final)
-- [ ] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas
+- [x] SEG-4 · 🟢 · Rendimiento con 3.000 socios en todas las pantallas — medido (npm run medir): 13 índices (0114) bajaron lo lento de 5–16 s a 1–2,6 s; lo que queda arriba de 1 s pasa a SEG-8
+- [ ] SEG-8 · 🟢 · Calcular el estado de todos los socios juntos (retención, Vencen hoy, Inicio, Avisos, filtro "al día") para bajar de 1 s con 3.000 socios — toca el cálculo de acceso: con las pruebas de acceso al lado
 - [ ] SEG-6 · 🟢 · Datos personales: el socio descarga sus datos; baja con anonimización
 - [ ] SEG-7 · 🟢 · Funciones viejas sin pantalla (cobrar_cuota, precio_cuota, caja_abierta, asignar_plan): confirmar que Vender las reemplazó y sacarles el acceso del equipo
 - [ ] AUD-16 · 🟢 · Recorrido completo como un cliente, de punta a punta
