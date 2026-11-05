@@ -62,6 +62,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - La tanda de pantallas encontró que un horario agregado hoy no se podía editar ("sacalo y agregalo de nuevo"): justo el caso de corregir un error de tipeo. Migración 0094 (copia de `editar_horario`): el horario de hoy se queda con su primer día y el nuevo arranca mañana, como al sacarlo.
 - **LO QUE ENCONTRÉ SIN PEDIRTELO**: en 0086, si cambiaba la hora y una clase posterior tenía reservas, las clases sin reservas de los días intermedios se movían al horario nuevo mientras el viejo seguía vigente esos días: al volver a mirar el día, el viejo creaba otra (dos clases). Ahora esas se quedan en el viejo con su hora y toman cupo y profe.
 - Prueba de base `editar-horario` (caso 0094), e2e `panel-clases` en la tanda final.
+- **0097** (la tanda de pantallas lo encontró después): sacar un horario que todavía no arrancó lo dejaba un día en la grilla, y si ese día era el suyo daba la clase. Ahora un horario puede quedar vacío (`vigente_hasta = vigente_desde - 1`): sacarlo lo saca entero, y editar uno de hoy lo reemplaza entero. Copias de `cerrar_horario` y `editar_horario`; caso nuevo en `editar-horario`.
 
 ---
 

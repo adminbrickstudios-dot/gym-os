@@ -83,3 +83,15 @@ test("0094: un horario agregado hoy se puede editar; el nuevo arranca mañana y 
   const cs = await t.q(`select to_char(inicio at time zone $3, 'HH24:MI') hora from public.clases where actividad_id = $1 and privado.dia_local(inicio, $3) = $2::date and cancelada_en is null`, [act2, manana, t.ctx.zona]);
   assert.deepEqual(cs.map((c) => c.hora), ["23:30"]);
 });
+
+test("0097: sacar un horario que arranca mañana lo saca entero (ni grilla ni clase ese día)", async () => {
+  const [{ id: act3 }] = await t.q(`insert into public.actividades (gimnasio_id, nombre) values ($1, 'Pilates') returning id`, [t.g]);
+  const [{ id: hm }] = await t.q(`insert into public.horarios_clase (gimnasio_id, sede_id, actividad_id, dia_semana, hora_inicio, duracion_min, vigente_desde)
+    values ($1,$2,$3, extract(isodow from $4::date)::int, '07:00', 60, $4::date) returning id`, [t.g, t.sede, act3, manana]);
+  await como(u.dueno, () => t.q(`select public.cerrar_horario($1)`, [hm]));
+  const grilla = await como(u.dueno, () => t.q(`select horario_id from public.horarios_gimnasio($1)`, [t.g]));
+  assert.ok(!grilla.some((r) => r.horario_id === hm), "no queda en la grilla");
+  await t.q(`select privado.materializar_dia($1, $2::date)`, [t.sede, manana]);
+  const [{ n }] = await t.q(`select count(*)::int n from public.clases where horario_id = $1 and cancelada_en is null`, [hm]);
+  assert.equal(n, 0, "mañana no hay clase de ese horario");
+});
