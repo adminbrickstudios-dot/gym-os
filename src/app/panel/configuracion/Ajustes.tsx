@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
 import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina } from "./acciones";
@@ -363,6 +364,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               : <span className="pildora pildora-amarillo">⏳ Sin publicar: la gente ve “Estamos armando nuestra página”</span>}</p>
             <p className="campo !h-auto py-3 break-all select-all" data-direccion-pagina>{direccionPagina}</p>
             <div className="flex flex-wrap gap-2">
+              <Link href="/panel/pagina" className="boton">✏️ Editar textos y secciones</Link>
               <a href={direccionPagina} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver mi página</a>
               <button type="button" className="boton" onClick={copiar}>{copiado ? "✅ Copiado" : "📋 Copiar link"}</button>
               <a className="boton" target="_blank" rel="noopener noreferrer"

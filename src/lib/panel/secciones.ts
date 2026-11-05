@@ -31,6 +31,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "caja", ruta: "/panel/caja", emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
   { clave: "transferencias", ruta: "/panel/transferencias", emoji: "🧾", titulo: "Transferencias", descripcion: "Comprobantes de socios para aprobar", grupo: "Plata", roles: MOSTRADOR, apagable: "transferencias" },
   { clave: "planes", ruta: "/panel/planes", emoji: "🏷️", titulo: "Planes y precios", descripcion: "Lo que vendés y cuánto cuesta", grupo: "Gimnasio", roles: GESTION },
+  { clave: "pagina", ruta: "/panel/pagina", emoji: "🌐", titulo: "Tu página", descripcion: "Lo que ve la gente antes de hacerse socio", grupo: "Gimnasio", roles: GESTION },
   { clave: "equipo", ruta: "/panel/equipo", emoji: "🧑‍🤝‍🧑", titulo: "Equipo", descripcion: "Quién trabaja y qué puede hacer", grupo: "Gimnasio", roles: GESTION },
   { clave: "configuracion", ruta: "/panel/configuracion", emoji: "⚙️", titulo: "Configuración", descripcion: "Marca, reglas y secciones que usás", grupo: "Gimnasio", roles: GESTION },
 ];

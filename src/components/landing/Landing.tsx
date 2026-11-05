@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import { urlMarca, type LandingPublicada, type Marca, type PlanPublico, type Seccion, type Sede } from "@/lib/landing";
+import type { LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import { urlMarca } from "@/lib/url-marca";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
@@ -77,8 +78,8 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
   return (
     <Bloque id="actividades" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {items.map((a) => (
-          <li key={a.nombre} className="tarjeta p-5 sm:p-6">
+        {items.map((a, i) => (
+          <li key={`${i}-${a.nombre}`} className="tarjeta p-5 sm:p-6">
             <p className="text-4xl sm:text-5xl mb-5" aria-hidden>{a.emoji || "💪"}</p>
             <p className="titulo text-2xl">{a.nombre}</p>
             {a.descripcion && <p className="texto-suave mt-1.5 text-[15px] leading-snug">{a.descripcion}</p>}
@@ -222,10 +223,10 @@ function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
   return (
     <Bloque id="equipo" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {personas.map((p) => {
+        {personas.map((p, i) => {
           const foto = urlMarca(p.foto);
           return (
-            <li key={p.nombre} className="tarjeta p-5 sm:p-6">
+            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6">
               {foto ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={foto} alt={p.nombre} className="size-16 rounded-2xl object-cover" />
@@ -250,8 +251,8 @@ function Preguntas({ s }: { s: Extract<Seccion, { tipo: "preguntas" }> }) {
   return (
     <Bloque id="preguntas" tipo={s.tipo} titulo={s.titulo}>
       <div className="space-y-2 max-w-3xl">
-        {items.map((q) => (
-          <details key={q.pregunta} className="tarjeta group">
+        {items.map((q, i) => (
+          <details key={`${i}-${q.pregunta}`} className="tarjeta group">
             <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-6 min-h-[64px] text-lg font-semibold">
               {q.pregunta}
               <span aria-hidden className="text-2xl texto-suave transition-transform group-open:rotate-45">+</span>

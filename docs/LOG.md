@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · PAG-1 · Editor de la página del gimnasio con vista previa
+
+**QUÉ HICE**
+- "🌐 Tu página" en el menú (grupo Gimnasio, dueño y encargado) y desde Configuración → Página. Portada (título, frase, texto del botón, mensaje de WhatsApp, foto elegida de la galería, mostrar precios) y las 8 secciones: título, mostrar u ocultar, ▲▼ para ordenar, y el contenido de Quiénes somos, Qué podés hacer, Profes y Preguntas (agregar, ordenar, quitar). Las que salen de otras pantallas (planes, horarios, fotos, sedes) dicen dónde se cambian.
+- Vista previa en vivo: en compu, la página entera achicada al costado; en el celular, "👀 Ver cómo queda" a pantalla completa. Cambios sin guardar avisan; "Deshacer".
+- Migración `20261104003000_editor_pagina.sql`: `pagina_panel` (dueño y encargado), `guardar_pagina` (solo dueño, todo junto, errores que dicen sección y campo: "Sección "Preguntas", respuesta 2: no puede quedar vacío"), trigger que suelta la foto de portada si se quita de la galería, y `privado.landing_completa`: el armado de la página vive en un solo lugar (lo usan la página pública y la vista previa). Verificado: `supabase/pruebas/editor-pagina.test.mjs` (4) y las de landing siguen en verde.
+- `scripts/e2e/pag-1.mjs` (17 pasos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Dos preguntas o actividades con el mismo texto rompían las claves de la lista en la página (aviso de React): ahora usan la posición.
+- `Landing.tsx` importaba de un archivo solo-servidor: no se podía usar en una vista previa. Arreglado (tipos e `urlMarca` aparte).
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0030).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Foto de cada profe (la sección muestra iniciales). Va con DIS-13.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0030 contra la base real: probada en la base local. `npm run db:types` necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · AUD-2 · Auditoría botón por botón: Página del gimnasio
 
 **QUÉ HICE**

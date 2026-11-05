@@ -99,6 +99,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-8 | El historial va en su propia pestaña "🕓 Cambios" (la última de Configuración), no al pie de cada pestaña. | Con diez pestañas, "al pie" quedaba en una sola o repetido en todas. | Mostrar los últimos cambios de cada pestaña al pie de esa pestaña. |
 | 2026-11-04 | CFG-8 | El historial no se puede borrar ni editar desde ningún panel, ni por el dueño; la pantalla muestra los últimos 100 y el super admin los últimos 20. | Es un registro: si el dueño lo pudiera borrar no serviría para "¿quién subió el descuento?". | Dejar que el dueño lo limpie. |
 | 2026-11-04 | CFG-8 | Lo que cambió sin una persona (el armado del demo, migraciones) aparece como "El sistema"; alguien que ya no está en el equipo, como tal. | No inventar un autor. | — |
+| 2026-11-04 | PAG-1 | La página la edita el dueño; el encargado la ve sin poder cambiarla (igual que el resto de la configuración). | Lo más prudente; la tabla permitía escribir al encargado pero ninguna pantalla lo usaba. | Que el encargado también edite. |
+| 2026-11-04 | PAG-1 | La foto de portada se elige entre las fotos del gimnasio (no hay una subida aparte); si esa foto se quita, la portada queda sin foto. | Un solo lugar para subir fotos y nunca un link roto. | Subida propia de la portada. |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -173,7 +175,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 2 · Página del gimnasio
 - [x] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio — verificado: e2e:pagina (16 pasos: cada link de la página publicada en compu y celular, borrador → próximamente con WhatsApp → publicar, gimnasio nuevo), inventario en docs/paneles/pagina.md, migración 0029 aplicada local
-- [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
+- [x] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa — verificado: db (editor-pagina, 4 pruebas: guardar, errores con dónde, foto de portada, permisos; landing sigue en verde), e2e:pag-1 (17 pasos: vista previa en vivo, ocultar, ordenar, agregar pregunta, error, foto, página pública, encargado, celular)
 - [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
 - [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
 - [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
