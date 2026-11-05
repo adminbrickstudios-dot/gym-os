@@ -15,6 +15,16 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-3 · Cancelar una clase avisando a los anotados
+
+**QUÉ HICE**
+- La recepción ve "🚫 Cancelar esta clase" (la base ya la dejaba; la pantalla lo escondía).
+- Avisos de hoy suma "❌ Clase cancelada", primero: los anotados de una clase cancelada en los últimos 2 días, con el WhatsApp y el mensaje nuevo "Clase cancelada" (Configuración → Mensajes, con {clase} {dia} {motivo}). La campana y el push ya los avisaban (AVI-5, PUSH-1).
+- La vista previa de Mensajes usa ejemplos para las variables que no son del socio (antes mostraba {detalle} o {clase} sin reemplazar).
+- Migración 0084 (copias del catálogo, `bandeja_avisos`, `marcar_avisado` y `vista_previa_mensaje`). Pruebas `bandeja-avisos` (caso nuevo) y `mensajes` (11), `e2e:cla-3`; cfg-5 espera 11 mensajes.
+
+---
+
 ## 2026-11-05 · CLA-5 · Ocupación por horario
 
 **QUÉ HICE**

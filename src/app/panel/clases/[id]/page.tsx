@@ -29,7 +29,7 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
           {clase.cancelada && <p className="pildora pildora-rojo mt-4">🚫 Cancelada: {clase.cancelada_motivo}</p>}
         </header>
         <Lista claseId={id} filas={filas} reserva={panel.modo_clases === "reserva"} cancelada={clase.cancelada}
-          puedeCancelar={panel.yo.rol !== "recepcion"} buscaSocios={panel.yo.rol !== "profe"} />
+          puedeCancelar buscaSocios={panel.yo.rol !== "profe"} />
       </>
     );
   });

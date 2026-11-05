@@ -42,3 +42,20 @@ test("arma la lista con el mensaje y el avisado ✓ queda", async () => {
   assert.ok(!(await bandeja()).some((x) => x.clave === "cumpleanos" && x.nombre === "Cumple Hoy"));
   await como(uRec, () => t.falla(() => t.q(`select public.marcar_avisado($1, 'cualquiera', 'x')`, [cumple.socio_id]), /desconocido/));
 });
+
+test("CLA-3: los anotados de una clase cancelada, con el mensaje armado", async () => {
+  const [{ id: socio }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) values ($1,'Anotada','Clase','+5490001112233') returning id`, [t.g]);
+  const [{ id: act }] = await t.q(`insert into public.actividades (gimnasio_id, nombre) values ($1, 'Pilates') returning id`, [t.g]);
+  const [{ id: clase }] = await t.q(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, cancelada_en, cancelada_motivo)
+    values ($1,$2,$3, now() + interval '1 day', now() + interval '25 hours', now(), 'el profe está enfermo') returning id`, [t.g, t.sede, act]);
+  await t.q(`insert into public.reservas (gimnasio_id, clase_id, socio_id, estado, cancelada_en, cancelada_por) values ($1,$2,$3,'cancelada', now(), 'clase_cancelada')`, [t.g, clase, socio]);
+  const b = await bandeja();
+  const x = b.find((i) => i.clave === "clase_cancelada" && i.socio_id === socio);
+  assert.ok(x, "está en la bandeja");
+  assert.match(x.motivo, /^Se canceló Pilates del \d\d\/\d\d \d\d:\d\d: el profe está enfermo$/);
+  assert.match(x.mensaje, /^Hola Anotada! Te avisamos de .+: se canceló Pilates del \d\d\/\d\d a las \d\d:\d\d \(el profe está enfermo\)/);
+  assert.equal(x.referencia, clase);
+  assert.equal(b[0].clave, "clase_cancelada", "va primero: es lo más urgente");
+  await como(uRec, () => t.q(`select public.marcar_avisado($1, 'clase_cancelada', $2)`, [socio, clase]));
+  assert.ok((await bandeja()).find((i) => i.clave === "clase_cancelada" && i.socio_id === socio).avisado_en);
+});
