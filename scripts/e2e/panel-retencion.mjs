@@ -52,7 +52,7 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/retencion`);
   await r.locator("main h1").waitFor({ timeout: 60000 });
-  chequear(await r.locator('nav[aria-label="Listas"] a').count() === 5 && await r.locator("[data-tablero-retencion]").count() === 0 && !/en riesgo/.test(await r.locator("main").innerText()),
+  chequear(await r.locator('nav[aria-label="Listas"] a').count() === 6 && await r.locator("[data-tablero-retencion]").count() === 0 && !/en riesgo/.test(await r.locator("main").innerText()),
     "la recepción ve las listas, sin la plata en riesgo ni el tablero (D2)", "la recepción ve plata o no ve las listas");
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 } catch (e) {

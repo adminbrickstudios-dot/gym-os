@@ -48,7 +48,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -71,6 +71,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && mostrador ? rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: id }) : Promise.resolve([]),
       // APP-8: si pidió la baja desde la app.
       rpc<{ pedido_id: string; motivo: string; nota: string | null } | null>("pedido_baja_socio", { p_socio_id: id }),
+      // COM-1: si está en riesgo de irse, el porqué (los mismos que ven Retención).
+      pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ nivel: "alto" | "medio"; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }) : Promise.resolve([]),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -112,6 +114,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {riesgo[0] && (
+            <p className={`mensaje ${riesgo[0].nivel === "alto" ? "mensaje-error" : "mensaje-aviso"} mt-6`} data-riesgo-ficha={riesgo[0].nivel}>
+              🎯 <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>
+            </p>
+          )}
           {!s.dado_de_baja_en && (
             <div className="flex flex-wrap gap-2 mt-6">
               {!v.puede || v.color === "amarillo"

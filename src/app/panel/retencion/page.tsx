@@ -13,10 +13,13 @@ export const metadata: Metadata = { title: "Retención" };
 
 type Fila = { socio_id: string; nombre: string; telefono: string | null; lista: string; texto: string; debe: number | null; monto_mensual: number | null;
   visitas_por_semana: number | null; ultimo_contacto_en: string | null; ultimo_contacto_por: string | null; ultimo_contacto_resultado: string | null; mensaje: string | null };
+type Riesgo = { socio_id: string; nombre: string; telefono: string | null; nivel: "alto" | "medio"; porque: string[]; mensaje: string | null };
 type Resumen = { plata_en_riesgo: number | null; listas: Record<string, number> };
 type Tablero = { semanas: { dia: string; al_dia: number }[]; altas_mes: number; bajas_mes: number; altas_mes_anterior: number; bajas_mes_anterior: number };
 
 const LISTAS = [
+  // COM-1: los que todavía pagan pero muestran señales de irse (lo calcula la base al abrir).
+  { clave: "riesgo", emoji: "🎯", titulo: "En riesgo", ayuda: "Todavía pagan, pero algo cambió: escribiles antes de que se vayan" },
   { clave: "vencido", emoji: "🔴", titulo: "Vencidos", ayuda: "Les venció y no pagaron" },
   { clave: "por_vencer", emoji: "⏰", titulo: "Por vencer", ayuda: "Vencen en los próximos días" },
   { clave: "nuevo", emoji: "🌱", titulo: "Nuevos que no vienen", ayuda: "Se anotaron hace poco y aflojaron" },
@@ -41,13 +44,14 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     // D2 (RET-2): la recepción también, sin la plata.
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const gestion = panel.yo.rol !== "recepcion";
-    const [resumen, todas, etiquetas, conEtiqueta, tablero] = await Promise.all([
+    const [resumen, todas, etiquetas, conEtiqueta, tablero, riesgoTodos] = await Promise.all([
       rpc<Resumen>("retencion_resumen", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Fila[]>("retencion", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<{ id: string; nombre: string; socios: number }[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       etiqueta ? rpc<string[]>("socios_con_etiqueta", { p_gimnasio_id: panel.gimnasio.id, p_etiqueta_id: etiqueta }) : Promise.resolve(null),
       // RET-1: socios al día (12 semanas), altas y bajas del mes.
       gestion ? rpc<Tablero>("tablero_retencion", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
+      rpc<Riesgo[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const hoyAlDia = tablero?.semanas.at(-1)?.al_dia ?? 0;
     const hace4 = tablero?.semanas.at(-5)?.al_dia ?? hoyAlDia;
@@ -55,13 +59,15 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     // Filtrar por etiqueta solo elige filas: quién está en cada lista lo sigue diciendo la base.
     const ids = conEtiqueta ? new Set(conEtiqueta) : null;
     const filas = ids ? todas.filter((f) => ids.has(f.socio_id)) : todas;
+    const riesgo = ids ? riesgoTodos.filter((r) => ids.has(r.socio_id)) : riesgoTodos;
+    const cuantos = (clave: string) => clave === "riesgo" ? riesgo.length : ids ? filas.filter((f) => f.lista === clave).length : resumen.listas[clave] ?? 0;
     const url = (l: string, e: string | null) => `/panel/retencion?lista=${l}${e ? `&etiqueta=${e}` : ""}`;
-    const lista = LISTAS.find((l) => l.clave === pedida) ?? LISTAS.find((l) => (resumen.listas[l.clave] ?? 0) > 0) ?? LISTAS[0];
+    const lista = LISTAS.find((l) => l.clave === pedida) ?? LISTAS.find((l) => cuantos(l.clave) > 0) ?? LISTAS[0];
     const zona = panel.gimnasio.zona_horaria;
     const visibles = filas.filter((f) => f.lista === lista.clave);
     // AUD-10: a los que deben, cobrarles desde la fila (si Vender está y el gimnasio cobra membresía).
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas) && panel.cobra.membresia && ["vencido", "por_vencer"].includes(lista.clave);
-    const otra = LISTAS.find((l) => l.clave !== lista.clave && (ids ? filas.filter((f) => f.lista === l.clave).length : resumen.listas[l.clave] ?? 0) > 0);
+    const otra = LISTAS.find((l) => l.clave !== lista.clave && cuantos(l.clave) > 0);
     return (
       <>
         <Encabezado emoji="📉" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
@@ -83,7 +89,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           {LISTAS.map((l) => (
             <Link key={l.clave} href={url(l.clave, etiqueta)} aria-current={l.clave === lista.clave ? "page" : undefined}
               className={`boton !min-h-12 whitespace-nowrap ${l.clave === lista.clave ? "!border-[var(--acento)]" : ""}`}>
-              {l.emoji} {l.titulo} <span className="numero text-lg texto-suave">{ids ? filas.filter((f) => f.lista === l.clave).length : resumen.listas[l.clave] ?? 0}</span>
+              {l.emoji} {l.titulo} <span className="numero text-lg texto-suave">{cuantos(l.clave)}</span>
             </Link>
           ))}
         </nav>
@@ -94,7 +100,20 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </nav>
         )}
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
-        {visibles.length === 0 ? (
+        {lista.clave === "riesgo" ? (riesgo.length === 0 ? (
+          <Vacio emoji="🎉" titulo="Nadie en riesgo">
+            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>.</> : "Los que pagan vienen como siempre. Se vuelve a calcular cada vez que abrís."}
+          </Vacio>
+        ) : (
+          <ul className="space-y-2" data-riesgo={riesgo.length}>
+            {riesgo.map((r) => (
+              <FilaContacto key={r.socio_id} socioId={r.socio_id} nombre={r.nombre} lista="no_viene"
+                texto={`${r.nivel === "alto" ? "🔴 Riesgo alto" : "🟡 Riesgo medio"} · ${r.porque[0]}`}
+                detalle={r.porque.slice(1).join(" · ") || null}
+                whatsapp={linkWhatsappSocio(r.telefono, r.mensaje)} puedeAnotar />
+            ))}
+          </ul>
+        )) : visibles.length === 0 ? (
           <Vacio emoji="🎉" titulo="Nadie en esta lista">
             {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>: ahí sí hay a quién escribirle.</> : "Nadie se está yendo. Volvé mañana: se calcula sola."}
           </Vacio>

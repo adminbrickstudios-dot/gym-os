@@ -403,7 +403,7 @@ bloque 18.
 - [x] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla — verificado: db (sumar-sede: caja sola, repetida y vacía avisan, encargado y recepción no), e2e:cliente (en la tanda)
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
-- [ ] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado
+- [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
 - [ ] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino
 - [ ] COM-3 · 🟢 · Avisar a todos los anotados de una clase
 - [ ] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio

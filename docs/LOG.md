@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-1 · Riesgo de baja
+
+**QUÉ HICE**
+- Retención abre con una lista nueva, "🎯 En riesgo": los que todavía pagan pero muestran señales de irse, cada uno con su nivel (🔴 alto / 🟡 medio), el porqué en una línea ("Venía 3 veces por semana y hace 16 días que no viene · Vence el 11/11 y no renovó") y el WhatsApp con el mensaje de "No viene". La ficha lo dice arriba.
+- Reglas en SQL, sin IA, calculadas al abrir (migración 0121, `riesgo_baja`): viene la mitad o menos que su promedio de las 8 semanas anteriores; reservaba seguido y hace 2 semanas que no reserva; pidió una pausa en el último mes o pidió la baja; y, si ya hay otra señal, que vence en una semana sin renovar. Alto: pidió la baja o dos señales. Los vencidos no entran (ya están en Vencidos).
+- La ven los mismos que Retención (también la recepción, D2). Con 3.000 socios: 0,13 s.
+
+**SIN ARREGLAR**
+- "No abre la app": la app no guarda cuándo se abre, así que no hay de dónde calcularlo. Sumarlo es guardar un hecho nuevo (última vez que abrió la app); lo dejo anotado acá.
+
+**LO QUE NO PUDE VERIFICAR**
+- La pantalla: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-1, panel-retencion).
+
+---
+
 ## 2026-11-05 · REV-1a · "Le prometieron pagar"
 
 **QUÉ HICE**
