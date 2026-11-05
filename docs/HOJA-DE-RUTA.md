@@ -350,7 +350,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio — verificado: db (permisos-equipo: por defecto como antes, solo el dueño, cada interruptor cambia lo que deja la base), e2e:equ-1 (pendiente de la tanda final)
 - [x] EQU-2 · 🟡 D3 · El profe busca socios — verificado: db (profe-busca-socios: solo nombre, foto y semáforo genérico, sin bajas, de afuera no), e2e:equ-2 (pendiente de la tanda final)
 - [x] EQU-3 · 🟢 · Qué hizo cada uno (auditoría) — verificado: db (actividad-equipo: ventas, descuentos, anulaciones, dejados pasar, caja con diferencia; recepción no; encargado según el permiso), e2e:equ-3 (pendiente de la tanda final)
-- [ ] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta
+- [x] DIS-11 · 🟢 · Pulido: Equipo y Mi cuenta — verificado: e2e:dis-11 (pendiente de la tanda final)
 
 ### 13 · Rutinas
 - [ ] RUT-1 · 🟢 · Ejercicios y rutinas del gimnasio

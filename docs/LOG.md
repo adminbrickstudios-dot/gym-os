@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-11 · Pulido de Equipo y Mi cuenta
+
+**QUÉ HICE**
+- Mi cuenta tenía dos verdes (Guardar contraseña y Guardar PIN): ninguno es "la" acción de la pantalla, quedan blancos. Equipo: el verde es "Sumar al equipo".
+- `e2e:dis-11`: Equipo, Qué hizo cada uno y Mi cuenta en el celular (sin desborde, botones de 44 px o más, a lo sumo un verde), capturas `dis11-*`.
+
+---
+
 ## 2026-11-05 · EQU-3 · Qué hizo cada uno
 
 **QUÉ HICE**

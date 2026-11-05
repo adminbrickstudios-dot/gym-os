@@ -17,7 +17,7 @@ export function MiPin() {
       <div className="flex gap-2">
         <input className="campo !w-36 numero text-center tracking-[0.4em]" type="password" inputMode="numeric" maxLength={4} aria-label="PIN nuevo"
           value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
-        <button type="submit" className="boton boton-principal" disabled={ocupado || pin.length !== 4}>Guardar PIN</button>
+        <button type="submit" className="boton" disabled={ocupado || pin.length !== 4}>Guardar PIN</button>
       </div>
       {msj && <p role={msj.ok ? "status" : "alert"} className={`pildora ${msj.ok ? "pildora-verde" : "pildora-rojo"} whitespace-normal`}>{msj.ok ? "✅" : "⚠️"} {msj.texto}</p>}
     </form>

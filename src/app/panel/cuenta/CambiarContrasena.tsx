@@ -17,7 +17,7 @@ export function CambiarContrasena() {
       <input type="password" autoComplete="new-password" className="campo" placeholder="Nueva (8 caracteres o más)" aria-label="Contraseña nueva" value={a} onChange={(e) => setA(e.target.value)} />
       <input type="password" autoComplete="new-password" className="campo" placeholder="Repetila" aria-label="Repetir la contraseña" value={b} onChange={(e) => setB(e.target.value)} />
       {msj.texto && <Mensaje tipo={msj.ok ? "exito" : "error"}>{msj.texto}</Mensaje>}
-      <button type="submit" disabled={ocupado || a.length < 8} className="boton boton-principal">Guardar</button>
+      <button type="submit" disabled={ocupado || a.length < 8} className="boton">Guardar</button>
     </form>
   );
 }
