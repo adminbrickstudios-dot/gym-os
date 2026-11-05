@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
-import { cobrar, preciosPara, type Venta } from "./acciones";
+import { cobrar, comprobante, preciosPara, type Venta } from "./acciones";
 import { anularVenta, pedirAnulacion } from "../ventas-acciones";
+import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
@@ -106,6 +107,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <p className="text-5xl" aria-hidden>✅</p>
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
+        {socio && <MandarComprobante ventaId={venta.venta_id} />}
         <DeshacerVenta ventaId={venta.venta_id} puedeAnular={puedeAnular} socioId={socio?.socio_id ?? null} />
         <div className="flex flex-wrap gap-2 mt-8">
           {/* Vino de la Entrada (ENT-9): vuelve con el socio y su veredicto nuevo, para anotarlo. */}
@@ -303,4 +305,19 @@ function DeshacerVenta({ ventaId, puedeAnular, socioId }: { ventaId: string; pue
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
     </form>
   );
+}
+
+/** VEN-1: el comprobante por WhatsApp, ya escrito (Configuración → Mensajes). Se arma apenas se cobra, así el toque abre WhatsApp directo. */
+function MandarComprobante({ ventaId }: { ventaId: string }) {
+  const [c, setC] = useState<{ link: string | null; mensaje: string; error?: string } | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    comprobante(ventaId).then((r) => { if (vivo) setC({ link: r.error ? null : linkWhatsappSocio(r.telefono, r.mensaje), mensaje: r.mensaje ?? "", error: r.error }); });
+    return () => { vivo = false; };
+  }, [ventaId]);
+  if (!c) return null;
+  if (c.error) return <p role="alert" className="pildora pildora-rojo mt-5">⚠️ {c.error}</p>;
+  return c.link
+    ? <a href={c.link} target="_blank" rel="noopener noreferrer" className="boton mt-5" data-comprobante>🧾 Mandar comprobante por WhatsApp</a>
+    : <p className="mt-5 texto-suave" data-comprobante>Sin celular cargado para mandarle el comprobante.</p>;
 }

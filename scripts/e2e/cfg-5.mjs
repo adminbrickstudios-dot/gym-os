@@ -37,7 +37,7 @@ try {
     await esperarRespuesta("por_vencer", () => tarjeta("por_vencer").locator('button:has-text("Volver al original")').click());
   }
 
-  chequear(await p.locator("[data-mensaje]").count() === 9, "los 9 mensajes están", `hay ${await p.locator("[data-mensaje]").count()} mensajes`);
+  chequear(await p.locator("[data-mensaje]").count() === 10, "los 10 mensajes están", `hay ${await p.locator("[data-mensaje]").count()} mensajes`);
   const originalRetencion = (await mensajesDe(p, "/panel/retencion?lista=por_vencer")).filter(Boolean);
   chequear(originalRetencion.length > 0 && originalRetencion.every((m) => /Te recordamos/.test(m)), `Retención arma ${originalRetencion.length} mensajes con el texto original`, "Retención no tiene mensajes por vencer");
   await abrir();

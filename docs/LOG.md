@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · VEN-1 · Comprobante de pago por WhatsApp
+
+**QUÉ HICE**
+- Después de cobrarle a un socio, Vender muestra "🧾 Mandar comprobante por WhatsApp", que abre su chat (o el del responsable, si es menor) con el texto ya escrito.
+- El texto es un mensaje más en Configuración → Mensajes ("Comprobante de pago"). Usa monto, detalle, fecha y "Quedás al día hasta el …" cuando corresponde.
+- Migración `20261104006400_comprobante_pago.sql` (`comprobante_venta`, copia del catálogo de mensajes). `supabase/pruebas/comprobante-pago.test.mjs`. Actualicé `mensajes.test` y `cfg-5` (10 mensajes). `scripts/e2e/ven-1.mjs`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que WhatsApp lo abra en un celular de verdad. Verifiqué el link (`wa.me` con el texto), no el teléfono.
+
+---
+
 ## 2026-11-05 · AUD-6 · Vender, Caja y Transferencias botón por botón
 
 **QUÉ HICE**

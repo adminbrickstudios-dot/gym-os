@@ -30,3 +30,9 @@ export async function cobrar(datos: {
     return { venta };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** VEN-1: a qué celular y qué texto, armado en la base con el mensaje editable del gimnasio. */
+export async function comprobante(ventaId: string): Promise<{ telefono?: string | null; mensaje?: string; error?: string }> {
+  try { return await rpc<{ telefono: string | null; mensaje: string }>("comprobante_venta", { p_venta_id: ventaId }); }
+  catch (e) { return { error: (e as Error).message }; }
+}
