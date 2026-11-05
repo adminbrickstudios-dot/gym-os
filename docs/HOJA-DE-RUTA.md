@@ -95,6 +95,10 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-6 | Formas de entrada: hoy solo existe la recepción, así que se muestra prendida y bloqueada (es el respaldo); QR del socio, tablet en la puerta y llavero aparecen apagados como "todavía no disponible". Cada ítem ENT que los construya prende su interruptor. El punto del LISTO SI "una forma apagada no aparece en Entrada ni en la app" queda para esos ítems: hoy no hay ninguna otra forma que esconder. | No se muestra un interruptor que no hace nada. | Interruptores en Configuración → Reglas. |
 | 2026-11-04 | CFG-7 | Con la sección Transferencias apagada, la app ya no pide comprobantes y la base no los acepta; el mostrador sigue cobrando por transferencia. | Nadie podía aprobarlos: el socio pagaba y quedaba sin acreditar. Es restringir, nunca dar más. | Prender Transferencias. |
 | 2026-11-04 | CFG-7 | Apagar una sección no se prohíbe nunca: se arreglan las pantallas que llevaban a ella (un nombre queda sin link, un botón desaparece). | Lo pide el ítem; cada gimnasio decide qué usa. | `LinkPanel` / `rutaDisponible`. |
+| 2026-11-04 | CFG-8 | El historial lo escriben triggers en las tablas de configuración (configuración, nombre, página, sedes, mensajes), no `guardar_configuracion`. | Así queda todo cambio, venga de la pantalla, de soporte o de otra función; y una guardada que no cambia nada no deja fila. | Escribirlo desde cada función de guardado. |
+| 2026-11-04 | CFG-8 | El historial va en su propia pestaña "🕓 Cambios" (la última de Configuración), no al pie de cada pestaña. | Con diez pestañas, "al pie" quedaba en una sola o repetido en todas. | Mostrar los últimos cambios de cada pestaña al pie de esa pestaña. |
+| 2026-11-04 | CFG-8 | El historial no se puede borrar ni editar desde ningún panel, ni por el dueño; la pantalla muestra los últimos 100 y el super admin los últimos 20. | Es un registro: si el dueño lo pudiera borrar no serviría para "¿quién subió el descuento?". | Dejar que el dueño lo limpie. |
+| 2026-11-04 | CFG-8 | Lo que cambió sin una persona (el armado del demo, migraciones) aparece como "El sistema"; alguien que ya no está en el equipo, como tal. | No inventar un autor. | — |
 
 ---
 
@@ -163,7 +167,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio — verificado: e2e:onb-1 (12 pasos: subir el logo marca su paso, publicar la página, ocultar/mostrar), db:pruebas 196 con la 0026, npm run e2e completo y verificar en verde
 - [x] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención — verificado: e2e:cfg-6 (9 pasos: reingreso, 1 día mueve 47 vencidos a “se fue”, formas de entrada), db:pruebas 198, npm run e2e completo y verificar en verde
 - [x] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras — verificado: e2e:cfg-7 (18 pasos: cada sección apagada, 14 pantallas sin links a ella, app sin comprobantes), db:pruebas 200 con la 0027, npm run e2e completo y verificar en verde
-- [~] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo)
+- [x] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo) — verificado: e2e:cfg-8 (11 pasos: cambio con quién y cuándo, guardar sin cambio real no suma filas, encargado, super admin, celular), db:pruebas con la 0028 (e2e completo y verificar corriendo)
 - [ ] CFG-9 · 🟢 · Aviso de contraste al elegir colores
 
 ### 2 · Página del gimnasio

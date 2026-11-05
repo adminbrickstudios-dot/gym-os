@@ -30,7 +30,7 @@ try {
   await capturar(p, "cfg1-compu-gimnasio", true);
 
   // ── Pestañas: todas abren, y sin cambios ningún Guardar está activo ──
-  const claves = ["gimnasio", "marca", "pagina", "cobros", "reglas", "horarios", "mensajes", "clases", "secciones", "direccion"];
+  const claves = ["gimnasio", "marca", "pagina", "cobros", "reglas", "horarios", "mensajes", "clases", "secciones", "direccion", "cambios"];
   let abren = 0, activos = 0;
   for (const k of claves) {
     await ir(k); abren++;

@@ -9,6 +9,7 @@ import { PESTANAS, type ClavePestana } from "./pestanas";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
 import { HorariosYCierres, type CierrePanel } from "./Horarios";
 import { Mensajes, type MensajePanel } from "./Mensajes";
+import { Historial, type Cambio } from "./Historial";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 
@@ -144,8 +145,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar, pestanaInicial, direccionPagina }: {
-  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina }: {
+  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string;
 }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
@@ -514,6 +515,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
         <HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} />
       )}
       {pestana === "mensajes" && <Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} />}
+      {pestana === "cambios" && <Historial cambios={cambios} />}
     </div>
   );
 }

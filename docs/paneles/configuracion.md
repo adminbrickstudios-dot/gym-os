@@ -88,3 +88,11 @@ apagada, 14 pantallas abiertas buscando links a ella.
 | Caja | Efectivo | Vender con los otros medios; la base rechaza efectivo (0023) | Inicio no muestra "la caja está cerrada" (ya lo hacía la base) |
 | Transferencias | Aprobar comprobantes | Cobrar por transferencia en el mostrador | La app no pide comprobantes y la base no los acepta (0027) |
 | Clases (en Secciones) | Clases en el menú, Inicio, la app y la pestaña de Configuración | Todo lo demás | — (ya estaba) |
+
+## Historial de cambios (CFG-8)
+
+Pestaña "🕓 Cambios" (dueño y encargado, solo lectura) y "Últimos cambios de
+configuración" en el super admin. Cada fila: qué campo, de qué a qué, quién y
+cuándo (hora del gimnasio). Lo escriben triggers en la base, nunca la
+pantalla: queda cualquier cambio venga de donde venga, y guardar sin cambiar
+nada no deja fila. No se puede borrar. Probado con `npm run e2e:cfg-8`.

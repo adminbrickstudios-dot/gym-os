@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-8 · Historial de cambios de configuración
+
+**QUÉ HICE**
+- Migración `20261104002800_historial_configuracion.sql`: tabla `historial_configuracion` (gimnasio, campo, antes, después, quién, cuándo) con FK compuesta y RLS (leen dueño y encargado; sin políticas de escritura). La escriben triggers en `configuracion_gimnasio`, `gimnasios` (nombre), `landing_gimnasio` (publicada, WhatsApp, Instagram, mail), `sedes` y `plantillas_mensaje`: una fila por campo que de verdad cambió. `historial_configuracion(gimnasio, límite)` lo devuelve en palabras ("Avisar que vence (días antes)", "Sí/No", "QR del socio", la hora en la zona del gimnasio) para dueño, encargado y BRIK; recepción y profe reciben error. Verificado: `supabase/pruebas/historial-configuracion.test.mjs` (2 pruebas: una fila por campo cambiado y no por campo enviado, quién, valores en palabras; recepción con error, nadie inserta ni borra desde el cliente, BRIK lee).
+- Configuración → pestaña "🕓 Cambios": qué, de qué a qué, quién y cuándo, lo más nuevo arriba. El super admin ve los últimos 20 en el detalle del gimnasio.
+- `scripts/e2e/cfg-8.mjs` (11 pasos): la dueña cambia "Avisar que vence" y aparece la fila con su nombre y la hora; guardar un WhatsApp escrito de otra forma que da el mismo número no suma filas; el encargado lo lee; el super admin lo ve; celular sin desborde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En el celular, la fila deslizable de pestañas no mostraba la pestaña abierta cuando se entraba por un link (`?pestana=cambios` abría con "Gimnasio, Marca, Página" a la vista). Ahora la pestaña activa queda a la vista (`Pestanas`, sirve para todas las pantallas con pestañas). Lo prueba cfg-8.
+- El WhatsApp escrito "00 0011-1222" se guarda como "+00111222" (un número que no existe) sin avisar: la normalización de `guardar_datos_gimnasio` (0021) toma el "00" como prefijo internacional. No lo toqué (es otra migración ya entregada); va abajo en SIN ARREGLAR.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0028).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- WhatsApp con "00" adelante se guarda mal (ver arriba): hace falta una migración nueva que lo rechace con un mensaje ("escribilo con característica, sin 00").
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0028 contra la base real: probada en la base local.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-7 · Apagar una sección avisa qué deja de andar en las otras
 
 **QUÉ HICE**
