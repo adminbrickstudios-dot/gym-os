@@ -371,7 +371,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] ADM-6 · 🟢 · Novedades de Gym OS para todos los dueños — verificado: db (publicar, el dueño la ve hasta cerrarla, retirar, recepción no, solo el admin publica), e2e:adm-6 (pendiente de la tanda final)
 - [x] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio — verificado: db (abono-brik: vencido no vende ni edita, la puerta sigue, el admin sí, pagar destraba; db:pruebas completo con los triggers), e2e:adm-3 (pendiente de la tanda final)
 - [x] ADM-3 · 🟡 D13 · Suscripción del gimnasio a BRIK — verificado: db (abono-brik: planes solo el admin, 14 días de gracia, por vencer, montos solo al dueño), e2e:adm-3 (pendiente de la tanda final)
-- [ ] DIS-15 · 🟢 · Pulido: Super admin
+- [x] DIS-15 · 🟢 · Pulido: Super admin — verificado: e2e:dis-15 (pendiente de la tanda final)
 - [ ] DIS-14 · 🟢 · Pulido: Ingresar, elegir gimnasio, no encontrado
 
 ### 16 · Cierre

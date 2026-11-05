@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-15 · Pulido del super admin
+
+**QUÉ HICE**
+- Un solo verde: en la lista, cada gimnasio tenía su "Entrar al panel" verde (más "Crear gimnasio"); ahora el verde es crear. En el detalle, "Sumar" persona y "Sumar" dirección dejan de ser verdes (queda "Entrar al panel").
+- `e2e:dis-15`: lista y detalle en compu y celular (sin desborde, botones altos, un verde), capturas `dis15-*`.
+
+---
+
 ## 2026-11-05 · ADM-3 y ADM-2 · Abono de Gym OS y suspensión gradual (D13, D11)
 
 **QUÉ HICE**

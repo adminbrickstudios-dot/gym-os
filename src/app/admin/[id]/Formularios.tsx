@@ -16,7 +16,7 @@ export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
       <label className="space-y-1"><span className="etiqueta">Rol</span>
         <select name="rol" className="campo" defaultValue="dueno">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]}</option>)}</select></label>
       <div className="sm:col-span-3"><ContrasenaNueva r={estado} /></div>
-      <div className="sm:col-span-3"><button className="boton boton-principal" disabled={guardando}>{guardando ? "Sumando…" : "➕ Sumar"}</button></div>
+      <div className="sm:col-span-3"><button className="boton" disabled={guardando}>{guardando ? "Sumando…" : "➕ Sumar"}</button></div>
     </form>
   );
 }
@@ -52,7 +52,7 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
         <input type="hidden" name="gimnasio_id" value={gimnasioId} />
         <div className="flex flex-wrap gap-2">
           <input name="host" required className="campo flex-1 min-w-56" placeholder="olympo-gym.vercel.app" aria-label="Dirección" />
-          <button className="boton boton-principal" disabled={guardando}>{guardando ? "Sumando…" : "Sumar"}</button>
+          <button className="boton" disabled={guardando}>{guardando ? "Sumando…" : "Sumar"}</button>
         </div>
         <ContrasenaNueva r={estado} />
       </form>

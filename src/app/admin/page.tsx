@@ -96,7 +96,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 </dl>
               </div>
               <div className="flex flex-wrap gap-2">
-                <BotonEntrar gimnasioId={g.gimnasio_id} />
+                <BotonEntrar gimnasioId={g.gimnasio_id} principal={false} />
                 <Link href={`/admin/${g.gimnasio_id}`} className="boton">⚙️ Equipo, claves y direcciones</Link>
                 <a href={`/g/${g.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
               </div>
