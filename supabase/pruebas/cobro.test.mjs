@@ -150,3 +150,13 @@ test("la recepción cobra por RPC; un socio no puede cobrarse", async () => {
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [t.ctx.socios.vence_hoy, us]);
   await t.comoUsuario(us, () => t.falla(() => t.q(`select public.cobrar_cuota($1, $2, 'transferencia')`, [t.ctx.socios.vence_hoy, t.sede]), /Sin permiso/));
 });
+
+test("trimestral (PLA-1): una cuota cubre 3 meses", async () => {
+  const [{ id: p }] = await t.q(`insert into public.planes (gimnasio_id, tipo, nombre, duracion_meses, renovacion)
+                                 values ($1, 'membresia', 'Trimestral', 3, 'desde_pago') returning id`, [t.g]);
+  await t.q(`insert into public.precios_plan (gimnasio_id, plan_id, monto, vigente_desde) values ($1, $2, 81000, '2020-01-01')`, [t.g, p]);
+  const s = await socioConPlan("Trimestral", p, []);
+  const r = await cobrar(s);
+  assert.match(r.veredicto.texto, /vence el 13\/02$/);  // 14/11 + 3 meses, último día 13/02
+  assert.equal((await estado(s, await t.en(sumarDias(HOY, 80)))).color, "verde");
+});
