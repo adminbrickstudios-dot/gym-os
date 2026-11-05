@@ -96,3 +96,7 @@ export async function quitarFoto(socioId: string): Promise<{ error?: string }> {
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Grupo familiar (SOC-5) ──────────────────────────────────────────
+export async function vincularFamilia(socioId: string, otroId: string) { return hacer(socioId, async () => { await rpc("vincular_familia", { p_socio_id: socioId, p_otro_id: otroId }); revalidatePath(`/panel/socios/${otroId}`); }); }
+export async function sacarDeFamilia(socioId: string, quienId: string) { return hacer(socioId, async () => { await rpc("sacar_de_familia", { p_socio_id: quienId }); revalidatePath(`/panel/socios/${quienId}`); }); }

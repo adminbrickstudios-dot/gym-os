@@ -15,6 +15,24 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-5 · Grupo familiar
+
+**QUÉ HICE**
+- En la ficha (Resumen) aparece "👨‍👩‍👧 Familia": se suma a otro socio buscándolo por nombre o DNI; cada familiar con su punto de estado, link a su ficha y "Sacar". Sin descuento automático (eso es D14).
+- Migración `20261104004100_grupo_familiar.sql`: tabla `grupos_familiares`, `socios.grupo_familiar_id` (FK compuesta), `familia_socio`, `vincular_familia` (si los dos ya tenían familia, se juntan), `sacar_de_familia` (una familia de uno se deshace). Mostrador para arriba; el profe no.
+- `supabase/pruebas/grupo-familiar.test.mjs` y `scripts/e2e/soc-5.mjs` (4 pasos, celular).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En el celular la fila de pestañas de la ficha empujaba la página 24 px a la derecha cuando una tarjeta del Resumen era ancha: `.pestanas` ahora tiene `min-width: 0; max-width: 100%` (arreglo trivial, al lado).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0041).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0041 contra la base real (probada local).
+
+---
+
 ## 2026-11-04 · SOC-8 · Encontrar y unir socios duplicados
 
 **QUÉ HICE**

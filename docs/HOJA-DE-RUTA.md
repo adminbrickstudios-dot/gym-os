@@ -208,7 +208,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] SOC-6 · 🟢 · Cumpleaños — verificado: db (cumpleanos: momento fijo, 29/2 el 28/2 en años no bisiestos, bajas no, mensaje), e2e:soc-6 (3 pasos: Inicio con “Saludar” armado, edad, el profe no); la bandeja de avisos la suma AVI-1
 - [x] SOC-7 · 🟢 · Foto del socio desde la cámara — verificado: db (foto-socio: ruta de la base, otra ruta no, el profe la ve, un ajeno no), e2e:soc-7 (6 pasos con la cámara de prueba de Chrome: ficha 480×480, bucket privado, Entrada, sin sesión no, cambiar borra la anterior, quitar)
 - [x] SOC-8 · 🟢 · Encontrar y unir socios duplicados — verificado: db (unir-socios: encuentra por celular, mueve entradas, cuota (queda verde), notas y etiquetas sin repetir, registro; frena membresías dobles y DNI distinto; solo dueño; los hechos siguen fijos), e2e:soc-8 (7 pasos)
-- [ ] SOC-5 · 🟢 · Grupo familiar
+- [x] SOC-5 · 🟢 · Grupo familiar
 - [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
 - [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
 - [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
