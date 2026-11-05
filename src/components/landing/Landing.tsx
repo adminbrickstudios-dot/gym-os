@@ -116,7 +116,7 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; wh
       )}
       {altas && p.id
         ? <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a href={`/hacete-socio?plan=${p.id}`} className="boton boton-principal">💪 Elegir este</a>
+            <a href={`/hacete-socio?plan=${p.id}`} className="boton">💪 Elegir este</a>
             {link && <a href={link} target="_blank" rel="noopener noreferrer" className="texto-suave underline underline-offset-4">Consultar</a>}
           </div>
         : link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
@@ -335,7 +335,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton boton-principal">💪 Hacete socio</a>}
+            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Hacete socio</a>}
             {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
             <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           </nav>

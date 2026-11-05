@@ -15,6 +15,28 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · DIS-13 · Pulido: Página del gimnasio
+
+**QUÉ HICE**
+- Un solo verde por pantalla: "Hacete socio" de arriba y "Elegir este" de cada plan pasaron a botón normal (el verde queda para el botón principal de la portada).
+- Hacete socio: al elegir plan o forma de pago con el teclado se ve dónde está el foco.
+- `loading.tsx` con la forma real en Hacete socio, Tu página y Prospectos.
+- Capturas antes y después en `.local/capturas/dis13-*` (página y alta, compu y celular). Ningún botón queda bajo 52 px.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Nada nuevo.
+
+**QUÉ CORRÉS VOS** / **QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- La portada en compu con texto y sin foto deja la mitad derecha vacía: con foto de portada (PAG-1) se llena. No lo toqué.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió y se midió.
+
+---
+
 ## 2026-11-04 · REG-1 · Hacete socio online desde la página
 
 **QUÉ HICE**

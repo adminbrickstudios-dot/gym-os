@@ -66,7 +66,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         <legend className="titulo text-2xl mb-3">1. Tu plan</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">
           {planes.map((p) => (
-            <label key={p.id} className={`tarjeta p-5 cursor-pointer border-2 ${plan === p.id ? "border-[var(--acento)]" : "border-transparent"}`} data-plan={p.nombre}>
+            <label key={p.id} className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${plan === p.id ? "border-[var(--acento)]" : "border-transparent"}`} data-plan={p.nombre}>
               <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id ?? null)} className="sr-only" />
               <span className="block titulo text-xl">{p.nombre}</span>
               {datos.mostrar_precios && p.precio != null && <span className="block mt-2"><span className="numero text-3xl">{formatearPesos(p.precio)}</span> <span className="texto-suave">{unidadPlan(p)}</span></span>}
@@ -99,13 +99,13 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         <legend className="titulo text-2xl mb-3">4. Cómo pagás</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Cómo pagás">
           {datos.transferencia && (
-            <label className={`tarjeta p-5 cursor-pointer border-2 ${medio === "transferencia" ? "border-[var(--acento)]" : "border-transparent"}`}>
+            <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "transferencia" ? "border-[var(--acento)]" : "border-transparent"}`}>
               <input type="radio" name="medio" value="transferencia" checked={medio === "transferencia"} onChange={() => setMedio("transferencia")} className="sr-only" />
               <span className="block titulo text-xl">🏦 Transferencia</span>
               <span className="block texto-suave text-sm mt-1">Te mostramos el alias y mandás el comprobante desde la app.</span>
             </label>
           )}
-          <label className={`tarjeta p-5 cursor-pointer border-2 ${medio === "mostrador" ? "border-[var(--acento)]" : "border-transparent"}`}>
+          <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "mostrador" ? "border-[var(--acento)]" : "border-transparent"}`}>
             <input type="radio" name="medio" value="mostrador" checked={medio === "mostrador"} onChange={() => setMedio("mostrador")} className="sr-only" />
             <span className="block titulo text-xl">🛎️ En el gimnasio</span>
             <span className="block texto-suave text-sm mt-1">Pagás en recepción cuando vengas.</span>

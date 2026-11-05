@@ -189,7 +189,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla — verificado: e2e:pag-2 (10 pasos: estado, copiar link, WhatsApp con el link, og:title/description/image + /og se abre, borrador → próximamente → publicar, encargado comparte sin publicar, celular)
 - [x] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página — verificado: db (prospectos, 4 pruebas: sin sesión solo publicada y visible, sin duplicar, tope 30/h, permisos y "socio" solo al dar de alta), e2e:pag-3 (16 pasos, el de punta a punta de PAG-1 a 3: editar → publicar → visitante en celular → Prospectos → escribirle → vino → Hacerlo socio → ficha)
 - [x] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`) — verificado: db (alta-online, 4 pruebas: apagado por defecto y sin reglamento no prende, alta sin cobertura con reglamento aceptado, sin duplicar DNI ni celular, menores al gimnasio, transferencia solo si el gimnasio la recibe, versiones, anon no lee), e2e:reg-1 (13 pasos: transferencia y mostrador desde la página, Entrada no lo deja pasar sin pagar con su motivo, Prospectos, apagar); MercadoPago queda para MP-1/MP-2 (🔌)
-- [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
+- [x] DIS-13 · 🟢 · Pulido: Página del gimnasio — verificado: capturas antes/después (dis13-*), botones ≥ 52 px medidos, un solo verde por pantalla, loading con la forma real en Hacete socio, Tu página y Prospectos, foco visible al elegir con teclado; barrido en verde
 - [ ] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots
 
 ### 3 · Socios
