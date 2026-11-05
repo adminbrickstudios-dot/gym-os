@@ -7,6 +7,8 @@ import { fechaLarga, formatearNumero, formatearPesos, saludo } from "@/lib/forma
 import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { FilaVenta } from "@/components/panel/Venta";
+import type { Venta } from "./ventas-acciones";
 
 type Numero = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" };
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
@@ -37,7 +39,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -48,6 +50,8 @@ export default async function Inicio() {
       rol === "dueno" || rol === "encargado" ? rpc<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // INV-1: los invitados de hoy, en el resumen del dueño.
       rol === "dueno" || rol === "encargado" ? rpc<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // VEN-6: ventas que la recepción pidió anular.
+      rol === "dueno" || rol === "encargado" ? rpc<Venta[]>("pedidos_anulacion_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
@@ -139,6 +143,13 @@ export default async function Inicio() {
             <ul className="space-y-1">
               {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✅" : "⏳"} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
+          </section>
+        )}
+
+        {anular.length > 0 && (
+          <section aria-labelledby="pedidos-anulacion" data-pedidos-anulacion={anular.length}>
+            <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4">↩️ Ventas para anular</h2>
+            <ul className="space-y-2">{anular.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} conSocio />)}</ul>
           </section>
         )}
 

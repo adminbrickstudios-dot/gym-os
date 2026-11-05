@@ -59,17 +59,21 @@ try {
   chequear(/\$33\.000 \(hasta el día 10: \$30\.000\)/.test(await cuota.innerText()), "el aumento programado se ve con su precio por día", await cuota.innerText());
   await cuota.locator('button:has-text("💲 Precios")').click();
   await cuota.locator('button:has-text("Anular ese aumento")').click();
-  await cuota.locator("text=📅 Desde el").waitFor({ state: "detached", timeout: 30000 });
+  await d.waitForFunction((n) => !document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes("📅 Desde el"), `Cuota${s5}`, { timeout: 30000 });
   ok("✕ Anular ese aumento: vuelve a regir solo el de hoy");
   await capturar(d, "pla5-compu-planes");
 
-  // Vender: el pase en efectivo sale $4.500.
-  await d.goto(`${G}/panel/vender`);
+  // Vender: el pase cuesta $4.500 en efectivo y $5.000 por transferencia.
+  await d.goto(`${G}/panel/socios?q=${encodeURIComponent("Testigo Al Día")}`);
+  const sid = (await d.locator('main ul a[href^="/panel/socios/"]').first().getAttribute("href")).split("/").pop();
+  await d.goto(`${G}/panel/vender?socio=${sid}`);
   const boton = d.locator("main button", { hasText: `Pase${s5}` }).first();
   await boton.waitFor({ timeout: 30000 });
-  await boton.click();
-  const total = await d.locator("main").innerText();
-  chequear(/\$4\.500/.test(total), "Vender: el pase en efectivo se cobra $4.500", "Vender no muestra el de efectivo");
+  await d.locator('button[aria-pressed]:has-text("Efectivo")').click();
+  await d.waitForFunction((n) => [...document.querySelectorAll("main button")].some((b) => b.textContent.includes(n) && b.textContent.includes("$4.500")), `Pase${s5}`, { timeout: 30000 });
+  await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
+  await d.waitForFunction((n) => [...document.querySelectorAll("main button")].some((b) => b.textContent.includes(n) && b.textContent.includes("$5.000")), `Pase${s5}`, { timeout: 30000 });
+  ok("Vender: el pase sale $4.500 en efectivo y $5.000 por transferencia");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 
   const c = await pagina(b, CELU);

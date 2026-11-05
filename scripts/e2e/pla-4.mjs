@@ -51,7 +51,8 @@ try {
   await d.locator('main a:has-text("Volver a Planes")').click();
   await d.waitForURL(/\/panel\/planes$/);
   await plan(d, `Uno${s5}`).locator("text=📅 Desde el").waitFor({ timeout: 30000 });
-  chequear(/\$31\.234[\s\S]*\$34\.000/.test(await plan(d, `Uno${s5}`).innerText()), "Planes: hoy $31.234 y 📅 el que viene", await plan(d, `Uno${s5}`).innerText());
+  const fila = await plan(d, `Uno${s5}`).innerText();
+  chequear(/\$31\.234/.test(fila) && /📅 Desde el .*\$34\.000/.test(fila), "Planes: hoy $31.234 y 📅 el que viene", fila);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 
   const c = await pagina(b, CELU);

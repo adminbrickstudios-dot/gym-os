@@ -11,7 +11,16 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
   const [hecho, setHecho] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const correr = (f: () => Promise<{ error?: string }>, ok: string) => empezar(async () => { const r = await f(); if (r.error) setError(r.error); else setHecho(ok); });
-  const abrir = () => empezar(async () => { const r = await verComprobante(p.pago_id); if (r.url) window.open(r.url, "_blank", "noopener"); else setError(r.error ?? null); });
+  // La pestaña se abre en el mismo toque (si se abre después de esperar al servidor, el celular la bloquea) y después se le pone el link.
+  const abrir = () => {
+    const pestana = window.open("", "_blank");
+    empezar(async () => {
+      const r = await verComprobante(p.pago_id);
+      if (r.url && pestana) { pestana.opener = null; pestana.location.href = r.url; }
+      else if (r.url) window.location.href = r.url;
+      else { pestana?.close(); setError(r.error ?? null); }
+    });
+  };
 
   if (hecho) return <li className="tarjeta p-4 texto-suave">{hecho} · {p.socio}</li>;
   return (

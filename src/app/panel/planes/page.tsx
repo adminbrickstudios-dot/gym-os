@@ -29,7 +29,7 @@ export default async function Planes() {
     return (
       <>
         <Encabezado emoji="🏷️" titulo="Planes y precios"
-          accion={planes.some((p) => p.activo && p.precio != null) ? <Link href="/panel/planes/aumento" className="boton">📈 Aumento de precios</Link> : undefined} bajada="Lo que vendés y cuánto cuesta: el precio general y, si querés, uno más barato en efectivo o por pagar antes. Un aumento se programa con fecha y no toca lo ya cobrado." />
+          accion={planes.some((p) => p.activo && p.precio != null) ? <Link href="/panel/planes/aumento" className="boton">📈 Aumento de precios</Link> : undefined} bajada="Lo que vendés y cuánto cuesta. Un aumento se programa con fecha y no toca lo ya cobrado." />
         <Editor planes={planes} listas={listas} actividades={actividades} incluyen={incluyen} matriculas={matriculas} productos={productos} zona={panel.gimnasio.zona_horaria} />
       </>
     );

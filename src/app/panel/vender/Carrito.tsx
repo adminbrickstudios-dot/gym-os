@@ -4,8 +4,9 @@ import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
-import { formatearPesos } from "@/lib/formato";
+import { formatearPesos, leerMonto } from "@/lib/formato";
 import { cobrar, preciosPara, type Venta } from "./acciones";
+import { anularVenta, pedirAnulacion } from "../ventas-acciones";
 import { lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
@@ -17,8 +18,10 @@ const MEDIOS: { medio: Medio; texto: string }[] = [
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false }: {
+export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
+  /** Dueño y encargado anulan; la recepción pide (VEN-6). */
+  puedeAnular?: boolean;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
@@ -75,15 +78,17 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const medioPrecio = mixto ? null : medio;
   const sinMedios = medios.length === 0;
   const total = useMemo(() => totalCarrito(lineas, medioPrecio), [lineas, medioPrecio]);
-  const sumaMixto = partes.reduce((s, p) => s + (Number(p.monto) || 0), 0);
-  const usaEfectivo = mixto ? partes.some((p) => p.medio === "efectivo" && Number(p.monto) > 0) : medio === "efectivo";
+  // Montos escritos a mano: "1.500" es mil quinientos, no 1,5 (AUD-6).
+  const monto = (x: string) => { const n = leerMonto(x); return Number.isNaN(n) ? 0 : n; };
+  const sumaMixto = partes.reduce((s, p) => s + monto(p.monto), 0);
+  const usaEfectivo = mixto ? partes.some((p) => p.medio === "efectivo" && monto(p.monto) > 0) : medio === "efectivo";
   const faltaCaja = usaEfectivo && !turnoId && (total ?? 0) > 0;
 
   const confirmar = () => empezar(async () => {
     setError(null);
     if (total == null) { setError("Hay algo en el carrito sin precio cargado"); return; }
     const pagos = total === 0 ? [] : mixto
-      ? partes.filter((p) => Number(p.monto) > 0).map((p) => ({ medio: p.medio, monto: Number(p.monto) }))
+      ? partes.filter((p) => monto(p.monto) > 0).map((p) => ({ medio: p.medio, monto: monto(p.monto) }))
       : medio ? [{ medio, monto: total }] : [];
     const items = lineas.map((l) => ({
       tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
@@ -100,6 +105,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <p className="text-5xl" aria-hidden>✅</p>
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
+        <DeshacerVenta ventaId={venta.venta_id} puedeAnular={puedeAnular} socioId={socio?.socio_id ?? null} />
         <div className="flex flex-wrap gap-2 mt-8">
           {/* Vino de la Entrada (ENT-9): vuelve con el socio y su veredicto nuevo, para anotarlo. */}
           {desdeEntrada && socio && <LinkPanel href={`/panel/entrada?socio=${socio.socio_id}`} className="boton boton-principal">🚪 Volver a la entrada con {socio.nombre.split(" ")[0]}</LinkPanel>}
@@ -185,11 +191,11 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           {otro && (
             <form className="tarjeta p-4 mt-3 flex flex-col sm:flex-row gap-2" onSubmit={(e) => {
               e.preventDefault();
-              if (!otro.descripcion.trim() || !(Number(otro.monto) >= 0)) return;
-              agregar({ tipo: "otro", nombre: otro.descripcion.trim(), precio_fijo: Number(otro.monto) }); setOtro(null);
+              if (!otro.descripcion.trim() || !(leerMonto(otro.monto) >= 0)) { setError("No entiendo el precio: escribilo como 84.500 o 84500,50"); return; }
+              agregar({ tipo: "otro", nombre: otro.descripcion.trim(), precio_fijo: leerMonto(otro.monto) }); setOtro(null);
             }}>
               <input autoFocus className="campo" placeholder="Qué es (ej: candado)" value={otro.descripcion} onChange={(e) => setOtro({ ...otro, descripcion: e.target.value })} />
-              <input className="campo sm:max-w-40" inputMode="decimal" placeholder="Precio" value={otro.monto} onChange={(e) => setOtro({ ...otro, monto: e.target.value.replace(",", ".") })} />
+              <input className="campo sm:max-w-40" inputMode="decimal" placeholder="Precio" value={otro.monto} onChange={(e) => setOtro({ ...otro, monto: e.target.value })} />
               <button type="submit" className="boton">Agregar</button>
             </form>
           )}
@@ -197,7 +203,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       </div>
 
       {/* El ticket */}
-      <aside className="tarjeta p-5 sm:p-6 lg:sticky lg:top-6">
+      <aside data-carrito className="tarjeta p-5 sm:p-6 lg:sticky lg:top-6">
         <h2 className="titulo text-2xl">🧾 Ticket</h2>
         {lineas.length === 0 ? <p className="texto-tenue mt-4">Tocá lo que se lleva.</p> : (
           <ul className="mt-4 divide-y divide-[var(--borde)]">
@@ -215,12 +221,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
-                      : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
+                      : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
                   </div>
                   {l.descuento != null && (
                     <div className="grid grid-cols-[110px_1fr] gap-2 mt-2">
-                      <input className="campo" inputMode="decimal" placeholder="$" value={l.descuento || ""}
-                        onChange={(e) => cambiar(l.clave, { descuento: Number(e.target.value.replace(",", ".")) || 0 })} aria-label="Monto del descuento" />
+                      <input className="campo" inputMode="decimal" placeholder="$" value={l.descuento_texto ?? (l.descuento || "")}
+                        onChange={(e) => cambiar(l.clave, { descuento_texto: e.target.value, descuento: monto(e.target.value) })} aria-label="Monto del descuento" />
                       <input className="campo" placeholder="Motivo (obligatorio)" value={l.descuento_motivo ?? ""}
                         onChange={(e) => cambiar(l.clave, { descuento_motivo: e.target.value })} aria-label="Motivo del descuento" />
                     </div>
@@ -250,7 +256,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                   <select className="campo !min-h-12" value={p.medio} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, medio: e.target.value as Medio } : x)))}>
                     {medios.map((m) => <option key={m.medio} value={m.medio}>{m.texto}</option>)}
                   </select>
-                  <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value.replace(",", ".") } : x)))} />
+                  <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                 </div>
               ))}
               {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
@@ -271,5 +277,29 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `✅ Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
       </aside>
     </div>
+  );
+}
+
+/** Se cobró mal: el dueño o el encargado la anulan acá; la recepción pide que la anulen (VEN-6). */
+function DeshacerVenta({ ventaId, puedeAnular, socioId }: { ventaId: string; puedeAnular: boolean; socioId: string | null }) {
+  const [abierto, setAbierto] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [hecho, setHecho] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ocupado, empezar] = useTransition();
+  if (hecho) return <p role="status" className="mt-5 texto-suave" data-deshacer-hecho>{hecho}</p>;
+  if (!abierto) return <button type="button" className="boton-texto mt-5" onClick={() => setAbierto(true)}>↩️ {puedeAnular ? "Anular esta venta" : "Me equivoqué: pedir que la anulen"}</button>;
+  return (
+    <form className="mt-5 flex flex-col sm:flex-row gap-2" onSubmit={(e) => {
+      e.preventDefault();
+      empezar(async () => {
+        const r = puedeAnular ? await anularVenta(ventaId, motivo, socioId) : await pedirAnulacion(ventaId, motivo);
+        if (r.error) setError(r.error); else setHecho(puedeAnular ? "↩️ Venta anulada: se revirtió lo que habilitó." : "↩️ Pedido enviado: el dueño o el encargado lo ven en Inicio.");
+      });
+    }}>
+      <input autoFocus className="campo" placeholder="Por qué (obligatorio)" aria-label="Motivo de la anulación" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+      <button type="submit" className="boton boton-peligro" disabled={!motivo.trim() || ocupado}>{puedeAnular ? "Anular" : "Pedir"}</button>
+      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+    </form>
   );
 }

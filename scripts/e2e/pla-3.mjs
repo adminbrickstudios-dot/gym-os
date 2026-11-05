@@ -28,7 +28,7 @@ try {
   await d.waitForURL(/\/panel\/vender\?socio=.*cuota=1/, { timeout: 30000 });
   await d.getByText(`Matrícula Mat${s5}`).first().waitFor({ timeout: 30000 });
   ok("Dar de alta y cobrar: la cuota y la matrícula ya en el carrito");
-  chequear(/\$28\.000/.test(await d.locator("aside").innerText()), "total $28.000 (20.000 + 8.000)", await d.locator("aside").innerText());
+  chequear(/\$28\.000/.test(await d.locator("[data-carrito]").innerText()), "total $28.000 (20.000 + 8.000)", await d.locator("[data-carrito]").innerText());
   await capturar(d, "pla3-compu-carrito");
   const id = new URL(d.url()).searchParams.get("socio");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
@@ -45,7 +45,9 @@ try {
   await fila.locator('input[aria-label="Matrícula"]').fill("");
   await fila.locator('button:has-text("Guardar")').click();
   await fila.locator('button:has-text("Editar")').waitFor({ timeout: 30000 });
-  chequear(!/matrícula/.test(await fila.innerText()), "✏️ Editar con la matrícula vacía: el plan queda sin matrícula", await fila.innerText());
+  await d.waitForFunction((n) => !document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes("matrícula"), `Mat${s5}`, { timeout: 15000 }).catch(() => {});
+  const tf = await fila.innerText();
+  chequear(!/matrícula/.test(tf), "✏️ Editar con la matrícula vacía: el plan queda sin matrícula", tf.replace(/\n/g, " | "));
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

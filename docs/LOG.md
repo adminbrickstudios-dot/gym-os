@@ -15,6 +15,44 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · Bloque 5 (Planes y precios) y VEN-6 · AUD-5, PLA-1 a PLA-7, DIS-10, VEN-6
+
+**QUÉ HICE**
+- **AUD-5** (inventario en `docs/paneles/planes.md`, `npm run e2e:planes`, 12 pasos):
+  - Arreglado: "Dejar de vender" borraba las veces por semana, el horario y la descripción. El plan quedaba libre y la puerta dejaba pasar de más. Migración `0055`: `guardar_plan` cambia solo lo que se le manda.
+  - Arreglado: "1500.50" se guardaba como $150.050. `leerMonto()` en `src/lib/formato.ts` (vitest) lee "84.500", "84500,50", "1500.50" y "$ 1.500"; lo que no entiende, lo avisa.
+  - Nuevo: ✏️ Editar plan (nombre, descripción, veces por semana) y producto (nombre y precio). Mensaje cuando no hay productos. Al crear un plan, el formulario se cierra.
+- **PLA-5** · 💲 Precios: el general, el más barato por medio de pago y por pagar antes de un día del mes, desde una fecha. Un aumento programado se puede anular. `0056`, `e2e:pla-5` (9 pasos, incluye Vender en efectivo y por transferencia).
+- **PLA-4** · 📈 Aumento de precios: varios planes, % o monto, redondeo y fecha. La vista previa es la misma cuenta que se guarda. Al terminar, el aviso queda listo para WhatsApp. `0057`, `e2e:pla-4` (7 pasos).
+- **PLA-1** · Mensual, trimestral, semestral y anual, con cuánto da por mes. `e2e:pla-1`: se cobra una cuota trimestral y la Entrada dice que vence a los 3 meses. Prueba nueva en `cobro.test`.
+- **PLA-2** · Horario y veces por semana, con errores que dicen qué poner. Qué clases incluye cada plan. `0058` y validación en `0055`. `e2e:pla-2`: al día pero fuera de horario no entra; con "Todo el día", entra.
+- **PLA-3** · Matrícula por plan, única o anual. Vender la suma con la cuota y la cobra una sola vez. `0059` (copias de `privado.vender` y `precios_venta`). `e2e:pla-3` (6 pasos).
+- **PLA-6** · Cambio de plan: antes de confirmar dice cuántos días pagos pasan y la diferencia por mes. `cambiar_plan` y `asignar_plan` explican por qué no se puede. `0060`, `e2e:pla-6`.
+- **PLA-7** · Recargo por pagar tarde, en Configuración → Cobros. Viene apagado. La base lo exige junto con la cuota; no cobrarlo es un descuento con motivo, con tope. `0061` (copias de configuración, `privado.vender` y `precios_venta`). `e2e:pla-7` (lo vuelve a apagar al final).
+- **DIS-10** · Medí Planes y Aumento en compu y celular (`dis10-*`): sin desborde, sin botones bajos, un solo verde. Nuevo `loading.tsx` en Planes y en Aumento.
+- **VEN-6** · Anular ventas.
+  - Desde la ficha (pestaña Pagos, ahora con el estado de cada venta), desde Vender recién cobrado y desde los pedidos en Inicio.
+  - La recepción lo pide; anulan el dueño o el encargado.
+  - Migración `0062`, `e2e:ven-6` (6 pasos).
+- Pruebas de base nuevas: `editar-plan`, `lista-precios`, `aumento-precios`, `restricciones-plan`, `matricula`, `cambio-plan`, `recargo`, `anular-ventas`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Vender leía "1.500" como $1,50 (en "Otra cosa", en el pago mixto y en el descuento). Caja leía "1500.50" como $150.050. Toca plata, pero entra en AUD-6, que es lo siguiente: los dos usan `leerMonto()`.
+- "🧾 Ver comprobante" en Transferencias abría la pestaña después de esperar al servidor, y el celular la bloquea. Ahora se abre en el mismo toque.
+- Posibles duplicados cortaba en 100 pares sin ordenar. Con muchos nombres parecidos, un par con el mismo celular podía no aparecer. `0063` ordena primero (mismo celular, más nuevos) y después corta.
+- Habilité `npm run e2e:<nombre>` para todas las pruebas de pantalla. Los encabezados ya lo decían, pero en package.json faltaban.
+
+**QUÉ CORRÉS VOS**
+- `aplicar` en la rama, que ahora va de 0020 a 0063.
+
+**SIN ARREGLAR**
+- La matrícula y el recargo no se suman cuando el socio paga por transferencia desde la app: ahí se cobra solo la cuota. Va con PAY-1.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada de lo de arriba quedó sin abrir: cada pantalla se probó con sesión real y cada función de base con pruebas.
+
+---
+
 ## 2026-11-05 · DIS-2 · Pulido de la Entrada
 
 **QUÉ HICE**

@@ -23,6 +23,7 @@ export type Linea = {
   precios?: Precios;       // planes: el precio depende del medio
   precio_fijo?: number;    // productos y "otro"
   descuento?: number;
+  descuento_texto?: string;  // lo que se escribió ("1.500"), para no perder el punto mientras se tipea
   descuento_motivo?: string;
 };
 

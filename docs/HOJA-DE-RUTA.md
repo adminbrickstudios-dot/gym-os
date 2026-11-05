@@ -128,6 +128,14 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | ENT-6 | El QR de la tablet lo firma un secreto de esa tablet (sale del hash de su token); vale un minuto como mucho. Si el socio puede entrar, entra; si no, la app y la tablet le dicen por qué. Nadie deja pasar desde ahí. | Un QR fotografiado de lejos sirve un minuto, no para siempre. | `entrar_por_qr_pared`. |
 | 2026-11-05 | ENT-7 | El llavero lo asigna cualquiera del mostrador desde la ficha; es único por gimnasio y se guarda en mayúsculas sin guiones. En la recepción, un código sin espacios se prueba primero como llavero; si no es de nadie, es una búsqueda común. | El lector escribe el código igual que una persona: así anda con cualquier lector USB. | `asignar_llavero` / `leer_llavero`. |
 | 2026-11-05 | INV-1 | Invita solo un socio que puede entrar hoy. El límite (2 por mes por defecto) es por socio que invita y también por DNI invitado. Un DNI de socio no puede ser invitado. El invitado no cuenta como entrada del socio ni se cobra. | Que nadie entrene gratis rotando de anfitrión; "nunca anónimo". | `privado.validar_invitado`. |
+| 2026-11-05 | AUD-5 | Editar un plan cambia solo lo que se manda; el tipo y la duración no se editan (cambiarían lo ya vendido: para eso, un plan nuevo). | "Dejar de vender" borraba las veces por semana y el horario: el plan quedaba libre en la puerta. | — |
+| 2026-11-05 | PLA-5 | Los precios especiales (por medio o por pagar antes de un día del mes) solo pueden ser más baratos que el general, y el día va del 1 al 28. Se edita la lista entera: un precio nuevo arma una lista nueva y lo que no está deja de regir. La deuda y la página muestran el general. | Cobrar ya usa el menor que aplica (0005): uno más caro nunca se usaría y confundiría. Con la lista entera, subir el general no borra sin avisar el de efectivo. | Recargo por medio (ej. crédito +10%) sería otra regla. |
+| 2026-11-05 | PLA-4 | El aumento aplica el mismo % o monto al general y a los precios especiales; redondeo a $1, 10, 50, 100, 500 o 1.000; más de 200% se rechaza. El aviso a los socios es un texto para copiar a WhatsApp hasta que exista la bandeja (AVI-1). | Lo que se ve en la vista previa es lo que se guarda (misma cuenta en la base). | — |
+| 2026-11-05 | PLA-2 | Horario y veces por semana solo en membresías; las clases incluidas (ninguna tildada = todas) en cualquier plan y solo si el gimnasio usa clases. | La puerta ya los calculaba (0006); faltaba dónde cargarlos. | — |
+| 2026-11-05 | PLA-3 | Matrícula solo en membresías: única o una vez por año. Se cobra en el mostrador (Vender la suma con la cuota); el pago por transferencia desde la app todavía cobra solo la cuota. Una venta anulada la vuelve a deber. | Lo debido sale de lo cobrado, no de una marca. | Sumarla en la app cuando se toque el pago desde la app (PAY-1). |
+| 2026-11-05 | PLA-6 | Cambiar de plan pasa los días pagos 1 a 1 al plan nuevo, aunque cueste distinto; la ficha muestra la diferencia por mes y deja ir a Vender. | D6: sin plata automática. | Prorratear en plata. |
+| 2026-11-05 | PLA-7 | Recargo: el atraso cuenta desde el primer día sin cubrir; con "más de N días" (N de 1 a 60), % de la cuota (hasta 50%) o monto fijo; quien nunca pagó no tiene atraso. La base lo exige junto con la cuota: no cobrarlo es un descuento con motivo, con el tope de la recepción. El pago por transferencia desde la app todavía no lo suma. | D8: siempre visible antes de cobrar, y que la recepción no lo saque sin dejar rastro. | Que la recepción pueda sacarlo libre. |
+| 2026-11-05 | VEN-6 | Anulan el dueño y el encargado (desde la ficha, desde Vender recién cobrado o desde el pedido en Inicio). La recepción pide solo ventas que cobró ella hoy. Si había efectivo de una caja ya cerrada, la devolución sale como retiro de la caja abierta de esa sede (si no hay ninguna abierta, no deja anular y lo dice). | Anular toca plata; el arqueo de una caja contada no se reabre. | — |
 
 ---
 
@@ -241,15 +249,15 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-2 · 🟢 · Pulido: Entrada
 
 ### 5 · Planes y precios
-- [ ] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos
-- [ ] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
-- [ ] PLA-4 · 🟢 · Aumento de precios masivo y programado
-- [ ] PLA-1 · 🟢 · Planes trimestral, semestral y anual
-- [ ] PLA-2 · 🟢 · Planes por horario y por días por semana
-- [ ] PLA-3 · 🟢 · Matrícula / inscripción
-- [ ] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
-- [ ] PLA-7 · 🟡 D8 · Recargo por pagar tarde
-- [ ] DIS-10 · 🟢 · Pulido: Planes y productos
+- [x] AUD-5 · 🟢 · Auditoría botón por botón: Planes y productos
+- [x] PLA-5 · 🟢 · Precio por medio de pago y por día, desde la pantalla
+- [x] PLA-4 · 🟢 · Aumento de precios masivo y programado
+- [x] PLA-1 · 🟢 · Planes trimestral, semestral y anual
+- [x] PLA-2 · 🟢 · Planes por horario y por días por semana
+- [x] PLA-3 · 🟢 · Matrícula / inscripción
+- [x] PLA-6 · 🟡 D6 · Cambio de plan con días a favor
+- [x] PLA-7 · 🟡 D8 · Recargo por pagar tarde
+- [x] DIS-10 · 🟢 · Pulido: Planes y productos
 
 ### 6 · Vender, Caja y Transferencias
 - [ ] AUD-6 · 🟢 · Auditoría botón por botón: Vender, Caja y Transferencias
@@ -257,7 +265,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] VEN-4 · 🟢 · Productos con stock
 - [ ] VEN-3 · 🟡 D14 · Convenios y descuentos automáticos
 - [ ] VEN-5 · 🟡 D5 · Deuda / cuenta corriente
-- [ ] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
+- [x] VEN-6 · 🟢 · Anular una venta desde la caja y la ficha (encargado y dueño, con motivo; la recepción la pide)
 - [ ] CAJ-1 · 🟢 · Historial de turnos de caja
 - [ ] CAJ-2 · 🟢 · Cierre de caja para compartir
 - [ ] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)

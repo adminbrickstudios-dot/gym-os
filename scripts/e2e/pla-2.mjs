@@ -60,9 +60,11 @@ try {
   if (hayClases) { nombreClase = (await clases.first().innerText()).trim().replace(/^\S+\s/, ""); await clases.first().click(); }
   await fila.locator('button:has-text("Guardar")').click();
   await fila.locator('button:has-text("Editar")').waitFor({ timeout: 30000 });
+  await d.waitForFunction((n) => !/ a \d\d:00/.test(document.querySelector(`li[data-plan="${n}"]`)?.textContent ?? ""), `Franja${s5}`, { timeout: 15000 }).catch(() => {});
+  if (hayClases) await d.waitForFunction(([n, c]) => document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes(`solo ${c}`), [`Franja${s5}`, nombreClase], { timeout: 15000 }).catch(() => {});
   const t = await fila.innerText();
   chequear(!/ a \d\d:00/.test(t.split("\n")[1] ?? ""), "“Todo el día”: la lista ya no dice horario", t);
-  if (hayClases) chequear(new RegExp(`solo ${nombreClase}`).test(t), `elegir una clase: “solo ${nombreClase}”`, t);
+  if (hayClases) chequear(new RegExp(`solo ${nombreClase}`).test(t), `elegir una clase: “solo ${nombreClase}”`, `[${nombreClase}] ${t.replace(/\n/g, " | ")}`);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   await d.locator('[data-veredicto="verde"]').waitFor({ timeout: 30000 });
   ok("sin horario, el mismo socio entra");

@@ -6,6 +6,8 @@ import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
+import { FilaVenta } from "@/components/panel/Venta";
+import type { Venta } from "@/app/panel/ventas-acciones";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { Calendario, type Asistencia } from "./Calendario";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
@@ -19,7 +21,6 @@ import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
-const MEDIO: Record<string, string> = { efectivo: "💵 Efectivo", transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago", debito_automatico: "🔁 Débito automático" };
 const RESULTADO: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
 type Plan = { plan_id: string; tipo: string; nombre: string; activo: boolean; precio: number | null };
 
@@ -43,7 +44,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     exigirSeccion(panel, "socios");
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero] = await Promise.all([
+    const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
+    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
@@ -54,6 +56,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       rpc<DatosApto>("apto_socio", { p_socio_id: id }),
       rpc<DatosOrigen>("origen_socio", { p_socio_id: id }),
       rpc<DatosLlavero>("llavero_socio", { p_socio_id: id }),
+      // VEN-6: las ventas con su estado y "Anular" (dueño y encargado).
+      veVentas ? rpc<Venta[]>("ventas_socio", { p_socio_id: id }) : Promise.resolve(null),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -154,26 +158,15 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
 
         </>}
 
-        {pestana === "pagos" && f.pagos && (
+        {pestana === "pagos" && ventas && (
           <section>
             <h2 className="titulo text-3xl mb-4">💵 Pagos</h2>
-            {f.pagos.length === 0 ? <p className="texto-suave">Sin pagos registrados.</p> : (
-              <ul className="space-y-2">
-                {f.pagos.map((p) => (
-                  <li key={p.id} className="tarjeta flex items-center gap-4 px-4 py-3">
-                    <span className="numero text-2xl">{formatearPesos(p.monto)}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{p.detalle ?? "Venta"}</span>
-                      <span className="block text-sm texto-tenue">{fechaCorta(p.fecha, zona)} · {MEDIO[p.medio] ?? p.medio}</span>
-                    </span>
-                    {p.estado !== "aprobado" && <span className={`pildora ${p.estado === "pendiente" ? "pildora-azul" : "pildora-rojo"}`}>{p.estado}</span>}
-                  </li>
-                ))}
-              </ul>
+            {ventas.length === 0 ? <p className="texto-suave">Todavía no se le cobró nada. Lo que se le venda aparece acá.</p> : (
+              <ul className="space-y-2" data-ventas>{ventas.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} />)}</ul>
             )}
           </section>
-                )}
-        {pestana === "pagos" && !f.pagos && <p className="texto-suave">Los pagos los ven el dueño y el encargado.</p>}
+        )}
+        {pestana === "pagos" && !ventas && <p className="texto-suave">Los pagos los ven el dueño y el encargado.</p>}
 
         {pestana === "asistencia" && asistencia && <Calendario a={asistencia} socioId={s.id} />}
 

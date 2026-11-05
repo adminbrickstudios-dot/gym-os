@@ -30,7 +30,7 @@ dueña en compu, encargado en celular, recepción sin acceso.
 
 ## Lo que se pensó en cadena
 
-- Vender y Caja leen montos con su propia cuenta y tienen el mismo problema
+- Vender y Caja leían montos con su propia cuenta y tenían el mismo problema
   ("1.500" en Vender se lee 1,5; "1500.50" en Caja, 150.050). Toca plata: se
   arregla en AUD-6 usando `leerMonto()`.
 - Un precio nuevo arma una lista nueva: si hoy hay un precio en efectivo más

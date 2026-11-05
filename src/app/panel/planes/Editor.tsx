@@ -117,10 +117,15 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
 }
 
 function NuevoPlan() {
-  const [estado, accion, guardando] = useActionState(crearPlan, {});
   const [tipo, setTipo] = useState("membresia");
   const [meses, setMeses] = useState("1");
   const [abierto, setAbierto] = useState(false);
+  // Creado: se cierra el formulario y el plan aparece en su lista.
+  const [estado, accion, guardando] = useActionState(async (prev: { error?: string; ok?: number }, f: FormData) => {
+    const r = await crearPlan(prev, f);
+    if (r.ok) { setAbierto(false); setTipo("membresia"); setMeses("1"); }
+    return r;
+  }, {});
   if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}>➕ Nuevo plan</button>;
   return (
     <form key={estado.ok} action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
