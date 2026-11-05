@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-9 · Cupones
+
+**QUÉ HICE**
+- Planes y precios → "🏷️ Cupones": el dueño crea un código (porcentaje o monto fijo), con tope de usos, fecha hasta la que vale y los planes a los que aplica (ninguno = todos). La lista dice usos y cuántos socios trajo; se desactiva en un toque.
+- En Vender: "Cupón" + "🏷️ Aplicar": la base dice si vale (vencido, agotado o inexistente avisan) y el descuento se carga solo en cada cuota, pase o pack que corresponde, con motivo "Cupón X" (nunca en productos; el monto fijo, una vez). Al cobrar, la venta queda anotada como uso del cupón.
+- El Resultado muestra los cupones usados con cuántos socios trajo cada uno.
+- Migración 0129 (`cupones`, `cupones_usos` con RLS y funciones), prueba de base (2 casos), vitest de `aplicarCupon`, e2e com-9, barrido con /panel/cupones.
+
+**PARA QUE MIRES VOS**
+- Decisión mía: no toqué `vender`. El cupón es un descuento como cualquier otro, así que **sigue valiendo el tope de la recepción** (un cupón de 20% con tope de 10% no pasa para la recepción). Que lo saltee sería darle más permiso: COM-9b. El alta online con cupón también quedó en COM-9b.
+- Si dos personas usan el último cupón al mismo tiempo, puede pasar una vez de más (el tope se mira al aplicarlo).
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-9).
+
+---
+
 ## 2026-11-05 · COM-8 · Eventos sueltos
 
 **QUÉ HICE**

@@ -66,3 +66,34 @@ export function totalCarrito(lineas: Linea[], medio: Medio | null, convenio?: Co
 export function lineaRecargo(r: NonNullable<PreciosVenta["recargo"]>): Linea {
   return { clave: "recargo", tipo: "recargo", nombre: `Recargo por pagar tarde (${r.atraso} días)`, precio_fijo: Number(r.monto), cantidad: 1 };
 }
+
+/** COM-9: un cupón válido (lo dice la base) y cómo descuenta. */
+export type Cupon = { cupon_id: string; codigo: string; tipo: "porcentaje" | "monto"; valor: number; planes: string[] };
+
+/**
+ * Carga el descuento del cupón en las líneas que corresponde: cuotas, pases y
+ * packs de los planes del cupón (todos si no tiene planes); nunca productos,
+ * recargos, matrículas ni deudas. El porcentaje va en cada línea; el monto
+ * fijo, una sola vez (en la primera que corresponde). El motivo es "Cupón X":
+ * es un descuento como cualquier otro (vale el tope de la recepción).
+ */
+export function aplicarCupon(lineas: Linea[], c: Cupon, medio: Medio | null, cuotaPlanId: string | null): { lineas: Linea[]; aplicadas: number } {
+  let aplicadas = 0;
+  const corresponde = (l: Linea) => {
+    const plan = l.tipo === "cuota" ? cuotaPlanId : l.tipo === "pase" || l.tipo === "pack" ? l.plan_id ?? null : null;
+    return plan != null && (!c.planes.length || c.planes.includes(plan));
+  };
+  const nuevas = lineas.map((l) => {
+    if (!corresponde(l)) return l;
+    const p = precioUnitario(l, medio);
+    if (p == null || p <= 0) return l;
+    const bruto = p * l.cantidad;
+    let d: number;
+    if (c.tipo === "porcentaje") d = Math.round(bruto * Number(c.valor)) / 100;
+    else if (aplicadas === 0) d = Math.min(Number(c.valor), bruto);
+    else return l;
+    aplicadas++;
+    return { ...l, descuento: d, descuento_texto: undefined, descuento_motivo: `Cupón ${c.codigo}` };
+  });
+  return { lineas: nuevas, aplicadas };
+}

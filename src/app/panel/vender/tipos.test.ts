@@ -1,5 +1,5 @@
-import { expect, test } from "vitest";
-import { descuentoConvenio, precioUnitario, totalCarrito, type Linea } from "./tipos";
+import { describe, expect, it, test } from "vitest";
+import { aplicarCupon, descuentoConvenio, precioUnitario, totalCarrito, type Linea } from "./tipos";
 
 const cuota: Linea = { clave: "c", tipo: "cuota", nombre: "Cuota", cantidad: 2, precios: { lista: 25000, efectivo: 22000, transferencia: null, debito: null, credito: 27000 } };
 const agua: Linea = { clave: "a", tipo: "producto", nombre: "Agua", cantidad: 3, precio_fijo: 1500 };
@@ -29,4 +29,27 @@ test("convenio (VEN-3): solo la cuota, por unidad, igual que la base", () => {
   expect(descuentoConvenio(agua, "efectivo", est)).toBe(0);
   expect(totalCarrito([cuota, agua], "efectivo", est)).toBe(44000 - 8800 + 4500);
   expect(descuentoConvenio({ ...cuota, cantidad: 1 }, "efectivo", { nombre: "Fijo", tipo: "monto", valor: 30000 })).toBe(22000);   // nunca más que la cuota
+});
+
+describe("COM-9: aplicarCupon", () => {
+  const precios = { lista: 20000, efectivo: 18000, transferencia: 20000, debito: 20000, credito: 22000, mercadopago: 20000 } as unknown as Linea["precios"];
+  const cuota: Linea = { clave: "c", tipo: "cuota", nombre: "Cuota Full", cantidad: 1, precios };
+  const agua: Linea = { clave: "a", tipo: "producto", nombre: "Agua", cantidad: 2, precio_fijo: 1500, producto_id: "agua" };
+  const pack: Linea = { clave: "p", tipo: "pack", nombre: "Pack 8", cantidad: 1, precios, plan_id: "pack8" };
+  it("porcentaje en la cuota del plan del cupón, nunca en productos", () => {
+    const r = aplicarCupon([cuota, agua], { cupon_id: "x", codigo: "VERANO", tipo: "porcentaje", valor: 25, planes: ["full"] }, "efectivo", "full");
+    expect(r.aplicadas).toBe(1);
+    expect(r.lineas[0].descuento).toBe(4500);
+    expect(r.lineas[0].descuento_motivo).toBe("Cupón VERANO");
+    expect(r.lineas[1].descuento).toBeUndefined();
+  });
+  it("monto fijo una sola vez, y no supera el precio", () => {
+    const r = aplicarCupon([cuota, pack], { cupon_id: "x", codigo: "MIL", tipo: "monto", valor: 50000, planes: [] }, "transferencia", "full");
+    expect(r.aplicadas).toBe(1);
+    expect(r.lineas[0].descuento).toBe(20000);
+    expect(r.lineas[1].descuento).toBeUndefined();
+  });
+  it("si el cupón es de otro plan, no aplica a nada", () => {
+    expect(aplicarCupon([cuota], { cupon_id: "x", codigo: "OTRO", tipo: "porcentaje", valor: 10, planes: ["otro"] }, "efectivo", "full").aplicadas).toBe(0);
+  });
 });

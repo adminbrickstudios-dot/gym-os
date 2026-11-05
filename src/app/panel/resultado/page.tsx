@@ -28,7 +28,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const [r, gastos, motivos, numeros] = await Promise.all([
+    const [r, gastos, motivos, numeros, cupones] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
       panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
@@ -36,6 +36,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       rpc<{ motivo: string; cantidad: number }[]>("motivos_baja_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // COM-5: la retención en números (es de hoy: solo se muestra en el mes en curso).
       pedido ? Promise.resolve(null) : rpc<NumerosRetencion>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }),
+      // COM-9: cuántos socios trajo cada cupón.
+      rpc<{ codigo: string; usos: number; socios: number }[]>("cupones_panel", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
@@ -117,6 +119,15 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           <section aria-labelledby="socios-numeros">
             <h2 id="socios-numeros" className="titulo text-2xl mb-3">Socios</h2>
             <NumerosDeRetencion n={numeros} />
+          </section>
+        )}
+
+        {cupones.some((c) => c.usos > 0) && (
+          <section aria-labelledby="cupones" data-cupones-resultado>
+            <h2 id="cupones" className="titulo text-2xl mb-3">🏷️ Cupones</h2>
+            <ul className="tarjeta divide-y divide-[var(--borde)]">{cupones.filter((c) => c.usos > 0).map((c) => (
+              <li key={c.codigo} className="flex justify-between gap-3 px-4 py-3"><span className="numero">{c.codigo}</span><span className="texto-suave">{c.usos} {c.usos === 1 ? "uso" : "usos"} · trajo {c.socios} {c.socios === 1 ? "socio" : "socios"}</span></li>
+            ))}</ul>
           </section>
         )}
 

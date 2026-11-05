@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
-import { cobrar, comprobante, preciosPara, type Venta } from "./acciones";
+import { cobrar, comprobante, preciosPara, registrarUsoCupon, validarCupon, type Venta } from "./acciones";
 import { anularVenta, pedirAnulacion } from "../ventas-acciones";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
-import { descuentoConvenio, lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { aplicarCupon, descuentoConvenio, lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
   { medio: "efectivo", texto: "💵 Efectivo" },
@@ -30,6 +30,11 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
   const [stock, setStock] = useState(stockInicial);
+  // COM-9: el cupón aplicado (se anota como uso al cobrar) y lo que dijo al aplicarlo.
+  const [cupon, setCupon] = useState<string | null>(null);
+  const [codigoCupon, setCodigoCupon] = useState("");
+  const [msjCupon, setMsjCupon] = useState<{ ok?: string; error?: string }>({});
+  const [usoCupon, setUsoCupon] = useState<string | null>(null);
   // DIS-4: la barra del celular se esconde cuando el carrito ya está a la vista.
   const [carritoVisible, setCarritoVisible] = useState(false);
   useEffect(() => {
@@ -119,7 +124,20 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       // Lo vendido sale del stock que se muestra (la base lo calcula igual).
       setStock((st) => Object.fromEntries(Object.entries(st).map(([id, x]) => [id, { ...x, stock: x.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0) }])));
       setVenta(r.venta!); setLineas([]);
+      if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
+        const u = await registrarUsoCupon(r.venta!.venta_id, cupon);
+        setUsoCupon(u.error ? `⚠️ El cobro quedó, pero no se anotó el uso del cupón: ${u.error}` : `🏷️ Cupón ${cupon} anotado`);
+      } else setUsoCupon(null);
+      setCupon(null); setCodigoCupon(""); setMsjCupon({});
     }
+  });
+  const aplicar = () => empezar(async () => {
+    const r = await validarCupon(codigoCupon);
+    if (r.error || !r.cupon) { setMsjCupon({ error: r.error ?? "No se pudo validar el cupón" }); return; }
+    const a = aplicarCupon(lineas, r.cupon, medioPrecio, precios.cuota?.plan_id ?? null);
+    if (!a.aplicadas) { setMsjCupon({ error: `El cupón ${r.cupon.codigo} no aplica a nada del carrito (${r.cupon.planes.length ? "es de otros planes" : "va con cuotas, pases o packs"}).` }); return; }
+    setLineas(a.lineas); setCupon(r.cupon.codigo);
+    setMsjCupon({ ok: `Cupón ${r.cupon.codigo}: ${r.cupon.tipo === "porcentaje" ? `${Number(r.cupon.valor)}% en ${a.aplicadas === 1 ? "1 línea" : `${a.aplicadas} líneas`}` : formatearPesos(r.cupon.valor)}. Si cambiás el medio de pago, volvé a aplicarlo.` });
   });
 
   if (venta) {
@@ -128,6 +146,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <p className="text-5xl" aria-hidden>✅</p>
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
+        {usoCupon && <p className="mt-3 texto-suave" data-uso-cupon>{usoCupon}</p>}
         {socio && <MandarComprobante ventaId={venta.venta_id} />}
         <DeshacerVenta ventaId={venta.venta_id} puedeAnular={puedeAnular} socioId={socio?.socio_id ?? null} />
         <div className="flex flex-wrap gap-2 mt-8">
@@ -287,6 +306,14 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
               );
             })}
           </ul>
+        )}
+        {lineas.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2" data-cupon>
+            <input className="campo !w-40 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
+            <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}>🏷️ Aplicar</button>
+            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</span>}
+            {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal">⚠️ {msjCupon.error}</span>}
+          </div>
         )}
         {precios.tope_descuento != null && lineas.some((l) => l.descuento != null) && (
           <p className="text-sm texto-tenue mt-2">Tu descuento máximo es {precios.tope_descuento}%.</p>

@@ -7,15 +7,15 @@ import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, capturar, entrar, falla, navegado
 
 const RUTAS = ["/panel", "/panel/entrada", "/panel/clases", "/panel/clases/grilla", "/panel/vencen-hoy", "/panel/socios",
   "/panel/socios/nuevo", "/panel/retencion", "/panel/vender", "/panel/caja", "/panel/transferencias", "/panel/planes",
-  "/panel/equipo", "/panel/configuracion", "/panel/cuenta", "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/campana", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/tareas", "/panel/documentos", "/panel/eventos"];
+  "/panel/equipo", "/panel/configuracion", "/panel/cuenta", "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/campana", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/tareas", "/panel/documentos", "/panel/eventos", "/panel/cupones"];
 // Lo que cada rol NO tiene que poder abrir (debe ver "sin permiso", no la pantalla).
 const PROHIBIDO = {
   duena: [],
   encargado: [],
-  recepcion: ["/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos"],
+  recepcion: ["/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos", "/panel/cupones"],
   profe: ["/panel/entrada", "/panel/vencen-hoy", "/panel/socios", "/panel/socios/nuevo", "/panel/retencion", "/panel/vender",
           "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla",
-          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos"],
+          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones"],
 };
 const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso/i;
 const soloRol = process.argv.find((a) => a.startsWith("--rol="))?.slice(6);

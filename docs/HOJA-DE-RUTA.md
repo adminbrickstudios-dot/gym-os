@@ -162,6 +162,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | REV-1a | "Le prometieron pagar": dueño y encargado ven a todos los que dejaron pasar ayer u hoy y siguen sin poder entrar; la recepción, solo los que dejó pasar ella. Sale solo cuando la puerta lo deja pasar. | Calculado de las entradas forzadas y de la misma función de la puerta; la recepción no ve nada que no viera. | Guardar "prometió pagar" como estado. |
 | 2026-11-05 | COM-7 | Los habituales en la tablet vienen apagados; prendidos, tocar el nombre pide los últimos 3 números del DNI (y cuenta para el freno de 30 intentos por minuto). | Sin eso, cualquiera entraría tocando un nombre ajeno: la tablet no tiene a nadie mirando. Nombre e inicial del apellido, nada más. | Entrar solo con tocar el nombre. |
 | 2026-11-05 | COM-8 | Un evento es un producto con stock = cupo (más su fecha, para quién y descripción): se vende en Vender sin tocar el cobro y los anotados son sus ventas no anuladas. El nombre del producto lleva la fecha. | Cero cambios en `vender` (plata). Cancelar o terminar lo saca de Vender; lo vendido queda. | Un tipo de ítem nuevo en Vender. |
+| 2026-11-05 | COM-9 | El cupón no toca `vender`: Vender carga el descuento en cada línea que corresponde (cuotas, pases y packs de sus planes; nunca productos) con motivo "Cupón X", y al cobrar registra el uso (la base exige que la venta tenga ese descuento). El tope de la recepción sigue valiendo. Monto fijo: una vez por venta. | Cero cambios en el cobro; el uso se cuenta de ventas no anuladas. | Que el cupón saltee el tope de la recepción (es darle más permiso). |
 
 ---
 
@@ -416,7 +417,8 @@ bloque 18.
 - [x] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre — verificado: db (kiosco-habituales: apagado por defecto, nombre con inicial, DNI equivocado no entra, el que ya entró no aparece), e2e:com-7 (en la tanda). Tocar el nombre pide los últimos 3 del DNI
 - [x] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago — verificado: db (eventos: crear, vender como producto, anotados y lugares, página y app, cerrar lo saca de Vender), e2e:com-8 (en la tanda). "Solo socios" y el cupo se muestran pero Vender no los frena (como el stock): COM-8b
 - [ ] COM-8b · 🟡 · Que Vender frene un evento lleno o "solo socios" vendido sin socio — hoy avisa (como el stock) y no frena: tocar el cobro, decide Mateo
-- [ ] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento)
+- [x] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento) — verificado: db (cupones: crear y validar, vencido y agotado frenan, uso anotado solo si la venta lleva el descuento, panel con usos y socios), vitest (aplicarCupon), e2e:com-9 (en la tanda). Alta online y "¿saltea el tope de la recepción?": COM-9b
+- [ ] COM-9b · 🟡 · Cupón en el alta online, y si el cupón puede pasar el tope de descuento de la recepción (hoy no: es un descuento más) — plata y permisos: decide Mateo
 - [ ] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos
 - [ ] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)
 - [ ] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala

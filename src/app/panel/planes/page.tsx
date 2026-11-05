@@ -33,7 +33,10 @@ export default async function Planes() {
     return (
       <>
         <Encabezado emoji="🏷️" titulo="Planes y precios"
-          accion={planes.some((p) => p.activo && p.precio != null) ? <Link href="/panel/planes/aumento" className="boton">📈 Aumento de precios</Link> : undefined} bajada="Lo que vendés y cuánto cuesta. Un aumento se programa con fecha y no toca lo ya cobrado." />
+          accion={<span className="flex flex-wrap gap-2">
+            {planes.some((p) => p.activo && p.precio != null) && <Link href="/panel/planes/aumento" className="boton">📈 Aumento de precios</Link>}
+            <Link href="/panel/cupones" className="boton" data-ir-cupones>🏷️ Cupones</Link>
+          </span>} bajada="Lo que vendés y cuánto cuesta. Un aumento se programa con fecha y no toca lo ya cobrado." />
         <Editor planes={planes} listas={listas} actividades={actividades} incluyen={incluyen} matriculas={matriculas} stock={stock} productos={productos} zona={panel.gimnasio.zona_horaria} />
         <div className="mt-12"><Convenios convenios={convenios} /></div>
       </>
