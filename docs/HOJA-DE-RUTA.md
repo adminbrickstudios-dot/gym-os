@@ -92,6 +92,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-5 | Una variable que ese mensaje no tiene (ej. {dias} en cumpleaños) es un error al guardar, no un hueco en blanco. | Un mensaje con "{cosa}" o un espacio vacío le llega así al socio. | `privado.validar_mensaje`. |
 | 2026-11-04 | ONB-1 | Para que el paso "Publicar tu página" no sea un callejón sin salida, sumé el botón Publicar / Pasar a borrador en Configuración → Página (solo el dueño). Copiar el link, mandarlo por WhatsApp y la vista al compartir ya estaban. Lo que queda de PAG-2 es poco. | Una página nueva quedaba en "Estamos armando nuestra página" para siempre: solo se publicaba desde la base. | `publicar_pagina`. |
 | 2026-11-04 | ONB-1 | Los pasos son 8: datos y dirección, logo, planes con precio, horarios (y grilla si da clases), cómo le pagan, equipo, socios, página publicada. "Equipo" cuenta hecho con una persona más que el dueño; si trabaja solo, puede ocultar la tarjeta. Importar socios desde Excel no existe todavía: el paso lleva al alta. | Cada uno sale de un dato real; nada se marca a mano. | `privado.primeros_pasos`. |
+| 2026-11-04 | CFG-6 | Formas de entrada: hoy solo existe la recepción, así que se muestra prendida y bloqueada (es el respaldo); QR del socio, tablet en la puerta y llavero aparecen apagados como "todavía no disponible". Cada ítem ENT que los construya prende su interruptor. El punto del LISTO SI "una forma apagada no aparece en Entrada ni en la app" queda para esos ítems: hoy no hay ninguna otra forma que esconder. | No se muestra un interruptor que no hace nada. | Interruptores en Configuración → Reglas. |
 
 ---
 
@@ -158,7 +159,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres — verificado: e2e:cfg-4 (18 pasos: un feriado cancela las 6 clases del día, se ve en la app y la página, anularlo las devuelve), db:pruebas 188 con la 0024, npm run e2e completo y verificar en verde
 - [x] CFG-5 · 🟢 · Mensajes editables con vista previa — verificado: e2e:cfg-5 (16 pasos: el cambio se ve en los links de Retención y Vencen hoy, volver al original), db:pruebas 193 con la 0025, npm run e2e completo y verificar en verde
 - [x] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio — verificado: e2e:onb-1 (12 pasos: subir el logo marca su paso, publicar la página, ocultar/mostrar), db:pruebas 196 con la 0026, npm run e2e completo y verificar en verde
-- [~] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención
+- [x] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención — verificado: e2e:cfg-6 (9 pasos: reingreso, 1 día mueve 47 vencidos a “se fue”, formas de entrada), db:pruebas 198, npm run e2e completo y verificar en verde
 - [ ] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras
 - [ ] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo)
 - [ ] CFG-9 · 🟢 · Aviso de contraste al elegir colores

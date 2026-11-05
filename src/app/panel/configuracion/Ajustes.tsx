@@ -18,6 +18,8 @@ export type Config = {
   cbu: string | null; titular_cuenta: string | null; descuento_max_recepcion: number; retencion_dias_ausencia: number;
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
+  reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number;
+  accesos_activos: string[];
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -53,6 +55,9 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   dias_aviso: [0, 30, "Avisar que vence"],
   descuento_max_recepcion: [0, 100, "Descuento máximo de la recepción"],
   retencion_dias_ausencia: [3, 90, "“No viene” después de"],
+  retencion_dias_nuevo: [7, 90, "Socio nuevo durante"],
+  retencion_dias_vencido: [1, 120, "Vencido pasa a “se fue” después de"],
+  retencion_dias_se_fue: [7, 365, "Los que se fueron se muestran durante"],
   reserva_dias_anticipacion: [0, 60, "Se reserva con hasta"],
   cancelacion_horas_limite: [0, 72, "Cancelar hasta"],
 };
@@ -61,7 +66,8 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
   cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
-  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "retencion_dias_ausencia"],
+  reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume",
+           "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
   secciones: ["secciones_apagadas", "modo_clases"],
 };
@@ -413,7 +419,29 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
                 : "Cuando se le termina la cuota, ya no entra hasta pagar")}
               {num("dias_aviso", "Avisar que vence (días antes)", "Aparece en amarillo en la entrada")}
               {num("descuento_max_recepcion", "Descuento máximo de la recepción (%)", "Más que eso lo autoriza el dueño")}
-              {num("retencion_dias_ausencia", "“No viene” después de (días)", "Para la lista de retención")}
+            </div>
+            <Interruptor etiqueta="🔁 Volver a entrar el mismo día gasta otra entrada"
+              ayuda={c.reingreso_mismo_dia_consume
+                ? "Prendido: si alguien con pack entra a las 8 y vuelve a las 19, se le descuenta otra clase; con pase diario, la segunda vez ya no entra."
+                : "Apagado: si alguien con pack entra a las 8 y vuelve a las 19, no se le descuenta otra clase; con pase diario, vuelve a entrar."}
+              checked={c.reingreso_mismo_dia_consume} onChange={(e) => set("reingreso_mismo_dia_consume", e.target.checked)} />
+          </Tarjeta>
+          <Tarjeta emoji="📉" titulo="Retención" ayuda="Cuándo alguien aparece en cada lista de Retención, para llamarlo a tiempo.">
+            <div className="grid sm:grid-cols-2 gap-3">
+              {num("retencion_dias_ausencia", "“No viene” después de (días)", "Paga pero no aparece: entra en la lista “No viene”")}
+              {num("retencion_dias_nuevo", "Socio nuevo durante (días)", "Si no viene en sus primeros días, va a “Nuevo que no viene”")}
+              {num("retencion_dias_vencido", "Vencido pasa a “se fue” después de (días)", "Mientras tanto está en “Venció”, para cobrarle")}
+              {num("retencion_dias_se_fue", "Los que se fueron se muestran durante (días)", "Después dejan de aparecer en “Se fue”")}
+            </div>
+          </Tarjeta>
+          <Tarjeta emoji="🚪" titulo="Cómo entra la gente" ayuda="La recepción busca al socio por nombre, DNI o número y le marca la entrada.">
+            <div className="divide-y divide-[var(--borde)]" data-accesos>
+              <Interruptor etiqueta="🛎️ Recepción" ayuda="Siempre prendida: es la forma de respaldo cuando falla todo lo demás." checked disabled readOnly />
+              {[["📱 QR del socio", "El socio muestra un QR en su app y la recepción lo lee con la cámara."],
+                ["📲 Tablet en la puerta", "El socio entra solo, sin pasar por la recepción."],
+                ["🔑 Llavero o tarjeta", "Con un lector USB en la recepción."]].map(([t, a]) => (
+                <Interruptor key={t} etiqueta={t} ayuda={`${a} Todavía no está disponible.`} checked={false} disabled readOnly />
+              ))}
             </div>
           </Tarjeta>
           {pie("reglas")}

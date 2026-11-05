@@ -15,6 +15,30 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-6 · Formas de entrada, reingreso y días de retención en Configuración
+
+**QUÉ HICE**
+- Configuración → Reglas: 🔁 "Volver a entrar el mismo día gasta otra entrada" con un ejemplo que cambia según esté prendido o apagado (pack a las 8 y a las 19; pase diario); 📉 Retención con los cuatro días ("No viene", socio nuevo, vencido → se fue, cuánto se muestran los que se fueron), cada uno con qué lista mueve; 🚪 Cómo entra la gente: Recepción prendida siempre, y QR del socio, tablet y llavero como "todavía no disponible".
+- Sin migración: la base ya guardaba y validaba estos campos (0020).
+- Verificado: `supabase/pruebas/reglas-cfg6.test.mjs` (guardado con la función de la pantalla y probado contra `calcular_acceso` y la retención con momentos fijos: con reingreso prendido el pase de hoy ya no deja entrar; con 1 día de límite, la testigo vencida pasa a "se fue"). `scripts/e2e/cfg-6.mjs` (9 pasos): con 1 día, en el demo los vencidos pasan de 58 a 11 y "se fue" de 31 a 78; todo vuelve al valor de antes.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Nada nuevo.
+
+**QUÉ CORRÉS VOS**
+- Nada nuevo (sin migraciones).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Los interruptores de QR, tablet y llavero se prenden cuando existan (ENT-2, ENT-3/6, ENT-7).
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada pendiente de esta vuelta más allá de lo general (`db:types` necesita el proyecto real).
+
+---
+
 ## 2026-11-04 · ONB-1 · "Primeros pasos" del dueño en Inicio
 
 **QUÉ HICE**
