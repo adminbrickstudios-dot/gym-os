@@ -11,6 +11,7 @@ import { AltaGimnasio } from "./AltaGimnasio";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
 import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
+import { PildoraAbono, PlanesBrik, type EstadoAbono, type PlanBrik } from "./Abono";
 import { Mensaje } from "@/components/ui/Mensaje";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
@@ -30,11 +31,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let gimnasios: Gimnasio[];
   let salud: Record<string, Salud> = {};
   let novedades: NovedadPlataforma[] = [];
+  let abonos: Record<string, EstadoAbono> = {};
+  let planesBrik: PlanBrik[] = [];
   let yo: MiSesion;
   try {
     yo = await rpc<MiSesion>("mi_sesion");
     if (!yo.es_admin) throw new ErrorDatos("Solo para administradores de BRIK", "42501", 403);
-    [gimnasios, salud, novedades] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios"), rpc<NovedadPlataforma[]>("admin_novedades")]);
+    [gimnasios, salud, novedades, abonos, planesBrik] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios"),
+      rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik")]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
@@ -57,6 +61,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <EstadoPlataforma />
       <AltaGimnasio dominio={dominioBase()} />
       <NovedadesDuenos novedades={novedades} />
+      <PlanesBrik planes={planesBrik} />
 
       <section className="space-y-3">
         <p className="titulo-grupo">Todos los gimnasios</p>
@@ -69,7 +74,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <p className="titulo text-2xl">
                     {g.nombre} {g.es_demo && <span className="pildora align-middle">demo</span>}{" "}
                     {g.suspendido && <span className="pildora pildora-rojo align-middle">suspendido</span>}{" "}
-                    {g.estoy_dentro && <span className="pildora pildora-verde align-middle">estás adentro</span>}
+                    {g.estoy_dentro && <span className="pildora pildora-verde align-middle">estás adentro</span>}{" "}
+                    <PildoraAbono a={abonos[g.gimnasio_id]} />
                   </p>
                   <p className="texto-suave text-sm mt-1">
                     👑 {g.duenos.join(", ") || "Sin dueño"}

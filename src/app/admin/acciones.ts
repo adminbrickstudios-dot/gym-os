@@ -135,3 +135,16 @@ export async function retirarNovedadPlataforma(id: string): Promise<{ error?: st
   try { await rpc("admin_retirar_novedad", { p_id: id }); revalidatePath("/admin"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── ADM-3 (D13): el abono de cada gimnasio a BRIK. El precio lo carga Mateo. ──
+const hechoAdmin = async (f: () => Promise<unknown>, rutas: string[]) => {
+  try { await f(); for (const r of rutas) revalidatePath(r); return {}; } catch (e) { return { error: (e as Error).message }; }
+};
+export const guardarPlanBrik = async (id: string | null, nombre: string, precio: number, activo = true) =>
+  hechoAdmin(() => rpc("admin_guardar_plan_brik", { p_id: id, p_nombre: nombre, p_precio: precio, p_activo: activo }), ["/admin"]);
+export const asignarPlanBrik = async (gimnasioId: string, planId: string | null) =>
+  hechoAdmin(() => rpc("admin_asignar_plan_brik", { p_gimnasio_id: gimnasioId, p_plan_id: planId }), ["/admin", `/admin/${gimnasioId}`]);
+export const registrarPagoBrik = async (gimnasioId: string, monto: number, cubreHasta: string, nota: string) =>
+  hechoAdmin(() => rpc("admin_registrar_pago_brik", { p_gimnasio_id: gimnasioId, p_monto: monto, p_cubre_hasta: cubreHasta, p_nota: nota || null }), ["/admin", `/admin/${gimnasioId}`]);
+export const anularPagoBrik = async (gimnasioId: string, pagoId: string) =>
+  hechoAdmin(() => rpc("admin_anular_pago_brik", { p_pago_id: pagoId }), ["/admin", `/admin/${gimnasioId}`]);

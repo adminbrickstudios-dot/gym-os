@@ -3,11 +3,11 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco } from "@/components/panel/Marco";
+import { Marco, type Abono } from "@/components/panel/Marco";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
-import { contextoPanel, ErrorDatos } from "@/lib/panel/servidor";
+import { contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -44,5 +44,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     throw e;
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
-  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null}>{children}</Marco>;
+  // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
+  const abono = await rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono}>{children}</Marco>;
 }

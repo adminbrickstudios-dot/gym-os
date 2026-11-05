@@ -15,6 +15,19 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ADM-3 y ADM-2 · Abono de Gym OS y suspensión gradual (D13, D11)
+
+**QUÉ HICE**
+- **ADM-3 (D13)**: Super admin → "💳 Planes de Gym OS" (nombre y precio por mes, los cargás vos; el código no inventa precios). En el detalle de cada gimnasio: su plan, "Registrar pago" (monto, hasta qué día cubre, nota) y los últimos pagos (se anulan, no se borran). La lista muestra el estado de cada uno.
+  - Estado calculado: sin abono (sin plan, o el demo) · al día · por vencer (7 días antes) · vencido. Al asignar un plan, 14 días hasta el primer pago: nadie queda trabado por asignarle un plan.
+- **ADM-2 (D11)**: 7 días antes el dueño ve el aviso arriba del panel. Vencido, todo el equipo ve "🔒 solo lectura" y **la base no deja** que el equipo venda ni edite (ventas del mostrador, socios, planes, precios, productos, equipo, configuración, página, gastos, caja y membresías). La puerta, la app del socio (reservar, pagar online, informar transferencia, vincular su cuenta) y el alta online siguen andando: el trigger solo frena a alguien del equipo. BRIK (el admin) puede igual.
+- Migraciones 0110 (`plataforma_planes` y `plataforma_pagos` sin acceso directo; `gimnasios.plataforma_plan_id`, `plataforma_desde`; siete funciones) y 0111 (trigger `solo_lectura` en 12 tablas, security definer para que valga también en escrituras directas con RLS). Prueba de base `abono-brik`; `db:pruebas` completo en verde con los triggers puestos; `e2e:adm-3`.
+
+**PARA QUE MIRES VOS**
+- Toca permisos y plata (D11 y D13 aprobadas). Por defecto ningún gimnasio tiene plan: nada cambia hasta que le asignes uno.
+
+---
+
 ## 2026-11-05 · ADM-6 · Novedades de Gym OS para todos los dueños
 
 **QUÉ HICE**
