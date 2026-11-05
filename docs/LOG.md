@@ -15,6 +15,33 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · REG-1 · Hacete socio online desde la página
+
+**QUÉ HICE**
+- Tu página → "💪 Hacerse socio desde la página": interruptor y reglamento (cada cambio es una versión nueva; lo aceptado no cambia). Solo el dueño; no se prende sin reglamento.
+- Con las altas prendidas, la página muestra "💪 Hacete socio" (arriba y en la portada) y en cada plan "💪 Elegir este". `/hacete-socio`: plan (con precio y variantes), datos (nombre, apellido, DNI, celular, mail y nacimiento opcionales), reglamento con "Leí y acepto", cómo paga (transferencia si el gimnasio la recibe, o en el gimnasio). Al terminar: "¡Bienvenido/a a …!" con el alias/CBU para copiar y "Entrar a la app con mi celular", o "Pasá por recepción". El mismo DNI o celular: "¡Ya sos socio!". Apagadas: "Consultanos por WhatsApp".
+- Migración `20261104003200_alta_online.sql`: `altas_online` (apagado), tablas `reglamentos` y `aceptaciones_reglamento` (RLS, solo lectura del equipo, anon no las ve), `alta_publica`, `alta_online` (sin sesión; valida todo; socio con plan y sin cobertura; aceptación; aviso en Prospectos; hasta 20 por hora), `altas_panel`, `guardar_altas`; la página trae el id de cada plan y si hay altas.
+- Entrada: el que se anotó online sale "⛔ Todavía no pagó Plan Full · son $25.000" con Cobrar, la misma cuenta de siempre.
+- `supabase/pruebas/alta-online.test.mjs` (4) y `scripts/e2e/reg-1.mjs` (13 pasos). Barrido con Tu página y Prospectos por rol.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Un pase o un pack no puede ser suscripción: el alta online los anota sin plan asignado (decisión en la hoja de ruta).
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0032).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada. Pagar con MercadoPago en el alta espera MP-1/MP-2 (tu app de MercadoPago).
+
+**SIN ARREGLAR**
+- La cuenta del socio: entra con el código a su celular (como hoy). En producción ese código necesita el proveedor de SMS o el mail (P1).
+- Datos del adulto responsable para menores (D10): por ahora el alta online los manda al gimnasio.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0032 contra la base real: probada en la base local (y `verificar` en base limpia en verde). `npm run db:types` necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · PAG-3 · "Probá una clase": prospectos desde la página
 
 **QUÉ HICE**
