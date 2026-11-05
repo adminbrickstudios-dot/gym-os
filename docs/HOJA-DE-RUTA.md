@@ -220,7 +220,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 4 · Entrada
 - [x] AUD-4 · 🟢 · Auditoría botón por botón: Entrada
-- [ ] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
+- [x] ENT-1 · 🟢 · Veredicto en pantalla completa, sonido y teclado
 - [ ] ENT-2 · 🟢 · QR del socio y lector con cámara en la recepción
 - [ ] ENT-4 · 🟡 D1 · Reglas de "dejar pasar"
 - [ ] ENT-3 · 🟢 · Tablet en la puerta (modo kiosco)

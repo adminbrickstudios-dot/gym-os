@@ -12,10 +12,10 @@ Probado haciendo clic con `npm run e2e:entrada` (`scripts/e2e/panel-entrada.mjs`
 
 | Elemento | Qué hace hoy | Anda | Qué le falta | Se conecta con | Configurable |
 |---|---|---|---|---|---|
-| Buscador | Arranca con foco. Nombre, DNI, teléfono o número; desde 2 letras. Enter elige al primero, Esc limpia. | ✅ | Lector de llavero/QR (ENT-2, ENT-7); que el foco vuelva solo después de cada entrada (ENT-1) | `buscar_socios` | — |
+| Buscador | Arranca con foco y vuelve a tenerlo después de cada entrada. Nombre, DNI, teléfono o número; desde 2 letras. Enter elige al primero, Esc limpia. | ✅ | Lector de llavero/QR (ENT-2, ENT-7) | `buscar_socios` | — |
 | Resultados | Punto de color, nombre, #número y el porqué. | ✅ | — | — | — |
 | No lo encuentra | "No encontramos a … · Darlo de alta". | ✅ | Pase de invitado o de prueba desde acá (INV-1, CLA-6) | Alta | — |
-| Veredicto | Color, emoji, foto (si tiene), nombre, el porqué, avisos, "para ponerse al día $…". | ✅ | Pantalla completa, sonido, Enter confirma (ENT-1) | `estado_acceso` | — |
+| Veredicto | A pantalla completa del color: emoji, foto (si tiene), nombre grande, el porqué, avisos, "para ponerse al día $…". Suena distinto si entra o no. Enter anota (solo si puede), Esc vuelve a buscar, escribir busca a otro. (ENT-1) | ✅ | — | `estado_acceso` | 🔊/🔇 por compu |
 | Aviso de apto | Si el gimnasio pide apto y no lo presentó o venció: "🩺 …" en amarillo. No frena. | ✅ (nuevo, AUD-4) | — | `apto_socio`, Reglas | Sí (Reglas → Pedir apto) |
 | ✅ Anotar entrada | Anota y muestra "Entró <nombre>". Repetido en el momento: "ya estaba anotado". | ✅ | — | `registrar_ingreso` | Reingreso (Reglas) |
 | ↩️ Deshacer | Después de anotar: la anula ("Anotada por error"). La recepción, dentro de los 5 minutos. | ✅ (nuevo, AUD-4) | — | `anular_ingreso` | — |

@@ -15,6 +15,25 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ENT-1 · Veredicto a pantalla completa, con sonido y teclado
+
+**QUÉ HICE**
+- El veredicto ocupa toda la pantalla con el color: emoji grande, foto, nombre a 8xl y el porqué, para leerlo desde lejos.
+- Teclado:
+  - Enter anota la entrada si puede entrar; si no puede, no hace nada (no se cobra ni se deja pasar por accidente).
+  - Esc vuelve a buscar con foco.
+  - Escribir con el veredicto abierto arranca otra búsqueda, así el lector de DNI o llavero sigue andando sin tocar nada.
+- Sonido: agudo y corto si entra; grave y doble si no; doble medio si entra con aviso. "🔊 Con sonido / 🔇 Sin sonido" queda guardado en esa compu.
+- `scripts/e2e/ent-1.mjs` (10 pasos: pantalla completa, sonidos contados sin parlantes, Enter en rojo y en verde, Esc, escribir para buscar, apagar el sonido, celular). Sigue pasando `panel-entrada`; lo hice más firme para cuando hay dos socios con el mismo nombre.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- En el demo hay socios con el mismo nombre y apellido (el sembrado los repite). Para probar está bien; Duplicados (SOC-8) los muestra.
+
+**LO QUE NO PUDE VERIFICAR**
+- Cómo suena de verdad en un parlante: se verificó qué tonos se tocan, no cómo se oyen.
+
+---
+
 ## 2026-11-05 · AUD-4 · Auditoría botón por botón: Entrada
 
 **QUÉ HICE**

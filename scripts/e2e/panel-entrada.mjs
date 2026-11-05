@@ -22,7 +22,8 @@ try {
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 30000 });
-  chequear(await buscar.evaluate((e) => e === document.activeElement), "el buscador arranca con foco", "el buscador no tiene foco");
+  const conFoco = await r.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "Buscar socio", null, { timeout: 10000 }).then(() => true, () => false);
+  chequear(conFoco, "el buscador arranca con foco", "el buscador no tiene foco");
   await buscar.fill("zzqqxx");
   await r.getByText("Darlo de alta").waitFor({ timeout: 15000 });
   ok("si no lo encuentra, ofrece darlo de alta");
@@ -75,20 +76,31 @@ try {
   // ── Pausa en curso: volvió antes ──
   const d = await pagina(b, COMPU);
   await entrar(d, "duena@ejemplo.invalid");
-  const pausa = await primero(d, "al_dia");
-  await d.goto(`${G}${pausa.href}`);
-  const card = d.locator("[data-pausas]");
-  await card.waitFor({ timeout: 30000 });
-  if (!(await d.locator('[data-pausa="en_curso"]').count())) {
+  // Un socio al día al que se le pueda poner una pausa que empezó hace 2 días (si uno ya usó sus días o choca, el siguiente).
+  await d.goto(`${G}/panel/socios?estado=al_dia`);
+  await d.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
+  const candidatos = await d.locator('main ul a[href^="/panel/socios/"]').evaluateAll((xs) => xs.slice(0, 15).map((x) => ({ href: x.getAttribute("href"), nombre: x.querySelector(".font-semibold").innerText.replace(/#\d+/, "").trim(), numero: (x.querySelector(".font-semibold").innerText.match(/#(\d+)/) ?? [])[1] })));
+  let pausa = null;
+  for (const c of candidatos.sort(() => Math.random() - 0.5)) {
+    await d.goto(`${G}${c.href}`);
+    const card = d.locator("[data-pausas]");
+    if (!(await card.count())) continue;
+    if (await d.locator('[data-pausa="en_curso"]').count()) { pausa = c; break; }
     await card.locator('button:has-text("Pausar la membresía")').click();
     await d.locator('input[aria-label="Desde"]').fill(hoyMenos(2));
     await d.locator('input[aria-label="Vuelve el"]').fill(hoyMenos(-5));
     await d.locator('[data-form-pausa] button[type="submit"]').click();
-    await d.locator('[data-pausa="en_curso"]').waitFor({ timeout: 30000 });
+    const listo = await Promise.race([
+      d.locator('[data-pausa="en_curso"]').waitFor({ timeout: 30000 }).then(() => true),
+      d.locator('[data-pausas] [role="alert"]').waitFor({ timeout: 30000 }).then(() => false),
+    ]);
+    if (listo) { pausa = c; break; }
   }
+  if (!pausa) throw new Error("no se pudo poner una pausa a ningún socio al día");
   await r.goto(`${G}/panel/entrada`);
-  await buscar.fill(pausa.nombre);
-  await r.locator("button.fila", { hasText: pausa.nombre }).first().click();
+  // Por número: puede haber dos con el mismo nombre.
+  await buscar.fill(pausa.numero);
+  await r.locator("button.fila", { hasText: `#${pausa.numero}` }).first().click();
   await ver.waitFor({ timeout: 30000 });
   chequear(/Congelada/.test(await ver.innerText()) && await ver.locator('a:has-text("Cobrar")').count() === 0, "en pausa: no ofrece cobrar", `en pausa dice: ${(await ver.innerText()).slice(0, 80)}`);
   await ver.locator('button:has-text("Volvió antes")').click();
