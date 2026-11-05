@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-8 · Pulido de Retención
+
+**QUÉ HICE**
+- Ya quedó en DIS-7, AUD-10 y RET-1:
+  - el WhatsApp de cada fila no es verde;
+  - la lista vacía tiene salida;
+  - el loading tiene la forma real;
+  - el tablero es de números grandes.
+- `scripts/e2e/dis-8.mjs` mide tres listas en el celular para la dueña y la recepción, con capturas `dis8-*`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Capturas "antes": solo "después".
+
+---
+
 ## 2026-11-05 · RET-2 · La recepción anota contactos (D2)
 
 **QUÉ HICE**

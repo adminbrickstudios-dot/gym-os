@@ -329,7 +329,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] RET-1 · 🟢 · Tablero de retención (bajas del mes, tendencia) — verificado: db (tablero-retencion: 12 semanas, la última igual a los al día de hoy, altas, recepción no), e2e:retencion
 - [x] RET-2 · 🟡 D2 · La recepción anota contactos — verificado: db (retencion: la recepción ve las listas sin monto ni plata en riesgo y anota), vitest (secciones), e2e:retencion y e2e:vencen
 - [x] RET-3 · 🟢 · Antes de la baja, ofrecer pausa y preguntar el motivo — verificado: db (motivos de baja del mes), e2e:socios (con plan, “¿le ofreciste una pausa?” antes de confirmar)
-- [ ] DIS-8 · 🟢 · Pulido: Retención
+- [x] DIS-8 · 🟢 · Pulido: Retención — verificado: e2e:dis-8 (tres listas, dueña y recepción en el celular: sin desborde, botones altos, un verde), capturas dis8-*
 
 ### 11 · App del socio
 - [ ] AUD-11 · 🟢 · Auditoría botón por botón: App del socio
