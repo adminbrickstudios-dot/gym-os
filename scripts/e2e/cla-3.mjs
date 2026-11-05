@@ -44,6 +44,7 @@ try {
 } finally {
   await db.query(`delete from public.avisos_enviados where referencia = $1`, [clase]);
   await db.query(`delete from public.envios_push where referencia = $1`, [clase]).catch(() => {});
+  await db.query(`delete from public.avisos_pendientes where clase_id = $1`, [clase]);
   await db.query(`delete from public.reservas where clase_id = $1`, [clase]);
   await db.query(`delete from public.clases where id = $1`, [clase]);
   await db.end();

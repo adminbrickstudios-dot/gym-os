@@ -23,7 +23,12 @@ try {
     await cfg.locator('input[type="checkbox"]').check();
     await d.locator('[data-turnos-config="si"]').waitFor({ timeout: 30000 });
   }
-  const [{ turnos_fijos: prendidos }] = (await db.query(`select turnos_fijos from public.configuracion_gimnasio where gimnasio_id = $1`, [gim])).rows;
+  // El tilde cambia al toque (optimista): se espera a que la base lo tenga guardado.
+  let prendidos = false;
+  for (let i = 0; i < 40 && !prendidos; i++) {
+    [{ turnos_fijos: prendidos }] = (await db.query(`select turnos_fijos from public.configuracion_gimnasio where gimnasio_id = $1`, [gim])).rows;
+    if (!prendidos) await new Promise((r) => setTimeout(r, 500));
+  }
   chequear(prendidos === true, "Configuración → Clases → 📌 Turnos fijos: prendidos (se guarda al tocar)", String(prendidos));
 
   const s = await pagina(b, CELU);
