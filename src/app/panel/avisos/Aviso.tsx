@@ -9,7 +9,9 @@ export type Aviso = { socio_id: string; nombre: string; telefono: string | null;
 
 /** Una persona a la que escribirle: el WhatsApp ya escrito; al tocarlo queda "avisado ✓". */
 export function FilaAviso({ a, hora }: { a: Aviso; hora: string | null }) {
-  const [hecho, setHecho] = useState<string | null>(a.avisado_en ? `Avisado${a.avisado_por ? ` por ${a.avisado_por}` : ""}${hora ? ` a las ${hora}` : ""}` : null);
+  // Lo que dice la base manda (al refrescar, por ejemplo después de "Avisar a todos"); lo local, hasta que llegue.
+  const [local, setHecho] = useState<string | null>(null);
+  const hecho = a.avisado_en ? `Avisado${a.avisado_por ? ` por ${a.avisado_por}` : ""}${hora ? ` a las ${hora}` : ""}` : local;
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const wa = linkWhatsappSocio(a.telefono, a.mensaje);

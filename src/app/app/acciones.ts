@@ -1,5 +1,8 @@
 "use server";
 import { notificarDespues } from "@/lib/push";
+import { headers } from "next/headers";
+import { crearPreferencia } from "@/lib/mercadopago";
+import { clienteServicio } from "@/lib/supabase/servicio";
 import { revalidatePath } from "next/cache";
 import { rpc } from "@/lib/panel/servidor";
 
@@ -34,4 +37,38 @@ export async function escanearEntrada(gimnasioId: string, socioId: string, codig
 export async function invitarHoy(gimnasioId: string, socioId: string, nombre: string, dni: string): Promise<{ error?: string }> {
   try { await rpc("invitar", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_nombre: nombre, p_dni: dni }); revalidatePath("/app"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+/**
+ * PAY-1: la base arma la venta y el pago pendiente (al precio de MercadoPago);
+ * acá se crea el checkout con el token del gimnasio (de Vault, con la clave de
+ * servicio) y se devuelve a dónde ir. El aviso de MercadoPago es el que acredita.
+ */
+export async function pagarConMercadoPago(socioId: string): Promise<{ url?: string; error?: string }> {
+  try {
+    const p = await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_pago_online", { p_socio_id: socioId });
+    const { data, error } = await clienteServicio().rpc("credenciales_mp", { p_gimnasio_id: p.gimnasio_id });
+    if (error) return { error: error.message };
+    const c = data as { token: string; modo: string } | null;
+    if (!c?.token) return { error: "El gimnasio no tiene MercadoPago conectado" };
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+    const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127\.|[^.]+\.localhost)/.test(host) ? "http" : "https");
+    const origen = `${proto}://${host}`;
+    const pref = await crearPreferencia(c.token, {
+      pagoId: p.pago_id, titulo: p.descripcion, monto: Number(p.monto),
+      volver: `${origen}/app/pago?pago=${p.pago_id}`,
+      avisar: `${origen}/api/webhooks/mercadopago?g=${p.gimnasio_id}`,
+    });
+    return { url: c.modo === "prueba" && pref.sandbox_init_point ? pref.sandbox_init_point : pref.init_point };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** "Confirmando tu pago…": cómo va (lo pregunta la pantalla cada pocos segundos). */
+export async function estadoPagoOnline(pagoId: string): Promise<{ estado?: string; motivo?: string | null; error?: string }> {
+  try {
+    const r = await rpc<{ estado: string; rechazado_motivo: string | null }>("pago_online", { p_pago_id: pagoId });
+    if (r.estado !== "pendiente") revalidatePath("/app");
+    return { estado: r.estado, motivo: r.rechazado_motivo };
+  } catch (e) { return { error: (e as Error).message }; }
 }

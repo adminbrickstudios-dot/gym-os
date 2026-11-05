@@ -9,6 +9,7 @@ import { textoCierre } from "@/lib/horarios";
 import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
 import { Pagar } from "./Pagar";
+import { PagarOnline } from "./PagarOnline";
 import { MiQR } from "./MiQR";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
@@ -37,12 +38,14 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       // AVI-5: cuántas novedades sin ver (si falla, no se muestra un cero que no es).
       rpc<{ sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
+      // PAY-1: si el gimnasio conectó MercadoPago, cuánto sale pagar ahora.
+      rpc<{ disponible: boolean; monto?: number; descripcion?: string }>("pago_online_disponible", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -95,8 +98,9 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {yo.pendiente && (
           <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full">🧾 Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
         )}
+        {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
         {!yo.pendiente && debePagar && yo.transferencia && (
-          <Pagar gimnasioId={g.id} socioId={s.socio_id} monto={yo.plan?.precio_transferencia ?? null} datos={yo.transferencia} />
+          <Pagar gimnasioId={g.id} socioId={s.socio_id} monto={yo.plan?.precio_transferencia ?? null} datos={yo.transferencia} secundario={!!online?.disponible} />
         )}
 
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}

@@ -187,3 +187,22 @@ export async function revocarTablet(id: string): Promise<{ error?: string; table
     return { tablets: await rpc<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── MercadoPago (PAY-1): el token y la clave van a Vault, nunca vuelven ──
+export type EstadoMP = { conectado: boolean; modo?: "prueba" | "produccion"; conectado_en?: string; por?: string | null };
+export async function conectarMercadoPago(token: string, secreto: string, modo: string): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_mercadopago", { p_gimnasio_id: panel.gimnasio.id, p_token: token, p_secreto: secreto, p_modo: modo });
+    revalidatePath("/panel/configuracion");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function desconectarMercadoPago(): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("quitar_mercadopago", { p_gimnasio_id: panel.gimnasio.id });
+    revalidatePath("/panel/configuracion");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

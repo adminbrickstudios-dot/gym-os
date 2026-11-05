@@ -17,6 +17,7 @@ cd "$(dirname "$0")/../.."
 mkdir -p .local
 PUERTO_APP="${PUERTO_APP:-3123}"
 PUERTO_SUPABASE="${PUERTO_SUPABASE:-54321}"
+PUERTO_MP="${PUERTO_MP:-$((PUERTO_SUPABASE + 10))}"   # simulador de MercadoPago (PAY-1)
 
 parar() {
   if [[ -f ".local/$1.pid" ]]; then kill "$(cat ".local/$1.pid")" 2>/dev/null || true; rm -f ".local/$1.pid"; fi
@@ -41,7 +42,7 @@ esperar() {   # esperar <url> <nombre>
 }
 
 case "${1:-}" in
-  parar) parar supabase; parar app; liberar_puerto "$PUERTO_APP"; liberar_puerto "$PUERTO_SUPABASE"; echo "Apagado."; exit 0 ;;
+  parar) parar supabase; parar mp; parar app; liberar_puerto "$PUERTO_APP"; liberar_puerto "$PUERTO_SUPABASE"; liberar_puerto "$PUERTO_MP"; echo "Apagado."; exit 0 ;;
   nueva) scripts/db/local.sh nueva; rm -rf .local/storage ;;   # base nueva: sin archivos de antes
 esac
 
@@ -59,12 +60,20 @@ if [[ "$(psql "$URL" -Atc "select count(*) from public.gimnasios where slug = 'd
 fi
 node scripts/datos/usuarios-demo.mjs --url "$URL" --supabase "http://127.0.0.1:$PUERTO_SUPABASE" --servicio "$SUPABASE_SERVICE_ROLE_KEY"
 
+# Simulador de MercadoPago: el pago online de punta a punta sin cuenta real.
+parar mp
+liberar_puerto "$PUERTO_MP"
+node scripts/local/mp-simulado.mjs --puerto "$PUERTO_MP" > .local/mp.log 2>&1 &
+echo $! > .local/mp.pid
+esperar "http://127.0.0.1:$PUERTO_MP/" mp
+
 parar app
 liberar_puerto "$PUERTO_APP"
 NEXT_DIST_DIR=.next-dev \
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SUPABASE" \
 NEXT_PUBLIC_DOMINIO_BASE=localhost \
 NEXT_PUBLIC_DOMINIO_PLATAFORMA=localhost \
+MP_API_URL="http://127.0.0.1:$PUERTO_MP" \
   npx next dev -p "$PUERTO_APP" > .local/app.log 2>&1 &
 echo $! > .local/app.pid
 esperar "http://localhost:$PUERTO_APP/" app

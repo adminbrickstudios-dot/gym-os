@@ -15,6 +15,29 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · PAY-1 · Pagos online listos para MercadoPago
+
+**QUÉ HICE**
+- Configuración → Cobros → "💳 Pagos online con MercadoPago" (el dueño): pega el Access Token y la clave secreta del webhook, con los pasos de dónde sacarlos. Se guardan en **Vault** (la tabla tiene solo el id del secreto); "Desconectar" pisa los secretos.
+- App del socio: "💳 Pagar ahora" (o "Pagar el próximo mes" si está al día) → la base arma la venta y el pago pendiente con el precio de MercadoPago → checkout → vuelve a "Estamos confirmando tu pago…", que se actualiza sola hasta "¡Pago acreditado!" (o "No se pudo cobrar").
+- Webhook `/api/webhooks/mercadopago?g=<gimnasio>`:
+  - firma `x-signature` verificada con la clave del gimnasio (inválida → 401);
+  - idempotente por ID externo (`eventos_webhook`);
+  - estado y monto leídos de la API de MercadoPago con el token del gimnasio;
+  - acredita con `confirmar_venta` solo si el monto coincide;
+  - si falla, 500 y MercadoPago reintenta.
+- `scripts/local/mp-simulado.mjs`: imita MercadoPago (preferencias, checkout, pagos y el aviso firmado). `levantar.sh` lo levanta y apunta la app a él (`MP_API_URL`).
+- Migración 0079, prueba de base `pagos-online`, e2e `e2e:pay-1`. Vault simulado en `supabase/local/simular-supabase.sql` (solo local).
+
+**QUÉ CONFIGURÁS VOS**
+- En Supabase, Vault tiene que estar activo (Database → Extensions → `supabase_vault`; en proyectos nuevos viene prendido). La migración 0079 lo verifica y frena si falta.
+- Nada en Vercel: cada gimnasio pega sus credenciales en su panel.
+
+**LO QUE NO PUDE VERIFICAR**
+- Contra MercadoPago real: el código está escrito según la documentación de MercadoPago (Checkout Pro, `/v1/payments`, firma `x-signature`), pero no está ejecutado contra su API. Para probarlo: conectar una cuenta con credenciales de prueba y pagar con una tarjeta de prueba de MercadoPago.
+
+---
+
 ## 2026-11-05 · RES-3 · Gastos y ganancia
 
 **QUÉ HICE**
