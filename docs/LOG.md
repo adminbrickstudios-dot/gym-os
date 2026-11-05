@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-1 · Pulido de Inicio
+
+**QUÉ HICE**
+- Revisé Inicio en el celular con la captura de la dueña (primeros pasos, accesos, números, "Ahora y lo que sigue"): la lista de primeros pasos ya arranca cerrada, un solo verde (el primer acceso), números de a dos. No hizo falta cambiar código.
+- `e2e:dis-1` lo mide para los cuatro roles (sin desborde, botones de 44 px o más, un verde, números en dos filas), capturas `dis1-celu-*`.
+
+---
+
 ## 2026-11-05 · AUD-14 · Inicio de cada rol, botón por botón
 
 **QUÉ HICE**

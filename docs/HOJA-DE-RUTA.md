@@ -359,7 +359,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 14 · Inicio (al final: junta todo lo anterior)
 - [x] AUD-14 · 🟢 · Auditoría botón por botón: Inicio de cada rol — verificado: e2e:inicio (pendiente de la tanda final), db (pedidos-socio: bajas pendientes); inventario en docs/paneles/inicio.md
-- [ ] DIS-1 · 🟢 · Pulido: Inicio
+- [x] DIS-1 · 🟢 · Pulido: Inicio — verificado: e2e:dis-1 (pendiente de la tanda final); sin cambios de código
 
 ### 15 · Super admin y plataforma
 - [ ] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio
