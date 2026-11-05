@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · SOC-14 · La ficha dice cómo llegó y qué reglamento aceptó
+
+**QUÉ HICE**
+- Ficha → Contacto, abajo: "📝 Lo dio de alta Ana en el mostrador el 5/11", "Se anotó solo desde la página el …" o "Vino en una importación (archivo) el …"; si antes fue prospecto, cómo llegó ("pidió una clase de prueba desde la página"). Si aceptó el reglamento: versión y fecha, y "Ver lo que aceptó" abre el texto de esa versión (aunque después haya otra), para mostrárselo al socio.
+- Migración `20261104004600_origen_socio.sql`: `origen_socio` y `reglamento_aceptado`. No guarda nada nuevo: sale de `socios.origen`, importaciones, prospectos y aceptaciones.
+- `supabase/pruebas/origen-socio.test.mjs` y `scripts/e2e/soc-14.mjs` (3 pasos; usa al socio que anota reg-1, va después en la cadena).
+
+**QUÉ CORRÉS VOS**
+- `aplicar` (0020 a 0046).
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0046 contra la base real (probada local).
+
+---
+
 ## 2026-11-05 · SOC-13 · Alta en un paso: datos, plan y cobrar
 
 **QUÉ HICE**
