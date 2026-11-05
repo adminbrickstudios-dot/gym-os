@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-12 · Equipo y Mi cuenta botón por botón
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/equipo.md` y `e2e:equipo` (sumar sin mail, cambiar rol, confirmar "hacer dueño", sacar y devolver acceso, el encargado sin botones, Mi cuenta en el celular).
+- Arreglado: elegir "Dueño" en el selector de rol le daba todo al toque; ahora pide confirmación en pantalla. Los campos de contraseña de Mi cuenta tienen nombre (solo tenían el texto de ejemplo). Faltaba `loading.tsx` en las dos rutas.
+
+**SIN ARREGLAR**
+- No se puede editar el nombre o la sede de alguien del equipo (anotado en el inventario).
+
+---
+
 ## 2026-11-05 · DIS-12 · Pulido de la app del socio
 
 **QUÉ HICE**

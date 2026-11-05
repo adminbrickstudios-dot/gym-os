@@ -346,7 +346,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-12 · 🟢 · Pulido: App del socio — verificado: e2e:dis-12 (pendiente de la tanda final: 5 pantallas en el celular, un verde)
 
 ### 12 · Equipo y cuentas
-- [ ] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta
+- [x] AUD-12 · 🟢 · Auditoría botón por botón: Equipo y Mi cuenta — verificado: e2e:equipo (pendiente de la tanda final); inventario en docs/paneles/equipo.md
 - [ ] EQU-1 · 🟡 D4 · Interruptores de permisos por gimnasio
 - [ ] EQU-2 · 🟡 D3 · El profe busca socios
 - [ ] EQU-3 · 🟢 · Qué hizo cada uno (auditoría)

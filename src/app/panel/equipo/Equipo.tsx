@@ -18,6 +18,12 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
   const [estado, accion, guardando] = useActionState<Resultado, FormData>(agregarPersona, {});
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  // AUD-12: hacer dueño a alguien le da la plata y la configuración: se confirma en pantalla.
+  const [hacerDueno, setHacerDueno] = useState<Miembro | null>(null);
+  const cambiarRol = (m: Miembro, rol: string) => {
+    if (rol === "dueno") { setHacerDueno(m); return; }
+    empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, rol, m.sede_id, m.activo); setError(r.error ?? null); });
+  };
   return (
     <div className="space-y-10">
       <ul className="space-y-2">
@@ -31,13 +37,21 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
             {puedeEditar && !m.soy_yo && (
               <div className="flex gap-2">
                 <select aria-label={`Rol de ${m.nombre}`} className="campo !w-auto" value={m.rol} disabled={ocupado}
-                  onChange={(e) => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, e.target.value, m.sede_id, m.activo); setError(r.error ?? null); })}>
+                  onChange={(e) => cambiarRol(m, e.target.value)}>
                   {(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]}</option>)}
                 </select>
                 <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
                   onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, m.rol, m.sede_id, !m.activo); setError(r.error ?? null); })}>
                   {m.activo ? "Sacar acceso" : "Devolver acceso"}
                 </button>
+              </div>
+            )}
+            {hacerDueno?.equipo_id === m.equipo_id && (
+              <div className="basis-full flex flex-wrap items-center gap-2" role="group" aria-label="Confirmar" data-confirmar-dueno>
+                <span className="texto-suave">¿Hacer dueño a {m.nombre}? Va a ver la plata y poder cambiar la configuración y el equipo.</span>
+                <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado}
+                  onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, "dueno", m.sede_id, m.activo); setError(r.error ?? null); setHacerDueno(null); })}>Sí, hacerlo dueño</button>
+                <button type="button" className="boton-texto texto-suave" onClick={() => setHacerDueno(null)}>Cancelar</button>
               </div>
             )}
             {puedeEditar && !m.soy_yo && m.activo && (
