@@ -114,6 +114,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
 
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
+        <p className="text-center"><Link href={`/app/historial${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-historial>🧾 Mis pagos y cuándo vine</Link></p>
         <Instalar />
 
         {yo.plan && (

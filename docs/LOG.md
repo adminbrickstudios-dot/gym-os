@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-3 · Historial en la app del socio
+
+**QUÉ HICE**
+- App del socio → "🧾 Mis pagos y cuándo vine" (`/app/historial`):
+  - los últimos 12 pagos, con qué pagó y si está aprobado, revisándose o rechazado (con el motivo);
+  - las últimas 15 entradas y clases.
+- Migración 0092 (`mi_historial`), prueba de base `historial-socio`, `e2e:app-3`.
+- El comprobante con link propio de cada pago (VEN-1 lo arma para WhatsApp) no está en esta lista: queda para AUD-11.
+
+---
+
 ## 2026-11-05 · APP-7 · Racha y entradas del mes
 
 **QUÉ HICE**
