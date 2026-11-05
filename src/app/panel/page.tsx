@@ -40,7 +40,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -59,6 +59,8 @@ export default async function Inicio() {
       rol === "dueno" || rol === "encargado" ? rpc<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
       // CAJ-4: lo que pasó con la plata (de otros), si hay Caja.
       (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpc<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
+      // CAJ-5: cajas que quedaron abiertas (al dueño y al encargado todas; a la recepción las suyas).
+      rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpc<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
@@ -151,6 +153,25 @@ export default async function Inicio() {
             <h2 id="invitados-hoy" className="titulo text-3xl mb-4">👥 Invitados hoy</h2>
             <ul className="space-y-1">
               {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✅" : "⏳"} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {olvidadas.length > 0 && (
+          <section aria-labelledby="cajas-olvidadas" data-cajas-olvidadas={olvidadas.length}>
+            <h2 id="cajas-olvidadas" className="titulo text-3xl mb-4">⏰ Caja abierta</h2>
+            <ul className="space-y-2">
+              {olvidadas.map((o) => (
+                <li key={o.turno_id}>
+                  <LinkPanel href="/panel/caja" siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-lg">{o.caja} quedó abierta</span>
+                      <span className="block texto-suave">Desde el {new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(o.abierto_en))}{o.mia ? " · la abriste vos" : ` · la abrió ${o.abierto_por}`}</span>
+                    </span>
+                    <span className="texto-suave">Cerrarla</span>
+                  </LinkPanel>
+                </li>
+              ))}
             </ul>
           </section>
         )}

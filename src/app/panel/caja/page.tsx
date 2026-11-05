@@ -18,7 +18,11 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     exigirSeccion(panel, "caja");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
-    const cajas = (await rpc<Caja[]>("cajas_sede", { p_sede_id: sede.id })).filter((c) => c.activa);
+    const [todas, olvidadas] = await Promise.all([
+      rpc<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
+      rpc<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
+    ]);
+    const cajas = todas.filter((c) => c.activa);
     const ve = panel.yo.rol !== "recepcion";   // arqueo ciego: la recepción no ve lo esperado con la caja abierta
     const resumenes = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpc<Resumen>("resumen_caja", { p_turno_id: c.turno_id }) : Promise.resolve(null))));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -30,7 +34,8 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
         <div className="space-y-4">
           {cajas.map((c, i) => c.turno_id
-            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]} />
+            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]}
+                olvidada={olvidadas.some((o) => o.turno_id === c.turno_id)} />
             : <AbrirCaja key={c.caja_id} cajaId={c.caja_id} nombre={c.nombre} />)}
         </div>
       </>

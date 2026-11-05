@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CAJ-5 · Caja olvidada abierta
+
+**QUÉ HICE**
+- Una caja está "olvidada" si quedó abierta de otro día, o si hoy ya pasó la hora de cierre de su sede.
+- Inicio: "⏰ Caja abierta". La ven quien la abrió ("la abriste vos"), el dueño y el encargado. Lleva a Caja, que muestra el aviso.
+- `abrir_caja` no deja abrir otra a quien ya tiene una abierta. Dice cuál y desde cuándo.
+- Migración `20261104007000_caja_olvidada.sql`: `privado.caja_olvidada`, `cajas_olvidadas` y una copia de `abrir_caja`.
+- Pruebas: `supabase/pruebas/caja-olvidada.test.mjs` (2) y `scripts/e2e/caj-5.mjs` (4 pasos). Para simular que pasó la noche, la prueba corre la apertura un día para atrás en la base local.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: se abrió, se "olvidó" y se cerró.
+
+---
+
 ## 2026-11-05 · CAJ-4 · Alertas de caja al dueño
 
 **QUÉ HICE**

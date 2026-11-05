@@ -140,6 +140,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | VEN-3 | El convenio se aplica solo a la cuota (no a pases, packs ni productos), por cuota, y nunca más que su precio. Lo crean, asignan y quitan el dueño y el encargado; la recepción lo ve. Un socio tiene uno a la vez; asignar otro reemplaza al anterior. Se guarda como descuento de la cuota con motivo "Convenio X" y no cuenta para el tope de la recepción. | D14: lo aplica Vender solo; que la recepción no pueda inventar descuentos y el dueño vea por qué se cobró menos. | Aplicarlo también a pases y packs. |
 | 2026-11-05 | VEN-5 | "A cuenta" es un medio de pago más en Vender: solo con socio, hasta el tope (deuda anterior + lo nuevo) y nunca para pagar deuda. La deuda sale de los pagos a cuenta menos los pagos de deuda (ventas no anuladas); no se guarda. La puerta deja entrar al que debe y lo pone en amarillo con "Debe $X a cuenta" (también si después se apaga el fiado). "Cobrado hoy" no suma lo fiado: la plata entra cuando paga la deuda. | D5. Si lo fiado contara como cobrado, el pago de la deuda se contaría dos veces. | Que deber deje afuera. |
 | 2026-11-05 | CAJ-4 | Las alertas no se guardan: se calculan de los últimos 7 días (cajas cerradas con diferencia, retiros, ventas anuladas, descuentos mayores al tope de la recepción sin contar convenios) y no se muestran las que hizo quien mira. Las ven el dueño y el encargado en Inicio, hasta que existan la campana (AVI-5) y las notificaciones (PUSH-1). La diferencia avisa desde $1 (no hay margen configurable). El ticket del retiro es opcional; lo sube quien anotó el retiro y no se cambia. | Que "nada que importe dependa de un cron" y que el dueño no reciba avisos de lo que hizo él. | Un margen de diferencia en Configuración. |
+| 2026-11-05 | CAJ-5 | "Olvidada" = abierta desde otro día, o hoy después de la última hora de cierre de esa sede (sin horarios cargados, solo el cambio de día). Nadie puede tener dos cajas abiertas a la vez (olvidada o no). El aviso lo ven en Inicio quien la abrió, el dueño y el encargado. | Sin cron: se calcula al mirar o al abrir. | Cerrarla sola (no: alguien tiene que contar la plata). |
 
 ---
 
@@ -273,7 +274,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CAJ-1 · 🟢 · Historial de turnos de caja
 - [x] CAJ-2 · 🟢 · Cierre de caja para compartir
 - [x] CAJ-4 · 🟢 · Alertas de caja al dueño: diferencia, retiro, anulación, descuento grande (con foto del ticket en retiros)
-- [ ] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
+- [x] CAJ-5 · 🟢 · Caja olvidada abierta: aviso y cierre obligatorio antes de abrir otra
 - [ ] CAJ-3 · 🟡 D15 · PIN del equipo en la recepción
 - [ ] DIS-4 · 🟢 · Pulido: Vender
 - [ ] DIS-5 · 🟢 · Pulido: Caja

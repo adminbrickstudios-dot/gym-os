@@ -24,7 +24,7 @@ export function AbrirCaja({ cajaId, nombre }: { cajaId: string; nombre: string }
   );
 }
 
-export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: string; nombre: string; desde: string; resumen: Resumen | null }) {
+export function TurnoAbierto({ turnoId, nombre, desde, resumen, olvidada = false }: { turnoId: string; nombre: string; desde: string; resumen: Resumen | null; olvidada?: boolean }) {
   const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar">("nada");
   const [monto, setMonto] = useState("");
   const [motivo, setMotivo] = useState("");
@@ -62,6 +62,8 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
         <p className="titulo text-2xl">🔓 {nombre} abierta</p>
         <p className="texto-suave">{desde}</p>
       </div>
+      {/* CAJ-5: abierta de otro día o pasada la hora de cierre. */}
+      {olvidada && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 whitespace-normal" data-olvidada>⏰ Esta caja quedó abierta. Contá la plata y cerrala: hasta que se cierre, quien la abrió no puede abrir otra.</p>}
       {resumen ? (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div><dt className="texto-tenue text-sm">Inicial</dt><dd className="numero text-2xl">{formatearPesos(resumen.monto_inicial)}</dd></div>
