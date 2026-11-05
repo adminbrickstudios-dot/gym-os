@@ -392,7 +392,7 @@ bloque 18.
 - [x] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular) — verificado: e2e:rev-2 (contra la app local; la contraseña por WhatsApp corre en la tanda); lo que falta: REV-2a
 - [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
 - [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
-- [ ] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando
+- [x] REV-5 · 🟢 · Segunda pasada: BRIK da de alta un gimnasio de cada tipo y lo deja andando — verificado: e2e:rev-5 (15 pasos: los 8 tipos; el dueño entra, ve sus planes y actividades, Clases según el tipo, pone el primer precio, celular sin desbordes)
 - [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
 
 ### 18 · Lo que encontró la segunda pasada

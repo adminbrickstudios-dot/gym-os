@@ -15,6 +15,13 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-5 · BRIK da de alta un gimnasio de cada tipo
+
+**QUÉ HICE**
+- `scripts/e2e/rev-5.mjs`: el super admin crea uno de cada tipo de la plantilla (musculación, grande, box, yoga, artes, natación, personal, 24 h); en cada uno el dueño entra con su contraseña, ve los primeros pasos, los planes de la plantilla, Clases en el menú solo si el tipo las usa, las actividades en la grilla, y le pone precio al primer plan. En el celular, sin desbordes. 15 pasos en verde en la tanda.
+
+---
+
 ## 2026-11-05 · REV-4 · Lo que encontró el día del profe
 
 **LO QUE ENCONTRÉ SIN PEDIRTELO**
