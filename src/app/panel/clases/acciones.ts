@@ -16,3 +16,13 @@ export const deshacerPresente = async (claseId: string, socioId: string, motivo:
   r(() => rpc("anular_presente", { p_clase_id: claseId, p_socio_id: socioId, p_motivo: motivo }), claseId);
 /** CLA-4: el WOD de la clase (vacío lo borra). */
 export const guardarWod = async (claseId: string, texto: string) => r(() => rpc("guardar_wod", { p_clase_id: claseId, p_texto: texto }), claseId);
+
+/** COM-3: arma un WhatsApp por anotado con el texto (la base lo anota en la clase). */
+export type MensajeClase = { socio_id: string; nombre: string; telefono: string | null; mensaje: string };
+export async function avisarClase(claseId: string, texto: string): Promise<{ error?: string; mensajes?: MensajeClase[] }> {
+  try {
+    const r = await rpc<{ mensajes: MensajeClase[] }>("avisar_clase", { p_clase_id: claseId, p_texto: texto });
+    revalidatePath(`/panel/clases/${claseId}`);
+    return { mensajes: r.mensajes };
+  } catch (e) { return { error: (e as Error).message }; }
+}

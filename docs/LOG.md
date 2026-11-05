@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-3 · Avisar a los anotados de una clase
+
+**QUÉ HICE**
+- En la lista de una clase: "📣 Avisar a todos (N)". Se escribe el aviso (con {nombre}, {clase} y {dia}, que se completan para cada uno), "Armar N mensajes" y aparece un botón de WhatsApp por persona. El aviso queda anotado en la clase: quién, cuándo, a cuántos y qué dijo.
+- Migración 0123 (`avisos_clase` con RLS, `avisar_clase`, `avisos_clase`). Pueden los mismos que ven la lista; el profe solo en sus clases y sin teléfonos si el dueño no se lo prendió (los que no tienen celular aparecen "sin celular"). Prueba de base y e2e com-3.
+
+**LO QUE NO PUDE VERIFICAR**
+- La pantalla: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-3). El mail queda para cuando exista AVI-2.
+
+---
+
 ## 2026-11-05 · COM-2 · El primer mes del socio nuevo
 
 **QUÉ HICE**
