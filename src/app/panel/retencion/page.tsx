@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FilaContacto } from "@/components/panel/FilaContacto";
 import { Encabezado } from "@/components/panel/Marco";
+import { Vacio } from "@/components/ui/Vacio";
+import { rutaDisponible } from "@/lib/panel/secciones";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
@@ -49,6 +51,9 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const lista = LISTAS.find((l) => l.clave === pedida) ?? LISTAS.find((l) => (resumen.listas[l.clave] ?? 0) > 0) ?? LISTAS[0];
     const zona = panel.gimnasio.zona_horaria;
     const visibles = filas.filter((f) => f.lista === lista.clave);
+    // AUD-10: a los que deben, cobrarles desde la fila (si Vender está y el gimnasio cobra membresía).
+    const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas) && panel.cobra.membresia && ["vencido", "por_vencer"].includes(lista.clave);
+    const otra = LISTAS.find((l) => l.clave !== lista.clave && (ids ? filas.filter((f) => f.lista === l.clave).length : resumen.listas[l.clave] ?? 0) > 0);
     return (
       <>
         <Encabezado emoji="📉" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
@@ -68,14 +73,18 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </nav>
         )}
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
-        {visibles.length === 0 ? <p className="texto-suave text-lg">Nadie en esta lista. 🎉</p> : (
+        {visibles.length === 0 ? (
+          <Vacio emoji="🎉" titulo="Nadie en esta lista">
+            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>: ahí sí hay a quién escribirle.</> : "Nadie se está yendo. Volvé mañana: se calcula sola."}
+          </Vacio>
+        ) : (
           <ul className="space-y-2">
             {visibles.map((f) => (
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={f.lista}
                 detalle={venia(f.visitas_por_semana)}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
                 ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : null}
-                puedeAnotar />
+                puedeAnotar cobrar={puedeCobrar} />
             ))}
           </ul>
         )}

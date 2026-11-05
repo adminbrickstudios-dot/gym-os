@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-10 · Auditoría de Retención
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/retencion.md`.
+- "💵 Cobrar" en las filas de Vencidos y Por vencer (abre Vender con la cuota).
+- Lista vacía con `Vacio` y el link a la lista que sí tiene gente.
+- `loading.tsx` con la forma real.
+- `scripts/e2e/panel-retencion.mjs` (`e2e:retencion`).
+
+---
+
 ## 2026-11-05 · DIS-9 · Pulido de Clases
 
 **QUÉ HICE**
