@@ -72,9 +72,18 @@ try {
   const horario = d.locator("li", { hasText: "Prueba e2e" }).filter({ hasText: "23:15" });
   await horario.waitFor({ timeout: 30000 });
   ok("➕ Agregar a la grilla: domingo 23:15");
-  await horario.getByRole("button", { name: /^Sacar/ }).click();
-  await horario.getByRole("button", { name: "Sí, sacar" }).click();
-  await horario.waitFor({ state: "detached", timeout: 30000 });
+  // CLA-8: editarlo en el lugar (hora y cupo).
+  await horario.getByRole("button", { name: /^Editar/ }).click();
+  const ed = d.locator("[data-editar-horario]");
+  await ed.locator('input[type="time"]').fill("23:30");
+  await ed.getByPlaceholder("Sin cupo").fill("7");
+  await ed.getByRole("button", { name: "Guardar" }).click();
+  const editado = d.locator("li", { hasText: "Prueba e2e" }).filter({ hasText: "23:30" });
+  await editado.waitFor({ timeout: 30000 });
+  chequear(/cupo 7/.test(await editado.innerText()), "Editar: pasa a las 23:30 con cupo 7, sin sacarlo", await editado.innerText());
+  await editado.getByRole("button", { name: /^Sacar/ }).click();
+  await editado.getByRole("button", { name: "Sí, sacar" }).click();
+  await editado.waitFor({ state: "detached", timeout: 30000 });
   ok("Sacar → “Sí, sacar” en pantalla (sin diálogo del navegador): ya no está");
   const ocup = d.locator("[data-ocupacion] li");
   ok(await ocup.count() ? `📊 Ocupación de las últimas 4 semanas (${await ocup.count()} horarios, ej: “${(await ocup.first().innerText()).replace(/\s+/g, " ")}”)` : "sin clases pasadas todavía: la ocupación no aparece (lo vacío está vacío)");

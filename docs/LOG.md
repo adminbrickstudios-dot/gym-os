@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-8 · Editar actividades y horarios sin sacarlos
+
+**QUÉ HICE**
+- Grilla:
+  - cada horario tiene "Editar" (hora, minutos, cupo, profe), en el lugar;
+  - tocar una actividad deja cambiarle el nombre y el emoji, o apagarla.
+- Cómo se guarda: un horario nuevo y el viejo cerrado (el horario no se edita, decisión de 0011), llevando las clases futuras.
+  - Las que ya tienen reservas conservan su hora.
+  - El cupo no baja de lo reservado; si sube, entra la espera.
+- Migración 0086 (`editar_horario`), prueba de base `editar-horario`, paso en `e2e:clases`.
+- CLA-6 (clase de prueba para prospectos) quedó sin hacer. Pide reservar sin ser socio, y hoy toda reserva es de un socio y cuenta para el cupo en varias funciones. No lo empecé a medias.
+
+---
+
 ## 2026-11-05 · CLA-4 · WOD de la clase
 
 **QUÉ HICE**
