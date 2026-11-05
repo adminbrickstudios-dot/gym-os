@@ -4,6 +4,7 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Anotar } from "./Anotar";
+import { MarcasProgreso, type Progreso } from "@/components/rutinas/Progreso";
 
 export const metadata: Metadata = { title: "Mi rutina" };
 export type MiRutina = { nombre: string; descripcion: string | null;
@@ -18,7 +19,10 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     if (yo.elegir || !yo.socio) return <p className="texto-suave">Elegí primero <Link href="/app" className="underline">qué socio sos</Link>.</p>;
     const s = yo.socio;
     const q = (extra = "") => { const p = new URLSearchParams(); if (yo.socios.length > 1) p.set("socio", s.socio_id); if (extra) p.set("dia", extra); const x = p.toString(); return x ? `?${x}` : ""; };
-    const r = await rpc<MiRutina | null>("rutina_de_socio", { p_socio_id: s.socio_id });
+    const [r, progreso] = await Promise.all([
+      rpc<MiRutina | null>("rutina_de_socio", { p_socio_id: s.socio_id }),
+      rpc<Progreso>("progreso_socio", { p_socio_id: s.socio_id }),
+    ]);
     if (!r) return (<><Link href={`/app${q()}`} className="texto-suave">← Volver</Link><h1 className="titular text-5xl mt-4">Mi rutina</h1>
       <p className="texto-suave text-lg mt-4">Todavía no tenés una rutina. Pedísela a tu profe.</p></>);
     const dias = [...new Set(r.items.map((x) => x.dia))].sort();
@@ -44,6 +48,7 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
             <Anotar socioId={s.socio_id} ejercicioId={x.ejercicio_id} nombre={x.ejercicio} />
           </li>
         ))}</ul>
+        <section className="space-y-3 pt-4"><h2 className="titulo text-3xl">🏆 Mis marcas</h2><MarcasProgreso datos={progreso} zona={yo.zona!} /></section>
       </div>
     );
   });

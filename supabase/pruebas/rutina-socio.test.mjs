@@ -61,3 +61,17 @@ test("otra rutina reemplaza; quitar la saca; el socio no se asigna solo", async 
   const [{ n }] = await t.q(`select count(*)::int n from public.rutinas_socio where socio_id = $1`, [socio]);
   assert.equal(n, 2, "las anteriores quedan como historia");
 });
+
+test("RUT-3: la marca es el mayor peso; el progreso, lo anotado en orden; el profe lo ve, otro socio no", async () => {
+  await como(uSocio, async () => {
+    for (const [kg, reps] of [[50, 10], [70, 5], [65, 8]]) await t.q(`select public.anotar_ejercicio($1, $2, $3, $4)`, [socio, sentadilla, kg, reps]);
+    await t.q(`select public.anotar_ejercicio($1, $2, null, 20)`, [socio, sentadilla]);   // solo repeticiones: no es marca de peso
+  });
+  const [{ p }] = await como(uProfe, () => t.q(`select public.progreso_socio($1) p`, [socio]));
+  const e = p.ejercicios[0];
+  assert.equal(e.ejercicio, "Sentadilla");
+  assert.equal(Number(e.marca.peso), 70); assert.equal(e.marca.repeticiones, 5);
+  // En la prueba todo pasa en la misma transacción (mismo momento): se compara sin el orden.
+  assert.deepEqual(e.registros.map((r) => r.peso === null ? 0 : Number(r.peso)).sort((a, b) => a - b), [0, 50, 65, 70]);
+  await como(uOtro, () => t.falla(() => t.q(`select public.progreso_socio($1)`, [socio]), /permiso/i));
+});

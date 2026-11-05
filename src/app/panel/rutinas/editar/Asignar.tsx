@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
@@ -26,6 +27,7 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
           <li key={s.socio_id} className="flex items-center gap-3 min-h-[52px]">
             <PuntoEstado color={s.color} />
             <span className="flex-1 min-w-0 truncate font-semibold">{s.nombre}</span>
+            <Link href={`/panel/rutinas/socio?id=${s.socio_id}`} className="boton-texto texto-suave text-sm" aria-label={`Progreso de ${s.nombre}`}>🏆 Progreso</Link>
             {hechos.includes(s.socio_id) ? <span className="pildora pildora-verde">✓ Asignada</span> : (
               <button type="button" className="boton boton-chico" disabled={ocupado}
                 onClick={() => empezar(async () => { const r = await asignarRutina(s.socio_id, rutinaId); if (r.error) setError(r.error); else setHechos((h) => [...h, s.socio_id]); })}>Asignar</button>

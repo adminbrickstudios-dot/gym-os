@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · RUT-3 · Marcas personales y progreso
+
+**QUÉ HICE**
+- Por ejercicio, la marca (el mayor peso, con cuántas repeticiones y cuándo) y un gráfico chico de lo anotado (últimos 30). Se calcula de lo que anotó.
+- El socio lo ve en "Mi rutina" → "🏆 Mis marcas". El profe (y el dueño y el encargado), desde "Asignar a un socio" → "🏆 Progreso" (`/panel/rutinas/socio`).
+- Migración 0105 (`progreso_socio`), caso nuevo en la prueba de base `rutina-socio`, `e2e:rut-2` lo recorre.
+
+---
+
 ## 2026-11-05 · RUT-2 · Asignar rutina; el socio la ve y anota sus pesos
 
 **QUÉ HICE**

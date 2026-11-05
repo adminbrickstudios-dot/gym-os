@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // RUT-2 · Rutina del socio: el profe asigna una rutina a “Testigo Al Día”
 // buscándolo por nombre; el socio la ve en su app (“💪 Mi rutina”), anota
-// 60 kg × 10 y le queda como “Última”. Al final se le quita y se archiva.
+// 60 kg × 10 y le queda como “Última”; RUT-3: la marca aparece en “Mis marcas”
+// y el profe la ve en el progreso del socio. Al final se le quita y se archiva.
 //   npm run e2e:rut-2            (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
@@ -42,6 +43,13 @@ try {
   await item.getByRole("button", { name: "Guardar" }).click();
   await item.locator("[data-ultimo]").waitFor({ timeout: 30000 });
   chequear(/60 kg × 10/.test(await item.locator("[data-ultimo]").innerText()), "el socio anota 60 kg × 10 y le queda como “Última”", await item.locator("[data-ultimo]").innerText());
+  await s.reload();
+  await s.locator("[data-marcas]").waitFor({ timeout: 60000 });
+  chequear(/Prensa e2e[\s\S]*🏆 60 kg × 10/.test(await s.locator("[data-marcas]").innerText()), "RUT-3: “🏆 Mis marcas” muestra 60 kg × 10", await s.locator("[data-marcas]").innerText());
+  const [{ id: socio }] = (await db.query(`select id from public.socios where gimnasio_id = $1 and nombre = 'Testigo' and apellido = 'Al Día'`, [gim])).rows;
+  await p.goto(`${G}/panel/rutinas/socio?id=${socio}`);
+  await p.locator("[data-marcas]").waitFor({ timeout: 60000 });
+  chequear(/🏆 60 kg/.test(await p.locator("[data-marcas]").innerText()), "el profe ve la marca en el progreso del socio", await p.locator("[data-marcas]").innerText());
   const ancho = await s.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `Mi rutina en el celular sin desborde (${ancho}px)`, `desborda ${ancho}`);
   for (const x of [p, s]) if (x.errores.length) falla(x.errores.join(" | "));
