@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Inicio() {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
-    return r.landing.publicada ? <LandingGimnasio landing={r.landing} agenda={r.agenda} /> : <LandingProximamente marca={r.landing.marca} />;
+    return r.landing.publicada ? <LandingGimnasio landing={r.landing} agenda={r.agenda} /> : <LandingProximamente marca={r.landing.marca} contacto={r.landing.contacto} />;
   }
   return (
     <main className="min-h-dvh flex flex-col justify-center px-4 py-16">

@@ -49,7 +49,9 @@ export type LandingPublicada = {
   sedes: Sede[];
 };
 
-export type Landing = LandingPublicada | { publicada: false; marca: Marca };
+/** Sin publicar: la marca y el WhatsApp (0029), para el "Próximamente". */
+export type LandingSinPublicar = { publicada: false; marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } };
+export type Landing = LandingPublicada | LandingSinPublicar;
 
 /** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
 export async function traerLanding(host: string): Promise<Landing | null> {

@@ -372,7 +372,10 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
             {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
           </div>
         </div>
-        <p className="mx-auto max-w-5xl mt-10 text-sm texto-tenue">Página hecha con Gym OS</p>
+        <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm texto-tenue">Página hecha con Gym OS</p>
+          <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4">🛎️ Soy del equipo</a>
+        </div>
       </footer>
 
       {whatsapp && (
@@ -384,13 +387,15 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
   );
 }
 
-export function LandingProximamente({ marca }: { marca: Marca }) {
+export function LandingProximamente({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
+  const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
   return (
     <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4">
       <div className="text-center">
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
         <p className="texto-suave mt-4 text-lg">🚧 Estamos armando nuestra página. Volvé pronto.</p>
+        {whatsapp && <div className="mt-8 flex justify-center"><BotonPrincipal href={whatsapp} className="px-8">💬 Escribinos por WhatsApp</BotonPrincipal></div>}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
           <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           <a href="/ingresar" className="boton">🛎️ Soy del equipo</a>

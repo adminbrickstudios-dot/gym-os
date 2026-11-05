@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · AUD-2 · Auditoría botón por botón: Página del gimnasio
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/pagina.md`: cada link y bloque de la página, publicada y sin publicar.
+- `scripts/e2e/panel-pagina.mjs` (16 pasos): abre cada link interno, valida WhatsApp (número + mensaje, otra pestaña), Instagram, mail, mapa y teléfono, "Lo quiero" de cada plan con su nombre, "Ver planes", título y og:title, celular sin desborde con el botón fijo; la dueña pasa a borrador → el visitante ve "Próximamente" → la vuelve a publicar; un gimnasio recién creado.
+- Migración `20261104002900_proximamente_whatsapp.sql`: la página sin publicar devuelve el WhatsApp (copia de `landing_publica` de 0008 con ese único cambio). Pre-vuelo y aplicada en la base local.
+- "🛎️ Soy del equipo" en el pie de la página publicada.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La página sin publicar no tenía cómo contactar al gimnasio (la especificación lo marcaba como hecho). Arreglado.
+- Cola: PAG-4 (aparecer en Google con datos del gimnasio).
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0029).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Nada de este ítem; lo grande está en PAG-1 a PAG-4 y REG-1.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0029 contra la base real: probada en la base local. `npm run db:types` necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-9 · Aviso de contraste al elegir colores
 
 **QUÉ HICE**

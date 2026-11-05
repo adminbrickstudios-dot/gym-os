@@ -171,12 +171,13 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-9 · 🟢 · Aviso de contraste al elegir colores — verificado: pruebas unitarias de contraste()/seLeePoco() (vitest), e2e:cfg-9 (6 pasos: amarillo sobre crema y gris sobre grafito avisan, violeta oscuro y verde no, con aviso se guarda igual, celular)
 
 ### 2 · Página del gimnasio
-- [ ] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio
+- [x] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio — verificado: e2e:pagina (16 pasos: cada link de la página publicada en compu y celular, borrador → próximamente con WhatsApp → publicar, gimnasio nuevo), inventario en docs/paneles/pagina.md, migración 0029 aplicada local
 - [ ] PAG-1 · 🟢 · Editor de la página del gimnasio con vista previa
 - [ ] PAG-2 · 🟢 · Publicar / despublicar la página, y compartirla
 - [ ] PAG-3 · 🟢 · "Quiero probar": prospectos desde la página
 - [ ] REG-1 · 🟢 · "Hacete socio": alta online desde la página, con reglamento y forma de pago (`docs/producto/05-ALTA-Y-PAGOS.md`)
 - [ ] DIS-13 · 🟢 · Pulido: Página del gimnasio
+- [ ] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots
 
 ### 3 · Socios
 - [ ] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha)
@@ -474,6 +475,8 @@ LISTO SI: prueba unitaria del cálculo; el aviso aparece y desaparece en el e2e 
 **PAG-2.** Estado de la página: borrador / publicada (si no está publicada, se ve "próximamente"). Botón publicar, link para copiar y compartir por WhatsApp, y Open Graph (título, descripción y foto al compartir el link).
 **PAG-3.** Formulario "Quiero probar una clase" (nombre, celular, qué le interesa) → sección **Prospectos** en el panel: lista, estado (nuevo, contactado, vino, se hizo socio, no), WhatsApp armado y "convertir en socio" (abre el alta con los datos). Con límite contra spam.
 LISTO SI (los tres): e2e de punta a punta (editar → publicar → un visitante deja sus datos → aparece en Prospectos → se convierte en socio).
+**PAG-4.** (Salió de AUD-2.) Que el gimnasio aparezca bien en Google: la página publicada lleva datos estructurados (`ExerciseGym` de schema.org con nombre, logo, dirección de cada sede, teléfono, horarios de apertura y link de Instagram), `sitemap.xml` y `robots.txt` por host (la página sin publicar y el panel no se indexan). Todo sale de los datos que ya carga el dueño.
+LISTO SI: prueba que lee el JSON-LD de la página demo y coincide con la agenda y las sedes; `robots.txt` de un gimnasio sin publicar dice que no; el panel tiene `noindex`.
 
 ### SOC · Socios
 
