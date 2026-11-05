@@ -104,7 +104,10 @@ test("guardar_socio: alta con número, validaciones claras, DNI único, sin dato
     assert.ok(s.f.socio.numero > 0);
     assert.equal(s.f.pagos, null, "la recepción no ve el historial de pagos");
     await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "Otra", dni: "30111222" }]), /Ya hay un socio con el DNI/);
-    await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "X", telefono: "3875551234" }]), /código de país/);
+    // Desde 0033 el teléfono se escribe como lo dice la gente; lo inválido sigue con error claro.
+    const [{ id: x }] = await t.q(`select public.guardar_socio($1, null, $2) as id`, [t.g, { nombre: "X", telefono: "387 15 555-1239" }]);
+    assert.equal((await t.q(`select telefono from public.socios where id = $1`, [x]))[0].telefono, "+5493875551239");
+    await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "X", telefono: "123" }]), /característica/);
     await t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "" }]), /obligatorio/);
   });
   await t.comoUsuario(u.ajeno, () => t.falla(() => t.q(`select public.guardar_socio($1, null, $2)`, [t.g, { nombre: "Z" }]), /Sin permiso/));

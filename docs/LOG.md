@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · AUD-3 · Auditoría botón por botón: Socios
+
+**QUÉ HICE**
+- Inventario en `docs/paneles/socios.md` (lista, alta, edición, ficha).
+- `scripts/e2e/panel-socios.mjs` (16 pasos): buscar por nombre y número, sin resultados, alta, DNI repetido, Cobrar, WhatsApp, Editar, Asignar plan, Dar de baja, Volver a darlo de alta; recepción en celular.
+- Migración `20261104003300_volver_a_dar_de_alta.sql`: `volver_a_dar_de_alta` + tabla `historial_bajas`; `telefono_normalizado` entiende el 15 del celular, el 0 de la característica, 0054 y 54 sin 9; `guardar_socio` la usa para el WhatsApp y el de emergencia. Pruebas: `volver-a-dar-de-alta.test.mjs` y `paneles.test.mjs` actualizada (antes exigía "+54 9", ahora acepta "387 15 555-1239").
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Un socio dado de baja que vuelve no tenía cómo volver: arreglado.
+- El alta de socios armaba mal algunos teléfonos (le sacaba un 0 de más) y nadie entendía "387 15 …": arreglado en la base para todo el sistema.
+- Cola: SOC-12 (filtros), SOC-13 (alta con plan y cobro), SOC-14 (cómo llegó y reglamento aceptado).
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0033).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Lo de la COLA.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0033 contra la base real: probada en la base local. `npm run db:types` necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · PAG-4 · Aparecer en Google
 
 **QUÉ HICE**

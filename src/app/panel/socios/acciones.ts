@@ -10,11 +10,7 @@ const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimie
 export async function guardarSocio(socioId: string | null, _: EstadoForm, form: FormData): Promise<EstadoForm> {
   const panel = await contextoPanel();
   const datos = Object.fromEntries(CAMPOS.map((c) => [c, String(form.get(c) ?? "").trim()]));
-  // "387 555-1234" → +54 9 387 555-1234: el gimnasio está en Argentina; si ya trae +, se respeta.
-  for (const c of ["telefono", "contacto_emergencia_telefono"] as const) {
-    const t = datos[c].replace(/[\s\-()]/g, "");
-    if (t && !t.startsWith("+")) datos[c] = `+549${t.replace(/^0/, "").replace(/^549?/, "")}`;
-  }
+  // Los teléfonos van como los escribió (387 15 555-1234, 011…): los normaliza la base.
   const prospecto = socioId ? "" : String(form.get("prospecto") ?? "");
   let id: string;
   try {
@@ -45,6 +41,16 @@ export async function darDeBaja(socioId: string, motivo: string): Promise<{ erro
   try {
     await rpc("dar_de_baja", { p_socio_id: socioId, p_motivo: motivo });
     revalidatePath(`/panel/socios/${socioId}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Un socio dado de baja que vuelve: se borra la baja (queda en el historial) y después se le asigna plan. */
+export async function volverADarDeAlta(socioId: string): Promise<{ error?: string }> {
+  try {
+    await rpc("volver_a_dar_de_alta", { p_socio_id: socioId });
+    revalidatePath(`/panel/socios/${socioId}`);
+    revalidatePath("/panel/socios");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }

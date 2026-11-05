@@ -11,7 +11,7 @@ const G = GIMNASIO();
 const b = await navegador();
 const s = Date.now().toString().slice(-6);
 const DNI1 = `40${s}`, DNI2 = `41${s}`;
-const TEL1 = `000 7${s.slice(0, 2)} ${s.slice(2)}1`, TEL2 = `000 7${s.slice(0, 2)} ${s.slice(2)}2`;
+const TEL1 = `000 ${s}1`, TEL2 = `000 ${s}2`;   // 10 números con característica 000: ficticios
 const REGLAMENTO = "1. Traé toalla.\n2. Dejá los discos en su lugar.\n3. La cuota se paga del 1 al 10 de cada mes.";
 try {
   // ── Dueña: reglamento y altas ──

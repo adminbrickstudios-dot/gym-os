@@ -5,7 +5,7 @@ import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado"
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
-import { CambiarPlan, DarDeBaja } from "./Acciones";
+import { CambiarPlan, DarDeBaja, VolverADarDeAlta } from "./Acciones";
 import type { Ficha } from "./tipos";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -53,6 +53,12 @@ export default async function FichaSocio({ params }: { params: Promise<{ id: str
             {s.dado_de_baja_en ? <span className="pildora">👋 Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
           </div>
+          {s.dado_de_baja_en && (
+            <div className="mt-6 space-y-2" data-dado-de-baja>
+              <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
+              <VolverADarDeAlta socioId={s.id} />
+            </div>
+          )}
           {!s.dado_de_baja_en && (
             <div className="flex flex-wrap gap-2 mt-6">
               {!v.puede || v.color === "amarillo"

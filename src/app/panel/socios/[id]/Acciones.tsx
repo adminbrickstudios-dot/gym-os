@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { asignarPlan, darDeBaja } from "../acciones";
+import { asignarPlan, darDeBaja, volverADarDeAlta } from "../acciones";
 
 type Plan = { plan_id: string; nombre: string; precio: number | null };
 const MOTIVOS: [string, string][] = [
@@ -46,6 +46,20 @@ export function DarDeBaja({ socioId }: { socioId: string }) {
       </div>
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
       <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
+    </div>
+  );
+}
+
+export function VolverADarDeAlta({ socioId }: { socioId: string }) {
+  const [error, setError] = useState<string | null>(null);
+  const [ocupado, empezar] = useTransition();
+  return (
+    <div className="space-y-2">
+      <button type="button" disabled={ocupado} className="boton boton-principal"
+        onClick={() => empezar(async () => { const r = await volverADarDeAlta(socioId); setError(r.error ?? null); })}>
+        {ocupado ? "Guardando…" : "↩️ Volver a darlo de alta"}
+      </button>
+      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
     </div>
   );
 }

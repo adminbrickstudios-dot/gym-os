@@ -39,7 +39,7 @@ const EJECUTABLES = {
     "public.guardar_horarios_apertura", "public.cierres_panel", "public.mensajes_panel", "public.guardar_mensaje",
     "public.restaurar_mensaje", "public.vista_previa_mensaje", "public.primeros_pasos", "public.ocultar_primeros_pasos",
     "public.publicar_pagina", "public.historial_configuracion", "public.pagina_panel", "public.guardar_pagina",
-    "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.altas_panel", "public.guardar_altas", "public.prospectos_panel", "public.crear_prospecto", "public.actualizar_prospecto", "public.prospecto_es_socio",
+    "public.volver_a_dar_de_alta", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.altas_panel", "public.guardar_altas", "public.prospectos_panel", "public.crear_prospecto", "public.actualizar_prospecto", "public.prospecto_es_socio",
     "public.admin_gimnasios", "public.admin_crear_gimnasio", "public.cajas_sede", "public.precios_venta", "public.vencen_hoy",
     "public.actividades_gimnasio", "public.guardar_actividad", "public.horarios_gimnasio", "public.agregar_horario",
     "public.cerrar_horario", "public.clase_detalle", "public.mi_socio",

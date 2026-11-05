@@ -111,6 +111,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | REG-1 | Menores de 18 no se anotan online: "el alta la hace un adulto responsable en el gimnasio" (D10 pide datos del responsable). | Lo más prudente con menores. | Pedir los datos del adulto en el formulario. |
 | 2026-11-04 | REG-1 | Un pase o un pack elegido online no se asigna (no son suscripciones): queda anotado como socio y la nota dice qué quiere comprar. | Se compran como siempre, en Vender. | — |
 | 2026-11-04 | REG-1 | El aviso al gimnasio es la fila en Prospectos → "Se hicieron socios" con cómo va a pagar (hasta que exista la bandeja de avisos, AVI-1). | Ya existe y la ven recepción, encargado y dueño. | — |
+| 2026-11-04 | AUD-3 | "Volver a darlo de alta" lo hacen dueño, encargado y recepción (los mismos que dan de baja); la baja queda guardada en `historial_bajas` y vuelve sin plan: no recupera días de la suscripción vieja. | Volver no da días gratis; la plata entra como siempre. Si había pagado de más, se arregla al cobrar. | Reabrir la suscripción vieja. |
+| 2026-11-04 | AUD-3 | El teléfono se normaliza en la base para todo el sistema (entiende el 15 del celular, el 0 de la característica, 0054, +54 9). | Un solo lugar; la pantalla armaba números mal. | — |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -193,7 +195,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] PAG-4 · 🟢 · Aparecer en Google: datos estructurados del gimnasio, sitemap y robots — verificado: vitest (datos-estructurados, 2), e2e:pag-4 (9 pasos: JSON-LD coincide con dirección y horarios, robots y sitemap por dirección, panel noindex, sin publicar noindex y robots que dice que no)
 
 ### 3 · Socios
-- [ ] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha)
+- [x] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha) — verificado: e2e:socios (16 pasos), db (volver-a-dar-de-alta, paneles con teléfonos nuevos), inventario en docs/paneles/socios.md, migración 0033 aplicada local
 - [ ] SOC-1 · 🟢 · Importar socios desde Excel o CSV
 - [ ] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas)
 - [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
@@ -205,6 +207,9 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [ ] SOC-9 · 🟡 D7 · Pausas desde la ficha
 - [ ] SOC-10 · 🟡 D10 · Menores con adulto responsable
 - [ ] SOC-11 · 🟡 D9 · Apto físico (solo sí/no y vencimiento)
+- [ ] SOC-12 · 🟢 · Filtros de la lista de socios por estado y plan
+- [ ] SOC-13 · 🟢 · Alta en un paso: datos, plan y "Guardar y cobrar"
+- [ ] SOC-14 · 🟢 · La ficha dice cómo llegó y qué reglamento aceptó
 - [ ] DIS-3 · 🟢 · Pulido: Socios
 
 ### 4 · Entrada
@@ -516,6 +521,12 @@ LISTO SI: prueba que lee el JSON-LD de la página demo y coincide con la agenda 
 LISTO SI: 3.000 filas importadas en < 30 s, duplicados detectados, deshacer probado, pruebas de base.
 
 **SOC-2.** Ficha en pestañas: **Resumen** (semáforo y por qué, plan, vence, packs, acciones grandes: cobrar, WhatsApp, editar) · **Pagos** · **Asistencia** (calendario del mes) · **Notas**.
+**SOC-12.** (Salió de AUD-3.) Filtros en píldoras arriba de la lista: al día, por vencer, vencidos, en pausa, nuevos (30 días), dados de baja, y por plan; cada uno con su cuenta. Salen de `estado_acceso` (nunca un cálculo aparte).
+LISTO SI: e2e que toca cada filtro y ve solo los que corresponden.
+**SOC-13.** (Salió de AUD-3.) Alta en un paso: en el mismo formulario, elegir plan y "✅ Guardar y cobrar" (va a Vender con el socio y el plan elegidos) o "Guardar" solo.
+LISTO SI: e2e de alta con plan que termina cobrado.
+**SOC-14.** (Salió de AUD-3.) La ficha dice cómo llegó (alta online, prospecto, importado, mostrador) y, si aceptó el reglamento, qué versión y cuándo (para mostrarle al socio).
+LISTO SI: prueba de la base y e2e con un alta online.
 **SOC-3.** Notas con fecha y autor, y etiquetas libres por gimnasio (turno mañana, estudiante…) para filtrar la lista y la retención.
 **SOC-4.** Exportar la lista filtrada a CSV/Excel (solo dueño y encargado).
 **SOC-5.** Grupo familiar: vincular socios (sin descuento automático: eso es D14).
