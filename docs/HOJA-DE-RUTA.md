@@ -340,7 +340,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] APP-6 · 🟢 · Novedades del gimnasio en la app — verificado: db (novedades-gimnasio: publicar, la app la ve, quitar, recepción no publica, máximo 3, otro no), e2e:app-6 (pendiente de la tanda final). Sin foto todavía
 - [x] APP-7 · 🟢 · Racha y entradas del mes — verificado: db (racha: semanas seguidas, la actual no corta, rechazados no cuentan), e2e:app-7
 - [x] APP-8 · 🟢 · Pedir pausa o baja desde la app — verificado: db (pedidos-socio), e2e:app-8 (pendiente de la tanda final)
-- [ ] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1)
+- [x] APP-9 · 🟢 · Entrar con mail y código, o con contraseña (P1) — verificado: db (entrar-con-mail: vincula por mail verificado, menores no, ya vinculado lo dice, solo el servidor), e2e:app-9 (pendiente de la tanda final). Falta la plantilla del mail en Supabase
 - [ ] REF-1 · 🟢 · Invitá a un amigo (pase de prueba con link)
 - [ ] DIS-12 · 🟢 · Pulido: App del socio
 

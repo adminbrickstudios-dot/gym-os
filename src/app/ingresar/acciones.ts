@@ -105,3 +105,36 @@ export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<
 async function elegirGimnasio(slug: string) {
   (await cookies()).set(COOKIE_GIMNASIO, slug, OPCIONES_COOKIE_GIMNASIO);
 }
+
+// ── Socios: entrar con el mail y un código (APP-9) ─────────────────
+export type EstadoCodigoMail = { error?: string; email?: string; enviado?: boolean; destino?: string };
+
+export async function pedirCodigoMail(_: EstadoCodigoMail, form: FormData): Promise<EstadoCodigoMail> {
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Escribí tu mail (el que diste en el gimnasio)", email };
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+  if (error) return { error: `No pudimos mandarte el código: ${error.message}`, email };
+  return { enviado: true, email };
+}
+
+/** Verifica el código del mail y vincula la cuenta a los socios de ESTE gimnasio con ese mail (lo hace el servidor). */
+export async function verificarCodigoMail(_: EstadoCodigoMail, form: FormData): Promise<EstadoCodigoMail> {
+  const email = String(form.get("email") ?? "");
+  const codigo = String(form.get("codigo") ?? "").replace(/\D/g, "");
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.auth.verifyOtp({ email, token: codigo, type: "email" });
+  if (error || !data.user) return { error: "El código no es correcto o venció. Pedí uno nuevo.", email, enviado: true };
+
+  const gimnasioId = (await headers()).get("x-gimnasio-id");
+  if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", email };
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const { data: v, error: errVincula } = await clienteServicio().rpc("vincular_socios_por_email", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
+  if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, email };
+
+  const { data: sesion } = await supabase.rpc("mi_sesion");
+  if ((sesion as MiSesion | null)?.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
+  await supabase.auth.signOut();
+  if ((v as { ya_vinculado?: boolean } | null)?.ya_vinculado) return { error: "Ya entrás a este gimnasio con tu celular: entrá con el celular.", email };
+  return { error: "Tu mail no está cargado en este gimnasio. Pedile a recepción que lo agregue a tu ficha, o entrá con tu celular.", email };
+}

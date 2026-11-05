@@ -25,7 +25,9 @@ export function FormularioIngreso({ siguiente }: { siguiente: string | null }) {
         {yendo ? "Entrando…" : "🔑 Entrar"}
       </button>
       <p className="texto-tenue text-sm text-center">
-        ¿Te olvidaste la contraseña? Pedile una nueva al dueño de tu gimnasio (si sos el dueño, a BRIK).
+        {siguiente === "/app"
+          ? "¿No tenés contraseña o te la olvidaste? Entrá con un código y creala en “Mi membresía”."
+          : "¿Te olvidaste la contraseña? Pedile una nueva al dueño de tu gimnasio (si sos el dueño, a BRIK)."}
       </p>
     </form>
   );

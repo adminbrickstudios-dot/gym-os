@@ -3,7 +3,8 @@ import Link from "next/link";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
-import { PedirBaja, PedirPausa } from "./Pedidos";
+import { CrearContrasena, PedirBaja, PedirPausa } from "./Pedidos";
+import { crearClienteServidor } from "@/lib/supabase/servidor";
 
 export const metadata: Metadata = { title: "Mi membresía" };
 
@@ -15,7 +16,10 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
     if (yo.elegir || !yo.socio) return <p className="texto-suave">Elegí primero <Link href="/app" className="underline">qué socio sos</Link>.</p>;
     const s = yo.socio;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
-    const baja = await rpc<{ motivo: string; pedido_en: string } | null>("pedido_baja_socio", { p_socio_id: s.socio_id });
+    const [baja, usuario] = await Promise.all([
+      rpc<{ motivo: string; pedido_en: string } | null>("pedido_baja_socio", { p_socio_id: s.socio_id }),
+      crearClienteServidor().then((c) => c.auth.getUser()),
+    ]);
     const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: yo.zona! }).format(new Date());
     return (
       <div className="space-y-6">
@@ -23,6 +27,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
         <h1 className="titular text-5xl">Mi membresía</h1>
         {yo.plan && <p className="texto-suave text-lg">🏷️ {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}
+        <CrearContrasena email={usuario.data.user?.email || null} />
         {baja
           ? <p className="mensaje mensaje-info" data-baja-pendiente>👋 Pediste la baja: el gimnasio te va a contactar.</p>
           : <PedirBaja socioId={s.socio_id} ofrecePausa={!!yo.plan} />}

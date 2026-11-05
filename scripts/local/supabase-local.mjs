@@ -172,6 +172,10 @@ async function auth(req, res, ruta, q, cuerpo) {
     if (!u) {
       u = (await pool.query(`insert into auth.users (email, phone, ${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"})
                              values ($1, $2, now()) returning *`, [cuerpo.email ? destino : null, cuerpo.email ? null : destino])).rows[0];
+    } else {
+      // Como GoTrue: verificar el código confirma el mail o el teléfono.
+      u = (await pool.query(`update auth.users set ${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"} = coalesce(${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"}, now())
+                             where id = $1 returning *`, [u.id])).rows[0];
     }
     return enviar(res, 200, await sesionPara(u));
   }

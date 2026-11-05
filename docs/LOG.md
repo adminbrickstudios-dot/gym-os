@@ -15,6 +15,23 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · APP-9 · Entrar con mail y código, o con contraseña
+
+**QUÉ HICE**
+- `/ingresar` → "💪 Soy socio": tres formas, **📱 Celular** (como antes), **✉️ Mail** (código al mail) y **🔑 Contraseña**.
+- Con el mail, el servidor vincula la cuenta a los socios de ese gimnasio con ese mail verificado (los menores no: los vincula el celular del adulto). Si el socio ya entraba con el celular, lo dice en vez de "tu mail no está cargado".
+- "Mi membresía" → 🔑 crear o cambiar la contraseña (si entró con mail).
+- Migración 0098 (`vincular_socios_por_email`, solo el servidor), prueba de base `entrar-con-mail`, `e2e:app-9`. `supabase-local` ahora confirma el mail al verificar el código, como GoTrue.
+
+**QUÉ CONFIGURÁS VOS**
+- Supabase → Authentication → Email Templates → "Magic Link": que el mail muestre el código `{{ .Token }}` (por defecto manda un link, y la app pide el código de 6 números).
+- El mail de Supabase sin SMTP propio manda pocos por hora: para usarlo de verdad hace falta SMTP (Resend, AVI-2).
+
+**LO QUE NO PUDE VERIFICAR**
+- El mail real (plantilla y envío): el código está escrito según la documentación, pero no está ejecutado contra Supabase.
+
+---
+
 ## 2026-11-05 · APP-6 · Novedades del gimnasio en la app
 
 **QUÉ HICE**

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { pedirBajaSocio, pedirPausaSocio } from "../acciones";
+import { crearContrasena, pedirBajaSocio, pedirPausaSocio } from "../acciones";
 
 const CATEGORIAS: [string, string][] = [["viaje", "✈️ Viaje"], ["trabajo", "💼 Trabajo"], ["estudio", "📚 Estudio"], ["otro", "Otro"]];
 const MOTIVOS: [string, string][] = [
@@ -82,5 +82,24 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
       </div>
       {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
     </div>
+  );
+}
+
+/** APP-9: crear o cambiar la contraseña (para entrar con mail y contraseña). */
+export function CrearContrasena({ email }: { email: string | null }) {
+  const [clave, setClave] = useState("");
+  const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
+  const [ocupado, empezar] = useTransition();
+  if (!email) return <p className="texto-suave text-sm" data-sin-mail>🔑 Para entrar con contraseña, entrá una vez con tu mail (“✉️ Mail” al ingresar).</p>;
+  return (
+    <form className="tarjeta p-5 space-y-3" data-crear-contrasena
+      onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearContrasena(clave); setMsj(r.error ? { error: r.error } : { ok: "Listo: ya podés entrar con tu mail y esta contraseña." }); if (!r.error) setClave(""); }); }}>
+      <h2 className="titulo text-2xl">🔑 Mi contraseña</h2>
+      <p className="texto-suave">Para entrar con <strong>{email}</strong> sin esperar un código.</p>
+      <input type="password" value={clave} onChange={(e) => setClave(e.target.value)} minLength={8} required autoComplete="new-password" placeholder="8 letras o más" className="campo w-full" aria-label="Contraseña nueva" />
+      <button type="submit" disabled={ocupado || clave.length < 8} className="boton w-full">{ocupado ? "Guardando…" : "Guardar contraseña"}</button>
+      {msj.ok && <p role="status" className="mensaje mensaje-exito">✅ {msj.ok}</p>}
+      {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
+    </form>
   );
 }
