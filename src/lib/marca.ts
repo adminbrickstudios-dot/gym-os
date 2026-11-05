@@ -31,6 +31,24 @@ export function tonoDeFondo(hex: string): "oscuro" | "claro" {
   return 1.05 / (l + 0.05) >= (l + 0.05) / 0.05 ? "oscuro" : "claro";
 }
 
+/** Contraste WCAG entre dos colores (1 a 21). null si alguno no es un color válido. */
+export function contraste(a: string, b: string): number | null {
+  const la = luminancia(a), lb = luminancia(b);
+  if (la == null || lb == null) return null;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * El color principal sobre el fondo: los links, los bordes y los botones
+ * tienen que distinguirse del fondo. Debajo de 3:1 (WCAG para elementos de
+ * interfaz y texto grande) se avisa; no se prohíbe.
+ */
+export const CONTRASTE_MINIMO = 3;
+export function seLeePoco(acento: string, fondo: string): boolean {
+  const c = contraste(acento, fondo);
+  return c != null && c < CONTRASTE_MINIMO;
+}
+
 export type ColoresMarca = { color_acento: string; color_fondo: string };
 
 /** Variables CSS y atributo de tono para el wrapper de una pantalla del gimnasio. */

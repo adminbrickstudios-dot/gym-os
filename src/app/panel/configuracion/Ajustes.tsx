@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
-import { propsMarca } from "@/lib/marca";
+import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
 import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
@@ -337,6 +337,12 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               {ACENTOS.map((a) => <button key={a} type="button" aria-label={a} aria-pressed={c.color_acento === a} onClick={() => set("color_acento", a)} className="size-11 rounded-xl border-2" style={{ background: a, borderColor: c.color_acento === a ? "var(--texto)" : "transparent" }} />)}
               <input type="color" aria-label="Otro color" value={c.color_acento} onChange={(e) => set("color_acento", e.target.value)} className="size-11 rounded-xl bg-transparent" />
             </div><p className="text-sm texto-tenue mt-1">El de la acción principal de cada pantalla. Usá el de tu logo.</p></div>
+            {seLeePoco(c.color_acento, c.color_fondo) && (
+              <p role="status" className="pildora pildora-amarillo whitespace-normal" data-aviso-contraste>
+                ⚠️ Este color se ve poco sobre este fondo (contraste {contraste(c.color_acento, c.color_fondo)?.toFixed(1).replace(".", ",")} a 1; conviene 3 o más).
+                Los links y los bordes van a costar verse. Se puede guardar igual; probá un color más oscuro o más claro.
+              </p>
+            )}
             <div {...propsMarca(c)} className="rounded-[var(--radio)] p-5 border border-[var(--borde)]">
               <p className="titulo text-2xl flex items-center gap-3 min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

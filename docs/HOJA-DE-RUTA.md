@@ -168,7 +168,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención — verificado: e2e:cfg-6 (9 pasos: reingreso, 1 día mueve 47 vencidos a “se fue”, formas de entrada), db:pruebas 198, npm run e2e completo y verificar en verde
 - [x] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras — verificado: e2e:cfg-7 (18 pasos: cada sección apagada, 14 pantallas sin links a ella, app sin comprobantes), db:pruebas 200 con la 0027, npm run e2e completo y verificar en verde
 - [x] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo) — verificado: e2e:cfg-8 (11 pasos: cambio con quién y cuándo, guardar sin cambio real no suma filas, encargado, super admin, celular), db:pruebas con la 0028 (e2e completo y verificar corriendo)
-- [ ] CFG-9 · 🟢 · Aviso de contraste al elegir colores
+- [~] CFG-9 · 🟢 · Aviso de contraste al elegir colores
 
 ### 2 · Página del gimnasio
 - [ ] AUD-2 · 🟢 · Auditoría botón por botón: Página del gimnasio
