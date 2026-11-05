@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-1b · El WhatsApp al prospecto lleva la página
+
+**QUÉ HICE**
+- En Prospectos, el WhatsApp armado lleva abajo del mensaje el link de la página del gimnasio, solo si está publicada (si no, el link mostraría "Próximamente"). No toqué la plantilla ni la base: la dirección la arma el panel igual que en "Tu página".
+- "📡 Sin conexión" (de REV-6) también entra en esta tanda.
+
+**LO QUE NO PUDE VERIFICAR**
+- El código está escrito según la documentación, pero no está ejecutado: lo prueba rev-1 en la tanda.
+
+---
+
 ## 2026-11-05 · REV-2 · Segunda pasada: una semana como dueña (celular)
 
 **QUÉ HICE**

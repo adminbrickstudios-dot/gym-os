@@ -16,7 +16,7 @@ export type Prospecto = {
 const ESTADOS: [Prospecto["estado"], string][] = [["nuevo", "🆕 Nuevos"], ["contactado", "💬 Contactados"], ["vino", "🏋️ Vinieron"], ["socio", "✅ Se hicieron socios"], ["no", "🚫 No les interesó"]];
 const ORIGEN: Record<Prospecto["origen"], string> = { pagina: "🌐 Página", recepcion: "🛎️ Mostrador", referido: "🤝 Recomendado" };
 
-export function Prospectos({ lista, zona, puedeAltas }: { lista: Prospecto[]; zona: string; puedeAltas: boolean }) {
+export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: Prospecto[]; zona: string; puedeAltas: boolean; pagina?: string | null }) {
   const [filtro, setFiltro] = useState<Prospecto["estado"]>("nuevo");
   const [error, setError] = useState<string | null>(null);
   const [pendiente, empezar] = useTransition();
@@ -64,7 +64,7 @@ export function Prospectos({ lista, zona, puedeAltas }: { lista: Prospecto[]; zo
         : (
           <ul className="space-y-2">
             {visibles.map((p) => {
-              const wa = linkWhatsappSocio(p.telefono, p.mensaje);
+              const wa = linkWhatsappSocio(p.telefono, pagina && p.mensaje ? `${p.mensaje}\n${pagina}` : p.mensaje);
               return (
                 <li key={p.id} className="tarjeta p-4 sm:p-5 space-y-3" data-prospecto={p.estado}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">

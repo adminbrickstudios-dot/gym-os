@@ -7,11 +7,18 @@
 // no se confirma) → cierra la caja a ciegas → la dueña ve el día en Inicio.
 // Lo que el documento pide y el sistema no tiene se escribe como "ℹ️ falta".
 //   npm run e2e:rev-1            (con scripts/local/levantar.sh corriendo)
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { COMPU, CELU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const s = Date.now().toString().slice(-5);
 const falta = (m) => console.log(`ℹ️ falta: ${m}`);
+// La página del demo publicada (el WhatsApp al prospecto la lleva solo si lo está); al final queda como estaba.
+const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
+await db.connect();
+const [{ publicada }] = (await db.query(`select l.publicada from public.landing_gimnasio l join public.gimnasios g on g.id = l.gimnasio_id where g.slug = 'demo'`)).rows;
+await db.query(`update public.landing_gimnasio set publicada = true where gimnasio_id = (select id from public.gimnasios where slug = 'demo')`);
 const b = await navegador();
 try {
   // 6:55 · Llega y abre la caja (si quedó una abierta, primero la cierra).
@@ -71,7 +78,7 @@ try {
   await fila.waitFor({ timeout: 30000 });
   const wa = await fila.locator('a[href*="wa.me"]').first().getAttribute("href").catch(() => null);
   chequear(!!wa, "9:30 · anota al que preguntó (nombre y celular) y tiene el WhatsApp armado", "el prospecto no tiene WhatsApp");
-  if (wa && !/localhost|\/g\//.test(decodeURIComponent(wa))) falta("9:30 · el WhatsApp al prospecto no lleva el link de la página del gimnasio");
+  if (wa) chequear(/https?:\/\/\S+/.test(decodeURIComponent(wa).split("?text=")[1] ?? ""), "9:30 · y el mensaje lleva el link de la página (REV-1b)", `el WhatsApp no lleva la página: ${decodeURIComponent(wa)}`);
 
   // 10:00 · Pase de prueba gratis (una vez por DNI).
   falta("10:00 · pase de prueba gratis una vez por DNI: hoy se vende un pase diario o se lo anota como prospecto “vino a probar”");
@@ -136,6 +143,9 @@ try {
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
+} finally {
+  await db.query(`update public.landing_gimnasio set publicada = $1 where gimnasio_id = (select id from public.gimnasios where slug = 'demo')`, [publicada]);
+  await db.end();
 }
 await b.close();
 resultado();

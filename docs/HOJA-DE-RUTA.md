@@ -396,7 +396,7 @@ bloque 18.
 
 ### 18 · Lo que encontró la segunda pasada
 - [ ] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado
-- [ ] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio (variable {link} en la plantilla "prospecto")
+- [x] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio — hecho sin tocar la plantilla: el link va abajo del mensaje, solo si la página está publicada (verificado: e2e:rev-1, en la tanda)
 - [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟢 · Retiro de caja para el proveedor: foto del ticket y, si es mercadería, sumar el stock en el mismo paso
 - [ ] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla
