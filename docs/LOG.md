@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-11 · Píxel de Meta y Google Analytics
+
+**QUÉ HICE**
+- Tu página → "📊 Medir las visitas": el dueño pega el ID del píxel de Meta (solo números) y el de Google Analytics (G-…). La base rechaza cualquier otra cosa: nunca se pega código. El encargado lo ve, no lo cambia.
+- La página publicada carga el píxel (PageView) y el gtag con esos IDs; la sin publicar no carga nada. Los IDs se vuelven a validar antes de escribirlos en el script.
+- Migración 0131 (columnas en `landing_gimnasio` con check, `medicion_panel`, `guardar_medicion`, `medicion_publica` para la página sin sesión). Prueba de base medicion, e2e com-11 (deja todo como estaba).
+
+**LO QUE NO PUDE VERIFICAR**
+- Que Meta y Google reciban las visitas: el sandbox no llega a esos sitios. La pantalla y la página: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-11).
+
+---
+
 ## 2026-11-05 · COM-10 · Reseña y encuesta
 
 **QUÉ HICE**

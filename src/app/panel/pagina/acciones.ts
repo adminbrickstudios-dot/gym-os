@@ -21,3 +21,13 @@ export async function guardarAltas(prendidas: boolean, reglamento: string): Prom
     return { altas };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** COM-11: IDs del píxel de Meta y de Google Analytics (la base los valida). */
+export async function guardarMedicion(pixel: string, ga: string): Promise<{ error?: string; medicion?: import("./MedicionPagina").MedicionPanel }> {
+  const panel = await contextoPanel();
+  try {
+    const medicion = await rpc<import("./MedicionPagina").MedicionPanel>("guardar_medicion", { p_gimnasio_id: panel.gimnasio.id, p_pixel_meta: pixel, p_google_analytics: ga });
+    revalidatePath("/", "layout");
+    return { medicion };
+  } catch (e) { return { error: (e as Error).message }; }
+}

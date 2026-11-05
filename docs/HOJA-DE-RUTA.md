@@ -420,7 +420,7 @@ bloque 18.
 - [x] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento) — verificado: db (cupones: crear y validar, vencido y agotado frenan, uso anotado solo si la venta lleva el descuento, panel con usos y socios), vitest (aplicarCupon), e2e:com-9 (en la tanda). Alta online y "¿saltea el tope de la recepción?": COM-9b
 - [ ] COM-9b · 🟡 · Cupón en el alta online, y si el cupón puede pasar el tope de descuento de la recepción (hoy no: es un descuento más) — plata y permisos: decide Mateo
 - [x] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos
-- [ ] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)
+- [x] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)
 - [ ] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala
 - [ ] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir"
 - [ ] COM-14 · 🟢 · TV de la sala: clase de ahora, WOD y anotados en grande

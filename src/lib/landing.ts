@@ -86,3 +86,13 @@ export async function traerEventos(host: string): Promise<EventoPublico[]> {
   if (error) throw new Error(`No se pudieron leer los eventos del gimnasio: ${error.message}`);
   return (data as EventoPublico[]) ?? [];
 }
+
+/** COM-11: los IDs de medición que cargó el dueño (solo con la página publicada; la base los valida). */
+export type Medicion = { pixel_meta?: string | null; google_analytics?: string | null };
+
+export async function traerMedicion(host: string): Promise<Medicion> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
+  if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
+  return (data as Medicion) ?? {};
+}
