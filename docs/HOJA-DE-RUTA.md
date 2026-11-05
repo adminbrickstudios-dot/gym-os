@@ -99,6 +99,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-8 | El historial va en su propia pestaña "🕓 Cambios" (la última de Configuración), no al pie de cada pestaña. | Con diez pestañas, "al pie" quedaba en una sola o repetido en todas. | Mostrar los últimos cambios de cada pestaña al pie de esa pestaña. |
 | 2026-11-04 | CFG-8 | El historial no se puede borrar ni editar desde ningún panel, ni por el dueño; la pantalla muestra los últimos 100 y el super admin los últimos 20. | Es un registro: si el dueño lo pudiera borrar no serviría para "¿quién subió el descuento?". | Dejar que el dueño lo limpie. |
 | 2026-11-04 | CFG-8 | Lo que cambió sin una persona (el armado del demo, migraciones) aparece como "El sistema"; alguien que ya no está en el equipo, como tal. | No inventar un autor. | — |
+| 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
 
@@ -326,6 +327,25 @@ bloque 18.
 
 ### 18 · Lo que encontró la segunda pasada
 
+### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
+- [ ] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado
+- [ ] COM-2 · 🟢 · Los primeros 30 días del socio nuevo: meta de visitas y aviso si la primera semana no vino
+- [ ] COM-3 · 🟢 · Avisar a todos los anotados de una clase
+- [ ] COM-4 · 🟢 · Tareas del equipo ("llamar a Juan el jueves") con las de hoy en Inicio
+- [ ] COM-5 · 🟢 · Retención en números: bajas del mes, cuántos siguen a los 90 días, socios con pocas visitas
+- [ ] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada
+- [ ] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre
+- [ ] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago
+- [ ] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento)
+- [ ] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos
+- [ ] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)
+- [ ] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala
+- [ ] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir"
+- [ ] COM-14 · 🟢 · TV de la sala: clase de ahora, WOD y anotados en grande
+- [ ] COM-15 · 🟡 · Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
+- [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)
+- [ ] COM-17 · 🔌 · Wellhub y TotalPass: el check-in de la plataforma cuenta como entrada
+
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
 - [ ] AVI-4 · 🔌 · Resumen diario al dueño por mail
@@ -549,6 +569,56 @@ LISTO SI: pruebas de base del QR (vencido, de otro gimnasio, repetido) y e2e de 
 **APP-1.** Instalable (manifest y service worker mínimo) con nombre, ícono y colores del gimnasio; "agregar a inicio" explicado.
 **APP-3.** Historial: pagos (con comprobante, VEN-1) y asistencia del mes.
 **APP-6.** Novedades: el dueño publica un aviso (texto y foto opcional, con vencimiento) y se ve arriba en la app.
+
+### COM · Lo que tiene la competencia (`docs/producto/12-COMPETENCIA.md`)
+
+**COM-1 · Riesgo de baja.** Por socio, un nivel (alto, medio, bajo) armado con reglas en SQL, sin IA: viene menos que su promedio de las últimas 8 semanas, dejó de reservar, venció y no renovó, no abre la app, pidió pausa. Cada socio en riesgo dice el porqué en una línea ("venía 3 veces por semana, las últimas 2 no vino") y al lado el WhatsApp armado. Se calcula, no se guarda. Va en Retención (primera lista) y en la ficha. Lo tienen Glofox, Wodify, Fitco y Virtuagym.
+LISTO SI: pruebas de la base con un socio por regla (momento fijo); la lista en Retención con su porqué; e2e.
+
+**COM-2 · Socio nuevo.** Los primeros 30 días: meta de entradas configurable (por defecto 8), aviso en Retención si en la primera semana vino menos de 2 veces, y mensajes sugeridos los días 1, 7 y 30 (plantillas editables de CFG-5). En la ficha, "Día 12 de 30 · 4 entradas".
+LISTO SI: prueba de la base con fechas fijas; aparece en Retención y en la ficha; e2e.
+
+**COM-3 · Avisar a los anotados.** Desde la lista de una clase, "Avisar a todos": texto con plantilla, un WhatsApp armado por persona (y mail cuando AVI-2 esté). Queda anotado en la clase.
+LISTO SI: e2e desde Clases de hoy.
+
+**COM-4 · Tareas del equipo.** Una tarea tiene qué, sobre qué socio (opcional), para quién y para cuándo. Se crea desde la ficha, Retención o Inicio; las de hoy y vencidas aparecen en Inicio de quien la tiene. Cada uno ve las suyas; dueño y encargado ven todas.
+LISTO SI: tabla con RLS y pruebas de permisos; e2e de crear, ver en Inicio y completar.
+
+**COM-5 · Retención en números.** En Retención y en Resultado: altas y bajas del mes (movimiento neto), de los que entraron hace 3 meses cuántos siguen, y % de socios activos con menos de 4 entradas en el mes. Cada número abre la lista con nombres.
+LISTO SI: pruebas de la base con datos armados; e2e que toca cada número y ve la lista.
+
+**COM-6 · Documentos para firmar.** El gimnasio carga sus textos (reglamento, deslinde, autorización del responsable para menores), cada uno con versión. El socio firma con nombre y tilde en la app o en recepción; se guarda versión, fecha y quién. En la entrada, "falta firmar" es un aviso amarillo, no bloquea (el gimnasio puede elegir que bloquee). Nunca datos de salud en los textos que se guardan firmados.
+LISTO SI: pruebas de la base (versión nueva pide firmar de nuevo); e2e firma desde la app y aviso en la entrada.
+
+**COM-7 · Kiosco con habituales.** La tablet de la puerta muestra los que suelen venir a esta hora (nombre e inicial del apellido) para tocar en vez de escribir; se puede apagar en Configuración.
+LISTO SI: e2e en el kiosco.
+
+**COM-8 · Eventos.** Un evento suelto (seminario, clase especial) con fecha, cupo, precio y quién puede anotarse; se vende en Vender y se muestra en la página y la app.
+LISTO SI: e2e crear → anotarse → cobrar.
+
+**COM-9 · Cupones.** Código, descuento (% o monto), tope de usos, vencimiento, planes a los que aplica; se usa en Vender y en el alta online. El Resultado dice cuántos socios trajo cada código.
+LISTO SI: pruebas de la base (tope y vencimiento); e2e.
+
+**COM-10 · Reseña y encuesta.** Después de la entrada 10 o del primer mes, la bandeja de avisos sugiere pedir la reseña de Google (link que carga el dueño) y una encuesta de una pregunta (0 a 10). Los 9 y 10 se marcan para invitar a traer a un amigo.
+LISTO SI: e2e en la bandeja.
+
+**COM-11 · Píxel y Analytics.** En Configuración → Página, el dueño pega su ID de píxel de Meta y de Google Analytics; la página publicada los carga. Validado (solo dígitos o `G-…`), nunca código libre.
+LISTO SI: e2e que ve el script con el ID en la página publicada y no en la sin publicar.
+
+**COM-12 · Lugar puntual.** Para clases con máquinas: la sala tiene lugares numerados (con uno fuera de servicio), el socio elige el suyo al reservar.
+LISTO SI: pruebas de la base (dos no reservan el mismo lugar); e2e.
+
+**COM-13 · Grados.** Para artes marciales: grados por actividad con requisitos (clases y tiempo), el grado de cada socio y la lista de listos para rendir.
+LISTO SI: pruebas de la base; e2e.
+
+**COM-14 · TV de la sala.** Una dirección para una TV: la clase de ahora, los anotados con nombre grande, el WOD del día (RUT) y la próxima clase. Se actualiza sola.
+LISTO SI: e2e que abre la TV y ve aparecer a un anotado nuevo.
+
+**COM-15 · Liquidación de profes.** Toca plata: espera decisión de Mateo (por clase, por presente o fijo; comisión por packs).
+
+**COM-16 · Factura ARCA.** Necesita el certificado de cada gimnasio. Espera respuesta de P3.
+
+**COM-17 · Wellhub y TotalPass.** Necesita la cuenta de partner de cada plataforma.
 
 ### ADM · Super admin (BRIK)
 
