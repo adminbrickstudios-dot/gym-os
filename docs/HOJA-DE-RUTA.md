@@ -321,7 +321,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)
 - [x] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9) — verificado: db (editar-horario: cupo y profe a las clases futuras, la reservada conserva la hora, sin duplicados, el cupo no baja de lo reservado), e2e:clases (editar hora y cupo)
 - [ ] CLA-9 · 🟢 · Faltas: descontar la clase del pack (tercera opción de D16)
-- [ ] DIS-9 · 🟢 · Pulido: Clases
+- [x] DIS-9 · 🟢 · Pulido: Clases — verificado: e2e:dis-9 (día, clase y grilla en el celular: sin desborde, botones altos, un verde), capturas dis9-*
 
 ### 10 · Retención
 - [ ] AUD-10 · 🟢 · Auditoría botón por botón: Retención

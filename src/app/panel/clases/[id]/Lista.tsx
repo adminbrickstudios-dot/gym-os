@@ -50,7 +50,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
                   <button type="button" className="boton-texto texto-suave text-sm" onClick={() => setDeshaciendo(f.socio_id)} aria-label={`Deshacer el presente de ${f.nombre}`}>↩️ Deshacer</button>
                 </span>
               )
-                : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton boton-principal !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id))}>✅ Presente</button>}
+                : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id))}>✅ Presente</button>}
             </li>
           ))}
         </ul>
@@ -66,7 +66,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
                 <PuntoEstado color={s.color} />
                 <span className="flex-1 truncate font-semibold">{s.nombre}</span>
                 {reserva && <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => anotar(claseId, s.socio_id))}>Reservar</button>}
-                <button type="button" disabled={ocupado} className="boton boton-principal boton-chico" onClick={() => correr(() => presente(claseId, s.socio_id))}>Presente</button>
+                <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => presente(claseId, s.socio_id))}>Presente</button>
               </li>
             ))}
           </ul>

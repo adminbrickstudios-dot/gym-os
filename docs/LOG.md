@@ -15,6 +15,18 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · DIS-9 · Pulido de Clases
+
+**QUÉ HICE**
+- Un solo verde: los "✅ Presente" de cada fila y de la búsqueda pasaron a botón blanco (en una clase de 20 había 20 verdes). El verde queda para "➕ Agregar" en la grilla.
+- Lo demás ya quedó en AUD-9, CLA-7 y CLA-8: loading con la forma real, confirmación en pantalla, deshacer y editar en el lugar.
+- `scripts/e2e/dis-9.mjs`: el día, una clase y la grilla en el celular, con capturas `dis9-*`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Capturas "antes": solo "después".
+
+---
+
 ## 2026-11-05 · CLA-8 · Editar actividades y horarios sin sacarlos
 
 **QUÉ HICE**
