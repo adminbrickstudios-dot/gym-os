@@ -82,12 +82,17 @@ export function TurnoAbierto({ turnoId, nombre, desde, resumen }: { turnoId: str
         </div>
       )}
       {(modo === "ingreso" || modo === "retiro") && (
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await moverCaja(turnoId, modo, monto, motivo); if (r.error) setError(r.error); else reiniciar(); }); }}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); empezar(async () => { const r = await moverCaja(turnoId, modo, monto, motivo, modo === "retiro" ? f : null); if (r.error) setError(r.error); else reiniciar(); }); }}>
           <p className="font-semibold">{modo === "ingreso" ? "➕ Entra plata a la caja" : "➖ Sale plata de la caja"}</p>
           <div className="grid sm:grid-cols-[160px_1fr] gap-2">
             <input autoFocus className="campo" inputMode="decimal" placeholder="$" value={monto} onChange={(e) => setMonto(e.target.value)} />
             <input className="campo" placeholder={modo === "ingreso" ? "Motivo (ej: cambio)" : "Motivo (ej: pago al proveedor)"} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           </div>
+          {modo === "retiro" && (
+            <label className="flex flex-wrap items-center gap-2 text-sm texto-suave">📷 Foto del ticket (opcional)
+              <input type="file" name="ticket" accept="image/jpeg,image/png,image/webp" capture="environment" className="text-sm" aria-label="Foto del ticket" />
+            </label>
+          )}
           {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
           <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Anotar</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>

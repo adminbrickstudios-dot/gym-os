@@ -19,10 +19,39 @@ export async function abrirCaja(cajaId: string, monto: string): Promise<{ error?
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function moverCaja(turnoId: string, tipo: "ingreso" | "retiro", monto: string, motivo: string): Promise<{ error?: string }> {
+export async function moverCaja(turnoId: string, tipo: "ingreso" | "retiro", monto: string, motivo: string, ticket?: FormData | null): Promise<{ error?: string }> {
   if (Number.isNaN(num(monto))) return { error: MAL };
-  try { await rpc("movimiento_caja", { p_turno_id: turnoId, p_tipo: tipo, p_monto: num(monto), p_motivo: motivo }); revalidatePath("/panel/caja"); return {}; }
-  catch (e) { return { error: (e as Error).message }; }
+  const foto = ticket?.get("ticket");
+  const conFoto = foto instanceof Blob && foto.size > 0;
+  if (conFoto && (!["image/jpeg", "image/png", "image/webp"].includes(foto.type) || foto.size > 6 * 1024 * 1024)) {
+    return { error: "La foto del ticket tiene que ser JPG, PNG o WEBP de hasta 6 MB." };
+  }
+  try {
+    const id = await rpc<string>("movimiento_caja", { p_turno_id: turnoId, p_tipo: tipo, p_monto: num(monto), p_motivo: motivo });
+    revalidatePath("/panel/caja");
+    // CAJ-4: la foto del ticket va después (la base arma la ruta); si falla, el retiro ya quedó anotado.
+    if (conFoto) {
+      const ext = foto.type === "image/png" ? "png" : foto.type === "image/webp" ? "webp" : "jpg";
+      const ruta = await rpc<string>("preparar_ticket", { p_movimiento_id: id, p_ext: ext });
+      const { clienteServicio } = await import("@/lib/supabase/servicio");
+      const { error } = await clienteServicio().storage.from("tickets_caja").upload(ruta, Buffer.from(await foto.arrayBuffer()), { contentType: foto.type, upsert: false });
+      if (error) return { error: `El retiro quedó anotado, pero la foto no se pudo subir: ${error.message}` };
+      await rpc("confirmar_ticket", { p_movimiento_id: id, p_ruta: ruta });
+    }
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** CAJ-4: link de 10 minutos a la foto del ticket (la base dice antes si quien la pide puede verla). */
+export async function verTicket(movimientoId: string): Promise<{ url?: string; error?: string }> {
+  try {
+    const ruta = await rpc<string | null>("ticket_movimiento", { p_movimiento_id: movimientoId });
+    if (!ruta) return { error: "Ese retiro no tiene foto del ticket" };
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { data, error } = await clienteServicio().storage.from("tickets_caja").createSignedUrl(ruta, 600);
+    if (error) return { error: `No se pudo abrir el ticket: ${error.message}` };
+    return { url: data.signedUrl };
+  } catch (e) { return { error: (e as Error).message }; }
 }
 
 /** Arqueo ciego: se informa lo contado y recién ahí se ve lo esperado. */

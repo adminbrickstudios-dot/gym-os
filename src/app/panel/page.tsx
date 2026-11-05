@@ -8,6 +8,7 @@ import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { FilaVenta } from "@/components/panel/Venta";
+import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
 
 type Numero = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" };
@@ -39,7 +40,7 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos] = await Promise.all([
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja] = await Promise.all([
       rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -56,6 +57,8 @@ export default async function Inicio() {
       rol === "dueno" || rol === "encargado" ? rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id })
         : ({} as Record<string, { stock: number; minimo: number | null }>),
       rol === "dueno" || rol === "encargado" ? rpc<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // CAJ-4: lo que pasó con la plata (de otros), si hay Caja.
+      (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpc<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
     ]);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
@@ -151,6 +154,8 @@ export default async function Inicio() {
             </ul>
           </section>
         )}
+
+        {alertasCaja.length > 0 && <AlertasCaja alertas={alertasCaja} zona={zona} />}
 
         {reponer.length > 0 && rutaDisponible("/panel/planes", rol, panel.secciones_apagadas) && (
           <section aria-labelledby="reponer" data-reponer={reponer.length}>

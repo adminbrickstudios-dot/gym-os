@@ -10,7 +10,7 @@
 //                                   y los permisos los decide Postgres
 //   /auth/v1/token, /user, /logout, /otp, /verify, /invite, /admin/users
 //                                   como GoTrue, con usuarios en auth.users
-//   /storage/v1/object/…            como Storage, en .local/storage: subir y
+//   /storage/v1/object/…            como Storage, en .local/storage (también links firmados): subir y
 //                                   borrar solo con la clave de servicio (así
 //                                   sube el panel), leer los buckets públicos
 //                                   y bajar los privados con la clave de servicio
@@ -272,6 +272,7 @@ const BUCKETS = {
   marcas: { publico: true, max: 2 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"] },
   comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
   fotos_socios: { publico: false, max: 512 * 1024, tipos: ["image/jpeg"] },
+  tickets_caja: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
 };
 const CARPETA_STORAGE = path.join(CARPETA, "storage");
 function archivoDe(bucket, ruta) {
@@ -282,8 +283,28 @@ function archivoDe(bucket, ruta) {
 }
 const errorStorage = (res, estado, error, message) => enviar(res, estado, { statusCode: String(estado), error, message });
 
-async function storage(req, res, ruta, crudo) {
+async function storage(req, res, ruta, crudo, consulta = new URLSearchParams()) {
   const claims = claimsDe(req);
+  // Links firmados (createSignedUrl): los pide el panel con la clave de servicio y los abre cualquiera mientras no venzan.
+  const firmado = /^\/object\/sign\/([a-z_]+)\/(.+)$/.exec(ruta);
+  if (firmado) {
+    const [bucket, rutaObjeto] = [firmado[1], decodeURIComponent(firmado[2])];
+    const f = BUCKETS[bucket] && archivoDe(bucket, rutaObjeto);
+    if (!f || !fs.existsSync(f)) return errorStorage(res, 404, "not_found", "Object not found");
+    if (req.method === "POST") {
+      if (claims?.role !== "service_role") return errorStorage(res, 403, "Unauthorized", "supabase-local: solo la clave de servicio firma links");
+      const { expiresIn = 60 } = crudo.length ? JSON.parse(crudo.toString()) : {};
+      const token = firmar({ url: `${bucket}/${rutaObjeto}`, exp: Math.floor(Date.now() / 1000) + Number(expiresIn) });
+      return enviar(res, 200, { signedURL: `/object/sign/${bucket}/${firmado[2]}?token=${token}` });
+    }
+    if (req.method === "GET") {
+      const p = verificar(consulta.get("token"));
+      if (!p || p.url !== `${bucket}/${rutaObjeto}`) return errorStorage(res, 400, "InvalidSignature", "The signature is invalid or expired");
+      const meta = JSON.parse(fs.readFileSync(`${f}.meta.json`, "utf8"));
+      res.writeHead(200, { "Content-Type": meta.tipo, "Content-Length": fs.statSync(f).size });
+      return res.end(fs.readFileSync(f));
+    }
+  }
   const publico = /^\/object\/public\/([a-z_]+)\/(.+)$/.exec(ruta);
   if (publico && req.method === "GET") {
     const b = BUCKETS[publico[1]];
@@ -340,7 +361,7 @@ http.createServer(async (req, res) => {
     const partes = [];
     for await (const parte of req) partes.push(parte);
     const crudo = Buffer.concat(partes);
-    if (url.pathname.startsWith("/storage/v1/")) return await storage(req, res, url.pathname.slice("/storage/v1".length), crudo);
+    if (url.pathname.startsWith("/storage/v1/")) return await storage(req, res, url.pathname.slice("/storage/v1".length), crudo, url.searchParams);
     const texto = crudo.toString("utf8");
     const cuerpo = texto ? JSON.parse(texto) : {};
     if (url.pathname.startsWith("/auth/v1/")) return await auth(req, res, url.pathname.slice("/auth/v1".length), url.searchParams, cuerpo);

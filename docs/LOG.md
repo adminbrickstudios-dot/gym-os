@@ -15,6 +15,29 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CAJ-4 · Alertas de caja al dueño
+
+**QUÉ HICE**
+- Inicio del dueño y del encargado: "🔔 Caja" con lo que hizo otro en los últimos 7 días:
+  - una caja que cerró con diferencia;
+  - plata que salió del cajón, con "🧾 Ver ticket" si sacaron foto;
+  - una venta anulada;
+  - un descuento mayor al tope de la recepción.
+- "➖ Sale plata" permite sacar la foto del ticket (opcional). Va al bucket privado `tickets_caja`; la sube el servidor y la base arma la ruta.
+- Migración `20261104006900_alertas_caja.sql`: `movimientos_caja.ticket_path`, `preparar_ticket`, `confirmar_ticket`, `ticket_movimiento`, `alertas_caja`, bucket privado.
+- `supabase/pruebas/alertas-caja.test.mjs`. `scripts/e2e/caj-4.mjs` (4 pasos: foto real subida y abierta con link firmado).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `supabase-local` no imitaba los links firmados de Storage. "Ver comprobante" (Transferencias) y "Ver ticket" daban error en local. Ahora los firma y los sirve, igual que Supabase. Solo afecta a la base local; en producción ya andaba.
+
+**QUÉ CONFIGURÁS VOS**
+- Nada: la migración crea el bucket `tickets_caja` (privado, 6 MB, JPG/PNG/WEBP).
+
+**LO QUE NO PUDE VERIFICAR**
+- Sacar la foto con la cámara de un celular real (`capture="environment"`). Lo probé subiendo un archivo.
+
+---
+
 ## 2026-11-05 · CAJ-1, CAJ-2 · Historial de turnos y cierre para compartir
 
 **QUÉ HICE**
