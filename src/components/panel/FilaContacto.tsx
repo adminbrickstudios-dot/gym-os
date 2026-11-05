@@ -7,9 +7,11 @@ import { anotarContacto } from "@/app/panel/retencion/acciones";
  * Un socio para contactar: el porqué, el mensaje armado por WhatsApp y,
  * si la persona puede, anotar que se le escribió (así nadie le escribe dos veces).
  */
-export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista, ultimo, puedeAnotar }: {
+export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista, ultimo, puedeAnotar, cobrar = false }: {
   socioId: string; nombre: string; texto: string; detalle?: string | null; whatsapp: string | null; lista: string;
   ultimo?: string | null; puedeAnotar: boolean;
+  /** AUD-7: "💵 Cobrar" lleva a Vender con su cuota cargada (si Vender está prendido y el rol cobra). */
+  cobrar?: boolean;
 }) {
   const [anotado, setAnotado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
           {whatsapp
             ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton boton-principal !min-h-11" onClick={() => puedeAnotar && !anotado && anotar("enviado")}>💬 WhatsApp</a>
             : <span className="pildora">📵 Sin teléfono</span>}
+          {cobrar && <LinkPanel href={`/panel/vender?socio=${socioId}&cuota=1`} className="boton !min-h-11">💵 Cobrar</LinkPanel>}
           {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}
         </div>
       </div>

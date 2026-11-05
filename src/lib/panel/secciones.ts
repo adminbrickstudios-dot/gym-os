@@ -24,6 +24,7 @@ const GESTION: Rol[] = ["dueno", "encargado"];
 export const SECCIONES: Seccion[] = [
   { clave: "entrada", ruta: "/panel/entrada", emoji: "🚪", titulo: "Entrada", descripcion: "Quién entra, y si no puede, por qué", grupo: "Hoy", roles: MOSTRADOR, apagable: "entrada" },
   { clave: "clases", ruta: "/panel/clases", emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
+  { clave: "avisos", ruta: "/panel/avisos", emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: "/panel/vencen-hoy", emoji: "⏰", titulo: "Vencen hoy", descripcion: "A quién avisarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy" },
   { clave: "socios", ruta: "/panel/socios", emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
   { clave: "retencion", ruta: "/panel/retencion", emoji: "📉", titulo: "Retención", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: GESTION, apagable: "retencion" },

@@ -142,6 +142,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | CAJ-4 | Las alertas no se guardan: se calculan de los últimos 7 días (cajas cerradas con diferencia, retiros, ventas anuladas, descuentos mayores al tope de la recepción sin contar convenios) y no se muestran las que hizo quien mira. Las ven el dueño y el encargado en Inicio, hasta que existan la campana (AVI-5) y las notificaciones (PUSH-1). La diferencia avisa desde $1 (no hay margen configurable). El ticket del retiro es opcional; lo sube quien anotó el retiro y no se cambia. | Que "nada que importe dependa de un cron" y que el dueño no reciba avisos de lo que hizo él. | Un margen de diferencia en Configuración. |
 | 2026-11-05 | CAJ-5 | "Olvidada" = abierta desde otro día, o hoy después de la última hora de cierre de esa sede (sin horarios cargados, solo el cambio de día). Nadie puede tener dos cajas abiertas a la vez (olvidada o no). El aviso lo ven en Inicio quien la abrió, el dueño y el encargado. | Sin cron: se calcula al mirar o al abrir. | Cerrarla sola (no: alguien tiene que contar la plata). |
 | 2026-11-05 | CAJ-3 | El PIN nunca da más permisos: con PIN puesto, solo se puede lo que pueden a la vez la sesión de la compu y quien puso el PIN, y queda anotado quien lo puso. Vale 12 horas en esa compu (cookie solo-servidor con un token firmado por la base). Un token vencido no se manda; uno adulterado o de otro gimnasio da error (nunca se anota a otro en silencio). PIN de 4 números, distinto entre los del equipo, sin los obvios (1234, 0000…); 5 equivocados en 10 minutos bloquean esa sesión. El hash vive en `privado` (nadie lo lee). Se cambia en Mi cuenta, sin PIN puesto. | D15, sin abrir una puerta: 4 números se adivinan, así que no pueden subir permisos. | Que el PIN del dueño habilite cosas de dueño en la compu de la recepción (pediría algo más fuerte que 4 números). |
+| 2026-11-05 | AVI-1 | La bandeja junta: vence en los próximos días (lo de Retención), venció hace 1 a 3 días, no viene (la lista de Retención), cumple años y comprobante rechazado en los últimos 3 días. “Avisado ✓” se guarda con a qué se refiere (el vencimiento, el último día que vino, el año del cumpleaños, el pago): ese aviso no vuelve, uno nuevo del mismo socio sí. Tocar WhatsApp ya lo marca. La ven dueño, encargado y recepción. | Se calcula al abrirla (sin cron) con las mismas cuentas de Retención y Cumpleaños. | Avisar por push o mail sin que nadie toque (PUSH-1). |
 
 ---
 
@@ -282,8 +283,8 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] DIS-6 · 🟢 · Pulido: Transferencias
 
 ### 7 · Vencen hoy y avisos
-- [ ] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy
-- [ ] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito)
+- [x] AUD-7 · 🟢 · Auditoría botón por botón: Vencen hoy — verificado: e2e:vencen (Cobrar abre Vender con la cuota; la recepción no anota; celular sin desborde); inventario en docs/paneles/vencen-hoy.md
+- [x] AVI-1 · 🟢 · Bandeja de avisos del día (WhatsApp ya escrito) — verificado: db (bandeja-avisos: momento de cada lista, avisado no vuelve, uno nuevo sí, permisos), e2e:avi-1 (marcar ✓, al volver “Avisado por Ana”, celular)
 - [ ] VEH-1 · 🟢 · Cobranza en tanda desde Vencen hoy
 - [ ] AVI-5 · 🟢 · Campana de avisos en la app del socio y en el panel
 - [ ] AVI-6 · 🟢 · Resumen diario y semanal del dueño en la app

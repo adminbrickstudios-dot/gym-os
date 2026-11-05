@@ -15,6 +15,26 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AUD-7, AVI-1 · Vencen hoy y la bandeja de avisos
+
+**QUÉ HICE**
+- Vencen hoy, botón por botón (`docs/paneles/vencen-hoy.md`):
+  - la bajada dice cuántos vencen hoy;
+  - cada fila tiene "💵 Cobrar", que abre Vender con el socio y su cuota (si el gimnasio cobra membresía y quien mira puede vender);
+  - sin nadie hoy: "Hoy no vence nadie" y el camino a Retención → Vence pronto;
+  - `loading.tsx` con la forma real.
+- 📬 Avisos de hoy (`/panel/avisos`, grupo HOY): a quién escribirle hoy, con el mensaje de Configuración ya escrito y el WhatsApp a un toque.
+  - Junta vence pronto, venció hace 1 a 3 días, no viene, cumple años y comprobante rechazado (últimos 3 días).
+  - "✓ Ya le avisé" (o tocar WhatsApp) queda anotado con quién y a qué se refiere: ese aviso no vuelve otro día; uno nuevo del mismo socio sí.
+  - Se calcula al abrirla: sin cron.
+- Migración 0072 (`avisos_enviados`, `bandeja_avisos`, `marcar_avisado`), prueba de base `bandeja-avisos`, e2e `e2e:vencen` y `e2e:avi-1`.
+- De paso: `stock.test` dependía del orden de dos filas con la misma hora; ahora no.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que WhatsApp abra con el texto en un celular real (se verificó el link armado).
+
+---
+
 ## 2026-11-05 · DIS-4, DIS-5, DIS-6 · Pulido de Vender, Caja y Transferencias
 
 **QUÉ HICE**

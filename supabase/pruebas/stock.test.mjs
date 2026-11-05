@@ -43,7 +43,7 @@ test("prender, contar, entrar mercadería, vender y anular", async () => {
     await t.q(`select public.anular_venta_panel($1, 'Prueba')`, [r.venta_id]);
     assert.equal(await stock(), 36);
     const [{ m }] = await t.q(`select public.movimientos_stock_producto($1) as m`, [agua]);
-    assert.deepEqual(m.map((x) => [x.tipo, x.cantidad]), [["entrada", 24], ["conteo", 15]]);
+    assert.deepEqual(m.map((x) => [x.tipo, x.cantidad]).sort(), [["conteo", 15], ["entrada", 24]]);   // en la misma transacción tienen la misma hora
     await t.falla(() => t.q(`select public.contar_stock($1, -1)`, [agua]), /de 0 en adelante/);
   });
 });
