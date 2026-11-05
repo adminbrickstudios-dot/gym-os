@@ -387,7 +387,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 Cada una vuelve a abrir todo el panel con su rol, lo compara con `docs/producto/`
 y con `10-DIA-A-DIA-Y-CASOS-RAROS.md` fila por fila, y suma lo que falte al
 bloque 18.
-- [ ] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja)
+- [x] REV-1 · 🟢 · Segunda pasada: un día entero como recepción (de abrir a cerrar caja) — verificado: e2e:rev-1 (12 pasos, en el orden del documento); lo que falta, en el bloque 18 (REV-1a…d)
 - [ ] REV-2 · 🟢 · Segunda pasada: una semana como dueño (celular)
 - [ ] REV-3 · 🟢 · Segunda pasada: un mes como socio (alta online → pagar → entrar → reservar → renovar)
 - [ ] REV-4 · 🟢 · Segunda pasada: un día como profe
@@ -395,6 +395,10 @@ bloque 18.
 - [ ] REV-6 · 🟢 · Segunda pasada: intentar romperlo (permisos, doble clic, dos personas a la vez, sin internet, datos raros)
 
 ### 18 · Lo que encontró la segunda pasada
+- [ ] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado
+- [ ] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio (variable {link} en la plantilla "prospecto")
+- [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
+- [ ] REV-1d · 🟢 · Retiro de caja para el proveedor: foto del ticket y, si es mercadería, sumar el stock en el mismo paso
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [ ] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado

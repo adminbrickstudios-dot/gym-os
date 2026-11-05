@@ -15,6 +15,29 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · REV-1 · Segunda pasada: un día entero como recepción
+
+**QUÉ HICE**
+- `scripts/e2e/rev-1.mjs` (`npm run e2e:rev-1`): Ana hace el día de `10-DIA-A-DIA-Y-CASOS-RAROS.md` en orden: cierra la caja que quedó abierta y abre la suya a ciegas, Entrada con foco, un vencido en rojo que deja pasar con "Paga a la tarde", anota a un curioso como prospecto con WhatsApp, saca $3.000 para el proveedor, abre Transferencias, una baja que empieza por el motivo, cierra justo con $7.000 y lo puede mandar por WhatsApp; la dueña, en el celular, ve a quién dejaron pasar y el turno. 12 pasos en verde contra la app local.
+
+**Fila por fila**
+| Hora | El documento | Ahora |
+|---|---|---|
+| 6:55 | PIN, abrir caja, cerrar la de ayer | ✅ (el PIN lo prueba caj-3) |
+| 7:00 | Entrada con foco | ✅ |
+| 7:10 | Dejar pasar con motivo → "le prometió pagar" a la tarde | ⚠️ la dueña lo ve en Inicio; nadie se lo recuerda a la tarde → REV-1a |
+| 8:00 | Clase llena, anotarlo en la espera | ✅ (cla-1 / panel-clases) |
+| 9:30 | Prospecto en 10 s + link de la página | ⚠️ WhatsApp sin el link → REV-1b |
+| 10:00 | Pase de prueba gratis una vez por DNI | ❌ → REV-1c (da acceso sin pagar: decide Mateo) |
+| 14:00 | Cambio de turno, arqueo ciego, aviso a la dueña | ✅ |
+| 15:00 | Retiro con foto del ticket; stock sube | ⚠️ retiro sí; foto y stock en el mismo paso no → REV-1d |
+| 18:00 | Cancelar clase con aviso | ✅ (cla-3) |
+| 19:00 | Aprobar transferencia | ✅ |
+| 21:00 | Baja: motivo + ofrecer pausa | ✅ |
+| 22:00 | Cierre → resumen a la dueña | ✅ |
+
+---
+
 ## 2026-11-05 · SEG-8 · El estado de muchos socios juntos, más rápido
 
 **QUÉ HICE**
