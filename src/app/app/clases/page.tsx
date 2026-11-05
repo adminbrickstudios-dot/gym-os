@@ -4,6 +4,8 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Reservar } from "./Reservar";
+import { ElegirLugar } from "./ElegirLugar";
+import type { MapaLugares } from "@/lib/clases/lugares";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 
 type Clase = { clase_id: string; actividad: string; emoji: string | null; inicio: string; profe: string | null; cupo: number | null;
@@ -34,6 +36,10 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     ]);
     const wodDe = new Map(wods.map((w) => [w.clase_id, w.wod]));
     const clases = todas.filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
+    // COM-12: en las clases que tiene confirmadas, el mapa de la sala si está numerada.
+    const mapas = new Map((await Promise.all(clases.filter((c) => reserva && c.mi_reserva === "confirmada")
+      .map(async (c) => [c.clase_id, await rpc<MapaLugares | null>("lugares_clase", { p_clase_id: c.clase_id, p_socio_id: yo.socio!.socio_id })] as const)))
+      .filter((x): x is readonly [string, MapaLugares] => x[1] != null));
     const reservaDe = new Map((yo.reservas ?? []).map((r) => [r.clase_id, r.reserva_id]));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const q = (d: string) => `/app/clases?dia=${d}${yo.socios.length > 1 ? `&socio=${yo.socio!.socio_id}` : ""}`;
@@ -60,6 +66,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
               {!reserva ? null : c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
                 : <Reservar claseId={c.clase_id} socioId={yo.socio!.socio_id} lleno={c.cupo != null && c.confirmadas >= c.cupo} />}
+              {mapas.get(c.clase_id) && <ElegirLugar mapa={mapas.get(c.clase_id)!} />}
               {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio>🏋️ {wodDe.get(c.clase_id)}</p>}
             </li>
           ))}</ul>

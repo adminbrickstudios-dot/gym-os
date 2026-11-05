@@ -26,3 +26,6 @@ export async function avisarClase(claseId: string, texto: string): Promise<{ err
     return { mensajes: r.mensajes };
   } catch (e) { return { error: (e as Error).message }; }
 }
+/** COM-12: numerar la sala de esta actividad en esta sede (0 = sin lugares numerados). */
+export const guardarLugares = async (claseId: string, cantidad: number, etiqueta: string, fuera: number[]) =>
+  r(() => rpc("guardar_lugares", { p_clase_id: claseId, p_cantidad: cantidad, p_etiqueta: etiqueta, p_fuera_servicio: fuera }), claseId);

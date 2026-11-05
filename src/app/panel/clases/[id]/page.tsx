@@ -5,6 +5,8 @@ import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { Lista } from "./Lista";
 import { Wod } from "./Wod";
 import { Avisar } from "./Avisar";
+import { Lugares } from "./Lugares";
+import type { MapaLugares, OcupadoEquipo } from "@/lib/clases/lugares";
 
 export const metadata: Metadata = { title: "Clase" };
 type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean; telefono?: string | null };
@@ -15,10 +17,12 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "clases");
-    const [filas, clase, avisos] = await Promise.all([
+    const [filas, clase, avisos, lugares] = await Promise.all([
       rpc<Fila[]>("lista_clase", { p_clase_id: id }),
       rpc<Clase>("clase_detalle", { p_clase_id: id }),
       rpc<{ texto: string; por: string; creado_en: string; personas: number }[]>("avisos_clase", { p_clase_id: id }),
+      // COM-12: la sala numerada (null si no lo está).
+      rpc<MapaLugares<OcupadoEquipo> | null>("lugares_clase", { p_clase_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -34,6 +38,7 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
         {!clase.cancelada && <Wod claseId={id} inicial={clase.wod} por={clase.wod_por} puedeEditar={panel.yo.rol !== "recepcion"} />}
         <Lista claseId={id} filas={filas} reserva={panel.modo_clases === "reserva"} cancelada={clase.cancelada}
           puedeCancelar buscaSocios={panel.yo.rol !== "profe"} />
+        {!clase.cancelada && panel.modo_clases === "reserva" && <Lugares claseId={id} mapa={lugares} puedeNumerar={["dueno", "encargado"].includes(panel.yo.rol)} />}
         <Avisar claseId={id} anotados={filas.length} previos={avisos} zona={zona} />
       </>
     );

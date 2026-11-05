@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-12 · Lugar puntual en la sala
+
+**QUÉ HICE**
+- En una clase del panel: "📍 Lugares en la sala". El dueño o el encargado la numeran (cuántos, cómo se llaman: Bici, Reformer…, y cuáles están fuera de servicio, ej "7, 12"); vale para esa actividad en esa sede. El profe y la recepción ven quién está en cada lugar.
+- En la app, en cada clase con la reserva confirmada: "📍 Elegí tu lugar", con los ocupados y los rotos sin poder tocarse; después queda "📍 Bici 3 · Cambiar". Los ocupados se ven sin nombres. La recepción también puede asignarlo.
+- Dos reservas confirmadas de la misma clase nunca tienen el mismo lugar: lo garantiza un índice único en la base (no un chequeo previo), así que vale aunque toquen a la vez. Cancelar la reserva libera el lugar solo. En espera no se elige.
+- Migración 0132 (`lugares_sala` con RLS, columna `reservas.lugar` con índice único, `guardar_lugares`, `lugares_clase`, `elegir_lugar`). Prueba de base lugares-sala, vitest de `leerNumeros`, e2e com-12 (deja todo como estaba).
+
+**PARA QUE MIRES VOS**
+- No toqué `reservar`: el lugar se elige en un paso aparte, justo después de reservar (la pantalla lo abre sola). Si el lugar que querías se ocupó en ese segundo, la base lo dice y elegís otro; la reserva queda igual.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-12).
+
+---
+
 ## 2026-11-05 · COM-11 · Píxel de Meta y Google Analytics
 
 **QUÉ HICE**

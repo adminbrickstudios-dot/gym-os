@@ -104,3 +104,5 @@ export async function responderEncuesta(socioId: string, puntaje: number): Promi
   try { return { r: await rpc("responder_encuesta", { p_socio_id: socioId, p_puntaje: puntaje }) }; }
   catch (e) { return { error: (e as Error).message }; }
 }
+/** COM-12: elegir (o soltar, con null) el lugar en la sala de una clase reservada. */
+export const elegirLugar = async (reservaId: string, lugar: number | null) => r(() => rpc("elegir_lugar", { p_reserva_id: reservaId, p_lugar: lugar }));
