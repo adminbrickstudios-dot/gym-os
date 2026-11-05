@@ -42,3 +42,14 @@ test("todas las plantillas se aplican; alguien que no es admin no", async () => 
   });
   await t.comoUsuario(dueno, () => t.falla(() => t.q(`select public.admin_aplicar_plantilla($1, 'box')`, [t.g]), /administradores/));
 });
+
+test("ADM-4: salud de cada gimnasio (último acceso del equipo, ventas y entradas de 7 días, sin uso)", async () => {
+  const [{ id: u }] = await t.q(`insert into auth.users (email, last_sign_in_at) values ($1, now() - interval '2 days') returning id`, [`e${Math.random()}@ejemplo.invalid`]);
+  await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Rec','recepcion')`, [t.g, u]);
+  await t.q(`update public.gimnasios set creado_en = now() - interval '30 days' where id = $1`, [t.g]);
+  const [{ s }] = await t.comoUsuario(admin, () => t.q(`select public.admin_salud_gimnasios() s`));
+  const mio = s[t.g];
+  assert.ok(mio.ultimo_acceso_equipo, "tiene el último acceso");
+  assert.equal(typeof mio.ventas_7_dias, "number");
+  await t.comoUsuario(dueno, () => t.falla(() => t.q(`select public.admin_salud_gimnasios()`), /administradores/));
+});

@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 // ADM-1 · Plantilla por tipo: el admin crea un gimnasio "🔥 Box", entra al
-// panel y ve los planes de ejemplo (sin precio) y Clases prendidas.
+// panel y ve los planes de ejemplo (sin precio) y Clases prendidas. ADM-4: la
+// lista muestra la salud de cada gimnasio.
 //   npm run e2e:adm-1            (con scripts/local/levantar.sh corriendo)
-import { PLATAFORMA as B, chequear, entrar, falla, navegador, pagina, resultado } from "./comun.mjs";
+import { PLATAFORMA as B, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const b = await navegador();
 try {
   const p = await pagina(b);
   await entrar(p, "admin@ejemplo.invalid", undefined, B);
+  await p.locator("[data-salud]").first().waitFor({ timeout: 60000 });
+  ok(`ADM-4: salud en cada gimnasio (“${(await p.locator("[data-salud]").first().innerText()).trim()}”)`);
   const s = Date.now().toString().slice(-5);
   await p.fill("input[name=nombre]", `Box Plantilla ${s}`);
   await p.fill("input[name=dueno]", "Dueña Box");

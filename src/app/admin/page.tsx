@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Aviso } from "@/components/panel/Marco";
 import { dominioBase } from "@/lib/dominios";
-import { formatearNumero } from "@/lib/formato";
+import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
 import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
@@ -18,16 +18,21 @@ type Gimnasio = {
   socios: number; socios_al_dia: number; ingresos_7_dias: number; duenos: string[]; duenos_sin_cuenta: number; estoy_dentro: boolean;
 };
 
+// ADM-4: cómo viene cada gimnasio.
+type Salud = { ultimo_acceso_equipo: string | null; ventas_7_dias: number; cobrado_7_dias: number; entradas_7_dias: number; sin_uso: boolean };
+const hace = (m: string | null) => { if (!m) return "nunca"; const d = Math.floor((Date.now() - new Date(m).getTime()) / 86400000); return d <= 0 ? "hoy" : d === 1 ? "ayer" : `hace ${d} días`; };
+
 // El super admin de BRIK: vive en el dominio de la plataforma, no en el de un gimnasio.
 export default async function Admin({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { error } = await searchParams;
   let gimnasios: Gimnasio[];
+  let salud: Record<string, Salud> = {};
   let yo: MiSesion;
   try {
     yo = await rpc<MiSesion>("mi_sesion");
     if (!yo.es_admin) throw new ErrorDatos("Solo para administradores de BRIK", "42501", 403);
-    gimnasios = await rpc<Gimnasio[]>("admin_gimnasios");
+    [gimnasios, salud] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios")]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
@@ -68,6 +73,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                     {g.duenos_sin_cuenta > 0 && <span className="pildora pildora-amarillo ml-2">{g.duenos_sin_cuenta === 1 ? "el dueño no tiene acceso" : `${g.duenos_sin_cuenta} dueños sin acceso`}</span>}
                   </p>
                   <p className="texto-tenue text-sm mt-1 break-all">🌐 {g.hosts.join(" · ")}</p>
+                  {salud[g.gimnasio_id] && (
+                    <p className="texto-suave text-sm mt-1" data-salud>
+                      🩺 El equipo entró {hace(salud[g.gimnasio_id].ultimo_acceso_equipo)} · {salud[g.gimnasio_id].ventas_7_dias} ventas en 7 días ({formatearPesos(salud[g.gimnasio_id].cobrado_7_dias)})
+                      {salud[g.gimnasio_id].sin_uso && !g.es_demo && <span className="pildora pildora-rojo ml-2">Dejó de usarse</span>}
+                    </p>
+                  )}
                 </div>
                 <dl className="flex gap-6">
                   <div><dd className="numero text-3xl">{formatearNumero(g.socios)}</dd><dt className="text-sm texto-tenue">socios</dt></div>

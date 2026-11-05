@@ -15,6 +15,14 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · ADM-4 · Salud de cada gimnasio en el super admin
+
+**QUÉ HICE**
+- En la lista del super admin, cada gimnasio: "🩺 El equipo entró hace N días · N ventas en 7 días ($…)" y "Dejó de usarse" en rojo si tiene más de 7 días y ninguna entrada ni venta en los últimos 7 (no en el demo). Soporte BRIK no cuenta como "el equipo entró".
+- Migración 0108 (`admin_salud_gimnasios`), caso en la prueba de base `plantillas-gimnasio`, `e2e:adm-1` lo mira.
+
+---
+
 ## 2026-11-05 · ADM-1 · Plantillas por tipo de gimnasio al crear
 
 **QUÉ HICE**

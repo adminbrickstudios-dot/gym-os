@@ -365,7 +365,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 ### 15 · Super admin y plataforma
 - [x] AUD-15 · 🟢 · Auditoría botón por botón: Super admin, Ingresar y Elegir gimnasio — verificado: e2e:acceso y e2e:admin (pendiente de la tanda final); inventario en docs/paneles/acceso.md
 - [x] ADM-1 · 🟢 · Plantillas por tipo de gimnasio al crear — verificado: db (plantillas-gimnasio: box completo, las 8, una sola vez, solo el admin), e2e:adm-1 (pendiente de la tanda final). Planes sin precio
-- [ ] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin
+- [x] ADM-4 · 🟢 · Salud de cada gimnasio en el super admin — verificado: db (último acceso, ventas, solo el admin), e2e:adm-1 (pendiente de la tanda final)
 - [ ] ADM-5 · 🟢 · Demo para vender: link "Probá Gym OS" y reiniciar el demo
 - [ ] ADM-6 · 🟢 · Novedades de Gym OS para todos los dueños
 - [ ] ADM-2 · 🟡 D11 · Suspensión gradual del gimnasio
