@@ -226,3 +226,10 @@ export async function sumarSede(nombre: string): Promise<{ error?: string; datos
     return { datos: await rpc("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** COM-10: el link de reseñas de Google (solo el dueño; vacío lo saca). */
+export async function guardarLinkResena(link: string): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try { await rpc("guardar_link_resena", { p_gimnasio_id: panel.gimnasio.id, p_link: link }); revalidatePath("/panel/configuracion"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}

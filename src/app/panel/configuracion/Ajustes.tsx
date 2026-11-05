@@ -12,6 +12,7 @@ import { PESTANAS, type ClavePestana } from "./pestanas";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "./Imagenes";
 import { HorariosYCierres, type CierrePanel } from "./Horarios";
 import { Tablets } from "./Tablets";
+import { LinkResena } from "./LinkResena";
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
@@ -159,8 +160,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos }: {
-  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[];
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null }: {
+  inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean;
 }) {
   const [c, setC] = useState(inicial);
@@ -626,7 +627,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       {pestana === "horarios" && (
         <HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} />
       )}
-      {pestana === "mensajes" && <Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} />}
+      {pestana === "mensajes" && <><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></>}
       {pestana === "cambios" && <Historial cambios={cambios} />}
       {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
       {pestana === "gimnasio" && puedeEditar && (

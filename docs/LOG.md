@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-10 · Reseña y encuesta
+
+**QUÉ HICE**
+- Configuración → Mensajes: "⭐ Reseñas en Google", donde el dueño pega el link (solo https). Con link, Avisos de hoy sugiere pedir la reseña al socio cuya entrada número 10 fue en los últimos 3 días (plantilla nueva "resena", editable como las otras).
+- App del socio: "⭐ Una sola pregunta" (del 0 al 10) cuando lleva 10 entradas o un mes desde su primer plan, una vez cada 90 días. Con 9 o 10: botón de reseña en Google (si hay link) e "Invitar a un amigo" (lleva a Referir). Con menos: "lo vamos a tener en cuenta".
+- Resultado: "⭐ ¿Nos recomiendan?": respuestas de 90 días, puntaje (los de 9-10 menos los de 0-6) y las listas de los que recomiendan y de los que dieron 6 o menos, con link a la ficha.
+- Migración 0130 (`link_resena`, plantilla `resena`, tabla `encuestas` con RLS, `guardar_link_resena`, `encuesta_socio`, `responder_encuesta`, `encuestas_panel`; copias de mensajes_catalogo, marcar_avisado, bandeja_avisos y vista_previa_mensaje). Prueba de base resena-encuesta, mensajes ahora con 14 plantillas, e2e com-10.
+
+**PARA QUE MIRES VOS**
+- La encuesta no guarda comentario de texto, solo el número (menos datos y nada sensible). Si querés un "¿por qué?" para los de 6 o menos, se suma.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-10).
+
+---
+
 ## 2026-11-05 · COM-9 · Cupones
 
 **QUÉ HICE**

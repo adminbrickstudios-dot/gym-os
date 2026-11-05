@@ -7,6 +7,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { Gastos, type GastosMes } from "./Gastos";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
+import { LinkPanel } from "@/components/panel/LinkPanel";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -28,7 +29,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const [r, gastos, motivos, numeros, cupones] = await Promise.all([
+    const [r, gastos, motivos, numeros, cupones, encuestas] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
       panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
@@ -38,6 +39,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       pedido ? Promise.resolve(null) : rpc<NumerosRetencion>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }),
       // COM-9: cuántos socios trajo cada cupón.
       rpc<{ codigo: string; usos: number; socios: number }[]>("cupones_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      // COM-10: la pregunta del 0 al 10 (últimos 90 días).
+      rpc<{ respuestas: number; nps: number | null; promotores: { socio_id: string; nombre: string; telefono: string | null; puntaje: number }[]; detractores: { socio_id: string; nombre: string; puntaje: number }[] }>("encuestas_panel", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
@@ -119,6 +122,27 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           <section aria-labelledby="socios-numeros">
             <h2 id="socios-numeros" className="titulo text-2xl mb-3">Socios</h2>
             <NumerosDeRetencion n={numeros} />
+          </section>
+        )}
+
+        {encuestas.respuestas > 0 && (
+          <section aria-labelledby="encuesta" data-encuesta-resultado>
+            <h2 id="encuesta" className="titulo text-2xl mb-1">⭐ ¿Nos recomiendan?</h2>
+            <p className="texto-suave mb-3">{encuestas.respuestas} {encuestas.respuestas === 1 ? "respuesta" : "respuestas"} en 90 días · puntaje {encuestas.nps ?? "—"} (los que dan 9 o 10, menos los que dan 6 o menos).</p>
+            {encuestas.promotores.length > 0 && (
+              <details className="tarjeta p-4"><summary className="cursor-pointer">💚 {encuestas.promotores.length} te recomiendan: invitalos a traer a un amigo</summary>
+                <ul className="mt-2 space-y-1">{encuestas.promotores.map((p) => (
+                  <li key={p.socio_id} className="text-sm"><LinkPanel href={`/panel/socios/${p.socio_id}`} siNoEsta="texto" className="underline">{p.nombre}</LinkPanel> · {p.puntaje}</li>
+                ))}</ul>
+              </details>
+            )}
+            {encuestas.detractores.length > 0 && (
+              <details className="tarjeta p-4 mt-2"><summary className="cursor-pointer">🟠 {encuestas.detractores.length} dieron 6 o menos</summary>
+                <ul className="mt-2 space-y-1">{encuestas.detractores.map((p) => (
+                  <li key={p.socio_id} className="text-sm"><LinkPanel href={`/panel/socios/${p.socio_id}`} siNoEsta="texto" className="underline">{p.nombre}</LinkPanel> · {p.puntaje}</li>
+                ))}</ul>
+              </details>
+            )}
           </section>
         )}
 

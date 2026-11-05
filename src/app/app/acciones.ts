@@ -98,3 +98,9 @@ export async function anotarEjercicio(socioId: string, ejercicioId: string, peso
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** COM-10: la respuesta a "del 0 al 10, ¿cuánto nos recomendarías?" (la base sabe si es su socio). */
+export async function responderEncuesta(socioId: string, puntaje: number): Promise<{ r?: { promotor: boolean; link_resena: string | null }; error?: string }> {
+  try { return { r: await rpc("responder_encuesta", { p_socio_id: socioId, p_puntaje: puntaje }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}

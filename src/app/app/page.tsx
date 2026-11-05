@@ -18,6 +18,7 @@ import { Referir, type LinkReferido } from "./Referir";
 import { rpc } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import type { EventoPublico } from "@/lib/landing";
+import { Encuesta } from "./Encuesta";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -42,7 +43,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos, encuesta] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -62,6 +63,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ pendientes: Pendiente[] }>("documentos_socio", { p_socio_id: s.socio_id }),
       // COM-8: los eventos que vienen (y si ya está anotado).
       rpc<(EventoPublico & { anotado: boolean })[]>("eventos_socio", { p_socio_id: s.socio_id }),
+      // COM-10: la pregunta del 0 al 10 (después de 10 entradas o del primer mes; cada 90 días).
+      rpc<{ pendiente: boolean }>("encuesta_socio", { p_socio_id: s.socio_id }),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -120,6 +123,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
+        {encuesta.pendiente && <Encuesta socioId={s.socio_id} />}
         {eventos.length > 0 && (
           <section className="space-y-2" data-eventos-app={eventos.length}>
             <p className="titulo text-2xl">🎟️ Próximos eventos</p>

@@ -12,7 +12,7 @@ export function Referir({ datos }: { datos: LinkReferido }) {
     try { await navigator.clipboard.writeText(link); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
   };
   return (
-    <section className="tarjeta p-5 space-y-3" data-referir>
+    <section id="referir" className="tarjeta p-5 space-y-3 scroll-mt-20" data-referir>
       <h2 className="titulo text-2xl">🤝 Invitá a un amigo</h2>
       <p className="texto-suave">Mandale tu link: deja sus datos y el gimnasio le escribe para que pruebe una clase.</p>
       <div className="flex flex-wrap gap-2">
