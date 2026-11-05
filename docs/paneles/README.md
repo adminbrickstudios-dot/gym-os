@@ -20,7 +20,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
 | `/hacete-socio` | pantalla |  |  | `agenda_publica`, `alta_online`, `alta_publica`, `landing_publica` | `/` `/ingresar` |
 | `/ingresar` | pantalla |  |  | `agenda_publica`, `landing_publica`, `mi_sesion`, `panel_gimnasio`, `vincular_socios_por_telefono` |  |
-| `/panel` | pantalla |  |  | `agenda_publica`, `buscar_socios`, `guardar_accesos_rapidos`, `landing_publica`, `ocultar_primeros_pasos`, `panel_gimnasio`, `panel_inicio`, `primeros_pasos` | `/elegir` |
+| `/panel` | pantalla |  |  | `agenda_publica`, `buscar_socios`, `cumplen_hoy`, `guardar_accesos_rapidos`, `landing_publica`, `ocultar_primeros_pasos`, `panel_gimnasio`, `panel_inicio`, `pedidos_pausa_pendientes`, `primeros_pasos` | `/elegir` `/panel/socios/` |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_sede`, `cerrar_caja`, `movimiento_caja`, `panel_gimnasio`, `resumen_caja` |  |
 | `/panel/clases` | pantalla |  | clases | `cancelar_clase`, `clases_del_dia`, `panel_gimnasio`, `reservar`, `tomar_asistencia` | `/panel/clases/` `/panel/clases/grilla` |
 | `/panel/clases/[id]` | pantalla |  | clases | `clase_detalle`, `lista_clase`, `panel_gimnasio` | `/panel/clases` |
@@ -32,11 +32,16 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/pagina` | pantalla | 👑 🧭 |  | `agenda_publica`, `altas_panel`, `guardar_altas`, `guardar_pagina`, `landing_publica`, `pagina_panel`, `panel_gimnasio` | `/hacete-socio` `/ingresar` `/panel/configuracion` |
 | `/panel/planes` | pantalla | 👑 🧭 |  | `guardar_plan`, `guardar_producto`, `panel_gimnasio`, `planes_gimnasio`, `productos_gimnasio`, `programar_precio` |  |
 | `/panel/prospectos` | pantalla | 👑 🧭 🛎️ |  | `actualizar_prospecto`, `crear_prospecto`, `panel_gimnasio`, `prospectos_panel` | `/panel/socios/` `/panel/socios/nuevo` |
-| `/panel/retencion` | pantalla | 👑 🧭 | retencion | `panel_gimnasio`, `registrar_contacto`, `retencion`, `retencion_resumen` | `/panel/socios/` |
-| `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `buscar_socios`, `dar_de_baja`, `guardar_socio`, `panel_gimnasio`, `prospecto_es_socio` | `/panel/socios/` `/panel/socios/nuevo` |
-| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `panel_gimnasio`, `planes_gimnasio` | `/panel/socios` `/panel/socios/` `/panel/vender` |
+| `/panel/retencion` | pantalla | 👑 🧭 | retencion | `etiquetas_gimnasio`, `panel_gimnasio`, `registrar_contacto`, `retencion`, `retencion_resumen`, `socios_con_etiqueta` | `/panel/socios/` |
+| `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `agregar_nota`, `anular_apto`, `anular_congelamiento`, `asignar_plan`, `borrar_nota`, `buscar_socios`, `cargar_apto`, `confirmar_foto_socio`, `congelar`, `dar_de_baja`, `descongelar`, `etiquetas_gimnasio`, `filtros_socios`, `guardar_socio`, `panel_gimnasio`, `pedir_pausa`, `poner_etiqueta`, `preparar_foto_socio`, `prospecto_es_socio`, `resolver_pedido_pausa`, `sacar_de_familia`, `sacar_etiqueta`, `vincular_familia`, `volver_a_dar_de_alta` | `/panel/socios/` `/panel/socios/duplicados` `/panel/socios/exportar` `/panel/socios/importar` `/panel/socios/nuevo` |
+| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `apto_socio`, `asistencia_socio`, `familia_socio`, `ficha_socio`, `foto_socio`, `notas_y_etiquetas`, `origen_socio`, `panel_gimnasio`, `pausas_socio`, `planes_gimnasio` | `/panel/socios` `/panel/socios/` `/panel/vender` |
 | `/panel/socios/[id]/editar` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `panel_gimnasio` |  |
-| `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `panel_gimnasio`, `prospectos_panel` |  |
+| `/panel/socios/[id]/foto` | acción (POST/GET) |  |  | `foto_socio`, `panel_gimnasio` |  |
+| `/panel/socios/[id]/reglamento` | pantalla | 👑 🧭 🛎️ | socios | `panel_gimnasio`, `reglamento_aceptado` | `/panel/socios/` |
+| `/panel/socios/duplicados` | pantalla | 👑 🧭 | socios | `panel_gimnasio`, `posibles_duplicados`, `unir_socios` | `/panel/socios/` |
+| `/panel/socios/exportar` | acción (POST/GET) |  |  | `exportar_socios`, `panel_gimnasio` |  |
+| `/panel/socios/importar` | pantalla | 👑 🧭 | socios | `deshacer_importacion`, `importaciones_panel`, `importar_socios`, `panel_gimnasio`, `revisar_importacion` | `/panel/socios` |
+| `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `panel_gimnasio`, `planes_gimnasio`, `prospectos_panel` |  |
 | `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `pagos_por_aprobar`, `panel_gimnasio`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy | `panel_gimnasio`, `vencen_hoy` | `/panel/socios/` |
 | `/panel/vender` | pantalla | 👑 🧭 🛎️ | vender | `cajas_sede`, `ficha_socio`, `panel_gimnasio`, `precios_venta`, `vender` | `/panel/caja` `/panel/entrada` `/panel/socios/` `/panel/socios/nuevo` |
@@ -44,16 +49,4 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 
 ## Funciones que ninguna pantalla llama
 
-Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas a pantalla nueva o a revisar):
-
-- `anular_asistencia`
-- `anular_congelamiento`
-- `anular_venta`
-- `asignar_plan`
-- `caja_abierta`
-- `cambiar_plan`
-- `cobrar_cuota`
-- `congelar`
-- `descongelar`
-- `precio_cuota`
-- `quiero_probar`
+(Sin base conectada: no se pudo revisar.)
