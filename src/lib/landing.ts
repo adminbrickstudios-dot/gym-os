@@ -75,3 +75,14 @@ export async function traerAgenda(host: string): Promise<Agenda | null> {
 
 // urlMarca vive aparte para poder usarla también en el navegador.
 export { urlMarca } from "@/lib/url-marca";
+
+/** COM-8: un evento suelto (seminario, clase especial) tal como se muestra afuera. */
+export type EventoPublico = { evento_id: string; nombre: string; inicio: string; precio: number; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string };
+
+/** Los eventos que vienen del gimnasio del host (solo con la página publicada). */
+export async function traerEventos(host: string): Promise<EventoPublico[]> {
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("eventos_publicos", { p_host: host });
+  if (error) throw new Error(`No se pudieron leer los eventos del gimnasio: ${error.message}`);
+  return (data as EventoPublico[]) ?? [];
+}

@@ -161,6 +161,7 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-05 | RET-3 | Los motivos de baja quedan con la lista fija que ya tenía la base (precio, horario, se mudó, otro gimnasio, sin tiempo, no le gustó, otro): hacerla editable por gimnasio cambiaría una restricción de la tabla de socios y cómo se agrupan en el Resultado. La pausa se ofrece si tiene plan y el motivo no es "se mudó" ni "otro gimnasio"; el botón lleva a Pausas de la ficha. Los motivos del mes se ven en el Resultado. | Lo prudente sin tocar datos existentes. | Lista de motivos editable por gimnasio. |
 | 2026-11-05 | REV-1a | "Le prometieron pagar": dueño y encargado ven a todos los que dejaron pasar ayer u hoy y siguen sin poder entrar; la recepción, solo los que dejó pasar ella. Sale solo cuando la puerta lo deja pasar. | Calculado de las entradas forzadas y de la misma función de la puerta; la recepción no ve nada que no viera. | Guardar "prometió pagar" como estado. |
 | 2026-11-05 | COM-7 | Los habituales en la tablet vienen apagados; prendidos, tocar el nombre pide los últimos 3 números del DNI (y cuenta para el freno de 30 intentos por minuto). | Sin eso, cualquiera entraría tocando un nombre ajeno: la tablet no tiene a nadie mirando. Nombre e inicial del apellido, nada más. | Entrar solo con tocar el nombre. |
+| 2026-11-05 | COM-8 | Un evento es un producto con stock = cupo (más su fecha, para quién y descripción): se vende en Vender sin tocar el cobro y los anotados son sus ventas no anuladas. El nombre del producto lleva la fecha. | Cero cambios en `vender` (plata). Cancelar o terminar lo saca de Vender; lo vendido queda. | Un tipo de ítem nuevo en Vender. |
 
 ---
 
@@ -413,7 +414,8 @@ bloque 18.
 - [x] COM-6 · 🟢 · Documentos para firmar (reglamento, deslinde, autorización de menores) con aviso en la entrada — verificado: db (documentos: versiones, firma en la app y en recepción, el de menores solo a menores, la versión vieja no se firma, la recepción no publica), e2e:com-6 (en la tanda). Que bloquee la entrada: COM-6b
 - [ ] COM-6b · 🟡 · Que "falta firmar" frene la entrada si el gimnasio lo elige — cambia quién entra (el cálculo de acceso): decide Mateo
 - [x] COM-7 · 🟢 · Kiosco: los habituales de esta hora para tocar su nombre — verificado: db (kiosco-habituales: apagado por defecto, nombre con inicial, DNI equivocado no entra, el que ya entró no aparece), e2e:com-7 (en la tanda). Tocar el nombre pide los últimos 3 del DNI
-- [ ] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago
+- [x] COM-8 · 🟢 · Eventos y workshops sueltos con cupo, precio y pago — verificado: db (eventos: crear, vender como producto, anotados y lugares, página y app, cerrar lo saca de Vender), e2e:com-8 (en la tanda). "Solo socios" y el cupo se muestran pero Vender no los frena (como el stock): COM-8b
+- [ ] COM-8b · 🟡 · Que Vender frene un evento lleno o "solo socios" vendido sin socio — hoy avisa (como el stock) y no frena: tocar el cobro, decide Mateo
 - [ ] COM-9 · 🟢 · Cupones con código para campañas (tope de usos y vencimiento)
 - [ ] COM-10 · 🟢 · Pedir la reseña de Google y una encuesta corta en buenos momentos
 - [ ] COM-11 · 🟢 · Píxel de Meta y Google Analytics en la página (el dueño pega su código)

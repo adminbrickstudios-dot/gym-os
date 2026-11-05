@@ -17,6 +17,7 @@ import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
 import { rpc } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
+import type { EventoPublico } from "@/lib/landing";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -41,7 +42,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -59,6 +60,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ nombre: string } | null>("rutina_de_socio", { p_socio_id: s.socio_id }).catch(() => null),
       // COM-6: lo que le falta firmar (reglamento, deslinde, autorización si es menor).
       rpc<{ pendientes: Pendiente[] }>("documentos_socio", { p_socio_id: s.socio_id }),
+      // COM-8: los eventos que vienen (y si ya está anotado).
+      rpc<(EventoPublico & { anotado: boolean })[]>("eventos_socio", { p_socio_id: s.socio_id }),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
@@ -117,6 +120,20 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
+        {eventos.length > 0 && (
+          <section className="space-y-2" data-eventos-app={eventos.length}>
+            <p className="titulo text-2xl">🎟️ Próximos eventos</p>
+            <ul className="space-y-2">
+              {eventos.map((e) => (
+                <li key={e.evento_id} className="tarjeta p-4">
+                  <p className="font-semibold">{e.nombre}</p>
+                  <p className="texto-suave text-sm first-letter:uppercase">{new Intl.DateTimeFormat("es-AR", { timeZone: e.zona, weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(e.inicio))}</p>
+                  <p className="mt-1 text-sm">{e.anotado ? "✅ Estás anotado" : e.quedan === 0 ? "Sin lugares" : `${Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"} · quedan ${e.quedan} · anotate en recepción`}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {documentos.pendientes.length > 0 && (
           <section className="space-y-3" data-para-firmar={documentos.pendientes.length}>
             <p className="titulo text-2xl">✍️ Para firmar</p>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import type { LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import type { EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
 import { urlMarca } from "@/lib/url-marca";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
@@ -316,7 +316,37 @@ function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPu
 
 // ── Página ──────────────────────────────────────────────────────────
 
-export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPublicada; agenda?: Agenda | null }) {
+/** COM-8: los eventos que vienen, con fecha, precio y lugares. Se anotan escribiendo o en recepción. */
+function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: string | null }) {
+  const cuando = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+  return (
+    <section aria-labelledby="eventos" className="px-4 py-12 sm:py-20" data-eventos-landing={eventos.length}>
+      <div className="mx-auto max-w-5xl">
+        <h2 id="eventos" className="flex items-center gap-4 mb-8 sm:mb-10 scroll-mt-24">
+          <span className="icono" aria-hidden>🎟️</span>
+          <span className="titulo text-4xl sm:text-5xl">Próximos eventos</span>
+        </h2>
+        <ul className="grid sm:grid-cols-2 gap-4">
+          {eventos.map((e) => (
+            <li key={e.evento_id} className="tarjeta p-6 space-y-2">
+              <p className="titulo text-2xl">{e.nombre}</p>
+              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}</p>
+              {e.descripcion && <p>{e.descripcion}</p>}
+              <p className="flex flex-wrap items-center gap-3 pt-2">
+                <span className="numero text-3xl">{Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"}</span>
+                <span className={`pildora ${e.quedan === 0 ? "pildora-rojo" : ""}`}>{e.quedan === 0 ? "Sin lugares" : `Quedan ${e.quedan} ${e.quedan === 1 ? "lugar" : "lugares"}`}</span>
+                {e.para === "socios" && <span className="pildora">Para socios</span>}
+              </p>
+              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Quiero anotarme</a>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
   const { marca, portada, contacto } = landing;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
   const hayPlanes = landing.planes.length > 0 && landing.secciones.some((s) => s.tipo === "planes");
@@ -380,6 +410,7 @@ export function LandingGimnasio({ landing, agenda = null }: { landing: LandingPu
 
       <main>
         {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
+        {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
 
       <footer className="px-4 pt-12 pb-32 sm:pb-14 mt-8 border-t border-[var(--borde)]">

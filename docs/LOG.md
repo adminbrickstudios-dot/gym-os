@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · COM-8 · Eventos sueltos
+
+**QUÉ HICE**
+- "🎟️ Eventos" (grupo Socios): la dueña o el encargado crean uno con nombre, día y hora, cupo, precio, para quién y una línea de qué es. Se vende en Vender como un producto (con la fecha en el nombre) y la pantalla dice "N de cupo · quedan X", con la lista de anotados. "Cancelarlo" o "Terminó" lo saca de Vender; lo vendido queda.
+- La página publicada muestra "Próximos eventos" (fecha, precio, lugares, "💬 Quiero anotarme"); la app, "🎟️ Próximos eventos" con "✅ Estás anotado" si ya compró.
+- Migración 0128 (`eventos` con RLS; crear, panel, cerrar, públicos, socio). Prueba de base, e2e com-8, barrido con /panel/eventos.
+
+**PARA QUE MIRES VOS**
+- Decisión mía: por dentro es un producto con stock, para no tocar `vender`. Por eso el cupo lleno y "solo socios" se avisan pero no frenan la venta (igual que el stock). Si querés que frene: COM-8b.
+
+**LO QUE NO PUDE VERIFICAR**
+- Las pantallas: el código está escrito según la documentación, pero no está ejecutado; corre en la tanda (com-8). El pago online del evento desde la app no está (se anota en recepción).
+
+---
+
 ## 2026-11-05 · COM-7 · Kiosco con los habituales
 
 **QUÉ HICE**

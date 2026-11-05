@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingProximamente } from "@/components/landing/Landing";
-import { traerAgenda, traerLanding, urlMarca } from "@/lib/landing";
+import { traerAgenda, traerEventos, traerLanding, urlMarca } from "@/lib/landing";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
@@ -15,9 +15,9 @@ const landingDelHost = cache(async () => {
   if (h.get("x-gymos-contexto") !== "gimnasio") return { tipo: "plataforma" as const };
   const host = h.get("x-gimnasio-host");
   if (!host) throw new Error("El middleware marcó un gimnasio pero no pasó el host.");
-  const [landing, agenda] = await Promise.all([traerLanding(host), traerAgenda(host)]);
+  const [landing, agenda, eventos] = await Promise.all([traerLanding(host), traerAgenda(host), traerEventos(host)]);
   if (!landing) notFound();
-  return { tipo: "gimnasio" as const, landing, agenda };
+  return { tipo: "gimnasio" as const, landing, agenda, eventos };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -60,7 +60,7 @@ export default async function Inicio() {
       <>
         {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
-        <LandingGimnasio landing={r.landing} agenda={r.agenda} />
+        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} />
       </>
     );
   }
