@@ -69,3 +69,17 @@ test("0087: un horario sacado (aunque se haya creado hoy) ya no aparece en la gr
   await como(u.dueno, () => t.q(`select public.cerrar_horario($1)`, [hoyH]));
   assert.ok(!(await ids()).includes(hoyH));
 });
+
+test("0094: un horario agregado hoy se puede editar; el nuevo arranca mañana y la grilla muestra uno solo", async () => {
+  const [{ id: act2 }] = await t.q(`insert into public.actividades (gimnasio_id, nombre) values ($1, 'Yoga') returning id`, [t.g]);
+  const [{ id: nuevoH }] = await t.q(`insert into public.horarios_clase (gimnasio_id, sede_id, actividad_id, dia_semana, hora_inicio, duracion_min, vigente_desde)
+    values ($1,$2,$3, extract(isodow from $4::date)::int, '23:15', 60, privado.dia_local(now(), $5)) returning id`, [t.g, t.sede, act2, manana, t.ctx.zona]);
+  await t.q(`select privado.materializar_dia($1, $2::date)`, [t.sede, manana]);
+  const [{ h }] = await como(u.dueno, () => t.q(`select public.editar_horario($1, '23:30', 60, 7, null) as h`, [nuevoH]));
+  const grilla = await como(u.dueno, () => t.q(`select horario_id, to_char(hora_inicio, 'HH24:MI') hora, cupo from public.horarios_gimnasio($1) where actividad = 'Yoga'`, [t.g]));
+  assert.deepEqual(grilla.map((r) => [r.horario_id === h, r.hora, r.cupo]), [[true, "23:30", 7]]);
+  // La de mañana (ya creada) pasa al nuevo; volver a mirar el día no crea otra.
+  await t.q(`select privado.materializar_dia($1, $2::date)`, [t.sede, manana]);
+  const cs = await t.q(`select to_char(inicio at time zone $3, 'HH24:MI') hora from public.clases where actividad_id = $1 and privado.dia_local(inicio, $3) = $2::date and cancelada_en is null`, [act2, manana, t.ctx.zona]);
+  assert.deepEqual(cs.map((c) => c.hora), ["23:30"]);
+});

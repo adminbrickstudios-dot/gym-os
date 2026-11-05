@@ -15,6 +15,15 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-8 (arreglo) · Editar un horario recién agregado
+
+**QUÉ HICE**
+- La tanda de pantallas encontró que un horario agregado hoy no se podía editar ("sacalo y agregalo de nuevo"): justo el caso de corregir un error de tipeo. Migración 0094 (copia de `editar_horario`): el horario de hoy se queda con su primer día y el nuevo arranca mañana, como al sacarlo.
+- **LO QUE ENCONTRÉ SIN PEDIRTELO**: en 0086, si cambiaba la hora y una clase posterior tenía reservas, las clases sin reservas de los días intermedios se movían al horario nuevo mientras el viejo seguía vigente esos días: al volver a mirar el día, el viejo creaba otra (dos clases). Ahora esas se quedan en el viejo con su hora y toman cupo y profe.
+- Prueba de base `editar-horario` (caso 0094), e2e `panel-clases` en la tanda final.
+
+---
+
 ## 2026-11-05 · APP-8 · Pedir pausa o baja desde la app
 
 **QUÉ HICE**
