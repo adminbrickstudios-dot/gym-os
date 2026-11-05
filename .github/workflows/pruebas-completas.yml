@@ -88,6 +88,6 @@ jobs:
           name: pantallas
           path: |
             .local/*.log
-            capturas/
+            .local/capturas/
           if-no-files-found: ignore
           retention-days: 7
