@@ -10,6 +10,7 @@ import type { LandingPublicada, Seccion } from "@/lib/landing";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 import { guardarPagina } from "./acciones";
+import { publicarPagina } from "../configuracion/acciones";
 
 type Portada = { titulo: string; bajada: string | null; boton_texto: string; foto_portada_path: string | null; mensaje_whatsapp: string; mostrar_precios: boolean };
 type SeccionPanel = Seccion & { visible: boolean };
@@ -66,7 +67,43 @@ function Miniatura({ children }: { children: ReactNode }) {
   );
 }
 
-export function Editor({ inicial, agenda, puedeEditar }: { inicial: PaginaPanel; agenda: Agenda | null; puedeEditar: boolean }) {
+/** Arriba del editor: si la página está publicada, publicarla o pasarla a borrador, y compartir el link. */
+function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicadaInicial: boolean; direccion: string; nombre: string; puedeEditar: boolean }) {
+  const [publicada, setPublicada] = useState(publicadaInicial);
+  const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
+  const [copiado, setCopiado] = useState(false);
+  const [cambiando, empezar] = useTransition();
+  const cambiar = (p: boolean) => empezar(async () => {
+    const r = await publicarPagina(p);
+    if (r.error) { setMsj({ error: r.error }); return; }
+    setPublicada(p);
+    setMsj({ ok: p ? "Publicada: ya la puede ver cualquiera con el link." : "Volvió a borrador: la gente ve “Estamos armando nuestra página”." });
+  });
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(direccion); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
+  };
+  return (
+    <section className="tarjeta p-5 sm:p-6 space-y-3" data-estado-pagina={publicada ? "publicada" : "borrador"}>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={`pildora ${publicada ? "pildora-verde" : "pildora-amarillo"}`}>{publicada ? "🟢 Publicada" : "📝 Borrador: la gente ve “Estamos armando nuestra página”"}</span>
+        <span className="texto-suave break-all">{direccion}</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {puedeEditar && (publicada
+          ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "📝 Pasar a borrador"}</button>
+          : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Publicando…" : "🚀 Publicar mi página"}</button>)}
+        <a href={direccion} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver</a>
+        <button type="button" className="boton" onClick={copiar}>{copiado ? "✅ Copiado" : "📋 Copiar link"}</button>
+        <a className="boton" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${nombre}: ${direccion}`)}`}>💬 Compartir por WhatsApp</a>
+      </div>
+      {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
+      {msj.ok && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
+      <p className="text-sm texto-tenue">Al pegar el link en WhatsApp o Instagram se ve el nombre, la frase y la foto de portada (o una imagen con tus colores).</p>
+    </section>
+  );
+}
+
+export function Editor({ inicial, agenda, puedeEditar, direccion }: { inicial: PaginaPanel; agenda: Agenda | null; puedeEditar: boolean; direccion: string }) {
   const [guardado, setGuardado] = useState(inicial);
   const [portada, setPortada] = useState(inicial.portada);
   const [secciones, setSecciones] = useState(inicial.secciones);
@@ -141,6 +178,7 @@ export function Editor({ inicial, agenda, puedeEditar }: { inicial: PaginaPanel;
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-start" data-editor-pagina data-listo={listo}>
       <div className="space-y-4 min-w-0">
+        <Estado publicadaInicial={inicial.vista.publicada} direccion={direccion} nombre={inicial.vista.marca.nombre} puedeEditar={puedeEditar} />
         {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la página.</p>}
         <fieldset disabled={!puedeEditar} className="space-y-4 min-w-0">
           <section className="tarjeta p-5 sm:p-6 space-y-4" data-bloque="portada">

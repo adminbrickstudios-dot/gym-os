@@ -15,6 +15,32 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · PAG-2 · Publicar, pasar a borrador y compartir la página
+
+**QUÉ HICE**
+- Arriba de "Tu página": estado (🟢 Publicada / 📝 Borrador), la dirección, Publicar / Pasar a borrador (dueño), Ver, Copiar link y Compartir por WhatsApp (dueño y encargado).
+- Al compartir el link: título, descripción (la frase de portada, o una armada con el título), imagen y tarjeta grande para WhatsApp, Instagram, Facebook y X. La imagen es la foto de portada; sin foto, `/og` dibuja una con el nombre, la frase y los colores del gimnasio. En borrador, la descripción dice que se está armando.
+- `direccionPagina` pasó a `src/lib/panel/direccion-pagina.ts` (la usan Configuración y Tu página).
+- `scripts/e2e/pag-2.mjs` (10 pasos).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Nada.
+
+**QUÉ CORRÉS VOS**
+- Nada nuevo (sin migración).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- La imagen de `/og` usa la letra por defecto (no la del sistema): para usar la misma hay que sumar el archivo de la letra al repositorio.
+- En la dirección de Gym OS (`/g/<slug>`), la imagen para compartir sale de la dirección propia del gimnasio si tiene; si no, es la de Gym OS.
+
+**LO QUE NO PUDE VERIFICAR**
+- Cómo la muestra WhatsApp de verdad: necesita la dirección pública (localhost no la ve nadie). Lo que se probó son las etiquetas y que la imagen se abre.
+
+---
+
 ## 2026-11-04 · PAG-1 · Editor de la página del gimnasio con vista previa
 
 **QUÉ HICE**

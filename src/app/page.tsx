@@ -24,12 +24,23 @@ export async function generateMetadata(): Promise<Metadata> {
   if (r.tipo === "plataforma") return { title: "Gym OS" };
   const { marca } = r.landing;
   const icono = urlMarca(marca.favicon_path ?? marca.logo_path);
-  const descripcion = r.landing.publicada ? r.landing.portada.bajada ?? undefined : undefined;
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
+  // Al compartir el link: la foto de portada si hay; si no, la imagen con el nombre y los colores (/og).
+  const foto = r.landing.publicada && r.landing.portada.foto_path ? urlMarca(r.landing.portada.foto_path) : null;
+  const imagen = foto ?? `${origen}/og`;
+  const titulo = r.landing.publicada ? `${marca.nombre} · ${r.landing.portada.titulo}` : marca.nombre;
+  const descripcion = r.landing.publicada
+    ? r.landing.portada.bajada ?? `${r.landing.portada.titulo}. Planes, horarios y cómo llegar.`
+    : "Estamos armando nuestra página. Escribinos por WhatsApp.";
   return {
-    title: { absolute: r.landing.publicada ? `${marca.nombre} · ${r.landing.portada.titulo}` : marca.nombre },
+    title: { absolute: titulo },
     description: descripcion,
     icons: icono ? { icon: icono, apple: icono } : undefined,
-    openGraph: { title: marca.nombre, description: descripcion, images: r.landing.publicada && r.landing.portada.foto_path ? [urlMarca(r.landing.portada.foto_path)!] : undefined },
+    openGraph: { type: "website", title: titulo, description: descripcion, siteName: marca.nombre, locale: "es_AR",
+                 images: [{ url: imagen, width: foto ? undefined : 1200, height: foto ? undefined : 630, alt: marca.nombre }] },
+    twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
   };
 }
 
