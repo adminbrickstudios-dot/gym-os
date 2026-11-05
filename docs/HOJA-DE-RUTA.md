@@ -113,6 +113,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | REG-1 | El aviso al gimnasio es la fila en Prospectos → "Se hicieron socios" con cómo va a pagar (hasta que exista la bandeja de avisos, AVI-1). | Ya existe y la ven recepción, encargado y dueño. | — |
 | 2026-11-04 | AUD-3 | "Volver a darlo de alta" lo hacen dueño, encargado y recepción (los mismos que dan de baja); la baja queda guardada en `historial_bajas` y vuelve sin plan: no recupera días de la suscripción vieja. | Volver no da días gratis; la plata entra como siempre. Si había pagado de más, se arregla al cobrar. | Reabrir la suscripción vieja. |
 | 2026-11-04 | AUD-3 | El teléfono se normaliza en la base para todo el sistema (entiende el 15 del celular, el 0 de la característica, 0054, +54 9). | Un solo lugar; la pantalla armaba números mal. | — |
+| 2026-11-04 | SOC-1 | Importan dueño y encargado (recepción no). Lo que tiene error no entra (se informa por fila); el resto entra junto. "Vence el" es una cobertura de origen importación desde hoy hasta ese día; sin fecha, queda con el plan y sin pagar. | Nadie entra gratis por un archivo mal cargado: lo que entra es lo que dice la planilla del dueño. | Rechazar todo el archivo si una fila tiene error. |
+| 2026-11-04 | SOC-1 | Deshacer borra la importación entera (socios, planes y coberturas) dentro de 24 h y solo si esos socios no tienen movimientos; es la única forma en que se borra un hecho, y solo desde esa función. | Que un archivo mal mapeado se pueda volver a importar bien sin dejar fantasmas. | Anularlos y dejarlos dados de baja. |
 | 2026-11-04 | COM | Lo que tiene la competencia entra como bloque 19, después de la segunda pasada; lo que toca plata (liquidación de profes) queda 🟡 y lo que necesita cuentas (ARCA, Wellhub) 🔌. Afuera a propósito: biometría, composición corporal, lesiones, planes de alimentación. | Lo pidió Mateo (mirar la competencia); las reglas de salud y plata siguen. | Mezclarlos en cada panel. |
 
 ---
@@ -196,7 +198,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 3 · Socios
 - [x] AUD-3 · 🟢 · Auditoría botón por botón: Socios (lista, alta, edición, ficha) — verificado: e2e:socios (16 pasos), db (volver-a-dar-de-alta, paneles con teléfonos nuevos), inventario en docs/paneles/socios.md, migración 0033 aplicada local
-- [ ] SOC-1 · 🟢 · Importar socios desde Excel o CSV
+- [x] SOC-1 · 🟢 · Importar socios desde Excel o CSV — verificado: db (importar-socios, 4 pruebas: errores por fila, vence como cobertura, deshacer y no con movimientos, 3.000 filas en 8,9 s), vitest (importar: CSV y columnas), e2e:soc-1 (12 pasos: CSV con errores, importar, deshacer, Excel, recepción sin permiso)
 - [ ] SOC-2 · 🟢 · Ficha del socio en pestañas (resumen, pagos, asistencia, notas)
 - [ ] SOC-3 · 🟢 · Notas y etiquetas, con filtros
 - [ ] SOC-4 · 🟢 · Exportar la lista de socios

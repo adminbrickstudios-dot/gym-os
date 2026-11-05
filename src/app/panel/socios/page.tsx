@@ -20,14 +20,20 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     return (
       <>
         <Encabezado emoji="👥" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
-          accion={<Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>} />
+          accion={<div className="flex flex-wrap gap-2">
+            <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>
+            {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar</Link>}
+          </div>} />
         <form className="mb-6" role="search">
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
         </form>
         {filas.length === 0 ? (
           q
             ? <Vacio emoji="🔍" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
-            : <Vacio emoji="👥" titulo="Todavía no hay socios" acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Cargar el primero</Link>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
+            : <Vacio emoji="👥" titulo="Todavía no hay socios" acciones={<>
+                <Link href="/panel/socios/nuevo" className="boton">➕ Cargar el primero</Link>
+                {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar de un Excel</Link>}
+              </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
           <ul className="space-y-2">
             {filas.map((s) => (

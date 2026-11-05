@@ -15,6 +15,31 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · SOC-1 · Importar socios desde Excel o CSV
+
+**QUÉ HICE**
+- Socios → "📥 Importar" (dueño y encargado): subir .xlsx o .csv → adivina qué columna es qué por el título (se puede cambiar; muestra un ejemplo de cada una) → "Revisar": cuántos entran y, por fila, qué hay que corregir (DNI inválido o ya socio, repetido en el archivo, celular que no se entiende, mail, fechas, plan que no existe) → "Importar N socios" → resumen y "Ver socios". Abajo, las importaciones con "Deshacer" (24 h).
+- Migración `20261104003400_importar_socios.sql`: tabla `importaciones`, `revisar_importacion`, `importar_socios`, `importaciones_panel`, `deshacer_importacion`; fechas como día/mes/año (o del Excel); "nombre y apellido" en una columna se separa; "vence el" como cobertura de origen importación. `hecho_inmutable` deja borrar solo las filas de la importación que se está deshaciendo.
+- `src/lib/importar.ts` (CSV con coma/punto y coma/tab y comillas, adivinar columnas) con pruebas en vitest; Excel con `read-excel-file` (dependencia nueva, solo en el navegador y solo al elegir un .xlsx).
+- Pruebas: `supabase/pruebas/importar-socios.test.mjs` (3.000 socios en 8,9 s) y `scripts/e2e/soc-1.mjs` (12 pasos, con un Excel de ejemplo en `scripts/e2e/archivos/`).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Algunos programas guardan celdas vacías del Excel de una forma que el lector no entiende: la pantalla lo dice y propone guardarlo como CSV.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0034).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Packs y pases en la planilla (clases que le quedan): solo se importan membresías.
+
+**LO QUE NO PUDE VERIFICAR**
+- La 0034 contra la base real (probada local). Excel de otros sistemas reales: probé uno armado a mano.
+
+---
+
 ## 2026-11-04 · AUD-3 · Auditoría botón por botón: Socios
 
 **QUÉ HICE**
