@@ -15,6 +15,20 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · CLA-9 · Faltas que se descuentan del pack
+
+**QUÉ HICE**
+- Configuración → Clases → "Si reserva y no viene": tercera opción **🎟️ Se descuenta del pack** (D16).
+- Una falta (reserva confirmada con pack de una clase que terminó sin presente y sin cancelar) cuenta como clase usada **de ese pack**. No se guarda nada: se calcula con `privado.faltas_pack(pack, momento)` y da lo mismo en la puerta, al reservar, en la ficha y en la app. Cuenta desde que se prende la regla; si se apaga, deja de contar.
+- No es falta si tiene el presente, o si ese día entró por la puerta (no se cobra dos veces con los packs que se descuentan al entrar). El presente tarde (hasta 24 h después) no queda frenado por su propia falta.
+- La app lo avisa con las reglas de reserva: "Si reservás con tu pack y no venís sin cancelar, la clase se descuenta igual."
+- Migración 0095 (copias de `via_pack`, `habilitacion_clase`, `ficha_socio`, `mi_socio`, `guardar_configuracion`, `politica_reservas`), prueba de base `faltas-pack` (con momento fijo), `e2e:cla-9`.
+
+**PARA QUE MIRES VOS**
+- Toca cómo se cuentan los packs (la puerta y la reserva): está aprobado en D16, pero es plata.
+
+---
+
 ## 2026-11-05 · CLA-8 (arreglo) · Editar un horario recién agregado
 
 **QUÉ HICE**

@@ -27,7 +27,7 @@ export type Config = {
   reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
   accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
   fiado_activo: boolean; fiado_tope: number;
-  falta_politica: "nada" | "bloquear"; falta_bloqueo_dias: number;
+  falta_politica: "nada" | "bloquear" | "descontar"; falta_bloqueo_dias: number;
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -557,8 +557,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             {c.modo_clases === "reserva" && (
               <div className="space-y-3" data-faltas>
                 <p className="font-semibold">Si reserva y no viene (sin cancelar)</p>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  {([["nada", "🙂 No pasa nada", "Queda anotado en su ficha."], ["bloquear", "⛔ No puede reservar por unos días", "La recepción lo puede anotar igual. Cuenta desde que lo prendés."]] as const).map(([v, t, a]) => (
+                <div className="grid sm:grid-cols-3 gap-2">
+                  {([["nada", "🙂 No pasa nada", "Queda anotado en su ficha."], ["descontar", "🎟️ Se descuenta del pack", "Si reservó con su pack, la clase cuenta como usada. Cuenta desde que lo prendés."], ["bloquear", "⛔ No puede reservar por unos días", "La recepción lo puede anotar igual. Cuenta desde que lo prendés."]] as const).map(([v, t, a]) => (
                     <button key={v} type="button" aria-pressed={c.falta_politica === v} onClick={() => set("falta_politica", v)}
                       className={`boton !flex-col !items-start !h-auto py-3 ${c.falta_politica === v ? "!border-[var(--acento)]" : "opacity-70"}`}>
                       <span>{t}</span><span className="text-sm texto-tenue font-normal">{a}</span>
