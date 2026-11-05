@@ -15,6 +15,34 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · ONB-1 · "Primeros pasos" del dueño en Inicio
+
+**QUÉ HICE**
+- Inicio del dueño: tarjeta 🚀 Primeros pasos con barra de progreso ("4 de 8 listos"), el próximo paso como botón que lleva a la pantalla que lo resuelve, la lista completa (✅ los hechos), "No mostrar más" y, si está oculta, "Ver los primeros pasos" para traerla de vuelta. Desaparece sola cuando está todo. Los otros roles no la ven ni la piden.
+- Migración `20261104002600_primeros_pasos.sql`: `privado.primeros_pasos` calcula cada paso de los datos (nunca se guarda un "hecho"); `primeros_pasos`, `ocultar_primeros_pasos` (usa `onboarding_salteado_en`, que ya existía) y `publicar_pagina`, solo el dueño. Verificado: `supabase/pruebas/primeros-pasos.test.mjs` (3 pruebas: cada dato marca su paso, cobros con y sin transferencias, ocultar/publicar y permisos).
+- Configuración → Página: 🚀 Publicar mi página / 📝 Pasar a borrador.
+- `scripts/e2e/onb-1.mjs` (12 pasos, con el gimnasio casi vacío Box Norte Demo): las 8 pantallas de los pasos abren; subir el logo marca su paso solo (3 → 4); borrador muestra "Estamos armando nuestra página" y publicar la muestra completa; el botón lleva al próximo paso; ocultar queda guardado; el encargado no lo ve. Se puede correr dos veces seguidas.
+- Verificado también: `npm run e2e` completo en verde (17 + 14 + 40 + 24 + 13 + 18 + 16 + 12 + 120), db:pruebas 196, `npm run verificar` en verde sobre base limpia, `npm run mapa` (84 funciones usadas, ninguna faltante), capturas de compu y celular revisadas.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Nadie podía publicar la página de un gimnasio nuevo desde el panel (solo el seed del demo la publicaba). Sumé el botón: es lo único que hacía falta para que el paso tenga salida.
+- En Inicio quedaban dos botones con el color principal (el paso y Entrada): el del paso pasó a botón común con borde de color.
+
+**QUÉ CORRÉS VOS**
+- Actions → Base de datos → rama `noche/2026-11-04` → `prevuelo`, después `aplicar` (0020 a 0026).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Importar socios desde Excel: no existe todavía (el paso lleva al alta de a uno).
+
+**LO QUE NO PUDE VERIFICAR**
+- La migración 0026 contra la base real: probada en la base local con las mismas migraciones.
+- `npm run db:types`: necesita el proyecto real.
+
+---
+
 ## 2026-11-04 · CFG-5 · Mensajes editables con vista previa
 
 **QUÉ HICE**

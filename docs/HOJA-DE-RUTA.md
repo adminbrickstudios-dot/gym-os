@@ -90,6 +90,8 @@ había, nunca cobra más de lo que el dueño ve antes de cobrar).
 | 2026-11-04 | CFG-5 | Los mensajes los edita el dueño y también el encargado (las plantillas ya eran de los dos desde 0010). Recepción no los ve. | Es el que más contacta socios; no se dio acceso nuevo. | `guardar_mensaje`. |
 | 2026-11-04 | CFG-5 | Mensajes: los 5 de retención + bienvenida, cumpleaños y comprobante rechazado. "Comprobante" se tomó como el rechazado (el aprobado no necesita mensaje: la app ya muestra que puede entrar). Los tres nuevos dicen en pantalla que todavía no los manda ninguna pantalla. | Quedan listos para la bandeja de avisos (AVI-1) sin prometer algo que hoy no pasa. | Catálogo en `privado.mensajes_catalogo`. |
 | 2026-11-04 | CFG-5 | Una variable que ese mensaje no tiene (ej. {dias} en cumpleaños) es un error al guardar, no un hueco en blanco. | Un mensaje con "{cosa}" o un espacio vacío le llega así al socio. | `privado.validar_mensaje`. |
+| 2026-11-04 | ONB-1 | Para que el paso "Publicar tu página" no sea un callejón sin salida, sumé el botón Publicar / Pasar a borrador en Configuración → Página (solo el dueño). Copiar el link, mandarlo por WhatsApp y la vista al compartir ya estaban. Lo que queda de PAG-2 es poco. | Una página nueva quedaba en "Estamos armando nuestra página" para siempre: solo se publicaba desde la base. | `publicar_pagina`. |
+| 2026-11-04 | ONB-1 | Los pasos son 8: datos y dirección, logo, planes con precio, horarios (y grilla si da clases), cómo le pagan, equipo, socios, página publicada. "Equipo" cuenta hecho con una persona más que el dueño; si trabaja solo, puede ocultar la tarjeta. Importar socios desde Excel no existe todavía: el paso lleva al alta. | Cada uno sale de un dato real; nada se marca a mano. | `privado.primeros_pasos`. |
 
 ---
 
@@ -155,7 +157,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CFG-3 · 🟢 · Medios de pago y datos de transferencia — verificado: e2e:cfg-3 (13 pasos: Vender y app del socio con los medios prendidos), db:pruebas 184 con la 0023 (la base rechaza medios no aceptados), npm run e2e completo y verificar en verde
 - [x] CFG-4 · 🟢 · Horarios del gimnasio, feriados y cierres — verificado: e2e:cfg-4 (18 pasos: un feriado cancela las 6 clases del día, se ve en la app y la página, anularlo las devuelve), db:pruebas 188 con la 0024, npm run e2e completo y verificar en verde
 - [x] CFG-5 · 🟢 · Mensajes editables con vista previa — verificado: e2e:cfg-5 (16 pasos: el cambio se ve en los links de Retención y Vencen hoy, volver al original), db:pruebas 193 con la 0025, npm run e2e completo y verificar en verde
-- [~] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio
+- [x] ONB-1 · 🟢 · "Primeros pasos" del dueño en Inicio — verificado: e2e:onb-1 (12 pasos: subir el logo marca su paso, publicar la página, ocultar/mostrar), db:pruebas 196 con la 0026, npm run e2e completo y verificar en verde
 - [ ] CFG-6 · 🟢 · Lo que la base ya guarda y Configuración no muestra: formas de entrada, reingreso el mismo día, días de retención
 - [ ] CFG-7 · 🟢 · Apagar una sección avisa qué deja de andar en las otras
 - [ ] CFG-8 · 🟢 · Historial de cambios de configuración (quién, qué, cuándo)

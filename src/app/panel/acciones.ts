@@ -25,3 +25,13 @@ export async function guardarAccesos(claves: string[]): Promise<{ error?: string
   revalidatePath("/panel");
   return {};
 }
+
+/** "Primeros pasos" de Inicio: ocultarlos o volver a mostrarlos (solo el dueño, lo decide la base). */
+export async function ocultarPrimerosPasos(ocultar: boolean): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("ocultar_primeros_pasos", { p_gimnasio_id: panel.gimnasio.id, p_ocultar: ocultar });
+    revalidatePath("/panel");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

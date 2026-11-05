@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
 import { propsMarca } from "@/lib/marca";
-import { guardarConfiguracion, guardarDatosGimnasio } from "./acciones";
+import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
@@ -140,6 +140,15 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
   const [msj, setMsj] = useState<Partial<Record<ClavePestana, Respuesta>>>({});
   const [enCurso, setEnCurso] = useState<ClavePestana | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [msjPagina, setMsjPagina] = useState<{ ok?: string; error?: string }>({});
+  const [publicando, empezarPublicar] = useTransition();
+  const cambiarPublicada = (publicada: boolean) => empezarPublicar(async () => {
+    const r = await publicarPagina(publicada);
+    if (r.error || !r.datos) { setMsjPagina({ error: r.error ?? "No se pudo" }); return; }
+    const nuevo = (r.datos as DatosGimnasio).publicada;
+    setD((x) => ({ ...x, publicada: nuevo })); setDGuardado((x) => ({ ...x, publicada: nuevo }));
+    setMsjPagina({ ok: nuevo ? "Tu página está publicada: ya la puede ver cualquiera." : "Tu página volvió a borrador: la gente ve “Estamos armando nuestra página”." });
+  });
   const [, empezar] = useTransition();
   const conClases = c.modo_clases !== "ninguno";
   const [pestana, setPestana] = useState<ClavePestana>(pestanaInicial === "clases" && inicial.modo_clases === "ninguno" ? "secciones" : pestanaInicial);
@@ -330,7 +339,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
           <Tarjeta emoji="🌐" titulo="Tu página" ayuda="La que comparte la gente para conocerte, ver precios y escribirte.">
             <p>{d.publicada
               ? <span className="pildora pildora-verde">✅ Publicada</span>
-              : <span className="pildora pildora-amarillo">⏳ Sin publicar: la gente ve “próximamente”</span>}</p>
+              : <span className="pildora pildora-amarillo">⏳ Sin publicar: la gente ve “Estamos armando nuestra página”</span>}</p>
             <p className="campo !h-auto py-3 break-all select-all" data-direccion-pagina>{direccionPagina}</p>
             <div className="flex flex-wrap gap-2">
               <a href={direccionPagina} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver mi página</a>
@@ -338,6 +347,16 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, puedeEditar
               <a className="boton" target="_blank" rel="noopener noreferrer"
                 href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${d.nombre}: ${direccionPagina}`)}`}>💬 Mandar por WhatsApp</a>
             </div>
+            {puedeEditar && (
+              <div className="flex flex-wrap items-center gap-3" data-publicar>
+                {d.publicada
+                  ? <button type="button" className="boton" disabled={publicando} onClick={() => cambiarPublicada(false)}>{publicando ? "Guardando…" : "📝 Pasar a borrador"}</button>
+                  : <button type="button" className="boton boton-principal" disabled={publicando} onClick={() => cambiarPublicada(true)}>{publicando ? "Publicando…" : "🚀 Publicar mi página"}</button>}
+                <span className="text-sm texto-tenue">{d.publicada ? "Si la pasás a borrador, la gente ve “Estamos armando nuestra página” hasta que la vuelvas a publicar." : "Antes de publicar, revisá tus datos, tu logo, tus planes y tus horarios."}</span>
+              </div>
+            )}
+            {msjPagina.error && <Mensaje tipo="error">{msjPagina.error}</Mensaje>}
+            {msjPagina.ok && <Mensaje tipo="exito">{msjPagina.ok}</Mensaje>}
             <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y precios.</p>
           </Tarjeta>
           <Tarjeta emoji="📸" titulo="Fotos" ayuda="Las que ve la gente en tu página. La primera es la que más se ve: ordenalas con las flechas.">

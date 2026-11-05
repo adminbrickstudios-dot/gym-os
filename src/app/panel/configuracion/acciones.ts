@@ -159,3 +159,13 @@ export async function vistaPreviaMensaje(clave: string, texto: string): Promise<
     return { vista: await rpc("vista_previa_mensaje", { p_gimnasio_id: panel.gimnasio.id, p_clave: clave, p_texto: texto }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Página ──────────────────────────────────────────────────────────
+export async function publicarPagina(publicada: boolean): Promise<{ error?: string; datos?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("publicar_pagina", { p_gimnasio_id: panel.gimnasio.id, p_publicada: publicada });
+    revalidatePath("/", "layout");
+    return { datos: await rpc("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}

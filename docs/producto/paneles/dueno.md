@@ -50,7 +50,7 @@ Las secciones apagadas no aparecen. El menú es igual en compu (lateral) y celul
 | Editar accesos | Elegir y ordenar los botones grandes | `guardar_accesos_rapidos` | ✅ |
 | Cada número | Abre el detalle (entradas de hoy, ventas de hoy, vencen hoy, socios filtrados) | Entrada, Caja, Vencen hoy, Socios | 🔧 |
 | Alerta → botón | Va a resolverla | Caja, Transferencias, Pagos online | 🆕 |
-| Próximo paso | Lleva a la pantalla que lo resuelve | Configuración, Planes, Socios, Página | 🆕 ONB-1 |
+| Próximo paso | Lleva a la pantalla que lo resuelve | Configuración, Planes, Socios, Página | ✅ ONB-1 |
 
 ## Socios
 

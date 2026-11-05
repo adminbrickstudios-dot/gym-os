@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
+import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
 import { fechaLarga, formatearNumero, formatearPesos, saludo } from "@/lib/formato";
 import { accesosDisponibles, accesosElegidos } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
@@ -28,7 +29,11 @@ export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const datos = await rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id });
+    const [datos, pasos] = await Promise.all([
+      rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
+      // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
+      rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
+    ]);
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
 
@@ -38,6 +43,8 @@ export default async function Inicio() {
           <h1 className="titular text-5xl sm:text-7xl">{saludo(new Date(), zona)}, {panel.yo.nombre} 👋</h1>
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
+
+        {pasos && <PrimerosPasos datos={pasos} />}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 
