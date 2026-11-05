@@ -82,8 +82,17 @@ jobs:
         run: scripts/db/local.sh nueva
       - name: Levantar la app con la imitación de Supabase
         run: scripts/local/levantar.sh
-      - name: Pantallas (e2e)
-        run: npm run e2e
+      - name: Pantallas (e2e, cada recorrido aunque falle otro)
+        run: |
+          mkdir -p .local
+          : > .local/fallas.txt
+          for s in $(node -p "require('./package.json').scripts.e2e.split('&&').map((x) => x.trim().replace(/^node /, '')).join(' ')"); do
+            echo "::group::$s"
+            node "$s" || echo "✗ $s" >> .local/fallas.txt
+            echo "::endgroup::"
+          done
+          if [ -s .local/fallas.txt ]; then echo "Recorridos con fallas:"; cat .local/fallas.txt; exit 1; fi
+          echo "Todos los recorridos en verde" 
       - name: Barrido (cada rol abre cada pantalla)
         if: always()
         run: node scripts/e2e/barrido.mjs
@@ -94,6 +103,7 @@ jobs:
           name: pantallas
           path: |
             .local/*.log
+            .local/fallas.txt
             .local/capturas/
           if-no-files-found: ignore
           retention-days: 7
