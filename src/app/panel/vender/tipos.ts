@@ -5,13 +5,17 @@ export type PreciosVenta = {
   /** Medios que acepta el gimnasio para cobrar acá (sin Caja, sin efectivo). */
   medios: Medio[];
   cuota: { plan_id: string; plan: string; duracion_meses: number; precios: Precios } | null;
+  /** La matrícula de su plan, si la debe (PLA-3). Se calcula en la base de lo cobrado. */
+  matricula?: { plan_id: string; plan: string; monto: number; anual: boolean } | null;
+  /** Recargo por pagar tarde, si corresponde hoy (PLA-7). Va siempre con la cuota. */
+  recargo?: { monto: number; atraso: number; dias: number } | null;
   pases: { plan_id: string; nombre: string; precios: Precios }[];
   packs: { plan_id: string; nombre: string; cantidad_clases: number; precios: Precios }[];
   productos: { producto_id: string; nombre: string; precio: number }[];
 };
 export type Linea = {
   clave: string;
-  tipo: "cuota" | "pase" | "pack" | "producto" | "otro";
+  tipo: "cuota" | "pase" | "pack" | "producto" | "matricula" | "recargo" | "otro";
   nombre: string;
   plan_id?: string;
   producto_id?: string;
@@ -37,4 +41,9 @@ export function totalCarrito(lineas: Linea[], medio: Medio | null): number | nul
     t += Math.round((p * l.cantidad - (l.descuento ?? 0)) * 100) / 100;
   }
   return Math.round(t * 100) / 100;
+}
+
+/** La línea del recargo por pagar tarde (PLA-7): la base la exige junto con la cuota. */
+export function lineaRecargo(r: NonNullable<PreciosVenta["recargo"]>): Linea {
+  return { clave: "recargo", tipo: "recargo", nombre: `Recargo por pagar tarde (${r.atraso} días)`, precio_fijo: Number(r.monto), cantidad: 1 };
 }

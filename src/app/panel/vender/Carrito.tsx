@@ -6,7 +6,7 @@ import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { cobrar, preciosPara, type Venta } from "./acciones";
-import { precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
   { medio: "efectivo", texto: "💵 Efectivo" },
@@ -23,8 +23,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
   // Recién dado de alta con plan (SOC-13): arranca con la primera cuota en el carrito.
+  // Si debe la matrícula de su plan (PLA-3), va también.
   const [lineas, setLineas] = useState<Linea[]>(() => conCuota && preciosIniciales.cuota
-    ? [{ clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${preciosIniciales.cuota.plan}`, precios: preciosIniciales.cuota.precios, cantidad: 1 }] : []);
+    ? [{ clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${preciosIniciales.cuota.plan}`, precios: preciosIniciales.cuota.precios, cantidad: 1 },
+       ...(preciosIniciales.matricula ? [{ clave: "matricula-inicial", tipo: "matricula" as const, nombre: `Matrícula ${preciosIniciales.matricula.plan}`,
+         precio_fijo: Number(preciosIniciales.matricula.monto), cantidad: 1 }] : []),
+       ...(preciosIniciales.recargo ? [lineaRecargo(preciosIniciales.recargo)] : [])] : []);
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
   const medios = MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio));
   const [medio, setMedio] = useState<Medio | null>(medios[0]?.medio ?? null);
@@ -53,13 +57,20 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     if (r.error) setError(r.error); else setPrecios(r.precios!);
   });
 
+  // El recargo por pagar tarde acompaña a la cuota: entra y sale con ella (PLA-7).
+  const conRecargo = (ls: Linea[]) => {
+    const hayCuota = ls.some((l) => l.tipo === "cuota");
+    const sin = ls.filter((l) => l.tipo !== "recargo");
+    if (!hayCuota || !precios.recargo) return sin;
+    return ls.some((l) => l.tipo === "recargo") ? ls : [...ls, lineaRecargo(precios.recargo)];
+  };
   const agregar = (l: Omit<Linea, "clave" | "cantidad">) => setLineas((ls) => {
     const igual = ls.find((x) => x.tipo === l.tipo && x.plan_id === l.plan_id && x.producto_id === l.producto_id && l.tipo !== "otro");
     if (igual) return ls.map((x) => (x === igual ? { ...x, cantidad: Math.min(x.cantidad + 1, x.tipo === "cuota" ? 12 : 50) } : x));
-    return [...ls, { ...l, clave: crypto.randomUUID(), cantidad: 1 }];
+    return conRecargo([...ls, { ...l, clave: crypto.randomUUID(), cantidad: 1 }]);
   });
   const cambiar = (clave: string, cambio: Partial<Linea>) => setLineas((ls) => ls.map((l) => (l.clave === clave ? { ...l, ...cambio } : l)));
-  const quitar = (clave: string) => setLineas((ls) => ls.filter((l) => l.clave !== clave));
+  const quitar = (clave: string) => setLineas((ls) => conRecargo(ls.filter((l) => l.clave !== clave)));
 
   const medioPrecio = mixto ? null : medio;
   const sinMedios = medios.length === 0;
@@ -149,6 +160,10 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
               <Boton emoji="🏷️" titulo={`Cuota ${precios.cuota.plan}`} precio={precioUnitario({ clave: "", tipo: "cuota", nombre: "", cantidad: 1, precios: precios.cuota.precios }, medioPrecio)}
                 onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />
             )}
+            {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && (
+              <Boton emoji="📝" titulo={`Matrícula ${precios.matricula.plan}`} precio={Number(precios.matricula.monto)}
+                onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />
+            )}
             {precios.pases.map((p) => (
               <Boton key={p.plan_id} emoji="🎫" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pase", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pase", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
@@ -195,9 +210,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     <span className="numero text-lg">{p == null ? "—" : formatearPesos(p * l.cantidad - (l.descuento ?? 0))}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
-                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo"} title={l.tipo === "recargo" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_motivo: undefined })}>Sin descuento</button>}

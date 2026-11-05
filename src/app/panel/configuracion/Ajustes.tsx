@@ -23,7 +23,7 @@ export type Config = {
   reserva_dias_anticipacion: number; cancelacion_horas_limite: number;
   medios_aceptados: string[]; banco_transferencia: string | null;
   reingreso_mismo_dia_consume: boolean; retencion_dias_nuevo: number; retencion_dias_vencido: number; retencion_dias_se_fue: number; pausa_dias_por_anio: number; pide_apto: boolean; tope_dejar_pasar: number; invitados_por_mes: number;
-  accesos_activos: string[];
+  accesos_activos: string[]; recargo_tipo: "no" | "porcentaje" | "monto"; recargo_valor: number; recargo_dias: number;
 };
 export type Sede = { id: string; nombre: string; direccion: string | null; telefono: string | null; mapa_url: string | null; es_principal: boolean };
 export type DatosGimnasio = {
@@ -73,6 +73,7 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
   pausa_dias_por_anio: [0, 365, "Pausa: máximo de días por año"],
   tope_dejar_pasar: [0, 50, "Dejar pasar: tope por día de la recepción"],
   invitados_por_mes: [0, 10, "Invitados por socio por mes"],
+  recargo_dias: [1, 60, "Recargo: con más de cuántos días de atraso"],
   reserva_dias_anticipacion: [0, 60, "Se reserva con hasta"],
   cancelacion_horas_limite: [0, 72, "Cancelar hasta"],
 };
@@ -80,7 +81,8 @@ const RANGOS: Partial<Record<Campo, [number, number, string]>> = {
 /** Qué campos de la configuración guarda cada pestaña. Gimnasio guarda aparte (otra función). */
 const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   marca: ["color_fondo", "color_acento"],
-  cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia"],
+  cobros: ["cobra_membresia", "cobra_pase", "cobra_pack", "medios_aceptados", "alias_transferencia", "cbu", "titular_cuenta", "banco_transferencia",
+           "recargo_tipo", "recargo_valor", "recargo_dias"],
   reglas: ["tolerancia_dias", "dias_aviso", "descuento_max_recepcion", "reingreso_mismo_dia_consume", "pausa_dias_por_anio", "pide_apto", "accesos_activos", "tope_dejar_pasar", "invitados_por_mes",
            "retencion_dias_ausencia", "retencion_dias_nuevo", "retencion_dias_vencido", "retencion_dias_se_fue"],
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite"],
@@ -429,6 +431,24 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 <input className="campo" maxLength={60} value={c.banco_transferencia ?? ""} onChange={(e) => set("banco_transferencia", e.target.value)} />
               </Campo>
             </div>
+          </Tarjeta>
+          <Tarjeta emoji="⏰" titulo="Recargo por pagar tarde" ayuda="Apagado, nadie paga de más. Prendido, Vender lo suma solo a la cuota y lo muestra antes de cobrar; no cobrarlo es un descuento con motivo.">
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Recargo por pagar tarde">
+              {([["no", "Sin recargo"], ["porcentaje", "% de la cuota"], ["monto", "$ fijo"]] as const).map(([k, t]) => (
+                <label key={k} className={`boton !min-h-11 cursor-pointer ${c.recargo_tipo === k ? "!border-[var(--acento)]" : ""}`}>
+                  <input type="radio" name="recargo_tipo" className="sr-only" checked={c.recargo_tipo === k} onChange={() => set("recargo_tipo", k)} />{t}
+                </label>
+              ))}
+            </div>
+            {c.recargo_tipo !== "no" && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Campo etiqueta={c.recargo_tipo === "porcentaje" ? "Cuánto (% de la cuota)" : "Cuánto ($)"} ayuda={c.recargo_tipo === "porcentaje" ? "Hasta 50 %" : "Se suma igual a cualquier plan"}>
+                  <input type="number" inputMode="decimal" min={0} className="campo" aria-label="Valor del recargo" value={Number.isNaN(c.recargo_valor) ? "" : c.recargo_valor}
+                    onChange={(e) => set("recargo_valor", (e.target.value === "" ? "" : Number(e.target.value)) as never)} />
+                </Campo>
+                {num("recargo_dias", "Con más de cuántos días de atraso", `Ej.: con ${c.recargo_dias || 10}, el que paga el día ${(c.recargo_dias || 10) + 1} de atraso o después lo paga`)}
+              </div>
+            )}
           </Tarjeta>
           {pie("cobros")}
         </>}

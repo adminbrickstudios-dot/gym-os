@@ -47,6 +47,15 @@ export async function asignarPlan(socioId: string, planId: string, cambiar: bool
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+export type VistaCambio = { plan_viejo: string | null; plan_nuevo: string; precio_viejo: number | null; precio_nuevo: number | null;
+  hasta: string | null; dias_a_favor: number; congelado: boolean };
+
+/** Qué pasa si se cambia de plan, antes de confirmarlo (PLA-6). */
+export async function vistaCambioPlan(socioId: string, planId: string): Promise<{ error?: string; vista?: VistaCambio }> {
+  try { return { vista: await rpc<VistaCambio>("vista_cambio_plan", { p_socio_id: socioId, p_plan_id: planId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function darDeBaja(socioId: string, motivo: string): Promise<{ error?: string }> {
   try {
     await rpc("dar_de_baja", { p_socio_id: socioId, p_motivo: motivo });

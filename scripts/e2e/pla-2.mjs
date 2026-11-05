@@ -4,7 +4,7 @@
 // ("es de … a …"); al pasarlo a todo el día, entra. Elegir clases deja
 // "solo Yoga" en la lista. Un horario al revés avisa qué poner.
 //   npm run e2e:pla-2            (con scripts/local/levantar.sh corriendo)
-import { COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -38,7 +38,7 @@ try {
   await d.getByText(`Cuota Franja${s5}`).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await d.locator('button:has-text("✅ Cobrar")').click();
-  await d.locator('aside [role="alert"], main [role="status"]').first().waitFor({ timeout: 30000 });
+  await esperarCobro(d);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   const rojo = d.locator('[data-veredicto="rojo"]');
   await rojo.waitFor({ timeout: 30000 });

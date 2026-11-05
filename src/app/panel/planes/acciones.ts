@@ -22,6 +22,12 @@ export async function crearPlan(_: { error?: string }, f: FormData): Promise<{ e
       hora_desde: f.get("hora_desde") || null, hora_hasta: f.get("hora_hasta") || null,
     } });
     await rpc("programar_precio", { p_plan_id: id, p_monto: precio });
+    const mat = String(f.get("matricula") ?? "").trim();
+    if (tipo === "membresia" && mat) {
+      const m = leerMonto(mat);
+      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde ✏️ Editar.` };
+      await rpc("guardar_matricula_plan", { p_plan_id: id, p_monto: m, p_anual: f.get("matricula_anual") === "on" });
+    }
     listo();
     return { ok: Date.now() };
   } catch (e) { return { error: (e as Error).message }; }
@@ -42,11 +48,14 @@ export async function activarPlan(planId: string, activo: boolean): Promise<{ er
 }
 
 export async function editarPlan(planId: string, datos: { nombre: string; descripcion: string; max_ingresos_semana?: string; hora_desde?: string; hora_hasta?: string },
-  actividades?: string[]): Promise<{ error?: string }> {
+  actividades?: string[], matricula?: { monto: string; anual: boolean }): Promise<{ error?: string }> {
   const panel = await contextoPanel();
+  const m = matricula?.monto.trim() ? leerMonto(matricula.monto) : null;
+  if (Number.isNaN(m)) return { error: `Matrícula: ${MAL_MONTO}` };
   try {
     await rpc("guardar_plan", { p_gimnasio_id: panel.gimnasio.id, p_plan_id: planId, p_datos: datos });
     if (actividades) await rpc("guardar_actividades_plan", { p_plan_id: planId, p_actividades: actividades });
+    if (matricula) await rpc("guardar_matricula_plan", { p_plan_id: planId, p_monto: m, p_anual: matricula.anual });
     return listo();
   }
   catch (e) { return { error: (e as Error).message }; }

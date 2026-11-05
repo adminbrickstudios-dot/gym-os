@@ -1,6 +1,6 @@
 "use client";
 import { useActionState, useState, useTransition } from "react";
-import { formatearPesos } from "@/lib/formato";
+import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { activarPlan, crearPlan, editarPlan, guardarProducto } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
 
@@ -18,10 +18,15 @@ const TIPO: Record<string, { emoji: string; titulo: string }> = {
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean };
 
-function FilaPlan({ p, lista, fecha, hoy, actividades, incluye }: { p: Plan; lista?: ListaPrecios; fecha: (d: string) => string; hoy: string; actividades: Actividad[]; incluye: string[] }) {
+export type Matricula = { monto: number; anual: boolean };
+
+function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
+  p: Plan; lista?: ListaPrecios; fecha: (d: string) => string; hoy: string; actividades: Actividad[]; incluye: string[]; matricula?: Matricula;
+}) {
   const [abierto, setAbierto] = useState<null | "precio" | "editar">(null);
   const [datos, setDatos] = useState({ nombre: p.nombre, descripcion: p.descripcion ?? "", veces: p.max_ingresos_semana ? String(p.max_ingresos_semana) : "",
-    desde: p.hora_desde?.slice(0, 5) ?? "", hasta: p.hora_hasta?.slice(0, 5) ?? "", actividades: incluye });
+    desde: p.hora_desde?.slice(0, 5) ?? "", hasta: p.hora_hasta?.slice(0, 5) ?? "", actividades: incluye,
+    matricula: matricula ? formatearNumero(Number(matricula.monto), 2) : "", matriculaAnual: matricula?.anual ?? false });
   const nombresIncluye = actividades.filter((a) => incluye.includes(a.actividad_id)).map((a) => a.nombre);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
@@ -34,6 +39,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye }: { p: Plan; lis
     p.max_ingresos_semana ? `${p.max_ingresos_semana} ${p.max_ingresos_semana === 1 ? "vez" : "veces"} por semana` : null,
     p.hora_desde && p.hora_hasta ? `de ${p.hora_desde.slice(0, 5)} a ${p.hora_hasta.slice(0, 5)}` : null,
     nombresIncluye.length ? `solo ${nombresIncluye.join(", ")}` : null,
+    matricula ? `matrícula ${formatearPesos(matricula.monto)}${matricula.anual ? " cada año" : " al entrar"}` : null,
     p.socios_activos ? `${p.socios_activos} socios activos` : null,
   ].filter(Boolean).join(" · ");
   return (
@@ -62,7 +68,8 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye }: { p: Plan; lis
           correr(() => editarPlan(p.plan_id, {
             nombre: datos.nombre, descripcion: datos.descripcion,
             ...(p.tipo === "membresia" ? { max_ingresos_semana: datos.veces, hora_desde: datos.desde, hora_hasta: datos.hasta } : {}),
-          }, actividades.length ? datos.actividades : undefined));
+          }, actividades.length ? datos.actividades : undefined,
+          p.tipo === "membresia" ? { monto: datos.matricula, anual: datos.matriculaAnual } : undefined));
         }}>
           <label className="space-y-1"><span className="etiqueta">Nombre</span><input autoFocus required className="campo" value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} /></label>
           {p.tipo === "membresia" && <label className="space-y-1"><span className="etiqueta">Veces por semana (vacío = libre)</span><input type="number" min={1} max={7} className="campo" value={datos.veces} onChange={(e) => setDatos({ ...datos, veces: e.target.value })} /></label>}
@@ -88,6 +95,14 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye }: { p: Plan; lis
                     </label>
                   );
                 })}
+              </div>
+            </fieldset>
+          )}
+          {p.tipo === "membresia" && (
+            <fieldset className="sm:col-span-2 space-y-1"><legend className="etiqueta mb-1">Matrícula (vacío = sin matrícula)</legend>
+              <div className="flex flex-wrap items-center gap-3">
+                <input className="campo !w-40" inputMode="decimal" placeholder="$" aria-label="Matrícula" value={datos.matricula} onChange={(e) => setDatos({ ...datos, matricula: e.target.value })} />
+                <label className="flex items-center gap-2 min-h-11"><input type="checkbox" className="w-5 h-5" checked={datos.matriculaAnual} onChange={(e) => setDatos({ ...datos, matriculaAnual: e.target.checked })} />Se vuelve a cobrar cada año</label>
               </div>
             </fieldset>
           )}
@@ -135,6 +150,14 @@ function NuevoPlan() {
       {tipo === "membresia" && (
         <fieldset className="space-y-1"><legend className="etiqueta mb-1">Horario (vacío = todo el día)</legend>
           <div className="flex items-center gap-2"><input name="hora_desde" type="time" aria-label="Horario desde" className="campo" /><span>a</span><input name="hora_hasta" type="time" aria-label="Horario hasta" className="campo" /></div>
+        </fieldset>
+      )}
+      {tipo === "membresia" && (
+        <fieldset className="space-y-1"><legend className="etiqueta mb-1">Matrícula (vacío = sin matrícula)</legend>
+          <div className="flex flex-wrap items-center gap-3">
+            <input name="matricula" inputMode="decimal" placeholder="$" aria-label="Matrícula" className="campo !w-40" />
+            <label className="flex items-center gap-2 min-h-11"><input type="checkbox" name="matricula_anual" className="w-5 h-5" />Cada año</label>
+          </div>
         </fieldset>
       )}
       {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Cantidad de clases</span><input name="cantidad_clases" type="number" min={1} required className="campo" /></label>}
@@ -198,8 +221,9 @@ function Productos({ productos }: { productos: Producto[] }) {
   );
 }
 
-export function Editor({ planes, listas, productos, zona, actividades, incluyen }: {
+export function Editor({ planes, listas, productos, zona, actividades, incluyen, matriculas }: {
   planes: Plan[]; listas: Record<string, ListaPrecios>; productos: Producto[]; zona: string; actividades: Actividad[]; incluyen: Record<string, string[]>;
+  matriculas: Record<string, Matricula>;
 }) {
   const fecha = (d: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(d));
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
@@ -213,7 +237,7 @@ export function Editor({ planes, listas, productos, zona, actividades, incluyen 
         return (
           <section key={k}>
             <h2 className="titulo text-3xl mb-4">{v.emoji} {v.titulo}</h2>
-            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} />)}</ul>
+            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} />)}</ul>
           </section>
         );
       })}

@@ -94,3 +94,12 @@ export const aparece = (loc, ms = 5000) => loc.first().waitFor({ timeout: ms }).
 
 /** Texto que delata una pantalla rota (error de Next o boundary). */
 export const PANTALLA_ROTA = /Application error|Something went wrong|Algo salió mal|Unhandled Runtime Error/i;
+
+/** Después de "✅ Cobrar" en Vender: espera "Cobrado $…" o corta con el error que muestra. */
+export async function esperarCobro(p) {
+  const r = await Promise.race([
+    p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 }).then(() => null),
+    p.locator('aside [role="alert"]').waitFor({ timeout: 30000 }).then(async () => await p.locator('aside [role="alert"]').innerText()),
+  ]);
+  if (r) throw new Error(`al cobrar: ${r}`);
+}

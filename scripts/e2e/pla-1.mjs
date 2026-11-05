@@ -3,7 +3,7 @@
 // la lista dice cuánto da por mes; se le da a un socio, se cobra una cuota y
 // la Entrada dice que vence en 3 meses.
 //   npm run e2e:pla-1            (con scripts/local/levantar.sh corriendo)
-import { COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -34,7 +34,7 @@ try {
   chequear(/\$81\.000/.test(await d.locator("main").innerText()), "Vender: la cuota trimestral sale $81.000", "no sale $81.000");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await d.locator('button:has-text("✅ Cobrar")').click();
-  await d.locator('aside [role="alert"], main [role="status"]').first().waitFor({ timeout: 30000 });
+  await esperarCobro(d);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   const ver = d.locator('[data-veredicto="verde"]');
   await ver.waitFor({ timeout: 30000 });
