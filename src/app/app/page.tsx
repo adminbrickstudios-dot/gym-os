@@ -37,17 +37,33 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados] = await Promise.all([
+    const [qr, qrPared, invitados, campana] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
+      // AVI-5: cuántas novedades sin ver (si falla, no se muestra un cero que no es).
+      rpc<{ sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     return (
       <div className="space-y-6">
-        <header>
-          <p className="texto-suave text-lg">Hola, {s.nombre} 👋</p>
-          {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue">Cambiar de socio</Link>}
+        <header className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="texto-suave text-lg">Hola, {s.nombre} 👋</p>
+            {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue">Cambiar de socio</Link>}
+          </div>
+          {campana && (
+            <Link href={`/app/novedades?socio=${s.socio_id}`} data-campana={campana.sin_leer}
+              aria-label={campana.sin_leer ? `Novedades: ${campana.sin_leer} sin ver` : "Novedades"}
+              className="relative grid place-items-center size-11 flex-none rounded-full border border-[var(--borde)] bg-[var(--tarjeta)] text-xl active:scale-95 transition">
+              <span aria-hidden>🔔</span>
+              {campana.sin_leer > 0 && (
+                <span aria-hidden className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center text-white" style={{ background: "var(--rojo)" }}>
+                  {campana.sin_leer > 99 ? "99+" : campana.sin_leer}
+                </span>
+              )}
+            </Link>
+          )}
         </header>
 
         <section className="rounded-[var(--radio-grande)] p-6 border"

@@ -72,7 +72,7 @@ export default async function Inicio() {
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
-          <h1 className="titular text-5xl sm:text-7xl">{saludo(new Date(), zona)}, {panel.yo.nombre} 👋</h1>
+          <h1 className="titular text-5xl sm:text-7xl pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} 👋</h1>
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 

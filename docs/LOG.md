@@ -15,6 +15,21 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · VEH-1, AVI-5 · Avisar a todos y la campana
+
+**QUÉ HICE**
+- "📣 Avisar a todos" en Vencen hoy y en cada grupo de Avisos de hoy: va de a uno ("2 de 7"), cada toque abre el WhatsApp de esa persona con su mensaje y la deja avisada; "Saltear" y "Terminar". Tocar WhatsApp en una fila de Vencen hoy también la marca en la bandeja.
+- 🔔 Campana, arriba a la derecha en todo el panel y en la app del socio:
+  - el número de lo nuevo (se pide después de pintar, no frena la pantalla);
+  - "Novedades": lo nuevo arriba, lo visto abajo, cada cosa lleva a donde se resuelve;
+  - cada rol ve lo suyo; el socio, si hoy no está al día, sus comprobantes (aprobado/rechazado) y sus clases (cancelada, entró de la lista de espera).
+- Migración 0073 (`avisos_leidos`, `campana`, `campana_socio`, `leer_campana`), prueba de base `campana`, e2e `e2e:veh-1` y `e2e:avi-5`. El barrido suma `/panel/avisos` y `/panel/campana`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Que WhatsApp abra uno tras otro en un celular real (se verificó que cada toque abre su link).
+
+---
+
 ## 2026-11-05 · AUD-7, AVI-1 · Vencen hoy y la bandeja de avisos
 
 **QUÉ HICE**

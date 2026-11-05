@@ -4,6 +4,7 @@ import { Vacio } from "@/components/ui/Vacio";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { FilaAviso, type Aviso } from "./Aviso";
+import { TandaAvisos } from "./Tanda";
 
 export const metadata: Metadata = { title: "Avisos de hoy" };
 
@@ -29,7 +30,10 @@ export default async function Avisos() {
           <div className="space-y-10">
             {grupos.map(([k, lista]) => (
               <section key={k} data-grupo-avisos={k}>
-                <h2 className="titulo text-2xl mb-3">{GRUPO[k]} <span className="texto-tenue text-lg">{lista.length}</span></h2>
+                <div className="flex flex-wrap items-center gap-3 mb-3">
+                  <h2 className="titulo text-2xl flex-1">{GRUPO[k]} <span className="texto-tenue text-lg">{lista.length}</span></h2>
+                  <TandaAvisos avisos={lista} etiqueta="Avisar a los que faltan" />
+                </div>
                 <ul className="space-y-2">{lista.map((a) => <FilaAviso key={`${a.clave}-${a.socio_id}-${a.referencia}`} a={a} hora={hora(a.avisado_en)} />)}</ul>
               </section>
             ))}
