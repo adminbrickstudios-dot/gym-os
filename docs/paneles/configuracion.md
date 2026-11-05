@@ -19,8 +19,8 @@ valida igual (nadie se saltea la regla llamando a la función directo).
 | Bloque | Elemento | Qué hace hoy | Anda | Qué le falta | Se conecta con | Configurable |
 |---|---|---|---|---|---|---|
 | Marca | Nombre del gimnasio | Cambia el nombre en la barra, el saludo y la página. Obligatorio, hasta 60 letras. | ✅ | Dirección, contacto y redes (CFG-1, pestaña Gimnasio) | Inicio, landing, app del socio | Sí (es el dato) |
-| Marca | 6 muestras de fondo + "Otro fondo" | Eligen el fondo; la vista previa cambia al instante. | ✅ | Avisar si el acento elegido no se lee sobre el fondo (CFG-9) | Todo el gimnasio (`propsMarca`) | Sí |
-| Marca | 7 muestras de color principal + "Otro color" | Eligen el color de los botones; al guardar cambia el panel. | ✅ (probadas las 13 muestras) | Ídem CFG-9 | Ídem | Sí |
+| Marca | 6 muestras de fondo + "Otro fondo" | Eligen el fondo; la vista previa cambia al instante. | ✅ | — (CFG-9: avisa si el color principal casi no se ve sobre el fondo) | Todo el gimnasio (`propsMarca`) | Sí |
+| Marca | 7 muestras de color principal + "Otro color" | Eligen el color de los botones; al guardar cambia el panel. | ✅ (probadas las 13 muestras) | — (aviso de contraste, CFG-9) | Ídem | Sí |
 | Marca | Vista previa | Muestra nombre, texto y botón con los colores elegidos. | ✅ | Logo en la vista previa (CFG-2) | — | — |
 | Marca | Guardar | Guarda nombre y colores. | ✅ | — | `guardar_configuracion` | — |
 | Qué cobrás | Membresía · Pase diario · Packs | Prenden o apagan lo que aparece en Vender. No deja apagar los tres. | ✅ | — | Vender, Planes | Sí |

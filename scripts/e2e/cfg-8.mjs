@@ -77,7 +77,7 @@ try {
   const a = await pagina(b, COMPU);
   await entrar(a, "admin@ejemplo.invalid", undefined, PLATAFORMA);
   await a.locator("li", { has: a.locator('a[href="/g/demo"]') }).locator('a[href^="/admin/"]').click();
-  await a.locator("[data-admin-cambios]").waitFor({ timeout: 30000 });
+  await a.locator("[data-admin-cambios]").waitFor({ timeout: 90000 });  // la primera vez, el modo desarrollo compila la página
   const deAdmin = await a.locator("[data-admin-cambios] [data-cambio]").count();
   chequear(deAdmin > 0 && deAdmin <= 20, `el super admin muestra los últimos ${deAdmin} cambios`, `el super admin muestra ${deAdmin}`);
   await a.context().close();

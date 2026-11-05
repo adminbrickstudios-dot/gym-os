@@ -15,6 +15,33 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-04 · CFG-9 · Aviso de contraste al elegir colores
+
+**QUÉ HICE**
+- `contraste()` y `seLeePoco()` en `src/lib/marca.ts` (WCAG; avisa por debajo de 3 a 1, lo mínimo para bordes, links y texto grande). Pruebas unitarias en `marca.test.ts`.
+- Configuración → Marca: con un color principal que casi no se ve sobre el fondo, aparece en el bloque "⚠️ Este color se ve poco sobre este fondo (contraste 1,5 a 1; conviene 3 o más)…". No prohíbe guardar. Pasa también con las muestras (el amarillo sobre el fondo crema).
+- `scripts/e2e/cfg-9.mjs` (6 pasos, compu y celular).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Dos muestras que ofrece la pantalla (amarillo y crema) juntas dan contraste 1,5: ahora avisa.
+
+**A PARTIR DE ACÁ (pedido de Mateo, 22:17)**
+- Pruebo a fondo lo esencial (permisos, plata, acceso). El resto lleva su prueba básica y la verificación completa (`npm run e2e` + `verificar`) corre en tandas cada varios ítems.
+
+**QUÉ CORRÉS VOS**
+- Nada nuevo (no hay migración en este ítem).
+
+**QUÉ CONFIGURÁS VOS**
+- Nada.
+
+**SIN ARREGLAR**
+- Nada de este ítem.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada: la pantalla se probó con sesión real.
+
+---
+
 ## 2026-11-04 · CFG-8 · Historial de cambios de configuración
 
 **QUÉ HICE**
