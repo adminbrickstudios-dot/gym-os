@@ -22,7 +22,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null }:
         secciones={secciones}
         grupos={GRUPOS}
         principales={principalesCelular(rol, panel.secciones_apagadas)}
-        buscaSocios={rol !== "profe" && !panel.secciones_apagadas.includes("socios")}
+        buscaSocios={!panel.secciones_apagadas.includes("socios")}
+        soloVerSocios={rol === "profe"}
         cambiarGimnasio={enPlataforma}
       />
       <div className="lg:pl-72">

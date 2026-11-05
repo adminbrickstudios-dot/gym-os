@@ -15,6 +15,17 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · EQU-2 · El profe busca socios (D3)
+
+**QUÉ HICE**
+- El profe ahora tiene el buscador (Ctrl+K / 🔍): ve nombre, foto (si tiene) y semáforo con un texto genérico ("Puede entrar" / "No puede entrar"). Sin número de socio, teléfono, DNI ni plata, y no abre la ficha. Los dados de baja no aparecen.
+- Migración 0101 (`buscar_socios_profe`), prueba de base `profe-busca-socios`, `e2e:equ-2`.
+
+**PARA QUE MIRES VOS**
+- Toca permisos (le da al profe una búsqueda que no tenía). Aprobado en D3, con lo mínimo que dice D3.
+
+---
+
 ## 2026-11-05 · EQU-1 · Interruptores de permisos por gimnasio (D4)
 
 **QUÉ HICE**
