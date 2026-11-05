@@ -76,7 +76,7 @@ try {
   const e = await pagina(b, COMPU);
   await entrar(e, "encargado@ejemplo.invalid");
   await abrir(e);
-  chequear(await e.locator("fieldset[disabled]").count() === 1 && await e.locator("[data-pie-pagina]").count() === 0,
+  chequear(await e.locator("fieldset[disabled]").count() >= 1 && await e.locator("fieldset:not([disabled]) input, fieldset:not([disabled]) textarea").count() === 0 && await e.locator("[data-pie-pagina]").count() === 0,
     "encargado: ve el editor deshabilitado y sin Guardar", "encargado puede editar");
   await e.context().close();
 
