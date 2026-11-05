@@ -96,6 +96,10 @@ export default async function Inicio() {
                 : <div key={n.clave} className="flex flex-col-reverse">{cuerpo}</div>;
             })}
           </dl>
+          {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
+          {(rol === "dueno" || rol === "encargado") && (
+            <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline">📊 Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
+          )}
         </section>
 
         <section aria-labelledby="ahora">

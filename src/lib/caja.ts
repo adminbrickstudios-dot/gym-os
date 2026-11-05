@@ -2,7 +2,7 @@
 // texto con lo que ya calculó la base (resumen_turno); no hace cuentas propias.
 import { formatearPesos } from "./formato";
 
-const MEDIO: Record<string, string> = { transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
+export const MEDIO: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
 
 export type CierreParaCompartir = {
   caja: string; cuando: string; abrio?: string | null; cerro?: string | null;

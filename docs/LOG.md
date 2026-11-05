@@ -15,6 +15,22 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 ---
 
+## 2026-11-05 · AVI-6 · Resumen del dueño, del día y de la semana
+
+**QUÉ HICE**
+- 📊 Resumen (`/panel/resumen`, grupo PLATA, dueño y encargado), con Hoy · Ayer · Esta semana · Semana pasada:
+  - cobrado, entradas (y socios distintos), altas y bajas, cada uno contra el período anterior;
+  - "Para mirar": diferencias de caja, retiros, descuentos (cuánto de convenios), ventas anuladas, dejados pasar, los que no pudieron entrar y lo que quedó a cuenta;
+  - por medio de pago y por quién cobró;
+  - la caja: cada diferencia y cada retiro, con quién y cuándo.
+- En Inicio, abajo de los números, "📊 Resumen de hoy". En la campana: el del día (desde las 22 h) y el de la semana pasada (los lunes).
+- Migración 0074 (`privado.resumen_periodo`, `resumen_dueno` y copia de `campana`), prueba de base `resumen-dueno`, e2e `e2e:avi-6`.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada más allá de lo de arriba: el mail queda para cuando esté conectado.
+
+---
+
 ## 2026-11-05 · VEH-1, AVI-5 · Avisar a todos y la campana
 
 **QUÉ HICE**
