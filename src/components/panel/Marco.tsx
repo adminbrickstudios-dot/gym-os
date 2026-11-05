@@ -7,6 +7,7 @@ import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
 import { ProveedorSecciones } from "./LinkPanel";
+import { SinConexion } from "@/components/ui/SinConexion";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
 /** ADM-2/ADM-3: el abono del gimnasio con BRIK (los montos, solo para el dueño). */
@@ -33,6 +34,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}
           <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10"><Campana /></div>
+          <SinConexion />
           {abono?.estado === "vencido" && (
             <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura>🔒 El abono de Gym OS está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
           )}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
+import { SinConexion } from "@/components/ui/SinConexion";
 
 // El ícono del gimnasio en la pestaña y al guardar la app en el celular.
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,7 +32,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
           <form action="/salir" method="post"><button className="boton-texto">Salir</button></form>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pt-6 pb-16">{children}</main>
+      <main className="mx-auto max-w-lg px-4 pt-6 pb-16"><SinConexion />{children}</main>
     </div>
   );
 }
