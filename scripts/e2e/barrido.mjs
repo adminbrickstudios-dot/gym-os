@@ -28,7 +28,9 @@ for (const rol of Object.keys(PROHIBIDO)) {
     await entrar(p, `${rol}@ejemplo.invalid`);
     for (const ruta of RUTAS) {
       const antes = p.errores.length;
-      const r = await p.goto(`${GIMNASIO()}${ruta}`, { timeout: 120000 });
+      // Una navegación cortada por la anterior (ERR_ABORTED, con el servidor de desarrollo cargado) se reintenta una vez.
+      const ir = () => p.goto(`${GIMNASIO()}${ruta}`, { timeout: 120000 });
+      const r = await ir().catch(async (e) => { if (!/ERR_ABORTED/.test(e.message)) throw e; await p.waitForTimeout(1000); return ir(); });
       await p.waitForLoadState("networkidle").catch(() => {});
       const texto = await p.locator("body").innerText().catch(() => "");
       const nombre = `${rol}-${tam}${ruta.replaceAll("/", "-")}`;
