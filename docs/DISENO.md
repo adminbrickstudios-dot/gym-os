@@ -99,3 +99,18 @@ export default async function Pantalla() {
 ```
 
 Y su `loading.tsx` con la misma forma (encabezado y filas grises), nunca un spinner solo.
+
+## Ayuda por pantalla (VD-31)
+
+`<AyudaPantalla>` (`src/components/ui/AyudaPantalla.tsx`) vive en los layouts del panel y de la app del socio. La
+primera vez que una persona abre una pantalla con texto en `src/lib/ayuda.ts` sale un globo corto con "Entendido";
+el "?" (al lado de la campana en el panel, en el encabezado en la app) lo vuelve a mostrar. Lo que ya vio se guarda
+en la base por usuario (`ayudas_vistas()`, `marcar_ayuda(clave)`); "Mi cuenta" lo apaga (`apagar_ayudas`) o lo
+reinicia (`reiniciar_ayudas`). El globo va en el flujo de la página (nunca flota: no tapa la ventana de Entrada ni
+la hoja Cobrar), y no sale en una pantalla de error (`PantallaError` marca `data-pantalla-error`). Para sumar una
+pantalla: su texto en `AYUDAS` y su ruta en `RUTAS_PANEL` o `RUTAS_APP`.
+
+**Para los e2e:** `levantar.sh` arranca la app con `PERMITIR_SIN_AYUDA=1`, y `pagina()` de `scripts/e2e/comun.mjs`
+pone la cookie `gymos_sin_ayuda=1`; con las dos, la app no muestra ningún globo (sin la variable la cookie no hace
+nada, así que en producción no se puede apagar por ahí). Solo `scripts/e2e/vd-31.mjs` los prueba, con
+`pagina(b, viewport, { conAyuda: true })`.
