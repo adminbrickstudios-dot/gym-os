@@ -20,13 +20,15 @@ try {
   const antes = await p.locator("[data-lista] li").count();
   await p.evaluate(() => { window.__marca = "misma-pagina"; });
   // Se frena la respuesta de la lista nueva para poder ver el estado "pidiendo".
-  await p.route("**/panel/socios?**", async (r) => { await new Promise((x) => setTimeout(x, 1500)); await r.continue(); });
+  await p.route("**/panel/socios?**", async (r) => { await new Promise((x) => setTimeout(x, 1500)); await r.continue().catch(() => {}); });
   const filtro = p.locator("[data-filtro-estados] a[data-estado]").first();
   await filtro.waitFor({ timeout: 15000 });
   const clave = await filtro.getAttribute("data-estado");
   await filtro.click();
   await p.locator('[data-atenuable][aria-busy="true"]').waitFor({ timeout: 5000 });
   const durante = await p.locator("[data-lista] li").count();
+  // La atenuación es una transición de CSS: se espera a que baje en vez de medir en el primer cuadro.
+  await p.waitForFunction(() => Number(getComputedStyle(document.querySelector("[data-lista]")).opacity) < 1, null, { timeout: 3000 }).catch(() => {});
   const opacidad = await p.locator("[data-lista]").first().evaluate((x) => Number(getComputedStyle(x).opacity));
   chequear(durante === antes && durante > 0, "mientras llega la lista nueva, la de antes sigue a la vista", `la lista se vació (${antes} → ${durante})`);
   chequear(opacidad < 1, `y está atenuada (opacidad ${opacidad})`, "la lista no se atenuó");

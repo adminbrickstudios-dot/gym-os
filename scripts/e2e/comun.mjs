@@ -30,7 +30,7 @@ export const falla = (m) => {
     const n = `falla-${process.argv[1]?.split(/[\\/]/).pop()?.replace(".mjs", "")}-${fallas}`;
     mkdirSync(CAPTURAS, { recursive: true });
     pendientes.push(p.screenshot({ path: join(CAPTURAS, `${n}.jpg`), type: "jpeg", quality: 60, timeout: 5000 }).catch(() => {}));
-    pendientes.push(p.locator("body").innerText({ timeout: 3000 }).then((t) => console.log(`  [pantalla ${p.url()}] ${t.replace(/\s+/g, " ").slice(0, 400)}`)).catch(() => {}));
+    pendientes.push(p.locator("main").first().innerText({ timeout: 3000 }).then((t) => console.log(`  [pantalla ${p.url()}] ${t.replace(/\s+/g, " ").slice(0, 1500)}`)).catch(() => {}));
   }
 };
 /** Un paso que pasa o falla según la condición. */
