@@ -15,9 +15,19 @@ const TOKEN = "TEST-1234567890123456-abcdefABCDEF-1234567890";
 const C1 = "aaaaaaaa-0000-4000-8000-000000000001", C2 = "aaaaaaaa-0000-4000-8000-000000000002", C3 = "aaaaaaaa-0000-4000-8000-000000000003";
 
 async function como(usuario, fn, rol = "authenticated") {
+  // Con savepoint: si fn falla, el error de verdad llega (no el de "transacción abortada" del reset).
+  await t.db.query("savepoint como");
   await t.db.query(`set role ${rol}`);
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: usuario, role: rol })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  try {
+    const r = await fn();
+    await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`);
+    await t.db.query("release savepoint como");
+    return r;
+  } catch (e) {
+    await t.db.query("rollback to savepoint como"); await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`);
+    throw e;
+  }
 }
 const usuario = async (email) => (await t.q(`insert into auth.users (email) values ($1) returning id`, [`${email}${Math.random()}@ejemplo.invalid`]))[0].id;
 async function persona(rol) {
@@ -62,7 +72,8 @@ before(async () => {
 after(async () => t && t.cerrar());
 
 const alta = (datos, planId) => t.q(`select public.alta_online($1, $2, $3, 1, 'mostrador') as r`, [HOST, planId, datos]).then((x) => x[0].r);
-const anon = async (fn) => { await t.db.query("set role anon"); try { return await fn(); } finally { await t.db.query("reset role"); } };
+// Si fn falla, t.falla vuelve al savepoint y con él al rol de antes: no se resetea en un finally (la transacción está abortada).
+const anon = async (fn) => { await t.db.query("set role anon"); const r = await fn(); await t.db.query("reset role"); return r; };
 const DATOS = { nombre: "Nueva", apellido: "Persona", dni: "33444555", telefono: "387 555 4040", email: "n@ejemplo.invalid", fecha_nacimiento: "1995-03-02" };
 
 // ── VD-35 · Registro ─────────────────────────────────────────────────

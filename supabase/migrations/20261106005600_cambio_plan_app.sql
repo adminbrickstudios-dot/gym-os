@@ -272,11 +272,11 @@ begin
   if not found then return new; end if;
   select * into actual from public.suscripciones where socio_id = cp.socio_id and baja_en is null;
   if not found then
-    nueva := privado.asignar_plan(cp.socio_id, cp.plan_id, now(), new.aprobado_por);
+    nueva := privado.asignar_plan(cp.socio_id, cp.plan_id, now(), auth.uid());
   elsif actual.plan_id = cp.plan_id then
     nueva := actual.id;          -- ya lo pasaron a ese plan en el mostrador: solo se acredita la cuota
   else
-    nueva := privado.cambiar_plan(cp.socio_id, cp.plan_id, now(), new.aprobado_por);
+    nueva := privado.cambiar_plan(cp.socio_id, cp.plan_id, now(), auth.uid());
   end if;
   select p.nombre into nombre from public.planes p where p.id = cp.plan_id;
   update public.venta_items set tipo = 'cuota', suscripcion_id = nueva, descripcion = 'Cuota ' || nombre
