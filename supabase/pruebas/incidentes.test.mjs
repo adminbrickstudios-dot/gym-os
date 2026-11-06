@@ -41,7 +41,7 @@ test("el dueño lista todos; el profe solo los suyos; el que no es del equipo, e
   assert.equal(profe.puede_ver_todo, false);
   assert.ok(profe.items.length >= 1 && profe.items.every((i) => i.autor === "Prof"));
   const [{ id: forastero }] = await t.q(`insert into auth.users (email) values ('fuera@ejemplo.invalid') returning id`);
-  await t.falla(() => como(forastero, () => t.q(`select public.incidentes_panel($1)`, [t.g])), /Sin permiso/);
+  await como(forastero, () => t.falla(() => t.q(`select public.incidentes_panel($1)`, [t.g]), /Sin permiso/));
 });
 
 test("se corrige dentro de las 24 h, solo quien lo cargó o la gestión", async () => {
@@ -50,14 +50,14 @@ test("se corrige dentro de las 24 h, solo quien lo cargó o la gestión", async 
   const [f] = await t.q(`select donde, corregido_en from public.incidentes where id = $1`, [id]);
   assert.equal(f.donde, "Sala de pesas 2");
   assert.ok(f.corregido_en);
-  await t.falla(() => como(uRec, () => t.q(`select public.corregir_incidente($1, 'x', 'x', null, 'x')`, [id])), /Solo quien lo cargó/);
+  await como(uRec, () => t.falla(() => t.q(`select public.corregir_incidente($1, 'x', 'x', null, 'x')`, [id]), /Solo quien lo cargó/));
   await como(uDueno, () => t.q(`select public.corregir_incidente($1, 'Sala de pesas 3', 'Se cayó una mancuerna', null, 'Se despejó')`, [id]));
 });
 
 test("pasadas las 24 h no se corrige ni se borra, ni por la función ni yendo directo a la tabla", async () => {
   const [{ id }] = await t.q(`insert into public.incidentes (gimnasio_id, donde, que_paso, que_se_hizo, creado_por, creado_en)
     values ($1, 'Pileta', 'Resbaló', 'Se lo ayudó', $2, now() - interval '25 hours') returning id`, [t.g, eProfe]);
-  await t.falla(() => como(uDueno, () => t.q(`select public.corregir_incidente($1, 'x', 'x', null, 'x')`, [id])), /24 horas/);
+  await como(uDueno, () => t.falla(() => t.q(`select public.corregir_incidente($1, 'x', 'x', null, 'x')`, [id]), /24 horas/));
   await t.falla(() => t.q(`update public.incidentes set que_paso = 'otra cosa' where id = $1`, [id]), /24 horas/);
   await t.falla(() => t.q(`delete from public.incidentes where id = $1`, [id]), /no se borran/);
   // Dentro de las 24 h tampoco se borra, ni se cambia quién lo cargó.
@@ -67,8 +67,8 @@ test("pasadas las 24 h no se corrige ni se borra, ni por la función ni yendo di
 });
 
 test("campos obligatorios, fecha futura y la sección apagada", async () => {
-  await t.falla(() => como(uProfe, () => t.q(`select public.crear_incidente($1, '', 'x', null, 'x')`, [t.g])), /dónde/);
-  await t.falla(() => como(uProfe, () => t.q(`select public.crear_incidente($1, 'Sala', 'x', null, 'x', null, now() + interval '3 hours')`, [t.g])), /futura/);
+  await como(uProfe, () => t.falla(() => t.q(`select public.crear_incidente($1, '', 'x', null, 'x')`, [t.g]), /dónde/));
+  await como(uProfe, () => t.falla(() => t.q(`select public.crear_incidente($1, 'Sala', 'x', null, 'x', null, now() + interval '3 hours')`, [t.g]), /futura/));
   await t.q(`update public.configuracion_gimnasio set secciones_apagadas = array['incidentes'] where gimnasio_id = $1`, [t.g]);
-  await t.falla(() => como(uDueno, () => t.q(`select public.incidentes_panel($1)`, [t.g])), /apagados/);
+  await como(uDueno, () => t.falla(() => t.q(`select public.incidentes_panel($1)`, [t.g]), /apagados/));
 });
