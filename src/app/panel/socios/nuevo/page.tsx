@@ -22,7 +22,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
       const ficha = await rpc<{ socio: { nombre: string; apellido: string } }>("ficha_socio", { p_socio_id: listo });
       return (
         <>
-          <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="➕" titulo="Nuevo socio" bajada="El alta ya está hecha." />
+          <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen emoji="➕" titulo="Nuevo socio" bajada="El alta ya está hecha." />
           <FormSocio socioId={null} creado={{ socioId: listo, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), cobrar: cobrar === "1" }} />
         </>
       );
@@ -37,7 +37,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
     return (
       <>
-        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
+        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
         <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : undefined} />
       </>
     );

@@ -37,7 +37,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
       const otros = r.por_medio.filter((m) => m.medio !== "efectivo");
       return (
         <>
-          <Encabezado emoji="📋" titulo={r.estado === "abierto" ? "Reporte del turno (en vivo)" : "Reporte del turno"} volver={{ href: "/panel/caja", texto: "Caja" }}
+          <Encabezado emoji="📋" titulo={r.estado === "abierto" ? "Reporte del turno (en vivo)" : "Reporte del turno"} volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
             bajada={`${r.caja} · ${cuando(r.abierto_en)}${r.cerrado_en ? ` a ${hora(r.cerrado_en)}` : ""} · abrió ${r.abierto_por ?? "—"}${r.cerrado_por ? ` · contó ${r.cerrado_por}` : ""}`} />
           <section className="tarjeta p-6 sm:p-8 space-y-6" data-reporte-turno={r.estado} data-veredicto={v.clave} aria-live="polite">
             <div className="flex flex-wrap items-center gap-3">
@@ -97,7 +97,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
     const fechaLarga = new Intl.DateTimeFormat("es-AR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" }).format(new Date(`${z.dia}T12:00:00Z`));
     return (
       <>
-        <Encabezado emoji="📋" titulo="Cierre del día" volver={{ href: "/panel/caja", texto: "Caja" }} bajada={`${sede.nombre} · ${fechaLarga}`} />
+        <Encabezado emoji="📋" titulo="Cierre del día" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen bajada={`${sede.nombre} · ${fechaLarga}`} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/reporte" />}
         <nav className="flex flex-wrap gap-2" aria-label="Cambiar de día">
           <Link className="boton boton-chico" href={`/panel/caja/reporte?dia=${ayer}${sedeQ}`}>← Día anterior</Link>

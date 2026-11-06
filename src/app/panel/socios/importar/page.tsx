@@ -14,7 +14,7 @@ export default async function ImportarSocios() {
     const anteriores = await rpc<Importacion[]>("importaciones_panel", { p_gimnasio_id: panel.gimnasio.id });
     return (
       <>
-        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="📥" titulo="Importar socios" bajada="Subí tu Excel o CSV: elegís qué columna es qué, revisás y entran todos juntos. Si algo salió mal, lo deshacés durante 24 horas." />
+        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen emoji="📥" titulo="Importar socios" bajada="Subí tu Excel o CSV: elegís qué columna es qué, revisás y entran todos juntos. Si algo salió mal, lo deshacés durante 24 horas." />
         <Importador anteriores={anteriores} zona={panel.gimnasio.zona_horaria} />
       </>
     );

@@ -32,7 +32,7 @@ try {
   const hrefFicha = await d.locator("[data-lista] a[href^='/panel/socios/']").first().getAttribute("href");
   await d.locator("[data-lista] a[href^='/panel/socios/']").first().click();
   await d.waitForURL(`**${hrefFicha}`, { timeout: 30000 });
-  await d.getByRole("link", { name: /← Socios/ }).click();
+  await d.getByRole("link", { name: /← (Volver a )?Socios/ }).click();
   await d.waitForURL(/\/panel\/socios\?.*estado=al_dia/, { timeout: 30000 });
   ok("volver de una ficha a Socios: el filtro “Al día” sigue puesto");
   chequear(await d.locator('[data-filtro-estados] [data-estado="al_dia"][aria-current="page"]').count() === 1, "la píldora Al día sigue marcada", "no quedó marcada");

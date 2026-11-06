@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { Lista } from "./Lista";
@@ -28,7 +28,7 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Link href="/panel/clases" className="texto-suave hover:text-[var(--texto)]">← Clases</Link>
+        <VolverAlOrigen href="/panel/clases" texto="Clases" className="texto-suave hover:text-[var(--texto)]" />
         <header className="mt-4 mb-8">
           <p className="text-4xl" aria-hidden>{clase.emoji ?? "🗓️"}</p>
           <h1 className="titular text-5xl sm:text-6xl mt-3">{clase.actividad ?? "Clase"}</h1>
