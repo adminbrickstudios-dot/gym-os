@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-27 · Diseño v2: vidrio, movimiento, componentes únicos
+
+**QUÉ HICE**
+- `globals.css`: variables de movimiento y clases `.aparecer .hoja .lista-entra .tilde .pulso .brillo .esqueleto`, `:active` 0,97, tarjetas de vidrio sutil con los tokens del gimnasio, foco y selección con su acento, `prefers-reduced-motion` sin animaciones.
+- Componentes nuevos `Hoja` (Esc, foco atrapado, sube desde abajo en celular), `Tilde`, `Brillo`; aplicados en Mensaje, Ctrl+K, menú móvil, avisos/tareas, cobro, entrada (el veredicto aparece al instante, el pulso solo acompaña) y los 54 `loading.tsx`. Documentado en `docs/DISENO.md`.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub.
+
+**SIN ARREGLAR**: `.lista-entra` anima la entrada pero no el achicarse al salir.
+**LO QUE NO PUDE VERIFICAR**: el aspecto (vidrio, blur, esqueleto) y el e2e `vd-27` (reduced-motion, hoja, foco, 390 px) están escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`. El ✅ de Puerta y Carrito pasó a un svg: ningún e2e dependía del emoji, sin correrlos.
+
 ## 2026-11-06 · Noche · VD-47 · Rapidez de verdad (parte central)
 
 **QUÉ HICE**

@@ -13,6 +13,7 @@ Si se compacta la conversación: releer esto, `NOCHE-WINDOWS.md` y correr `node 
 
 - VD-34 (base verde en GitHub; e2e en la corrida de la tanda 1)
 - VD-47 (parcial, resto en VD-47X; base verde)
+- VD-27 (base verde; e2e y capturas en la corrida de la tanda)
 
 ## Publicadas
 

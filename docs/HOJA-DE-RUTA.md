@@ -448,7 +448,7 @@ bloque 18.
 *Tanda 1 · Para mañana (lo que ve el dueño)*
 - [x] VD-34 · 🟢 · Confiabilidad base: nada dos veces (botón único y clave de operación), nada se pierde, nada se traba — verificado: db: misma clave dos veces = una venta (también simultáneas) y la versión avisa quién cambió, corrida de base en verde en GitHub; e2e vd-34: en la corrida de la tanda
 - [x] VD-47 · 🟢 · Rapidez de verdad: misma región, middleware liviano, un viaje por pantalla, streaming, caché de lo que no cambia, carga diferida y medición (`docs/v2/16-RAPIDEZ-Y-FLUIDEZ.md`) — verificado: middleware con gimnasio en memoria y getClaims, rpc con 10 s y Reintentar, Inicio con Suspense, caché pública con etiqueta, QR bajo demanda, scripts/medir/tiempos.mjs; base en verde en GitHub; lo que falta está en VD-47X
-- [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
+- [x] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos — verificado: sistema de movimiento, vidrio, Hoja/Tilde/Brillo y loading con .esqueleto; base en verde en GitHub; e2e vd-27 y capturas: en la corrida de la tanda
 - [ ] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo
 - [ ] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores)
 - [ ] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón
