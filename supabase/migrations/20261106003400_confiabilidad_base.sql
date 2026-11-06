@@ -89,7 +89,7 @@ alter table public.configuracion_gimnasio add column if not exists actualizado_p
 create or replace function privado.sellar_actualizacion() returns trigger
 language plpgsql set search_path = '' as $$
 begin
-  new.actualizado_en := now();
+  new.actualizado_en := clock_timestamp();   -- no now(): dos ediciones en la misma transacción también se distinguen
   new.actualizado_por := (select e.id from public.equipo e where e.usuario_id = auth.uid() and e.gimnasio_id = new.gimnasio_id limit 1);
   return new;
 end $$;
