@@ -87,7 +87,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: ffmpeg (los recorridos de QR y video lo usan)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+        timeout-minutes: 6
+        continue-on-error: true   # si el espejo de apt se cuelga, solo fallan los recorridos que graban video
+        run: sudo timeout 300 apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y -qq ffmpeg || sudo timeout 120 apt-get update -qq && sudo timeout 300 apt-get install -y -qq ffmpeg
       - name: Base nueva
         run: scripts/db/local.sh nueva
       - name: Levantar la app con la imitación de Supabase
