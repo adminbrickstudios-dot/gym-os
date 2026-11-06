@@ -24,10 +24,11 @@ export const LISTA_DEL_NUMERO: Record<string, { ruta: string; seccion: string }>
 };
 
 /** Mini gráfico de los últimos días (el último, hoy, resaltado). Decorativo: el número ya dice todo. */
-function MiniGrafico({ serie }: { serie: number[] }) {
+function MiniGrafico({ serie, pesos }: { serie: number[]; pesos: boolean }) {
   const max = Math.max(...serie, 1);
+  const dicho = serie.map((n) => (pesos ? formatearPesos(n) : formatearNumero(n))).join(", ");
   return (
-    <span className="flex items-end gap-[3px] h-6 mt-2" aria-hidden data-mini-grafico={serie.length}>
+    <span className="flex items-end gap-[3px] h-6 mt-2" role="img" aria-label={`Tendencia de los últimos 7 días, de más viejo a hoy: ${dicho}`} data-mini-grafico={serie.length}>
       {serie.map((n, i) => (
         <span key={i} className="w-2 rounded-sm" style={{ height: `${Math.max(12, (n / max) * 100)}%`, background: i === serie.length - 1 ? "var(--acento, currentColor)" : "var(--tarjeta-alta)" }} />
       ))}
@@ -43,7 +44,7 @@ export function NumerosInicio({ numeros, apagadas }: { numeros: NumeroInicio[]; 
         const cuerpo = (
           <>
             <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}</dt>
-            <dd className="numero text-5xl sm:text-6xl min-w-0 break-words">{valor}{n.serie && n.serie.length > 1 && <MiniGrafico serie={n.serie} />}</dd>
+            <dd className="numero text-5xl sm:text-6xl min-w-0 break-words">{valor}{n.serie && n.serie.length > 1 && <MiniGrafico serie={n.serie} pesos={n.formato === "pesos"} />}</dd>
           </>
         );
         const lista = LISTA_DEL_NUMERO[n.clave];

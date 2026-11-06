@@ -31,6 +31,8 @@ export const USUARIOS_DEMO = [
   { email: "profe@ejemplo.invalid", nombre: "Diego", gimnasio: "demo", rol: "profe" },
   { email: "box@ejemplo.invalid", nombre: "Bruno", gimnasio: "demo-box", rol: "dueno" },
   { email: "socio@ejemplo.invalid", nombre: null, gimnasio: "demo", socio: "Testigo Al Día" },
+  // VD-23c: un socio con la cuota vencida, para probar que "Pagar" va arriba de todo en su app.
+  { email: "socio-vencido@ejemplo.invalid", nombre: null, gimnasio: "demo", socio: "Testigo Vencida" },
 ];
 
 const db = new pg.Client({ connectionString: url });
