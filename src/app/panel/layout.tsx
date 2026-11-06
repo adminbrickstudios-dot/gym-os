@@ -9,6 +9,7 @@ import { AyudaBrik } from "@/components/panel/AyudaBrik";
 import { BannerSoporte } from "@/components/panel/BannerSoporte";
 
 type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
+import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
 import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -79,10 +80,13 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   }
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
   return (
-    <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
-      {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
-      {children}
-      {pideAyuda && <AyudaBrik />}
-    </Marco>
+    <>
+      <RegistrarSesion />
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+        {children}
+        {pideAyuda && <AyudaBrik />}
+      </Marco>
+    </>
   );
 }

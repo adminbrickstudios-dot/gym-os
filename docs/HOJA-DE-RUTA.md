@@ -514,6 +514,11 @@ bloque 18.
 - [ ] VD-22c · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
 - [ ] VD-22d · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
 - [ ] VD-40b · 🟢 · Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
+- [ ] VD-42b · 🟢 · Super admin con 2FA obligatorio: sin factor no entra a /admin y las admin_* exigen aal2
+- [ ] VD-42c · 🟢 · Pedir el código TOTP justo después de la contraseña al ingresar
+- [ ] VD-42d · 🟢 · Alerta al dueño por exportes grandes e intentos fallidos de PIN; aal2 en exportar_mes y exportar_gastos
+- [ ] VD-43b · 🟢 · Ventas y clases de ejemplo borrables sin dejar plata en Resultado
+- [ ] VD-43c · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -543,8 +548,8 @@ bloque 18.
 - [x] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso — verificado: biblioteca, plantillas, asignar a varios, la rutina de hoy en la app y quién la hizo; base en verde en GitHub (rutinas-completas); e2e vd-20 en la corrida de la tanda
 *Tanda 5 · BRIK y seguridad*
 - [x] VD-40 · 🟢 · Super admin v2: salud, alta en 3 pasos, soporte con motivo, ayuda con contexto, métricas — verificado: alta de gimnasio en 3 pasos con vista previa, salud con colores calculada, entrar como soporte con motivo visible al dueño, ayuda del dueño con contexto, métricas; base en verde en GitHub (super-admin-v2); e2e vd-40 en la corrida de la tanda
-- [ ] VD-42 · 🟢 · Mi cuenta y seguridad: contraseña, sesiones, 2FA, dar de baja a alguien del equipo
-- [ ] VD-43 · 🟢 · Gimnasio nuevo: onboarding calculado y datos de ejemplo
+- [x] VD-42 · 🟢 · Mi cuenta y seguridad: contraseña, sesiones, 2FA, dar de baja a alguien del equipo — verificado: TOTP con aal2 solo si hay factor verificado en exportes/equipo/MercadoPago, dar de baja corta sesión+PIN+turno, alertas de seguridad al dueño; base en verde en GitHub (dos-pasos-y-baja); e2e vd-42 en la corrida de la tanda; el enrolamiento TOTP real no es ejecutable en el imitador
+- [x] VD-43 · 🟢 · Gimnasio nuevo: onboarding calculado y datos de ejemplo — verificado: 9 pasos calculados, socios de ejemplo marcados que no tachan 'Tus socios', cargar y borrar ejemplos; base en verde en GitHub (onboarding-ejemplos); e2e vd-43 en la corrida de la tanda
 - [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo
 *Tanda 6 · El día a día real*
 - [ ] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos

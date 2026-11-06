@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-42 y VD-43 · Mi cuenta y seguridad; onboarding con datos de ejemplo
+
+**QUÉ HICE**
+- VD-42 (migración 6400): `privado.exigir_aal2(gimnasio)` exige aal2 SOLO si el usuario tiene un factor TOTP verificado (quien no lo activó sigue igual); copiando las definiciones más nuevas se agregó en `exportar_gimnasio`, `exportar_socios`, `guardar_equipo`, `guardar_permisos_equipo`, `guardar_mercadopago`, `quitar_mercadopago`, `cuenta_para_nueva_clave` y `persona_para_dar_acceso` (si exportar choca con aal2, la pantalla redirige a Mi cuenta). `dar_de_baja_equipo` (y `guardar_equipo(activo=false)` / "Sacar acceso") desactiva a la persona, borra su PIN, cierra su turno de caja "sin contar" y corta sus sesiones (solo si esa cuenta no es de otro equipo ni de un socio); el historial queda. Alertas de seguridad al dueño (`alertas_seguridad`, `huellas_equipo`, cerradas por RLS): dispositivo nuevo de alguien del equipo (el primero no, ni el dueño) y cada baja, en Inicio con "Entendido"; y recomendación de activar los dos pasos. Mi cuenta: enrolamiento TOTP (QR, código, confirmar, desactivar) y Equipo: "Dar de baja" con confirmación.
+- VD-43 (migración 6500): paso 9 "Probá la entrada con un DNI" (se tacha con una entrada de un socio real); socios de ejemplo marcados (`socios.es_ejemplo`, no tachan "Tus socios"); `cargar_socios_ejemplo` (10 socios con teléfonos `+54 9 000…` y mails `@ejemplo.invalid`, con plan y vencimientos variados si hay plan de membresía) y `borrar_socios_ejemplo` (sin tocar lo real; un ejemplo con entrada o cobro se queda y se avisa); Inicio del dueño los ofrece mientras no hay socios reales y muestra "Estás viendo datos de ejemplo · Borrarlos".
+- Conflicto resuelto a mano en `panel/layout.tsx`: conviven `RegistrarSesion` (VD-42) con el banner de soporte y la ayuda a BRIK (VD-40).
+- Verificado: lint, typecheck, 115 pruebas, build y base/chequeos/demo en verde en GitHub (`dos-pasos-y-baja`, `onboarding-ejemplos`; `primeros-pasos` pasa de 8 a 9 pasos).
+
+**QUÉ CONFIGURÁS VOS**: nada; cada persona activa su 2FA desde Mi cuenta.
+**SIN ARREGLAR**: VD-42b (el super admin con 2FA obligatorio: `/admin` es de VD-40), VD-42c (pedir el código al ingresar), VD-42d (más alertas y aal2 en `exportar_mes`/`exportar_gastos`), VD-43b (ventas y clases de ejemplo), VD-43c (fecha objetivo y pistas por rol).
+**LO QUE NO PUDE VERIFICAR**: el enrolamiento TOTP real (el imitador no hace MFA de GoTrue; `vd-42` prueba la sección y el redirect con un factor verificado en la base, y la regla aal2 está cubierta en SQL con tokens aal1/aal2), que `postgres` pueda borrar de `auth.sessions` en Supabase real (la baja igual vale: `exigir_equipo` le niega todo), y los e2e `vd-42`/`vd-43`.
+
 ## 2026-11-06 · Noche · VD-40 · Super admin v2
 
 **QUÉ HICE**

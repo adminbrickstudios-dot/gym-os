@@ -81,3 +81,4 @@ VD-19/20 mergeados. Lanzado VD-40 ae1c369e385efd2a4 (vd40, migr 6300). En curso:
 (VD-22 mergeado; tanda 4 completa)
 VD-22 mergeado. Lanzado VD-42→43 a495eedbb541876c4 (vd42, migr 6400/6500). En curso: VD-44 (a003fa0a390b234fc), VD-40 (ae1c369e385efd2a4). Falta tanda 5: VD-21; luego tandas 6/7.
 (VD-40 mergeado). TRIAGE de pantallas tanda 1: agente adbcaf6f5b21a3aca (rama noche/2026-11-05-triage1 sobre publicar/2026-11-06-tanda-1; log en .local/pantallas-tanda1.log). Corrida 42162017854 falló en ~60 recorridos (posible caída del servidor + fallas reales).
+(VD-42, VD-43 mergeados). AL MERGEAR VD-44 (5400): verificar que no pierda sus cambios si redefine guardar_equipo (6400 la copia de versiones anteriores a 5400).

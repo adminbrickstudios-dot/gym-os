@@ -10,7 +10,7 @@ const TABLAS = ["socios", "planes", "precios_plan", "suscripciones", "coberturas
 type Fila = Record<string, unknown>;
 const valor = (v: unknown) => (v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
 
-export async function GET() {
+export async function GET(pedido: Request) {
   const panel = await contextoPanel();
   const archivos: Record<string, Uint8Array> = {};
   try {
@@ -20,6 +20,8 @@ export async function GET() {
       archivos[`${t}.csv`] = strToU8(aCsv(columnas, filas.map((f) => columnas.map((c) => valor(f[c])))));
     }
   } catch (e) {
+    // VD-42: con la verificación en dos pasos activa, falta confirmar el código: se lleva a donde se hace.
+    if (/dos pasos/.test((e as Error).message)) return Response.redirect(new URL("/panel/cuenta#dos-pasos", pedido.url), 303);
     return new Response(`No se pudo exportar: ${(e as Error).message}`, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());

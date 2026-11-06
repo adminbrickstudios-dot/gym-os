@@ -4,6 +4,8 @@ import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { agregarPersona, editarPersona, type Resultado } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { BotonAccion } from "@/components/ui/BotonAccion";
+import { darDeBajaPersona } from "../seguridad-acciones";
 
 export type Miembro = { equipo_id: string; nombre: string; rol: Rol; sede_id: string | null; sede: string | null; activo: boolean; tiene_acceso: boolean; soy_yo: boolean };
 const EMOJI: Record<Rol, string> = { dueno: "👑", encargado: "🧭", recepcion: "🛎️", profe: "💪" };
@@ -20,6 +22,10 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
   const [ocupado, empezar] = useTransition();
   // AUD-12: hacer dueño a alguien le da la plata y la configuración: se confirma en pantalla.
   const [hacerDueno, setHacerDueno] = useState<Miembro | null>(null);
+  // VD-42: "Dar de baja" corta todo de una vez; se confirma en pantalla diciendo qué pasa.
+  const [baja, setBaja] = useState<Miembro | null>(null);
+  const [motivoBaja, setMotivoBaja] = useState("");
+  const [avisoBaja, setAvisoBaja] = useState<string | null>(null);
   const cambiarRol = (m: Miembro, rol: string) => {
     if (rol === "dueno") { setHacerDueno(m); return; }
     empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, rol, m.sede_id, m.activo); setError(r.error ?? null); });
@@ -44,6 +50,27 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
                   onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, m.rol, m.sede_id, !m.activo); setError(r.error ?? null); })}>
                   {m.activo ? "Sacar acceso" : "Devolver acceso"}
                 </button>
+                {m.activo && (
+                  <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado} data-dar-de-baja={m.equipo_id}
+                    onClick={() => { setBaja(m); setMotivoBaja(""); setAvisoBaja(null); }}>
+                    Dar de baja
+                  </button>
+                )}
+              </div>
+            )}
+            {baja?.equipo_id === m.equipo_id && (
+              <div className="basis-full space-y-2" role="group" aria-label="Confirmar la baja" data-confirmar-baja>
+                <p className="texto-suave">¿Dar de baja a {m.nombre}? Deja de entrar al sistema ahora mismo: se cierran sus sesiones, se borra su PIN y se cierra su turno de caja si tiene uno abierto. Su historial queda.</p>
+                <input className="campo" aria-label="Motivo de la baja (opcional)" placeholder="Motivo (opcional)" maxLength={200} value={motivoBaja} onChange={(e) => setMotivoBaja(e.target.value)} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <BotonAccion className="boton boton-chico boton-peligro" ocupadoTexto="Dando de baja…" data-confirmar-baja-si
+                    onClick={async () => {
+                      const r = await darDeBajaPersona(m.equipo_id, motivoBaja);
+                      setError(r.error ?? null); setAvisoBaja(r.aviso ?? null);
+                      if (!r.error) setBaja(null);
+                    }}>Sí, dar de baja</BotonAccion>
+                  <button type="button" className="boton-texto texto-suave" onClick={() => setBaja(null)}>Cancelar</button>
+                </div>
               </div>
             )}
             {hacerDueno?.equipo_id === m.equipo_id && (
@@ -62,6 +89,7 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
         ))}
       </ul>
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {avisoBaja && <Mensaje tipo="exito"><span data-baja-hecha>{avisoBaja}</span></Mensaje>}
 
       {puedeEditar && (
         <form action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">

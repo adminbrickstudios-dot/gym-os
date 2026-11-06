@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
+import { DatosEjemploInicio } from "@/components/panel/DatosEjemploInicio";
+import { SeguridadDueno } from "@/components/panel/SeguridadDueno";
 import { fechaLarga, saludo } from "@/lib/formato";
 import { NumerosInicio, type NumeroInicio } from "@/components/panel/NumerosInicio";
 import { ElegirNumeros } from "@/components/panel/ElegirNumeros";
@@ -140,6 +142,13 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
         })()}
         <NovedadesGymOS novedades={novedadesGymOS} />
         {pasos && <PrimerosPasos datos={pasos} />}
+        {/* VD-43: socios de ejemplo (y su aviso fijo) · VD-42: dos pasos y alertas de seguridad. Solo el dueño. */}
+        {rol === "dueno" && (
+          <Suspense fallback={null}>
+            <DatosEjemploInicio gimnasioId={panel.gimnasio.id} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
+            <SeguridadDueno gimnasioId={panel.gimnasio.id} zona={zona} />
+          </Suspense>
+        )}
 
         <section aria-label="Números de hoy">
           <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
