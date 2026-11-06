@@ -9,10 +9,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type Guia, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
 import { ultimasEntradas, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { volverADarDeAlta } from "@/app/panel/socios/acciones";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -67,6 +68,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   const [nadie, setNadie] = useState<string | null>(null);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
+  const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
   const [firmar, setFirmar] = useState<string | null>(null);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
@@ -137,7 +139,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
 
   const reiniciar = useCallback((inicial = "", enfocar = true) => {
     setPaso("escribir"); setTexto(inicial); setSocios([]); setListaPara(""); setMarcado(0); setNadie(null); setElegido(null);
-    setV(null); setApto(null); setFirmar(null); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion");
+    setV(null); setGuia(null); setApto(null); setFirmar(null); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion");
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
@@ -149,7 +151,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia(forma); setPaso("veredicto"); setV(null);
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); setElegido(null); return; }
-    setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+    setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
     if (sonido) sonar(r.v!.color);
   }), [sedeId, sonido]);
 
@@ -187,7 +189,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
       anotado(e.r!, s);
       return;
     }
-    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setPaso("veredicto");
+    setElegido(s); setVia(forma); setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setPaso("veredicto");
   }, [sedeId, sonido, anotado]);
 
   // Enter sobre lo escrito: QR del lector, llavero, o buscar y elegir (la base busca por DNI, número o nombre).
@@ -304,7 +306,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   useEffect(() => {
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
     puedeEnterRef.current = puedeAnotarConEnter; anotarRef.current = () => anotar();
-    dejarRef.current = () => { if (v && !v.puede && !(esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue"))) { setForzando(true); void cupoDejarPasar().then(setCupo); } };
+    dejarRef.current = () => { if (v && !v.puede && !(esRecepcion && (guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue"))) { setForzando(true); void cupoDejarPasar().then(setCupo); } };
   });
 
   // El botón grande de Inicio y cualquier otro "abrir la Entrada".
@@ -315,10 +317,20 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
     return () => window.removeEventListener(EVENTO_ABRIR_ENTRADA, abrirDesdeBoton);
   }, [propia, abrir, cerrar]);
 
+  const refrescar = async (socioId: string) => {
+    const r = await veredicto(socioId, sedeId);
+    if (r.error) { setError(r.error); return; }
+    setError(null); setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+  };
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
     const r = await terminarPausa(elegido.socio_id, sedeId);
-    if (r.error) setError(r.error); else { setError(null); setV(r.v!); }
+    if (r.error) setError(r.error); else await refrescar(elegido.socio_id);
+  });
+  const volverAlta = () => empezar(async () => {
+    if (!elegido) return;
+    const r = await volverADarDeAlta(elegido.socio_id);
+    if (r.error) setError(r.error); else await refrescar(elegido.socio_id);
   });
   const deshacer = () => empezar(async () => {
     if (!hecho) return;
@@ -328,6 +340,32 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   const alCerrarHoja = () => { if (forzando) setForzando(false); else cerrar(); };
 
   if (propia) return null;
+
+  // VD-2: el botón principal (y el segundo) lo dice la base según la situación; acá solo se dibujan.
+  const bloqueadoParaRecepcion = !!v && !v.puede && esRecepcion && (!!guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue");
+  const principal = guia?.boton ?? (v?.puede ? "anotar" : "cobrar");
+  const segundo = guia?.segundo ?? null;
+  const avisosSueltos = (v?.avisos ?? []).filter((a) => !guia || !(a === "Cumple años hoy" || /^Debe .+ a cuenta$/.test(a)));
+  const boton = (clave: string, esPrincipal: boolean) => {
+    if (!v || !elegido) return null;
+    const clase = `boton ${esPrincipal ? "boton-principal text-lg px-8" : ""}`;
+    switch (clave) {
+      case "anotar":
+        return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar>✅ Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
+      case "cobrar":
+      case "cobrar_pack":
+        return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "💵 Cobrar un pack" : "💵 Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
+      case "dejar_pasar":
+        if (v.puede || forzando) return null;
+        return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={() => dejarRef.current()} className={clase} data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
+      case "volver_antes":
+        return v.puede ? null : <button key={clave} type="button" disabled={ocupado} onClick={volvioAntes} className={clase} data-ventana-volvio>🏃 Volvió antes: terminar la pausa</button>;
+      case "volver_alta":
+        return <button key={clave} type="button" disabled={ocupado} onClick={volverAlta} className={clase} data-ventana-volver-alta>↩️ Volver a dar de alta</button>;
+      default:
+        return null;
+    }
+  };
 
   const dni = /^\d{6,9}$/.test(nadie ?? "") ? `el DNI ${conPuntos(nadie!)}` : null;
   const hayLista = paso === "escribir" && socios.length > 0 && listaPara === sinPuntos(texto).trim();
@@ -441,30 +479,26 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
                     </div>
                   </div>
 
-                  {(v.avisos?.length || apto || firmar) ? (
-                    <ul className="flex flex-wrap gap-2">
-                      {v.avisos?.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
+                  {/* VD-2: lo que hay que decirle, cuánto le falta y los avisos (todo lo calcula la base). */}
+                  {guia?.falta && <p className="text-xl font-semibold" data-ventana-falta>{guia.falta}</p>}
+                  {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile>💬 {guia.decile}</p>}
+                  {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
+                    <ul className="flex flex-wrap gap-2" data-ventana-chips>
+                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.texto}</li>)}
+                      {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
                       {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
-                      {firmar && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
+                      {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
                     </ul>
                   ) : null}
                   {v.para_regularizar ? <p className="texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
                   {error && <Mensaje tipo="error">{error}</Mensaje>}
 
                   <div className="flex flex-wrap gap-2">
-                    {v.puede && (
-                      <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8" data-ventana-anotar>✅ Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button>
+                    {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0))}
+                    {!v.puede && !forzando && principal !== "dejar_pasar" && !bloqueadoParaRecepcion && (
+                      <button type="button" onClick={() => dejarRef.current()} className="boton" data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
                     )}
-                    {v.motivo === "congelada" && !v.puede && (
-                      <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
-                    )}
-                    {v.motivo !== "congelada" && (
-                      <Link ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`}
-                        className={`boton ${v.puede ? "" : "boton-principal text-lg px-8"}`} data-ventana-cobrar>💵 Cobrar <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>
-                    )}
-                    {!v.puede && !forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
-                      ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>
-                      : <button type="button" onClick={() => dejarRef.current()} className="boton" data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>)}
+                    {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>}
                     <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
                     <button type="button" onClick={() => reiniciar()} className="boton-texto px-3">Otro socio</button>
                   </div>

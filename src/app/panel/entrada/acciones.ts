@@ -7,25 +7,34 @@ export type Veredicto = {
   puede: boolean; color: string; via: string; motivo: string; texto: string; vence_en: string | null;
   para_regularizar: number | null; pack_restantes: number | null; avisos: string[] | null; modo_aviso: boolean;
 };
+/** VD-2: lo que la recepción necesita para actuar en cada situación (lo calcula la base: guia_entrada). */
+export type Guia = {
+  situacion: string; color: string; puede: boolean;
+  boton: "anotar" | "cobrar" | "cobrar_pack" | "dejar_pasar" | "volver_antes" | "volver_alta" | "ficha"; boton_texto: string;
+  segundo: "anotar" | "cobrar" | null; segundo_texto: string | null;
+  solo_encargado: boolean; decile: string; falta: string | null; entradas_mes: number;
+  chips: { clave: string; emoji: string; texto: string }[];
+};
 export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; veredicto?: Veredicto };
 
 type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
 
 /** El veredicto de la puerta, y aparte lo que el mostrador tiene que saber (no cambia si entra): el apto físico, si el gimnasio lo pide. */
-export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; apto?: string | null; firmar?: string | null; error?: string }> {
+export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; guia?: Guia; apto?: string | null; firmar?: string | null; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
-    const [v, a, docs] = await Promise.all([
+    const [v, a, docs, guia] = await Promise.all([
       rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }),
       rpc<Apto>("apto_socio", { p_socio_id: socioId }),
       // COM-6: lo que le falta firmar (un aviso: no cambia si entra).
       rpc<{ pendientes: { titulo: string }[] }>("documentos_socio", { p_socio_id: socioId }),
+      rpc<Guia>("guia_entrada", { p_socio_id: socioId, p_sede_id: sede.id }),
     ]);
     const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
     const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
     const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
-    return { v, apto, firmar };
+    return { v, guia, apto, firmar };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

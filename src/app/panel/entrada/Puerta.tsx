@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type Guia, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { Camara } from "./CamaraDinamica";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
@@ -44,6 +44,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
   const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string }) | null>(null);
+  const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
   const [firmar, setFirmar] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,11 +74,11 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     return () => clearTimeout(t);
   }, [texto]);
 
-  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
+  const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setGuia(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
   const elegir = (s: ResultadoSocio) => empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia("recepcion");
     const r = await veredicto(s.socio_id, sedeId);
-    if (r.error) setError(r.error); else { setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); if (sonido) sonar(r.v!.color); }
+    if (r.error) setError(r.error); else { setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); if (sonido) sonar(r.v!.color); }
   });
   // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
   // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
@@ -95,7 +96,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       campo.current?.focus();
       return;
     }
-    setElegido(s); setVia(forma); setV(r.v!); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+    setElegido(s); setVia(forma); setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
   }, [sedeId, sonido]);
   const porQr = useCallback((codigo: string) => empezar(async () => {
     setCamara(false); setTexto(""); setHecho(null); setForzando(false);
@@ -208,6 +209,9 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           </div>
           <p className="titular text-6xl sm:text-8xl mt-4 break-words">{elegido.nombre}</p>
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
+          {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
+          {guia?.decile && <p className="mt-2 text-2xl" data-decile>💬 {guia.decile}</p>}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
