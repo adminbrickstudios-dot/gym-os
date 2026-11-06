@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { guardarSocio, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
+import { guardarSocio, prospectoPorDni, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Tilde } from "@/components/ui/Tilde";
@@ -101,6 +101,12 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
     setOfrecido(r.prospecto ?? null);
     if (!r.prospecto) setVinculado(null);
   };
+  // VD-6b: el Interesado también se ofrece por DNI.
+  const buscarInteresadoDni = async (dni: string) => {
+    if (socioId || prospectoId) return;
+    const r = await prospectoPorDni(dni);
+    if (r.prospecto) setOfrecido(r.prospecto);
+  };
   // Menor de 18 (D10): aparece el adulto responsable. La base lo exige igual.
   const [nacimiento, setNacimiento] = useState(socio?.fecha_nacimiento ?? "");
   const menor = esMenor(nacimiento);
@@ -150,7 +156,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
         <legend className="titulo text-2xl mb-4">👤 Datos</legend>
         <Campo nombre="nombre" etiqueta="Nombre" valor={v.nombre} required autoFocus autoComplete="off" />
         <Campo nombre="apellido" etiqueta="Apellido" valor={v.apellido} autoComplete="off" />
-        <Campo nombre="dni" etiqueta="DNI" valor={v.dni} inputMode="numeric" ayuda="Solo números, sin puntos" />
+        <Campo nombre="dni" etiqueta="DNI" valor={v.dni} inputMode="numeric" ayuda="Solo números, sin puntos" onBlur={(e) => void buscarInteresadoDni(e.target.value)} />
         <Campo nombre="fecha_nacimiento" etiqueta="Fecha de nacimiento" valor={v.fecha_nacimiento} tipo="date" onChange={(e) => setNacimiento(e.target.value)} />
       </fieldset>
       {(menor || socio?.responsable_nombre) && (

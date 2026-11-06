@@ -23,6 +23,7 @@ import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
+import { BotonEntradaFicha } from "./BotonEntradaFicha";
 import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 
@@ -155,10 +156,15 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </p>
           )}
           {!s.dado_de_baja_en && (
-            <div className="flex flex-wrap gap-2 mt-6">
+            <div className="flex flex-wrap gap-2 mt-6" data-ficha-acciones>
+              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
+              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
               {!v.puede || v.color === "amarillo"
                 ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
-                : <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>}
+                : <>
+                    <BotonCobrar socioId={s.id} origen="ficha" className="boton">💵 Cobrar</BotonCobrar>
+                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>
+                  </>}
               {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
               <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />

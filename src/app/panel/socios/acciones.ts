@@ -70,6 +70,15 @@ export async function planesParaAlta(sedeId: string): Promise<{ planes?: PlanPar
 export type ProspectoOfrecido = { id: string; nombre: string; creado_en: string };
 
 /** El Interesado con ese celular, para ofrecerlo en el alta. Un celular a medio escribir no coincide con nadie. */
+/** VD-6b · El Interesado con ese DNI. Un DNI a medio escribir no coincide con nadie. */
+export async function prospectoPorDni(dni: string): Promise<{ prospecto?: ProspectoOfrecido | null; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    if (dni.replace(/\D/g, "").length < 6) return { prospecto: null };
+    return { prospecto: await rpc<ProspectoOfrecido | null>("prospecto_por_dni", { p_gimnasio_id: panel.gimnasio.id, p_dni: dni }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function prospectoPorTelefono(telefono: string): Promise<{ prospecto?: ProspectoOfrecido | null; error?: string }> {
   try {
     const panel = await contextoPanel();
