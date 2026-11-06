@@ -13,6 +13,14 @@ export async function traerMarca() {
   return landing?.marca ?? null;
 }
 
+/** VD-35: ¿el gimnasio de esta dirección tiene el registro abierto? Si lo apagó el dueño, "Soy nuevo" no aparece. */
+export async function registroAbierto() {
+  const h = await headers();
+  const host = h.get("x-gimnasio-host");
+  const landing = h.get("x-gymos-contexto") === "gimnasio" && host ? await traerLanding(host) : null;
+  return !!landing && landing.publicada && !!landing.altas_online;
+}
+
 export type MarcaIngreso = Awaited<ReturnType<typeof traerMarca>>;
 
 /** Cáscara de las pantallas de ingreso: fondo con degradé, logo y nombre, y la tarjeta de vidrio con el contenido. */

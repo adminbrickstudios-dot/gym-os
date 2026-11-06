@@ -15,6 +15,7 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   const datos = Object.fromEntries(campos.map((c) => [c, String(form.get(c) ?? "").trim()])) as Record<(typeof campos)[number], string>;
   if (String(form.get("sitio") ?? "")) return { listo: true, nombre: datos.nombre };   // robots
   if (!datos.plan) return { error: "Elegí un plan.", datos };
+  if (!datos.fecha_nacimiento) return { error: "Escribí tu fecha de nacimiento: los menores de 18 se anotan en el gimnasio con un adulto.", datos };
   if (datos.acepto !== "si") return { error: "Para anotarte tenés que leer y aceptar el reglamento.", datos };
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;

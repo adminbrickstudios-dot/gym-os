@@ -57,6 +57,7 @@ try {
     await f.locator('input[name="apellido"]').fill(`Online${s}`);
     await f.locator('input[name="dni"]').fill(dni);
     await f.locator('input[name="telefono"]').fill(tel);
+    await f.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
   };
   await llenar(form, DNI1, TEL1);
   await form.locator('button[type="submit"]').click();

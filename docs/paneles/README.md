@@ -14,20 +14,21 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
 | `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `acreditar_pago_mp`, `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
-| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_transferencia`, `iniciar_pago_online`, `invitar`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared` | `/app/clases` `/app/novedades` `/app/rutina` |
+| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_compra_app`, `informar_transferencia`, `iniciar_compra_online`, `iniciar_pago_online`, `invitar`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared`, `vista_compra_app` | `/app/clases` `/app/novedades` `/app/rutina` |
 | `/app/clases` | pantalla |  |  | `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `turnos_socio`, `wods_socio` | `/app` |
 | `/app/cuenta` | pantalla |  |  | `mi_seguridad`, `pedido_baja_socio` | `/app` `/app/mis-datos` |
 | `/app/historial` | pantalla |  |  | `mi_historial` | `/app` |
 | `/app/mis-datos` | acción (POST/GET) |  |  | `mis_datos` |  |
 | `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana` | `/app` |
 | `/app/pago` | pantalla |  |  | `pago_online` |  |
+| `/app/plan` | pantalla |  |  | `opciones_compra_app` | `/app` `/app/yo` |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
-| `/app/yo` | pantalla |  |  | `mi_link_referido`, `mis_invitados` | `/app` `/app/mis-datos` |
+| `/app/yo` | pantalla |  |  | `mi_link_referido`, `mis_invitados`, `opciones_compra_app` | `/app` `/app/mis-datos` |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
 | `/hacete-socio` | pantalla |  |  | `alta_online`, `alta_publica` | `/` `/ingresar` |
-| `/ingresar` | pantalla |  |  | `mi_sesion`, `registrar_pedido_codigo`, `telefono_para_ingresar`, `vincular_socios_por_email`, `vincular_socios_por_telefono` |  |
+| `/ingresar` | pantalla |  |  | `mi_sesion`, `registrar_pedido_codigo`, `telefono_para_ingresar`, `vincular_socios_por_email`, `vincular_socios_por_telefono` | `/hacete-socio` |
 | `/ingresar/recuperar` | pantalla |  |  |  | `/ingresar` |
 | `/kiosco` | pantalla |  |  | `kiosco_entrar`, `kiosco_entrar_habitual`, `kiosco_estado`, `kiosco_habituales`, `kiosco_qr`, `kiosco_ultimo` |  |
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
@@ -41,7 +42,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/clases/[id]` | pantalla |  | clases | `avisos_clase`, `clase_detalle`, `lista_clase` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `editar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `ocupacion_horarios` | `/panel/clases` |
 | `/panel/clases/tv` | pantalla | 👑 🧭 | clases | `tvs_panel` |  |
-| `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `autorizar_tablet`, `cierres_panel`, `config_caja`, `config_dejar_pasar`, `config_entrada`, `config_turnos_fijos`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `encuestas_panel`, `estado_pagos_online`, `guardar_config_dejar_pasar`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_horarios_apertura`, `guardar_link_resena`, `guardar_mensaje`, `guardar_mercadopago`, `guardar_meta_visitas`, `guardar_regla_plan`, `guardar_regla_vencimiento`, `guardar_turnos_fijos`, `historial_configuracion`, `horarios_apertura_panel`, `mensajes_panel`, `meta_visitas_panel`, `ordenar_fotos`, `preparar_imagen_marca`, `publicar_pagina`, `quitar_imagen_marca`, `quitar_mercadopago`, `reglas_vencimiento`, `restaurar_mensaje`, `revocar_tablet`, `simular_cuota`, `sumar_sede`, `tablets_panel`, `vista_previa_mensaje` | `/panel/documentos` `/panel/exportar` `/panel/pagina` |
+| `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `autorizar_tablet`, `autoservicio_panel`, `cierres_panel`, `config_caja`, `config_dejar_pasar`, `config_entrada`, `config_turnos_fijos`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `encuestas_panel`, `estado_pagos_online`, `guardar_compras_app`, `guardar_config_dejar_pasar`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_horarios_apertura`, `guardar_link_resena`, `guardar_mensaje`, `guardar_mercadopago`, `guardar_meta_visitas`, `guardar_registro_socios`, `guardar_regla_plan`, `guardar_regla_vencimiento`, `guardar_turnos_fijos`, `historial_configuracion`, `horarios_apertura_panel`, `mensajes_panel`, `meta_visitas_panel`, `ordenar_fotos`, `preparar_imagen_marca`, `publicar_pagina`, `quitar_imagen_marca`, `quitar_mercadopago`, `reglas_vencimiento`, `restaurar_mensaje`, `revocar_tablet`, `simular_cuota`, `sumar_sede`, `tablets_panel`, `vista_previa_mensaje` | `/panel/documentos` `/panel/exportar` `/panel/pagina` `/panel/socios` |
 | `/panel/control` | pantalla | 👑 🧭 | control | `equipo_gimnasio`, `linea_de_control` | `/panel/control/exportar` `/panel/entrada/control` `/panel/equipo/actividad` |
 | `/panel/control/exportar` | acción (POST/GET) |  |  | `linea_de_control` |  |
 | `/panel/cuenta` | pantalla |  |  | `mi_seguridad` | `/panel/pin` |

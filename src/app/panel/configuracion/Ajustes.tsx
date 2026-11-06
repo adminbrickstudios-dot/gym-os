@@ -19,6 +19,8 @@ import { ConfigEntrada } from "./ConfigEntrada";
 import { ConfigDejarPasarCard, ReglasVencimiento } from "./ReglasCobro";
 import type { ConfigDejarPasar, ReglasVencimiento as DatosVencimiento } from "./cobros-acciones";
 import { ConfigCaja } from "./ConfigCaja";
+import { Autoservicio } from "./Autoservicio";
+import type { AutoservicioPanel } from "./autoservicio-acciones";
 import type { ConfigCaja as DatosConfigCaja } from "@/app/panel/caja/tipos";
 import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/config";
 import type { Tablet } from "./acciones";
@@ -172,8 +174,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar, cajaConfig = null }: {
-  metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar, cajaConfig = null, autoservicio = null }: {
+  autoservicio?: AutoservicioPanel | null; metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -413,6 +415,11 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             {msjPagina.ok && <Mensaje tipo="exito">{msjPagina.ok}</Mensaje>}
             <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y precios.</p>
           </Tarjeta>
+          {autoservicio && (
+            <Tarjeta emoji="📲" titulo="Lo que hacen los socios solos" ayuda="Anotarse desde tu página y cambiar de plan o comprar pases desde la app.">
+              <Autoservicio inicial={autoservicio} puedeEditar={puedeEditar} />
+            </Tarjeta>
+          )}
           <Tarjeta emoji="📸" titulo="Fotos" ayuda="Las que ve la gente en tu página. La primera es la que más se ve: ordenalas con las flechas.">
             <Fotos fotos={d.fotos} reglas={d.reglas_imagenes.foto} puedeEditar={puedeEditar} nombre={d.nombre} alListo={imagenesListas} />
           </Tarjeta>

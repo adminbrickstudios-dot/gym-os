@@ -47,6 +47,7 @@ try {
   await form.locator('input[name="apellido"]').fill(`Rev${s}`);
   await form.locator('input[name="dni"]').fill(DNI);
   await form.locator('input[name="telefono"]').fill(TEL);
+  await form.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
   await form.locator('button[type="submit"]').click();
