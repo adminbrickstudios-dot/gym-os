@@ -9,9 +9,18 @@ import { abrir, HOY } from "./_comun.mjs";
 
 let t, uDueno, uEnc, uRec, eDueno;
 async function como(usuario, fn) {
+  // Con un savepoint: si la función falla (a propósito, en los casos de permisos) se vuelve atrás y el error real llega al test.
+  await t.db.query("savepoint como");
   await t.db.query("set role authenticated");
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: usuario, role: "authenticated" })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  let bien = false;
+  try { const r = await fn(); bien = true; return r; }
+  finally {
+    if (!bien) await t.db.query("rollback to savepoint como");
+    await t.db.query("reset role");
+    await t.q(`select set_config('request.jwt.claims', '', false)`);
+    await t.db.query("release savepoint como");
+  }
 }
 before(async () => {
   t = await abrir("prueba-emergencia-puerta");
@@ -80,11 +89,11 @@ test("cerrada a mano: desde ese momento no rige; suspendidos y dados de baja nun
 
 test("otra sede o otro gimnasio no se enteran; la guía muestra el chip y pone Anotar en vez de Cobrar", async () => {
   const s = t.ctx.socios;
-  const m = await t.en(HOY, "19:00:00");
+  const m = await t.en(HOY, "22:30:00");   // fuera de las ventanas de los otros casos (comparten transacción)
   const sinEmergencia = await guia(s.vencida, m);
   assert.equal(sinEmergencia.emergencia, false);
   assert.equal(sinEmergencia.boton, "cobrar");
-  await emergencia(await t.en(HOY, "18:00:00"), await t.en(HOY, "21:00:00"));
+  await emergencia(await t.en(HOY, "22:00:00"), await t.en(HOY, "23:30:00"));
   const g = await guia(s.vencida, m);
   assert.equal(g.emergencia, true);
   assert.equal(g.boton, "anotar");
