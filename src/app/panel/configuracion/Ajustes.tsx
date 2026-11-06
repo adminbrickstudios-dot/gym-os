@@ -16,6 +16,8 @@ import { HorariosYCierres, type CierrePanel } from "./Horarios";
 import { Tablets } from "./Tablets";
 import { LinkResena } from "./LinkResena";
 import { ConfigEntrada } from "./ConfigEntrada";
+import { ConfigDejarPasarCard, ReglasVencimiento } from "./ReglasCobro";
+import type { ConfigDejarPasar, ReglasVencimiento as DatosVencimiento } from "./cobros-acciones";
 import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/config";
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
@@ -164,8 +166,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12 }: {
-  metaVisitas?: number;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar }: {
+  metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -477,6 +479,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             )}
           </Tarjeta>
           {pie("cobros")}
+          <ReglasVencimiento inicial={vencimiento} puedeEditar={puedeEditar} />
+          <ConfigDejarPasarCard inicial={dejarPasar} puedeEditar={puedeEditar} />
           <MercadoPago estado={mercadopago} puedeEditar={puedeEditar} />
         </>}
 

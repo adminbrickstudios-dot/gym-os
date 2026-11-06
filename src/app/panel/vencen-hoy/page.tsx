@@ -12,7 +12,7 @@ import { TandaAvisos } from "@/app/panel/avisos/Tanda";
 import type { Aviso } from "@/app/panel/avisos/Aviso";
 
 export const metadata: Metadata = { title: "Vencen hoy" };
-type Prometio = { socio_id: string; socio: string; momento: string; motivo: string | null; por: string | null; texto: string | null; telefono: string | null };
+type Prometio = { socio_id: string; socio: string; momento: string; motivo: string | null; por: string | null; texto: string | null; telefono: string | null; promete_el?: string | null; autorizo?: string | null };
 type Fila = { socio_id: string; nombre: string; telefono: string | null; texto: string; ultimo_ingreso: string | null; ultimo_contacto_en: string | null; ultimo_contacto_por: string | null; mensaje: string | null };
 
 export default async function VencenHoy() {
@@ -48,7 +48,7 @@ export default async function VencenHoy() {
             <ul className="space-y-2">
               {prometieron.map((p) => (
                 <FilaContacto key={p.socio_id} socioId={p.socio_id} nombre={p.socio} texto={p.texto ?? ""} lista="vencido"
-                  detalle={`Pasó el ${fechaCorta(p.momento, zona)} a las ${hora(p.momento)}${p.por ? ` (lo dejó pasar ${p.por})` : ""}${p.motivo ? `: “${p.motivo}”` : ""}`}
+                  detalle={`${p.promete_el ? `Prometió pagar el ${p.promete_el.split("-").reverse().slice(0, 2).join("/")}. ` : ""}Pasó el ${fechaCorta(p.momento, zona)} a las ${hora(p.momento)}${p.por ? ` (lo dejó pasar ${p.por}${p.autorizo && p.autorizo !== p.por ? `, autorizó ${p.autorizo}` : ""})` : ""}${p.motivo ? `: “${p.motivo}”` : ""}`}
                   whatsapp={linkWhatsappSocio(p.telefono, null)} ultimo={null} puedeAnotar={false} cobrar={puedeCobrar} />
               ))}
             </ul>

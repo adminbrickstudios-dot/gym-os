@@ -17,8 +17,8 @@ export class ErrorDatos extends Error {
  * Llama a una función de public. Nunca devuelve vacío ante un error: lo tira,
  * con el texto de la base ("Sin permiso…", "El DNI…").
  */
-export async function rpc<T>(nombre: string, args?: Record<string, unknown>, opciones: { lectura?: boolean } = {}): Promise<T> {
-  const supabase = await crearClienteServidor();
+export async function rpc<T>(nombre: string, args?: Record<string, unknown>, opciones: { lectura?: boolean; operador?: string } = {}): Promise<T> {
+  const supabase = await crearClienteServidor(opciones.operador);
   // VD-47: tiempo máximo de 10 s. Solo una LECTURA se reintenta (una vez); una escritura nunca se
   // repite sola (podría cobrar dos veces): ante la demora, se avisa y la persona decide.
   const intentos = opciones.lectura ? 2 : 1;

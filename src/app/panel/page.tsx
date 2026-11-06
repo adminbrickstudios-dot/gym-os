@@ -30,7 +30,7 @@ const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
 
 type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumple: number; mensaje: string };
 type InvitadoHoy = { id: string; nombre: string; socio: string; entro_en: string | null };
-type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string };
+type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string; promete_el?: string | null; autorizo?: string | null };
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
 type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo: string; nota: string | null; pedido_en: string };
 const MOTIVO_BAJA: Record<string, string> = { precio: "el precio", horario: "los horarios", mudanza: "se muda", otro_gimnasio: "otro gimnasio", sin_tiempo: "no tiene tiempo", insatisfecho: "no le gustó", otro: "otra cosa" };
@@ -229,7 +229,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                     <span className="numero text-lg texto-suave w-12 flex-none">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.momento))}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg truncate">{x.socio}</span>
-                      <span className="block texto-suave truncate">{x.por ?? "El equipo"}: “{x.motivo}” · {x.porque_no}</span>
+                      <span className="block texto-suave truncate">{x.por ?? "El equipo"}{x.autorizo && x.autorizo !== x.por ? ` (autorizó ${x.autorizo})` : ""}: “{x.motivo}” · {x.porque_no}{x.promete_el ? ` · promete pagar el ${x.promete_el.split("-").reverse().slice(0, 2).join("/")}` : ""}</span>
                     </span>
                   </LinkPanel>
                 </li>

@@ -65,13 +65,26 @@ export async function leerLlavero(codigo: string): Promise<{ socio?: { socio_id:
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" | "nfc" = "recepcion"): Promise<{ r?: ResultadoIngreso; error?: string }> {
+/** VD-8 (D19): lo que acompaña a "dejar pasar sin pagar": el día que promete pagar y, si hace falta, el PIN del dueño o el encargado. */
+export type PromesaPago = { prometePagarEl?: string | null; pin?: string | null };
+
+export async function registrarEntrada(socioId: string, sedeId: string, forzarMotivo?: string, via: "recepcion" | "qr_socio" | "nfc" = "recepcion", promesa?: PromesaPago): Promise<{ r?: ResultadoIngreso; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
+    // El PIN autoriza SOLO esta entrada: se canjea por un token y se manda en esta llamada, no queda en la cookie de la compu.
+    let operador: string | undefined;
+    const pin = promesa?.pin?.trim();
+    if (pin) {
+      if (!/^\d{4}$/.test(pin)) return { error: "El PIN son 4 números" };
+      const p = await rpc<{ token?: string; error?: string; quedan?: number }>("entrar_con_pin", { p_gimnasio_id: panel.gimnasio.id, p_pin: pin });
+      if (p.error || !p.token) return { error: p.quedan ? `${p.error ?? "PIN equivocado"}: te quedan ${p.quedan} intento${p.quedan === 1 ? "" : "s"}` : `${p.error ?? "PIN equivocado"}: esperá 10 minutos` };
+      operador = p.token;
+    }
     const r = await rpc<ResultadoIngreso>("registrar_ingreso", {
       p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: via, p_forzar_motivo: forzarMotivo?.trim() || null,
-    });
+      p_promete_pagar_el: promesa?.prometePagarEl || null,
+    }, { operador });
     revalidatePath("/panel/entrada");
     revalidatePath("/panel");
     return { r };
@@ -87,7 +100,12 @@ export async function anularEntrada(ingresoId: string, motivo: string): Promise<
 }
 
 /** Cuántas veces puede dejar pasar hoy quien está en la recepción (el tope lo pone el dueño; D1). */
-export async function cupoDejarPasar(): Promise<{ sin_tope: boolean; tope: number; usados: number } | null> {
+export type CupoDejarPasar = {
+  sin_tope: boolean; tope: number; usados: number;
+  /** VD-8: cómo se deja pasar sin pagar en este gimnasio, hasta cuántos días decide la recepción y si hay un PIN de dueño o encargado cargado. */
+  modo?: "recepcion_hasta_dias" | "siempre_pin" | "libre"; dias_max?: number; hay_pines?: boolean;
+};
+export async function cupoDejarPasar(): Promise<CupoDejarPasar | null> {
   const panel = await contextoPanel();
   try { return await rpc("cupo_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }); } catch { return null; }
 }

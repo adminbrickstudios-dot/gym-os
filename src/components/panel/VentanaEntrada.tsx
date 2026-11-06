@@ -9,7 +9,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type Guia, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
 import { ultimasEntradas, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
@@ -28,7 +29,6 @@ export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
 
 const ES_QR = /^GYMOS1\./;
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
-const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
 
 type Paso = "escribir" | "veredicto" | "anotado" | "alta";
 /** VD-6 · El alta rápida dentro de la ventana: datos → plan → (cobro en la hoja) → entra. */
@@ -117,7 +117,7 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
-  const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
+  const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [sonido, setSonido] = useState(true);
   const [ocupado, empezar] = useTransition();
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
@@ -210,11 +210,11 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zona]);
 
-  const anotar = useCallback((forzar?: string) => {
+  const anotar = useCallback((forzar?: string, promesa?: PromesaPago) => {
     if (!elegido || trabajando.current) return;
     trabajando.current = true;
     empezar(async () => {
-      const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via);
+      const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
       trabajando.current = false;
       if (r.error) { setError(r.error); return; }
       setError(null);
@@ -704,21 +704,7 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
                   </div>
 
                   {forzando && (
-                    <form className="space-y-3" data-dejar-pasar onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
-                      <div className="flex flex-wrap gap-2" aria-label="Motivos frecuentes">
-                        {MOTIVOS_PASAR.map((m) => <button key={m} type="button" className={`pestana ${motivo === m ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`} onClick={() => setMotivo(m)}>{m}</button>)}
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" aria-label="Motivo para dejar pasar" />
-                        <button type="submit" disabled={!motivo.trim() || ocupado || (!!cupo && !cupo.sin_tope && cupo.usados >= cupo.tope)} className="boton boton-peligro">Dejar pasar</button>
-                      </div>
-                      {cupo && !cupo.sin_tope && (
-                        <p className="text-sm texto-suave" data-cupo={cupo.tope - cupo.usados}>
-                          {cupo.usados >= cupo.tope ? `Ya dejaste pasar a ${cupo.usados} hoy (el tope es ${cupo.tope}): que lo autorice el dueño o el encargado.`
-                            : `Te ${cupo.tope - cupo.usados === 1 ? "queda" : "quedan"} ${cupo.tope - cupo.usados} de ${cupo.tope} hoy. Lo ve el dueño.`}
-                        </p>
-                      )}
-                    </form>
+                    <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
                   )}
                   <p className="text-sm texto-tenue">{puedeAnotarConEnter ? "Enter anota · " : ""}Esc cierra · escribí un número para buscar a otro</p>
                 </div>
