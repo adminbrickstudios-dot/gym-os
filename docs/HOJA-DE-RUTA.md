@@ -474,7 +474,7 @@ bloque 18.
 - [ ] VD-33d · 🟢 · 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
 - [ ] VD-33e · 🟢 · Al cambiar la contraseña, ofrecer cerrar las demás sesiones
 - [ ] VD-33f · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
-- [ ] VD-6b · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular)
+- [x] VD-6b · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular) — verificado: prospectos.dni y el alta lo ofrece por DNI; base en verde en GitHub (interesados-dni)
 - [ ] VD-6c · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
 - [ ] VD-2c · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
 - [ ] VD-3b · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
@@ -494,6 +494,7 @@ bloque 18.
 - [ ] VD-16b · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30)
 - [ ] VD-16c · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
 - [ ] VD-18b · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
+- [ ] VD-15b · 🟢 · Socios: la píldora 🌐 cuenta solo los que no pagaron; encabezado de la ficha fijo al scrollear; línea de tiempo única en la ficha (entradas, pagos, contactos y cambios de plan)
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -507,7 +508,7 @@ bloque 18.
 - [ ] VD-37 · 🟢 · Pendientes con números y puntitos calculados, y centro de notificaciones
 - [ ] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app
 - [x] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
-- [ ] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones
+- [x] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones — verificado: lista de Socios con memoria, Interesados como pestaña de Socios, 🌐 de autoalta, ficha con Entrada y Cobrar; base en verde en GitHub (interesados-dni); e2e vd-15 en la corrida de la tanda
 - [ ] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos)
 - [x] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata) — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
 - [x] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda

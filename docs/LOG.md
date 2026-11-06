@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-15 y VD-6b · Socios con memoria, Interesados y ficha con acciones (D22)
+
+**QUÉ HICE**
+- Socios recuerda búsqueda, filtros y scroll en `sessionStorage` (al volver de una ficha los restaura; "Todos" o sacar un filtro no los vuelve a poner). Pestañas Socios · Interesados (`/panel/socios?vista=interesados`) con todas las funciones de Prospectos (seguimiento, "Ya le escribí", "Hacerlo socio", WhatsApp armado); `/panel/prospectos` redirige (si Socios está apagado se sigue mostrando la pantalla vieja). 🌐 en la lista y píldora "Se anotaron por la web" para los de autoalta. La ficha tiene en el encabezado "🚪 Entrada" (abre la ventana de VD-1 con ese socio) y "💵 Cobrar" (hoja de VD-5).
+- VD-6b (migración 5100): `prospectos.dni` (opcional, único por gimnasio, 6 a 12 números); `crear_prospecto` con `p_dni` (firma vieja borrada); el alta ofrece al Interesado por DNI aunque el celular sea otro y "Hacerlo socio" trae nombre, celular y DNI; `buscar_socios` devuelve `autoalta` y acepta `p_origen='web'` (firma vieja borrada).
+- Verificado: lint, typecheck, 105 pruebas y base/chequeos/demo en verde en GitHub (`interesados-dni`).
+
+**SIN ARREGLAR**: VD-15b (la píldora 🌐 no distingue si ya pagó, encabezado fijo al scrollear, línea de tiempo única en la ficha).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-15` y los viejos (panel-socios, soc-*, pro-*, reg-1, pag-3, rev-1, vd-6): escritos según la documentación, pero no ejecutados; el tramo de autoalta 🌐 del e2e es condicional y solo está probado en la base.
+
 ## 2026-11-06 · Noche · VD-11 · Menú nuevo y redirecciones
 
 **QUÉ HICE**
