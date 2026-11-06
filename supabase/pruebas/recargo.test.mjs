@@ -56,11 +56,11 @@ test("Vender lo muestra y lo exige con la cuota; no cobrarlo es un descuento con
     assert.equal((await precios(justo)).recargo, null);
     assert.equal((await precios(nuevo)).recargo, null);
     await t.falla(() => vender(tarde, [{ tipo: "cuota" }], 20000), /Falta el recargo por pagar tarde \(\$2\.000\)/);
-    await t.falla(() => vender(tarde, [{ tipo: "cuota" }, { tipo: "recargo", descuento: 2000, descuento_motivo: "Amigo" }], 20000), /descuento máximo/);
+    await t.falla(() => vender(tarde, [{ tipo: "cuota" }, { tipo: "recargo", descuento: 2000, descuento_motivo: "Amigo o familiar del gimnasio" }], 20000), /descuento máximo/);
     await t.falla(() => vender(justo, [{ tipo: "cuota" }, { tipo: "recargo" }], 22000), /no tiene recargo/);
   });
   await como(uDueno, async () => {
-    const [{ r }] = await vender(tarde, [{ tipo: "cuota" }, { tipo: "recargo", descuento: 2000, descuento_motivo: "Primera vez" }], 20000);
+    const [{ r }] = await vender(tarde, [{ tipo: "cuota" }, { tipo: "recargo", descuento: 2000, descuento_motivo: "Amigo o familiar del gimnasio" }], 20000);
     assert.equal(Number(r.total), 20000);
     const [{ d, tipo }] = await t.q(`select descripcion as d, tipo from public.venta_items where venta_id = $1 and tipo = 'adicional'`, [r.venta_id]);
     assert.equal(tipo, "adicional"); assert.match(d, /Recargo por pagar tarde \(15 días\)/);

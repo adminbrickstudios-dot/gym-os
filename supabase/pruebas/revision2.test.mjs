@@ -111,7 +111,7 @@ test("15: la recepción no puede reconstruir lo esperado (no lee pagos, ítems, 
 test("22a/b: un 100% de descuento se registra sin pagos; el carrito no acepta 13 cuotas", async () => {
   const [{ id: prod }] = await t.q(`select id from public.productos where gimnasio_id = $1`, [t.g]);
   const r = await como(uEnc, async () => (await t.q(`select public.vender($1,$2,$3) as r`,
-    [t.sede, JSON.stringify([{ tipo: "producto", producto_id: prod, descuento: 1500, descuento_motivo: "Regalo de cumpleaños" }]), "[]"]))[0].r);
+    [t.sede, JSON.stringify([{ tipo: "producto", producto_id: prod, descuento: 1500, descuento_motivo: "Amigo o familiar del gimnasio" }]), "[]"]))[0].r);
   assert.equal(Number(r.total), 0);
   await como(uRec, () => t.falla(() => t.q(`select public.vender($1,$2,$3,$4)`,
     [t.sede, JSON.stringify([{ tipo: "cuota", cantidad: 13 }]), JSON.stringify([{ medio: "transferencia", monto: 325000 }]), t.ctx.socios.sin_pago]), /Cantidad inválida/));
