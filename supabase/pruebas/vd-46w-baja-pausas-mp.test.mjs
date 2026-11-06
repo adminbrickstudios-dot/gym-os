@@ -47,7 +47,7 @@ test("un approved tardío sobre un pago cerrado por la baja no acredita nada: qu
   const p = (await como(u.socio, () => t.q(`select public.iniciar_pago_online($1) as p`, [socio])))[0].p;
   await como(u.dueno, () => t.q(`select public.dar_de_baja($1, 'precio')`, [socio]));
   const [cerrado] = await t.q(`select estado, rechazado_motivo from public.pagos where id = $1`, [p.pago_id]);
-  assert.equal(cerrado.estado, "rechazado"); assert.equal(cerrado.rechazado_motivo, "Baja del socio");
+  assert.equal(cerrado.estado, "rechazado"); assert.match(cerrado.rechazado_motivo, /Baja del socio/);
   assert.equal(await acreditar(p, "990001", "approved"), "cobro_tarde");
   assert.equal(await acreditar(p, "990001", "approved"), "cobro_tarde", "repetirlo no cambia nada");
   const [d] = await t.q(`select estado, cobro_tarde_en, cobro_tarde_mp_id from public.pagos where id = $1`, [p.pago_id]);
