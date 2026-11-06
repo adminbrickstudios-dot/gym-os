@@ -77,3 +77,14 @@ create or replace view vault.decrypted_secrets as
   select id, name, description, secret, secret as decrypted_secret, key_id, nonce, created_at, updated_at from vault.secrets;
 revoke all on schema vault from anon, authenticated;
 revoke all on all tables in schema vault from anon, authenticated;
+
+-- VD-33b: sesiones de auth (en Supabase las lleva GoTrue; acá las anota supabase-local).
+create table if not exists auth.sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  not_after timestamptz,
+  user_agent text,
+  ip inet
+);

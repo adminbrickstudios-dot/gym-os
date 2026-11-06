@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
 import { TEXTO_SIN_CONEXION, destinoTrasEntrar, sinConexion } from "./destino";
+import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
 // la acción, Next renderiza el destino en el mismo POST, sin los encabezados
@@ -55,6 +56,9 @@ export type EstadoCodigo = { error?: string; telefono?: string; enviado?: boolea
 export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
   const telefono = await normalizarCelular(String(form.get("telefono") ?? ""));
   if (!telefono) return { error: "Escribí tu celular con código de área (ej: 387 555-1234)" };
+  // VD-33c: con Turnstile prendido, sin el desafío resuelto no sale el SMS.
+  const desafio = await exigirDesafio(form, telefono);
+  if (desafio) return { error: desafio, telefono };
   const limite = await limiteCodigos(telefono);
   if (limite) return { error: limite, telefono };
   const supabase = await crearClienteServidor();
@@ -93,6 +97,8 @@ export type EstadoCodigoMail = { error?: string; email?: string; enviado?: boole
 export async function pedirCodigoMail(_: EstadoCodigoMail, form: FormData): Promise<EstadoCodigoMail> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Escribí tu mail (el que diste en el gimnasio)", email };
+  const desafio = await exigirDesafio(form, email);
+  if (desafio) return { error: desafio, email };
   const limite = await limiteCodigos(email);
   if (limite) return { error: limite, email };
   const supabase = await crearClienteServidor();
@@ -132,6 +138,8 @@ export type EstadoRecuperar = { error?: string; email?: string; enviado?: boolea
 export async function pedirRecuperacion(_: EstadoRecuperar, form: FormData): Promise<EstadoRecuperar> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Escribí el mail de tu cuenta", email };
+  const desafio = await exigirDesafio(form, email);
+  if (desafio) return { error: desafio, email };
   const limite = await limiteCodigos(email);
   if (limite) return { error: limite, email };
   const supabase = await crearClienteServidor();

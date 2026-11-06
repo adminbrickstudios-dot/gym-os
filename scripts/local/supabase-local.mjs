@@ -68,7 +68,7 @@ const CARPETA = path.join(process.cwd(), ".local");
 fs.mkdirSync(CARPETA, { recursive: true });
 const ARCHIVO_CODIGOS = path.join(CARPETA, "codigos.json");
 const codigos = new Map();      // destino → { codigo, tipo, vence }
-const refrescos = new Map();    // refresh_token → usuario_id
+const refrescos = new Map();    // refresh_token → { id: usuario_id, sesion: session_id }
 function guardarCodigo(destino, tipo) {
   const codigo = String(crypto.randomInt(0, 1000000)).padStart(6, "0");
   codigos.set(destino, { codigo, tipo, vence: Date.now() + 10 * 60_000 });
@@ -104,15 +104,18 @@ function usuarioPublico(u) {
     user_metadata: u.raw_user_meta_data ?? {}, identities: [], created_at: u.created_at, updated_at: u.updated_at,
   };
 }
-async function sesionPara(u) {
+async function sesionPara(u, agente = null, sesion = crypto.randomUUID()) {
   await pool.query(`update auth.users set last_sign_in_at = now() where id = $1`, [u.id]);
+  // VD-33b: como GoTrue, cada ingreso es una sesión (auth.sessions); renovar el token la mantiene.
+  await pool.query(`insert into auth.sessions (id, user_id, user_agent) values ($1, $2, $3)
+                    on conflict (id) do update set updated_at = now()`, [sesion, u.id, agente]);
   const ahora = Math.floor(Date.now() / 1000);
   const access_token = firmar({
     sub: u.id, role: "authenticated", aud: "authenticated", email: u.email ?? "", phone: u.phone ?? "",
-    iat: ahora, exp: ahora + DURACION_TOKEN, session_id: crypto.randomUUID(), is_anonymous: false,
+    iat: ahora, exp: ahora + DURACION_TOKEN, session_id: sesion, is_anonymous: false,
   });
   const refresh_token = crypto.randomBytes(24).toString("base64url");
-  refrescos.set(refresh_token, u.id);
+  refrescos.set(refresh_token, { id: u.id, sesion });
   return { access_token, token_type: "bearer", expires_in: DURACION_TOKEN, expires_at: ahora + DURACION_TOKEN, refresh_token, user: usuarioPublico(u) };
 }
 const traerUsuario = async (campo, valor) =>
@@ -133,13 +136,14 @@ async function auth(req, res, ruta, q, cuerpo) {
     if (!u || !cuerpo.password || !contrasenaOk(cuerpo.password, u.encrypted_password)) {
       return errorAuth(res, 400, "invalid_credentials", "Invalid login credentials");
     }
-    return enviar(res, 200, await sesionPara(u));
+    return enviar(res, 200, await sesionPara(u, req.headers["user-agent"] ?? null));
   }
   if (ruta === "/token" && q.get("grant_type") === "refresh_token") {
-    const id = refrescos.get(cuerpo.refresh_token);
-    if (!id) return errorAuth(res, 400, "refresh_token_not_found", "Invalid Refresh Token: Refresh Token Not Found");
+    const previo = refrescos.get(cuerpo.refresh_token);
+    const viva = previo && (await pool.query(`select 1 from auth.sessions where id = $1`, [previo.sesion])).rowCount > 0;
+    if (!viva) return errorAuth(res, 400, "refresh_token_not_found", "Invalid Refresh Token: Refresh Token Not Found");
     refrescos.delete(cuerpo.refresh_token);
-    return enviar(res, 200, await sesionPara(await traerUsuario("id", id)));
+    return enviar(res, 200, await sesionPara(await traerUsuario("id", previo.id), req.headers["user-agent"] ?? null, previo.sesion));
   }
   if (ruta === "/user" && (req.method === "GET" || req.method === "PUT")) {
     if (!claims?.sub) return errorAuth(res, 401, "bad_jwt", "invalid JWT");
@@ -152,7 +156,16 @@ async function auth(req, res, ruta, q, cuerpo) {
     }
     return enviar(res, 200, usuarioPublico(u));
   }
-  if (ruta === "/logout") return enviar(res, 204);
+  if (ruta === "/logout") {
+    // scope=global (por defecto) cierra todas, others las demás, local solo esta.
+    if (claims?.sub) {
+      const alcance = q.get("scope") ?? "global";
+      if (alcance === "others") await pool.query(`delete from auth.sessions where user_id = $1 and id <> $2`, [claims.sub, claims.session_id ?? null]);
+      else if (alcance === "local") await pool.query(`delete from auth.sessions where id = $1`, [claims.session_id ?? null]);
+      else await pool.query(`delete from auth.sessions where user_id = $1`, [claims.sub]);
+    }
+    return enviar(res, 204);
+  }
   if (ruta === "/otp") {
     const destino = cuerpo.email ? String(cuerpo.email).toLowerCase() : normalizarTel(cuerpo.phone);
     if (!destino) return errorAuth(res, 400, "validation_failed", "Falta mail o teléfono");
@@ -177,7 +190,7 @@ async function auth(req, res, ruta, q, cuerpo) {
       u = (await pool.query(`update auth.users set ${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"} = coalesce(${cuerpo.email ? "email_confirmed_at" : "phone_confirmed_at"}, now())
                              where id = $1 returning *`, [u.id])).rows[0];
     }
-    return enviar(res, 200, await sesionPara(u));
+    return enviar(res, 200, await sesionPara(u, req.headers["user-agent"] ?? null));
   }
   // Admin (solo service_role): cambiar la contraseña de un usuario (updateUserById).
   const porId = /^\/admin\/users\/([0-9a-f-]{36})$/.exec(ruta);

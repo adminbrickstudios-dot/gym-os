@@ -21,8 +21,10 @@ function encabezadoOperador(valor: string | undefined): Record<string, string> {
 // verificador PKCE) en cookies, que el servidor sí puede leer.
 export async function crearClienteServidor() {
   const almacen = await cookies();
+  // VD-33b: auth anota el dispositivo con el User-Agent que le llega; que sea el del navegador, no el del servidor.
+  const agente = (await headers()).get("user-agent");
   return createServerClient(supabaseUrl(), supabaseAnon(), {
-    global: { headers: encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value) },
+    global: { headers: { ...encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value), ...(agente ? { "User-Agent": agente } : {}) } },
     cookies: {
       getAll: () => almacen.getAll(),
       setAll: (lista) => {
