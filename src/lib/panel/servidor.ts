@@ -78,7 +78,13 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
-  return rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id });
+  const panel = await rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id });
+  // VD-10: el Control es del dueño; el encargado lo ve solo si el dueño le dio el Resultado (EQU-1).
+  // La base lo exige igual (linea_de_control): acá solo se saca del menú y de la campana.
+  if (panel.yo.rol === "encargado" && !panel.permisos.encargado_ve_resultado && !panel.secciones_apagadas.includes("control")) {
+    return { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "control"] };
+  }
+  return panel;
 });
 
 /** Corta si el rol no puede ver la pantalla: error claro, no una lista vacía. */

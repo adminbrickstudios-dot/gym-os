@@ -29,7 +29,10 @@ export default async function ActividadEquipo({ searchParams }: { searchParams: 
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Link href="/panel/equipo" className="texto-suave">← Equipo</Link>
+        <p className="flex flex-wrap gap-x-4 gap-y-1">
+          <Link href="/panel/equipo" className="texto-suave">← Equipo</Link>
+          {!panel.secciones_apagadas.includes("control") && <Link href="/panel/control" className="texto-suave underline" data-link-control>🛡️ Todo en una línea: Control</Link>}
+        </p>
         <Encabezado emoji="📋" titulo="Qué hizo cada uno" bajada="Ventas, descuentos, anulaciones, dejados pasar y cierres de caja, por persona." />
         <nav className="flex flex-wrap items-center gap-2 mb-8" aria-label="Día">
           <Link href={`/panel/equipo/actividad?dia=${mover(-1)}`} className="boton !min-h-11">← Anterior</Link>

@@ -37,6 +37,7 @@ export default async function ControlPuerta({ searchParams }: { searchParams: Pr
       <>
         <Encabezado volver={{ href: "/panel/entrada", texto: "Entrada" }} emoji="🔎" titulo="Control de la puerta"
           bajada="A quién dejaron pasar sin poder entrar y qué entradas se anularon: quién, cuándo y por qué." />
+        {!panel.secciones_apagadas.includes("control") && <p className="mb-4"><Link href="/panel/control?tipos=dejado_pasar&tipos=entrada_anulada&tipos=prestamo" className="texto-suave underline" data-link-control>🛡️ Verlo junto con el resto en Control</Link></p>}
         <nav className="flex flex-wrap items-center gap-2 mb-8" aria-label="Semana" data-semana={c.desde}>
           <Link href={`/panel/entrada/control?desde=${sumar(desde, -7)}`} className="boton">◀ Anterior</Link>
           <span className="font-semibold px-2">Del {dia(c.desde)} al {dia(c.hasta)}</span>
