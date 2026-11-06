@@ -251,3 +251,14 @@ export async function guardarLinkResena(link: string): Promise<{ error?: string 
   try { await rpc("guardar_link_resena", { p_gimnasio_id: panel.gimnasio.id, p_link: link }); revalidatePath("/panel/configuracion"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+/** VD-46G: prende o apaga el plan familiar/corporativo (solo el dueño; arranca apagado). */
+export async function guardarPlanFamiliar(activo: boolean): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_plan_familiar", { p_gimnasio_id: panel.gimnasio.id, p_activo: activo });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/panel/socios");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
