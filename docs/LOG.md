@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-19 y VD-20 · Eventos completos y rutinas
+
+**QUÉ HICE**
+- VD-19 (migración 5900): evento con flyer, lugar, responsable, fin, varias fechas, precio general y de socio, borrador/publicar; anotarse desde la app y desde la página (la reserva se paga en recepción en Vender y la venta reemplaza a la reserva sin contar doble); lista de espera calculada (si alguien se baja, sube la siguiente) con tope y campo trampa contra spam desde la página; check-in: la ventana de Entrada muestra "Hoy: evento" al reconocer al socio y marca presencia con un toque; cierre con "Asistieron X de Y"; si se cancela, la app avisa al anotado 7 días. Panel: CSV, WhatsApp por persona, si pagó o falta. `crear_evento` suma parámetros (firma vieja borrada; las llamadas anteriores siguen andando).
+- VD-20 (migración 6000): biblioteca de ejercicios con equipo, buscador y filtros; plantillas que se copian sin tocar la original; asignar a varios con tildes y fecha de cambio salteando a los dados de baja; la rutina de hoy en la app (el día que sigue al último que hizo el socio, "Hice el Día N" guarda un hecho por día); sección para el profe "Quién la hizo" (veces en 30 días y "Toca cambiarla"). Solo pesos y repeticiones: ningún dato de salud. `guardar_ejercicio` suma parámetros (firma vieja borrada).
+- **Decisiones de plata y permisos**: Vender cobra el precio general del producto (el de socio queda acordado en la reserva y la recepción lo aplica con el descuento); una reserva no bloquea Vender (podrían venderse más lugares que el cupo si hay reservas sin pagar); cierra o publica un evento el dueño o el encargado y la recepción marca presencias; los teléfonos de la página se normalizan a +54.
+- Se ajustó el selector de `rut-1.mjs` (el formulario tiene más selects).
+- Verificado: lint, typecheck, 113 pruebas, build y base/chequeos/demo en verde en GitHub (`eventos-completos`, `rutinas-completas`).
+
+**SIN ARREGLAR**: VD-19b (editar un evento ya creado, check-in por DNI para no socios, aviso al subir de la espera), VD-19c (🔌 pago online del evento), VD-20b (aviso de rutina vencida y gráfico de progreso).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-19`/`vd-20` y los viejos de eventos y rutinas: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-25 · Página del gimnasio rediseñada
 
 **QUÉ HICE**

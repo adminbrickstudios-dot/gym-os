@@ -76,3 +76,4 @@ VD-35/39 mergeados (worktree borrado). Lanzado VD-19→20 a949a9204dfd8a9b6 (vd1
 VD-24/38b mergeados. Lanzado VD-25 a844ff15db8200a08 (vd25, migr 6100). En curso: VD-44 (a003fa0a390b234fc), VD-19→20 (a949a9204dfd8a9b6). Falta tanda 4: VD-22. Luego tanda 5.
 (VD-25 mergeado; OJO landing_completa redefinida en 6100: al mergear VD-44 (5400) verificar que no pierda sus cambios a landing/agenda)
 VD-25 mergeado. Lanzado VD-22 a0d497e08d20e949d (vd22, migr 6200). En curso: VD-44 (a003fa0a390b234fc), VD-19→20 (a949a9204dfd8a9b6). Tanda 4 completa con eso. Siguen tanda 5 (VD-40, 42, 43, 21) y 6/7.
+(VD-19, VD-20 mergeados)

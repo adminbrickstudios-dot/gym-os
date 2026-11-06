@@ -17,7 +17,7 @@ import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
 import { rpc } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
-import type { EventoPublico } from "@/lib/landing";
+import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
 import { Bienvenida } from "./Bienvenida";
 import { Entraste } from "./Entraste";
@@ -67,7 +67,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       // COM-6: lo que le falta firmar (reglamento, deslinde, autorización si es menor).
       rpc<{ pendientes: Pendiente[] }>("documentos_socio", { p_socio_id: s.socio_id }),
       // COM-8: los eventos que vienen (y si ya está anotado).
-      rpc<(EventoPublico & { anotado: boolean })[]>("eventos_socio", { p_socio_id: s.socio_id }),
+      rpc<EventoApp[]>("eventos_socio", { p_socio_id: s.socio_id }),
       // COM-10: la pregunta del 0 al 10 (después de 10 entradas o del primer mes; cada 90 días).
       rpc<{ pendiente: boolean }>("encuesta_socio", { p_socio_id: s.socio_id }),
       // COM-13: su grado (cinturón) en las actividades que los usan.
@@ -153,18 +153,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
         {eventos.length > 0 && (
-          <section className="space-y-2" data-eventos-app={eventos.length}>
-            <p className="titulo text-2xl">🎟️ Próximos eventos</p>
-            <ul className="space-y-2">
-              {eventos.map((e) => (
-                <li key={e.evento_id} className="tarjeta p-4">
-                  <p className="font-semibold">{e.nombre}</p>
-                  <p className="texto-suave text-sm first-letter:uppercase">{new Intl.DateTimeFormat("es-AR", { timeZone: e.zona, weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(e.inicio))}</p>
-                  <p className="mt-1 text-sm">{e.anotado ? "✅ Estás anotado" : e.quedan === 0 ? "Sin lugares" : `${Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"} · quedan ${e.quedan} · anotate en recepción`}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
+          <EventosApp socioId={s.socio_id} eventos={eventos} />
         )}
         {documentos.pendientes.length > 0 && (
           <section className="space-y-3" data-para-firmar={documentos.pendientes.length}>

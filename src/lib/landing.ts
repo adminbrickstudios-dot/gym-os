@@ -85,7 +85,8 @@ export async function traerAgenda(host: string): Promise<Agenda | null> {
 export { urlMarca } from "@/lib/url-marca";
 
 /** COM-8: un evento suelto (seminario, clase especial) tal como se muestra afuera. */
-export type EventoPublico = { evento_id: string; nombre: string; inicio: string; precio: number; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string };
+export type EventoPublico = { evento_id: string; nombre: string; inicio: string; fechas?: string[]; precio: number; precio_socio?: number | null; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string;
+  lugar?: string | null; responsable?: string | null; flyer?: string | null; lista_espera?: boolean };
 
 /** Los eventos que vienen del gimnasio del host (solo con la página publicada). */
 export async function traerEventos(host: string): Promise<EventoPublico[]> {

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
 import type { EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
 import { urlMarca } from "@/lib/url-marca";
+import { urlFotoProducto } from "@/lib/url-producto";
+import { AnotarseEvento } from "./AnotarseEvento";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
@@ -327,16 +329,25 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
         </h2>
         <ul className="grid sm:grid-cols-2 gap-4">
           {eventos.map((e) => (
-            <li key={e.evento_id} className="tarjeta p-6 space-y-2">
+            <li key={e.evento_id} className="tarjeta p-6 space-y-2" data-evento-pagina={e.nombre}>
+              {e.flyer && urlFotoProducto(e.flyer) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} className="w-full max-h-80 rounded-[var(--radio)] object-cover" loading="lazy" />
+              )}
               <p className="titulo text-2xl">{e.nombre}</p>
-              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}</p>
+              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas && e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>
+              {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `📍 ${e.lugar}`, e.responsable && `👤 ${e.responsable}`].filter(Boolean).join(" · ")}</p>}
               {e.descripcion && <p>{e.descripcion}</p>}
               <p className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="numero text-3xl">{Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"}</span>
+                {e.precio_socio != null && Number(e.precio) > 0 && Number(e.precio_socio) < Number(e.precio) && <span className="pildora pildora-verde">Socios {formatearPesos(e.precio_socio)}</span>}
                 <span className={`pildora ${e.quedan === 0 ? "pildora-rojo" : ""}`}>{e.quedan === 0 ? "Sin lugares" : `Quedan ${e.quedan} ${e.quedan === 1 ? "lugar" : "lugares"}`}</span>
                 {e.para === "socios" && <span className="pildora">Para socios</span>}
               </p>
-              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Quiero anotarme</a>}
+              {e.para === "todos"
+                ? <AnotarseEvento eventoId={e.evento_id} lleno={e.quedan === 0} conEspera={e.lista_espera !== false} />
+                : <p className="texto-suave">Anotate desde la app del gimnasio.</p>}
+              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Consultar por WhatsApp</a>}
             </li>
           ))}
         </ul>
