@@ -374,3 +374,12 @@ html { accent-color: var(--acento); }
 /* VD-47X: mientras llega la lista nueva (filtro o búsqueda), la de antes queda a la vista, atenuada. */
 [data-atenuable] [data-lista] { transition: opacity 120ms ease; }
 [data-atenuable][aria-busy="true"] [data-lista] { opacity: 0.5; pointer-events: none; }
+
+/* VD-21: la opción a la que te lleva el buscador de Configuración se resalta unos segundos. */
+[data-resaltada] {
+  outline: 2px solid var(--acento);
+  outline-offset: 4px;
+  border-radius: var(--radio);
+  animation: brillo 2.4s ease-out;
+  scroll-margin-top: 6rem;
+}

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Restablecer } from "./Restablecer";
 import { guardarMetaVisitas } from "./acciones";
 
 /** VD-23b: la meta de visitas del mes que cada socio ve en su Inicio (se guarda aparte del resto de la pestaña). */
@@ -32,6 +33,14 @@ export function MetaVisitas({ inicial, puedeEditar }: { inicial: number; puedeEd
       {!valida && texto !== "" && <Mensaje tipo="error">Poné un número entero entre 1 y 31.</Mensaje>}
       {estado.error && <Mensaje tipo="error">{estado.error}</Mensaje>}
       {estado.ok && <Mensaje tipo="exito">Meta guardada: {guardada} visitas por mes.</Mensaje>}
+      {puedeEditar && (
+        <Restablecer id="meta-visitas" recomendado="12 visitas por mes."
+          alConfirmar={async () => {
+            const r = await guardarMetaVisitas(12);
+            if (r.error) return r.error;
+            setGuardada(12); setTexto("12"); setEstado({}); return null;
+          }} />
+      )}
     </section>
   );
 }

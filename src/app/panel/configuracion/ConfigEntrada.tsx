@@ -2,8 +2,9 @@
 // VD-1 · Configuración → Entrada: cómo se comporta la ventana de Entrada.
 // Por gimnasio (queda en la base) y "en esta compu" (queda en este navegador y le gana al gimnasio).
 import { useEffect, useState, useTransition } from "react";
+import { Restablecer } from "./Restablecer";
 import { guardarConfigEntrada, guardarConfigVisita, leerConfigVisita, type ConfigVisita } from "@/app/panel/entrada/ventana-acciones";
-import { guardarPisado, leerPisado, type ConfigEntrada as Config, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
+import { CONFIG_ENTRADA_POR_DEFECTO, guardarPisado, leerPisado, type ConfigEntrada as Config, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 
@@ -13,7 +14,9 @@ const SEGUNDOS: { valor: Config["cerrar_sola_seg"]; texto: string }[] = [
 type Eleccion = "gimnasio" | "si" | "no";
 const aEleccion = (x: boolean | undefined): Eleccion => (x === undefined ? "gimnasio" : x ? "si" : "no");
 
-export function ConfigEntrada({ inicial }: { inicial: Config }) {
+const VISITA_POR_DEFECTO: ConfigVisita = { visita_horas: 5, antiprestamo_minutos: 60, avisar_en_vivo: true };
+
+export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config; puedeEditar?: boolean }) {
   const [c, setC] = useState(inicial);
   const [guardado, setGuardado] = useState(inicial);
   const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
@@ -39,13 +42,13 @@ export function ConfigEntrada({ inicial }: { inicial: Config }) {
       <section className="tarjeta p-5 space-y-2">
         <h2 className="titulo text-2xl">🚪 La Entrada en todo el panel</h2>
         <p className="texto-suave">La ventana de Entrada se abre desde cualquier pantalla: con el botón verde, con F2 o Ctrl+E, tipeando un DNI o pasando el lector.</p>
-        <Interruptor etiqueta="Abrir al tipear un número" ayuda="Si no estás escribiendo en un campo, tocar un número abre la Entrada con ese número. Un lector de QR o llavero la abre siempre."
+        <Interruptor etiqueta="Abrir al tipear un número" data-opcion="entrada-abrir-al-tipear" ayuda="Si no estás escribiendo en un campo, tocar un número abre la Entrada con ese número. Un lector de QR o llavero la abre siempre."
           checked={c.abrir_al_tipear} onChange={(e) => setC({ ...c, abrir_al_tipear: e.target.checked })} />
-        <Interruptor etiqueta="Barra fija a la derecha" ayuda="Solo en compus de pantalla ancha: el campo DNI siempre a la vista y las últimas 5 entradas. Pensada para la compu del mostrador."
+        <Interruptor etiqueta="Barra fija a la derecha" data-opcion="entrada-barra-fija" ayuda="Solo en compus de pantalla ancha: el campo DNI siempre a la vista y las últimas 5 entradas. Pensada para la compu del mostrador."
           checked={c.barra_fija} onChange={(e) => setC({ ...c, barra_fija: e.target.checked })} />
-        <Interruptor etiqueta="Anotar solo cuando está en verde" ayuda="Con esto prendido, Enter anota la entrada solo si el socio está en verde; en amarillo o naranja hay que tocar el botón (así se lee el aviso)."
+        <Interruptor etiqueta="Anotar solo cuando está en verde" data-opcion="entrada-solo-verde" ayuda="Con esto prendido, Enter anota la entrada solo si el socio está en verde; en amarillo o naranja hay que tocar el botón (así se lee el aviso)."
           checked={c.anotar_solo_en_verde} onChange={(e) => setC({ ...c, anotar_solo_en_verde: e.target.checked })} />
-        <div className="py-2">
+        <div className="py-2" data-opcion="entrada-cerrar-sola">
           <p className="font-semibold">Cerrar sola después de anotar</p>
           <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Cerrar sola después de anotar">
             {SEGUNDOS.map((s) => (
@@ -60,11 +63,19 @@ export function ConfigEntrada({ inicial }: { inicial: Config }) {
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
         {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+        {puedeEditar && (
+          <Restablecer id="entrada" recomendado="abrir al tipear prendido, barra fija apagada, anotar con Enter siempre, y cerrar sola a los 4 segundos."
+            alConfirmar={async () => {
+              const r = await guardarConfigEntrada(CONFIG_ENTRADA_POR_DEFECTO);
+              if (r.error || !r.config) return r.error ?? "No se pudo restablecer.";
+              setC(r.config); setGuardado(r.config); return null;
+            }} />
+        )}
       </section>
 
-      <ConfigVisitaSeccion />
+      <ConfigVisitaSeccion puedeEditar={puedeEditar} />
 
-      <section className="tarjeta p-5 space-y-3" data-entrada-en-esta-compu>
+      <section className="tarjeta p-5 space-y-3" data-entrada-en-esta-compu data-opcion="entrada-esta-compu">
         <h2 className="titulo text-2xl">🖥️ En esta compu</h2>
         <p className="texto-suave">Para pisar lo del gimnasio solo en esta compu o tablet (queda guardado en este navegador). Por ejemplo, prender la barra fija solo en el mostrador.</p>
         <Elegir etiqueta="Abrir al tipear un número" valor={aEleccion(pisado.abrir_al_tipear)} alCambiar={(e) => pisar("abrir_al_tipear", e)} />
@@ -76,7 +87,7 @@ export function ConfigEntrada({ inicial }: { inicial: Config }) {
 }
 
 /** VD-3 · Una visita dura N horas (dentro, volver a pasar no cuenta otra entrada) y el aviso de préstamo. */
-function ConfigVisitaSeccion() {
+function ConfigVisitaSeccion({ puedeEditar }: { puedeEditar: boolean }) {
   const [c, setC] = useState<ConfigVisita | null>(null);
   const [guardado, setGuardado] = useState<ConfigVisita | null>(null);
   const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
@@ -99,7 +110,7 @@ function ConfigVisitaSeccion() {
   });
   const entero = (t: string) => (t === "" ? 0 : Math.max(0, Math.trunc(Number(t)) || 0));
   return (
-    <section className="tarjeta p-5 space-y-3" data-config-visita>
+    <section className="tarjeta p-5 space-y-3" data-config-visita data-opcion="visita-horas antiprestamo avisar-en-vivo">
       <h2 className="titulo text-2xl">🔁 Volver a entrar y avisos de la puerta</h2>
       <p className="texto-suave">Una visita dura unas horas: si el mismo socio pasa de nuevo por cualquier vía (DNI, QR, tablet) dentro de ese tiempo, se le dice a qué hora entró y no se cuenta otra entrada ni se gasta otra clase.</p>
       {!c ? <div className="esqueleto h-24" aria-hidden /> : (
@@ -122,6 +133,14 @@ function ConfigVisitaSeccion() {
             <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
             {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
           </div>
+          {puedeEditar && (
+            <Restablecer id="visita" recomendado="una visita dura 5 horas, avisar el préstamo a los 60 minutos y avisos en vivo prendidos."
+              alConfirmar={async () => {
+                const r = await guardarConfigVisita(VISITA_POR_DEFECTO);
+                if (r.error || !r.config) return r.error ?? "No se pudo restablecer.";
+                setC(r.config); setGuardado(r.config); return null;
+              }} />
+          )}
         </>
       )}
       {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
