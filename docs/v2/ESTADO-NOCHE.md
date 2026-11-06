@@ -70,3 +70,4 @@ VD-37 mergeado. Tanda 4 empezó: VD-35→39 a96aa2ce17a63697c (vd35, migr 5500/5
 (VD-38 mergeado; sumados VD-38b/c)
 VD-38 mergeado. Lanzado VD-24→38b a5ab496be69ce81a2 (vd24, migr 5700/5800). En curso: VD-44 (a003fa0a390b234fc), VD-35→39 (a96aa2ce17a63697c). Faltan tanda 4: VD-22, 25, 19, 20.
 AVISO DISCO: C: se llenó (worktrees de agentes de ~400-900 MB c/u). Regla: borrar el worktree de cada agente al mergearlo (cmd /c rmdir de node_modules si es junction; luego rmdir /s /q del worktree; git worktree prune). Hecho el 2026-11-06 madrugada: quedan 3 activos (a003fa, a96aa2, a5ab49).
+(VD-35, VD-39 mergeados; sumado VD-39b)

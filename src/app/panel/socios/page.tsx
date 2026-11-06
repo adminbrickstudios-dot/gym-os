@@ -13,7 +13,7 @@ import { MemoriaSocios } from "./MemoriaSocios";
 
 export const metadata: Metadata = { title: "Socios" };
 
-type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; autoalta?: boolean };
+type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; puede?: boolean; autoalta?: boolean };
 
 type Etiqueta = { id: string; nombre: string; socios: number };
 type Filtros = Record<"todos" | "al_dia" | "por_vencer" | "vencidos" | "en_pausa" | "sin_plan" | "nuevos" | "bajas", number> & { planes: { plan_id: string; nombre: string; socios: number }[] };
@@ -152,7 +152,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                     <span className="block font-semibold text-lg truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>
                     <span className="block texto-suave truncate">{s.dado_de_baja ? "Dado de baja" : s.texto}</span>
                   </span>
-                  {s.autoalta && <span className="pildora flex-none" data-autoalta title="Se registró solo desde la página">🌐<span className="hidden sm:inline"> Se anotó por la web</span></span>}
+                  {s.autoalta && <span className={`pildora flex-none ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined} title="Se registró solo desde la página">🌐{s.puede === false && " A cobrar"}<span className="hidden sm:inline">{s.puede !== false ? " Se anotó por la web" : " · se anotó por la web"}</span></span>}
                   {s.plan && <span className="hidden sm:inline pildora">{s.plan}</span>}
                 </Link>
               </li>

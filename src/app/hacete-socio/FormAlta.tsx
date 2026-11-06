@@ -84,7 +84,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         <label className="block space-y-1"><span className="etiqueta">DNI</span><input name="dni" required inputMode="numeric" className="campo" defaultValue={v("dni")} /><span className="text-sm texto-tenue">Solo números</span></label>
         <label className="block space-y-1"><span className="etiqueta">Celular</span><input name="telefono" required type="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={v("telefono")} /><span className="text-sm texto-tenue">Con él entrás a la app</span></label>
         <label className="block space-y-1"><span className="etiqueta">Mail <span className="texto-tenue font-normal">(opcional)</span></span><input name="email" type="email" autoComplete="email" className="campo" defaultValue={v("email")} /></label>
-        <label className="block space-y-1"><span className="etiqueta">Fecha de nacimiento <span className="texto-tenue font-normal">(opcional)</span></span><input name="fecha_nacimiento" type="date" className="campo" defaultValue={v("fecha_nacimiento")} /><span className="text-sm texto-tenue">Para saludarte en tu cumpleaños</span></label>
+        <label className="block space-y-1"><span className="etiqueta">Fecha de nacimiento</span><input name="fecha_nacimiento" type="date" required className="campo" defaultValue={v("fecha_nacimiento")} /><span className="text-sm texto-tenue">Si tenés menos de 18, el alta la hace un adulto en el gimnasio</span></label>
       </fieldset>
 
       <fieldset className="space-y-3">

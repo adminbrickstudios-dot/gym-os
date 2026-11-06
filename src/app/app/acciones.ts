@@ -13,9 +13,28 @@ const r = async (f: () => Promise<unknown>) => {
 export const reservarClase = async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }));
 export const cancelarReserva = async (reservaId: string) => r(() => rpc("cancelar_reserva", { p_reserva_id: reservaId }));
 /** El comprobante ya está subido al bucket (desde el navegador, a la carpeta del socio): acá se informa el pago. */
-export const informarPago = async (socioId: string, path: string) => r(async () => {
-  const x = await rpc<{ pago_id: string }>("informar_transferencia", { p_socio_id: socioId, p_comprobante_path: path, p_cuotas: 1 });
-  notificarDespues("comprobante", x?.pago_id);   // PUSH-1: a quien lo revisa
+export const informarPago = async (socioId: string, path: string, clave?: string) => r(async () => {
+  // VD-34: con la misma clave, un segundo toque devuelve el pago ya informado (no se crea otro ni da error).
+  const x = await rpc<{ pago_id: string; repetida?: boolean }>("informar_transferencia", { p_socio_id: socioId, p_comprobante_path: path, p_cuotas: 1, p_clave_operacion: clave ?? null });
+  if (!x?.repetida) notificarDespues("comprobante", x?.pago_id);   // PUSH-1: a quien lo revisa
+});
+
+/** VD-39: lo que pasa si elige ese plan o pase (D6 para una membresía: los días a favor los calcula la base). */
+export type VistaCompra = {
+  plan_id: string; nombre: string; tipo: "membresia" | "pase_diario" | "pack"; cambia_plan: boolean;
+  plan_viejo?: string | null; dias_a_favor?: number; hasta?: string | null; congelado?: boolean;
+  cantidad_clases?: number | null; validez_dias?: number | null;
+  precio_transferencia: number | null; precio_mercadopago: number | null;
+};
+export async function vistaCompraApp(socioId: string, planId: string): Promise<{ vista?: VistaCompra; error?: string }> {
+  try { return { vista: await rpc<VistaCompra>("vista_compra_app", { p_socio_id: socioId, p_plan_id: planId }, { lectura: true }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+/** VD-39: el socio informa su transferencia por un plan o pase (el comprobante ya está en su carpeta). */
+export const informarCompraApp = async (socioId: string, planId: string, path: string, clave: string) => r(async () => {
+  const x = await rpc<{ pago_id: string; repetida?: boolean }>("informar_compra_app", { p_socio_id: socioId, p_plan_id: planId, p_comprobante_path: path, p_clave_operacion: clave });
+  if (!x?.repetida) notificarDespues("comprobante", x?.pago_id);
+  revalidatePath("/app/plan");
 });
 
 /** El QR de entrada (ENT-2): lo arma y lo firma la base; cambia cada 30 segundos. */
@@ -50,9 +69,12 @@ export async function invitarHoy(gimnasioId: string, socioId: string, nombre: st
  * acá se crea el checkout con el token del gimnasio (de Vault, con la clave de
  * servicio) y se devuelve a dónde ir. El aviso de MercadoPago es el que acredita.
  */
-export async function pagarConMercadoPago(socioId: string): Promise<{ url?: string; error?: string }> {
+export async function pagarConMercadoPago(socioId: string, clave?: string, planId?: string): Promise<{ url?: string; error?: string }> {
   try {
-    const p = await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_pago_online", { p_socio_id: socioId });
+    // Sin plan: la cuota de siempre. Con plan (VD-39): cambio de plan o pase/pack. Ambas con la clave de operación (VD-34).
+    const p = planId
+      ? await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_compra_online", { p_socio_id: socioId, p_plan_id: planId, p_clave_operacion: clave ?? null })
+      : await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_pago_online", { p_socio_id: socioId, p_clave_operacion: clave ?? null });
     const { data, error } = await clienteServicio().rpc("credenciales_mp", { p_gimnasio_id: p.gimnasio_id });
     if (error) return { error: error.message };
     const c = data as { token: string; modo: string } | null;

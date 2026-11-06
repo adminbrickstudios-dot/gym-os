@@ -28,7 +28,7 @@ after(async () => t && t.cerrar());
 const anon = async (fn) => { await t.q(`set local role anon`); const r = await fn(); await t.q(`reset role`); return r; };
 const alta = (datos, medio = "mostrador", version = 1, planId = plan) =>
   t.q(`select public.alta_online($1, $2, $3, $4, $5) as r`, [HOST, planId, datos, version, medio]).then((x) => x[0].r);
-const DATOS = { nombre: "Ana", apellido: "Online", dni: "30111222", telefono: "387 555 7777", email: "ana@ejemplo.invalid" };
+const DATOS = { nombre: "Ana", apellido: "Online", dni: "30111222", telefono: "387 555 7777", email: "ana@ejemplo.invalid", fecha_nacimiento: "1990-05-01" };
 
 test("apagado por defecto; no se prende sin reglamento; el dueño lo prende, el encargado no", async () => {
   await t.falla(() => anon(() => alta(DATOS)), /no está aceptando altas online/);
@@ -54,6 +54,7 @@ test("el visitante se anota: socio con plan, sin cobertura, reglamento aceptado 
 
   await t.falla(() => anon(() => alta(DATOS, "mostrador", 0)), /El reglamento cambió/);
   await t.falla(() => anon(() => alta({ ...DATOS, dni: "12" })), /DNI/);
+  await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: "" })), /fecha de nacimiento/);
   await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: "2015-05-01" })), /menos de 18/);
   await t.falla(() => anon(() => alta(DATOS, "mostrador", 1, "00000000-0000-0000-0000-000000000000")), /Elegí uno de los planes/);
 

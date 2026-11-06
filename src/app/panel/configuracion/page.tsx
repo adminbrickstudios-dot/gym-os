@@ -13,6 +13,7 @@ import type { EstadoMP, Tablet } from "./acciones";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
 import type { ConfigDejarPasar, ReglasVencimiento } from "./cobros-acciones";
 import type { ConfigCaja } from "@/app/panel/caja/tipos";
+import type { AutoservicioPanel } from "./autoservicio-acciones";
 
 export const metadata: Metadata = { title: "Configuración" };
 
@@ -20,7 +21,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
-    const [config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, cajaConfig, { pestana }] = await Promise.all([
+    const [config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, cajaConfig, autoservicio, { pestana }] = await Promise.all([
       rpc<Config>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<DatosGimnasio>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Agenda>("horarios_apertura_panel", { p_gimnasio_id: panel.gimnasio.id }),
@@ -36,6 +37,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
       rpc<ReglasVencimiento>("reglas_vencimiento", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<ConfigDejarPasar>("config_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<AutoservicioPanel>("autoservicio_panel", { p_gimnasio_id: panel.gimnasio.id }),
       searchParams,
     ]);
     const inicial: ClavePestana = PESTANAS.find((p) => p.clave === pestana)?.clave ?? "gimnasio";
@@ -44,7 +46,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
         <Encabezado emoji="⚙️" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
         <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambios} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
           direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos}
-          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} vencimiento={vencimiento} dejarPasar={dejarPasar} cajaConfig={cajaConfig} />
+          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} vencimiento={vencimiento} dejarPasar={dejarPasar} cajaConfig={cajaConfig} autoservicio={autoservicio} />
       </>
     );
   });

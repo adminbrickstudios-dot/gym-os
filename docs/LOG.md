@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-35 y VD-39 · Registro del socio y cambio de plan desde la app (D26, D28)
+
+**QUÉ HICE**
+- VD-35 (migración 5500): `alta_online` exige fecha de nacimiento (sin ella la base no sabe si es menor, D10); interruptor "Registro abierto" (`registro_socios_panel` / `guardar_registro_socios`, solo el dueño, sin tocar `guardar_configuracion`; usa `altas_online` y no deja abrir sin reglamento) en Configuración → Página → "Lo que hacen los socios solos"; "Soy nuevo, quiero anotarme" en el ingreso del socio solo si está abierto; en Socios el que se anotó solo y no pagó muestra "🌐 A cobrar"; los pagos de la app (`informar_transferencia`, `iniciar_pago_online`, firmas viejas borradas) llevan clave de operación: el mismo envío dos veces devuelve el mismo pago.
+- VD-39 (migración 5600): `/app/plan` ("Cambiar de plan o comprar un pase", solo si el dueño lo dejó prendido y hay algo para elegir) con los días a favor (regla D6) calculados por la base (`vista_compra_app`); paga con MercadoPago o transferencia (con clave de operación); el plan cambia al acreditarse el pago, por un trigger sobre `pagos` (sirve para aprobación del equipo y para MercadoPago; si se rechaza, el plan queda igual); pases y packs son una venta común. Tablas `ajustes_autoservicio` y `cambios_plan_app`.
+- **Decisiones de plata y permisos (revisar)**: se cambió un check de `pagos` (rechazado o anulado sin `mp_pago_id` ahora es válido; aprobado sigue exigiéndolo) porque `rechazar_pendientes_de_suscripcion` fallaba con un pago de MercadoPago abierto y no terminado, y con él también el cambio de plan de la recepción; la transferencia siempre pasa por aprobación del equipo y MercadoPago acredita solo; el cambio de plan cobra la cuota del plan nuevo sin matrícula; solo compra el socio dueño de la cuenta.
+- Verificado: lint, typecheck, 110 pruebas y base/chequeos/demo en verde en GitHub (`registro-cambio-plan-app`, y `alta-online` actualizada para pasar fecha); se actualizaron reg-1 y rev-3 por la fecha obligatoria.
+
+**SIN ARREGLAR**: VD-39b (aprobación previa del dueño para cambios por MercadoPago, deshacer un cambio de plan, mensaje de /app/pago que nombre lo comprado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-35`/`vd-39` y los viejos (reg-1, rev-3, pay-1…): escritos según la documentación, pero no ejecutados; el build local no corrió con el disco lleno (lo cubre la corrida del merge); `npm run db:types` no se corrió.
+
 ## 2026-11-06 · Noche · VD-38 · Mensajes de los socios al gimnasio (D27)
 
 **QUÉ HICE**

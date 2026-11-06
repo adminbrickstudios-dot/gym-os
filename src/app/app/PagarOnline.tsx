@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { pagarConMercadoPago } from "./acciones";
 
@@ -7,9 +7,10 @@ import { pagarConMercadoPago } from "./acciones";
 export function PagarOnline({ socioId, monto, descripcion, adelantar = false }: { socioId: string; monto: number; descripcion: string; adelantar?: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [yendo, empezar] = useTransition();
+  const clave = useRef(crypto.randomUUID());   // VD-34: el mismo intento (doble toque) es un solo pago
   const ir = () => empezar(async () => {
     setError(null);
-    const r = await pagarConMercadoPago(socioId);
+    const r = await pagarConMercadoPago(socioId, clave.current);
     if (r.error || !r.url) { setError(r.error ?? "No se pudo abrir MercadoPago"); return; }
     window.location.assign(r.url);
   });
