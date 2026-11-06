@@ -17,7 +17,7 @@ try {
   await ej.waitFor({ timeout: 60000 });
   for (const [nombre, grupo] of [[A, "piernas"], [B, "espalda"]]) {
     await ej.getByPlaceholder("Sentadilla con barra").fill(nombre);
-    await ej.locator("select").selectOption(grupo);
+    await ej.locator("form select").first().selectOption(grupo);   // VD-20: el formulario suma "Equipo" y la biblioteca, filtros
     await ej.getByRole("button", { name: /Sumar/ }).click();
     await ej.locator("li", { hasText: nombre }).waitFor({ timeout: 30000 });
   }

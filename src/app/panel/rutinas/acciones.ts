@@ -4,11 +4,11 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
 const listo = () => { revalidatePath("/panel/rutinas"); return {}; };
 
-/** RUT-1: un ejercicio de la biblioteca (nuevo o editado). */
-export async function guardarEjercicio(id: string | null, nombre: string, grupo: string, video: string, activo = true): Promise<{ error?: string; id?: string }> {
+/** RUT-1: un ejercicio de la biblioteca (nuevo o editado). VD-20: con el equipo para filtrar. */
+export async function guardarEjercicio(id: string | null, nombre: string, grupo: string, video: string, activo = true, equipo = "otro"): Promise<{ error?: string; id?: string }> {
   const panel = await contextoPanel();
   try {
-    const nuevo = await rpc<string>("guardar_ejercicio", { p_gimnasio_id: panel.gimnasio.id, p_id: id, p_nombre: nombre, p_grupo: grupo, p_video: video || null, p_activo: activo });
+    const nuevo = await rpc<string>("guardar_ejercicio", { p_gimnasio_id: panel.gimnasio.id, p_id: id, p_nombre: nombre, p_grupo: grupo, p_video: video || null, p_activo: activo, p_equipo: equipo });
     revalidatePath("/panel/rutinas");
     return { id: nuevo };
   } catch (e) { return { error: (e as Error).message }; }
@@ -34,5 +34,26 @@ export async function archivarRutina(id: string): Promise<{ error?: string }> {
 /** RUT-2: asignar la rutina a un socio (reemplaza la que tenía). */
 export async function asignarRutina(socioId: string, rutinaId: string): Promise<{ error?: string }> {
   try { await rpc("asignar_rutina", { p_socio_id: socioId, p_rutina_id: rutinaId }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-20: una rutina a varios socios de una vez, con la fecha en que conviene cambiarla (opcional, "YYYY-MM-DD"). */
+export async function asignarRutinaVarios(rutinaId: string, socios: string[], cambiarEn: string | null): Promise<{ asignados?: number; omitidos?: number; error?: string }> {
+  try {
+    const r = await rpc<{ asignados: number; omitidos: number }>("asignar_rutina_varios", { p_rutina_id: rutinaId, p_socios: socios, p_cambiar_en: cambiarEn || null });
+    revalidatePath("/panel/rutinas");
+    return r;
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-20: marcar (o desmarcar) una rutina como plantilla. */
+export async function marcarPlantilla(rutinaId: string, plantilla: boolean): Promise<{ error?: string }> {
+  try { await rpc("marcar_plantilla", { p_rutina_id: rutinaId, p_plantilla: plantilla }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-20: una copia propia de la rutina o plantilla (se edita sin tocar la original). Devuelve el id de la copia. */
+export async function copiarRutina(rutinaId: string, nombre: string): Promise<{ id?: string; error?: string }> {
+  try { const id = await rpc<string>("copiar_rutina", { p_rutina_id: rutinaId, p_nombre: nombre || null }); revalidatePath("/panel/rutinas"); return { id }; }
   catch (e) { return { error: (e as Error).message }; }
 }
