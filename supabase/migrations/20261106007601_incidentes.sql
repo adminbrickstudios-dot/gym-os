@@ -7,7 +7,7 @@
 --                propio, probado). Nunca se borra.
 --   crear_incidente · corregir_incidente · incidentes_panel
 --
--- Permisos: crea cualquiera del equipo (incluido el profe); lista TODO solo el dueño y el encargado.
+-- Permisos: crea cualquiera del equipo (incluido el profe); lista todos solo el dueño y el encargado.
 -- Los demás ven únicamente los que cargaron ellos. Sección "incidentes" apagable por gimnasio.
 -- No se tocan vender, registrar_ingreso, pendientes_panel ni para_hacer_hoy.
 
