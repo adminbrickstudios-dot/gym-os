@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import type { Agenda } from "@/lib/horarios";
 
@@ -58,12 +59,17 @@ export type LandingSinPublicar = { publicada: false; marca: Marca; contacto?: { 
 export type Landing = LandingPublicada | LandingSinPublicar;
 
 /** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
-export async function traerLanding(host: string): Promise<Landing | null> {
+// VD-47: la marca, los planes, las secciones y los horarios casi no cambian: se guardan 60 s por direccion y se
+// invalidan al guardar (etiqueta "landing", ver rpc() en lib/panel/servidor.ts). Es informacion publica, igual
+// para todos: nunca permisos, plata ni socios.
+const landingEnCache = unstable_cache(async (host: string): Promise<Landing | null> => {
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("landing_publica", { p_host: host });
   if (error) throw new Error(`No se pudo leer la página del gimnasio: ${error.message}`);
   return (data as Landing | null) ?? null;
-}
+}, ["landing_publica"], { tags: ["landing"], revalidate: 60 });
+
+export const traerLanding = (host: string): Promise<Landing | null> => landingEnCache(host);
 
 /** Horarios, "abierto ahora" y próximos cierres del gimnasio del host (agenda_publica, sin sesión). */
 export async function traerAgenda(host: string): Promise<Agenda | null> {
@@ -90,9 +96,11 @@ export async function traerEventos(host: string): Promise<EventoPublico[]> {
 /** COM-11: los IDs de medición que cargó el dueño (solo con la página publicada; la base los valida). */
 export type Medicion = { pixel_meta?: string | null; google_analytics?: string | null };
 
-export async function traerMedicion(host: string): Promise<Medicion> {
+const medicionEnCache = unstable_cache(async (host: string): Promise<Medicion> => {
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
   if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
   return (data as Medicion) ?? {};
-}
+}, ["medicion_publica"], { tags: ["landing"], revalidate: 60 });
+
+export const traerMedicion = (host: string): Promise<Medicion> => medicionEnCache(host);

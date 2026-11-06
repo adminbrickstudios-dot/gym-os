@@ -4,7 +4,7 @@ import { BotonPin } from "@/components/panel/BotonPin";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Resumen } from "./acciones";
 import { AbrirCaja, TurnoAbierto } from "./Turno";
@@ -20,12 +20,12 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const [todas, olvidadas] = await Promise.all([
-      rpc<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
-      rpc<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
+      rpcLectura<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const cajas = todas.filter((c) => c.activa);
     const ve = panel.yo.rol !== "recepcion";   // arqueo ciego: la recepción no ve lo esperado con la caja abierta
-    const resumenes = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpc<Resumen>("resumen_caja", { p_turno_id: c.turno_id }) : Promise.resolve(null))));
+    const resumenes = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpcLectura<Resumen>("resumen_caja", { p_turno_id: c.turno_id }) : Promise.resolve(null))));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>

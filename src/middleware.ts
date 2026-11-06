@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO as OPCIONES_COOKIE } from "@/lib/cookie-gimnasio";
 import { clasificarHost, normalizarHost } from "@/lib/host";
+import { memoriaCorta } from "@/lib/rapidez/memoria";
+
+// VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
+// RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
+type Resuelto = { gimnasio_id: string; slug: string; host?: string | null } | undefined;
+const gimnasios = memoriaCorta<Resuelto>(60_000);
 
 // Encabezados que solo pone este middleware. Si vienen del navegador se
 // borran: nadie puede elegir su gimnasio mandando un header.
@@ -34,8 +40,10 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
       },
     },
   });
-  const { data } = await supabase.auth.getUser();
-  if (!data.user && esProtegida(ruta)) {
+  // getClaims verifica el JWT en el servidor sin ir a Auth cuando el proyecto usa claves asimétricas
+  // (con clave simétrica la propia librería cae a getUser). La base decide todo con auth.uid().
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims?.sub && esProtegida(ruta)) {
     const destino = req.nextUrl.clone();
     destino.pathname = "/ingresar";
     destino.search = `?siguiente=${encodeURIComponent(ruta + req.nextUrl.search)}${ruta.startsWith("/app") ? "&modo=socio" : ""}`;
@@ -60,7 +68,9 @@ export async function middleware(req: NextRequest) {
   const cabeceras = new Headers(req.headers);
   CABECERAS.forEach((c) => cabeceras.delete(c));
 
-  const resolver = async (funcion: "gimnasio_por_host" | "gimnasio_por_slug", args: Record<string, string>) => {
+  const resolver = (funcion: "gimnasio_por_host" | "gimnasio_por_slug", args: Record<string, string>) =>
+    gimnasios.obtener(`${funcion}:${Object.values(args)[0]}`, () => consultar(funcion, args));
+  const consultar = async (funcion: "gimnasio_por_host" | "gimnasio_por_slug", args: Record<string, string>): Promise<Resuelto> => {
     const r = await fetch(`${supabaseUrl}/rest/v1/rpc/${funcion}`, {
       method: "POST",
       headers: { apikey: anon, Authorization: `Bearer ${anon}`, "Content-Type": "application/json" },
@@ -68,7 +78,7 @@ export async function middleware(req: NextRequest) {
       cache: "no-store",
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return ((await r.json()) as { gimnasio_id: string; slug: string }[])[0];
+    return ((await r.json()) as NonNullable<Resuelto>[])[0];
   };
 
   const clase = clasificarHost(host, base, plataforma);
@@ -174,5 +184,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt).*)"],
+  // Sin estáticos ni imágenes. /manifest.webmanifest SÍ pasa: lo arma cada gimnasio y necesita su dirección.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|sw.js|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?|ttf|otf|map)$).*)"],
 };

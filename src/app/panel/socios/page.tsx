@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Socios" };
@@ -31,9 +31,9 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     exigirSeccion(panel, "socios");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const [filas, etiquetas, filtros] = await Promise.all([
-      rpc<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan }),
-      rpc<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan }),
+      rpcLectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     // Un link con los filtros de ahora, cambiando uno (null lo saca).
     const con = (cambio: { etiqueta?: string | null; estado?: string | null; plan?: string | null }) => {

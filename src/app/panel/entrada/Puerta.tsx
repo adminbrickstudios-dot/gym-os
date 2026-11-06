@@ -5,7 +5,7 @@ import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
-import { Camara } from "./Camara";
+import { Camara } from "./CamaraDinamica";
 import { Mensaje } from "@/components/ui/Mensaje";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };

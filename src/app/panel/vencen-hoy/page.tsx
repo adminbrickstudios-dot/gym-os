@@ -6,7 +6,7 @@ import { rutaDisponible } from "@/lib/panel/secciones";
 import { Encabezado } from "@/components/panel/Marco";
 import { fechaCorta } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { TandaAvisos } from "@/app/panel/avisos/Tanda";
 import type { Aviso } from "@/app/panel/avisos/Aviso";
@@ -21,9 +21,9 @@ export default async function VencenHoy() {
     exigirSeccion(panel, "vencen_hoy");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const [filas, bandeja, prometieron] = await Promise.all([
-      rpc<Fila[]>("vencen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Prometio[]>("prometieron_pagar", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Fila[]>("vencen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Prometio[]>("prometieron_pagar", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     // VEH-1: el "avisado ✓" es el de la bandeja (misma cuenta). Si no está en la bandeja, ya se le avisó otro día por este vencimiento.
     const avisos = new Map(bandeja.filter((b) => b.clave === "por_vencer").map((b) => [b.socio_id, b]));

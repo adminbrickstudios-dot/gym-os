@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Puerta } from "./Puerta";
 import { SinInternet } from "./SinInternet";
@@ -24,12 +24,12 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     const sp = await searchParams;
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const [hoy, formas, invitados] = await Promise.all([
-      rpc<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
-      rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
+      rpcLectura<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     // ?socio= (al volver de cobrar): se abre su veredicto.
-    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
+    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpcLectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
     const vuelto: ResultadoSocio | null = ficha ? { socio_id: ficha.socio.id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(),
       color: ficha.acceso.color, texto: ficha.acceso.texto, puede: ficha.acceso.puede, dado_de_baja: !!ficha.socio.dado_de_baja_en } : null;
 

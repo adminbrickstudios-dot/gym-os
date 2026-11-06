@@ -2,6 +2,7 @@ import "server-only";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { ErrorDatos } from "@/lib/panel/servidor";
+import { Reintentar } from "@/components/ui/Reintentar";
 import { PaginaHidratada } from "@/components/Hidratado";
 
 /**
@@ -17,6 +18,7 @@ export async function intentar(pantalla: () => Promise<ReactNode>): Promise<Reac
   } catch (e) {
     if (!(e instanceof ErrorDatos)) throw e;
     if (e.codigo === "apagada") return <Aviso emoji="🧩" titulo="Esta sección está apagada"><p>{e.message}</p></Aviso>;
+    if (e.codigo === "demora") return <Aviso emoji="🐢" titulo="La base está tardando"><p>{e.message}</p><Reintentar /></Aviso>;
     return e.sinPermiso
       ? <Aviso emoji="🔒" titulo="No tenés acceso a esta pantalla"><p>{e.message}</p></Aviso>
       : <Aviso titulo="No se pudo cargar esta pantalla"><p>{e.message}</p></Aviso>;
