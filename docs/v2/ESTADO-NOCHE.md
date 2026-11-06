@@ -68,3 +68,4 @@ VD-13 mergeado. VD-44 lanzado: a003fa0a390b234fc (vd44, migr 5400). En curso: VD
 (VD-37 mergeado; falta tanda 3: VD-38 y VD-44 en curso)
 VD-37 mergeado. Tanda 4 empezó: VD-35→39 a96aa2ce17a63697c (vd35, migr 5500/5600). En curso: VD-38 (af583325233c07c8f), VD-44 (a003fa0a390b234fc). Faltan tanda 4: VD-22, 24, 25, 19, 20.
 (VD-38 mergeado; sumados VD-38b/c)
+VD-38 mergeado. Lanzado VD-24→38b a5ab496be69ce81a2 (vd24, migr 5700/5800). En curso: VD-44 (a003fa0a390b234fc), VD-35→39 (a96aa2ce17a63697c). Faltan tanda 4: VD-22, 25, 19, 20.
