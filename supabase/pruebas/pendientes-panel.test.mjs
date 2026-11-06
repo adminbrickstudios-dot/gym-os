@@ -123,11 +123,13 @@ test("Caja: una abierta que quedó del día anterior cuenta para su dueña y par
 test("Vencen y cobrar: sube con uno que vence hoy y baja solo cuando paga", async () => {
   const hoy0 = (await pend(u.recepcion)).vencen_hoy;
   const s = t.ctx.socios.vence_hoy;
-  // El testigo vence "hoy" del calendario de la prueba; se le suma una cortesía que termina al fin del día real de la base.
+  // El calendario del testigo es el de la prueba (14/11), no el de hoy: se anula su cobertura y se le da una cortesía que termina al fin del día real de la base.
+  await t.q(`update public.coberturas set anulada_en = now(), anulada_por = $2, anulada_motivo = 'prueba de pendientes' where socio_id = $1 and anulada_en is null`, [s, u.dueno]);
   await t.q(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, motivo)
-              select c.gimnasio_id, c.suscripcion_id, c.socio_id, max(c.hasta), privado.medianoche(privado.dia_local(now(), g.zona_horaria)::date + 1, g.zona_horaria), 'cortesia', 'prueba de pendientes'
+              select c.gimnasio_id, c.suscripcion_id, c.socio_id, privado.medianoche(privado.dia_local(now(), g.zona_horaria)::date - 5, g.zona_horaria),
+                     privado.medianoche(privado.dia_local(now(), g.zona_horaria)::date + 1, g.zona_horaria), 'cortesia', 'prueba de pendientes'
                 from public.coberturas c join public.gimnasios g on g.id = c.gimnasio_id
-               where c.socio_id = $1 and c.anulada_en is null group by c.gimnasio_id, c.suscripcion_id, c.socio_id, g.zona_horaria`, [s]);
+               where c.socio_id = $1 limit 1`, [s]);
   const conUno = (await pend(u.recepcion)).vencen_hoy;
   assert.equal(conUno, hoy0 + 1, "el que vence hoy suma");
   assert.equal((await pend(u.dueno)).vencen_hoy, conUno);
