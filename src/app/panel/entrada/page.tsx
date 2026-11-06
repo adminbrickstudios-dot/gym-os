@@ -15,6 +15,8 @@ import { Invitados } from "./Invitados";
 import { TurnoEntrada } from "./TurnoEntrada";
 import type { MiTurno } from "@/app/panel/caja/tipos";
 import type { Invitado } from "./acciones";
+import { PanelEmergencia } from "./PanelEmergencia";
+import type { EmergenciaHistorial, EstadoEmergencia } from "./emergencia-tipos";
 
 export const metadata: Metadata = { title: "Entrada" };
 
@@ -27,12 +29,16 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     const sp = await searchParams;
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const conCaja = !panel.secciones_apagadas.includes("caja");
-    const [hoy, formas, invitados, miTurno] = await Promise.all([
+    const equipoCompleto = panel.yo.rol !== "recepcion";
+    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias] = await Promise.all([
       rpcLectura<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
       rpcLectura<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
       rpcLectura<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
       // VD-9: mi turno de caja (se ofrece abrirlo desde acá). Si algo falla no rompe la Entrada.
       conCaja ? rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }).catch(() => null) : Promise.resolve(null),
+      // VD-46M: ¿la puerta está en emergencia? Si no se puede leer, el cartel lo vuelve a preguntar solo (no rompe la Entrada).
+      rpcLectura<EstadoEmergencia>("estado_emergencia_puerta", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }).catch(() => null),
+      equipoCompleto ? rpcLectura<EmergenciaHistorial[]>("historial_emergencias_puerta", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 }).catch(() => []) : Promise.resolve([] as EmergenciaHistorial[]),
     ]);
     // ?socio= (al volver de cobrar): se abre su veredicto.
     const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpcLectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
@@ -50,7 +56,8 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
             {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
             {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
-            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} emergenciaInicial={emergencia?.activa ?? null} />
+            {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias} />}
           </div>
           <div>
             <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />

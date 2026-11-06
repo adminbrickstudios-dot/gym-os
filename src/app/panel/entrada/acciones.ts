@@ -14,9 +14,11 @@ export type Guia = {
   segundo: "anotar" | "cobrar" | null; segundo_texto: string | null;
   solo_encargado: boolean; decile: string; falta: string | null; entradas_mes: number;
   chips: { clave: string; emoji: string; texto: string; href?: string }[];
+  /** VD-46M: la puerta está en emergencia y a este socio se lo anota igual (queda marcado). */
+  emergencia?: boolean;
 };
 /** VD-3: si es un repetido, `texto` dice a qué hora entró; con `alerta_prestamo` llegó por otra vía hace pocos minutos (amarillo). */
-export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; color?: string; alerta_prestamo?: boolean; veredicto?: Veredicto };
+export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; color?: string; alerta_prestamo?: boolean; emergencia?: boolean; veredicto?: Veredicto };
 
 type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
 

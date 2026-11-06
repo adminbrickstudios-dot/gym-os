@@ -23,6 +23,7 @@ import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
 import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
 import { EventosHoyEntrada } from "./EventosHoyEntrada";
+import { CartelEmergencia, useEmergencia } from "./CartelEmergencia";
 import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
@@ -106,6 +107,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [pisado, setPisado] = useState<PisadoEnEstaCompu>({});
   const cfg = efectiva(config, pisado);
   const [abierta, setAbierta] = useState(false);
+  // VD-46M: el cartel rojo mientras la puerta está en emergencia (se pregunta solo con la ventana abierta).
+  const emergencia = useEmergencia(sedeId, abierta);
   const [paso, setPaso] = useState<Paso>("escribir");
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
@@ -511,6 +514,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const clase = `boton ${esPrincipal ? "boton-principal text-lg px-8" : ""}`;
     switch (clave) {
       case "anotar":
+        // VD-46M: con la puerta en emergencia, al que no podía entrar se lo anota igual (queda marcado); un clic a propósito, sin Enter.
+        if (!v.puede && guia?.emergencia) return <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar data-anotar-emergencia>🚨 Anotar entrada (emergencia)</button>;
         return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar>✅ Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
       case "cobrar":
       case "cobrar_pack":
@@ -573,6 +578,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
       <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl">
         <div data-ventana-entrada data-paso={paso} className="max-h-[88dvh] overflow-y-auto">
+          {emergencia && <div className="p-4 pb-0"><CartelEmergencia e={emergencia} /></div>}
           {paso === "escribir" && (
             <div className="p-6 sm:p-8 space-y-4">
               <p className="titulo text-2xl text-center">🚪 Entrada</p>
@@ -715,7 +721,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile>💬 {guia.decile}</p>}
                   {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
                     <ul className="flex flex-wrap gap-2" data-ventana-chips>
-                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.texto}</li>)}
+                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
                       {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
                       {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
                       {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}

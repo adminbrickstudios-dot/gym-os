@@ -37,6 +37,12 @@ export async function habitualesDeLaTablet(): Promise<{ socio_id: string; nombre
   return error || !data ? [] : data;
 }
 
+/** VD-46M: ¿la puerta está en emergencia? (la tablet muestra el cartel rojo; lo decide la base con el token de la tablet). */
+export async function emergenciaDeLaTablet(): Promise<{ activa: boolean; vence_en: string | null } | null> {
+  const { data, error } = await cliente().rpc("kiosco_emergencia", { p_token: await token() });
+  return error || !data ? null : (data as { activa: boolean; vence_en: string | null });   // sin respuesta: la tablet deja el cartel como estaba
+}
+
 /** Tocó su nombre: entra con los últimos 3 números del DNI (lo decide la base, igual que con el DNI entero). */
 export async function entrarHabitual(socioId: string, dniFin: string): Promise<Resultado> {
   const t = await token();
