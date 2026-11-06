@@ -9,6 +9,8 @@ import { cobrar, preciosPara, registrarUsoCupon, validarCupon, type Venta } from
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { urlFotoProducto } from "@/lib/url-producto";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
@@ -18,7 +20,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   puedeAnular?: boolean;
   /** EQU-1: la recepción no vende productos si el dueño lo apagó. */
   sinProductos?: boolean;
-  stockInicial?: Record<string, { stock: number; minimo: number | null }>;
+  stockInicial?: Record<string, { stock: number; minimo: number | null; negativo?: boolean }>;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
   const [precios, setPrecios] = useState(preciosIniciales);
@@ -144,22 +146,38 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     );
   }
 
-  const Boton = ({ onClick, emoji, titulo, precio, deshabilitado, nota }: { onClick: () => void; emoji: string; titulo: string; precio: number | null; deshabilitado?: string; nota?: { texto: string; alerta: boolean } }) => (
-    <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null} title={deshabilitado}
+  const Boton = ({ onClick, emoji, titulo, precio, deshabilitado, nota, foto }: {
+    onClick: () => void; emoji: string; titulo: string; precio: number | null; deshabilitado?: string;
+    nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
+  }) => (
+    <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
       className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
-      <span className="flex items-center gap-2"><span aria-hidden className="text-xl">{emoji}</span><span>{titulo}</span></span>
+      <span className="flex items-center gap-2">
+        {foto
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
+          : <span aria-hidden className="text-xl">{emoji}</span>}
+        <span>{titulo}</span>
+      </span>
       <span className="flex flex-wrap items-baseline gap-x-2">
         <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
         {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
+        {nota?.poco && <span className="pildora pildora-amarillo text-xs" data-queda-poco>Queda poco</span>}
       </span>
     </button>
   );
-  // VEN-4: cuántos quedan (avisa; no frena la venta). Lo del carrito ya se descuenta.
+  // VD-18: lo más que se puede llevar de un producto con stock (la base lo exige igual).
+  const topeStock = (l: Linea) => { const s = l.tipo === "producto" && l.producto_id ? stock[l.producto_id] : undefined; return s && !s.negativo ? s.stock : Infinity; };
+  // VEN-4 + VD-18: cuántos quedan, "queda poco" desde el mínimo, y sin stock no se vende (salvo que el producto lo permita).
+  // Lo del carrito ya se descuenta.
   const notaStock = (id: string) => {
     const s = stock[id];
     if (!s) return undefined;
     const quedan = s.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0);
-    return { texto: quedan <= 0 ? "Sin stock" : `Quedan ${quedan}`, alerta: quedan <= 0 || (s.minimo != null && quedan <= s.minimo) };
+    return {
+      texto: quedan <= 0 ? "Sin stock" : `Quedan ${quedan}`, alerta: quedan <= 0,
+      poco: quedan > 0 && s.minimo != null && quedan <= s.minimo, sinStock: quedan <= 0 && !s.negativo,
+    };
   };
 
   return (
@@ -198,6 +216,13 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         {/* Qué se vende */}
         <section>
           <h2 className="titulo text-2xl mb-3">🛒 Qué se lleva</h2>
+          {/* VD-18 (D21): las cuotas y los pases se cobran en Cobrar; acá el mostrador es de productos. */}
+          {socio && !buscando && (precios.cuota || precios.pases.length > 0 || precios.packs.length > 0) && (
+            <div className="tarjeta p-4 mb-3 flex flex-wrap items-center gap-3" data-ir-cobrar>
+              <p className="flex-1 min-w-48 texto-suave">La cuota, los pases y los packs de {socio.nombre.split(" ")[0]} se cobran en <strong>Cobrar</strong>, con todo lo que le toca.</p>
+              <BotonCobrar socioId={socio.socio_id} origen="otro" cuota={!!precios.cuota} className="boton boton-principal">💵 Cobrar a {socio.nombre.split(" ")[0]}</BotonCobrar>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {precios.cuota && (
               <Boton emoji="🏷️" titulo={`Cuota ${precios.cuota.plan}`} precio={precioUnitario({ clave: "", tipo: "cuota", nombre: "", cantidad: 1, precios: precios.cuota.precios }, medioPrecio)}
@@ -220,7 +245,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {!sinProductos && precios.productos.map((p) => (
-              <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)}
+              <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}
             <button type="button" className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px]" onClick={() => setOtro({ descripcion: "", monto: "" })}>
@@ -273,7 +298,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                   <div className="flex items-center gap-2 mt-2">
                     <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
+                      title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}

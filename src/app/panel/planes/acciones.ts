@@ -116,7 +116,7 @@ export async function aplicarAumento(a: Aumento): Promise<{ error?: string; n?: 
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export type Stock = { controla: boolean; stock: number; minimo: number | null };
+export type Stock = { controla: boolean; stock: number; minimo: number | null; negativo?: boolean };
 
 /** VEN-4: prender/apagar el stock de un producto; al prenderlo, se cuenta lo que hay. */
 export async function configurarStock(productoId: string, controla: boolean, minimo: string, contado?: string): Promise<{ error?: string }> {
@@ -204,6 +204,96 @@ export async function guardarServicio(id: string | null, nombre: string, precio:
   if (Number.isNaN(n)) return { error: MAL_MONTO };
   try { await rpc("guardar_servicio", { p_gimnasio_id: panel.gimnasio.id, p_producto_id: id, p_nombre: nombre, p_precio: n, p_activo: activo }); return listo(); }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── VD-18 · Productos y stock ──────────────────────────────────────────
+
+export type Movimiento = { id: string; fecha: string; cantidad: number; tipo: "entrada" | "conteo"; motivo: string | null; por: string; remito: boolean };
+const MAX_FOTO = 6 * 1024 * 1024;
+
+/** Costo, categoría y si se puede vender sin stock. Vacío = sin costo / sin categoría. */
+export async function guardarFichaProducto(productoId: string, d: { costo?: string; categoria?: string; permiteNegativo?: boolean }): Promise<{ error?: string }> {
+  const datos: Record<string, unknown> = {};
+  if (d.costo !== undefined) {
+    const c = d.costo.trim() === "" ? null : leerMonto(d.costo);
+    if (Number.isNaN(c)) return { error: `Costo: ${MAL_MONTO}` };
+    datos.costo = c;
+  }
+  if (d.categoria !== undefined) datos.categoria = d.categoria.trim() || null;
+  if (d.permiteNegativo !== undefined) datos.permite_negativo = d.permiteNegativo;
+  try { await rpc("guardar_ficha_producto", { p_producto_id: productoId, p_datos: datos }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+type Imagen = "image/jpeg" | "image/png" | "image/webp";
+const extDe = (mime: string) => (mime === "application/pdf" ? "pdf" : mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg");
+
+/** La foto del producto: se achica (VD-47X) y se sube con la clave de servicio; la base arma la ruta y la confirma. */
+export async function subirFotoProducto(productoId: string, f: FormData): Promise<{ error?: string }> {
+  const foto = f.get("foto");
+  if (!(foto instanceof Blob) || foto.size === 0) return { error: "Elegí una foto" };
+  if (!["image/jpeg", "image/png", "image/webp"].includes(foto.type) || foto.size > MAX_FOTO) return { error: "La foto tiene que ser JPG, PNG o WEBP de hasta 6 MB." };
+  try {
+    const { achicarFoto } = await import("@/lib/imagenes-servidor");
+    const a = await achicarFoto(new Uint8Array(await foto.arrayBuffer()), foto.type as Imagen);
+    const ruta = await rpc<string>("preparar_foto_producto", { p_producto_id: productoId, p_ext: extDe(a.mime) });
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { error } = await clienteServicio().storage.from("fotos_productos").upload(ruta, Buffer.from(a.bytes), { contentType: a.mime, upsert: false });
+    if (error) return { error: `No se pudo subir la foto: ${error.message}` };
+    await rpc("confirmar_foto_producto", { p_producto_id: productoId, p_ruta: ruta });
+    return listo();
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function quitarFotoProducto(productoId: string): Promise<{ error?: string }> {
+  try { await rpc("quitar_foto_producto", { p_producto_id: productoId }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Entró mercadería: la cantidad se anota primero (si la foto del remito falla, la entrada ya quedó). */
+export async function entradaMercaderia(productoId: string, f: FormData): Promise<{ error?: string }> {
+  const n = Number(String(f.get("cantidad") ?? "").trim());
+  if (!String(f.get("cantidad") ?? "").trim() || !Number.isInteger(n)) return { error: "Un número entero" };
+  const remito = f.get("remito");
+  const conRemito = remito instanceof Blob && remito.size > 0;
+  if (conRemito && (!["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(remito.type) || remito.size > MAX_FOTO)) {
+    return { error: "El remito tiene que ser JPG, PNG, WEBP o PDF de hasta 6 MB." };
+  }
+  try {
+    await rpc("entrada_stock", { p_producto_id: productoId, p_cantidad: n, p_motivo: String(f.get("motivo") ?? "").trim() || null });
+    listo();
+    if (conRemito) {
+      let bytes: Uint8Array = new Uint8Array(await remito.arrayBuffer());
+      let mime: string = remito.type;
+      if (mime !== "application/pdf") {
+        const { achicarFoto } = await import("@/lib/imagenes-servidor");
+        const a = await achicarFoto(bytes, mime as Imagen); bytes = a.bytes; mime = a.mime;
+      }
+      const ruta = await rpc<string>("preparar_remito_stock", { p_producto_id: productoId, p_ext: extDe(mime) });
+      const { clienteServicio } = await import("@/lib/supabase/servicio");
+      const { error } = await clienteServicio().storage.from("remitos_stock").upload(ruta, Buffer.from(bytes), { contentType: mime, upsert: false });
+      if (error) return { error: `La mercadería quedó anotada, pero el remito no se pudo subir: ${error.message}` };
+      await rpc("confirmar_remito_stock", { p_producto_id: productoId, p_ruta: ruta });
+    }
+    return listo();
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function movimientosDe(productoId: string): Promise<{ movimientos?: Movimiento[]; error?: string }> {
+  try { return { movimientos: await rpc<Movimiento[]>("movimientos_stock_producto", { p_producto_id: productoId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Link de 10 minutos al remito (la base dice antes si quien lo pide puede verlo). */
+export async function verRemito(movimientoId: string): Promise<{ url?: string; error?: string }> {
+  try {
+    const ruta = await rpc<string | null>("remito_stock", { p_movimiento_id: movimientoId });
+    if (!ruta) return { error: "Esa entrada no tiene remito" };
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { data, error } = await clienteServicio().storage.from("remitos_stock").createSignedUrl(ruta, 600);
+    if (error || !data) return { error: "No se pudo abrir el remito" };
+    return { url: data.signedUrl };
+  } catch (e) { return { error: (e as Error).message }; }
 }
 
 /** Asigna o quita un servicio a un socio: desde la próxima cuota se suma solo en Cobrar. */

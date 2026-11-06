@@ -16,7 +16,7 @@ export default async function Planes() {
     exigirRol(panel, ["dueno", "encargado"]);
     const [planes, productos, matriculas, stock, convenios, ajustes, servicios] = await Promise.all([
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Producto[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<Producto[]>("productos_mostrador", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Record<string, Matricula>>("matriculas_planes", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Record<string, Stock>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<Convenio[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),

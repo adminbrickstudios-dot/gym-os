@@ -46,6 +46,8 @@ const EJECUTABLES = {
     "public.admin_entrar_gimnasio", "public.admin_salir_gimnasio", "public.admin_gimnasio", "public.admin_agregar_persona",
     "public.admin_agregar_dominio", "public.admin_quitar_dominio", "public.cuenta_para_nueva_clave", "public.persona_para_dar_acceso",
     "public.servicios_gimnasio", "public.guardar_servicio", "public.asignar_servicio", "public.ajustes_planes", "public.guardar_ajustes_plan", "public.ordenar_planes",
+    "public.productos_mostrador", "public.guardar_ficha_producto", "public.preparar_foto_producto", "public.confirmar_foto_producto", "public.quitar_foto_producto",
+    "public.preparar_remito_stock", "public.confirmar_remito_stock", "public.remito_stock",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),

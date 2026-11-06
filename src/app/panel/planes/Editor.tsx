@@ -2,15 +2,16 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { useVersion } from "@/components/panel/useVersion";
-import { activarPlan, configurarStock, crearPlan, editarPlan, guardarProducto, moverStock, ordenarPlanes, type AjustesPlanes, type Servicio, type Stock } from "./acciones";
+import { activarPlan, crearPlan, editarPlan, ordenarPlanes, type AjustesPlanes, type Servicio, type Stock } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
 import { AjustesDelPlan, resumenAjustes, VistaPrevia } from "./Ajustes";
 import { Servicios } from "./Servicios";
+import { Productos, type Producto } from "./Productos";
 
 export type Plan = { plan_id: string; tipo: string; nombre: string; descripcion: string | null; activo: boolean; duracion_meses: number | null;
   cantidad_clases: number | null; validez_dias: number | null; max_ingresos_semana: number | null; hora_desde: string | null; hora_hasta: string | null;
   precio: number | null; proximo_precio: number | null; proximo_desde: string | null; socios_activos: number };
-export type Producto = { producto_id: string; nombre: string; precio: number; activo: boolean };
+export type { Producto } from "./Productos";
 
 /** PLA-1: una cuota cubre esos meses (la base ya lo calcula así). */
 const DURACION: Record<string, string> = { "1": "Mensual", "3": "Trimestral", "6": "Semestral", "12": "Anual" };
@@ -185,106 +186,6 @@ function NuevoPlan() {
       {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2">⚠️ {estado.error}</p>}
       <div className="flex gap-2 sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal">✅ Crear</button><button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button></div>
     </form>
-  );
-}
-
-function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {
-  const [panelStock, setPanelStock] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [datos, setDatos] = useState({ nombre: p.nombre, precio: String(p.precio).replace(".", ",") });
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) setEditando(false); });
-  return (
-    <li className={`tarjeta px-4 py-3 ${p.activo ? "" : "opacity-55"}`} data-producto={p.nombre}>
-      {editando ? (
-        <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => guardarProducto(p.producto_id, datos.nombre, datos.precio, p.activo)); }}>
-          <input autoFocus required aria-label="Nombre del producto" className="campo !w-auto flex-1 min-w-32" value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} />
-          <input required aria-label="Precio del producto" inputMode="decimal" className="campo !w-28" value={datos.precio} onChange={(e) => setDatos({ ...datos, precio: e.target.value })} />
-          <button type="submit" className="boton boton-principal" disabled={ocupado}>Guardar</button>
-          <button type="button" className="boton" onClick={() => setEditando(false)}>Cancelar</button>
-        </form>
-      ) : (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="flex-1 font-semibold min-w-0">{p.nombre}{!p.activo && <span className="texto-tenue font-normal text-sm"> · oculto en Vender</span>}</span>
-          <span className="numero text-xl">{formatearPesos(p.precio)}</span>
-          {stock?.controla && <span className={`pildora text-sm ${stock.stock <= 0 ? "pildora-rojo" : stock.minimo != null && stock.stock <= stock.minimo ? "pildora-amarillo" : ""}`} data-stock={stock.stock}>📦 {stock.stock <= 0 ? "Sin stock" : `Quedan ${stock.stock}`}</span>}
-          <button type="button" className="boton-texto" onClick={() => setEditando(true)}>✏️ Editar</button>
-          <button type="button" className="boton-texto" onClick={() => setPanelStock(!panelStock)}>📦 Stock</button>
-          <button type="button" className="boton-texto" disabled={ocupado} onClick={() => correr(() => guardarProducto(p.producto_id, p.nombre, p.precio, !p.activo))}>{p.activo ? "Ocultar" : "Mostrar"}</button>
-        </div>
-      )}
-      {panelStock && <PanelStock p={p} stock={stock} cerrar={() => setPanelStock(false)} />}
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
-    </li>
-  );
-}
-
-/** VEN-4: llevar stock, entrada de mercadería, contar y desde cuánto avisar. */
-function PanelStock({ p, stock, cerrar }: { p: Producto; stock?: Stock; cerrar: () => void }) {
-  const [cant, setCant] = useState("");
-  const [motivo, setMotivo] = useState("");
-  const [contado, setContado] = useState("");
-  const [minimo, setMinimo] = useState(stock?.minimo != null ? String(stock.minimo) : "");
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>, ok?: () => void) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) ok?.(); });
-  if (!stock?.controla) {
-    return (
-      <form className="mt-3 space-y-2" data-panel-stock onSubmit={(e) => { e.preventDefault(); correr(() => configurarStock(p.producto_id, true, minimo, contado), cerrar); }}>
-        <p className="text-sm texto-suave">Llevar la cuenta de cuántos quedan. Vender lo muestra y avisa; nunca frena una venta.</p>
-        <div className="flex flex-wrap gap-2">
-          <input className="campo !w-36" inputMode="numeric" required placeholder="¿Cuántos hay?" aria-label="Cuántos hay ahora" value={contado} onChange={(e) => setContado(e.target.value)} />
-          <input className="campo !w-40" inputMode="numeric" placeholder="Avisar con (opcional)" aria-label="Avisar cuando queden" value={minimo} onChange={(e) => setMinimo(e.target.value)} />
-          <button type="submit" className="boton boton-principal" disabled={ocupado || !contado.trim()}>📦 Llevar stock</button>
-        </div>
-        {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-      </form>
-    );
-  }
-  return (
-    <div className="mt-3 space-y-3" data-panel-stock>
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => moverStock(p.producto_id, "entrada", cant, motivo), () => { setCant(""); setMotivo(""); }); }}>
-        <input className="campo !w-28" inputMode="numeric" placeholder="Cuántos" aria-label="Cuántos entraron" value={cant} onChange={(e) => setCant(e.target.value)} />
-        <input className="campo !w-auto flex-1 min-w-32" placeholder="De dónde (opcional)" aria-label="Motivo de la entrada" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        <button type="submit" className="boton" disabled={ocupado || !cant.trim()}>➕ Entró mercadería</button>
-      </form>
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => moverStock(p.producto_id, "conteo", contado), () => setContado("")); }}>
-        <input className="campo !w-28" inputMode="numeric" placeholder="Hay" aria-label="Cuántos contaste" value={contado} onChange={(e) => setContado(e.target.value)} />
-        <button type="submit" className="boton" disabled={ocupado || !contado.trim()}>🔢 Conté: ajustar</button>
-      </form>
-      <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => configurarStock(p.producto_id, true, minimo)); }}>
-        <span className="text-sm">Avisar cuando queden</span>
-        <input className="campo !w-24" inputMode="numeric" aria-label="Avisar cuando queden" value={minimo} onChange={(e) => setMinimo(e.target.value)} />
-        <button type="submit" className="boton boton-chico" disabled={ocupado}>Guardar</button>
-        <button type="button" className="boton-texto ml-auto" disabled={ocupado} onClick={() => correr(() => configurarStock(p.producto_id, false, ""), cerrar)}>Dejar de llevar stock</button>
-      </form>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-    </div>
-  );
-}
-
-function Productos({ productos, stock }: { productos: Producto[]; stock: Record<string, Stock> }) {
-  const [nuevo, setNuevo] = useState({ nombre: "", precio: "" });
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  return (
-    <section>
-      <h2 className="titulo text-3xl mb-1">🥤 Productos</h2>
-      <p className="texto-suave mb-4">Lo que se vende en el mostrador además de los planes: agua, bebidas, suplementos. Aparecen en Vender.</p>
-      {productos.length === 0 ? <p className="texto-tenue mb-4">Todavía no cargaste productos. Agregá el primero acá abajo.</p> : (
-        <ul className="grid sm:grid-cols-2 gap-2 mb-4">{productos.map((p) => <FilaProducto key={p.producto_id} p={p} stock={stock[p.producto_id]} />)}</ul>
-      )}
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => {
-        e.preventDefault();
-        empezar(async () => { const r = await guardarProducto(null, nuevo.nombre, nuevo.precio); setError(r.error ?? null); if (!r.error) setNuevo({ nombre: "", precio: "" }); });
-      }}>
-        <input className="campo !w-auto flex-1 min-w-40" aria-label="Producto nuevo" placeholder="Producto (ej: Agua)" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
-        <input className="campo !w-32" inputMode="decimal" aria-label="Precio del producto nuevo" placeholder="$" value={nuevo.precio} onChange={(e) => setNuevo({ ...nuevo, precio: e.target.value })} />
-        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}>➕ Agregar</button>
-      </form>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
-    </section>
   );
 }
 
