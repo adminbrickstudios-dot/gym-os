@@ -188,7 +188,7 @@ test("la pantalla: solo el dueño guarda; el encargado lee; queda escrito quién
     assert.equal(h.nombre, "Dueña"); assert.equal(h.despues.dia_fijo, 10);
   });
   const [{ id }] = await t.q(`insert into public.cambios_cobro (gimnasio_id, tema, detalle) values ($1, 'vencimiento', 'x') returning id`, [t.g]);
-  await t.falla(() => t.q(`update public.cambios_cobro set detalle = 'otra cosa' where id = $1`, [id]), /solo se puede cambiar/);
+  await t.falla(() => t.q(`update public.cambios_cobro set detalle = 'otra cosa' where id = $1`, [id]), /no se modifican ni se borran/);
 });
 
 test("un plan puede pisar la regla (solo el dueño)", async () => {

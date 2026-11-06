@@ -23,7 +23,6 @@ begin
   if to_regprocedure('privado.vender(uuid, uuid, uuid, jsonb, jsonb, uuid, uuid, numeric, timestamptz)') is null then raise exception 'Guarda: falta privado.vender'; end if;
   if to_regprocedure('public.precios_venta(uuid, uuid)') is null then raise exception 'Guarda: falta public.precios_venta'; end if;
   if to_regprocedure('privado.politicas_estandar(regclass, text[], text[], boolean)') is null then raise exception 'Guarda: falta privado.politicas_estandar'; end if;
-  if to_regprocedure('privado.hecho_inmutable()') is null then raise exception 'Guarda: falta privado.hecho_inmutable'; end if;
   if to_regprocedure('public.vender(uuid, jsonb, jsonb, uuid, uuid, uuid, timestamptz, text, text)') is null then raise exception 'Guarda: falta public.vender (VD-5)'; end if;
 end $$;
 
@@ -67,9 +66,16 @@ create index if not exists cambios_cobro_reciente on public.cambios_cobro (gimna
 select privado.politicas_estandar('public.cambios_cobro', array['dueno', 'encargado'], '{}');
 revoke all on table public.cambios_cobro from anon;
 revoke truncate, references, trigger on public.cambios_cobro from authenticated;
+-- Un registro fijo: no se modifica ni se borra (hecho_inmutable sin columnas permitidas no sirve: su lista llega vacía).
+create or replace function privado.registro_fijo() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  raise exception 'Los registros de % no se modifican ni se borran', tg_table_name using errcode = 'check_violation';
+end $$;
+revoke all on function privado.registro_fijo() from public, anon, authenticated;
 drop trigger if exists cambios_cobro_inmutable on public.cambios_cobro;
 create trigger cambios_cobro_inmutable before update or delete on public.cambios_cobro
-  for each row execute function privado.hecho_inmutable();
+  for each row execute function privado.registro_fijo();
 
 -- ── 2 · La regla que rige para un plan ──────────────────────────────
 -- Un plan que usa la regla del gimnasio (y el gimnasio la configuró) toma renovación y día fijo de ahí.
@@ -253,6 +259,8 @@ declare
   medio_unico text; tipo text; cant int; precio numeric; desc_ numeric; pl public.planes; pr public.productos;
   sus public.suscripciones; descripcion text; subtotal numeric; medios text[]; mat jsonb; rec jsonb; hay_cuota boolean := false; hay_recargo boolean := false; conv jsonb; desc_conv numeric; motivo text; fiado numeric; deuda numeric; tope_fiado numeric; hay_deuda numeric := 0; per record; zona_g text;
 begin
+  -- VD-7: `per` tiene que existir antes del primer ítem (el CASE del precio lo lee aunque el ítem no sea una cuota).
+  select false as p_parcial, 1::numeric as p_factor, 100::numeric as p_redondeo into per;
   if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
     raise exception 'El carrito está vacío';
   end if;
