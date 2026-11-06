@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-26 · Página de Gym OS para vender
+
+**QUÉ HICE**
+- Migración 6700: la dirección de la plataforma (sin gimnasio) muestra la landing para venderle Gym OS a dueños: hero "¿Este socio puede entrar hoy?", tres bloques (semáforo de entrada, cobrar en un toque, quién dejó de venir) con ilustraciones en CSS (sin imágenes ni cifras inventadas), preguntas frecuentes con `<details>` sin JavaScript, "Ingresar" arriba y abajo hacia `/ingresar`, y formulario "Quiero una demo". Los planes de BRIK salen solo si hay activos en `plataforma_planes` (si no hay, la sección no aparece; si la consulta falla, sale sin precios). Server components, mobile-first. La página de cada gimnasio (`Landing.tsx`) no se tocó.
+- `pedidos_demo_brik`: recibe pedidos sin sesión con campo trampa, no duplica un contacto con pedido sin atender en 7 días, tope de 20 por hora en total, valida mail o WhatsApp. En `/admin`, tarjeta con los pendientes y "Ya lo contacté".
+- Decisión: un plan con `activo = true` se considera público (un plan interno activo aparecería en la landing). Sin WhatsApp de BRIK hardcodeado.
+- Verificado: lint, typecheck, 118 pruebas, build y base/chequeos/demo en verde en GitHub (`pedidos-demo-brik`).
+
+**QUÉ CONFIGURÁS VOS**: cargar los planes de BRIK en el super admin para que aparezcan los precios.
+**SIN ARREGLAR**: VD-26B (avisar a BRIK de cada pedido por mail o WhatsApp; flag propio de plan público).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-26` y los viejos (super-admin, adm-*, landing/pag-*): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-21 · Configuración con buscador, explicación y restablecer
 
 **QUÉ HICE**

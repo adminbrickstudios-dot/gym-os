@@ -521,6 +521,7 @@ bloque 18.
 - [ ] VD-43C · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol
 - [ ] VD-21B · 🟢 · Historial de cambios visible desde cada opción ("Ver cambios")
 - [ ] VD-21C · 🟢 · Vista previa en vivo de los mensajes y de la página al editar
+- [ ] VD-26B · 🟢 · Avisar a BRIK de cada pedido de demo (mail o WhatsApp) y un flag propio de plan público
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -578,7 +579,7 @@ bloque 18.
 - [ ] VD-29 · 🟢 · Ctrl+K con acciones
 - [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
 - [ ] VD-31 · 🟢 · Ayuda y onboarding por pantalla
-- [ ] VD-26 · 🟢 · Página de Gym OS para vender
+- [x] VD-26 · 🟢 · Página de Gym OS para vender — verificado: landing de plataforma (hero, 3 bloques en CSS, preguntas, planes solo si hay cargados, demo con campo trampa) y tarjeta de pedidos en /admin; base en verde en GitHub (pedidos-demo-brik); e2e vd-26 en la corrida de la tanda
 - [ ] VD-32 · 🟢 · Segunda pasada v2: un día del dueño, de la recepción y un mes del socio
 *Necesitan una cuenta (🔌: el agente deja todo listo, Mateo conecta)*
 - [ ] VD-22B · 🔌 · Credenciales de Google para el ingreso del socio (las crea Mateo)
