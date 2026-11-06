@@ -56,10 +56,22 @@ Escrito como si fuera un socio de BRIK que mira el negocio de afuera.
 15. **Soporte**: un WhatsApp de BRIK visible en el panel ("¿Necesitás
     ayuda?") y la sección de Novedades (ya existe) para avisar cambios.
 
+## Lo que más se nota y se arregla en 2 minutos
+
+16. **Región**: si Supabase está en São Paulo y Vercel en Estados Unidos
+    (lo que viene por defecto), cada pantalla pierde medio segundo en
+    viajes. Fijate la región en Supabase (Settings → General) y poné la
+    misma en Vercel (Settings → Functions → Region: São Paulo, `gru1`).
+17. **Probalo en el celular del dueño** (si tiene iPhone, en Safari) y con
+    el internet del gimnasio, no solo en tu compu.
+18. **Copia de seguridad**: en el plan gratis de Supabase no hay backups
+    automáticos. Antes de cargar los socios reales del cliente, pasá a Pro o
+    corré el exporte del gimnasio cada tanto.
+
 ## Forma de trabajo
 
-16. Una noche no alcanza para todo lo que está en `08-PLAN.md`. El orden de
+19. Una noche no alcanza para todo lo que está en `08-PLAN.md`. El orden de
     la noche pone primero lo que se ve mañana (tanda 1). Lo demás sigue las
     noches siguientes con el mismo prompt.
-17. Cada mañana: leer el reporte, probar 5 minutos, decir qué no te gustó.
+20. Cada mañana: leer el reporte, probar 5 minutos, decir qué no te gustó.
     El agente lo convierte en ítems.

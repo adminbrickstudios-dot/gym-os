@@ -49,6 +49,8 @@ nivel:
 
 ## Velocidad
 
+**El detalle técnico, medido en el código, está en `16-RAPIDEZ-Y-FLUIDEZ.md` (VD-47).**
+
 Meta: **< 100 ms** del toque al primer cambio, **< 1 s** para ver datos en
 una pantalla común, con 3.000 socios por gimnasio y 200 gimnasios.
 

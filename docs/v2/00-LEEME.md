@@ -35,6 +35,7 @@ quién paga, cuándo paga, y quién dejó de venir**.
 | `13-CONFIABILIDAD-Y-ESCALA.md` | Nada dos veces, nada se pierde, nada se cae, miles a la vez |
 | `14-SITUACIONES.md` | Lo que pasa todos los días en un gimnasio, del más grande al más chico |
 | `15-RECOMENDACIONES.md` | Lo que se puede estar escapando (producto, negocio, mañana) |
+| `16-RAPIDEZ-Y-FLUIDEZ.md` | Dónde se va el tiempo hoy, cómo se hace rápido, y el sistema de movimiento |
 | `NOCHE-WINDOWS.md` | Cómo trabaja el agente de noche desde la compu de Mateo (Windows) |
 
 ## Principios (valen para cada ítem)

@@ -8,7 +8,7 @@ publica entera cuando da verde (D25, ver `NOCHE-WINDOWS.md`).
 
 | Tanda | Para qué | Ítems, en orden |
 |---|---|---|
-| **1 · Para mañana** | Lo que el dueño ve en la presentación: lindo, rápido y que no se rompa | VD-34 (confiabilidad base) · VD-27 (diseño v2: base) · VD-33 (ingreso) · VD-1 · VD-2 · VD-5 · VD-6 · VD-12 · VD-36 · VD-23 |
+| **1 · Para mañana** | Lo que el dueño ve en la presentación: lindo, rápido y que no se rompa | VD-34 (confiabilidad base) · VD-47 (rapidez) · VD-27 (diseño v2: base, movimiento de `16` §3) · VD-33 (ingreso) · VD-1 · VD-2 · VD-5 · VD-6 · VD-12 · VD-36 · VD-23 |
 | **2 · Plata y control** | Que nadie se lleve nada y cada peso tenga dueño | VD-7 · VD-8 · VD-9 · VD-10 · VD-3 · VD-4 · VD-41 |
 | **3 · El día del dueño** | Todo conectado y con pendientes | VD-11 · VD-37 · VD-13 · VD-14 · VD-15 · VD-38 · VD-16 · VD-17 · VD-18 · VD-44 |
 | **4 · Socio y página** | La app y la página que dan ganas | VD-35 · VD-39 · VD-22 · VD-24 · VD-25 · VD-19 · VD-20 |
@@ -307,3 +307,16 @@ LISTO SI: e2e: profe con foto aparece en su clase en la app.
 Cada situación ⭐ que el sistema todavía no resuelve es un ítem VD-46,
 VD-47… con su LISTO SI (los arma el agente al empezar la tanda 6, leyendo
 `14-SITUACIONES.md` y el código).
+
+**VD-47 · Rapidez de verdad** (`16` §1-2, §4)
+Región igual a Supabase (o QUÉ CONFIGURÁS VOS), middleware con el gimnasio
+en memoria 60 s y `getClaims`, una consulta o `Promise.all` por pantalla,
+`Suspense` en los bloques lentos, `unstable_cache` por gimnasio de lo que
+casi no cambia con `revalidateTag` al guardar, `next/dynamic` para lo
+pesado, fotos achicadas al subir, tiempo máximo con "Reintentar",
+`scripts/medir/tiempos.mjs` en las Pruebas completas.
+LISTO SI: tabla de tiempos antes/después en el LOG (15 pantallas × rol,
+3.000 socios): todas < 1 s hasta ver contenido en compu; el middleware hace
+como mucho 1 viaje a Supabase por pedido (contado en la prueba); cambiar la
+marca o un plan se ve al instante (revalidación); ningún dato de permisos o
+plata en caché (prueba: dos roles ven lo suyo).
