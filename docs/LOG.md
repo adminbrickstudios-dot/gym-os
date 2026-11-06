@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-9 · Caja por turno que se cierra sola, sin cron (D20)
+
+**QUÉ HICE**
+- Migraciones 4100 y 4101: una caja abierta de otro día, o con más de N horas (14 por defecto, hora de corte 00:00 por defecto), cuenta como "sin contar"; al primer acceso queda registrada cerrada sin contar con el esperado y sin responsable. Un trigger `before insert` sobre `pagos`, `ventas` y `movimientos_caja` impide cobrar en ella (`vender` no se tocó). "Para revisar" en Caja para dueño y encargado: "conté $X" o dejarla con motivo, siempre con quién y cuándo.
+- Mi turno desde la Entrada (abrir con fondo sugerido sin ponerlo solo, cerrar, aviso si quedó vencido). Reporte X (turno abierto, solo dueño/encargado: arqueo ciego) y de cierre; Z del día con SOBRAN/FALTAN grande y lo sin contar aparte; por WhatsApp. Calculadora de billetes opcional (la base re-suma). Configuración → Cobros → Caja: por turno o una caja por día, pedir billetes, fondo fijo, hora de corte, horas máximas (solo dueño; queda en el historial).
+- Decisiones: `abrir_caja` registra como sin contar toda caja vencida antes de abrir (reemplaza la regla CAJ-5 "cerrala antes de abrir otra"; sigue sin permitir dos turnos abiertos); si la recepción cierra su propia caja vencida antes de que se registre, cuenta, pero queda anotado que se cerró sola; la recepción ve solo reportes de turnos que abrió o cerró. Se actualizó `caja-olvidada` para esa regla nueva.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`caja-sin-contar`, `caja-olvidada`).
+
+**SIN ARREGLAR**: VD-9b (alerta al dueño en la campana), VD-9c (abrir turno en Inicio para dueño/encargado), VD-9d (etiquetas de `caja.*` en el historial), VD-9e (fondo que no coincide con el turno anterior).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-9` y los viejos caj-1, caj-3, caj-4, caj-5 (no modificados): escritos según la documentación, pero no ejecutados; `npm run db:types` no se corrió.
+
 ## 2026-11-06 · Noche · VD-7 y VD-8 · Cómo vencen las cuotas y dejar pasar sin pagar (D18, D19)
 
 **QUÉ HICE**

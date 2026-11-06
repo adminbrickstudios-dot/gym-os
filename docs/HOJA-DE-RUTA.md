@@ -483,10 +483,14 @@ bloque 18.
 - [ ] VD-7c · 🟢 · Ventana de pago en Vencen hoy ("día 4 de 10" con día fijo y gracia)
 - [ ] VD-7d · 🟢 · Un gimnasio nuevo arranca con la regla proporcional (hoy sin fila queda "como hasta ahora")
 - [ ] VD-8b · 🟢 · Lista de promesas de pago incumplidas con quién las autorizó y aviso al dueño
+- [ ] VD-9b · 🟢 · Alerta al dueño (campana) una sola vez cuando una caja se cierra sin contar
+- [ ] VD-9c · 🟢 · "Abrir mi turno" en Inicio también para dueño y encargado
+- [ ] VD-9d · 🟢 · Etiquetas legibles de caja.* en el historial de configuración
+- [ ] VD-9e · 🟢 · Avisar si el fondo con que se abre no coincide con lo que dejó el turno anterior
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
-- [ ] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z
+- [x] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z — verificado: caja vencida = sin_contar calculada sin cron, trigger que impide cobrar en ella, Para revisar, reportes X y Z con SOBRAN/FALTAN, calculadora; base en verde en GitHub (caja-sin-contar); e2e vd-9 en la corrida de la tanda
 - [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
 - [x] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
 - [x] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda

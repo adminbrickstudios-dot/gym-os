@@ -18,6 +18,8 @@ import { LinkResena } from "./LinkResena";
 import { ConfigEntrada } from "./ConfigEntrada";
 import { ConfigDejarPasarCard, ReglasVencimiento } from "./ReglasCobro";
 import type { ConfigDejarPasar, ReglasVencimiento as DatosVencimiento } from "./cobros-acciones";
+import { ConfigCaja } from "./ConfigCaja";
+import type { ConfigCaja as DatosConfigCaja } from "@/app/panel/caja/tipos";
 import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/config";
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
@@ -166,8 +168,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar }: {
-  metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar, cajaConfig = null }: {
+  metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -482,6 +484,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <ReglasVencimiento inicial={vencimiento} puedeEditar={puedeEditar} />
           <ConfigDejarPasarCard inicial={dejarPasar} puedeEditar={puedeEditar} />
           <MercadoPago estado={mercadopago} puedeEditar={puedeEditar} />
+          {cajaConfig && <ConfigCaja inicial={cajaConfig} puedeEditar={puedeEditar} />}
         </>}
 
         {pestana === "reglas" && <>
