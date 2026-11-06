@@ -14,6 +14,7 @@ const url = arg("url") ?? process.env.DB_PRUEBAS_URL ?? process.env.SUPABASE_DB_
 const slug = arg("gimnasio") ?? "demo";
 const verPlan = process.argv.includes("--plan");
 const anidado = process.argv.includes("--anidado");
+const planes = process.argv.includes("--planes");
 if (!url) { console.error("Falta --url o DB_PRUEBAS_URL"); process.exit(1); }
 if (/supabase\.(co|com)/.test(url)) { console.error("explain.mjs no corre contra Supabase real"); process.exit(1); }
 
@@ -92,22 +93,31 @@ try {
     }
     filas.push({ nombre, quien, ms, error, presupuesto });
     if (verPlan && !error) console.log(`\n── ${nombre}\n${texto}`);
-    // --anidado: los planes de las consultas de ADENTRO de la función (auto_explain), solo de las que pasan.
+    // --anidado: cuánto gastó cada función de ADENTRO (track_functions), de las que pasan del presupuesto.
+    // --planes: además, los planes de las consultas de adentro (auto_explain; sale muchísimo texto).
     const detalle = /estado_acceso|registrar_ingreso/.test(nombre);
-    if (anidado && !error && (ms > presupuesto || detalle)) {
+    if ((anidado || planes) && !error && (ms > presupuesto || detalle)) {
       const avisos = [];
       const alAviso = (m) => avisos.push(m.message);
       db.on("notice", alAviso);
+      let tabla = "";
+      await db.query("select pg_stat_reset()");
       await db.query("begin");
       try {
-        await db.query("load 'auto_explain'");
-        await db.query(`set auto_explain.log_min_duration = ${detalle ? 0 : 20}; set auto_explain.log_analyze = on; set auto_explain.log_nested_statements = on; set auto_explain.log_timing = on; set client_min_messages = log`);
+        await db.query("set track_functions = 'all'");
+        if (planes) {
+          await db.query("load 'auto_explain'");
+          await db.query(`set auto_explain.log_min_duration = ${detalle ? 0 : 20}; set auto_explain.log_analyze = on; set auto_explain.log_nested_statements = on; set auto_explain.log_timing = on; set client_min_messages = log`);
+        }
         await db.query("set local role authenticated");
         await db.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: quien === "recepcion" ? recepcion : duenio, role: "authenticated" })]);
         await db.query(sqlFinal);
       } catch (e) { avisos.push(`error: ${e.message}`); }
       finally { await db.query("rollback"); db.off("notice", alAviso); }
-      console.log(`\n::group::planes de adentro de ${nombre}\n${avisos.join("\n").slice(0, 60000)}\n::endgroup::`);
+      await new Promise((r) => setTimeout(r, 1300));   // las estadísticas de funciones se vuelcan al pasar un segundo
+      const { rows } = await db.query("select schemaname || '.' || funcname as f, calls, round(total_time::numeric, 1) as total, round(self_time::numeric, 1) as propio from pg_stat_user_functions where calls > 0 order by total_time desc limit 8");
+      tabla = rows.map((r) => `  ${r.f}  llamadas ${r.calls}  total ${r.total} ms  propio ${r.propio} ms`).join("\n");
+      console.log(`\n::group::por dentro de ${nombre}\n${tabla}${planes ? "\n" + avisos.join("\n").slice(0, 60000) : ""}\n::endgroup::`);
     }
   }
 } finally {

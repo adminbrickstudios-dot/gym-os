@@ -50,8 +50,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Base nueva con todas las migraciones
-        run: scripts/db/local.sh nueva
+      # ANTES y DESPUÉS salen de la misma corrida (misma máquina y misma base): entre una corrida y otra los
+      # runners de GitHub varían hasta el doble. La migración "velocidad_escala" se aplica recién después de medir.
+      - name: Base nueva (sin la migración de velocidad)
+        run: |
+          mkdir -p .local/aparte
+          mv supabase/migrations/*_velocidad_escala.sql .local/aparte/ || true
+          scripts/db/local.sh nueva
       - name: Demo con muchos socios
         run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios || '3000' }}"
       - name: Gimnasios de carga
@@ -60,13 +65,20 @@ jobs:
         run: |
           scripts/local/levantar.sh
           psql "$(scripts/db/local.sh url)" -c "select count(*) as socios from public.socios" -c "select count(*) as gimnasios from public.gimnasios"
-      - name: Estadísticas al día (como lo deja el autovacuum en producción)
-        run: psql "$(scripts/db/local.sh url)" -c "vacuum analyze"
-      - name: explain analyze de las funciones de pantalla
+      - name: ANTES · estadísticas al día y explain analyze
         run: |
-          mkdir -p .local
+          psql "$(scripts/db/local.sh url)" -c "vacuum analyze"
+          node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/antes.md --json .local/antes.json
+      - name: Aplicar la migración de velocidad
+        run: |
+          mv .local/aparte/*.sql supabase/migrations/ || true
+          node scripts/db/aplicar.mjs --url "$(scripts/db/local.sh url)"
+      - name: DESPUÉS · estadísticas al día y explain analyze
+        run: |
+          psql "$(scripts/db/local.sh url)" -c "vacuum analyze"
           node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/explain.md --json .local/explain.json
-          { echo "## Funciones de pantalla (explain analyze)"; echo; cat .local/explain.md; } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/medir/comparar.mjs .local/antes.json .local/explain.json | tee .local/comparacion.md
+          { echo "## Funciones de pantalla: antes / después (explain analyze)"; echo; cat .local/comparacion.md; echo; echo "## Después, con el detalle"; echo; cat .local/explain.md; } >> "$GITHUB_STEP_SUMMARY"
       - name: Pantallas (tiempo hasta ver contenido)
         if: inputs.pantallas
         continue-on-error: true
@@ -81,6 +93,9 @@ jobs:
           name: medicion-escala
           path: |
             .local/explain.md
+            .local/antes.md
+            .local/comparacion.md
+            .local/antes.json
             .local/explain.json
             .local/tiempos.md
             .local/*.log
