@@ -7,6 +7,7 @@ import { formatearPesos } from "@/lib/formato";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { Camara } from "./CamaraDinamica";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Tilde } from "@/components/ui/Tilde";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
@@ -164,7 +165,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
 
       {hecho && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : "verde") }}>
-          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : "✅"}</span>
+          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : <Tilde tamano={32} />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">
             {hecho.repetido ? `${hecho.nombre} ya estaba anotado hace un momento` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : `Entró ${hecho.nombre}`}
           </p>
@@ -197,7 +198,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         <section aria-live="polite" role="dialog" aria-label={`Veredicto: ${elegido.nombre}`} data-veredicto={v.color}
           className="fixed inset-0 z-50 overflow-y-auto p-6 sm:p-12 flex"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 62%)` }}>
-          <div className="m-auto w-full max-w-3xl">
+          <div className="pulso m-auto w-full max-w-3xl">
           <div className="flex items-center gap-4">
             <p className="text-7xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
             {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}

@@ -1,6 +1,6 @@
 // Con la forma real de Vender: buscador, botones de lo que se vende y el ticket al costado.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <div className="space-y-6" aria-busy="true" aria-label="Cargando">
       <div className={`${bloque} h-24 w-2/3`} />

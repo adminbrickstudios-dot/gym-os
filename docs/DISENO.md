@@ -52,7 +52,10 @@ Siempre con emoji delante cuando es una acción de las de todos los días
 | `Pestanas` | `ui/Pestanas.tsx` | Pestañas; con `href` cada una es una ruta (`recargar`: navegación completa, para que una pantalla con cambios sin guardar avise); `marca` pone un • (cambios sin guardar). En el celular se deslizan; en compu bajan de renglón |
 | `PildoraEstado` / `PuntoEstado` | `panel/Estado.tsx` | El semáforo, siempre con su texto |
 | `GrillaAccesos` | `panel/GrillaAccesos.tsx` | Los botones grandes de Inicio, editables |
-| `Buscador` | `panel/Buscador.tsx` | Ctrl+K |
+| `Buscador` | `panel/Buscador.tsx` | Ctrl+K (usa `Hoja`) |
+| `Hoja` | `ui/Hoja.tsx` | Modal/hoja flotante reutilizable: `abierta`, `alCerrar`, `etiqueta`, `alineacion`. Esc cierra, tocar afuera cierra, foco atrapado y devuelto; escala al entrar y en el celular sube desde abajo (`.hoja`). Todo lo que flota usa esta |
+| `Tilde` | `ui/Tilde.tsx` | El ✓ que se dibuja en 300 ms (`.tilde`): al anotar, cobrar, guardar |
+| `Brillo` | `ui/Brillo.tsx` | Un número que se ilumina 600 ms cuando cambia (`Dato` ya lo usa para texto y números) |
 
 ## Clases de estructura
 

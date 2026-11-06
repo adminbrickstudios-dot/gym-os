@@ -23,7 +23,7 @@ export function Novedades({ gimnasioId, novedades, puede, hoy }: { gimnasioId: s
         <p className="texto-suave">Un aviso corto que todos ven arriba en la app, hasta el día que elijas.</p>
       </div>
       {novedades.length > 0 && (
-        <ul className="space-y-2">{novedades.map((n) => (
+        <ul className="lista-entra space-y-2">{novedades.map((n) => (
           <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--borde)] px-4 py-3" data-novedad>
             <span className="flex-1 min-w-0">{n.texto}<span className="block text-sm texto-tenue">Hasta el {fecha(n.hasta)} · {n.por}</span></span>
             {puede && <button type="button" disabled={ocupado} className="boton !min-h-11 texto-suave"

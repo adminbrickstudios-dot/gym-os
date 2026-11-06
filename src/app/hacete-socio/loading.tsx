@@ -1,6 +1,6 @@
 // Con la forma real del alta: título, planes y campos.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <main className="mx-auto max-w-3xl px-4 pt-20 space-y-8" aria-busy="true" aria-label="Cargando">
       <div className={`${bloque} h-14 w-2/3`} />

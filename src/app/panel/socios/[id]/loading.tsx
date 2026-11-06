@@ -1,6 +1,6 @@
 // Con la forma real de la ficha: foto y nombre, estado, botones, pestañas y tarjetas.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <div className="space-y-8" aria-busy="true" aria-label="Cargando">
       <div className="flex items-center gap-4"><div className={`${bloque} size-16 sm:size-20 flex-none`} /><div className={`${bloque} h-14 w-2/3`} /></div>

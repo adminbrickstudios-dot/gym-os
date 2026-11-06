@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import type { Seccion } from "@/lib/panel/secciones";
+import { Hoja } from "@/components/ui/Hoja";
 import { PuntoEstado } from "./Estado";
 
 const sinAcentos = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -60,10 +61,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
         </button>
       )}
 
-      {abierto && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center px-3 pt-[10vh]" onClick={() => setAbierto(false)}>
-          <div role="dialog" aria-modal="true" aria-label="Buscar" onClick={(e) => e.stopPropagation()}
-            className="tarjeta w-full max-w-xl overflow-hidden shadow-2xl !bg-[var(--fondo)]">
+      <Hoja abierta={abierto} alCerrar={() => setAbierto(false)} etiqueta="Buscar" alineacion="arriba">
             <input
               ref={campo} value={texto} onChange={(e) => setTexto(e.target.value)}
               onKeyDown={(e) => {
@@ -114,9 +112,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                 <p className="px-3 py-6 texto-suave text-center">No hay socios ni secciones con “{texto.trim()}”.</p>
               )}
             </div>
-          </div>
-        </div>
-      )}
+      </Hoja>
     </>
   );
 }

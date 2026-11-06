@@ -11,7 +11,7 @@ export function Mensaje({ tipo = "info", children, accion, className = "" }: {
   tipo?: TipoMensaje; children: ReactNode; accion?: ReactNode; className?: string;
 }) {
   return (
-    <div role={tipo === "error" ? "alert" : "status"} className={`mensaje mensaje-${tipo} ${className}`}>
+    <div role={tipo === "error" ? "alert" : "status"} className={`aparecer mensaje mensaje-${tipo} ${className}`}>
       <span aria-hidden>{EMOJI[tipo]}</span>
       <div className="min-w-0 flex-1">{children}</div>
       {accion && <div className="flex-none">{accion}</div>}
