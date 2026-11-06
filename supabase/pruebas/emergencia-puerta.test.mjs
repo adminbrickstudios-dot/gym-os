@@ -122,7 +122,7 @@ test("encendido, permisos y el ciclo completo con las funciones públicas (now)"
   assert.equal((await est()).habilitada, true);
 
   await t.falla(() => activar(uRec), /Sin permiso/);
-  await t.falla(() => activar(uDueno, "corto"), /motivo/);
+  await t.falla(() => activar(uDueno, "ya"), /motivo/);
   await t.falla(() => activar(uDueno, "Corte de luz en la puerta", 0), /1 a 12 horas/);
   await t.falla(() => activar(uDueno, "Corte de luz en la puerta", 13), /1 a 12 horas/);
   const a = await activar(uEnc, "Molinete en libre desde las 18", 2);
