@@ -1,4 +1,17 @@
 # Gy
+## 2026-11-06 · Noche · VD-6, VD-5b, VD-1b y VD-2b · Alta rápida y ventana de Entrada completa
+
+**QUÉ HICE**
+- VD-6 (migración 3800): en la ventana de Entrada, un DNI inexistente ofrece "Darlo de alta" (tecla A): datos → plan con tarjetas y primer pago → "Guardar y cobrar" abre la hoja Cobrar → vuelve en verde para anotar. Alta completa en Socios en 4 pasos en una pantalla (datos, plan con tarjetas y primer pago, hoja Cobrar sobre el alta, Listo con bienvenida). Un Interesado con ese celular se ofrece. Un error o celular a medio escribir no borra nada. `planes_para_alta` calcula cuota, matrícula y totales en la base; `prospecto_por_telefono` busca al Interesado. "Dar de alta" sin plan sigue yendo a la ficha.
+- VD-5b: "Dar de alta y cobrar" y el Cobrar de `Puerta.tsx` abren la hoja Cobrar (si no está montada, respaldo a Vender); `Puerta` recalcula el veredicto al cobrar. Actualicé ent-9, pla-3, pla-6, soc-13, vd-1, vd-34, ven-5 y ven-6, y los 12 e2e que usaban el select de plan usan el helper `scripts/e2e/alta.mjs` (el plan pasó a tarjetas).
+- VD-1b: F abre la ficha con `?desde=entrada` y su Volver reabre la ventana con el mismo socio; el dueño con varias sedes elige sede en la ventana (queda en esa compu).
+- VD-2b (migración 3802): chips "Tiene clase hoy a las HH:MM" y "En prueba" en `guia_entrada`.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`alta-rapida`, `guia-clase-hoy`).
+
+**Decisiones del agente**: "En prueba" es provisoria (primera vez con pase o pack), solo informativa y sin cambiar quién entra: queda atada a CLA-6/REV-1c (VD-2c, 🟡).
+**SIN ARREGLAR**: VD-6b (el Interesado no guarda DNI: solo se cruza por celular), VD-6c (proporcional del día fijo depende de VD-7); al cambiar de pestaña en la ficha se pierde `desde=entrada`.
+**LO QUE NO PUDE VERIFICAR**: todo lo de pantallas y los e2e nuevos y actualizados: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
 ## 2026-11-06 · Noche · VD-33b, VD-33c y VD-12e · Mi cuenta, anti-robot e Inicio sin repetir
 
 **QUÉ HICE**

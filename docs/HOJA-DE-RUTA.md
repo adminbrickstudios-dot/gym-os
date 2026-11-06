@@ -453,7 +453,7 @@ bloque 18.
 - [x] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores) — verificado: ventana de Entrada global (tipeo, botón, F2/Ctrl+E, lector USB, barra fija opcional) sobre las funciones de siempre + Configuración → Entrada; base en verde en GitHub; e2e vd-1 en la corrida de la tanda
 - [x] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón — verificado: guia_entrada en la base: botón, qué decirle, chips por situación; prueba de base por cada fila de la tabla; base en verde en GitHub; e2e vd-2 en la corrida de la tanda
 - [x] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K) — verificado: hoja Cobrar única (Entrada, ficha, Vencen, Retención, Ctrl+K) con las mismas acciones que Vender, otro día solo dueño/encargado exigido por la base, vuelve al origen; base en verde en GitHub; e2e vd-5 en la corrida de la tanda
-- [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
+- [x] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [x] VD-12 · 🟢 · Inicio del dueño y de la recepción — verificado: numeros_inicio en un viaje con permisos por rol, 4 números configurables, turno de caja de la recepción; base en verde en GitHub; e2e vd-12 en la corrida de la tanda
 - [x] VD-36 · 🟢 · App del socio en 4 pestañas, limpia — verificado: 4 pestañas Inicio·Clases·Rutina·Yo calculadas por pestanas_app en la base, pantallas viejas accesibles en Yo; base en verde en GitHub; e2e vd-36 en la corrida de la tanda
 - [x] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida — verificado: progreso_inicio en la base (semana, racha, meta, hito, Entraste), bienvenida de 3 pasos, Pagar arriba si debe; base en verde en GitHub; e2e vd-23 en la corrida de la tanda
@@ -465,15 +465,18 @@ bloque 18.
 - [x] VD-33c · 🟢 · Desafío anti-robot (Turnstile) antes de mandar códigos que cuestan SMS, detrás de una variable (LISTO SI: sin el desafío resuelto no se manda el código; sin la variable todo sigue igual) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
 - [x] VD-23b · 🟢 · Editor de la meta de visitas del mes (meta_visitas_mes) en Configuración, y fila "Escribile al gimnasio" en Yo → Más (LISTO SI: el dueño cambia la meta y el Inicio del socio la sigue) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
 - [x] VD-23c · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba" — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [ ] VD-1b · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas)
-- [ ] VD-2b · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip)
+- [x] VD-1b · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
+- [x] VD-2b · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [ ] VD-47Y · 🟢 · Correr scripts/medir/explain.mjs con 3.000 socios y poner la tabla antes/después en el LOG (LISTO SI: ninguna función de pantalla pasa de 300 ms)
 - [x] VD-12e · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
-- [ ] VD-5b · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes)
+- [x] VD-5b · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [ ] VD-5c · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
 - [ ] VD-33d · 🟢 · 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
 - [ ] VD-33e · 🟢 · Al cambiar la contraseña, ofrecer cerrar las demás sesiones
 - [ ] VD-33f · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
+- [ ] VD-6b · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular)
+- [ ] VD-6c · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
+- [ ] VD-2c · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
