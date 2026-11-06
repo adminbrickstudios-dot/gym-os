@@ -3,6 +3,7 @@ import { startTransition, useActionState, useEffect, useState } from "react";
 import { guardarContrasenaNueva, pedirRecuperacion, verificarRecuperacion, type EstadoRecuperar } from "../acciones";
 import { PasoCodigo } from "@/components/cuentas/PasoCodigo";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
 
 /** Tres pasos en el mismo lugar: el mail, el código de 6 dígitos y la contraseña nueva. Nunca dice si el mail tiene cuenta. */
 export function Recuperar({ siguiente }: { siguiente: string | null }) {
@@ -60,6 +61,7 @@ function Pasos({ siguiente, otraVez }: { siguiente: string | null; otraVez: () =
         <span className="etiqueta">Mail de tu cuenta</span>
         <input className="campo" type="email" name="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vos@ejemplo.com" />
       </label>
+      <DesafioTurnstile />
       {pedido.error && <Mensaje tipo="error">{pedido.error}</Mensaje>}
       <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">{pidiendo ? "Mandando…" : "✉️ Mandame el código"}</button>
     </form>

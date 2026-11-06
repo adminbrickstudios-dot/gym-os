@@ -30,7 +30,7 @@ const EJECUTABLES = {
     "public.retencion", "public.retencion_resumen", "public.registrar_contacto",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",
-    "public.mi_sesion", "public.panel_gimnasio", "public.guardar_accesos_rapidos", "public.panel_inicio",
+    "public.mi_sesion", "public.mi_seguridad", "public.panel_gimnasio", "public.guardar_accesos_rapidos", "public.panel_inicio",
     "public.buscar_socios", "public.ficha_socio", "public.guardar_socio", "public.planes_gimnasio", "public.guardar_plan",
     "public.programar_precio", "public.productos_gimnasio", "public.guardar_producto", "public.ingresos_del_dia",
     "public.configuracion_panel", "public.guardar_configuracion", "public.equipo_gimnasio", "public.guardar_equipo",

@@ -86,14 +86,15 @@ export const pedirBajaSocio = async (socioId: string, motivo: string, nota: stri
   r(async () => { await rpc("pedir_baja_socio", { p_socio_id: socioId, p_motivo: motivo, p_nota: nota || null }); revalidatePath("/app/cuenta"); });
 
 /** APP-9: el socio crea (o cambia) su contraseña para entrar con su mail. */
-export async function crearContrasena(clave: string): Promise<{ error?: string }> {
+export async function crearContrasena(clave: string, actual?: string): Promise<{ error?: string }> {
   if (clave.length < 8) return { error: "La contraseña: 8 letras o más." };
   const { crearClienteServidor } = await import("@/lib/supabase/servidor");
   const supabase = await crearClienteServidor();
   const { data } = await supabase.auth.getUser();
   if (!data.user?.email) return { error: "Para entrar con contraseña, entrá una vez con tu mail." };
-  const { error } = await supabase.auth.updateUser({ password: clave });
-  return error ? { error: `No se pudo guardar: ${error.message}` } : {};
+  // VD-33b: si ya tenía contraseña, se pide la actual.
+  const { cambiarContrasenaCuenta } = await import("@/lib/cuenta/acciones");
+  return cambiarContrasenaCuenta(clave, actual);
 }
 
 /** RUT-2: el socio anota peso y repeticiones de un ejercicio de su rutina. */

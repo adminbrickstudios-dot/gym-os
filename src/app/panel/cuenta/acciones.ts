@@ -1,8 +1,7 @@
 "use server";
-import { crearClienteServidor } from "@/lib/supabase/servidor";
+import { cambiarContrasenaCuenta } from "@/lib/cuenta/acciones";
 
-export async function cambiarContrasena(nueva: string): Promise<{ error?: string }> {
-  if (nueva.length < 8) return { error: "Tiene que tener al menos 8 caracteres" };
-  const { error } = await (await crearClienteServidor()).auth.updateUser({ password: nueva });
-  return error ? { error: `No se pudo cambiar: ${error.message}` } : {};
+/** VD-33b: con contraseña puesta pide la actual (la verifica cambiarContrasenaCuenta). */
+export async function cambiarContrasena(nueva: string, actual?: string): Promise<{ error?: string }> {
+  return cambiarContrasenaCuenta(nueva, actual);
 }

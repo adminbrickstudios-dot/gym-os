@@ -4,6 +4,7 @@ import { pedirCodigo, pedirCodigoMail, verificarCodigo, verificarCodigoMail } fr
 import { FormularioIngreso } from "./FormularioIngreso";
 import { PasoCodigo } from "@/components/cuentas/PasoCodigo";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
 
 type Via = "celular" | "mail" | "clave";
 type Estado = { error?: string; enviado?: boolean; telefono?: string; email?: string; destino?: string };
@@ -100,6 +101,7 @@ function PorCodigo({ via, setVia, valor, setValor, vias, otraVez }: {
         />
       </label>
       {vias}
+      <DesafioTurnstile />
       {pedido.error && <Mensaje tipo="error">{pedido.error}</Mensaje>}
       <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">
         {pidiendo ? "Mandando…" : mail ? "✉️ Mandame el código" : "📲 Mandame el código"}

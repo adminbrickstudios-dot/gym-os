@@ -120,7 +120,12 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
-    const ahora = datos.ahora.filter((a) => !a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas));
+    // VD-12e: lo que ya figura en "Para hacer hoy" no se repite en "Ahora y lo que sigue".
+    const yaEnHacer = new Set(hacerHoy.map((x) => x.clave));
+    const repetido = (a: Ahora) =>
+      (a.tipo === "transferencias" && yaEnHacer.has("transferencias")) ||
+      (a.tipo === "vencen" && yaEnHacer.has("vencen_hoy"));
+    const ahora = datos.ahora.filter((a) => (!a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas)) && !repetido(a));
 
     return (
       <>
