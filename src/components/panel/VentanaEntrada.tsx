@@ -12,7 +12,7 @@ import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type Guia, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
-import { ultimasEntradas, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
@@ -173,8 +173,11 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
 
   // Las últimas 5 entradas de la barra: al abrir la pantalla, después de cada entrada y cada 20 s si la pestaña se ve.
   const refrescarUltimas = useCallback(async () => {
-    const r = await ultimasEntradas(sedeId);
-    if (r.entradas) setUltimas(r.entradas);
+    try {
+      const res = await fetch(`/panel/entrada/ultimas?sede=${encodeURIComponent(sedeId)}`, { cache: "no-store" });
+      const r = (await res.json()) as { entradas?: UltimaEntrada[] };
+      if (r.entradas) setUltimas(r.entradas);
+    } catch { /* sin red: se queda lo último que llegó */ }
   }, [sedeId]);
   useEffect(() => {
     if (!conBarra) return;
