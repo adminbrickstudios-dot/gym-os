@@ -20,6 +20,8 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
+import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
+import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
@@ -81,8 +83,8 @@ function Iniciales({ nombre }: { nombre: string }) {
   return <>{(a?.[0] ?? "?").toUpperCase()}{(b?.[0] ?? "").toUpperCase()}</>;
 }
 
-export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlavero, esRecepcion, sedes = [], puedeCobrar = false }: {
-  sedeId: string; zona: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; esRecepcion: boolean;
+export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, conQr, conLlavero, esRecepcion, sedes = [], puedeCobrar = false }: {
+  gimnasioId: string; sedeId: string; zona: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; esRecepcion: boolean;
   /** VD-1b: las sedes entre las que el dueño elige (vacío si no puede elegir). */
   sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean;
 }) {
@@ -171,16 +173,21 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
     return () => { delete document.documentElement.dataset.barraEntrada; };
   }, [conBarra]);
 
-  // Las últimas 5 entradas de la barra: al abrir la pantalla, después de cada entrada y cada 20 s si la pestaña se ve.
+  // Las últimas 5 entradas de la barra: al abrir la pantalla, después de cada entrada propia y (VD-4) apenas
+  // entra alguien por otra vía: el "oído" compartido avisa y acá se vuelve a leer la lista (sin otro polling).
   const refrescarUltimas = useCallback(async () => {
     const r = await ultimasEntradas(sedeId);
     if (r.entradas) setUltimas(r.entradas);
   }, [sedeId]);
+  const refrescarRef = useRef(refrescarUltimas);
+  useEffect(() => { refrescarRef.current = refrescarUltimas; });
+  useEffect(() => {
+    if (!conBarra) return;
+    return escucharEntradas(gimnasioId, () => { void refrescarRef.current(); });
+  }, [conBarra, gimnasioId]);
   useEffect(() => {
     if (!conBarra) return;
     void refrescarUltimas();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void refrescarUltimas(); }, 20000);
-    return () => clearInterval(t);
   }, [conBarra, refrescarUltimas, hecho]);
 
   const hora = (d: Date) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
@@ -412,6 +419,18 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
     window.addEventListener(EVENTO_ABRIR_ENTRADA, abrirDesdeBoton);
     return () => window.removeEventListener(EVENTO_ABRIR_ENTRADA, abrirDesdeBoton);
   }, [propia, abrir, cerrar]);
+
+  // VD-4: tocar un aviso de la puerta abre el veredicto de ese socio acá.
+  useEffect(() => {
+    if (propia) return;
+    const abrirSocio = (e: Event) => {
+      const s = (e as CustomEvent<ResultadoSocio>).detail;
+      abrir();
+      setTimeout(() => elegir(s), 0);
+    };
+    window.addEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
+    return () => window.removeEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
+  }, [propia, abrir, elegir]);
 
   const refrescar = async (socioId: string) => {
     const r = await veredicto(socioId, sedeId);

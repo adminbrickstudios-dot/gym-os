@@ -9,6 +9,7 @@ import { Campana } from "./Campana";
 import { ProveedorSecciones } from "./LinkPanel";
 import { SinConexion } from "@/components/ui/SinConexion";
 import { VentanaEntrada } from "./VentanaEntrada";
+import { AvisosEntrada } from "./AvisosEntrada";
 import { CobrarHost } from "./cobrar/CobrarHost";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
@@ -44,7 +45,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         cambiarGimnasio={enPlataforma}
       />
       {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
-      {entrada && <VentanaEntrada sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
+      {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana />}
+      {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}

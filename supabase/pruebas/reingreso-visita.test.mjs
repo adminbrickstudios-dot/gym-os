@@ -34,6 +34,7 @@ test("a las 4 h 59 m es la misma visita: no cuenta otra entrada ni descuenta el 
   const s = t.ctx.socios.pack_con_clases;
   const m = await t.en(HOY, "10:00:00");
   const antes = await packs(s);
+  const entradasAntes = await ingresos(s);   // el caso testigo ya trae las entradas de sus clases consumidas
   const r1 = await reg(s, m);
   assert.equal(r1.repetido, false);
   assert.equal(await packs(s), antes + 1);
@@ -42,22 +43,24 @@ test("a las 4 h 59 m es la misma visita: no cuenta otra entrada ni descuenta el 
   assert.equal(r2.ingreso_id, r1.ingreso_id);
   assert.match(r2.texto, /^Ya entró a las 10:00$/);
   assert.equal(r2.color, r1.veredicto.color, "el color de quien está al día no cambia");
-  assert.equal(await ingresos(s), 1);
+  assert.equal(await ingresos(s), entradasAntes + 1);
   assert.equal(await packs(s), antes + 1, "el pack no se descuenta otra vez");
 });
 
 test("a las 5 h 01 m es una entrada nueva", async () => {
   const s = t.ctx.socios.pack_con_clases;
   const m = await t.en(HOY, "10:00:00");
+  const entradasAntes = await ingresos(s);
   const r = await reg(s, sumar(m, 5 * 60 + 1));
   assert.equal(r.repetido, false);
   assert.notEqual(r.ingreso_id, undefined);
-  assert.equal(await ingresos(s), 2);
+  assert.equal(await ingresos(s), entradasAntes + 1);
 });
 
 test("el QR dos veces dice 'ya entraste' y no cuenta otra", async () => {
   const s = t.ctx.socios.por_vencer;
   const m = await t.en(HOY, "08:00:00");
+  const base = await ingresos(s);
   const r1 = await reg(s, m, "qr_socio");
   const r2 = await reg(s, sumar(m, 90), "qr_socio");
   assert.equal(r2.repetido, true);
@@ -65,13 +68,14 @@ test("el QR dos veces dice 'ya entraste' y no cuenta otra", async () => {
   assert.equal(r2.alerta_prestamo, undefined, "misma vía: no es préstamo");
   assert.match(r2.texto, /^Ya entraste a las 08:00 ✓$/);
   assert.equal(r2.color, r1.veredicto.color);
-  assert.equal(await ingresos(s), 1);
+  assert.equal(await ingresos(s), base + 1);
   assert.equal(await alertas(s), 0);
 });
 
 test("otra vía a los 4 minutos: amarillo, sin entrada nueva, y queda la alerta para el dueño", async () => {
   const s = t.ctx.socios.al_dia;
   const m = await t.en(HOY, "10:00:00");
+  const base = await ingresos(s);
   const r1 = await reg(s, m, "recepcion");
   assert.equal(r1.veredicto.color, "verde");
   const r2 = await reg(s, sumar(m, 4), "qr_pared");
@@ -80,7 +84,7 @@ test("otra vía a los 4 minutos: amarillo, sin entrada nueva, y queda la alerta 
   assert.equal(r2.color, "amarillo");
   assert.equal(r2.color_entrada, "verde");
   assert.match(r2.texto, /^Ya entró hace 4 min por recepción: ¿es la misma persona\?$/);
-  assert.equal(await ingresos(s), 1, "no cuenta otra entrada");
+  assert.equal(await ingresos(s), base + 1, "no cuenta otra entrada");
   assert.equal(await alertas(s), 1);
   // El dueño la ve; la recepción no.
   const lista = await como(uDueno, async () => (await t.q(`select public.alertas_prestamo($1, $2::date, 7) as a`, [t.g, HOY]))[0].a);
@@ -118,20 +122,21 @@ test("visita en 0 horas: queda el doble toque de 60 segundos y nada más", async
   const s = t.ctx.socios.en_tolerancia;
   await config({ horas: 0, minutos: 0 });
   const m = await t.en(HOY, "10:00:00");
+  const base = await ingresos(s);
   const r1 = await reg(s, m);
   const r2 = await reg(s, new Date(new Date(m).getTime() + 20_000));
   assert.equal(r2.repetido, true);
   assert.equal(r2.ingreso_id, r1.ingreso_id);
   const r3 = await reg(s, sumar(m, 2));
   assert.equal(r3.repetido, false, "a los 2 minutos ya es otra entrada");
-  assert.equal(await ingresos(s), 2);
+  assert.equal(await ingresos(s), base + 2);
 });
 
 test("la configuración: el dueño la cambia, todos la leen, y se valida", async () => {
   const guardar = (usuario, datos) => como(usuario, async () => (await t.q(`select public.guardar_config_visita($1, $2::jsonb) c`, [t.g, JSON.stringify(datos)]))[0].c);
   const leer = (usuario) => como(usuario, async () => (await t.q(`select public.config_visita($1) c`, [t.g]))[0].c);
   const r = await guardar(uDueno, { visita_horas: 3, antiprestamo_minutos: 30 });
-  assert.deepEqual(r, { visita_horas: 3, antiprestamo_minutos: 30 });
+  assert.deepEqual(r, { visita_horas: 3, antiprestamo_minutos: 30, avisar_en_vivo: true });
   assert.deepEqual(await leer(uRec), r);
   await como(uRec, () => t.falla(() => t.q(`select public.guardar_config_visita($1, '{"visita_horas": 1}'::jsonb)`, [t.g]), /permiso|rol|acceso/i));
   await como(uDueno, () => t.falla(() => t.q(`select public.guardar_config_visita($1, '{"visita_horas": 30}'::jsonb)`, [t.g]), /de 0 a 24/));

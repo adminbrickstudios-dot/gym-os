@@ -100,7 +100,7 @@ function ConfigVisitaSeccion() {
   const entero = (t: string) => (t === "" ? 0 : Math.max(0, Math.trunc(Number(t)) || 0));
   return (
     <section className="tarjeta p-5 space-y-3" data-config-visita>
-      <h2 className="titulo text-2xl">🔁 Volver a entrar</h2>
+      <h2 className="titulo text-2xl">🔁 Volver a entrar y avisos de la puerta</h2>
       <p className="texto-suave">Una visita dura unas horas: si el mismo socio pasa de nuevo por cualquier vía (DNI, QR, tablet) dentro de ese tiempo, se le dice a qué hora entró y no se cuenta otra entrada ni se gasta otra clase.</p>
       {!c ? <div className="esqueleto h-24" aria-hidden /> : (
         <>
@@ -116,6 +116,8 @@ function ConfigVisitaSeccion() {
               onChange={(e) => setC({ ...c, antiprestamo_minutos: entero(e.target.value) })} />
             <span className="block texto-tenue text-sm mt-1">Si entra por el QR y a los pocos minutos por la tablet (o al revés), la recepción ve un aviso amarillo y te queda anotado en Control de la puerta. 0 = apagado.</span>
           </label>
+          <Interruptor etiqueta="Avisar las entradas por QR o tablet en todas las pantallas" ayuda="Un aviso chiquito arriba a la derecha cuando alguien entra por el QR o la tablet, o intenta entrar y no puede (ese queda hasta que lo cierres, con el botón Cobrar)."
+            checked={c.avisar_en_vivo} onChange={(e) => setC({ ...c, avisar_en_vivo: e.target.checked })} />
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
             {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
