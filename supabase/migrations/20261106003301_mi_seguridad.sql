@@ -25,8 +25,8 @@ begin
   select (u.encrypted_password is not null and u.encrypted_password <> '') into tiene from auth.users u where u.id = yo;
   select coalesce(jsonb_agg(jsonb_build_object(
            'id', s.id, 'creada', s.created_at, 'actividad', coalesce(s.updated_at, s.created_at),
-           'user_agent', s.user_agent, 'actual', s.id = actual)
-         order by (s.id = actual) desc, coalesce(s.updated_at, s.created_at) desc), '[]'::jsonb)
+           'user_agent', s.user_agent, 'actual', coalesce(s.id = actual, false))
+         order by coalesce(s.id = actual, false) desc, coalesce(s.updated_at, s.created_at) desc), '[]'::jsonb)
     into lista
     from auth.sessions s
    where s.user_id = yo and (s.not_after is null or s.not_after > now());
