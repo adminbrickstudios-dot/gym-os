@@ -370,3 +370,7 @@ html { accent-color: var(--acento); }
 @media (min-width: 1280px) {
   html[data-barra-entrada="si"] .con-barra { padding-right: 18rem; }
 }
+
+/* VD-47X: mientras llega la lista nueva (filtro o búsqueda), la de antes queda a la vista, atenuada. */
+[data-atenuable] [data-lista] { transition: opacity 120ms ease; }
+[data-atenuable][aria-busy="true"] [data-lista] { opacity: 0.5; pointer-events: none; }

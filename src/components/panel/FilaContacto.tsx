@@ -1,6 +1,6 @@
 "use client";
 import { LinkPanel } from "@/components/panel/LinkPanel";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { anotarContacto } from "@/app/panel/retencion/acciones";
 import { marcarAvisado } from "@/app/panel/avisos/acciones";
 
@@ -18,10 +18,14 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
   /** COM-4: "📌 Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
   tarea?: boolean;
 }) {
-  const [anotado, setAnotado] = useState<string | null>(null);
+  const [anotadoReal, setAnotado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  // VD-47X: el "anotado" aparece al instante; si la base dice que no, vuelve atrás y muestra el error.
+  const [anotado, anotarYa] = useOptimistic<string | null, string>(anotadoReal, (_, r) => r);
   const anotar = (resultado: string) => empezar(async () => {
+    setError(null);
+    anotarYa(resultado);
     const r = await anotarContacto(socioId, lista, resultado);
     if (r.error) setError(r.error); else setAnotado(resultado);
   });
