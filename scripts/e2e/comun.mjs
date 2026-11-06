@@ -40,7 +40,15 @@ export async function navegador({ camara = false, video = null } = {}) {
 /** Página nueva que junta errores de la página y respuestas 5xx. */
 export async function pagina(b, viewport = COMPU, opciones = {}) {
   // opciones: más del contexto (por ejemplo el userAgent de un iPhone).
-  const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...opciones });
+  // conAyuda: true deja que salgan los globos de ayuda (VD-31); solo e2e/vd-31.mjs lo pide.
+  const { conAyuda = false, ...deContexto } = opciones;
+  const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...deContexto });
+  // VD-31: sin esto, el globo de ayuda de la primera visita empujaría el contenido de cada pantalla.
+  // La app lo respeta SOLO con PERMITIR_SIN_AYUDA=1 (lo pone scripts/local/levantar.sh; nunca en producción).
+  if (!conAyuda) {
+    await ctx.addCookies(["demo", "demo-box"].map((s) => GIMNASIO(s)).concat(PLATAFORMA)
+      .map((url) => ({ name: "gymos_sin_ayuda", value: "1", url })));
+  }
   const p = await ctx.newPage();
   p.errores = [];
   // Con la app compilada el HTML llega antes que React, y el contenido de la pantalla (que viene en

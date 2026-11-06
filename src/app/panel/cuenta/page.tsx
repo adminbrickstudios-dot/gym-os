@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { CambiarContrasena } from "./CambiarContrasena";
 import { MiPin } from "./MiPin";
+import { AjustesAyuda } from "./AjustesAyuda";
 import { DosPasos } from "./DosPasos";
 import { ActivarPush } from "@/components/ActivarPush";
 import { Sesiones } from "@/components/cuenta/Sesiones";
@@ -17,9 +18,10 @@ export const metadata: Metadata = { title: "Mi cuenta" };
 
 export default async function Cuenta() {
   const panel = await contextoPanel();
-  const [{ data }, seguridad] = await Promise.all([
+  const [{ data }, seguridad, ayudas] = await Promise.all([
     crearClienteServidor().then((c) => c.auth.getUser()),
     rpc<MiSeguridad>("mi_seguridad"),
+    rpc<{ apagadas: boolean }>("ayudas_vistas", undefined, { lectura: true }).catch(() => null),   // VD-31
   ]);
   return (
     <>
@@ -41,6 +43,7 @@ export default async function Cuenta() {
           <ActivarPush />
         </section>
       )}
+      {ayudas && <AjustesAyuda apagadas={ayudas.apagadas} />}
       <form action="/salir" method="post" className="mt-8"><button className="boton">🚪 Cerrar sesión</button></form>
     </>
   );

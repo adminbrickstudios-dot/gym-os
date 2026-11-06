@@ -6,6 +6,8 @@ import { Aviso } from "@/components/panel/Marco";
 import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
 import { redirect } from "next/navigation";
 import { AyudaBrik } from "@/components/panel/AyudaBrik";
+import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
+import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
 import { BannerSoporte } from "@/components/panel/BannerSoporte";
 
 type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
@@ -54,7 +56,10 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
   // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
-  const abono = await rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+  const [abono, ayudas] = await Promise.all([
+    rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
+    ayudasDeUsuario(),   // VD-31: qué globos de ayuda ya vio esta persona (si falla, no hay globos: nunca bloquea)
+  ]);
   // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
   let entrada: DatosEntrada | null = null;
   if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
@@ -84,6 +89,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       <RegistrarSesion />
       <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+        {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}
         {pideAyuda && <AyudaBrik />}
       </Marco>

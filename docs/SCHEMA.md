@@ -211,7 +211,9 @@ cada dueño va en `novedades_plataforma_cerradas`, con `gimnasio_id`),
 `pedidos_codigo` (el límite de códigos por celular, mail o IP: llega antes
 de saber de qué gimnasio es; guarda el destino como hash y dura 24 h),
 `pedidos_demo_brik` (VD-26: lo que deja un dueño en "Quiero una demo" de la página
-de Gym OS; todavía no es cliente de ningún gimnasio).
+de Gym OS; todavía no es cliente de ningún gimnasio),
+`ayudas_usuario` (VD-31: qué globos de ayuda ya vio cada usuario y si los apagó; es de la
+persona, no de un gimnasio: quien trabaja en dos no ve dos veces el mismo globo).
 
 **Excepciones a "unique por gimnasio"** (lista cerrada):
 `gimnasios.slug`, `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,
