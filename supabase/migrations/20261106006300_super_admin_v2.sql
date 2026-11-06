@@ -202,16 +202,16 @@ begin
     abono := privado.estado_abono(r.id) ->> 'estado';
     dias := case when r.ultimo is null then null else floor(extract(epoch from (now() - r.ultimo)) / 86400)::int end;
     if not r.es_demo then
-      if abono = 'vencido' then rojos := rojos || 'Abono a BRIK vencido'; end if;
-      if r.suspendido then rojos := rojos || 'Suspendido'; end if;
-      if r.socios > 0 and r.entradas = 0 and r.creado_en < now() - interval '7 days' then rojos := rojos || 'Nadie entró en 7 días'; end if;
+      if abono = 'vencido' then rojos := array_append(rojos, 'Abono a BRIK vencido'::text); end if;
+      if r.suspendido then rojos := array_append(rojos, 'Suspendido'::text); end if;
+      if r.socios > 0 and r.entradas = 0 and r.creado_en < now() - interval '7 days' then rojos := array_append(rojos, 'Nadie entró en 7 días'::text); end if;
       if r.socios = 0 or r.sin_dueno then
-        amarillos := amarillos || (case when r.sin_dueno then 'Alta sin terminar: el dueño no tiene acceso' else 'Alta sin terminar: todavía no tiene socios' end);
+        amarillos := array_append(amarillos, (case when r.sin_dueno then 'Alta sin terminar: el dueño no tiene acceso' else 'Alta sin terminar: todavía no tiene socios' end)::text);
       end if;
       if r.creado_en < now() - interval '3 days' and (r.ultimo is null or r.ultimo < now() - interval '3 days') and not r.sin_dueno then
-        amarillos := amarillos || ('El equipo no entra al panel hace ' || coalesce(dias::text, 'mucho') || ' días'); end if;
-      if abono = 'por_vencer' then amarillos := amarillos || 'El abono a BRIK está por vencer'; end if;
-      if r.ayudas > 0 then amarillos := amarillos || (case when r.ayudas = 1 then 'Pidió ayuda y está sin responder' else r.ayudas::text || ' pedidos de ayuda sin responder' end); end if;
+        amarillos := array_append(amarillos, ('El equipo no entra al panel hace ' || coalesce(dias::text, 'mucho') || ' días')::text); end if;
+      if abono = 'por_vencer' then amarillos := array_append(amarillos, 'El abono a BRIK está por vencer'::text); end if;
+      if r.ayudas > 0 then amarillos := array_append(amarillos, (case when r.ayudas = 1 then 'Pidió ayuda y está sin responder' else r.ayudas::text || ' pedidos de ayuda sin responder' end)::text); end if;
     end if;
     color := case when r.es_demo then 'verde' when cardinality(rojos) > 0 then 'rojo' when cardinality(amarillos) > 0 then 'amarillo' else 'verde' end;
     orden := case when r.es_demo then 3 when color = 'rojo' then 0 when color = 'amarillo' then 1 else 2 end;

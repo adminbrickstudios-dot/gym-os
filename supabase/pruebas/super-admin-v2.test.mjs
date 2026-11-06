@@ -18,8 +18,9 @@ async function hacer(usuario, sql, params) {
   try {
     return await t.q(sql, params);
   } finally {
-    await t.q(`reset role`);
-    await t.q(`select set_config('request.jwt.claims', '', true)`);
+    // Si la consulta falló, la transacción está abortada: no se tapa el error de verdad con otro.
+    await t.q(`reset role`).catch(() => {});
+    await t.q(`select set_config('request.jwt.claims', '', true)`).catch(() => {});
   }
 }
 const uno = async (usuario, sql, params) => (await hacer(usuario, sql, params))[0];
