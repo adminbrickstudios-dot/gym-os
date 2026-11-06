@@ -19,6 +19,8 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
+import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
+import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 
 export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
@@ -82,6 +84,10 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
   const [camara, setCamara] = useState(false);
+  // VD-5: mientras la hoja Cobrar está abierta, la Entrada se esconde (y no atiende teclas); al cobrar vuelve con el veredicto nuevo.
+  const [cobrando, setCobrando] = useState(false);
+  const [cobrado, setCobrado] = useState<{ ventaId: string; total: number } | null>(null);
+  const cobrandoRef = useRef(false);
 
   const campo = useRef<HTMLInputElement>(null);
   const barra = useRef<HTMLInputElement>(null);
@@ -101,6 +107,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   const dejarRef = useRef<() => void>(() => {});
   useEffect(() => { textoRef.current = texto; }, [texto]);
   useEffect(() => { pasoRef.current = paso; }, [paso]);
+  useEffect(() => { cobrandoRef.current = cobrando; }, [cobrando]);
 
   // Lo que esta compu le pisa al gimnasio, y el sonido (por compu).
   useEffect(() => {
@@ -139,7 +146,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
 
   const reiniciar = useCallback((inicial = "", enfocar = true) => {
     setPaso("escribir"); setTexto(inicial); setSocios([]); setListaPara(""); setMarcado(0); setNadie(null); setElegido(null);
-    setV(null); setGuia(null); setApto(null); setFirmar(null); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion");
+    setV(null); setGuia(null); setApto(null); setFirmar(null); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null);
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
@@ -248,6 +255,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   useEffect(() => {
     if (propia) return;
     const tecla = (e: KeyboardEvent) => {
+      if (cobrandoRef.current) return;   // la hoja Cobrar tiene el teclado
       const t = e.target as HTMLElement | null;
       const editable = esEditable(t);
       // F2 / Ctrl+E: abrir o cerrar.
@@ -339,6 +347,30 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
   });
   const alCerrarHoja = () => { if (forzando) setForzando(false); else cerrar(); };
 
+  // VD-5: Cobrar se abre sobre la Entrada; al cobrar vuelve con el veredicto recalculado (verde: Enter anota).
+  const cobrarAhora = () => { if (!elegido) return; setCobrando(true); cobrandoRef.current = true; abrirCobrar({ socioId: elegido.socio_id, origen: "entrada" }); };
+  const elegidoRef = useRef<ResultadoSocio | null>(null);
+  useEffect(() => { elegidoRef.current = elegido; }, [elegido]);
+  // Al volver de cobrar con el veredicto en verde, el foco queda en "Anotar entrada": Enter anota.
+  useEffect(() => {
+    if (!cobrado || cobrando || !v?.puede) return;
+    const id = setTimeout(() => document.querySelector<HTMLElement>("[data-ventana-anotar]")?.focus(), 0);
+    return () => clearTimeout(id);
+  }, [cobrado, cobrando, v]);
+  useEffect(() => {
+    const hecho = (e: Event) => {
+      const c = (e as CustomEvent<CobroHecho>).detail;
+      if (c.origen !== "entrada" || elegidoRef.current?.socio_id !== c.socioId) return;
+      setCobrado({ ventaId: c.ventaId, total: c.total });
+      void refrescar(c.socioId);
+    };
+    const cerrada = () => setCobrando(false);
+    window.addEventListener(EVENTO_COBRO_HECHO, hecho);
+    window.addEventListener(EVENTO_COBRAR_CERRADO, cerrada);
+    return () => { window.removeEventListener(EVENTO_COBRO_HECHO, hecho); window.removeEventListener(EVENTO_COBRAR_CERRADO, cerrada); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sedeId]);
+
   if (propia) return null;
 
   // VD-2: el botón principal (y el segundo) lo dice la base según la situación; acá solo se dibujan.
@@ -354,7 +386,8 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
         return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar>✅ Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
       case "cobrar":
       case "cobrar_pack":
-        return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "💵 Cobrar un pack" : "💵 Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
+        return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar
+          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "💵 Cobrar un pack" : "💵 Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
       case "dejar_pasar":
         if (v.puede || forzando) return null;
         return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={() => dejarRef.current()} className={clase} data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
@@ -410,7 +443,7 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
         </aside>
       )}
 
-      <Hoja abierta={abierta} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl">
+      <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl">
         <div data-ventana-entrada data-paso={paso} className="max-h-[88dvh] overflow-y-auto">
           {paso === "escribir" && (
             <div className="p-6 sm:p-8 space-y-4">
@@ -492,6 +525,9 @@ export function VentanaEntrada({ sedeId, zona, config, conQr, conLlavero, esRece
                   ) : null}
                   {v.para_regularizar ? <p className="texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
                   {error && <Mensaje tipo="error">{error}</Mensaje>}
+                  {cobrado && (
+                    <Mensaje tipo="exito"><span data-ventana-cobrado={cobrado.total}>Cobrado {formatearPesos(cobrado.total)}.</span> <MandarComprobante ventaId={cobrado.ventaId} className="mt-2" /></Mensaje>
+                  )}
 
                   <div className="flex flex-wrap gap-2">
                     {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0))}

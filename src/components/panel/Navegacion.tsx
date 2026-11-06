@@ -17,6 +17,8 @@ type Props = {
   buscaSocios: boolean;
   /** EQU-2 (D3): el profe ve nombre, foto y semáforo, sin abrir la ficha. */
   soloVerSocios?: boolean;
+  /** VD-5: Ctrl+K ofrece "Cobrar" a cada socio. */
+  puedeCobrar?: boolean;
   /** Desde la dirección de la plataforma: volver a elegir gimnasio (y al super admin). */
   cambiarGimnasio?: boolean;
 };
@@ -79,7 +81,7 @@ export function Navegacion(props: Props) {
       {/* Compu: barra lateral fija */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
         <p className="titulo text-2xl px-3 flex items-center gap-3 min-w-0"><Logo url={props.logo} tam="h-10 max-w-28" /><span className="truncate">{props.gimnasio}</span></p>
-        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} /></div>
+        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} /></div>
         <Menu props={props} actual={actual} />
         <div className="mt-auto pt-8 space-y-3">
           <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
@@ -92,7 +94,7 @@ export function Navegacion(props: Props) {
       <header className="lg:hidden sticky top-0 z-30 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
         <div className="flex items-center gap-3 px-4 h-14">
           <p className="titulo text-xl flex-1 flex items-center gap-2 min-w-0"><Logo url={props.logo} tam="h-8 max-w-24" /><span className="truncate">{props.gimnasio}</span></p>
-          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} compacto />
+          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} compacto />
         </div>
       </header>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
@@ -153,7 +154,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {!s.dado_de_baja_en && (
             <div className="flex flex-wrap gap-2 mt-6">
               {!v.puede || v.color === "amarillo"
-                ? <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</LinkPanel>
+                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
                 : <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>}
               {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
               <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>

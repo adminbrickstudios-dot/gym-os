@@ -1,5 +1,7 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { useState, useTransition } from "react";
 import { anotarContacto } from "@/app/panel/retencion/acciones";
 import { marcarAvisado } from "@/app/panel/avisos/acciones";
@@ -18,6 +20,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
   /** COM-4: "📌 Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
   tarea?: boolean;
 }) {
+  const ruta = usePathname();
   const [anotado, setAnotado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
@@ -38,7 +41,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
           {whatsapp
             ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}>💬 WhatsApp</a>
             : <span className="pildora">📵 Sin teléfono</span>}
-          {cobrar && <LinkPanel href={`/panel/vender?socio=${socioId}&cuota=1`} className="boton !min-h-11">💵 Cobrar</LinkPanel>}
+          {cobrar && <BotonCobrar socioId={socioId} cuota origen={ruta.includes("retencion") ? "retencion" : "vencen"} className="boton !min-h-11">💵 Cobrar</BotonCobrar>}
           {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}
           {tarea && <LinkPanel href={`/panel/tareas?socio=${socioId}`} className="boton !min-h-11">📌 Tarea</LinkPanel>}
         </div>
