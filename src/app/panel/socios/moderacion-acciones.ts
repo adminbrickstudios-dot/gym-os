@@ -20,6 +20,21 @@ export async function revisarSuspension(socioId: string, suspensionId: string, r
   return hacer(socioId, () => rpc("revisar_suspension", { p_suspension_id: suspensionId, p_revisar_el: revisar }));
 }
 
+// ── VD-46J · Devolución al dar de baja ──────────────────────────────
+export type CalculoDevolucion = { modo: string; hay: boolean; total?: number; dado_de_baja: boolean; puede_registrar: boolean; ya_registrada?: boolean;
+  lineas?: { cobertura_id: string; concepto: string; desde: string; hasta: string; pagado: number; dias_total: number; dias_sin_usar: number; empezado: boolean; a_devolver: number; medios: string | null }[] };
+export async function devolucionBaja(socioId: string): Promise<{ calculo?: CalculoDevolucion; error?: string }> {
+  try { return { calculo: await rpc<CalculoDevolucion>("calcular_devolucion_baja", { p_socio_id: socioId }, { lectura: true }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+export async function registrarDevolucion(socioId: string, medio: string, monto: number, motivo: string): Promise<R> {
+  return hacer(socioId, () => rpc("registrar_devolucion", { p_socio_id: socioId, p_medio: medio, p_monto: monto, p_motivo: motivo }));
+}
+export async function guardarModoDevolucion(gimnasioId: string, modo: string): Promise<R> {
+  try { await rpc("guardar_devolucion_baja_modo", { p_gimnasio_id: gimnasioId, p_modo: modo }); revalidatePath("/panel/control"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 // ── VD-46C · Cortesías y motivos ───────────────────────────────────
 export async function darCortesia(socioId: string, dias: number, motivoId: string, nota: string): Promise<R> {
   return hacer(socioId, () => rpc("dar_cortesia", { p_socio_id: socioId, p_dias: dias, p_motivo_id: motivoId, p_nota: nota || null }));

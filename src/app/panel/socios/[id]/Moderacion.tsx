@@ -3,7 +3,59 @@
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { anularCortesia, darCortesia, levantarSuspension, revisarSuspension, suspenderSocio } from "../moderacion-acciones";
+import { anularCortesia, darCortesia, levantarSuspension, registrarDevolucion, revisarSuspension, suspenderSocio, type CalculoDevolucion } from "../moderacion-acciones";
+import { formatearPesos, leerMonto } from "@/lib/formato";
+
+// ── VD-46J · Devolución al dar de baja ──────────────────────────────
+const MEDIOS_DEVOLUCION: [string, string][] = [["efectivo", "💵 Efectivo (sale de mi caja)"], ["transferencia", "🏦 Transferencia"], ["mercadopago", "💳 MercadoPago"], ["otro", "Otro medio"], ["ninguno", "No se devuelve"]];
+
+export function DevolucionBaja({ socioId, calculo: c, zona }: { socioId: string; calculo: CalculoDevolucion; zona: string }) {
+  const [abierto, setAbierto] = useState(false);
+  const [medio, setMedio] = useState("efectivo");
+  const [monto, setMonto] = useState(String(c.total ?? 0).replace(".", ","));
+  const [motivo, setMotivo] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const f = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(m));
+  if (!c.hay || c.ya_registrada) return null;
+  if (c.total == null) {
+    return <p className="mensaje mensaje-aviso" data-devolucion-baja>↩️ <span>Tenía períodos pagados por adelantado: la devolución la decide el dueño o el encargado.</span></p>;
+  }
+  const montoNum = medio === "ninguno" ? 0 : leerMonto(monto);
+  const valido = medio === "ninguno" || (Number.isFinite(montoNum) && montoNum > 0 && montoNum <= (c.total ?? 0));
+  const guardar = async () => { const r = await registrarDevolucion(socioId, medio, montoNum, motivo); if (r.error) setError(r.error); else setAbierto(false); };
+  return (
+    <div className="tarjeta p-4 space-y-3" data-devolucion-baja>
+      <p className="font-semibold">↩️ Devolución por cuota adelantada: {formatearPesos(c.total)}</p>
+      <ul className="text-sm texto-suave space-y-1">
+        {(c.lineas ?? []).map((l) => (
+          <li key={l.cobertura_id}>{l.concepto} del {f(l.desde)} al {f(l.hasta)}: pagó {formatearPesos(l.pagado)}{l.empezado ? `, le quedaban ${l.dias_sin_usar} de ${l.dias_total} días` : " (todavía no empezó)"} → {formatearPesos(l.a_devolver)}{l.medios ? ` · pagó con ${l.medios}` : ""}</li>
+        ))}
+      </ul>
+      <p className="texto-tenue text-sm">Se registra como un hecho nuevo con motivo: el pago original no se toca. Regla del gimnasio: {c.modo === "proporcional" ? "proporcional a los días sin usar" : "solo los períodos que todavía no empezaron"}.</p>
+      {!c.puede_registrar ? <p className="texto-suave text-sm">La registra el dueño o el encargado.</p>
+        : !abierto ? <button type="button" className="boton boton-principal" data-devolucion-abrir onClick={() => setAbierto(true)}>Registrar la devolución</button>
+        : (
+          <div className="space-y-3">
+            <label className="block"><span className="font-semibold">Cómo se devuelve</span>
+              <select className="campo mt-1" value={medio} onChange={(e) => { setMedio(e.target.value); if (e.target.value === "ninguno") setMonto("0"); else if (monto === "0") setMonto(String(c.total).replace(".", ",")); }} aria-label="Medio de la devolución">
+                {MEDIOS_DEVOLUCION.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+              </select></label>
+            {medio !== "ninguno" && (
+              <label className="block"><span className="font-semibold">Monto (hasta {formatearPesos(c.total)})</span>
+                <input className="campo mt-1" inputMode="decimal" value={monto} onChange={(e) => setMonto(e.target.value)} aria-label="Monto a devolver" /></label>
+            )}
+            <label className="block"><span className="font-semibold">Motivo (queda anotado con tu nombre)</span>
+              <input className="campo mt-1" value={motivo} maxLength={300} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej.: se mudó a otra ciudad" aria-label="Motivo de la devolución" /></label>
+            {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+            <div className="flex flex-wrap gap-2">
+              <BotonAccion className="boton boton-principal" disabled={!valido || motivo.trim().length < 3} onClick={guardar}>{medio === "ninguno" ? "Dejar asentado: no se devuelve" : "↩️ Registrar la devolución"}</BotonAccion>
+              <button type="button" className="boton" onClick={() => { setAbierto(false); setError(null); }}>Cancelar</button>
+            </div>
+          </div>
+        )}
+    </div>
+  );
+}
 
 // ── VD-46C · Cortesías ──────────────────────────────────────────────
 export type DatosCortesias = {

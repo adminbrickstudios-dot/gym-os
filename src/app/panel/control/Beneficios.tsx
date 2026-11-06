@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { formatearPesos } from "@/lib/formato";
-import { guardarMotivoBeneficio, guardarTopesBeneficios } from "@/app/panel/socios/moderacion-acciones";
+import { guardarModoDevolucion, guardarMotivoBeneficio, guardarTopesBeneficios } from "@/app/panel/socios/moderacion-acciones";
 
 export type BeneficiosMes = {
   mes: string; descuentos_total: number; descuentos_cantidad: number; cortesias_dias: number; cortesias_cantidad: number; puede_editar: boolean;
@@ -12,7 +12,10 @@ export type BeneficiosMes = {
   motivos: { id: string; nombre: string; activo: boolean }[];
 };
 
-export function Beneficios({ gimnasioId, datos: d }: { gimnasioId: string; datos: BeneficiosMes }) {
+const MODOS_DEVOLUCION: [string, string][] = [["ninguna", "No se devuelve nada al dar de baja"], ["cuotas_adelantadas", "Se devuelven los períodos pagados que todavía no empezaron"], ["proporcional", "Además, los días sin usar del período en curso"]];
+
+export function Beneficios({ gimnasioId, datos: d, devolucionModo }: { gimnasioId: string; datos: BeneficiosMes; devolucionModo: string }) {
+  const [modo, setModo] = useState(devolucionModo);
   const [t, setT] = useState({ recepcionDias: d.topes.max_dias_recepcion, encargadoDias: d.topes.max_dias_encargado, recepcionMes: d.topes.dias_mes_recepcion, encargadoMes: d.topes.dias_mes_encargado, alerta: d.topes.alerta_repetidas });
   const [nuevo, setNuevo] = useState("");
   const [msj, setMsj] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
@@ -46,6 +49,11 @@ export function Beneficios({ gimnasioId, datos: d }: { gimnasioId: string; datos
             ))}
           </div>
           {d.puede_editar && <BotonAccion className="boton" onClick={async () => hecho(await guardarTopesBeneficios(gimnasioId, t), "Topes guardados. Rigen desde ahora.")}>Guardar topes</BotonAccion>}
+          <label className="block space-y-1" data-devolucion-modo><span className="font-semibold">Devolución al dar de baja con cuota adelantada</span>
+            <select className="campo" value={modo} disabled={!d.puede_editar} aria-label="Regla de devolución al dar de baja"
+              onChange={async (e) => { const nuevo = e.target.value; setModo(nuevo); hecho(await guardarModoDevolucion(gimnasioId, nuevo), "Regla guardada. Rige para las bajas desde ahora."); }}>
+              {MODOS_DEVOLUCION.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+            </select></label>
           <div className="space-y-2">
             <p className="font-semibold">Motivos de cortesías y descuentos</p>
             <ul className="space-y-1">

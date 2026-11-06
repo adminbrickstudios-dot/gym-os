@@ -41,7 +41,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
     const soportesPedido = panel.yo.rol === "dueno"
       ? rpc<SoporteEntrada[]>("soportes_del_gimnasio", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 })
       : Promise.resolve<SoporteEntrada[]>([]);
-    const [pagina, equipo, soportes, moderacion, beneficios] = await Promise.all([
+    const [pagina, equipo, soportes, moderacion, beneficios, devolucionModo] = await Promise.all([
       rpc<PaginaControl>("linea_de_control", {
         p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_tipos: tipos.length ? tipos : null,
         p_quien: quien || null, p_limite: POR_PAGINA, p_cursor: cursor,
@@ -52,6 +52,8 @@ export default async function Control({ searchParams }: { searchParams: Promise<
       cursor ? Promise.resolve<{ items: ItemModeracion[] }>({ items: [] }) : rpc<{ items: ItemModeracion[] }>("moderacion_control", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_limite: 30 }),
       // VD-46C: descuentos y cortesías del mes, con los topes y la lista de motivos.
       rpc<BeneficiosMes>("beneficios_mes", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-46J: la regla de devolución al dar de baja.
+      rpc<string>("devolucion_baja_config", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
 
     const filtros = new URLSearchParams();
@@ -135,7 +137,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
               </ul>
             </section>
           )}
-          {!cursor && <Beneficios gimnasioId={panel.gimnasio.id} datos={beneficios} />}
+          {!cursor && <Beneficios gimnasioId={panel.gimnasio.id} datos={beneficios} devolucionModo={devolucionModo} />}
           {panel.yo.rol === "dueno" && (
             <section className="space-y-2" data-soporte-brik aria-label="Entradas de soporte de BRIK">
               <h2 className="titulo-grupo">🧱 Cuando BRIK entró a ayudarte</h2>
