@@ -30,6 +30,7 @@ const EJECUTABLES = {
     "public.retencion", "public.retencion_resumen", "public.registrar_contacto",
     "public.calcular_devolucion_baja", "public.registrar_devolucion", "public.devolucion_baja_config", "public.guardar_devolucion_baja_modo",
     "public.constancia_baja",
+    "public.plan_familiar_estado", "public.guardar_plan_familiar", "public.fijar_titular_familia", "public.quitar_titular_familia", "public.plan_familiar_socio",
     "public.motivos_beneficio_gimnasio", "public.guardar_motivo_beneficio", "public.guardar_topes_beneficios", "public.dar_cortesia", "public.anular_cortesia", "public.cortesias_socio", "public.beneficios_mes",
     "public.suspender_socio", "public.levantar_suspension", "public.revisar_suspension", "public.suspension_socio", "public.moderacion_control",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",

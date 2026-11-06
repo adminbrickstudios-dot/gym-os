@@ -15,7 +15,7 @@ import { Calendario, type Asistencia } from "./Calendario";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import { Foto } from "./Foto";
-import { Familia, type Familiar } from "./Familia";
+import { Familia, type Familiar, type PlanFamiliar } from "./Familia";
 import { Pausas, type DatosPausas } from "./Pausas";
 import { AptoFisico, type DatosApto } from "./AptoFisico";
 import { Origen, type DatosOrigen } from "./Origen";
@@ -62,6 +62,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     // VD-38: lo que este socio le escribió al gimnasio. Sin permiso (recepción sin el interruptor) la tarjeta no se muestra; la base exige el permiso igual.
     const pMensajes: Promise<FilaHistorial[] | null> = pestana === "resumen" && panel.yo.rol !== "profe" && !panel.secciones_apagadas.includes("mensajes")
       ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
+    // VD-46G: si el plan familiar está prendido, quién es el titular de su grupo (la tarjeta Familia lo muestra).
+    const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
     const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -95,6 +97,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && !panel.secciones_apagadas.includes("clases") ? rpc<GradosSocio>("grados_socio", { p_socio_id: id }) : Promise.resolve([] as GradosSocio),
     ]);
     const mensajesFicha = await pMensajes;
+    const planFamiliar = await pPlanFamiliar;
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
     const momento = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -216,7 +219,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} /></div>
           </div>
           {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
-          <Familia socioId={s.id} familia={familia} />
+          <Familia socioId={s.id} familia={familia} plan={planFamiliar} puedeArmar={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} />
         </section>
 
         <section>
