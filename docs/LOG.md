@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-46F y VD-46M · Chip de transferencia pendiente y modo emergencia de la puerta
+
+**QUÉ HICE**
+- **46F (migración 7500)**: copia de `privado.guia_entrada` con el chip `transferencia_pendiente` ("Subió un comprobante hace 3 horas por $25.000", y "(y N más)" si hay varios) que enlaza a Transferencias; aparece solo si el socio no puede entrar (o está en gracia) y tiene un pago por transferencia pendiente; NO cambia el color, el motivo, el botón ni quién entra. Lo dibujan `Puerta.tsx` y `VentanaEntrada.tsx` (el tipo `Guia` suma `href?`).
+- **46M (migración 7501)**: tabla `emergencias_puerta`, `ingresos.emergencia_id` y el flag `emergencia_puerta_habilitada` (arranca APAGADO; lo prende solo el dueño). Dueño y encargado la activan por sede con motivo de al menos 5 caracteres y de 1 a 12 horas; vence sola (se calcula, sin cron). `privado.registrar_ingreso` (copia de 4200, conserva el reingreso por visita y el anti-préstamo) hace que quien no podía entrar pase como `entro_modo_aviso` con el color real guardado y la emergencia atada; `kiosco_ultimo` (misma firma) hace que la tablet muestre amarillo y no el rojo real; botón "Anotar entrada (emergencia)"; al cerrar se lista quiénes entraron ("no estaba al día") y queda un historial. Cartel rojo "EMERGENCIA activa" en `/panel/entrada`, la ventana de Entrada y la tablet; panel de control en `PanelEmergencia.tsx`.
+- **Decisiones de permisos y plata (revisar)**: un suspendido o dado de baja NO entra por la emergencia; un "dejar pasar" a mano con motivo manda sobre la emergencia (queda `forzado` con su promesa de pago); apagar el modo corta la emergencia en curso; la recepción ve el cartel pero no activa, cierra ni lee la lista.
+- Verificado: lint, typecheck, 147 pruebas, build y base/chequeos/demo en verde en GitHub (`chip-transferencia`, `emergencia-puerta`).
+
+**SIN ARREGLAR**: VD-46X (las emergencias no aparecen en Control porque copiar `avisos_moderacion` de 7203 pisaría a otros; el llavero y el hábito del kiosco no tienen prueba de emergencia propia).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46f`/`vd-46m`, los de Entrada (ent-*, vd-1 a vd-4, panel-entrada) y la tablet en pantalla: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-46B, C, E y J · Suspender, cortesías, baja con constancia y devolución
 
 **QUÉ HICE**
