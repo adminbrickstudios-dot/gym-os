@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-46A · MercadoPago: reembolso, contracargo y conciliación
+
+**QUÉ HICE**
+- Migración 6800: un pago aprobado que MercadoPago devuelve o contracarga pasa a `devuelto`; la venta se anula con la lógica de `anular_venta` y el socio pierde la cobertura. El pago conserva su ID y cuándo se aprobó y la venta queda marcada "anulada por MercadoPago" sin persona; nada se borra. Causa raíz: el webhook deduplicaba por ID de pago, así que el contracargo de un pago ya aprobado quedaba como "ya procesado"; ahora el evento en `eventos_webhook` es por pago y estado. Cada aviso trae la fecha en que MercadoPago actualizó el pago y uno más viejo que lo aplicado se ignora (un `approved` posterior a un `refunded` no revive nada).
+- Reconsulta sin cron: al abrir `/app/pago` si el pago lleva más de 15 minutos colgado, y con el botón "Revisar con MercadoPago" en Transferencias (dueño y encargado; la recepción no lo ve), que mira los pendientes de más de 15 minutos y los aprobados de los últimos 30 días. Revierte SOLO el webhook firmado o la reconsulta del servidor con la clave de servicio, nunca el navegador. Alerta en la campana para dueño y encargado (se suma en `campana/datos.ts` sin redefinir `campana_panel`). `/app/pago` muestra "Este pago se devolvió".
+- **Decisiones de plata (revisar)**: si la venta tenía otro pago aprobado no se anula sola (el pago queda `devuelto`, la cobertura sigue y la alerta dice "revisala a mano"); un reembolso parcial no toca la cobertura (queda anotado y avisa); un `refunded`/`charged_back` sobre un pago pendiente queda rechazado, como antes. El webhook ahora lee el pago de la API antes de registrar el evento.
+- Verificado: lint, typecheck, 128 pruebas y base/chequeos/demo en verde en GitHub (`mercadopago-devoluciones`).
+
+**QUÉ CORRÉS VOS**: después de aplicar, `npm run db:types`. En MercadoPago el webhook debe incluir `payment` (ya era el único tipo que se procesaba).
+**SIN ARREGLAR**: VD-46S (devueltos en Control, botón también en Ventas, estado `in_mediation` con aviso, etiqueta `devuelto` en la ficha de pagos).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46a` y que pay-1, rev-3 y cliente sigan pasando (riesgo: el reenvío del mismo aviso debería seguir devolviendo `ya:true`): escritos según la documentación, pero no ejecutados; el build local no se leyó.
+
 ## 2026-11-06 · Noche · VD-28 · Navegación con memoria y Volver al origen
 
 **QUÉ HICE**
