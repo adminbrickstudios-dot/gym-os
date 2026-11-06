@@ -73,7 +73,7 @@ test("expulsión: sin fecha de fin, la revisa el dueño, aparece en la ficha, en
   const socio = t.ctx.socios.vencida;
   const sid = await como(u.dueno, async () => (await t.q(`select public.suspender_socio($1, 'Agredió a un profe', 'expulsion', null, current_date + 20) as id`, [socio]))[0].id);
   assert.equal(await bloqueo(socio), "Expulsado · Agredió a un profe");
-  await como(u.dueno, () => t.falla(() => t.q(`select public.suspender_socio($1, 'x con fin', 'expulsion', current_date + 5)`, [t.ctx.socios.sin_pago]), /sin fecha de fin/));
+  await como(u.dueno, () => t.falla(() => t.q(`select public.suspender_socio($1, 'x con fin', 'expulsion', current_date + 5)`, [t.ctx.socios.sin_pago]), /no tiene fecha de fin/));
   const ficha = await como(u.recepcion, async () => (await t.q(`select public.suspension_socio($1) as r`, [socio]))[0].r);
   assert.equal(ficha.vigente.tipo, "expulsion"); assert.equal(ficha.vigente.por, "Sofía");
   assert.deepEqual([ficha.puede_suspender, ficha.puede_expulsar, ficha.puede_levantar], [true, false, false]);
