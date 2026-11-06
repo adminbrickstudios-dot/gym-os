@@ -3,6 +3,7 @@
 // del gimnasio e idempotente por ID externo (eventos_webhook). El estado y el
 // monto se leen de la API de MercadoPago con el token del gimnasio, no del aviso.
 import { leerPago, firmaValida } from "@/lib/mercadopago";
+import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
 
 export const dynamic = "force-dynamic";
@@ -28,23 +29,25 @@ export async function POST(req: Request) {
   }
   if (tipo !== "payment" || !dataId) return responder(200, { ignorado: tipo || "sin tipo" });
 
-  const { data: ev, error: e2 } = await db.rpc("registrar_evento_webhook", { p_origen: "mp_cobros", p_tipo: "payment", p_id_externo: dataId, p_gimnasio_id: gimnasio, p_payload: cuerpo });
-  if (e2) return responder(500, { error: e2.message });
-  const evento = ev as { evento_id: string; procesado: boolean };
-  if (evento.procesado) return responder(200, { ya: true });
-
+  // El estado y el monto salen de la API de MercadoPago, no del aviso. Si no se puede leer, queda anotado y
+  // se responde 500: MercadoPago vuelve a avisar.
+  let pago: Awaited<ReturnType<typeof leerPago>>;
+  try { pago = await leerPago(c.token, dataId); }
+  catch (e) {
+    const { data: ev } = await db.rpc("registrar_evento_webhook", { p_origen: "mp_cobros", p_tipo: "payment", p_id_externo: `${dataId}:lectura`, p_gimnasio_id: gimnasio, p_payload: cuerpo });
+    const evento = ev as { evento_id: string } | null;
+    if (evento) await db.rpc("cerrar_evento_webhook", { p_evento_id: evento.evento_id, p_error: (e as Error).message });
+    return responder(500, { error: (e as Error).message });
+  }
   try {
-    const pago = await leerPago(c.token, dataId);
-    if (!pago.external_reference || !UUID.test(pago.external_reference)) throw new Error("El pago de MercadoPago no tiene nuestra referencia");
-    if (pago.currency_id && pago.currency_id !== "ARS") throw new Error(`Moneda inesperada: ${pago.currency_id}`);
-    const { data: r, error } = await db.rpc("acreditar_pago_mp", { p_pago_id: pago.external_reference, p_mp_pago_id: String(pago.id), p_monto: pago.transaction_amount, p_estado: pago.status });
-    if (error) throw new Error(error.message);
-    // Pendiente o en proceso: el evento queda abierto para el próximo aviso.
-    if (r !== "sin_cambios") await db.rpc("cerrar_evento_webhook", { p_evento_id: evento.evento_id, p_error: null });
-    return responder(200, { resultado: r });
+    // VD-46A: el evento es por pago Y estado: un pago aprobado que después se devuelve o se contracarga es un
+    // evento nuevo (antes quedaba "ya procesado" y la cobertura seguía).
+    const r = await procesarPagoMP(db, gimnasio, pago, cuerpo);
+    if (r.ya) return responder(200, { ya: true });
+    return responder(200, { resultado: r.resultado });
   } catch (e) {
-    await db.rpc("cerrar_evento_webhook", { p_evento_id: evento.evento_id, p_error: (e as Error).message });
     // 500: MercadoPago vuelve a avisar más tarde.
     return responder(500, { error: (e as Error).message });
   }
+
 }

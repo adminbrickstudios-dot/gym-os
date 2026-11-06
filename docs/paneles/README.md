@@ -13,7 +13,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/admin/[id]` | pantalla |  |  | `admin_gimnasio`, `admin_notas`, `admin_planes_brik`, `admin_soportes`, `admin_uso_semanal`, `historial_configuracion` | `/admin` `/g/` |
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
-| `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `acreditar_pago_mp`, `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
+| `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
 | `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_inscripcion_evento`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_compra_app`, `informar_transferencia`, `iniciar_compra_online`, `iniciar_pago_online`, `inscribirse_evento`, `invitar`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared`, `vista_compra_app` | `/app/clases` `/app/novedades` `/app/rutina` |
 | `/app/clases` | pantalla |  |  | `avisos_lugar_socio`, `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `turnos_socio`, `wods_socio` | `/app` `/app/yo` |
 | `/app/cuenta` | pantalla |  |  | `mi_seguridad`, `pedido_baja_socio` | `/app` `/app/mis-datos` |
@@ -23,7 +23,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/mensajes/nuevo` | pantalla |  |  | `mensajes_estado_socio` | `/app` `/app/mensajes` |
 | `/app/mis-datos` | acción (POST/GET) |  |  | `mis_datos` |  |
 | `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana`, `mensajes_estado_socio` | `/app` `/app/mensajes` |
-| `/app/pago` | pantalla |  |  | `pago_online` |  |
+| `/app/pago` | pantalla |  |  | `pago_online`, `pago_online_revisable` |  |
 | `/app/plan` | pantalla |  |  | `opciones_compra_app` | `/app` `/app/yo` |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
 | `/app/yo` | pantalla |  |  | `mensajes_estado_socio`, `mi_link_referido`, `mis_invitados`, `opciones_compra_app` | `/app` `/app/mis-datos` |
@@ -88,7 +88,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/socios/importar` | pantalla | 👑 🧭 | socios | `deshacer_importacion`, `importaciones_panel`, `importar_socios`, `revisar_importacion` | `/panel/socios` |
 | `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `planes_para_alta`, `prospectos_panel` |  |
 | `/panel/tareas` | pantalla |  |  | `checklist_hoy`, `crear_tarea`, `ficha_socio`, `guardar_checklist_item`, `guardar_tarea_auto`, `marcar_tarea`, `para_hacer_hoy`, `tareas_auto_config`, `tareas_panel`, `tildar_checklist` | `/panel` `/panel/socios/` |
-| `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `pagos_por_aprobar`, `rechazar_pago` | `/panel/socios/` |
+| `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `estado_pagos_online`, `pagos_por_aprobar`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy |  | `/panel/retencion` |
 | `/panel/vender` | pantalla | 👑 🧭 🛎️ | vender | `cajas_sede`, `comprobante_venta`, `contexto_cobro`, `ficha_socio`, `guardar_config_cobro`, `precios_venta`, `registrar_uso_cupon`, `validar_cupon`, `vender` | `/panel/caja` `/panel/entrada` `/panel/socios/` `/panel/socios/nuevo` |
 | `/salir` | acción (POST/GET) |  |  |  |  |

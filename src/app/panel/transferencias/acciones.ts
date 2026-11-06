@@ -3,6 +3,7 @@ import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { clienteServicio } from "@/lib/supabase/servicio";
+import { reconsultarMercadoPago } from "@/lib/mp-reconsulta";
 
 type Pendiente = { pago_id: string; comprobante_path: string | null };
 
@@ -30,4 +31,24 @@ export async function aprobar(pagoId: string): Promise<{ error?: string }> {
 export async function rechazar(pagoId: string, motivo: string): Promise<{ error?: string }> {
   try { await rpc("rechazar_pago", { p_pago_id: pagoId, p_motivo: motivo }); notificarDespues("pago_resuelto", pagoId); revalidatePath("/panel/transferencias"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+export type ResultadoRevision = { error?: string; sinMercadoPago?: boolean; revisados?: number; cambios?: number; sinPago?: number; fallaron?: number };
+
+/**
+ * VD-46A: "Revisar con MercadoPago" (dueño y encargado). Sin cron: reconsulta a MercadoPago los pagos pendientes de
+ * más de 15 minutos y los aprobados del último mes, y aplica lo que encuentre (acredita lo que quedó colgado, retira
+ * lo devuelto o contracargado). La persona se comprueba con su sesión (estado_pagos_online exige dueño o encargado);
+ * revertir lo hace después el servidor con la clave de servicio, nunca el navegador.
+ */
+export async function revisarConMercadoPago(): Promise<ResultadoRevision> {
+  try {
+    const panel = await contextoPanel();
+    const estado = await rpc<{ conectado: boolean }>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id });
+    if (!estado.conectado) return { sinMercadoPago: true };
+    const r = await reconsultarMercadoPago(panel.gimnasio.id);
+    if (!r) return { sinMercadoPago: true };
+    revalidatePath("/panel/transferencias"); revalidatePath("/panel"); revalidatePath("/panel/campana");
+    return { revisados: r.revisados, cambios: r.cambios.length, sinPago: r.sinPago, fallaron: r.errores.length };
+  } catch (e) { return { error: (e as Error).message }; }
 }

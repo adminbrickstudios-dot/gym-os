@@ -9,7 +9,7 @@ export function Confirmando({ pagoId, inicial, volver }: { pagoId: string; inici
   const [motivo, setMotivo] = useState<string | null>(null);
   const [vueltas, setVueltas] = useState(0);
   useEffect(() => {
-    if (estado !== "pendiente" || vueltas > 100) return;
+    if (estado !== "pendiente" || vueltas > 100) return;   // aprobado, rechazado y devuelto son finales
     const t = setTimeout(async () => {
       const r = await estadoPagoOnline(pagoId);
       if (r.estado) setEstado(r.estado);
@@ -24,6 +24,16 @@ export function Confirmando({ pagoId, inicial, volver }: { pagoId: string; inici
         <p className="text-6xl" aria-hidden>✅</p>
         <h1 className="titular text-5xl">¡Pago acreditado!</h1>
         <p className="texto-suave text-lg">Ya quedaste al día.</p>
+        <Link href={volver} className="boton boton-principal w-full text-lg">Volver a mi gimnasio</Link>
+      </div>
+    );
+  }
+  if (estado === "devuelto") {
+    return (
+      <div className="space-y-4" data-pago="devuelto">
+        <p className="text-6xl" aria-hidden>↩️</p>
+        <h1 className="titular text-5xl">Este pago se devolvió</h1>
+        <p className="texto-suave text-lg">MercadoPago devolvió la plata, así que la cuota ya no está paga. Si fue un error, pagá de nuevo o hablá con el gimnasio.</p>
         <Link href={volver} className="boton boton-principal w-full text-lg">Volver a mi gimnasio</Link>
       </div>
     );
