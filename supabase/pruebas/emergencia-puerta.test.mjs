@@ -35,6 +35,8 @@ after(async () => t && t.cerrar());
 const reg = async (socio, m, via = "recepcion", forzar = null) =>
   (await t.q(`select privado.registrar_ingreso($1, $2, $3, null, null, $4, $5) as r`, [socio, t.sede, via, forzar, m]))[0].r;
 const guia = async (socio, m) => (await t.q(`select privado.guia_entrada($1, $2, $3) g`, [socio, m, t.sede]))[0].g;
+// Un socio nuevo, sin plan ni entradas (los casos testigo traen entradas sembradas que caen dentro de la visita de now()).
+const nuevo = async (n) => (await t.q(`insert into public.socios (gimnasio_id, nombre, apellido) values ($1, 'Nuevo', $2) returning id`, [t.g, n]))[0].id;
 const fila = async (id) => (await t.q(`select * from public.ingresos where id = $1`, [id]))[0];
 async function emergencia(desde, hasta, extra = {}) {
   const [{ id }] = await t.q(
@@ -110,7 +112,7 @@ test("otra sede o otro gimnasio no se enteran; la guía muestra el chip y pone A
 });
 
 test("encendido, permisos y el ciclo completo con las funciones públicas (now)", async () => {
-  const s = t.ctx.socios;
+  const [uno, dos] = [await nuevo("Uno"), await nuevo("Dos")];
   const est = () => como(uRec, async () => (await t.q(`select public.estado_emergencia_puerta($1, $2) e`, [t.g, t.sede]))[0].e);
   const activar = (u, motivo = "Corte de luz en la puerta", horas = 3) =>
     como(u, async () => (await t.q(`select public.activar_emergencia_puerta($1, $2, $3, $4) e`, [t.g, t.sede, motivo, horas]))[0].e);
@@ -133,7 +135,7 @@ test("encendido, permisos y el ciclo completo con las funciones públicas (now)"
   assert.equal((await est()).puede_activar, false);
 
   // La recepción anota al vencido por la función pública: pasa marcado.
-  const sinPlazo = await como(uRec, async () => (await t.q(`select public.registrar_ingreso($1, $2) r`, [s.sin_plan, t.sede]))[0].r);
+  const sinPlazo = await como(uRec, async () => (await t.q(`select public.registrar_ingreso($1, $2) r`, [uno, t.sede]))[0].r);
   assert.equal(sinPlazo.resultado, "entro_modo_aviso");
   assert.equal(sinPlazo.veredicto.color, "amarillo");
   assert.equal((await est()).activa.entradas, 1);
@@ -147,10 +149,10 @@ test("encendido, permisos y el ciclo completo con las funciones públicas (now)"
 
   const cierre = await como(uDueno, async () => (await t.q(`select public.cerrar_emergencia_puerta($1, $2) r`, [t.g, a.activa.id]))[0].r);
   assert.equal(cierre.entradas.length, 1);
-  assert.equal(cierre.entradas[0].socio, "Testigo Sin Plan");
+  assert.equal(cierre.entradas[0].socio, "Nuevo Uno");
   await t.falla(() => como(uDueno, () => t.q(`select public.cerrar_emergencia_puerta($1, $2)`, [t.g, a.activa.id])), /ya estaba cerrada/);
   assert.equal((await est()).activa, null, "cerrada: la puerta vuelve a lo de siempre");
-  const despues = await como(uRec, async () => (await t.q(`select public.registrar_ingreso($1, $2) r`, [s.sin_pago, t.sede]))[0].r);
+  const despues = await como(uRec, async () => (await t.q(`select public.registrar_ingreso($1, $2) r`, [dos, t.sede]))[0].r);
   assert.notEqual(despues.emergencia, true);
 
   const h = await como(uDueno, async () => (await t.q(`select public.historial_emergencias_puerta($1) h`, [t.g]))[0].h);
