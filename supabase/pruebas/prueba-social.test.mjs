@@ -70,7 +70,9 @@ test("dejar los dos vacíos saca las reseñas", async () => {
 
 test("el encargado lee y no guarda; recepción ni lee; anon no puede ni llamar", async () => {
   await t.comoUsuario(u.encargado, async () => {
-    assert.equal((await t.q(`select public.prueba_social_panel($1) as p`, [t.g]))[0].p.mostrar_socios, false);
+    const p = (await t.q(`select public.prueba_social_panel($1) as p`, [t.g]))[0].p;
+    assert.equal(typeof p.mostrar_socios, "boolean");
+    assert.equal(p.socios_ahora, null, "con menos de 20 socios, sin número");
     await t.falla(() => t.q(`select public.guardar_prueba_social($1, true, null, null)`, [t.g]), /./);
   });
   await t.comoUsuario(u.recepcion, async () => {
