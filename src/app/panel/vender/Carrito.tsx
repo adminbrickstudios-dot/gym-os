@@ -9,6 +9,7 @@ import { cobrar, preciosPara, registrarUsoCupon, validarCupon, type Venta } from
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
+import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { urlFotoProducto } from "@/lib/url-producto";
 
@@ -308,8 +309,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     <div className="grid grid-cols-[110px_1fr] gap-2 mt-2">
                       <input className="campo" inputMode="decimal" placeholder="$" value={l.descuento_texto ?? (l.descuento || "")}
                         onChange={(e) => cambiar(l.clave, { descuento_texto: e.target.value, descuento: monto(e.target.value) })} aria-label="Monto del descuento" />
-                      <input className="campo" placeholder="Motivo (obligatorio)" value={l.descuento_motivo ?? ""}
-                        onChange={(e) => cambiar(l.clave, { descuento_motivo: e.target.value })} aria-label="Motivo del descuento" />
+                      <MotivoDescuento valor={l.descuento_motivo ?? ""} onChange={(m) => cambiar(l.clave, { descuento_motivo: m })} />
                     </div>
                   )}
                 </li>

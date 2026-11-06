@@ -1,8 +1,9 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { formatearPesos } from "@/lib/formato";
 import { anonimizarSocio, asignarPlan, darDeBaja, resolverPedidoBaja, vistaCambioPlan, volverADarDeAlta, type VistaCambio } from "../acciones";
+import { devolucionBaja, type CalculoDevolucion } from "../moderacion-acciones";
 
 type Plan = { plan_id: string; nombre: string; precio: number | null };
 const MOTIVOS: [string, string][] = [
@@ -67,6 +68,14 @@ export function DarDeBaja({ socioId, ofrecePausa = false }: { socioId: string; o
   const [motivo, setMotivo] = useState<[string, string] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  // VD-46J: si pagó por adelantado, se avisa antes de confirmar cuánto corresponde devolver (la baja sola no devuelve nada).
+  const [dev, setDev] = useState<CalculoDevolucion | null>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    let vivo = true;
+    devolucionBaja(socioId).then((r) => { if (vivo && r.calculo) setDev(r.calculo); });
+    return () => { vivo = false; };
+  }, [abierto, socioId]);
   const baja = (v: string) => empezar(async () => { const r = await darDeBaja(socioId, v); if (r.error) setError(r.error); else { setAbierto(false); setMotivo(null); } });
   if (!abierto) return <button type="button" className="boton texto-suave" onClick={() => setAbierto(true)}>👋 Dar de baja</button>;
   if (motivo) {
@@ -86,6 +95,12 @@ export function DarDeBaja({ socioId, ofrecePausa = false }: { socioId: string; o
   return (
     <div className="tarjeta p-4 w-full space-y-3">
       <p className="font-semibold">¿Por qué se va? Sirve para saber qué mejorar.</p>
+      <p className="texto-suave text-sm" data-baja-cierra>Al darlo de baja se anulan sus pagos por aprobar, sus turnos fijos y sus reservas de clases que vienen. Lo que ya pagó no se toca.</p>
+      {dev?.hay && (
+        <p className="mensaje mensaje-aviso" data-baja-devolucion>↩️ <span>{dev.total != null
+          ? <>Pagó por adelantado: si se va hoy corresponden <strong>{formatearPesos(dev.total)}</strong> de devolución. La baja sola no devuelve nada: se registra después, en su ficha.</>
+          : <>Tiene períodos pagados por adelantado: la devolución la decide el dueño o el encargado.</>}</span></p>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {MOTIVOS.map(([v, t]) => (
           <button key={v} type="button" disabled={ocupado} className="boton"
@@ -113,7 +128,7 @@ export function VolverADarDeAlta({ socioId }: { socioId: string }) {
 }
 
 /** APP-8: el socio pidió la baja desde la app. Se habla con él: se queda, o se le da la baja con el motivo que dio. */
-export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { pedido_id: string; motivo: string; nota: string | null } }) {
+export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { pedido_id: string; motivo: string; nota: string | null; codigo?: string; pedido_en?: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const motivo = MOTIVOS.find(([v]) => v === pedido.motivo)?.[1] ?? pedido.motivo;
@@ -121,7 +136,8 @@ export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { ped
   return (
     <div className="mensaje mensaje-aviso mt-4 space-y-3" data-pedido-baja>
       <p><span className="font-semibold">👋 Pidió la baja desde la app</span> · {motivo}{pedido.nota ? `: “${pedido.nota}”` : ""}</p>
-      <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza.</p>
+      {pedido.codigo && <p className="text-sm" data-codigo-baja>🧾 Constancia <strong>{pedido.codigo}</strong>: es el código que ya tiene el socio en su app.</p>}
+      <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza. Dar la baja anula sus pagos por aprobar, sus turnos fijos y sus reservas de clases que vienen; lo que ya pagó no se toca.</p>
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado} className="boton" onClick={() => resolver(false)}>💪 Se queda</button>
         <button type="button" disabled={ocupado} className="boton boton-peligro" onClick={() => resolver(true)}>Darle la baja</button>

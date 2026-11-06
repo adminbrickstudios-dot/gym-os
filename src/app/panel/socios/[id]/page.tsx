@@ -25,6 +25,8 @@ import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
 import { BotonEntradaFicha } from "./BotonEntradaFicha";
+import { ConstanciaBaja, ModeracionFicha } from "./ModeracionFicha";
+import { Suspense } from "react";
 import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
@@ -81,7 +83,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && mostrador ? rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: id }) : Promise.resolve(null),
       pestana === "resumen" && mostrador ? rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: id }) : Promise.resolve([]),
       // APP-8: si pidió la baja desde la app.
-      rpc<{ pedido_id: string; motivo: string; nota: string | null } | null>("pedido_baja_socio", { p_socio_id: id }),
+      rpc<{ pedido_id: string; motivo: string; nota: string | null; codigo?: string; pedido_en?: string } | null>("pedido_baja_socio", { p_socio_id: id }),
       // COM-1: si está en riesgo de irse, el porqué (los mismos que ven Retención).
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ nivel: "alto" | "medio"; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }) : Promise.resolve([]),
       // COM-2: los primeros 30 días del socio nuevo.
@@ -143,11 +145,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>
               <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
+              <Suspense fallback={null}><ConstanciaBaja socioId={s.id} zona={zona} /></Suspense>
               <VolverADarDeAlta socioId={s.id} />
               {panel.yo.rol === "dueno" && !(s.nombre === "Socio" && /^borrado #/.test(s.apellido)) && <BorrarDatos socioId={s.id} />}
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {!s.dado_de_baja_en && <Suspense fallback={null}><ModeracionFicha socioId={s.id} zona={zona} /></Suspense>}
           {!s.dado_de_baja_en && panel.yo.rol !== "profe" && (
             <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico">📌 Anotar una tarea sobre este socio</LinkPanel></p>
           )}

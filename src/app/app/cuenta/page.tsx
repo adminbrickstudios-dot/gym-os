@@ -19,7 +19,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
     const s = yo.socio;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     const [baja, usuario, seguridad] = await Promise.all([
-      rpc<{ motivo: string; pedido_en: string } | null>("pedido_baja_socio", { p_socio_id: s.socio_id }),
+      rpc<{ motivo: string; pedido_en: string; codigo?: string } | null>("pedido_baja_socio", { p_socio_id: s.socio_id }),
       crearClienteServidor().then((c) => c.auth.getUser()),
       rpc<MiSeguridad>("mi_seguridad"),
     ]);
@@ -36,7 +36,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
         {/* SEG-6: lo que el gimnasio guarda de él. */}
         <p><a href={`/app/mis-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" download data-mis-datos>⬇️ Descargar mis datos</a></p>
         {baja
-          ? <p className="mensaje mensaje-info" data-baja-pendiente>👋 Pediste la baja: el gimnasio te va a contactar.</p>
+          ? <p className="mensaje mensaje-info" data-baja-pendiente>👋 Pediste la baja: el gimnasio te va a contactar.{baja.codigo && <> Tu código de baja: <strong data-codigo-baja>{baja.codigo}</strong>. Guardalo: es tu constancia.</>}</p>
           : <PedirBaja socioId={s.socio_id} ofrecePausa={!!yo.plan} />}
       </div>
     );
