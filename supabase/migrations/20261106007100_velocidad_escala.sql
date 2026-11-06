@@ -23,6 +23,8 @@ begin
 end $$;
 
 -- ── 2) Retención ──
+-- VD-30: privado.dia_local, fecha_corta y celular_aviso escritos en línea (llevan `set search_path`, así que Postgres
+-- no las expande y cada llamada cuesta: 26.000 llamadas por pantalla). Mismo resultado.
 create or replace function privado.retencion_con(p_gimnasio_id uuid, p_momento timestamptz, p_plantillas jsonb)
 returns table (
   socio_id uuid, nombre text, telefono text, lista text, texto text, dias int,
@@ -35,7 +37,7 @@ with
 g as (select gi.id, gi.nombre, gi.zona_horaria as zona, c.* from public.gimnasios gi
        join public.configuracion_gimnasio c on c.gimnasio_id = gi.id where gi.id = p_gimnasio_id),
 cfg as (select c from public.configuracion_gimnasio c where c.gimnasio_id = p_gimnasio_id),
-hoy as (select privado.dia_local(p_momento, g.zona) as d from g),
+hoy as (select ((p_momento) at time zone g.zona)::date as d from g),
 -- La membresía que importa de cada socio: la activa, o la última si se cerró hace poco.
 sus as (
   select distinct on (s.socio_id) s.*
@@ -81,7 +83,7 @@ precios as (
 base as (
   select so.id as socio_id, trim(so.nombre || ' ' || so.apellido) as nombre, so.nombre as nombre_pila,
          -- Un menor (D10): se le escribe al responsable.
-         privado.celular_aviso(so.telefono, so.responsable_telefono, so.fecha_nacimiento, privado.dia_local(p_momento, (select zona from g))) as telefono,
+         case when coalesce(so.fecha_nacimiento > (((p_momento) at time zone (select zona from g))::date - interval '18 years')::date, false) then so.responsable_telefono else so.telefono end as telefono,
          so.dado_de_baja_en, so.motivo_baja, su.id as suscripcion_id, su.baja_en, su.plan_id,
          an.primer_inicio, e.fin_actual, e.ultimo_fin, e.tiene_futuro, v.ultimo as ultimo_ingreso, f.por_semana,
          round(pr.precio / pl.duracion_meses, 2) as monto_mensual,
@@ -122,10 +124,10 @@ clasificado as (
       when b.dado_de_baja_en is not null and b.dado_de_baja_en <= p_momento then 'se_fue'
       when b.baja_en is not null and b.baja_en <= p_momento then 'se_fue'
       when b.fin_actual is null and not b.tiene_futuro
-           and hoy.d - privado.dia_local(coalesce(b.ultimo_fin, b.primer_inicio), g.zona) > g.retencion_dias_vencido then 'se_fue'
+           and hoy.d - ((coalesce(b.ultimo_fin, b.primer_inicio)) at time zone g.zona)::date > g.retencion_dias_vencido then 'se_fue'
       when b.fin_actual is null and not b.tiene_futuro then 'vencido'
       when b.fin_actual is not null
-           and privado.dia_local(b.fin_actual - interval '1 microsecond', g.zona) - hoy.d <= g.dias_aviso then 'por_vencer'
+           and ((b.fin_actual - interval '1 microsecond') at time zone g.zona)::date - hoy.d <= g.dias_aviso then 'por_vencer'
       when b.fin_actual is not null and b.primer_inicio > p_momento - make_interval(days => g.retencion_dias_nuevo)
            and coalesce(b.ultimo_ingreso, b.primer_inicio) <= p_momento - interval '7 days' then 'nuevo'
       when b.fin_actual is not null
@@ -144,9 +146,9 @@ con_texto as materialized (
       when 'vencido' then c.ultimo_fin
       else c.fin_actual end as vence,
     case
-      when c.lista in ('no_viene', 'nuevo') then c.hoy_d - privado.dia_local(coalesce(c.ultimo_ingreso, c.primer_inicio), g.zona)
-      when c.lista in ('vencido', 'se_fue') then c.hoy_d - privado.dia_local(coalesce(c.dado_de_baja_en, c.baja_en, c.sin_cubrir_desde), g.zona)
-      when c.lista = 'por_vencer' then privado.dia_local(c.fin_actual - interval '1 microsecond', g.zona) - c.hoy_d
+      when c.lista in ('no_viene', 'nuevo') then c.hoy_d - ((coalesce(c.ultimo_ingreso, c.primer_inicio)) at time zone g.zona)::date
+      when c.lista in ('vencido', 'se_fue') then c.hoy_d - ((coalesce(c.dado_de_baja_en, c.baja_en, c.sin_cubrir_desde)) at time zone g.zona)::date
+      when c.lista = 'por_vencer' then ((c.fin_actual - interval '1 microsecond') at time zone g.zona)::date - c.hoy_d
     end as dias
     from clasificado c, g
    where c.lista is not null
@@ -164,7 +166,7 @@ select t.socio_id, t.nombre, t.telefono, t.lista,
     when 'no_viene' then case when t.ultimo_ingreso is null then 'No vino nunca · se anotó hace ' || t.dias || ' días'
                               else 'No viene hace ' || t.dias || ' días' end
                          || case when t.por_semana >= 0.5 then ' · venía ' || round(t.por_semana) || ' veces por semana' else '' end
-    when 'nuevo' then 'Se anotó el ' || privado.fecha_corta(t.primer_inicio, g.zona) || ' · '
+    when 'nuevo' then 'Se anotó el ' || to_char((t.primer_inicio) at time zone g.zona, 'DD/MM') || ' · '
                       || case when t.ultimo_ingreso is null then 'todavía no vino' else 'no viene hace ' || t.dias || ' días' end
     when 'por_vencer' then case t.dias when 0 then 'Vence hoy' when 1 then 'Vence mañana'
                                        else 'Vence el ' || privado.ultimo_dia(t.fin_actual, g.zona) end
@@ -172,8 +174,8 @@ select t.socio_id, t.nombre, t.telefono, t.lista,
                              else 'Venció el ' || privado.ultimo_dia(t.ultimo_fin, g.zona)
                                   || coalesce(' · debe ' || privado.formato_pesos(t.debe), '') end
     when 'se_fue' then case when t.dado_de_baja_en is not null
-                            then 'Se dio de baja el ' || privado.fecha_corta(t.dado_de_baja_en, g.zona) || coalesce(' · ' || replace(t.motivo_baja, '_', ' '), '')
-                            when t.ultimo_fin is null then 'Nunca pagó · se anotó el ' || privado.fecha_corta(t.primer_inicio, g.zona)
+                            then 'Se dio de baja el ' || to_char((t.dado_de_baja_en) at time zone g.zona, 'DD/MM') || coalesce(' · ' || replace(t.motivo_baja, '_', ' '), '')
+                            when t.ultimo_fin is null then 'Nunca pagó · se anotó el ' || to_char((t.primer_inicio) at time zone g.zona, 'DD/MM')
                             else 'Dejó de pagar el ' || privado.ultimo_dia(t.ultimo_fin, g.zona) end
   end,
   t.dias, t.vence, t.monto_mensual, t.debe, t.ultimo_ingreso, round(t.por_semana, 1),

@@ -116,7 +116,7 @@ try {
       finally { await db.query("rollback"); db.off("notice", alAviso); }
       // Las estadísticas de funciones se vuelcan cuando la sesión queda libre y pasó más de un segundo desde el último volcado:
       await new Promise((r) => setTimeout(r, 1300)); await db.query("select 1"); await new Promise((r) => setTimeout(r, 300));
-      const { rows } = await db.query("select schemaname || '.' || funcname as f, calls, round(total_time::numeric, 1) as total, round(self_time::numeric, 1) as propio from pg_stat_user_functions where calls > 0 order by total_time desc limit 8");
+      const { rows } = await db.query("select schemaname || '.' || funcname as f, calls, round(total_time::numeric, 1) as total, round(self_time::numeric, 1) as propio from pg_stat_user_functions where calls > 0 order by total_time desc limit 14");
       tabla = rows.map((r) => `  ${r.f}  llamadas ${r.calls}  total ${r.total} ms  propio ${r.propio} ms`).join("\n");
       console.log(`\n::group::por dentro de ${nombre}\n${tabla}${planes ? "\n" + avisos.join("\n").slice(0, 60000) : ""}\n::endgroup::`);
     }
