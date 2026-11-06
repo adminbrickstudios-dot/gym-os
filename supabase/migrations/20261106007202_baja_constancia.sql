@@ -106,13 +106,14 @@ language plpgsql set search_path = '' as $$
 declare g uuid; ahora timestamptz := now(); pid uuid; cod text; cierre jsonb; v_motivo text := p_motivo; n int;
 begin
   select gimnasio_id into g from public.socios where id = p_socio_id;
-  perform privado.dar_de_baja(p_socio_id, p_motivo, ahora);
+  -- Un motivo fuera de la lista queda como "otro" (la ficha del socio solo acepta los de la lista).
+  if v_motivo is null or v_motivo not in ('precio', 'horario', 'mudanza', 'otro_gimnasio', 'sin_tiempo', 'insatisfecho', 'otro') then v_motivo := 'otro'; end if;
+  perform privado.dar_de_baja(p_socio_id, v_motivo, ahora);
   cierre := privado.cerrar_pendientes_baja(p_socio_id, ahora, p_actor);
   update public.pedidos_baja set estado = 'dado_de_baja', resuelto_en = ahora, resuelto_por = p_actor
    where socio_id = p_socio_id and estado = 'pendiente' returning id, codigo into pid, cod;
   if pid is null then
     -- Baja pedida en el mostrador: también deja su constancia.
-    if v_motivo is null or v_motivo not in ('precio', 'horario', 'mudanza', 'otro_gimnasio', 'sin_tiempo', 'insatisfecho', 'otro') then v_motivo := 'otro'; end if;
     insert into public.pedidos_baja (gimnasio_id, socio_id, motivo, estado, pedido_en, pedido_por, resuelto_en, resuelto_por)
     values (g, p_socio_id, v_motivo, 'dado_de_baja', ahora, auth.uid(), ahora, p_actor) returning id, codigo into pid, cod;
   end if;
@@ -164,6 +165,12 @@ begin
   if position('sin responder hace más de 24 h' in d) = 0 then
     if position(viejo in d) = 0 then raise exception 'Guarda: para_hacer_hoy cambió: no encuentro el texto de las bajas pedidas'; end if;
     execute replace(d, viejo, nuevo);
+  end if;
+  -- Arreglo al lado: en "clases con lista de espera hoy" la variable fin chocaba con la columna clases.fin ("column reference fin is ambiguous"):
+  -- en cualquier gimnasio con clases, Para hacer hoy fallaba entero. Se califica con el nombre de la función.
+  d := pg_get_functiondef('public.para_hacer_hoy(uuid)'::regprocedure);
+  if position('kl.inicio < fin and' in d) > 0 then
+    execute replace(d, 'kl.inicio < fin and', 'kl.inicio < para_hacer_hoy.fin and');
   end if;
 end $$;
 
