@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { LinkPanel } from "@/components/panel/LinkPanel";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
@@ -66,6 +66,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [otro, setOtro] = useState<{ descripcion: string; monto: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [venta, setVenta] = useState<Venta | null>(null);
+  const claveOperacion = useRef<string | null>(null);
   const [ocupado, empezar] = useTransition();
 
   useEffect(() => {
@@ -118,11 +119,14 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" || l.tipo === "deuda" ? l.precio_fijo : undefined,
       descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
     }));
-    const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos });
+    // VD-34: la misma operación lleva la misma clave hasta que se cobra; un reintento no cobra dos veces.
+    claveOperacion.current ??= crypto.randomUUID();
+    const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos, claveOperacion: claveOperacion.current });
     if (r.error) setError(r.error);
     else {
       // Lo vendido sale del stock que se muestra (la base lo calcula igual).
       setStock((st) => Object.fromEntries(Object.entries(st).map(([id, x]) => [id, { ...x, stock: x.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0) }])));
+      claveOperacion.current = null;
       setVenta(r.venta!); setLineas([]);
       if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
         const u = await registrarUsoCupon(r.venta!.venta_id, cupon);

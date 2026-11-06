@@ -17,13 +17,13 @@ export type Venta = { venta_id: string; total: number; veredicto: Veredicto | nu
 
 export async function cobrar(datos: {
   sedeId: string; socioId: string | null; turnoId: string | null;
-  items: Record<string, unknown>[]; pagos: { medio: string; monto: number }[];
+  items: Record<string, unknown>[]; pagos: { medio: string; monto: number }[]; claveOperacion?: string;
 }): Promise<{ venta?: Venta; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, datos.sedeId);
     const venta = await rpc<Venta>("vender", {
-      p_sede_id: sede.id, p_items: datos.items, p_pagos: datos.pagos, p_socio_id: datos.socioId, p_turno_id: datos.turnoId,
+      p_sede_id: sede.id, p_items: datos.items, p_pagos: datos.pagos, p_socio_id: datos.socioId, p_turno_id: datos.turnoId, p_clave_operacion: datos.claveOperacion ?? null,
     });
     revalidatePath("/panel");
     if (datos.socioId) revalidatePath(`/panel/socios/${datos.socioId}`);

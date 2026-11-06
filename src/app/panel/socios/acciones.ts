@@ -2,8 +2,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { conflictoDe } from "@/lib/panel/version";
 
-export type EstadoForm = { error?: string; destino?: string; valores?: Record<string, string> };
+export type EstadoForm = { error?: string; destino?: string; valores?: Record<string, string>; version?: string };
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
 
@@ -16,6 +17,11 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   const plan = socioId ? "" : String(form.get("plan_id") ?? "");
   const cobrar = !!plan && form.get("despues") === "cobrar";
   let id: string;
+  // VD-34: si otra persona tocó la ficha desde que se abrió, se avisa en vez de pisarla.
+  if (socioId) {
+    const c = await conflictoDe(panel.gimnasio.id, "socios", socioId, String(form.get("version") ?? ""));
+    if (c) return { error: c.error, version: c.version, valores: datos };
+  }
   try {
     id = await rpc<string>("guardar_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: socioId, p_datos: datos });
     if (prospecto) {

@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { conflictoDe } from "@/lib/panel/version";
 
 const listo = () => { revalidatePath("/panel/planes"); return {}; };
 const MAL_MONTO = "No entiendo el precio: escribilo como 84.500 o 84500,50";
@@ -48,10 +49,12 @@ export async function activarPlan(planId: string, activo: boolean): Promise<{ er
 }
 
 export async function editarPlan(planId: string, datos: { nombre: string; descripcion: string; max_ingresos_semana?: string; hora_desde?: string; hora_hasta?: string },
-  actividades?: string[], matricula?: { monto: string; anual: boolean }): Promise<{ error?: string }> {
+  actividades?: string[], matricula?: { monto: string; anual: boolean }, version?: string | null): Promise<{ error?: string; version?: string }> {
   const panel = await contextoPanel();
   const m = matricula?.monto.trim() ? leerMonto(matricula.monto) : null;
   if (Number.isNaN(m)) return { error: `Matrícula: ${MAL_MONTO}` };
+  const choque = await conflictoDe(panel.gimnasio.id, "planes", planId, version);
+  if (choque) return choque;
   try {
     await rpc("guardar_plan", { p_gimnasio_id: panel.gimnasio.id, p_plan_id: planId, p_datos: datos });
     if (actividades) await rpc("guardar_actividades_plan", { p_plan_id: planId, p_actividades: actividades });

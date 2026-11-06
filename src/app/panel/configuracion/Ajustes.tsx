@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
-import { guardarConfiguracion, guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
+import { useVersion } from "@/components/panel/useVersion";
+import { guardarConfiguracion,guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
 import { MercadoPago } from "./MercadoPago";
 import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -181,6 +182,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
     setMsjPagina({ ok: nuevo ? "Tu página está publicada: ya la puede ver cualquiera." : "Tu página volvió a borrador: la gente ve “Estamos armando nuestra página”." });
   });
   const [, empezar] = useTransition();
+  const [version, setVersion] = useVersion("configuracion", "gimnasio");
   const conClases = c.modo_clases !== "ninguno";
   const [pestana, setPestana] = useState<ClavePestana>(pestanaInicial === "clases" && inicial.modo_clases === "ninguno" ? "secciones" : pestanaInicial);
 
@@ -240,8 +242,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
     setEnCurso(p);
     empezar(async () => {
       const datosAGuardar = Object.fromEntries(campos.map((k) => [k, c[k]]));
-      const r = await guardarConfiguracion(datosAGuardar);
+      const r = await guardarConfiguracion(datosAGuardar, version);
       setEnCurso(null);
+      if (r.version) setVersion(r.version);
       if (r.error) { responder(p, { error: r.error }); return; }
       setGuardado((g) => ({ ...g, ...datosAGuardar }));
       responder(p, { ok: "Guardado" });

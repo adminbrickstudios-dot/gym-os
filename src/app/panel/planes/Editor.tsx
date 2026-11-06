@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
+import { useVersion } from "@/components/panel/useVersion";
 import { activarPlan, configurarStock, crearPlan, editarPlan, guardarProducto, moverStock, type Stock } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
 
@@ -24,13 +25,14 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
   p: Plan; lista?: ListaPrecios; fecha: (d: string) => string; hoy: string; actividades: Actividad[]; incluye: string[]; matricula?: Matricula;
 }) {
   const [abierto, setAbierto] = useState<null | "precio" | "editar">(null);
+  const [version, setVersion] = useVersion("planes", abierto === "editar" ? p.plan_id : null);
   const [datos, setDatos] = useState({ nombre: p.nombre, descripcion: p.descripcion ?? "", veces: p.max_ingresos_semana ? String(p.max_ingresos_semana) : "",
     desde: p.hora_desde?.slice(0, 5) ?? "", hasta: p.hora_hasta?.slice(0, 5) ?? "", actividades: incluye,
     matricula: matricula ? formatearNumero(Number(matricula.monto), 2) : "", matriculaAnual: matricula?.anual ?? false });
   const nombresIncluye = actividades.filter((a) => incluye.includes(a.actividad_id)).map((a) => a.nombre);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) setAbierto(null); });
+  const correr = (f: () => Promise<{ error?: string; version?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (r.version) setVersion(r.version); if (!r.error) setAbierto(null); });
   const detalle = [
     p.duracion_meses && p.duracion_meses > 1
       ? `${DURACION[p.duracion_meses] ?? `${p.duracion_meses} meses`}${p.precio != null ? ` (${formatearPesos(Math.round(p.precio / p.duracion_meses))} por mes)` : ""}` : null,
@@ -69,7 +71,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
             nombre: datos.nombre, descripcion: datos.descripcion,
             ...(p.tipo === "membresia" ? { max_ingresos_semana: datos.veces, hora_desde: datos.desde, hora_hasta: datos.hasta } : {}),
           }, actividades.length ? datos.actividades : undefined,
-          p.tipo === "membresia" ? { monto: datos.matricula, anual: datos.matriculaAnual } : undefined));
+          p.tipo === "membresia" ? { monto: datos.matricula, anual: datos.matriculaAnual } : undefined, version));
         }}>
           <label className="space-y-1"><span className="etiqueta">Nombre</span><input autoFocus required className="campo" value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} /></label>
           {p.tipo === "membresia" && <label className="space-y-1"><span className="etiqueta">Veces por semana (vacío = libre)</span><input type="number" min={1} max={7} className="campo" value={datos.veces} onChange={(e) => setDatos({ ...datos, veces: e.target.value })} /></label>}

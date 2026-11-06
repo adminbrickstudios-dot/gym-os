@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { guardarSocio, type EstadoForm } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { BotonAccion } from "@/components/ui/BotonAccion";
+import { useVersion } from "@/components/panel/useVersion";
 import { formatearPesos } from "@/lib/formato";
 
 export type PlanAlta = { plan_id: string; nombre: string; precio: number | null };
@@ -32,6 +34,7 @@ export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobra
   const [plan, setPlan] = useState("");
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
+  const [versionAbierta] = useVersion("socios", socioId);
   useEffect(() => { if (estado.destino) router.push(estado.destino); }, [estado.destino, router]);
   // Menor de 18 (D10): aparece el adulto responsable. La base lo exige igual.
   const [nacimiento, setNacimiento] = useState(socio?.fecha_nacimiento ?? "");
@@ -40,6 +43,7 @@ export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobra
   const v: Socio = { ...socio, ...estado.valores };
   return (
     <form action={accion} className="max-w-2xl space-y-8">
+      {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
       {prospectoId && <input type="hidden" name="prospecto" value={prospectoId} />}
       {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
       <fieldset className="grid sm:grid-cols-2 gap-4">
@@ -82,10 +86,10 @@ export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobra
       <div className="flex flex-wrap gap-2">
         {!socioId && plan && puedeCobrar
           ? <>
-              <button type="submit" name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "✅ Dar de alta y cobrar"}</button>
-              <button type="submit" disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</button>
+              <BotonAccion name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "✅ Dar de alta y cobrar"}</BotonAccion>
+              <BotonAccion disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</BotonAccion>
             </>
-          : <button type="submit" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</button>}
+          : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</BotonAccion>}
         <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
       </div>
     </form>

@@ -1,15 +1,19 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { conflictoDe, versionDe } from "@/lib/panel/version";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { svgSeguro, tipoReal } from "@/lib/imagenes";
 
-export async function guardarConfiguracion(datos: Record<string, unknown>): Promise<{ error?: string }> {
+export async function guardarConfiguracion(datos: Record<string, unknown>, version?: string | null): Promise<{ error?: string; version?: string }> {
   const panel = await contextoPanel();
+  // VD-34: si otra persona guardó la configuración mientras esta estaba abierta, se avisa antes de pisarla.
+  const choque = await conflictoDe(panel.gimnasio.id, "configuracion", panel.gimnasio.id, version);
+  if (choque) return choque;
   try {
     await rpc("guardar_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_datos: datos });
     revalidatePath("/panel", "layout");
-    return {};
+    return { version: (await versionDe(panel.gimnasio.id, "configuracion", panel.gimnasio.id)) ?? undefined };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
