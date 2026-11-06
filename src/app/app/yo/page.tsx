@@ -16,9 +16,11 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     const s = yo.socio!;
     const zona = yo.zona!;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
-    const [referido, invitados] = await Promise.all([
+    const [referido, invitados, mensajes] = await Promise.all([
       rpc<unknown | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
       rpc<unknown | null>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
+      // VD-38 (D27): escribirle al gimnasio. Si la sección está apagada o la base no responde, la fila no se muestra.
+      rpc<{ activo: boolean; sin_leer: number }>("mensajes_estado_socio", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
@@ -60,6 +62,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         <section aria-labelledby="mas" className="space-y-2" data-yo-mas>
           <h2 id="mas" className="titulo text-2xl">Más</h2>
           <ul className="space-y-2">
+            {mensajes?.activo && fila(`/app/mensajes${q}`, "💬", "Escribile al gimnasio", mensajes.sin_leer > 0 ? (mensajes.sin_leer === 1 ? "1 respuesta nueva" : `${mensajes.sin_leer} respuestas nuevas`) : "Una consulta, una queja o algo que perdiste", "mensajes")}
             {referido != null && fila(`/app${q}#referir`, "🤝", "Invitá a un amigo", "Tu link para que se anote", "referir")}
             {invitados != null && fila(`/app${q}`, "🎫", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
             <li><a href={`/app/mis-datos${q}`} download className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila="mis-datos">

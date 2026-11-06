@@ -9,7 +9,7 @@ import { clienteServicio } from "@/lib/supabase/servicio";
  * (`destinos_push`), que además no deja mandar dos veces lo mismo. Si no
  * llega, nada se pierde: todo está en la campana (AVI-5).
  */
-export type EventoPush = "comprobante" | "pago_resuelto" | "caja_diferencia" | "caja_retiro" | "pedido_anulacion" | "clase_cancelada";
+export type EventoPush = "comprobante" | "pago_resuelto" | "caja_diferencia" | "caja_retiro" | "pedido_anulacion" | "clase_cancelada" | "mensaje_nuevo" | "mensaje_respuesta";
 export type Mensaje = { titulo: string; cuerpo: string; url: string };
 type Destinos = Mensaje & { tipo: string; destinos: { endpoint: string; p256dh: string; auth: string }[] };
 
@@ -36,7 +36,8 @@ export async function mandar(sub: { endpoint: string; p256dh: string; auth: stri
 export async function notificar(evento: EventoPush, id: string): Promise<{ enviados: number; bajas: number; fallas: number } | null> {
   if (!pushConfigurado()) { console.warn(`[push] sin claves VAPID: no se manda ${evento}`); return null; }
   const db = clienteServicio();
-  const { data, error } = await db.rpc("destinos_push", { p_evento: evento, p_id: id });
+  // VD-38: los mensajes de los socios tienen su propia función (destinos_push no se toca).
+  const { data, error } = await db.rpc(evento.startsWith("mensaje_") ? "destinos_push_mensajes" : "destinos_push", { p_evento: evento, p_id: id });
   if (error) { console.error(`[push] ${evento} ${id}: ${error.message}`); return null; }
   const d = data as Destinos | null;
   if (!d) return { enviados: 0, bajas: 0, fallas: 0 };   // ya se mandó o el hecho no aplica

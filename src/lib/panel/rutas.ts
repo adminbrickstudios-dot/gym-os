@@ -20,6 +20,7 @@ export const DESTINO = {
   rutinas: "/panel/rutinas",
   eventos: "/panel/eventos",
   prospectos: "/panel/prospectos",      // VD-15: "Interesados" dentro de Socios
+  mensajes: "/panel/mensajes",          // VD-38: lo que los socios le escriben al gimnasio
   vender: "/panel/vender",              // VD-18: "Productos y stock" (D21)
   caja: "/panel/caja",
   transferencias: "/panel/transferencias",

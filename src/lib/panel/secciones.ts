@@ -39,6 +39,8 @@ export const SECCIONES: Seccion[] = [
   // SOCIOS
   { clave: "socios", ruta: DESTINO.socios, emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
   { clave: "prospectos", ruta: DESTINO.prospectos, emoji: "🌱", titulo: "Interesados", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR, tambien: "prospectos" },
+  // "mensajes": para la recepción lo saca contextoPanel si el dueño no se lo prendió (VD-38); el contador de pendientes lo suma VD-37.
+  { clave: "mensajes", ruta: DESTINO.mensajes, emoji: "💬", titulo: "Mensajes", descripcion: "Consultas y quejas de los socios, para contestar", grupo: "Socios", roles: MOSTRADOR, apagable: "mensajes", tambien: "consultas quejas objetos perdidos" },
   { clave: "retencion", ruta: DESTINO.retencion, emoji: "📉", titulo: "Retención y números", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion", tambien: "retencion" },
   { clave: "rutinas", ruta: DESTINO.rutinas, emoji: "💪", titulo: "Rutinas", descripcion: "Ejercicios y rutinas para los socios", grupo: "Socios", roles: ["dueno", "encargado", "profe"], apagable: "rutinas" },
   { clave: "eventos", ruta: DESTINO.eventos, emoji: "🎟️", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", roles: MOSTRADOR },

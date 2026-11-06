@@ -18,11 +18,14 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/clases` | pantalla |  |  | `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `turnos_socio`, `wods_socio` | `/app` |
 | `/app/cuenta` | pantalla |  |  | `mi_seguridad`, `pedido_baja_socio` | `/app` `/app/mis-datos` |
 | `/app/historial` | pantalla |  |  | `mi_historial` | `/app` |
+| `/app/mensajes` | pantalla |  |  | `escribir_al_gimnasio`, `mensajes_estado_socio`, `mis_mensajes`, `responder_hilo_socio` | `/app` `/app/mensajes/` `/app/mensajes/nuevo` `/app/yo` |
+| `/app/mensajes/[id]` | pantalla |  |  | `mi_hilo` | `/app` `/app/mensajes` |
+| `/app/mensajes/nuevo` | pantalla |  |  | `mensajes_estado_socio` | `/app` `/app/mensajes` |
 | `/app/mis-datos` | acción (POST/GET) |  |  | `mis_datos` |  |
-| `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana` | `/app` |
+| `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana`, `mensajes_estado_socio` | `/app` `/app/mensajes` |
 | `/app/pago` | pantalla |  |  | `pago_online` |  |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
-| `/app/yo` | pantalla |  |  | `mi_link_referido`, `mis_invitados` | `/app` `/app/mis-datos` |
+| `/app/yo` | pantalla |  |  | `mensajes_estado_socio`, `mi_link_referido`, `mis_invitados` | `/app` `/app/mis-datos` |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
@@ -57,6 +60,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/gastos/exportar` | acción (POST/GET) |  |  | `exportar_gastos` |  |
 | `/panel/grados` | pantalla |  | clases | `anular_grado_socio`, `archivar_grado`, `grados_panel`, `guardar_grado`, `otorgar_grado` | `/panel/socios/` |
 | `/panel/hoy` | pantalla |  |  |  |  |
+| `/panel/mensajes` | pantalla | 👑 🧭 🛎️ | mensajes | `bandeja_mensajes`, `cambiar_estado_hilo`, `guardar_permisos_mensajes`, `guardar_respuesta_rapida`, `hilo_mensajes`, `permisos_mensajes`, `quitar_respuesta_rapida`, `responder_mensaje`, `respuestas_rapidas` | `/panel/socios/` |
 | `/panel/pagina` | pantalla | 👑 🧭 |  | `altas_panel`, `guardar_altas`, `guardar_medicion`, `guardar_pagina`, `medicion_panel`, `pagina_panel` | `/panel/configuracion` |
 | `/panel/pin` | pantalla |  |  | `entrar_con_pin`, `guardar_mi_pin`, `operador_actual` | `/panel/cuenta` |
 | `/panel/planes` | pantalla | 👑 🧭 |  | `actividades_gimnasio`, `ajustes_planes`, `anular_precio_programado`, `aplicar_aumento`, `asignar_servicio`, `configurar_stock`, `confirmar_foto_producto`, `confirmar_remito_stock`, `contar_stock`, `convenios_gimnasio`, `entrada_stock`, `guardar_actividades_plan`, `guardar_ajustes_plan`, `guardar_convenio`, `guardar_ficha_producto`, `guardar_matricula_plan`, `guardar_plan`, `guardar_producto`, `guardar_regla_plan`, `guardar_servicio`, `lista_precios_plan`, `movimientos_stock_producto`, `ordenar_planes`, `planes_gimnasio`, `preparar_foto_producto`, `preparar_remito_stock`, `productos_mostrador`, `programar_lista_precios`, `programar_precio`, `quitar_foto_producto`, `remito_stock`, `servicios_gimnasio`, `vista_aumento` | `/panel/cupones` `/panel/planes/aumento` |
@@ -71,7 +75,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/rutinas/editar` | pantalla | 👑 🧭 💪 | rutinas | `ejercicios_gimnasio`, `rutina_detalle` | `/panel/rutinas` `/panel/rutinas/socio` |
 | `/panel/rutinas/socio` | pantalla | 👑 🧭 💪 | rutinas | `progreso_socio`, `rutina_de_socio` | `/panel/rutinas` |
 | `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `agregar_nota`, `anonimizar_socio`, `anular_apto`, `anular_congelamiento`, `asignar_convenio`, `asignar_llavero`, `asignar_plan`, `borrar_nota`, `cargar_apto`, `confirmar_foto_socio`, `congelar`, `dar_de_baja`, `descongelar`, `ficha_socio`, `guardar_socio`, `pedir_pausa`, `planes_para_alta`, `poner_etiqueta`, `preparar_foto_socio`, `prospecto_es_socio`, `prospecto_por_dni`, `prospecto_por_telefono`, `quitar_convenio`, `quitar_llavero`, `resolver_pedido_baja`, `resolver_pedido_pausa`, `sacar_de_familia`, `sacar_etiqueta`, `vincular_familia`, `vista_cambio_plan`, `volver_a_dar_de_alta` | `/panel/socios/` `/panel/socios/duplicados` `/panel/socios/exportar` `/panel/socios/importar` `/panel/socios/nuevo` |
-| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `apto_socio`, `asistencia_socio`, `convenio_socio`, `convenios_gimnasio`, `documentos_socio`, `faltas_socio`, `familia_socio`, `ficha_socio`, `foto_socio`, `grados_socio`, `horarios_para_turno`, `llavero_socio`, `notas_y_etiquetas`, `origen_socio`, `pausas_socio`, `pedido_baja_socio`, `planes_gimnasio`, `primer_mes_socio`, `riesgo_baja`, `turnos_socio`, `ventas_socio` | `/panel/entrada` `/panel/socios` `/panel/socios/` `/panel/tareas` `/panel/vender` |
+| `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `apto_socio`, `asistencia_socio`, `convenio_socio`, `convenios_gimnasio`, `documentos_socio`, `faltas_socio`, `familia_socio`, `ficha_socio`, `foto_socio`, `grados_socio`, `historial_mensajes_socio`, `horarios_para_turno`, `llavero_socio`, `notas_y_etiquetas`, `origen_socio`, `pausas_socio`, `pedido_baja_socio`, `planes_gimnasio`, `primer_mes_socio`, `riesgo_baja`, `turnos_socio`, `ventas_socio` | `/panel/entrada` `/panel/mensajes` `/panel/socios` `/panel/socios/` `/panel/tareas` `/panel/vender` |
 | `/panel/socios/[id]/editar` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio` |  |
 | `/panel/socios/[id]/foto` | acción (POST/GET) |  |  | `foto_socio` |  |
 | `/panel/socios/[id]/reglamento` | pantalla | 👑 🧭 🛎️ | socios | `reglamento_aceptado` | `/panel/socios/` |

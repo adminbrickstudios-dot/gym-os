@@ -26,6 +26,7 @@ import { GradosFicha } from "./GradosFicha";
 import { BotonEntradaFicha } from "./BotonEntradaFicha";
 import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
+import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
@@ -54,6 +55,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
+    // VD-38: lo que este socio le escribió al gimnasio. Sin permiso (recepción sin el interruptor) la tarjeta no se muestra; la base exige el permiso igual.
+    const pMensajes: Promise<FilaHistorial[] | null> = pestana === "resumen" && panel.yo.rol !== "profe" && !panel.secciones_apagadas.includes("mensajes")
+      ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
     const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -86,6 +90,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       // COM-13: su grado en las actividades con grados (cinturones).
       pestana === "resumen" && !panel.secciones_apagadas.includes("clases") ? rpc<GradosSocio>("grados_socio", { p_socio_id: id }) : Promise.resolve([] as GradosSocio),
     ]);
+    const mensajesFicha = await pMensajes;
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
     const momento = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -222,6 +227,27 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </ul>
           )}
         </section>
+        {mensajesFicha && (
+          <section data-historial-mensajes>
+            <h2 className="titulo text-3xl mb-4">💬 Mensajes</h2>
+            {mensajesFicha.length === 0 ? <p className="texto-suave">Todavía no le escribió al gimnasio desde la app.</p> : (
+              <ul className="space-y-2">
+                {mensajesFicha.map((m) => (
+                  <li key={m.hilo_id}>
+                    <Link href={`/panel/mensajes?estado=todos&hilo=${m.hilo_id}`} className="tarjeta flex items-start gap-3 p-4">
+                      <span aria-hidden>{motivoDe(m.motivo).emoji}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold">{motivoDe(m.motivo).titulo} · {estadoDe(m.estado).titulo}{m.sin_responder && <span className="pildora pildora-rojo ml-2 !text-xs">Sin responder</span>}</span>
+                        {m.extracto && <span className="block texto-suave truncate">{m.extracto}</span>}
+                        <span className="block text-sm texto-tenue">{momento(m.ultimo_en)}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
         {turnos?.prendido && !s.dado_de_baja_en && <TurnosFijos socioId={s.id} turnos={turnos.turnos} horarios={horariosTurno} quien="equipo" />}
 
         </>}

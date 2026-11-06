@@ -501,6 +501,8 @@ bloque 18.
 - [ ] VD-37b · 🟢 · Para el dueño nuevo, solo lo urgente prendido por defecto (comprobantes, caja, pedidos)
 - [ ] VD-37c · 🟢 · Canales mail y WhatsApp en las preferencias de avisos
 - [ ] VD-37d · 🟢 · Punto en Yo y Clases de la app del socio cuando hay un pago a hacer o un mensaje respondido (depende de VD-38)
+- [ ] VD-38b · 🟢 · pendientes_panel suma mensajes_sin_responder (hoy en 0) y el menú prende el punto de Mensajes (LISTO SI: db: llega un mensaje y el contador sube; baja al contestar)
+- [ ] VD-38c · 🟢 · Respuestas rápidas de ejemplo al crear un gimnasio; el equipo puede adjuntar foto en sus respuestas
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -515,7 +517,7 @@ bloque 18.
 - [x] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app — verificado: 13 automáticas calculadas con su dato, manuales con repetición, checklist de apertura y cierre, cada una prendible y asignable; base en verde en GitHub (para-hacer-hoy); e2e vd-13 en la corrida de la tanda
 - [x] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
 - [x] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones — verificado: lista de Socios con memoria, Interesados como pestaña de Socios, 🌐 de autoalta, ficha con Entrada y Cobrar; base en verde en GitHub (interesados-dni); e2e vd-15 en la corrida de la tanda
-- [ ] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos)
+- [x] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos) — verificado: mensajes del socio con foto y motivos, bandeja del panel con respuestas rápidas y estados, permisos por rol y aviso al socio; base en verde en GitHub (mensajes-socios); e2e vd-38 en la corrida de la tanda
 - [x] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata) — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
 - [x] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda
 - [x] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda

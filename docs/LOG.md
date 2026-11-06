@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-38 · Mensajes de los socios al gimnasio (D27)
+
+**QUÉ HICE**
+- Migración 5300: en la app, Yo → Más → "Escribile al gimnasio" (`/app/mensajes`, formulario con motivo —consulta, queja, objeto perdido, otro—, foto opcional achicada en el celular y el aviso de no contar diagnósticos). Al contestarle, push y "N respuestas nuevas" en Yo y en Novedades. Panel: `/panel/mensajes` (bandeja con filtros por estado, detalle, foto, respuestas rápidas, marcar resuelto) e historial en la ficha del socio. Un socio ve solo los suyos; dueño y encargado siempre; la recepción solo si el dueño lo prende (interruptor en la bandeja); el profe nunca; sin permiso, error y no bandeja vacía (y `ver_mensajes_equipo` saca "Mensajes" del menú sin tocar `panel_gimnasio`). Sección `mensajes` apagable por gimnasio (suma a la lista vigente de `secciones_validas()`). Bucket privado `mensajes_fotos`.
+- Decisiones: fotos hasta 2,5 MB (límite de las acciones del servidor 3 MB); el push usa su propia función y se avisa una sola vez por mensaje; tres respuestas rápidas de ejemplo en los gimnasios existentes.
+- Verificado: lint, typecheck, 110 pruebas, build y base/chequeos/demo en verde en GitHub (`mensajes-socios`).
+
+**QUÉ CONFIGURÁS VOS**: si querés que la recepción vea los mensajes, prender el interruptor en `/panel/mensajes`; el push necesita las claves VAPID.
+**SIN ARREGLAR**: VD-38b (`pendientes_panel` sigue contando mensajes en 0: falta llamar a `mensajes_sin_responder`) y VD-38c (respuestas de ejemplo para gimnasios nuevos, foto en las respuestas del equipo).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-38`, capturas y el push real: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-37 · Pendientes (números y puntitos) y centro de notificaciones
 
 **QUÉ HICE**

@@ -76,6 +76,8 @@ const SECCIONES: [string, string, string, string][] = [
     "Los socios no pueden mandar comprobantes desde la app (no habría quién los apruebe). En el mostrador se sigue cobrando por transferencia."],
   ["gastos", "🧮 Gastos", "Cargar gastos y fijos, el presupuesto y la ganancia del mes.",
     "No hay pantalla de Gastos. El Resultado sigue mostrando lo cobrado."],
+  ["mensajes", "💬 Mensajes", "Lo que los socios te escriben desde la app: consultas, quejas y objetos perdidos.",
+    "Los socios no ven “Escribile al gimnasio” en la app y no hay bandeja de Mensajes en el panel. Lo ya escrito se conserva."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */
