@@ -15,7 +15,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
 | `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `acreditar_pago_mp`, `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
 | `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_transferencia`, `iniciar_pago_online`, `invitar`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared` | `/app/clases` `/app/novedades` `/app/rutina` |
-| `/app/clases` | pantalla |  |  | `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `turnos_socio`, `wods_socio` | `/app` |
+| `/app/clases` | pantalla |  |  | `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `profes_de_clases`, `turnos_socio`, `wods_socio` | `/app` |
 | `/app/cuenta` | pantalla |  |  | `mi_seguridad`, `pedido_baja_socio` | `/app` `/app/mis-datos` |
 | `/app/historial` | pantalla |  |  | `mi_historial` | `/app` |
 | `/app/mis-datos` | acción (POST/GET) |  |  | `mis_datos` |  |
@@ -25,6 +25,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/yo` | pantalla |  |  | `mi_link_referido`, `mis_invitados` | `/app` `/app/mis-datos` |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
+| `/foto-equipo/[id]` | acción (POST/GET) |  |  | `foto_equipo` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
 | `/hacete-socio` | pantalla |  |  | `alta_online`, `alta_publica` | `/` `/ingresar` |
 | `/ingresar` | pantalla |  |  | `mi_sesion`, `registrar_pedido_codigo`, `telefono_para_ingresar`, `vincular_socios_por_email`, `vincular_socios_por_telefono` |  |
@@ -49,7 +50,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/documentos` | pantalla | 👑 🧭 |  | `archivar_documento`, `documentos_panel`, `firmar_documento`, `guardar_documento` |  |
 | `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `apto_socio`, `config_visita`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `descongelar`, `documentos_socio`, `entrar_con_pin`, `estado_acceso`, `guardar_config_entrada`, `guardar_config_visita`, `guia_entrada`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `registrar_ingreso`, `registrar_invitado`, `sincronizar_sin_internet` | `/panel/caja` `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` |
 | `/panel/entrada/control` | pantalla | 👑 🧭 | entrada | `alertas_prestamo`, `control_entrada` | `/panel/control` `/panel/socios/` |
-| `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `guardar_permisos_equipo`, `permisos_equipo` | `/panel/configuracion` `/panel/control` `/panel/equipo/actividad` |
+| `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `equipo_perfiles`, `guardar_equipo`, `guardar_equipo_ajuste`, `guardar_foto_equipo`, `guardar_perfil_equipo`, `guardar_permisos_equipo`, `permisos_equipo`, `preparar_foto_equipo` | `/panel/configuracion` `/panel/control` `/panel/equipo/actividad` |
 | `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/control` `/panel/equipo` |
 | `/panel/eventos` | pantalla | 👑 🧭 🛎️ |  | `cerrar_evento`, `crear_evento`, `eventos_panel` | `/panel/socios/` `/panel/vender` |
 | `/panel/exportar` | acción (POST/GET) |  |  | `exportar_gimnasio` |  |

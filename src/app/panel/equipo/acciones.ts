@@ -52,3 +52,61 @@ export async function guardarPermiso(clave: string, valor: boolean): Promise<{ e
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── VD-44 · Foto, clases y horario de cada persona ───────────────────
+export type HorarioTrabajo = { dia: number; desde: string; hasta: string };
+
+/** La opción general: mostrar al equipo en la página y la app (solo el dueño; lo valida la base). */
+export async function guardarMostrarEquipo(mostrar: boolean): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("guardar_equipo_ajuste", { p_gimnasio_id: panel.gimnasio.id, p_mostrar: mostrar });
+    revalidatePath("/panel/equipo");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function guardarPerfil(equipoId: string, mostrar: boolean, actividades: string[], horario: HorarioTrabajo[]): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try {
+    await rpc("guardar_perfil_equipo", { p_gimnasio_id: panel.gimnasio.id, p_equipo_id: equipoId, p_mostrar: mostrar, p_actividades: actividades, p_horario: horario });
+    revalidatePath("/panel/equipo");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+type Imagen = "image/jpeg" | "image/png" | "image/webp";
+const MAX_FOTO = 6 * 1024 * 1024;
+
+/** La foto se achica (VD-47X) y se sube con la clave de servicio al bucket privado; la base arma la ruta y la confirma. */
+export async function subirFotoEquipo(equipoId: string, f: FormData): Promise<{ error?: string }> {
+  const foto = f.get("foto");
+  if (!(foto instanceof Blob) || foto.size === 0) return { error: "Elegí una foto" };
+  if (!["image/jpeg", "image/png", "image/webp"].includes(foto.type) || foto.size > MAX_FOTO) return { error: "La foto tiene que ser JPG, PNG o WEBP de hasta 6 MB." };
+  try {
+    const { achicarFoto } = await import("@/lib/imagenes-servidor");
+    const a = await achicarFoto(new Uint8Array(await foto.arrayBuffer()), foto.type as Imagen);
+    const ext = a.mime === "image/png" ? "png" : a.mime === "image/webp" ? "webp" : "jpg";
+    const ruta = await rpc<string>("preparar_foto_equipo", { p_equipo_id: equipoId, p_ext: ext });
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const almacen = clienteServicio().storage.from("fotos_equipo");
+    const { error } = await almacen.upload(ruta, Buffer.from(a.bytes), { contentType: a.mime, upsert: false });
+    if (error) return { error: `No se pudo subir la foto: ${error.message}` };
+    const anterior = await rpc<string | null>("guardar_foto_equipo", { p_equipo_id: equipoId, p_ruta: ruta });
+    if (anterior) await almacen.remove([anterior]);
+    revalidatePath("/panel/equipo");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function quitarFotoEquipo(equipoId: string): Promise<{ error?: string }> {
+  try {
+    const anterior = await rpc<string | null>("guardar_foto_equipo", { p_equipo_id: equipoId, p_ruta: null });
+    if (anterior) {
+      const { clienteServicio } = await import("@/lib/supabase/servicio");
+      await clienteServicio().storage.from("fotos_equipo").remove([anterior]);
+    }
+    revalidatePath("/panel/equipo");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

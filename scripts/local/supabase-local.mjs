@@ -295,6 +295,8 @@ const BUCKETS = {
   comprobantes_gastos: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp", "application/pdf"] },
   // VD-18: la foto del producto (pública, se ve en el mostrador) y el remito de la mercadería (privado).
   fotos_productos: { publico: true, max: 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
+  // VD-44: la foto del equipo (privada; se sirve por /foto-equipo después de que la base autoriza).
+  fotos_equipo: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
   remitos_stock: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp", "application/pdf"] },
 };
 const CARPETA_STORAGE = path.join(CARPETA, "storage");

@@ -40,6 +40,9 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const mapas = new Map((await Promise.all(clases.filter((c) => reserva && c.mi_reserva === "confirmada")
       .map(async (c) => [c.clase_id, await rpc<MapaLugares | null>("lugares_clase", { p_clase_id: c.clase_id, p_socio_id: yo.socio!.socio_id })] as const)))
       .filter((x): x is readonly [string, MapaLugares] => x[1] != null));
+    // VD-44: "Profe: Ana" con su foto, solo si el dueño mostró al equipo (la base devuelve vacío si no).
+    const profes = new Map((clases.length ? await rpc<{ clase_id: string; equipo_id: string; nombre: string; tiene_foto: boolean }[]>("profes_de_clases", { p_clase_ids: clases.map((c) => c.clase_id) }, { lectura: true }) : [])
+      .map((p) => [p.clase_id, p] as const));
     const reservaDe = new Map((yo.reservas ?? []).map((r) => [r.clase_id, r.reserva_id]));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const q = (d: string) => `/app/clases?dia=${d}${yo.socios.length > 1 ? `&socio=${yo.socio!.socio_id}` : ""}`;
@@ -62,7 +65,16 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
               <span className="numero text-2xl w-14">{hora(c.inicio)}</span>
               <span className="text-2xl" aria-hidden>{c.emoji ?? "🗓️"}</span>
               <span className="grow basis-36 min-w-0"><span className="block font-semibold">{c.actividad}</span>
-                <span className="block text-sm texto-suave">{reserva ? (c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo") : ""}{c.profe ? `${reserva ? " · " : ""}${c.profe}` : ""}</span></span>
+                <span className="block text-sm texto-suave">{reserva ? (c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo") : ""}{c.profe && !profes.get(c.clase_id) ? `${reserva ? " · " : ""}${c.profe}` : ""}</span>
+                {profes.get(c.clase_id) && (
+                  <span className="flex items-center gap-2 mt-1 text-sm" data-profe-clase={profes.get(c.clase_id)!.nombre}>
+                    {profes.get(c.clase_id)!.tiene_foto && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/foto-equipo/${profes.get(c.clase_id)!.equipo_id}`} alt={`Foto de ${profes.get(c.clase_id)!.nombre}`} className="size-8 rounded-full object-cover" />
+                    )}
+                    <span>Profe: {profes.get(c.clase_id)!.nombre}</span>
+                  </span>
+                )}</span>
               {!reserva ? null : c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
                 : <Reservar claseId={c.clase_id} socioId={yo.socio!.socio_id} lleno={c.cupo != null && c.confirmadas >= c.cupo} />}
