@@ -2,13 +2,16 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { useVersion } from "@/components/panel/useVersion";
-import { activarPlan, configurarStock, crearPlan, editarPlan, guardarProducto, moverStock, type Stock } from "./acciones";
+import { activarPlan, crearPlan, editarPlan, ordenarPlanes, type AjustesPlanes, type Servicio, type Stock } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
+import { AjustesDelPlan, resumenAjustes, VistaPrevia } from "./Ajustes";
+import { Servicios } from "./Servicios";
+import { Productos, type Producto } from "./Productos";
 
 export type Plan = { plan_id: string; tipo: string; nombre: string; descripcion: string | null; activo: boolean; duracion_meses: number | null;
   cantidad_clases: number | null; validez_dias: number | null; max_ingresos_semana: number | null; hora_desde: string | null; hora_hasta: string | null;
   precio: number | null; proximo_precio: number | null; proximo_desde: string | null; socios_activos: number };
-export type Producto = { producto_id: string; nombre: string; precio: number; activo: boolean };
+export type { Producto } from "./Productos";
 
 /** PLA-1: una cuota cubre esos meses (la base ya lo calcula así). */
 const DURACION: Record<string, string> = { "1": "Mensual", "3": "Trimestral", "6": "Semestral", "12": "Anual" };
@@ -21,10 +24,12 @@ export type Actividad = { actividad_id: string; nombre: string; emoji: string | 
 
 export type Matricula = { monto: number; anual: boolean };
 
-function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
+function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajustes, mover }: {
   p: Plan; lista?: ListaPrecios; fecha: (d: string) => string; hoy: string; actividades: Actividad[]; incluye: string[]; matricula?: Matricula;
+  ajustes: AjustesPlanes | null; mover: (id: string, delta: -1 | 1) => Promise<{ error?: string }>;
 }) {
-  const [abierto, setAbierto] = useState<null | "precio" | "editar">(null);
+  const [abierto, setAbierto] = useState<null | "precio" | "editar" | "ajustes" | "vista">(null);
+  const aj = ajustes?.planes[p.plan_id];
   const [version, setVersion] = useVersion("planes", abierto === "editar" ? p.plan_id : null);
   const [datos, setDatos] = useState({ nombre: p.nombre, descripcion: p.descripcion ?? "", veces: p.max_ingresos_semana ? String(p.max_ingresos_semana) : "",
     desde: p.hora_desde?.slice(0, 5) ?? "", hasta: p.hora_hasta?.slice(0, 5) ?? "", actividades: incluye,
@@ -42,6 +47,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
     p.hora_desde && p.hora_hasta ? `de ${p.hora_desde.slice(0, 5)} a ${p.hora_hasta.slice(0, 5)}` : null,
     nombresIncluye.length ? `solo ${nombresIncluye.join(", ")}` : null,
     matricula ? `matrícula ${formatearPesos(matricula.monto)}${matricula.anual ? " cada año" : " al entrar"}` : null,
+    ...resumenAjustes(p.tipo, aj, ajustes, ajustes?.sedes ?? []),
     p.socios_activos ? `${p.socios_activos} socios activos` : null,
   ].filter(Boolean).join(" · ");
   return (
@@ -60,10 +66,17 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
         <div className="flex flex-wrap gap-2 mt-4">
           <button type="button" className="boton boton-chico" onClick={() => setAbierto("precio")}>💲 Precios</button>
           <button type="button" className="boton boton-chico" onClick={() => setAbierto("editar")}>✏️ Editar</button>
+          {aj && ajustes && <button type="button" className="boton boton-chico" data-ajustes-abrir onClick={() => setAbierto("ajustes")}>⚙️ Ajustes</button>}
+          <button type="button" className="boton boton-chico" data-vista-abrir onClick={() => setAbierto("vista")}>👁️ Cómo lo ve el socio</button>
+          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}>⬆️</button>
+          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}>⬇️</button>
           <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
         </div>
       )}
       {abierto === "precio" && lista && <Precios lista={lista} hoy={hoy} fecha={fecha} cerrar={() => setAbierto(null)} />}
+      {abierto === "ajustes" && aj && ajustes && <AjustesDelPlan planId={p.plan_id} tipo={p.tipo} a={aj} r={ajustes} cerrar={() => setAbierto(null)} />}
+      {abierto === "vista" && <VistaPrevia nombre={p.nombre} descripcion={p.descripcion} precio={p.precio} cerrar={() => setAbierto(null)}
+        detalle={[...detalle.split(" · ").filter((d) => d && !/socios activos/.test(d) && !/no se ve en la página/.test(d))]} />}
       {abierto === "editar" && (
         <form className="grid sm:grid-cols-2 gap-3 mt-4" onSubmit={(e) => {
           e.preventDefault();
@@ -176,110 +189,21 @@ function NuevoPlan() {
   );
 }
 
-function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {
-  const [panelStock, setPanelStock] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [datos, setDatos] = useState({ nombre: p.nombre, precio: String(p.precio).replace(".", ",") });
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) setEditando(false); });
-  return (
-    <li className={`tarjeta px-4 py-3 ${p.activo ? "" : "opacity-55"}`} data-producto={p.nombre}>
-      {editando ? (
-        <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => guardarProducto(p.producto_id, datos.nombre, datos.precio, p.activo)); }}>
-          <input autoFocus required aria-label="Nombre del producto" className="campo !w-auto flex-1 min-w-32" value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} />
-          <input required aria-label="Precio del producto" inputMode="decimal" className="campo !w-28" value={datos.precio} onChange={(e) => setDatos({ ...datos, precio: e.target.value })} />
-          <button type="submit" className="boton boton-principal" disabled={ocupado}>Guardar</button>
-          <button type="button" className="boton" onClick={() => setEditando(false)}>Cancelar</button>
-        </form>
-      ) : (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="flex-1 font-semibold min-w-0">{p.nombre}{!p.activo && <span className="texto-tenue font-normal text-sm"> · oculto en Vender</span>}</span>
-          <span className="numero text-xl">{formatearPesos(p.precio)}</span>
-          {stock?.controla && <span className={`pildora text-sm ${stock.stock <= 0 ? "pildora-rojo" : stock.minimo != null && stock.stock <= stock.minimo ? "pildora-amarillo" : ""}`} data-stock={stock.stock}>📦 {stock.stock <= 0 ? "Sin stock" : `Quedan ${stock.stock}`}</span>}
-          <button type="button" className="boton-texto" onClick={() => setEditando(true)}>✏️ Editar</button>
-          <button type="button" className="boton-texto" onClick={() => setPanelStock(!panelStock)}>📦 Stock</button>
-          <button type="button" className="boton-texto" disabled={ocupado} onClick={() => correr(() => guardarProducto(p.producto_id, p.nombre, p.precio, !p.activo))}>{p.activo ? "Ocultar" : "Mostrar"}</button>
-        </div>
-      )}
-      {panelStock && <PanelStock p={p} stock={stock} cerrar={() => setPanelStock(false)} />}
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
-    </li>
-  );
-}
-
-/** VEN-4: llevar stock, entrada de mercadería, contar y desde cuánto avisar. */
-function PanelStock({ p, stock, cerrar }: { p: Producto; stock?: Stock; cerrar: () => void }) {
-  const [cant, setCant] = useState("");
-  const [motivo, setMotivo] = useState("");
-  const [contado, setContado] = useState("");
-  const [minimo, setMinimo] = useState(stock?.minimo != null ? String(stock.minimo) : "");
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>, ok?: () => void) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) ok?.(); });
-  if (!stock?.controla) {
-    return (
-      <form className="mt-3 space-y-2" data-panel-stock onSubmit={(e) => { e.preventDefault(); correr(() => configurarStock(p.producto_id, true, minimo, contado), cerrar); }}>
-        <p className="text-sm texto-suave">Llevar la cuenta de cuántos quedan. Vender lo muestra y avisa; nunca frena una venta.</p>
-        <div className="flex flex-wrap gap-2">
-          <input className="campo !w-36" inputMode="numeric" required placeholder="¿Cuántos hay?" aria-label="Cuántos hay ahora" value={contado} onChange={(e) => setContado(e.target.value)} />
-          <input className="campo !w-40" inputMode="numeric" placeholder="Avisar con (opcional)" aria-label="Avisar cuando queden" value={minimo} onChange={(e) => setMinimo(e.target.value)} />
-          <button type="submit" className="boton boton-principal" disabled={ocupado || !contado.trim()}>📦 Llevar stock</button>
-        </div>
-        {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-      </form>
-    );
-  }
-  return (
-    <div className="mt-3 space-y-3" data-panel-stock>
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => moverStock(p.producto_id, "entrada", cant, motivo), () => { setCant(""); setMotivo(""); }); }}>
-        <input className="campo !w-28" inputMode="numeric" placeholder="Cuántos" aria-label="Cuántos entraron" value={cant} onChange={(e) => setCant(e.target.value)} />
-        <input className="campo !w-auto flex-1 min-w-32" placeholder="De dónde (opcional)" aria-label="Motivo de la entrada" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        <button type="submit" className="boton" disabled={ocupado || !cant.trim()}>➕ Entró mercadería</button>
-      </form>
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => moverStock(p.producto_id, "conteo", contado), () => setContado("")); }}>
-        <input className="campo !w-28" inputMode="numeric" placeholder="Hay" aria-label="Cuántos contaste" value={contado} onChange={(e) => setContado(e.target.value)} />
-        <button type="submit" className="boton" disabled={ocupado || !contado.trim()}>🔢 Conté: ajustar</button>
-      </form>
-      <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => configurarStock(p.producto_id, true, minimo)); }}>
-        <span className="text-sm">Avisar cuando queden</span>
-        <input className="campo !w-24" inputMode="numeric" aria-label="Avisar cuando queden" value={minimo} onChange={(e) => setMinimo(e.target.value)} />
-        <button type="submit" className="boton boton-chico" disabled={ocupado}>Guardar</button>
-        <button type="button" className="boton-texto ml-auto" disabled={ocupado} onClick={() => correr(() => configurarStock(p.producto_id, false, ""), cerrar)}>Dejar de llevar stock</button>
-      </form>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-    </div>
-  );
-}
-
-function Productos({ productos, stock }: { productos: Producto[]; stock: Record<string, Stock> }) {
-  const [nuevo, setNuevo] = useState({ nombre: "", precio: "" });
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  return (
-    <section>
-      <h2 className="titulo text-3xl mb-1">🥤 Productos</h2>
-      <p className="texto-suave mb-4">Lo que se vende en el mostrador además de los planes: agua, bebidas, suplementos. Aparecen en Vender.</p>
-      {productos.length === 0 ? <p className="texto-tenue mb-4">Todavía no cargaste productos. Agregá el primero acá abajo.</p> : (
-        <ul className="grid sm:grid-cols-2 gap-2 mb-4">{productos.map((p) => <FilaProducto key={p.producto_id} p={p} stock={stock[p.producto_id]} />)}</ul>
-      )}
-      <form className="flex flex-wrap gap-2" onSubmit={(e) => {
-        e.preventDefault();
-        empezar(async () => { const r = await guardarProducto(null, nuevo.nombre, nuevo.precio); setError(r.error ?? null); if (!r.error) setNuevo({ nombre: "", precio: "" }); });
-      }}>
-        <input className="campo !w-auto flex-1 min-w-40" aria-label="Producto nuevo" placeholder="Producto (ej: Agua)" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
-        <input className="campo !w-32" inputMode="decimal" aria-label="Precio del producto nuevo" placeholder="$" value={nuevo.precio} onChange={(e) => setNuevo({ ...nuevo, precio: e.target.value })} />
-        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}>➕ Agregar</button>
-      </form>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
-    </section>
-  );
-}
-
-export function Editor({ planes, listas, productos, zona, actividades, incluyen, matriculas, stock }: {
+export function Editor({ planes, listas, productos, zona, actividades, incluyen, matriculas, stock, ajustes, servicios }: {
   planes: Plan[]; listas: Record<string, ListaPrecios>; productos: Producto[]; zona: string; actividades: Actividad[]; incluyen: Record<string, string[]>;
-  matriculas: Record<string, Matricula>; stock: Record<string, Stock>;
+  matriculas: Record<string, Matricula>; stock: Record<string, Stock>; ajustes: AjustesPlanes | null; servicios: Servicio[];
 }) {
+  // VD-17: subir o bajar un plan dentro de su grupo (mismo tipo y mismo estado); se manda la lista entera en su orden nuevo.
+  const mover = async (id: string, delta: -1 | 1) => {
+    const yo = planes.find((p) => p.plan_id === id);
+    if (!yo) return { error: "Ese plan ya no está" };
+    const grupo = planes.filter((p) => p.tipo === yo.tipo && p.activo === yo.activo).map((p) => p.plan_id);
+    const i = grupo.indexOf(id), j = i + delta;
+    if (j < 0 || j >= grupo.length) return {};
+    [grupo[i], grupo[j]] = [grupo[j], grupo[i]];
+    let k = 0;
+    return ordenarPlanes(planes.map((p) => (p.tipo === yo.tipo && p.activo === yo.activo ? grupo[k++] : p.plan_id)));
+  };
   const fecha = (d: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(d));
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
   return (
@@ -292,10 +216,11 @@ export function Editor({ planes, listas, productos, zona, actividades, incluyen,
         return (
           <section key={k}>
             <h2 className="titulo text-3xl mb-4">{v.emoji} {v.titulo}</h2>
-            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} />)}</ul>
+            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} ajustes={ajustes} mover={mover} />)}</ul>
           </section>
         );
       })}
+      <Servicios servicios={servicios} />
       <Productos productos={productos} stock={stock} />
     </div>
   );
