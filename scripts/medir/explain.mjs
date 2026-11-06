@@ -74,7 +74,7 @@ try {
     // Los ids van como literales (son nuestros, uuid): el driver no deja parámetros sin usar.
     const sqlFinal = sql.replace("$1", `'${g.id}'`).replace("$2", `'${socio}'`).replace("$3", `'${sede}'`);
     let ms = NaN, error, texto = "";
-    for (const vuelta of [0, 1]) {
+    for (let vuelta = 0; vuelta < 2; vuelta++) {
       await db.query("begin");
       try {
         await db.query("set local role authenticated");
@@ -93,14 +93,15 @@ try {
     filas.push({ nombre, quien, ms, error, presupuesto });
     if (verPlan && !error) console.log(`\n── ${nombre}\n${texto}`);
     // --anidado: los planes de las consultas de ADENTRO de la función (auto_explain), solo de las que pasan.
-    if (anidado && !error && ms > presupuesto) {
+    const detalle = /estado_acceso|registrar_ingreso/.test(nombre);
+    if (anidado && !error && (ms > presupuesto || detalle)) {
       const avisos = [];
       const alAviso = (m) => avisos.push(m.message);
       db.on("notice", alAviso);
       await db.query("begin");
       try {
         await db.query("load 'auto_explain'");
-        await db.query("set auto_explain.log_min_duration = 20; set auto_explain.log_analyze = on; set auto_explain.log_nested_statements = on; set auto_explain.log_timing = on; set client_min_messages = log");
+        await db.query(`set auto_explain.log_min_duration = ${detalle ? 0 : 20}; set auto_explain.log_analyze = on; set auto_explain.log_nested_statements = on; set auto_explain.log_timing = on; set client_min_messages = log`);
         await db.query("set local role authenticated");
         await db.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: quien === "recepcion" ? recepcion : duenio, role: "authenticated" })]);
         await db.query(sqlFinal);
