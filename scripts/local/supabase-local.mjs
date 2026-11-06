@@ -292,6 +292,7 @@ const BUCKETS = {
   comprobantes: { publico: false, max: 5 * 1024 * 1024, tipos: ["image/png", "image/jpeg", "image/webp", "application/pdf"] },
   fotos_socios: { publico: false, max: 512 * 1024, tipos: ["image/jpeg"] },
   tickets_caja: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
+  comprobantes_gastos: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp", "application/pdf"] },
 };
 const CARPETA_STORAGE = path.join(CARPETA, "storage");
 function archivoDe(bucket, ruta) {

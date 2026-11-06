@@ -32,7 +32,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const [r, gastos, motivos, numeros, cupones, encuestas] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
-      panel.yo.rol === "dueno" ? rpc<GastosMes>("gastos_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
+      panel.yo.rol === "dueno" && !panel.secciones_apagadas.includes("gastos") ? rpc<GastosMes>("ganancia_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
       // RET-3: por qué se fue la gente este mes.
       rpc<{ motivo: string; cantidad: number }[]>("motivos_baja_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // COM-5: la retención en números (es de hoy: solo se muestra en el mes en curso).
