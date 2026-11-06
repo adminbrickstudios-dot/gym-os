@@ -1,4 +1,25 @@
 # Gy
+## 2026-11-06 · Noche · VD-22 · Entrar con Google y sesión recordada (D23)
+
+**QUÉ HICE**
+- Migración 6200: botón "Continuar con Google" en el ingreso del socio (`/auth/google`, `signInWithOAuth` PKCE), visible solo con `ENTRAR_CON_GOOGLE=1`: sin la variable no se dibuja y nada cambia. `/auth/callback` cambia el código por la sesión: un Google ya vinculado entra directo a `/app`, si no va a `/auth/vincular`, y una cuenta del equipo se cierra con aviso. Vínculo seguro la primera vez: DNI + código al celular o mail que el gimnasio ya tiene cargado (misma respuesta exista o no el DNI; a un menor, al adulto responsable); nunca por nombre ni mail suelto; si el Google ya sostiene a otra persona o el socio ya tenía otro Google, pide confirmar. Tabla `vinculos_google` (FK compuesta, RLS, un Google activo por socio), `socio_para_vincular_google`, `vincular_google`, `entrar_con_google`. Sesión recordada: la cookie de Supabase dura 400 días y `/salir` la corta.
+- **Toca ingresos existentes (revisar)**: se redefinieron `vincular_socios_por_telefono` y `vincular_socios_por_email` (copiando las versiones vigentes) para que el código de celular o mail recupere al socio que hoy sostiene un Google; sin eso, quien vinculó Google quedaba sin poder entrar por celular.
+- Imitador local: `/auth/v1/authorize` y `token?grant_type=pkce` con un Google falso (`.local/google-falso.json`); `levantar.sh` prende `ENTRAR_CON_GOOGLE=1`. Middleware: las rutas `/auth/*` se resuelven al gimnasio elegido también desde la dirección de la plataforma.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`entrar-con-google`).
+
+**QUÉ CONFIGURÁS VOS 🔌 (VD-22B)**
+1. Google Cloud Console → crear o elegir un proyecto → APIs y servicios → Pantalla de consentimiento OAuth: Externa, con nombre de la app y alcances `email`, `profile`, `openid`.
+2. Credenciales → Crear credenciales → ID de cliente OAuth → Aplicación web.
+3. URI de redirección autorizados: `https://<ref-del-proyecto>.supabase.co/auth/v1/callback` (el callback de Supabase, no el de Gym OS).
+4. Copiar Client ID y Client Secret.
+5. Supabase → Authentication → Providers → Google: activar y pegarlos.
+6. Supabase → Authentication → URL Configuration → Redirect URLs: `https://*.<dominio-base>/auth/callback` y `https://<dominio-plataforma>/auth/callback` (y el dominio propio de cada gimnasio si lo tienen).
+7. Vercel: variable `ENTRAR_CON_GOOGLE=1` (solo servidor); recién ahí aparece el botón.
+8. Si la pantalla de consentimiento queda en "Prueba", solo entran los mails cargados como usuarios de prueba; para abrirla a todos hay que publicarla.
+
+**SIN ARREGLAR**: VD-22c ("Sumar a otra persona" en /app y desvincular desde la ficha), VD-22d (un solo usuario por socio con varias identidades: hoy, si alguien usa Google y celular en dos dispositivos, cada ingreso le saca el socio al otro).
+**LO QUE NO PUDE VERIFICAR**: un Google real (el imitador no valida credenciales ni redirecciones), que las cookies de `/auth/callback` lleguen con sesión persistente y el e2e `vd-22`: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-19 y VD-20 · Eventos completos y rutinas
 
 **QUÉ HICE**

@@ -511,6 +511,8 @@ bloque 18.
 - [ ] VD-19b · 🟢 · Editar un evento ya creado; check-in por DNI de anotados que no son socios; aviso cuando alguien sube de la espera
 - [ ] VD-19c · 🔌 · Pago online del evento con MercadoPago (webhook deja al socio anotado)
 - [ ] VD-20b · 🟢 · Aviso de rutina vencida al socio y gráfico de progreso por rutina y por socio para el profe
+- [ ] VD-22c · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
+- [ ] VD-22d · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -533,7 +535,7 @@ bloque 18.
 *Tanda 4 · Socio y página*
 - [x] VD-35 · 🟡 D26 · Registro del socio por su cuenta (queda socio sin pagar) — verificado: alta online con fecha de nacimiento obligatoria, interruptor registro abierto, 'Soy nuevo' en el ingreso, 🌐 A cobrar en Socios y clave de operación en los pagos de la app; base en verde en GitHub (registro-cambio-plan-app); e2e vd-35 en la corrida de la tanda
 - [x] VD-39 · 🟡 D28 · Cambio de plan y compra de pases desde la app — verificado: /app/plan con días a favor calculados por la base, pago por MercadoPago o transferencia con clave de operación, el plan cambia al acreditarse el pago; base en verde en GitHub; e2e vd-39 en la corrida de la tanda
-- [ ] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada
+- [x] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada — verificado: todo listo hasta las credenciales de Google (botón detrás de ENTRAR_CON_GOOGLE, vínculo por DNI + código, sesión recordada, imitador); base en verde en GitHub (entrar-con-google); e2e vd-22 en la corrida de la tanda
 - [x] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar" — verificado: promoción de la espera sin dobles (dos conexiones reales), push de lugar liberado, motivo_reserva con frase y botón; base en verde en GitHub (espera-motivo, espera-concurrente); e2e vd-24 en la corrida de la tanda
 - [x] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp) — verificado: prueba social en la portada (abierto ahora, reseñas, +N socios), primera vez en 3 pasos, WhatsApp flotante, next/image; base en verde en GitHub (prueba-social); e2e vd-25 en la corrida de la tanda; Lighthouse sin medir
 - [x] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in) — verificado: eventos con flyer, fechas, precio socio/no socio, espera calculada, check-in en la Entrada y cierre con asistentes; base en verde en GitHub (eventos-completos); e2e vd-19 en la corrida de la tanda
