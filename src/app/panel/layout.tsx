@@ -3,7 +3,10 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco, type Abono } from "@/components/panel/Marco";
+import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
+import { rutaDisponible } from "@/lib/panel/secciones";
+import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
@@ -46,5 +49,17 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
   // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
   const abono = await rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
-  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono}>{children}</Marco>;
+  // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
+  let entrada: DatosEntrada | null = null;
+  if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
+    try {
+      const { sede } = sedeActiva(panel);
+      const [config, formas] = await Promise.all([
+        rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO),
+        rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]),
+      ]);
+      entrada = { sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc") };
+    } catch { entrada = null; }   // sin sede activa: la pantalla de Entrada lo dice con todas las letras
+  }
+  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>{children}</Marco>;
 }
