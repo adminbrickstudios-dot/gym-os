@@ -29,6 +29,8 @@ import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 
 export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
+/** VD-29: abrir la ventana con un DNI, número o nombre ya escrito (detail = el texto). */
+export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 
 const ES_QR = /^GYMOS1\./;
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -421,6 +423,18 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     window.addEventListener(EVENTO_ABRIR_ENTRADA, abrirDesdeBoton);
     return () => window.removeEventListener(EVENTO_ABRIR_ENTRADA, abrirDesdeBoton);
   }, [propia, abrir, cerrar]);
+
+  // VD-29: Ctrl+K "entrada 12345678": abre la ventana con eso ya escrito (un DNI se resuelve solo; un nombre muestra coincidencias).
+  useEffect(() => {
+    if (propia) return;
+    const conTexto = (e: Event) => {
+      const t = ((e as CustomEvent<string>).detail ?? "").trim();
+      if (!t) { abrir(); return; }
+      if (/^[\d.\s]{6,}$/.test(t)) enviar(t.replace(/[.\s]/g, "")); else abrir(t);
+    };
+    window.addEventListener(EVENTO_ABRIR_ENTRADA_CON, conTexto);
+    return () => window.removeEventListener(EVENTO_ABRIR_ENTRADA_CON, conTexto);
+  }, [propia, abrir, enviar]);
 
   // VD-4: tocar un aviso de la puerta abre el veredicto de ese socio acá.
   useEffect(() => {
