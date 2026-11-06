@@ -34,7 +34,7 @@ type Cumple = { socio_id: string; nombre: string; telefono: string | null; cumpl
 type InvitadoHoy = { id: string; nombre: string; socio: string; entro_en: string | null };
 type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: string; por: string | null; motivo: string; porque_no: string; promete_el?: string | null; autorizo?: string | null };
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
-type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo: string; nota: string | null; pedido_en: string };
+type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo: string; nota: string | null; pedido_en: string; codigo?: string; tarde?: boolean };
 const MOTIVO_BAJA: Record<string, string> = { precio: "el precio", horario: "los horarios", mudanza: "se muda", otro_gimnasio: "otro gimnasio", sin_tiempo: "no tiene tiempo", insatisfecho: "no le gustó", otro: "otra cosa" };
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
@@ -307,7 +307,8 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                   <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg truncate">{x.nombre}</span>
-                      <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}</span>
+                      <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}{x.codigo ? ` · ${x.codigo}` : ""}</span>
+                      {x.tarde && <span className="block font-semibold text-sm" data-baja-tarde>⏳ Hace más de 24 h que espera respuesta</span>}
                     </span>
                     <span className="texto-suave">Resolver</span>
                   </LinkPanel>

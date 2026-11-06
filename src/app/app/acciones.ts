@@ -108,8 +108,15 @@ export async function estadoPagoOnline(pagoId: string): Promise<{ estado?: strin
 /** APP-8: el socio pide una pausa (la aprueba el gimnasio) o la baja (la da el gimnasio). */
 export const pedirPausaSocio = async (socioId: string, desde: string, hasta: string, categoria: string, nota: string) =>
   r(async () => { await rpc("pedir_pausa_socio", { p_socio_id: socioId, p_desde: desde, p_hasta: hasta, p_categoria: categoria, p_nota: nota || null }); revalidatePath("/app/cuenta"); });
-export const pedirBajaSocio = async (socioId: string, motivo: string, nota: string) =>
-  r(async () => { await rpc("pedir_baja_socio", { p_socio_id: socioId, p_motivo: motivo, p_nota: nota || null }); revalidatePath("/app/cuenta"); });
+/** VD-46E: devuelve el código de baja (la constancia) para mostrarlo al instante. */
+export const pedirBajaSocio = async (socioId: string, motivo: string, nota: string): Promise<{ error?: string; codigo?: string }> => {
+  try {
+    await rpc("pedir_baja_socio", { p_socio_id: socioId, p_motivo: motivo, p_nota: nota || null });
+    const c = await rpc<{ codigo: string } | null>("constancia_baja", { p_socio_id: socioId });
+    revalidatePath("/app/cuenta");
+    return { codigo: c?.codigo };
+  } catch (e) { return { error: (e as Error).message }; }
+};
 
 /** APP-9: el socio crea (o cambia) su contraseña para entrar con su mail. */
 export async function crearContrasena(clave: string, actual?: string): Promise<{ error?: string }> {

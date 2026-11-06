@@ -75,7 +75,7 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
       <input value={nota} onChange={(e) => setNota(e.target.value)} maxLength={300} placeholder="Contanos algo más (opcional)" className="campo w-full" />
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado || !motivo} className="boton boton-peligro"
-          onClick={() => empezar(async () => { const r = await pedirBajaSocio(socioId, motivo!, nota); setMsj(r.error ? { error: r.error } : { ok: "Listo: el gimnasio te va a contactar." }); })}>
+          onClick={() => empezar(async () => { const r = await pedirBajaSocio(socioId, motivo!, nota); setMsj(r.error ? { error: r.error } : { ok: `Listo: el gimnasio te va a contactar.${r.codigo ? ` Tu código de baja: ${r.codigo}. Guardalo: es tu constancia.` : ""}` }); })}>
           {ocupado ? "Enviando…" : "Pedir la baja"}
         </button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>

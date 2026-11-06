@@ -113,7 +113,7 @@ export function VolverADarDeAlta({ socioId }: { socioId: string }) {
 }
 
 /** APP-8: el socio pidió la baja desde la app. Se habla con él: se queda, o se le da la baja con el motivo que dio. */
-export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { pedido_id: string; motivo: string; nota: string | null } }) {
+export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { pedido_id: string; motivo: string; nota: string | null; codigo?: string; pedido_en?: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const motivo = MOTIVOS.find(([v]) => v === pedido.motivo)?.[1] ?? pedido.motivo;
@@ -121,7 +121,8 @@ export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { ped
   return (
     <div className="mensaje mensaje-aviso mt-4 space-y-3" data-pedido-baja>
       <p><span className="font-semibold">👋 Pidió la baja desde la app</span> · {motivo}{pedido.nota ? `: “${pedido.nota}”` : ""}</p>
-      <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza.</p>
+      {pedido.codigo && <p className="text-sm" data-codigo-baja>🧾 Constancia <strong>{pedido.codigo}</strong>: es el código que ya tiene el socio en su app.</p>}
+      <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza. Dar la baja anula sus pagos por aprobar, sus turnos fijos y sus reservas de clases que vienen; lo que ya pagó no se toca.</p>
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado} className="boton" onClick={() => resolver(false)}>💪 Se queda</button>
         <button type="button" disabled={ocupado} className="boton boton-peligro" onClick={() => resolver(true)}>Darle la baja</button>
