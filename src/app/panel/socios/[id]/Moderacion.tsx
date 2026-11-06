@@ -3,7 +3,84 @@
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { levantarSuspension, revisarSuspension, suspenderSocio } from "../moderacion-acciones";
+import { anularCortesia, darCortesia, levantarSuspension, revisarSuspension, suspenderSocio } from "../moderacion-acciones";
+
+// ── VD-46C · Cortesías ──────────────────────────────────────────────
+export type DatosCortesias = {
+  rol: string; tiene_membresia: boolean; tope_dias: number; tope_mes: number | null; usados_mes: number; puede_dar: boolean; puede_anular: boolean;
+  recientes_60_dias: number; alerta_desde: number; motivos: { id: string; nombre: string }[];
+  cortesias: { id: string; desde: string; hasta: string; dias: number; motivo: string; por: string | null; en: string; anulada: boolean; anulada_motivo: string | null }[];
+};
+
+export function Cortesias({ socioId, datos: d, zona }: { socioId: string; datos: DatosCortesias; zona: string }) {
+  const [abierto, setAbierto] = useState(false);
+  const [dias, setDias] = useState(1);
+  const [motivo, setMotivo] = useState("");
+  const [nota, setNota] = useState("");
+  const [anulando, setAnulando] = useState<string | null>(null);
+  const [porque, setPorque] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const cerrar = () => { setAbierto(false); setAnulando(null); setMotivo(""); setNota(""); setPorque(""); setDias(1); setError(null); };
+  const correr = async (fn: () => Promise<{ error?: string }>) => { const r = await fn(); if (r.error) setError(r.error); else cerrar(); };
+  const f = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(m));
+  const vigentes = d.cortesias.filter((c) => !c.anulada);
+  if (!d.tiene_membresia && d.cortesias.length === 0) return null;
+  return (
+    <div className="mt-4 space-y-3" data-cortesias={vigentes.length}>
+      {d.recientes_60_dias >= d.alerta_desde && (
+        <Mensaje tipo="aviso"><p className="text-sm">🎁 Ya le dieron {d.recientes_60_dias} cortesías en los últimos 60 días: hablalo con el dueño antes de darle otra.</p></Mensaje>
+      )}
+      {!abierto ? (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {d.puede_dar
+            ? <button type="button" className="boton boton-chico texto-suave" data-cortesia-abrir onClick={() => setAbierto(true)}>🎁 Dar una cortesía</button>
+            : <span className="texto-tenue text-sm" data-cortesia-sin-cupo>🎁 {!d.tiene_membresia ? "Sin membresía: no se le puede dar una cortesía." : d.tope_dias === 0 ? "Tu rol no da cortesías." : "Ya usaste los días de cortesía de este mes."}</span>}
+          {d.tope_mes != null && d.puede_dar && <span className="texto-tenue text-sm">Este mes diste {d.usados_mes} de {d.tope_mes} días</span>}
+        </div>
+      ) : (
+        <div className="tarjeta p-4 space-y-3" data-cortesia-form>
+          <p className="font-semibold">Dar días de cortesía</p>
+          <p className="texto-suave text-sm">Empieza hoy (o cuando termina lo que ya tiene cubierto). Hasta {d.tope_dias} {d.tope_dias === 1 ? "día" : "días"} por cortesía{d.tope_mes != null ? `; este mes te quedan ${Math.max(0, d.tope_mes - d.usados_mes)}` : ""}.</p>
+          <label className="block"><span className="font-semibold">Días</span>
+            <select className="campo mt-1" value={dias} onChange={(e) => setDias(Number(e.target.value))} aria-label="Días de cortesía">
+              {Array.from({ length: Math.min(d.tope_dias, d.tope_mes != null ? Math.max(1, d.tope_mes - d.usados_mes) : 31) }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} {n === 1 ? "día" : "días"}</option>)}
+            </select></label>
+          <label className="block"><span className="font-semibold">Motivo (de la lista)</span>
+            <select className="campo mt-1" value={motivo} onChange={(e) => setMotivo(e.target.value)} aria-label="Motivo de la cortesía">
+              <option value="">Elegí el motivo</option>
+              {d.motivos.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            </select></label>
+          <label className="block"><span className="font-semibold">Nota (opcional)</span>
+            <input className="campo mt-1" value={nota} maxLength={200} onChange={(e) => setNota(e.target.value)} /></label>
+          {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+          <div className="flex flex-wrap gap-2">
+            <BotonAccion className="boton boton-principal" disabled={!motivo} onClick={() => correr(() => darCortesia(socioId, dias, motivo, nota))}>🎁 Dar la cortesía</BotonAccion>
+            <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
+          </div>
+        </div>
+      )}
+      {d.cortesias.length > 0 && (
+        <ul className="space-y-1 text-sm">
+          {d.cortesias.map((c) => (
+            <li key={c.id} className={c.anulada ? "texto-tenue line-through" : "texto-suave"} data-cortesia={c.anulada ? "anulada" : "vigente"}>
+              🎁 {c.dias} {c.dias === 1 ? "día" : "días"} del {f(c.desde)} al {f(c.hasta)} · {c.motivo}{c.por ? ` · ${c.por}` : ""}{c.anulada ? ` · anulada: ${c.anulada_motivo ?? ""}` : ""}
+              {!c.anulada && d.puede_anular && (anulando === c.id ? (
+                <span className="block mt-1 space-y-2 no-underline" data-anular-cortesia>
+                  <input className="campo" placeholder="¿Por qué se anula?" value={porque} onChange={(e) => setPorque(e.target.value)} maxLength={300} aria-label="Motivo de la anulación" />
+                  {error && <span role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</span>}
+                  <span className="flex gap-2">
+                    <BotonAccion className="boton boton-chico" disabled={porque.trim().length < 3} onClick={() => correr(() => anularCortesia(socioId, c.id, porque))}>Anular</BotonAccion>
+                    <button type="button" className="boton boton-chico" onClick={cerrar}>Cancelar</button>
+                  </span>
+                </span>
+              ) : <button type="button" className="boton-texto ml-2" onClick={() => { setAnulando(c.id); setError(null); }}>Anular</button>)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export type DatosSuspension = {
   vigente: { id: string; tipo: "suspension" | "expulsion"; motivo: string; desde: string; hasta: string | null; revisar_en: string | null; por: string | null; revision_vencida: boolean } | null;

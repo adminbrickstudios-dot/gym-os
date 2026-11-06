@@ -11,6 +11,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
+import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { formatearPesos, leerMonto } from "@/lib/formato";
 import { cobrar, datosCobro, guardarMedioDefecto, registrarUsoCupon, subirComprobanteCobro, validarCupon, type DatosCobro, type Venta } from "@/app/panel/vender/acciones";
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/compartido";
@@ -277,8 +278,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                       <div className="grid grid-cols-[110px_1fr] gap-2 mt-2">
                         <input className="campo" inputMode="decimal" placeholder="$" value={l.descuento_texto ?? (l.descuento || "")} aria-label="Monto del descuento"
                           onChange={(e) => cambiar(l.clave, { descuento_texto: e.target.value, descuento: monto(e.target.value) })} />
-                        <input className="campo" placeholder="Motivo (obligatorio)" value={l.descuento_motivo ?? ""} aria-label="Motivo del descuento"
-                          onChange={(e) => cambiar(l.clave, { descuento_motivo: e.target.value })} />
+                        <MotivoDescuento valor={l.descuento_motivo ?? ""} onChange={(m) => cambiar(l.clave, { descuento_motivo: m })} />
                       </div>
                     )}
                   </li>
