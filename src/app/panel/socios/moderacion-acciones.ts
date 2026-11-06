@@ -61,3 +61,8 @@ export async function guardarTopesBeneficios(gimnasioId: string, t: { recepcionD
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── VD-46N · "No escribirle" ───────────────────────────────────────
+export async function marcarNoEscribirle(socioId: string, marcar: boolean, motivo: string): Promise<R> {
+  return hacer(socioId, () => rpc("marcar_no_escribirle", { p_socio_id: socioId, p_marcar: marcar, p_motivo: motivo }));
+}

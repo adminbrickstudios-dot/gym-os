@@ -1,5 +1,6 @@
 import { rpc } from "@/lib/panel/servidor";
 import type { CalculoDevolucion } from "../moderacion-acciones";
+import { NoEscribirle, type DatosNoEscribirle } from "./NoEscribirle";
 import { Cortesias, DevolucionBaja, Suspension, type DatosCortesias, type DatosSuspension } from "./Moderacion";
 
 type Constancia = { codigo: string; estado: string; motivo: string; pedido_en: string; resuelto_en: string | null; resuelto_por: string | null } | null;
@@ -26,12 +27,14 @@ export async function ConstanciaBaja({ socioId, zona }: { socioId: string; zona:
 /** VD-46: lo que la ficha muestra de moderación (suspensión y cortesías). Si la base lo niega, es un error, no un bloque vacío. */
 export async function ModeracionFicha({ socioId, zona }: { socioId: string; zona: string }) {
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
-  const [suspension, cortesias] = await Promise.all([
+  const [suspension, cortesias, noEscribirle] = await Promise.all([
     rpc<DatosSuspension>("suspension_socio", { p_socio_id: socioId }),
     rpc<DatosCortesias>("cortesias_socio", { p_socio_id: socioId }),
+    rpc<DatosNoEscribirle>("no_escribirle_socio", { p_socio_id: socioId }),   // VD-46N
   ]);
   return (
     <>
+      <NoEscribirle socioId={socioId} datos={noEscribirle} zona={zona} />
       <Suspension socioId={socioId} datos={suspension} zona={zona} hoy={hoy} />
       {!suspension.vigente && <Cortesias socioId={socioId} datos={cortesias} zona={zona} />}
     </>
