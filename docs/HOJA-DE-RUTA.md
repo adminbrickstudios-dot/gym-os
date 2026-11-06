@@ -493,6 +493,7 @@ bloque 18.
 - [ ] VD-10b · 🟢 · Control: filtro por socio, e2e del cobro con fecha atrasada que llega a la campana, y el conteo de Control en el resumen del día del dueño
 - [ ] VD-16b · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30)
 - [ ] VD-16c · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
+- [ ] VD-18b · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -509,8 +510,8 @@ bloque 18.
 - [ ] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones
 - [ ] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos)
 - [x] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata) — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
-- [ ] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad)
-- [ ] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería)
+- [x] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda
+- [x] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda
 - [ ] VD-44 · 🟢 · Equipo con foto, clases y horario
 *Tanda 4 · Socio y página*
 - [ ] VD-35 · 🟡 D26 · Registro del socio por su cuenta (queda socio sin pagar)

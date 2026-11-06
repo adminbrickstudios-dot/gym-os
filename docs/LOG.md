@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-17 y VD-18 · Planes y servicios; productos y stock (D21)
+
+**QUÉ HICE**
+- VD-17 (migración 4700): "Ajustes" por plan: cómo vence (el del gimnasio, continua, desde el pago o día fijo; solo el dueño la cambia), días de tolerancia, cuándo el pack descuenta, visible en la página y el alta online (apagado = solo lo vende la recepción), sedes donde vale; orden con subir/bajar y "Cómo lo ve el socio". Servicios adicionales recurrentes (locker, toalla) como productos asignados al socio: `precios_venta` los trae y la cuota los suma sola en Cobrar y en Vender por los mismos meses; la base rechaza servicios sin cuota, no contratados o con otros meses.
+- VD-18 (migración 4800): producto con foto (achicada al subir), costo, margen y categoría; entrada de mercadería con foto del remito e historial; "Queda poco" y lista "Para reponer"; botones de Vender con foto y "Quedan N", bloqueados en cero; `vender` rechaza si el stock no alcanza salvo que el producto lo permita (apagado de origen); en Vender, con un socio elegido, "Cobrar a …" abre la hoja Cobrar (los botones viejos de cuota siguen). Buckets `fotos_productos` (público) y `remitos_stock` (privado, también en supabase-local).
+- `privado.vender` y `precios_venta` se copiaron en cadena 4000 → 4700 → 4800 (verificado: cada una arrastra lo anterior).
+- Verificado: lint, typecheck, 99 pruebas, build y base/chequeos/demo en verde en GitHub (`planes-servicios`, `productos-stock`).
+
+**SIN ARREGLAR**: VD-18b (margen por producto en Resultado, servicios contratados en la ficha del socio, costo unitario en cada entrada). La hoja Cobrar no controla stock por pantalla (solo la frena la base).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-17`/`vd-18` y los viejos (panel-planes, pla-*, ven-*, panel-vender), y subir foto o remito contra el storage: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-14 y VD-16 · Vencen y cobrar con pestañas; Retención y números
 
 **QUÉ HICE**
