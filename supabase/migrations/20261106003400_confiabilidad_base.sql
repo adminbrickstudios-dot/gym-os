@@ -104,7 +104,7 @@ create trigger sellar_actualizacion before update on public.configuracion_gimnas
 
 -- El historial de configuración no cuenta la marca de versión como un cambio de configuración.
 create or replace function privado.historial_tg() returns trigger
-language plpgsql security definer set search_path = '' as $
+language plpgsql security definer set search_path = '' as $$
 declare comunes text[] := array['gimnasio_id', 'id', 'actualizado_en', 'actualizado_por', 'creado_en', 'creado_por'];
 begin
   if tg_table_name = 'configuracion_gimnasio' then
@@ -125,7 +125,7 @@ begin
       jsonb_build_object(new.clave, new.texto), comunes);
   end if;
   return null;
-end $;
+end $$;
 
 -- Versión actual de un registro: la pantalla la guarda al abrir el formulario.
 create or replace function public.version_registro(p_gimnasio_id uuid, p_tabla text, p_id uuid) returns jsonb
