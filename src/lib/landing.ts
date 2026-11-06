@@ -49,6 +49,8 @@ export type LandingPublicada = {
   mostrar_precios: boolean;
   /** Se puede hacer socio desde la página (0032). */
   altas_online?: boolean;
+  /** VD-25: "+N socios" (si el dueño lo prende; redondeado por la base) y reseñas de Google (si las cargó). */
+  prueba_social?: { socios: number | null; resena: { puntaje: number | string; cantidad: number; link: string | null } | null };
   secciones: Seccion[];
   planes: PlanPublico[];
   sedes: Sede[];
