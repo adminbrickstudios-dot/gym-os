@@ -20,6 +20,7 @@ import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
 import { Bienvenida } from "./Bienvenida";
+import { AvisosInicio } from "./AvisosInicio";
 import { Entraste } from "./Entraste";
 import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
@@ -108,6 +109,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           )}
         </header>
 
+        <AvisosInicio socioId={s.socio_id} />
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app>📣 {n.texto}</p>)}
 
         <section className="rounded-[var(--radio-grande)] p-6 border"

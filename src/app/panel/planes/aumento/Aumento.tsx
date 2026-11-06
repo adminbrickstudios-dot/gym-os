@@ -2,19 +2,24 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
-import { aplicarAumento, vistaAumento, type Aumento as Datos, type VistaAumento } from "../acciones";
+import { aplicarAumento, avisoPrevioAumento, guardarAvisoDias, vistaAumento, type AumentoHecho, type AvisoPrevio, type Aumento as Datos, type VistaAumento } from "../acciones";
 import type { Plan } from "../Editor";
 import { MEDIO } from "../Precios";
 
 const REDONDEOS = [1, 10, 50, 100, 500, 1000];
 
-export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Plan[]; hoy: string; sugerido: string; zona: string; gimnasio: string }) {
+const diaTxt = (d: string) => new Intl.DateTimeFormat("es-AR", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" }).format(new Date(`${d.slice(0, 10)}T00:00:00Z`));
+
+export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDueno, hechos }: { planes: Plan[]; hoy: string; sugerido: string; zona: string; gimnasio: string; avisoDias: number; esDueno: boolean; hechos: AumentoHecho[] }) {
   const [datos, setDatos] = useState<Datos>({ planes: planes.filter((p) => p.precio != null).map((p) => p.plan_id), tipo: "porcentaje", valor: "", redondeo: 100, desde: sugerido });
   const [vista, setVista] = useState<VistaAumento | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hecho, setHecho] = useState<{ n: number; vista: VistaAumento } | null>(null);
+  const [hecho, setHecho] = useState<{ n: number; vista: VistaAumento; avisados: number } | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [ocupado, empezar] = useTransition();
+  const [previo, setPrevio] = useState<AvisoPrevio | null>(null);
+  const [dias, setDias] = useState(String(avisoDias));
+  const [diasMsg, setDiasMsg] = useState<string | null>(null);
   const fecha = (d: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "numeric", month: "long" }).format(new Date(d));
 
   // Vista previa a medida que se escribe (la cuenta es de la base, la misma que guarda).
@@ -24,8 +29,18 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Pla
     return () => clearTimeout(t);
   }, [datos]);
 
+  // VD-46D: cuántos días de aviso lleva y a cuántos socios les llega (lo cuenta la base).
+  useEffect(() => {
+    if (!datos.planes.length) { setPrevio(null); return; }
+    const t = setTimeout(async () => { const r = await avisoPrevioAumento(datos.planes, datos.desde); setPrevio(r.aviso ?? null); }, 200);
+    return () => clearTimeout(t);
+  }, [datos.planes, datos.desde, avisoDias]);
+
   const tildar = (id: string) => setDatos({ ...datos, planes: datos.planes.includes(id) ? datos.planes.filter((x) => x !== id) : [...datos.planes, id] });
   const conProblema = vista?.planes.some((p) => p.problema);
+  const motivoOk = (datos.motivo ?? "").trim().length >= 10;
+  const sinAviso = !!previo && !previo.cumple;
+  const bloqueado = !previo || (sinAviso && !(previo.puede_excepcion && motivoOk));
   const aviso = (v: VistaAumento) => [
     `Hola! Te contamos que desde el ${fecha(v.desde)} actualizamos los precios en ${gimnasio}:`,
     ...v.planes.map((p) => `• ${p.nombre}: ${formatearPesos(p.nuevo)}${p.variantes.length ? ` (${p.variantes.map((x) => `${x.medio ? MEDIO[x.medio]?.replace(/^\S+ /, "").toLowerCase() : ""}${x.medio && x.hasta_dia ? " " : ""}${x.hasta_dia ? `pagando hasta el ${x.hasta_dia}` : ""} ${formatearPesos(x.monto)}`).join(", ")})` : ""}`),
@@ -37,6 +52,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Pla
     return (
       <div className="space-y-5" data-aumento-hecho>
         <p role="status" className="tarjeta p-5 text-lg font-semibold">✅ Aumento programado en {hecho.n} {hecho.n === 1 ? "plan" : "planes"} desde el {fecha(hecho.vista.desde)}.</p>
+        <p className="tarjeta p-4" data-constancia>🧾 {hecho.avisados === 0 ? "No hay socios con membresía activa en esos planes: no hizo falta avisar." : `Quedó la constancia: le avisamos en su app a ${hecho.avisados} ${hecho.avisados === 1 ? "socio" : "socios"}.`}</p>
         <section className="space-y-2">
           <h2 className="titulo text-2xl">📣 Avisales a tus socios</h2>
           <p className="texto-suave">Para mandar por WhatsApp a tu lista de difusión o pegar en el grupo:</p>
@@ -51,7 +67,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Pla
   return (
     <form className="space-y-8" onSubmit={(e) => {
       e.preventDefault();
-      empezar(async () => { const r = await aplicarAumento(datos); setError(r.error ?? null); if (!r.error && vista) setHecho({ n: r.n ?? 0, vista }); });
+      empezar(async () => { const r = await aplicarAumento(datos); setError(r.error ?? null); if (!r.error && vista) setHecho({ n: r.n ?? 0, vista, avisados: previo?.socios_a_avisar ?? 0 }); });
     }}>
       <fieldset className="space-y-2">
         <legend className="etiqueta mb-2">¿Qué planes?</legend>
@@ -89,6 +105,23 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Pla
         </label>
       </div>
 
+      {previo && (
+        <section className="tarjeta p-4 space-y-3" data-aviso-previo={previo.cumple ? "ok" : "falta"}>
+          {previo.cumple ? (
+            <p>✅ <b>{previo.dias_de_aviso} días de aviso</b> (el mínimo son {previo.aviso_dias}). Les llega el aviso en la app a <b>{previo.socios_a_avisar}</b> {previo.socios_a_avisar === 1 ? "socio" : "socios"} y queda la constancia.</p>
+          ) : (
+            <>
+              <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ Con {previo.dias_de_aviso} {previo.dias_de_aviso === 1 ? "día" : "días"} de aviso no alcanza: hacen falta {previo.aviso_dias}. Avisar tarde es lo que termina en multas.</p>
+              <button type="button" className="boton" onClick={() => setDatos({ ...datos, desde: previo.fecha_minima })}>📅 Poner el {diaTxt(previo.fecha_minima)}</button>
+              {previo.puede_excepcion ? (
+                <label className="block space-y-2"><span className="etiqueta">Si es urgente, aplicalo igual: ¿por qué? (queda registrado a tu nombre)</span>
+                  <textarea className="campo" rows={2} maxLength={300} aria-label="Motivo para aplicar sin el aviso mínimo" value={datos.motivo ?? ""} onChange={(e) => setDatos({ ...datos, motivo: e.target.value })} />
+                </label>
+              ) : <p className="texto-suave text-sm">Si de verdad es urgente, lo tiene que aprobar el dueño.</p>}
+            </>
+          )}
+        </section>
+      )}
       {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
       {vista && (
         <section className="space-y-2" data-vista>
@@ -111,7 +144,35 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio }: { planes: Pla
           </ul>
         </section>
       )}
-      <button type="submit" className="boton boton-principal" disabled={!vista || conProblema || ocupado}>📈 Programar aumento</button>
+      <button type="submit" className="boton boton-principal" disabled={!vista || conProblema || ocupado || bloqueado}>📈 Programar aumento</button>
+
+      <section className="space-y-3 pt-4 border-t border-[var(--borde)]" data-config-aviso>
+        <h2 className="titulo text-2xl">Aviso mínimo</h2>
+        {esDueno ? (
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="space-y-2 block"><span className="etiqueta">Días de aviso antes de un aumento (7 a 90)</span>
+              <input className="campo !w-28" inputMode="numeric" aria-label="Días de aviso" value={dias} onChange={(e) => setDias(e.target.value)} /></label>
+            <button type="button" className="boton" disabled={ocupado} onClick={() => empezar(async () => { const r = await guardarAvisoDias(dias); setDiasMsg(r.error ?? `✓ Desde ahora, ${r.dias} días`); })}>Guardar</button>
+            {diasMsg && <p role="status" className="texto-suave text-sm">{diasMsg}</p>}
+          </div>
+        ) : <p className="texto-suave">El gimnasio avisa con {avisoDias} días de anticipación. Lo cambia el dueño.</p>}
+      </section>
+
+      {hechos.length > 0 && (
+        <section className="space-y-2" data-aumentos-hechos>
+          <h2 className="titulo text-2xl">Aumentos anteriores</h2>
+          <ul className="space-y-2">
+            {hechos.map((h) => (
+              <li key={h.id} className="tarjeta p-4 space-y-1" data-aumento-hecho-id={h.id}>
+                <p className="font-semibold">{h.tipo === "porcentaje" ? `${h.valor}%` : formatearPesos(h.valor)} · {h.planes.join(", ")}</p>
+                <p className="texto-suave text-sm">Desde el {fecha(h.vigente_desde)} · lo programó {h.por} el {fecha(h.creado_en)} con {h.aviso_dias_reales} días de aviso</p>
+                <p className="text-sm">🧾 Avisados en la app: {h.avisados} · lo vieron: {h.vistos}</p>
+                {h.excepcion_motivo && <p className="text-sm" style={{ color: "var(--acento)" }}>Sin el aviso mínimo ({h.aviso_dias_exigido} días). Motivo: {h.excepcion_motivo}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </form>
   );
 }
