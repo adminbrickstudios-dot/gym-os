@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
-import { fechaLarga, formatearNumero, formatearPesos, saludo } from "@/lib/formato";
+import { fechaLarga, saludo } from "@/lib/formato";
+import { NumerosInicio, type NumeroInicio } from "@/components/panel/NumerosInicio";
+import { ElegirNumeros } from "@/components/panel/ElegirNumeros";
 import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, rpcLectura, type PanelGimnasio } from "@/lib/panel/servidor";
@@ -14,21 +16,9 @@ import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
 import { FilaTarea, type Tarea } from "./tareas/Tareas";
 
-type Numero = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" };
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
-type Inicio = { hoy: string; numeros: Numero[]; ahora: Ahora[] };
-const DETALLE: Record<string, { ruta: string; seccion: string }> = {
-  entraron: { ruta: "/panel/entrada", seccion: "entrada" },
-  cobrado: { ruta: "/panel/caja", seccion: "caja" },
-  vencen: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
-  al_dia: { ruta: "/panel/socios", seccion: "socios" },
-  por_aprobar: { ruta: "/panel/transferencias", seccion: "transferencias" },
-  mis_clases: { ruta: "/panel/clases", seccion: "clases" },
-  anotados: { ruta: "/panel/clases", seccion: "clases" },
-  presentes: { ruta: "/panel/clases", seccion: "clases" },
-  faltan: { ruta: "/panel/clases", seccion: "clases" },
-  clases: { ruta: "/panel/clases", seccion: "clases" },
-};
+type Inicio = { hoy: string; numeros: NumeroInicio[]; ahora: Ahora[] };
+type NumerosElegidos = { numeros: NumeroInicio[]; elegidos: string[]; disponibles: { clave: string; emoji: string; etiqueta: string }[] };
 
 // Las rutas que devuelve la base son relativas al panel.
 const enPanel = (href?: string) => (href ? `/panel${href}` : undefined);
@@ -56,6 +46,13 @@ export default async function Inicio() {
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
+        {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
+          <Link href="/panel/entrada" data-boton-entrada className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition">
+            <span aria-hidden>🚪</span> Entrada
+            <span className="text-lg font-normal opacity-90 hidden sm:inline">o tipeá un DNI</span>
+          </Link>
+        )}
+
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 
         <Suspense fallback={<EsqueletoBloques />}>
@@ -82,8 +79,10 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
       rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
+      rol !== "profe" ? rpcLectura<NumerosElegidos>("numeros_inicio", { p_gimnasio_id: panel.gimnasio.id }) : null,
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
       rol === "dueno" ? rpcLectura<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
       rol === "profe" ? [] : rpcLectura<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
@@ -117,25 +116,21 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
     return (
       <>
+        {rol === "recepcion" && (() => {
+          const turno = datos.ahora.find((a) => a.tipo === "caja");
+          return turno && rutaDisponible("/panel/caja", rol, panel.secciones_apagadas) ? (
+            <p data-turno className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
+              <span className="min-w-0 flex-1"><span aria-hidden>{turno.emoji}</span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
+              <Link href="/panel/caja" className="boton">{turno.tono ? "Abrir mi turno" : "Cerrar mi turno"}</Link>
+            </p>
+          ) : null;
+        })()}
         <NovedadesGymOS novedades={novedadesGymOS} />
         {pasos && <PrimerosPasos datos={pasos} />}
 
         <section aria-label="Números de hoy">
-          <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
-            {datos.numeros.map((n) => {
-              const cuerpo = (
-                <>
-                  <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}</dt>
-                  <dd className="numero text-5xl sm:text-6xl">{n.formato === "pesos" ? formatearPesos(n.valor) : formatearNumero(n.valor)}</dd>
-                </>
-              );
-              // Cada número lleva a su detalle (si la sección está prendida).
-              const href = DETALLE[n.clave];
-              return href && !panel.secciones_apagadas.includes(href.seccion)
-                ? <Link key={n.clave} href={href.ruta} className="flex flex-col-reverse justify-end rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
-                : <div key={n.clave} className="flex flex-col-reverse justify-end">{cuerpo}</div>;
-            })}
-          </dl>
+          <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+          {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
           {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
           {(rol === "dueno" || rol === "encargado") && (
             <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline">📊 Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
