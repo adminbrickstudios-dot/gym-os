@@ -171,10 +171,9 @@ test("check-in el día del evento y cerrar con asistentes; cancelar avisa", asyn
   const r2 = await como(u.recepcion, async () => (await t.q(`select public.evento_marcar_presente($1, $2) r`, [hoy, S().al_dia]))[0].r);
   assert.equal(r2.ya_estaba, true); assert.equal(r2.asistieron, 1);
   assert.equal((await como(u.recepcion, async () => (await t.q(`select public.eventos_del_dia_socio($1) r`, [S().al_dia]))[0].r))[0].presente, true);
+  const enEspera = (await panel(u.recepcion)).find((x) => x.evento_id === hoy).espera[0];
   await como(u.recepcion, async () => {
     // El de la espera no tiene lugar; el que no se anotó, tampoco; y un evento de otro día no admite check-in hoy.
-    const e = (await panel(u.recepcion)).find((x) => x.evento_id === hoy);
-    const enEspera = e.espera[0];
     await t.falla(() => t.q(`select public.evento_marcar_presente($1, null, $2)`, [hoy, enEspera.inscripcion_id]), /lista de espera/);
     await t.falla(() => t.q(`select public.evento_marcar_presente($1, $2)`, [hoy, t.ctx.socios.congelada]), /No está anotado/);
     await t.falla(() => t.q(`select public.evento_marcar_presente($1, $2)`, [futuro, S().al_dia]), /Hoy no es un día/);
