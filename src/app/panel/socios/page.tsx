@@ -6,10 +6,14 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
+import { Pestanas } from "@/components/ui/Pestanas";
+import { cargarInteresados } from "../prospectos/Interesados";
+import { Prospectos } from "../prospectos/Prospectos";
+import { MemoriaSocios } from "./MemoriaSocios";
 
 export const metadata: Metadata = { title: "Socios" };
 
-type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean };
+type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; autoalta?: boolean };
 
 type Etiqueta = { id: string; nombre: string; socios: number };
 type Filtros = Record<"todos" | "al_dia" | "por_vencer" | "vencidos" | "en_pausa" | "sin_plan" | "nuevos" | "bajas", number> & { planes: { plan_id: string; nombre: string; socios: number }[] };
@@ -22,30 +26,50 @@ const ESTADOS = [
 type Estado = (typeof ESTADOS)[number][0];
 const uuid = (x?: string) => (/^[0-9a-f-]{36}$/.test(x ?? "") ? x! : null);
 
-export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string; estado?: string; plan?: string }> }) {
+export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string; estado?: string; plan?: string; vista?: string; web?: string }> }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const etiqueta = uuid(sp.etiqueta), plan = uuid(sp.plan);
   const estado: Estado | null = ESTADOS.find(([k]) => k === sp.estado)?.[0] ?? null;
+  const web = sp.web === "1";
+  const interesados = sp.vista === "interesados";
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "socios");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const [filas, etiquetas, filtros] = await Promise.all([
-      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan }),
+    // VD-15 (D22): Socios · Interesados. Los Interesados (ex-Prospectos) viven en la segunda pestaña.
+    if (interesados) {
+      const { lista, pagina } = await cargarInteresados(panel);
+      const nuevos = lista.filter((p) => p.estado === "nuevo").length;
+      return (
+        <>
+          <Encabezado emoji="👥" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />
+          <PestanasSocios activa="interesados" nuevos={nuevos} />
+          <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas />
+        </>
+      );
+    }
+    const [filas, etiquetas, filtros, autoaltas, nuevosInteresados] = await Promise.all([
+      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
       rpcLectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       rpcLectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<number>("autoaltas_web", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<{ estado: string }[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id }).then((l) => l.filter((p) => p.estado === "nuevo").length),
     ]);
     // Un link con los filtros de ahora, cambiando uno (null lo saca).
-    const con = (cambio: { etiqueta?: string | null; estado?: string | null; plan?: string | null }) => {
-      const v = { etiqueta, estado, plan, ...cambio };
+    const con = (cambio: { etiqueta?: string | null; estado?: string | null; plan?: string | null; web?: boolean }) => {
+      const v = { etiqueta, estado, plan, web, ...cambio };
       const u = new URLSearchParams(); if (q) u.set("q", q);
       for (const k of ["estado", "plan", "etiqueta"] as const) if (v[k]) u.set(k, v[k]!);
+      if (v.web) u.set("web", "1");
       const x = u.toString(); return `/panel/socios${x ? `?${x}` : ""}`;
     };
-    const filtrado = !!(estado || plan || etiqueta);
+    const filtrado = !!(estado || plan || etiqueta || web);
+    // Lo que MemoriaSocios recuerda: la query de ahora.
+    const actual = (() => { const x = con({}).replace("/panel/socios", ""); return x; })();
     return (
       <>
+        <MemoriaSocios actual={actual} />
         <Encabezado emoji="👥" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
           accion={(() => {
             const extra = panel.yo.rol !== "recepcion" && <>
@@ -70,12 +94,14 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
               </div>
             );
           })()} />
+        <PestanasSocios activa="socios" nuevos={nuevosInteresados} />
         <Atenuable>
         <form className="mb-4" role="search" data-transicion>
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
           {etiqueta && <input type="hidden" name="etiqueta" value={etiqueta} />}
           {estado && <input type="hidden" name="estado" value={estado} />}
           {plan && <input type="hidden" name="plan" value={plan} />}
+          {web && <input type="hidden" name="web" value="1" />}
         </form>
         {filtros.todos + filtros.bajas > 0 && (
           <nav className="pestanas mb-3" aria-label="Filtrar por estado" data-filtro-estados>
@@ -87,6 +113,11 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {t} <span className="texto-tenue">{filtros[k]}</span>
               </a>
             ))}
+            {(autoaltas > 0 || web) && (
+              <a href={con({ web: !web })} data-transicion className="pestana" aria-current={web ? "page" : undefined} data-filtro-web>
+                🌐 Se anotaron por la web <span className="texto-tenue">{autoaltas}</span>
+              </a>
+            )}
           </nav>
         )}
         {(filtros.planes.length > 1 || etiquetas.length > 0) && (
@@ -121,6 +152,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                     <span className="block font-semibold text-lg truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>
                     <span className="block texto-suave truncate">{s.dado_de_baja ? "Dado de baja" : s.texto}</span>
                   </span>
+                  {s.autoalta && <span className="pildora flex-none" data-autoalta title="Se registró solo desde la página">🌐<span className="hidden sm:inline"> Se anotó por la web</span></span>}
                   {s.plan && <span className="hidden sm:inline pildora">{s.plan}</span>}
                 </Link>
               </li>
@@ -133,4 +165,16 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
       </>
     );
   });
+}
+
+/** Socios · Interesados (VD-15, D22). */
+function PestanasSocios({ activa, nuevos }: { activa: "socios" | "interesados"; nuevos: number }) {
+  return (
+    <div className="mb-4" data-pestanas-socios>
+      <Pestanas etiqueta="Socios e interesados" activa={activa} pestanas={[
+        { clave: "socios", texto: "Socios", emoji: "👥", href: "/panel/socios" },
+        { clave: "interesados", texto: nuevos > 0 ? `Interesados (${nuevos} nuevos)` : "Interesados", emoji: "🌱", href: "/panel/socios?vista=interesados" },
+      ]} />
+    </div>
+  );
 }

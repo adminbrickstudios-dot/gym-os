@@ -9,7 +9,7 @@ import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { agregarProspecto, cambiarEstado } from "./acciones";
 
 export type Prospecto = {
-  id: string; nombre: string; telefono: string; interes: string | null; origen: "pagina" | "recepcion" | "referido"; referido_por?: string | null;
+  id: string; nombre: string; telefono: string; dni?: string | null; interes: string | null; origen: "pagina" | "recepcion" | "referido"; referido_por?: string | null;
   estado: "nuevo" | "contactado" | "vino" | "socio" | "no"; nota: string | null; socio_id: string | null;
   creado_en: string; actualizado_en: string; mensaje: string;
 };
@@ -46,6 +46,7 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
           <form ref={form} action={accionAlta} className="tarjeta p-5 grid gap-3 sm:grid-cols-2" data-form-prospecto>
             <label className="block space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required maxLength={80} className="campo" autoFocus /></label>
             <label className="block space-y-1"><span className="etiqueta">WhatsApp</span><input name="telefono" required type="tel" placeholder="387 555 1234" className="campo" /></label>
+            <label className="block space-y-1"><span className="etiqueta">DNI (si lo tenés)</span><input name="dni" inputMode="numeric" maxLength={12} placeholder="Solo números" className="campo" /></label>
             <label className="block space-y-1"><span className="etiqueta">Qué le interesa</span><input name="interes" maxLength={200} className="campo" /></label>
             <label className="block space-y-1"><span className="etiqueta">Cómo llegó</span>
               <select name="origen" className="campo"><option value="recepcion">Preguntó en el mostrador</option><option value="referido">Lo recomendó alguien</option></select></label>
@@ -60,7 +61,7 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       {visibles.length === 0
-        ? <p className="texto-suave text-lg">{filtro === "nuevo" ? "No hay prospectos nuevos. Los que dejen sus datos en “Probá una clase” de tu página aparecen acá." : "No hay ninguno en esta lista."}</p>
+        ? <p className="texto-suave text-lg">{filtro === "nuevo" ? "No hay Interesados nuevos. Los que dejen sus datos en “Probá una clase” de tu página aparecen acá." : "No hay ninguno en esta lista."}</p>
         : (
           <ul className="space-y-2">
             {visibles.map((p) => {
@@ -69,7 +70,7 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
                 <li key={p.id} className="tarjeta p-4 sm:p-5 space-y-3" data-prospecto={p.estado}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="font-semibold text-lg">{p.nombre}</p>
-                    <p className="text-sm texto-tenue">{ORIGEN[p.origen]}{p.referido_por ? ` por ${p.referido_por}` : ""} · {fechaCorta(p.creado_en, zona)}</p>
+                    <p className="text-sm texto-tenue">{p.dni ? `DNI ${p.dni} · ` : ""}{ORIGEN[p.origen]}{p.referido_por ? ` por ${p.referido_por}` : ""} · {fechaCorta(p.creado_en, zona)}</p>
                   </div>
                   {p.interes && <p className="texto-suave">“{p.interes}”</p>}
                   {p.nota && <p className="text-sm texto-tenue">📝 {p.nota}</p>}

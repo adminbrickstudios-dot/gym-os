@@ -8,7 +8,7 @@ import { sedeActiva } from "@/lib/panel/sede";
 
 export const metadata: Metadata = { title: "Nuevo socio" };
 
-type Prospecto = { id: string; nombre: string; telefono: string; estado: string };
+type Prospecto = { id: string; nombre: string; telefono: string; dni?: string | null; estado: string };
 
 export default async function NuevoSocio({ searchParams }: { searchParams: Promise<{ prospecto?: string; listo?: string; cobrar?: string }> }) {
   return intentar(async () => {
@@ -30,7 +30,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     const prospecto = prospectoId
       ? (await rpc<Prospecto[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id })).find((x) => x.id === prospectoId && x.estado !== "socio") ?? null
       : null;
-    if (prospectoId && !prospecto) throw new Error("Ese prospecto no existe o ya es socio. Volvé a Prospectos.");
+    if (prospectoId && !prospecto) throw new Error("Ese prospecto no existe o ya es socio. Volvé a Interesados.");
     const [nombre, ...resto] = (prospecto?.nombre ?? "").split(" ");
     // Las membresías con su primer pago (cuota + matrícula), calculado por la base.
     const planes = await rpc<PlanAlta[]>("planes_para_alta", { p_sede_id: sedeActiva(panel).sede.id });
@@ -38,7 +38,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     return (
       <>
         <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="➕" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
-        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono } : undefined} />
+        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : undefined} />
       </>
     );
   });
