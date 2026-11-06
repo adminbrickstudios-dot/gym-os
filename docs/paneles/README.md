@@ -44,7 +44,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/cuenta` | pantalla |  |  | `mi_seguridad` | `/panel/pin` |
 | `/panel/cupones` | pantalla | 👑 🧭 |  | `cupones_panel`, `desactivar_cupon`, `guardar_cupon`, `planes_gimnasio` |  |
 | `/panel/documentos` | pantalla | 👑 🧭 |  | `archivar_documento`, `documentos_panel`, `firmar_documento`, `guardar_documento` |  |
-| `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `apto_socio`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `descongelar`, `documentos_socio`, `estado_acceso`, `guardar_config_entrada`, `guia_entrada`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `registrar_ingreso`, `registrar_invitado`, `sincronizar_sin_internet` | `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` `/panel/vender` |
+| `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `apto_socio`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `descongelar`, `documentos_socio`, `estado_acceso`, `guardar_config_entrada`, `guia_entrada`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `registrar_ingreso`, `registrar_invitado`, `sincronizar_sin_internet` | `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` |
 | `/panel/entrada/control` | pantalla | 👑 🧭 | entrada | `control_entrada` | `/panel/socios/` |
 | `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `guardar_permisos_equipo`, `permisos_equipo` | `/panel/configuracion` `/panel/equipo/actividad` |
 | `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/equipo` |
@@ -63,7 +63,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/rutinas` | pantalla | 👑 🧭 💪 | rutinas | `archivar_rutina`, `asignar_rutina`, `ejercicios_gimnasio`, `guardar_ejercicio`, `guardar_rutina`, `rutinas_gimnasio` | `/panel/rutinas/editar` |
 | `/panel/rutinas/editar` | pantalla | 👑 🧭 💪 | rutinas | `ejercicios_gimnasio`, `rutina_detalle` | `/panel/rutinas` `/panel/rutinas/socio` |
 | `/panel/rutinas/socio` | pantalla | 👑 🧭 💪 | rutinas | `progreso_socio`, `rutina_de_socio` | `/panel/rutinas` |
-| `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `agregar_nota`, `anonimizar_socio`, `anular_apto`, `anular_congelamiento`, `asignar_convenio`, `asignar_llavero`, `asignar_plan`, `borrar_nota`, `cargar_apto`, `confirmar_foto_socio`, `congelar`, `dar_de_baja`, `descongelar`, `guardar_socio`, `pedir_pausa`, `poner_etiqueta`, `preparar_foto_socio`, `prospecto_es_socio`, `quitar_convenio`, `quitar_llavero`, `resolver_pedido_baja`, `resolver_pedido_pausa`, `sacar_de_familia`, `sacar_etiqueta`, `vincular_familia`, `vista_cambio_plan`, `volver_a_dar_de_alta` | `/panel/socios/` `/panel/socios/duplicados` `/panel/socios/exportar` `/panel/socios/importar` `/panel/socios/nuevo` |
+| `/panel/socios` | pantalla | 👑 🧭 🛎️ | socios | `agregar_nota`, `anonimizar_socio`, `anular_apto`, `anular_congelamiento`, `asignar_convenio`, `asignar_llavero`, `asignar_plan`, `borrar_nota`, `cargar_apto`, `confirmar_foto_socio`, `congelar`, `dar_de_baja`, `descongelar`, `ficha_socio`, `guardar_socio`, `pedir_pausa`, `planes_para_alta`, `poner_etiqueta`, `preparar_foto_socio`, `prospecto_es_socio`, `prospecto_por_telefono`, `quitar_convenio`, `quitar_llavero`, `resolver_pedido_baja`, `resolver_pedido_pausa`, `sacar_de_familia`, `sacar_etiqueta`, `vincular_familia`, `vista_cambio_plan`, `volver_a_dar_de_alta` | `/panel/socios/` `/panel/socios/duplicados` `/panel/socios/exportar` `/panel/socios/importar` `/panel/socios/nuevo` |
 | `/panel/socios/[id]` | pantalla | 👑 🧭 🛎️ | socios | `apto_socio`, `asistencia_socio`, `convenio_socio`, `convenios_gimnasio`, `documentos_socio`, `faltas_socio`, `familia_socio`, `ficha_socio`, `foto_socio`, `grados_socio`, `horarios_para_turno`, `llavero_socio`, `notas_y_etiquetas`, `origen_socio`, `pausas_socio`, `pedido_baja_socio`, `planes_gimnasio`, `primer_mes_socio`, `riesgo_baja`, `turnos_socio`, `ventas_socio` | `/panel/socios` `/panel/socios/` `/panel/tareas` `/panel/vender` |
 | `/panel/socios/[id]/editar` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio` |  |
 | `/panel/socios/[id]/foto` | acción (POST/GET) |  |  | `foto_socio` |  |
@@ -71,7 +71,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/socios/duplicados` | pantalla | 👑 🧭 | socios | `posibles_duplicados`, `unir_socios` | `/panel/socios/` |
 | `/panel/socios/exportar` | acción (POST/GET) |  |  | `exportar_socios` |  |
 | `/panel/socios/importar` | pantalla | 👑 🧭 | socios | `deshacer_importacion`, `importaciones_panel`, `importar_socios`, `revisar_importacion` | `/panel/socios` |
-| `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `planes_gimnasio`, `prospectos_panel` |  |
+| `/panel/socios/nuevo` | pantalla | 👑 🧭 🛎️ | socios | `ficha_socio`, `planes_para_alta`, `prospectos_panel` |  |
 | `/panel/tareas` | pantalla |  |  | `crear_tarea`, `ficha_socio`, `marcar_tarea`, `tareas_panel` | `/panel/socios/` |
 | `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `pagos_por_aprobar`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy |  | `/panel/retencion` |

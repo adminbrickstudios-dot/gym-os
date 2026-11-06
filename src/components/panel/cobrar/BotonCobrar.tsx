@@ -15,7 +15,7 @@ export function BotonCobrar({ socioId, origen, cuota = false, className = "boton
   const disponible = useRutaDisponible("/panel/vender");
   if (!disponible) return null;
   return (
-    <Link href={`/panel/vender?socio=${socioId}${cuota ? "&cuota=1" : ""}`} className={className} data-cobrar-abrir
+    <Link href={`/panel/vender?socio=${socioId}${cuota ? "&cuota=1" : ""}${origen === "entrada" ? "&desde=entrada" : ""}`} className={className} data-cobrar-abrir
       onClick={(e) => {
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return;
         e.preventDefault();

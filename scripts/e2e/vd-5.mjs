@@ -4,6 +4,7 @@
 // que guarda la base; avisa del doble cobro sin frenarlo; el celular no desborda.
 //   node scripts/e2e/vd-5.mjs     (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -14,7 +15,7 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 async function moroso(p, nombre) {
   await p.goto(`${G}/panel/socios/nuevo`);
   await p.locator('input[name="nombre"]').fill(nombre);
-  await p.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
+  await elegirPlan(p, 0);
   await p.locator('button:has-text("Solo dar de alta")').click();
   await p.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 30000 });
   return new URL(p.url()).pathname.split("/").pop();

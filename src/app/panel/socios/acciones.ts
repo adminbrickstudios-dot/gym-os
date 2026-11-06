@@ -2,9 +2,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { sedeActiva } from "@/lib/panel/sede";
 import { conflictoDe } from "@/lib/panel/version";
 
-export type EstadoForm = { error?: string; destino?: string; valores?: Record<string, string>; version?: string };
+export type EstadoForm = {
+  error?: string; destino?: string; valores?: Record<string, string>; version?: string;
+  /** VD-6: el alta salió bien: el socio, si hay que cobrar ahora y si el plan no se pudo asignar. */
+  socioId?: string; cobrar?: boolean; sinPlan?: boolean; nombre?: string;
+};
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
 
@@ -40,9 +45,64 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
     try { await rpc("asignar_plan", { p_socio_id: id, p_plan_id: plan }); conPlan = true; revalidatePath(`/panel/socios/${id}`); }
     catch { conPlan = false; }
   }
+  // VD-5b/VD-6: con cobro, la pantalla abre la hoja Cobrar en el lugar (el destino a Vender queda de respaldo,
+  // si la hoja no está montada). Desde un prospecto se vuelve al alta con el socio ya creado ("listo").
   const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;
-  if (prospecto) redirect(destino);
-  return { destino };
+  if (prospecto) redirect(cobrar && conPlan ? `/panel/socios/nuevo?listo=${id}&cobrar=1` : destino);
+  return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim() };
+}
+
+export type PlanParaAlta = {
+  plan_id: string; nombre: string; descripcion: string | null; duracion_meses: number | null;
+  renovacion: "continua" | "desde_pago" | "dia_fijo" | null; dia_fijo: number | null;
+  lista: number | null; efectivo: number | null; matricula: number | null; total_lista: number | null; total_efectivo: number | null;
+};
+
+/** Las membresías con su primer pago, calculado por la base (cuota + matrícula). */
+export async function planesParaAlta(sedeId: string): Promise<{ planes?: PlanParaAlta[]; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    return { planes: await rpc<PlanParaAlta[]>("planes_para_alta", { p_sede_id: sede.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export type ProspectoOfrecido = { id: string; nombre: string; creado_en: string };
+
+/** El Interesado con ese celular, para ofrecerlo en el alta. Un celular a medio escribir no coincide con nadie. */
+export async function prospectoPorTelefono(telefono: string): Promise<{ prospecto?: ProspectoOfrecido | null; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    if (telefono.replace(/\D/g, "").length < 8) return { prospecto: null };
+    return { prospecto: await rpc<ProspectoOfrecido | null>("prospecto_por_telefono", { p_gimnasio_id: panel.gimnasio.id, p_telefono: telefono }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/**
+ * VD-6 · Alta rápida desde la Entrada: crea al socio (y le asigna el plan) sin salir de la ventana.
+ * Si algo falla devuelve el error y no borra nada de lo escrito; si el socio ya quedó creado y solo el plan
+ * falló, lo dice (`sinPlan`) para seguir desde la ficha.
+ */
+export async function altaRapida(datos: { nombre: string; apellido?: string; dni?: string; telefono?: string }, planId: string | null, prospectoId?: string | null)
+  : Promise<{ socioId?: string; numero?: number | null; sinPlan?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const limpio = Object.fromEntries(Object.entries(datos).map(([k, v]) => [k, String(v ?? "").trim()]));
+    if (!limpio.nombre) return { error: "Escribí el nombre." };
+    const id = await rpc<string>("guardar_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: null, p_datos: limpio });
+    if (prospectoId) {
+      try { await rpc("prospecto_es_socio", { p_gimnasio_id: panel.gimnasio.id, p_prospecto_id: prospectoId, p_socio_id: id }); } catch { /* ya quedó socio; el Interesado se marca después */ }
+    }
+    let sinPlan = false;
+    if (planId) {
+      try { await rpc("asignar_plan", { p_socio_id: id, p_plan_id: planId }); } catch { sinPlan = true; }
+    }
+    let numero: number | null = null;
+    try { numero = (await rpc<{ socio: { numero: number } }>("ficha_socio", { p_socio_id: id })).socio.numero; } catch { /* sin número en pantalla */ }
+    revalidatePath("/panel/socios");
+    if (prospectoId) revalidatePath("/panel/prospectos");
+    return { socioId: id, numero, sinPlan };
+  } catch (e) { return { error: (e as Error).message }; }
 }
 
 export async function asignarPlan(socioId: string, planId: string, cambiar: boolean): Promise<{ error?: string }> {

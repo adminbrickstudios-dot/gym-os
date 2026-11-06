@@ -4,25 +4,36 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { FormSocio, type PlanAlta } from "../FormSocio";
 import { rutaDisponible } from "@/lib/panel/secciones";
+import { sedeActiva } from "@/lib/panel/sede";
 
 export const metadata: Metadata = { title: "Nuevo socio" };
 
 type Prospecto = { id: string; nombre: string; telefono: string; estado: string };
 
-export default async function NuevoSocio({ searchParams }: { searchParams: Promise<{ prospecto?: string }> }) {
+export default async function NuevoSocio({ searchParams }: { searchParams: Promise<{ prospecto?: string; listo?: string; cobrar?: string }> }) {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "socios");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     // "Hacerlo socio" desde Prospectos: el alta arranca con su nombre y WhatsApp, y al guardar queda atado.
-    const { prospecto: prospectoId } = await searchParams;
+    const { prospecto: prospectoId, listo, cobrar } = await searchParams;
+    // VD-6: vuelve de un Interesado con el alta ya hecha: sigue en el cobro, sin volver a pedir los datos.
+    if (listo) {
+      const ficha = await rpc<{ socio: { nombre: string; apellido: string } }>("ficha_socio", { p_socio_id: listo });
+      return (
+        <>
+          <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} emoji="➕" titulo="Nuevo socio" bajada="El alta ya está hecha." />
+          <FormSocio socioId={null} creado={{ socioId: listo, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), cobrar: cobrar === "1" }} />
+        </>
+      );
+    }
     const prospecto = prospectoId
       ? (await rpc<Prospecto[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id })).find((x) => x.id === prospectoId && x.estado !== "socio") ?? null
       : null;
     if (prospectoId && !prospecto) throw new Error("Ese prospecto no existe o ya es socio. Volvé a Prospectos.");
     const [nombre, ...resto] = (prospecto?.nombre ?? "").split(" ");
-    const planes = (await rpc<(PlanAlta & { tipo: string; activo: boolean })[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }))
-      .filter((p) => p.tipo === "membresia" && p.activo);
+    // Las membresías con su primer pago (cuota + matrícula), calculado por la base.
+    const planes = await rpc<PlanAlta[]>("planes_para_alta", { p_sede_id: sedeActiva(panel).sede.id });
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
     return (
       <>

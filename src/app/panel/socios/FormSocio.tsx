@@ -1,13 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
-import { guardarSocio, type EstadoForm } from "./acciones";
+import Link from "next/link";
+import { guardarSocio, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { BotonAccion } from "@/components/ui/BotonAccion";
+import { Tilde } from "@/components/ui/Tilde";
 import { useVersion } from "@/components/panel/useVersion";
+import { TarjetasPlan, PrimerPago } from "@/components/panel/TarjetasPlan";
+import { abrirCobrar, hayHojaCobrar, EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
+import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 
-export type PlanAlta = { plan_id: string; nombre: string; precio: number | null };
+export type PlanAlta = PlanParaAlta;
 
 type Socio = Partial<Record<"nombre" | "apellido" | "dni" | "telefono" | "email" | "fecha_nacimiento" | "contacto_emergencia_nombre" | "contacto_emergencia_telefono" | "notas" | "responsable_nombre" | "responsable_telefono", string | null>>;
 
@@ -28,23 +33,118 @@ function esMenor(nacimiento: string) {
   return cumple18 > hoy;
 }
 
-export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobrar = false }: {
+type Props = {
   socioId: string | null; socio?: Socio; prospectoId?: string; planes?: PlanAlta[]; puedeCobrar?: boolean;
-}) {
+  /** VD-6: el alta ya está hecha (vuelve de un Interesado): arranca en el cobro. */
+  creado?: { socioId: string; nombre: string; cobrar: boolean };
+};
+
+/** VD-6 · Los 4 pasos del alta: datos, plan, cobro, listo. */
+function Pasos({ actual }: { actual: number }) {
+  const nombres = ["Datos", "Plan", "Cobro", "Listo"];
+  return (
+    <ol className="flex gap-2 text-sm" data-pasos-alta={actual} aria-label="Pasos del alta">
+      {nombres.map((n, i) => (
+        <li key={n} aria-current={i + 1 === actual ? "step" : undefined}
+          className={`flex-1 min-w-0 rounded-full px-3 py-1.5 text-center truncate border ${i + 1 === actual ? "border-[var(--acento)] font-semibold" : i + 1 < actual ? "texto-suave border-[var(--borde)]" : "texto-tenue border-[var(--borde)]"}`}>
+          {i + 1 < actual ? "✓ " : `${i + 1} · `}{n}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function FormSocio(props: Props) {
+  // "Dar de alta a otro": cambia la clave y el formulario vuelve a empezar limpio.
+  const [vuelta, setVuelta] = useState(0);
+  return <FormInterno key={vuelta} {...props} otro={() => setVuelta((n) => n + 1)} />;
+}
+
+function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = false, creado: creadoInicial, otro }: Props & { otro: () => void }) {
   const [plan, setPlan] = useState("");
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
   const [versionAbierta] = useVersion("socios", socioId);
-  useEffect(() => { if (estado.destino) router.push(estado.destino); }, [estado.destino, router]);
+  // VD-6: el socio ya está creado (pasos 3 y 4), lo cobrado, y el Interesado con ese celular si lo hay.
+  const [creado, setCreado] = useState<{ socioId: string; nombre: string } | null>(creadoInicial ?? null);
+  const [cobro, setCobro] = useState<CobroHecho | null>(null);
+  const [despues, setDespues] = useState(false);
+  const [ofrecido, setOfrecido] = useState<ProspectoOfrecido | null>(null);
+  const [vinculado, setVinculado] = useState<string | null>(null);
+  const planElegido = planes.find((p) => p.plan_id === plan) ?? null;
+  useEffect(() => {
+    if (!estado.destino) return;
+    // VD-5b: con cobro, la hoja Cobrar se abre acá mismo; si no está montada, se va a Vender como antes.
+    if (!socioId && estado.cobrar && estado.socioId && hayHojaCobrar()) {
+      setCreado({ socioId: estado.socioId, nombre: estado.nombre ?? "" });
+      abrirCobrar({ socioId: estado.socioId, origen: "otro" });
+      return;
+    }
+    router.push(estado.destino);
+  }, [estado.destino, estado.cobrar, estado.socioId, estado.nombre, socioId, router]);
+  // Viene de un Interesado con el alta hecha: la hoja de cobro se abre sola.
+  useEffect(() => {
+    if (creadoInicial?.cobrar && hayHojaCobrar()) abrirCobrar({ socioId: creadoInicial.socioId, origen: "otro" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const creadoId = creado?.socioId;
+  useEffect(() => {
+    if (!creadoId) return;
+    const hecho = (e: Event) => { const c = (e as CustomEvent<CobroHecho>).detail; if (c.socioId === creadoId) setCobro(c); };
+    window.addEventListener(EVENTO_COBRO_HECHO, hecho);
+    return () => window.removeEventListener(EVENTO_COBRO_HECHO, hecho);
+  }, [creadoId]);
+  const paso = creado ? (cobro || despues ? 4 : 3) : plan ? 2 : 1;
+  const buscarInteresado = async (celular: string) => {
+    if (socioId || prospectoId) return;
+    const r = await prospectoPorTelefono(celular);
+    setOfrecido(r.prospecto ?? null);
+    if (!r.prospecto) setVinculado(null);
+  };
   // Menor de 18 (D10): aparece el adulto responsable. La base lo exige igual.
   const [nacimiento, setNacimiento] = useState(socio?.fecha_nacimiento ?? "");
   const menor = esMenor(nacimiento);
   // Con error, React vacía el form al volver la acción: se vuelve a dibujar con lo que se había escrito.
   const v: Socio = { ...socio, ...estado.valores };
+
+  // Pasos 3 y 4 del alta: el cobro (la hoja Cobrar) y el "listo" con la bienvenida.
+  if (creado) {
+    const nombreSocio = creado.nombre || "el socio";
+    return (
+      <div className="max-w-2xl space-y-6" data-alta-creado={creado.socioId}>
+        <Pasos actual={paso} />
+        {paso === 3 ? (
+          <div className="tarjeta p-6 space-y-4" data-alta-paso="cobro">
+            <p className="titulo text-2xl">💵 Cobrá el primer pago</p>
+            <p className="texto-suave">{nombreSocio} ya está dado de alta. Falta cobrar su primera cuota para que pueda entrar.</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="boton boton-principal text-lg px-8" data-alta-cobrar onClick={() => abrirCobrar({ socioId: creado.socioId, origen: "otro" })}>💵 Cobrar</button>
+              <button type="button" className="boton" data-alta-despues onClick={() => setDespues(true)}>Cobrar después</button>
+            </div>
+          </div>
+        ) : (
+          <div className="tarjeta p-6 space-y-4 aparecer" data-alta-paso="listo">
+            <div className="flex items-center gap-3"><Tilde tamano={48} /><p className="titulo text-2xl">¡Listo! {nombreSocio} ya es socio</p></div>
+            {cobro
+              ? <Mensaje tipo="exito"><span data-alta-cobrado={cobro.total}>Cobrado {formatearPesos(cobro.total)}.</span> <MandarComprobante ventaId={cobro.ventaId} className="mt-2" /></Mensaje>
+              : <Mensaje tipo="info">Todavía no se cobró nada: se cobra desde su ficha o cuando venga.</Mensaje>}
+            <p className="texto-suave">Dale la bienvenida: ya puede entrar con su DNI.</p>
+            <div className="flex flex-wrap gap-2">
+              <Link href={`/panel/socios/${creado.socioId}`} className="boton boton-principal" data-alta-ficha>👤 Ver su ficha</Link>
+              <button type="button" className="boton" data-alta-otro onClick={otro}>➕ Dar de alta a otro</button>
+              <Link href="/panel/socios" className="boton">Socios</Link>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <form action={accion} className="max-w-2xl space-y-8">
+      {!socioId && <Pasos actual={paso} />}
       {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
-      {prospectoId && <input type="hidden" name="prospecto" value={prospectoId} />}
+      {(prospectoId || vinculado) && <input type="hidden" name="prospecto" value={prospectoId ?? vinculado ?? ""} />}
       {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
       <fieldset className="grid sm:grid-cols-2 gap-4">
         <legend className="titulo text-2xl mb-4">👤 Datos</legend>
@@ -63,7 +163,16 @@ export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobra
       )}
       <fieldset className="grid sm:grid-cols-2 gap-4">
         <legend className="titulo text-2xl mb-4">📱 Contacto</legend>
-        <Campo nombre="telefono" etiqueta="WhatsApp" valor={v.telefono} tipo="tel" placeholder="387 555-1234" ayuda="Para avisarle cuándo vence" />
+        <Campo nombre="telefono" etiqueta="WhatsApp" valor={v.telefono} tipo="tel" placeholder="387 555-1234" ayuda="Para avisarle cuándo vence" onBlur={(e) => void buscarInteresado(e.target.value)} />
+        {ofrecido && !vinculado && (
+          <div className="sm:col-span-2" data-interesado-ofrecido={ofrecido.id}>
+            <Mensaje tipo="info">
+              ¿Es {ofrecido.nombre}, que preguntó el {new Date(ofrecido.creado_en).toLocaleDateString("es-AR", { day: "numeric", month: "numeric" })}?{" "}
+              <button type="button" className="boton mt-2" onClick={() => setVinculado(ofrecido.id)}>Sí, es esa persona</button>
+            </Mensaje>
+          </div>
+        )}
+        {vinculado && <div className="sm:col-span-2"><Mensaje tipo="info">Es {ofrecido?.nombre}: al darlo de alta queda marcado como “se hizo socio”.</Mensaje></div>}
         <Campo nombre="email" etiqueta="Mail" valor={v.email} tipo="email" />
         <Campo nombre="contacto_emergencia_nombre" etiqueta="Contacto de emergencia" valor={v.contacto_emergencia_nombre} placeholder="Nombre" />
         <Campo nombre="contacto_emergencia_telefono" etiqueta="Teléfono de emergencia" valor={v.contacto_emergencia_telefono} tipo="tel" />
@@ -76,10 +185,9 @@ export function FormSocio({ socioId, socio, prospectoId, planes = [], puedeCobra
       {!socioId && planes.length > 0 && (
         <fieldset className="space-y-2" data-plan-alta>
           <legend className="titulo text-2xl mb-2">🏷️ Plan</legend>
-          <select name="plan_id" value={plan} onChange={(e) => setPlan(e.target.value)} className="campo" aria-label="Plan">
-            <option value="">Sin plan por ahora (viene con pase o pack)</option>
-            {planes.map((p) => <option key={p.plan_id} value={p.plan_id}>{p.nombre}{p.precio != null ? ` · ${formatearPesos(p.precio)}` : ""}</option>)}
-          </select>
+          <input type="hidden" name="plan_id" value={plan} />
+          <TarjetasPlan planes={planes} valor={plan} alElegir={setPlan} />
+          {planElegido ? <PrimerPago plan={planElegido} /> : <p className="texto-tenue text-sm">Sin plan por ahora (viene con pase o pack). Tocá un plan para elegirlo; tocalo de nuevo para sacarlo.</p>}
         </fieldset>
       )}
       {estado.error && <Mensaje tipo="error">{estado.error}</Mensaje>}
