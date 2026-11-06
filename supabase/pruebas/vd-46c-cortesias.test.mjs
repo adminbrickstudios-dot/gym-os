@@ -103,7 +103,9 @@ test("tope por mes: la recepción llega a 5 días y la sexta cortesía se rechaz
 });
 
 test("a un suspendido, a un dado de baja o sin membresía no se le da; sin plan, tampoco", async () => {
-  await intento(u.dueno, t.ctx.socios.suspendido, 1, null, /suspendido/);
+  // El testigo "suspendido" arranca ayer según HOY (fijo); acá se suspende a uno ahora, con la función nueva.
+  await como(u.dueno, () => t.q(`select public.suspender_socio($1, 'Pelea en el vestuario')`, [t.ctx.socios.pack_con_clases]));
+  await intento(u.dueno, t.ctx.socios.pack_con_clases, 1, null, /suspendido/);
   await intento(u.dueno, t.ctx.socios.se_fue, 1, null, /dado de baja/);
   await intento(u.dueno, t.ctx.socios.sin_plan, 1, null, /asignale un plan/);
   await como(ajenoUsuario(), () => t.falla(() => t.q(`select public.dar_cortesia($1, 1, $2, null)`, [t.ctx.socios.al_dia, motivos[0].id]), /Sin permiso/));
