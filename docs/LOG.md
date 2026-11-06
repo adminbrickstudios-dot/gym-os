@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-46G · Plan familiar y corporativo: el titular paga por los vinculados
+
+**QUÉ HICE**
+- Migración 7700: `grupos_familiares` tiene titular y tipo (familiar o corporativo). `privado.calcular_acceso` (copia de 6700) hereda la membresía del titular para los miembros sin cobertura propia: "Cubierto por X · …" (`cubierto_por_titular`); titular vencido, sin pagar, congelado o sin membresía → "El plan familiar de X venció el dd/mm" (`titular_vencido`); titular dado de baja → "Plan individual pendiente" (rojo). Quien tiene pase, pack o membresía propia entra con lo propio y una congelación propia no se pisa; la suspensión de un miembro lo alcanza y la del titular no alcanza al grupo. En `privado.retencion_con` (copia de 7100) los vinculados no aparecen como vencidos ni por vencer y la fila del titular dice "· paga por N vinculados": Vencen, Retención y Para hacer hoy salen de ahí sin duplicados.
+- ARRANCA APAGADO (`configuracion_gimnasio.plan_familiar_activo = false`; apagado, todo anda como antes); interruptor `plan_familiar_estado`/`guardar_plan_familiar` (solo el dueño, sin `guardar_configuracion`) en Configuración → Reglas. `fijar_titular_familia` y `quitar_titular_familia` son de dueño y encargado y no se usan con el plan apagado; `vincular_familia` y `sacar_de_familia` pasan a exigir dueño o encargado en grupos con titular (si no, la recepción podría regalar o quitar el plan). Tarjeta Familia de la ficha con `plan_familiar_socio`. Caso testigo nuevo en `CASOS_FAMILIA`/`sembrarFamilia` (aparte de `CASOS_TESTIGO` para no alterar el seed).
+- No se tocaron `guia_entrada` ni `registrar_ingreso`: los motivos nuevos caen en su rama genérica ("Anotale la entrada" / "Miralo en la ficha").
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`vd-46g-plan-familiar`).
+
+**SIN ARREGLAR**: VD-46G2 (el miembro no respeta franja horaria, tope semanal ni sede del plan del titular), VD-46G3 (cobrar la cuota del titular desde un miembro; resumen corporativo), VD-46G4 (avisar a los miembros cuando el titular vence).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46g` (prende el interruptor, arma el grupo desde la ficha, mira al miembro en 390 px): escrito según la documentación, pero no ejecutado; `npm run db:types` no se corrió.
+
 ## 2026-11-06 · Noche · VD-46D, L, P y R · Aviso previo de aumentos, deuda con los socios, resultado por sede y firma propia al cumplir 18
 
 **QUÉ HICE**
