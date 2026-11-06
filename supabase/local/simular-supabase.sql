@@ -88,3 +88,14 @@ create table if not exists auth.sessions (
   user_agent text,
   ip inet
 );
+
+-- VD-42: factores de verificación en dos pasos (en Supabase los lleva GoTrue; acá solo la forma que lee la base).
+create table if not exists auth.mfa_factors (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  friendly_name text,
+  factor_type text not null default 'totp',
+  status text not null default 'unverified',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);

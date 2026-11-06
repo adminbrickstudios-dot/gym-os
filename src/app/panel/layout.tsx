@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
 import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -66,5 +67,10 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       };
     } catch { entrada = null; }   // sin sede activa: la pantalla de Entrada lo dice con todas las letras
   }
-  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>{children}</Marco>;
+  return (
+    <>
+      <RegistrarSesion />
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>{children}</Marco>
+    </>
+  );
 }

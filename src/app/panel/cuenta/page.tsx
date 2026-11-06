@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { CambiarContrasena } from "./CambiarContrasena";
 import { MiPin } from "./MiPin";
+import { DosPasos } from "./DosPasos";
 import { ActivarPush } from "@/components/ActivarPush";
 import { Sesiones } from "@/components/cuenta/Sesiones";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
@@ -26,6 +27,8 @@ export default async function Cuenta() {
       <CambiarContrasena tieneContrasena={seguridad.tiene_contrasena} />
       {/* VD-33b: dónde está abierta la cuenta y cerrar las demás. */}
       <Sesiones sesiones={seguridad.sesiones} zona={panel.gimnasio.zona_horaria} />
+      {/* VD-42: la verificación en dos pasos protege exportar, el equipo y los cobros (la exige la base). */}
+      {panel.yo.rol !== "profe" && <DosPasos recomendada={panel.yo.rol === "dueno"} />}
       {/* Con un PIN puesto en esta compu, el PIN que se guarda es el de la sesión: se pide sin PIN puesto. */}
       {(await cookies()).get("gymos_operador")
         ? <p className="texto-suave mt-6">🔢 Para cambiar tu PIN, primero <Link href="/panel/pin" className="underline">salí del PIN</Link> de esta compu.</p>
