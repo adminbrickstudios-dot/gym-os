@@ -175,22 +175,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
         {referido && <Referir datos={referido} />}
-        <p className="text-center"><Link href={`/app/historial${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-historial>🧾 Mis pagos y cuándo vine</Link>
-          <span className="texto-tenue"> · </span><Link href={`/app/cuenta${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-cuenta>⏸️ Pausar o dar de baja</Link></p>
         <Instalar />
-
-        {yo.plan && (
-          <section className="tarjeta p-5">
-            <p className="texto-tenue text-sm">Tu plan</p>
-            <p className="titulo text-2xl">🏷️ {yo.plan.nombre}</p>
-          </section>
-        )}
-        {yo.packs?.map((p) => (
-          <section key={p.plan} className="tarjeta p-5">
-            <p className="titulo text-2xl">🎟️ {p.plan}</p>
-            <p className="texto-suave">Te quedan {p.cantidad - p.usadas} de {p.cantidad} clases{p.vence_en ? ` · vence el ${fechaCorta(p.vence_en, zona)}` : ""}</p>
-          </section>
-        ))}
 
         {yo.modo_clases !== "ninguno" && (
           <section>
