@@ -2,13 +2,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
-import { GRUPOS, NOMBRE_ROL, principalesCelular, seccionesPara } from "@/lib/panel/secciones";
+import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara } from "@/lib/panel/secciones";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
 import { ProveedorSecciones } from "./LinkPanel";
 import { SinConexion } from "@/components/ui/SinConexion";
 import { VentanaEntrada } from "./VentanaEntrada";
+import { CobrarHost } from "./cobrar/CobrarHost";
+import { sedeActiva } from "@/lib/panel/sede";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
@@ -21,6 +23,11 @@ export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boole
 export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
+  // VD-5: la hoja Cobrar vive acá una sola vez; solo donde Vender está prendido y la persona cobra.
+  let sedeCobro: string | null = null;
+  if (rutaDisponible("/panel/vender", rol, panel.secciones_apagadas)) {
+    try { sedeCobro = sedeActiva(panel).sede.id; } catch { sedeCobro = null; }
+  }
   return (
     <div {...propsMarca(panel.marca)} className="min-h-dvh con-barra">
       <Navegacion
@@ -33,8 +40,10 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         principales={principalesCelular(rol, panel.secciones_apagadas)}
         buscaSocios={!panel.secciones_apagadas.includes("socios")}
         soloVerSocios={rol === "profe"}
+        puedeCobrar={!!sedeCobro && !panel.secciones_apagadas.includes("socios")}
         cambiarGimnasio={enPlataforma}
       />
+      {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
       {entrada && <VentanaEntrada sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">

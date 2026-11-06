@@ -5,18 +5,10 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
-import { cobrar, comprobante, preciosPara, registrarUsoCupon, validarCupon, type Venta } from "./acciones";
-import { anularVenta, pedirAnulacion } from "../ventas-acciones";
-import { linkWhatsappSocio } from "@/lib/whatsapp";
-import { aplicarCupon, descuentoConvenio, lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { cobrar, preciosPara, registrarUsoCupon, validarCupon, type Venta } from "./acciones";
+import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { DeshacerVenta, MandarComprobante, MEDIOS } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
-
-const MEDIOS: { medio: Medio; texto: string }[] = [
-  { medio: "efectivo", texto: "💵 Efectivo" },
-  { medio: "transferencia", texto: "🏦 Transferencia" },
-  { medio: "debito", texto: "💳 Débito" },
-  { medio: "credito", texto: "💳 Crédito" },
-];
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
@@ -47,11 +39,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   }, []);
   // Recién dado de alta con plan (SOC-13): arranca con la primera cuota en el carrito.
   // Si debe la matrícula de su plan (PLA-3), va también.
-  const [lineas, setLineas] = useState<Linea[]>(() => conCuota && preciosIniciales.cuota
-    ? [{ clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${preciosIniciales.cuota.plan}`, precios: preciosIniciales.cuota.precios, cantidad: 1 },
-       ...(preciosIniciales.matricula ? [{ clave: "matricula-inicial", tipo: "matricula" as const, nombre: `Matrícula ${preciosIniciales.matricula.plan}`,
-         precio_fijo: Number(preciosIniciales.matricula.monto), cantidad: 1 }] : []),
-       ...(preciosIniciales.recargo ? [lineaRecargo(preciosIniciales.recargo)] : [])] : []);
+  const [lineas, setLineas] = useState<Linea[]>(() => (conCuota ? lineasIniciales(preciosIniciales) : []));
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
   // VEN-5: "A cuenta" aparece si el gimnasio fía y hay socio elegido.
   const medios = [...MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio)),
@@ -85,12 +73,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   });
 
   // El recargo por pagar tarde acompaña a la cuota: entra y sale con ella (PLA-7).
-  const conRecargo = (ls: Linea[]) => {
-    const hayCuota = ls.some((l) => l.tipo === "cuota");
-    const sin = ls.filter((l) => l.tipo !== "recargo");
-    if (!hayCuota || !precios.recargo) return sin;
-    return ls.some((l) => l.tipo === "recargo") ? ls : [...ls, lineaRecargo(precios.recargo)];
-  };
+  const conRecargo = (ls: Linea[]) => conRecargoLineas(ls, precios.recargo);
   const agregar = (l: Omit<Linea, "clave" | "cantidad">) => setLineas((ls) => {
     const igual = ls.find((x) => x.tipo === l.tipo && x.plan_id === l.plan_id && x.producto_id === l.producto_id && l.tipo !== "otro");
     if (igual) return ls.map((x) => (x === igual ? { ...x, cantidad: Math.min(x.cantidad + 1, x.tipo === "cuota" ? 12 : 50) } : x));
@@ -115,11 +98,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     const pagos = total === 0 ? [] : mixto
       ? partes.filter((p) => monto(p.monto) > 0).map((p) => ({ medio: p.medio, monto: monto(p.monto) }))
       : medioOk ? [{ medio: medioOk, monto: total }] : [];
-    const items = lineas.map((l) => ({
-      tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
-      descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" || l.tipo === "deuda" ? l.precio_fijo : undefined,
-      descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
-    }));
+    const items = armarItems(lineas);
     // VD-34: la misma operación lleva la misma clave hasta que se cobra; un reintento no cobra dos veces.
     claveOperacion.current ??= crypto.randomUUID();
     const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos, claveOperacion: claveOperacion.current });
@@ -365,43 +344,4 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       </aside>
     </div>
   );
-}
-
-/** Se cobró mal: el dueño o el encargado la anulan acá; la recepción pide que la anulen (VEN-6). */
-function DeshacerVenta({ ventaId, puedeAnular, socioId }: { ventaId: string; puedeAnular: boolean; socioId: string | null }) {
-  const [abierto, setAbierto] = useState(false);
-  const [motivo, setMotivo] = useState("");
-  const [hecho, setHecho] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [ocupado, empezar] = useTransition();
-  if (hecho) return <p role="status" className="mt-5 texto-suave" data-deshacer-hecho>{hecho}</p>;
-  if (!abierto) return <button type="button" className="boton-texto mt-5" onClick={() => setAbierto(true)}>↩️ {puedeAnular ? "Anular esta venta" : "Me equivoqué: pedir que la anulen"}</button>;
-  return (
-    <form className="mt-5 flex flex-col sm:flex-row gap-2" onSubmit={(e) => {
-      e.preventDefault();
-      empezar(async () => {
-        const r = puedeAnular ? await anularVenta(ventaId, motivo, socioId) : await pedirAnulacion(ventaId, motivo);
-        if (r.error) setError(r.error); else setHecho(puedeAnular ? "↩️ Venta anulada: se revirtió lo que habilitó." : "↩️ Pedido enviado: el dueño o el encargado lo ven en Inicio.");
-      });
-    }}>
-      <input autoFocus className="campo" placeholder="Por qué (obligatorio)" aria-label="Motivo de la anulación" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-      <button type="submit" className="boton boton-peligro" disabled={!motivo.trim() || ocupado}>{puedeAnular ? "Anular" : "Pedir"}</button>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-    </form>
-  );
-}
-
-/** VEN-1: el comprobante por WhatsApp, ya escrito (Configuración → Mensajes). Se arma apenas se cobra, así el toque abre WhatsApp directo. */
-function MandarComprobante({ ventaId }: { ventaId: string }) {
-  const [c, setC] = useState<{ link: string | null; mensaje: string; error?: string } | null>(null);
-  useEffect(() => {
-    let vivo = true;
-    comprobante(ventaId).then((r) => { if (vivo) setC({ link: r.error ? null : linkWhatsappSocio(r.telefono, r.mensaje), mensaje: r.mensaje ?? "", error: r.error }); });
-    return () => { vivo = false; };
-  }, [ventaId]);
-  if (!c) return null;
-  if (c.error) return <p role="alert" className="pildora pildora-rojo mt-5">⚠️ {c.error}</p>;
-  return c.link
-    ? <a href={c.link} target="_blank" rel="noopener noreferrer" className="boton mt-5" data-comprobante>🧾 Mandar comprobante por WhatsApp</a>
-    : <p className="mt-5 texto-suave" data-comprobante>Sin celular cargado para mandarle el comprobante.</p>;
 }

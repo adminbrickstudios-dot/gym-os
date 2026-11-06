@@ -26,7 +26,7 @@ const EJECUTABLES = {
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
     "public.precio_cuota", "public.cobrar_cuota", "public.anular_venta", "public.asignar_plan", "public.cambiar_plan",
     "public.dar_de_baja", "public.abrir_caja", "public.cerrar_caja", "public.resumen_caja", "public.caja_abierta", "public.movimiento_caja",
-    "public.vender", "public.version_registro", "public.verificar_version", "public.informar_transferencia", "public.aprobar_pago", "public.rechazar_pago", "public.pagos_por_aprobar",
+    "public.vender", "public.contexto_cobro", "public.config_cobro", "public.guardar_config_cobro", "public.version_registro", "public.verificar_version", "public.informar_transferencia", "public.aprobar_pago", "public.rechazar_pago", "public.pagos_por_aprobar",
     "public.retencion", "public.retencion_resumen", "public.registrar_contacto",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",

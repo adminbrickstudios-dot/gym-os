@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-5 · Cobrar: un solo flujo en todos lados
+
+**QUÉ HICE**
+- Hoja flotante `Cobrar` única, abierta desde la ventana de Entrada (tecla C), la ficha, Vencen hoy, Retención y Ctrl+K (botón por socio o "cobrar Juan" + Enter). Muestra la cuota de su plan con su período y las líneas de matrícula, recargo, convenio y cupón; medios en botones, dos medios, comprobante de transferencia (hasta 2,5 MB), descuento con motivo, agregar producto/pase/pack/deuda/otra cosa, "atiende X" (PIN), recibo por WhatsApp y aviso de doble cobro que nunca frena. Medio por defecto configurable desde la hoja (dueño/encargado). Desde la Entrada, al cobrar la hoja se cierra y el veredicto se recalcula (C → Enter → Enter deja al vencido adentro); desde las demás, "Cobrado" con Anular y Volver.
+- "Cobré otro día": solo dueño/encargado, con motivo, hasta 90 días atrás, nunca en efectivo ni a cuenta (decisión prudente para no mezclar la caja de hoy); lo exige la base. La venta guarda motivo, quién la cargó y cuándo.
+- Comparte con `/panel/vender` las acciones y las cuentas (`compartido.tsx`, `tipos.ts`); `/panel/vender` sigue igual. Migración 3450 (`vender` con fecha de cobro, motivo y comprobante opcionales y la firma vieja borrada; `contexto_cobro`; medio por defecto). Número 3450 y no 0500: depende de `vender` de VD-34.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`cobrar-flujo`).
+
+**SIN ARREGLAR**: VD-5b (el alta y `Puerta.tsx` todavía redirigen a `/panel/vender?…&cuota=1`; hay e2e viejos que esperan esa URL) y VD-5c (prueba de que Transferencias no mezcla comprobantes).
+**LO QUE NO PUDE VERIFICAR**: la hoja, el foco/Enter entre la hoja y la Entrada, la subida del comprobante contra el storage local y `vd-5.mjs` (y el `panel-vencen.mjs` actualizado): escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
 ## 2026-11-06 · Noche · VD-47X, VD-12b/c/d y VD-23b/c · Rapidez restante e Inicio en vivo
 
 **QUÉ HICE**

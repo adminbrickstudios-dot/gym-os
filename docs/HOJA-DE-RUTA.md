@@ -452,7 +452,7 @@ bloque 18.
 - [x] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo — verificado: ingreso con marca, un campo celular o mail, código de 6 dígitos con reenviar, olvidé mi contraseña por código, errores que no revelan cuentas; base en verde en GitHub; e2e vd-33 en la corrida de la tanda
 - [x] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores) — verificado: ventana de Entrada global (tipeo, botón, F2/Ctrl+E, lector USB, barra fija opcional) sobre las funciones de siempre + Configuración → Entrada; base en verde en GitHub; e2e vd-1 en la corrida de la tanda
 - [x] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón — verificado: guia_entrada en la base: botón, qué decirle, chips por situación; prueba de base por cada fila de la tabla; base en verde en GitHub; e2e vd-2 en la corrida de la tanda
-- [ ] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K)
+- [x] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K) — verificado: hoja Cobrar única (Entrada, ficha, Vencen, Retención, Ctrl+K) con las mismas acciones que Vender, otro día solo dueño/encargado exigido por la base, vuelve al origen; base en verde en GitHub; e2e vd-5 en la corrida de la tanda
 - [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
 - [x] VD-12 · 🟢 · Inicio del dueño y de la recepción — verificado: numeros_inicio en un viaje con permisos por rol, 4 números configurables, turno de caja de la recepción; base en verde en GitHub; e2e vd-12 en la corrida de la tanda
 - [x] VD-36 · 🟢 · App del socio en 4 pestañas, limpia — verificado: 4 pestañas Inicio·Clases·Rutina·Yo calculadas por pestanas_app en la base, pantallas viejas accesibles en Yo; base en verde en GitHub; e2e vd-36 en la corrida de la tanda
@@ -469,6 +469,8 @@ bloque 18.
 - [ ] VD-2b · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip)
 - [ ] VD-47Y · 🟢 · Correr scripts/medir/explain.mjs con 3.000 socios y poner la tabla antes/después en el LOG (LISTO SI: ninguna función de pantalla pasa de 300 ms)
 - [ ] VD-12e · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces)
+- [ ] VD-5b · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes)
+- [ ] VD-5c · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables

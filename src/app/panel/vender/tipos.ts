@@ -97,3 +97,30 @@ export function aplicarCupon(lineas: Linea[], c: Cupon, medio: Medio | null, cuo
   });
   return { lineas: nuevas, aplicadas };
 }
+
+/** El recargo por pagar tarde acompaña a la cuota: entra y sale con ella (PLA-7). */
+export function conRecargoLineas(ls: Linea[], recargo: PreciosVenta["recargo"] | undefined): Linea[] {
+  const hayCuota = ls.some((l) => l.tipo === "cuota");
+  const sin = ls.filter((l) => l.tipo !== "recargo");
+  if (!hayCuota || !recargo) return sin;
+  return ls.some((l) => l.tipo === "recargo") ? ls : [...ls, lineaRecargo(recargo)];
+}
+
+/** Lo que arranca en el carrito de quien debe su cuota: la cuota de su plan, su matrícula si la debe y el recargo si corresponde. */
+export function lineasIniciales(p: PreciosVenta): Linea[] {
+  if (!p.cuota) return [];
+  return [
+    { clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${p.cuota.plan}`, precios: p.cuota.precios, cantidad: 1 },
+    ...(p.matricula ? [{ clave: "matricula-inicial", tipo: "matricula" as const, nombre: `Matrícula ${p.matricula.plan}`, precio_fijo: Number(p.matricula.monto), cantidad: 1 }] : []),
+    ...(p.recargo ? [lineaRecargo(p.recargo)] : []),
+  ];
+}
+
+/** Las líneas del carrito como las recibe vender() en la base. */
+export function armarItems(lineas: Linea[]): Record<string, unknown>[] {
+  return lineas.map((l) => ({
+    tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
+    descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" || l.tipo === "deuda" ? l.precio_fijo : undefined,
+    descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
+  }));
+}
