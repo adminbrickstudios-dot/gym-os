@@ -10,7 +10,9 @@ const r = async (f: () => Promise<unknown>) => {
   try { await f(); revalidatePath("/app"); revalidatePath("/app/clases"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 };
-export const reservarClase = async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }));
+/** VD-46D: el socio dice "entendido" a un aviso (queda la constancia de que lo vio). */
+export const marcarAvisoLeido = async (avisoId: string) => r(() => rpc("marcar_aviso_leido", { p_aviso_id: avisoId }));
+export const reservarClase =async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }));
 /** VD-24: si al cancelar subió alguien de la lista de espera, la base devuelve su reserva y se le manda el push. */
 export const cancelarReserva = async (reservaId: string) => r(async () => {
   const subio = await rpc<string | null>("cancelar_reserva", { p_reserva_id: reservaId });

@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-46D, L, P y R · Aviso previo de aumentos, deuda con los socios, resultado por sede y firma propia al cumplir 18
+
+**QUÉ HICE**
+- **46D (7400)**: `aplicar_aumento` pasa a 7 argumentos (`p_motivo_sin_aviso`; la firma vieja se borra) y exige 30 días de aviso por defecto (el dueño lo configura entre 7 y 90). Con menos días solo puede el dueño, con un motivo de al menos 10 letras; el encargado no puede saltearlo. Cada aumento queda registrado (quién, cuándo, desde cuándo, motivo de la excepción) y cada socio con membresía activa en un plan afectado recibe un aviso en su app (tarjeta con "Entendido", queda registrado que lo vio; `AvisosSocio.tsx`, sin tocar funciones ajenas). Panel: días de aviso, a cuántos socios llega, "Poner el …" (lleva la fecha al mínimo) y "Aumentos anteriores" con avisados y vistos. Lo ya cobrado no cambia: el precio nuevo rige para el próximo pago. Se subieron las fechas de `aumento-precios.test.mjs` y `pla-4.mjs`, que usaban menos de 30 días.
+- **46L (7401)**: `deuda_con_socios` (solo lectura) suma los usos que quedan de packs vigentes y la parte futura de las cuotas pagadas, al neto pagado (precio menos descuento); lo que no tiene venta detrás (cortesías, cargas sin venta) se cuenta aparte sin sumarlo; tarjeta en Resultado, solo mes en curso, con los permisos de Resultado.
+- **46P (7402)**: `resultado_por_sede` da por sede lo cobrado, entradas, socios y "para repartir" (la parte de cuotas, pases y packs de lo que paga cada socio, dividida entre sedes según sus entradas del mes; el resto queda donde se cobró; el total repartido es igual al cobrado); se muestra solo con más de una sede.
+- **46R (7403)**: sin estado guardado: se compara la fecha de nacimiento con la de cada firma; lo que firmó un responsable antes de cumplir 18 se vuelve a pedir, y la firma propia va a `firmas_propias_documento` (la anterior queda de constancia). Se redefinieron `privado.documentos_de` y `firmar_documento` (copia de `20261104012600`). La tarea automática "mayores_de_edad" se engancha con un parche de texto con `replace` sobre `para_hacer_hoy_con` y el catálogo, con guarda que corta con error si no encuentra el texto (frágil si otro ítem cambia la rama `clases_espera`). La prueba `para-hacer-hoy` pasa de "13 automáticas" a "al menos 13".
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`aumento-aviso`, `deuda-socios`, `resultado-por-sede`, `firma-propia`).
+
+**SIN ARREGLAR**: VD-46Z (anular un aumento no avisa a los socios y deja el aviso anterior; aviso por push o mail; plan con menores y mayores; prueba con venta mixta en `resultado_por_sede`, que reparte por proporción de cuotas, pases y packs sobre el total de la venta).
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46d/l/p/r` (`vd-46p` y `vd-46l` dependen de los datos del demo), la tarjeta del Inicio de la app del socio y el flujo de firma propia en pantalla (ningún e2e abre la app del socio): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-46H, I, K y Q · Datos de salud, incidentes, reemplazo de profe y perdón de faltas
 
 **QUÉ HICE**

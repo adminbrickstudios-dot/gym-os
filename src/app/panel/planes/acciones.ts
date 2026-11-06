@@ -93,14 +93,14 @@ export async function anularProgramado(planId: string, desde: string): Promise<{
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export type Aumento = { planes: string[]; tipo: "porcentaje" | "monto"; valor: string; redondeo: number; desde: string };
+export type Aumento = { planes: string[]; tipo: "porcentaje" | "monto"; valor: string; redondeo: number; desde: string; motivo?: string };
 export type VistaAumento = { desde: string; planes: { plan_id: string; nombre: string; tipo: string; socios: number; antes: number | null; nuevo: number | null;
   variantes: { medio: string | null; hasta_dia: number | null; antes: number; monto: number }[]; problema: string | null; despues: string | null }[] };
 
 const argsAumento = (g: string, a: Aumento) => {
   const v = leerMonto(a.valor.replace("%", ""));
   if (Number.isNaN(v)) throw new Error(a.tipo === "porcentaje" ? "Escribí el porcentaje, por ejemplo 10 o 12,5" : MAL_MONTO);
-  return { p_gimnasio_id: g, p_planes: a.planes, p_tipo: a.tipo, p_valor: v, p_redondeo: a.redondeo, p_desde: a.desde || null };
+  return { p_gimnasio_id: g, p_planes: a.planes, p_tipo: a.tipo, p_valor: v, p_redondeo: a.redondeo, p_desde: a.desde || null, p_motivo_sin_aviso: a.motivo?.trim() || null };
 };
 
 /** La vista previa y el aplicar usan la misma cuenta en la base (PLA-4). */
@@ -113,6 +113,26 @@ export async function vistaAumento(a: Aumento): Promise<{ error?: string; vista?
 export async function aplicarAumento(a: Aumento): Promise<{ error?: string; n?: number }> {
   const panel = await contextoPanel();
   try { const n = await rpc<number>("aplicar_aumento", argsAumento(panel.gimnasio.id, a)); listo(); revalidatePath("/panel/planes/aumento"); return { n }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+export type AvisoPrevio = { aviso_dias: number; dias_de_aviso: number; cumple: boolean; fecha_minima: string; socios_a_avisar: number; puede_excepcion: boolean };
+export type AumentoHecho = { id: string; creado_en: string; vigente_desde: string; tipo: string; valor: number; aviso_dias_reales: number; aviso_dias_exigido: number;
+  excepcion_motivo: string | null; por: string; por_rol: string; planes: string[]; avisados: number; vistos: number };
+
+/** VD-46D: cuántos días de aviso lleva este aumento y a cuántos socios les va a llegar el aviso. */
+export async function avisoPrevioAumento(planes: string[], desde: string): Promise<{ error?: string; aviso?: AvisoPrevio }> {
+  const panel = await contextoPanel();
+  try { return { aviso: await rpc<AvisoPrevio>("aviso_previo_aumento", { p_gimnasio_id: panel.gimnasio.id, p_planes: planes, p_desde: desde || null }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-46D: cuántos días de aviso exige el gimnasio (solo el dueño lo cambia). */
+export async function guardarAvisoDias(dias: string): Promise<{ error?: string; dias?: number }> {
+  const panel = await contextoPanel();
+  const n = Number(dias);
+  if (!Number.isInteger(n)) return { error: "Escribí un número de días, por ejemplo 30" };
+  try { const r = await rpc<number>("guardar_config_aumento", { p_gimnasio_id: panel.gimnasio.id, p_dias: n }); revalidatePath("/panel/planes/aumento"); return { dias: r }; }
   catch (e) { return { error: (e as Error).message }; }
 }
 

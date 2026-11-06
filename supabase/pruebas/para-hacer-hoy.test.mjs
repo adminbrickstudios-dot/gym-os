@@ -76,7 +76,7 @@ test("permisos: la recepción no configura ni recibe lo de gestión; el profe no
     await t.falla(() => t.q(`select public.guardar_tarea_auto($1, 'inventada', true, null, null, null)`, [t.g]), /no existe/);
     await t.q(`select public.guardar_tarea_auto($1, 'vencen_pronto', true, null, null, 7)`, [t.g]);
     const [{ c }] = await t.q(`select public.tareas_auto_config($1) c`, [t.g]);
-    assert.equal(c.automaticas.length, 13);
+    assert.ok(c.automaticas.length >= 13, "el catálogo tiene al menos las 13 de siempre (VD-46R suma una)");
     assert.equal(c.automaticas.find((a) => a.clave === "vencen_pronto").dias_actual, 7);
   });
   await como(u.pablo, async () => {

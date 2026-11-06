@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // PLA-4 · Aumento de precios masivo y programado: la dueña elige dos planes,
-// 10% redondeado a $100 desde dentro de 10 días; ve antes → después (también
+// 10% redondeado a $100 desde dentro de 40 días (el aviso previo mínimo es de 30); ve antes → después (también
 // el precio en efectivo); lo programa; Planes muestra el 📅 de cada uno; copia
 // el aviso; un plan sin precio no se puede tildar a ciegas.
 //   npm run e2e:pla-4            (con scripts/local/levantar.sh corriendo)
@@ -33,7 +33,7 @@ try {
   for (const cb of await d.locator('input[type="checkbox"]').all()) if (await cb.isChecked()) await cb.uncheck();
   await d.locator(`input[aria-label="Uno${s5}"]`).check();
   await d.locator(`input[aria-label="Otro${s5}"]`).check();
-  const en10 = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+  const en10 = new Date(Date.now() + 40 * 864e5).toISOString().slice(0, 10);
   await d.locator('input[aria-label="Desde"]').fill(en10);
   await d.locator('input[aria-label="Cuánto aumenta"]').fill("10");
   const uno = d.locator(`[data-vista-plan="Uno${s5}"]`);

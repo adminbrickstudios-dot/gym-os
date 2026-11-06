@@ -56,6 +56,7 @@ const EJECUTABLES = {
     "public.productos_mostrador", "public.guardar_ficha_producto", "public.preparar_foto_producto", "public.confirmar_foto_producto", "public.quitar_foto_producto",
     "public.preparar_remito_stock", "public.confirmar_remito_stock", "public.remito_stock",
     "public.equipo_perfiles", "public.guardar_equipo_ajuste", "public.guardar_perfil_equipo", "public.preparar_foto_equipo", "public.guardar_foto_equipo", "public.foto_equipo", "public.profes_de_clases",
+    "public.config_aumento", "public.guardar_config_aumento", "public.aviso_previo_aumento", "public.aumentos_hechos", "public.mis_avisos", "public.marcar_aviso_leido", "public.deuda_con_socios", "public.resultado_por_sede", "public.firmas_propias_pendientes",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
     "public.reemplazar_profe", "public.reemplazos_clase",   // VD-46K

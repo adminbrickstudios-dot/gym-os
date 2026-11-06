@@ -62,7 +62,7 @@ function UnDocumento({ clave, nombre, ayuda, doc, puedeEditar }: { clave: string
   );
 }
 
-export type Pendiente = { documento_id: string; clave: string; titulo: string; texto: string; version: number };
+export type Pendiente = { documento_id: string; clave: string; titulo: string; texto: string; version: number; motivo?: string | null };
 
 /** Firmar un documento: nombre de quien firma y el tilde de "leí y acepto". La usan la ficha (mostrador) y la app. */
 export function Firmar({ socioId, doc, nombreSugerido = "", textoBoton = "✍️ Firmar" }: { socioId: string; doc: Pendiente; nombreSugerido?: string; textoBoton?: string }) {
@@ -75,6 +75,7 @@ export function Firmar({ socioId, doc, nombreSugerido = "", textoBoton = "✍️
     <form className="tarjeta p-4 space-y-3" data-firmar={doc.clave}
       onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await firmarDocumento(doc.documento_id, socioId, nombre); setEstado(r.error ? { error: r.error } : { ok: true }); }); }}>
       <p className="font-semibold">{doc.titulo} <span className="texto-tenue font-normal">· versión {doc.version}</span></p>
+      {doc.motivo === "cumplio_18" && <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-firma-propia>🎓 Cumplió 18: lo que firmó su responsable ya no alcanza. Ahora firma la propia persona.</p>}
       <details><summary className="cursor-pointer text-sm texto-suave">Leer el texto</summary><p className="whitespace-pre-wrap mt-2 text-sm">{doc.texto}</p></details>
       <label className="block space-y-1"><span className="etiqueta">{doc.clave === "menores" ? "Nombre y apellido del adulto responsable" : "Nombre y apellido de quien firma"}</span>
         <input className="campo" maxLength={120} value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>

@@ -102,3 +102,4 @@ Lanzados (VD-46 resto): a6c86fdb842f56ce5 = 46D,L,P,R (rama noche/2026-11-05-vd4
 Pendientes después: 46G (solo), 46N→46O, 46T..W, VD-32 (segunda pasada), y los B/C/D sueltos. Antes de VD-32 y de publicar tandas 2+: correr [pantallas] sobre la rama de la noche y hacer otra ronda de triage.
 (VD-46F, VD-46M mergeados; sumado VD-46X)
 (VD-46H,I,K,Q mergeados; sumado VD-46Y)
+(VD-46D,L,P,R mergeados; sumado VD-46Z)

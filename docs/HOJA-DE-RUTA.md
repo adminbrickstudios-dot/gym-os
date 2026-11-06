@@ -532,6 +532,7 @@ bloque 18.
 - [ ] VD-46W · 🟢 · Al dar de baja, rechazar también los pedidos de pausa pendientes y evitar que un aviso tardío de MercadoPago apruebe un pago ya rechazado
 - [ ] VD-46X · 🟢 · Las emergencias de la puerta aparecen en Control (extender privado.avisos_moderacion copiando la versión vigente) y el llavero/kiosco habitual también entran marcados en emergencia (prueba de base)
 - [ ] VD-46Y · 🟢 · Deshacer un perdón de falta (con motivo, queda el hecho); un reemplazo de profe sobrevive a editar el horario; perdones y reemplazos en Control; hora real del incidente hasta 7 días atrás; la recepción pide el perdón y dueño/encargado aprueba
+- [ ] VD-46Z · 🟢 · Aumentos: anular un aumento avisa a los socios; el aviso del aumento también por push/mail; plan con categoría menores/mayores al cumplir 18; prueba de resultado_por_sede con venta mixta
 - [ ] VD-44B · 🟢 · "Mi foto": el profe o la recepción cambia su propia foto desde Mi cuenta
 - [ ] VD-44C · 🟢 · La foto del profe en la TV de la sala y en el detalle de la clase del panel
 - [ ] VD-31B · 🟢 · Apagar las ayudas también desde Yo en la app del socio, y un tour de la hoja Cobrar
@@ -580,7 +581,7 @@ bloque 18.
 - [x] VD-46J · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [ ] VD-46N · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
 - [ ] VD-46O · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
-- [ ] VD-46D · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13
+- [x] VD-46D · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13 — verificado: base en verde en GitHub (aumento-aviso, deuda-socios, resultado-por-sede, firma-propia); e2e vd-46x en la corrida de la tanda
 - [x] VD-46F · 🟢 · Chip "subió comprobante hace X" en la Entrada para el vencido con una transferencia pendiente (informativo: no cambia quién entra) — caso 10 — verificado: chip 'subió comprobante hace X' informativo (no cambia el color ni quién entra); base en verde en GitHub (chip-transferencia); e2e vd-46f en la corrida de la tanda
 - [x] VD-46M · 🟢 · Modo emergencia de la puerta (solo dueño/encargado, con motivo, vence solo; las entradas de ese rato quedan marcadas y se listan al cerrar; arranca apagado por gimnasio) — casos 8, 63 — verificado: modo emergencia de la puerta (apagado de origen, solo dueño/encargado, con motivo, vence solo, entradas marcadas y listadas al cerrar); base en verde en GitHub (emergencia-puerta); e2e vd-46m en la corrida de la tanda
 - [ ] VD-46G · 🟢 · Plan familiar/corporativo: el titular paga por los vinculados y calcular_acceso hereda la cobertura ("cubierto por X"); titular vencido o dado de baja explicado a los miembros; arranca apagado por gimnasio — casos 32, 33
@@ -588,9 +589,9 @@ bloque 18.
 - [x] VD-46I · 🟢 · Registro de incidentes en la sala sin diagnóstico (inmutable a las 24 h, solo dueño/encargado listan todo) — caso 62 — verificado: base en verde en GitHub (incidentes, reemplazar-profe, perdonar-falta, salud en vitest); e2e vd-46x en la corrida de la tanda
 - [x] VD-46K · 🟢 · Reemplazar al profe en una sola clase con motivo — caso 50 — verificado: base en verde en GitHub (incidentes, reemplazar-profe, perdonar-falta, salud en vitest); e2e vd-46x en la corrida de la tanda
 - [x] VD-46Q · 🟢 · Perdonar una falta o un bloqueo de reservas con motivo — caso 52 — verificado: base en verde en GitHub (incidentes, reemplazar-profe, perdonar-falta, salud en vitest); e2e vd-46x en la corrida de la tanda
-- [ ] VD-46L · 🟢 · Resultado: "lo que le debés a los socios" (packs con usos restantes + cuotas adelantadas) — caso 24
-- [ ] VD-46P · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87
-- [ ] VD-46R · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
+- [x] VD-46L · 🟢 · Resultado: "lo que le debés a los socios" (packs con usos restantes + cuotas adelantadas) — caso 24 — verificado: base en verde en GitHub (aumento-aviso, deuda-socios, resultado-por-sede, firma-propia); e2e vd-46x en la corrida de la tanda
+- [x] VD-46P · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87 — verificado: base en verde en GitHub (aumento-aviso, deuda-socios, resultado-por-sede, firma-propia); e2e vd-46x en la corrida de la tanda
+- [x] VD-46R · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6 — verificado: base en verde en GitHub (aumento-aviso, deuda-socios, resultado-por-sede, firma-propia); e2e vd-46x en la corrida de la tanda
 *Tanda 7 · Cierre*
 - [x] VD-28 · 🟢 · Navegación con memoria y Volver al origen — verificado: origen único (ruta+query+scroll) por pestaña, VolverAlOrigen con Link en ficha, clase y 9 pantallas, useMemoriaLista en las listas, vuelta del cobro con aviso; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-28 en la corrida de la tanda
 - [x] VD-29 · 🟢 · Ctrl+K con acciones — verificado: intérprete de comandos (cobrar juan, entrada DNI, ficha, nuevo socio, vender, turno, tarea, nuevo gasto) con permisos por rol y secciones; sin migración; lint, typecheck, 147 pruebas, build y base en verde; e2e vd-29 en la corrida de la tanda
