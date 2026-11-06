@@ -96,6 +96,10 @@ jobs:
       - name: Barrido (cada rol abre cada pantalla)
         if: always()
         run: node scripts/e2e/barrido.mjs
+      - name: Tiempos (VD-47, avisa y no corta)
+        if: always()
+        continue-on-error: true
+        run: node scripts/medir/tiempos.mjs | tee .local/tiempos.md
       - name: Guardar capturas y logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -104,6 +108,7 @@ jobs:
           path: |
             .local/*.log
             .local/fallas.txt
+            .local/tiempos.md
             .local/capturas/
           if-no-files-found: ignore
           retention-days: 7

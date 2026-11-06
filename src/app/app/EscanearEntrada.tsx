@@ -2,7 +2,7 @@
 // El socio escanea el QR de la tablet de la entrada con su celular (ENT-6).
 import { useCallback, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
-import { Camara } from "@/app/panel/entrada/Camara";
+import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { escanearEntrada } from "./acciones";
 
 /** principal: el verde de la pantalla solo si es lo que tiene que hacer ahora (si debe pagar, el verde es pagar). */

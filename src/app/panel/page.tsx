@@ -2,12 +2,13 @@ import { NovedadesGymOS, type NovedadGymOS } from "@/components/panel/NovedadesG
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import Link from "next/link";
+import { Suspense } from "react";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
 import { fechaLarga, formatearNumero, formatearPesos, saludo } from "@/lib/formato";
 import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, rpcLectura, type PanelGimnasio } from "@/lib/panel/servidor";
 import { FilaVenta } from "@/components/panel/Venta";
 import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
@@ -40,45 +41,14 @@ type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo:
 const MOTIVO_BAJA: Record<string, string> = { precio: "el precio", horario: "los horarios", mudanza: "se muda", otro_gimnasio: "otro gimnasio", sin_tiempo: "no tiene tiempo", insatisfecho: "no le gustó", otro: "otra cosa" };
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
+// VD-47: primero la estructura (saludo y accesos, que salen del contexto), después los números y las
+// listas, que llegan en streaming con su esqueleto.
 export default async function Inicio() {
   return intentar(async () => {
     const panel = await contextoPanel();
     const { rol } = panel.yo;
-    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
-      rpc<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
-      // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
-      rol === "dueno" ? rpc<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
-      rol === "profe" ? [] : rpc<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
-      // Las pausas que pidió la recepción esperan al dueño o al encargado.
-      rol === "dueno" || rol === "encargado" ? rpc<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // D1: cada "dejar pasar" de hoy, a la vista del dueño y del encargado.
-      rol === "dueno" || rol === "encargado" ? rpc<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // INV-1: los invitados de hoy, en el resumen del dueño.
-      rol === "dueno" || rol === "encargado" ? rpc<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // VEN-6: ventas que la recepción pidió anular.
-      rol === "dueno" || rol === "encargado" ? rpc<Venta[]>("pedidos_anulacion_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // VEN-4: productos que llegaron a su mínimo.
-      rol === "dueno" || rol === "encargado" ? rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id })
-        : ({} as Record<string, { stock: number; minimo: number | null }>),
-      rol === "dueno" || rol === "encargado" ? rpc<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // CAJ-4: lo que pasó con la plata (de otros), si hay Caja.
-      (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpc<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
-      // CAJ-5: cajas que quedaron abiertas (al dueño y al encargado todas; a la recepción las suyas).
-      rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpc<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // AUD-14: los que pidieron la baja desde la app (APP-8).
-      rol !== "profe" ? rpc<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // ADM-6: lo que cuenta BRIK a los dueños.
-      rol === "dueno" ? rpc<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
-      // COM-4: las tareas de hoy y las atrasadas de quien mira.
-      rpc<{ hoy: string; tareas: Tarea[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id }),
-    ]);
-    const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
-      || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
-    // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
-    const ahora = datos.ahora.filter((a) => !a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas));
-
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
@@ -86,10 +56,69 @@ export default async function Inicio() {
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
+        <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
+
+        <Suspense fallback={<EsqueletoBloques />}>
+          <BloquesInicio panel={panel} />
+        </Suspense>
+      </div>
+    );
+  });
+}
+
+function EsqueletoBloques() {
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  return (
+    <div className="space-y-10 sm:space-y-12" aria-busy="true" aria-label="Cargando">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => <div key={i} className={`${bloque} h-20`} />)}
+      </div>
+      <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className={`${bloque} h-[68px]`} />)}</div>
+    </div>
+  );
+}
+
+async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
+  return intentar(async () => {
+    const { rol } = panel.yo;
+    const zona = panel.gimnasio.zona_horaria;
+    const [datos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
+      rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
+      // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
+      rol === "dueno" ? rpcLectura<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
+      rol === "profe" ? [] : rpcLectura<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      // Las pausas que pidió la recepción esperan al dueño o al encargado.
+      rol === "dueno" || rol === "encargado" ? rpcLectura<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // D1: cada "dejar pasar" de hoy, a la vista del dueño y del encargado.
+      rol === "dueno" || rol === "encargado" ? rpcLectura<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // INV-1: los invitados de hoy, en el resumen del dueño.
+      rol === "dueno" || rol === "encargado" ? rpcLectura<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // VEN-6: ventas que la recepción pidió anular.
+      rol === "dueno" || rol === "encargado" ? rpcLectura<Venta[]>("pedidos_anulacion_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // VEN-4: productos que llegaron a su mínimo.
+      rol === "dueno" || rol === "encargado" ? rpcLectura<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id })
+        : ({} as Record<string, { stock: number; minimo: number | null }>),
+      rol === "dueno" || rol === "encargado" ? rpcLectura<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // CAJ-4: lo que pasó con la plata (de otros), si hay Caja.
+      (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpcLectura<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
+      // CAJ-5: cajas que quedaron abiertas (al dueño y al encargado todas; a la recepción las suyas).
+      rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpcLectura<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // AUD-14: los que pidieron la baja desde la app (APP-8).
+      rol !== "profe" ? rpcLectura<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // ADM-6: lo que cuenta BRIK a los dueños.
+      rol === "dueno" ? rpcLectura<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
+      // COM-4: las tareas de hoy y las atrasadas de quien mira.
+      rpcLectura<{ hoy: string; tareas: Tarea[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+    ]);
+    const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
+      || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
+    // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
+    const ahora = datos.ahora.filter((a) => !a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas));
+
+    return (
+      <>
         <NovedadesGymOS novedades={novedadesGymOS} />
         {pasos && <PrimerosPasos datos={pasos} />}
-
-        <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 
         <section aria-label="Números de hoy">
           <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
@@ -283,7 +312,7 @@ export default async function Inicio() {
             </ul>
           </section>
         )}
-      </div>
+      </>
     );
   });
 }

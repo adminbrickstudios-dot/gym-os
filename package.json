@@ -154,7 +154,8 @@
     "e2e:com-13": "node scripts/e2e/com-13.mjs",
     "e2e:com-14": "node scripts/e2e/com-14.mjs",
     "e2e:seg-5": "node scripts/e2e/seg-5.mjs",
-    "e2e:vd-34": "node scripts/e2e/vd-34.mjs"
+    "e2e:vd-34": "node scripts/e2e/vd-34.mjs",
+    "medir": "node scripts/medir/tiempos.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

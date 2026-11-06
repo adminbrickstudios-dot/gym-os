@@ -4,7 +4,7 @@
 // Vuelve sola al inicio a los pocos segundos.
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
-import { Camara } from "@/app/panel/entrada/Camara";
+import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
 
