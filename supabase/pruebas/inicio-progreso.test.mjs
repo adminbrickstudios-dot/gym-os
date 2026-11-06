@@ -13,10 +13,21 @@ before(async () => {
 });
 after(async () => t && t.cerrar());
 
+// Un error dentro de la transacción de prueba la aborta: cada llamada va en su savepoint, y si falla se vuelve atrás.
 const como = async (usuario, fn) => {
+  await t.db.query("savepoint c");
   await t.db.query("set role authenticated");
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: usuario, role: "authenticated" })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  try {
+    const r = await fn();
+    await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`);
+    await t.db.query("release savepoint c");
+    return r;
+  } catch (e) {
+    await t.db.query("rollback to savepoint c");
+    await t.db.query("reset role");
+    throw e;
+  }
 };
 const progreso = () => como(uSocio, async () => (await t.q(`select public.progreso_inicio($1) as r`, [socio]))[0].r);
 const entrar = (minutosAtras, resultado = "entro") => t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, via_habilitante, color, motivo, texto)
