@@ -58,3 +58,4 @@ VD-11 lanzado: a8252a126ffc5dd91 (vd11). En curso: VD-14→16 (abda8c33632111e12
 (VD-14, VD-16 mergeados)
 VD-13 lanzado: aa10ecfaee648c08c (vd13, migr 5000, dueña de para_hacer_hoy). En curso: VD-17→18 (adf8116a26608df5d), VD-11 (a8252a126ffc5dd91). Pendientes tanda 3: VD-37, VD-15, VD-38, VD-44.
 (VD-17, VD-18 mergeados)
+VD-15 lanzado: a5008692e3fdd727b (vd15, migr 5100; incluye VD-6b). En curso: VD-11 (a8252a126ffc5dd91), VD-13 (aa10ecfaee648c08c). Pendientes tanda 3: VD-37, VD-38, VD-44.
