@@ -9,6 +9,7 @@ import { cobrar, comprobante, preciosPara, registrarUsoCupon, validarCupon, type
 import { anularVenta, pedirAnulacion } from "../ventas-acciones";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { aplicarCupon, descuentoConvenio, lineaRecargo, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
+import { Tilde } from "@/components/ui/Tilde";
 
 const MEDIOS: { medio: Medio; texto: string }[] = [
   { medio: "efectivo", texto: "💵 Efectivo" },
@@ -147,7 +148,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   if (venta) {
     return (
       <section className="tarjeta p-6 sm:p-10 max-w-xl" aria-live="polite">
-        <p className="text-5xl" aria-hidden>✅</p>
+        <p className="text-5xl flex justify-center" aria-hidden><Tilde tamano={64} /></p>
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         {usoCupon && <p className="mt-3 texto-suave" data-uso-cupon>{usoCupon}</p>}

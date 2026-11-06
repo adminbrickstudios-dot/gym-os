@@ -1,6 +1,6 @@
 // Con la forma real del inicio: saludo, grilla, números y lista.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <div className="space-y-10" aria-busy="true" aria-label="Cargando">
       <div className={`${bloque} h-16 w-3/4`} />
