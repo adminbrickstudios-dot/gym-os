@@ -6,6 +6,7 @@ import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } f
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
 import { FormProbar } from "./FormProbar";
+import { Foto } from "./Foto";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -214,9 +215,8 @@ function Galeria({ s, nombre }: { s: Extract<Seccion, { tipo: "galeria" }>; nomb
     <Bloque id="galeria" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-3">
         {fotos.map((u, i) => (
-          <li key={u} className={i === 0 ? "col-span-2 row-span-2" : ""}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={u} alt={`Foto ${i + 1} de ${nombre}`} loading="lazy" className="w-full h-full aspect-square object-cover rounded-[var(--radio)]" />
+          <li key={u} className={`relative overflow-hidden rounded-[var(--radio)] aspect-square ${i === 0 ? "col-span-2 row-span-2" : ""}`}>
+            <Foto src={u} alt={`Foto ${i + 1} de ${nombre}`} sizes={i === 0 ? "(min-width: 1024px) 66vw, 100vw" : "(min-width: 1024px) 33vw, 50vw"} />
           </li>
         ))}
       </ul>
@@ -235,8 +235,7 @@ function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
           return (
             <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6">
               {foto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={foto} alt={p.nombre} className="size-16 rounded-2xl object-cover" />
+                <span className="relative block size-16 rounded-2xl overflow-hidden"><Foto src={foto} alt={p.nombre} sizes="64px" /></span>
               ) : (
                 <span aria-hidden className="size-16 rounded-2xl grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">
                   {iniciales(p.nombre)}
@@ -346,6 +345,63 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
   );
 }
 
+/** VD-25: lo primero que se ve después del título: abierto ahora, reseñas y socios. Solo lo que el dueño prendió. */
+function Senales({ landing, ahora }: { landing: LandingPublicada; ahora: Agenda["sedes"][number] | null }) {
+  const ps = landing.prueba_social;
+  const resena = ps?.resena ?? null;
+  const socios = ps?.socios ?? null;
+  const estado = ahora?.texto ? ahora : null;
+  if (!estado && !resena && !socios) return null;
+  const puntaje = resena ? Number(resena.puntaje).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : "";
+  const contenidoResena = resena && (
+    <>
+      <span aria-hidden className="text-[#f5b50a]">★</span>
+      <span className="numero">{puntaje}</span>
+      <span>· {resena.cantidad.toLocaleString("es-AR")} {resena.cantidad === 1 ? "reseña" : "reseñas"} en Google</span>
+    </>
+  );
+  return (
+    <ul className="mt-5 flex flex-wrap items-center gap-2" data-prueba-social>
+      {estado && <li><EstadoAhora texto={estado.texto} abierto={estado.abierto} /></li>}
+      {resena && (
+        <li>
+          {resena.link
+            ? <a href={resena.link} target="_blank" rel="noopener noreferrer" className="pildora" data-resenas>{contenidoResena}</a>
+            : <span className="pildora" data-resenas>{contenidoResena}</span>}
+        </li>
+      )}
+      {socios && <li><span className="pildora" data-socios>👥 +{socios.toLocaleString("es-AR")} socios</span></li>}
+    </ul>
+  );
+}
+
+/** VD-25: tres pasos para el que nunca vino. Salen de lo que la página tiene prendido (probar, planes, altas). */
+function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boolean; altas: boolean }) {
+  const pasos = [
+    probar && { href: "#probar", titulo: "Probá una clase", texto: "Dejás tu WhatsApp y te escribimos para arreglar día y hora." },
+    planes && { href: "#planes", titulo: "Elegí tu plan", texto: "Mirá los precios y quedate con el que te cierra." },
+    altas && { href: "/hacete-socio", titulo: "Hacete socio", texto: "Te anotás desde el celular y empezás." },
+  ].filter(Boolean) as { href: string; titulo: string; texto: string }[];
+  if (pasos.length < 2) return null;
+  return (
+    <section aria-labelledby="empezar" className="px-4 pt-4 pb-2" data-como-empezar>
+      <div className="mx-auto max-w-5xl">
+        <h2 id="empezar" className="titulo text-2xl sm:text-3xl mb-4">🚀 ¿Primera vez? Empezá acá</h2>
+        <ol className="grid gap-3 sm:grid-cols-3">
+          {pasos.map((p, i) => (
+            <li key={p.titulo}>
+              <a href={p.href} className="tarjeta p-5 flex gap-4 items-start h-full">
+                <span aria-hidden className="numero text-3xl" style={{ color: "var(--acento)" }}>{i + 1}</span>
+                <span><span className="titulo text-xl block">{p.titulo}</span><span className="texto-suave text-[15px] leading-snug">{p.texto}</span></span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
   const { marca, portada, contacto } = landing;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
@@ -376,13 +432,12 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       {foto ? (
         <section className="px-4 pt-4 pb-6">
           <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={foto} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <Foto src={foto} alt="" prioridad sizes="(min-width: 1024px) 1024px, 100vw" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
             <div className="relative p-6 sm:p-12 text-white">
               <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/80 max-w-[36ch]">{portada.bajada}</p>}
-              {ahora?.texto && <p className="mt-5"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
+              <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
                 {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
                 {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
@@ -396,7 +451,7 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
           <div className="mx-auto max-w-5xl">
             <h1 className="titular text-[clamp(3.5rem,15vw,8.5rem)] max-w-[11ch]">{portada.titulo}</h1>
             {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
-            {ahora?.texto && <p className="mt-6"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
+            <Senales landing={landing} ahora={ahora} />
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
@@ -409,6 +464,7 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       )}
 
       <main>
+        <ComoEmpezar probar={hayProbar} planes={hayPlanes} altas={!!landing.altas_online} />
         {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
         {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
@@ -425,6 +481,7 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
               <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton">📷 Instagram</a>
             )}
             {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
+            {landing.prueba_social?.resena?.link && <a href={landing.prueba_social.resena.link} target="_blank" rel="noopener noreferrer" className="boton">⭐ Dejanos tu reseña</a>}
           </div>
         </div>
         <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
@@ -433,6 +490,11 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
         </div>
       </footer>
 
+      {whatsapp && (
+        <a href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Escribinos por WhatsApp" data-whatsapp-flotante
+          className="hidden sm:grid fixed right-6 bottom-6 z-30 size-14 place-items-center rounded-full text-2xl shadow-lg"
+          style={{ background: "var(--acento)", color: "var(--acento-texto)" }}>💬</a>
+      )}
       {whatsapp && (
         <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-[color-mix(in_oklab,var(--fondo)_88%,transparent)] backdrop-blur-md">
           <BotonPrincipal href={whatsapp} className="w-full">💬 {portada.boton_texto}</BotonPrincipal>
