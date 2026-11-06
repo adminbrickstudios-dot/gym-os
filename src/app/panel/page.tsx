@@ -1,4 +1,5 @@
 import { NovedadesGymOS, type NovedadGymOS } from "@/components/panel/NovedadesGymOS";
+import { BotonEntrada } from "@/components/panel/BotonEntrada";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import Link from "next/link";
@@ -47,10 +48,7 @@ export default async function Inicio() {
         </header>
 
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
-          <Link href="/panel/entrada" data-boton-entrada className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition">
-            <span aria-hidden>🚪</span> Entrada
-            <span className="text-lg font-normal opacity-90 hidden sm:inline">o tipeá un DNI</span>
-          </Link>
+          <BotonEntrada className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />

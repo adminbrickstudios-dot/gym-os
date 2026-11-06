@@ -365,3 +365,8 @@ html { accent-color: var(--acento); }
   from { background-position: 120% 0; }
   to { background-position: -120% 0; }
 }
+
+/* VD-1: con la barra fija de Entrada prendida (compu ≥ 1280 px) el contenido le deja su lugar. */
+@media (min-width: 1280px) {
+  html[data-barra-entrada="si"] .con-barra { padding-right: 18rem; }
+}

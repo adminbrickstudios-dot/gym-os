@@ -8,16 +8,21 @@ import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
 import { ProveedorSecciones } from "./LinkPanel";
 import { SinConexion } from "@/components/ui/SinConexion";
+import { VentanaEntrada } from "./VentanaEntrada";
+import type { ConfigEntrada } from "@/app/panel/entrada/config";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
 /** ADM-2/ADM-3: el abono del gimnasio con BRIK (los montos, solo para el dueño). */
 export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido"; plan?: string; precio_mensual?: number; pagado_hasta?: string; dias?: number };
 
-export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null }) {
+/** VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas (null = este rol o este gimnasio no la usa). */
+export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean };
+
+export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
   return (
-    <div {...propsMarca(panel.marca)} className="min-h-dvh">
+    <div {...propsMarca(panel.marca)} className="min-h-dvh con-barra">
       <Navegacion
         gimnasio={panel.gimnasio.nombre}
         logo={urlMarca(panel.marca.logo_path)}
@@ -30,6 +35,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         soloVerSocios={rol === "profe"}
         cambiarGimnasio={enPlataforma}
       />
+      {entrada && <VentanaEntrada sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}

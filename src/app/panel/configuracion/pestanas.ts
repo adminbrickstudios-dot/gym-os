@@ -6,6 +6,7 @@ export const PESTANAS = [
   { clave: "pagina", texto: "Página", emoji: "🌐" },
   { clave: "cobros", texto: "Cobros", emoji: "💵" },
   { clave: "reglas", texto: "Reglas", emoji: "📏" },
+  { clave: "entrada", texto: "Entrada", emoji: "🚪" },
   { clave: "horarios", texto: "Horarios", emoji: "⏰" },
   { clave: "mensajes", texto: "Mensajes", emoji: "💬" },
   { clave: "clases", texto: "Clases", emoji: "🗓️" },
