@@ -3,6 +3,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Acceso, Grupo, Seccion } from "@/lib/panel/secciones";
+import { traerPendientes } from "@/app/panel/pendientes-acciones";
+import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type Pendientes } from "@/lib/panel/pendientes";
+import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
 import { Buscador } from "./Buscador";
 
 type Props = {
@@ -25,7 +28,20 @@ type Props = {
 
 const activa = (actual: string, ruta: string) => (ruta === "/panel" ? actual === "/panel" : actual === ruta || actual.startsWith(`${ruta}/`));
 
-function Item({ s, actual, alElegir }: { s: Pick<Seccion, "ruta" | "emoji" | "titulo"> & { descripcion?: string }; actual: string; alElegir?: () => void }) {
+/** VD-37: el número de una sección. Rojo solo si algo se pierde si no se actúa hoy; el resto, neutro. */
+function Numero({ clave, n }: { clave: string; n: number }) {
+  if (n <= 0) return null;
+  const rojo = ROJOS.has(clave);
+  return (
+    <span data-pendiente={clave} data-numero={n} data-rojo={rojo ? "si" : "no"} aria-label={`${n} pendientes`}
+      className={`ml-auto flex-none min-w-6 h-6 px-1.5 rounded-full text-[13px] font-bold grid place-items-center ${rojo ? "text-white" : "border border-[var(--borde)] bg-[var(--tarjeta-alta)] text-[var(--texto)]"}`}
+      style={rojo ? { background: "var(--rojo)" } : undefined}>
+      {textoNumero(n)}
+    </span>
+  );
+}
+
+function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji" | "titulo"> & { descripcion?: string; clave?: string }; actual: string; alElegir?: () => void; n?: number }) {
   const on = activa(actual, s.ruta);
   return (
     <Link href={s.ruta} onClick={alElegir} aria-current={on ? "page" : undefined}
@@ -35,11 +51,12 @@ function Item({ s, actual, alElegir }: { s: Pick<Seccion, "ruta" | "emoji" | "ti
         <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{s.titulo}</span>
         {s.descripcion && <span className="block text-[13px] texto-tenue leading-snug truncate">{s.descripcion}</span>}
       </span>
+      {s.clave && <Numero clave={s.clave} n={n} />}
     </Link>
   );
 }
 
-function Menu({ props, actual, alElegir }: { props: Props; actual: string; alElegir?: () => void }) {
+function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
   return (
     <nav aria-label="Secciones" className="space-y-6">
       <Item s={{ ruta: "/panel", emoji: "🏠", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
@@ -49,7 +66,7 @@ function Menu({ props, actual, alElegir }: { props: Props; actual: string; alEle
         return (
           <div key={g}>
             <p className="titulo-grupo px-3 mb-1.5">{g}</p>
-            <div className="space-y-0.5">{items.map((s) => <Item key={s.clave} s={s} actual={actual} alElegir={alElegir} />)}</div>
+            <div className="space-y-0.5">{items.map((s) => <Item key={s.clave} s={s} actual={actual} alElegir={alElegir} n={numeroDe(pendientes, s.clave)} />)}</div>
           </div>
         );
       })}
@@ -76,13 +93,33 @@ export function Navegacion(props: Props) {
   const [abierto, setAbierto] = useState(false);
   useEffect(() => { document.body.style.overflow = abierto ? "hidden" : ""; }, [abierto]);
 
+  // VD-37: los números salen de la base en un solo pedido. Se piden al cargar, al cambiar de pantalla,
+  // al cobrar o resolver algo, y cada 60 s con la pestaña visible. Si falla se conserva el último número.
+  const [pendientes, setPendientes] = useState<Pendientes | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    const pedir = () => { void traerPendientes().then((p) => { if (vivo && p) setPendientes(p); }); };
+    const cuandoVuelve = () => { if (document.visibilityState === "visible") pedir(); };
+    pedir();
+    const cada = setInterval(cuandoVuelve, 60_000);
+    document.addEventListener("visibilitychange", cuandoVuelve);
+    window.addEventListener(EVENTO_PENDIENTES, pedir);
+    window.addEventListener(EVENTO_COBRO_HECHO, pedir);
+    return () => {
+      vivo = false; clearInterval(cada);
+      document.removeEventListener("visibilitychange", cuandoVuelve);
+      window.removeEventListener(EVENTO_PENDIENTES, pedir);
+      window.removeEventListener(EVENTO_COBRO_HECHO, pedir);
+    };
+  }, [actual]);
+
   return (
     <>
       {/* Compu: barra lateral fija */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
         <p className="titulo text-2xl px-3 flex items-center gap-3 min-w-0"><Logo url={props.logo} tam="h-10 max-w-28" /><span className="truncate">{props.gimnasio}</span></p>
         <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} /></div>
-        <Menu props={props} actual={actual} />
+        <Menu props={props} actual={actual} pendientes={pendientes} />
         <div className="mt-auto pt-8 space-y-3">
           <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
           {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}
@@ -107,7 +144,10 @@ export function Navegacion(props: Props) {
               <li key={a.clave}>
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
-                  <span className={`text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>{a.emoji}</span>
+                  <span className={`relative text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>
+                    {a.emoji}
+                    {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
+                  </span>
                   {a.corto ?? a.titulo}
                 </Link>
               </li>
@@ -115,7 +155,10 @@ export function Navegacion(props: Props) {
           })}
           <li className="col-start-5">
             <button type="button" onClick={() => setAbierto(true)} className="w-full flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold texto-tenue">
-              <span className="text-2xl" aria-hidden>☰</span>Menú
+              <span className="relative text-2xl" aria-hidden>
+                ☰
+                {hayAlgo(pendientes) && <span data-menu-punto={hayRojo(pendientes) ? "rojo" : "neutro"} className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: hayRojo(pendientes) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
+              </span>Menú
             </button>
           </li>
         </ul>
@@ -127,7 +170,7 @@ export function Navegacion(props: Props) {
             <p className="titulo text-2xl">Menú</p>
             <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú">✕</button>
           </div>
-          <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} />
+          <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} pendientes={pendientes} />
           <div className="mt-8 space-y-3">
             <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
             {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}

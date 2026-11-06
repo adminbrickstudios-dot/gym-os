@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-37 · Pendientes (números y puntitos) y centro de notificaciones
+
+**QUÉ HICE**
+- Migración 5200: `pendientes_panel(gimnasio)` devuelve todos los contadores del menú en un pedido y por rol (la recepción no ve control, pedidos de socios ni plata; quien no es del equipo recibe error, no vacío); `mensajes` en 0 hasta VD-38; llama a `para_hacer_hoy` sin copiarla. `campana_panel` une la campana de siempre con la del Control, suma el tipo a cada aviso y saca los tipos apagados; tabla `preferencias_aviso` (RLS, canal `app`) con `preferencias_aviso_panel` y `guardar_preferencia_aviso`.
+- Menú con números ("9+" desde 10, punto en el botón Menú del celular; rojo solo en Vencen y cobrar, Transferencias y Caja; Inicio nunca lleva número), que se renuevan al cargar, al cambiar de pantalla, al cobrar o aprobar/rechazar, al volver a la pestaña y cada 60 s. Campana `/panel/campana` agrupada por día con "Para atender ahora" y "Marcar todo como leído", preferencias por tipo en una sección plegable, push ofrecido solo ante un aviso de comprobantes, caja o pedidos.
+- Decisiones: Vencen cuenta solo los que vencen hoy (doc 12); "Para hacer hoy" suma `para_hacer_hoy` (que no incluye tareas manuales: verificado, sin doble conteo) más mis tareas de hoy o atrasadas; la recepción no ve el número de pedidos de pausa y baja.
+- Verificado: lint, typecheck, 110 pruebas, build y base/chequeos/demo en verde en GitHub (`pendientes-panel`).
+
+**QUÉ CONFIGURÁS VOS**: para que llegue el push siguen haciendo falta las claves VAPID.
+**SIN ARREGLAR**: VD-37b (solo lo urgente por defecto), VD-37c (canales mail y WhatsApp), VD-37d (punto en Yo y Clases de la app, depende de VD-38).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-37` ("Marcar todo" no se prueba si nadie tiene avisos), los 50 ms con 3.000 socios (`pendientes_panel` llama dos veces a `privado.retencion`: la parte a mirar) y 390 px: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-13 · Para hacer hoy: tareas inteligentes
 
 **QUÉ HICE**
