@@ -72,7 +72,7 @@ declare
   generico constant text := 'El DNI o el código no son correctos';
   s public.socios; hoy date; menor boolean; ok_google boolean;
   v_tel text; v_mail text; v_ingreso timestamptz; v_tel_ok timestamptz; v_mail_ok timestamptz;
-  tel_v text; mail_v text; via text; otros text[]; otra uuid; n int;
+  tel_v text; mail_v text; tel_ficha text; via text; otros text[]; otra uuid; n int;
 begin
   if not privado.es_servicio() then raise exception 'Solo el servidor vincula socios' using errcode = '42501'; end if;
 
@@ -95,7 +95,8 @@ begin
   if v_ingreso is null or v_ingreso < now() - interval '15 minutes' then raise exception '%', generico using errcode = 'P0001'; end if;
   if v_tel_ok is not null and v_tel is not null then tel_v := '+' || regexp_replace(v_tel, '\D', '', 'g'); end if;
   if v_mail_ok is not null and v_mail is not null then mail_v := v_mail; end if;
-  if tel_v is not null and tel_v = case when menor then s.responsable_telefono else s.telefono end then via := 'celular';
+  tel_ficha := case when menor then s.responsable_telefono else s.telefono end;
+  if tel_v is not null and tel_v = tel_ficha then via := 'celular';
   elsif mail_v is not null and not menor and mail_v = lower(s.email) then via := 'mail';
   else raise exception '%', generico using errcode = 'P0001';
   end if;
