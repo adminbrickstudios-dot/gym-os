@@ -9,7 +9,7 @@ Flujo por agente: rama `noche/2026-11-05-<id>` → push → base verde → yo ha
 
 | Ítem | Agente | Rama | Migración | Estado |
 |---|---|---|---|---|
-| VD-33 | a73ec23a45c383a90 | noche/2026-11-05-vd33 | 20261106003300 | en curso |
+| (VD-33 mergeado) | | | | |
 | VD-36 → VD-23 | a629f942bc5071cce | noche/2026-11-05-vd36 | 3600 / 2300 | en curso |
 | (VD-12 mergeado) | | | | |
 
@@ -21,6 +21,7 @@ Después, EN SERIE (tocan Entrada y Cobrar): VD-1, VD-2, VD-5, VD-6; luego VD-47
 - VD-47 (parcial, resto en VD-47X; base verde)
 - VD-27 (base verde; e2e y capturas en la corrida de la tanda)
 - VD-12 (base verde; sumados VD-12b/c/d)
+- VD-33 (base verde; sumados VD-33b/c)
 
 ## Publicadas
 

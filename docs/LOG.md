@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-33 · Ingreso más lindo y "primero quién, después cómo"
+
+**QUÉ HICE**
+- Pantalla de ingreso con la marca del gimnasio (o de Gym OS en la plataforma), degradé lento, logo y tarjeta de vidrio; sin animación con reduced-motion. Socio: un solo campo "celular o mail" (con `@` pasa a mail) y debajo los tres métodos de siempre. Código de 6 dígitos que se completa solo, acepta pegado, verifica al sexto y "Reenviar en 0:59". "Olvidé mi contraseña" (`/ingresar/recuperar`) por código al mail. Errores iguales exista o no la cuenta. Sin migración; la lógica de destino pasó a `destino.ts` sin cambiar comportamiento; los selectores de los e2e viejos se mantienen.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub.
+
+**QUÉ CONFIGURÁS VOS**: SMTP propio (Resend/Postmark) en Supabase Auth: sin eso Supabase manda 2 mails por hora y el código por mail / olvidé mi contraseña no sirven en producción (VD-45).
+**SIN ARREGLAR**: sumados VD-33b (mi cuenta: contraseña y sesiones) y VD-33c (Turnstile). El límite de 5 pedidos de código por destino por hora cuenta también los reenvíos.
+**LO QUE NO PUDE VERIFICAR**: `vd-33` y los e2e viejos que entran por /ingresar (app-9, panel-acceso, entrarSocio) no corrieron: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]` de la tanda.
+
 ## 2026-11-06 · Noche · VD-12 · Inicio del dueño y de la recepción
 
 **QUÉ HICE**
