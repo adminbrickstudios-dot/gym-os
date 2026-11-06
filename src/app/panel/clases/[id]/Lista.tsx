@@ -2,15 +2,22 @@
 import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
-import { anotar, cancelarClase, deshacerPresente, presente } from "../acciones";
+import { anotar, cancelarClase, deshacerPresente, perdonarFalta, presente } from "../acciones";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
+import { detectarSalud } from "@/lib/salud";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Vacio } from "@/components/ui/Vacio";
 
 type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean; telefono?: string | null };
 const ESTADO: Record<string, string> = { confirmada: "Reservó", espera: "En espera", sin_reserva: "Vino sin reservar" };
 
-export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, buscaSocios }: { claseId: string; filas: Fila[]; reserva: boolean; puedeCancelar: boolean; cancelada: boolean; buscaSocios: boolean }) {
+export type FaltaClase = { socio_id: string; perdonada: boolean; motivo: string | null };
+
+export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, buscaSocios, faltas = [] }: { claseId: string; filas: Fila[]; reserva: boolean; puedeCancelar: boolean; cancelada: boolean; buscaSocios: boolean; faltas?: FaltaClase[] }) {
   const [error, setError] = useState<string | null>(null);
+  // VD-46Q: perdonar una falta desde la lista (solo llega `faltas` al dueño y al encargado, con la clase ya terminada).
+  const [perdonando, setPerdonando] = useState<string | null>(null);
+  const [motivoPerdon, setMotivoPerdon] = useState("");
   const [ocupado, empezar] = useTransition();
   const [texto, setTexto] = useState("");
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
@@ -52,6 +59,19 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
                 </span>
               )
                 : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id))}>✅ Presente</button>}
+              {!f.presente && faltas.find((x) => x.socio_id === f.socio_id) && (() => {
+                const x = faltas.find((y) => y.socio_id === f.socio_id)!;
+                if (x.perdonada) return <span className="pildora basis-full sm:basis-auto" data-falta-perdonada>🤝 Falta perdonada: {x.motivo}</span>;
+                if (perdonando !== f.socio_id) return <button type="button" className="boton !min-h-11" onClick={() => { setPerdonando(f.socio_id); setMotivoPerdon(""); }} data-perdonar-falta aria-label={`Perdonar la falta de ${f.nombre}`}>🤝 Perdonar falta</button>;
+                return (
+                  <form className="flex flex-wrap items-center gap-2 basis-full" onSubmit={(e) => { e.preventDefault(); if (motivoPerdon.trim().length >= 3 && !detectarSalud(motivoPerdon)) { const m = motivoPerdon.trim(); setPerdonando(null); correr(() => perdonarFalta(claseId, f.socio_id, m)); } }} data-form-perdon>
+                    <input autoFocus className="campo !w-auto flex-1 min-w-40" maxLength={300} value={motivoPerdon} onChange={(e) => setMotivoPerdon(e.target.value)} placeholder="¿Por qué? Ej: avisó por teléfono" aria-label={`Motivo para perdonar la falta de ${f.nombre}`} />
+                    <button type="submit" className="boton !min-h-11" disabled={motivoPerdon.trim().length < 3 || !!detectarSalud(motivoPerdon) || ocupado} data-confirmar-perdon>Perdonar</button>
+                    <button type="button" className="boton-texto texto-suave" onClick={() => setPerdonando(null)}>Volver</button>
+                    <span className="basis-full"><AvisoSalud texto={motivoPerdon} /></span>
+                  </form>
+                );
+              })()}
             </li>
           ))}
         </ul>
