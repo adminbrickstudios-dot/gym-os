@@ -43,11 +43,12 @@ test("abierta de ayer: olvidada; no deja abrir otra; la ve quien la abrió y el 
   await como(uRec2, () => t.q(`select public.abrir_caja($1, 0)`, [caja2]));   // otra persona sí abre otra caja
   await como(uRec, async () => {
     await t.q(`select public.abrir_caja($1, 0)`, [caja1]);
-    const [{ vieja }] = await t.q(`select sin_contar as vieja from public.turnos_caja where id = $1`, [turno]);
-    assert.equal(vieja, true);
     assert.equal((await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]))[0].o.length, 0);
     await t.falla(() => t.q(`select public.abrir_caja($1, 0)`, [caja3]), /Tenés abierta la Mostrador desde el .*cerrala antes de abrir otra/);
   });
+  // (La recepción no lee los turnos —arqueo ciego—: se mira como administrador de la base.)
+  const [{ vieja }] = await t.q(`select sin_contar as vieja from public.turnos_caja where id = $1`, [turno]);
+  assert.equal(vieja, true);
 });
 
 test("de hoy, después de la hora de cierre de la sede: olvidada", async () => {
