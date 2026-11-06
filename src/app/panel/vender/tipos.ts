@@ -20,13 +20,15 @@ export type PreciosVenta = {
   /** VEN-5: lo que debe a cuenta, y cuánto más se le puede fiar (si el gimnasio fía). */
   deuda?: number | null;
   fiado?: { tope: number; disponible: number } | null;
+  /** VD-17: los servicios adicionales (locker, toalla…) que tiene contratados: van con la cuota, mes a mes. */
+  servicios?: { producto_id: string; nombre: string; precio: number }[];
   pases: { plan_id: string; nombre: string; precios: Precios }[];
   packs: { plan_id: string; nombre: string; cantidad_clases: number; precios: Precios }[];
-  productos: { producto_id: string; nombre: string; precio: number }[];
+  productos: { producto_id: string; nombre: string; precio: number; foto_path?: string | null; categoria?: string | null }[];
 };
 export type Linea = {
   clave: string;
-  tipo: "cuota" | "pase" | "pack" | "producto" | "matricula" | "recargo" | "deuda" | "otro";
+  tipo: "cuota" | "pase" | "pack" | "producto" | "matricula" | "recargo" | "servicio" | "deuda" | "otro";
   nombre: string;
   plan_id?: string;
   producto_id?: string;
@@ -105,21 +107,33 @@ export function aplicarCupon(lineas: Linea[], c: Cupon, medio: Medio | null, cuo
 }
 
 /** El recargo por pagar tarde acompaña a la cuota: entra y sale con ella (PLA-7). */
-export function conRecargoLineas(ls: Linea[], recargo: PreciosVenta["recargo"] | undefined): Linea[] {
+export function conRecargoLineas(ls: Linea[], recargo: PreciosVenta["recargo"] | undefined, servicios?: PreciosVenta["servicios"]): Linea[] {
   const hayCuota = ls.some((l) => l.tipo === "cuota");
   const sin = ls.filter((l) => l.tipo !== "recargo");
-  if (!hayCuota || !recargo) return sin;
-  return ls.some((l) => l.tipo === "recargo") ? ls : [...ls, lineaRecargo(recargo)];
+  const conRec = !hayCuota || !recargo ? sin : ls.some((l) => l.tipo === "recargo") ? ls : [...ls, lineaRecargo(recargo)];
+  return conServiciosLineas(conRec, servicios);
+}
+
+/** VD-17: los servicios del socio acompañan a la cuota, por los mismos meses (la base lo exige igual). */
+export function conServiciosLineas(ls: Linea[], servicios: PreciosVenta["servicios"] | undefined): Linea[] {
+  const meses = ls.filter((l) => l.tipo === "cuota").reduce((n, l) => n + l.cantidad, 0);
+  if ((meses === 0 || !servicios?.length) && !ls.some((l) => l.tipo === "servicio")) return ls;
+  const sin = ls.filter((l) => l.tipo !== "servicio");
+  if (meses === 0 || !servicios?.length) return sin;
+  return [...sin, ...servicios.map((s): Linea => {
+    const previa = ls.find((l) => l.tipo === "servicio" && l.producto_id === s.producto_id);
+    return { ...(previa ?? { clave: `servicio-${s.producto_id}`, tipo: "servicio", nombre: `${s.nombre} (servicio)`, producto_id: s.producto_id, precio_fijo: Number(s.precio) }), cantidad: meses };
+  })];
 }
 
 /** Lo que arranca en el carrito de quien debe su cuota: la cuota de su plan, su matrícula si la debe y el recargo si corresponde. */
 export function lineasIniciales(p: PreciosVenta): Linea[] {
   if (!p.cuota) return [];
-  return [
+  return conServiciosLineas([
     { clave: "cuota-inicial", tipo: "cuota", nombre: `Cuota ${p.cuota.plan}`, precios: p.cuota.precios, cantidad: 1 },
     ...(p.matricula ? [{ clave: "matricula-inicial", tipo: "matricula" as const, nombre: `Matrícula ${p.matricula.plan}`, precio_fijo: Number(p.matricula.monto), cantidad: 1 }] : []),
     ...(p.recargo ? [lineaRecargo(p.recargo)] : []),
-  ];
+  ], p.servicios);
 }
 
 /** Las líneas del carrito como las recibe vender() en la base. */

@@ -151,3 +151,63 @@ export async function guardarConvenio(id: string | null, nombre: string, tipo: s
   try { await rpc("guardar_convenio", { p_gimnasio_id: panel.gimnasio.id, p_convenio_id: id, p_nombre: nombre, p_tipo: tipo, p_valor: v, p_activo: activo }); return listo(); }
   catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── VD-17 · Planes y servicios ─────────────────────────────────────────
+
+export type AjustesPlan = {
+  usa_regla_gimnasio: boolean; renovacion: string | null; dia_fijo: number | null; renovacion_propia: string | null; dia_fijo_propio: number | null;
+  tolerancia_dias: number | null; consume_en: string | null; visible_en_landing: boolean; todas_las_sedes: boolean; sedes: string[];
+};
+export type AjustesPlanes = {
+  regla_gimnasio: { renovacion: string; dia_fijo: number | null } | null; tolerancia_gimnasio: number | null;
+  sedes: { sede_id: string; nombre: string }[]; planes: Record<string, AjustesPlan>;
+};
+export type Servicio = { producto_id: string; nombre: string; precio: number; activo: boolean; socios: { socio_id: string; nombre: string }[] };
+
+/** Cómo vence el plan (el suyo o el del gimnasio), tolerancia, consume_en, visible en la página y sedes. Lo valida la base. */
+export async function guardarAjustesPlan(planId: string, a: {
+  renovacion: "gimnasio" | "continua" | "desde_pago" | "dia_fijo"; diaFijo: string; tolerancia: string; consumeEn?: string;
+  visible: boolean; todasLasSedes: boolean; sedes: string[]; esMembresia: boolean; esPack: boolean;
+  /** La regla de vencimiento solo la cambia el dueño: si no se tocó, no se manda (el encargado edita lo demás). */
+  cambioRegla: boolean;
+}): Promise<{ error?: string }> {
+  const tol = a.tolerancia.trim();
+  if (a.esMembresia && tol !== "" && !/^\d{1,2}$/.test(tol)) return { error: "La tolerancia son días enteros (vacío = la del gimnasio)" };
+  try {
+    if (a.esMembresia && a.cambioRegla) {
+      const dia = Number(a.diaFijo);
+      if (a.renovacion === "dia_fijo" && !(Number.isInteger(dia) && dia >= 1 && dia <= 28)) return { error: "Con día fijo, elegí el día (del 1 al 28)" };
+      await rpc("guardar_regla_plan", {
+        p_plan_id: planId, p_usa_gimnasio: a.renovacion === "gimnasio",
+        p_renovacion: a.renovacion === "gimnasio" ? null : a.renovacion, p_dia_fijo: a.renovacion === "dia_fijo" ? dia : null,
+      });
+    }
+    await rpc("guardar_ajustes_plan", { p_plan_id: planId, p_datos: {
+      ...(a.esMembresia ? { tolerancia_dias: tol === "" ? null : Number(tol) } : {}),
+      ...(a.esPack && a.consumeEn ? { consume_en: a.consumeEn } : {}),
+      visible_en_landing: a.visible, todas_las_sedes: a.todasLasSedes, sedes: a.todasLasSedes ? [] : a.sedes,
+    } });
+    return listo();
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** El orden en que se ofrecen los planes (alta, página): la lista entera, en su orden nuevo. */
+export async function ordenarPlanes(ids: string[]): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try { await rpc("ordenar_planes", { p_gimnasio_id: panel.gimnasio.id, p_ids: ids }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function guardarServicio(id: string | null, nombre: string, precio: string | number, activo = true): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  const n = typeof precio === "number" ? precio : leerMonto(precio);
+  if (Number.isNaN(n)) return { error: MAL_MONTO };
+  try { await rpc("guardar_servicio", { p_gimnasio_id: panel.gimnasio.id, p_producto_id: id, p_nombre: nombre, p_precio: n, p_activo: activo }); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Asigna o quita un servicio a un socio: desde la próxima cuota se suma solo en Cobrar. */
+export async function asignarServicio(socioId: string, productoId: string, asignar: boolean): Promise<{ error?: string }> {
+  try { await rpc("asignar_servicio", { p_socio_id: socioId, p_producto_id: productoId, p_asignar: asignar }); revalidatePath(`/panel/socios/${socioId}`); return listo(); }
+  catch (e) { return { error: (e as Error).message }; }
+}

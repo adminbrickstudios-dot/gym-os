@@ -2,8 +2,10 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { useVersion } from "@/components/panel/useVersion";
-import { activarPlan, configurarStock, crearPlan, editarPlan, guardarProducto, moverStock, type Stock } from "./acciones";
+import { activarPlan, configurarStock, crearPlan, editarPlan, guardarProducto, moverStock, ordenarPlanes, type AjustesPlanes, type Servicio, type Stock } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
+import { AjustesDelPlan, resumenAjustes, VistaPrevia } from "./Ajustes";
+import { Servicios } from "./Servicios";
 
 export type Plan = { plan_id: string; tipo: string; nombre: string; descripcion: string | null; activo: boolean; duracion_meses: number | null;
   cantidad_clases: number | null; validez_dias: number | null; max_ingresos_semana: number | null; hora_desde: string | null; hora_hasta: string | null;
@@ -21,10 +23,12 @@ export type Actividad = { actividad_id: string; nombre: string; emoji: string | 
 
 export type Matricula = { monto: number; anual: boolean };
 
-function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
+function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajustes, mover }: {
   p: Plan; lista?: ListaPrecios; fecha: (d: string) => string; hoy: string; actividades: Actividad[]; incluye: string[]; matricula?: Matricula;
+  ajustes: AjustesPlanes | null; mover: (id: string, delta: -1 | 1) => Promise<{ error?: string }>;
 }) {
-  const [abierto, setAbierto] = useState<null | "precio" | "editar">(null);
+  const [abierto, setAbierto] = useState<null | "precio" | "editar" | "ajustes" | "vista">(null);
+  const aj = ajustes?.planes[p.plan_id];
   const [version, setVersion] = useVersion("planes", abierto === "editar" ? p.plan_id : null);
   const [datos, setDatos] = useState({ nombre: p.nombre, descripcion: p.descripcion ?? "", veces: p.max_ingresos_semana ? String(p.max_ingresos_semana) : "",
     desde: p.hora_desde?.slice(0, 5) ?? "", hasta: p.hora_hasta?.slice(0, 5) ?? "", actividades: incluye,
@@ -42,6 +46,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
     p.hora_desde && p.hora_hasta ? `de ${p.hora_desde.slice(0, 5)} a ${p.hora_hasta.slice(0, 5)}` : null,
     nombresIncluye.length ? `solo ${nombresIncluye.join(", ")}` : null,
     matricula ? `matrícula ${formatearPesos(matricula.monto)}${matricula.anual ? " cada año" : " al entrar"}` : null,
+    ...resumenAjustes(p.tipo, aj, ajustes, ajustes?.sedes ?? []),
     p.socios_activos ? `${p.socios_activos} socios activos` : null,
   ].filter(Boolean).join(" · ");
   return (
@@ -60,10 +65,17 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula }: {
         <div className="flex flex-wrap gap-2 mt-4">
           <button type="button" className="boton boton-chico" onClick={() => setAbierto("precio")}>💲 Precios</button>
           <button type="button" className="boton boton-chico" onClick={() => setAbierto("editar")}>✏️ Editar</button>
+          {aj && ajustes && <button type="button" className="boton boton-chico" data-ajustes-abrir onClick={() => setAbierto("ajustes")}>⚙️ Ajustes</button>}
+          <button type="button" className="boton boton-chico" data-vista-abrir onClick={() => setAbierto("vista")}>👁️ Cómo lo ve el socio</button>
+          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}>⬆️</button>
+          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}>⬇️</button>
           <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
         </div>
       )}
       {abierto === "precio" && lista && <Precios lista={lista} hoy={hoy} fecha={fecha} cerrar={() => setAbierto(null)} />}
+      {abierto === "ajustes" && aj && ajustes && <AjustesDelPlan planId={p.plan_id} tipo={p.tipo} a={aj} r={ajustes} cerrar={() => setAbierto(null)} />}
+      {abierto === "vista" && <VistaPrevia nombre={p.nombre} descripcion={p.descripcion} precio={p.precio} cerrar={() => setAbierto(null)}
+        detalle={[...detalle.split(" · ").filter((d) => d && !/socios activos/.test(d) && !/no se ve en la página/.test(d))]} />}
       {abierto === "editar" && (
         <form className="grid sm:grid-cols-2 gap-3 mt-4" onSubmit={(e) => {
           e.preventDefault();
@@ -276,10 +288,21 @@ function Productos({ productos, stock }: { productos: Producto[]; stock: Record<
   );
 }
 
-export function Editor({ planes, listas, productos, zona, actividades, incluyen, matriculas, stock }: {
+export function Editor({ planes, listas, productos, zona, actividades, incluyen, matriculas, stock, ajustes, servicios }: {
   planes: Plan[]; listas: Record<string, ListaPrecios>; productos: Producto[]; zona: string; actividades: Actividad[]; incluyen: Record<string, string[]>;
-  matriculas: Record<string, Matricula>; stock: Record<string, Stock>;
+  matriculas: Record<string, Matricula>; stock: Record<string, Stock>; ajustes: AjustesPlanes | null; servicios: Servicio[];
 }) {
+  // VD-17: subir o bajar un plan dentro de su grupo (mismo tipo y mismo estado); se manda la lista entera en su orden nuevo.
+  const mover = async (id: string, delta: -1 | 1) => {
+    const yo = planes.find((p) => p.plan_id === id);
+    if (!yo) return { error: "Ese plan ya no está" };
+    const grupo = planes.filter((p) => p.tipo === yo.tipo && p.activo === yo.activo).map((p) => p.plan_id);
+    const i = grupo.indexOf(id), j = i + delta;
+    if (j < 0 || j >= grupo.length) return {};
+    [grupo[i], grupo[j]] = [grupo[j], grupo[i]];
+    let k = 0;
+    return ordenarPlanes(planes.map((p) => (p.tipo === yo.tipo && p.activo === yo.activo ? grupo[k++] : p.plan_id)));
+  };
   const fecha = (d: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(d));
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date());
   return (
@@ -292,10 +315,11 @@ export function Editor({ planes, listas, productos, zona, actividades, incluyen,
         return (
           <section key={k}>
             <h2 className="titulo text-3xl mb-4">{v.emoji} {v.titulo}</h2>
-            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} />)}</ul>
+            <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} ajustes={ajustes} mover={mover} />)}</ul>
           </section>
         );
       })}
+      <Servicios servicios={servicios} />
       <Productos productos={productos} stock={stock} />
     </div>
   );

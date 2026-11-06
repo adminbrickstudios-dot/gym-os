@@ -73,13 +73,13 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   });
 
   // El recargo por pagar tarde acompaña a la cuota: entra y sale con ella (PLA-7).
-  const conRecargo = (ls: Linea[]) => conRecargoLineas(ls, precios.recargo);
+  const conRecargo = (ls: Linea[]) => conRecargoLineas(ls, precios.recargo, precios.servicios);
   const agregar = (l: Omit<Linea, "clave" | "cantidad">) => setLineas((ls) => {
     const igual = ls.find((x) => x.tipo === l.tipo && x.plan_id === l.plan_id && x.producto_id === l.producto_id && l.tipo !== "otro");
     if (igual) return ls.map((x) => (x === igual ? { ...x, cantidad: Math.min(x.cantidad + 1, x.tipo === "cuota" ? 12 : 50) } : x));
     return conRecargo([...ls, { ...l, clave: crypto.randomUUID(), cantidad: 1 }]);
   });
-  const cambiar = (clave: string, cambio: Partial<Linea>) => setLineas((ls) => ls.map((l) => (l.clave === clave ? { ...l, ...cambio } : l)));
+  const cambiar = (clave: string, cambio: Partial<Linea>) => setLineas((ls) => conRecargo(ls.map((l) => (l.clave === clave ? { ...l, ...cambio } : l))));
   const quitar = (clave: string) => setLineas((ls) => conRecargo(ls.filter((l) => l.clave !== clave)));
 
   const medioOk = medio && medios.some((m) => m.medio === medio) ? medio : (medios[0]?.medio ?? null);
@@ -271,9 +271,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-2">
-                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo"} title={l.tipo === "recargo" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "deuda"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda"} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
