@@ -503,7 +503,7 @@ bloque 18.
 - [x] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
 - [x] VD-41 · 🟢 · Gastos y presupuesto: la ganancia del mes — verificado: gastos por categoría con comprobante, fijos calculados sin cron, presupuesto, ganancia_mes en Resultado, encargado solo con permiso nuevo; base en verde en GitHub (gastos-presupuesto); e2e vd-41 en la corrida de la tanda
 *Tanda 3 · El día del dueño*
-- [ ] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones
+- [x] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones — verificado: menú nuevo con los nombres del doc 03 (claves intactas, ninguna ruta sacada), mapa central de rutas, Gastos oculto al encargado sin permiso; base en verde en GitHub (menu-gastos); e2e vd-11 en la corrida de la tanda
 - [ ] VD-37 · 🟢 · Pendientes con números y puntitos calculados, y centro de notificaciones
 - [ ] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app
 - [x] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir

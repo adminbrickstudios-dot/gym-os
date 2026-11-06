@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-11 · Menú nuevo y redirecciones
+
+**QUÉ HICE**
+- Menú en el orden del doc 03 §1: Hoy (Entrada, Para hacer hoy, Avisos de hoy, Vencen y cobrar, Clases de hoy), Socios (Socios, Interesados, Retención y números, Rutinas, Eventos), Plata (Caja, Productos y stock, Transferencias, Resultado, Gastos, Control, Resumen) y Gimnasio (Planes y servicios, Tu página, Equipo, Configuración). Las claves de las secciones no cambiaron: los accesos rápidos guardados siguen andando y ninguna ruta se sacó ni necesitó redirección. Mapa central `src/lib/panel/rutas.ts` (`DESTINO`, rutas viejas, `REDIRECCIONES` vacío): VD-13/15/18 solo cambian el destino ahí. Ctrl+K encuentra por el nombre viejo y por el nuevo.
+- Migración 4900: `panel_gimnasio` (redefinida entera, misma firma) apaga "gastos" para el encargado sin `encargado_ve_gastos` y manda ese permiso (VD-41b). Control ya lo apagaba `contextoPanel`.
+- Decisiones: "Productos y stock" apunta a `/panel/vender` para que la recepción conserve su pantalla de venta (los productos siguen en Planes y servicios); "Avisos de hoy" queda aparte hasta que VD-13 lo junte.
+- Verificado: lint, typecheck, 109 pruebas, build y base/chequeos/demo en verde en GitHub (`menu-gastos`).
+
+**SIN ARREGLAR**: cuando VD-13/15/18 creen sus rutas nuevas hay que cargarlas en `REDIRECCIONES`.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-11` (nombres y orden, 16 rutas viejas, accesos rápidos, Ctrl+K, menús por rol y 390 px) y el barrido: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-17 y VD-18 · Planes y servicios; productos y stock (D21)
 
 **QUÉ HICE**
