@@ -479,9 +479,13 @@ bloque 18.
 - [ ] VD-2c · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
 - [ ] VD-3b · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
 - [ ] VD-4b · 🟢 · Aviso en vivo con el nombre de la sede para el dueño con varias sedes
+- [ ] VD-7b · 🟢 · La deuda de la puerta (para_regularizar) de quien se anota con día fijo usa el proporcional que cobra la hoja (LISTO SI: db: para_regularizar de un socio sin cobertura con día fijo = lo que cobra la hoja)
+- [ ] VD-7c · 🟢 · Ventana de pago en Vencen hoy ("día 4 de 10" con día fijo y gracia)
+- [ ] VD-7d · 🟢 · Un gimnasio nuevo arranca con la regla proporcional (hoy sin fila queda "como hasta ahora")
+- [ ] VD-8b · 🟢 · Lista de promesas de pago incumplidas con quién las autorizó y aviso al dueño
 *Tanda 2 · Plata y control*
-- [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
-- [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
+- [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
+- [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
 - [ ] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z
 - [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
 - [x] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda

@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-7 y VD-8 · Cómo vencen las cuotas y dejar pasar sin pagar (D18, D19)
+
+**QUÉ HICE**
+- VD-7 (migración 4000): regla de vencimiento por gimnasio y por plan: con día fijo, quien se anota a mitad de mes paga proporcional a los días hasta el día fijo (redondeo a $100 configurable), mes entero, gratis hasta el día fijo, o "como hasta ahora". La cuenta está en la base (11 de 30 = $11.000; 21 de 31 = $20.300; 14 de 28 = $15.000); la hoja Cobrar muestra "N días de M" y a qué día cubre; Configuración → Cobros con simulador "¿y si se anota el…?" y la regla de cada plan; cada cambio queda en `cambios_cobro`; cambiar de modo no toca lo ya cobrado. Un gimnasio sin configurar queda como antes (ningún cobro cambia solo). Copia `privado.vender` y `precios_venta` de la definición más nueva (6700).
+- VD-8 (migración 4001): tres modos de "dejar pasar" por deuda: la recepción hasta N días (3 por defecto), siempre con PIN del dueño o encargado, o libre con registro; solo el dueño lo cambia. El PIN se canjea por un token de esa sola entrada. Cada caso queda en `promesas_pago` (quién pidió, quién autorizó, regla vigente, día prometido). Aparece en Inicio, Vencen hoy ("Le prometieron pagar"), Para hacer hoy y como chip "Ayer dijo que pagaba hoy" en la Entrada del día. Componente compartido `FormDejarPasar`. La firma de `registrar_ingreso` suma `p_promete_pagar_el` y la vieja se borra ahí mismo.
+- Verificado: lint, typecheck, 94 pruebas, build y base/chequeos/demo en verde en GitHub (`vencimiento-cuotas`, `dejar-pasar-modos`).
+
+**QUÉ CONFIGURÁS VOS**: elegir en Configuración → Cobros la regla de vencimiento y el modo de dejar pasar (hasta entonces todo sigue como estaba) y cargar el PIN en Mi cuenta (dueño y encargado).
+**SIN ARREGLAR**: sumados VD-7b (la deuda de la puerta usa el precio entero para quien nunca pagó con día fijo), VD-7c (ventana de pago en Vencen), VD-7d (default de gimnasio nuevo), VD-8b (promesas incumplidas).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-7` y `vd-8`, la hoja Cobrar con primera cuota gratis ($0) en pantalla y 390 px: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-3 y VD-4 · Reingreso por visita, anti-préstamo y entradas en vivo
 
 **QUÉ HICE**
