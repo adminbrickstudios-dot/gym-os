@@ -6,6 +6,7 @@
 // con un QR de socio entra por QR; Configuración → Entrada existe.
 //   node scripts/e2e/vd-1.mjs     (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -30,9 +31,10 @@ try {
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Ventana${s5}`);
   await d.locator('input[name="dni"]').fill(dni);
-  await d.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
+  await elegirPlan(d, 0);
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.waitForURL(/\/panel\/vender\?socio=/, { timeout: 30000 });
+  // VD-5b: "Dar de alta y cobrar" abre la hoja Cobrar sobre el alta; después se sigue en Vender con el socio.
+  await irAVender(d, await hojaDeAlta(d));
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await d.locator('button:has-text("✅ Cobrar")').click();

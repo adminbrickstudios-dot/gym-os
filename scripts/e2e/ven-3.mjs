@@ -4,6 +4,7 @@
 // con el descuento (la base lo calcula igual). Al final lo desactiva.
 //   npm run e2e:ven-3            (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -22,7 +23,7 @@ try {
 
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Estu${s5}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ label: await d.locator('select[aria-label="Plan"] option', { hasText: "Plan Full" }).first().innerText() });
+  await elegirPlan(d, "Plan Full");
   await d.locator('button:has-text("Solo dar de alta")').click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 30000 });
   const id = d.url().split("/").pop();

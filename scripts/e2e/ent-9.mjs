@@ -4,6 +4,7 @@
 // transferencia; "Volver a la entrada" abre su veredicto nuevo y entra.
 //   npm run e2e:ent-9            (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -14,7 +15,7 @@ try {
   // Uno nuevo, con plan y sin pagar.
   await r.goto(`${G}/panel/socios/nuevo`);
   await r.locator('input[name="nombre"]').fill(`Moroso${s5}`);
-  await r.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
+  await elegirPlan(r, 0);
   await r.locator('button:has-text("Solo dar de alta")').click();
   await r.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 30000 });
 
@@ -24,23 +25,17 @@ try {
   const ver = r.locator("[data-veredicto]");
   await ver.waitFor({ timeout: 30000 });
   chequear(await ver.getAttribute("data-veredicto") !== "verde", `sin pagar no entra (${(await ver.innerText()).split("\n").find((x) => /pag|cuota|plan/i.test(x)) ?? ""})`, "entra sin pagar");
+  // VD-5b: "Cobrar" abre la hoja Cobrar sobre la Entrada (ya no navega a Vender); al cobrar vuelve con el veredicto nuevo.
   await ver.locator('a:has-text("Cobrar")').click();
-  await r.waitForURL(/\/panel\/vender\?socio=.*cuota=1.*desde=entrada/, { timeout: 30000 });
-  await r.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-  ok("“Cobrar” abre Vender con la cuota ya en el carrito");
-  await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
-  const listo = await Promise.race([
-    r.locator('main a:has-text("Volver a la entrada")').waitFor({ timeout: 30000 }).then(() => null),
-    r.locator('aside [role="alert"]').waitFor({ timeout: 30000 }).then(async () => await r.locator('aside [role="alert"]').innerText()),
-  ]);
-  if (listo) throw new Error(`al cobrar: ${listo}`);
-  await capturar(r, "ent9-compu-cobrado");
-  await r.locator('main a:has-text("Volver a la entrada")').click();
-  await r.waitForURL(/\/panel\/entrada\?socio=/, { timeout: 30000 });
+  await r.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
+  chequear(await r.locator("[data-cobrar-linea=cuota]").count() === 1, "“Cobrar” abre la hoja con la cuota ya en el carrito", "la hoja no trae la cuota");
+  chequear(new URL(r.url()).pathname === "/panel/entrada", "y sigue en la Entrada (no navegó a Vender)", `fue a ${r.url()}`);
+  await r.locator('[data-cobrar-medio]', { hasText: "Transferencia" }).click();
+  await capturar(r, "ent9-compu-cobrar");
+  await r.locator('[data-cobrar-confirmar]').click();
   const ver2 = r.locator('[data-veredicto="verde"]');
   await ver2.waitFor({ timeout: 30000 });
-  ok("“Volver a la entrada” abre su veredicto: ya en verde");
+  ok("al cobrar vuelve a la Entrada con su veredicto: ya en verde");
   await r.keyboard.press("Enter");
   await r.locator("[data-hecho]").waitFor({ timeout: 30000 });
   chequear(new RegExp(`Entró Moroso${s5}`).test(await r.locator("[data-hecho]").innerText()), "y entra con Enter", "no entró");

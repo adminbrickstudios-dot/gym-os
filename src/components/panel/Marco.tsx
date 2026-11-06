@@ -18,7 +18,7 @@ import type { ConfigEntrada } from "@/app/panel/entrada/config";
 export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido"; plan?: string; precio_mensual?: number; pagado_hasta?: string; dias?: number };
 
 /** VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas (null = este rol o este gimnasio no la usa). */
-export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean };
+export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean };
 
 export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
   const { rol } = panel.yo;
@@ -44,7 +44,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         cambiarGimnasio={enPlataforma}
       />
       {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
-      {entrada && <VentanaEntrada sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} esRecepcion={rol === "recepcion"} />}
+      {entrada && <VentanaEntrada sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}

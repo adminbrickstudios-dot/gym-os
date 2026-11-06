@@ -5,6 +5,7 @@
 // existe tiene salida.
 //   node scripts/e2e/vd-34.mjs     (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -16,9 +17,10 @@ try {
   // Alta con cobro y doble clic en Cobrar.
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Doble${s5}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
+  await elegirPlan(d, 0);
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.waitForURL(/\/panel\/vender\?socio=/, { timeout: 30000 });
+  // VD-5b: "Dar de alta y cobrar" abre la hoja Cobrar sobre el alta; después se sigue en Vender con el socio.
+  await irAVender(d, await hojaDeAlta(d));
   const id = new URL(d.url()).searchParams.get("socio");
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();

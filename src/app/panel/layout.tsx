@@ -53,12 +53,17 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   let entrada: DatosEntrada | null = null;
   if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
     try {
-      const { sede } = sedeActiva(panel);
+      const { sede, puedeCambiar } = sedeActiva(panel);
       const [config, formas] = await Promise.all([
         rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO),
         rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]),
       ]);
-      entrada = { sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc") };
+      entrada = {
+        sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc"),
+        // VD-1b: el dueño con varias sedes elige en cuál anota; VD-6: el alta rápida cobra solo si Vender está disponible.
+        sedes: puedeCambiar ? panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre })) : [],
+        puedeCobrar: rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas),
+      };
     } catch { entrada = null; }   // sin sede activa: la pantalla de Entrada lo dice con todas las letras
   }
   return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>{children}</Marco>;

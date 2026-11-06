@@ -4,6 +4,7 @@
 // vez Vender ya no la ofrece.
 //   npm run e2e:pla-3            (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -23,9 +24,11 @@ try {
 
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Inscripto${s5}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ label: await d.locator('select[aria-label="Plan"] option', { hasText: `Mat${s5}` }).innerText() });
+  await elegirPlan(d, `Mat${s5}`);
+  chequear(/28\.000/.test(await d.locator("[data-primer-pago]").innerText()), "el alta muestra el primer pago: cuota + matrícula = $28.000", await d.locator("[data-primer-pago]").innerText());
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.waitForURL(/\/panel\/vender\?socio=.*cuota=1/, { timeout: 30000 });
+  // VD-5b: "Dar de alta y cobrar" abre la hoja Cobrar sobre el alta; después se sigue en Vender con el socio.
+  await irAVender(d, await hojaDeAlta(d));
   await d.getByText(`Matrícula Mat${s5}`).first().waitFor({ timeout: 30000 });
   ok("Dar de alta y cobrar: la cuota y la matrícula ya en el carrito");
   chequear(/\$28\.000/.test(await d.locator("[data-carrito]").innerText()), "total $28.000 (20.000 + 8.000)", await d.locator("[data-carrito]").innerText());

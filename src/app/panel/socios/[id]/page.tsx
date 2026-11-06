@@ -23,6 +23,7 @@ import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
+import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
@@ -41,7 +42,7 @@ const PESTANAS = [
 ] as const;
 type Pestana = (typeof PESTANAS)[number]["clave"];
 
-export default async function FichaSocio({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; mes?: string; sin_plan?: string }> }) {
+export default async function FichaSocio({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; mes?: string; sin_plan?: string; desde?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const pestana: Pestana = PESTANAS.find((p) => p.clave === sp.pestana)?.clave ?? "resumen";
@@ -96,7 +97,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       <div className="space-y-10">
         {sp.sin_plan && !f.membresia && <p role="alert" className="pildora pildora-amarillo whitespace-normal">⚠️ Quedó dado de alta, pero el plan no se pudo asignar: asignalo con “🏷️ Asignar plan”.</p>}
         <header>
-          <Link href="/panel/socios" className="texto-suave hover:text-[var(--texto)]">← Socios</Link>
+          {sp.desde === "entrada"
+            ? <VolverAEntrada socioId={s.id} nombre={`${s.nombre} ${s.apellido}`.trim()} />
+            : <Link href="/panel/socios" className="texto-suave hover:text-[var(--texto)]">← Socios</Link>}
           <div className="flex items-start gap-4 mt-4">
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
               version={foto ? foto.slice(-36, -4) : null} />

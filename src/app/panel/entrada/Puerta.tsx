@@ -1,5 +1,7 @@
 "use client";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
@@ -127,6 +129,20 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     reiniciar();
   });
 
+  // VD-5b: Cobrar abre la hoja sobre esta pantalla; al cobrar, el veredicto se recalcula (ahora en verde: Enter anota).
+  const elegidoRef = useRef<ResultadoSocio | null>(null);
+  useEffect(() => { elegidoRef.current = elegido; });
+  useEffect(() => {
+    const hecho = (e: Event) => {
+      const c = (e as CustomEvent<CobroHecho>).detail;
+      if (c.origen !== "entrada" || !elegidoRef.current || elegidoRef.current.socio_id !== c.socioId) return;
+      elegir(elegidoRef.current);
+    };
+    window.addEventListener(EVENTO_COBRO_HECHO, hecho);
+    return () => window.removeEventListener(EVENTO_COBRO_HECHO, hecho);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Con el veredicto abierto: Enter anota (si puede), Esc vuelve, y escribir arranca otra búsqueda
   // (así el lector de DNI o llavero sigue andando sin tocar nada).
   useEffect(() => {
@@ -225,7 +241,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
                 {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
                 {v.motivo === "congelada"
                   ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
-                  : <LinkPanel href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className="boton boton-principal text-lg px-8">💵 Cobrar</LinkPanel>}
+                  : <BotonCobrar socioId={elegido.socio_id} origen="entrada" cuota={!!v.para_regularizar} className="boton boton-principal text-lg px-8">💵 Cobrar</BotonCobrar>}
                 {/* D1: a un suspendido o dado de baja lo deja pasar el dueño o el encargado (la base lo frena igual). */}
                 {!forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
                   ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>
