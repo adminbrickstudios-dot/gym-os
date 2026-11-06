@@ -17,9 +17,9 @@ async function como(usuario, fn) {
   try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
 }
 const mas = async (dias) => (await t.q(`select ($1::timestamptz + ($2 || ' days')::interval) as t`, [ahora, String(dias)]))[0].t;
-async function item(tipo, plan, neto, cantidad = 1) {
+async function item(tipo, plan, neto, cantidad = 1, suscripcion = null) {
   const [{ id: v }] = await t.q(`insert into public.ventas (gimnasio_id, sede_id, origen, estado, confirmada_en, creado_en) values ($1,$2,'recepcion','confirmada',$3,$3) returning id`, [t.g, t.sede, await mas(-12)]);
-  return (await t.q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, descripcion, cantidad, precio_unitario) values ($1,$2,$3,$4,'x',$5,$6) returning id`, [t.g, v, tipo, plan, cantidad, neto / cantidad]))[0].id;
+  return (await t.q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, descripcion, cantidad, precio_unitario, suscripcion_id) values ($1,$2,$3,$4,'x',$5,$6,$7) returning id`, [t.g, v, tipo, plan, cantidad, neto / cantidad, suscripcion]))[0].id;
 }
 async function socio(n) {
   const [{ id }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido) values ($1,$2,'Deuda') returning id`, [t.g, n]);
@@ -36,8 +36,9 @@ async function consumir(socio, packId, veces) {
     await t.q(`insert into public.consumos_pack (gimnasio_id, pack_id, socio_id, momento, ingreso_id) values ($1,$2,$3,$4,$5)`, [t.g, packId, socio, await mas(-5 + i), ing]);
   }
 }
-async function cobertura(socio, plan, desde, hasta, venta) {
+async function cobertura(socio, plan, desde, hasta, neto) {
   const [{ id: s }] = await t.q(`insert into public.suscripciones (gimnasio_id, socio_id, plan_id, inicio) values ($1,$2,$3,$4) returning id`, [t.g, socio, plan, await mas(-60)]);
+  const venta = await item("cuota", plan, neto, 1, s);
   await t.q(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, venta_item_id) values ($1,$2,$3,$4,$5,'pago',$6)`, [t.g, s, socio, await mas(desde), await mas(hasta), venta]);
 }
 
@@ -51,9 +52,9 @@ before(async () => {
   // Ana: pack de 10 por $10.000, usó 3 → le quedan 7 = $7.000. Cuota de $30.000 de hace 10 días a +20: queda 20/30 = $20.000.
   const p1 = await pack(a, pk, 10, await mas(40), await item("pack", pk, 10000));
   await consumir(a, p1, 3);
-  await cobertura(a, mem, -10, 20, await item("cuota", mem, 30000));
+  await cobertura(a, mem, -10, 20, 30000);
   // Beto: cuota adelantada de $24.000 que empieza en 30 días (todo a favor). Un pack vencido no se debe.
-  await cobertura(b, mem, 30, 60, await item("cuota", mem, 24000));
+  await cobertura(b, mem, 30, 60, 24000);
   await pack(b, pk, 10, await mas(-1), await item("pack", pk, 8000));
   // Cami: un pack cargado sin venta (cortesía): 5 usos que no suman plata.
   await pack(c, pk, 5, await mas(10), null);
