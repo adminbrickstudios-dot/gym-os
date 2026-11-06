@@ -74,3 +74,4 @@ AVISO DISCO: C: se llenó (worktrees de agentes de ~400-900 MB c/u). Regla: borr
 VD-35/39 mergeados (worktree borrado). Lanzado VD-19→20 a949a9204dfd8a9b6 (vd19, migr 5900/6000). En curso: VD-44 (a003fa0a390b234fc), VD-24→38b (a5ab496be69ce81a2). Faltan tanda 4: VD-22, VD-25.
 (VD-24, VD-38b mergeados)
 VD-24/38b mergeados. Lanzado VD-25 a844ff15db8200a08 (vd25, migr 6100). En curso: VD-44 (a003fa0a390b234fc), VD-19→20 (a949a9204dfd8a9b6). Falta tanda 4: VD-22. Luego tanda 5.
+(VD-25 mergeado; OJO landing_completa redefinida en 6100: al mergear VD-44 (5400) verificar que no pierda sus cambios a landing/agenda)

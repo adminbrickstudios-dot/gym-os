@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-25 · Página del gimnasio rediseñada
+
+**QUÉ HICE**
+- Migración 6100: portada con una fila de confianza (píldora "abierto ahora", "★ 4,8 · 120 reseñas en Google" que lleva al link de reseñas de Configuración, "+N socios" calculado por la base con los socios sin baja redondeado hacia abajo y oculto por debajo de 20; cada dato solo si el dueño lo prendió), "¿Primera vez? Empezá acá" en tres pasos armados con lo que la página tiene prendido, WhatsApp flotante en compu, "Dejanos tu reseña" en el pie, fotos con `next/image` en producción (con tamaño reservado). Tarjeta "Confianza en la portada" en Tu página (`prueba_social_panel` / `guardar_prueba_social`; la base rechaza un puntaje de 9). `landing_completa` copiada de la versión más nueva (0032) más la clave `prueba_social`; no cambiaron las firmas de `landing_publica`, `agenda_publica` ni `pagina_panel`. Todo lo que el dueño ya editaba sigue igual.
+- Verificado: lint, typecheck, 113 pruebas, build y base/chequeos/demo en verde en GitHub (`prueba-social`).
+
+**QUÉ CONFIGURÁS VOS**: el dueño carga puntaje y cantidad de reseñas en Tu página y pega el link de Google en Configuración → Mensajes.
+**SIN ARREGLAR**: VD-25b (grilla de clases con cupo en la página pública), VD-25c (🔌 reseñas desde la API de Google), VD-25d (medir Lighthouse en el despliegue).
+**LO QUE NO PUDE VERIFICAR**: Lighthouse celular ≥ 90 no se midió acá (apoyado en prioridad de la portada, tamaño reservado, server components y un solo JS de cliente); e2e `vd-25` y los viejos (pag-1…pag-4, panel-pagina, landing, cliente): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-24 y VD-38b · Lista de espera automática, motivo de "no podés reservar" y mensajes en el menú
 
 **QUÉ HICE**

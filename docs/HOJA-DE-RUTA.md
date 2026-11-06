@@ -505,6 +505,9 @@ bloque 18.
 - [ ] VD-38c · 🟢 · Respuestas rápidas de ejemplo al crear un gimnasio; el equipo puede adjuntar foto en sus respuestas
 - [ ] VD-39b · 🟢 · Aprobación previa del dueño para cambios de plan pagados por MercadoPago (opcional); deshacer un cambio de plan (anular la venta devuelve suscripción y coberturas); el mensaje de /app/pago nombra lo comprado ("Tu plan ahora es X")
 - [ ] VD-24b · 🟢 · Cancelar una reserva suelta desde el panel (avisa a la espera) y promover de la espera al subir el cupo de una clase
+- [ ] VD-25b · 🟢 · Grilla de clases con cupo en la página pública (RPC pública de clases, Reservar y Probar esta clase)
+- [ ] VD-25c · 🔌 · Reseñas automáticas desde la API de Google (hoy las tipea el dueño)
+- [ ] VD-25d · 🟢 · Medir Lighthouse celular de la página pública en el despliegue (≥ 90) y ajustar
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -529,7 +532,7 @@ bloque 18.
 - [x] VD-39 · 🟡 D28 · Cambio de plan y compra de pases desde la app — verificado: /app/plan con días a favor calculados por la base, pago por MercadoPago o transferencia con clave de operación, el plan cambia al acreditarse el pago; base en verde en GitHub; e2e vd-39 en la corrida de la tanda
 - [ ] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada
 - [x] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar" — verificado: promoción de la espera sin dobles (dos conexiones reales), push de lugar liberado, motivo_reserva con frase y botón; base en verde en GitHub (espera-motivo, espera-concurrente); e2e vd-24 en la corrida de la tanda
-- [ ] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp)
+- [x] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp) — verificado: prueba social en la portada (abierto ahora, reseñas, +N socios), primera vez en 3 pasos, WhatsApp flotante, next/image; base en verde en GitHub (prueba-social); e2e vd-25 en la corrida de la tanda; Lighthouse sin medir
 - [ ] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in)
 - [ ] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso
 *Tanda 5 · BRIK y seguridad*
