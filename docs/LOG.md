@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-31 · Ayuda y onboarding por pantalla
+
+**QUÉ HICE**
+- Migración 6900: globo de ayuda corto la primera vez que cada persona abre cada pantalla importante, con "Entendido" y un "?" fijo para volver a verlo; la segunda vez no sale. "Ya lo vio" se guarda en la base por usuario (`ayudas_usuario`, RLS, sin escritura directa; `ayudas_vistas`, `marcar_ayuda`, `apagar_ayudas`, `reiniciar_ayudas`; sin sesión dan error), así que sigue entre dispositivos. Panel: Inicio, Entrada, Socios, Vencen y cobrar, Caja, Productos y cobros (la hoja Cobrar no es ruta: su ayuda está en `/panel/vender`), Para hacer hoy, Planes, Configuración y Control; app del socio: Inicio, Clases, Rutina y Yo. Textos por rol en `src/lib/ayuda.ts` (la recepción ve el suyo). El globo va en el flujo de la página: no tapa la ventana de Entrada ni la hoja Cobrar, no intercepta clics, no sale en pantallas de error y no se mueve con reduced-motion. En Mi cuenta: interruptor para apagar las ayudas y "Volver a ver todas".
+- Para los e2e viejos: `levantar.sh` arranca la app con `PERMITIR_SIN_AYUDA=1` y `pagina()` de `comun.mjs` pone la cookie `gymos_sin_ayuda=1`; solo `vd-31.mjs` pide los globos (`{ conAyuda: true }`). Documentado en `docs/DISENO.md`; `ayudas_usuario` va como excepción a `gimnasio_id` en `docs/SCHEMA.md`. `PERMITIR_SIN_AYUDA` no se define en Vercel.
+- Verificado: lint, typecheck, 128 pruebas, build y base/chequeos/demo en verde en GitHub (`ayuda-pantalla`).
+
+**SIN ARREGLAR**: VD-31B (apagar las ayudas desde Yo en la app del socio; tour de la hoja Cobrar).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-31` y los e2e viejos con la cookie `gymos_sin_ayuda`; cómo queda el globo a 390 px (se reservaron 7 rem a la derecha para la campana y el "?"): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-44 · Equipo con foto, clases y horario
 
 **QUÉ HICE**
