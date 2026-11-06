@@ -446,7 +446,7 @@ bloque 18.
 
 ### 20 · Gym OS v2 (VD-*): dueño, recepción y socio (pedido de Mateo, 05/11 · `docs/v2/`, detalle y LISTO SI en `docs/v2/08-PLAN.md`; se publica por tanda, D25)
 *Tanda 1 · Para mañana (lo que ve el dueño)*
-- [ ] VD-34 · 🟢 · Confiabilidad base: nada dos veces (botón único y clave de operación), nada se pierde, nada se traba
+- [x] VD-34 · 🟢 · Confiabilidad base: nada dos veces (botón único y clave de operación), nada se pierde, nada se traba — verificado: db: misma clave dos veces = una venta (también simultáneas) y la versión avisa quién cambió, corrida de base en verde en GitHub; e2e vd-34: en la corrida de la tanda
 - [ ] VD-47 · 🟢 · Rapidez de verdad: misma región, middleware liviano, un viaje por pantalla, streaming, caché de lo que no cambia, carga diferida y medición (`docs/v2/16-RAPIDEZ-Y-FLUIDEZ.md`)
 - [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
 - [ ] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo

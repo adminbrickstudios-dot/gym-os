@@ -89,7 +89,7 @@ alter table public.configuracion_gimnasio add column if not exists actualizado_p
 create or replace function privado.sellar_actualizacion() returns trigger
 language plpgsql set search_path = '' as $$
 begin
-  new.actualizado_en := now();
+  new.actualizado_en := clock_timestamp();   -- no now(): dos ediciones en la misma transacción también se distinguen
   new.actualizado_por := (select e.id from public.equipo e where e.usuario_id = auth.uid() and e.gimnasio_id = new.gimnasio_id limit 1);
   return new;
 end $$;
@@ -101,6 +101,31 @@ drop trigger if exists sellar_actualizacion on public.planes;
 create trigger sellar_actualizacion before update on public.planes for each row execute function privado.sellar_actualizacion();
 drop trigger if exists sellar_actualizacion on public.configuracion_gimnasio;
 create trigger sellar_actualizacion before update on public.configuracion_gimnasio for each row execute function privado.sellar_actualizacion();
+
+-- El historial de configuración no cuenta la marca de versión como un cambio de configuración.
+create or replace function privado.historial_tg() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare comunes text[] := array['gimnasio_id', 'id', 'actualizado_en', 'actualizado_por', 'creado_en', 'creado_por'];
+begin
+  if tg_table_name = 'configuracion_gimnasio' then
+    perform privado.registrar_cambios(new.gimnasio_id, '', to_jsonb(old), to_jsonb(new),
+      comunes || array['ultimo_numero_socio', 'onboarding_salteado_en', 'avisar_sin_bloquear_hasta']);
+  elsif tg_table_name = 'gimnasios' then
+    perform privado.registrar_cambios(new.id, '', jsonb_build_object('nombre', old.nombre), jsonb_build_object('nombre', new.nombre), comunes);
+  elsif tg_table_name = 'landing_gimnasio' then
+    perform privado.registrar_cambios(new.gimnasio_id, 'pagina.',
+      jsonb_build_object('publicada', old.publicada, 'whatsapp', old.whatsapp, 'instagram', old.instagram, 'email_contacto', old.email_contacto),
+      jsonb_build_object('publicada', new.publicada, 'whatsapp', new.whatsapp, 'instagram', new.instagram, 'email_contacto', new.email_contacto), comunes);
+  elsif tg_table_name = 'sedes' then
+    perform privado.registrar_cambios(new.gimnasio_id, 'sede.' || old.nombre || '.',
+      jsonb_build_object('nombre', old.nombre, 'direccion', old.direccion, 'telefono', old.telefono, 'mapa_url', old.mapa_url),
+      jsonb_build_object('nombre', new.nombre, 'direccion', new.direccion, 'telefono', new.telefono, 'mapa_url', new.mapa_url), comunes);
+  elsif tg_table_name = 'plantillas_mensaje' then
+    perform privado.registrar_cambios(new.gimnasio_id, 'mensaje.', jsonb_build_object(new.clave, old.texto),
+      jsonb_build_object(new.clave, new.texto), comunes);
+  end if;
+  return null;
+end $$;
 
 -- Versión actual de un registro: la pantalla la guarda al abrir el formulario.
 create or replace function public.version_registro(p_gimnasio_id uuid, p_tabla text, p_id uuid) returns jsonb
@@ -153,5 +178,6 @@ begin
   if has_function_privilege('anon', 'public.vender(uuid, jsonb, jsonb, uuid, uuid, uuid)', 'execute') then raise exception 'Verificación: anon puede vender'; end if;
   if has_function_privilege('anon', 'public.verificar_version(uuid, text, uuid, timestamptz)', 'execute') then raise exception 'Verificación: anon puede verificar versiones'; end if;
   if not exists (select 1 from pg_indexes where indexname = 'ventas_clave_operacion_uq') then raise exception 'Verificación: falta el unique de la clave de operación'; end if;
+  if position('actualizado_por' in pg_get_functiondef('privado.historial_tg()'::regprocedure)) = 0 then raise exception 'Verificación: el historial cuenta la versión como cambio'; end if;
   if (select count(*) from pg_trigger where tgname = 'sellar_actualizacion' and not tgisinternal) <> 3 then raise exception 'Verificación: faltan triggers de versión'; end if;
 end $$;
