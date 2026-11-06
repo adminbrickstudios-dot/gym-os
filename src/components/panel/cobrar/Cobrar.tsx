@@ -17,7 +17,7 @@ import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/com
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio } from "@/app/panel/vender/tipos";
 import type { OrigenCobro } from "./evento";
 
-const VUELTA: Record<OrigenCobro, string> = { entrada: "Volver a la entrada", ficha: "Volver a la ficha", vencen: "Volver a Vencen hoy", retencion: "Volver a Retención", buscador: "Listo", otro: "Listo" };
+const VUELTA: Record<OrigenCobro, string> = { entrada: "Volver a la entrada", ficha: "Volver a la ficha", vencen: "Volver a Vencen hoy", retencion: "Volver a Retención", buscador: "Listo", tarea: "Volver a Para hacer hoy", otro: "Listo" };
 
 /** Un día "20/11" en la zona del gimnasio; `menos` resta milisegundos (el fin de un período es la medianoche siguiente). */
 const diaCorto = (iso: string, zona: string, menos = 0) =>
