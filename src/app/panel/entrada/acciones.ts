@@ -13,7 +13,7 @@ export type Guia = {
   boton: "anotar" | "cobrar" | "cobrar_pack" | "dejar_pasar" | "volver_antes" | "volver_alta" | "ficha"; boton_texto: string;
   segundo: "anotar" | "cobrar" | null; segundo_texto: string | null;
   solo_encargado: boolean; decile: string; falta: string | null; entradas_mes: number;
-  chips: { clave: string; emoji: string; texto: string }[];
+  chips: { clave: string; emoji: string; texto: string; href?: string }[];
 };
 /** VD-3: si es un repetido, `texto` dice a qué hora entró; con `alerta_prestamo` llegó por otra vía hace pocos minutos (amarillo). */
 export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; color?: string; alerta_prestamo?: boolean; veredicto?: Veredicto };
