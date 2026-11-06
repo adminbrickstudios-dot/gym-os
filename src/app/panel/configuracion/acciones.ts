@@ -4,6 +4,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { conflictoDe, versionDe } from "@/lib/panel/version";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { svgSeguro, tipoReal } from "@/lib/imagenes";
+import { achicarFoto } from "@/lib/imagenes-servidor";
 
 export async function guardarConfiguracion(datos: Record<string, unknown>, version?: string | null): Promise<{ error?: string; version?: string }> {
   const panel = await contextoPanel();
@@ -51,12 +52,14 @@ export async function subirImagen(formulario: FormData): Promise<{ error?: strin
   const archivo = formulario.get("archivo");
   if (!TIPOS.includes(tipo) || !(archivo instanceof File)) return { error: "Elegí un archivo." };
   try {
-    const bytes = new Uint8Array(await archivo.arrayBuffer());
-    const mime = tipoReal(bytes);
+    let bytes: Uint8Array = new Uint8Array(await archivo.arrayBuffer());
+    let mime = tipoReal(bytes);
     if (!mime) return { error: `“${archivo.name}” no es una imagen que podamos usar (PNG, JPG, WEBP o SVG).` };
     if (mime === "image/svg+xml" && !svgSeguro(new TextDecoder().decode(bytes))) {
       return { error: "Ese SVG trae código o links adentro y no lo podemos mostrar. Exportalo de nuevo como PNG." };
     }
+    // VD-47X: logos y fotos se guardan a 800 px como mucho y en webp (el ícono y el SVG quedan como vienen).
+    if (mime !== "image/svg+xml" && tipo !== "favicon") { const a = await achicarFoto(bytes, mime); bytes = a.bytes; mime = a.mime; }
     const ruta = await rpc<string>("preparar_imagen_marca", { p_gimnasio_id: panel.gimnasio.id, p_tipo: tipo, p_tipo_mime: mime, p_bytes: bytes.length });
     const { error } = await clienteServicio().storage.from("marcas").upload(ruta, Buffer.from(bytes), { contentType: mime, upsert: false, cacheControl: "31536000" });
     if (error) return { error: `No se pudo subir la imagen: ${error.message}` };

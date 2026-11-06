@@ -3,6 +3,7 @@ import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
 import { rpc } from "@/lib/panel/servidor";
+import { achicarFoto } from "@/lib/imagenes-servidor";
 
 export type Resumen = {
   turno_id: string; abierto_en: string; cerrado_en: string | null; monto_inicial: number; efectivo: number;
@@ -33,10 +34,12 @@ export async function moverCaja(turnoId: string, tipo: "ingreso" | "retiro", mon
     if (tipo === "retiro") notificarDespues("caja_retiro", id);   // PUSH-1
     // CAJ-4: la foto del ticket va después (la base arma la ruta); si falla, el retiro ya quedó anotado.
     if (conFoto) {
-      const ext = foto.type === "image/png" ? "png" : foto.type === "image/webp" ? "webp" : "jpg";
+      // VD-47X: el ticket se guarda a 800 px como mucho y en webp (si no se puede achicar, va como vino).
+      const a = await achicarFoto(new Uint8Array(await foto.arrayBuffer()), foto.type as "image/jpeg" | "image/png" | "image/webp");
+      const ext = a.mime === "image/png" ? "png" : a.mime === "image/webp" ? "webp" : "jpg";
       const ruta = await rpc<string>("preparar_ticket", { p_movimiento_id: id, p_ext: ext });
       const { clienteServicio } = await import("@/lib/supabase/servicio");
-      const { error } = await clienteServicio().storage.from("tickets_caja").upload(ruta, Buffer.from(await foto.arrayBuffer()), { contentType: foto.type, upsert: false });
+      const { error } = await clienteServicio().storage.from("tickets_caja").upload(ruta, Buffer.from(a.bytes), { contentType: a.mime, upsert: false });
       if (error) return { error: `El retiro quedó anotado, pero la foto no se pudo subir: ${error.message}` };
       await rpc("confirmar_ticket", { p_movimiento_id: id, p_ruta: ruta });
     }

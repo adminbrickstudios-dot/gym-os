@@ -80,7 +80,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                 <div key={s.socio_id} className="flex items-center gap-3 rounded-xl px-3 min-h-[56px]" data-socio-profe>
                   {s.tiene_foto
                     // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={`/panel/socios/${s.socio_id}/foto`} alt="" className="size-10 rounded-full object-cover flex-none" />
+                    ? <img src={`/panel/socios/${s.socio_id}/foto`} alt="" width={40} height={40} loading="lazy" decoding="async" className="size-10 rounded-full object-cover flex-none" />
                     : <PuntoEstado color={s.color} />}
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold truncate">{s.nombre}</span>

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { crearTarea, marcarTarea } from "./acciones";
@@ -12,10 +12,18 @@ const ddmm = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
 /** Una tarea con su tilde. La usan Tareas y el Inicio. */
 export function FilaTarea({ t, hoy, mostrarPara = false }: { t: Tarea; hoy: string; mostrarPara?: boolean }) {
-  const [hecha, setHecha] = useState(!!t.hecha_en);
+  const [hechaReal, setHecha] = useState(!!t.hecha_en);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const cambiar = () => empezar(async () => { const r = await marcarTarea(t.id, !hecha); if (r.error) setError(r.error); else { setHecha(!hecha); setError(null); } });
+  // VD-47X: el tilde cambia al instante; si falla, vuelve atrás y dice por qué.
+  const [hecha, tildarYa] = useOptimistic<boolean, boolean>(hechaReal, (_, nueva) => nueva);
+  const cambiar = () => empezar(async () => {
+    const nueva = !hecha;
+    setError(null);
+    tildarYa(nueva);
+    const r = await marcarTarea(t.id, nueva);
+    if (r.error) setError(r.error); else setHecha(nueva);
+  });
   return (
     <li className={`tarjeta p-4 flex flex-wrap items-center gap-3 ${hecha ? "opacity-60" : ""}`} data-tarea={hecha ? "hecha" : t.atrasada ? "atrasada" : "pendiente"}>
       <button type="button" className="boton !min-h-11 !px-3" disabled={ocupado} onClick={cambiar} aria-label={hecha ? `Reabrir: ${t.que}` : `Marcar hecha: ${t.que}`}>

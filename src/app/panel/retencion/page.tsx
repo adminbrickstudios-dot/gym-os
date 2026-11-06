@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FilaContacto } from "@/components/panel/FilaContacto";
 import { Encabezado } from "@/components/panel/Marco";
 import { Vacio } from "@/components/ui/Vacio";
+import { Atenuable } from "@/components/panel/Atenuable";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
@@ -89,9 +90,10 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">💸 Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
         </dl>}
         {numeros && <NumerosDeRetencion n={numeros} />}
+        <Atenuable>
         <nav aria-label="Listas" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
           {LISTAS.map((l) => (
-            <Link key={l.clave} href={url(l.clave, etiqueta)} aria-current={l.clave === lista.clave ? "page" : undefined}
+            <Link key={l.clave} href={url(l.clave, etiqueta)} data-transicion aria-current={l.clave === lista.clave ? "page" : undefined}
               className={`boton !min-h-12 whitespace-nowrap ${l.clave === lista.clave ? "!border-[var(--acento)]" : ""}`}>
               {l.emoji} {l.titulo} <span className="numero text-lg texto-suave">{cuantos(l.clave)}</span>
             </Link>
@@ -99,10 +101,11 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
         </nav>
         {etiquetas.length > 0 && (
           <nav className="flex flex-wrap gap-2 mb-4" aria-label="Filtrar por etiqueta" data-filtro-etiquetas>
-            <Link href={url(lista.clave, null)} className="pestana" aria-current={!etiqueta ? "page" : undefined}>Todos</Link>
-            {etiquetas.map((e) => <Link key={e.id} href={url(lista.clave, e.id)} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre}</Link>)}
+            <Link href={url(lista.clave, null)} data-transicion className="pestana" aria-current={!etiqueta ? "page" : undefined}>Todos</Link>
+            {etiquetas.map((e) => <Link key={e.id} href={url(lista.clave, e.id)} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre}</Link>)}
           </nav>
         )}
+        <div data-lista>
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
         {lista.clave === "riesgo" ? (riesgo.length === 0 ? (
           <Vacio emoji="🎉" titulo="Nadie en riesgo">
@@ -132,6 +135,8 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
             ))}
           </ul>
         )}
+        </div>
+        </Atenuable>
       </>
     );
   });

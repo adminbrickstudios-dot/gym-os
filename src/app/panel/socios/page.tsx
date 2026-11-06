@@ -5,6 +5,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { Vacio } from "@/components/ui/Vacio";
+import { Atenuable } from "@/components/panel/Atenuable";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -69,7 +70,8 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
               </div>
             );
           })()} />
-        <form className="mb-4" role="search">
+        <Atenuable>
+        <form className="mb-4" role="search" data-transicion>
           <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
           {etiqueta && <input type="hidden" name="etiqueta" value={etiqueta} />}
           {estado && <input type="hidden" name="estado" value={estado} />}
@@ -79,9 +81,9 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           <nav className="pestanas mb-3" aria-label="Filtrar por estado" data-filtro-estados>
             {/* Filtros: links comunes (recargan la lista). Con la app compilada, la navegación de <Link> a la misma
                 lista con otro filtro a veces se cortaba (ERR_ABORTED) y no cambiaba nada: así siempre anda. */}
-            <a href={con({ estado: null })} className="pestana" aria-current={!estado ? "page" : undefined}>Todos <span className="texto-tenue">{filtros.todos}</span></a>
+            <a href={con({ estado: null })} data-transicion className="pestana" aria-current={!estado ? "page" : undefined}>Todos <span className="texto-tenue">{filtros.todos}</span></a>
             {ESTADOS.filter(([k]) => filtros[k] > 0 || estado === k).map(([k, t]) => (
-              <a key={k} href={con({ estado: estado === k ? null : k })} className="pestana" aria-current={estado === k ? "page" : undefined} data-estado={k}>
+              <a key={k} href={con({ estado: estado === k ? null : k })} data-transicion className="pestana" aria-current={estado === k ? "page" : undefined} data-estado={k}>
                 {t} <span className="texto-tenue">{filtros[k]}</span>
               </a>
             ))}
@@ -90,15 +92,16 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
         {(filtros.planes.length > 1 || etiquetas.length > 0) && (
           <nav className="pestanas mb-6" aria-label="Filtrar por plan o etiqueta" data-filtro-etiquetas>
             {filtros.planes.length > 1 && filtros.planes.map((p) => (
-              <a key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
+              <a key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} data-transicion className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
                 📋 {p.nombre} <span className="texto-tenue">{p.socios}</span>
               </a>
             ))}
             {etiquetas.map((e) => (
-              <a key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></a>
+              <a key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></a>
             ))}
           </nav>
         )}
+        <div data-lista>
         {filas.length === 0 ? (
           filtrado && !q
             ? <Vacio emoji="🔍" titulo="Nadie con ese filtro" acciones={<Link href="/panel/socios" className="boton">Ver todos</Link>}>Probá con otro, o sacá el filtro.</Vacio>
@@ -124,7 +127,9 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
             ))}
           </ul>
         )}
+        </div>
         {filas.length === 60 && <p className="texto-tenue mt-4">Se muestran los primeros 60. Buscá para encontrar a alguien en particular.</p>}
+        </Atenuable>
       </>
     );
   });
