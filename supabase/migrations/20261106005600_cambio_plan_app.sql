@@ -28,6 +28,25 @@ begin
   end if;
 end $$;
 
+-- ── Un pago de MercadoPago que nunca se abrió puede cerrarse sin ID de MercadoPago ──
+-- Al cambiar de plan (también el que hace la recepción), 0007 cierra los pagos pendientes de la membresía
+-- vieja: uno de MercadoPago que el socio abrió y no terminó no tiene mp_pago_id, y el check de pagos
+-- (mp_pago_id obligatorio salvo pendiente) hacía fallar el cambio entero. Rechazado o anulado sin ID es
+-- exactamente eso: no llegó plata ni aviso. Aprobado sigue exigiendo el ID.
+do $$
+declare c record;
+begin
+  if not exists (select 1 from pg_constraint where conrelid = 'public.pagos'::regclass and conname = 'pagos_mp_aprobado_con_id') then
+    for c in select conname from pg_constraint
+              where conrelid = 'public.pagos'::regclass and contype = 'c'
+                and pg_get_constraintdef(oid) like '%mercadopago%' and pg_get_constraintdef(oid) like '%mp_pago_id IS NOT NULL%' loop
+      execute format('alter table public.pagos drop constraint %I', c.conname);
+    end loop;
+    alter table public.pagos add constraint pagos_mp_aprobado_con_id
+      check (medio <> 'mercadopago' or mp_pago_id is not null or estado in ('pendiente', 'rechazado', 'anulado'));
+  end if;
+end $$;
+
 -- ── Ajustes del autoservicio (chica, del gimnasio) ──────────────────
 create table if not exists public.ajustes_autoservicio (
   gimnasio_id    uuid primary key references public.gimnasios(id),
@@ -337,6 +356,9 @@ begin
     end if;
     if has_function_privilege('anon', f, 'execute') then raise exception 'Verificación: anon puede ejecutar %', f; end if;
   end loop;
+  if not exists (select 1 from pg_constraint where conrelid = 'public.pagos'::regclass and conname = 'pagos_mp_aprobado_con_id') then
+    raise exception 'Verificación: falta el check de pagos de MercadoPago';
+  end if;
   if not exists (select 1 from pg_trigger where tgname = 'pagos_aplicar_cambio_plan' and tgrelid = 'public.pagos'::regclass) then
     raise exception 'Verificación: falta el trigger que aplica el cambio de plan';
   end if;

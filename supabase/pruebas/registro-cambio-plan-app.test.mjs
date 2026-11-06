@@ -195,6 +195,9 @@ test("MercadoPago: el plan cambia cuando llega el aviso, no antes; un rechazo no
   const ok = await como(null, async () => (await t.q(`select public.acreditar_pago_mp($1, '777002', $2, 'approved') as r`, [p.pago_id, p.monto]))[0].r, "service_role");
   assert.equal(ok, "acreditado");
   assert.equal(await planActivo(s), "Pase libre");
+  // El pago de la cuota vieja que había abierto y no terminó (clave C2) se cerró solo, sin trabar el cambio.
+  const [{ estado }] = await t.q(`select p.estado from public.pagos p join public.ventas v on v.id = p.venta_id where v.gimnasio_id = $1 and v.clave_operacion = $2`, [t.g, C2]);
+  assert.equal(estado, "rechazado");
   const [{ e }] = await t.q(`select (privado.calcular_acceso($1, now())).color as e`, [s]);
   assert.equal(e, "verde");
 });
