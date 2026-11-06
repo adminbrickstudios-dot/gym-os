@@ -10,14 +10,16 @@
 -- 3) pendientes_panel (corre en cada pantalla) calcula la retención UNA vez (antes, dos) y se la pasa a Para hacer hoy
 --    (privado.para_hacer_hoy_con). public.para_hacer_hoy sigue igual para quien la llame.
 -- 4) resultado_mes: el precio "de hoy" se calcula una vez por plan y no una vez por socio.
--- 5) privado.precio_para: la misma consulta en plpgsql (el plan se guarda en la sesión): la puerta la llama por cada vencido.
+-- 5) privado.precio_para y privado.deuda_socio: la misma consulta en plpgsql (el plan se guarda en la sesión): la puerta las llama por cada socio.
+-- 6) privado.retencion_liviana: lo que usan Pendientes y Para hacer hoy, sin calcular la deuda ni los textos de los vencidos.
 
 -- ── Guarda de entrada ──────────────────────────────────────────────
 do $$
 begin
   if to_regprocedure('public.para_hacer_hoy(uuid)') is null then raise exception 'Guarda: falta public.para_hacer_hoy'; end if;
   if to_regprocedure('public.pendientes_panel(uuid)') is null then raise exception 'Guarda: falta public.pendientes_panel'; end if;
-  if to_regprocedure('privado.retencion_con(uuid, timestamptz, jsonb)') is null then raise exception 'Guarda: falta privado.retencion_con'; end if;
+  if to_regprocedure('privado.retencion_con(uuid, timestamptz, jsonb)') is null
+     and to_regprocedure('privado.retencion_con(uuid, timestamptz, jsonb, boolean)') is null then raise exception 'Guarda: falta privado.retencion_con'; end if;
   if to_regprocedure('public.resultado_mes(uuid, date)') is null then raise exception 'Guarda: falta public.resultado_mes'; end if;
   if not exists (select 1 from pg_indexes where schemaname = 'public' and indexname = 'ingresos_socio') then raise exception 'Guarda: falta el índice ingresos_socio'; end if;
 end $$;
@@ -25,7 +27,7 @@ end $$;
 -- ── 2) Retención ──
 -- VD-30: privado.dia_local, fecha_corta y celular_aviso escritos en línea (llevan `set search_path`, así que Postgres
 -- no las expande y cada llamada cuesta: 26.000 llamadas por pantalla). Mismo resultado.
-create or replace function privado.retencion_con(p_gimnasio_id uuid, p_momento timestamptz, p_plantillas jsonb)
+create or replace function privado.retencion_con(p_gimnasio_id uuid, p_momento timestamptz, p_plantillas jsonb, p_liviano boolean default false)
 returns table (
   socio_id uuid, nombre text, telefono text, lista text, texto text, dias int,
   vence_en timestamptz, monto_mensual numeric, debe numeric, ultimo_ingreso timestamptz,
@@ -140,7 +142,7 @@ clasificado as (
 con_texto as materialized (
   select c.*,
     -- Vencidos: el texto y la deuda salen de la misma función que usa la puerta.
-    case when c.lista = 'vencido' then privado.via_membresia(c.socio_id, p_momento, null, g.zona, (select cfg.c from cfg)) end as vm,
+    case when c.lista = 'vencido' and not p_liviano then privado.via_membresia(c.socio_id, p_momento, null, g.zona, (select cfg.c from cfg)) end as vm,
     case c.lista
       when 'se_fue' then coalesce(c.dado_de_baja_en, c.baja_en, c.ultimo_fin, c.primer_inicio)
       when 'vencido' then c.ultimo_fin
@@ -155,7 +157,7 @@ con_texto as materialized (
 ),
 final as materialized (
   select t.*,
-    case when t.lista = 'vencido' then
+    case when t.lista = 'vencido' and not p_liviano then
       coalesce((t.vm).para_regularizar,
                (select pr.precio from precios pr where pr.plan_id = t.plan_id) * privado.cuotas_para_cubrir(t.suscripcion_id, p_momento))
     end as debe
@@ -198,7 +200,24 @@ left join lateral (
 order by array_position(array['vencido', 'por_vencer', 'nuevo', 'no_viene', 'se_fue'], t.lista),
          case when t.lista = 'por_vencer' then t.dias else -t.dias end, t.nombre
 $$;
-revoke all on function privado.retencion_con(uuid, timestamptz, jsonb) from public, anon, authenticated;
+-- La firma cambia (suma p_liviano): la vieja se borra en esta misma migración. privado.retencion y vista_previa_mensaje la
+-- llaman con tres argumentos y siguen andando (p_liviano vale false).
+drop function if exists privado.retencion_con(uuid, timestamptz, jsonb);
+revoke all on function privado.retencion_con(uuid, timestamptz, jsonb, boolean) from public, anon, authenticated;
+
+-- La versión sin plata ni mensajes, para quien solo cuenta socios de por_vencer, no_viene y nuevo (Pendientes y Para hacer
+-- hoy). Es la misma consulta con la misma clasificación; no calcula la deuda ni el texto de los vencidos, que ahí no se usan.
+create or replace function privado.retencion_liviana(p_gimnasio_id uuid, p_momento timestamptz)
+returns table (
+  socio_id uuid, nombre text, telefono text, lista text, texto text, dias int,
+  vence_en timestamptz, monto_mensual numeric, debe numeric, ultimo_ingreso timestamptz,
+  visitas_por_semana numeric, ultimo_contacto_en timestamptz, ultimo_contacto_por text,
+  ultimo_contacto_resultado text, mensaje text
+)
+language sql stable set search_path = '' as $$
+  select * from privado.retencion_con(p_gimnasio_id, p_momento, null, true)
+$$;
+revoke all on function privado.retencion_liviana(uuid, timestamptz) from public, anon, authenticated;
 
 -- ── 3) Para hacer hoy / Pendientes ──
 create or replace function privado.para_hacer_hoy_con(p_gimnasio_id uuid, p_ret jsonb) returns jsonb
@@ -235,7 +254,7 @@ begin
 
     if v_clave in ('vencen_hoy', 'vencen_pronto', 'no_vienen', 'nuevos_sin_venir') and ret is null then
       select coalesce(jsonb_agg(jsonb_build_object('socio_id', r.socio_id, 'nombre', r.nombre, 'lista', r.lista, 'dias', r.dias)), '[]'::jsonb)
-        into ret from privado.retencion(p_gimnasio_id, now()) r where r.lista in ('por_vencer', 'no_viene', 'nuevo');
+        into ret from privado.retencion_liviana(p_gimnasio_id, now()) r where r.lista in ('por_vencer', 'no_viene', 'nuevo');
     end if;
 
     if v_clave = 'vencen_hoy' then
@@ -335,7 +354,7 @@ begin
     -- Vencen y cobrar: los que vencen hoy y todavía no pagaron (el mismo cálculo que la pantalla).
     -- VD-30: la retención (lo más caro de la pantalla) se calcula UNA vez y se comparte con "Para hacer hoy".
     select coalesce(jsonb_agg(jsonb_build_object('socio_id', r2.socio_id, 'nombre', r2.nombre, 'lista', r2.lista, 'dias', r2.dias)), '[]'::jsonb)
-      into ret from privado.retencion(p_gimnasio_id, now()) r2 where r2.lista in ('por_vencer', 'no_viene', 'nuevo');
+      into ret from privado.retencion_liviana(p_gimnasio_id, now()) r2 where r2.lista in ('por_vencer', 'no_viene', 'nuevo');
     select count(*) into vencen from jsonb_array_elements(ret) x where x ->> 'lista' = 'por_vencer' and (x ->> 'dias')::int = 0;
     -- Transferencias por aprobar (misma cuenta que "Para hacer hoy").
     select count(*) into transf from public.pagos p join public.ventas v on v.id = p.venta_id
@@ -481,13 +500,26 @@ begin
 end $$;
 revoke all on function privado.precio_para(uuid, timestamptz, text, uuid, boolean) from public, anon, authenticated;
 
+-- ── 6) Deuda de un socio ──
+-- Misma cuenta, en plpgsql por lo mismo que precio_para: la puerta la llama por cada socio (2.600 veces en Socios).
+create or replace function privado.deuda_socio(p_socio_id uuid) returns numeric
+language plpgsql stable set search_path = '' as $$
+begin
+  return coalesce((select sum(p.monto) from public.pagos p join public.ventas v on v.id = p.venta_id
+                    where v.socio_id = p_socio_id and v.estado <> 'anulada' and p.medio = 'cuenta_corriente' and p.estado = 'aprobado'), 0)
+       - coalesce((select sum(vi.cantidad * vi.precio_unitario - vi.descuento) from public.venta_items vi join public.ventas v on v.id = vi.venta_id
+                    where v.socio_id = p_socio_id and v.estado <> 'anulada' and vi.tipo = 'deuda'), 0);
+end $$;
+revoke all on function privado.deuda_socio(uuid) from public, anon, authenticated;
+
 -- ── Verificación ────────────────────────────────────────────────────
 do $$
 declare f text;
 begin
   foreach f in array array['public.para_hacer_hoy(uuid)', 'public.pendientes_panel(uuid)', 'public.resultado_mes(uuid, date)',
-                           'privado.para_hacer_hoy_con(uuid, jsonb)', 'privado.retencion_con(uuid, timestamptz, jsonb)',
-                           'privado.precio_para(uuid, timestamptz, text, uuid, boolean)'] loop
+                           'privado.para_hacer_hoy_con(uuid, jsonb)', 'privado.retencion_con(uuid, timestamptz, jsonb, boolean)',
+                           'privado.retencion_liviana(uuid, timestamptz)',
+                           'privado.precio_para(uuid, timestamptz, text, uuid, boolean)', 'privado.deuda_socio(uuid)'] loop
     if to_regprocedure(f) is null then raise exception 'Verificación: falta %', f; end if;
     if not exists (select 1 from pg_proc where oid = f::regprocedure and 'search_path=""' = any (proconfig)) then
       raise exception 'Verificación: % sin search_path vacío', f;
