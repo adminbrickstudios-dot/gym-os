@@ -30,11 +30,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/ingresar/recuperar` | pantalla |  |  |  | `/ingresar` |
 | `/kiosco` | pantalla |  |  | `kiosco_entrar`, `kiosco_entrar_habitual`, `kiosco_estado`, `kiosco_habituales`, `kiosco_qr`, `kiosco_ultimo` |  |
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
-<<<<<<< HEAD
 | `/panel` | pantalla |  |  | `anular_venta_panel`, `buscar_socios`, `cerrar_novedad_plataforma`, `estado_abono_panel`, `guardar_accesos_rapidos`, `guardar_numeros_inicio`, `ocultar_primeros_pasos`, `pedir_anulacion`, `resolver_pedido_anulacion` | `/elegir` `/panel/caja` `/panel/entrada` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
-=======
-| `/panel` | pantalla |  |  | `anular_venta_panel`, `buscar_socios`, `cerrar_novedad_plataforma`, `estado_abono_panel`, `guardar_accesos_rapidos`, `ocultar_primeros_pasos`, `pedir_anulacion`, `resolver_pedido_anulacion` | `/elegir` `/panel/caja` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
->>>>>>> origin/noche/2026-11-05-vd33
 | `/panel/avisos` | pantalla | 👑 🧭 🛎️ |  | `bandeja_avisos`, `marcar_avisado`, `novedades_panel`, `publicar_novedad`, `quitar_novedad` | `/panel/socios/` |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cerrar_caja`, `confirmar_ticket`, `movimiento_caja`, `preparar_ticket`, `ticket_movimiento` | `/panel/caja/historial` |
 | `/panel/caja/historial` | pantalla | 👑 🧭 | caja | `historial_caja` |  |
