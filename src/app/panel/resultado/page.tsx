@@ -8,6 +8,7 @@ import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { Gastos, type GastosMes } from "./Gastos";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { DeudaSocios, type DeudaConSocios } from "./DeudaSocios";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -29,7 +30,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const pedido = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? `${sp.mes}-01` : null;
-    const [r, gastos, motivos, numeros, cupones, encuestas] = await Promise.all([
+    const [r, gastos, motivos, numeros, cupones, encuestas, deuda] = await Promise.all([
       rpc<Resultado>("resultado_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
       // RES-3: los gastos (hay sueldos) los ve solo el dueño.
       panel.yo.rol === "dueno" && !panel.secciones_apagadas.includes("gastos") ? rpc<GastosMes>("ganancia_mes", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }) : null,
@@ -41,6 +42,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       rpc<{ codigo: string; usos: number; socios: number }[]>("cupones_panel", { p_gimnasio_id: panel.gimnasio.id }),
       // COM-10: la pregunta del 0 al 10 (últimos 90 días).
       rpc<{ respuestas: number; nps: number | null; promotores: { socio_id: string; nombre: string; telefono: string | null; puntaje: number }[]; detractores: { socio_id: string; nombre: string; puntaje: number }[] }>("encuestas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-46L: lo cobrado por un servicio que todavía no se dio (es una foto de hoy: solo se muestra en el mes en curso).
+      rpc<DeudaConSocios>("deuda_con_socios", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
@@ -117,6 +120,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             )}
           </section>
         </div>
+
+        {deuda && r.en_curso && <DeudaSocios d={deuda} />}
 
         {numeros && r.en_curso && (
           <section aria-labelledby="socios-numeros">
