@@ -27,12 +27,12 @@ before(async () => {
 });
 after(async () => t && t.cerrar());
 
-const items = JSON.stringify([{ tipo: "producto", producto_id: agua }]);
+const itemsDe = () => JSON.stringify([{ tipo: "producto", producto_id: agua }]);
 const pago = (medio) => JSON.stringify([{ medio, monto: 1000 }]);
 const hace = (dias) => new Date(Date.now() - dias * 86400_000).toISOString();
 // vender(sede, items, pagos, socio, turno, clave, cobrado_en, motivo, comprobante)
 const vender = (medio, { socioId = socio, cobradoEn = null, motivo = null, comprobante = null } = {}) =>
-  t.q(`select public.vender($1, $2, $3, $4, null, null, $5, $6, $7) as r`, [t.sede, items, pago(medio), socioId, cobradoEn, motivo, comprobante]);
+  t.q(`select public.vender($1, $2, $3, $4, null, null, $5, $6, $7) as r`, [t.sede, itemsDe(), pago(medio), socioId, cobradoEn, motivo, comprobante]);
 
 test("la hoja pide el cobro de otro día: la recepción no puede, ni con motivo", async () => {
   await t.falla(() => como(uRec, () => vender("transferencia", { cobradoEn: hace(1), motivo: "Pagó ayer" })), /dueño o el encargado/);
@@ -87,7 +87,7 @@ test("el comprobante se guarda en la transferencia, y tiene que ser de este soci
   // Con dos transferencias no se sabe a cuál pegarlo.
   const dos = JSON.stringify([{ medio: "transferencia", monto: 400 }, { medio: "transferencia", monto: 600 }]);
   await t.falla(() => como(uDueno, () => t.q(`select public.vender($1, $2, $3, $4, null, null, null, null, $5)`,
-    [t.sede, items, dos, socio, `${t.g}/${socio}/${crypto.randomUUID()}.jpg`])), /un pago por transferencia/);
+    [t.sede, itemsDe(), dos, socio, `${t.g}/${socio}/${crypto.randomUUID()}.jpg`])), /un pago por transferencia/);
 });
 
 test("el medio por defecto: todos lo leen, solo dueño y encargado lo cambian", async () => {
