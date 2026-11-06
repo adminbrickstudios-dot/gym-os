@@ -20,7 +20,19 @@ if (/supabase\.co|vercel\.app/.test(process.env.BASE ?? "")) {
 let pasos = 0;
 let fallas = 0;
 export const ok = (m) => console.log(`✓ ${++pasos}. ${m}`);
-export const falla = (m) => { fallas++; console.log(`✗ ${m}`); };
+let ultimaPagina = null;
+const pendientes = [];
+export const falla = (m) => {
+  fallas++; console.log(`✗ ${m}`);
+  // Para investigar: foto y texto de la última pantalla abierta en el momento de la falla (se guardan antes de cerrar el navegador).
+  const p = ultimaPagina;
+  if (p && !p.isClosed() && pendientes.length < 6) {
+    const n = `falla-${process.argv[1]?.split(/[\\/]/).pop()?.replace(".mjs", "")}-${fallas}`;
+    mkdirSync(CAPTURAS, { recursive: true });
+    pendientes.push(p.screenshot({ path: join(CAPTURAS, `${n}.jpg`), type: "jpeg", quality: 60, timeout: 5000 }).catch(() => {}));
+    pendientes.push(p.locator("main").first().innerText({ timeout: 3000 }).then((t) => console.log(`  [pantalla ${p.url()}] ${t.replace(/\s+/g, " ").slice(0, 1500)}`)).catch(() => {}));
+  }
+};
 /** Un paso que pasa o falla según la condición. */
 export const chequear = (condicion, siPasa, siFalla) => (condicion ? ok(siPasa) : falla(siFalla));
 export const resultado = () => {
@@ -34,7 +46,10 @@ export async function navegador({ camara = false, video = null } = {}) {
   // video: lo que "filma" esa cámara (un .y4m; el .mjpeg Chrome no lo toma), por ejemplo un QR para el lector de la Entrada.
   const extra = camara || video ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [];
   if (video) extra.push(`--use-file-for-fake-video-capture=${video}`);
-  return chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
+  const nav = await chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
+  const cerrar = nav.close.bind(nav);
+  nav.close = async (...a) => { await Promise.allSettled(pendientes); return cerrar(...a); };
+  return nav;
 }
 
 /** Página nueva que junta errores de la página y respuestas 5xx. */
@@ -51,12 +66,16 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   }
   const p = await ctx.newPage();
   p.errores = [];
+  ultimaPagina = p;
   // Con la app compilada el HTML llega antes que React, y el contenido de la pantalla (que viene en
   // streaming) se hidrata después que el marco: un clic en ese momento se pierde. Después de cada
   // carga o cambio de dirección se espera a que React tome la página y a que la red se calme.
   const listo = async () => {
     await p.waitForFunction(() => document.documentElement.dataset.hidratado === "1" && !document.querySelector('[data-pagina-hidratada="0"]'),
       null, { timeout: 20000 }).catch(() => {});
+    // Y a que se calmen las consultas que la propia pantalla dispara al abrir (las precargas de los links y la
+    // renovación de la Entrada): una acción mandada en ese instante guardaba bien pero la pantalla no se refrescaba.
+    await p.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
   };
   for (const metodo of ["goto", "reload", "waitForURL"]) {
     const original = p[metodo].bind(p);
@@ -67,6 +86,10 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   p.on("dialog", (d) => d.accept());
   // E2E_CONSOLA=1: muestra los errores y advertencias de la consola del navegador (para investigar).
   if (process.env.E2E_CONSOLA) p.on("console", (m) => { if (["error", "warning"].includes(m.type())) console.log(`  [consola ${m.type()}] ${p.url()} ${m.text().slice(0, Number(process.env.E2E_CONSOLA) > 1 ? 4000 : 300)}`); });
+  if (process.env.E2E_CONSOLA) {
+    p.on("response", (r) => { if (r.status() >= 400) console.log(`  [http ${r.status()}] ${r.request().method()} ${r.url().slice(0, 140)}`); });
+    p.on("requestfailed", (r) => console.log(`  [red fallo] ${r.method()} ${r.url().slice(0, 140)} ${r.failure()?.errorText}`));
+  }
   return p;
 }
 
@@ -88,7 +111,10 @@ export async function entrarSocio(p, telefono, base = GIMNASIO()) {
   const codigos = JSON.parse(readFileSync(join(process.cwd(), ".local", "codigos.json"), "utf8"));
   const c = codigos[telefono] ?? Object.values(codigos).pop();
   await p.fill("input[name=codigo]", String(c?.codigo ?? c));
-  await p.click("button[type=submit]");
+  // Con 6 dígitos el formulario se manda solo (VD-33): si el botón ya no está, no hay nada que tocar.
+  await p.waitForURL(/\/app/, { timeout: 5000 }).catch(async () => {
+    if (await p.locator("button[type=submit]:not([disabled])").count()) await p.click("button[type=submit]:not([disabled])", { timeout: 5000 }).catch(() => {});
+  });
   await p.waitForURL(/\/app/, { timeout: 60000 });
 }
 

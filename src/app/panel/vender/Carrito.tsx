@@ -273,7 +273,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       {/* DIS-4: en el celular el carrito queda abajo de todo: una barra con el total lleva hasta él. */}
       {lineas.length > 0 && !carritoVisible && (
         <a href="#carrito" data-barra-carrito
-          className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(76px+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] shadow-lg">
+          className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(9.75rem+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] shadow-lg">
           <span>🛒 {lineas.reduce((n, l) => n + l.cantidad, 0)} · {total == null ? "—" : formatearPesos(total)}</span>
           <span>Cobrar ↓</span>
         </a>

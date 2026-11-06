@@ -13,7 +13,7 @@ import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, reg
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
-import { ultimasEntradas, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
@@ -170,8 +170,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.ventanaEntrada = "si";
-    return () => { delete document.documentElement.dataset.ventanaEntrada; };
+    document.documentElement.dataset.entradaLista = "si";
+    return () => { delete document.documentElement.dataset.entradaLista; };
   }, []);
 
   const conBarra = cfg.barra_fija && !propia;
@@ -183,8 +183,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Las últimas 5 entradas de la barra: al abrir la pantalla, después de cada entrada propia y (VD-4) apenas
   // entra alguien por otra vía: el "oído" compartido avisa y acá se vuelve a leer la lista (sin otro polling).
   const refrescarUltimas = useCallback(async () => {
-    const r = await ultimasEntradas(sedeId);
-    if (r.entradas) setUltimas(r.entradas);
+    try {
+      const res = await fetch(`/panel/entrada/ultimas?sede=${encodeURIComponent(sedeId)}`, { cache: "no-store" });
+      const r = (await res.json()) as { entradas?: UltimaEntrada[] };
+      if (r.entradas) setUltimas(r.entradas);
+    } catch { /* sin red: se queda lo último que llegó */ }
   }, [sedeId]);
   const refrescarRef = useRef(refrescarUltimas);
   useEffect(() => { refrescarRef.current = refrescarUltimas; });

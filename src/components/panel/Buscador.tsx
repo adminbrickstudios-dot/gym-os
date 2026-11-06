@@ -32,11 +32,13 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
   const [haciendo, hacer] = useTransition();
   const [marcado, setMarcado] = useState(0);
   const campo = useRef<HTMLInputElement>(null);
+  const disparador = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setAbierto(true); }
+      // Hay dos buscadores (menú y barra del celular): solo abre el que se ve, si no se apilan dos hojas.
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); if (disparador.current && disparador.current.getClientRects().length > 0) setAbierto(true); }
       if (e.key === "Escape") setAbierto(false);
     };
     window.addEventListener("keydown", tecla);
@@ -122,9 +124,9 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
   return (
     <>
       {compacto ? (
-        <button type="button" onClick={() => setAbierto(true)} className="boton !min-h-11 !px-3" aria-label="Buscar">🔍</button>
+        <button ref={disparador} type="button" onClick={() => setAbierto(true)} className="boton !min-h-11 !px-3" aria-label="Buscar">🔍</button>
       ) : (
-        <button type="button" onClick={() => setAbierto(true)} className="boton w-full !justify-between texto-suave !font-medium">
+        <button ref={disparador} type="button" onClick={() => setAbierto(true)} className="boton w-full !justify-between texto-suave !font-medium">
           <span>🔍 Buscar…</span>
           <kbd className="text-xs texto-tenue font-sans">Ctrl K</kbd>
         </button>

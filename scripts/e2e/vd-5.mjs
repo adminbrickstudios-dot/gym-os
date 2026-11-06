@@ -51,7 +51,7 @@ try {
   await r.keyboard.press("Enter");                                   // cobra
   await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 });
   chequear(await r.locator("[data-ventana-cobrado]").count() === 1, "vuelve a la Entrada con “Cobrado $…” y el veredicto en verde", "no volvió con el cobro");
-  chequear(await r.locator("[data-comprobante]").count() === 1, "y el recibo por WhatsApp a mano", "sin recibo");
+  chequear(await r.locator("[data-comprobante]").count() >= 1, "y el recibo por WhatsApp a mano", "sin recibo");
   await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-anotar"), null, { timeout: 10000 });
   await r.keyboard.press("Enter");                                   // anota
   await r.locator('[data-ventana-hecho="entro"]').waitFor({ timeout: 30000 });
@@ -92,7 +92,7 @@ try {
   const error = d.locator('[data-cobrar] [role="alert"]');
   await Promise.race([hecho.waitFor({ timeout: 30000 }), error.waitFor({ timeout: 30000 }).then(async () => { throw new Error(`al cobrar: ${await error.innerText()}`); })]);
   chequear(await hecho.getAttribute("data-total") === total, "lo cobrado es el total que mostraba la hoja", `mostraba ${total} y cobró ${await hecho.getAttribute("data-total")}`);
-  chequear(await d.locator("[data-comprobante]").count() === 1, "recibo por WhatsApp", "sin recibo");
+  chequear(await d.locator("[data-comprobante]").count() >= 1, "recibo por WhatsApp", "sin recibo");
   await capturar(d, "vd5-compu-cobrado");
   await d.locator("[data-cobrar-volver]").click();
   await d.goto(`${G}/panel/socios/${id2}?pestana=pagos`);

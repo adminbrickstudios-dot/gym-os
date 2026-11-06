@@ -12,7 +12,7 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/vencen-hoy`);
   await r.locator("main h1").waitFor({ timeout: 60000 });
-  const filas = r.locator("main ul > li");
+  const filas = r.locator("main div.space-y-3 > ul > li");
   if (await filas.count() === 0) {
     chequear(await r.getByText("Hoy no vence nadie").count() > 0, "sin vencimientos hoy: “Hoy no vence nadie” y el camino a Retención", "vacío sin texto");
   } else {

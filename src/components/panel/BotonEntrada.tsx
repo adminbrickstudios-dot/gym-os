@@ -10,7 +10,7 @@ export function BotonEntrada({ className }: { className: string }) {
   return (
     <Link href="/panel/entrada" data-boton-entrada className={className}
       onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || document.documentElement.dataset.ventanaEntrada !== "si") return;   // abrir en pestaña nueva sigue andando
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || document.documentElement.dataset.entradaLista !== "si") return;   // abrir en pestaña nueva sigue andando
         e.preventDefault();
         window.dispatchEvent(new Event(EVENTO_ABRIR_ENTRADA));
       }}>

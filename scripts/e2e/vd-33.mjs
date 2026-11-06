@@ -32,7 +32,7 @@ try {
   await m.goto(`${PLATAFORMA}/g/demo`);
   await m.goto(`${PLATAFORMA}/ingresar?modo=socio`);
   chequear(((await m.locator("[data-marca-ingreso]").textContent())?.trim()) === nombreGim, "desde /g/demo también se ve la marca del demo", "desde /g/demo no se ve la marca del demo");
-  chequear(await m.getByText("Tu celular o tu mail").isVisible() && await m.getByRole("button", { name: /Celular/ }).isVisible()
+  chequear(await m.getByText("Tu celular o tu mail", { exact: true }).isVisible() && await m.getByRole("button", { name: /Celular/ }).isVisible()
     && await m.getByRole("button", { name: /Mail/ }).isVisible() && await m.getByRole("button", { name: /Contraseña/ }).isVisible(),
   "un campo “celular o mail” y los tres métodos a la vista", "faltan el campo o los métodos");
   chequear(await sinDesborde(m), "celular 390: ingreso del socio sin desborde", "el ingreso del socio desborda en 390");
@@ -51,7 +51,7 @@ try {
     await e.fill("input[type=email]", mail);
     await e.fill("input[type=password]", "mal-mal-mal");
     await e.click("button[type=submit]");
-    return (await e.locator('[role=alert]').first().innerText({ timeout: 30000 })).replace(/^\S+\s*/, "").trim();
+    return (await e.locator('[role=alert]').filter({ hasText: /\S/ }).first().innerText({ timeout: 30000 })).replace(/^\S+\s*/, "").trim();
   };
   const conCuenta = await textoError("duena@ejemplo.invalid");
   const sinCuenta = await textoError(`nadie-${Date.now() % 100000}@ejemplo.invalid`);

@@ -11,7 +11,9 @@ const medir = (p) => p.evaluate(() => {
   return { ancho: document.documentElement.scrollWidth,
     bajos: [...document.querySelectorAll("main .boton")].filter(vis).filter((e) => e.getBoundingClientRect().height < 44).length,
     verdes: [...document.querySelectorAll("main .boton-principal")].filter(vis).length,
-    filasNumeros: new Set(nums).size };
+    filasNumeros: new Set(nums).size,
+    // Quién se pasa del borde (para saber qué arreglar cuando el ancho no da).
+    culpables: document.documentElement.scrollWidth <= window.innerWidth ? [] : [...document.querySelectorAll("body *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1 && getComputedStyle(e).position !== "fixed").slice(0, 6).map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(" ").slice(0, 4).join(".")}[${Math.round(e.getBoundingClientRect().width)}]`) };
 });
 const b = await navegador();
 try {
