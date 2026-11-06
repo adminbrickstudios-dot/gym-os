@@ -167,10 +167,10 @@ begin
     execute replace(d, viejo, nuevo);
   end if;
   -- Arreglo al lado: en "clases con lista de espera hoy" la variable fin chocaba con la columna clases.fin ("column reference fin is ambiguous"):
-  -- en cualquier gimnasio con clases, Para hacer hoy fallaba entero. Se califica con el nombre de la función.
+  -- en cualquier gimnasio con clases, Para hacer hoy fallaba entero. Se reemplaza por la misma cuenta (medianoche de mañana).
   d := pg_get_functiondef('public.para_hacer_hoy(uuid)'::regprocedure);
   if position('kl.inicio < fin and' in d) > 0 then
-    execute replace(d, 'kl.inicio < fin and', 'kl.inicio < para_hacer_hoy.fin and');
+    execute replace(d, 'kl.inicio < fin and', 'kl.inicio < privado.medianoche(hoy + 1, zona) and');
   end if;
 end $$;
 
