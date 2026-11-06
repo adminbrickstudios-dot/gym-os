@@ -5,7 +5,9 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { abrir } from "./_comun.mjs";
 
-let t, u = {}, ahora, a, b, c;
+let t, u = {}, ahora, a, b, c, base, baseLejos;
+// El gimnasio de prueba ya trae los casos testigo (con sus packs y coberturas): las cuentas se miran contra lo que había antes.
+const deuda = (momento) => como(u.dueno, async () => (await t.q(`select public.deuda_con_socios($1, $2::timestamptz) as d`, [t.g, momento]))[0].d);
 async function persona(rol) {
   const [{ id }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`${rol}${Math.random()}@ejemplo.invalid`]);
   await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,$3,$4)`, [t.g, id, `P ${rol}`, rol]);
@@ -46,11 +48,13 @@ before(async () => {
   t = await abrir("prueba-deuda-socios");
   u.dueno = await persona("dueno"); u.recepcion = await persona("recepcion");
   ahora = await t.en("2026-11-14", "12:00:00");
+  base = await deuda(ahora);
+  baseLejos = await deuda(await mas(1100));
   const [{ id: pk }] = await t.q(`insert into public.planes (gimnasio_id, tipo, nombre, cantidad_clases, consume_en) values ($1,'pack','Pack 10 deuda',10,'ingreso') returning id`, [t.g]);
   const [{ id: mem }] = await t.q(`insert into public.planes (gimnasio_id, tipo, nombre, duracion_meses, renovacion) values ($1,'membresia','Mensual deuda',1,'continua') returning id`, [t.g]);
   a = await socio("Ana"); b = await socio("Beto"); c = await socio("Cami");
-  // Ana: pack de 10 por $10.000, usó 3 → le quedan 7 = $7.000. Cuota de $30.000 de hace 10 días a +20: queda 20/30 = $20.000.
-  const p1 = await pack(a, pk, 10, await mas(40), await item("pack", pk, 10000));
+  // Ana: pack de 10 por $10.000.000 (para ser la de más a favor), usó 3 → le quedan 7 = $7.000.000. Cuota de $30.000 de hace 10 días a +20: queda 20/30 = $20.000.
+  const p1 = await pack(a, pk, 10, await mas(40), await item("pack", pk, 10000000));
   await consumir(a, p1, 3);
   await cobertura(a, mem, -10, 20, 30000);
   // Beto: cuota adelantada de $24.000 que empieza en 30 días (todo a favor). Un pack vencido no se debe.
@@ -62,22 +66,23 @@ before(async () => {
 after(async () => t && t.cerrar());
 
 test("suma los usos que quedan y lo que falta de las cuotas, al neto pagado", async () => {
-  const d = await como(u.dueno, async () => (await t.q(`select public.deuda_con_socios($1, $2) as d`, [t.g, ahora]))[0].d);
-  assert.equal(Number(d.packs.valor), 7000); assert.equal(d.packs.usos, 12); assert.equal(d.packs.socios, 2);
-  assert.equal(d.packs.usos_sin_venta, 5);
-  assert.equal(Number(d.cuotas.valor), 44000); assert.equal(Number(d.cuotas.adelantadas), 24000); assert.equal(Number(d.cuotas.en_curso), 20000);
-  assert.equal(d.cuotas.socios, 2);
-  assert.equal(Number(d.total), 51000);
-  assert.equal(d.mayores[0].nombre, "Ana Deuda"); assert.equal(Number(d.mayores[0].valor), 27000);
-  assert.equal(d.mayores.length, 2);
+  const d = await deuda(ahora);
+  const dif = (x, y) => Number(x) - Number(y);
+  assert.equal(dif(d.packs.valor, base.packs.valor), 7000000); assert.equal(d.packs.usos - base.packs.usos, 12); assert.equal(d.packs.socios - base.packs.socios, 2);
+  assert.equal(d.packs.usos_sin_venta - base.packs.usos_sin_venta, 5);
+  assert.equal(dif(d.cuotas.valor, base.cuotas.valor), 44000); assert.equal(dif(d.cuotas.adelantadas, base.cuotas.adelantadas), 24000); assert.equal(dif(d.cuotas.en_curso, base.cuotas.en_curso), 20000);
+  assert.equal(d.cuotas.socios - base.cuotas.socios, 2);
+  assert.equal(dif(d.total, base.total), 7044000);
+  assert.equal(d.mayores[0].nombre, "Ana Deuda"); assert.equal(Number(d.mayores[0].valor), 7020000);
+  assert.ok(d.mayores.every((m, i) => i === 0 || Number(d.mayores[i - 1].valor) >= Number(m.valor)));
 });
 
 test("un consumo anulado devuelve el uso; sin cobertura ni packs no hay deuda", async () => {
   await t.q(`update public.consumos_pack set anulado_en = $2 where socio_id = $1 and id = (select id from public.consumos_pack where socio_id = $1 limit 1)`, [a, ahora]);
-  const d = await como(u.dueno, async () => (await t.q(`select public.deuda_con_socios($1, $2) as d`, [t.g, ahora]))[0].d);
-  assert.equal(Number(d.packs.valor), 8000);
-  const lejos = await como(u.dueno, async () => (await t.q(`select public.deuda_con_socios($1, $2::timestamptz + interval '3 years') as d`, [t.g, ahora]))[0].d);
-  assert.equal(Number(lejos.total), 0); assert.equal(lejos.mayores.length, 0);
+  const d = await deuda(ahora);
+  assert.equal(Number(d.packs.valor) - Number(base.packs.valor), 8000000);
+  const lejos = await deuda(await mas(1100));
+  assert.equal(Number(lejos.total), Number(baseLejos.total));   // lo cargado por esta prueba ya venció o ya pasó
 });
 
 test("solo dueño y encargado; la recepción recibe un error, no un cero", async () => {
