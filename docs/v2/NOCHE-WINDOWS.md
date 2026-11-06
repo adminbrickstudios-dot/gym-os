@@ -28,7 +28,7 @@ parás hasta que `node scripts/noche/pendientes.mjs --siguiente` diga `NADA`.
     una base limpia, `npm run db:pruebas`, `npm run chequeos`, siembra del
     demo): ~5 min.
   - Un commit cuyo mensaje tenga `[pantallas]` corre además las pantallas
-    (`npm run e2e` + barrido, ~1-2 h). Usalo **cuando se cerró un bloque**
+    (`npm run e2e` + barrido, 2 a 4 h). Usalo **cuando se cerró un bloque**
     (A, B, C, D) o al final, no en cada ítem.
   - Mirar: `gh run list --branch <rama> --workflow pruebas-completas.yml -L 3`
     y `gh run watch <id> --exit-status`; el detalle de una falla:
