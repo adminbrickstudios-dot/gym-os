@@ -109,7 +109,10 @@ Lo nuevo:
   ofrece "Abrir mi turno" (fondo sugerido = lo que dejó el turno anterior).
   Cambio de turno: "Cerrar mi turno" (arqueo ciego) → el siguiente abre.
 - **Cierre automático**: una caja abierta de un día anterior **es** "cerrada
-  sin contar" (se calcula, no depende de un cron). Al primer acceso del día
+  sin contar" (se calcula, no depende de un cron). **La hora de corte la
+  elige el gimnasio** (por defecto 00:00; un gimnasio 24 h pone la de su
+  cambio de turno) y también "un turno abierto más de N horas" (por
+  defecto 14). La venta pertenece al turno, no al reloj. Al primer acceso del día
   se registra el cierre con estado `sin_contar`, el esperado calculado y
   nadie como responsable del conteo. El dueño la ve en Caja → "Para revisar"
   y la puede contar después ("conté $X") o dejarla así con motivo.
