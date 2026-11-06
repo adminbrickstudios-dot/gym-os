@@ -39,14 +39,15 @@ test("el dueño prende socios y carga reseñas; la página las muestra; socios r
     assert.equal(r.mostrar_socios, true);
     assert.equal(Number(r.resena_puntaje), 4.8, "el puntaje queda con un decimal");
     assert.equal(r.resena_cantidad, 120);
+    const l = await publica();   // dentro de la sesión: comoUsuario revierte lo guardado al salir
+    assert.equal(l.prueba_social.socios, 100, "137 socios se muestran como +100");
+    assert.equal(Number(l.prueba_social.resena.puntaje), 4.8);
+    assert.equal(l.prueba_social.resena.cantidad, 120);
   });
-  const l = await publica();
-  assert.equal(l.prueba_social.socios, 100, "137 socios se muestran como +100");
-  assert.equal(Number(l.prueba_social.resena.puntaje), 4.8);
-  assert.equal(l.prueba_social.resena.cantidad, 120);
 });
 
 test("con menos de 20 socios no se muestra número aunque esté prendido", async () => {
+  await t.q(`update public.landing_gimnasio set mostrar_socios = true where gimnasio_id = $1`, [t.g]);
   await t.q(`update public.socios set dado_de_baja_en = now(), motivo_baja = 'otro' where gimnasio_id = $1 and numero > 10`, [t.g]);
   assert.equal((await publica()).prueba_social.socios, null);
 });
@@ -60,10 +61,11 @@ test("errores que dicen qué: puntaje fuera de rango, solo uno de los dos", asyn
 });
 
 test("dejar los dos vacíos saca las reseñas", async () => {
+  await t.q(`update public.landing_gimnasio set resena_puntaje = 4.5, resena_cantidad = 10 where gimnasio_id = $1`, [t.g]);
   await t.comoUsuario(u.dueno, async () => {
     await t.q(`select public.guardar_prueba_social($1, false, null, null)`, [t.g]);
+    assert.equal((await publica()).prueba_social.resena, null);
   });
-  assert.equal((await publica()).prueba_social.resena, null);
 });
 
 test("el encargado lee y no guarda; recepción ni lee; anon no puede ni llamar", async () => {
