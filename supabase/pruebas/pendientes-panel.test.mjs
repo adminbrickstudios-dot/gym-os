@@ -123,9 +123,11 @@ test("Caja: una abierta que quedó del día anterior cuenta para su dueña y par
 test("Vencen y cobrar: sube con uno que vence hoy y baja solo cuando paga", async () => {
   const hoy0 = (await pend(u.recepcion)).vencen_hoy;
   const s = t.ctx.socios.vence_hoy;
-  // El testigo vence "hoy" del calendario de la prueba; se lo corre al día real de la base.
-  await t.q(`update public.coberturas c set hasta = privado.medianoche(privado.dia_local(now(), g.zona_horaria)::date + 1, g.zona_horaria)
-               from public.gimnasios g where g.id = c.gimnasio_id and c.socio_id = $1`, [s]);
+  // El testigo vence "hoy" del calendario de la prueba; se le suma una cortesía que termina al fin del día real de la base.
+  await t.q(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, motivo)
+              select c.gimnasio_id, c.suscripcion_id, c.socio_id, max(c.hasta), privado.medianoche(privado.dia_local(now(), g.zona_horaria)::date + 1, g.zona_horaria), 'cortesia', 'prueba de pendientes'
+                from public.coberturas c join public.gimnasios g on g.id = c.gimnasio_id
+               where c.socio_id = $1 and c.anulada_en is null group by c.gimnasio_id, c.suscripcion_id, c.socio_id, g.zona_horaria`, [s]);
   const conUno = (await pend(u.recepcion)).vencen_hoy;
   assert.equal(conUno, hoy0 + 1, "el que vence hoy suma");
   assert.equal((await pend(u.dueno)).vencen_hoy, conUno);
