@@ -6,7 +6,7 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { abrir } from "./_comun.mjs";
 
-let t, u = {}, plan, otro, s1, s2, sBaja, sOtroPlan, uSocio, uAjeno;
+let t, u = {}, plan, otro, s1, s2, sOtroPlan, uSocio, uAjeno;
 before(async () => {
   t = await abrir("prueba-aumento-aviso");
   const usuario = async () => (await t.q(`insert into auth.users (email) values ($1) returning id`, [`u${Math.random()}@ejemplo.invalid`]))[0].id;
@@ -23,7 +23,7 @@ before(async () => {
     if (baja) await t.q(`update public.socios set dado_de_baja_en = now(), motivo_baja = 'otro' where id = $1`, [id]);
     return id;
   };
-  s1 = await socio("Uno", plan); s2 = await socio("Dos", plan); sBaja = await socio("Baja", plan, true); sOtroPlan = await socio("Otro", otro);
+  s1 = await socio("Uno", plan); s2 = await socio("Dos", plan); await socio("Baja", plan, true); sOtroPlan = await socio("Otro", otro);
   uSocio = await usuario(); uAjeno = await usuario();
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [s1, uSocio]);
   await t.q(`update public.socios set usuario_id = $2 where id = $1`, [s2, uAjeno]);
@@ -53,10 +53,11 @@ test("con menos de 30 días no pasa: ni el encargado ni el dueño sin motivo", a
 });
 
 test("aviso_previo_aumento cuenta los días y los socios activos (sin los dados de baja)", async () => {
+  const [d10, d30] = [await dia(10), await dia(30)];
   await como(u.encargado, async () => {
-    const [{ v }] = await t.q(`select public.aviso_previo_aumento($1, $2, $3::date) as v`, [t.g, [plan], await dia(10)]);
+    const [{ v }] = await t.q(`select public.aviso_previo_aumento($1, $2, $3::date) as v`, [t.g, [plan], d10]);
     assert.equal(v.cumple, false); assert.equal(v.dias_de_aviso, 10); assert.equal(v.aviso_dias, 30); assert.equal(v.socios_a_avisar, 2); assert.equal(v.puede_excepcion, false);
-    const [{ v: ok }] = await t.q(`select public.aviso_previo_aumento($1, $2, $3::date) as v`, [t.g, [plan, otro], await dia(30)]);
+    const [{ v: ok }] = await t.q(`select public.aviso_previo_aumento($1, $2, $3::date) as v`, [t.g, [plan, otro], d30]);
     assert.equal(ok.cumple, true); assert.equal(ok.socios_a_avisar, 3);
   });
   await como(u.dueno, async () => {
