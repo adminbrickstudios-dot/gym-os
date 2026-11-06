@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-40 · Super admin v2
+
+**QUÉ HICE**
+- Migración 6300: alta de gimnasio en 3 pasos (tipo, datos y marca con vista previa del nombre y los colores, dueño) que termina con mensaje de bienvenida (mail, contraseña y link de WhatsApp si hay celular); salud de cada gimnasio en rojo, amarillo o verde con el motivo escrito, ordenada de "necesitan atención" a "no", demo al final, con filtros y búsqueda (se calcula en el momento, no se guarda ningún estado); entrar como soporte pide motivo obligatorio y guarda quién, por qué y cuándo, vence a los 60 minutos (se cierra cuando alguien mira, sin cron), muestra marco y cartel con el motivo y el botón Salir, y el dueño lo ve en su Control ("Cuando BRIK entró a ayudarte"); el botón "¿Necesitás ayuda?" (dueño y encargado) manda gimnasio, quién, pantalla y último error al tablero de BRIK con tope de 5 por hora por persona; métricas de la plataforma (entradas por día, abonos por mes); ficha del gimnasio con uso de 4 semanas, registro de soporte y notas internas.
+- `admin_entrar_gimnasio` pasa a llevar el motivo (la firma sin motivo se borra en la misma migración) y se actualizaron las llamadas en `super-admin.test.mjs`; los e2e que dan de alta o entran como soporte (adm-1, adm-3, cliente, rev-5, super-admin) pasan por el helper `alta-gimnasio.mjs`. Un soporte que ya estaba adentro antes de la migración debe entrar de nuevo escribiendo el motivo.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`super-admin-v2`).
+
+**SIN ARREGLAR**: VD-40b (avisos por segmento, campana del dueño para "BRIK entró", módulos por gimnasio, logo en el alta, errores de 24 h y migraciones en la ficha). El 2FA del super admin es VD-42.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-40` y los viejos reescritos con el helper (no se confirmó que ninguno se haya roto): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-22 · Entrar con Google y sesión recordada (D23)
 
 **QUÉ HICE**

@@ -513,6 +513,7 @@ bloque 18.
 - [ ] VD-20b · 🟢 · Aviso de rutina vencida al socio y gráfico de progreso por rutina y por socio para el profe
 - [ ] VD-22c · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
 - [ ] VD-22d · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
+- [ ] VD-40b · 🟢 · Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -541,7 +542,7 @@ bloque 18.
 - [x] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in) — verificado: eventos con flyer, fechas, precio socio/no socio, espera calculada, check-in en la Entrada y cierre con asistentes; base en verde en GitHub (eventos-completos); e2e vd-19 en la corrida de la tanda
 - [x] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso — verificado: biblioteca, plantillas, asignar a varios, la rutina de hoy en la app y quién la hizo; base en verde en GitHub (rutinas-completas); e2e vd-20 en la corrida de la tanda
 *Tanda 5 · BRIK y seguridad*
-- [ ] VD-40 · 🟢 · Super admin v2: salud, alta en 3 pasos, soporte con motivo, ayuda con contexto, métricas
+- [x] VD-40 · 🟢 · Super admin v2: salud, alta en 3 pasos, soporte con motivo, ayuda con contexto, métricas — verificado: alta de gimnasio en 3 pasos con vista previa, salud con colores calculada, entrar como soporte con motivo visible al dueño, ayuda del dueño con contexto, métricas; base en verde en GitHub (super-admin-v2); e2e vd-40 en la corrida de la tanda
 - [ ] VD-42 · 🟢 · Mi cuenta y seguridad: contraseña, sesiones, 2FA, dar de baja a alguien del equipo
 - [ ] VD-43 · 🟢 · Gimnasio nuevo: onboarding calculado y datos de ejemplo
 - [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo

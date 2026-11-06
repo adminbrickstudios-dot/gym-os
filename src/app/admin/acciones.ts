@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
-import { dominioBase } from "@/lib/dominios";
+import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
 import { rpc } from "@/lib/panel/servidor";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
@@ -11,8 +11,19 @@ import { rpc } from "@/lib/panel/servidor";
 
 export type EstadoAlta = {
   error?: string;
-  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string };
+  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; bienvenida?: { texto: string; wa: string | null } };
 };
+
+const COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/** VD-40: el mensaje de bienvenida para pasarle al dueño por WhatsApp, con el link y la contraseña provisoria. */
+function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string, celular: string) {
+  const base = dominioBase();
+  const host = subdominiosFuncionan(base) ? `${slug}.${base}` : (dominioPlataforma() || base);
+  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Gym OS. Entrá en https://${host} con “Entrá a tu gimnasio”.\nMail: ${email}\nContraseña provisoria: ${contrasena}\nCambiala apenas entres (Mi cuenta).`;
+  const digitos = celular.replace(/\D/g, "");
+  return { texto, wa: digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : null };
+}
 
 export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoAlta> {
   const slug = String(f.get("slug") ?? "").trim().toLowerCase();
@@ -37,11 +48,18 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
     catch (e) { avisoPlantilla = ` No se pudo aplicar la plantilla: ${(e as Error).message}.`; }
   }
+  // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
+  const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
+  if (COLOR.test(acento) && COLOR.test(fondo)) {
+    try { await rpc("admin_guardar_marca", { p_gimnasio_id: r.gimnasio_id, p_acento: acento, p_fondo: fondo }); }
+    catch (e) { avisoPlantilla += ` No se pudieron guardar los colores: ${(e as Error).message}.`; }
+  }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
   if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
     const { contrasena } = await darAcceso(r.equipo_id, email, dueno);
-    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla } };
+    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla,
+      bienvenida: contrasena ? bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? "")) : undefined } };
   } catch (e) {
     return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
   }
@@ -148,3 +166,8 @@ export const registrarPagoBrik = async (gimnasioId: string, monto: number, cubre
   hechoAdmin(() => rpc("admin_registrar_pago_brik", { p_gimnasio_id: gimnasioId, p_monto: monto, p_cubre_hasta: cubreHasta, p_nota: nota || null }), ["/admin", `/admin/${gimnasioId}`]);
 export const anularPagoBrik = async (gimnasioId: string, pagoId: string) =>
   hechoAdmin(() => rpc("admin_anular_pago_brik", { p_pago_id: pagoId }), ["/admin", `/admin/${gimnasioId}`]);
+
+// ── VD-40: ayuda del dueño y notas internas ──
+export const resolverAyuda = async (id: string) => hechoAdmin(() => rpc("admin_resolver_ayuda", { p_id: id }), ["/admin"]);
+export const agregarNotaBrik = async (gimnasioId: string, texto: string) =>
+  hechoAdmin(() => rpc("admin_agregar_nota", { p_gimnasio_id: gimnasioId, p_texto: texto }), [`/admin/${gimnasioId}`]);

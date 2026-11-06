@@ -5,6 +5,7 @@
 // demo por /g/demo → el socio entra a la app desde la plataforma.
 //   npm run e2e:admin             (con scripts/local/levantar.sh corriendo)
 import { PLATAFORMA as B, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { altaGimnasio, entrarSoporte } from "./alta-gimnasio.mjs";
 
 const b = await navegador();
 const p = await pagina(b);
@@ -16,16 +17,13 @@ try {
   ok(`estado de la plataforma: ${await p.locator("details summary").first().innerText()}`);
 
   const s = Date.now().toString().slice(-5);
-  await p.fill("input[name=nombre]", `Olympo ${s}`);
-  await p.fill("input[name=dueno]", "Dueño Olympo");
-  await p.fill("input[name=email]", `olympo${s}@ejemplo.invalid`);
-  await p.click('button:has-text("Crear gimnasio")');
+  await altaGimnasio(p, { nombre: `Olympo ${s}`, dueno: "Dueño Olympo", email: `olympo${s}@ejemplo.invalid` });
   await p.locator("strong.numero").first().waitFor({ timeout: 30000 });
   const clave1 = (await p.locator("strong.numero").first().innerText()).trim();
   ok(`gimnasio creado, contraseña provisoria ${clave1}`);
   await capturar(p, "admin-creado", true);
 
-  await p.click('button:has-text("Entrar al panel")');
+  await entrarSoporte(p.locator("[data-alta-gimnasio]"));
   await p.waitForURL(/\/panel/, { timeout: 60000 });
   const saludo = await p.locator("h1").first().innerText();
   chequear(/Soporte BRIK/.test(saludo), `panel del gimnasio nuevo: "${saludo}"`, `no saluda a Soporte BRIK: ${saludo}`);
@@ -78,7 +76,7 @@ try {
 
   await p.context().clearCookies();
   await entrar(p, "admin@ejemplo.invalid", undefined, B);
-  await fila("Gimnasio Demo").locator('button:has-text("Entrar al panel")').click();
+  await entrarSoporte(fila("Gimnasio Demo"));
   await p.waitForURL(/\/panel/, { timeout: 60000 });
   ok(`admin dentro del demo: "${await p.locator("h1").first().innerText()}"`);
 

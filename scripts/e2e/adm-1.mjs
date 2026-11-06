@@ -4,6 +4,7 @@
 // lista muestra la salud de cada gimnasio.
 //   npm run e2e:adm-1            (con scripts/local/levantar.sh corriendo)
 import { PLATAFORMA as B, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { altaGimnasio, entrarSoporte } from "./alta-gimnasio.mjs";
 
 const b = await navegador();
 try {
@@ -12,13 +13,10 @@ try {
   await p.locator("[data-salud]").first().waitFor({ timeout: 60000 });
   ok(`ADM-4: salud en cada gimnasio (“${(await p.locator("[data-salud]").first().innerText()).trim()}”)`);
   const s = Date.now().toString().slice(-5);
-  await p.fill("input[name=nombre]", `Box Plantilla ${s}`);
-  await p.fill("input[name=dueno]", "Dueña Box");
-  await p.locator("select[name=tipo]").selectOption("box");
-  await p.click('button:has-text("Crear gimnasio")');
+  await altaGimnasio(p, { nombre: `Box Plantilla ${s}`, dueno: "Dueña Box", tipo: "box" });
   await p.getByText(/está creado/).first().waitFor({ timeout: 60000 });
   chequear(!/No se pudo aplicar la plantilla/.test(await p.locator("main").innerText()), "el admin crea un gimnasio tipo Box", "la plantilla falló");
-  await p.click('button:has-text("Entrar al panel")');
+  await entrarSoporte(p.locator("[data-alta-gimnasio]"));
   await p.waitForURL(/\/panel/, { timeout: 60000 });
   await p.goto(`${B}/panel/planes`);
   await p.getByText("Pack 8 clases").first().waitFor({ timeout: 60000 });
