@@ -47,3 +47,4 @@ Corrida [pantallas]: 42158575189. Cuando dé verde: git branch publicar/2026-11-
 Tanda 2 en paralelo: A = VD-7→VD-8 (migr 004000/004001, DUEÑO DE `vender`/Cobros), B = VD-9 caja (004100; NO redefine vender: trigger), C = VD-3→VD-4 (004200/004201, DUEÑA de registrar_ingreso). Luego VD-10 y VD-41.
 Agentes tanda 2: A=VD-7→8 af348dbb159d73e89 (rama noche/2026-11-05-vd7); B=VD-9 a78a9f148a4280757 (vd9); C=VD-3→4 ac7165214cdd8c393 (vd3).
 (VD-3, VD-4 mergeados; sumados VD-3b, VD-4b)
+VD-3/4 mergeados. Lanzado VD-41 a5fdf294283752045 (rama noche/2026-11-05-vd41, migr 004150). Falta tanda 2: VD-10 (esperar a VD-8/9 mergeados).
