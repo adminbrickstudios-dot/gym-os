@@ -1,4 +1,19 @@
 # Gy
+## 2026-11-06 · Noche · VD-46B, C, E y J · Suspender, cortesías, baja con constancia y devolución
+
+**QUÉ HICE**
+- **46B (migración 7200)**: `suspender_socio` (la recepción solo suspende; la expulsión es de dueño o encargado), `levantar_suspension` y `revisar_suspension` (solo dueño o encargado, con motivo), `suspension_socio` para la ficha; fecha de revisión (30 días por defecto) con aviso en la campana; un DNI suspendido no entra ni de invitado; aparece en Control y hay botón en la ficha.
+- **46C (7201)**: `dar_cortesia` y `anular_cortesia` con tope BAJO por defecto (recepción 1 día por cortesía y 5 por mes, encargado 7 y 30, dueño hasta 31; los edita el dueño en Control); lista de motivos del gimnasio (`motivos_beneficio`, 6 de partida); el motivo del descuento en Cobrar y Vender pasa a un select de esa lista; la campana avisa si un socio recibe 2 cortesías en 60 días; Control muestra descuentos y cortesías del mes por persona. No se tocó `vender`.
+- **46E (7202)**: cada baja tiene un código `BAJA-XXXXXXXX` visible en la app y en la ficha; un pedido sin responder hace más de 24 h aparece en la campana, en Inicio y en Para hacer hoy; `dar_de_baja` devuelve jsonb y cierra lo pendiente (rechaza los pagos por aprobar y anula sus ventas, saca los turnos fijos y cancela las reservas futuras; lo ya cobrado no se toca); un motivo fuera de la lista queda como `otro`.
+- **46J (7203)**: `calcular_devolucion_baja` (la recepción solo ve si hay algo para evaluar, no los montos) y `registrar_devolucion` (solo dueño o encargado, con motivo, HECHO NUEVO que no toca el pago original; en efectivo sale de la caja abierta del que la registra como retiro y baja lo esperado del cierre). Regla del gimnasio: `ninguna`, `cuotas_adelantadas` (por defecto) o `proporcional`, editable en Control. Control las lista y la campana avisa la baja reciente con una devolución por decidir.
+- **Decisiones de plata y permisos (revisar)**: la baja no devuelve nada sola; si la devolución es en efectivo y quien la registra no tiene caja abierta, falla; un período se devuelve una sola vez (se puede devolver menos de lo calculado dejando anotado cuánto era).
+- **Funciones compartidas**: `para_hacer_hoy` se parcha en el lugar apuntando a `privado.para_hacer_hoy_con` (falla con un mensaje claro si el texto de las bajas cambió); `campana_control` y `moderacion_control` se redefinieron copiando la versión anterior; `privado.avisos_moderacion` es un gancho que 7200 a 7203 van reemplazando acumulando avisos: un ítem posterior que lo redefina tiene que copiar la versión de 7203.
+- **Bugs encontrados**: la variable `fin` de `para_hacer_hoy` (ya corregida también por VD-30/7100); `privado.hecho_inmutable()` sin argumentos no frena nada porque `tg_argv` queda nulo: se arregló en los triggers nuevos; `pedidos_demo_brik` (6300:80) lo usa igual sin argumentos y probablemente no es inmutable.
+- Verificado: lint, typecheck, 147 pruebas, mapa y base/chequeos/demo en verde en GitHub (`vd-46b-suspender`, `vd-46c-cortesias`, `vd-46e-baja`, `vd-46j-devolucion`), con VD-30 ya adentro de su rama.
+
+**SIN ARREGLAR**: VD-46T (la base rechaza descuentos manuales con motivo fuera de la lista), VD-46U (topes y motivos en Configuración → Reglas; anular una devolución), VD-46V (suspensión por sede o de toda la cadena; el dueño no deja pasar a un expulsado), VD-46W (rechazar también pedidos de pausa al dar de baja; aviso tardío de MercadoPago). Además queda por revisar `hecho_inmutable` en `pedidos_demo_brik`.
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46b/c/e/j` y las pantallas (botón de suspender, constancia de baja, select de motivos): escritos según la documentación, pero no ejecutados; el build de Next no se corrió en la rama.
+
 ## 2026-11-06 · Noche · VD-30 (con VD-47Y y VD-16B) · Velocidad medida y escala
 
 **QUÉ HICE**

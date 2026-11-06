@@ -526,6 +526,10 @@ bloque 18.
 - [ ] VD-28C · 🟢 · El alta nueva conserva el origen (alta desde Socios filtrado, cobrar y volver con el filtro)
 - [ ] VD-28D · 🟢 · Memoria de lista también en Mensajes y Resultado cuando haya detalle propio
 - [ ] VD-46S · 🟢 · MercadoPago: pagos devueltos en Control (linea_de_control), botón Revisar también en Ventas, estado in_mediation con aviso, etiqueta devuelto en la ficha de pagos
+- [ ] VD-46T · 🟢 · La base rechaza descuentos manuales con motivo fuera de la lista motivos_beneficio (hoy solo lo exige la pantalla)
+- [ ] VD-46U · 🟢 · Topes y motivos de cortesías y devoluciones en Configuración → Reglas (hoy en Control); anular una devolución registrada por error
+- [ ] VD-46V · 🟢 · Suspensión por sede o de toda la cadena; el dueño no deja pasar a un expulsado con dejar pasar
+- [ ] VD-46W · 🟢 · Al dar de baja, rechazar también los pedidos de pausa pendientes y evitar que un aviso tardío de MercadoPago apruebe un pago ya rechazado
 - [ ] VD-44B · 🟢 · "Mi foto": el profe o la recepción cambia su propia foto desde Mi cuenta
 - [ ] VD-44C · 🟢 · La foto del profe en la TV de la sala y en el detalle de la clase del panel
 - [ ] VD-31B · 🟢 · Apagar las ayudas también desde Yo en la app del socio, y un tour de la hoja Cobrar
@@ -568,10 +572,10 @@ bloque 18.
 *Tanda 6 · El día a día real*
 - [x] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos — verificado: análisis de las 89 situaciones: 25 ⭐ (14 cubiertas, 5 parciales, 6 abiertas) y 18 ítems VD-46A…R armados en la COLA con su LISTO SI
 - [x] VD-46A · 🟢 · MercadoPago: reembolso, contracargo y conciliación (un pago aprobado + charged_back pasa a devuelto, anula la venta y retira la cobertura; un approved posterior a refunded se ignora; el pendiente > 15 min se reconsulta sin cron; revierte solo por webhook o reconsulta, nunca por el navegador; alerta al dueño) — caso 17 de 14-SITUACIONES — verificado: devolución/contracargo de un pago aprobado pasa a devuelto, anula la venta y retira la cobertura (solo por webhook firmado o reconsulta del servidor); orden por fecha; reconsulta sin cron; alerta en la campana; base en verde en GitHub (mercadopago-devoluciones); e2e vd-46a en la corrida de la tanda
-- [ ] VD-46B · 🟢 · Suspender o expulsar a un socio con motivo y fecha de revisión (suspender_socio / levantar_suspension; la recepción suspende pero solo dueño/encargado levantan; el suspendido no entra ni como invitado; aparece en Control) — caso 37
-- [ ] VD-46C · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23
-- [ ] VD-46E · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30
-- [ ] VD-46J · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16
+- [x] VD-46B · 🟢 · Suspender o expulsar a un socio con motivo y fecha de revisión (suspender_socio / levantar_suspension; la recepción suspende pero solo dueño/encargado levantan; el suspendido no entra ni como invitado; aparece en Control) — caso 37 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
+- [x] VD-46C · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
+- [x] VD-46E · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
+- [x] VD-46J · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [ ] VD-46N · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
 - [ ] VD-46O · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
 - [ ] VD-46D · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13

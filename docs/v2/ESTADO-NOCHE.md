@@ -97,3 +97,4 @@ VD-28 y VD-46A mergeados. Lanzado VD-31 aaa33a931c8aef32f (vd31, migr 6900). En 
 (VD-29 mergeado)
 VD-29 mergeado. Lanzado G2 de VD-46 (B, C, E, J en serie): agente a0f8c975d6faa4388, rama noche/2026-11-05-vd46b, migraciones 7200 a 7203. En curso: VD-30 (a7557f7dbc071d7ce) y el triaje de la tanda 1 (adbcaf6f5b21a3aca).
 (VD-30, VD-47Y, VD-16B mergeados; sumado VD-30B). La 7100 es la versión vigente de para_hacer_hoy, pendientes_panel, retencion_con, precio_para, deuda_socio, resultado_mes.
+(VD-46B,C,E,J mergeados; sumados VD-46T..W). privado.avisos_moderacion: versión vigente = la de 7203.
