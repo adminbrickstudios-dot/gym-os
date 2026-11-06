@@ -18,7 +18,7 @@ export default async function PaginaAumento() {
     const primeroDelMes = `${m === 12 ? a + 1 : a}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}-01`;
     return (
       <>
-        <Encabezado emoji="📈" titulo="Aumento de precios" volver={{ href: "/panel/planes", texto: "Planes y precios" }}
+        <Encabezado emoji="📈" titulo="Aumento de precios" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
           bajada="Varios planes a la vez, desde un día. Lo ya cobrado no cambia; hasta ese día se cobra el precio de hoy." />
         <Aumento planes={planes} hoy={hoy} sugerido={primeroDelMes} zona={zona} gimnasio={panel.gimnasio.nombre} />
       </>

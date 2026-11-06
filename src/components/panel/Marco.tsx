@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
 import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara } from "@/lib/panel/secciones";
@@ -10,6 +10,8 @@ import { ProveedorSecciones } from "./LinkPanel";
 import { SinConexion } from "@/components/ui/SinConexion";
 import { VentanaEntrada } from "./VentanaEntrada";
 import { AvisosEntrada } from "./AvisosEntrada";
+import { OrigenPanel } from "./OrigenPanel";
+import { VolverAlOrigen } from "./VolverAlOrigen";
 import { CobrarHost } from "./cobrar/CobrarHost";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
@@ -44,6 +46,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         puedeCobrar={!!sedeCobro && !panel.secciones_apagadas.includes("socios")}
         cambiarGimnasio={enPlataforma}
       />
+      {/* VD-28: el origen (de qué lista venís) y la memoria de scroll de las listas. */}
+      <Suspense fallback={null}><OrigenPanel /></Suspense>
       {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
       {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana />}
       {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
@@ -70,12 +74,14 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
 }
 
 /** Encabezado de una pantalla: emoji, título grande y una línea que explica qué es. */
-/** `volver`: el link para subir un nivel (“← Socios”), arriba de todo. */
-export function Encabezado({ emoji, titulo, bajada, accion, volver }: { emoji: string; titulo: string; bajada?: ReactNode; accion?: ReactNode; volver?: { href: string; texto: string } }) {
+/** `volver`: el link para subir un nivel (“← Socios”), arriba de todo. `volverAlOrigen` (VD-28): si se llegó desde una lista, ese link pasa a “← Volver a <esa lista>” con su búsqueda y scroll. */
+export function Encabezado({ emoji, titulo, bajada, accion, volver, volverAlOrigen = false }: { emoji: string; titulo: string; bajada?: ReactNode; accion?: ReactNode; volver?: { href: string; texto: string }; volverAlOrigen?: boolean }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
       <div className="min-w-0">
-        {volver && <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>}
+        {volver && (volverAlOrigen
+          ? <VolverAlOrigen href={volver.href} texto={volver.texto} />
+          : <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>)}
         <p className="text-4xl mb-3" aria-hidden>{emoji}</p>
         <h1 className="titular text-5xl sm:text-6xl">{titulo}</h1>
         {bajada && <p className="texto-suave text-lg mt-2">{bajada}</p>}

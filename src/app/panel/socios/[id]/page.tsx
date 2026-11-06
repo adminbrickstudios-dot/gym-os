@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
+import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
@@ -105,7 +106,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         <header>
           {sp.desde === "entrada"
             ? <VolverAEntrada socioId={s.id} nombre={`${s.nombre} ${s.apellido}`.trim()} />
-            : <Link href="/panel/socios" className="texto-suave hover:text-[var(--texto)]">← Socios</Link>}
+            : <VolverAlOrigen href="/panel/socios" texto="Socios" className="texto-suave hover:text-[var(--texto)]" />}
           <div className="flex items-start gap-4 mt-4">
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
               version={foto ? foto.slice(-36, -4) : null} />

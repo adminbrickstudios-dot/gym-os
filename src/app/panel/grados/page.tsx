@@ -19,7 +19,7 @@ export default async function PaginaGrados() {
     const conGrados = p.actividades.filter((a) => a.grados.length);
     return (
       <>
-        <Encabezado emoji="🥋" titulo="Grados" volver={{ href: "/panel/clases", texto: "Clases" }}
+        <Encabezado emoji="🥋" titulo="Grados" volver={{ href: "/panel/clases", texto: "Clases" }} volverAlOrigen
           bajada="Para artes marciales: los cinturones de cada actividad, lo que pide cada uno y quién está listo para rendir." />
         {conGrados.length > 0 && (
           <section className="mb-10" aria-labelledby="listos">

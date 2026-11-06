@@ -33,7 +33,7 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }}
+        <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
           bajada="Quién abrió y cerró, cuánto tenía que haber, cuánto se contó y qué entró o salió del cajón." />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/historial" />}
         {turnos.length === 0 ? <Vacio emoji="🗂️" titulo="Todavía no hubo turnos">Cuando se abra y se cierre la caja, cada turno queda acá.</Vacio> : (
