@@ -3,6 +3,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { Pendiente } from "./Pendiente";
+import { RevisarMP } from "./RevisarMP";
 import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Transferencias" };
@@ -14,10 +15,14 @@ export default async function Transferencias() {
     exigirSeccion(panel, "transferencias");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const filas = await rpc<Fila[]>("pagos_por_aprobar", { p_gimnasio_id: panel.gimnasio.id });
+    // VD-46A: el dueño y el encargado pueden revisar con MercadoPago si el gimnasio lo tiene conectado.
+    const puedeRevisar = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
+    const mp = puedeRevisar ? await rpc<{ conectado: boolean }>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }) : null;
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
         <Encabezado emoji="🧾" titulo="Transferencias" bajada="Socios que pagaron por transferencia y subieron el comprobante. Mirá que haya llegado y aprobala." />
+        {mp?.conectado && <div className="mb-4"><RevisarMP /></div>}
         {filas.length === 0 ? <Vacio emoji="✨" titulo="Nada para revisar">Cuando un socio pague por transferencia desde su app y suba el comprobante, aparece acá para que lo apruebes.</Vacio> : (
           <ul className="space-y-2">{filas.map((p) => <Pendiente key={p.pago_id} p={p} cuando={cuando(p.informado_en)} />)}</ul>
         )}

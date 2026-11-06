@@ -13,7 +13,15 @@ export type PreferenciaAviso = { tipo: string; app: boolean };
 export async function traerCampana() {
   const panel = await contextoPanel();
   const c = await rpc<{ items: ItemCampana[] }>("campana_panel", { p_gimnasio_id: panel.gimnasio.id });
-  const items = c.items
+  // VD-46A: lo que MercadoPago devolvió o contracargó (lo calcula la base, solo para dueño y encargado). No se redefine
+  // campana_panel: se suma acá. Si esta consulta falla no se rompe la campana entera: se muestra lo demás.
+  let mp: ItemCampana[] = [];
+  if (panel.yo.rol === "dueno" || panel.yo.rol === "encargado") {
+    try { mp = (await rpc<{ items: Omit<ItemCampana, "tipo">[] }>("avisos_pagos_mp", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true })).items.map((i) => ({ ...i, tipo: null })); }
+    catch { mp = []; }
+  }
+  const items = [...c.items, ...mp]
+    .sort((a, b) => (Date.parse(b.en ?? "") || 0) - (Date.parse(a.en ?? "") || 0))
     .map((i) => ({ ...i, href: i.href === "/" ? "/panel" : `/panel${i.href}` }))
     .filter((i) => rutaDisponible(i.href, panel.yo.rol, panel.secciones_apagadas));
   return { panel, items, sinLeer: items.filter((i) => !i.leido).length };

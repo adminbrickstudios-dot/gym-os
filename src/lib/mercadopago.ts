@@ -9,7 +9,13 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const API = () => (process.env.MP_API_URL ?? "https://api.mercadopago.com").replace(/\/$/, "");
 
 export type Preferencia = { id: string; init_point: string; sandbox_init_point?: string };
-export type PagoMP = { id: number | string; status: string; external_reference: string | null; transaction_amount: number; currency_id: string };
+export type PagoMP = {
+  id: number | string; status: string; external_reference: string | null; transaction_amount: number; currency_id: string;
+  /** Cuándo MercadoPago tocó el pago por última vez: ordena los avisos (uno más viejo no pisa a uno más nuevo). */
+  date_last_updated?: string | null;
+  /** Lo devuelto hasta ahora (un reembolso parcial deja el estado en approved). */
+  transaction_amount_refunded?: number | null;
+};
 
 async function llamar<T>(token: string, ruta: string, init?: RequestInit): Promise<T> {
   const r = await fetch(`${API()}${ruta}`, {
@@ -38,6 +44,20 @@ export function crearPreferencia(token: string, p: { pagoId: string; titulo: str
 }
 
 export const leerPago = (token: string, id: string) => llamar<PagoMP>(token, `/v1/payments/${encodeURIComponent(id)}`);
+
+/**
+ * VD-46A: el pago de MercadoPago que lleva NUESTRA referencia (el id de nuestro pago). Es la forma de
+ * reconsultar un pago que el socio abrió y del que nunca llegó el aviso. Devuelve el último que se tocó.
+ */
+export async function buscarPagoPorReferencia(token: string, referencia: string): Promise<PagoMP | null> {
+  const r = await llamar<{ results?: PagoMP[] }>(token, `/v1/payments/search?external_reference=${encodeURIComponent(referencia)}&sort=date_last_updated&criteria=desc&limit=5`);
+  const filas = (r.results ?? []).filter((p) => p.external_reference === referencia);
+  return filas[0] ?? null;
+}
+
+/** Reconsulta un pago nuestro: por su ID de MercadoPago si ya lo tiene, y si no por la referencia. */
+export const consultarPagoMP = (token: string, p: { pagoId: string; mpPagoId: string | null }) =>
+  p.mpPagoId ? leerPago(token, p.mpPagoId) : buscarPagoPorReferencia(token, p.pagoId);
 
 /**
  * Firma del webhook (x-signature "ts=…,v1=…"): HMAC-SHA256 de

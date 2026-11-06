@@ -13,6 +13,10 @@
 //   GET  /v1/payments/<id>          el pago, como lo lee el webhook
 //   POST /__reenviar/<id>           vuelve a mandar el aviso (idempotencia)
 //   POST /__firma-mala/<id>         manda el aviso con una firma inválida
+//   GET  /v1/payments/search        busca por external_reference (la reconsulta del servidor, VD-46A)
+//   POST /__estado/<id>?estado=charged_back|refunded|approved[&reembolsado=N][&avisar=0]
+//                                   cambia el pago como lo haría MercadoPago (devolución, contracargo, reembolso
+//                                   parcial) y manda el aviso firmado; con avisar=0 no avisa (prueba la reconsulta)
 //
 // La clave del webhook es la que se le carga al gimnasio de prueba:
 // MP_SIMULADO_SECRETO (por defecto la de abajo, solo para local).
@@ -81,13 +85,33 @@ http.createServer(async (req, res) => {
       const p = prefs.get(m[1]);
       if (!p) return json(res, 404, { message: "preference not found" });
       const pago = { id: siguiente++, status: u.searchParams.get("estado") ?? "approved", external_reference: p.external_reference,
-        transaction_amount: Number(p.items[0].unit_price), currency_id: "ARS", preferencia: m[1] };
+        transaction_amount: Number(p.items[0].unit_price), currency_id: "ARS", preferencia: m[1],
+        date_last_updated: new Date().toISOString(), transaction_amount_refunded: 0 };
       pagos.set(String(pago.id), pago);
       await avisar(pago);
       const vuelta = new URL(pago.status === "approved" ? p.back_urls.success : p.back_urls.failure);
       vuelta.searchParams.set("collection_status", pago.status); vuelta.searchParams.set("payment_id", String(pago.id));
       res.writeHead(302, { location: vuelta.toString() });
       return res.end();
+    }
+    if (req.method === "GET" && u.pathname === "/v1/payments/search") {
+      if (!autorizado) return json(res, 401, { message: "invalid access token" });
+      const ref = u.searchParams.get("external_reference");
+      const results = [...pagos.values()].filter((p) => p.external_reference === ref).sort((a, b) => b.date_last_updated.localeCompare(a.date_last_updated))
+        .map((p) => Object.fromEntries(Object.entries(p).filter(([k]) => k !== "preferencia")));
+      return json(res, 200, { paging: { total: results.length }, results });
+    }
+    m = /^\/__estado\/(\d+)$/.exec(u.pathname);
+    if (req.method === "POST" && m) {
+      const pago = pagos.get(m[1]);
+      if (!pago) return json(res, 404, { message: "payment not found" });
+      const estado = u.searchParams.get("estado") ?? "refunded";
+      pago.status = estado;
+      pago.transaction_amount_refunded = estado === "refunded" ? pago.transaction_amount : Number(u.searchParams.get("reembolsado") ?? 0);
+      // Cada cambio lleva una fecha posterior (MercadoPago la sube siempre): así se prueba la guarda de orden.
+      pago.date_last_updated = new Date(Math.max(Date.now(), Date.parse(pago.date_last_updated) + 1000)).toISOString();
+      if (u.searchParams.get("avisar") === "0") return json(res, 200, { status: 200, cuerpo: "sin aviso" });
+      return json(res, 200, await avisar(pago));
     }
     m = /^\/v1\/payments\/(\d+)$/.exec(u.pathname);
     if (req.method === "GET" && m) {
