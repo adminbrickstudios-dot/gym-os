@@ -116,13 +116,14 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
   const faltaCaja = usaEfectivo && !d.turnoId && (total ?? 0) > 0;
   const sinMedios = medios.length === 0;
   const hayCuota = lineas.some((l) => l.tipo === "cuota");
+  const parcial = precios.cuota?.parcial ?? null;   // VD-7: la primera cuota con día fijo, con el cálculo a la vista
   const cuotas = lineas.filter((l) => l.tipo === "cuota").reduce((n, l) => n + l.cantidad, 0);
   const faltaOtroDia = !!otroDia && (!otroDia.fecha || otroDia.motivo.trim().length < 3);
 
   const conRecargo = (ls: Linea[]) => conRecargoLineas(ls, precios.recargo);
   const agregar = (l: Omit<Linea, "clave" | "cantidad">) => setLineas((ls) => {
     const igual = ls.find((x) => x.tipo === l.tipo && x.plan_id === l.plan_id && x.producto_id === l.producto_id && l.tipo !== "otro");
-    if (igual) return ls.map((x) => (x === igual ? { ...x, cantidad: Math.min(x.cantidad + 1, x.tipo === "cuota" ? 12 : 50) } : x));
+    if (igual) return ls.map((x) => (x === igual ? { ...x, cantidad: Math.min(x.cantidad + 1, x.tipo === "cuota" ? (parcial ? 1 : 12) : 50) } : x));
     return conRecargo([...ls, { ...l, clave: crypto.randomUUID(), cantidad: 1 }]);
   });
   const cambiar = (c: string, cambio: Partial<Linea>) => setLineas((ls) => ls.map((l) => (l.clave === c ? { ...l, ...cambio } : l)));
@@ -244,6 +245,13 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                         {cuotas > 1 ? `Cubre ${cuotas} períodos desde el ${diaCorto(ctx.cubre.desde, d.zona)}` : `Cubre del ${diaCorto(ctx.cubre.desde, d.zona)} al ${diaCorto(ctx.cubre.hasta, d.zona, 1)}`}
                       </p>
                     )}
+                    {l.tipo === "cuota" && parcial && (
+                      <p className="text-sm mt-1" data-cobrar-parcial={parcial.modo}>
+                        📐 Primera cuota con día fijo: {parcial.modo === "proporcional" ? `${parcial.texto}${parcial.lista_entera != null ? ` de ${formatearPesos(parcial.lista_entera)}` : ""} = ${p == null ? "—" : formatearPesos(p)}`
+                          : parcial.modo === "gratis" ? `no paga nada, ${parcial.texto}` : parcial.texto}.
+                        {" "}Desde ahí entra al ciclo de todos.
+                      </p>
+                    )}
                     {conv > 0 && (
                       <div className="flex items-start gap-2 mt-1 texto-suave" data-convenio>
                         <span className="flex-1">🤝 Convenio {precios.convenio!.nombre}</span><span className="numero">−{formatearPesos(conv)}</span>
@@ -258,7 +266,8 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                       <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo"} title={l.tipo === "recargo" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined}
                         onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                       <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                      <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "deuda" || l.tipo === "otro"}
+                      <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "deuda" || l.tipo === "otro" || (l.tipo === "cuota" && !!parcial)}
+                        title={l.tipo === "cuota" && parcial ? "La primera cuota es parcial: se cobra sola" : undefined}
                         onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                       {l.descuento == null
                         ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>

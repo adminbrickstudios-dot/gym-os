@@ -19,12 +19,15 @@ function encabezadoOperador(valor: string | undefined): Record<string, string> {
 // Cliente de Supabase para Server Components, Server Actions y Route
 // Handlers. @supabase/ssr en todo el flujo de auth: guarda la sesión (y el
 // verificador PKCE) en cookies, que el servidor sí puede leer.
-export async function crearClienteServidor() {
+export async function crearClienteServidor(operadorPuntual?: string) {
   const almacen = await cookies();
   // VD-33b: auth anota el dispositivo con el User-Agent que le llega; que sea el del navegador, no el del servidor.
   const agente = (await headers()).get("user-agent");
+  // VD-8: `operadorPuntual` = el token de alguien que puso su PIN SOLO para esta llamada (el dueño que autoriza
+  // un "dejar pasar"); le gana a la cookie de esta compu y no se guarda en ningún lado.
+  const operador = operadorPuntual ? encabezadoOperador(operadorPuntual) : encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value);
   return createServerClient(supabaseUrl(), supabaseAnon(), {
-    global: { headers: { ...encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value), ...(agente ? { "User-Agent": agente } : {}) } },
+    global: { headers: { ...operador, ...(agente ? { "User-Agent": agente } : {}) } },
     cookies: {
       getAll: () => almacen.getAll(),
       setAll: (lista) => {

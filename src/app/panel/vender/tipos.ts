@@ -1,10 +1,16 @@
 export type Precios = { lista: number | null; efectivo: number | null; transferencia: number | null; debito: number | null; credito: number | null };
-export type Medio = "efectivo" | "transferencia" | "debito" | "credito" | "cuenta_corriente";
+/** VD-7 (D18): la primera cuota con día fijo cuando es parcial. Los precios de `cuota.precios` ya vienen escalados por la base. */
+export type PrimeraCuota = {
+  modo: "proporcional" | "mes_entero" | "gratis"; dias: number; dias_ciclo: number; desde: string; hasta: string;
+  /** "11 días de 30", "gratis hasta el 01/12", "mes entero, cubre hasta el 01/01". */
+  texto: string; lista_entera: number | null;
+};
+export type Medio ="efectivo" | "transferencia" | "debito" | "credito" | "cuenta_corriente";
 export type PreciosVenta = {
   tope_descuento: number | null;
   /** Medios que acepta el gimnasio para cobrar acá (sin Caja, sin efectivo). */
   medios: Medio[];
-  cuota: { plan_id: string; plan: string; duracion_meses: number; precios: Precios } | null;
+  cuota: { plan_id: string; plan: string; duracion_meses: number; precios: Precios; parcial?: PrimeraCuota | null } | null;
   /** La matrícula de su plan, si la debe (PLA-3). Se calcula en la base de lo cobrado. */
   matricula?: { plan_id: string; plan: string; monto: number; anual: boolean } | null;
   /** Recargo por pagar tarde, si corresponde hoy (PLA-7). Va siempre con la cuota. */

@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type Guia, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
@@ -33,12 +34,10 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-const MOTIVOS_PASAR = ["Paga hoy más tarde", "Paga mañana", "Se olvidó el celular", "Clase de prueba", "Autorizado por el dueño"];
-
 export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null }: {
   sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null;
 }) {
-  const [cupo, setCupo] = useState<{ sin_tope: boolean; tope: number; usados: number } | null>(null);
+  const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [texto, setTexto] = useState("");
@@ -121,9 +120,9 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
     if (r.error) setError(r.error); else setHecho(null);
   });
-  const anotar = (forzar?: string) => empezar(async () => {
+  const anotar = (forzar?: string, promesa?: PromesaPago) => empezar(async () => {
     if (!elegido) return;
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via);
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
     if (r.error) { setError(r.error); return; }
     setHecho({ ...r.r!, nombre: elegido.nombre });
     reiniciar();
@@ -253,21 +252,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           </div>
 
           {forzando && (
-            <form className="mt-5 space-y-3" data-dejar-pasar onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) anotar(motivo); }}>
-              <div className="flex flex-wrap gap-2" aria-label="Motivos frecuentes">
-                {MOTIVOS_PASAR.map((m) => <button key={m} type="button" className={`pestana ${motivo === m ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`} onClick={() => setMotivo(m)}>{m}</button>)}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input autoFocus value={motivo} onChange={(e) => setMotivo(e.target.value)} className="campo" placeholder="¿Por qué lo dejás pasar? (queda anotado)" aria-label="Motivo para dejar pasar" />
-                <button type="submit" disabled={!motivo.trim() || ocupado || (!!cupo && !cupo.sin_tope && cupo.usados >= cupo.tope)} className="boton boton-peligro">Dejar pasar</button>
-              </div>
-              {cupo && !cupo.sin_tope && (
-                <p className="text-sm texto-suave" data-cupo={cupo.tope - cupo.usados}>
-                  {cupo.usados >= cupo.tope ? `Ya dejaste pasar a ${cupo.usados} hoy (el tope es ${cupo.tope}): que lo autorice el dueño o el encargado.`
-                    : `Te ${cupo.tope - cupo.usados === 1 ? "queda" : "quedan"} ${cupo.tope - cupo.usados} de ${cupo.tope} hoy. Lo ve el dueño.`}
-                </p>
-              )}
-            </form>
+            <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
           )}
           <p className="mt-6 text-sm texto-suave">{v.puede ? "Enter anota la entrada · " : ""}Esc vuelve a buscar · escribí para buscar a otro</p>
           </div>
