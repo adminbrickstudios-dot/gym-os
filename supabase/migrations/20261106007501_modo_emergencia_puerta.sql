@@ -411,7 +411,7 @@ begin
   if n <> 1 then raise exception 'No se pudo guardar la configuración del modo emergencia.'; end if;
   if not p_habilitada then
     update public.emergencias_puerta x set cerrada_en = least(now(), x.vence_en), cerrada_por = e.id
-     where x.gimnasio_id = p_gimnasio_id and x.cerrada_en is null and x.vence_en > now();
+     where x.gimnasio_id = p_gimnasio_id and x.cerrada_en is null and x.iniciada_en <= now() and x.vence_en > now();
   end if;
   return p_habilitada;
 end $$;
