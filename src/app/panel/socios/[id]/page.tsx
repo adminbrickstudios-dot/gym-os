@@ -25,6 +25,8 @@ import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
 import { BotonEntradaFicha } from "./BotonEntradaFicha";
+import { ModeracionFicha } from "./ModeracionFicha";
+import { Suspense } from "react";
 import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
@@ -148,6 +150,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {!s.dado_de_baja_en && <Suspense fallback={null}><ModeracionFicha socioId={s.id} zona={zona} /></Suspense>}
           {!s.dado_de_baja_en && panel.yo.rol !== "profe" && (
             <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico">📌 Anotar una tarea sobre este socio</LinkPanel></p>
           )}

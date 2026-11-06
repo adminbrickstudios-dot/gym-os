@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { Vacio } from "@/components/ui/Vacio";
 import { detalleControl, enlaceControl, META_TIPO, TIPOS_CONTROL, tituloControl, type ItemControl, type PaginaControl } from "@/lib/control";
+import { formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { FiltrosControl, type PersonaControl } from "./FiltrosControl";
@@ -39,13 +40,15 @@ export default async function Control({ searchParams }: { searchParams: Promise<
     const soportesPedido = panel.yo.rol === "dueno"
       ? rpc<SoporteEntrada[]>("soportes_del_gimnasio", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 })
       : Promise.resolve<SoporteEntrada[]>([]);
-    const [pagina, equipo, soportes] = await Promise.all([
+    const [pagina, equipo, soportes, moderacion] = await Promise.all([
       rpc<PaginaControl>("linea_de_control", {
         p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_tipos: tipos.length ? tipos : null,
         p_quien: quien || null, p_limite: POR_PAGINA, p_cursor: cursor,
       }),
       rpc<(PersonaControl & { activo: boolean })[]>("equipo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       soportesPedido,
+      // VD-46: suspensiones, cortesías, bajas y devoluciones del mismo período (solo en la primera página).
+      cursor ? Promise.resolve<{ items: ItemModeracion[] }>({ items: [] }) : rpc<{ items: ItemModeracion[] }>("moderacion_control", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_limite: 30 }),
     ]);
 
     const filtros = new URLSearchParams();
@@ -110,6 +113,25 @@ export default async function Control({ searchParams }: { searchParams: Promise<
               </nav>
             </div>
           )}
+          {moderacion.items.length > 0 && (
+            <section className="space-y-2" data-moderacion-control aria-label="Suspensiones, cortesías, bajas y devoluciones">
+              <h2 className="titulo-grupo">🚫 Suspensiones, cortesías, bajas y devoluciones</h2>
+              <ul className="space-y-2">
+                {moderacion.items.map((i) => (
+                  <li key={i.clave} data-moderacion-item={i.tipo}>
+                    <Link href={i.socio_id ? `/panel/socios/${i.socio_id}` : "/panel/control"} className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[60px] hover:bg-[var(--tarjeta-alta)] transition-colors">
+                      <span className="icono" aria-hidden>{META_MODERACION[i.tipo]?.emoji ?? "•"}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold leading-tight break-words">{META_MODERACION[i.tipo]?.titulo ?? i.tipo}{i.socio ? `: ${i.socio}` : ""}{i.monto != null ? ` · ${formatearPesos(Number(i.monto))}` : ""}</span>
+                        <span className="block texto-suave text-[15px] break-words">{[i.quien, i.detalle].filter(Boolean).join(" · ")}</span>
+                      </span>
+                      <span className="numero texto-tenue text-sm flex-none">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(i.en))}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {panel.yo.rol === "dueno" && (
             <section className="space-y-2" data-soporte-brik aria-label="Entradas de soporte de BRIK">
               <h2 className="titulo-grupo">🧱 Cuando BRIK entró a ayudarte</h2>
@@ -135,5 +157,11 @@ export default async function Control({ searchParams }: { searchParams: Promise<
     );
   });
 }
+
+type ItemModeracion = { tipo: string; clave: string; en: string; quien: string | null; socio_id: string | null; socio: string | null; monto: number | null; detalle: string | null };
+const META_MODERACION: Record<string, { emoji: string; titulo: string }> = {
+  suspension: { emoji: "🚫", titulo: "Suspensión" }, expulsion: { emoji: "⛔", titulo: "Expulsión" }, levantamiento: { emoji: "✅", titulo: "Se levantó" },
+  cortesia: { emoji: "🎁", titulo: "Cortesía" }, baja: { emoji: "👋", titulo: "Baja" }, devolucion: { emoji: "↩️", titulo: "Devolución" },
+};
 
 type SoporteEntrada = { id: string; motivo: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };

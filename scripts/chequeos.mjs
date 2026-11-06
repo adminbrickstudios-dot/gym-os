@@ -28,6 +28,7 @@ const EJECUTABLES = {
     "public.dar_de_baja", "public.abrir_caja", "public.cerrar_caja", "public.resumen_caja", "public.caja_abierta", "public.movimiento_caja",
     "public.vender", "public.contexto_cobro", "public.config_cobro", "public.guardar_config_cobro", "public.reglas_vencimiento", "public.config_dejar_pasar", "public.guardar_config_dejar_pasar", "public.guardar_regla_vencimiento", "public.guardar_regla_plan", "public.simular_cuota","public.version_registro", "public.verificar_version", "public.informar_transferencia", "public.aprobar_pago", "public.rechazar_pago", "public.pagos_por_aprobar",
     "public.retencion", "public.retencion_resumen", "public.registrar_contacto",
+    "public.suspender_socio", "public.levantar_suspension", "public.revisar_suspension", "public.suspension_socio", "public.moderacion_control",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",
     "public.mi_sesion", "public.mi_seguridad", "public.ayudas_vistas", "public.marcar_ayuda", "public.apagar_ayudas", "public.reiniciar_ayudas", "public.panel_gimnasio", "public.guardar_accesos_rapidos", "public.panel_inicio",
