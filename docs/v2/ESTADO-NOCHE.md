@@ -60,3 +60,4 @@ VD-13 lanzado: aa10ecfaee648c08c (vd13, migr 5000, dueña de para_hacer_hoy). En
 (VD-17, VD-18 mergeados)
 VD-15 lanzado: a5008692e3fdd727b (vd15, migr 5100; incluye VD-6b). En curso: VD-11 (a8252a126ffc5dd91), VD-13 (aa10ecfaee648c08c). Pendientes tanda 3: VD-37, VD-38, VD-44.
 (VD-11 mergeado; panel_gimnasio redefinida en 4900: otra migración que la redefina debe copiar la de 4900)
+VD-37 lanzado: a436c36190c2d6fe1 (vd37, migr 5200). En curso: VD-13 (aa10ecfaee648c08c), VD-15 (a5008692e3fdd727b). Pendientes tanda 3: VD-38, VD-44.
