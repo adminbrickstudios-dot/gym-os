@@ -477,13 +477,15 @@ bloque 18.
 - [ ] VD-6b · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular)
 - [ ] VD-6c · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
 - [ ] VD-2c · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
+- [ ] VD-3b · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
+- [ ] VD-4b · 🟢 · Aviso en vivo con el nombre de la sede para el dueño con varias sedes
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
 - [ ] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z
 - [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
-- [ ] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable
-- [ ] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas
+- [x] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
+- [x] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
 - [ ] VD-41 · 🟢 · Gastos y presupuesto: la ganancia del mes
 *Tanda 3 · El día del dueño*
 - [ ] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones

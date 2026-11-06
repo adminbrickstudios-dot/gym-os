@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-3 y VD-4 · Reingreso por visita, anti-préstamo y entradas en vivo
+
+**QUÉ HICE**
+- VD-3 (migración 4200): `registrar_ingreso` reemplaza los 60 s fijos por una visita de N horas (5 por defecto, `configuracion_visita`): dentro de ella devuelve "Ya entró/entraste a las HH:MM" sin crear entrada, sin contar ni descontar pack o pase y con el mismo color. Otra vía o dispositivo antes de N minutos (60) → amarillo "¿es la misma persona?" y alerta en `alertas_prestamo` para dueño y encargado (Control de la puerta). `antiprestamo_minutos = 0` lo apaga; `visita_horas = 0` deja solo el doble toque de 60 s. Configuración → Entrada. No se tocó `calcular_acceso` ni `guardar_configuracion`. Prueba con momentos fijos (4 h 59 m, 5 h 01 m, QR dos veces, otra vía a los 4 y a los 61 min, 0). Se ajustó el test viejo "reingreso el mismo día" de `acceso` apagando la visita larga para seguir probando ese cálculo.
+- VD-4 (migración 4201): `entradas_desde` + un solo polling de 4 s con la pestaña visible; toasts de vidrio (verde 6 s, amarillo 12 s, rojo queda con Cobrar que abre la hoja); la barra fija de la ventana usa el mismo polling; "Hoy" se actualiza sola; no avisa las entradas hechas por la misma recepción. Interruptor en Configuración → Entrada (prendido por defecto).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`reingreso-visita`, `entradas-en-vivo`, y las viejas de acceso, kiosco y QR).
+
+**SIN ARREGLAR**: VD-3b (foto en el amarillo, chip en Inicio, mismo polling en UltimasEntradas) y VD-4b (nombre de sede en el aviso del dueño con varias sedes).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-3` y `vd-4` (el segundo supone `ffmpeg` y a `socio@ejemplo.invalid` como "Testigo Al Día") y los e2e viejos de entrada, kiosco y TV: escritos según la documentación, pero no ejecutados; el aviso en 390 px no se vio.
+
 ## 2026-11-06 · Noche · VD-6, VD-5b, VD-1b y VD-2b · Alta rápida y ventana de Entrada completa
 
 **QUÉ HICE**
