@@ -9,6 +9,7 @@ import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
+import { ExSocios, MOTIVOS_EX, ANTIGUEDADES, type DatosExSocios } from "./ExSocios";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { NumerosDelPeriodo, PERIODOS, type NumerosDelPeriodo as DatosPeriodo } from "@/components/panel/NumerosPeriodo";
 
@@ -39,12 +40,15 @@ function venia(porSemana: number | null) {
   return n < 1 ? "Venía menos de una vez por semana" : `Venía ${n} ${n === 1 ? "vez" : "veces"} por semana`;
 }
 
-export default async function Retencion({ searchParams }: { searchParams: Promise<{ lista?: string; etiqueta?: string; periodo?: string; n?: string }> }) {
+export default async function Retencion({ searchParams }: { searchParams: Promise<{ lista?: string; etiqueta?: string; periodo?: string; n?: string; motivo?: string; antig?: string }> }) {
   const sp = await searchParams;
   // VD-30: cada lista se muestra de a 50; "Ver 50 más" suma otras 50.
   const mostrar = Math.min(1000, Math.max(POR_PAGINA, Math.round(Number(sp.n) / POR_PAGINA) * POR_PAGINA || POR_PAGINA));
   const pedida = sp.lista;
   const etiqueta = /^[0-9a-f-]{36}$/.test(sp.etiqueta ?? "") ? sp.etiqueta! : null;
+  // VD-46O: filtros de “Se fueron” (la base valida los valores; uno inventado se ignora acá).
+  const motivoEx = sp.motivo && sp.motivo in MOTIVOS_EX ? sp.motivo : null;
+  const antigEx = ANTIGUEDADES.find((a) => a.clave === sp.antig)?.clave ?? null;
   const periodo = PERIODOS.find((p) => p.clave === sp.periodo)?.clave ?? "mes";
   return intentar(async () => {
     const panel = await contextoPanel();
@@ -77,6 +81,11 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const lista = LISTAS.find((l) => l.clave === pedida) ?? LISTAS.find((l) => cuantos(l.clave) > 0) ?? LISTAS[0];
     const zona = panel.gimnasio.zona_horaria;
     const visibles = filas.filter((f) => f.lista === lista.clave);
+    // VD-46O: “Se fueron” sale de ex_socios (motivo de baja, antigüedad y cuántos volvieron a pagar).
+    const ex = lista.clave === "se_fue" ? await rpc<DatosExSocios>("ex_socios", { p_gimnasio_id: panel.gimnasio.id, p_motivo: motivoEx, p_antiguedad: antigEx }) : null;
+    if (ex && ids) ex.filas = ex.filas.filter((f) => ids.has(f.socio_id));
+    const cantidadLista = lista.clave === "riesgo" ? riesgo.length : ex ? ex.filas.length : visibles.length;
+    const urlEx = (m: string | null, a: string | null) => `${url("se_fue", etiqueta)}${m ? `&motivo=${m}` : ""}${a ? `&antig=${a}` : ""}`;
     // AUD-10: a los que deben, cobrarles desde la fila (si Vender está y el gimnasio cobra membresía).
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas) && panel.cobra.membresia && ["vencido", "por_vencer"].includes(lista.clave);
     const otra = LISTAS.find((l) => l.clave !== lista.clave && cuantos(l.clave) > 0);
@@ -119,7 +128,8 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
         )}
         <div data-lista>
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
-        {lista.clave === "riesgo" ? (riesgo.length === 0 ? (
+        {ex ? <ExSocios datos={ex} motivo={motivoEx} antiguedad={antigEx} url={urlEx} zona={zona} mostrar={mostrar} />
+        : lista.clave === "riesgo" ? (riesgo.length === 0 ? (
           <Vacio emoji="🎉" titulo="Nadie en riesgo">
             {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>.</> : "Los que pagan vienen como siempre. Se vuelve a calcular cada vez que abrís."}
           </Vacio>
@@ -148,10 +158,10 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </ul>
         )}
         </div>
-        {(lista.clave === "riesgo" ? riesgo.length : visibles.length) > mostrar && (
+        {cantidadLista > mostrar && (
           <div className="mt-4 flex flex-wrap items-center gap-3" data-mas-retencion>
-            <p className="texto-tenue">Se muestran {mostrar} de {lista.clave === "riesgo" ? riesgo.length : visibles.length}.</p>
-            <Link href={`${url(lista.clave, etiqueta)}&n=${mostrar + POR_PAGINA}`} data-transicion className="boton">Ver {POR_PAGINA} más</Link>
+            <p className="texto-tenue">Se muestran {mostrar} de {cantidadLista}.</p>
+            <Link href={`${ex ? urlEx(motivoEx, antigEx) : url(lista.clave, etiqueta)}&n=${mostrar + POR_PAGINA}`} data-transicion className="boton">Ver {POR_PAGINA} más</Link>
           </div>
         )}
         </Atenuable>

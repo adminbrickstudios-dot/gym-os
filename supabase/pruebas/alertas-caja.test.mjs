@@ -38,7 +38,7 @@ test("las cuatro alertas, de otros; el ticket una sola vez", async () => {
   });
   // Descuento grande del encargado (sin tope) y una anulación del encargado.
   const [{ r }] = await como(uEnc, () => t.q(`select public.vender($1, $2, $3, null, null) as r`, [t.sede,
-    JSON.stringify([{ tipo: "producto", producto_id: agua, descuento: 500, descuento_motivo: "Amigo" }]), JSON.stringify([{ medio: "transferencia", monto: 500 }])]));
+    JSON.stringify([{ tipo: "producto", producto_id: agua, descuento: 500, descuento_motivo: "Amigo o familiar del gimnasio" }]), JSON.stringify([{ medio: "transferencia", monto: 500 }])]));
   await como(uEnc, () => t.q(`select public.anular_venta_panel($1, 'Error')`, [r.venta_id]));
   const a = await como(uDueno, async () => (await t.q(`select public.alertas_caja($1) as a`, [t.g]))[0].a);
   const tipos = a.map((x) => x.tipo).sort();
@@ -51,7 +51,7 @@ test("las cuatro alertas, de otros; el ticket una sola vez", async () => {
   const ae = await como(uEnc, async () => (await t.q(`select public.alertas_caja($1) as a`, [t.g]))[0].a);
   assert.ok(!ae.some((x) => x.tipo === "anulacion"));
   const [{ r: r2 }] = await como(uEnc, () => t.q(`select public.vender($1, $2, $3, null, null) as r`, [t.sede,
-    JSON.stringify([{ tipo: "producto", producto_id: agua, descuento: 500, descuento_motivo: "Amigo" }]), JSON.stringify([{ medio: "transferencia", monto: 500 }])]));
+    JSON.stringify([{ tipo: "producto", producto_id: agua, descuento: 500, descuento_motivo: "Amigo o familiar del gimnasio" }]), JSON.stringify([{ medio: "transferencia", monto: 500 }])]));
   assert.ok(r2.venta_id);
   const a2 = await como(uDueno, async () => (await t.q(`select public.alertas_caja($1) as a`, [t.g]))[0].a);
   assert.equal(a2.find((x) => x.tipo === "descuento").porcentaje, 50);

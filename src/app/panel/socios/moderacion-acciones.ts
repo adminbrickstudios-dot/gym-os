@@ -6,7 +6,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
 type R = { error?: string };
 async function hacer(socioId: string, fn: () => Promise<unknown>): Promise<R> {
-  try { await fn(); revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel"); revalidatePath("/panel/control"); return {}; }
+  try { await fn(); revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel"); revalidatePath("/panel/control"); revalidatePath("/panel/configuracion"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
 
@@ -31,7 +31,7 @@ export async function registrarDevolucion(socioId: string, medio: string, monto:
   return hacer(socioId, () => rpc("registrar_devolucion", { p_socio_id: socioId, p_medio: medio, p_monto: monto, p_motivo: motivo }));
 }
 export async function guardarModoDevolucion(gimnasioId: string, modo: string): Promise<R> {
-  try { await rpc("guardar_devolucion_baja_modo", { p_gimnasio_id: gimnasioId, p_modo: modo }); revalidatePath("/panel/control"); return {}; }
+  try { await rpc("guardar_devolucion_baja_modo", { p_gimnasio_id: gimnasioId, p_modo: modo }); revalidatePath("/panel/control"); revalidatePath("/panel/configuracion"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
 
@@ -50,7 +50,7 @@ export async function motivosBeneficio(): Promise<{ motivos?: { id: string; nomb
   } catch (e) { return { error: (e as Error).message }; }
 }
 export async function guardarMotivoBeneficio(gimnasioId: string, id: string | null, nombre: string, activo: boolean): Promise<R> {
-  try { await rpc("guardar_motivo_beneficio", { p_gimnasio_id: gimnasioId, p_id: id, p_nombre: nombre, p_activo: activo }); revalidatePath("/panel/control"); return {}; }
+  try { await rpc("guardar_motivo_beneficio", { p_gimnasio_id: gimnasioId, p_id: id, p_nombre: nombre, p_activo: activo }); revalidatePath("/panel/control"); revalidatePath("/panel/configuracion"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
 export async function guardarTopesBeneficios(gimnasioId: string, t: { recepcionDias: number; encargadoDias: number; recepcionMes: number; encargadoMes: number; alerta: number }): Promise<R> {
@@ -60,4 +60,16 @@ export async function guardarTopesBeneficios(gimnasioId: string, t: { recepcionD
     revalidatePath("/panel/control");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── VD-46N · "No escribirle" ───────────────────────────────────────
+export async function marcarNoEscribirle(socioId: string, marcar: boolean, motivo: string): Promise<R> {
+  return hacer(socioId, () => rpc("marcar_no_escribirle", { p_socio_id: socioId, p_marcar: marcar, p_motivo: motivo }));
+}
+
+// ── VD-46U · Anular una devolución registrada por error ─────────────
+export type DevolucionHecha = { id: string; medio: string; monto: number; calculado: number; motivo: string; en: string; por: string | null;
+  anulada: boolean; anulada_motivo: string | null; anulada_en: string | null; anulada_por: string | null; reintegro_caja: boolean | null };
+export async function anularDevolucion(socioId: string, devolucionId: string, motivo: string, reintegro: boolean): Promise<R> {
+  return hacer(socioId, () => rpc("anular_devolucion", { p_devolucion_id: devolucionId, p_motivo: motivo, p_reintegro_caja: reintegro }));
 }

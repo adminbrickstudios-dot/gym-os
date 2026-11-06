@@ -149,7 +149,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>
               <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
-              <Suspense fallback={null}><ConstanciaBaja socioId={s.id} zona={zona} /></Suspense>
+              <Suspense fallback={null}><ConstanciaBaja socioId={s.id} zona={zona} verDevoluciones={["dueno", "encargado"].includes(panel.yo.rol)} /></Suspense>
               <VolverADarDeAlta socioId={s.id} />
               {panel.yo.rol === "dueno" && !(s.nombre === "Socio" && /^borrado #/.test(s.apellido)) && <BorrarDatos socioId={s.id} />}
             </div>
