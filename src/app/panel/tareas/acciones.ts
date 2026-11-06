@@ -14,6 +14,13 @@ export async function crearTarea(que: string, para: string, dia: string, socioId
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-29 · Ctrl+K "tarea llamar a Pedro": una tarea para hoy, para quien la escribe (la base valida igual que en la pantalla). */
+export async function crearTareaRapida(que: string): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: panel.gimnasio.zona_horaria, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  return crearTarea(que, panel.yo.equipo_id, hoy, null, null);
+}
+
 export async function marcarTarea(id: string, hecha: boolean): Promise<{ error?: string }> {
   try {
     await rpc("marcar_tarea", { p_tarea_id: id, p_hecha: hecha });
