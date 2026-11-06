@@ -15,6 +15,10 @@ import { FilaVenta } from "@/components/panel/Venta";
 import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
 import { FilaTarea, type Tarea } from "./tareas/Tareas";
+import { UltimasEntradas, type EntradaVivo } from "@/components/panel/UltimasEntradas";
+
+// VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
+type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
 
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
 type Inicio = { hoy: string; numeros: NumeroInicio[]; ahora: Ahora[] };
@@ -79,7 +83,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas] = await Promise.all([
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo] = await Promise.all([
       rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? rpcLectura<NumerosElegidos>("numeros_inicio", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -108,7 +112,13 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
       rol === "dueno" ? rpcLectura<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
       // COM-4: las tareas de hoy y las atrasadas de quien mira.
       rpcLectura<{ hoy: string; tareas: Tarea[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-12b: Para hacer hoy y las últimas entradas (el profe no las ve: su Inicio es el de sus clases).
+      rol !== "profe" ? rpcLectura<ParaHacer[]>("para_hacer_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol !== "profe" ? rpcLectura<EntradaVivo[]>("ultimas_entradas", { p_gimnasio_id: panel.gimnasio.id, p_limite: 8 }) : [],
     ]);
+    // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
+    const hacerHoy = paraHacer.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));
+    const verEntradas = rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas);
     const reponer = productos.filter((p) => p.activo && stock[p.producto_id] && (stock[p.producto_id].stock <= 0
       || (stock[p.producto_id].minimo != null && stock[p.producto_id].stock <= stock[p.producto_id].minimo!)));
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
@@ -136,6 +146,33 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
             <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline">📊 Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
           )}
         </section>
+
+        {rol !== "profe" && (
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-8">
+            <section aria-labelledby="para-hacer" data-para-hacer={hacerHoy.length}>
+              <h2 id="para-hacer" className="titulo text-3xl mb-4">✅ Para hacer hoy{hacerHoy.length > 0 ? ` (${hacerHoy.length})` : ""}</h2>
+              {hacerHoy.length === 0 ? (
+                <p className="texto-suave text-lg">Nada para hacer por ahora: todo al día. ✨</p>
+              ) : (
+                <ul className="space-y-2">
+                  {hacerHoy.map((x) => (
+                    <li key={x.clave} data-hacer={x.clave} className="tarjeta flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="icono" aria-hidden>{x.emoji}</span>
+                      <span className="min-w-0 flex-1 font-semibold text-lg leading-tight">{x.texto}</span>
+                      <Link href={`/panel${x.href}`} className="boton !min-h-11" aria-label={`Ver: ${x.texto}`}>Ver</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            {verEntradas && (
+              <section aria-labelledby="ultimas-entradas">
+                <h2 id="ultimas-entradas" className="titulo text-3xl mb-4">🚪 Últimas entradas <span className="texto-tenue text-base font-normal">en vivo</span></h2>
+                <UltimasEntradas iniciales={entradasVivo} zona={zona} />
+              </section>
+            )}
+          </div>
+        )}
 
         <section aria-labelledby="ahora">
           <h2 id="ahora" className="titulo text-3xl mb-4">Ahora y lo que sigue</h2>

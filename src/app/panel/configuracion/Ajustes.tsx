@@ -6,6 +6,7 @@ import { useVersion } from "@/components/panel/useVersion";
 import { guardarConfiguracion,guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
 import { MercadoPago } from "./MercadoPago";
 import { TurnosFijosConfig } from "./TurnosFijosConfig";
+import { MetaVisitas } from "./MetaVisitas";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
@@ -161,7 +162,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null }: {
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, metaVisitas = 12 }: {
+  metaVisitas?: number;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean;
 }) {
@@ -553,6 +555,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "nfc"])] : c.accesos_activos.filter((x) => x !== "nfc"))} />
             </div>
           </Tarjeta>
+          <MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} />
           {pie("reglas")}
         </>}
 

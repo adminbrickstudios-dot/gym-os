@@ -221,6 +221,17 @@ export async function guardarTurnosFijos(prendido: boolean): Promise<{ error?: s
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-23b: la meta de visitas del mes que ve el socio en su Inicio (solo el dueño; la base valida 1 a 31). */
+export async function guardarMetaVisitas(meta: number): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_meta_visitas", { p_gimnasio_id: panel.gimnasio.id, p_meta: meta });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/app");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** REV-2a: suma una sede (la base valida: solo el dueño, nombre único) y devuelve los datos como quedaron. */
 export async function sumarSede(nombre: string): Promise<{ error?: string; datos?: unknown }> {
   const panel = await contextoPanel();
