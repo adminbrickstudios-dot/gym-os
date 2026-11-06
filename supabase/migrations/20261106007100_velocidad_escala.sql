@@ -10,6 +10,7 @@
 -- 3) pendientes_panel (corre en cada pantalla) calcula la retención UNA vez (antes, dos) y se la pasa a Para hacer hoy
 --    (privado.para_hacer_hoy_con). public.para_hacer_hoy sigue igual para quien la llame.
 -- 4) resultado_mes: el precio "de hoy" se calcula una vez por plan y no una vez por socio.
+-- 5) privado.precio_para: la misma consulta en plpgsql (el plan se guarda en la sesión): la puerta la llama por cada vencido.
 
 -- ── Guarda de entrada ──────────────────────────────────────────────
 do $$
@@ -150,7 +151,7 @@ con_texto as materialized (
     from clasificado c, g
    where c.lista is not null
 ),
-final as (
+final as materialized (
   select t.*,
     case when t.lista = 'vencido' then
       coalesce((t.vm).para_regularizar,
@@ -447,12 +448,44 @@ end $$;
 revoke all on function public.resultado_mes(uuid, date) from public, anon, authenticated;
 grant execute on function public.resultado_mes(uuid, date) to authenticated, service_role;
 
+-- ── 5) Precio de un plan ──
+-- Misma consulta, ahora en plpgsql: una función SQL con CTE se vuelve a planificar en cada llamada (0,4 ms) y la
+-- puerta la llama por cada socio vencido; en plpgsql el plan queda guardado en la sesión (medido: 20 veces más rápido).
+create or replace function privado.precio_para(
+  p_plan_id uuid, p_momento timestamptz, p_medio text, p_sede_id uuid, p_aplicar_dia boolean
+) returns numeric
+language plpgsql stable set search_path = '' as $$
+begin
+  return (
+    with filas as (
+      select p.* from public.precios_plan p
+       where p.plan_id = p_plan_id and p.vigente_desde <= p_momento
+         and (p.sede_id is null or p.sede_id = p_sede_id)
+    ), lista as (
+      select max(f.vigente_desde) as v from filas f
+    ), en_lista as (
+      select f.* from filas f, lista where f.vigente_desde = lista.v
+    ), nivel as (
+      select coalesce(bool_or(e.sede_id is not null), false) as hay_sede from en_lista e
+    ), dia as (
+      select extract(day from p_momento at time zone g.zona_horaria)::int as d
+        from public.planes pl join public.gimnasios g on g.id = pl.gimnasio_id where pl.id = p_plan_id
+    )
+    select min(e.monto) from en_lista e, nivel, dia
+     where (e.sede_id is not null) = nivel.hay_sede
+       and (e.medio_pago is null or e.medio_pago = p_medio)
+       and (e.pago_hasta_dia is null or (p_aplicar_dia and e.pago_hasta_dia >= dia.d))
+  );
+end $$;
+revoke all on function privado.precio_para(uuid, timestamptz, text, uuid, boolean) from public, anon, authenticated;
+
 -- ── Verificación ────────────────────────────────────────────────────
 do $$
 declare f text;
 begin
   foreach f in array array['public.para_hacer_hoy(uuid)', 'public.pendientes_panel(uuid)', 'public.resultado_mes(uuid, date)',
-                           'privado.para_hacer_hoy_con(uuid, jsonb)', 'privado.retencion_con(uuid, timestamptz, jsonb)'] loop
+                           'privado.para_hacer_hoy_con(uuid, jsonb)', 'privado.retencion_con(uuid, timestamptz, jsonb)',
+                           'privado.precio_para(uuid, timestamptz, text, uuid, boolean)'] loop
     if to_regprocedure(f) is null then raise exception 'Verificación: falta %', f; end if;
     if not exists (select 1 from pg_proc where oid = f::regprocedure and 'search_path=""' = any (proconfig)) then
       raise exception 'Verificación: % sin search_path vacío', f;
