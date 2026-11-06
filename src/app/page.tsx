@@ -6,6 +6,8 @@ import { LandingGimnasio, LandingProximamente } from "@/components/landing/Landi
 import { traerAgenda, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
+import { PlataformaLanding } from "@/components/landing/Plataforma";
+import { planesBrikPublicos } from "@/lib/plataforma-venta";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
 //   plataforma → la página de Gym OS
@@ -23,7 +25,11 @@ const landingDelHost = cache(async () => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const r = await landingDelHost();
-  if (r.tipo === "plataforma") return { title: "Gym OS" };
+  if (r.tipo === "plataforma") {
+    const descripcion = "Gym OS responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.";
+    return { title: { absolute: "Gym OS · El sistema para tu gimnasio" }, description: descripcion,
+             openGraph: { type: "website", title: "Gym OS", description: descripcion, locale: "es_AR" } };
+  }
   const { marca } = r.landing;
   const icono = urlMarca(marca.favicon_path ?? marca.logo_path);
   const h = await headers();
@@ -66,16 +72,7 @@ export default async function Inicio() {
       </>
     );
   }
-  return (
-    <main className="min-h-dvh flex flex-col justify-center px-4 py-16">
-      <div className="mx-auto w-full max-w-5xl">
-        <p className="text-6xl mb-8" aria-hidden>🏋️</p>
-        <h1 className="titular text-[clamp(3.5rem,14vw,8rem)]">Gym OS</h1>
-        <p className="texto-suave text-xl sm:text-2xl mt-6 max-w-[30ch]">
-          El sistema para tu gimnasio: quién entra, quién paga y quién dejó de venir.
-        </p>
-        <a href="/ingresar" className="boton boton-principal text-lg px-8 mt-10">🔑 Ingresar</a>
-      </div>
-    </main>
-  );
+  // VD-26: la plataforma muestra la página para venderle Gym OS a los dueños. Los precios salen de los planes
+  // que BRIK dejó activos en el super admin; si no hay ninguno, no se muestra ningún precio.
+  return <PlataformaLanding planes={await planesBrikPublicos()} />;
 }
