@@ -2,7 +2,7 @@
 # (Postgres con la simulación de Supabase), sus pruebas, los chequeos contra
 # la base y las pantallas con sesión real (e2e + barrido).
 # Corre sola en cada push a una rama noche/** o dia/** (la base, ~5 min).
-# Las pantallas (~1-2 h) corren si el mensaje del commit dice [pantallas],
+# Las pantallas (2 a 4 h) corren si el mensaje del commit dice [pantallas],
 # o a mano: Actions → Pruebas completas → Run workflow.
 # El agente la mira con:  gh run list --workflow pruebas-completas.yml
 name: Pruebas completas
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       pantallas:
-        description: "Correr también las pantallas (e2e y barrido, ~1 h)"
+        description: "Correr también las pantallas (e2e y barrido, 2 a 4 h)"
         type: boolean
         default: true
 
@@ -62,7 +62,7 @@ jobs:
       cancel-in-progress: false
     if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 340
     services:
       postgres:
         image: postgres:16
