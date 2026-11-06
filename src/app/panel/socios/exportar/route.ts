@@ -6,7 +6,8 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 type Fila = { numero: number; nombre: string; apellido: string; dni: string | null; telefono: string | null; email: string | null; nacimiento: string | null;
   plan: string | null; estado: string; cubierto_hasta: string | null; alta: string; dado_de_baja: string | null; etiquetas: string | null };
 
-const fecha = (d: string | null) => (d ? d.split("-").reverse().join("/") : "");
+const TOPE_CSV = 5000;
+const fecha =(d: string | null) => (d ? d.split("-").reverse().join("/") : "");
 
 export async function GET(req: Request) {
   const panel = await contextoPanel();
@@ -19,9 +20,13 @@ export async function GET(req: Request) {
     // Sin permiso (o cualquier error): se dice, nunca un archivo vacío.
     return new Response(`No se pudo exportar: ${(e as Error).message}`, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
+  // VD-30: tope de filas por archivo; si hay más, la última línea lo avisa (nunca se corta en silencio).
+  const cortado = filas.length > TOPE_CSV;
+  const cuerpo = filas.slice(0, TOPE_CSV).map((f) => [f.numero, f.nombre, f.apellido, f.dni, f.telefono, f.email, fecha(f.nacimiento), f.plan, f.estado, fecha(f.cubierto_hasta), fecha(f.alta), fecha(f.dado_de_baja), f.etiquetas]);
+  if (cortado) cuerpo.push(["", `Se cortó en ${TOPE_CSV} filas: filtrá por etiqueta o buscá para exportar el resto.`, "", "", "", "", "", "", "", "", "", "", ""]);
   const csv = aCsv(
     ["Número", "Nombre", "Apellido", "DNI", "Celular", "Mail", "Nacimiento", "Plan", "Estado", "Cubierto hasta", "Alta", "Baja", "Etiquetas"],
-    filas.map((f) => [f.numero, f.nombre, f.apellido, f.dni, f.telefono, f.email, fecha(f.nacimiento), f.plan, f.estado, fecha(f.cubierto_hasta), fecha(f.alta), fecha(f.dado_de_baja), f.etiquetas]),
+    cuerpo,
   );
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());
   return new Response(csv, {

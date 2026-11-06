@@ -24,11 +24,14 @@ const ESTADOS = [
   ["sin_plan", "⚪ Sin plan"], ["nuevos", "🆕 Nuevos (30 días)"], ["bajas", "👋 Dados de baja"],
 ] as const;
 type Estado = (typeof ESTADOS)[number][0];
+const POR_PAGINA = 60, TOPE_LISTA = 600;
 const uuid = (x?: string) => (/^[0-9a-f-]{36}$/.test(x ?? "") ? x! : null);
 
-export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string; estado?: string; plan?: string; vista?: string; web?: string }> }) {
+export default async function Socios({ searchParams }: { searchParams: Promise<{ q?: string; etiqueta?: string; estado?: string; plan?: string; vista?: string; web?: string; n?: string }> }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
+  // VD-30: la lista se pide de a 60 y "Ver 60 más" suma otras 60 (hasta 600); para el resto, buscar.
+  const limite = Math.min(TOPE_LISTA, Math.max(POR_PAGINA, Math.round(Number(sp.n) / POR_PAGINA) * POR_PAGINA || POR_PAGINA));
   const etiqueta = uuid(sp.etiqueta), plan = uuid(sp.plan);
   const estado: Estado | null = ESTADOS.find(([k]) => k === sp.estado)?.[0] ?? null;
   const web = sp.web === "1";
@@ -50,7 +53,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
       );
     }
     const [filas, etiquetas, filtros, autoaltas, nuevosInteresados] = await Promise.all([
-      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: 60, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
+      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: limite, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
       rpcLectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       rpcLectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
       rpcLectura<number>("autoaltas_web", { p_gimnasio_id: panel.gimnasio.id }),
@@ -160,7 +163,12 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           </ul>
         )}
         </div>
-        {filas.length === 60 && <p className="texto-tenue mt-4">Se muestran los primeros 60. Buscá para encontrar a alguien en particular.</p>}
+        {filas.length >= limite && (
+          <div className="mt-4 flex flex-wrap items-center gap-3" data-mas-socios>
+            <p className="texto-tenue">Se muestran {filas.length}. Buscá para encontrar a alguien en particular.</p>
+            {limite < TOPE_LISTA && <a href={`${con({})}${con({}).includes("?") ? "&" : "?"}n=${limite + POR_PAGINA}`} className="boton" data-transicion>Ver {POR_PAGINA} más</a>}
+          </div>
+        )}
         </Atenuable>
       </>
     );

@@ -9,7 +9,8 @@ import { CELU, COMPU, GIMNASIO, entrar, entrarSocio, navegador, pagina } from ".
 const PRESUPUESTO = { compu: 1000, celu: 1500 };
 const PANTALLAS = ["/panel", "/panel/entrada", "/panel/socios", "/panel/vencen-hoy", "/panel/caja", "/panel/vender", "/panel/clases",
   "/panel/retencion", "/panel/transferencias", "/panel/planes", "/panel/configuracion", "/panel/pagina", "/panel/resumen", "/panel/tareas"];
-const ROLES = ["duena", "encargado", "recepcion", "profe"];
+const ROLES = process.env.MEDIR_ROLES ? process.env.MEDIR_ROLES.split(",") : ["duena", "encargado", "recepcion", "profe"];
+const TAMANOS = [["compu", COMPU], ["celu", CELU]].filter(([t]) => !process.env.MEDIR_SOLO_COMPU || t === "compu");
 
 /** Tiempo (ms) desde pedir la dirección hasta que hay un título o texto visible en <main>/<body>. */
 async function medir(p, url) {
@@ -25,7 +26,7 @@ async function medir(p, url) {
 const filas = [];
 const b = await navegador();
 try {
-  for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
+  for (const [tam, viewport] of TAMANOS) {
     for (const rol of ROLES) {
       const p = await pagina(b, viewport);
       try {
