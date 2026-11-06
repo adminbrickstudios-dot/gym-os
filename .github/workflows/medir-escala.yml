@@ -9,6 +9,9 @@
 name: Medir escala
 
 on:
+  # Hasta que esté en main, GitHub no deja disparar a mano desde una rama: un push con [medir] en el mensaje lo corre.
+  push:
+    branches: ["noche/**", "dia/**"]
   workflow_dispatch:
     inputs:
       socios:
@@ -31,6 +34,7 @@ jobs:
   medir:
     name: Medir la escala
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[medir]')
     timeout-minutes: 90
     services:
       postgres:
@@ -49,10 +53,10 @@ jobs:
       - name: Base nueva con todas las migraciones
         run: scripts/db/local.sh nueva
       - name: Demo con muchos socios
-        run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios }}"
+        run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios || '3000' }}"
       - name: Gimnasios de carga
         if: inputs.gimnasios != '0'
-        run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios }}"
+        run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios || '200' }}"
       - name: Usuarios del demo (dueño, recepción…)
         run: |
           scripts/local/levantar.sh
