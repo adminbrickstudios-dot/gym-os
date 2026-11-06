@@ -7,7 +7,11 @@ import { Reservar } from "./Reservar";
 import { ElegirLugar } from "./ElegirLugar";
 import type { MapaLugares } from "@/lib/clases/lugares";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
+import { Mensaje } from "@/components/ui/Mensaje";
 
+/** VD-24: lo que la base dice de cada clase: si puede reservar y, si no, por qué y qué botón corresponde. */
+type Motivo = { puede: boolean; motivo: string; texto: string; accion: "reservar" | "espera" | "pagar" | "cambiar_plan" | "ninguna"; etiqueta: string | null };
+type Aviso = { tipo: "lugar_liberado" | "clase_cancelada"; texto: string; clase_id: string };
 type Clase = { clase_id: string; actividad: string; emoji: string | null; inicio: string; profe: string | null; cupo: number | null;
   confirmadas: number; cancelada: boolean; mi_reserva: string | null; mi_posicion: number | null };
 
@@ -24,7 +28,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
     if (!sede) throw new Error("El gimnasio no tiene sedes activas");
-    const [todas, politica, turnos, horarios, wods] = await Promise.all([
+    const [todas, politica, turnos, horarios, wods, avisos] = await Promise.all([
       rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
       // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.
       rpc<{ reglas: string[]; bloqueo: { texto: string } | null }>("politica_reservas", { p_socio_id: yo.socio.socio_id }),
@@ -33,9 +37,15 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
       rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: yo.socio.socio_id }),
       // CLA-4: el WOD de las clases que reservó.
       rpc<{ clase_id: string; wod: string }[]>("wods_socio", { p_socio_id: yo.socio.socio_id }),
+      // VD-24: "se liberó un lugar", "se canceló una clase" (lo que la base le avisó en los últimos días).
+      rpc<Aviso[]>("avisos_lugar_socio", { p_socio_id: yo.socio.socio_id }),
     ]);
     const wodDe = new Map(wods.map((w) => [w.clase_id, w.wod]));
     const clases = todas.filter((c) => !c.cancelada && new Date(c.inicio) > new Date());
+    // VD-24: el motivo de cada clase que todavía no reservó, calculado por la base, en un solo pedido.
+    const sinReserva = clases.filter((c) => !c.mi_reserva).map((c) => c.clase_id);
+    const motivos = reserva && sinReserva.length > 0
+      ? await rpc<Record<string, Motivo>>("motivos_reserva", { p_socio_id: yo.socio.socio_id, p_clase_ids: sinReserva }) : {};
     // COM-12: en las clases que tiene confirmadas, el mapa de la sala si está numerada.
     const mapas = new Map((await Promise.all(clases.filter((c) => reserva && c.mi_reserva === "confirmada")
       .map(async (c) => [c.clase_id, await rpc<MapaLugares | null>("lugares_clase", { p_clase_id: c.clase_id, p_socio_id: yo.socio!.socio_id })] as const)))
@@ -56,16 +66,19 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
           ))}
         </nav>
         {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas>⛔ {politica.bloqueo.texto}</p>}
-        {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.</p> : (
+        {reserva && avisos.length > 0 && <div className="space-y-2 mb-4" data-avisos-lugar>{avisos.map((a) => <Mensaje key={a.clase_id + a.tipo} tipo={a.tipo === "lugar_liberado" ? "exito" : "aviso"}>{a.texto}</Mensaje>)}</div>}
+        {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.{dias.indexOf(dia) < dias.length - 1 && <> <Link href={q(dias[dias.indexOf(dia) + 1])} className="underline">Ver el día siguiente</Link></>}</p> : (
           <ul className="space-y-2">{clases.map((c) => (
-            <li key={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
+            <li key={c.clase_id} data-clase={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="numero text-2xl w-14">{hora(c.inicio)}</span>
               <span className="text-2xl" aria-hidden>{c.emoji ?? "🗓️"}</span>
               <span className="grow basis-36 min-w-0"><span className="block font-semibold">{c.actividad}</span>
                 <span className="block text-sm texto-suave">{reserva ? (c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo") : ""}{c.profe ? `${reserva ? " · " : ""}${c.profe}` : ""}</span></span>
               {!reserva ? null : c.mi_reserva && reservaDe.get(c.clase_id)
                 ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
-                : <Reservar claseId={c.clase_id} socioId={yo.socio!.socio_id} lleno={c.cupo != null && c.confirmadas >= c.cupo} />}
+                : <Accion m={motivos[c.clase_id]} claseId={c.clase_id} socioId={yo.socio!.socio_id} varios={yo.socios.length > 1} />}
+              {reserva && !c.mi_reserva && motivos[c.clase_id] && motivos[c.clase_id].motivo !== "ok" && motivos[c.clase_id].motivo !== "bloqueo_faltas" && (
+                <p className="basis-full text-sm texto-suave" data-motivo={motivos[c.clase_id].motivo}>{motivos[c.clase_id].texto}</p>)}
               {mapas.get(c.clase_id) && <ElegirLugar mapa={mapas.get(c.clase_id)!} />}
               {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio>🏋️ {wodDe.get(c.clase_id)}</p>}
             </li>
@@ -76,4 +89,14 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
       </>
     );
   });
+}
+
+/** El botón que corresponde según lo que dice la base: reservar, anotarse en espera, pagar, cambiar de plan o nada. */
+function Accion({ m, claseId, socioId, varios }: { m: Motivo | undefined; claseId: string; socioId: string; varios: boolean }) {
+  if (!m) return <Reservar claseId={claseId} socioId={socioId} lleno={false} />;
+  const con = varios ? `?socio=${socioId}` : "";
+  if (m.accion === "reservar" || m.accion === "espera") return <Reservar claseId={claseId} socioId={socioId} lleno={m.accion === "espera"} />;
+  if (m.accion === "pagar") return <Link href={`/app${con}`} className="boton boton-principal !min-h-11" data-accion-motivo="pagar">{m.etiqueta ?? "Pagar"}</Link>;
+  if (m.accion === "cambiar_plan") return <Link href={`/app/yo${con}`} className="boton !min-h-11" data-accion-motivo="cambiar_plan">{m.etiqueta ?? "Cambiar de plan"}</Link>;
+  return <span className="pildora" data-accion-motivo="ninguna">No disponible</span>;
 }

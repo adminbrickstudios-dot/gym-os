@@ -5,7 +5,7 @@
 export type Pendientes = Partial<Record<"tareas" | "vencen_hoy" | "transferencias" | "prospectos" | "caja" | "socios" | "control" | "mensajes", number>>;
 
 /** Claves de sección (secciones.ts) que llevan número, y cuáles se pintan en rojo. */
-export const CON_NUMERO = ["tareas", "vencen_hoy", "transferencias", "prospectos", "caja", "socios", "control"] as const;
+export const CON_NUMERO = ["tareas", "vencen_hoy", "transferencias", "prospectos", "caja", "socios", "control", "mensajes"] as const;
 export const ROJOS: ReadonlySet<string> = new Set(["vencen_hoy", "transferencias", "caja"]);
 
 /** Más de 9 → "9+". */

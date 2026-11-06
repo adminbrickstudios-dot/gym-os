@@ -59,7 +59,7 @@ test("cada rol ve solo sus contadores: el profe solo lo suyo; la recepción no v
   assert.deepEqual(Object.keys(profe).sort(), ["tareas"]);
   const rec = await pend(u.recepcion);
   assert.deepEqual(Object.keys(rec).sort(), ["caja", "mensajes", "prospectos", "tareas", "transferencias", "vencen_hoy"]);
-  assert.equal(rec.mensajes, 0, "VD-38 todavía no existe");
+  assert.equal(rec.mensajes, 0, "sin mensajes, el contador es 0");
   const dueno = await pend(u.dueno);
   assert.deepEqual(Object.keys(dueno).sort(), ["caja", "control", "mensajes", "prospectos", "socios", "tareas", "transferencias", "vencen_hoy"]);
   // El encargado sin acceso al Resultado no tiene "control" (ni error).
@@ -169,4 +169,18 @@ test("preferencias: un tipo que no es de mi rol y un canal que no existe dan err
   assert.equal(vistas, 0, "RLS: Beto no lee las de Ana");
   const desde = await como(u.recepcion, async () => (await t.q(`select public.preferencias_aviso_panel($1) as p`, [t.g]))[0].p);
   assert.equal(desde.find((x) => x.tipo === "caja").app, false);
+});
+
+test("VD-38b · Mensajes: sube cuando llega uno del socio, baja al contestar; la recepción sin permiso ve 0", async () => {
+  const antes = (await pend(u.dueno)).mensajes;
+  const r = await como(u.socio, async () => (await t.q(`select public.escribir_al_gimnasio($1, 'consulta', 'Ayer olvidé mi botella') as r`, [socio]))[0].r);
+  assert.equal((await pend(u.dueno)).mensajes, antes + 1, "llegó un mensaje: el dueño ve uno más");
+  assert.equal((await pend(u.encargado)).mensajes, antes + 1);
+  assert.equal((await pend(u.recepcion)).mensajes, 0, "la recepción sin permiso no ve los mensajes: 0, no error");
+  await como(u.dueno, () => t.q(`select public.guardar_permisos_mensajes($1, true)`, [t.g]));
+  assert.equal((await pend(u.recepcion)).mensajes, antes + 1, "con el permiso, la recepción lo ve");
+  assert.ok(!("mensajes" in (await pend(u.profe))), "el profe no tiene contador de mensajes");
+  await como(u.recepcion, () => t.q(`select public.responder_mensaje($1, 'Está en recepción')`, [r.hilo_id]));
+  assert.equal((await pend(u.dueno)).mensajes, antes, "al contestar baja solo");
+  assert.equal((await pend(u.recepcion)).mensajes, antes);
 });

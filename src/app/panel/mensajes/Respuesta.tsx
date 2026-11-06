@@ -5,6 +5,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { ESTADOS, MAX_TEXTO, type RespuestaRapida } from "@/lib/mensajes";
+import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { cambiarEstado, responder } from "./acciones";
 
 /** Contestar un mensaje: con respuestas rápidas para insertar, y los botones de estado. */
@@ -19,14 +20,14 @@ export function Respuesta({ hiloId, estado, rapidas }: { hiloId: string; estado:
     const r = await responder(hiloId, texto);
     if (r.error) { setError(r.error); return; }
     setTexto(""); setHecho("Respuesta enviada. Al socio le llega el aviso.");
-    router.refresh();
+    refrescarPendientes(); router.refresh();
   };
   const estadoA = async (e: string) => {
     setError(null); setHecho(null);
     const r = await cambiarEstado(hiloId, e);
     if (r.error) { setError(r.error); return; }
     setHecho(e === "resuelto" ? "Marcado como resuelto." : "Estado cambiado.");
-    router.refresh();
+    refrescarPendientes(); router.refresh();
   };
 
   return (
