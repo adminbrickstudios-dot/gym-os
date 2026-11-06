@@ -51,7 +51,7 @@ select privado.politicas_estandar('public.devoluciones', array['dueno', 'encarga
 revoke all on table public.devoluciones from anon;
 revoke truncate, references, trigger on public.devoluciones from authenticated;
 drop trigger if exists devoluciones_inmutable on public.devoluciones;
-create trigger devoluciones_inmutable before update or delete on public.devoluciones for each row execute function privado.hecho_inmutable();
+create trigger devoluciones_inmutable before update or delete on public.devoluciones for each row execute function privado.hecho_inmutable('_nada_');
 
 -- Qué cobertura se devolvió y cuánto (una cobertura se devuelve una sola vez).
 create table if not exists public.devoluciones_items (
@@ -70,7 +70,7 @@ select privado.politicas_estandar('public.devoluciones_items', array['dueno', 'e
 revoke all on table public.devoluciones_items from anon;
 revoke truncate, references, trigger on public.devoluciones_items from authenticated;
 drop trigger if exists devoluciones_items_inmutable on public.devoluciones_items;
-create trigger devoluciones_items_inmutable before update or delete on public.devoluciones_items for each row execute function privado.hecho_inmutable();
+create trigger devoluciones_items_inmutable before update or delete on public.devoluciones_items for each row execute function privado.hecho_inmutable('_nada_');
 
 -- ── El cálculo (una sola cuenta, para la ficha, el registro y el aviso) ──
 -- Los períodos pagados con una venta confirmada que terminan después del momento de la baja y todavía no se devolvieron.
