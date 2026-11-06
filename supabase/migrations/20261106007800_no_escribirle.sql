@@ -4,7 +4,7 @@
 -- a "Vencen para cobrar" (vencen_pestanas): a ese socio se le sigue cobrando, en persona o en el mostrador.
 --
 -- Cambios, copiando la definición VIGENTE de cada función:
---   privado.retencion_con (7100) · public.retencion (9000) · public.bandeja_avisos (13000)
+--   privado.retencion_con (7700) · public.retencion (9000) · public.bandeja_avisos (13000)
 --   public.cumplen_hoy (4700) · public.avisar_clase (12300)
 -- Permisos (lo prudente): marcar puede la recepción (es quien escucha el pedido); sacar la marca solo dueño y
 -- encargado (reabre el contacto con alguien que lo pidió). Cada cambio queda en la marca vigente; sacar la
@@ -13,7 +13,7 @@
 -- ── Guarda de entrada ──────────────────────────────────────────────
 do $$
 begin
-  if to_regprocedure('privado.retencion_con(uuid, timestamptz, jsonb, boolean)') is null then raise exception 'Guarda: falta privado.retencion_con (7100)'; end if;
+  if to_regprocedure('privado.retencion_con(uuid, timestamptz, jsonb, boolean)') is null then raise exception 'Guarda: falta privado.retencion_con (7700, plan familiar)'; end if;
   if to_regprocedure('public.retencion(uuid)') is null then raise exception 'Guarda: falta public.retencion'; end if;
   if to_regprocedure('public.bandeja_avisos(uuid)') is null then raise exception 'Guarda: falta public.bandeja_avisos'; end if;
   if to_regprocedure('public.cumplen_hoy(uuid, timestamptz)') is null then raise exception 'Guarda: falta public.cumplen_hoy'; end if;
@@ -179,6 +179,10 @@ base as (
   select so.id as socio_id, trim(so.nombre || ' ' || so.apellido) as nombre, so.nombre as nombre_pila,
          -- Un menor (D10): se le escribe al responsable.
          case when coalesce(so.fecha_nacimiento > (((p_momento) at time zone (select zona from g))::date - interval '18 years')::date, false) then so.responsable_telefono else so.telefono end as telefono,
+         -- VD-46G: con el plan familiar prendido, el cobro de los vinculados va al titular (una sola vez).
+         (coalesce((select g3.plan_familiar_activo from g g3), false) and gf.titular_id is not null and gf.titular_id <> so.id) as vinculado,
+         case when coalesce((select g3.plan_familiar_activo from g g3), false) and gf.titular_id = so.id
+              then (select count(*) from public.socios m where m.grupo_familiar_id = gf.id and m.id <> so.id and m.dado_de_baja_en is null)::int end as vinculados,
          so.dado_de_baja_en, so.motivo_baja, so.no_escribirle_en is not null as no_escribir, su.id as suscripcion_id, su.baja_en, su.plan_id,
          an.primer_inicio, e.fin_actual, e.ultimo_fin, e.tiene_futuro, v.ultimo as ultimo_ingreso, f.por_semana,
          round(pr.precio / pl.duracion_meses, 2) as monto_mensual,
@@ -191,6 +195,7 @@ base as (
     join antiguedad an on an.socio_id = so.id
     join estado e on e.socio_id = so.id
     join public.planes pl on pl.id = su.plan_id
+    left join public.grupos_familiares gf on gf.id = so.grupo_familiar_id
     left join precios pr on pr.plan_id = su.plan_id
     -- VD-30: la última visita y la frecuencia, socio por socio por el índice de ingresos (gimnasio, socio, momento).
     -- Antes eran dos CTE que se recorrían enteros por cada socio (8 millones de comparaciones con 3.000 socios).
@@ -246,7 +251,7 @@ con_texto as materialized (
       when c.lista = 'por_vencer' then ((c.fin_actual - interval '1 microsecond') at time zone g.zona)::date - c.hoy_d
     end as dias
     from clasificado c, g
-   where c.lista is not null
+   where c.lista is not null and not (c.vinculado and c.lista in ('vencido', 'por_vencer'))
      -- VD-46N: el que pidió que no le escriban no entra en las listas de re-enganche; sí sigue en vencidos y por vencer (se le cobra)
      and not (c.no_escribir and c.lista in ('nuevo', 'no_viene', 'se_fue'))
 ),
@@ -259,7 +264,7 @@ final as materialized (
     from con_texto t
 )
 select t.socio_id, t.nombre, t.telefono, t.lista,
-  case t.lista
+  (case t.lista
     when 'no_viene' then case when t.ultimo_ingreso is null then 'No vino nunca · se anotó hace ' || t.dias || ' días'
                               else 'No viene hace ' || t.dias || ' días' end
                          || case when t.por_semana >= 0.5 then ' · venía ' || round(t.por_semana) || ' veces por semana' else '' end
@@ -274,7 +279,9 @@ select t.socio_id, t.nombre, t.telefono, t.lista,
                             then 'Se dio de baja el ' || to_char((t.dado_de_baja_en) at time zone g.zona, 'DD/MM') || coalesce(' · ' || replace(t.motivo_baja, '_', ' '), '')
                             when t.ultimo_fin is null then 'Nunca pagó · se anotó el ' || to_char((t.primer_inicio) at time zone g.zona, 'DD/MM')
                             else 'Dejó de pagar el ' || privado.ultimo_dia(t.ultimo_fin, g.zona) end
-  end,
+  end)
+  || case when t.vinculados > 0 and t.lista in ('vencido', 'por_vencer')
+          then ' · paga por ' || t.vinculados || case t.vinculados when 1 then ' vinculado' else ' vinculados' end else '' end,
   t.dias, t.vence, t.monto_mensual, t.debe, t.ultimo_ingreso, round(t.por_semana, 1),
   uc.creado_en, uc.quien, uc.resultado,
   privado.armar_mensaje(coalesce(p_plantillas ->> t.lista, pm.texto), jsonb_build_object(

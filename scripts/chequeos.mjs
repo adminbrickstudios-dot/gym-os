@@ -65,6 +65,7 @@ const EJECUTABLES = {
     "public.crear_incidente", "public.corregir_incidente", "public.incidentes_panel", "privado.es_gestion_de",   // VD-46I
     "public.marcar_no_escribirle", "public.no_escribirle_socio",   // VD-46N
     "public.ex_socios",   // VD-46O
+    "public.anular_devolucion", "public.devoluciones_socio", "public.reglas_beneficios",   // VD-46U
   ]),
 };
 
