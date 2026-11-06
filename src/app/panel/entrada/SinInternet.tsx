@@ -140,11 +140,11 @@ export function SinInternet({ sedeId, zona }: { sedeId: string; zona: string }) 
         <p className="order-last text-sm texto-suave flex flex-wrap items-center gap-x-3 gap-y-1">
           {prendido ? <>
             <span data-copia={copia?.socios.length ?? 0}>📴 Copia para cuando se corte internet: {copia ? `${hora(copia.generada_en)} · ${copia.socios.length} socios` : "bajando…"}</span>
-            <button type="button" className="underline" onClick={() => setManual(true)}>Usarla ahora</button>
-            <button type="button" className="underline" onClick={() => prender(false)}>Apagar en esta compu</button>
+            <button type="button" className="underline min-h-11 inline-flex items-center" onClick={() => setManual(true)}>Usarla ahora</button>
+            <button type="button" className="underline min-h-11 inline-flex items-center" onClick={() => prender(false)}>Apagar en esta compu</button>
           </> : <>
             <span>📴 ¿Se te corta internet?</span>
-            <button type="button" className="underline" data-prender-copia onClick={() => prender(true)}>Guardar una copia en esta compu</button>
+            <button type="button" className="underline min-h-11 inline-flex items-center" data-prender-copia onClick={() => prender(true)}>Guardar una copia en esta compu</button>
           </>}
         </p>
       )}

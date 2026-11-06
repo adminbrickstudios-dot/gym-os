@@ -23,7 +23,7 @@ on:
       app_modo:
         description: "Cómo corre la app: dev (next dev) o produccion (next build + next start)"
         type: string
-        default: "dev"
+        default: "produccion"
 
 env:
   PGHOST: localhost
@@ -92,7 +92,7 @@ jobs:
         run: scripts/db/local.sh nueva
       - name: Levantar la app con la imitación de Supabase
         env:
-          APP_MODO: ${{ inputs.app_modo || 'dev' }}
+          APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
@@ -102,7 +102,8 @@ jobs:
       - name: Pantallas (e2e, cada recorrido aunque falle otro)
         env:
           SOLO: ${{ inputs.solo }}
-          APP_MODO: ${{ inputs.app_modo || 'dev' }}
+          E2E_DEPURAR: "1"
+          APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local

@@ -161,8 +161,8 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.ventanaEntrada = "si";
-    return () => { delete document.documentElement.dataset.ventanaEntrada; };
+    document.documentElement.dataset.entradaLista = "si";
+    return () => { delete document.documentElement.dataset.entradaLista; };
   }, []);
 
   const conBarra = cfg.barra_fija && !propia;

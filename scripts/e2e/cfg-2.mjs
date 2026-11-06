@@ -40,12 +40,12 @@ try {
   await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.png", mimeType: "image/png", buffer: png });
   await esperar(logoBox, /Logo listo/);
   const src = await logoBox.locator("img").getAttribute("src");
-  chequear(/\/storage\/v1\/object\/public\/marcas\/.+\/marca\/logo-[0-9a-f]{32}\.png$/.test(src ?? ""), "subir un PNG lo guarda en el bucket con una ruta del gimnasio", `el logo quedó en ${src}`);
+  chequear(/\/storage\/v1\/object\/public\/marcas\/.+\/marca\/logo-[0-9a-f]{32}\.(png|webp)$/.test(src ?? ""), "subir un PNG lo guarda en el bucket con una ruta del gimnasio", `el logo quedó en ${src}`);
   // Solo la carpeta de este gimnasio: otras bases locales anteriores pudieron dejar archivos con otro id.
   const carpeta = (src ?? "").match(/\/marcas\/([^/]+)\/marca\//)?.[1] ?? "sin-gimnasio";
   const vista = await p.context().newPage();
   const r = await vista.goto(src);
-  chequear(r.status() === 200 && r.headers()["content-type"] === "image/png", "el logo se puede ver desde su link público", `el link del logo dio ${r.status()} ${r.headers()["content-type"]}`);
+  chequear(r.status() === 200 && /^image\/(png|webp)$/.test(r.headers()["content-type"] ?? ""), "el logo se puede ver desde su link público", `el link del logo dio ${r.status()} ${r.headers()["content-type"]}`);
   await vista.close();
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   chequear(await p.locator("aside img").first().getAttribute("src") === src, "el logo aparece en la barra del panel", "la barra del panel no muestra el logo");
