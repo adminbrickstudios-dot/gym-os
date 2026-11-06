@@ -61,7 +61,7 @@ test("cada campo se valida", async () => {
 });
 
 test("otro gimnasio no ve ni cambia esta configuración", async () => {
-  await t.falla(() => leer(u.dueno, () => otro), /permiso|rol|acceso/i);
+  await como(u.dueno, () => t.falla(() => t.q(`select public.config_entrada($1)`, [otro]), /permiso|rol|acceso/i));
   await como(u.dueno, () => t.falla(() => t.q(`select public.guardar_config_entrada($1, '{"barra_fija": false}'::jsonb)`, [otro]), /permiso|rol|acceso/i));
   // Ni por la tabla: las políticas dejan leer solo el propio gimnasio y no escribir.
   const filas = await como(u.dueno, async () => await t.q(`select gimnasio_id from public.configuracion_entrada`));
