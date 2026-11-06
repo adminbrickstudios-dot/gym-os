@@ -11,6 +11,8 @@ import { Hoy, type Ingreso } from "./Hoy";
 import type { ResultadoSocio } from "@/app/panel/acciones";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { Invitados } from "./Invitados";
+import { TurnoEntrada } from "./TurnoEntrada";
+import type { MiTurno } from "@/app/panel/caja/tipos";
 import type { Invitado } from "./acciones";
 
 export const metadata: Metadata = { title: "Entrada" };
@@ -23,10 +25,13 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const sp = await searchParams;
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
-    const [hoy, formas, invitados] = await Promise.all([
+    const conCaja = !panel.secciones_apagadas.includes("caja");
+    const [hoy, formas, invitados, miTurno] = await Promise.all([
       rpcLectura<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
       rpcLectura<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
       rpcLectura<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-9: mi turno de caja (se ofrece abrirlo desde acá). Si algo falla no rompe la Entrada.
+      conCaja ? rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }).catch(() => null) : Promise.resolve(null),
     ]);
     // ?socio= (al volver de cobrar): se abre su veredicto.
     const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpcLectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
@@ -42,6 +47,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
           <div className="flex flex-col gap-6">
             {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
+            {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
             <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
           </div>
           <div>

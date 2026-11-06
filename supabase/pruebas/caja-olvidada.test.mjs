@@ -4,11 +4,12 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { abrir } from "./_comun.mjs";
 
-let t, uRec, uRec2, uDueno, caja1, caja2;
+let t, uRec, uRec2, uDueno, caja1, caja2, caja3;
 before(async () => {
   t = await abrir("prueba-caja-olvidada");
   [{ id: caja1 }] = await t.q(`insert into public.cajas (gimnasio_id, sede_id, nombre) values ($1,$2,'Mostrador') returning id`, [t.g, t.sede]);
   [{ id: caja2 }] = await t.q(`insert into public.cajas (gimnasio_id, sede_id, nombre) values ($1,$2,'Barra') returning id`, [t.g, t.sede]);
+  [{ id: caja3 }] = await t.q(`insert into public.cajas (gimnasio_id, sede_id, nombre) values ($1,$2,'Salón') returning id`, [t.g, t.sede]);
   const crear = async (rol, n) => {
     const [{ id: u }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`${rol}${Math.random()}@ejemplo.invalid`]);
     await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,$3,$4)`, [t.g, u, n, rol]);
@@ -29,7 +30,6 @@ test("abierta de ayer: olvidada; no deja abrir otra; la ve quien la abrió y el 
   await t.q(`update public.turnos_caja set abierto_en = now() - interval '1 day' where id = $1`, [turno]);
   assert.equal((await t.q(`select privado.caja_olvidada($1, now()) as o`, [turno]))[0].o, true);
   await como(uRec, async () => {
-    await t.falla(() => t.q(`select public.abrir_caja($1, 0)`, [caja2]), /Tenés abierta la Mostrador desde el .*cerrala antes de abrir otra/);
     const [{ o }] = await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]);
     assert.equal(o.length, 1); assert.equal(o[0].mia, true);
   });
@@ -38,6 +38,15 @@ test("abierta de ayer: olvidada; no deja abrir otra; la ve quien la abrió y el 
     await t.q(`select public.abrir_caja($1, 0)`, [caja2]);   // otra persona sí abre otra caja
   });
   await como(uDueno, async () => assert.equal((await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]))[0].o.length, 1));
+  // VD-9 (D20): ya no obliga a cerrarla antes. Al abrir su turno nuevo, la vieja queda registrada como
+  // sin contar (para el dueño); lo que sigue valiendo es que no se abre una SEGUNDA caja con la nueva abierta.
+  await como(uRec, async () => {
+    await t.q(`select public.abrir_caja($1, 0)`, [caja1]);
+    const [{ vieja }] = await t.q(`select sin_contar as vieja from public.turnos_caja where id = $1`, [turno]);
+    assert.equal(vieja, true);
+    assert.equal((await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]))[0].o.length, 0);
+    await t.falla(() => t.q(`select public.abrir_caja($1, 0)`, [caja3]), /Tenés abierta la Mostrador desde el .*cerrala antes de abrir otra/);
+  });
 });
 
 test("de hoy, después de la hora de cierre de la sede: olvidada", async () => {

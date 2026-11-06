@@ -82,12 +82,12 @@ export async function datosCobro(sedeId: string | null, socioId: string): Promis
     const { sede } = sedeActiva(panel, sedeId ?? undefined);
     const [precios, cajas, ficha, ctx] = await Promise.all([
       rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
-      rpc<{ turno_id: string | null }[]>("cajas_sede", { p_sede_id: sede.id }, { lectura: true }),
+      rpc<{ turno_id: string | null; vencida?: boolean }[]>("cajas_sede", { p_sede_id: sede.id }, { lectura: true }),
       rpc<Ficha>("ficha_socio", { p_socio_id: socioId }, { lectura: true }),
       rpc<ContextoCobro>("contexto_cobro", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
     ]);
     return { datos: {
-      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, turnoId: cajas.find((c) => c.turno_id)?.turno_id ?? null,
+      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, turnoId: cajas.find((c) => c.turno_id && !c.vencida)?.turno_id ?? null,
       socio: { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), numero: ficha.socio.numero ?? null, color: ficha.acceso.color, texto: ficha.acceso.texto },
       precios, ctx, puedeAnular: panel.yo.rol === "dueno" || panel.yo.rol === "encargado",
       sinProductos: panel.yo.rol === "recepcion" && !panel.permisos.recepcion_vende_productos,

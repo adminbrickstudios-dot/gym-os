@@ -16,6 +16,8 @@ import { HorariosYCierres, type CierrePanel } from "./Horarios";
 import { Tablets } from "./Tablets";
 import { LinkResena } from "./LinkResena";
 import { ConfigEntrada } from "./ConfigEntrada";
+import { ConfigCaja } from "./ConfigCaja";
+import type { ConfigCaja as DatosConfigCaja } from "@/app/panel/caja/tipos";
 import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/config";
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
@@ -164,8 +166,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12 }: {
-  metaVisitas?: number;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, cajaConfig = null }: {
+  metaVisitas?: number; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -478,6 +480,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           </Tarjeta>
           {pie("cobros")}
           <MercadoPago estado={mercadopago} puedeEditar={puedeEditar} />
+          {cajaConfig && <ConfigCaja inicial={cajaConfig} puedeEditar={puedeEditar} />}
         </>}
 
         {pestana === "reglas" && <>

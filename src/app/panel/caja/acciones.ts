@@ -2,10 +2,12 @@
 import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
-import { rpc } from "@/lib/panel/servidor";
+import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { achicarFoto } from "@/lib/imagenes-servidor";
+import type { Billetes, ConfigCaja, EstadoTurno } from "./tipos";
 
 export type Resumen = {
+  estado?: EstadoTurno; revisado_nota?: string | null; billetes?: Billetes | null;
   turno_id: string; abierto_en: string; cerrado_en: string | null; monto_inicial: number; efectivo: number;
   ingresos: number; retiros: number; esperado: number; contado: number | null; diferencia: number | null;
   otros_medios: Record<string, number>;
@@ -59,15 +61,46 @@ export async function verTicket(movimientoId: string): Promise<{ url?: string; e
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-/** Arqueo ciego: se informa lo contado y recién ahí se ve lo esperado. */
-export async function cerrarCaja(turnoId: string, contado: string, nota: string): Promise<{ resumen?: Resumen; error?: string }> {
+/** Arqueo ciego: se informa lo contado y recién ahí se ve lo esperado. `billetes`: el conteo de la calculadora (opcional). */
+export async function cerrarCaja(turnoId: string, contado: string, nota: string, billetes: Billetes | null = null): Promise<{ resumen?: Resumen; error?: string }> {
   if (String(contado).trim() && Number.isNaN(num(contado))) return { error: MAL };
   if (!(num(contado) >= 0)) return { error: "Escribí cuánta plata contaste" };
   try {
     // Sin revalidar: si la página se vuelve a pintar, el turno ya cerrado desaparece
     // antes de que se vea el resultado del arqueo. La pantalla refresca al tocar "Listo".
-    const resumen = await rpc<Resumen>("cerrar_caja", { p_turno_id: turnoId, p_monto_contado: num(contado), p_nota: nota || null });
+    const resumen = await rpc<Resumen>("cerrar_caja", { p_turno_id: turnoId, p_monto_contado: num(contado), p_nota: nota || null, ...(billetes ? { p_billetes: billetes } : {}) });
     notificarDespues("caja_diferencia", turnoId);   // PUSH-1: la base decide si hubo diferencia
     return { resumen };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-9: el dueño o el encargado cuenta una caja que se cerró sola. Lo escrito queda con quién y cuándo. */
+export async function contarCajaSinContar(turnoId: string, contado: string, nota: string, billetes: Billetes | null = null): Promise<{ resumen?: Resumen; error?: string }> {
+  if (String(contado).trim() && Number.isNaN(num(contado))) return { error: MAL };
+  if (!(num(contado) >= 0)) return { error: "Escribí cuánta plata había" };
+  try {
+    const resumen = await rpc<Resumen>("contar_caja_sin_contar", { p_turno_id: turnoId, p_monto_contado: num(contado), p_nota: nota || null, ...(billetes ? { p_billetes: billetes } : {}) });
+    revalidatePath("/panel/caja");
+    return { resumen };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-9: dejarla sin contar pide motivo (queda escrito). */
+export async function dejarCajaSinContar(turnoId: string, motivo: string): Promise<{ error?: string }> {
+  if (!motivo.trim()) return { error: "Escribí por qué se deja sin contar" };
+  try { await rpc("dejar_caja_sin_contar", { p_turno_id: turnoId, p_motivo: motivo }); revalidatePath("/panel/caja"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-9: Configuración → Caja (solo el dueño; la base lo verifica). */
+export async function guardarConfigCaja(c: ConfigCaja): Promise<{ config?: ConfigCaja; error?: string }> {
+  const fondo = Number(c.fondo_fijo);
+  if (!Number.isFinite(fondo) || fondo < 0) return { error: "El fondo fijo no puede ser negativo" };
+  try {
+    const panel = await contextoPanel();
+    const config = await rpc<ConfigCaja>("guardar_config_caja", { p_gimnasio_id: panel.gimnasio.id, p_modo: c.modo, p_pedir_billetes: c.pedir_billetes,
+      p_fondo_fijo: fondo, p_hora_corte: c.hora_corte, p_horas_max: Number(c.horas_max) });
+    revalidatePath("/panel", "layout");
+    return { config };
   } catch (e) { return { error: (e as Error).message }; }
 }

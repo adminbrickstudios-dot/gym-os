@@ -10,7 +10,7 @@ import { Carrito } from "./Carrito";
 import type { PreciosVenta } from "./tipos";
 
 export const metadata: Metadata = { title: "Vender" };
-type Caja = { caja_id: string; nombre: string; activa: boolean; turno_id: string | null };
+type Caja = { caja_id: string; nombre: string; activa: boolean; turno_id: string | null; vencida?: boolean };
 
 export default async function Vender({ searchParams }: { searchParams: Promise<{ socio?: string; sede?: string; cuota?: string; desde?: string }> }) {
   const sp = await searchParams;
@@ -25,7 +25,8 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
       sp.socio ? rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }) : Promise.resolve(null),
       rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
-    const turno = cajas.find((c) => c.turno_id)?.turno_id ?? null;
+    // VD-9: una caja abierta de otro día figura sin contar y no se cobra en ella.
+    const turno = cajas.find((c) => c.turno_id && !c.vencida)?.turno_id ?? null;
     const socio = ficha ? { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), color: ficha.acceso.color, texto: ficha.acceso.texto } : null;
     return (
       <>
