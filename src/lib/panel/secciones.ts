@@ -1,6 +1,9 @@
 // Las secciones del panel: dónde están, para quién y qué son. La
 // descripción es la línea que explica cada cosa en el menú.
 // Solo se listan las que existen: lo vacío está vacío.
+// VD-11: nombres y orden del doc 03 §1; las rutas salen de rutas.ts.
+
+import { DESTINO } from "./rutas";
 
 export type Rol = "dueno" | "encargado" | "recepcion" | "profe";
 export type Grupo = "Hoy" | "Socios" | "Plata" | "Gimnasio";
@@ -15,43 +18,53 @@ export type Seccion = {
   roles: Rol[];
   /** Clave en configuracion_gimnasio.secciones_apagadas, si el gimnasio la puede apagar. */
   apagable?: string;
+  /** Nombre corto para la barra de abajo del celular (si el título no entra). */
+  corto?: string;
+  /** Nombres viejos y sinónimos: el buscador (Ctrl+K) los encuentra igual. */
+  tambien?: string;
 };
 
 const TODOS: Rol[] = ["dueno", "encargado", "recepcion", "profe"];
 const MOSTRADOR: Rol[] = ["dueno", "encargado", "recepcion"];
 const GESTION: Rol[] = ["dueno", "encargado"];
 
+// Las claves NO cambian (los accesos rápidos guardados van por clave); cambian títulos, orden y destino.
 export const SECCIONES: Seccion[] = [
-  { clave: "entrada", ruta: "/panel/entrada", emoji: "🚪", titulo: "Entrada", descripcion: "Quién entra, y si no puede, por qué", grupo: "Hoy", roles: MOSTRADOR, apagable: "entrada" },
-  { clave: "clases", ruta: "/panel/clases", emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
-  { clave: "avisos", ruta: "/panel/avisos", emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
-  { clave: "tareas", ruta: "/panel/tareas", emoji: "📌", titulo: "Tareas", descripcion: "Lo que hay que hacer, para quién y para cuándo", grupo: "Hoy", roles: TODOS },
-  { clave: "vencen_hoy", ruta: "/panel/vencen-hoy", emoji: "⏰", titulo: "Vencen hoy", descripcion: "A quién avisarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy" },
-  { clave: "socios", ruta: "/panel/socios", emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
-  { clave: "retencion", ruta: "/panel/retencion", emoji: "📉", titulo: "Retención", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion" },
-  { clave: "rutinas", ruta: "/panel/rutinas", emoji: "💪", titulo: "Rutinas", descripcion: "Ejercicios y rutinas para los socios", grupo: "Socios", roles: ["dueno", "encargado", "profe"], apagable: "rutinas" },
-  { clave: "eventos", ruta: "/panel/eventos", emoji: "🎟️", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", roles: MOSTRADOR },
-  { clave: "prospectos", ruta: "/panel/prospectos", emoji: "🌱", titulo: "Prospectos", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR },
-  { clave: "vender", ruta: "/panel/vender", emoji: "🛒", titulo: "Vender", descripcion: "Cuotas, pases, packs y productos", grupo: "Plata", roles: MOSTRADOR, apagable: "vender" },
-  { clave: "caja", ruta: "/panel/caja", emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
-  { clave: "resultado", ruta: "/panel/resultado", emoji: "📈", titulo: "Resultado", descripcion: "La plata del mes: cuánto entró, de dónde y contra el anterior", grupo: "Plata", roles: GESTION },
-  { clave: "gastos", ruta: "/panel/gastos", emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
-  { clave: "resumen", ruta: "/panel/resumen", emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
-  { clave: "control", ruta: "/panel/control", emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control" },
-  { clave: "transferencias", ruta: "/panel/transferencias", emoji: "🧾", titulo: "Transferencias", descripcion: "Comprobantes de socios para aprobar", grupo: "Plata", roles: MOSTRADOR, apagable: "transferencias" },
-  { clave: "planes", ruta: "/panel/planes", emoji: "🏷️", titulo: "Planes y precios", descripcion: "Lo que vendés y cuánto cuesta", grupo: "Gimnasio", roles: GESTION },
-  { clave: "pagina", ruta: "/panel/pagina", emoji: "🌐", titulo: "Tu página", descripcion: "Lo que ve la gente antes de hacerse socio", grupo: "Gimnasio", roles: GESTION },
-  { clave: "equipo", ruta: "/panel/equipo", emoji: "🧑‍🤝‍🧑", titulo: "Equipo", descripcion: "Quién trabaja y qué puede hacer", grupo: "Gimnasio", roles: GESTION },
-  { clave: "configuracion", ruta: "/panel/configuracion", emoji: "⚙️", titulo: "Configuración", descripcion: "Marca, reglas y secciones que usás", grupo: "Gimnasio", roles: GESTION },
+  // HOY
+  { clave: "entrada", ruta: DESTINO.entrada, emoji: "🚪", titulo: "Entrada", descripcion: "Quién entra, y si no puede, por qué", grupo: "Hoy", roles: MOSTRADOR, apagable: "entrada" },
+  { clave: "tareas", ruta: DESTINO.tareas, emoji: "✅", titulo: "Para hacer hoy", descripcion: "Lo que hay que hacer, para quién y para cuándo", grupo: "Hoy", roles: TODOS, tambien: "tareas pendientes" },
+  { clave: "avisos", ruta: DESTINO.avisos, emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
+  { clave: "vencen_hoy", ruta: DESTINO.vencen_hoy, emoji: "⏰", titulo: "Vencen y cobrar", descripcion: "A quién avisarle y cobrarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy", tambien: "vencen hoy vencimientos" },
+  { clave: "clases", ruta: DESTINO.clases, emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
+  // SOCIOS
+  { clave: "socios", ruta: DESTINO.socios, emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
+  { clave: "prospectos", ruta: DESTINO.prospectos, emoji: "🌱", titulo: "Interesados", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR, tambien: "prospectos" },
+  { clave: "retencion", ruta: DESTINO.retencion, emoji: "📉", titulo: "Retención y números", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion", tambien: "retencion" },
+  { clave: "rutinas", ruta: DESTINO.rutinas, emoji: "💪", titulo: "Rutinas", descripcion: "Ejercicios y rutinas para los socios", grupo: "Socios", roles: ["dueno", "encargado", "profe"], apagable: "rutinas" },
+  { clave: "eventos", ruta: DESTINO.eventos, emoji: "🎟️", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", roles: MOSTRADOR },
+  // PLATA
+  { clave: "caja", ruta: DESTINO.caja, emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
+  { clave: "vender", ruta: DESTINO.vender, emoji: "🛒", titulo: "Productos y stock", corto: "Productos", descripcion: "Vender productos, pases y packs; el stock que queda", grupo: "Plata", roles: MOSTRADOR, apagable: "vender", tambien: "vender cobrar cuotas" },
+  { clave: "transferencias", ruta: DESTINO.transferencias, emoji: "🧾", titulo: "Transferencias", descripcion: "Comprobantes de socios para aprobar", grupo: "Plata", roles: MOSTRADOR, apagable: "transferencias" },
+  { clave: "resultado", ruta: DESTINO.resultado, emoji: "📈", titulo: "Resultado", descripcion: "La plata del mes: cuánto entró, de dónde y contra el anterior", grupo: "Plata", roles: GESTION },
+  // "gastos" lo apaga panel_gimnasio para el encargado sin permiso (VD-41b); "control" lo apaga contextoPanel (VD-10).
+  { clave: "gastos", ruta: DESTINO.gastos, emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
+  { clave: "control", ruta: DESTINO.control, emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control", tambien: "auditoria" },
+  { clave: "resumen", ruta: DESTINO.resumen, emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
+  // GIMNASIO
+  { clave: "planes", ruta: DESTINO.planes, emoji: "🏷️", titulo: "Planes y servicios", descripcion: "Lo que vendés, cuánto cuesta y el stock", grupo: "Gimnasio", roles: GESTION, tambien: "planes y precios productos stock" },
+  { clave: "pagina", ruta: DESTINO.pagina, emoji: "🌐", titulo: "Tu página", descripcion: "Lo que ve la gente antes de hacerse socio", grupo: "Gimnasio", roles: GESTION },
+  { clave: "equipo", ruta: DESTINO.equipo, emoji: "🧑‍🤝‍🧑", titulo: "Equipo", descripcion: "Quién trabaja y qué puede hacer", grupo: "Gimnasio", roles: GESTION },
+  { clave: "configuracion", ruta: DESTINO.configuracion, emoji: "⚙️", titulo: "Configuración", descripcion: "Marca, reglas y secciones que usás", grupo: "Gimnasio", roles: GESTION },
 ];
 
 export const GRUPOS: Grupo[] = ["Hoy", "Socios", "Plata", "Gimnasio"];
 
 /** Accesos rápidos del inicio: las secciones más una acción directa. */
-export type Acceso = { clave: string; ruta: string; emoji: string; titulo: string; roles: Rol[]; apagable?: string };
+export type Acceso = { clave: string; ruta: string; emoji: string; titulo: string; roles: Rol[]; apagable?: string; corto?: string };
 export const ACCESOS: Acceso[] = [
-  ...SECCIONES.map(({ clave, ruta, emoji, titulo, roles, apagable }) => ({ clave, ruta, emoji, titulo, roles, apagable })),
-  { clave: "nuevo_socio", ruta: "/panel/socios/nuevo", emoji: "➕", titulo: "Nuevo socio", roles: MOSTRADOR, apagable: "socios" },
+  ...SECCIONES.map(({ clave, ruta, emoji, titulo, roles, apagable, corto }) => ({ clave, ruta, emoji, titulo, roles, apagable, corto })),
+  { clave: "nuevo_socio", ruta: DESTINO.nuevo_socio, emoji: "➕", titulo: "Nuevo socio", roles: MOSTRADOR, apagable: "socios" },
 ];
 
 const ACCESOS_INICIALES: Record<Rol, string[]> = {

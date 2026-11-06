@@ -2,8 +2,8 @@ import { expect, test } from "vitest";
 import { accesosElegidos, principalesCelular, seccionesPara } from "./secciones";
 
 test("el profe ve clases, tareas y rutinas; la recepción ve retención (D2) pero no configuración ni rutinas", () => {
-  expect(seccionesPara("profe", []).map((s) => s.clave)).toEqual(["clases", "tareas", "rutinas"]);
-  expect(seccionesPara("profe", ["rutinas"]).map((s) => s.clave)).toEqual(["clases", "tareas"]);
+  expect(seccionesPara("profe", []).map((s) => s.clave)).toEqual(["tareas", "clases", "rutinas"]);   // VD-11: Para hacer hoy va antes de Clases
+  expect(seccionesPara("profe", ["rutinas"]).map((s) => s.clave)).toEqual(["tareas", "clases"]);
   const rec = seccionesPara("recepcion", []).map((s) => s.clave);
   expect(rec).toContain("retencion");
   expect(rec).not.toContain("configuracion");
