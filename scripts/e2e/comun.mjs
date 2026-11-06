@@ -65,6 +65,9 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   const listo = async () => {
     await p.waitForFunction(() => document.documentElement.dataset.hidratado === "1" && !document.querySelector('[data-pagina-hidratada="0"]'),
       null, { timeout: 20000 }).catch(() => {});
+    // Y a que se calmen las consultas que la propia pantalla dispara al abrir (las precargas de los links y la
+    // renovación de la Entrada): una acción mandada en ese instante guardaba bien pero la pantalla no se refrescaba.
+    await p.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
   };
   for (const metodo of ["goto", "reload", "waitForURL"]) {
     const original = p[metodo].bind(p);
