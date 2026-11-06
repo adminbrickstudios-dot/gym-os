@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-13 · Para hacer hoy: tareas inteligentes
+
+**QUÉ HICE**
+- Migración 5000: `/panel/tareas` pasó a ser "Para hacer hoy" sin sacar nada (`/panel/hoy` redirige). Tres bloques: 13 automáticas calculadas, cada una con su dato y sus nombres (las 5 de antes — vencen hoy, prometieron pagar, transferencias por aprobar, caja abierta, no vienen — más caja sin contar, vencen en N días, nuevos sin venir, cumpleaños, stock bajo, pausas, bajas y clases con lista de espera); checklist de apertura y cierre (lo arman dueño y encargado, se tilda por día); tareas manuales con repetición diaria, semanal o mensual (al tildar una repetida nace la siguiente, una sola vez). En "vencen hoy" y "prometieron pagar" hay 💵 Cobrar por persona que abre la hoja de VD-5 y la saca de la lista.
+- Configuración "Qué se avisa y a quién" (dueño y encargado): prender o apagar cada automática, asignarla a un rol, una persona o "lo de siempre" y elegir los días de las que llevan N. Tablas `tareas_auto`, `tareas_checklist`, `tareas_checklist_hechas`; `para_hacer_hoy` reescrita con la misma firma sobre la versión vigente; `crear_tarea` suma un parámetro y la firma vieja se borra.
+- Decisiones: "no vienen" sigue solo para dueño y encargado (el dueño puede asignarla a la recepción); las tarjetas muestran cantidades y nombres, nunca montos; caja sin contar, stock, pausas y bajas son de gestión y no se asignan a la recepción; el profe no ve ninguna.
+- Verificado: lint, typecheck, 104 pruebas, build y base/chequeos/demo en verde en GitHub (`para-hacer-hoy`, `inicio-en-vivo`).
+
+**SIN ARREGLAR**: VD-13b (avisos automáticos en la app del socio: la base no tiene bandeja de avisos para el socio), VD-13c (firmas pendientes, hitos de entradas, pedir reseña), VD-13d (Para hacer hoy como bloque principal del Inicio). Vencen hoy, prometieron y transferencias solo se prueban con el e2e.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-13` (depende de que el demo tenga a quien venza hoy) y las pantallas con sesión real: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-15 y VD-6b · Socios con memoria, Interesados y ficha con acciones (D22)
 
 **QUÉ HICE**

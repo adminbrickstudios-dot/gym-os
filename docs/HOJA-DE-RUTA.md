@@ -495,6 +495,9 @@ bloque 18.
 - [ ] VD-16c · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
 - [ ] VD-18b · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
 - [ ] VD-15b · 🟢 · Socios: la píldora 🌐 cuenta solo los que no pagaron; encabezado de la ficha fijo al scrollear; línea de tiempo única en la ficha (entradas, pagos, contactos y cambios de plan)
+- [ ] VD-13b · 🟢 · Avisos al socio en su app (automáticos, según Configuración → Mensajes), con el contador de personas a avisar sobre cada grupo (LISTO SI: el socio ve el aviso "vence en 3 días" en su app)
+- [ ] VD-13c · 🟢 · Tres automáticas que faltan: firmas pendientes, hitos de 10/50/100 entradas con botón Hecho, pedir reseña a los contentos
+- [ ] VD-13d · 🟢 · Para hacer hoy como bloque principal del Inicio (mismo componente AutomaticasHoy)
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -506,7 +509,7 @@ bloque 18.
 *Tanda 3 · El día del dueño*
 - [x] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones — verificado: menú nuevo con los nombres del doc 03 (claves intactas, ninguna ruta sacada), mapa central de rutas, Gastos oculto al encargado sin permiso; base en verde en GitHub (menu-gastos); e2e vd-11 en la corrida de la tanda
 - [ ] VD-37 · 🟢 · Pendientes con números y puntitos calculados, y centro de notificaciones
-- [ ] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app
+- [x] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app — verificado: 13 automáticas calculadas con su dato, manuales con repetición, checklist de apertura y cierre, cada una prendible y asignable; base en verde en GitHub (para-hacer-hoy); e2e vd-13 en la corrida de la tanda
 - [x] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
 - [x] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones — verificado: lista de Socios con memoria, Interesados como pestaña de Socios, 🌐 de autoalta, ficha con Entrada y Cobrar; base en verde en GitHub (interesados-dni); e2e vd-15 en la corrida de la tanda
 - [ ] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos)

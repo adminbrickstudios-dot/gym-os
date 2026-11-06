@@ -8,7 +8,7 @@ export const EVENTO_COBRO_HECHO = "gymos:cobro-hecho";
 export const EVENTO_COBRAR_CERRADO = "gymos:cobrar-cerrado";
 
 /** De dónde se abrió: es adonde vuelve al terminar. */
-export type OrigenCobro = "entrada" | "ficha" | "vencen" | "retencion" | "buscador" | "otro";
+export type OrigenCobro = "entrada" | "ficha" | "vencen" | "retencion" | "buscador" | "tarea" | "otro";
 
 export type PedidoCobro = { socioId: string; origen: OrigenCobro; sedeId?: string };
 export type CobroHecho = { socioId: string; ventaId: string; total: number; origen: OrigenCobro };

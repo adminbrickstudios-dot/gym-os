@@ -63,3 +63,4 @@ VD-15 lanzado: a5008692e3fdd727b (vd15, migr 5100; incluye VD-6b). En curso: VD-
 VD-37 lanzado: a436c36190c2d6fe1 (vd37, migr 5200). En curso: VD-13 (aa10ecfaee648c08c), VD-15 (a5008692e3fdd727b). Pendientes tanda 3: VD-38, VD-44.
 (VD-15, VD-6b mergeados)
 VD-38 lanzado: af583325233c07c8f (vd38, migr 5300). En curso: VD-13 (aa10ecfaee648c08c), VD-37 (a436c36190c2d6fe1). Falta tanda 3: VD-44. Luego tanda 4: VD-35, 39, 22, 24, 25, 19, 20.
+(VD-13 mergeado)
