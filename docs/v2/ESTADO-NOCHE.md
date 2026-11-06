@@ -13,7 +13,7 @@ Flujo por agente: rama `noche/2026-11-05-<id>` → push → base verde → yo ha
 | VD-36 → VD-23 | a629f942bc5071cce | noche/2026-11-05-vd36 | 3600 / 2300 | en curso |
 | (VD-12 mergeado) | | | | |
 
-Lanzado: VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1, migr 0100/0200). Después: VD-5, VD-6 (serie), VD-47X, VD-12b/c/d, VD-33b/c; luego cerrar tanda 1 con commit [pantallas] y publicar. Al mergear: regenerar docs/paneles con npm run mapa (conflicta siempre).
+Lanzados (3 agentes): VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1, migr 0100/0200); VD-47X (a37bb70833aeb1eb0, rama noche/2026-11-05-vd47x, migr 004701); VD-12b→12c→12d→23b→23c (a01f26a4fc33c1e10, rama noche/2026-11-05-vd12b, migr 001201). Después: VD-5, VD-6 (serie, tras VD-1/2), VD-33b/c; luego cerrar tanda 1 con commit [pantallas] y publicar. Al mergear: regenerar docs/paneles con npm run mapa y unir listas de chequeos.mjs (conflictan siempre).
 
 ## Terminados
 
@@ -23,6 +23,7 @@ Lanzado: VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1, migr 0100/02
 - VD-12 (base verde; sumados VD-12b/c/d)
 - VD-33 (base verde; sumados VD-33b/c)
 - VD-36, VD-23 (base verde; sumados VD-23b/c)
+(VD-36/VD-23 mergeados)
 
 ## Publicadas
 
