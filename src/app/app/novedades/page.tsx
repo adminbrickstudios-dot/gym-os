@@ -16,7 +16,11 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
     const { g, yo } = await miSocio(pedido);
     if (yo.elegir || !yo.socio) return <p className="texto-suave">Elegí primero <Link href="/app" className="underline">qué socio sos</Link>.</p>;
     const s = yo.socio;
-    const c = await rpc<{ items: Item[]; sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id });
+    const [c, mensajes] = await Promise.all([
+      rpc<{ items: Item[]; sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }),
+      // VD-38: las respuestas del gimnasio a mis mensajes (no vive en campana_socio: esa función no se toca).
+      rpc<{ activo: boolean; sin_leer: number }>("mensajes_estado_socio", { p_socio_id: s.socio_id }).catch(() => null),
+    ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     const zona = yo.zona!;
     const cuando = (m: string | null) => (m ? new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m)) : null);
@@ -24,6 +28,13 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
       <div className="space-y-6">
         <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
         <h1 className="titular text-5xl">🔔 Novedades</h1>
+        {mensajes && mensajes.sin_leer > 0 && (
+          <Link href={`/app/mensajes${q}`} className="tarjeta flex items-center gap-3 p-4" data-novedad-mensajes>
+            <span className="text-2xl" aria-hidden>💬</span>
+            <span className="flex-1 font-semibold">{mensajes.sin_leer === 1 ? "El gimnasio te respondió" : `El gimnasio te respondió ${mensajes.sin_leer} mensajes`}</span>
+            <span aria-hidden className="texto-tenue">›</span>
+          </Link>
+        )}
         <MarcarLeidas claves={c.items.filter((i) => !i.leido).map((i) => i.clave)} />
         {c.items.length === 0 ? <p className="texto-suave text-lg">Nada nuevo por ahora. Cuando aprueben tu pago o cambie una clase, aparece acá. ✨</p> : (
           <ul className="space-y-2">

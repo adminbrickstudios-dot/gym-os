@@ -78,7 +78,13 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
-  const panel = await rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id });
+  let panel = await rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id });
+  // VD-38: los Mensajes de los socios los ve la recepción solo si el dueño se lo prendió (tabla propia: panel_gimnasio no se toca).
+  // La base lo exige igual en cada función; acá solo se saca del menú, de Ctrl+K y de los accesos. Solo la recepción pregunta.
+  if (panel.yo.rol === "recepcion" && !panel.secciones_apagadas.includes("mensajes")) {
+    const ve = await rpcLectura<boolean>("ver_mensajes_equipo", { p_gimnasio_id: g.id }).catch(() => false);
+    if (!ve) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "mensajes"] };
+  }
   // VD-10: el Control es del dueño; el encargado lo ve solo si el dueño le dio el Resultado (EQU-1).
   // La base lo exige igual (linea_de_control): acá solo se saca del menú y de la campana.
   if (panel.yo.rol === "encargado" && !panel.permisos.encargado_ve_resultado && !panel.secciones_apagadas.includes("control")) {
