@@ -35,12 +35,17 @@ export default async function Control({ searchParams }: { searchParams: Promise<
     const quien = UUID.test(sp.quien ?? "") ? sp.quien! : "";
     const cursor = sp.cursor && sp.cursor.includes("|") && sp.cursor.length < 200 ? sp.cursor : null;
 
-    const [pagina, equipo] = await Promise.all([
+    // VD-40: cuándo entró BRIK a ayudar y por qué (solo el dueño; la base lo exige igual).
+    const soportesPedido = panel.yo.rol === "dueno"
+      ? rpc<SoporteEntrada[]>("soportes_del_gimnasio", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 })
+      : Promise.resolve<SoporteEntrada[]>([]);
+    const [pagina, equipo, soportes] = await Promise.all([
       rpc<PaginaControl>("linea_de_control", {
         p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_tipos: tipos.length ? tipos : null,
         p_quien: quien || null, p_limite: POR_PAGINA, p_cursor: cursor,
       }),
       rpc<(PersonaControl & { activo: boolean })[]>("equipo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      soportesPedido,
     ]);
 
     const filtros = new URLSearchParams();
@@ -105,8 +110,30 @@ export default async function Control({ searchParams }: { searchParams: Promise<
               </nav>
             </div>
           )}
+          {panel.yo.rol === "dueno" && (
+            <section className="space-y-2" data-soporte-brik aria-label="Entradas de soporte de BRIK">
+              <h2 className="titulo-grupo">🧱 Cuando BRIK entró a ayudarte</h2>
+              {soportes.length === 0
+                ? <p className="texto-suave">BRIK no entró a tu gimnasio. Si alguna vez entra a ayudarte, queda escrito acá: quién, por qué y cuándo.</p>
+                : (
+                  <ul className="space-y-2">
+                    {soportes.map((s) => (
+                      <li key={s.id} className="tarjeta flex items-center gap-3 px-4 py-3" data-soporte-entrada={s.en_curso ? "en-curso" : "cerrada"}>
+                        <span className="icono" aria-hidden>🧱</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold leading-tight break-words">BRIK entró a ayudarte: {s.motivo}</span>
+                          <span className="block texto-suave text-[15px]">{s.en_curso ? "Está adentro ahora" : "Salió"} · {new Intl.DateTimeFormat("es-AR", { timeZone: zona, dateStyle: "short", timeStyle: "short" }).format(new Date(s.entro_en))}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </section>
+          )}
         </div>
       </>
     );
   });
 }
+
+type SoporteEntrada = { id: string; motivo: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };

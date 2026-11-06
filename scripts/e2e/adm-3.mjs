@@ -7,6 +7,7 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { COMPU, PLATAFORMA as B, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { altaGimnasio, entrarSoporte } from "./alta-gimnasio.mjs";
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
 const db = new pg.Client({ connectionString: url }); await db.connect();
@@ -23,10 +24,7 @@ try {
   await planes.getByText(`Plan e2e ${s}`).waitFor({ timeout: 30000 });
   ok("💳 el admin carga un plan de Gym OS con su precio");
 
-  await p.fill("input[name=nombre]", `Abono ${s}`);
-  await p.fill("input[name=dueno]", "Dueño Abono");
-  await p.locator("select[name=tipo]").selectOption("");
-  await p.click('button:has-text("Crear gimnasio")');
+  await altaGimnasio(p, { nombre: `Abono ${s}`, dueno: "Dueño Abono", tipo: "" });
   await p.getByText(/está creado/).first().waitFor({ timeout: 60000 });
   await p.locator("a[data-alta-equipo]").click();
   await p.waitForURL(/\/admin\/[0-9a-f-]{36}/, { timeout: 30000 });
@@ -45,7 +43,7 @@ try {
   await db.query(`update public.gimnasios set plataforma_desde = current_date - 30 where id = $1`, [gid]);
   await p.reload();
   await ab.locator('[data-abono="vencido"]').waitFor({ timeout: 30000 });
-  await p.getByRole("button", { name: /Entrar al panel/ }).first().click();
+  await entrarSoporte(p);
   await p.waitForURL(/\/panel/, { timeout: 60000 });
   await p.locator("[data-solo-lectura]").waitFor({ timeout: 60000 });
   chequear(/solo lectura/.test(await p.locator("[data-solo-lectura]").innerText()), "vencido: el panel avisa “solo lectura” (la puerta y la app siguen)", "no avisa");

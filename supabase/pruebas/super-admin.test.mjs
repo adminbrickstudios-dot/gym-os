@@ -48,7 +48,7 @@ before(async () => {
 after(async () => t && t.cerrar());
 
 test("admin_entrar_gimnasio: el admin queda como Soporte BRIK y ve el panel; otro no puede", async () => {
-  const { slug } = await uno(u.admin, `select public.admin_entrar_gimnasio($1) as slug`, [t.g]);
+  const { slug } = await uno(u.admin, `select public.admin_entrar_gimnasio($1, 'prueba de soporte') as slug`, [t.g]);
   const [g] = await t.q(`select slug from public.gimnasios where id = $1`, [t.g]);
   assert.equal(slug, g.slug);
   const [s] = await t.q(`select nombre, rol, es_soporte, activo from public.equipo where gimnasio_id = $1 and usuario_id = $2`, [t.g, u.admin]);
@@ -56,17 +56,17 @@ test("admin_entrar_gimnasio: el admin queda como Soporte BRIK y ve el panel; otr
   const { r } = await uno(u.admin, `select public.panel_gimnasio($1) as r`, [t.g]);
   assert.equal(r.yo.nombre, "Soporte BRIK");
   // Entrar dos veces no duplica
-  await uno(u.admin, `select public.admin_entrar_gimnasio($1)`, [t.g]);
+  await uno(u.admin, `select public.admin_entrar_gimnasio($1, 'prueba de soporte')`, [t.g]);
   const [{ n }] = await t.q(`select count(*)::int as n from public.equipo where gimnasio_id = $1 and usuario_id = $2`, [t.g, u.admin]);
   assert.equal(n, 1);
-  await t.comoUsuario(u.dueno, () => t.falla(() => t.q(`select public.admin_entrar_gimnasio($1)`, [otro]), /administradores/));
+  await t.comoUsuario(u.dueno, () => t.falla(() => t.q(`select public.admin_entrar_gimnasio($1, 'prueba de soporte')`, [otro]), /administradores/));
 });
 
 test("admin_salir_gimnasio: desactiva el acceso de soporte; volver a entrar lo reactiva", async () => {
   await uno(u.admin, `select public.admin_salir_gimnasio($1)`, [t.g]);
   await t.comoUsuario(u.admin, () => t.falla(() => t.q(`select public.panel_gimnasio($1)`, [t.g]), /Sin permiso/));
   await t.comoUsuario(u.admin, () => t.falla(() => t.q(`select public.admin_salir_gimnasio($1)`, [t.g]), /No tenías acceso/));
-  await uno(u.admin, `select public.admin_entrar_gimnasio($1)`, [t.g]);
+  await uno(u.admin, `select public.admin_entrar_gimnasio($1, 'vuelve a entrar')`, [t.g]);
   const { r } = await uno(u.admin, `select public.panel_gimnasio($1) as r`, [t.g]);
   assert.equal(r.yo.rol, "dueno");
 });

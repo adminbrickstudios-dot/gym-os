@@ -9,6 +9,7 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, PLATAFORMA, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { altaGimnasio } from "./alta-gimnasio.mjs";
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
 const db = new pg.Client({ connectionString: url }); await db.connect();
@@ -22,11 +23,7 @@ try {
   const creados = [];
   for (const tipo of Object.keys(plantillas)) {
     await a.goto(`${PLATAFORMA}/admin`);
-    await a.fill("input[name=nombre]", `Rev5 ${tipo} ${s}`);
-    await a.fill("input[name=dueno]", `Dueño ${tipo}`);
-    await a.fill("input[name=email]", `rev5-${tipo}-${s}@ejemplo.invalid`.replace(/[^a-z0-9@.-]/gi, ""));
-    await a.locator("select[name=tipo]").selectOption(tipo);
-    await a.click('button:has-text("Crear gimnasio")');
+    await altaGimnasio(a, { nombre: `Rev5 ${tipo} ${s}`, dueno: `Dueño ${tipo}`, email: `rev5-${tipo}-${s}@ejemplo.invalid`.replace(/[^a-z0-9@.-]/gi, ""), tipo });
     await a.locator("a[data-alta-equipo]").waitFor({ timeout: 60000 });
     const clave = (await a.locator("strong.numero").first().innerText()).trim();
     const id = (await a.locator("a[data-alta-equipo]").getAttribute("href")).split("/").pop();

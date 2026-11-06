@@ -4,6 +4,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { redirect } from "next/navigation";
+import { AyudaBrik } from "@/components/panel/AyudaBrik";
+import { BannerSoporte } from "@/components/panel/BannerSoporte";
+
+type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
 import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -66,5 +71,18 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       };
     } catch { entrada = null; }   // sin sede activa: la pantalla de Entrada lo dice con todas las letras
   }
-  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>{children}</Marco>;
+  // VD-40: si es Soporte BRIK, marco de color y cartel con el motivo; vencida la sesión (60 min), vuelve al super admin.
+  let soporte: EstadoSoporte | null = null;
+  if (panel.yo.nombre === "Soporte BRIK") {
+    soporte = await rpc<EstadoSoporte>("estado_soporte", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+    if (soporte && !soporte.activo) redirect(`/admin?error=${encodeURIComponent("Terminó tu entrada de soporte (dura 60 minutos). Para volver a entrar, escribí el motivo otra vez.")}`);
+  }
+  const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
+  return (
+    <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+      {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+      {children}
+      {pideAyuda && <AyudaBrik />}
+    </Marco>
+  );
 }

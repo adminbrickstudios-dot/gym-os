@@ -3,13 +3,15 @@ import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO } from "@/lib/cookie-gimnasio
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 
 // El super admin entra al panel de un gimnasio como "Soporte BRIK". La base
-// valida que sea admin y lo suma al equipo (admin_entrar_gimnasio); acá solo
-// se elige el gimnasio (cookie) y se va al panel. POST: nadie lo dispara con un link.
+// valida que sea admin, exige el MOTIVO (el dueño lo ve en su Control), deja
+// escrito quién y cuándo, y lo suma al equipo por 60 minutos (admin_entrar_gimnasio);
+// acá solo se elige el gimnasio (cookie) y se va al panel. POST: nadie lo dispara con un link.
 export async function POST(req: NextRequest) {
   const f = await req.formData();
   const gimnasioId = String(f.get("gimnasio_id") ?? "");
+  const motivo = String(f.get("motivo") ?? "");
   const supabase = await crearClienteServidor();
-  const { data: slug, error } = await supabase.rpc("admin_entrar_gimnasio", { p_gimnasio_id: gimnasioId });
+  const { data: slug, error } = await supabase.rpc("admin_entrar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo });
   const destino = req.nextUrl.clone();
   destino.search = "";
   if (error || typeof slug !== "string") {
