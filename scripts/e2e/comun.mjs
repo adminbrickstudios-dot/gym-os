@@ -20,7 +20,19 @@ if (/supabase\.co|vercel\.app/.test(process.env.BASE ?? "")) {
 let pasos = 0;
 let fallas = 0;
 export const ok = (m) => console.log(`✓ ${++pasos}. ${m}`);
-export const falla = (m) => { fallas++; console.log(`✗ ${m}`); };
+let ultimaPagina = null;
+const pendientes = [];
+export const falla = (m) => {
+  fallas++; console.log(`✗ ${m}`);
+  // Para investigar: foto y texto de la última pantalla abierta en el momento de la falla (se guardan antes de cerrar el navegador).
+  const p = ultimaPagina;
+  if (p && !p.isClosed() && pendientes.length < 6) {
+    const n = `falla-${process.argv[1]?.split(/[\\/]/).pop()?.replace(".mjs", "")}-${fallas}`;
+    mkdirSync(CAPTURAS, { recursive: true });
+    pendientes.push(p.screenshot({ path: join(CAPTURAS, `${n}.jpg`), type: "jpeg", quality: 60, timeout: 5000 }).catch(() => {}));
+    pendientes.push(p.locator("body").innerText({ timeout: 3000 }).then((t) => console.log(`  [pantalla ${p.url()}] ${t.replace(/\s+/g, " ").slice(0, 400)}`)).catch(() => {}));
+  }
+};
 /** Un paso que pasa o falla según la condición. */
 export const chequear = (condicion, siPasa, siFalla) => (condicion ? ok(siPasa) : falla(siFalla));
 export const resultado = () => {
@@ -34,7 +46,10 @@ export async function navegador({ camara = false, video = null } = {}) {
   // video: lo que "filma" esa cámara (un .y4m; el .mjpeg Chrome no lo toma), por ejemplo un QR para el lector de la Entrada.
   const extra = camara || video ? ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] : [];
   if (video) extra.push(`--use-file-for-fake-video-capture=${video}`);
-  return chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
+  const nav = await chromium.launch({ args: ["--host-resolver-rules=MAP *.localhost 127.0.0.1", ...extra] });
+  const cerrar = nav.close.bind(nav);
+  nav.close = async (...a) => { await Promise.allSettled(pendientes); return cerrar(...a); };
+  return nav;
 }
 
 /** Página nueva que junta errores de la página y respuestas 5xx. */
@@ -43,6 +58,7 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...opciones });
   const p = await ctx.newPage();
   p.errores = [];
+  ultimaPagina = p;
   // Con la app compilada el HTML llega antes que React, y el contenido de la pantalla (que viene en
   // streaming) se hidrata después que el marco: un clic en ese momento se pierde. Después de cada
   // carga o cambio de dirección se espera a que React tome la página y a que la red se calme.

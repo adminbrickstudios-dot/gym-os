@@ -51,7 +51,7 @@ try {
     await e.fill("input[type=email]", mail);
     await e.fill("input[type=password]", "mal-mal-mal");
     await e.click("button[type=submit]");
-    return (await e.locator('[role=alert]').first().innerText({ timeout: 30000 })).replace(/^\S+\s*/, "").trim();
+    return (await e.locator('[role=alert]').filter({ hasText: /\S/ }).first().innerText({ timeout: 30000 })).replace(/^\S+\s*/, "").trim();
   };
   const conCuenta = await textoError("duena@ejemplo.invalid");
   const sinCuenta = await textoError(`nadie-${Date.now() % 100000}@ejemplo.invalid`);
