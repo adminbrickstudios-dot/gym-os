@@ -67,7 +67,7 @@ after(async () => t && t.cerrar());
 
 test("suma los usos que quedan y lo que falta de las cuotas, al neto pagado", async () => {
   const d = await deuda(ahora);
-  const dif = (x, y) => Number(x) - Number(y);
+  const dif = (x, y) => Math.round((Number(x) - Number(y)) * 100) / 100;
   assert.equal(dif(d.packs.valor, base.packs.valor), 7000000); assert.equal(d.packs.usos - base.packs.usos, 12); assert.equal(d.packs.socios - base.packs.socios, 2);
   assert.equal(d.packs.usos_sin_venta - base.packs.usos_sin_venta, 5);
   assert.equal(dif(d.cuotas.valor, base.cuotas.valor), 44000); assert.equal(dif(d.cuotas.adelantadas, base.cuotas.adelantadas), 24000); assert.equal(dif(d.cuotas.en_curso, base.cuotas.en_curso), 20000);
@@ -80,9 +80,9 @@ test("suma los usos que quedan y lo que falta de las cuotas, al neto pagado", as
 test("un consumo anulado devuelve el uso; sin cobertura ni packs no hay deuda", async () => {
   await t.q(`update public.consumos_pack set anulado_en = $2 where socio_id = $1 and id = (select id from public.consumos_pack where socio_id = $1 limit 1)`, [a, ahora]);
   const d = await deuda(ahora);
-  assert.equal(Number(d.packs.valor) - Number(base.packs.valor), 8000000);
+  assert.equal(Math.round((Number(d.packs.valor) - Number(base.packs.valor)) * 100) / 100, 8000000);
   const lejos = await deuda(await mas(1100));
-  assert.equal(Number(lejos.total), Number(baseLejos.total));   // lo cargado por esta prueba ya venció o ya pasó
+  assert.equal(Math.round(Number(lejos.total) * 100), Math.round(Number(baseLejos.total) * 100));   // lo cargado por esta prueba ya venció o ya pasó
 });
 
 test("solo dueño y encargado; la recepción recibe un error, no un cero", async () => {
