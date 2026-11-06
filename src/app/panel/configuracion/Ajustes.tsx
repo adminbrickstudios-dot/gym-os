@@ -70,6 +70,8 @@ const SECCIONES: [string, string, string, string][] = [
     "No se cobra desde el panel: desaparecen los botones Cobrar y Vender. Los socios pueden pagar por transferencia desde la app."],
   ["caja", "💵 Caja", "Abrir y cerrar caja, y contar la plata.",
     "No se cobra en efectivo: Vender ofrece los otros medios de pago."],
+  ["control", "🛡️ Control", "La línea de tiempo del dueño: cobros, anulaciones, descuentos, cajas, precios y entradas anuladas.",
+    "El Control no se ve en ningún panel. Las alertas de la campana (cobros con otra fecha, préstamos de entrada) tampoco llegan."],
   ["transferencias", "🧾 Transferencias", "Aprobar los comprobantes que mandan los socios.",
     "Los socios no pueden mandar comprobantes desde la app (no habría quién los apruebe). En el mostrador se sigue cobrando por transferencia."],
   ["gastos", "🧮 Gastos", "Cargar gastos y fijos, el presupuesto y la ganancia del mes.",

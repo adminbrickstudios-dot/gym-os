@@ -53,3 +53,4 @@ TANDA 1: corrida de pantallas en la rama publicar/2026-11-06-tanda-1 (commit 2e0
 VD-10 lanzado: a4a70fd6c35d2969b (rama noche/2026-11-05-vd10, migr 004300). En curso además VD-41 (a5fdf294283752045).
 (VD-41 mergeado; OJO: redefine secciones_validas() en 4150: otra migración que la redefina debe copiar la de 4150)
 Tanda 3 lanzada: VD-14→16 abda8c33632111e12 (vd14, migr 4400/4600), VD-17→18 adf8116a26608df5d (vd17, migr 4700/4800, dueña de vender/precios_venta). En curso: VD-10 a4a70fd6c35d2969b. Siguen: VD-11 (menú, tras VD-10), VD-37, VD-13, VD-15, VD-38, VD-44.
+(VD-10 mergeado → tanda 2 completa salvo e2e. Siguiente: VD-11 menú.)

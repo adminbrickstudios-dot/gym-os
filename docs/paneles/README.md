@@ -36,19 +36,21 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_para_revisar`, `cerrar_caja`, `confirmar_ticket`, `contar_caja_sin_contar`, `dejar_caja_sin_contar`, `guardar_config_caja`, `movimiento_caja`, `preparar_ticket`, `ticket_movimiento` | `/panel/caja/historial` `/panel/caja/reporte` |
 | `/panel/caja/historial` | pantalla | 👑 🧭 | caja | `historial_caja` | `/panel/caja/reporte` |
 | `/panel/caja/reporte` | pantalla | 👑 🧭 🛎️ | caja | `reporte_dia`, `reporte_turno` | `/panel/caja` |
-| `/panel/campana` | pantalla |  |  | `campana`, `leer_campana` |  |
+| `/panel/campana` | pantalla |  |  | `campana`, `campana_control`, `leer_campana` |  |
 | `/panel/clases` | pantalla |  | clases | `anular_presente`, `avisar_clase`, `cancelar_clase`, `clases_del_dia`, `crear_tv`, `guardar_lugares`, `guardar_wod`, `reservar`, `revocar_tv`, `tomar_asistencia` | `/panel/clases/` `/panel/clases/grilla` `/panel/clases/tv` `/panel/grados` |
 | `/panel/clases/[id]` | pantalla |  | clases | `avisos_clase`, `clase_detalle`, `lista_clase` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `editar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `ocupacion_horarios` | `/panel/clases` |
 | `/panel/clases/tv` | pantalla | 👑 🧭 | clases | `tvs_panel` |  |
 | `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `autorizar_tablet`, `cierres_panel`, `config_caja`, `config_dejar_pasar`, `config_entrada`, `config_turnos_fijos`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `encuestas_panel`, `estado_pagos_online`, `guardar_config_dejar_pasar`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_horarios_apertura`, `guardar_link_resena`, `guardar_mensaje`, `guardar_mercadopago`, `guardar_meta_visitas`, `guardar_regla_plan`, `guardar_regla_vencimiento`, `guardar_turnos_fijos`, `historial_configuracion`, `horarios_apertura_panel`, `mensajes_panel`, `meta_visitas_panel`, `ordenar_fotos`, `preparar_imagen_marca`, `publicar_pagina`, `quitar_imagen_marca`, `quitar_mercadopago`, `reglas_vencimiento`, `restaurar_mensaje`, `revocar_tablet`, `simular_cuota`, `sumar_sede`, `tablets_panel`, `vista_previa_mensaje` | `/panel/documentos` `/panel/exportar` `/panel/pagina` |
+| `/panel/control` | pantalla | 👑 🧭 | control | `equipo_gimnasio`, `linea_de_control` | `/panel/control/exportar` `/panel/entrada/control` `/panel/equipo/actividad` |
+| `/panel/control/exportar` | acción (POST/GET) |  |  | `linea_de_control` |  |
 | `/panel/cuenta` | pantalla |  |  | `mi_seguridad` | `/panel/pin` |
 | `/panel/cupones` | pantalla | 👑 🧭 |  | `cupones_panel`, `desactivar_cupon`, `guardar_cupon`, `planes_gimnasio` |  |
 | `/panel/documentos` | pantalla | 👑 🧭 |  | `archivar_documento`, `documentos_panel`, `firmar_documento`, `guardar_documento` |  |
 | `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `anular_ingreso`, `apto_socio`, `config_visita`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `descongelar`, `documentos_socio`, `entrar_con_pin`, `estado_acceso`, `guardar_config_entrada`, `guardar_config_visita`, `guia_entrada`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `registrar_ingreso`, `registrar_invitado`, `sincronizar_sin_internet` | `/panel/caja` `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` |
-| `/panel/entrada/control` | pantalla | 👑 🧭 | entrada | `alertas_prestamo`, `control_entrada` | `/panel/socios/` |
-| `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `guardar_permisos_equipo`, `permisos_equipo` | `/panel/configuracion` `/panel/equipo/actividad` |
-| `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/equipo` |
+| `/panel/entrada/control` | pantalla | 👑 🧭 | entrada | `alertas_prestamo`, `control_entrada` | `/panel/control` `/panel/socios/` |
+| `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `guardar_equipo`, `guardar_permisos_equipo`, `permisos_equipo` | `/panel/configuracion` `/panel/control` `/panel/equipo/actividad` |
+| `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/control` `/panel/equipo` |
 | `/panel/eventos` | pantalla | 👑 🧭 🛎️ |  | `cerrar_evento`, `crear_evento`, `eventos_panel` | `/panel/socios/` `/panel/vender` |
 | `/panel/exportar` | acción (POST/GET) |  |  | `exportar_gimnasio` |  |
 | `/panel/gastos` | pantalla | 👑 🧭 | gastos | `anular_gasto`, `cargar_gasto`, `comprobante_gasto`, `confirmar_comprobante_gasto`, `ganancia_mes`, `guardar_gasto_fijo`, `guardar_permiso_gastos`, `guardar_presupuesto_gasto`, `preparar_comprobante_gasto`, `terminar_gasto_fijo` | `/panel/gastos/exportar` |

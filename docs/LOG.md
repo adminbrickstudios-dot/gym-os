@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-10 · Control: todo queda escrito, con alertas al dueño
+
+**QUÉ HICE**
+- Migración 4300: `linea_de_control(gimnasio, desde, hasta, tipos[], quien, limite, cursor)`, paginada por cursor con índices por gimnasio y fecha, con 11 tipos: cobros, anulaciones (quién la pidió y quién la aprobó), descuentos, "cobré otro día", dejados pasar (con la promesa), cajas (abrió, cerró, sin contar), precios, configuración, entradas anuladas, invitados y anti-préstamo. La ve el dueño, y el encargado solo si tiene `encargado_ve_resultado` (decisión prudente: no se creó un permiso aparte); recepción y profe reciben error.
+- Alertas a la campana (`campana_control`): cobro con fecha atrasada y posible préstamo de entrada; anulación y descuento grande ya llegaban por `alertas_caja` (no se duplicaron). Llega una sola vez (clave = id del hecho). El cambio de precio de un producto ahora deja historial (trigger).
+- `/panel/control`: filtros por tipo, persona y fechas (se recuerdan), lista por día con "Más viejos", CSV con tope de 5.000 filas (avisa si corta), enlaces desde Control de la puerta, "Qué hizo cada uno" y Equipo. Sección apagable por gimnasio (`control` suma a `secciones_validas()` leyendo la lista vigente, que ya incluye `gastos`).
+- Barrido: `/panel/control` y `/panel/gastos` sumados a RUTAS y prohibidos para recepción y profe (gastos también para el encargado sin permiso).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`control`).
+
+**SIN ARREGLAR**: VD-10b (filtro por socio, e2e del cobro atrasado en la campana, conteo en el resumen del día).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-10` (selectores de Descuento/Anular copiados de e2e viejos), el filtro recordado en localStorage, la descarga del CSV, 390 px y una consulta con miles de filas: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-41 · Gastos y presupuesto: la ganancia del mes
 
 **QUÉ HICE**

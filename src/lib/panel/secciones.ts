@@ -37,6 +37,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "resultado", ruta: "/panel/resultado", emoji: "📈", titulo: "Resultado", descripcion: "La plata del mes: cuánto entró, de dónde y contra el anterior", grupo: "Plata", roles: GESTION },
   { clave: "gastos", ruta: "/panel/gastos", emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
   { clave: "resumen", ruta: "/panel/resumen", emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
+  { clave: "control", ruta: "/panel/control", emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control" },
   { clave: "transferencias", ruta: "/panel/transferencias", emoji: "🧾", titulo: "Transferencias", descripcion: "Comprobantes de socios para aprobar", grupo: "Plata", roles: MOSTRADOR, apagable: "transferencias" },
   { clave: "planes", ruta: "/panel/planes", emoji: "🏷️", titulo: "Planes y precios", descripcion: "Lo que vendés y cuánto cuesta", grupo: "Gimnasio", roles: GESTION },
   { clave: "pagina", ruta: "/panel/pagina", emoji: "🌐", titulo: "Tu página", descripcion: "Lo que ve la gente antes de hacerse socio", grupo: "Gimnasio", roles: GESTION },
