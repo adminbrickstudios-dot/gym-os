@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-47X, VD-12b/c/d y VD-23b/c · Rapidez restante e Inicio en vivo
+
+**QUÉ HICE**
+- VD-47X (migración 4701): filtros y buscador de Socios y listas de Retención con la lista anterior atenuada mientras llega la nueva (nunca en blanco); `useOptimistic` en marcar contactado y en tareas con vuelta atrás; fotos de logo/Configuración/ticket de Caja achicadas a 800 px webp al subir (si falla, sube la original); 7 índices que empiezan por `gimnasio_id` (sacados de leer las funciones, no de `explain` real); pruebas de que dos gimnasios no se ven, que pedir otro gimnasio da error y que la recepción no ve `plata_en_riesgo`; test que prohíbe `unstable_cache` fuera de lo público; `scripts/medir/explain.mjs`.
+- VD-12b/c/d y VD-23b/c (migración 3700, renumerada para correr después de la 2300): Inicio con "Últimas entradas en vivo" (hora, vía, ⛔ y Cobrar, se renueva cada 20 s) y "Para hacer hoy" con [Ver] (el profe no los ve); `numeros_inicio` respeta el interruptor existente "la recepción ve lo cobrado" (apagado por defecto); mini gráfico de 7 días en los 8 números; editor de la meta de visitas del mes en Configuración → Reglas (dueño; encargado lo ve); socio demo vencido `socio-vencido@ejemplo.invalid`.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`rapidez-cache`, `inicio-en-vivo`).
+
+**SIN ARREGLAR**: sumados VD-47Y (correr `explain.mjs` con 3.000 socios y la tabla antes/después) y VD-12e (Inicio repite filas). No se usó `next/image` en listas de socios (las fotos pasan por una ruta con sesión). "Escribile al gimnasio" espera a VD-38.
+**QUÉ CONFIGURÁS VOS**: nada. Para ver el socio vencido en el demo hay que correr `usuarios-demo`.
+**LO QUE NO PUDE VERIFICAR**: pantallas y e2e `vd-47x`, `vd-12b`, `vd-23c`, e `explain.mjs`: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`. No hay tabla de tiempos todavía.
+
 ## 2026-11-06 · Noche · VD-1 y VD-2 · Ventana de Entrada en todas las pantallas y guía del veredicto
 
 **QUÉ HICE**

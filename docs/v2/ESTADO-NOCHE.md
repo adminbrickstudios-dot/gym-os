@@ -35,3 +35,4 @@ Lanzados (3 agentes): VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1,
 - VD-34: la versión de registros avisa y el segundo Guardar guarda igual (no hay botón aparte).
 - VD-47: no se agregó vercel.json (no consta la región de Supabase).
 VD-5 lanzado: a815b6bb188be1ede, rama noche/2026-11-05-vd5, migr 000500. Siguen en curso: VD-47X (a37bb70833aeb1eb0), VD-12b..23c (a01f26a4fc33c1e10). Luego VD-6, VD-1b, VD-2b, VD-33b/c.
+(VD-47X, VD-12b/c/d, VD-23b/c mergeados; base verde. Sumados VD-47Y, VD-12e)
