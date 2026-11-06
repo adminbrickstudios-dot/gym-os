@@ -1,4 +1,13 @@
 # Gy
+## 2026-11-06 · Noche · VD-12 · Inicio del dueño y de la recepción
+
+**QUÉ HICE**
+- Botón Entrada grande (dueño, encargado, recepción) hacia `/panel/entrada` (VD-1 lo cambia por la ventana). 4 números configurables por gimnasio de 8 posibles, traídos por `numeros_inicio` en un viaje (migración 1200, sólo el dueño los guarda, la base valida claves); mini gráfico de 7 días en "Entraron hoy" y "Cobrado hoy"; cada número es un link a su lista. Recepción: barra de su turno de caja y sin "Cobrado hoy" (prudente: el interruptor no existe aún). Se conservan todos los bloques anteriores y el streaming de VD-47.
+- Verificado: lint, typecheck, 79 pruebas, base/chequeos/demo en verde en GitHub (incluye `inicio-numeros.test.mjs`).
+
+**SIN ARREGLAR**: sumados VD-12b (últimas entradas en vivo), VD-12c (interruptor de lo cobrado para la recepción), VD-12d (gráficos en los demás números).
+**LO QUE NO PUDE VERIFICAR**: pantallas, e2e `vd-12` y celular 390 px: escritos según la documentación, pero no ejecutados; el build local en Windows no se pudo leer (lo cubre Verificar en GitHub).
+
 ## 2026-11-06 · Noche · VD-27 · Diseño v2: vidrio, movimiento, componentes únicos
 
 **QUÉ HICE**
