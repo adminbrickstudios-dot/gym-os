@@ -9,7 +9,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
@@ -22,6 +22,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
 import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
+import { EventosHoyEntrada } from "./EventosHoyEntrada";
 import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
@@ -114,6 +115,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
   const [firmar, setFirmar] = useState<string | null>(null);
+  const [eventosHoy, setEventosHoy] = useState<EventoHoy[]>([]);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [hecho, setHecho] = useState<Hecho | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -194,7 +196,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   const reiniciar = useCallback((inicial = "", enfocar = true) => {
     setPaso("escribir"); setTexto(inicial); setSocios([]); setListaPara(""); setMarcado(0); setNadie(null); setElegido(null);
-    setV(null); setGuia(null); setApto(null); setFirmar(null); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
+    setV(null); setGuia(null); setApto(null); setFirmar(null); setEventosHoy([]); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
@@ -206,7 +208,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia(forma); setPaso("veredicto"); setV(null);
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); setElegido(null); return; }
-    setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+    setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setEventosHoy(r.eventosHoy ?? []);
     if (sonido) sonar(r.v!.color);
   }), [sedeId, sonido]);
 
@@ -235,7 +237,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); return; }
-    setError(null);
+    setError(null); setEventosHoy(r.eventosHoy ?? []);
     if (sonido) sonar(r.v!.color);
     if (r.v!.puede) {
       const e = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
@@ -435,7 +437,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const refrescar = async (socioId: string) => {
     const r = await veredicto(socioId, sedeId);
     if (r.error) { setError(r.error); return; }
-    setError(null); setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null);
+    setError(null); setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setEventosHoy(r.eventosHoy ?? []);
   };
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
@@ -705,6 +707,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                       {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
                     </ul>
                   ) : null}
+                  <EventosHoyEntrada key={elegido.socio_id} socioId={elegido.socio_id} eventos={eventosHoy} />
                   {v.para_regularizar ? <p className="texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
                   {error && <Mensaje tipo="error">{error}</Mensaje>}
                   {cobrado && (
@@ -741,6 +744,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   : hecho.resultado === "rechazado" ? "Anotado que no pudo entrar"
                   : `Entró ${hecho.hora}`}
               </p>
+              <div className="flex justify-center"><EventosHoyEntrada key={hecho.socioId} socioId={hecho.socioId} eventos={eventosHoy} /></div>
               {error && <Mensaje tipo="error">{error}</Mensaje>}
               <div className="flex flex-wrap justify-center gap-2">
                 {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}

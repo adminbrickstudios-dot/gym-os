@@ -21,21 +21,35 @@ export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultad
 type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
 
 /** El veredicto de la puerta, y aparte lo que el mostrador tiene que saber (no cambia si entra): el apto físico, si el gimnasio lo pide. */
-export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; guia?: Guia; apto?: string | null; firmar?: string | null; error?: string }> {
+export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; guia?: Guia; apto?: string | null; firmar?: string | null; eventosHoy?: EventoHoy[]; error?: string }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, sedeId);
-    const [v, a, docs, guia] = await Promise.all([
+    const [v, a, docs, guia, eventosHoy] = await Promise.all([
       rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sede.id }),
       rpc<Apto>("apto_socio", { p_socio_id: socioId }),
       // COM-6: lo que le falta firmar (un aviso: no cambia si entra).
       rpc<{ pendientes: { titulo: string }[] }>("documentos_socio", { p_socio_id: socioId }),
       rpc<Guia>("guia_entrada", { p_socio_id: socioId, p_sede_id: sede.id }),
+      // VD-19: si está anotado en un evento de hoy, la ventana lo ofrece (un aviso: nunca cambia si entra ni rompe el veredicto).
+      rpc<EventoHoy[]>("eventos_del_dia_socio", { p_socio_id: socioId }).catch((): EventoHoy[] => []),
     ]);
     const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
     const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
     const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
-    return { v, guia, apto, firmar };
+    return { v, guia, apto, firmar, eventosHoy };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-19: un evento de hoy en el que está anotado el socio que está en la puerta. */
+export type EventoHoy = { evento_id: string; nombre: string; espera: boolean; presente: boolean; inscripcion_id: string | null };
+
+/** VD-19: check-in en el evento desde la ventana de Entrada (la base verifica que hoy sea día del evento y que tenga lugar). */
+export async function presenteEnEvento(eventoId: string, socioId: string, quitar = false): Promise<{ error?: string }> {
+  try {
+    await rpc(quitar ? "evento_quitar_presente" : "evento_marcar_presente", { p_evento_id: eventoId, p_socio_id: socioId });
+    revalidatePath("/panel/eventos");
+    return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
 
