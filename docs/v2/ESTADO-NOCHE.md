@@ -48,3 +48,4 @@ Tanda 2 en paralelo: A = VD-7→VD-8 (migr 004000/004001, DUEÑO DE `vender`/Cob
 Agentes tanda 2: A=VD-7→8 af348dbb159d73e89 (rama noche/2026-11-05-vd7); B=VD-9 a78a9f148a4280757 (vd9); C=VD-3→4 ac7165214cdd8c393 (vd3).
 (VD-3, VD-4 mergeados; sumados VD-3b, VD-4b)
 VD-3/4 mergeados. Lanzado VD-41 a5fdf294283752045 (rama noche/2026-11-05-vd41, migr 004150). Falta tanda 2: VD-10 (esperar a VD-8/9 mergeados).
+TANDA 1: corrida de pantallas en la rama publicar/2026-11-06-tanda-1 (commit 2e0be05), run 42162017854 (dispatch pantallas=true; en la rama de la noche cada push cancela la base y con ella las pantallas: NO usar [pantallas] allí mientras haya pushes). VD-7/8 mergeados.
