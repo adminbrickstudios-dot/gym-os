@@ -10,6 +10,7 @@
 //                                   y los permisos los decide Postgres
 //   /auth/v1/token, /user, /logout, /otp, /verify, /invite, /admin/users
 //                                   como GoTrue, con usuarios en auth.users
+//   /auth/v1/authorize + token?grant_type=pkce   "Continuar con Google" simulado (VD-22): sin Google real
 //   /storage/v1/object/…            como Storage, en .local/storage (también links firmados): subir y
 //                                   borrar solo con la clave de servicio (así
 //                                   sube el panel), leer los buckets públicos
@@ -69,6 +70,9 @@ fs.mkdirSync(CARPETA, { recursive: true });
 const ARCHIVO_CODIGOS = path.join(CARPETA, "codigos.json");
 const codigos = new Map();      // destino → { codigo, tipo, vence }
 const refrescos = new Map();    // refresh_token → { id: usuario_id, sesion: session_id }
+const codigosGoogle = new Map(); // VD-22: código de Google simulado → { usuario, desafio, metodo, vence }
+const ARCHIVO_GOOGLE = path.join(CARPETA, "google-falso.json");
+const ARCHIVO_GOOGLE_CANCELA = path.join(CARPETA, "google-cancela");
 function guardarCodigo(destino, tipo) {
   const codigo = String(crypto.randomInt(0, 1000000)).padStart(6, "0");
   codigos.set(destino, { codigo, tipo, vence: Date.now() + 10 * 60_000 });
@@ -94,6 +98,7 @@ function enviar(res, estado, cuerpo, extra = {}) {
   const h = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...extra };
   res.writeHead(estado, h).end(cuerpo === undefined ? "" : JSON.stringify(cuerpo));
 }
+const redirigir = (res, destino) => res.writeHead(302, { Location: destino, "Cache-Control": "no-store" }).end();
 const errorAuth = (res, estado, codigo, msg) => enviar(res, estado, { code: estado, error_code: codigo, msg });
 
 function usuarioPublico(u) {
@@ -137,6 +142,47 @@ async function auth(req, res, ruta, q, cuerpo) {
       return errorAuth(res, 400, "invalid_credentials", "Invalid login credentials");
     }
     return enviar(res, 200, await sesionPara(u, req.headers["user-agent"] ?? null));
+  }
+  // VD-22 · Google simulado (PKCE). /authorize hace de "Google + Supabase": sin pantalla de consentimiento, usa el
+  // usuario de Google falso que dejó la prueba en .local/google-falso.json ({ sub, email, nombre }) y vuelve al
+  // redirect_to con un código de un solo uso. /token?grant_type=pkce lo cambia por la sesión, comprobando el desafío
+  // (S256) como GoTrue. No hay ningún secreto de Google acá: no existe nada que se parezca a una credencial.
+  if (ruta === "/authorize" && req.method === "GET") {
+    const destino = q.get("redirect_to");
+    if (q.get("provider") !== "google" || !destino || !q.get("code_challenge")) return errorAuth(res, 400, "validation_failed", "Falta provider=google, redirect_to o code_challenge");
+    const volver = new URL(destino);
+    if (fs.existsSync(ARCHIVO_GOOGLE_CANCELA)) {   // la persona tocó "Cancelar" en Google
+      volver.searchParams.set("error", "access_denied");
+      return redirigir(res, volver.toString());
+    }
+    const google = fs.existsSync(ARCHIVO_GOOGLE) ? JSON.parse(fs.readFileSync(ARCHIVO_GOOGLE, "utf8")) : { sub: "google-falso-1", email: "falso@ejemplo.invalid", nombre: "Persona Falsa" };
+    const email = String(google.email).toLowerCase();
+    // Como Supabase: el mismo Google (sub) siempre es el mismo usuario; si no existe pero hay un usuario con ESE mail
+    // ya verificado, el Google se suma a esa cuenta; si no, se crea uno nuevo.
+    let u = (await pool.query(`select * from auth.users where raw_user_meta_data ->> 'google_sub' = $1`, [google.sub])).rows[0];
+    if (!u) {
+      const igual = await traerUsuario("email", email);
+      if (igual?.email_confirmed_at) {
+        u = (await pool.query(`update auth.users set raw_app_meta_data = raw_app_meta_data || '{"provider":"google","providers":["email","google"]}'::jsonb,
+                                  raw_user_meta_data = raw_user_meta_data || $2::jsonb where id = $1 returning *`,
+                               [igual.id, JSON.stringify({ google_sub: google.sub, full_name: google.nombre })])).rows[0];
+      } else {
+        u = (await pool.query(`insert into auth.users (email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data)
+                               values ($1, now(), '{"provider":"google","providers":["google"]}'::jsonb, $2::jsonb) returning *`,
+                              [email, JSON.stringify({ google_sub: google.sub, full_name: google.nombre })])).rows[0];
+      }
+    }
+    const codigo = crypto.randomBytes(16).toString("base64url");
+    codigosGoogle.set(codigo, { usuario: u.id, desafio: q.get("code_challenge"), metodo: q.get("code_challenge_method") ?? "plain", vence: Date.now() + 5 * 60_000 });
+    volver.searchParams.set("code", codigo);
+    return redirigir(res, volver.toString());
+  }
+  if (ruta === "/token" && q.get("grant_type") === "pkce") {
+    const c = codigosGoogle.get(cuerpo.auth_code);
+    codigosGoogle.delete(cuerpo.auth_code);   // un solo uso
+    const calculado = c && (String(c.metodo).toLowerCase() === "s256" ? crypto.createHash("sha256").update(String(cuerpo.code_verifier ?? "")).digest("base64url") : String(cuerpo.code_verifier ?? ""));
+    if (!c || c.vence < Date.now() || calculado !== c.desafio) return errorAuth(res, 400, "flow_state_not_found", "invalid flow state, no valid flow state found");
+    return enviar(res, 200, await sesionPara(await traerUsuario("id", c.usuario), req.headers["user-agent"] ?? null));
   }
   if (ruta === "/token" && q.get("grant_type") === "refresh_token") {
     const previo = refrescos.get(cuerpo.refresh_token);

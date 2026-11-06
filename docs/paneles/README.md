@@ -8,7 +8,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | Ruta | Tipo | Quién la ve | Se apaga con | Funciones de la base | Lleva a |
 |---|---|---|---|---|---|
 | `(middleware)` | cada pedido |  |  | `gimnasio_por_host`, `gimnasio_por_slug` |  |
-| `/` | pantalla |  |  | `abonar_turno`, `borrar_suscripcion_push`, `guardar_suscripcion_push`, `quitar_turno`, `suscripcion_push` | `/ingresar` |
+| `/` | pantalla |  |  | `abonar_turno`, `borrar_suscripcion_push`, `guardar_suscripcion_push`, `quitar_turno`, `registrar_pedido_codigo`, `socio_para_vincular_google`, `suscripcion_push`, `vincular_google` | `/ingresar` |
 | `/admin` | pantalla |  |  | `admin_agregar_dominio`, `admin_agregar_persona`, `admin_anular_pago_brik`, `admin_aplicar_plantilla`, `admin_asignar_plan_brik`, `admin_crear_gimnasio`, `admin_gimnasios`, `admin_guardar_plan_brik`, `admin_novedades`, `admin_planes_brik`, `admin_publicar_novedad`, `admin_quitar_dominio`, `admin_registrar_pago_brik`, `admin_retirar_novedad`, `cuenta_para_nueva_clave`, `mi_sesion`, `persona_para_dar_acceso`, `usuario_por_mail` | `/admin/` `/g/` |
 | `/admin/[id]` | pantalla |  |  | `admin_gimnasio`, `admin_planes_brik`, `historial_configuracion` | `/admin` `/g/` |
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
@@ -27,11 +27,14 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/plan` | pantalla |  |  | `opciones_compra_app` | `/app` `/app/yo` |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
 | `/app/yo` | pantalla |  |  | `mensajes_estado_socio`, `mi_link_referido`, `mis_invitados`, `opciones_compra_app` | `/app` `/app/mis-datos` |
+| `/auth/callback` | acción (POST/GET) |  |  | `entrar_con_google`, `mi_sesion` |  |
+| `/auth/google` | acción (POST/GET) |  |  |  |  |
+| `/auth/vincular` | pantalla |  |  | `mi_sesion` | `/ingresar` |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |
 | `/hacete-socio` | pantalla |  |  | `alta_online`, `alta_publica` | `/` `/ingresar` |
-| `/ingresar` | pantalla |  |  | `mi_sesion`, `registrar_pedido_codigo`, `telefono_para_ingresar`, `vincular_socios_por_email`, `vincular_socios_por_telefono` | `/hacete-socio` |
+| `/ingresar` | pantalla |  |  | `mi_sesion`, `registrar_pedido_codigo`, `telefono_para_ingresar`, `vincular_socios_por_email`, `vincular_socios_por_telefono` | `/auth/google` `/hacete-socio` |
 | `/ingresar/recuperar` | pantalla |  |  |  | `/ingresar` |
 | `/kiosco` | pantalla |  |  | `kiosco_entrar`, `kiosco_entrar_habitual`, `kiosco_estado`, `kiosco_habituales`, `kiosco_qr`, `kiosco_ultimo` |  |
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
