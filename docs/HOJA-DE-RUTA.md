@@ -487,6 +487,9 @@ bloque 18.
 - [ ] VD-9c · 🟢 · "Abrir mi turno" en Inicio también para dueño y encargado
 - [ ] VD-9d · 🟢 · Etiquetas legibles de caja.* en el historial de configuración
 - [ ] VD-9e · 🟢 · Avisar si el fondo con que se abre no coincide con lo que dejó el turno anterior
+- [ ] VD-41b · 🟢 · El menú oculta Gastos al encargado sin permiso (se hace con VD-11)
+- [ ] VD-41c · 🟢 · El interruptor encargado_ve_gastos también en Equipo → Permisos
+- [ ] VD-41d · 🟢 · Presupuesto distinto por mes y aviso al dueño al pasarse
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -494,7 +497,7 @@ bloque 18.
 - [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
 - [x] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
 - [x] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas — verificado: base en verde en GitHub (reingreso-visita, entradas-en-vivo); e2e vd-3 y vd-4 en la corrida de la tanda
-- [ ] VD-41 · 🟢 · Gastos y presupuesto: la ganancia del mes
+- [x] VD-41 · 🟢 · Gastos y presupuesto: la ganancia del mes — verificado: gastos por categoría con comprobante, fijos calculados sin cron, presupuesto, ganancia_mes en Resultado, encargado solo con permiso nuevo; base en verde en GitHub (gastos-presupuesto); e2e vd-41 en la corrida de la tanda
 *Tanda 3 · El día del dueño*
 - [ ] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones
 - [ ] VD-37 · 🟢 · Pendientes con números y puntitos calculados, y centro de notificaciones

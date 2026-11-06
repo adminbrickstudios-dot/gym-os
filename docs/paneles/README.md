@@ -51,13 +51,15 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/equipo` |
 | `/panel/eventos` | pantalla | 👑 🧭 🛎️ |  | `cerrar_evento`, `crear_evento`, `eventos_panel` | `/panel/socios/` `/panel/vender` |
 | `/panel/exportar` | acción (POST/GET) |  |  | `exportar_gimnasio` |  |
+| `/panel/gastos` | pantalla | 👑 🧭 | gastos | `anular_gasto`, `cargar_gasto`, `comprobante_gasto`, `confirmar_comprobante_gasto`, `ganancia_mes`, `guardar_gasto_fijo`, `guardar_permiso_gastos`, `guardar_presupuesto_gasto`, `preparar_comprobante_gasto`, `terminar_gasto_fijo` | `/panel/gastos/exportar` |
+| `/panel/gastos/exportar` | acción (POST/GET) |  |  | `exportar_gastos` |  |
 | `/panel/grados` | pantalla |  | clases | `anular_grado_socio`, `archivar_grado`, `grados_panel`, `guardar_grado`, `otorgar_grado` | `/panel/socios/` |
 | `/panel/pagina` | pantalla | 👑 🧭 |  | `altas_panel`, `guardar_altas`, `guardar_medicion`, `guardar_pagina`, `medicion_panel`, `pagina_panel` | `/panel/configuracion` |
 | `/panel/pin` | pantalla |  |  | `entrar_con_pin`, `guardar_mi_pin`, `operador_actual` | `/panel/cuenta` |
 | `/panel/planes` | pantalla | 👑 🧭 |  | `actividades_gimnasio`, `anular_precio_programado`, `aplicar_aumento`, `configurar_stock`, `contar_stock`, `convenios_gimnasio`, `guardar_actividades_plan`, `guardar_convenio`, `guardar_matricula_plan`, `guardar_plan`, `guardar_producto`, `lista_precios_plan`, `planes_gimnasio`, `productos_gimnasio`, `programar_lista_precios`, `programar_precio`, `vista_aumento` | `/panel/cupones` `/panel/planes/aumento` |
 | `/panel/planes/aumento` | pantalla | 👑 🧭 |  | `planes_gimnasio` | `/panel/planes` |
 | `/panel/prospectos` | pantalla | 👑 🧭 🛎️ |  | `actualizar_prospecto`, `crear_prospecto`, `prospectos_panel` | `/panel/socios/` `/panel/socios/nuevo` |
-| `/panel/resultado` | pantalla | 👑 🧭 |  | `cupones_panel`, `encuestas_panel`, `gastos_mes`, `guardar_gasto`, `motivos_baja_mes`, `quitar_gasto`, `repetir_gastos`, `resultado_mes`, `retencion_numeros` | `/panel/resultado/exportar` `/panel/socios/` |
+| `/panel/resultado` | pantalla | 👑 🧭 |  | `anular_gasto`, `cargar_gasto`, `cupones_panel`, `encuestas_panel`, `ganancia_mes`, `motivos_baja_mes`, `repetir_gastos`, `resultado_mes`, `retencion_numeros` | `/panel/gastos` `/panel/resultado/exportar` `/panel/socios/` |
 | `/panel/resultado/exportar` | acción (POST/GET) |  |  | `exportar_mes` |  |
 | `/panel/resumen` | pantalla | 👑 🧭 |  | `resumen_dueno` | `/panel/caja/historial` |
 | `/panel/retencion` | pantalla | 👑 🧭 🛎️ | retencion | `etiquetas_gimnasio`, `registrar_contacto`, `retencion`, `retencion_numeros`, `retencion_resumen`, `riesgo_baja`, `socios_con_etiqueta`, `tablero_retencion` |  |

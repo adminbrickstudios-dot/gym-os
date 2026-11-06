@@ -72,6 +72,8 @@ const SECCIONES: [string, string, string, string][] = [
     "No se cobra en efectivo: Vender ofrece los otros medios de pago."],
   ["transferencias", "🧾 Transferencias", "Aprobar los comprobantes que mandan los socios.",
     "Los socios no pueden mandar comprobantes desde la app (no habría quién los apruebe). En el mostrador se sigue cobrando por transferencia."],
+  ["gastos", "🧮 Gastos", "Cargar gastos y fijos, el presupuesto y la ganancia del mes.",
+    "No hay pantalla de Gastos. El Resultado sigue mostrando lo cobrado."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */

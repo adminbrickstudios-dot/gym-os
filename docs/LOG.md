@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-41 · Gastos y presupuesto: la ganancia del mes
+
+**QUÉ HICE**
+- Migración 4150: seis categorías de gasto (alquiler, sueldos, servicios, mantenimiento, proveedores, otros) con día calendario y comprobante opcional (bucket privado `comprobantes_gastos`); `gastos_fijos` que valen desde el mes en que se cargan hasta que se dejan de repetir (se calculan al consultar, sin cron); `presupuestos_gasto` mensual por categoría; `ganancia_mes` (ingresos − gastos − fijos y el desvío contra el presupuesto), que ahora usa Resultado. Tablas con `gimnasio_id`, FK compuesta y RLS; `gastos` suma a `secciones_validas()` (se apaga por gimnasio).
+- Pantalla `/panel/gastos` (cargar, lista con comprobante, fijos, presupuesto, mes a mes, CSV, esqueleto, estado vacío), en el menú de PLATA. Resultado muestra ganancia, desvío y carga rápida con link a Gastos; `res-3` sigue válido.
+- **Decisión de permisos**: el encargado ve y carga gastos solo si el dueño prende `encargado_ve_gastos` (apagado de origen: no se reutilizó `encargado_ve_resultado` porque abriría los sueldos por defecto); con permiso no ve la lista de fijos (solo el total). Fijos, presupuesto y el interruptor son del dueño. Recepción y profe: error.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`gastos-presupuesto`).
+
+**QUÉ CORRÉS VOS**: después de aplicar, `npm run db:types`. El bucket se crea con la migración.
+**SIN ARREGLAR**: VD-41b (el menú muestra Gastos al encargado sin permiso y recibe el error al abrirla; se arregla en VD-11), VD-41c (interruptor también en Equipo → Permisos), VD-41d (presupuesto por mes y aviso).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-41`, la subida del comprobante contra Storage real y 390 px: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-9 · Caja por turno que se cierra sola, sin cron (D20)
 
 **QUÉ HICE**
