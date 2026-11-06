@@ -1,4 +1,36 @@
 # Gy
+## 2026-11-06 · Cierre de la noche (frenada por la facturación de GitHub Actions)
+
+**QUÉ HICE**
+- Rama `noche/2026-11-05` (PR #2): **todo el bloque 20 de la COLA hecho en código salvo lo que sigue**, mergeado ítem por ítem: tanda 1 (VD-34, 47, 27, 33, 1, 2, 5, 6, 12, 36, 23 y sus seguimientos VD-47X, 12B/C/D, 33B/C, 23B/C, 5B, 1B, 2B, 6B, 12E), tanda 2 (VD-7, 8, 9, 10, 3, 4, 41), tanda 3 (VD-11, 37, 13, 14, 15, 38, 16, 17, 18, 44), tanda 4 (VD-35, 39, 22 —listo hasta las credenciales—, 24 y 38B, 25, 19, 20), tanda 5 (VD-40, 42, 43, 21), tanda 6 (el análisis de las 89 situaciones y VD-46A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, T, U, W) y de la tanda 7 VD-26, 28, 29, 30 (con VD-47Y y VD-16B) y 31. Detalle por ítem: las entradas de arriba de este LOG.
+- Migraciones nuevas de la noche: `20261106000100` hasta `20261106007804` (más de 60, todas aditivas, con guarda de entrada y verificación al final). Funciones que varias migraciones reemplazan en cadena (siempre copiando la versión más nueva): `vender` (4800 → 7802), `calcular_acceso` y `retencion_con` (7700 → 7800), `para_hacer_hoy` (7100 con parches 7200–7403), `guia_entrada` (7501), `registrar_ingreso` privada (7501), `landing_completa` (6101), `moderacion_control` (7803), `avisos_pagos_mp` (7804), `panel_gimnasio` (4900), `privado.secciones_validas` (leer la vigente y agregar).
+- Se detectó y arregló una caída en cascada de las pantallas en Actions (la app corría con `next dev`; ahora `next start` en producción) y se encontró un bug real con la medición (variable `fin` en `para_hacer_hoy`).
+- Verificado ejecutando: la base (migraciones en una base limpia, pruebas, chequeos y demo) en verde en GitHub hasta el merge de VD-46N/O/T/U/W (corrida 42216716432). Después: se mergeó el triaje de la tanda 1 (workflow y e2e, arreglos de la app) y en local pasan lint, typecheck, 150 pruebas unitarias y `npm run build` con las variables de prueba.
+
+**TABLA DE TIEMPOS** (3.019 socios y 202 gimnasios; antes/después en la misma corrida): ver la entrada de VD-30. Ocho funciones de pantalla dentro de 300 ms; `pendientes_panel` (203 ms contra 50), `filtros_socios` (541), `exportar_socios` (689) y `vencen_pestanas` (319) no cumplen: VD-30B.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El primer recorrido completo de pantallas de la tanda 1 falló en ~60 recorridos: la mayoría eran la cascada por `next dev`; tras el cambio a producción quedaron 37 sin arreglo confirmado (ver VD-TRI1 en la COLA).
+- Revisar a mano (permisos): el barrido dice que `/panel/clases/grilla` y `/panel/clases/tv` muestran la pantalla a recepción y profe aunque las páginas piden dueño o encargado; no se tocó (permisos). `privado.hecho_inmutable()` usado sin argumentos (p. ej. en `pedidos_demo_brik`) no frena nada.
+- REV-6a (doble cobro simultáneo a la misma cuota) sigue sin resolver; la clave de operación de VD-34 cubre el reintento del mismo envío.
+
+**QUÉ CORRÉS VOS**
+1. **Resolver la facturación de GitHub Actions** (Settings → Billing & plans): hoy todos los jobs terminan en 2 s con "recent account payments have failed or your spending limit needs to be increased". Hasta que se arregle no corre ni la base ni las pantallas.
+2. Cuando vuelva: `gh workflow run pruebas-completas.yml --ref noche/2026-11-05 --raw-field pantallas=true` (o desde Actions → Run workflow, ~1 h) y, con el resultado, arreglar los recorridos que fallen (VD-TRI1).
+3. **Publicar por tandas** (no se publicó nada: ninguna tanda tiene la corrida de pantallas en verde): para cada tanda, `git branch publicar/<fecha>-tanda-<n> <commit>`, push, Actions → Base de datos → `prevuelo` y después `aplicar` con esa rama, PR a `main` y merge. Orden de las migraciones: las `…0001xx` a `…007804` en el orden de su nombre. Después `npm run db:types`.
+
+**QUÉ CONFIGURÁS VOS**
+- Región de Vercel igual a la de Supabase (si es São Paulo, `gru1`) y Supabase → JWT Signing Keys (claves asimétricas) para que `getClaims` ahorre el viaje.
+- SMTP propio (Resend o Postmark) en Supabase Auth: sin eso Supabase manda 2 mails por hora (VD-45).
+- Google (VD-22B): consola de Google Cloud → OAuth → Supabase Providers → Redirect URLs `https://*.<dominio-base>/auth/callback` y la variable `ENTRAR_CON_GOOGLE=1` en Vercel (paso a paso en la entrada de VD-22).
+- Turnstile (VD-33C): crear el widget en Cloudflare y cargar `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel.
+- Claves VAPID para el push; cargar los planes de BRIK en el super admin (para que aparezcan precios en la landing); el dueño carga sus reseñas y el link de Google; cada dueño prende lo que arranca apagado (plan familiar, modo emergencia de la puerta, registro abierto, compras en la app).
+- Sentry (VD-45B) y el resto de los 🔌 siguen sin hacerse.
+
+**SIN ARREGLAR**: ver la COLA: quedan ~69 ítems (seguimientos B/C/D de casi todos los VD, VD-32 —la segunda pasada de punta a punta, que necesita las pantallas en verde—, y los 🔌). Las decisiones del agente en plata y permisos están en "Decisiones que tomó el agente" de la hoja de ruta para que las revises.
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos de pantallas (e2e y barrido) de TODO lo hecho desde VD-34: nada se vio con sesión real; el código de pantallas está escrito según la documentación, pero no está ejecutado. La base de lo mergeado después de la corrida 42216716432 (el triaje) no corrió en Actions. `npm run db:types` no se corrió en ningún ítem.
+
 ## 2026-11-06 · Noche · VD-46N, O, T, U y W · No escribirle, ex socios, motivo de descuento, anular devolución y baja con pausas
 
 **QUÉ HICE**
