@@ -35,11 +35,12 @@ test("abierta de ayer: olvidada; no deja abrir otra; la ve quien la abrió y el 
   });
   await como(uRec2, async () => {
     assert.equal((await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]))[0].o.length, 0);
-    await t.q(`select public.abrir_caja($1, 0)`, [caja2]);   // otra persona sí abre otra caja
   });
   await como(uDueno, async () => assert.equal((await t.q(`select public.cajas_olvidadas($1) as o`, [t.g]))[0].o.length, 1));
-  // VD-9 (D20): ya no obliga a cerrarla antes. Al abrir su turno nuevo, la vieja queda registrada como
-  // sin contar (para el dueño); lo que sigue valiendo es que no se abre una SEGUNDA caja con la nueva abierta.
+  // VD-9 (D20): ya no obliga a cerrarla antes. Cuando otra persona abre su turno (o la misma abre uno nuevo),
+  // la vieja queda registrada como sin contar (para el dueño); lo que sigue valiendo es que no se abre una
+  // SEGUNDA caja con la nueva abierta.
+  await como(uRec2, () => t.q(`select public.abrir_caja($1, 0)`, [caja2]));   // otra persona sí abre otra caja
   await como(uRec, async () => {
     await t.q(`select public.abrir_caja($1, 0)`, [caja1]);
     const [{ vieja }] = await t.q(`select sin_contar as vieja from public.turnos_caja where id = $1`, [turno]);
