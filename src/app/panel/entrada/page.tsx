@@ -5,6 +5,7 @@ import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
+import { RefrescarAlEntrar } from "@/components/panel/RefrescarAlEntrar";
 import { Puerta } from "./Puerta";
 import { SinInternet } from "./SinInternet";
 import { Hoy, type Ingreso } from "./Hoy";
@@ -37,6 +38,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
       <>
         <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
           accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
+        <RefrescarAlEntrar gimnasioId={panel.gimnasio.id} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
           <div className="flex flex-col gap-6">

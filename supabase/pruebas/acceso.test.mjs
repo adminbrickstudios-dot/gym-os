@@ -145,6 +145,8 @@ test("el pack se descuenta una sola vez aunque toquen dos veces", async () => {
 });
 
 test("reingreso el mismo día no descuenta otra clase", async () => {
+  // VD-3: la visita larga (5 h) tiene su propia prueba (reingreso-visita); acá se apaga para mirar el cálculo del reingreso.
+  await q(`insert into public.configuracion_visita (gimnasio_id, visita_horas) values ($1, 0) on conflict (gimnasio_id) do update set visita_horas = 0`, [g]);
   const s = ctx.socios.pack_con_clases;
   const r = await registrar(s, new Date(new Date(momento).getTime() + 2 * 3600_000));
   assert.equal(r.resultado, "entro");
