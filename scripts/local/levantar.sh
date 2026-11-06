@@ -74,6 +74,7 @@ NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SUPABASE" \
 NEXT_PUBLIC_DOMINIO_BASE=localhost \
 NEXT_PUBLIC_DOMINIO_PLATAFORMA=localhost \
 MP_API_URL="http://127.0.0.1:$PUERTO_MP" \
+ENTRAR_CON_GOOGLE=1 \
   npx next dev -p "$PUERTO_APP" > .local/app.log 2>&1 &
 echo $! > .local/app.pid
 esperar "http://localhost:$PUERTO_APP/" app

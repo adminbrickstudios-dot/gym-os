@@ -131,7 +131,8 @@ export async function middleware(req: NextRequest) {
     // dirección de la plataforma: el gimnasio sale de la cookie que se puso
     // al entrar. La cookie no da permisos.
     const socioIngresando = ruta === "/ingresar" && req.nextUrl.searchParams.get("modo") === "socio";
-    const delGimnasio = ruta === "/panel" || ruta.startsWith("/panel/") || ruta === "/app" || ruta.startsWith("/app/");
+    // VD-22: /auth/* (Google: ir, volver y vincular) también son del gimnasio elegido.
+    const delGimnasio = ruta === "/panel" || ruta.startsWith("/panel/") || ruta === "/app" || ruta.startsWith("/app/") || ruta.startsWith("/auth/");
     const slug = req.cookies.get(COOKIE_GIMNASIO)?.value;
     if (delGimnasio || (socioIngresando && slug)) {
       let elegido: Elegido | undefined;
