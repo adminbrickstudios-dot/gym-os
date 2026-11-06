@@ -16,15 +16,26 @@ before(async () => {
   [{ id: agua }] = await t.q(`insert into public.productos (gimnasio_id, nombre, precio) values ($1,'Agua VD18',1000) returning id`, [t.g]);
 });
 after(async () => t && t.cerrar());
+// Con la sesión del usuario; lo que escribe se conserva si sale bien, y si falla vuelve todo atrás (la transacción sigue viva).
 async function como(u, fn) {
+  await t.db.query("savepoint co");
   await t.db.query("set role authenticated");
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: u, role: "authenticated" })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  try {
+    const r = await fn();
+    await t.db.query("reset role");
+    await t.q(`select set_config('request.jwt.claims', '', false)`);
+    await t.db.query("release savepoint co");
+    return r;
+  } catch (e) {
+    await t.db.query("rollback to savepoint co");
+    throw e;
+  }
 }
 const items = (...cants) => JSON.stringify(cants.map((n) => ({ tipo: "producto", producto_id: agua, cantidad: n })));
 const pagos = (n) => JSON.stringify([{ medio: "transferencia", monto: 1000 * n }]);
 const vender = (...cants) => t.q(`select public.vender($1, $2, $3, null, null) as r`, [t.sede, items(...cants), pagos(cants.reduce((a, b) => a + b, 0))]);
-const stock = async () => (await t.q(`select public.stock_productos($1) as s`, [t.g]))[0].s[agua];
+const stock = () => como(uDueno, async () => (await t.q(`select public.stock_productos($1) as s`, [t.g]))[0].s[agua]);
 
 test("la ficha: costo, categoría y margen; la recepción no ve el costo ni lo toca", async () => {
   await t.falla(() => como(uRec, () => t.q(`select public.guardar_ficha_producto($1, '{"costo": 600}')`, [agua])));
