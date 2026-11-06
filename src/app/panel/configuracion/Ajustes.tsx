@@ -28,6 +28,9 @@ import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
+import { BuscadorConfig } from "./BuscadorConfig";
+import { Restablecer } from "./Restablecer";
+import type { Opcion } from "./indice";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -111,6 +114,25 @@ const CAMPOS: Partial<Record<ClavePestana, Campo[]>> = {
   clases: ["modo_clases", "reserva_dias_anticipacion", "cancelacion_horas_limite", "falta_politica", "falta_bloqueo_dias"],
   secciones: ["secciones_apagadas", "modo_clases"],
 };
+/** VD-21 · Lo recomendado de cada tarjeta (lo mismo que trae un gimnasio nuevo). "Restablecer" lo guarda por la vía de siempre. */
+const RECOMENDADO: Record<string, { valores: Partial<Config>; texto: string }> = {
+  "que-cobras": { valores: { cobra_membresia: true, cobra_pase: true, cobra_pack: false }, texto: "membresía y pase diario prendidos, packs apagados." },
+  "medios-pago": { valores: { medios_aceptados: ["efectivo", "transferencia", "debito", "credito"] }, texto: "efectivo, transferencia, débito y crédito." },
+  recargo: { valores: { recargo_tipo: "no", recargo_valor: 0, recargo_dias: 10 }, texto: "sin recargo por pagar tarde." },
+  fiado: { valores: { fiado_activo: false, fiado_tope: 0 }, texto: "no se cobra a cuenta." },
+  reglas: { valores: { tolerancia_dias: 5, dias_aviso: 3, descuento_max_recepcion: 10, invitados_por_mes: 2, tope_dejar_pasar: 5, pausa_dias_por_anio: 30, reingreso_mismo_dia_consume: false, pide_apto: false },
+    texto: "5 días de gracia, avisar 3 días antes, descuento máximo 10 %, 2 invitados por mes, dejar pasar hasta 5 por día, pausa hasta 30 días, volver a entrar el mismo día no gasta otra entrada y sin apto físico." },
+  retencion: { valores: { retencion_dias_ausencia: 14, retencion_dias_nuevo: 28, meta_primer_mes: 8, retencion_dias_vencido: 30, retencion_dias_se_fue: 90 }, texto: "“No viene” a los 14 días, socio nuevo 28 días, meta del primer mes 8 entradas, “se fue” a los 30 días y visible 90." },
+  accesos: { valores: { accesos_activos: ["recepcion"], kiosco_habituales: false }, texto: "solo la recepción (QR, tablet y llavero apagados)." },
+  clases: { valores: { reserva_dias_anticipacion: 7, cancelacion_horas_limite: 2, falta_politica: "nada", falta_bloqueo_dias: 7 }, texto: "se reserva con 7 días, se cancela hasta 2 horas antes y faltar no tiene consecuencia." },
+  secciones: { valores: { secciones_apagadas: [] }, texto: "todas las secciones prendidas." },
+};
+/** Qué ancla del buscador lleva cada número de la pantalla. */
+const ANCLA_NUM: Partial<Record<Campo, string>> = {
+  tolerancia_dias: "tolerancia-dias", dias_aviso: "dias-aviso", descuento_max_recepcion: "descuento-max", invitados_por_mes: "invitados", tope_dejar_pasar: "tope-dejar-pasar",
+  pausa_dias_por_anio: "pausa-dias", retencion_dias_ausencia: "retencion-ausencia", retencion_dias_nuevo: "retencion-nuevo", meta_primer_mes: "meta-primer-mes",
+  retencion_dias_vencido: "retencion-vencido", retencion_dias_se_fue: "retencion-se-fue", reserva_dias_anticipacion: "reserva-dias", cancelacion_horas_limite: "cancelacion-horas",
+};
 const CAMPOS_GIMNASIO = ["nombre", "whatsapp", "instagram", "email_contacto"] as const;
 
 const normal = (v: unknown) => (Array.isArray(v) ? [...v].sort() : v === "" ? null : v ?? null);
@@ -144,11 +166,12 @@ function problema(c: Config, campos: Campo[]): string | null {
 }
 
 /** Una tarjeta dentro de una pestaña: título, una línea de qué es, y sus campos. */
-function Tarjeta({ emoji, titulo, ayuda, children }: { emoji: string; titulo: string; ayuda?: string; children: React.ReactNode }) {
+function Tarjeta({ emoji, titulo, ayuda, ancla, restablecer, children }: { emoji: string; titulo: string; ayuda?: string; ancla?: string; restablecer?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="tarjeta p-5 sm:p-6 space-y-4">
+    <section className="tarjeta p-5 sm:p-6 space-y-4" data-opcion={ancla}>
       <div><p className="titulo text-2xl">{emoji} {titulo}</p>{ayuda && <p className="texto-suave">{ayuda}</p>}</div>
       {children}
+      {restablecer}
     </section>
   );
 }
@@ -201,6 +224,24 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   const [version, setVersion] = useVersion("configuracion", "gimnasio");
   const conClases = c.modo_clases !== "ninguno";
   const [pestana, setPestana] = useState<ClavePestana>(pestanaInicial === "clases" && inicial.modo_clases === "ninguno" ? "secciones" : pestanaInicial);
+
+  // VD-21: el buscador cambia de pestaña y deja la opción resaltada.
+  const [destino, setDestino] = useState<{ id: string; n: number } | null>(null);
+  const irA = (o: Opcion) => { if (o.pestana !== pestana) cambiarPestana(o.pestana); setDestino((x) => ({ id: o.id, n: (x?.n ?? 0) + 1 })); };
+  useEffect(() => {
+    if (!destino) return;
+    let intentos = 0, quitar: ReturnType<typeof setTimeout> | undefined, espera: ReturnType<typeof setTimeout> | undefined;
+    const buscar = () => {
+      const el = document.querySelector<HTMLElement>(`[data-opcion~="${destino.id}"]`);
+      if (!el) { if (++intentos < 20) espera = setTimeout(buscar, 60); return; }
+      const marco = el.closest<HTMLElement>("label") ?? el;
+      marco.scrollIntoView({ block: "center", behavior: "smooth" });
+      marco.setAttribute("data-resaltada", destino.id);
+      quitar = setTimeout(() => marco.removeAttribute("data-resaltada"), 3000);
+    };
+    espera = setTimeout(buscar, 30);
+    return () => { clearTimeout(espera); clearTimeout(quitar); document.querySelectorAll("[data-resaltada]").forEach((e) => e.removeAttribute("data-resaltada")); };
+  }, [destino]);
 
   const set = <K extends Campo>(k: K, v: Config[K]) => setC((x) => ({ ...x, [k]: v }));
   const setDato = <K extends keyof DatosGimnasio>(k: K, v: DatosGimnasio[K]) => setD((x) => ({ ...x, [k]: v }));
@@ -266,6 +307,18 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       responder(p, { ok: "Guardado" });
     });
   };
+  /** Restablecer una tarjeta: valida, guarda por guardarConfiguracion (la vía de siempre) y deja la pantalla como lo guardado. */
+  const restablecer = async (id: string): Promise<string | null> => {
+    const r0 = RECOMENDADO[id];
+    const mal = problema({ ...c, ...r0.valores }, Object.keys(r0.valores) as Campo[]);
+    if (mal) return mal;
+    const r = await guardarConfiguracion(r0.valores, version);
+    if (r.version) setVersion(r.version);
+    if (r.error) return r.error;
+    setC((x) => ({ ...x, ...r0.valores })); setGuardado((g) => ({ ...g, ...r0.valores }));
+    return null;
+  };
+  const volver = (id: string) => puedeEditar ? <Restablecer id={id} recomendado={RECOMENDADO[id].texto} alConfirmar={() => restablecer(id)} /> : undefined;
   const pie = (p: ClavePestana) => puedeEditar && (
     <Pie id={p} onGuardar={() => guardar(p)} ocupado={enCurso !== null} sucio={sucio(p)} msj={msj[p]} />
   );
@@ -275,7 +328,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
     const v = c[k] as unknown as number | "";
     return (
       <Campo etiqueta={etiqueta} ayuda={`${ayuda} · de ${min} a ${max}`}>
-        <input type="number" inputMode="numeric" min={min} max={max} className="campo" value={Number.isNaN(v) ? "" : v}
+        <input type="number" inputMode="numeric" min={min} max={max} className="campo" data-opcion={ANCLA_NUM[k]} value={Number.isNaN(v) ? "" : v}
           onChange={(e) => set(k, (e.target.value === "" ? "" : Number(e.target.value)) as never)} />
       </Campo>
     );
@@ -300,11 +353,12 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   return (
     <div className="space-y-5">
       {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la configuración. Los mensajes y los días que cierra los podés cambiar vos.</p>}
+      <BuscadorConfig visible={(o) => o.pestana !== "clases" || conClases} alElegir={irA} />
       <Pestanas pestanas={pestanas} activa={pestana} alCambiar={cambiarPestana} etiqueta="Partes de la configuración" />
 
       <fieldset disabled={!puedeEditar} className="space-y-4" data-pestana-activa={pestana}>
         {pestana === "gimnasio" && <>
-          <Tarjeta emoji="🏠" titulo="Tu gimnasio" ayuda="Lo que ve la gente en tu página y en la app del socio.">
+          <Tarjeta emoji="🏠" titulo="Tu gimnasio" ancla="datos-gimnasio" ayuda="Lo que ve la gente en tu página y en la app del socio.">
             <Campo etiqueta="Nombre del gimnasio" ayuda="Se ve en la barra, en el saludo y en la página. Hasta 60 letras.">
               <input className="campo" maxLength={60} value={d.nombre} onChange={(e) => setDato("nombre", e.target.value)} />
             </Campo>
@@ -319,9 +373,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 <input className="campo" type="email" autoCapitalize="none" value={d.email_contacto ?? ""} onChange={(e) => setDato("email_contacto", e.target.value)} />
               </Campo>
             </div>
-            <p className="text-sm texto-tenue">Zona horaria: {d.zona_horaria}. Con ella se calcula cuándo empieza y termina cada día (vencimientos, pases). Si está mal, pedile a soporte BRIK que la cambie.</p>
+            <p className="text-sm texto-tenue" data-opcion="zona-horaria">Zona horaria: {d.zona_horaria}. Con ella se calcula cuándo empieza y termina cada día (vencimientos, pases). Si está mal, pedile a soporte BRIK que la cambie.</p>
           </Tarjeta>
-          <Tarjeta emoji="📍" titulo={d.sedes.length > 1 ? "Sedes" : "Dónde queda"} ayuda="La dirección, el teléfono y el mapa salen en tu página.">
+          <Tarjeta emoji="📍" titulo={d.sedes.length > 1 ? "Sedes" : "Dónde queda"} ancla="sedes" ayuda="La dirección, el teléfono y el mapa salen en tu página.">
             {d.sedes.map((s, i) => (
               <div key={s.id} className={`space-y-3 ${i > 0 ? "pt-4 border-t border-[var(--borde)]" : ""}`} data-sede={i}>
                 {d.sedes.length > 1 && <p className="font-semibold">{s.es_principal ? "⭐ Sede principal" : `Sede ${i + 1}`}</p>}
@@ -347,14 +401,14 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         </>}
 
         {pestana === "marca" && <>
-          <Tarjeta emoji="🖼️" titulo="Logo" ayuda="Sale en tu página, arriba en el panel y en la app del socio. Mejor cuadrado o apaisado, con fondo transparente.">
+          <Tarjeta emoji="🖼️" titulo="Logo" ancla="logo" ayuda="Sale en tu página, arriba en el panel y en la app del socio. Mejor cuadrado o apaisado, con fondo transparente.">
             <UnaImagen tipo="logo" ruta={d.logo_path} reglas={d.reglas_imagenes.logo} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => url
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-xl p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
                 : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
           </Tarjeta>
-          <Tarjeta emoji="🔖" titulo="Ícono de la pestaña" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
+          <Tarjeta emoji="🔖" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
             <UnaImagen tipo="favicon" ruta={d.favicon_path} reglas={d.reglas_imagenes.favicon} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => (
                 <div className="inline-flex items-center gap-2 rounded-t-xl border border-b-0 border-[var(--borde)] bg-[var(--tarjeta-alta)] px-3 py-2 max-w-full">
@@ -364,7 +418,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 </div>
               )} />
           </Tarjeta>
-          <Tarjeta emoji="🎨" titulo="Colores" ayuda="Se ven en tu página, en el panel y en la app del socio.">
+          <Tarjeta emoji="🎨" titulo="Colores" ancla="colores" ayuda="Se ven en tu página, en el panel y en la app del socio.">
             <div><p className="etiqueta mb-2">Fondo</p><div className="flex flex-wrap gap-2">
               {FONDOS.map((f) => <button key={f} type="button" aria-label={f} aria-pressed={c.color_fondo === f} onClick={() => set("color_fondo", f)} className="size-11 rounded-xl border-2" style={{ background: f, borderColor: c.color_fondo === f ? "var(--acento)" : "var(--borde)" }} />)}
               <input type="color" aria-label="Otro fondo" value={c.color_fondo} onChange={(e) => set("color_fondo", e.target.value)} className="size-11 rounded-xl bg-transparent" />
@@ -393,13 +447,13 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         </>}
 
         {pestana === "pagina" && <>
-          <Tarjeta emoji="🌐" titulo="Tu página" ayuda="La que comparte la gente para conocerte, ver precios y escribirte.">
+          <Tarjeta emoji="🌐" titulo="Tu página" ancla="publicar-pagina" ayuda="La que comparte la gente para conocerte, ver precios y escribirte.">
             <p>{d.publicada
               ? <span className="pildora pildora-verde">✅ Publicada</span>
               : <span className="pildora pildora-amarillo">⏳ Sin publicar: la gente ve “Estamos armando nuestra página”</span>}</p>
             <p className="campo !h-auto py-3 break-all select-all" data-direccion-pagina>{direccionPagina}</p>
             <div className="flex flex-wrap gap-2">
-              <Link href="/panel/pagina" className="boton">✏️ Editar textos y secciones</Link>
+              <Link href="/panel/pagina" className="boton" data-opcion="prueba-social">✏️ Editar textos y secciones</Link>
               <a href={direccionPagina} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver mi página</a>
               <button type="button" className="boton" onClick={copiar}>{copiado ? "✅ Copiado" : "📋 Copiar link"}</button>
               <a className="boton" target="_blank" rel="noopener noreferrer"
@@ -418,24 +472,24 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y precios.</p>
           </Tarjeta>
           {autoservicio && (
-            <Tarjeta emoji="📲" titulo="Lo que hacen los socios solos" ayuda="Anotarse desde tu página y cambiar de plan o comprar pases desde la app.">
+            <Tarjeta emoji="📲" titulo="Lo que hacen los socios solos" ancla="autoservicio" ayuda="Anotarse desde tu página y cambiar de plan o comprar pases desde la app.">
               <Autoservicio inicial={autoservicio} puedeEditar={puedeEditar} />
             </Tarjeta>
           )}
-          <Tarjeta emoji="📸" titulo="Fotos" ayuda="Las que ve la gente en tu página. La primera es la que más se ve: ordenalas con las flechas.">
+          <Tarjeta emoji="📸" titulo="Fotos" ancla="fotos" ayuda="Las que ve la gente en tu página. La primera es la que más se ve: ordenalas con las flechas.">
             <Fotos fotos={d.fotos} reglas={d.reglas_imagenes.foto} puedeEditar={puedeEditar} nombre={d.nombre} alListo={imagenesListas} />
           </Tarjeta>
         </>}
 
         {pestana === "cobros" && <>
-          <Tarjeta emoji="💵" titulo="Qué cobrás" ayuda="Lo que no cobrás no aparece al vender. Tiene que quedar al menos uno.">
+          <Tarjeta emoji="💵" titulo="Qué cobrás" ancla="que-cobras" restablecer={volver("que-cobras")} ayuda="Lo que no cobrás no aparece al vender. Tiene que quedar al menos uno.">
             <div className="divide-y divide-[var(--borde)]">
               <Interruptor etiqueta="🏷️ Membresía mensual" ayuda="El socio paga el mes y entra todos los días." checked={c.cobra_membresia} onChange={(e) => set("cobra_membresia", e.target.checked)} />
               <Interruptor etiqueta="🎫 Pase diario" ayuda="Paga y entra ese día." checked={c.cobra_pase} onChange={(e) => set("cobra_pase", e.target.checked)} />
               <Interruptor etiqueta="🎟️ Packs de clases" ayuda="Compra una cantidad de clases y las va usando." checked={c.cobra_pack} onChange={(e) => set("cobra_pack", e.target.checked)} />
             </div>
           </Tarjeta>
-          <Tarjeta emoji="💳" titulo="Medios de pago" ayuda="Con qué te pueden pagar. Lo que apagues no se ofrece en Vender ni en la app.">
+          <Tarjeta emoji="💳" titulo="Medios de pago" ancla="medios-pago" restablecer={volver("medios-pago")} ayuda="Con qué te pueden pagar. Lo que apagues no se ofrece en Vender ni en la app.">
             <div className="divide-y divide-[var(--borde)]">
               {MEDIOS.map(([k, t, ayuda]) => (
                 <Interruptor key={k} etiqueta={t}
@@ -446,7 +500,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               <Interruptor etiqueta="📲 Mercado Pago" ayuda="Cobrar con link o QR de Mercado Pago, que se acredita solo. Todavía no está disponible: lo vas a poder prender cuando conectemos tu cuenta." checked={false} disabled readOnly />
             </div>
           </Tarjeta>
-          <Tarjeta emoji="🏦" titulo="Transferencias" ayuda="Lo que ve el socio para pagarte por transferencia.">
+          <Tarjeta emoji="🏦" titulo="Transferencias" ancla="transferencias" ayuda="Lo que ve el socio para pagarte por transferencia.">
             {!c.medios_aceptados.includes("transferencia")
               ? <Mensaje tipo="info">Apagaste las transferencias: estos datos no se le muestran a nadie.</Mensaje>
               : !c.alias_transferencia?.trim() && !c.cbu?.trim() && <Mensaje tipo="aviso">Sin alias ni CBU, la app no le ofrece al socio pagar por transferencia.</Mensaje>}
@@ -465,7 +519,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               </Campo>
             </div>
           </Tarjeta>
-          <Tarjeta emoji="⏰" titulo="Recargo por pagar tarde" ayuda="Apagado, nadie paga de más. Prendido, Vender lo suma solo a la cuota y lo muestra antes de cobrar; no cobrarlo es un descuento con motivo.">
+          <Tarjeta emoji="⏰" titulo="Recargo por pagar tarde" ancla="recargo" restablecer={volver("recargo")} ayuda="Apagado, nadie paga de más. Prendido, Vender lo suma solo a la cuota y lo muestra antes de cobrar; no cobrarlo es un descuento con motivo.">
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Recargo por pagar tarde">
               {([["no", "Sin recargo"], ["porcentaje", "% de la cuota"], ["monto", "$ fijo"]] as const).map(([k, t]) => (
                 <label key={k} className={`boton !min-h-11 cursor-pointer ${c.recargo_tipo === k ? "!border-[var(--acento)]" : ""}`}>
@@ -483,7 +537,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               </div>
             )}
           </Tarjeta>
-          <Tarjeta emoji="📒" titulo="Fiar (cuenta corriente)" ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
+          <Tarjeta emoji="📒" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
             <Interruptor etiqueta="📒 Se puede cobrar a cuenta" ayuda={c.fiado_activo ? "Prendido: hasta el tope de abajo por socio." : "Apagado: nadie queda debiendo."}
               checked={c.fiado_activo} onChange={(e) => set("fiado_activo", e.target.checked)} />
             {c.fiado_activo && (
@@ -494,16 +548,16 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             )}
           </Tarjeta>
           {pie("cobros")}
-          <ReglasVencimiento inicial={vencimiento} puedeEditar={puedeEditar} />
-          <ConfigDejarPasarCard inicial={dejarPasar} puedeEditar={puedeEditar} />
-          <MercadoPago estado={mercadopago} puedeEditar={puedeEditar} />
-          {cajaConfig && <ConfigCaja inicial={cajaConfig} puedeEditar={puedeEditar} />}
+          <div data-opcion="vencimiento"><ReglasVencimiento inicial={vencimiento} puedeEditar={puedeEditar} /></div>
+          <div data-opcion="dejar-pasar"><ConfigDejarPasarCard inicial={dejarPasar} puedeEditar={puedeEditar} /></div>
+          <div data-opcion="mercado-pago"><MercadoPago estado={mercadopago} puedeEditar={puedeEditar} /></div>
+          {cajaConfig && <div data-opcion="caja"><ConfigCaja inicial={cajaConfig} puedeEditar={puedeEditar} /></div>}
         </>}
 
         {pestana === "reglas" && <>
           {/* COM-6: los textos que firman los socios viven en su pantalla. */}
-          <p><Link href="/panel/documentos" className="boton" data-ir-documentos>✍️ Documentos para firmar (reglamento, deslinde, menores)</Link></p>
-          <Tarjeta emoji="📏" titulo="Reglas" ayuda="Cómo se calcula si alguien puede entrar, y qué puede hacer la recepción.">
+          <p data-opcion="documentos"><Link href="/panel/documentos" className="boton" data-ir-documentos>✍️ Documentos para firmar (reglamento, deslinde, menores)</Link></p>
+          <Tarjeta emoji="📏" titulo="Reglas" ancla="reglas" restablecer={volver("reglas")} ayuda="Cómo se calcula si alguien puede entrar, y qué puede hacer la recepción.">
             <div className="grid sm:grid-cols-2 gap-3">
               {num("tolerancia_dias", "Días de gracia al vencer", gracia > 0
                 ? `Cuando se le termina la cuota, puede entrar ${gracia === 1 ? "1 día más" : `${gracia} días más`} mientras paga`
@@ -520,18 +574,18 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 ? "Por socio. La da el dueño o el encargado; la recepción la pide"
                 : "En 0 no se dan pausas")}
             </div>
-            <Interruptor etiqueta="🔁 Volver a entrar el mismo día gasta otra entrada"
+            <Interruptor etiqueta="🔁 Volver a entrar el mismo día gasta otra entrada" data-opcion="reingreso"
               ayuda={c.reingreso_mismo_dia_consume
                 ? "Prendido: si alguien con pack entra a las 8 y vuelve a las 19, se le descuenta otra clase; con pase diario, la segunda vez ya no entra."
                 : "Apagado: si alguien con pack entra a las 8 y vuelve a las 19, no se le descuenta otra clase; con pase diario, vuelve a entrar."}
               checked={c.reingreso_mismo_dia_consume} onChange={(e) => set("reingreso_mismo_dia_consume", e.target.checked)} />
-            <Interruptor etiqueta="🩺 Pedir apto físico"
+            <Interruptor etiqueta="🩺 Pedir apto físico" data-opcion="pide-apto"
               ayuda={c.pide_apto
                 ? "Prendido: en la ficha de cada socio se anota si presentó el apto y hasta cuándo vale (nada médico, sin subir el papel). No frena la entrada."
                 : "Apagado: no aparece en ningún lado."}
               checked={c.pide_apto} onChange={(e) => set("pide_apto", e.target.checked)} />
           </Tarjeta>
-          <Tarjeta emoji="📉" titulo="Retención" ayuda="Cuándo alguien aparece en cada lista de Retención, para llamarlo a tiempo.">
+          <Tarjeta emoji="📉" titulo="Retención" ancla="retencion" restablecer={volver("retencion")} ayuda="Cuándo alguien aparece en cada lista de Retención, para llamarlo a tiempo.">
             <div className="grid sm:grid-cols-2 gap-3">
               {num("retencion_dias_ausencia", "“No viene” después de (días)", "Paga pero no aparece: entra en la lista “No viene”")}
               {num("retencion_dias_nuevo", "Socio nuevo durante (días)", "Si no viene en sus primeros días, va a “Nuevo que no viene”")}
@@ -540,28 +594,28 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               {num("retencion_dias_se_fue", "Los que se fueron se muestran durante (días)", "Después dejan de aparecer en “Se fue”")}
             </div>
           </Tarjeta>
-          <Tarjeta emoji="🚪" titulo="Cómo entra la gente" ayuda="La recepción busca al socio por nombre, DNI o número y le marca la entrada.">
+          <Tarjeta emoji="🚪" titulo="Cómo entra la gente" ancla="accesos" restablecer={volver("accesos")} ayuda="La recepción busca al socio por nombre, DNI o número y le marca la entrada.">
             <div className="divide-y divide-[var(--borde)]" data-accesos>
               <Interruptor etiqueta="🛎️ Recepción" ayuda="Siempre prendida: es la forma de respaldo cuando falla todo lo demás." checked disabled readOnly />
-              <Interruptor etiqueta="📱 QR del socio" checked={c.accesos_activos.includes("qr_socio")}
+              <Interruptor etiqueta="📱 QR del socio" data-opcion="acceso-qr" checked={c.accesos_activos.includes("qr_socio")}
                 ayuda={c.accesos_activos.includes("qr_socio")
                   ? "Prendido: el socio ve en su app un QR que cambia cada 30 segundos, y en Entrada aparece “📷 Leer QR” (cámara o lector). Si puede entrar, se anota solo."
                   : "Apagado: la app no muestra el QR y en Entrada no está la cámara."}
                 onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_socio"])] : c.accesos_activos.filter((x) => x !== "qr_socio"))} />
-              <Interruptor etiqueta="📲 Tablet en la puerta" checked={c.accesos_activos.includes("kiosco")}
+              <Interruptor etiqueta="📲 Tablet en la puerta" data-opcion="acceso-kiosco" checked={c.accesos_activos.includes("kiosco")}
                 ayuda={c.accesos_activos.includes("kiosco")
                   ? "Prendido: una tablet autorizada en la puerta; el socio escribe su DNI (o muestra su QR) y, si puede, entra solo. Si no puede, la tablet le dice por qué y que pase por recepción."
                   : "Apagado: ninguna tablet deja entrar."}
                 onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "kiosco"])] : c.accesos_activos.filter((x) => x !== "kiosco" && x !== "qr_pared"))} />
               {c.accesos_activos.includes("kiosco") && (
-                <Interruptor etiqueta="🔳 QR en la tablet (el socio lo escanea)" checked={c.accesos_activos.includes("qr_pared")}
+                <Interruptor etiqueta="🔳 QR en la tablet (el socio lo escanea)" data-opcion="acceso-qr-pared" checked={c.accesos_activos.includes("qr_pared")}
                   ayuda={c.accesos_activos.includes("qr_pared")
                     ? "Prendido: la tablet muestra un QR que cambia cada 30 segundos; el socio lo escanea desde su app y entra (o ve por qué no)."
                     : "Apagado: en la tablet solo se escribe el DNI."}
                   onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "qr_pared"])] : c.accesos_activos.filter((x) => x !== "qr_pared"))} />
               )}
               {c.accesos_activos.includes("kiosco") && (
-                <Interruptor etiqueta="👋 Los habituales de esta hora en la tablet" checked={c.kiosco_habituales}
+                <Interruptor etiqueta="👋 Los habituales de esta hora en la tablet" data-opcion="kiosco-habituales" checked={c.kiosco_habituales}
                   ayuda={c.kiosco_habituales
                     ? "Prendido: la tablet muestra a los que suelen venir a esta hora (nombre e inicial del apellido); tocan su nombre y ponen los últimos 3 números del DNI."
                     : "Apagado: la tablet no muestra nombres (se escribe el DNI entero)."}
@@ -570,19 +624,19 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               {guardado.accesos_activos.includes("kiosco") && (
                 <Tablets inicial={tablets} sedes={datos.sedes} esDueno={puedeEditar} zona={datos.zona_horaria} />
               )}
-              <Interruptor etiqueta="🔑 Llavero o tarjeta" checked={c.accesos_activos.includes("nfc")}
+              <Interruptor etiqueta="🔑 Llavero o tarjeta" data-opcion="acceso-nfc" checked={c.accesos_activos.includes("nfc")}
                 ayuda={c.accesos_activos.includes("nfc")
                   ? "Prendido: en la ficha de cada socio se le asigna su llavero; el lector USB lo escribe en Entrada (o en la tablet) y entra directo."
                   : "Apagado: los llaveros no se usan."}
                 onChange={(e) => set("accesos_activos", e.target.checked ? [...new Set([...c.accesos_activos, "nfc"])] : c.accesos_activos.filter((x) => x !== "nfc"))} />
             </div>
           </Tarjeta>
-          <MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} />
+          <div data-opcion="meta-visitas"><MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} /></div>
           {pie("reglas")}
         </>}
 
         {pestana === "clases" && conClases && <>
-          <Tarjeta emoji="🗓️" titulo="Clases" ayuda="Cómo se anota la gente. Para no dar clases, apagalas en Secciones.">
+          <Tarjeta emoji="🗓️" titulo="Clases" ancla="modo-clases" restablecer={volver("clases")} ayuda="Cómo se anota la gente. Para no dar clases, apagalas en Secciones.">
             <div className="grid sm:grid-cols-2 gap-2">
               {[["reserva", "📝 Con reserva y cupo", "Se anotan desde la app; cuando se llena, no entran más."], ["sin_reserva", "🚶 Sin reserva", "Vienen y el profe toma asistencia."]].map(([v, t, a]) => (
                 <button key={v} type="button" aria-pressed={c.modo_clases === v} onClick={() => set("modo_clases", v)}
@@ -596,7 +650,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               {num("cancelacion_horas_limite", "Cancelar hasta (horas antes)", "Después de eso la reserva cuenta igual")}
             </div>}
             {c.modo_clases === "reserva" && (
-              <div className="space-y-3" data-faltas>
+              <div className="space-y-3" data-faltas data-opcion="falta-politica">
                 <p className="font-semibold">Si reserva y no viene (sin cancelar)</p>
                 <div className="grid sm:grid-cols-3 gap-2">
                   {([["nada", "🙂 No pasa nada", "Queda anotado en su ficha."], ["descontar", "🎟️ Se descuenta del pack", "Si reservó con su pack, la clase cuenta como usada. Cuenta desde que lo prendés."], ["bloquear", "⛔ No puede reservar por unos días", "La recepción lo puede anotar igual. Cuenta desde que lo prendés."]] as const).map(([v, t, a]) => (
@@ -612,11 +666,11 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             )}
           </Tarjeta>
           {pie("clases")}
-          {guardado.modo_clases === "reserva" && <TurnosFijosConfig inicial={turnosFijos} puedeEditar={puedeEditar} />}
+          {guardado.modo_clases === "reserva" && <div data-opcion="turnos-fijos"><TurnosFijosConfig inicial={turnosFijos} puedeEditar={puedeEditar} /></div>}
         </>}
 
         {pestana === "secciones" && <>
-          <Tarjeta emoji="🧩" titulo="Secciones" ayuda="Apagá lo que no usás: desaparece de todos los paneles.">
+          <Tarjeta emoji="🧩" titulo="Secciones" ancla="secciones" restablecer={volver("secciones")} ayuda="Apagá lo que no usás: desaparece de todos los paneles.">
             <div className="grid sm:grid-cols-2 gap-x-6 divide-y divide-[var(--borde)] sm:divide-y-0">
               <Interruptor etiqueta="🗓️ Clases" ayuda="Clases con horario, cupo y asistencia. Apagadas, no aparecen en ningún panel ni en la app."
                 checked={conClases} onChange={(e) => set("modo_clases", e.target.checked ? (guardado.modo_clases !== "ninguno" ? guardado.modo_clases : "reserva") : "ninguno")} />
@@ -633,7 +687,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         {pestana === "horarios" && !puedeEditar && <p className="texto-suave">Los horarios los cambia el dueño. Los días que cierra los podés cargar vos.</p>}
 
         {pestana === "direccion" && (
-          <Tarjeta emoji="🔗" titulo="Dirección" ayuda="Dónde se abren tu página, tu panel y la app de tus socios.">
+          <Tarjeta emoji="🔗" titulo="Dirección" ancla="direccion" ayuda="Dónde se abren tu página, tu panel y la app de tus socios.">
             <ul className="divide-y divide-[var(--borde)]">
               {d.dominios.map((x) => (
                 <li key={x.host} className="py-3 flex flex-wrap items-center gap-2 justify-between">
@@ -653,14 +707,14 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       </fieldset>
       {/* Fuera del fieldset: los cierres los carga también el encargado (la base lo permite). */}
       {pestana === "horarios" && (
-        <HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} />
+        <div data-opcion="horarios cierres"><HorariosYCierres agendaInicial={agenda} cierresIniciales={cierres} esDueno={puedeEditar} alCambiarSucio={setHorariosSucio} /></div>
       )}
-      {pestana === "entrada" && <ConfigEntrada inicial={entrada} />}
-      {pestana === "mensajes" && <><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></>}
-      {pestana === "cambios" && <Historial cambios={cambios} />}
+      {pestana === "entrada" && <ConfigEntrada inicial={entrada} puedeEditar={puedeEditar} />}
+      {pestana === "mensajes" && <><div data-opcion="link-resena"><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /></div><div data-opcion="mensajes"><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></div></>}
+      {pestana === "cambios" && <div data-opcion="historial"><Historial cambios={cambios} /></div>}
       {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
       {pestana === "gimnasio" && puedeEditar && (
-        <section className="tarjeta p-5 mt-8 space-y-2" data-exportar-todo>
+        <section className="tarjeta p-5 mt-8 space-y-2" data-exportar-todo data-opcion="exportar-datos">
           <h2 className="titulo text-2xl">📦 Tus datos</h2>
           <p className="texto-suave">Todo lo de tu gimnasio (socios, pagos, entradas, caja, clases…), un archivo por tema, para abrir con Excel.</p>
           <a href="/panel/exportar" className="boton" download>⬇️ Descargar todos los datos</a>

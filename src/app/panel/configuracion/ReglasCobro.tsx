@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Restablecer } from "./Restablecer";
 import { formatearPesos } from "@/lib/formato";
 import {
   guardarConfigDejarPasar, guardarReglaPlan, guardarReglaVencimiento, simularCuota,
@@ -112,6 +113,14 @@ export function ReglasVencimiento({ inicial, puedeEditar }: { inicial: ReglasVen
       )}
       {!puedeEditar && <p className="texto-tenue text-sm">Lo cambia el dueño.</p>}
       {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+      {puedeEditar && (
+        <Restablecer id="vencimiento" recomendado="las cuotas vencen desde el día que paga (con día fijo, la primera cuota es proporcional y sin redondeo). Los planes con regla propia no cambian."
+          alConfirmar={async () => {
+            const x = await guardarReglaVencimiento({ renovacion: "desde_pago", dia_fijo: null, primera_cuota: "proporcional", redondeo: 0 });
+            if (x.error || !x.reglas) return x.error ?? "No se pudo restablecer.";
+            aplicar(x.reglas); setSim(null); return null;
+          }} />
+      )}
       {r.ultimo_cambio && <p className="texto-tenue text-sm" data-ultimo-cambio>Último cambio: {r.ultimo_cambio.por ?? "alguien"}, {fechaCorta(r.ultimo_cambio.cuando)} · {r.ultimo_cambio.detalle}.</p>}
 
       {r.planes.length > 0 && (
@@ -234,6 +243,14 @@ export function ConfigDejarPasarCard({ inicial, puedeEditar }: { inicial: Config
         </div>
       ) : <p className="texto-tenue text-sm">Lo cambia el dueño.</p>}
       {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+      {puedeEditar && (
+        <Restablecer id="dejar-pasar" recomendado="la recepción decide hasta 3 días de promesa; más lejos pide el PIN."
+          alConfirmar={async () => {
+            const x = await guardarConfigDejarPasar("recepcion_hasta_dias", 3);
+            if (x.error || !x.config) return x.error ?? "No se pudo restablecer.";
+            setC(x.config); setModo(x.config.modo); setDias(x.config.dias_max); return null;
+          }} />
+      )}
       {c.ultimo_cambio && <p className="texto-tenue text-sm">Último cambio: {c.ultimo_cambio.por ?? "alguien"}, {fechaCorta(c.ultimo_cambio.cuando)}.</p>}
     </section>
   );

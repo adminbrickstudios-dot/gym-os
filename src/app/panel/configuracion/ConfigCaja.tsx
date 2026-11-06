@@ -6,6 +6,7 @@ import { guardarConfigCaja } from "@/app/panel/caja/acciones";
 import type { ConfigCaja as Config } from "@/app/panel/caja/tipos";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Restablecer } from "./Restablecer";
 
 export function ConfigCaja({ inicial, puedeEditar }: { inicial: Config; puedeEditar: boolean }) {
   const [c, setC] = useState(inicial);
@@ -57,6 +58,14 @@ export function ConfigCaja({ inicial, puedeEditar }: { inicial: Config; puedeEdi
         </div>
       )}
       {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+      {puedeEditar && (
+        <Restablecer id="caja" recomendado="caja por turno, sin pedir el conteo de billetes, fondo fijo $0, corte a las 00:00 y turnos de hasta 14 horas."
+          alConfirmar={async () => {
+            const r = await guardarConfigCaja({ modo: "por_turno", pedir_billetes: false, fondo_fijo: 0, hora_corte: "00:00", horas_max: 14 });
+            if (r.error || !r.config) return r.error ?? "No se pudo restablecer.";
+            setC(r.config); setGuardado(r.config); return null;
+          }} />
+      )}
     </section>
   );
 }
