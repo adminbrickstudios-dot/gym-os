@@ -2,6 +2,11 @@
 
 ## Diseño v2
 
+**Un pase de diseño por cada panel, en este orden**: ingreso (`11`), Inicio
+y Entrada, Cobrar, Socios y ficha, Vencen, Caja, app del socio, super
+admin (`10`), Configuración, el resto. Afinar, no reinventar: lo que
+funciona se queda.
+
 Base: el tema oscuro "modo gym" que decidió Mateo (grafito + verde,
 `globals.css`, `docs/DISENO.md`). Se mantiene el esqueleto (saludo, accesos
 grandes, 4 números, "ahora y lo que sigue", menú agrupado). Se sube el
@@ -12,12 +17,24 @@ nivel:
   saturate(1.4)`, fondo semitransparente, borde de 1 px claro, sombra
   grande y suave. Con fallback sólido si el navegador no lo soporta y con
   `prefers-reduced-transparency`.
-- **Movimiento con intención** (CSS, sin librerías pesadas): entrar/salir de
-  lo flotante (160 ms), tilde que se dibuja al confirmar, números que suben
-  al cargar (count-up corto), el semáforo que "late" una vez, transiciones
-  entre páginas con View Transitions donde el navegador lo soporte, press
-  state `:active` en todos los botones (escala 0,97). Todo respeta
-  `prefers-reduced-motion`.
+- **Movimiento con intención** (CSS, sin librerías pesadas). Duraciones:
+  150-200 ms en compu, ~225 ms al entrar y ~195 ms al salir en celular; más
+  de 400 ms se siente lento.
+  - Sí: entrar/salir de lo flotante, tilde que se dibuja al confirmar, filas
+    que entran o salen de una lista, el semáforo que aparece al instante con
+    un pulso, press state `:active` (escala 0,97) en todo botón,
+    respuesta optimista con vuelta atrás donde fallar es raro (tildar
+    tarea, reservar, marcar presente).
+  - No: animaciones de página completa en cada clic, contadores que suben
+    de a poco en los números de Inicio, rebotes en tablas, confetti
+    repetido (solo en hitos del socio).
+  - **View Transitions de Next**: siguen experimentales ("not recommended
+    for production"): **no** activar `experimental.viewTransition`. Solo la
+    API nativa de CSS en la app del socio, con fallback.
+  - Todo respeta `prefers-reduced-motion` (solo opacidad o nada).
+- **Deshacer en vez de "¿Estás seguro?"** en lo que se revierte (cancelar
+  reserva, archivar, tildar): aviso con "Deshacer" 6 s. En plata (cobrar,
+  anular), confirmación explícita.
 - **Jerarquía**: más aire, anchos máximos por tipo de pantalla (listas 1100
   px, formularios 640 px, Inicio 1200 px), tablas que en el celular pasan a
   tarjetas.

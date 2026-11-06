@@ -6,7 +6,8 @@ parás hasta que `node scripts/noche/pendientes.mjs --siguiente` diga `NADA`.
 
 ## Antes de empezar (una sola vez por noche)
 
-1. Leé completos: `CLAUDE.md`, todo `docs/v2/`, `docs/HOJA-DE-RUTA.md`
+1. Leé completos: `CLAUDE.md`, todo `docs/v2/` (empezando por
+   `00-LEEME.md` y `08-PLAN.md`), `docs/HOJA-DE-RUTA.md`
    (reglas, decisiones y el bloque 20), `docs/DISENO.md`, la primera entrada
    de `docs/LOG.md`, y `scripts/noche/PROMPT.md` (las reglas de una vuelta:
    valen todas salvo lo que este archivo cambia para Windows).
@@ -28,23 +29,52 @@ parás hasta que `node scripts/noche/pendientes.mjs --siguiente` diga `NADA`.
     una base limpia, `npm run db:pruebas`, `npm run chequeos`, siembra del
     demo): ~5 min.
   - Un commit cuyo mensaje tenga `[pantallas]` corre además las pantallas
-    (`npm run e2e` + barrido, 2 a 4 h). Usalo **cuando se cerró un bloque**
-    (A, B, C, D) o al final, no en cada ítem.
+    (cada recorrido e2e + barrido, 2 a 4 h). Usalo **cuando se cerró una
+    tanda** (ver `08-PLAN.md`), no en cada ítem. Mientras corre, seguí con
+    la tanda siguiente.
   - Mirar: `gh run list --branch <rama> --workflow pruebas-completas.yml -L 3`
     y `gh run watch <id> --exit-status`; el detalle de una falla:
     `gh run view <id> --log-failed`. Capturas y logs: `gh run download <id>`.
 - **Acá corrés**: `npm ci` (si cambió package-lock), `npm run lint`,
   `npm run typecheck`, `npm test`, y el build con las variables de prueba:
   `NEXT_PUBLIC_SUPABASE_URL=https://ejemplo.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=clave-de-build NEXT_PUBLIC_DOMINIO_BASE=ejemplo.com NEXT_PUBLIC_DOMINIO_PLATAFORMA=app.ejemplo.com npm run build`
-- `gh` se usa **solo** para: crear/editar el PR borrador, mirar y bajar
-  corridas de Pruebas completas. **Nunca**: mergear, `gh workflow run
-  base-de-datos.yml` (ni prevuelo ni aplicar), tocar Secrets, nada de
-  Vercel ni de Supabase real. Las migraciones las aplica Mateo a la mañana.
+- `gh` se usa **solo** para: crear/editar PRs, mirar y bajar corridas de
+  Pruebas completas, y **publicar una tanda** (abajo). **Nunca**: tocar
+  Secrets, `vercel`, ni Supabase directo (solo a través del workflow Base de
+  datos), ni `aplicar` sin `prevuelo` en verde antes, ni mergear algo que no
+  pasó por la publicación de abajo.
 - Un ítem **no** está `[x]` hasta que su corrida de base en GitHub está en
   verde. Las pantallas (e2e) de un ítem se dan por verificadas cuando pasa
-  la corrida `[pantallas]` del bloque; mientras tanto el ítem queda `[x]`
-  con "e2e: en la corrida del bloque" y, si esa corrida falla, se arregla
-  antes de seguir con el bloque siguiente.
+  la corrida `[pantallas]` de su tanda; mientras tanto el ítem queda `[x]`
+  con "e2e: en la corrida de la tanda" y, si esa corrida falla, se arregla
+  antes de publicar.
+
+## Publicar una tanda en producción (D25)
+
+Mateo decidió que los cambios salgan durante la noche, por tanda. **Solo si
+no existe `.claude/BASE_CON_DATOS_REALES`** (si existe: no publicás, dejás
+todo para la mañana y lo decís en el LOG).
+
+1. La tanda entera está `[x]` y la corrida `[pantallas]` del commit que
+   cierra la tanda está en verde (base + e2e + barrido). Si el e2e de algo
+   viejo falla porque la pantalla cambió a propósito, se actualiza la
+   prueba (no se borra) y se vuelve a correr.
+2. Rama de publicación en ese commit exacto (no en lo que siguió después):
+   `git branch publicar/<fecha>-tanda-<n> <commit>` y push.
+3. `gh workflow run base-de-datos.yml --ref publicar/<fecha>-tanda-<n> -f accion=prevuelo`
+   → esperar y leer: tiene que terminar en "Pre-vuelo OK".
+4. Mismo comando con `-f accion=aplicar` → esperar → "Todo en verde".
+5. PR de `publicar/<fecha>-tanda-<n>` a `main` (`gh pr create --fill`),
+   `gh pr merge --merge` cuando Verificar esté en verde. Vercel publica solo.
+6. A los 3 minutos, probar producción: `curl -s -o /dev/null -w "%{http_code}"`
+   a `https://gym-os-pied.vercel.app/ingresar`, `/g/demo` y `/admin` (200
+   o redirección, nunca 500). Si algo da 500: `gh pr revert` no existe;
+   revertir con un PR de `git revert -m 1 <merge>` a main y avisar en el LOG
+   (las migraciones son aditivas: la versión anterior anda con la base
+   nueva).
+7. Entrada en el LOG: "Publicada la tanda N" con las migraciones aplicadas.
+8. La rama de la noche sigue con la tanda siguiente (traé `main` si hace
+   falta: `git merge origin/main`).
 
 ## Orquestar: varios agentes sin pisarse
 
@@ -56,8 +86,9 @@ con `isolation: "worktree"`), cada uno con **un ítem** VD-* y su propia rama
    lanzarlos, listá los archivos que cada uno va a tocar; si se cruzan
    (ej: dos que cambian `src/app/panel/layout.tsx`, `secciones.ts`,
    `globals.css`, `scripts/chequeos.mjs` o `package.json`), van en serie.
-   Los del bloque A tocan casi todos la Entrada y Cobrar: VD-1, VD-5 y VD-6
-   van en serie entre ellos.
+   En la tanda 1, VD-34 y VD-27 van primero y solos (cambian componentes
+   que usa todo); después VD-1, VD-5 y VD-6 van en serie entre ellos (tocan
+   la Entrada y Cobrar); VD-33, VD-36/VD-23 y VD-12 pueden ir en paralelo.
 2. **Migraciones con número reservado**: cada ítem usa
    `2026110600NN00_<nombre>.sql` con NN = número del ítem (VD-3 →
    `20261106000300_reingreso.sql`; VD-13 → `20261106001300_...`). Anotalo en
@@ -95,10 +126,12 @@ recorrido, capturas de compu y celular), más:
 
 ## Al final de la noche
 
-1. Corrida `[pantallas]` completa en verde (o lo que falló, anotado).
+1. La última tanda terminada, publicada; lo que quedó a medias, en la rama
+   con su corrida, sin publicar.
 2. `docs/v2/ESTADO-NOCHE.md` cerrado y una entrada final en el LOG con el
-   formato de reporte de `CLAUDE.md`. En **QUÉ CORRÉS VOS**: las migraciones
-   nuevas en orden → Actions → Base de datos → esta rama → `prevuelo` →
-   `aplicar` → merge del PR.
-3. Actualizá el cuerpo del PR borrador con lo hecho, las migraciones y lo
-   que espera a Mateo. No mergees.
+   formato de reporte de `CLAUDE.md`. En **QUÉ CORRÉS VOS**: solo lo que no se
+   pudo publicar (con sus comandos), y en **QUÉ CONFIGURÁS VOS** los 🔌.
+3. Actualizá el cuerpo del PR borrador de la noche con lo hecho, lo
+   publicado, las migraciones y lo que espera a Mateo. Ese PR (la rama de
+   la noche entera) no se mergea: lo publicado ya entró por las ramas
+   `publicar/…`.

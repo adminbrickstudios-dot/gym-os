@@ -43,6 +43,38 @@ Pagar · Invitar a un amigo · Eventos · Novedades
 - Al entrar (QR o DNI): "Entraste 19:04 ✓ · llevás 12 este mes 🔥" con una
   animación corta; hitos (10, 50, 100) con confetti.
 
+## 2b. Registrarse solo (D26)
+
+Desde la página del gimnasio o la pantalla de ingreso: "Soy nuevo, quiero
+anotarme". Pide lo mínimo: nombre, apellido, DNI, celular, mail, fecha de
+nacimiento, plan (tarjetas con precio), aceptar reglamento y privacidad, y
+cómo entrar (Google o contraseña). Queda **socio sin pagar** con ese plan
+("a cobrar" en el panel, con la marca 🌐): puede ver horarios y pagar desde
+la app; entra al gimnasio cuando paga. Menores: no se anotan solos (piden
+que venga un adulto). El dueño puede apagar el registro (ya existe el
+interruptor del alta online; se mantiene, con un texto claro).
+
+## 2c. Escribirle al gimnasio (D27)
+
+Botón "💬 Escribile al gimnasio" en la app: categoría (consulta, queja,
+sugerencia, objetos perdidos, otra), texto y foto opcional. Llega al panel
+en **Mensajes** con puntito rojo (dueño, encargado, recepción; el dueño
+elige quién los ve). Se contesta desde el panel y el socio ve la respuesta
+en la app (con aviso). Estados: nuevo · respondido · cerrado. Historial en
+la ficha del socio. Respuestas rápidas guardadas ("El horario de feriado
+es…"). Nunca datos de salud: si alguien escribe sobre una lesión, se
+contesta pero el sistema no lo clasifica ni lo guarda aparte.
+
+## 2d. Cambiar de plan o comprar otro pase (D28)
+
+En "Mi plan": ver el actual y los otros planes con precio. Elegir uno →
+la app muestra **lo que le queda a favor** (regla D6: los días que le
+quedaban se convierten en días a favor) y el precio a pagar → pagar online
+(MercadoPago, cuando esté conectado) o "pagué por transferencia" con
+comprobante. Si el dueño lo prende, queda **pendiente de aprobación** en
+Para hacer hoy. Comprar un pase diario o un pack suelto: igual, sin cambiar
+el plan. Todo lo calcula la base (nunca la app).
+
 ## 3. Lo que se suma
 
 - **Progreso**: visitas por mes (gráfico), racha, meta mensual de visitas
@@ -58,8 +90,26 @@ Pagar · Invitar a un amigo · Eventos · Novedades
   app (vence pronto, clase cancelada, evento, cumpleaños, hitos).
 - **Reseña**: después de una buena racha, "¿nos dejás una reseña en Google?"
   (ya existe la encuesta 0-10: los promotores van al link).
+- **Rutinas con videos**: cada ejercicio con su video o foto (ya existe el
+  video en ejercicios), "la de hoy" primero, marcar series hechas.
+- **Recomendaciones** (sin inteligencia artificial inventada, con reglas
+  claras): "hace 10 días que no venís, hoy hay Funcional 19:00", "te queda 1
+  clase del pack", "tu cuota vence el viernes".
+- **Novedades** del gimnasio (ya existe) con foto.
+- **Agendar con QR**: en gimnasios con reserva, el QR de la entrada marca
+  el presente de la clase reservada de ese horario (presente = entrada, A7).
+- **Débito automático**: lugar reservado en "Mis pagos" ("Pagá
+  automático todos los meses — próximamente") hasta que exista MP-3 🔌.
 - Cada sección se apaga si el gimnasio no la usa (clases, rutinas, eventos,
   pagos online, invitados, referidos, grados).
+
+## 3b. Orden y limpieza (lo que pidió Mateo: "limpio y simple")
+
+La app tiene **4 pestañas abajo**: **Inicio** (estado, QR, lo de hoy) ·
+**Clases** (horarios y reservas) · **Rutina** · **Yo** (plan y pagos,
+historial, mensajes, datos, contraseña, salir). Todo lo demás (eventos,
+invitar, referir, grados, novedades) aparece en Inicio solo cuando hay algo
+y en "Yo" → "Más". Si el gimnasio no tiene clases, la pestaña no está.
 
 ## 4. Cómo se siente
 

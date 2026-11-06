@@ -2,8 +2,19 @@
 
 Mismo formato que la COLA de `docs/HOJA-DE-RUTA.md` (bloque 20). Cada ítem:
 qué, dónde está el detalle, y **LISTO SI** (lo que se prueba ejecutando).
-Orden: primero lo que más usa la gente todos los días (entrada y cobro),
-después el dueño, el socio, la página y el pulido.
+El detalle de cada ítem está abajo agrupado por tema (A-F); **el orden en
+que se hacen son las tandas** (es el orden de la COLA). Cada tanda se
+publica entera cuando da verde (D25, ver `NOCHE-WINDOWS.md`).
+
+| Tanda | Para qué | Ítems, en orden |
+|---|---|---|
+| **1 · Para mañana** | Lo que el dueño ve en la presentación: lindo, rápido y que no se rompa | VD-34 (confiabilidad base) · VD-27 (diseño v2: base) · VD-33 (ingreso) · VD-1 · VD-2 · VD-5 · VD-6 · VD-12 · VD-36 · VD-23 |
+| **2 · Plata y control** | Que nadie se lleve nada y cada peso tenga dueño | VD-7 · VD-8 · VD-9 · VD-10 · VD-3 · VD-4 · VD-41 |
+| **3 · El día del dueño** | Todo conectado y con pendientes | VD-11 · VD-37 · VD-13 · VD-14 · VD-15 · VD-38 · VD-16 · VD-17 · VD-18 · VD-44 |
+| **4 · Socio y página** | La app y la página que dan ganas | VD-35 · VD-39 · VD-22 · VD-24 · VD-25 · VD-19 · VD-20 |
+| **5 · BRIK y seguridad** | Manejar muchos gimnasios tranquilo | VD-40 · VD-42 · VD-43 · VD-21 |
+| **6 · El día a día real** | Las situaciones de `14-SITUACIONES.md` que todavía no estén cubiertas | VD-46 … |
+| **7 · Cierre** | Pulido, velocidad, memoria y segunda pasada | VD-28 · VD-29 · VD-30 · VD-31 · VD-26 · VD-32 |
 
 **Para todos:** no sacar ninguna función; rutas viejas redirigen; cada
 pantalla tocada: celular 390 px sin desbordes, esqueleto con la forma real,
@@ -203,3 +214,96 @@ base por usuario).
 Hacer los tres días completos (`04` "Su día", un día del dueño, un mes del
 socio) con capturas; todo lo que falte se arregla o se suma como VD-32X.
 LISTO SI: e2e rev-v2-dueno, rev-v2-recepcion, rev-v2-socio en verde.
+
+## E · Lo que se sumó el 05/11 a la noche (pedido de Mateo)
+
+**VD-33 · Ingreso más lindo y "primero quién, después cómo"** (`11`)
+Pantalla con la marca del gimnasio (o de Gym OS), animación corta, tarjeta
+de vidrio; un campo "celular o mail" que ofrece el método según la cuenta;
+código de 6 dígitos con autocompletado y "reenviar en 0:59"; errores que no
+revelan cuentas; "olvidé mi contraseña". No se pierde ningún método de hoy.
+LISTO SI: e2e: entrar con contraseña, con código por mail (imitador) y con
+código por celular desde la misma pantalla; desde `/g/demo` se ve la marca
+del demo; reduced-motion sin animación; celular sin desbordes.
+
+**VD-34 · Confiabilidad base: nada dos veces, nada se pierde, nada se traba** (`13` §1-3)
+`BotonAccion` único (se deshabilita, "Guardando…", ignora el segundo envío)
+en todo el panel y la app; **clave de operación** en cobros y pagos (unique
+por gimnasio, reintento devuelve lo ya hecho); formularios con
+`useActionState` devuelven lo escrito ante error (todos); `error.tsx` y
+`not-found.tsx` con "Volver" e "Ir al inicio"; versión en ediciones
+concurrentes de ficha, plan y configuración ("Sofi lo cambió hace 1 min").
+LISTO SI: db: misma clave dos veces = una venta; e2e: doble clic en Cobrar
+= un cobro; error en un formulario conserva todo; dos sesiones editan la
+misma ficha y la segunda ve el aviso.
+
+**VD-35 · Registro del socio (D26)** (`05` §2b, `11`)
+LISTO SI: e2e: desde la página → registrarse con plan → queda "a cobrar"
+con 🌐 en el panel → paga por transferencia → entra; menor no puede; con el
+registro apagado no aparece.
+
+**VD-36 · App del socio en 4 pestañas, limpia** (`05` §3b)
+Inicio · Clases · Rutina · Yo; lo demás en Inicio solo cuando hay algo y en
+Yo → Más; pestañas que se apagan con la sección.
+LISTO SI: barrido del socio en celular: cada pantalla vieja sigue
+accesible; gimnasio sin clases no muestra la pestaña.
+
+**VD-37 · Pendientes (números y puntitos) y centro de notificaciones** (`12`)
+`pendientes_panel(gimnasio)` en un pedido, menú con números calculados,
+regla del rojo, punto en Novedades, campana agrupada por día con "marcar
+todo leído", preferencias por tipo y canal, push pedido después de algo
+que lo justifique.
+LISTO SI: db: cada contador baja solo al resolverse; < 50 ms con 3.000
+socios; e2e: cobrar a uno baja el número de Vencen.
+
+**VD-38 · Mensajes de los socios (D27)** (`05` §2c)
+Tabla de mensajes con RLS (el socio los suyos, el equipo los del gimnasio
+según el dueño), foto opcional, respuestas rápidas, estados, aviso al
+socio, historial en la ficha.
+LISTO SI: db: un socio no ve los de otro, la recepción solo si el dueño lo
+prende; e2e: socio escribe con foto → recepción ve el puntito y contesta →
+el socio ve la respuesta.
+
+**VD-39 · Cambio de plan y compra de pases desde la app (D28)** (`05` §2d)
+Usa la regla D6 y `iniciar_pago_online`/transferencia; aprobación
+opcional del dueño.
+LISTO SI: db: días a favor calculados por la base; e2e: socio cambia a un
+plan más caro, paga por transferencia, la recepción aprueba y el plan
+cambia.
+
+**VD-40 · Super admin v2** (`10`)
+LISTO SI: e2e: alta de gimnasio en 3 pasos con vista previa; salud con
+colores y orden "necesitan atención"; entrar como soporte pide motivo y el
+dueño lo ve; mensaje de ayuda del dueño llega con contexto.
+
+**VD-41 · Gastos y presupuesto del gimnasio** (`15` §7)
+Gastos por categoría (alquiler, sueldos, servicios, mantenimiento,
+proveedores, otros) con foto del comprobante, fijos que se repiten cada
+mes, presupuesto mensual por categoría; Resultado muestra ingresos −
+gastos = **ganancia** y el desvío contra el presupuesto. Solo dueño (y
+encargado si se prende).
+LISTO SI: db: la recepción no ve gastos; un gasto fijo aparece todos los
+meses; e2e: cargar gastos y ver la ganancia del mes.
+
+**VD-42 · Mi cuenta y seguridad** (`11`)
+Cambiar contraseña (todos), mis sesiones y "cerrar las demás", 2FA TOTP
+(super admin obligatorio, dueño recomendado) con políticas `aal2` en lo
+sensible, "Dar de baja" a alguien del equipo en un botón, alertas de
+seguridad al dueño.
+LISTO SI: db: sin aal2 el dueño no exporta ni toca el equipo si tiene 2FA
+activo; e2e: cambiar contraseña; dar de baja corta su sesión y su PIN.
+
+**VD-43 · Gimnasio nuevo: onboarding calculado y datos de ejemplo** (`12`)
+LISTO SI: e2e: gimnasio recién creado → cada paso se tacha solo al
+cumplirse; cargar ejemplos y borrarlos.
+
+**VD-44 · Equipo con foto, clases y horario** (`11`)
+Profes y recepción con foto, qué clases da cada uno, horario de trabajo; se
+ven en la página y la app (si el dueño quiere). La liquidación sigue en
+COM-15 (🟡).
+LISTO SI: e2e: profe con foto aparece en su clase en la app.
+
+**VD-46… · Situaciones del día a día** (`14-SITUACIONES.md`)
+Cada situación ⭐ que el sistema todavía no resuelve es un ítem VD-46,
+VD-47… con su LISTO SI (los arma el agente al empezar la tanda 6, leyendo
+`14-SITUACIONES.md` y el código).

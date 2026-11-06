@@ -69,6 +69,10 @@ mientras no tenga ✅).
 | D22 | Prospectos | Pasa a Socios como "Interesados", con "darlo de alta". | ✅ |
 | D23 | ¿Con qué entra el socio? | Google, mail y contraseña, código por mail y código por SMS/WhatsApp. | ✅ |
 | D24 | Reingreso | Una visita dura 5 h (configurable): dentro de la ventana, volver a pasar es "ya entró" y no cuenta ni consume; anti-préstamo configurable. | ✅ |
+| D25 | ¿Los cambios salen en producción durante la noche? (05/11) | Sí, por tanda: cuando una tanda entera da verde en GitHub (base y pantallas), el agente corre prevuelo y aplicar de sus migraciones y mergea a main. Mientras no exista `.claude/BASE_CON_DATOS_REALES`. | ✅ |
+| D26 | Socio que se registra solo | Queda socio sin pagar con el plan que eligió; ve horarios y paga desde la app; entra cuando paga. El dueño lo puede apagar. | ✅ |
+| D27 | Dudas, consultas y quejas de los socios | Mensajes dentro de la app con categoría y foto; llegan al panel con número de pendientes y se contestan ahí. | ✅ |
+| D28 | ¿El socio cambia de plan o compra pases desde la app? | Sí: elige, ve lo que le queda a favor (D6) y paga online o por transferencia; aprobación del dueño opcional. | ✅ |
 
 ### Decisiones que tomó el agente
 
@@ -440,40 +444,64 @@ bloque 18.
 - [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)
 - [ ] COM-17 · 🔌 · Wellhub y TotalPass: el check-in de la plataforma cuenta como entrada
 
-### 20 · Gym OS v2 (VD-*): dueño, recepción y socio (pedido de Mateo, 05/11 · `docs/v2/`, detalle y LISTO SI en `docs/v2/08-PLAN.md`)
+### 20 · Gym OS v2 (VD-*): dueño, recepción y socio (pedido de Mateo, 05/11 · `docs/v2/`, detalle y LISTO SI en `docs/v2/08-PLAN.md`; se publica por tanda, D25)
+*Tanda 1 · Para mañana (lo que ve el dueño)*
+- [ ] VD-34 · 🟢 · Confiabilidad base: nada dos veces (botón único y clave de operación), nada se pierde, nada se traba
+- [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
+- [ ] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo
 - [ ] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores)
 - [ ] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón
-- [ ] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable
-- [ ] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas
 - [ ] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K)
 - [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
+- [ ] VD-12 · 🟢 · Inicio del dueño y de la recepción
+- [ ] VD-36 · 🟢 · App del socio en 4 pestañas, limpia
+- [ ] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida
+*Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
 - [ ] VD-9 · 🟡 D20 · Caja por turno que se cierra sola (sin contar) con reporte X y Z
 - [ ] VD-10 · 🟢 · Control: todo queda escrito, con alertas al dueño
+- [ ] VD-3 · 🟡 D24 · Reingreso: una visita dura N horas y anti-préstamo configurable
+- [ ] VD-4 · 🟢 · Entradas en vivo (QR, tablet, otra compu) como avisos en todas las pantallas
+- [ ] VD-41 · 🟢 · Gastos y presupuesto: la ganancia del mes
+*Tanda 3 · El día del dueño*
 - [ ] VD-11 · 🟡 D21 · Menú nuevo (Para hacer hoy, Vencen y cobrar, Productos y stock, Control, Interesados) con redirecciones
-- [ ] VD-12 · 🟢 · Inicio del dueño y de la recepción
+- [ ] VD-37 · 🟢 · Pendientes con números y puntitos calculados, y centro de notificaciones
 - [ ] VD-13 · 🟢 · Para hacer hoy: tareas inteligentes, manuales con repetición y avisos también a la app
 - [ ] VD-14 · 🟢 · Vencen y cobrar con pestañas y totales
 - [ ] VD-15 · 🟡 D22 · Socios: lista con memoria, Interesados, autoalta visible, ficha con acciones
+- [ ] VD-38 · 🟡 D27 · Mensajes de los socios al gimnasio (consultas, quejas, objetos perdidos)
 - [ ] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata)
 - [ ] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad)
 - [ ] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería)
-- [ ] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in)
-- [ ] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso
-- [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo
+- [ ] VD-44 · 🟢 · Equipo con foto, clases y horario
+*Tanda 4 · Socio y página*
+- [ ] VD-35 · 🟡 D26 · Registro del socio por su cuenta (queda socio sin pagar)
+- [ ] VD-39 · 🟡 D28 · Cambio de plan y compra de pases desde la app
 - [ ] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada
-- [ ] VD-22B · 🔌 · Credenciales de Google para el ingreso del socio (las crea Mateo)
-- [ ] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida
 - [ ] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar"
 - [ ] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp)
-- [ ] VD-26 · 🟢 · Página de Gym OS para vender
-- [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
+- [ ] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in)
+- [ ] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso
+*Tanda 5 · BRIK y seguridad*
+- [ ] VD-40 · 🟢 · Super admin v2: salud, alta en 3 pasos, soporte con motivo, ayuda con contexto, métricas
+- [ ] VD-42 · 🟢 · Mi cuenta y seguridad: contraseña, sesiones, 2FA, dar de baja a alguien del equipo
+- [ ] VD-43 · 🟢 · Gimnasio nuevo: onboarding calculado y datos de ejemplo
+- [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo
+*Tanda 6 · El día a día real*
+- [ ] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos
+*Tanda 7 · Cierre*
 - [ ] VD-28 · 🟢 · Navegación con memoria y Volver al origen
 - [ ] VD-29 · 🟢 · Ctrl+K con acciones
 - [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
 - [ ] VD-31 · 🟢 · Ayuda y onboarding por pantalla
+- [ ] VD-26 · 🟢 · Página de Gym OS para vender
 - [ ] VD-32 · 🟢 · Segunda pasada v2: un día del dueño, de la recepción y un mes del socio
+*Necesitan una cuenta (🔌: el agente deja todo listo, Mateo conecta)*
+- [ ] VD-22B · 🔌 · Credenciales de Google para el ingreso del socio (las crea Mateo)
+- [ ] VD-45 · 🔌 · SMTP propio (Resend) para que los mails de ingreso y "olvidé mi contraseña" anden en producción (Supabase manda 2 por hora sin esto)
+- [ ] VD-45B · 🔌 · Sentry para ver los errores de producción (la integración queda lista detrás de una variable)
+- [ ] VD-45C · 🔌 · Turnstile (CAPTCHA) en el registro y el envío de códigos
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)

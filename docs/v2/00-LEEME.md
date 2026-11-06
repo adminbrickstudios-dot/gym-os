@@ -29,6 +29,12 @@ quién paga, cuándo paga, y quién dejó de venir**.
 | `07-DISENO-VELOCIDAD-NAVEGACION.md` | Diseño v2, animaciones, rapidez, escala, memoria y botones de volver |
 | `08-PLAN.md` | Los ítems VD-* en orden, cada uno con su LISTO SI (también están en la COLA de la hoja de ruta) |
 | `09-INSPIRACION.md` | Lo que hacen los mejores sistemas y qué tomamos |
+| `10-SUPER-ADMIN.md` | El panel de BRIK para manejar muchos gimnasios |
+| `11-INGRESO-Y-SEGURIDAD.md` | Ingreso más lindo, registro, contraseñas, sesiones, 2FA, equipo |
+| `12-NOTIFICACIONES-Y-ONBOARDING.md` | Puntitos rojos, campana, push, primeros pasos, ayuda |
+| `13-CONFIABILIDAD-Y-ESCALA.md` | Nada dos veces, nada se pierde, nada se cae, miles a la vez |
+| `14-SITUACIONES.md` | Lo que pasa todos los días en un gimnasio, del más grande al más chico |
+| `15-RECOMENDACIONES.md` | Lo que se puede estar escapando (producto, negocio, mañana) |
 | `NOCHE-WINDOWS.md` | Cómo trabaja el agente de noche desde la compu de Mateo (Windows) |
 
 ## Principios (valen para cada ítem)
@@ -63,7 +69,7 @@ quién paga, cuándo paga, y quién dejó de venir**.
 ## Decisiones de Mateo (05/11/2026)
 
 Contestadas en el chat; están también en la tabla de decisiones de la hoja
-de ruta (D17 a D24) con su ✅.
+de ruta (D17 a D28) con su ✅.
 
 | # | Pregunta | Lo que decidió Mateo |
 |---|---|---|
@@ -75,11 +81,21 @@ de ruta (D17 a D24) con su ✅.
 | D22 | Prospectos | **Pasa a Socios como "Interesados"**, con "darlo de alta" que lleva los datos al alta. |
 | D23 | ¿Con qué entra el socio a su app? | **Google, mail y contraseña, código por mail y código por SMS/WhatsApp.** |
 | D24 | Reingreso | **Una visita dura 5 horas** (configurable): dentro de esa ventana, volver a pasar es "ya entraste" y no cuenta otra entrada ni consume otra clase; pasadas las 5 h, es una entrada nueva. |
+| D25 | ¿Se publica durante la noche? | **Sí, por tanda**, cuando toda la tanda da verde en GitHub. |
+| D26 | Socio que se registra solo | **Socio sin pagar** con su plan; paga desde la app y entra cuando paga. |
+| D27 | Consultas y quejas | **Mensajes en la app**, que llegan al panel con número de pendientes. |
+| D28 | Cambiar de plan desde la app | **Sí, lo pide y lo paga** (con lo que le queda a favor). |
 
 ## Cómo se trabaja
 
 - Los ítems están en `08-PLAN.md` y en la COLA de `docs/HOJA-DE-RUTA.md`
   (bloque 20), con el formato que lee `scripts/noche/pendientes.mjs`.
 - De noche, desde Windows: `NOCHE-WINDOWS.md`.
-- Las migraciones nuevas **no se aplican a producción**: las aplica Mateo
-  desde Actions (prevuelo → aplicar) antes de mergear. Hay un gimnasio real.
+- Se publica en producción **por tanda** cuando toda la tanda da verde en
+  GitHub (D25): prevuelo → aplicar → merge (procedimiento en
+  `NOCHE-WINDOWS.md`). Si existe `.claude/BASE_CON_DATOS_REALES`, no: las
+  aplica Mateo.
+- Lo que se sumó la segunda vez (05/11 a la noche): `10-SUPER-ADMIN.md`,
+  `11-INGRESO-Y-SEGURIDAD.md`, `12-NOTIFICACIONES-Y-ONBOARDING.md`,
+  `13-CONFIABILIDAD-Y-ESCALA.md`, `14-SITUACIONES.md`,
+  `15-RECOMENDACIONES.md`, y las decisiones D25 a D28.
