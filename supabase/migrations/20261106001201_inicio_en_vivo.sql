@@ -15,10 +15,13 @@ do $$ begin
   if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'configuracion_gimnasio' and column_name = 'recepcion_ve_cobrado') then
     raise exception 'Guarda: falta recepcion_ve_cobrado (EQU-1)';
   end if;
-  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'configuracion_gimnasio' and column_name = 'meta_visitas_mes') then
-    raise exception 'Guarda: falta meta_visitas_mes (VD-23)';
-  end if;
 end $$;
+
+-- La meta de visitas la crea también VD-23 (2300, que corre después): acá va idéntica e idempotente,
+-- así esta migración no depende del orden y la de VD-23 queda sin efecto.
+alter table public.configuracion_gimnasio add column if not exists meta_visitas_mes int not null default 12;
+alter table public.configuracion_gimnasio drop constraint if exists configuracion_meta_visitas_valida;
+alter table public.configuracion_gimnasio add constraint configuracion_meta_visitas_valida check (meta_visitas_mes between 1 and 31);
 
 -- ── Los números, con permiso de la recepción y mini gráfico en todos ─
 create or replace function public.numeros_inicio(p_gimnasio_id uuid, p_sede_id uuid default null) returns jsonb
