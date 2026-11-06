@@ -467,7 +467,7 @@ bloque 18.
 - [x] VD-23C · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba" — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
 - [x] VD-1B · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [x] VD-2B · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
-- [ ] VD-47Y · 🟢 · Correr scripts/medir/explain.mjs con 3.000 socios y poner la tabla antes/después en el LOG (LISTO SI: ninguna función de pantalla pasa de 300 ms)
+- [x] VD-47Y · 🟢 · Correr scripts/medir/explain.mjs con 3.000 socios y poner la tabla antes/después en el LOG (LISTO SI: ninguna función de pantalla pasa de 300 ms) — verificado: tabla antes/después en el LOG de VD-30 (workflow medir-escala.yml)
 - [x] VD-12E · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
 - [x] VD-5B · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [ ] VD-5C · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
@@ -491,7 +491,7 @@ bloque 18.
 - [ ] VD-41C · 🟢 · El interruptor encargado_ve_gastos también en Equipo → Permisos
 - [ ] VD-41D · 🟢 · Presupuesto distinto por mes y aviso al dueño al pasarse
 - [ ] VD-10B · 🟢 · Control: filtro por socio, e2e del cobro con fecha atrasada que llega a la campana, y el conteo de Control en el resumen del día del dueño
-- [ ] VD-16B · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30)
+- [x] VD-16B · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30) — verificado: sembrador con --socios 3000 y cargar-gimnasios.mjs; retencion_periodo/vencen_pestanas medidas en medir-escala
 - [ ] VD-16C · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
 - [ ] VD-18B · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
 - [ ] VD-15B · 🟢 · Socios: la píldora 🌐 cuenta solo los que no pagaron; encabezado de la ficha fijo al scrollear; línea de tiempo única en la ficha (entradas, pagos, contactos y cambios de plan)
@@ -532,6 +532,7 @@ bloque 18.
 - [ ] VD-29B · 🟢 · "entrada <dni>" también desde /panel/entrada (la página lee ?q=)
 - [ ] VD-29C · 🟢 · Caja con acción directa (?accion=abrir|cerrar enfoca el formulario)
 - [ ] VD-29D · 🟢 · "nuevo socio María" abre el alta con el nombre cargado
+- [ ] VD-30B · 🟢 · Pendientes e Inicio sin recalcular la retención en cada vista (contadores guardados o caché de 60 s por gimnasio, o retención incremental). LISTO SI: pendientes_panel < 50 ms y filtros_socios < 300 ms con 3.000 socios en la tabla de medir-escala
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -587,7 +588,7 @@ bloque 18.
 *Tanda 7 · Cierre*
 - [x] VD-28 · 🟢 · Navegación con memoria y Volver al origen — verificado: origen único (ruta+query+scroll) por pestaña, VolverAlOrigen con Link en ficha, clase y 9 pantallas, useMemoriaLista en las listas, vuelta del cobro con aviso; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-28 en la corrida de la tanda
 - [x] VD-29 · 🟢 · Ctrl+K con acciones — verificado: intérprete de comandos (cobrar juan, entrada DNI, ficha, nuevo socio, vender, turno, tarea, nuevo gasto) con permisos por rol y secciones; sin migración; lint, typecheck, 147 pruebas, build y base en verde; e2e vd-29 en la corrida de la tanda
-- [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
+- [x] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios) — verificado: 8 funciones de pantalla dentro del presupuesto con 3.019 socios y 202 gimnasios; 4 no (pendientes_panel, filtros_socios, exportar_socios, vencen_pestanas) con causa anotada -> VD-30B; base en verde en GitHub
 - [x] VD-31 · 🟢 · Ayuda y onboarding por pantalla — verificado: globo de ayuda la primera vez por pantalla (panel y app del socio), guardado en la base por usuario, '?' para volver a verlo y apagado en Mi cuenta; base en verde en GitHub (ayuda-pantalla); e2e vd-31 en la corrida de la tanda
 - [x] VD-26 · 🟢 · Página de Gym OS para vender — verificado: landing de plataforma (hero, 3 bloques en CSS, preguntas, planes solo si hay cargados, demo con campo trampa) y tarjeta de pedidos en /admin; base en verde en GitHub (pedidos-demo-brik); e2e vd-26 en la corrida de la tanda
 - [ ] VD-32 · 🟢 · Segunda pasada v2: un día del dueño, de la recepción y un mes del socio

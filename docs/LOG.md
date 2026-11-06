@@ -1,4 +1,34 @@
 # Gy
+## 2026-11-06 · Noche · VD-30 (con VD-47Y y VD-16B) · Velocidad medida y escala
+
+**QUÉ HICE**
+- Sembrado y carga: `sembrar-demo.mjs` ya aceptaba `--socios 3000`; nuevo `scripts/datos/cargar-gimnasios.mjs` (`--gimnasios 200 --socios 15`, datos fijos). Medición: `scripts/medir/explain.mjs` reescrito (30 llamadas con el rol correcto y presupuesto de 300 ms, 50 ms para `pendientes_panel`; `--anidado` muestra lo que gasta cada función por dentro), `comparar.mjs` (tabla antes/después), y el workflow `medir-escala.yml`, que mide antes y después en la MISMA corrida (los runners varían hasta 2x entre corridas), deja la tabla en el resumen y como artefacto. Como `gh workflow run` da 404 mientras el workflow no esté en `main`, también corre con un push a `noche/**`/`dia/**` cuyo mensaje lleve `[medir]`.
+- Migración 7100: `retencion_con` busca la última visita y la frecuencia por el índice de ingresos (firma nueva con `p_liviano`, la vieja se borra), `privado.retencion_liviana` para `pendientes_panel` y `para_hacer_hoy`, `pendientes_panel` calcula la retención una vez (antes, dos), `resultado_mes` calcula el precio por plan, `precio_para` y `deuda_socio` pasan a plpgsql. Paginación: Socios y Retención muestran de a 60 y 50 con "Ver más"; el exportar socios corta en 5.000 filas avisándolo en la última línea; Control ya tenía cursor y tope.
+- **Bug encontrado midiendo**: en `para_hacer_hoy` una variable `fin` chocaba con la columna `clases.fin`: la tarea "clases con lista de espera" nunca andaba y `pendientes_panel` (que la llama) fallaba entero en un gimnasio con clases. Corregido en la misma migración.
+- Verificado: lint, typecheck, 128 pruebas, build, y base/chequeos/demo en verde en GitHub con los resultados sin cambiar.
+
+**TABLA DE TIEMPOS (3.019 socios, 202 gimnasios; las dos columnas salen de la misma corrida, el ratio importa más que los ms)**
+
+| función | antes (ms) | después (ms) | presupuesto |
+|---|---:|---:|---|
+| `pendientes_panel` | error (bug de `fin`) | 203 | 50, NO cumple |
+| `numeros_inicio` / `panel_inicio` | 978 / 960 | 284 / 288 | ok |
+| `para_hacer_hoy` | error (bug de `fin`) | 188 | ok |
+| `vencen_hoy` | 935 | 269 | ok |
+| `vencen_pestanas` | 1012 | 319 | 300, NO cumple |
+| `retencion` | 1012 | 269 | ok |
+| `retencion_resumen` | 979 | 276 | ok |
+| `resultado_mes` | 563 | 17 | ok |
+| `filtros_socios` | 733 | 541 | 300, NO cumple |
+| `exportar_socios` | 821 | 689 | 300, NO cumple |
+
+`registrar_ingreso` y `estado_acceso` ya tardaban 1–2 ms; el resto de las funciones de pantalla no se movió (todas por debajo de 200 ms). Esa corrida cayó en un runner lento: en la anterior, más rápida, `retencion` pasó de 659 a 192 ms y `filtros_socios` de 460 a 355 ms. La retención quedó 3 a 4 veces más rápida.
+
+**POR QUÉ NO CUMPLEN**: `pendientes_panel` — la retención de 3.000 socios cuesta ~190 ms y es la misma clasificación de la pantalla de Retención (el menú la llama como server action desde el cliente, así que no bloquea el render); `filtros_socios` y `exportar_socios` llaman a `calcular_acceso` por socio (0,13 a 0,25 ms cada vez) porque esa es la fuente única de verdad que no se reimplementa; `vencen_pestanas` quedó a 319 contra 300 en un runner lento (con el runner rápido cumplía).
+
+**SIN ARREGLAR**: VD-30B (retención incremental o contadores/caché de 60 s para bajar `pendientes_panel` a < 50 ms y `filtros_socios` a < 300 ms).
+**LO QUE NO PUDE VERIFICAR**: "Ver más" en Socios y Retención en pantalla y `tiempos.mjs` (UI; el input `pantallas` de `medir-escala.yml` está en `false` por defecto): escritos según la documentación, pero no ejecutados. Si otra tanda redefine `para_hacer_hoy`, `pendientes_panel`, `retencion_con`, `precio_para` o `deuda_socio`, hay que fusionar a mano con la 7100.
+
 ## 2026-11-06 · Noche · VD-29 · Ctrl+K con acciones
 
 **QUÉ HICE**
