@@ -101,3 +101,4 @@ VD-29 mergeado. Lanzado G2 de VD-46 (B, C, E, J en serie): agente a0f8c975d6faa4
 Lanzados (VD-46 resto): a6c86fdb842f56ce5 = 46D,L,P,R (rama noche/2026-11-05-vd46d, migr 7400-7403); a04a07e6a0c6f1376 = 46F→46M (vd46f, migr 7500/7501); a5033b0b55ebd37c9 = 46H,I,K,Q (vd46h, migr 7600-7603). Triage tanda 1 (adbcaf6f5b21a3aca) reanudado: ~40 recorridos con fallas reales tras la 2ª corrida (42186887082).
 Pendientes después: 46G (solo), 46N→46O, 46T..W, VD-32 (segunda pasada), y los B/C/D sueltos. Antes de VD-32 y de publicar tandas 2+: correr [pantallas] sobre la rama de la noche y hacer otra ronda de triage.
 (VD-46F, VD-46M mergeados; sumado VD-46X)
+(VD-46H,I,K,Q mergeados; sumado VD-46Y)

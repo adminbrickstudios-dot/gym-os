@@ -1,4 +1,17 @@
 # Gy
+## 2026-11-06 · Noche · VD-46H, I, K y Q · Datos de salud, incidentes, reemplazo de profe y perdón de faltas
+
+**QUÉ HICE**
+- **46H** (sin migración): `src/lib/salud.ts` con su prueba ("operado de rodilla" y "tiene diabetes" se detectan, "operación de caja" no). Avisa en vivo (`AvisoSalud`) y deshabilita el guardado en las notas de la ficha, `FormMensaje.tsx`, el motivo y la nota de las pausas y las tareas (en `FormSocio.tsx` solo aviso en vivo); el servidor lo rechaza igual pidiendo reescribir; en los mensajes del socio el envío se frena.
+- **46I** (7601): tabla `incidentes` (dónde, qué pasó, testigos, qué se hizo, socio opcional) con trigger propio que frena el UPDATE después de 24 h y todo DELETE; crea cualquiera del equipo, dueño y encargado listan todos y los demás solo los suyos; pantalla `/panel/incidentes` (loading y error propios, sección apagable, grupo Hoy del menú) que usa el detector de 46H. Se ajustaron `secciones.test.ts` y `menu-vd11.test.ts` porque el profe ahora ve "Incidentes".
+- **46K** (7602): `reemplazar_profe(clase, profe, motivo)` y `reemplazos_profe` (no se edita ni se borra); cambia solo esa clase, el profe anterior deja de ver la lista y marcar presentes y el nuevo puede; solo dueño y encargado; UI en `panel/clases/[id]`.
+- **46Q** (7603): `faltas_perdonadas` (inmutable); `privado.faltas` y `privado.faltas_pack` ignoran las perdonadas (se levanta el bloqueo y el pack recupera la clase); `perdonar_falta`, `perdonar_bloqueo`, `faltas_socio_detalle`, `faltas_clase`; botón en la lista de la clase y en la pestaña Asistencia de la ficha.
+- **Decisiones de plata y permisos (revisar)**: reemplazar profe y perdonar son solo de dueño y encargado (perdonar devuelve una clase de un pack y reemplazar toca la liquidación del profe); la recepción no ve esos botones.
+- Verificado: lint, typecheck, 150 pruebas, build y base/chequeos/demo en verde en GitHub (`incidentes`, `reemplazar-profe`, `perdonar-falta`).
+
+**SIN ARREGLAR**: VD-46Y (deshacer un perdón, que un reemplazo sobreviva a editar el horario —`editar_horario` pisa el profe de las clases futuras—, perdones y reemplazos en Control, hora real del incidente, perdón pedido por la recepción con aprobación).
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46h/i/k/q` y los viejos de clases y socios (cla-*, panel-clases, soc-*): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-46F y VD-46M · Chip de transferencia pendiente y modo emergencia de la puerta
 
 **QUÉ HICE**
