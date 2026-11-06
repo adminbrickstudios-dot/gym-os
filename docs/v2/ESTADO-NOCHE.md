@@ -24,6 +24,7 @@ Lanzados (3 agentes): VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1,
 - VD-33 (base verde; sumados VD-33b/c)
 - VD-36, VD-23 (base verde; sumados VD-23b/c)
 (VD-36/VD-23 mergeados)
+(VD-1/VD-2 mergeados; VD-1b, VD-2b sumados)
 
 ## Publicadas
 

@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-1 y VD-2 · Ventana de Entrada en todas las pantallas y guía del veredicto
+
+**QUÉ HICE**
+- VD-1 (migración 0100): la ventana de Entrada vive en el layout del panel y se abre tipeando un número fuera de un campo (teclado numérico incluido), con el botón (centrado sobre la barra en el celular), con F2/Ctrl+E y con un lector USB (teclas < 30 ms: reconoce QR `GYMOS1.` y llavero). Escribir (DNI con puntos, hasta 3 coincidencias) → veredicto → anotado; se cierra sola a los N segundos; Esc devuelve el foco. Barra fija opcional a la derecha (≥ 1280 px) con las últimas 5 entradas. Usa solo las funciones de la base de siempre. `/panel/entrada` queda igual (la ventana se desactiva ahí). El botón grande de Inicio abre la ventana. Configuración → Entrada (por gimnasio, tabla `configuracion_entrada`, y "en esta compu" en el navegador, que le gana).
+- VD-2 (migración 0200): `guia_entrada` devuelve por situación el botón principal y el segundo, "lo que hay que decirle", cuánto le falta y los chips (primer día, entrada 100, cumple, debe, falta firmar, menor con o sin responsable, lo dejaron pasar, cerrado). La ventana y /panel/entrada solo dibujan lo que dice la base. Una prueba de base por cada fila de la tabla con casos testigo y momento fijo.
+- Verificado: lint, typecheck, 79 pruebas, base/chequeos/demo en verde en GitHub (`config-entrada`, `guia-entrada`).
+
+**Decisiones del agente**: con "anotar solo en verde" Enter anota solo si está en verde; la ventana usa la sede principal; "Fuera del horario" ofrece Dejar pasar y Cobrar (no existe "cobrar la diferencia").
+**QUÉ CORRÉS VOS**: nada; ojo, la migración 0200 debe estar aplicada antes que el código (`veredicto()` llama a `guia_entrada`): la publicación por tanda lo hace en ese orden.
+**SIN ARREGLAR**: VD-1b (F abre la ficha y vuelve; sede), VD-2b (chip "tiene clase hoy", "En prueba"); alta rápida dentro de la ventana es VD-6; Cobrar en la ventana es un link a Vender hasta VD-5.
+**LO QUE NO PUDE VERIFICAR**: la ventana y los e2e `vd-1`/`vd-2` (y que los e2e viejos de Entrada sigan pasando): escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
 ## 2026-11-06 · Noche · VD-36 y VD-23 · App del socio en 4 pestañas, progreso y bienvenida
 
 **QUÉ HICE**

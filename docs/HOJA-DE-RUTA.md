@@ -450,8 +450,8 @@ bloque 18.
 - [x] VD-47 · 🟢 · Rapidez de verdad: misma región, middleware liviano, un viaje por pantalla, streaming, caché de lo que no cambia, carga diferida y medición (`docs/v2/16-RAPIDEZ-Y-FLUIDEZ.md`) — verificado: middleware con gimnasio en memoria y getClaims, rpc con 10 s y Reintentar, Inicio con Suspense, caché pública con etiqueta, QR bajo demanda, scripts/medir/tiempos.mjs; base en verde en GitHub; lo que falta está en VD-47X
 - [x] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos — verificado: sistema de movimiento, vidrio, Hoja/Tilde/Brillo y loading con .esqueleto; base en verde en GitHub; e2e vd-27 y capturas: en la corrida de la tanda
 - [x] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo — verificado: ingreso con marca, un campo celular o mail, código de 6 dígitos con reenviar, olvidé mi contraseña por código, errores que no revelan cuentas; base en verde en GitHub; e2e vd-33 en la corrida de la tanda
-- [ ] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores)
-- [ ] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón
+- [x] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores) — verificado: ventana de Entrada global (tipeo, botón, F2/Ctrl+E, lector USB, barra fija opcional) sobre las funciones de siempre + Configuración → Entrada; base en verde en GitHub; e2e vd-1 en la corrida de la tanda
+- [x] VD-2 · 🟢 · Todas las situaciones del veredicto con su texto, lo que hay que decirle y su botón — verificado: guia_entrada en la base: botón, qué decirle, chips por situación; prueba de base por cada fila de la tabla; base en verde en GitHub; e2e vd-2 en la corrida de la tanda
 - [ ] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K)
 - [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
 - [x] VD-12 · 🟢 · Inicio del dueño y de la recepción — verificado: numeros_inicio en un viaje con permisos por rol, 4 números configurables, turno de caja de la recepción; base en verde en GitHub; e2e vd-12 en la corrida de la tanda
@@ -465,6 +465,8 @@ bloque 18.
 - [ ] VD-33c · 🟢 · Desafío anti-robot (Turnstile) antes de mandar códigos que cuestan SMS, detrás de una variable (LISTO SI: sin el desafío resuelto no se manda el código; sin la variable todo sigue igual)
 - [ ] VD-23b · 🟢 · Editor de la meta de visitas del mes (meta_visitas_mes) en Configuración, y fila "Escribile al gimnasio" en Yo → Más (LISTO SI: el dueño cambia la meta y el Inicio del socio la sigue)
 - [ ] VD-23c · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba"
+- [ ] VD-1b · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas)
+- [ ] VD-2b · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip)
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
