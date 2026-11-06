@@ -10,7 +10,8 @@ try {
   const s = await pagina(b, CELU);
   await entrar(s, "socio@ejemplo.invalid");
   await s.goto(`${G}/app`);
-  await s.locator("[data-link-historial]").click();
+  await s.goto(`${G}/app/yo`);
+  await s.locator("[data-yo-fila=historial]").click();
   await s.waitForURL(/\/app\/historial/, { timeout: 30000 });
   await s.locator("[data-historial-pagos]").waitFor({ timeout: 60000 });
   const pagos = await s.locator("[data-historial-pagos]").innerText();

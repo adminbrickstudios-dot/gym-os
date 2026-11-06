@@ -12,7 +12,8 @@ try {
   const s = await pagina(b, CELU);
   await entrar(s, "socio@ejemplo.invalid");
   await s.goto(`${G}/app`);
-  await s.locator("[data-link-cuenta]").click();
+  await s.goto(`${G}/app/yo`);
+  await s.locator("[data-yo-fila=cuenta]").click();
   await s.waitForURL(/\/app\/cuenta/, { timeout: 30000 });
   const pausa = s.locator("[data-pedir-pausa]");
   await pausa.waitFor({ timeout: 60000 });

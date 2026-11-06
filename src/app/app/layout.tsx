@@ -5,6 +5,10 @@ import type { ReactNode } from "react";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
 import { SinConexion } from "@/components/ui/SinConexion";
+import { Suspense } from "react";
+import { crearClienteServidor, gimnasioActual } from "@/lib/supabase/servidor";
+import { rpc } from "@/lib/panel/servidor";
+import { NavSocio } from "./NavSocio";
 
 // El ícono del gimnasio en la pestaña y al guardar la app en el celular.
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,6 +24,11 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
   const landing = host ? await traerLanding(host) : null;
   if (!landing) throw new Error("La app del socio se abre desde la dirección del gimnasio.");
   const logo = urlMarca(landing.marca.logo_path);
+  // Las pestañas salen de la configuración del gimnasio (la base). Sin sesión no hay pestañas (la página redirige a ingresar).
+  // Si la base falla se muestran solo Inicio y Yo, que existen siempre.
+  const gimnasio = await gimnasioActual();
+  const sesion = (await (await crearClienteServidor()).auth.getUser()).data.user;
+  const pestanas = sesion ? await rpc<{ clases: boolean; rutina: boolean }>("pestanas_app", { p_gimnasio_id: gimnasio.id }).catch(() => ({ clases: false, rutina: false })) : null;
   return (
     <div {...propsMarca(landing.marca)} className="min-h-dvh">
       <header className="sticky top-0 z-20 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
@@ -32,7 +41,8 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
           <form action="/salir" method="post"><button className="boton-texto">Salir</button></form>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pt-6 pb-16"><SinConexion />{children}</main>
+      <main className={`mx-auto max-w-lg px-4 pt-6 ${pestanas ? "pb-28" : "pb-16"}`}><SinConexion />{children}</main>
+      {pestanas && <Suspense fallback={null}><NavSocio clases={pestanas.clases} rutina={pestanas.rutina} /></Suspense>}
     </div>
   );
 }

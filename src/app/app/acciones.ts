@@ -33,6 +33,12 @@ export async function escanearEntrada(gimnasioId: string, socioId: string, codig
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-23: el socio vio (o salteó) la bienvenida de la primera vez; queda anotado en la base. */
+export async function marcarBienvenida(socioId: string): Promise<{ error?: string }> {
+  try { await rpc("marcar_bienvenida", { p_socio_id: socioId }); revalidatePath("/app"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 /** Invitar a alguien hoy (INV-1): la recepción confirma cuando llega. */
 export async function invitarHoy(gimnasioId: string, socioId: string, nombre: string, dni: string): Promise<{ error?: string }> {
   try { await rpc("invitar", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_nombre: nombre, p_dni: dni }); revalidatePath("/app"); return {}; }

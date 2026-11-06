@@ -14,7 +14,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
 | `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `acreditar_pago_mp`, `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
-| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_transferencia`, `iniciar_pago_online`, `invitar`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `racha_socio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared` | `/app/clases` `/app/cuenta` `/app/historial` `/app/novedades` `/app/rutina` |
+| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_reserva`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_transferencia`, `iniciar_pago_online`, `invitar`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `usa_qr_pared` | `/app/clases` `/app/novedades` `/app/rutina` |
 | `/app/clases` | pantalla |  |  | `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `turnos_socio`, `wods_socio` | `/app` |
 | `/app/cuenta` | pantalla |  |  | `pedido_baja_socio` | `/app` `/app/mis-datos` |
 | `/app/historial` | pantalla |  |  | `mi_historial` | `/app` |
@@ -22,6 +22,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana` | `/app` |
 | `/app/pago` | pantalla |  |  | `pago_online` |  |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
+| `/app/yo` | pantalla |  |  | `mi_link_referido`, `mis_invitados` | `/app` `/app/mis-datos` |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
 | `/gimnasio-no-encontrado` | pantalla |  |  |  |  |

@@ -19,6 +19,9 @@ import { rpc } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import type { EventoPublico } from "@/lib/landing";
 import { Encuesta } from "./Encuesta";
+import { Bienvenida } from "./Bienvenida";
+import { Entraste } from "./Entraste";
+import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
 
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
@@ -44,7 +47,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, racha, novedades, referido, rutina, documentos, eventos, encuesta, grados] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -53,7 +56,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       // PAY-1: si el gimnasio conectó MercadoPago, cuánto sale pagar ahora.
       rpc<{ disponible: boolean; monto?: number; descripcion?: string }>("pago_online_disponible", { p_socio_id: s.socio_id }).catch(() => null),
       // APP-7: cuántas veces vino este mes y cuántas semanas seguidas.
-      rpc<{ semanas_seguidas: number; entradas_mes: number; entradas_mes_anterior: number; vino_esta_semana: boolean }>("racha_socio", { p_socio_id: s.socio_id }).catch(() => null),
+      // VD-23: la semana, la racha, la meta del mes, el hito y "entraste": todo lo calcula la base.
+      rpc<ProgresoSocio>("progreso_inicio", { p_socio_id: s.socio_id }).catch(() => null),
       // APP-6: lo que publicó el gimnasio.
       rpc<{ id: string; texto: string }[]>("novedades_socio", { p_socio_id: s.socio_id }).catch(() => []),
       // REF-1: su link para invitar (null si la página no recibe pedidos).
@@ -70,8 +74,21 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<GradosSocio>("grados_socio", { p_socio_id: s.socio_id }),
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
+    // VD-23: vencido o por vencer, pagar va arriba de todo (pegado al semáforo); al día, más abajo.
+    const bloquePago = (
+      <>
+        {yo.pendiente && (
+          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full">🧾 Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
+        )}
+        {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
+        {!yo.pendiente && debePagar && yo.transferencia && (
+          <Pagar gimnasioId={g.id} socioId={s.socio_id} monto={yo.plan?.precio_transferencia ?? null} datos={yo.transferencia} secundario={!!online?.disponible} />
+        )}
+      </>
+    );
     return (
       <div className="space-y-6">
+        {progreso?.bienvenida_pendiente && <Bienvenida socioId={s.socio_id} nombre={s.nombre} qr={!!qr || qrPared} clases={(yo.modo_clases ?? "ninguno") as "reserva" | "sin_reserva" | "ninguno"} pagos={!!yo.transferencia || !!online?.disponible} />}
         <header className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <p className="texto-suave text-lg">Hola, {s.nombre} 👋</p>
@@ -102,12 +119,9 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
 
-        {racha && (racha.entradas_mes > 0 || racha.semanas_seguidas > 0) && (
-          <section className="grid grid-cols-2 gap-3" data-racha>
-            <div className="tarjeta p-4"><p className="numero text-4xl">{racha.entradas_mes}</p><p className="texto-suave text-sm">{racha.entradas_mes === 1 ? "vez" : "veces"} este mes{racha.entradas_mes_anterior ? ` · ${racha.entradas_mes_anterior} el anterior` : ""}</p></div>
-            <div className="tarjeta p-4"><p className="numero text-4xl">{racha.semanas_seguidas >= 2 ? "🔥 " : ""}{racha.semanas_seguidas}</p><p className="texto-suave text-sm">{racha.semanas_seguidas === 1 ? "semana" : "semanas"} seguidas{racha.semanas_seguidas > 0 && !racha.vino_esta_semana ? " · vení esta semana para seguir" : ""}</p></div>
-          </section>
-        )}
+        {debePagar && bloquePago}
+        {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
+        {progreso && <ProgresoInicio p={progreso} />}
 
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
@@ -158,13 +172,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
             {documentos.pendientes.map((d) => <Firmar key={d.documento_id} socioId={s.socio_id} doc={d} />)}
           </section>
         )}
-        {yo.pendiente && (
-          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full">🧾 Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
-        )}
-        {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
-        {!yo.pendiente && debePagar && yo.transferencia && (
-          <Pagar gimnasioId={g.id} socioId={s.socio_id} monto={yo.plan?.precio_transferencia ?? null} datos={yo.transferencia} secundario={!!online?.disponible} />
-        )}
+        {!debePagar && bloquePago}
 
         {rutina && (
           <Link href={`/app/rutina${q}`} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-link-rutina>
@@ -175,22 +183,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
         {referido && <Referir datos={referido} />}
-        <p className="text-center"><Link href={`/app/historial${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-historial>🧾 Mis pagos y cuándo vine</Link>
-          <span className="texto-tenue"> · </span><Link href={`/app/cuenta${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" data-link-cuenta>⏸️ Pausar o dar de baja</Link></p>
         <Instalar />
-
-        {yo.plan && (
-          <section className="tarjeta p-5">
-            <p className="texto-tenue text-sm">Tu plan</p>
-            <p className="titulo text-2xl">🏷️ {yo.plan.nombre}</p>
-          </section>
-        )}
-        {yo.packs?.map((p) => (
-          <section key={p.plan} className="tarjeta p-5">
-            <p className="titulo text-2xl">🎟️ {p.plan}</p>
-            <p className="texto-suave">Te quedan {p.cantidad - p.usadas} de {p.cantidad} clases{p.vence_en ? ` · vence el ${fechaCorta(p.vence_en, zona)}` : ""}</p>
-          </section>
-        ))}
 
         {yo.modo_clases !== "ninguno" && (
           <section>
