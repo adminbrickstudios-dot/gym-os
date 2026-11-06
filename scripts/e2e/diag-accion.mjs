@@ -8,13 +8,18 @@ const p = await pagina(b, COMPU);
 await entrar(p, "recepcion@ejemplo.invalid");
 await p.goto(`${G}/panel/socios`);
 const links = await p.locator('main ul a[href^="/panel/socios/"]').evaluateAll((xs) => xs.slice(0, 2).map((x) => x.getAttribute("href")));
-const ETQ = `Diag ${Date.now().toString().slice(-5)}`;
+const t0 = Date.now();
+p.on("request", (r) => { if (r.method() === "POST") console.log(`  [POST +${Date.now() - t0}ms] ${r.url().slice(-40)} action=${(r.headers()["next-action"] ?? "").slice(0, 8)}`); });
+p.on("requestfinished", (r) => { if (r.method() === "POST") console.log(`  [POST ok +${Date.now() - t0}ms] ${r.url().slice(-40)}`); });
+p.on("requestfailed", (r) => { if (r.method() === "POST") console.log(`  [POST fallo +${Date.now() - t0}ms] ${r.url().slice(-40)} ${r.failure()?.errorText}`); });
+const ETQ =`Diag ${Date.now().toString().slice(-5)}`;
 const mira = async (cual, ms) => {
   await p.waitForTimeout(ms);
   console.log(`[${cual} +${ms}ms] etiquetas: ${await p.locator("[data-etiqueta]").allInnerTexts().then((t) => JSON.stringify(t))} | error: ${await p.locator('main [role="alert"], main .texto-rojo').allInnerTexts().then((t) => JSON.stringify(t))}`);
 };
 for (const [i, href] of links.entries()) {
   await p.goto(`${G}${href}`);
+  if (i === 1) await p.waitForTimeout(6000);   // deja pasar la acción que la Entrada dispara al abrir la pantalla
   await p.locator('input[aria-label="Nueva etiqueta"]').fill(i === 0 ? ETQ : ETQ.toUpperCase());
   await p.locator('button:has-text("Poner")').click();
   await mira(`ficha ${i}`, 1500);
