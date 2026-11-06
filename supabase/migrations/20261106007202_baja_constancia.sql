@@ -155,20 +155,22 @@ end $$;
 -- ── Para hacer hoy: las bajas sin responder hace más de 24 h se dicen ──
 -- Se parcha la función vigente (otros ítems también la tocan esta noche): se cambia solo el texto de las bajas.
 do $$
-declare d text;
+declare d text; f regprocedure;
   viejo constant text := $v$texto := cant || case when cant = 1 then ' baja pedida desde la app' else ' bajas pedidas desde la app' end;$v$;
   nuevo constant text := $n$texto := cant || case when cant = 1 then ' baja pedida desde la app' else ' bajas pedidas desde la app' end
         || coalesce((select ' (' || count(*) || ' sin responder hace más de 24 h)' from public.pedidos_baja pb
                       where pb.gimnasio_id = p_gimnasio_id and pb.estado = 'pendiente' and pb.pedido_en < now() - interval '24 hours' having count(*) > 0), '');$n$;
 begin
-  d := pg_get_functiondef('public.para_hacer_hoy(uuid)'::regprocedure);
+  -- Desde VD-30 (7100) el cuerpo vive en privado.para_hacer_hoy_con; antes, en la pública.
+  f := coalesce(to_regprocedure('privado.para_hacer_hoy_con(uuid, jsonb)'), 'public.para_hacer_hoy(uuid)'::regprocedure);
+  d := pg_get_functiondef(f);
   if position('sin responder hace más de 24 h' in d) = 0 then
     if position(viejo in d) = 0 then raise exception 'Guarda: para_hacer_hoy cambió: no encuentro el texto de las bajas pedidas'; end if;
     execute replace(d, viejo, nuevo);
   end if;
   -- Arreglo al lado: en "clases con lista de espera hoy" la variable fin chocaba con la columna clases.fin ("column reference fin is ambiguous"):
   -- en cualquier gimnasio con clases, Para hacer hoy fallaba entero. Se reemplaza por la misma cuenta (medianoche de mañana).
-  d := pg_get_functiondef('public.para_hacer_hoy(uuid)'::regprocedure);
+  d := pg_get_functiondef(f);
   if position('kl.inicio < fin and' in d) > 0 then
     execute replace(d, 'kl.inicio < fin and', 'kl.inicio < privado.medianoche(hoy + 1, zona) and');
   end if;
@@ -277,7 +279,7 @@ begin
     end if;
     if has_function_privilege('anon', f, 'execute') then raise exception 'Verificación: anon puede ejecutar %', f; end if;
   end loop;
-  if position('sin responder hace más de 24 h' in pg_get_functiondef('public.para_hacer_hoy(uuid)'::regprocedure)) = 0 then
+  if position('sin responder hace más de 24 h' in pg_get_functiondef(coalesce(to_regprocedure('privado.para_hacer_hoy_con(uuid, jsonb)'), 'public.para_hacer_hoy(uuid)'::regprocedure))) = 0 then
     raise exception 'Verificación: Para hacer hoy no dice las bajas sin responder';
   end if;
   foreach f in array array['revisar_suspension', 'cortesias_repetidas', 'pedido_baja_tarde'] loop
