@@ -11,7 +11,11 @@ const r = async (f: () => Promise<unknown>) => {
   catch (e) { return { error: (e as Error).message }; }
 };
 export const reservarClase = async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }));
-export const cancelarReserva = async (reservaId: string) => r(() => rpc("cancelar_reserva", { p_reserva_id: reservaId }));
+/** VD-24: si al cancelar subió alguien de la lista de espera, la base devuelve su reserva y se le manda el push. */
+export const cancelarReserva = async (reservaId: string) => r(async () => {
+  const subio = await rpc<string | null>("cancelar_reserva", { p_reserva_id: reservaId });
+  notificarDespues("lugar_liberado", subio);
+});
 /** El comprobante ya está subido al bucket (desde el navegador, a la carpeta del socio): acá se informa el pago. */
 export const informarPago = async (socioId: string, path: string, clave?: string) => r(async () => {
   // VD-34: con la misma clave, un segundo toque devuelve el pago ya informado (no se crea otro ni da error).

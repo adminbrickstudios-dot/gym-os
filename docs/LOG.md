@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-24 y VD-38b · Lista de espera automática, motivo de "no podés reservar" y mensajes en el menú
+
+**QUÉ HICE**
+- VD-24 (migración 5700): `cancelar_reserva` (privada y pública, con la firma vieja borrada) ahora devuelve quién subió de la espera; push de "lugar liberado" una sola vez por reserva (`destinos_push_clases`); `motivo_reserva`/`motivos_reserva` devuelven si puede, el código, la frase y el botón (reservar, espera, pagar, cambiar de plan) para cupo lleno, plan que no incluye la clase, vencido, pack sin clases, límite semanal, clase cerrada o cancelada, fuera de plazo, congelada y suspendido; `avisos_lugar_socio` trae los avisos de los últimos 2 días. La pantalla de clases del socio muestra los avisos arriba, la frase y el botón; el estado vacío ofrece ver el día siguiente. Dos cancelaciones simultáneas no confirman a la misma persona dos veces (prueba con dos conexiones reales).
+- VD-38b (migración 5800): `pendientes_panel` suma `mensajes_sin_responder` (la recepción sin permiso sigue viendo 0) y el menú muestra el contador de Mensajes (neutro, no rojo); contestar refresca el número.
+- Verificado: lint, typecheck, 113 pruebas, mapa y base/chequeos/demo en verde en GitHub (`espera-motivo`, `espera-concurrente`, `pendientes-panel`).
+
+**SIN ARREGLAR**: VD-24b (la recepción no puede cancelar una reserva suelta desde el panel; subir el cupo de una clase no promueve a nadie de la espera). No hay motivo propio de "fuera de franja": cae en "el plan no incluye".
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-24` y `vd-38b` y la pantalla del socio: escritos según la documentación, pero no ejecutados; `npm run db:types` no se corrió.
+
 ## 2026-11-06 · Noche · VD-35 y VD-39 · Registro del socio y cambio de plan desde la app (D26, D28)
 
 **QUÉ HICE**

@@ -501,9 +501,10 @@ bloque 18.
 - [ ] VD-37b · 🟢 · Para el dueño nuevo, solo lo urgente prendido por defecto (comprobantes, caja, pedidos)
 - [ ] VD-37c · 🟢 · Canales mail y WhatsApp en las preferencias de avisos
 - [ ] VD-37d · 🟢 · Punto en Yo y Clases de la app del socio cuando hay un pago a hacer o un mensaje respondido (depende de VD-38)
-- [ ] VD-38b · 🟢 · pendientes_panel suma mensajes_sin_responder (hoy en 0) y el menú prende el punto de Mensajes (LISTO SI: db: llega un mensaje y el contador sube; baja al contestar)
+- [x] VD-38b · 🟢 · pendientes_panel suma mensajes_sin_responder (hoy en 0) y el menú prende el punto de Mensajes (LISTO SI: db: llega un mensaje y el contador sube; baja al contestar) — verificado: pendientes_panel suma mensajes_sin_responder; base en verde en GitHub; e2e vd-38b en la corrida de la tanda
 - [ ] VD-38c · 🟢 · Respuestas rápidas de ejemplo al crear un gimnasio; el equipo puede adjuntar foto en sus respuestas
 - [ ] VD-39b · 🟢 · Aprobación previa del dueño para cambios de plan pagados por MercadoPago (opcional); deshacer un cambio de plan (anular la venta devuelve suscripción y coberturas); el mensaje de /app/pago nombra lo comprado ("Tu plan ahora es X")
+- [ ] VD-24b · 🟢 · Cancelar una reserva suelta desde el panel (avisa a la espera) y promover de la espera al subir el cupo de una clase
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -527,7 +528,7 @@ bloque 18.
 - [x] VD-35 · 🟡 D26 · Registro del socio por su cuenta (queda socio sin pagar) — verificado: alta online con fecha de nacimiento obligatoria, interruptor registro abierto, 'Soy nuevo' en el ingreso, 🌐 A cobrar en Socios y clave de operación en los pagos de la app; base en verde en GitHub (registro-cambio-plan-app); e2e vd-35 en la corrida de la tanda
 - [x] VD-39 · 🟡 D28 · Cambio de plan y compra de pases desde la app — verificado: /app/plan con días a favor calculados por la base, pago por MercadoPago o transferencia con clave de operación, el plan cambia al acreditarse el pago; base en verde en GitHub; e2e vd-39 en la corrida de la tanda
 - [ ] VD-22 · 🟡 D23 · Entrar con Google (todo listo hasta las credenciales) y sesión recordada
-- [ ] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar"
+- [x] VD-24 · 🟢 · Lista de espera automática y motivo de "no podés reservar" — verificado: promoción de la espera sin dobles (dos conexiones reales), push de lugar liberado, motivo_reserva con frase y botón; base en verde en GitHub (espera-motivo, espera-concurrente); e2e vd-24 en la corrida de la tanda
 - [ ] VD-25 · 🟢 · Página del gimnasio rediseñada (prueba arriba, precios, horario en vivo, reseñas, WhatsApp)
 - [ ] VD-19 · 🟢 · Eventos completos (flyer, varias fechas, precio socio/no socio, espera, check-in)
 - [ ] VD-20 · 🟢 · Rutinas: biblioteca, plantillas, asignar a varios, progreso

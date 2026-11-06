@@ -72,3 +72,4 @@ VD-38 mergeado. Lanzado VD-24→38b a5ab496be69ce81a2 (vd24, migr 5700/5800). En
 AVISO DISCO: C: se llenó (worktrees de agentes de ~400-900 MB c/u). Regla: borrar el worktree de cada agente al mergearlo (cmd /c rmdir de node_modules si es junction; luego rmdir /s /q del worktree; git worktree prune). Hecho el 2026-11-06 madrugada: quedan 3 activos (a003fa, a96aa2, a5ab49).
 (VD-35, VD-39 mergeados; sumado VD-39b)
 VD-35/39 mergeados (worktree borrado). Lanzado VD-19→20 a949a9204dfd8a9b6 (vd19, migr 5900/6000). En curso: VD-44 (a003fa0a390b234fc), VD-24→38b (a5ab496be69ce81a2). Faltan tanda 4: VD-22, VD-25.
+(VD-24, VD-38b mergeados)
