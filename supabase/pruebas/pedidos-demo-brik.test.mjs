@@ -8,7 +8,10 @@ let t, admin, dueno;
 async function como(rol, usuario, fn) {
   await t.db.query(`set role ${rol}`);
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify(usuario ? { sub: usuario, role: rol } : { role: rol })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  try { return await fn(); } finally {
+    // Si fn falló, la transacción está abortada hasta que falla() vuelva a su savepoint (que también deshace el rol).
+    try { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); } catch { /* ya lo deshace falla() */ }
+  }
 }
 before(async () => {
   t = await abrir("prueba-pedidos-demo");
@@ -36,9 +39,8 @@ test("un contacto que no sirve o un nombre vacío se rechazan con un mensaje cla
 });
 
 test("el tope por hora frena el spam", async () => {
-  for (let i = 0; i < 25; i++) {
-    try { await pedir(`Spam ${i}`, `spam${i}@ejemplo.invalid`); } catch { /* el tope corta al llegar a 20 */ }
-  }
+  for (let i = 0; i < 19; i++) await pedir(`Spam ${i}`, `spam${i}@ejemplo.invalid`);
+  assert.equal(Number((await t.q(`select count(*) n from public.pedidos_demo_brik where creado_en > now() - interval '1 hour'`))[0].n), 20);
   await t.falla(() => pedir("Otro", "otro@ejemplo.invalid"), /muchos pedidos/);
 });
 
