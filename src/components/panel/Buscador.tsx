@@ -45,7 +45,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
   }, [consulta, buscaSocios]);
 
   const q = sinAcentos(consulta);
-  const secc = q ? secciones.filter((s) => sinAcentos(`${s.titulo} ${s.descripcion}`).includes(q)) : secciones;
+  const secc = q ? secciones.filter((s) => sinAcentos(`${s.titulo} ${s.descripcion} ${s.tambien ?? ""}`).includes(q)) : secciones;
   const opciones: { ruta: string; clave: string }[] = [
     ...(soloVer ? [] : socios.map((s) => ({ ruta: `/panel/socios/${s.socio_id}`, clave: s.socio_id }))),
     ...secc.map((s) => ({ ruta: s.ruta, clave: s.clave })),

@@ -108,7 +108,7 @@ export function Navegacion(props: Props) {
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
                   <span className={`text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>{a.emoji}</span>
-                  {a.titulo}
+                  {a.corto ?? a.titulo}
                 </Link>
               </li>
             );
