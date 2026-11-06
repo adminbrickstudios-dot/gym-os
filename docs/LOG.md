@@ -1,4 +1,23 @@
 # Gy
+## 2026-11-06 · Noche · VD-47 · Rapidez de verdad (parte central)
+
+**QUÉ HICE**
+- Middleware: el gimnasio por dirección en memoria 60 s (los "no existe" no se recuerdan); sesión con `getClaims` (con clave simétrica cae solo a `getUser`); matcher sin estáticos.
+- `rpc()` corta a 10 s con "La base está tardando — Reintentar"; `rpcLectura` reintenta una vez (las escrituras nunca). Inicio muestra primero saludo y accesos y los números entran con Suspense y esqueleto.
+- Caché 60 s con etiqueta `landing` de lo público (landing y medición), invalidada por cualquier `guardar_/publicar_/…`. Permisos, plata y socios no se cachean. Lector QR bajo demanda (`next/dynamic`).
+- `scripts/medir/tiempos.mjs` (14 pantallas × 4 roles + app del socio) y paso en Pruebas completas que avisa sin cortar.
+- Verificado: base, chequeos y demo en verde en GitHub; lint, typecheck, 79 pruebas unitarias y build.
+
+**QUÉ CONFIGURÁS VOS**
+- Confirmar la región de Supabase (Settings → General) y ponerla en Vercel → Settings → Functions → Region (São Paulo = `gru1`): es lo que más se nota.
+- Supabase → JWT Signing Keys: migrar a claves asimétricas; sin eso `getClaims` cae a `getUser`.
+
+**SIN ARREGLAR**
+- Se sumó VD-47X: useTransition/useOptimistic, fotos a 800 px, next/image, índices por `explain analyze`, prueba de dos roles con caché y la tabla antes/después.
+
+**LO QUE NO PUDE VERIFICAR**
+- El código del middleware, `getClaims`, el timeout, la caché y el esqueleto de Inicio está escrito según la documentación, pero no está ejecutado (las pantallas corren en la corrida `[pantallas]` de la tanda). `tiempos.mjs` no se corrió: no hay tabla de tiempos todavía.
+
 ## 2026-11-06 · Noche · VD-34 · Confiabilidad base: nada dos veces, nada se pisa en silencio
 
 **QUÉ HICE**

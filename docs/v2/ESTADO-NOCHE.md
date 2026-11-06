@@ -7,11 +7,12 @@ Si se compacta la conversación: releer esto, `NOCHE-WINDOWS.md` y correr `node 
 
 | Ítem | Agente | Rama | Migración reservada | Estado |
 |---|---|---|---|---|
-| VD-47 | agente a0d27e | noche/2026-11-05-vd47 | 20261106004700 | en curso |
+| (libre) | | | | |
 
 ## Terminados
 
 - VD-34 (base verde en GitHub; e2e en la corrida de la tanda 1)
+- VD-47 (parcial, resto en VD-47X; base verde)
 
 ## Publicadas
 

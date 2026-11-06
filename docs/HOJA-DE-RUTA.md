@@ -447,7 +447,7 @@ bloque 18.
 ### 20 · Gym OS v2 (VD-*): dueño, recepción y socio (pedido de Mateo, 05/11 · `docs/v2/`, detalle y LISTO SI en `docs/v2/08-PLAN.md`; se publica por tanda, D25)
 *Tanda 1 · Para mañana (lo que ve el dueño)*
 - [x] VD-34 · 🟢 · Confiabilidad base: nada dos veces (botón único y clave de operación), nada se pierde, nada se traba — verificado: db: misma clave dos veces = una venta (también simultáneas) y la versión avisa quién cambió, corrida de base en verde en GitHub; e2e vd-34: en la corrida de la tanda
-- [ ] VD-47 · 🟢 · Rapidez de verdad: misma región, middleware liviano, un viaje por pantalla, streaming, caché de lo que no cambia, carga diferida y medición (`docs/v2/16-RAPIDEZ-Y-FLUIDEZ.md`)
+- [x] VD-47 · 🟢 · Rapidez de verdad: misma región, middleware liviano, un viaje por pantalla, streaming, caché de lo que no cambia, carga diferida y medición (`docs/v2/16-RAPIDEZ-Y-FLUIDEZ.md`) — verificado: middleware con gimnasio en memoria y getClaims, rpc con 10 s y Reintentar, Inicio con Suspense, caché pública con etiqueta, QR bajo demanda, scripts/medir/tiempos.mjs; base en verde en GitHub; lo que falta está en VD-47X
 - [ ] VD-27 · 🟢 · Diseño v2: vidrio, movimiento, componentes únicos
 - [ ] VD-33 · 🟢 · Ingreso más lindo: marca del gimnasio, "primero quién, después cómo", código que se completa solo
 - [ ] VD-1 · 🟢 · Ventana de Entrada flotante en todas las pantallas (se abre al tipear, botón, barra fija; teclado numérico y lectores)
@@ -457,6 +457,7 @@ bloque 18.
 - [ ] VD-12 · 🟢 · Inicio del dueño y de la recepción
 - [ ] VD-36 · 🟢 · App del socio en 4 pestañas, limpia
 - [ ] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida
+- [ ] VD-47X · 🟢 · Rapidez, lo que quedó: useTransition en filtros, useOptimistic en tareas/reservas, fotos a 800 px webp al subir, next/image en listas, índices según explain analyze con 3.000 socios (migración 20261106004701), prueba de dos roles con caché, tabla de tiempos antes/después en el LOG
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
