@@ -1,0 +1,85 @@
+# VD-30 · Velocidad medida y escala. A MANO (Actions → Medir escala → Run workflow).
+# Base nueva con todas las migraciones + demo de 3.000 socios + 200 gimnasios chicos, y mide:
+#   1) explain analyze de las funciones de pantalla (scripts/medir/explain.mjs) con el rol correcto;
+#   2) (opcional) cuánto tarda cada pantalla clave hasta verse (scripts/medir/tiempos.mjs).
+# Presupuesto: función de pantalla < 300 ms; pendientes_panel < 50 ms. La tabla va al resumen de la
+# corrida ($GITHUB_STEP_SUMMARY) y se sube como artefacto. No corta por pasar el presupuesto: la tabla
+# es lo que se compara antes / después de cada cambio de índices o funciones.
+#   gh workflow run medir-escala.yml --ref <rama> --raw-field socios=3000 --raw-field gimnasios=200
+name: Medir escala
+
+on:
+  workflow_dispatch:
+    inputs:
+      socios:
+        description: "Socios del gimnasio demo"
+        default: "3000"
+      gimnasios:
+        description: "Gimnasios chicos de carga (0 = ninguno)"
+        default: "200"
+      pantallas:
+        description: "Medir también las pantallas con la app levantada (más lento, en modo desarrollo)"
+        type: boolean
+        default: false
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  medir:
+    name: Medir la escala
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva con todas las migraciones
+        run: scripts/db/local.sh nueva
+      - name: Demo con muchos socios
+        run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios }}"
+      - name: Gimnasios de carga
+        if: inputs.gimnasios != '0'
+        run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios }}"
+      - name: Usuarios del demo (dueño, recepción…)
+        run: |
+          scripts/local/levantar.sh
+          psql "$(scripts/db/local.sh url)" -c "select count(*) as socios from public.socios" -c "select count(*) as gimnasios from public.gimnasios"
+      - name: Estadísticas al día (como lo deja el autovacuum en producción)
+        run: psql "$(scripts/db/local.sh url)" -c "vacuum analyze"
+      - name: explain analyze de las funciones de pantalla
+        run: |
+          mkdir -p .local
+          node scripts/medir/explain.mjs --url "$(scripts/db/local.sh url)" --md .local/explain.md --json .local/explain.json
+          { echo "## Funciones de pantalla (explain analyze)"; echo; cat .local/explain.md; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Pantallas (tiempo hasta ver contenido)
+        if: inputs.pantallas
+        continue-on-error: true
+        run: |
+          npx playwright install --with-deps chromium
+          MEDIR_ROLES=duena,recepcion MEDIR_SOLO_COMPU=1 node scripts/medir/tiempos.mjs | tee .local/tiempos.md
+          { echo; echo "## Pantallas (modo desarrollo)"; echo; cat .local/tiempos.md; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar la tabla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: medicion-escala
+          path: |
+            .local/explain.md
+            .local/explain.json
+            .local/tiempos.md
+            .local/*.log
+          if-no-files-found: ignore
+          retention-days: 30
