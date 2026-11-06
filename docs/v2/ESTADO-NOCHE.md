@@ -1,17 +1,23 @@
 # Estado de la noche (memoria del agente)
 
-Rama: `noche/2026-11-05` (sale de `origin/dia/2026-11-05`). PR borrador: ver `gh pr list --head noche/2026-11-05`.
+Rama: `noche/2026-11-05` (sale de `origin/dia/2026-11-05`). PR borrador #2.
 Si se compacta la conversación: releer esto, `NOCHE-WINDOWS.md` y correr `node scripts/noche/pendientes.mjs --siguiente`.
+Ayudantes del orquestador (fuera del repo): scratchpad/marcar.mjs (marca la COLA), log.mjs (entrada en el LOG), brief.txt (brief común de agentes).
+Flujo por agente: rama `noche/2026-11-05-<id>` → push → base verde → yo hago `git merge --no-ff origin/<rama>`, agrego su e2e a package.json (`e2e:<id>` y la cadena `e2e`, antes de barrido), marco COLA, LOG, push.
 
-## Ahora
+## Ahora (lanzados)
 
-| Ítem | Agente | Rama | Migración reservada | Estado |
+| Ítem | Agente | Rama | Migración | Estado |
 |---|---|---|---|---|
-| (libre) | | | | |
+| VD-33 | a73ec23a45c383a90 | noche/2026-11-05-vd33 | 20261106003300 | en curso |
+| VD-36 → VD-23 | a629f942bc5071cce | noche/2026-11-05-vd36 | 3600 / 2300 | en curso |
+| VD-12 | a4d96482e34fc548e | noche/2026-11-05-vd12 | 1200 | en curso |
+
+Después, EN SERIE (tocan Entrada y Cobrar): VD-1, VD-2, VD-5, VD-6; luego VD-47X; luego cerrar tanda 1 con commit `[pantallas]` y publicar.
 
 ## Terminados
 
-- VD-34 (base verde en GitHub; e2e en la corrida de la tanda 1)
+- VD-34 (base verde; e2e en la corrida de la tanda)
 - VD-47 (parcial, resto en VD-47X; base verde)
 - VD-27 (base verde; e2e y capturas en la corrida de la tanda)
 
@@ -21,4 +27,5 @@ Si se compacta la conversación: releer esto, `NOCHE-WINDOWS.md` y correr `node 
 
 ## Decisiones que tomó el agente
 
-(ver también HOJA-DE-RUTA)
+- VD-34: la versión de registros avisa y el segundo Guardar guarda igual (no hay botón aparte).
+- VD-47: no se agregó vercel.json (no consta la región de Supabase).
