@@ -36,6 +36,8 @@ export const SECCIONES: Seccion[] = [
   { clave: "avisos", ruta: DESTINO.avisos, emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: DESTINO.vencen_hoy, emoji: "⏰", titulo: "Vencen y cobrar", descripcion: "A quién avisarle y cobrarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy", tambien: "vencen hoy vencimientos" },
   { clave: "clases", ruta: DESTINO.clases, emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
+  // VD-46I: todo el equipo anota; el dueño y el encargado ven todos (lo exige la base).
+  { clave: "incidentes", ruta: DESTINO.incidentes, emoji: "🩹", titulo: "Incidentes", descripcion: "Lo que pasó en la sala, sin diagnóstico", grupo: "Hoy", roles: TODOS, apagable: "incidentes", tambien: "accidente caída mareo" },
   // SOCIOS
   { clave: "socios", ruta: DESTINO.socios, emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
   { clave: "prospectos", ruta: DESTINO.prospectos, emoji: "🌱", titulo: "Interesados", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR, tambien: "prospectos" },

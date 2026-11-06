@@ -57,6 +57,7 @@ const EJECUTABLES = {
     "public.equipo_perfiles", "public.guardar_equipo_ajuste", "public.guardar_perfil_equipo", "public.preparar_foto_equipo", "public.guardar_foto_equipo", "public.foto_equipo", "public.profes_de_clases",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
+    "public.crear_incidente", "public.corregir_incidente", "public.incidentes_panel", "privado.es_gestion_de",   // VD-46I
   ]),
 };
 

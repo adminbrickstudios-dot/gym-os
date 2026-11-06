@@ -65,6 +65,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/gastos/exportar` | acción (POST/GET) |  |  | `exportar_gastos` |  |
 | `/panel/grados` | pantalla |  | clases | `anular_grado_socio`, `archivar_grado`, `grados_panel`, `guardar_grado`, `otorgar_grado` | `/panel/socios/` |
 | `/panel/hoy` | pantalla |  |  |  |  |
+| `/panel/incidentes` | pantalla |  | incidentes | `corregir_incidente`, `crear_incidente`, `incidentes_panel` | `/panel/socios/` |
 | `/panel/mensajes` | pantalla | 👑 🧭 🛎️ | mensajes | `bandeja_mensajes`, `cambiar_estado_hilo`, `guardar_permisos_mensajes`, `guardar_respuesta_rapida`, `hilo_mensajes`, `permisos_mensajes`, `quitar_respuesta_rapida`, `responder_mensaje`, `respuestas_rapidas` | `/panel/socios/` |
 | `/panel/pagina` | pantalla | 👑 🧭 |  | `altas_panel`, `guardar_altas`, `guardar_medicion`, `guardar_pagina`, `guardar_prueba_social`, `medicion_panel`, `pagina_panel`, `prueba_social_panel` | `/panel/configuracion` |
 | `/panel/pin` | pantalla |  |  | `entrar_con_pin`, `guardar_mi_pin`, `operador_actual` | `/panel/cuenta` |
