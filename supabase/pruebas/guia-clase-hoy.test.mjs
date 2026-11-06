@@ -42,12 +42,12 @@ test("una reserva confirmada de hoy muestra 'Tiene clase hoy' con la hora; la de
 
 test("'En prueba' solo con pase o pack y primera vez; quien está al día con cuota no", async () => {
   assert.equal(chip(await guia("al_dia"), "en_prueba"), undefined);
-  const g = await guia("pack_con_clases");
-  assert.equal(g.puede, true, "el testigo del pack puede entrar");
-  assert.ok(chip(g, "en_prueba"), "pack y sin entradas: en prueba");
+  const g = await guia("pase_hoy");
+  assert.equal(g.puede, true, "el testigo del pase de hoy puede entrar");
+  assert.ok(chip(g, "en_prueba"), "pase de hoy y sin entradas: en prueba");
   await aparte(async () => {
     await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, via_habilitante, color, motivo, texto)
-               values ($1,$2,$3, $4::timestamptz - interval '3 days', 'recepcion', 'entro', 'pack', 'verde', 'pack', 'Pack')`, [t.g, t.sede, t.ctx.socios.pack_con_clases, momento]);
-    assert.equal(chip(await guia("pack_con_clases"), "en_prueba"), undefined, "ya vino antes");
+               values ($1,$2,$3, $4::timestamptz - interval '3 days', 'recepcion', 'entro', 'pase', 'verde', 'pase_de_hoy', 'Pase')`, [t.g, t.sede, t.ctx.socios.pase_hoy, momento]);
+    assert.equal(chip(await guia("pase_hoy"), "en_prueba"), undefined, "ya vino antes");
   });
 });
