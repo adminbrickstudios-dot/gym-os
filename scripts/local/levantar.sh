@@ -28,7 +28,7 @@ liberar_puerto() {
   # Junta lo que encuentre cada herramienta: en algunos contenedores lsof no ve los procesos y fuser sí.
   local pids
   pids="$(lsof -ti "tcp:$1" 2>/dev/null || true) $(fuser "$1/tcp" 2>/dev/null || true)"
-  [[ "$1" == "$PUERTO_APP" ]] && pids="$pids $(pgrep -f "next dev -p $1" || true)"
+  [[ "$1" == "$PUERTO_APP" ]] && pids="$pids $(pgrep -f "next (dev|start) -p $1" || true)"
   pids="$(echo $pids | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -u | tr '\n' ' ' || true)"
   [[ -n "${pids// /}" ]] && kill $pids 2>/dev/null || true
   for _ in $(seq 1 20); do curl -s -o /dev/null "http://localhost:$1/" || return 0; sleep 0.5; done
@@ -69,12 +69,21 @@ esperar "http://127.0.0.1:$PUERTO_MP/" mp
 
 parar app
 liberar_puerto "$PUERTO_APP"
-NEXT_DIST_DIR=.next-dev \
-NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SUPABASE" \
-NEXT_PUBLIC_DOMINIO_BASE=localhost \
-NEXT_PUBLIC_DOMINIO_PLATAFORMA=localhost \
-MP_API_URL="http://127.0.0.1:$PUERTO_MP" \
+export NEXT_DIST_DIR=.next-dev
+export NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SUPABASE"
+export NEXT_PUBLIC_DOMINIO_BASE=localhost
+export NEXT_PUBLIC_DOMINIO_PLATAFORMA=localhost
+export MP_API_URL="http://127.0.0.1:$PUERTO_MP"
+if [[ "${APP_MODO:-dev}" == "produccion" ]]; then
+  # Build de producción + next start: sin compilar cada ruta al abrirla ni crecer en memoria
+  # (en dev la app se caía a mitad de las pantallas en Actions).
+  if [[ ! -f "$NEXT_DIST_DIR/BUILD_ID" || "${REHACER_BUILD:-}" == "si" ]]; then
+    npx next build > .local/build.log 2>&1 || { tail -n 60 .local/build.log; echo "✗ next build falló"; exit 1; }
+  fi
+  npx next start -p "$PUERTO_APP" > .local/app.log 2>&1 &
+else
   npx next dev -p "$PUERTO_APP" > .local/app.log 2>&1 &
+fi
 echo $! > .local/app.pid
 esperar "http://localhost:$PUERTO_APP/" app
 echo "Listo: http://demo.localhost:$PUERTO_APP  ·  panel: /panel  ·  super admin: http://localhost:$PUERTO_APP/admin"

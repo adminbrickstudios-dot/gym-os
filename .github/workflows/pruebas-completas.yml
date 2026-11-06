@@ -16,6 +16,14 @@ on:
         description: "Correr también las pantallas (e2e y barrido, 2 a 4 h)"
         type: boolean
         default: true
+      solo:
+        description: "Solo estos recorridos, separados por coma (p. ej. vd-12,ent-2; barrido para el barrido). Vacío = todos"
+        type: string
+        default: ""
+      app_modo:
+        description: "Cómo corre la app: dev (next dev) o produccion (next build + next start)"
+        type: string
+        default: "dev"
 
 env:
   PGHOST: localhost
@@ -78,26 +86,57 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: ffmpeg (los recorridos de QR y video lo usan)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Base nueva
         run: scripts/db/local.sh nueva
       - name: Levantar la app con la imitación de Supabase
+        env:
+          APP_MODO: ${{ inputs.app_modo || 'dev' }}
+          NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
+      - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
+        run: |
+          mkdir -p .local
+          nohup bash -c 'while true; do echo "== $(date +%T) =="; free -m | sed -n 2p; ps -eo rss,args --sort=-rss | head -4 | cut -c1-140; sleep 20; done' > .local/memoria.log 2>&1 &
       - name: Pantallas (e2e, cada recorrido aunque falle otro)
+        env:
+          SOLO: ${{ inputs.solo }}
+          APP_MODO: ${{ inputs.app_modo || 'dev' }}
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local
           : > .local/fallas.txt
-          for s in $(node -p "require('./package.json').scripts.e2e.split('&&').map((x) => x.trim().replace(/^node /, '')).join(' ')"); do
+          : > .local/caidas.txt
+          if [ -n "$SOLO" ]; then
+            LISTA=$(echo "$SOLO" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | grep -vx barrido | sed 's#^#scripts/e2e/#; s#$#.mjs#' | tr '\n' ' ')
+          else
+            LISTA=$(node -p "require('./package.json').scripts.e2e.split('&&').map((x) => x.trim().replace(/^node /, '')).join(' ')")
+          fi
+          for s in $LISTA; do
+            if ! curl -s -o /dev/null --max-time 20 http://localhost:3123/; then
+              echo "::warning::la app no responde antes de $s; últimos 200 renglones de .local/app.log:"
+              tail -n 200 .local/app.log || true
+              tail -n 12 .local/memoria.log || true
+              echo "app caída antes de $s" >> .local/caidas.txt
+              scripts/local/levantar.sh || true
+            fi
             echo "::group::$s"
-            node "$s" || echo "✗ $s" >> .local/fallas.txt
+            if ! node "$s"; then
+              echo "✗ $s" >> .local/fallas.txt
+              echo "::warning::falló $s; últimos 200 renglones de .local/app.log:"
+              tail -n 200 .local/app.log || true
+              tail -n 6 .local/memoria.log || true
+            fi
             echo "::endgroup::"
           done
           if [ -s .local/fallas.txt ]; then echo "Recorridos con fallas:"; cat .local/fallas.txt; exit 1; fi
-          echo "Todos los recorridos en verde" 
+          echo "Todos los recorridos en verde"
       - name: Barrido (cada rol abre cada pantalla)
-        if: always()
+        if: always() && (inputs.solo == '' || contains(inputs.solo, 'barrido'))
         run: node scripts/e2e/barrido.mjs
       - name: Tiempos (VD-47, avisa y no corta)
-        if: always()
+        if: always() && inputs.solo == ''
         continue-on-error: true
         run: node scripts/medir/tiempos.mjs | tee .local/tiempos.md
       - name: Guardar capturas y logs
@@ -108,6 +147,7 @@ jobs:
           path: |
             .local/*.log
             .local/fallas.txt
+            .local/caidas.txt
             .local/tiempos.md
             .local/capturas/
           if-no-files-found: ignore
