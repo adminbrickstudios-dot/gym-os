@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-28 · Navegación con memoria y Volver al origen
+
+**QUÉ HICE**
+- Sin migración. Al salir de una lista hacia una ficha o detalle se guarda de dónde (ruta, query y scroll), por pestaña (`OrigenPanel`, montado una vez en el Marco, `origen.ts`). `VolverAlOrigen` ("← Volver a Socios") lleva a esa lista con su búsqueda, filtros y scroll, con `<Link>`; si la pantalla se abrió directo queda el "← Socios" de siempre. Lo usan la ficha del socio, `clases/[id]` y 9 pantallas más a través de la prop opcional `volverAlOrigen` de `Encabezado`. `useMemoriaLista` generaliza la memoria de Socios (VD-15; `MemoriaSocios` quedó como una llamada al hook) y toma solas Vencen hoy, Retención, Transferencias, Caja, Clases, Eventos, Planes, Tareas y Novedades sin tocar sus páginas. El scroll se restaura esperando a que la lista cargue y no pelea si la persona la mueve.
+- Cobrar: si se cobra desde una ficha a la que se llegó desde una lista, al cerrar la hoja se vuelve a esa lista con el aviso "Cobro registrado: $…"; desde la Entrada (`desde=entrada`) o con la ficha abierta directo no cambia nada.
+- Verificado: lint, typecheck, pruebas, build y base en verde en GitHub. Se editó una línea de `vd-15.mjs` (el link ahora puede decir "← Volver a Socios").
+
+**SIN ARREGLAR**: VD-28B (desde=entrada y origen conviven: hoy gana la Entrada), VD-28C (el alta nueva pierde el origen), VD-28D (Mensajes y Resultado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-28` (Socios filtrado → ficha → Cobrar → vuelve con filtro y scroll; Vencen; 390 px), en especial la restauración del scroll en el celular y el aviso post-cobro; otros e2e que busquen el texto exacto del link viejo no se revisaron más allá de un grep. Escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-26 · Página de Gym OS para vender
 
 **QUÉ HICE**

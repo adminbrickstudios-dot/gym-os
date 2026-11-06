@@ -522,6 +522,9 @@ bloque 18.
 - [ ] VD-21B · 🟢 · Historial de cambios visible desde cada opción ("Ver cambios")
 - [ ] VD-21C · 🟢 · Vista previa en vivo de los mensajes y de la página al editar
 - [ ] VD-26B · 🟢 · Avisar a BRIK de cada pedido de demo (mail o WhatsApp) y un flag propio de plan público
+- [ ] VD-28B · 🟢 · desde=entrada y origen conviven (hoy gana la Entrada)
+- [ ] VD-28C · 🟢 · El alta nueva conserva el origen (alta desde Socios filtrado, cobrar y volver con el filtro)
+- [ ] VD-28D · 🟢 · Memoria de lista también en Mensajes y Resultado cuando haya detalle propio
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -575,7 +578,7 @@ bloque 18.
 - [ ] VD-46P · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87
 - [ ] VD-46R · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
 *Tanda 7 · Cierre*
-- [ ] VD-28 · 🟢 · Navegación con memoria y Volver al origen
+- [x] VD-28 · 🟢 · Navegación con memoria y Volver al origen — verificado: origen único (ruta+query+scroll) por pestaña, VolverAlOrigen con Link en ficha, clase y 9 pantallas, useMemoriaLista en las listas, vuelta del cobro con aviso; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-28 en la corrida de la tanda
 - [ ] VD-29 · 🟢 · Ctrl+K con acciones
 - [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
 - [ ] VD-31 · 🟢 · Ayuda y onboarding por pantalla

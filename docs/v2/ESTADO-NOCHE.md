@@ -89,3 +89,4 @@ VD-46 análisis recibido: 18 ítems VD-46a…r agregados a la COLA (🟢 con la 
 NOTA: pendientes.mjs solo ve IDs con mayúsculas/dígitos (VD-12B, no VD-12b). Usar siempre sufijo en MAYÚSCULA en la COLA y con marcar.mjs. Quedan ~73 ítems; prioridad: (1) publicar tanda 1 (triage), (2) tanda 7 VD-28/29/30/31/32, (3) VD-46*, (4) sufijos B/C/D.
 (VD-26 mergeado)
 VD-26 mergeado. Lanzados: VD-28 ae64a1f5dfd24ebd8 (vd28, sin migración), VD-46A a48e564a2c32aaa9b (vd46a, migr 6800). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca, corrida 42180310624).
+(VD-28 mergeado)
