@@ -56,3 +56,4 @@ Tanda 3 lanzada: VD-14→16 abda8c33632111e12 (vd14, migr 4400/4600), VD-17→18
 (VD-10 mergeado → tanda 2 completa salvo e2e. Siguiente: VD-11 menú.)
 VD-11 lanzado: a8252a126ffc5dd91 (vd11). En curso: VD-14→16 (abda8c33632111e12), VD-17→18 (adf8116a26608df5d). Falta tanda 3: VD-37, VD-13, VD-15, VD-38, VD-44 (tras VD-11).
 (VD-14, VD-16 mergeados)
+VD-13 lanzado: aa10ecfaee648c08c (vd13, migr 5000, dueña de para_hacer_hoy). En curso: VD-17→18 (adf8116a26608df5d), VD-11 (a8252a126ffc5dd91). Pendientes tanda 3: VD-37, VD-15, VD-38, VD-44.
