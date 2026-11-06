@@ -263,3 +263,40 @@ export async function sembrarCasos(db, { gimnasioId, sedeId, hoy, telefonoBase =
   }
   return { planes, socios, zona };
 }
+
+// ── Plan familiar / corporativo (VD-46G) ─────────────────────────────
+// Un miembro SIN cobertura propia, vinculado a un titular que ya existe entre los casos de arriba. Aparte de
+// CASOS_TESTIGO a propósito: solo se siembra donde se prueba el plan familiar (que arranca apagado), así el
+// resto de las pruebas y del seed no cambian. `titular` es la clave de CASOS_TESTIGO que paga.
+export const CASOS_FAMILIA = [
+  { clave: "vinculado_al_dia", nombre: "Testigo", apellido: "Vinculado Al Día", titular: "al_dia",
+    esperado: { puede: true, color: "verde", motivo: "cubierto_por_titular", via: "membresia", consume: "nada", texto: /^Cubierto por Testigo Al Día/ } },
+  { clave: "vinculado_titular_vencido", nombre: "Testigo", apellido: "Vinculado Vencido", titular: "vencida", tipo: "corporativo",
+    esperado: { puede: false, color: "rojo", motivo: "titular_vencido", texto: /^El plan corporativo de Testigo Vencida venció el / } },
+  { clave: "vinculado_titular_de_baja", nombre: "Testigo", apellido: "Vinculado De Baja", titular: "se_fue",
+    esperado: { puede: false, color: "rojo", motivo: "plan_individual_pendiente", texto: /^Plan individual pendiente · Testigo Se Fue/ } },
+];
+
+// Arma un grupo por cada caso de CASOS_FAMILIA (titular ya sembrado + el miembro nuevo) y prende el plan familiar.
+// Devuelve { socios: {clave: miembroId}, grupos: {clave: grupoId} }.
+export async function sembrarFamilia(db, { gimnasioId, socios, telefonoBase = 5490000400000, activar = true }) {
+  const out = { socios: {}, grupos: {} };
+  let i = 0;
+  for (const c of CASOS_FAMILIA) {
+    i++;
+    const titular = socios[c.titular];
+    if (!titular) continue;
+    const { rows: [gr] } = await db.query(
+      `insert into public.grupos_familiares (gimnasio_id, tipo) values ($1, $2) returning id`, [gimnasioId, c.tipo ?? "familiar"]);
+    const { rows: [s] } = await db.query(
+      `insert into public.socios (gimnasio_id, nombre, apellido, telefono, email, notas, grupo_familiar_id)
+       values ($1,$2,$3,$4,$5,$6,$7) returning id`,
+      [gimnasioId, c.nombre, c.apellido, `+${telefonoBase + i}`, `testigo.${c.clave}@ejemplo.invalid`, `Caso testigo: ${c.clave}`, gr.id]);
+    await db.query(`update public.socios set grupo_familiar_id = $2 where id = $1`, [titular, gr.id]);
+    await db.query(`update public.grupos_familiares set titular_id = $2 where id = $1`, [gr.id, titular]);
+    out.socios[c.clave] = s.id;
+    out.grupos[c.clave] = gr.id;
+  }
+  if (activar) await db.query(`update public.configuracion_gimnasio set plan_familiar_activo = true where gimnasio_id = $1`, [gimnasioId]);
+  return out;
+}

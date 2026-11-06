@@ -7,6 +7,7 @@ import { guardarConfiguracion,guardarDatosGimnasio, publicarPagina, sumarSede, t
 import { MercadoPago } from "./MercadoPago";
 import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { MetaVisitas } from "./MetaVisitas";
+import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Pestanas, type Pestana } from "@/components/ui/Pestanas";
@@ -201,8 +202,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, vencimiento, dejarPasar, cajaConfig = null, autoservicio = null }: {
-  autoservicio?: AutoservicioPanel | null; metaVisitas?: number; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, cajaConfig = null, autoservicio = null }: {
+  autoservicio?: AutoservicioPanel | null; metaVisitas?: number; planFamiliar?: boolean; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -634,6 +635,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             </div>
           </Tarjeta>
           <div data-opcion="meta-visitas"><MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} /></div>
+          <div data-opcion="plan-familiar-seccion"><PlanFamiliarConfig inicial={planFamiliar} puedeEditar={puedeEditar} /></div>
           {pie("reglas")}
         </>}
 

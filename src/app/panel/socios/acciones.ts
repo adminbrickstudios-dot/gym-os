@@ -199,6 +199,10 @@ export async function quitarFoto(socioId: string): Promise<{ error?: string }> {
 export async function vincularFamilia(socioId: string, otroId: string) { return hacer(socioId, async () => { await rpc("vincular_familia", { p_socio_id: socioId, p_otro_id: otroId }); revalidatePath(`/panel/socios/${otroId}`); }); }
 export async function sacarDeFamilia(socioId: string, quienId: string) { return hacer(socioId, async () => { await rpc("sacar_de_familia", { p_socio_id: quienId }); revalidatePath(`/panel/socios/${quienId}`); }); }
 
+// VD-46G: el titular que paga por el grupo (dueño o encargado; la base lo exige y pide el plan familiar prendido).
+export async function fijarTitularFamilia(socioId: string, titularId: string, tipo: "familiar" | "corporativo") { return hacer(socioId, async () => { await rpc("fijar_titular_familia", { p_socio_id: socioId, p_titular_id: titularId, p_tipo: tipo }); revalidatePath(`/panel/socios/${socioId}`); revalidatePath(`/panel/socios/${titularId}`); }); }
+export async function quitarTitularFamilia(socioId: string) { return hacer(socioId, async () => { await rpc("quitar_titular_familia", { p_socio_id: socioId }); revalidatePath(`/panel/socios/${socioId}`); }); }
+
 // ── Pausas (SOC-9) ──────────────────────────────────────────────────
 // El dueño o el encargado la dan; la recepción la pide. La base decide quién puede.
 export async function darPausa(socioId: string, suscripcionId: string, desde: string, vuelve: string, motivo: string, nota: string) {
