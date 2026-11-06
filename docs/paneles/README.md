@@ -31,12 +31,12 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/ingresar/recuperar` | pantalla |  |  |  | `/ingresar` |
 | `/kiosco` | pantalla |  |  | `kiosco_entrar`, `kiosco_entrar_habitual`, `kiosco_estado`, `kiosco_habituales`, `kiosco_qr`, `kiosco_ultimo` |  |
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
-| `/panel` | pantalla |  |  | `anular_venta_panel`, `buscar_socios`, `cerrar_novedad_plataforma`, `config_entrada`, `estado_abono_panel`, `formas_de_entrada`, `guardar_accesos_rapidos`, `guardar_numeros_inicio`, `ocultar_primeros_pasos`, `pedir_anulacion`, `resolver_pedido_anulacion`, `ultimas_entradas` | `/elegir` `/panel/caja` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
+| `/panel` | pantalla |  |  | `anular_venta_panel`, `buscar_socios`, `cerrar_novedad_plataforma`, `config_entrada`, `estado_abono_panel`, `formas_de_entrada`, `guardar_accesos_rapidos`, `guardar_numeros_inicio`, `ocultar_primeros_pasos`, `pedir_anulacion`, `pendientes_panel`, `resolver_pedido_anulacion`, `ultimas_entradas` | `/elegir` `/panel/caja` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
 | `/panel/avisos` | pantalla | 👑 🧭 🛎️ |  | `bandeja_avisos`, `marcar_avisado`, `novedades_panel`, `publicar_novedad`, `quitar_novedad` | `/panel/socios/` |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_para_revisar`, `cerrar_caja`, `confirmar_ticket`, `contar_caja_sin_contar`, `dejar_caja_sin_contar`, `guardar_config_caja`, `movimiento_caja`, `preparar_ticket`, `ticket_movimiento` | `/panel/caja/historial` `/panel/caja/reporte` |
 | `/panel/caja/historial` | pantalla | 👑 🧭 | caja | `historial_caja` | `/panel/caja/reporte` |
 | `/panel/caja/reporte` | pantalla | 👑 🧭 🛎️ | caja | `reporte_dia`, `reporte_turno` | `/panel/caja` |
-| `/panel/campana` | pantalla |  |  | `campana`, `campana_control`, `leer_campana` |  |
+| `/panel/campana` | pantalla |  |  | `campana_panel`, `guardar_preferencia_aviso`, `leer_campana`, `preferencias_aviso_panel` | `/panel/cuenta` |
 | `/panel/clases` | pantalla |  | clases | `anular_presente`, `avisar_clase`, `cancelar_clase`, `clases_del_dia`, `crear_tv`, `guardar_lugares`, `guardar_wod`, `reservar`, `revocar_tv`, `tomar_asistencia` | `/panel/clases/` `/panel/clases/grilla` `/panel/clases/tv` `/panel/grados` |
 | `/panel/clases/[id]` | pantalla |  | clases | `avisos_clase`, `clase_detalle`, `lista_clase` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `editar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `ocupacion_horarios` | `/panel/clases` |
