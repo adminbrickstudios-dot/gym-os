@@ -20,7 +20,7 @@ before(async () => {
   const socio = async (n, p, baja = false) => {
     const [{ id }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido) values ($1,$2,'Aviso') returning id`, [t.g, n]);
     await t.q(`insert into public.suscripciones (gimnasio_id, socio_id, plan_id, inicio) values ($1,$2,$3, now() - interval '20 days')`, [t.g, id, p]);
-    if (baja) await t.q(`update public.socios set dado_de_baja_en = now() where id = $1`, [id]);
+    if (baja) await t.q(`update public.socios set dado_de_baja_en = now(), motivo_baja = 'otro' where id = $1`, [id]);
     return id;
   };
   s1 = await socio("Uno", plan); s2 = await socio("Dos", plan); sBaja = await socio("Baja", plan, true); sOtroPlan = await socio("Otro", otro);
