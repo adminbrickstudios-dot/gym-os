@@ -55,7 +55,7 @@ test("VD-12b: últimas entradas de hoy con el rechazado y si corresponde cobrar;
              values ($1,$2,$3,'recepcion','rechazado','rojo','vencida','Venció hace días')`, [t.g, t.sede, s.vencida]);
   await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, via_acceso, resultado, via_habilitante, color, motivo, texto)
              values ($1,$2,$3,'qr_socio','entro','membresia','verde','al_dia','Al día')`, [t.g, t.sede, s.al_dia]);
-  const lista = await como(uRec, async () => (await t.q(`select public.ultimas_entradas($1, 8) as r`, [t.g]))[0].r);
+  const lista = await como(uRec, async () => (await t.q(`select public.ultimas_entradas($1, 20) as r`, [t.g]))[0].r);
   assert.ok(lista.length >= 2);   // el demo ya trae entradas propias
   const rech = lista.find((x) => x.resultado === "rechazado" && x.socio_id === s.vencida);
   assert.equal(rech.socio_id, s.vencida);
