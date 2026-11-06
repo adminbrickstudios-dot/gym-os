@@ -1,7 +1,9 @@
 "use client";
 import { useOptimistic, useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { detectarSalud } from "@/lib/salud";
 import { crearTarea, marcarTarea } from "./acciones";
 
 export type Tarea = { id: string; que: string; dia: string; socio_id: string | null; socio: string | null; para_id: string; para: string; mia: boolean;
@@ -59,6 +61,7 @@ export function NuevaTarea({ equipo, hoy, socio, abierta = false }: { equipo: Pe
       onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearTarea(que, para, dia, socio?.id ?? null, repite || null); setEstado(r.error ? { error: r.error } : { ok: true }); if (!r.error) setQue(""); }); }}>
       <label className="block space-y-1 sm:col-span-2"><span className="etiqueta">Qué hay que hacer</span>
         <input className="campo" maxLength={200} autoFocus value={que} onChange={(e) => setQue(e.target.value)} placeholder={socio ? `Llamar a ${socio.nombre.split(" ")[0]} para…` : "Ej: reponer agua, llamar a Juan"} /></label>
+      <div className="sm:col-span-2 empty:hidden"><AvisoSalud texto={que} /></div>
       <label className="block space-y-1"><span className="etiqueta">Para quién</span>
         <select className="campo" value={para} onChange={(e) => setPara(e.target.value)}>{equipo.map((p) => <option key={p.id} value={p.id}>{p.yo ? `${p.nombre} (vos)` : p.nombre}</option>)}</select></label>
       <label className="block space-y-1"><span className="etiqueta">Para qué día</span>
@@ -70,7 +73,7 @@ export function NuevaTarea({ equipo, hoy, socio, abierta = false }: { equipo: Pe
       {estado.error && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
       {estado.ok && <Mensaje tipo="exito" className="sm:col-span-2">Tarea anotada.</Mensaje>}
       <div className="flex gap-2 sm:col-span-2">
-        <button type="submit" className="boton boton-principal" disabled={guardando || que.trim().length < 2}>{guardando ? "Guardando…" : "✅ Anotar tarea"}</button>
+        <button type="submit" className="boton boton-principal" disabled={guardando || que.trim().length < 2 || !!detectarSalud(que)}>{guardando ? "Guardando…" : "✅ Anotar tarea"}</button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button>
       </div>
     </form>

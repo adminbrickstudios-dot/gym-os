@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { errorSiHaySalud } from "@/lib/salud";
 import { sedeActiva } from "@/lib/panel/sede";
 import { conflictoDe } from "@/lib/panel/version";
 
@@ -16,6 +17,9 @@ const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimie
 export async function guardarSocio(socioId: string | null, _: EstadoForm, form: FormData): Promise<EstadoForm> {
   const panel = await contextoPanel();
   const datos = Object.fromEntries(CAMPOS.map((c) => [c, String(form.get(c) ?? "").trim()]));
+  // VD-46H: no se guardan datos de salud en las notas.
+  const sal = errorSiHaySalud(datos.notas);
+  if (sal) return { error: sal, valores: datos };
   // Los teléfonos van como los escribió (387 15 555-1234, 011…): los normaliza la base.
   const prospecto = socioId ? "" : String(form.get("prospecto") ?? "");
   // Alta en un paso (SOC-13): el plan y, si se eligió, ir directo a cobrar.
@@ -154,7 +158,7 @@ async function hacer(socioId: string, fn: () => Promise<unknown>): Promise<{ err
   try { await fn(); revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel/socios"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 }
-export async function agregarNota(socioId: string, texto: string) { return hacer(socioId, () => rpc("agregar_nota", { p_socio_id: socioId, p_texto: texto })); }
+export async function agregarNota(socioId: string, texto: string) { const sal = errorSiHaySalud(texto); if (sal) return { error: sal }; return hacer(socioId, () => rpc("agregar_nota", { p_socio_id: socioId, p_texto: texto })); }
 export async function borrarNota(socioId: string, notaId: string) { return hacer(socioId, () => rpc("borrar_nota", { p_nota_id: notaId })); }
 export async function ponerEtiqueta(socioId: string, nombre: string) { return hacer(socioId, () => rpc("poner_etiqueta", { p_socio_id: socioId, p_nombre: nombre })); }
 export async function sacarEtiqueta(socioId: string, etiquetaId: string) { return hacer(socioId, () => rpc("sacar_etiqueta", { p_socio_id: socioId, p_etiqueta_id: etiquetaId })); }
@@ -198,16 +202,18 @@ export async function sacarDeFamilia(socioId: string, quienId: string) { return 
 // ── Pausas (SOC-9) ──────────────────────────────────────────────────
 // El dueño o el encargado la dan; la recepción la pide. La base decide quién puede.
 export async function darPausa(socioId: string, suscripcionId: string, desde: string, vuelve: string, motivo: string, nota: string) {
+  const sal = errorSiHaySalud(nota); if (sal) return { error: sal };
   return hacer(socioId, async () => { await rpc("congelar", { p_suscripcion_id: suscripcionId, p_desde: desde, p_hasta: vuelve, p_categoria: motivo, p_nota: nota || null }); revalidatePath("/panel"); });
 }
 export async function pedirPausa(socioId: string, suscripcionId: string, desde: string, vuelve: string, motivo: string, nota: string) {
+  const sal = errorSiHaySalud(nota); if (sal) return { error: sal };
   return hacer(socioId, async () => { await rpc("pedir_pausa", { p_suscripcion_id: suscripcionId, p_desde: desde, p_hasta: vuelve, p_categoria: motivo, p_nota: nota || null }); revalidatePath("/panel"); });
 }
 export async function resolverPedidoPausa(socioId: string, pedidoId: string, aprobar: boolean) {
   return hacer(socioId, async () => { await rpc("resolver_pedido_pausa", { p_pedido_id: pedidoId, p_aprobar: aprobar }); revalidatePath("/panel"); });
 }
 export async function volvioAntes(socioId: string, pausaId: string) { return hacer(socioId, () => rpc("descongelar", { p_congelamiento_id: pausaId })); }
-export async function anularPausa(socioId: string, pausaId: string, motivo: string) { return hacer(socioId, () => rpc("anular_congelamiento", { p_congelamiento_id: pausaId, p_motivo: motivo })); }
+export async function anularPausa(socioId: string, pausaId: string, motivo: string) { const sal = errorSiHaySalud(motivo); if (sal) return { error: sal }; return hacer(socioId, () => rpc("anular_congelamiento", { p_congelamiento_id: pausaId, p_motivo: motivo })); }
 
 // ── Apto físico (SOC-11) ────────────────────────────────────────────
 export async function cargarApto(socioId: string, vence: string) { return hacer(socioId, () => rpc("cargar_apto", { p_socio_id: socioId, p_vence: vence })); }

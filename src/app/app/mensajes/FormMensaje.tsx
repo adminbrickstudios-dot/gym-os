@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { achicarEnNavegador } from "@/lib/achicar-cliente";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
+import { detectarSalud } from "@/lib/salud";
 import { AVISO_SALUD, MAX_TEXTO, MOTIVOS, fotoValida } from "@/lib/mensajes";
 import { enviarMensaje, responderAlGimnasio } from "./acciones";
 
@@ -23,6 +25,7 @@ export function FormMensaje({ socioId, hilo, q = "", motivoInicial }: { socioId:
   const enviar = async () => {
     setError(null); setAviso(null);
     if (!texto.trim()) { setError("Escribí tu mensaje"); return; }
+    if (detectarSalud(texto)) return;   // VD-46H: el aviso ya está a la vista; no se envía
     const datos = new FormData();
     datos.set("texto", texto);
     if (hilo) datos.set("hilo", hilo); else { datos.set("socio", socioId); datos.set("motivo", motivo); }
@@ -67,8 +70,9 @@ export function FormMensaje({ socioId, hilo, q = "", motivoInicial }: { socioId:
         </label>
         {foto && <p className="text-sm texto-suave break-words">📎 {foto.name} · <button type="button" className="underline" onClick={() => { setFoto(null); if (archivo.current) archivo.current.value = ""; }}>Sacar</button></p>}
       </div>
+      <AvisoSalud texto={texto} />
       <p className="text-sm texto-suave" data-aviso-salud>🩺 {AVISO_SALUD}</p>
-      <BotonAccion className="boton boton-principal w-full !min-h-14" ocupadoTexto="Enviando…" disabled={!texto.trim()} onClick={enviar} data-enviar-mensaje>✉️ Enviar</BotonAccion>
+      <BotonAccion className="boton boton-principal w-full !min-h-14" ocupadoTexto="Enviando…" disabled={!texto.trim() || !!detectarSalud(texto)} onClick={enviar} data-enviar-mensaje>✉️ Enviar</BotonAccion>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {aviso && <Mensaje tipo="aviso">{aviso}</Mensaje>}
     </form>

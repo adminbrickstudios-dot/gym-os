@@ -1,11 +1,13 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { errorSiHaySalud } from "@/lib/salud";
 
 const refrescar = () => { revalidatePath("/panel/tareas"); revalidatePath("/panel"); };
 
 /** COM-4: la base valida quién puede (cada uno las suyas; dueño y encargado todas). VD-13: puede repetirse. */
 export async function crearTarea(que: string, para: string, dia: string, socioId: string | null, repite: string | null = null): Promise<{ error?: string }> {
+  const sal = errorSiHaySalud(que); if (sal) return { error: sal };   // VD-46H
   const panel = await contextoPanel();
   try {
     await rpc("crear_tarea", { p_gimnasio_id: panel.gimnasio.id, p_que: que, p_para: para, p_dia: dia, p_socio_id: socioId, p_repite: repite || null });

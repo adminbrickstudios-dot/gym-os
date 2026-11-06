@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { guardarSocio, prospectoPorDni, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Tilde } from "@/components/ui/Tilde";
 import { useVersion } from "@/components/panel/useVersion";
@@ -109,6 +110,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   };
   // Menor de 18 (D10): aparece el adulto responsable. La base lo exige igual.
   const [nacimiento, setNacimiento] = useState(socio?.fecha_nacimiento ?? "");
+  const [textoNotas, setTextoNotas] = useState(socio?.notas ?? "");   // VD-46H
   const menor = esMenor(nacimiento);
   // Con error, React vacía el form al volver la acción: se vuelve a dibujar con lo que se había escrito.
   const v: Socio = { ...socio, ...estado.valores };
@@ -185,7 +187,8 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
       </fieldset>
       <label className="block space-y-2">
         <span className="etiqueta">Notas</span>
-        <textarea name="notas" defaultValue={v.notas ?? ""} className="campo" placeholder="Horario que prefiere, objetivo…" />
+        <textarea name="notas" defaultValue={v.notas ?? ""} onChange={(e) => setTextoNotas(e.target.value)} className="campo" placeholder="Horario que prefiere, objetivo…" />
+        <AvisoSalud texto={textoNotas} />
         <span className="block text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</span>
       </label>
       {!socioId && planes.length > 0 && (
