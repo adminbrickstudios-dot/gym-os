@@ -1,4 +1,18 @@
 # Gy
+## 2026-11-06 · Noche · VD-46N, O, T, U y W · No escribirle, ex socios, motivo de descuento, anular devolución y baja con pausas
+
+**QUÉ HICE**
+- **46N (7800)**: "No escribirle" es un hecho del socio (cuándo, quién, por qué), con historial inmutable al sacarlo. Deja de aparecer en la bandeja de avisos, en Retención, en cumpleaños y en avisar a la clase; SIGUE en Vencen para cobrar y en vencidos y por vencer (se le sigue cobrando). La recepción marca; solo dueño y encargado sacan, con motivo. Sobre `retencion_con` se rehízo sobre la de 7700 (VD-46G) para no perder los vinculados del plan familiar.
+- **46O (7801)**: "Se fueron" sale de `ex_socios` con filtro por motivo de baja y antigüedad y muestra "X de Y contactados volvieron a pagar" (180 días; "volvió" = una cobertura de pago creada después del primer contacto); quien está marcado "No escribirle" no aparece.
+- **46T (7802)**: `privado.vender` (copia de 4800, con servicios, stock y vencimiento) rechaza un descuento cuyo motivo no esté entre los activos de `motivos_beneficio` o que no sea "Cupón X" con un cupón activo, para todos los roles. Se cambiaron los motivos libres de cinco pruebas viejas (`actividad-equipo`, `alertas-caja`, `caja`, `recargo`, `revision2`) a "Amigo o familiar del gimnasio".
+- **46U (7803)**: tarjeta nueva en Configuración → Reglas con topes, regla de devolución y motivos (mismo componente que sigue en Control). Anular una devolución no la borra: escribe un hecho aparte con motivo y quién; los períodos vuelven a estar para devolver y Control marca la devolución como ANULADA; solo dueño y encargado; si era en efectivo y el dueño confirma que la plata volvió, se anota un ingreso en su caja abierta; la ficha lista las devoluciones y tiene el botón Anular.
+- **46W (7804)**: al dar de baja se rechazan los pedidos de pausa pendientes; un aviso "approved" tardío de MercadoPago nunca aprueba un pago ya rechazado por la baja o por el equipo, ni uno de una venta anulada: como MercadoPago sí cobró, queda escrito (`cobro_tarde_en`) y se avisa al dueño en la campana para devolver o cobrar a mano; si el rechazo lo informó la propia MercadoPago sigue devolviendo "ya_rechazado" sin alarma.
+- **Cadena de funciones (importante para lo que venga)**: la vigente de `retencion_con` es la de 7800; la 7803 redefine `moderacion_control` (copia de 7203; quien la toque después, p. ej. VD-46X, debe copiar la de 7803); la 7804 redefine `avisos_pagos_mp` (copia de 6800; VD-46S debe copiar esa).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub.
+
+**SIN ARREGLAR**: VD-46N2 (los avisos automáticos por push o mail, si los hay, también respeten la marca: hoy solo las cuatro listas pedidas), VD-46O2 (mensaje masivo a los ex socios filtrados), VD-46W2 (resolver el cobro tardío de MercadoPago y cerrar la alerta).
+**LO QUE NO PUDE VERIFICAR**: los cinco e2e `vd-46n/o/t/u/w` y las pantallas nuevas (ficha, `ExSocios`, tarjeta de Reglas, anular devolución, que solo está probada en la base): escritos según la documentación, pero no ejecutados; `db:types` no se corrió.
+
 ## 2026-11-06 · Noche · VD-46G · Plan familiar y corporativo: el titular paga por los vinculados
 
 **QUÉ HICE**

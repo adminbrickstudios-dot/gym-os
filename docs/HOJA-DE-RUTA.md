@@ -526,16 +526,19 @@ bloque 18.
 - [ ] VD-28C · 🟢 · El alta nueva conserva el origen (alta desde Socios filtrado, cobrar y volver con el filtro)
 - [ ] VD-28D · 🟢 · Memoria de lista también en Mensajes y Resultado cuando haya detalle propio
 - [ ] VD-46S · 🟢 · MercadoPago: pagos devueltos en Control (linea_de_control), botón Revisar también en Ventas, estado in_mediation con aviso, etiqueta devuelto en la ficha de pagos
-- [ ] VD-46T · 🟢 · La base rechaza descuentos manuales con motivo fuera de la lista motivos_beneficio (hoy solo lo exige la pantalla)
-- [ ] VD-46U · 🟢 · Topes y motivos de cortesías y devoluciones en Configuración → Reglas (hoy en Control); anular una devolución registrada por error
+- [x] VD-46T · 🟢 · La base rechaza descuentos manuales con motivo fuera de la lista motivos_beneficio (hoy solo lo exige la pantalla) — verificado: base en verde en GitHub (vd-46n/o/t/u/w en supabase/pruebas); e2e vd-46x en la corrida de la tanda
+- [x] VD-46U · 🟢 · Topes y motivos de cortesías y devoluciones en Configuración → Reglas (hoy en Control); anular una devolución registrada por error — verificado: base en verde en GitHub (vd-46n/o/t/u/w en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [ ] VD-46V · 🟢 · Suspensión por sede o de toda la cadena; el dueño no deja pasar a un expulsado con dejar pasar
-- [ ] VD-46W · 🟢 · Al dar de baja, rechazar también los pedidos de pausa pendientes y evitar que un aviso tardío de MercadoPago apruebe un pago ya rechazado
+- [x] VD-46W · 🟢 · Al dar de baja, rechazar también los pedidos de pausa pendientes y evitar que un aviso tardío de MercadoPago apruebe un pago ya rechazado — verificado: base en verde en GitHub (vd-46n/o/t/u/w en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [ ] VD-46X · 🟢 · Las emergencias de la puerta aparecen en Control (extender privado.avisos_moderacion copiando la versión vigente) y el llavero/kiosco habitual también entran marcados en emergencia (prueba de base)
 - [ ] VD-46Y · 🟢 · Deshacer un perdón de falta (con motivo, queda el hecho); un reemplazo de profe sobrevive a editar el horario; perdones y reemplazos en Control; hora real del incidente hasta 7 días atrás; la recepción pide el perdón y dueño/encargado aprueba
 - [ ] VD-46Z · 🟢 · Aumentos: anular un aumento avisa a los socios; el aviso del aumento también por push/mail; plan con categoría menores/mayores al cumplir 18; prueba de resultado_por_sede con venta mixta
 - [ ] VD-46G2 · 🟢 · Plan familiar: el miembro respeta franja horaria, tope semanal y sede del plan del titular, medido con sus propias visitas
 - [ ] VD-46G3 · 🟢 · Plan familiar: cobrar la cuota del titular desde cualquier miembro y resumen mensual de socios activos por empresa (corporativo)
 - [ ] VD-46G4 · 🟢 · Plan familiar: avisar a los miembros cuando el titular vence o se da de baja
+- [ ] VD-46N2 · 🟢 · Los avisos automáticos por push o mail (si existen) también respetan "No escribirle" (prueba de base de cada generador masivo)
+- [ ] VD-46O2 · 🟢 · Mensaje a todos los ex socios filtrados con tope y registro de contacto
+- [ ] VD-46W2 · 🟢 · Resolver el cobro tardío de MercadoPago (devolverlo o conciliarlo a mano) y cerrar la alerta
 - [ ] VD-44B · 🟢 · "Mi foto": el profe o la recepción cambia su propia foto desde Mi cuenta
 - [ ] VD-44C · 🟢 · La foto del profe en la TV de la sala y en el detalle de la clase del panel
 - [ ] VD-31B · 🟢 · Apagar las ayudas también desde Yo en la app del socio, y un tour de la hoja Cobrar
@@ -582,8 +585,8 @@ bloque 18.
 - [x] VD-46C · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [x] VD-46E · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [x] VD-46J · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16 — verificado: base en verde en GitHub (vd-46b/c/e/j en supabase/pruebas); e2e vd-46x en la corrida de la tanda
-- [ ] VD-46N · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
-- [ ] VD-46O · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
+- [x] VD-46N · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69 — verificado: base en verde en GitHub (vd-46n/o/t/u/w en supabase/pruebas); e2e vd-46x en la corrida de la tanda
+- [x] VD-46O · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80 — verificado: base en verde en GitHub (vd-46n/o/t/u/w en supabase/pruebas); e2e vd-46x en la corrida de la tanda
 - [x] VD-46D · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13 — verificado: base en verde en GitHub (aumento-aviso, deuda-socios, resultado-por-sede, firma-propia); e2e vd-46x en la corrida de la tanda
 - [x] VD-46F · 🟢 · Chip "subió comprobante hace X" en la Entrada para el vencido con una transferencia pendiente (informativo: no cambia quién entra) — caso 10 — verificado: chip 'subió comprobante hace X' informativo (no cambia el color ni quién entra); base en verde en GitHub (chip-transferencia); e2e vd-46f en la corrida de la tanda
 - [x] VD-46M · 🟢 · Modo emergencia de la puerta (solo dueño/encargado, con motivo, vence solo; las entradas de ese rato quedan marcadas y se listan al cerrar; arranca apagado por gimnasio) — casos 8, 63 — verificado: modo emergencia de la puerta (apagado de origen, solo dueño/encargado, con motivo, vence solo, entradas marcadas y listadas al cerrar); base en verde en GitHub (emergencia-puerta); e2e vd-46m en la corrida de la tanda

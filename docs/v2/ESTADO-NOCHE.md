@@ -106,3 +106,4 @@ Pendientes después: 46G (solo), 46N→46O, 46T..W, VD-32 (segunda pasada), y lo
 VD-46D,L,P,R mergeados (base de la noche verde). Lanzados: 46G (a6315641ab0faa582, vd46g, migr 7700, dueña de calcular_acceso); 46N,O,T,U,W (a53d889aaebeebbd7, vd46n, migr 7800-7804, dueña de vender). Triage tanda 1 (adbcaf6f5b21a3aca) sigue trabajando.
 PLAN: cuando el triage entregue sus arreglos (rama noche/2026-11-05-triage1), mergearlos a la noche, y correr [pantallas] sobre una rama aparte `verificar/2026-11-06-noche` por workflow_dispatch (para que los pushes no la cancelen) → triage de tandas 2-6 → recién ahí publicar tanda 1 (commit del triage verde) y luego las demás.
 (VD-46G mergeado: la versión vigente de calcular_acceso y retencion_con es la de 7700)
+(VD-46N,O,T,U,W mergeados). Vigentes: retencion_con=7800, moderacion_control=7803, avisos_pagos_mp=7804, privado.vender=7802, calcular_acceso=7700.
