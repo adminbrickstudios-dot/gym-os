@@ -728,10 +728,10 @@ export function VentanaEntrada({ sedeId: sedeBase, zona, config, conQr, conLlave
 
           {paso === "anotado" && hecho && (
             <div className="p-8 text-center space-y-4" data-ventana-hecho={hecho.resultado} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : <Tilde tamano={72} />}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : hecho.alerta_prestamo ? "⚠️" : <Tilde tamano={72} />}</div>
               <p className="titular text-4xl break-words">{hecho.nombre}</p>
               <p className="text-xl font-semibold">
-                {hecho.repetido ? "Ya estaba anotado hace un momento"
+                {hecho.repetido ? (hecho.texto ?? "Ya estaba anotado hace un momento")
                   : hecho.resultado === "forzado" ? `Entrada anotada a las ${hecho.hora} (lo dejaste pasar)`
                   : hecho.resultado === "rechazado" ? "Anotado que no pudo entrar"
                   : `Entró ${hecho.hora}`}

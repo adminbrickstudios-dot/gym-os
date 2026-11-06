@@ -17,6 +17,23 @@ export async function ultimasEntradas(sedeId: string): Promise<{ entradas?: Ulti
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-3: cuánto dura una visita y cuándo se avisa de un posible préstamo (por gimnasio). */
+export type ConfigVisita = { visita_horas: number; antiprestamo_minutos: number };
+
+export async function leerConfigVisita(): Promise<{ config?: ConfigVisita; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { config: await rpc<ConfigVisita>("config_visita", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function guardarConfigVisita(datos: Partial<ConfigVisita>): Promise<{ config?: ConfigVisita; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { config: await rpc<ConfigVisita>("guardar_config_visita", { p_gimnasio_id: panel.gimnasio.id, p_datos: datos }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** Configuración → Entrada (por gimnasio). La base valida cada campo y quién puede cambiarlo. */
 export async function guardarConfigEntrada(datos: Partial<ConfigEntrada>): Promise<{ error?: string; config?: ConfigEntrada }> {
   try {

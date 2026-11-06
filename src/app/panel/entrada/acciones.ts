@@ -15,7 +15,8 @@ export type Guia = {
   solo_encargado: boolean; decile: string; falta: string | null; entradas_mes: number;
   chips: { clave: string; emoji: string; texto: string }[];
 };
-export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; veredicto?: Veredicto };
+/** VD-3: si es un repetido, `texto` dice a qué hora entró; con `alerta_prestamo` llegó por otra vía hace pocos minutos (amarillo). */
+export type ResultadoIngreso = { ingreso_id: string; repetido: boolean; resultado: string; texto?: string; color?: string; alerta_prestamo?: boolean; veredicto?: Veredicto };
 
 type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
 

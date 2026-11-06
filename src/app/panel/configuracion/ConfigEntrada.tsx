@@ -2,7 +2,7 @@
 // VD-1 · Configuración → Entrada: cómo se comporta la ventana de Entrada.
 // Por gimnasio (queda en la base) y "en esta compu" (queda en este navegador y le gana al gimnasio).
 import { useEffect, useState, useTransition } from "react";
-import { guardarConfigEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { guardarConfigEntrada, guardarConfigVisita, leerConfigVisita, type ConfigVisita } from "@/app/panel/entrada/ventana-acciones";
 import { guardarPisado, leerPisado, type ConfigEntrada as Config, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -62,6 +62,8 @@ export function ConfigEntrada({ inicial }: { inicial: Config }) {
         {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
       </section>
 
+      <ConfigVisitaSeccion />
+
       <section className="tarjeta p-5 space-y-3" data-entrada-en-esta-compu>
         <h2 className="titulo text-2xl">🖥️ En esta compu</h2>
         <p className="texto-suave">Para pisar lo del gimnasio solo en esta compu o tablet (queda guardado en este navegador). Por ejemplo, prender la barra fija solo en el mostrador.</p>
@@ -70,6 +72,58 @@ export function ConfigEntrada({ inicial }: { inicial: Config }) {
         <p className="texto-tenue text-sm">El sonido de la puerta también se prende o apaga por compu, desde la pantalla de Entrada.</p>
       </section>
     </div>
+  );
+}
+
+/** VD-3 · Una visita dura N horas (dentro, volver a pasar no cuenta otra entrada) y el aviso de préstamo. */
+function ConfigVisitaSeccion() {
+  const [c, setC] = useState<ConfigVisita | null>(null);
+  const [guardado, setGuardado] = useState<ConfigVisita | null>(null);
+  const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
+  const [ocupado, empezar] = useTransition();
+  useEffect(() => {
+    let vivo = true;
+    void leerConfigVisita().then((r) => {
+      if (!vivo) return;
+      if (r.config) { setC(r.config); setGuardado(r.config); } else setMsj({ tipo: "error", texto: r.error ?? "No se pudo leer." });
+    });
+    return () => { vivo = false; };
+  }, []);
+  const sucio = !!c && JSON.stringify(c) !== JSON.stringify(guardado);
+  const guardar = () => empezar(async () => {
+    if (!c) return;
+    const r = await guardarConfigVisita(c);
+    if (r.error || !r.config) { setMsj({ tipo: "error", texto: r.error ?? "No se pudo guardar." }); return; }
+    setC(r.config); setGuardado(r.config);
+    setMsj({ tipo: "exito", texto: "Guardado." });
+  });
+  const entero = (t: string) => (t === "" ? 0 : Math.max(0, Math.trunc(Number(t)) || 0));
+  return (
+    <section className="tarjeta p-5 space-y-3" data-config-visita>
+      <h2 className="titulo text-2xl">🔁 Volver a entrar</h2>
+      <p className="texto-suave">Una visita dura unas horas: si el mismo socio pasa de nuevo por cualquier vía (DNI, QR, tablet) dentro de ese tiempo, se le dice a qué hora entró y no se cuenta otra entrada ni se gasta otra clase.</p>
+      {!c ? <div className="esqueleto h-24" aria-hidden /> : (
+        <>
+          <label className="block">
+            <span className="font-semibold">Una visita dura (horas)</span>
+            <input className="campo mt-1 max-w-40" type="number" inputMode="numeric" min={0} max={24} value={c.visita_horas} data-visita-horas
+              onChange={(e) => setC({ ...c, visita_horas: entero(e.target.value) })} />
+            <span className="block texto-tenue text-sm mt-1">0 = no hay visita larga: solo se ignora el doble toque de un minuto.</span>
+          </label>
+          <label className="block">
+            <span className="font-semibold">Avisar si vuelve a entrar por otra vía antes de (minutos)</span>
+            <input className="campo mt-1 max-w-40" type="number" inputMode="numeric" min={0} max={720} value={c.antiprestamo_minutos} data-antiprestamo-minutos
+              onChange={(e) => setC({ ...c, antiprestamo_minutos: entero(e.target.value) })} />
+            <span className="block texto-tenue text-sm mt-1">Si entra por el QR y a los pocos minutos por la tablet (o al revés), la recepción ve un aviso amarillo y te queda anotado en Control de la puerta. 0 = apagado.</span>
+          </label>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
+            {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
+          </div>
+        </>
+      )}
+      {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+    </section>
   );
 }
 

@@ -13,6 +13,9 @@ type Control = {
   anuladas: { ingreso_id: string; anulado_en: string; socio_id: string; socio: string; por: string | null; motivo: string; resultado: string }[];
   por_persona: { nombre: string; rol: string; forzados: number; anuladas: number }[];
 };
+/** VD-3: alguien que ya había entrado volvió por otra vía en pocos minutos (anti-préstamo). */
+type Prestamo = { alerta_id: string; momento: string; socio_id: string; socio: string; minutos: number; via_anterior: string; via_nueva: string; dispositivo_anterior: string | null; dispositivo_nuevo: string | null };
+const VIA: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
 const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 const sumar = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
 
@@ -25,7 +28,10 @@ export default async function ControlPuerta({ searchParams }: { searchParams: Pr
     const hoy = new Intl.DateTimeFormat("sv-SE", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());
     const { desde: pedido } = await searchParams;
     const desde = /^\d{4}-\d{2}-\d{2}$/.test(pedido ?? "") ? pedido! : sumar(hoy, -6);
-    const c = await rpc<Control>("control_entrada", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_dias: 7 });
+    const [c, prestamos] = await Promise.all([
+      rpc<Control>("control_entrada", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_dias: 7 }),
+      rpc<Prestamo[]>("alertas_prestamo", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_dias: 7 }),
+    ]);
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
@@ -36,7 +42,7 @@ export default async function ControlPuerta({ searchParams }: { searchParams: Pr
           <span className="font-semibold px-2">Del {dia(c.desde)} al {dia(c.hasta)}</span>
           {sumar(desde, 7) <= hoy && <Link href={`/panel/entrada/control?desde=${sumar(desde, 7)}`} className="boton">Siguiente ▶</Link>}
         </nav>
-        {c.forzados.length + c.anuladas.length === 0 ? (
+        {c.forzados.length + c.anuladas.length + prestamos.length === 0 ? (
           <Vacio emoji="✅" titulo="Nada para revisar esta semana">Nadie entró sin poder y no se anuló ninguna entrada.</Vacio>
         ) : (
           <div className="space-y-10">
@@ -58,6 +64,17 @@ export default async function ControlPuerta({ searchParams }: { searchParams: Pr
                   <li key={f.ingreso_id} className={`tarjeta px-4 py-3 ${f.anulado ? "opacity-60" : ""}`}>
                     <p><Link href={`/panel/socios/${f.socio_id}`} className="font-semibold hover:underline">{f.socio}</Link> <span className="texto-tenue">· {hora(f.momento)}</span></p>
                     <p className="texto-suave">{f.por ?? "El equipo"}: “{f.motivo}” · no podía porque {f.porque_no.charAt(0).toLowerCase() + f.porque_no.slice(1)}{f.anulado ? " · después se anuló" : ""}</p>
+                  </li>
+                ))}</ul>
+              </section>
+            )}
+            {prestamos.length > 0 && (
+              <section aria-labelledby="prestamos" data-prestamos={prestamos.length}>
+                <h2 id="prestamos" className="titulo text-3xl mb-4">🔁 ¿Se prestaron el QR?</h2>
+                <ul className="space-y-2">{prestamos.map((p) => (
+                  <li key={p.alerta_id} className="tarjeta px-4 py-3">
+                    <p><Link href={`/panel/socios/${p.socio_id}`} className="font-semibold hover:underline">{p.socio}</Link> <span className="texto-tenue">· {hora(p.momento)}</span></p>
+                    <p className="texto-suave">Ya había entrado {p.minutos < 1 ? "hace menos de 1 min" : `hace ${p.minutos} min`} ({VIA[p.via_anterior] ?? p.via_anterior}{p.dispositivo_anterior ? `: ${p.dispositivo_anterior}` : ""}) y volvió por {VIA[p.via_nueva] ?? p.via_nueva}{p.dispositivo_nuevo ? `: ${p.dispositivo_nuevo}` : ""}.</p>
                   </li>
                 ))}</ul>
               </section>
