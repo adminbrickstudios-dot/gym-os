@@ -1,4 +1,28 @@
-# Gym OS — Registro
+# Gy
+## 2026-11-06 · Noche · VD-34 · Confiabilidad base: nada dos veces, nada se pisa en silencio
+
+**QUÉ HICE**
+- **Clave de operación en los cobros** (migración 3400): `ventas.clave_operacion` con unique por gimnasio; `vender(…, p_clave_operacion)` toma un lock por clave y, si la operación ya existe, devuelve la venta hecha (`repetida: true`) sin cobrar de nuevo. Cobrar genera el uuid al primer intento y lo conserva hasta que se cobra. La firma vieja se borra en la misma migración. Probado en la base: misma clave dos veces = una venta, claves distintas = ventas distintas, dos envíos simultáneos = una venta.
+- **Versión en lo que se edita** (socios, planes, configuración): `actualizado_en` / `actualizado_por` con trigger (`clock_timestamp`), `version_registro` y `verificar_version`. Si otra persona guardó mientras el formulario estaba abierto, aparece "Beto lo cambió hace 1 min. Recargá… o tocá Guardar otra vez para guardar igual" y no se borra lo escrito; el segundo Guardar sí guarda. Probado en la base (quién, cuándo, y que la recepción no ve la versión de configuración).
+- El historial de configuración no cuenta `actualizado_por` como un cambio (una prueba vieja lo detectó).
+- `BotonAccion` (un solo componente: se deshabilita, "Guardando…", ignora el segundo toque) en el alta/edición de socio y en el flujo de cobro; el resto de los botones ya se deshabilitaban mientras trabajan.
+- `error.tsx` en la raíz, `/panel`, `/app` y `/admin` y `not-found.tsx`, todos con Reintentar · Volver · Ir al inicio (`PantallaError`).
+- Verificado ejecutando: corrida de base en GitHub en verde (migraciones, pruebas de la base, chequeos, demo); lint, typecheck y 75 pruebas unitarias en verde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Todos los formularios con `useActionState` ya devuelven lo escrito ante un error salvo los listados abajo en SIN ARREGLAR; los botones de escritura ya se deshabilitaban (los cambios de este ítem son la red de seguridad: la clave de operación cubre el reintento por red, que un botón deshabilitado no cubre).
+
+**QUÉ CORRÉS VOS**
+- Nada: se publica por tanda (prevuelo → aplicar de la migración 3400 con el resto de la tanda 1).
+
+**SIN ARREGLAR**
+- Los pagos de la app del socio (transferencia, online) todavía no llevan clave de operación: se suma cuando se toque VD-39 (cambio de plan y compra de pases).
+- `npm run db:types` no se pudo correr (no hay Postgres en esta compu).
+
+**LO QUE NO PUDE VERIFICAR**
+- El e2e `scripts/e2e/vd-34.mjs` (doble clic en Cobrar, dos sesiones sobre la misma ficha, pantalla inexistente con salida): el código está escrito según la documentación, pero no está ejecutado; corre en la corrida `[pantallas]` de la tanda.
+
+m OS — Registro
 
 Una entrada por capa cerrada, la más nueva arriba. Siempre con esta
 estructura. `docs/ESTADO.md` es una copia local de este archivo y no se
