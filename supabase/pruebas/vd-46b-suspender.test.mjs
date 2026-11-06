@@ -88,7 +88,7 @@ test("expulsión: sin fecha de fin, la revisa el dueño, aparece en la ficha, en
   await como(u.recepcion, () => t.falla(() => t.q(`select public.moderacion_control($1, $2::date, $3::date)`, [t.g, desde, hoy]), /Sin permiso/));
 
   // La campana avisa recién cuando llega la fecha de revisión, y una sola vez por fecha.
-  const avisos = async () => (await como(u.dueno, async () => (await t.q(`select public.campana_control($1) as r`, [t.g]))[0].r)).filter((i) => /^revisar_suspension:/.test(i.clave));
+  const avisos = async () => (await como(u.dueno, async () => (await t.q(`select public.campana_control($1) as r`, [t.g]))[0].r)).items.filter((i) => /^revisar_suspension:/.test(i.clave));
   assert.equal((await avisos()).length, 0);
   await t.q(`update public.suspensiones set revisar_en = now() - interval '1 day' where id = $1`, [sid]);
   const a = await avisos();
