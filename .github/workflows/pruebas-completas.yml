@@ -103,6 +103,7 @@ jobs:
         env:
           SOLO: ${{ inputs.solo }}
           E2E_DEPURAR: "1"
+          E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
@@ -145,6 +146,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pantallas
+          include-hidden-files: true
           path: |
             .local/*.log
             .local/fallas.txt
