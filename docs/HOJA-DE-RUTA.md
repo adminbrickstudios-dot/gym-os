@@ -458,69 +458,69 @@ bloque 18.
 - [x] VD-36 · 🟢 · App del socio en 4 pestañas, limpia — verificado: 4 pestañas Inicio·Clases·Rutina·Yo calculadas por pestanas_app en la base, pantallas viejas accesibles en Yo; base en verde en GitHub; e2e vd-36 en la corrida de la tanda
 - [x] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida — verificado: progreso_inicio en la base (semana, racha, meta, hito, Entraste), bienvenida de 3 pasos, Pagar arriba si debe; base en verde en GitHub; e2e vd-23 en la corrida de la tanda
 - [x] VD-47X · 🟢 · Rapidez, lo que quedó: useTransition en filtros, useOptimistic en tareas/reservas, fotos a 800 px webp al subir, next/image en listas, índices según explain analyze con 3.000 socios (migración 20261106004701), prueba de dos roles con caché, tabla de tiempos antes/después en el LOG — verificado: filtros con lista atenuada, useOptimistic en tareas/contactado, fotos a 800 px webp, 7 índices, pruebas de dos gimnasios/roles y de caché prohibida; base en verde en GitHub; explain.mjs y e2e vd-47x sin ejecutar
-- [x] VD-12b · 🟢 · Inicio: últimas entradas en vivo con ⛔ y botón Cobrar, y Para hacer hoy con [Ver] (LISTO SI: Inicio muestra las últimas entradas con hora y vía y los vencidos llevan a cobrar) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [x] VD-12c · 🟢 · Interruptor: la recepción ve lo cobrado hoy (LISTO SI: el dueño lo prende en Configuración y la recepción ve el número) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [x] VD-12d · 🟢 · Mini gráfico de tendencia en los 8 números de Inicio — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [x] VD-33b · 🟢 · Mi cuenta: cambiar contraseña con la actual, ver dispositivos y cerrar las demás sesiones (LISTO SI: e2e de las tres cosas) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
-- [x] VD-33c · 🟢 · Desafío anti-robot (Turnstile) antes de mandar códigos que cuestan SMS, detrás de una variable (LISTO SI: sin el desafío resuelto no se manda el código; sin la variable todo sigue igual) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
-- [x] VD-23b · 🟢 · Editor de la meta de visitas del mes (meta_visitas_mes) en Configuración, y fila "Escribile al gimnasio" en Yo → Más (LISTO SI: el dueño cambia la meta y el Inicio del socio la sigue) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [x] VD-23c · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba" — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
-- [x] VD-1b · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
-- [x] VD-2b · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
+- [x] VD-12B · 🟢 · Inicio: últimas entradas en vivo con ⛔ y botón Cobrar, y Para hacer hoy con [Ver] (LISTO SI: Inicio muestra las últimas entradas con hora y vía y los vencidos llevan a cobrar) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
+- [x] VD-12C · 🟢 · Interruptor: la recepción ve lo cobrado hoy (LISTO SI: el dueño lo prende en Configuración y la recepción ve el número) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
+- [x] VD-12D · 🟢 · Mini gráfico de tendencia en los 8 números de Inicio — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
+- [x] VD-33B · 🟢 · Mi cuenta: cambiar contraseña con la actual, ver dispositivos y cerrar las demás sesiones (LISTO SI: e2e de las tres cosas) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
+- [x] VD-33C · 🟢 · Desafío anti-robot (Turnstile) antes de mandar códigos que cuestan SMS, detrás de una variable (LISTO SI: sin el desafío resuelto no se manda el código; sin la variable todo sigue igual) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
+- [x] VD-23B · 🟢 · Editor de la meta de visitas del mes (meta_visitas_mes) en Configuración, y fila "Escribile al gimnasio" en Yo → Más (LISTO SI: el dueño cambia la meta y el Inicio del socio la sigue) — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
+- [x] VD-23C · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba" — verificado: base en verde en GitHub (inicio-en-vivo); e2e vd-12b/vd-23c en la corrida de la tanda
+- [x] VD-1B · 🟢 · Ventana de Entrada: tecla F abre la ficha y su Volver regresa a la ventana con el mismo socio; selector de sede para el dueño con varias sedes (LISTO SI: e2e de ambas) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
+- [x] VD-2B · 🟢 · Veredicto: chip "tiene clase hoy" y situación "En prueba" (LISTO SI: prueba de base con una reserva de hoy muestra el chip) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [ ] VD-47Y · 🟢 · Correr scripts/medir/explain.mjs con 3.000 socios y poner la tabla antes/después en el LOG (LISTO SI: ninguna función de pantalla pasa de 300 ms)
-- [x] VD-12e · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
-- [x] VD-5b · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
-- [ ] VD-5c · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
-- [ ] VD-33d · 🟢 · 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
-- [ ] VD-33e · 🟢 · Al cambiar la contraseña, ofrecer cerrar las demás sesiones
-- [ ] VD-33f · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
-- [x] VD-6b · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular) — verificado: prospectos.dni y el alta lo ofrece por DNI; base en verde en GitHub (interesados-dni)
-- [ ] VD-6c · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
-- [ ] VD-2c · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
-- [ ] VD-3b · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
-- [ ] VD-4b · 🟢 · Aviso en vivo con el nombre de la sede para el dueño con varias sedes
-- [ ] VD-7b · 🟢 · La deuda de la puerta (para_regularizar) de quien se anota con día fijo usa el proporcional que cobra la hoja (LISTO SI: db: para_regularizar de un socio sin cobertura con día fijo = lo que cobra la hoja)
-- [ ] VD-7c · 🟢 · Ventana de pago en Vencen hoy ("día 4 de 10" con día fijo y gracia)
-- [ ] VD-7d · 🟢 · Un gimnasio nuevo arranca con la regla proporcional (hoy sin fila queda "como hasta ahora")
-- [ ] VD-8b · 🟢 · Lista de promesas de pago incumplidas con quién las autorizó y aviso al dueño
-- [ ] VD-9b · 🟢 · Alerta al dueño (campana) una sola vez cuando una caja se cierra sin contar
-- [ ] VD-9c · 🟢 · "Abrir mi turno" en Inicio también para dueño y encargado
-- [ ] VD-9d · 🟢 · Etiquetas legibles de caja.* en el historial de configuración
-- [ ] VD-9e · 🟢 · Avisar si el fondo con que se abre no coincide con lo que dejó el turno anterior
-- [ ] VD-41b · 🟢 · El menú oculta Gastos al encargado sin permiso (se hace con VD-11)
-- [ ] VD-41c · 🟢 · El interruptor encargado_ve_gastos también en Equipo → Permisos
-- [ ] VD-41d · 🟢 · Presupuesto distinto por mes y aviso al dueño al pasarse
-- [ ] VD-10b · 🟢 · Control: filtro por socio, e2e del cobro con fecha atrasada que llega a la campana, y el conteo de Control en el resumen del día del dueño
-- [ ] VD-16b · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30)
-- [ ] VD-16c · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
-- [ ] VD-18b · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
-- [ ] VD-15b · 🟢 · Socios: la píldora 🌐 cuenta solo los que no pagaron; encabezado de la ficha fijo al scrollear; línea de tiempo única en la ficha (entradas, pagos, contactos y cambios de plan)
-- [ ] VD-13b · 🟢 · Avisos al socio en su app (automáticos, según Configuración → Mensajes), con el contador de personas a avisar sobre cada grupo (LISTO SI: el socio ve el aviso "vence en 3 días" en su app)
-- [ ] VD-13c · 🟢 · Tres automáticas que faltan: firmas pendientes, hitos de 10/50/100 entradas con botón Hecho, pedir reseña a los contentos
-- [ ] VD-13d · 🟢 · Para hacer hoy como bloque principal del Inicio (mismo componente AutomaticasHoy)
-- [ ] VD-37b · 🟢 · Para el dueño nuevo, solo lo urgente prendido por defecto (comprobantes, caja, pedidos)
-- [ ] VD-37c · 🟢 · Canales mail y WhatsApp en las preferencias de avisos
-- [ ] VD-37d · 🟢 · Punto en Yo y Clases de la app del socio cuando hay un pago a hacer o un mensaje respondido (depende de VD-38)
-- [x] VD-38b · 🟢 · pendientes_panel suma mensajes_sin_responder (hoy en 0) y el menú prende el punto de Mensajes (LISTO SI: db: llega un mensaje y el contador sube; baja al contestar) — verificado: pendientes_panel suma mensajes_sin_responder; base en verde en GitHub; e2e vd-38b en la corrida de la tanda
-- [ ] VD-38c · 🟢 · Respuestas rápidas de ejemplo al crear un gimnasio; el equipo puede adjuntar foto en sus respuestas
-- [ ] VD-39b · 🟢 · Aprobación previa del dueño para cambios de plan pagados por MercadoPago (opcional); deshacer un cambio de plan (anular la venta devuelve suscripción y coberturas); el mensaje de /app/pago nombra lo comprado ("Tu plan ahora es X")
-- [ ] VD-24b · 🟢 · Cancelar una reserva suelta desde el panel (avisa a la espera) y promover de la espera al subir el cupo de una clase
-- [ ] VD-25b · 🟢 · Grilla de clases con cupo en la página pública (RPC pública de clases, Reservar y Probar esta clase)
-- [ ] VD-25c · 🔌 · Reseñas automáticas desde la API de Google (hoy las tipea el dueño)
-- [ ] VD-25d · 🟢 · Medir Lighthouse celular de la página pública en el despliegue (≥ 90) y ajustar
-- [ ] VD-19b · 🟢 · Editar un evento ya creado; check-in por DNI de anotados que no son socios; aviso cuando alguien sube de la espera
-- [ ] VD-19c · 🔌 · Pago online del evento con MercadoPago (webhook deja al socio anotado)
-- [ ] VD-20b · 🟢 · Aviso de rutina vencida al socio y gráfico de progreso por rutina y por socio para el profe
-- [ ] VD-22c · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
-- [ ] VD-22d · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
-- [ ] VD-40b · 🟢 · Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
-- [ ] VD-42b · 🟢 · Super admin con 2FA obligatorio: sin factor no entra a /admin y las admin_* exigen aal2
-- [ ] VD-42c · 🟢 · Pedir el código TOTP justo después de la contraseña al ingresar
-- [ ] VD-42d · 🟢 · Alerta al dueño por exportes grandes e intentos fallidos de PIN; aal2 en exportar_mes y exportar_gastos
-- [ ] VD-43b · 🟢 · Ventas y clases de ejemplo borrables sin dejar plata en Resultado
-- [ ] VD-43c · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol
-- [ ] VD-21b · 🟢 · Historial de cambios visible desde cada opción ("Ver cambios")
-- [ ] VD-21c · 🟢 · Vista previa en vivo de los mensajes y de la página al editar
+- [x] VD-12E · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
+- [x] VD-5B · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
+- [ ] VD-5C · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
+- [ ] VD-33D · 🟢 · 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
+- [ ] VD-33E · 🟢 · Al cambiar la contraseña, ofrecer cerrar las demás sesiones
+- [ ] VD-33F · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
+- [x] VD-6B · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular) — verificado: prospectos.dni y el alta lo ofrece por DNI; base en verde en GitHub (interesados-dni)
+- [ ] VD-6C · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
+- [ ] VD-2C · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
+- [ ] VD-3B · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
+- [ ] VD-4B · 🟢 · Aviso en vivo con el nombre de la sede para el dueño con varias sedes
+- [ ] VD-7B · 🟢 · La deuda de la puerta (para_regularizar) de quien se anota con día fijo usa el proporcional que cobra la hoja (LISTO SI: db: para_regularizar de un socio sin cobertura con día fijo = lo que cobra la hoja)
+- [ ] VD-7C · 🟢 · Ventana de pago en Vencen hoy ("día 4 de 10" con día fijo y gracia)
+- [ ] VD-7D · 🟢 · Un gimnasio nuevo arranca con la regla proporcional (hoy sin fila queda "como hasta ahora")
+- [ ] VD-8B · 🟢 · Lista de promesas de pago incumplidas con quién las autorizó y aviso al dueño
+- [ ] VD-9B · 🟢 · Alerta al dueño (campana) una sola vez cuando una caja se cierra sin contar
+- [ ] VD-9C · 🟢 · "Abrir mi turno" en Inicio también para dueño y encargado
+- [ ] VD-9D · 🟢 · Etiquetas legibles de caja.* en el historial de configuración
+- [ ] VD-9E · 🟢 · Avisar si el fondo con que se abre no coincide con lo que dejó el turno anterior
+- [ ] VD-41B · 🟢 · El menú oculta Gastos al encargado sin permiso (se hace con VD-11)
+- [ ] VD-41C · 🟢 · El interruptor encargado_ve_gastos también en Equipo → Permisos
+- [ ] VD-41D · 🟢 · Presupuesto distinto por mes y aviso al dueño al pasarse
+- [ ] VD-10B · 🟢 · Control: filtro por socio, e2e del cobro con fecha atrasada que llega a la campana, y el conteo de Control en el resumen del día del dueño
+- [ ] VD-16B · 🟢 · Sembrador con cantidad (npm run sembrar:demo -- --socios 3000) y medir retencion_periodo/vencen_pestanas < 300 ms (va con VD-30)
+- [ ] VD-16C · 🟢 · Retención: posponer una fila de riesgo hasta una fecha; gráficos de socios activos y churn mes a mes; cobrado por mes y por medio y proyección del mes
+- [ ] VD-18B · 🟢 · Resultado: margen por producto (la base ya trae costo y margen); ficha del socio con sus servicios contratados; costo unitario en cada entrada de mercadería
+- [ ] VD-15B · 🟢 · Socios: la píldora 🌐 cuenta solo los que no pagaron; encabezado de la ficha fijo al scrollear; línea de tiempo única en la ficha (entradas, pagos, contactos y cambios de plan)
+- [ ] VD-13B · 🟢 · Avisos al socio en su app (automáticos, según Configuración → Mensajes), con el contador de personas a avisar sobre cada grupo (LISTO SI: el socio ve el aviso "vence en 3 días" en su app)
+- [ ] VD-13C · 🟢 · Tres automáticas que faltan: firmas pendientes, hitos de 10/50/100 entradas con botón Hecho, pedir reseña a los contentos
+- [ ] VD-13D · 🟢 · Para hacer hoy como bloque principal del Inicio (mismo componente AutomaticasHoy)
+- [ ] VD-37B · 🟢 · Para el dueño nuevo, solo lo urgente prendido por defecto (comprobantes, caja, pedidos)
+- [ ] VD-37C · 🟢 · Canales mail y WhatsApp en las preferencias de avisos
+- [ ] VD-37D · 🟢 · Punto en Yo y Clases de la app del socio cuando hay un pago a hacer o un mensaje respondido (depende de VD-38)
+- [x] VD-38B · 🟢 · pendientes_panel suma mensajes_sin_responder (hoy en 0) y el menú prende el punto de Mensajes (LISTO SI: db: llega un mensaje y el contador sube; baja al contestar) — verificado: pendientes_panel suma mensajes_sin_responder; base en verde en GitHub; e2e vd-38b en la corrida de la tanda
+- [ ] VD-38C · 🟢 · Respuestas rápidas de ejemplo al crear un gimnasio; el equipo puede adjuntar foto en sus respuestas
+- [ ] VD-39B · 🟢 · Aprobación previa del dueño para cambios de plan pagados por MercadoPago (opcional); deshacer un cambio de plan (anular la venta devuelve suscripción y coberturas); el mensaje de /app/pago nombra lo comprado ("Tu plan ahora es X")
+- [ ] VD-24B · 🟢 · Cancelar una reserva suelta desde el panel (avisa a la espera) y promover de la espera al subir el cupo de una clase
+- [ ] VD-25B · 🟢 · Grilla de clases con cupo en la página pública (RPC pública de clases, Reservar y Probar esta clase)
+- [ ] VD-25C · 🔌 · Reseñas automáticas desde la API de Google (hoy las tipea el dueño)
+- [ ] VD-25D · 🟢 · Medir Lighthouse celular de la página pública en el despliegue (≥ 90) y ajustar
+- [ ] VD-19B · 🟢 · Editar un evento ya creado; check-in por DNI de anotados que no son socios; aviso cuando alguien sube de la espera
+- [ ] VD-19C · 🔌 · Pago online del evento con MercadoPago (webhook deja al socio anotado)
+- [ ] VD-20B · 🟢 · Aviso de rutina vencida al socio y gráfico de progreso por rutina y por socio para el profe
+- [ ] VD-22C · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
+- [ ] VD-22D · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
+- [ ] VD-40B · 🟢 · Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
+- [ ] VD-42B · 🟢 · Super admin con 2FA obligatorio: sin factor no entra a /admin y las admin_* exigen aal2
+- [ ] VD-42C · 🟢 · Pedir el código TOTP justo después de la contraseña al ingresar
+- [ ] VD-42D · 🟢 · Alerta al dueño por exportes grandes e intentos fallidos de PIN; aal2 en exportar_mes y exportar_gastos
+- [ ] VD-43B · 🟢 · Ventas y clases de ejemplo borrables sin dejar plata en Resultado
+- [ ] VD-43C · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol
+- [ ] VD-21B · 🟢 · Historial de cambios visible desde cada opción ("Ver cambios")
+- [ ] VD-21C · 🟢 · Vista previa en vivo de los mensajes y de la página al editar
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -555,24 +555,24 @@ bloque 18.
 - [x] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo — verificado: buscador de ~60 opciones con ancla y resaltado, explicación y recomendado por opción, restablecer por tarjeta con confirmación; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-21 en la corrida de la tanda
 *Tanda 6 · El día a día real*
 - [ ] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos
-- [ ] VD-46a · 🟢 · MercadoPago: reembolso, contracargo y conciliación (un pago aprobado + charged_back pasa a devuelto, anula la venta y retira la cobertura; un approved posterior a refunded se ignora; el pendiente > 15 min se reconsulta sin cron; revierte solo por webhook o reconsulta, nunca por el navegador; alerta al dueño) — caso 17 de 14-SITUACIONES
-- [ ] VD-46b · 🟢 · Suspender o expulsar a un socio con motivo y fecha de revisión (suspender_socio / levantar_suspension; la recepción suspende pero solo dueño/encargado levantan; el suspendido no entra ni como invitado; aparece en Control) — caso 37
-- [ ] VD-46c · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23
-- [ ] VD-46e · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30
-- [ ] VD-46j · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16
-- [ ] VD-46n · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
-- [ ] VD-46o · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
-- [ ] VD-46d · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13
-- [ ] VD-46f · 🟢 · Chip "subió comprobante hace X" en la Entrada para el vencido con una transferencia pendiente (informativo: no cambia quién entra) — caso 10
-- [ ] VD-46m · 🟢 · Modo emergencia de la puerta (solo dueño/encargado, con motivo, vence solo; las entradas de ese rato quedan marcadas y se listan al cerrar; arranca apagado por gimnasio) — casos 8, 63
-- [ ] VD-46g · 🟢 · Plan familiar/corporativo: el titular paga por los vinculados y calcular_acceso hereda la cobertura ("cubierto por X"); titular vencido o dado de baja explicado a los miembros; arranca apagado por gimnasio — casos 32, 33
-- [ ] VD-46h · 🟢 · Detector de datos de salud en campos libres (notas, mensajes, pausas, tareas): avisa y pide reescribir — casi nadie 7
-- [ ] VD-46i · 🟢 · Registro de incidentes en la sala sin diagnóstico (inmutable a las 24 h, solo dueño/encargado listan todo) — caso 62
-- [ ] VD-46k · 🟢 · Reemplazar al profe en una sola clase con motivo — caso 50
-- [ ] VD-46q · 🟢 · Perdonar una falta o un bloqueo de reservas con motivo — caso 52
-- [ ] VD-46l · 🟢 · Resultado: "lo que le debés a los socios" (packs con usos restantes + cuotas adelantadas) — caso 24
-- [ ] VD-46p · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87
-- [ ] VD-46r · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
+- [ ] VD-46A · 🟢 · MercadoPago: reembolso, contracargo y conciliación (un pago aprobado + charged_back pasa a devuelto, anula la venta y retira la cobertura; un approved posterior a refunded se ignora; el pendiente > 15 min se reconsulta sin cron; revierte solo por webhook o reconsulta, nunca por el navegador; alerta al dueño) — caso 17 de 14-SITUACIONES
+- [ ] VD-46B · 🟢 · Suspender o expulsar a un socio con motivo y fecha de revisión (suspender_socio / levantar_suspension; la recepción suspende pero solo dueño/encargado levantan; el suspendido no entra ni como invitado; aparece en Control) — caso 37
+- [ ] VD-46C · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23
+- [ ] VD-46E · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30
+- [ ] VD-46J · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16
+- [ ] VD-46N · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
+- [ ] VD-46O · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
+- [ ] VD-46D · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13
+- [ ] VD-46F · 🟢 · Chip "subió comprobante hace X" en la Entrada para el vencido con una transferencia pendiente (informativo: no cambia quién entra) — caso 10
+- [ ] VD-46M · 🟢 · Modo emergencia de la puerta (solo dueño/encargado, con motivo, vence solo; las entradas de ese rato quedan marcadas y se listan al cerrar; arranca apagado por gimnasio) — casos 8, 63
+- [ ] VD-46G · 🟢 · Plan familiar/corporativo: el titular paga por los vinculados y calcular_acceso hereda la cobertura ("cubierto por X"); titular vencido o dado de baja explicado a los miembros; arranca apagado por gimnasio — casos 32, 33
+- [ ] VD-46H · 🟢 · Detector de datos de salud en campos libres (notas, mensajes, pausas, tareas): avisa y pide reescribir — casi nadie 7
+- [ ] VD-46I · 🟢 · Registro de incidentes en la sala sin diagnóstico (inmutable a las 24 h, solo dueño/encargado listan todo) — caso 62
+- [ ] VD-46K · 🟢 · Reemplazar al profe en una sola clase con motivo — caso 50
+- [ ] VD-46Q · 🟢 · Perdonar una falta o un bloqueo de reservas con motivo — caso 52
+- [ ] VD-46L · 🟢 · Resultado: "lo que le debés a los socios" (packs con usos restantes + cuotas adelantadas) — caso 24
+- [ ] VD-46P · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87
+- [ ] VD-46R · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
 *Tanda 7 · Cierre*
 - [ ] VD-28 · 🟢 · Navegación con memoria y Volver al origen
 - [ ] VD-29 · 🟢 · Ctrl+K con acciones
