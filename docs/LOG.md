@@ -1,4 +1,13 @@
 # Gy
+## 2026-11-06 · Noche · VD-29 · Ctrl+K con acciones
+
+**QUÉ HICE**
+- Sin migración. Intérprete de comandos puro (`comandos.ts`, 19 pruebas): `cobrar juan` (o `cobrale a juan`) ofrece "Cobrar a Juan Pérez" y abre Cobrar con esa persona; `entrada 12345678` abre la ventana de Entrada con ese DNI; `ficha juan`; `nuevo socio` (abre el alta de siempre, no la hoja); `vender` / `vender juan`; `abrir turno` / `cerrar turno` (llevan a Caja); `tarea …` anota una tarea para hoy para vos sin salir del buscador (`crear_tarea` existente); `nuevo gasto`. Resultados agrupados en Acciones · Socios · Pantallas con el primero marcado, flechas, Enter y Esc; el campo vacío muestra ejemplos clicables por rol. Las acciones salen de las secciones que ya ve el rol y de las que el gimnasio tiene prendidas (la recepción no ve "gasto"; el profe solo anota tareas; una sección apagada apaga su acción). Lo que Ctrl+K ya hacía sigue igual; debounce de 180 a 120 ms y una respuesta vieja no pisa a la nueva. El placeholder "Socio, DNI, sección o acción: “cobrar Juan”" contiene "ección" para no romper el selector de vd-11.
+- Verificado: lint, typecheck, 147 pruebas (19 nuevas), build y base en verde en GitHub.
+
+**SIN ARREGLAR**: VD-29B (`entrada <dni>` desde `/panel/entrada`, donde la ventana no se monta), VD-29C (Caja con acción directa), VD-29D (alta con el nombre ya cargado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-29` y los viejos del Buscador (dis-*, vd-5, vd-11, vd-27) y el foco al abrir la Entrada desde Ctrl+K: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-31 · Ayuda y onboarding por pantalla
 
 **QUÉ HICE**

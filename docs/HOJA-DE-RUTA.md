@@ -529,6 +529,9 @@ bloque 18.
 - [ ] VD-44B · 🟢 · "Mi foto": el profe o la recepción cambia su propia foto desde Mi cuenta
 - [ ] VD-44C · 🟢 · La foto del profe en la TV de la sala y en el detalle de la clase del panel
 - [ ] VD-31B · 🟢 · Apagar las ayudas también desde Yo en la app del socio, y un tour de la hoja Cobrar
+- [ ] VD-29B · 🟢 · "entrada <dni>" también desde /panel/entrada (la página lee ?q=)
+- [ ] VD-29C · 🟢 · Caja con acción directa (?accion=abrir|cerrar enfoca el formulario)
+- [ ] VD-29D · 🟢 · "nuevo socio María" abre el alta con el nombre cargado
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -583,7 +586,7 @@ bloque 18.
 - [ ] VD-46R · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
 *Tanda 7 · Cierre*
 - [x] VD-28 · 🟢 · Navegación con memoria y Volver al origen — verificado: origen único (ruta+query+scroll) por pestaña, VolverAlOrigen con Link en ficha, clase y 9 pantallas, useMemoriaLista en las listas, vuelta del cobro con aviso; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-28 en la corrida de la tanda
-- [ ] VD-29 · 🟢 · Ctrl+K con acciones
+- [x] VD-29 · 🟢 · Ctrl+K con acciones — verificado: intérprete de comandos (cobrar juan, entrada DNI, ficha, nuevo socio, vender, turno, tarea, nuevo gasto) con permisos por rol y secciones; sin migración; lint, typecheck, 147 pruebas, build y base en verde; e2e vd-29 en la corrida de la tanda
 - [ ] VD-30 · 🟢 · Velocidad medida y escala (3.000 socios, 200 gimnasios)
 - [x] VD-31 · 🟢 · Ayuda y onboarding por pantalla — verificado: globo de ayuda la primera vez por pantalla (panel y app del socio), guardado en la base por usuario, '?' para volver a verlo y apagado en Mi cuenta; base en verde en GitHub (ayuda-pantalla); e2e vd-31 en la corrida de la tanda
 - [x] VD-26 · 🟢 · Página de Gym OS para vender — verificado: landing de plataforma (hero, 3 bloques en CSS, preguntas, planes solo si hay cargados, demo con campo trampa) y tarjeta de pedidos en /admin; base en verde en GitHub (pedidos-demo-brik); e2e vd-26 en la corrida de la tanda

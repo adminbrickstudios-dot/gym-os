@@ -94,3 +94,4 @@ VD-26 mergeado. Lanzados: VD-28 ae64a1f5dfd24ebd8 (vd28, sin migración), VD-46A
 VD-28 y VD-46A mergeados. Lanzado VD-31 aaa33a931c8aef32f (vd31, migr 6900). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca corrida 42186887082).
 (VD-44 mergeado; migración 6101 agrega la unión de landing_completa (VD-25+VD-44))
 (VD-31 mergeado)
+(VD-29 mergeado)
