@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
-import { entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
+import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
@@ -59,6 +59,15 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
   const [camara, setCamara] = useState(false);
   const [ocupado, empezar] = useTransition();
   const campo = useRef<HTMLInputElement>(null);
+  // VD-46M: el cartel rojo mientras la puerta está en emergencia (se pregunta cada 20 s; vence solo en la base).
+  const [emergencia, setEmergencia] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    const leer = () => void emergenciaDeLaTablet().then((e) => { if (vivo && e) setEmergencia(e.activa); });
+    leer();
+    const i = setInterval(leer, 20000);
+    return () => { vivo = false; clearInterval(i); };
+  }, []);
   // COM-7: los habituales de esta hora (vacío si el gimnasio no lo usa) y el que tocó su nombre.
   const [habituales, setHabituales] = useState<{ socio_id: string; nombre: string }[]>([]);
   const [elegido, setElegido] = useState<{ socio_id: string; nombre: string } | null>(null);
@@ -113,6 +122,12 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
   }
   return (
     <div className="w-full max-w-md space-y-6 text-center" data-kiosco="listo">
+      {emergencia && (
+        <div role="alert" data-kiosco-emergencia className="rounded-[var(--radio-grande)] p-4 border-2 text-2xl font-bold"
+          style={{ background: `color-mix(in oklab, ${colorVar("rojo")}, var(--fondo) 75%)`, borderColor: colorVar("rojo") }}>
+          🚨 EMERGENCIA activa: pasá por la puerta
+        </div>
+      )}
       <div>
         <p className="texto-suave text-lg">{gimnasio}{sede ? ` · ${sede}` : ""}</p>
         <h1 className="titular text-5xl mt-2">{elegido ? `¡Hola, ${elegido.nombre}!` : "¡Hola! 👋"}</h1>

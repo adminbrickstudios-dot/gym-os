@@ -9,6 +9,8 @@ import { formatearPesos } from "@/lib/formato";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
+import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmergencia";
+import type { EmergenciaActiva } from "./emergencia-tipos";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 
@@ -34,9 +36,11 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null }: {
-  sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null;
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null }: {
+  sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null; emergenciaInicial?: EmergenciaActiva | null;
 }) {
+  // VD-46M: el cartel rojo mientras la puerta está en emergencia (lo pregunta a la base cada 30 s).
+  const emergencia = useEmergencia(sedeId, true, emergenciaInicial);
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
@@ -160,6 +164,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
 
   return (
     <div className="space-y-5">
+      <CartelEmergencia e={emergencia} />
       <input
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); }}
         onKeyDown={(e) => {
@@ -183,7 +188,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : hecho.alerta_prestamo ? "amarillo" : "verde") }}>
           <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : hecho.alerta_prestamo ? "⚠️" : <Tilde tamano={32} />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">
-            {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : `Entró ${hecho.nombre}`}
+            {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
           {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
         </div>
@@ -226,7 +231,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
           {guia?.decile && <p className="mt-2 text-2xl" data-decile>💬 {guia.decile}</p>}
-          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.texto}</li>)}</ul> : null}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.href ? <LinkPanel href={c.href} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
@@ -237,6 +242,8 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
               <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8">✅ Anotar entrada</button>
             ) : (
               <>
+                {/* VD-46M: puerta en emergencia: a quien no podía entrar se lo anota igual (queda marcado). Es un clic a propósito: Enter no lo hace. */}
+                {guia?.emergencia && <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8" data-anotar-emergencia>🚨 Anotar entrada (emergencia)</button>}
                 {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
                 {v.motivo === "congelada"
                   ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
