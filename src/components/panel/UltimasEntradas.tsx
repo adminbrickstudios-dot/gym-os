@@ -45,7 +45,7 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
                   <span className="block font-semibold text-lg truncate">{x.socio}</span>
                   <span className="block texto-suave truncate"><span className="numero">{hora(x.momento)}</span> · {VIA[x.via] ?? x.via}{!bien || x.color !== "verde" ? ` · ${x.texto}` : ""}</span>
                 </LinkPanel>
-                {x.cobrar && <LinkPanel href={`/panel/vender?socio=${x.socio_id}&cuota=1`} className="boton boton-principal !min-h-11" >💵 Cobrar</LinkPanel>}
+                {x.cobrar && <LinkPanel href={`/panel/vender?socio=${x.socio_id}&cuota=1`} className="boton !min-h-11" >💵 Cobrar</LinkPanel>}
               </li>
             );
           })}

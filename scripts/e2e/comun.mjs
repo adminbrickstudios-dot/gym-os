@@ -80,7 +80,10 @@ export async function entrarSocio(p, telefono, base = GIMNASIO()) {
   const codigos = JSON.parse(readFileSync(join(process.cwd(), ".local", "codigos.json"), "utf8"));
   const c = codigos[telefono] ?? Object.values(codigos).pop();
   await p.fill("input[name=codigo]", String(c?.codigo ?? c));
-  await p.click("button[type=submit]");
+  // Con 6 dígitos el formulario se manda solo (VD-33): si el botón ya no está, no hay nada que tocar.
+  await p.waitForURL(/\/app/, { timeout: 5000 }).catch(async () => {
+    if (await p.locator("button[type=submit]:not([disabled])").count()) await p.click("button[type=submit]:not([disabled])", { timeout: 5000 }).catch(() => {});
+  });
   await p.waitForURL(/\/app/, { timeout: 60000 });
 }
 

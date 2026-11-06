@@ -151,7 +151,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
         </section>
 
         {rol !== "profe" && (
-          <div className="grid gap-10 lg:grid-cols-2 lg:gap-8">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8 [&>*]:min-w-0">
             <section aria-labelledby="para-hacer" data-para-hacer={hacerHoy.length}>
               <h2 id="para-hacer" className="titulo text-3xl mb-4">✅ Para hacer hoy{hacerHoy.length > 0 ? ` (${hacerHoy.length})` : ""}</h2>
               {hacerHoy.length === 0 ? (
