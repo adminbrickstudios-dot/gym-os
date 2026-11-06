@@ -100,6 +100,8 @@ test("registrar: motivo y tope; en efectivo sale de la caja abierta como retiro 
   assert.deepEqual([d.medio, Number(d.monto), Number(d.monto_calculado), d.creado_por], ["efectivo", 50000, 56000, eq.encargado]);
   assert.equal((await t.q(`select count(*)::int n from public.devoluciones_items where devolucion_id = $1`, [r.devolucion_id]))[0].n, 2);
   // Un hecho no se edita ni se borra, y cada período se devuelve una sola vez.
+  const trg = await t.q(`select tgname, tgenabled, tgtype from pg_trigger where tgrelid = 'public.devoluciones'::regclass and not tgisinternal`);
+  assert.equal(trg.length, 1, `triggers: ${JSON.stringify(trg)}`);
   await t.falla(() => t.q(`update public.devoluciones set monto = 1 where id = $1`, [r.devolucion_id]), /solo se puede cambiar/);
   await t.falla(() => t.q(`delete from public.devoluciones where id = $1`, [r.devolucion_id]), /no se borran/);
   await intento(u.encargado, "efectivo", 100, "Otra vez", /No hay nada para devolver/);
