@@ -13,9 +13,15 @@ async function persona(rol, nombre) {
   u[rol] = id; eq[rol] = e;
 }
 async function como(usuario, fn) {
+  // Con savepoint: si algo falla, el error de verdad sale (no el "transacción abortada" del reset role).
+  await t.db.query("savepoint como");
   await t.db.query("set role authenticated");
   await t.q(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: usuario, role: "authenticated" })]);
-  try { return await fn(); } finally { await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`); }
+  try {
+    const r = await fn();
+    await t.db.query("reset role"); await t.q(`select set_config('request.jwt.claims', '', false)`);
+    return r;
+  } catch (e) { await t.db.query("rollback to savepoint como"); await t.db.query("reset role"); throw e; }
 }
 const campana = async () => (await como(u.dueno, async () => (await t.q(`select public.campana_control($1) as r`, [t.g]))[0].r)).items;
 
