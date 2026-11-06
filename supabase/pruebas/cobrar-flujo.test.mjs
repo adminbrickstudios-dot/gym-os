@@ -1,4 +1,4 @@
-// VD-5 (0005): la hoja Cobrar. "Cobré otro día" solo dueño o encargado (con motivo, nunca en efectivo),
+// VD-5 (3450): la hoja Cobrar. "Cobré otro día" solo dueño o encargado (con motivo, nunca en efectivo),
 // el comprobante de la transferencia, el medio por defecto y lo que la hoja pregunta al abrirse.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
