@@ -64,7 +64,8 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/resultado` | pantalla | 👑 🧭 |  | `anular_gasto`, `cargar_gasto`, `cupones_panel`, `encuestas_panel`, `ganancia_mes`, `motivos_baja_mes`, `repetir_gastos`, `resultado_mes`, `retencion_numeros` | `/panel/gastos` `/panel/resultado/exportar` `/panel/socios/` |
 | `/panel/resultado/exportar` | acción (POST/GET) |  |  | `exportar_mes` |  |
 | `/panel/resumen` | pantalla | 👑 🧭 |  | `resumen_dueno` | `/panel/caja/historial` |
-| `/panel/retencion` | pantalla | 👑 🧭 🛎️ | retencion | `etiquetas_gimnasio`, `registrar_contacto`, `retencion`, `retencion_numeros`, `retencion_resumen`, `riesgo_baja`, `socios_con_etiqueta`, `tablero_retencion` |  |
+| `/panel/retencion` | pantalla | 👑 🧭 🛎️ | retencion | `etiquetas_gimnasio`, `registrar_contacto`, `retencion`, `retencion_numeros`, `retencion_periodo`, `retencion_resumen`, `riesgo_baja`, `socios_con_etiqueta`, `tablero_retencion` |  |
+| `/panel/retencion/exportar` | acción (POST/GET) |  |  | `retencion_periodo` |  |
 | `/panel/rutinas` | pantalla | 👑 🧭 💪 | rutinas | `archivar_rutina`, `asignar_rutina`, `ejercicios_gimnasio`, `guardar_ejercicio`, `guardar_rutina`, `rutinas_gimnasio` | `/panel/rutinas/editar` |
 | `/panel/rutinas/editar` | pantalla | 👑 🧭 💪 | rutinas | `ejercicios_gimnasio`, `rutina_detalle` | `/panel/rutinas` `/panel/rutinas/socio` |
 | `/panel/rutinas/socio` | pantalla | 👑 🧭 💪 | rutinas | `progreso_socio`, `rutina_de_socio` | `/panel/rutinas` |

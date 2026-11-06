@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-14 y VD-16 · Vencen y cobrar con pestañas; Retención y números
+
+**QUÉ HICE**
+- VD-14 (migración 4400, `vencen_pestanas`): `/panel/vencen-hoy` con pestañas Vencen hoy · Vencidos · Por vencer · Prometieron pagar, cada una con su cuenta; arriba "$X a cobrar hoy · $Y vencido · $Z por vencer"; con día fijo "Período de pago, día 4 de 10". Cobrar abre la hoja de VD-5. La recepción ve cantidades y lo que debe cada vencido, no lo que paga cada socio por mes (decisión prudente). El bloque Prometieron pagar sigue en la pestaña de hoy para que `rev-1` y `vd-8` sigan pasando.
+- VD-16 (migración 1600, `retencion_periodo`): churn general y de 90 días, ingreso por socio, visitas por socio, los de una vez por semana o menos, mapa de calor, ocupación de clases y ausentes, por período (este mes, mes pasado, 3, 6, 12 meses) con "¿Qué es esto?" y link a la lista que lo forma; "Exportar a Excel" (CSV); solo dueño y encargado; índices para que responda rápido. Prueba de exactitud con datos y momento fijos.
+- Verificado: lint, typecheck, 98 pruebas, build y base/chequeos/demo en verde en GitHub.
+
+**SIN ARREGLAR**: VD-16b (sembrador con cantidad y medir los 300 ms con 3.000 socios) y VD-16c (posponer una fila de riesgo, gráficos mes a mes, cobrado por mes y por medio).
+**LO QUE NO PUDE VERIFICAR**: el tiempo < 300 ms con 3.000 socios no se midió; pantallas y e2e `vd-14`/`vd-16` y los viejos (panel-vencen, veh-1, avi-*, panel-retencion, ret-*): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-10 · Control: todo queda escrito, con alertas al dueño
 
 **QUÉ HICE**
