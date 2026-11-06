@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
-import { Lista } from "./Lista";
+import { Lista, type FaltaClase } from "./Lista";
 import { Wod } from "./Wod";
 import { Avisar } from "./Avisar";
+import { ReemplazarProfe, type Reemplazo } from "./ReemplazarProfe";
 import { Lugares } from "./Lugares";
 import type { MapaLugares, OcupadoEquipo } from "@/lib/clases/lugares";
 
@@ -25,6 +26,19 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
       rpc<MapaLugares<OcupadoEquipo> | null>("lugares_clase", { p_clase_id: id }),
     ]);
     const zona = panel.gimnasio.zona_horaria;
+    // VD-46K: solo dueño y encargado cambian al profe de esta clase (la base lo exige igual).
+    const gestiona = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
+    const [equipo, reemplazos] = gestiona
+      ? await Promise.all([
+        rpc<{ equipo_id: string; nombre: string; rol: string; activo: boolean }[]>("equipo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+        rpc<Reemplazo[]>("reemplazos_clase", { p_clase_id: id }),
+      ])
+      : [[], [] as Reemplazo[]];
+    // VD-46Q: quién faltó (clase ya terminada) y a quién se le perdonó; solo para dueño y encargado.
+    const terminada = new Date(clase.fin).getTime() <= new Date().getTime();
+    const faltas = gestiona && terminada && !clase.cancelada && panel.modo_clases === "reserva"
+      ? await rpc<FaltaClase[]>("faltas_clase", { p_clase_id: id }) : [];
+    const profes = equipo.filter((p) => p.rol === "profe" && p.activo).map((p) => ({ id: p.equipo_id, nombre: p.nombre }));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
@@ -35,9 +49,11 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
           <p className="texto-suave text-lg mt-2 first-letter:uppercase">{hora(clase.inicio)}{clase.profe ? ` · ${clase.profe}` : ""}{clase.cupo != null ? ` · ${clase.confirmadas} de ${clase.cupo} lugares` : ""}</p>
           {clase.cancelada && <p className="pildora pildora-rojo mt-4">🚫 Cancelada: {clase.cancelada_motivo}</p>}
         </header>
+        {!clase.cancelada && <ReemplazarProfe claseId={id} profeActual={clase.profe} profes={profes} historial={reemplazos} zona={zona}
+          puedeReemplazar={gestiona && new Date(clase.fin).getTime() > new Date().getTime()} />}
         {!clase.cancelada && <Wod claseId={id} inicial={clase.wod} por={clase.wod_por} puedeEditar={panel.yo.rol !== "recepcion"} />}
         <Lista claseId={id} filas={filas} reserva={panel.modo_clases === "reserva"} cancelada={clase.cancelada}
-          puedeCancelar buscaSocios={panel.yo.rol !== "profe"} />
+          puedeCancelar buscaSocios={panel.yo.rol !== "profe"} faltas={faltas} />
         {!clase.cancelada && panel.modo_clases === "reserva" && <Lugares claseId={id} mapa={lugares} puedeNumerar={["dueno", "encargado"].includes(panel.yo.rol)} />}
         <Avisar claseId={id} anotados={filas.length} previos={avisos} zona={zona} />
       </>

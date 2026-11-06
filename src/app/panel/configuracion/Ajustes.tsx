@@ -83,6 +83,8 @@ const SECCIONES: [string, string, string, string][] = [
     "No hay pantalla de Gastos. El Resultado sigue mostrando lo cobrado."],
   ["mensajes", "💬 Mensajes", "Lo que los socios te escriben desde la app: consultas, quejas y objetos perdidos.",
     "Los socios no ven “Escribile al gimnasio” en la app y no hay bandeja de Mensajes en el panel. Lo ya escrito se conserva."],
+  ["incidentes", "🩹 Incidentes", "El registro de lo que pasa en la sala (caídas, mareos, roturas), sin diagnósticos.",
+    "No hay pantalla de Incidentes en el panel. Lo ya anotado se conserva."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */

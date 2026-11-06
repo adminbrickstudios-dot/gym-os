@@ -1,6 +1,8 @@
 "use client";
 // Etiquetas del socio (arriba de la ficha) y sus notas con autor y fecha.
 import { useState, useTransition } from "react";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
+import { detectarSalud } from "@/lib/salud";
 import { agregarNota, borrarNota, ponerEtiqueta, sacarEtiqueta } from "../acciones";
 
 export type Etiqueta = { id: string; nombre: string };
@@ -41,9 +43,10 @@ export function Notas({ socioId, notas, zona, notaVieja }: { socioId: string; no
       <form className="tarjeta p-5 space-y-3" onSubmit={(ev) => { ev.preventDefault(); empezar(async () => { const r = await agregarNota(socioId, texto); setError(r.error ?? null); if (!r.error) setTexto(""); }); }}>
         <label className="block space-y-1"><span className="etiqueta">Nueva nota</span>
           <textarea value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={1000} className="campo min-h-24" placeholder="Prefiere el turno mañana, viene con la hermana…" /></label>
+        <AvisoSalud texto={texto} />
         <p className="text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</p>
         {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-        <button type="submit" disabled={ocupado || !texto.trim()} className="boton boton-principal">{ocupado ? "Guardando…" : "📝 Guardar nota"}</button>
+        <button type="submit" disabled={ocupado || !texto.trim() || !!detectarSalud(texto)} className="boton boton-principal">{ocupado ? "Guardando…" : "📝 Guardar nota"}</button>
       </form>
       {notas.length === 0 && !notaVieja && <p className="texto-suave">Todavía no hay notas.</p>}
       <ul className="space-y-2">

@@ -2,6 +2,7 @@
 import { notificarDespues } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import { rpc } from "@/lib/panel/servidor";
+import { errorSiHaySalud } from "@/lib/salud";
 
 const r = async (fn: () => Promise<unknown>, claseId: string) => {
   try { await fn(); revalidatePath(`/panel/clases/${claseId}`); revalidatePath("/panel/clases"); return {}; }
@@ -14,6 +15,25 @@ export const cancelarClase = async (claseId: string, motivo: string) =>
 /** CLA-7: deshacer un presente marcado por error (con motivo; las reglas de quién y hasta cuándo, en la base). */
 export const deshacerPresente = async (claseId: string, socioId: string, motivo: string) =>
   r(() => rpc("anular_presente", { p_clase_id: claseId, p_socio_id: socioId, p_motivo: motivo }), claseId);
+/** VD-46K: otro profe en ESTA clase, con motivo (solo dueño y encargado; la base lo exige). El motivo no lleva datos de salud. */
+export async function reemplazarProfe(claseId: string, profeId: string, motivo: string): Promise<{ error?: string }> {
+  const sal = errorSiHaySalud(motivo);
+  if (sal) return { error: sal };
+  return r(() => rpc("reemplazar_profe", { p_clase_id: claseId, p_profe_id: profeId, p_motivo: motivo }), claseId);
+}
+/** VD-46Q: perdonar una falta (clase + socio) o el bloqueo de reservas, con motivo. Solo dueño y encargado (la base lo exige). */
+async function perdonar(rpcNombre: string, args: Record<string, unknown>, socioId: string): Promise<{ error?: string }> {
+  const sal = errorSiHaySalud(String(args.p_motivo ?? ""));
+  if (sal) return { error: sal };
+  try {
+    await rpc(rpcNombre, args);
+    revalidatePath(`/panel/socios/${socioId}`); revalidatePath("/panel/clases");
+    if (typeof args.p_clase_id === "string") revalidatePath(`/panel/clases/${args.p_clase_id}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const perdonarFalta = async (claseId: string, socioId: string, motivo: string) => perdonar("perdonar_falta", { p_clase_id: claseId, p_socio_id: socioId, p_motivo: motivo }, socioId);
+export const perdonarBloqueo = async (socioId: string, motivo: string) => perdonar("perdonar_bloqueo", { p_socio_id: socioId, p_motivo: motivo }, socioId);
 /** CLA-4: el WOD de la clase (vacío lo borra). */
 export const guardarWod = async (claseId: string, texto: string) => r(() => rpc("guardar_wod", { p_clase_id: claseId, p_texto: texto }), claseId);
 
