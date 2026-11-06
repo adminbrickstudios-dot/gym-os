@@ -55,7 +55,6 @@ jobs:
       - name: Demo con muchos socios
         run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios || '3000' }}"
       - name: Gimnasios de carga
-        if: inputs.gimnasios != '0'
         run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios || '200' }}"
       - name: Usuarios del demo (dueño, recepción…)
         run: |
@@ -66,7 +65,7 @@ jobs:
       - name: explain analyze de las funciones de pantalla
         run: |
           mkdir -p .local
-          node scripts/medir/explain.mjs --url "$(scripts/db/local.sh url)" --md .local/explain.md --json .local/explain.json
+          node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/explain.md --json .local/explain.json
           { echo "## Funciones de pantalla (explain analyze)"; echo; cat .local/explain.md; } >> "$GITHUB_STEP_SUMMARY"
       - name: Pantallas (tiempo hasta ver contenido)
         if: inputs.pantallas

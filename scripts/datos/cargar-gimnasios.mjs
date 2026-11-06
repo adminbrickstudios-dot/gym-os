@@ -16,6 +16,7 @@ const cuantos = Number(arg("gimnasios", "200"));
 const porGimnasio = Number(arg("socios", "15"));
 if (!url) { console.error("Falta --url o DB_PRUEBAS_URL"); process.exit(1); }
 if (/supabase\.(co|com)/.test(url)) { console.error("cargar-gimnasios.mjs no corre contra Supabase real"); process.exit(1); }
+if (cuantos === 0) { console.log("Carga de gimnasios: 0, nada que hacer."); process.exit(0); }
 if (!(cuantos > 0 && porGimnasio > 0)) { console.error("--gimnasios y --socios deben ser números positivos"); process.exit(1); }
 
 const ZONA = "America/Argentina/Buenos_Aires";

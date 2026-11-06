@@ -30,6 +30,8 @@ const LISTAS = [
   { clave: "se_fue", emoji: "👋", titulo: "Se fueron", ayuda: "Hace rato que no pagan" },
 ];
 
+const POR_PAGINA = 50;
+
 // La deuda ya está en el texto (sale de la misma función que la puerta): no se repite.
 function venia(porSemana: number | null) {
   if (!porSemana) return null;
@@ -37,8 +39,10 @@ function venia(porSemana: number | null) {
   return n < 1 ? "Venía menos de una vez por semana" : `Venía ${n} ${n === 1 ? "vez" : "veces"} por semana`;
 }
 
-export default async function Retencion({ searchParams }: { searchParams: Promise<{ lista?: string; etiqueta?: string; periodo?: string }> }) {
+export default async function Retencion({ searchParams }: { searchParams: Promise<{ lista?: string; etiqueta?: string; periodo?: string; n?: string }> }) {
   const sp = await searchParams;
+  // VD-30: cada lista se muestra de a 50; "Ver 50 más" suma otras 50.
+  const mostrar = Math.min(1000, Math.max(POR_PAGINA, Math.round(Number(sp.n) / POR_PAGINA) * POR_PAGINA || POR_PAGINA));
   const pedida = sp.lista;
   const etiqueta = /^[0-9a-f-]{36}$/.test(sp.etiqueta ?? "") ? sp.etiqueta! : null;
   const periodo = PERIODOS.find((p) => p.clave === sp.periodo)?.clave ?? "mes";
@@ -121,7 +125,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </Vacio>
         ) : (
           <ul className="space-y-2" data-riesgo={riesgo.length} data-lista-retencion>
-            {riesgo.map((r) => (
+            {riesgo.slice(0, mostrar).map((r) => (
               <FilaContacto key={r.socio_id} socioId={r.socio_id} nombre={r.nombre} lista="no_viene"
                 texto={`${r.nivel === "alto" ? "🔴 Riesgo alto" : "🟡 Riesgo medio"} · ${r.porque[0]}`}
                 detalle={r.porque.slice(1).join(" · ") || null}
@@ -134,7 +138,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </Vacio>
         ) : (
           <ul className="space-y-2" data-lista-retencion>
-            {visibles.map((f) => (
+            {visibles.slice(0, mostrar).map((f) => (
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={f.lista}
                 detalle={venia(f.visitas_por_semana)}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
@@ -144,6 +148,12 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </ul>
         )}
         </div>
+        {(lista.clave === "riesgo" ? riesgo.length : visibles.length) > mostrar && (
+          <div className="mt-4 flex flex-wrap items-center gap-3" data-mas-retencion>
+            <p className="texto-tenue">Se muestran {mostrar} de {lista.clave === "riesgo" ? riesgo.length : visibles.length}.</p>
+            <Link href={`${url(lista.clave, etiqueta)}&n=${mostrar + POR_PAGINA}`} data-transicion className="boton">Ver {POR_PAGINA} más</Link>
+          </div>
+        )}
         </Atenuable>
       </>
     );

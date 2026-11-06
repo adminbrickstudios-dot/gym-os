@@ -13,6 +13,7 @@ const arg = (n) => { const i = process.argv.indexOf(`--${n}`); return i > -1 ? p
 const url = arg("url") ?? process.env.DB_PRUEBAS_URL ?? process.env.SUPABASE_DB_URL;
 const slug = arg("gimnasio") ?? "demo";
 const verPlan = process.argv.includes("--plan");
+const anidado = process.argv.includes("--anidado");
 if (!url) { console.error("Falta --url o DB_PRUEBAS_URL"); process.exit(1); }
 if (/supabase\.(co|com)/.test(url)) { console.error("explain.mjs no corre contra Supabase real"); process.exit(1); }
 
@@ -70,8 +71,8 @@ try {
   ];
   for (const [nombre, quien, sql, presupuesto = PRESUPUESTO_PANTALLA] of LLAMADAS) {
     // El driver exige exactamente los parámetros que el texto usa.
-    const nParams = sql.includes("$3") ? 3 : sql.includes("$2") ? 2 : 1;
-    const valores = [g.id, socio, sede].slice(0, nParams);
+    // Los ids van como literales (son nuestros, uuid): el driver no deja parámetros sin usar.
+    const sqlFinal = sql.replace("$1", `'${g.id}'`).replace("$2", `'${socio}'`).replace("$3", `'${sede}'`);
     let ms = NaN, error, texto = "";
     for (const vuelta of [0, 1]) {
       await db.query("begin");
@@ -79,7 +80,7 @@ try {
         await db.query("set local role authenticated");
         await db.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: quien === "recepcion" ? recepcion : duenio, role: "authenticated" })]);
         // auto_explain no ve adentro de las funciones: se mide la llamada entera, que es lo que paga la pantalla.
-        const { rows } = await db.query(`explain (analyze, buffers, format text) ${sql}`, valores);
+        const { rows } = await db.query(`explain (analyze, buffers, format text) ${sqlFinal}`);
         texto = rows.map((r) => r["QUERY PLAN"]).join("\n");
         ms = Number(/Execution Time: ([\d.]+) ms/.exec(texto)?.[1] ?? NaN);
       } catch (e) {
@@ -91,6 +92,22 @@ try {
     }
     filas.push({ nombre, quien, ms, error, presupuesto });
     if (verPlan && !error) console.log(`\n── ${nombre}\n${texto}`);
+    // --anidado: los planes de las consultas de ADENTRO de la función (auto_explain), solo de las que pasan.
+    if (anidado && !error && ms > presupuesto) {
+      const avisos = [];
+      const alAviso = (m) => avisos.push(m.message);
+      db.on("notice", alAviso);
+      await db.query("begin");
+      try {
+        await db.query("load 'auto_explain'");
+        await db.query("set auto_explain.log_min_duration = 20; set auto_explain.log_analyze = on; set auto_explain.log_nested_statements = on; set auto_explain.log_timing = on; set client_min_messages = log");
+        await db.query("set local role authenticated");
+        await db.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: quien === "recepcion" ? recepcion : duenio, role: "authenticated" })]);
+        await db.query(sqlFinal);
+      } catch (e) { avisos.push(`error: ${e.message}`); }
+      finally { await db.query("rollback"); db.off("notice", alAviso); }
+      console.log(`\n::group::planes de adentro de ${nombre}\n${avisos.join("\n").slice(0, 60000)}\n::endgroup::`);
+    }
   }
 } finally {
   await db.end();
