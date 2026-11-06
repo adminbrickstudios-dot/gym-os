@@ -45,3 +45,4 @@ Corrida [pantallas] temprana: 42157094181 (estado actual de la rama, sin VD-6/5b
 ## TANDA 1 CERRADA en el commit 2e0be05 (rama noche/2026-11-05)
 Corrida [pantallas]: 42158575189. Cuando dé verde: git branch publicar/2026-11-06-tanda-1 2e0be05 → push → base-de-datos.yml prevuelo → aplicar → PR a main → merge → probar producción (NOCHE-WINDOWS.md). Si hay e2e rotos: arreglar en la rama de la noche y volver a correr [pantallas]; el commit a publicar es el que quede verde.
 Tanda 2 en paralelo: A = VD-7→VD-8 (migr 004000/004001, DUEÑO DE `vender`/Cobros), B = VD-9 caja (004100; NO redefine vender: trigger), C = VD-3→VD-4 (004200/004201, DUEÑA de registrar_ingreso). Luego VD-10 y VD-41.
+Agentes tanda 2: A=VD-7→8 af348dbb159d73e89 (rama noche/2026-11-05-vd7); B=VD-9 a78a9f148a4280757 (vd9); C=VD-3→4 ac7165214cdd8c393 (vd3).
