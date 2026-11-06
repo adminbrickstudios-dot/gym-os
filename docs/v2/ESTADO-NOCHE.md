@@ -38,3 +38,4 @@ VD-5 lanzado: a815b6bb188be1ede, rama noche/2026-11-05-vd5, migr 000500. Siguen 
 (VD-47X, VD-12b/c/d, VD-23b/c mergeados; base verde. Sumados VD-47Y, VD-12e)
 Lanzado: VD-33b→33c→12e (a5c3a07448104c617, rama noche/2026-11-05-vd33b, migr 003301). VD-5 mergeado (migr 003450; sumados VD-5b/c). Pendiente tanda 1: VD-6, VD-1b, VD-2b, VD-5b, VD-5c; VD-47Y pasa a VD-30.
 Lanzado: VD-6→5b→1b→2b (adc1883401ca19abd, rama noche/2026-11-05-vd6, migr 3800+). Tras él y VD-33b/c/12e: cerrar tanda 1 ([pantallas] + publicar).
+(VD-33b/c, VD-12e mergeados; sumados VD-33d/e/f)

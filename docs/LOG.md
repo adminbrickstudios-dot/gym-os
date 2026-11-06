@@ -1,4 +1,16 @@
 # Gy
+## 2026-11-06 · Noche · VD-33b, VD-33c y VD-12e · Mi cuenta, anti-robot e Inicio sin repetir
+
+**QUÉ HICE**
+- VD-33b (migración 3301, `mi_seguridad`): cambiar contraseña pide la actual si ya hay una (cliente aparte, no abre sesión nueva); una cuenta sin contraseña pone la primera sin pedirla; "Mi cuenta" muestra dónde está abierta (dispositivo, última actividad, "Este dispositivo") y "Cerrar las otras" (`signOut scope others`); el cliente de servidor reenvía el User-Agent. En panel y en la app del socio.
+- VD-33c: desafío Turnstile antes de mandar códigos (SMS, mail del socio, recuperar contraseña) solo si están `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY`; sin ellas todo sigue igual; si Cloudflare no responde no sale el código; cookie firmada de 10 min por destino para reenviar.
+- VD-12e: "Ahora y lo que sigue" ya no repite lo que está en "Para hacer hoy".
+- Verificado: lint, typecheck, 91 pruebas, base/chequeos/demo en verde en GitHub (`mi-seguridad`).
+
+**QUÉ CONFIGURÁS VOS 🔌**: crear el widget Turnstile en Cloudflare y cargar las dos variables en Vercel (con ambas vacías no cambia nada).
+**SIN ARREGLAR**: sumados VD-33d (2FA), VD-33e (cerrar sesiones al cambiar contraseña), VD-33f (aviso de dispositivo nuevo).
+**LO QUE NO PUDE VERIFICAR**: `vd-33b` y `vd-12e`, el widget real contra Cloudflare, `signOut others` y el User-Agent contra Supabase real: escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-5 · Cobrar: un solo flujo en todos lados
 
 **QUÉ HICE**
