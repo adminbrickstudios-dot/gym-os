@@ -55,14 +55,15 @@ test("VD-12b: últimas entradas de hoy con el rechazado y si corresponde cobrar;
              values ($1,$2,$3,'recepcion','rechazado','rojo','vencida','Venció hace días')`, [t.g, t.sede, s.vencida]);
   await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, via_acceso, resultado, via_habilitante, color, motivo, texto)
              values ($1,$2,$3,'qr_socio','entro','membresia','verde','al_dia','Al día')`, [t.g, t.sede, s.al_dia]);
-  const lista = await como(uRec, async () => (await t.q(`select public.ultimas_entradas($1, 8) as r`, [t.g]))[0].r);
-  assert.equal(lista.length, 2);
-  const rech = lista.find((x) => x.resultado === "rechazado");
-  assert.equal(rech.socio_id, s.vencida);
+  const lista = await como(uRec, async () => (await t.q(`select public.ultimas_entradas($1, 20) as r`, [t.g]))[0].r);
+  // La siembra ya trae entradas de hoy: se miran las dos de esta prueba.
+  const rech = lista.find((x) => x.socio_id === s.vencida && x.resultado === "rechazado");
+  assert.ok(rech, "falta el rechazado");
   assert.equal(rech.cobrar, true);
-  assert.equal(lista.find((x) => x.resultado === "entro").cobrar, false);
-  assert.equal(lista.find((x) => x.resultado === "entro").via, "qr_socio");
-  assert.equal(new Date(lista[0].momento) >= new Date(lista[1].momento), true);
+  const bien = lista.find((x) => x.socio_id === s.al_dia && x.via === "qr_socio");
+  assert.ok(bien, "falta la entrada al día");
+  assert.equal(bien.cobrar, false);
+  for (let i = 1; i < lista.length; i++) assert.ok(new Date(lista[i - 1].momento) >= new Date(lista[i].momento), "orden: la última primero");
   await como(uProfe, () => t.falla(() => t.q(`select public.ultimas_entradas($1)`, [t.g]), /permiso/i));
 });
 
