@@ -84,3 +84,4 @@ VD-22 mergeado. Lanzado VD-42→43 a495eedbb541876c4 (vd42, migr 6400/6500). En 
 (VD-42, VD-43 mergeados). AL MERGEAR VD-44 (5400): verificar que no pierda sus cambios si redefine guardar_equipo (6400 la copia de versiones anteriores a 5400).
 VD-42/43 mergeados. Lanzado VD-21 a0f0083cc7afd8c90 (vd21, migr 6600). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca). Después tandas 6 (VD-46…) y 7 (28,29,30,31,26,32).
 (VD-21 mergeado; tanda 5 completa salvo 🔌)
+VD-21 mergeado. Lanzados: VD-46 análisis (a952eaaabea777a1d, solo análisis, sin código), VD-26 (a6f14be2d37c67ee4, vd26, migr 6700). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca, corrida 42180310624). Siguen: VD-28, 29, 30(+47Y,16b), 31, 32 y los sufijos b/c/d.
