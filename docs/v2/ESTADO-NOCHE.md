@@ -91,3 +91,4 @@ NOTA: pendientes.mjs solo ve IDs con mayúsculas/dígitos (VD-12B, no VD-12b). U
 VD-26 mergeado. Lanzados: VD-28 ae64a1f5dfd24ebd8 (vd28, sin migración), VD-46A a48e564a2c32aaa9b (vd46a, migr 6800). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca, corrida 42180310624).
 (VD-28 mergeado)
 (VD-46A mergeado)
+VD-28 y VD-46A mergeados. Lanzado VD-31 aaa33a931c8aef32f (vd31, migr 6900). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca corrida 42186887082).
