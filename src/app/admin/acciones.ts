@@ -171,3 +171,6 @@ export const anularPagoBrik = async (gimnasioId: string, pagoId: string) =>
 export const resolverAyuda = async (id: string) => hechoAdmin(() => rpc("admin_resolver_ayuda", { p_id: id }), ["/admin"]);
 export const agregarNotaBrik = async (gimnasioId: string, texto: string) =>
   hechoAdmin(() => rpc("admin_agregar_nota", { p_gimnasio_id: gimnasioId, p_texto: texto }), [`/admin/${gimnasioId}`]);
+
+// ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──
+export const atenderDemo = async (id: string) => hechoAdmin(() => rpc("admin_atender_demo", { p_id: id }), ["/admin"]);

@@ -15,6 +15,7 @@ import { PildoraAbono, PlanesBrik, type EstadoAbono, type PlanBrik } from "./Abo
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Ayudas, type PedidoAyuda } from "./Ayudas";
 import { Metricas, type MetricasPlataforma } from "./Metricas";
+import { PedidosDemo, type PedidoDemo } from "./PedidosDemo";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
 type Gimnasio = {
@@ -42,6 +43,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let saludV2: Record<string, SaludV2>;
   let metricas: MetricasPlataforma;
   let ayudas: PedidoAyuda[];
+  let pedidosDemo: PedidoDemo[] = [];
   let novedades: NovedadPlataforma[] = [];
   let abonos: Record<string, EstadoAbono> = {};
   let planesBrik: PlanBrik[] = [];
@@ -52,6 +54,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     [gimnasios, salud, novedades, abonos, planesBrik, saludV2, metricas, ayudas] = await Promise.all([rpc<Gimnasio[]>("admin_gimnasios"), rpc<Record<string, Salud>>("admin_salud_gimnasios"),
       rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik"),
       rpc<Record<string, SaludV2>>("admin_salud_v2"), rpc<MetricasPlataforma>("admin_metricas"), rpc<PedidoAyuda[]>("admin_ayudas", { p_pendientes: true })]);
+    pedidosDemo = await rpc<PedidoDemo[]>("admin_pedidos_demo", { p_pendientes: true });
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
@@ -81,6 +84,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <Ayudas pedidos={ayudas} />
+      <PedidosDemo pedidos={pedidosDemo} />
       <Metricas m={metricas} />
       <EstadoPlataforma />
       <AltaGimnasio dominio={dominioBase()} />
