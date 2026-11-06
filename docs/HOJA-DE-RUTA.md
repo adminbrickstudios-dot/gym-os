@@ -555,6 +555,24 @@ bloque 18.
 - [x] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo — verificado: buscador de ~60 opciones con ancla y resaltado, explicación y recomendado por opción, restablecer por tarjeta con confirmación; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-21 en la corrida de la tanda
 *Tanda 6 · El día a día real*
 - [ ] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos
+- [ ] VD-46a · 🟢 · MercadoPago: reembolso, contracargo y conciliación (un pago aprobado + charged_back pasa a devuelto, anula la venta y retira la cobertura; un approved posterior a refunded se ignora; el pendiente > 15 min se reconsulta sin cron; revierte solo por webhook o reconsulta, nunca por el navegador; alerta al dueño) — caso 17 de 14-SITUACIONES
+- [ ] VD-46b · 🟢 · Suspender o expulsar a un socio con motivo y fecha de revisión (suspender_socio / levantar_suspension; la recepción suspende pero solo dueño/encargado levantan; el suspendido no entra ni como invitado; aparece en Control) — caso 37
+- [ ] VD-46c · 🟢 · Cortesías y descuentos con motivo de una lista y tope bajo por defecto (dar_cortesia con vencimiento, tope por rol y por mes, alerta de cortesías repetidas; el motivo del descuento sale de una lista del gimnasio) — casos 11, 22, 23
+- [ ] VD-46e · 🟢 · Baja con constancia: el pedido da un código, el pedido sin resolver > 24 h aparece en Para hacer hoy y la campana, y dar la baja anula pagos pendientes, turnos fijos y reservas futuras — caso 30
+- [ ] VD-46j · 🟢 · Devolución proporcional al dar de baja con cuota adelantada (calcular_devolucion_baja y registrar_devolucion como hecho nuevo, egreso de caja con motivo, visible en Control y cierre) — casos 24, 16
+- [ ] VD-46n · 🟢 · "No escribirle" por socio: un socio marcado no aparece en avisos masivos pero sí en Vencen para cobrar — casi nadie 14, caso 69
+- [ ] VD-46o · 🟢 · Reactivar ex socios por motivo de baja y antigüedad, con seguimiento de cuántos volvieron a pagar — caso 80
+- [ ] VD-46d · 🟢 · Aumento de precios con aviso previo mínimo (30 días, excepción solo del dueño con motivo) y constancia por socio activo; el que tiene cobertura pagada conserva el precio hasta que vence — caso 13
+- [ ] VD-46f · 🟢 · Chip "subió comprobante hace X" en la Entrada para el vencido con una transferencia pendiente (informativo: no cambia quién entra) — caso 10
+- [ ] VD-46m · 🟢 · Modo emergencia de la puerta (solo dueño/encargado, con motivo, vence solo; las entradas de ese rato quedan marcadas y se listan al cerrar; arranca apagado por gimnasio) — casos 8, 63
+- [ ] VD-46g · 🟢 · Plan familiar/corporativo: el titular paga por los vinculados y calcular_acceso hereda la cobertura ("cubierto por X"); titular vencido o dado de baja explicado a los miembros; arranca apagado por gimnasio — casos 32, 33
+- [ ] VD-46h · 🟢 · Detector de datos de salud en campos libres (notas, mensajes, pausas, tareas): avisa y pide reescribir — casi nadie 7
+- [ ] VD-46i · 🟢 · Registro de incidentes en la sala sin diagnóstico (inmutable a las 24 h, solo dueño/encargado listan todo) — caso 62
+- [ ] VD-46k · 🟢 · Reemplazar al profe en una sola clase con motivo — caso 50
+- [ ] VD-46q · 🟢 · Perdonar una falta o un bloqueo de reservas con motivo — caso 52
+- [ ] VD-46l · 🟢 · Resultado: "lo que le debés a los socios" (packs con usos restantes + cuotas adelantadas) — caso 24
+- [ ] VD-46p · 🟢 · Resultado por sede donde se cobró y por sede donde se usó — casos 86, 87
+- [ ] VD-46r · 🟢 · Al cumplir 18: tarea automática y firma propia de documentos — casi nadie 6
 *Tanda 7 · Cierre*
 - [ ] VD-28 · 🟢 · Navegación con memoria y Volver al origen
 - [ ] VD-29 · 🟢 · Ctrl+K con acciones

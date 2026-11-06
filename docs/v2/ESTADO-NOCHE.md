@@ -85,3 +85,4 @@ VD-22 mergeado. Lanzado VD-42→43 a495eedbb541876c4 (vd42, migr 6400/6500). En 
 VD-42/43 mergeados. Lanzado VD-21 a0f0083cc7afd8c90 (vd21, migr 6600). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca). Después tandas 6 (VD-46…) y 7 (28,29,30,31,26,32).
 (VD-21 mergeado; tanda 5 completa salvo 🔌)
 VD-21 mergeado. Lanzados: VD-46 análisis (a952eaaabea777a1d, solo análisis, sin código), VD-26 (a6f14be2d37c67ee4, vd26, migr 6700). En curso: VD-44 (a003fa0a390b234fc), triage (adbcaf6f5b21a3aca, corrida 42180310624). Siguen: VD-28, 29, 30(+47Y,16b), 31, 32 y los sufijos b/c/d.
+VD-46 análisis recibido: 18 ítems VD-46a…r agregados a la COLA (🟢 con la opción más prudente; anotar en 'Decisiones que tomó el agente' del LOG final). Orden de paralelismo del análisis: G1 46a; G2 serie 46b→46c→46e→46j→46n→46o; G3 46d; G4 46f→46m; G5 46g solo; G6 46h→46i; G7 46k,46q; G8 46l,46p,46r.
