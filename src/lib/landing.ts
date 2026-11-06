@@ -41,6 +41,9 @@ export type Seccion =
 
 export type Sede = { nombre: string; direccion: string | null; mapa_url: string | null; telefono: string | null };
 
+/** VD-44: la gente del equipo que el dueño eligió mostrar (sin horarios de trabajo). */
+export type EquipoPublico = { equipo_id: string; nombre: string; rol: string; tiene_foto: boolean; actividades: string[] };
+
 export type LandingPublicada = {
   publicada: true;
   marca: Marca;
@@ -54,6 +57,7 @@ export type LandingPublicada = {
   secciones: Seccion[];
   planes: PlanPublico[];
   sedes: Sede[];
+  equipo_publico?: EquipoPublico[];
 };
 
 /** Sin publicar: la marca y el WhatsApp (0029), para el "Próximamente". */

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import type { EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import type { EquipoPublico, EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
 import { urlMarca } from "@/lib/url-marca";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { AnotarseEvento } from "./AnotarseEvento";
@@ -226,16 +226,21 @@ function Galeria({ s, nombre }: { s: Extract<Seccion, { tipo: "galeria" }>; nomb
   );
 }
 
-function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
-  const personas = s.contenido.personas ?? [];
+// VD-44: además de las personas que escribe el dueño en el editor, las del equipo real que él tildó
+// (foto servida por /foto-equipo, que la base autoriza; con las clases que da).
+function Equipo({ s, reales }: { s: Extract<Seccion, { tipo: "equipo" }>; reales: EquipoPublico[] }) {
+  const manuales = (s.contenido.personas ?? []).map((p) => ({ nombre: p.nombre, rol: p.rol, foto: urlMarca(p.foto), real: false, detalle: null as string | null }));
+  const delEquipo = reales.map((p) => ({ nombre: p.nombre, rol: p.rol, foto: p.tiene_foto ? `/foto-equipo/${p.equipo_id}` : null, real: true,
+    detalle: p.actividades.length ? p.actividades.join(" · ") : null }));
+  const personas = [...manuales, ...delEquipo];
   if (!personas.length) return null;
   return (
     <Bloque id="equipo" tipo={s.tipo} titulo={s.titulo}>
-      <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4" data-equipo-publico>
         {personas.map((p, i) => {
-          const foto = urlMarca(p.foto);
+          const foto = p.foto;
           return (
-            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6">
+            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6" {...(p.real ? { "data-persona-equipo": p.nombre } : {})}>
               {foto ? (
                 <span className="relative block size-16 rounded-2xl overflow-hidden"><Foto src={foto} alt={p.nombre} sizes="64px" /></span>
               ) : (
@@ -245,6 +250,7 @@ function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
               )}
               <p className="titulo text-xl mt-5">{p.nombre}</p>
               {p.rol && <p className="texto-suave text-[15px]">{p.rol}</p>}
+              {p.detalle && <p className="texto-tenue text-sm mt-1">{p.detalle}</p>}
             </li>
           );
         })}
@@ -301,7 +307,7 @@ function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPu
     case "planes": return <Planes s={s} landing={landing} />;
     case "horarios": return <Horarios s={s} agenda={agenda} />;
     case "galeria": return <Galeria s={s} nombre={landing.marca.nombre} />;
-    case "equipo": return <Equipo s={s} />;
+    case "equipo": return <Equipo s={s} reales={landing.equipo_publico ?? []} />;
     case "preguntas": return <Preguntas s={s} />;
     case "ubicacion": return <Ubicacion s={s} sedes={landing.sedes} />;
     case "probar": return (
@@ -477,6 +483,10 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       <main>
         <ComoEmpezar probar={hayProbar} planes={hayPlanes} altas={!!landing.altas_online} />
         {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
+        {/* VD-44: si el dueño no armó la sección Equipo pero mostró a su gente, aparece igual. */}
+        {(landing.equipo_publico?.length ?? 0) > 0 && !landing.secciones.some((s) => s.tipo === "equipo") && (
+          <Equipo s={{ tipo: "equipo", titulo: "Nuestro equipo", contenido: {} }} reales={landing.equipo_publico ?? []} />
+        )}
         {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
 

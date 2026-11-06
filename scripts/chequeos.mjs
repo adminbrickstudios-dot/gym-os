@@ -20,7 +20,7 @@ const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key", "eventos_webhook_origen_tipo_id_externo_key",
 ]);
 const EJECUTABLES = {
-  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.planes_brik_publicos"]),
+  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.foto_equipo"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
@@ -50,6 +50,7 @@ const EJECUTABLES = {
     "public.servicios_gimnasio", "public.guardar_servicio", "public.asignar_servicio", "public.ajustes_planes", "public.guardar_ajustes_plan", "public.ordenar_planes",
     "public.productos_mostrador", "public.guardar_ficha_producto", "public.preparar_foto_producto", "public.confirmar_foto_producto", "public.quitar_foto_producto",
     "public.preparar_remito_stock", "public.confirmar_remito_stock", "public.remito_stock",
+    "public.equipo_perfiles", "public.guardar_equipo_ajuste", "public.guardar_perfil_equipo", "public.preparar_foto_equipo", "public.guardar_foto_equipo", "public.foto_equipo", "public.profes_de_clases",
     "privado.mis_gimnasios", "privado.mi_equipo_id", "privado.soy_admin_plataforma", "privado.es_servicio",
     "privado.mis_socios", "privado.sin_acentos",
   ]),

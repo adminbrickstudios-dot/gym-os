@@ -526,6 +526,8 @@ bloque 18.
 - [ ] VD-28C · 🟢 · El alta nueva conserva el origen (alta desde Socios filtrado, cobrar y volver con el filtro)
 - [ ] VD-28D · 🟢 · Memoria de lista también en Mensajes y Resultado cuando haya detalle propio
 - [ ] VD-46S · 🟢 · MercadoPago: pagos devueltos en Control (linea_de_control), botón Revisar también en Ventas, estado in_mediation con aviso, etiqueta devuelto en la ficha de pagos
+- [ ] VD-44B · 🟢 · "Mi foto": el profe o la recepción cambia su propia foto desde Mi cuenta
+- [ ] VD-44C · 🟢 · La foto del profe en la TV de la sala y en el detalle de la clase del panel
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -544,7 +546,7 @@ bloque 18.
 - [x] VD-16 · 🟢 · Retención y números (churn general y de 90 días, asistencia, ocupación, plata) — verificado: base en verde en GitHub (vencen-pestanas, retencion-periodo); e2e vd-14 y vd-16 en la corrida de la tanda; los 300 ms con 3.000 socios sin medir
 - [x] VD-17 · 🟢 · Planes y servicios (renovación por plan, servicios adicionales, orden y visibilidad) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda
 - [x] VD-18 · 🟡 D21 · Productos y stock (venta rápida con foto, mínimo, mercadería) — verificado: base en verde en GitHub (planes-servicios, productos-stock); e2e vd-17 y vd-18 en la corrida de la tanda
-- [ ] VD-44 · 🟢 · Equipo con foto, clases y horario
+- [x] VD-44 · 🟢 · Equipo con foto, clases y horario — verificado: foto, actividades y horario del equipo (foto privada servida tras autorizar la base), visible en /app/clases y en la página solo si el dueño lo prende; base en verde en GitHub (equipo-perfil); e2e vd-44 en la corrida de la tanda
 *Tanda 4 · Socio y página*
 - [x] VD-35 · 🟡 D26 · Registro del socio por su cuenta (queda socio sin pagar) — verificado: alta online con fecha de nacimiento obligatoria, interruptor registro abierto, 'Soy nuevo' en el ingreso, 🌐 A cobrar en Socios y clave de operación en los pagos de la app; base en verde en GitHub (registro-cambio-plan-app); e2e vd-35 en la corrida de la tanda
 - [x] VD-39 · 🟡 D28 · Cambio de plan y compra de pases desde la app — verificado: /app/plan con días a favor calculados por la base, pago por MercadoPago o transferencia con clave de operación, el plan cambia al acreditarse el pago; base en verde en GitHub; e2e vd-39 en la corrida de la tanda

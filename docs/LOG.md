@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-44 · Equipo con foto, clases y horario
+
+**QUÉ HICE**
+- Migración 5400: en `/panel/equipo`, sección "Fotos, clases y horarios": cada persona tiene foto, las actividades que da y su horario de trabajo (varias franjas por día, validadas en la base). Opción general "Mostrar al equipo en la página y en la app" (solo el dueño) y una tilda por persona. En `/app/clases` cada clase muestra "Profe: Ana" con su foto, y la sección Equipo de la página pública suma a las personas tildadas con su foto y las clases que dan — solo si la opción general está prendida y la persona tildada.
+- **Decisiones de permisos**: la foto va en un bucket privado (`fotos_equipo`) y se sirve por `/foto-equipo/[id]` solo cuando la base autoriza (apagar la opción o destildar a alguien la oculta al instante, sin borrar archivos); el horario de trabajo es interno y no sale en la página ni en la app; editan dueño y encargado; cada persona puede cambiar su propia foto en la base pero todavía no hay pantalla.
+- **Choque de migraciones resuelto**: la 5400 y la 6100 (VD-25) copiaron `privado.landing_completa` de la 0032 por separado; como la 6100 corre después, sola le sacaba el equipo a la página. Se agregó la migración 6101, que deja la función con las dos cosas (prueba social y equipo), con guarda de entrada y verificación. `guardar_equipo` (reescrita por VD-42 en la 6400) no fue tocada por VD-44: sin choque.
+- Verificado: lint, typecheck y pruebas, y base en verde en GitHub (`equipo-perfil`); la 6101 corre por primera vez en la corrida de la rama de la noche.
+
+**SIN ARREGLAR**: VD-44B (pantalla "Mi foto" para cada persona), VD-44C (foto del profe en la TV de la sala y en el detalle de la clase del panel). La liquidación sigue en COM-15.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-44` y el build local (se colgó): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-46A · MercadoPago: reembolso, contracargo y conciliación
 
 **QUÉ HICE**
