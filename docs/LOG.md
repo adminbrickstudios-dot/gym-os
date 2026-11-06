@@ -1,4 +1,15 @@
 # Gy
+## 2026-11-06 · Noche · VD-21 · Configuración con buscador, explicación y restablecer
+
+**QUÉ HICE**
+- Sin migración. Arriba de las pestañas, "Buscar una opción" (sin tildes ni mayúsculas, con todas las palabras a la vez): cada resultado muestra título, pestaña, la explicación de una línea y el valor recomendado; al elegirlo cambia de pestaña, baja a la opción y la resalta 3 segundos. Índice único `indice.ts` con unas 60 opciones de todas las pestañas (`indice.test.ts` verifica que cada una tenga su ancla en la pantalla). "Reingreso" devuelve primero la visita y después volver a entrar el mismo día.
+- "Restablecer a lo recomendado" por tarjeta, con confirmación en la misma tarjeta, guardando por la función propia de cada tarjeta (`guardarConfiguracion` para cobros, medios, recargo, fiado, reglas, retención, accesos, clases y secciones; las propias para vencimiento, dejar pasar, caja, entrada, visita, meta de visitas y autoservicio). No se sacó ninguna pestaña ni opción.
+- **Decisiones a revisar**: los valores recomendados salen de los defaults de la base; dos son elección del agente: vencimiento "desde el día que paga" con primera cuota proporcional, y accesos solo recepción (QR, tablet y llavero apagados); "Restablecer secciones" las deja todas prendidas.
+- Verificado: lint, typecheck, pruebas, build y base en verde en GitHub.
+
+**SIN ARREGLAR**: VD-21b (historial de cambios desde cada opción) y VD-21c (vista previa en vivo de mensajes y página). Una opción que depende de otra apagada cambia de pestaña pero no resalta nada.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-21` (buscar, restablecer Reglas y la meta, 390 px) y `panel-configuracion`/`cfg-2…cfg-9` (solo se agregaron atributos `data-opcion` y `div` envolventes): escritos según la documentación, pero no ejecutados.
+
 ## 2026-11-06 · Noche · VD-42 y VD-43 · Mi cuenta y seguridad; onboarding con datos de ejemplo
 
 **QUÉ HICE**

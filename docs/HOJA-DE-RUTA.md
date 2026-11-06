@@ -519,6 +519,8 @@ bloque 18.
 - [ ] VD-42d · 🟢 · Alerta al dueño por exportes grandes e intentos fallidos de PIN; aal2 en exportar_mes y exportar_gastos
 - [ ] VD-43b · 🟢 · Ventas y clases de ejemplo borrables sin dejar plata en Resultado
 - [ ] VD-43c · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol
+- [ ] VD-21b · 🟢 · Historial de cambios visible desde cada opción ("Ver cambios")
+- [ ] VD-21c · 🟢 · Vista previa en vivo de los mensajes y de la página al editar
 *Tanda 2 · Plata y control*
 - [x] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua) — verificado: regla de vencimiento por gimnasio y por plan (proporcional/mes entero/gratis/como antes) calculada en la base, simulador y hoja Cobrar; base en verde en GitHub; e2e vd-7 en la corrida de la tanda
 - [x] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables — verificado: dejar pasar en tres modos (hasta N días/siempre PIN/libre) con registro fijo en promesas_pago; base en verde en GitHub; e2e vd-8 en la corrida de la tanda
@@ -550,7 +552,7 @@ bloque 18.
 - [x] VD-40 · 🟢 · Super admin v2: salud, alta en 3 pasos, soporte con motivo, ayuda con contexto, métricas — verificado: alta de gimnasio en 3 pasos con vista previa, salud con colores calculada, entrar como soporte con motivo visible al dueño, ayuda del dueño con contexto, métricas; base en verde en GitHub (super-admin-v2); e2e vd-40 en la corrida de la tanda
 - [x] VD-42 · 🟢 · Mi cuenta y seguridad: contraseña, sesiones, 2FA, dar de baja a alguien del equipo — verificado: TOTP con aal2 solo si hay factor verificado en exportes/equipo/MercadoPago, dar de baja corta sesión+PIN+turno, alertas de seguridad al dueño; base en verde en GitHub (dos-pasos-y-baja); e2e vd-42 en la corrida de la tanda; el enrolamiento TOTP real no es ejecutable en el imitador
 - [x] VD-43 · 🟢 · Gimnasio nuevo: onboarding calculado y datos de ejemplo — verificado: 9 pasos calculados, socios de ejemplo marcados que no tachan 'Tus socios', cargar y borrar ejemplos; base en verde en GitHub (onboarding-ejemplos); e2e vd-43 en la corrida de la tanda
-- [ ] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo
+- [x] VD-21 · 🟢 · Configuración con buscador, explicación y restablecer, con todo lo nuevo — verificado: buscador de ~60 opciones con ancla y resaltado, explicación y recomendado por opción, restablecer por tarjeta con confirmación; sin migración; lint, typecheck, pruebas, build y base en verde; e2e vd-21 en la corrida de la tanda
 *Tanda 6 · El día a día real*
 - [ ] VD-46 · 🟢 · Situaciones del día a día (`docs/v2/14-SITUACIONES.md`): armar un ítem por cada ⭐ que falte y hacerlos
 *Tanda 7 · Cierre*
