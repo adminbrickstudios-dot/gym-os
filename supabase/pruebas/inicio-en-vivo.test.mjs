@@ -56,12 +56,12 @@ test("VD-12b: últimas entradas de hoy con el rechazado y si corresponde cobrar;
   await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, via_acceso, resultado, via_habilitante, color, motivo, texto)
              values ($1,$2,$3,'qr_socio','entro','membresia','verde','al_dia','Al día')`, [t.g, t.sede, s.al_dia]);
   const lista = await como(uRec, async () => (await t.q(`select public.ultimas_entradas($1, 8) as r`, [t.g]))[0].r);
-  assert.equal(lista.length, 2);
-  const rech = lista.find((x) => x.resultado === "rechazado");
+  assert.ok(lista.length >= 2);   // el demo ya trae entradas propias
+  const rech = lista.find((x) => x.resultado === "rechazado" && x.socio_id === s.vencida);
   assert.equal(rech.socio_id, s.vencida);
   assert.equal(rech.cobrar, true);
-  assert.equal(lista.find((x) => x.resultado === "entro").cobrar, false);
-  assert.equal(lista.find((x) => x.resultado === "entro").via, "qr_socio");
+  assert.equal(lista.find((x) => x.socio_id === s.al_dia && x.via === "qr_socio").cobrar, false);
+  assert.equal(lista.find((x) => x.socio_id === s.al_dia && x.via === "qr_socio").via, "qr_socio");
   assert.equal(new Date(lista[0].momento) >= new Date(lista[1].momento), true);
   await como(uProfe, () => t.falla(() => t.q(`select public.ultimas_entradas($1)`, [t.g]), /permiso/i));
 });
