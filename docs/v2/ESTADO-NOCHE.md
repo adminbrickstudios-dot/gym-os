@@ -22,6 +22,7 @@ Lanzado: VD-1→VD-2 (a4b58e1f880b3b4ce, rama noche/2026-11-05-vd1, migr 0100/02
 - VD-27 (base verde; e2e y capturas en la corrida de la tanda)
 - VD-12 (base verde; sumados VD-12b/c/d)
 - VD-33 (base verde; sumados VD-33b/c)
+- VD-36, VD-23 (base verde; sumados VD-23b/c)
 
 ## Publicadas
 

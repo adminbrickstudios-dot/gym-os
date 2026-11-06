@@ -1,4 +1,14 @@
 # Gy
+## 2026-11-06 · Noche · VD-36 y VD-23 · App del socio en 4 pestañas, progreso y bienvenida
+
+**QUÉ HICE**
+- VD-36 (migración 3600, `pestanas_app`): barra Inicio · Clases · Rutina · Yo; Clases y Rutina salen de la base (sin clases o con la sección apagada no aparecen; si la base falla quedan Inicio y Yo). `/app/yo`: mi plan, packs, pagos y asistencia, novedades, membresía y Más (invitar, referir, descargar datos, salir). Las pantallas viejas siguen accesibles; Inicio conserva Invitar, Referir e Instalar. Editados app-3, app-8 y panel-app para entrar por Yo.
+- VD-23 (migración 2300, `progreso_inicio`, `marcar_bienvenida`): semana, semanas seguidas, meta del mes (dato por gimnasio, 12 por defecto), hitos 10/50/100/250/500/1000 con felicitación, "Entraste 19:04 ✓ · llevás N este mes", bienvenida de 3 pasos (tarjeta; los socios existentes no la ven), Pagar pegado al semáforo si debe o está por vencer. Nada recalculado en TypeScript.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub (incluye `app-pestanas` e `inicio-progreso`).
+
+**SIN ARREGLAR**: sumados VD-23b (editor de la meta y "Escribile al gimnasio") y VD-23c (socio demo vencido y su e2e). Una corrida intermedia (42148233313) quedó colgada en GitHub "in_progress"; se puede ignorar.
+**LO QUE NO PUDE VERIFICAR**: pantallas y e2e vd-36, vd-23, app-3, app-8, panel-app: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]` de la tanda.
+
 ## 2026-11-06 · Noche · VD-33 · Ingreso más lindo y "primero quién, después cómo"
 
 **QUÉ HICE**

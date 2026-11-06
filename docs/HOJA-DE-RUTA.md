@@ -455,14 +455,16 @@ bloque 18.
 - [ ] VD-5 · 🟢 · Cobrar: un solo flujo en todos lados (Entrada, ficha, Vencen, alta, Ctrl+K)
 - [ ] VD-6 · 🟢 · Alta rápida desde la Entrada y alta completa en un solo lugar
 - [x] VD-12 · 🟢 · Inicio del dueño y de la recepción — verificado: numeros_inicio en un viaje con permisos por rol, 4 números configurables, turno de caja de la recepción; base en verde en GitHub; e2e vd-12 en la corrida de la tanda
-- [ ] VD-36 · 🟢 · App del socio en 4 pestañas, limpia
-- [ ] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida
+- [x] VD-36 · 🟢 · App del socio en 4 pestañas, limpia — verificado: 4 pestañas Inicio·Clases·Rutina·Yo calculadas por pestanas_app en la base, pantallas viejas accesibles en Yo; base en verde en GitHub; e2e vd-36 en la corrida de la tanda
+- [x] VD-23 · 🟢 · Inicio del socio, progreso (racha, meta, hitos) y bienvenida — verificado: progreso_inicio en la base (semana, racha, meta, hito, Entraste), bienvenida de 3 pasos, Pagar arriba si debe; base en verde en GitHub; e2e vd-23 en la corrida de la tanda
 - [ ] VD-47X · 🟢 · Rapidez, lo que quedó: useTransition en filtros, useOptimistic en tareas/reservas, fotos a 800 px webp al subir, next/image en listas, índices según explain analyze con 3.000 socios (migración 20261106004701), prueba de dos roles con caché, tabla de tiempos antes/después en el LOG
 - [ ] VD-12b · 🟢 · Inicio: últimas entradas en vivo con ⛔ y botón Cobrar, y Para hacer hoy con [Ver] (LISTO SI: Inicio muestra las últimas entradas con hora y vía y los vencidos llevan a cobrar)
 - [ ] VD-12c · 🟢 · Interruptor: la recepción ve lo cobrado hoy (LISTO SI: el dueño lo prende en Configuración y la recepción ve el número)
 - [ ] VD-12d · 🟢 · Mini gráfico de tendencia en los 8 números de Inicio
 - [ ] VD-33b · 🟢 · Mi cuenta: cambiar contraseña con la actual, ver dispositivos y cerrar las demás sesiones (LISTO SI: e2e de las tres cosas)
 - [ ] VD-33c · 🟢 · Desafío anti-robot (Turnstile) antes de mandar códigos que cuestan SMS, detrás de una variable (LISTO SI: sin el desafío resuelto no se manda el código; sin la variable todo sigue igual)
+- [ ] VD-23b · 🟢 · Editor de la meta de visitas del mes (meta_visitas_mes) en Configuración, y fila "Escribile al gimnasio" en Yo → Más (LISTO SI: el dueño cambia la meta y el Inicio del socio la sigue)
+- [ ] VD-23c · 🟢 · Socio demo vencido en usuarios-demo.mjs y e2e de "vencido → Pagar arriba"
 *Tanda 2 · Plata y control*
 - [ ] VD-7 · 🟡 D18 · Cómo vencen las cuotas, con pantalla (día fijo con proporcional, desde el pago, continua)
 - [ ] VD-8 · 🟡 D19 · Dejar pasar sin pagar en tres modos configurables
