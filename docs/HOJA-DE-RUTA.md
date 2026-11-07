@@ -255,6 +255,9 @@ Panel por panel. Cada panel arranca con su **auditoría botón por botón (AUD)*
 que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
+### 23 · Detalles (07/11 · orden y grupos en `docs/v2/DETALLES.md`)
+- [ ] VD-64 · 🟢 · Pasar a Next 16.4 (trae el React que arregla las acciones que quedan en "Guardando…"): `scripts/diag/accion-colgada.mjs 50` sin ningún cuelgue con la app compilada, y todo lo demás como antes
+
 ### 22 · Pedidos de Mateo del 07/11 (se hacen en la fase 5 de `docs/v2/CIERRE.md`, detalle en `docs/v2/21-PEDIDOS-07-11.md`)
 - [x] VD-61 · 🟢 · Ingreso: segunda pasada (más lindo, cada caso de error y de "olvidé mi contraseña", registro claro, cambio rápido de persona en la recepción, probado en iPhone) — verificado: base en verde + e2e vd-61: 58 pasos en verde con sesión real (cierre 07/11)
 - [~] VD-62 · 🟢 · Página del gimnasio y página de Gym OS: segunda pasada visual y de contenido (fotos reales, prueba gratis, reseñas, planes, WhatsApp, rápida en el celular) — código y base en verde; el e2e no pasó del todo en el cierre (ver LOG)
