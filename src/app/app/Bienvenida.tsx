@@ -33,7 +33,7 @@ export function Bienvenida({ socioId, nombre, qr, clases, pagos }: { socioId: st
       <div className="flex gap-2">
         {ultimo
           ? <button type="button" className="boton boton-principal flex-1 !min-h-12" disabled={ocupado} onClick={cerrar} data-bienvenida-listo>{ocupado ? "Un segundo…" : "Empezar"}</button>
-          : <button type="button" className="boton boton-principal flex-1 !min-h-12" onClick={() => setPaso(paso + 1)} data-bienvenida-siguiente>Siguiente</button>}
+          : <button type="button" className="boton flex-1 !min-h-12" onClick={() => setPaso(paso + 1)} data-bienvenida-siguiente>Siguiente</button>}
         {!ultimo && <button type="button" className="boton !min-h-12" disabled={ocupado} onClick={cerrar} data-bienvenida-saltear>Saltear</button>}
       </div>
     </section>

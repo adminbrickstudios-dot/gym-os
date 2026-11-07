@@ -120,9 +120,8 @@ try {
   await r.keyboard.press("Escape");
 
   // ── Barra fija, prendida solo en esta compu, desde Caja ──
-  await r.goto(`${G}/panel/configuracion?pestana=entrada`);
-  await r.locator("[data-config-entrada]").waitFor({ timeout: 30000 });
-  await r.locator('[data-en-esta-compu="Barra fija a la derecha:si"]').click();
+  // La recepción no abre Configuración: la barra "en esta compu" la deja puesta quien configuró esa compu (queda en el navegador).
+  await r.evaluate(() => localStorage.setItem("gymos.entrada.en-esta-compu", JSON.stringify({ barra_fija: true })));
   await r.goto(`${G}/panel/caja`);
   const barra = r.locator("[data-barra-entrada]");
   await barra.waitFor({ timeout: 30000 });
@@ -133,8 +132,7 @@ try {
   chequear(await ver.getAttribute("data-ventana-veredicto") !== null, "con la barra, el veredicto aparece flotando encima", "no apareció el veredicto");
   await capturar(r, "vd1-compu-barra");
   await r.keyboard.press("Escape");
-  await r.goto(`${G}/panel/configuracion?pestana=entrada`);
-  await r.locator('[data-en-esta-compu="Barra fija a la derecha:gimnasio"]').click();
+  await r.evaluate(() => localStorage.removeItem("gymos.entrada.en-esta-compu"));
 
   // ── Lector USB: teclas rápidas + Enter con el QR de un socio ──
   await prenderQr(d);

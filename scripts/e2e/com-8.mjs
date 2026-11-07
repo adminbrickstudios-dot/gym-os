@@ -20,7 +20,7 @@ try {
   const f = d.locator("[data-nuevo-evento]");
   await f.locator("input").first().fill(NOMBRE);
   const en3 = new Date(Date.now() + 3 * 864e5); const dia = en3.toISOString().slice(0, 10);
-  await f.locator('input[type="datetime-local"]').fill(`${dia}T19:00`);
+  await f.locator('input[type="datetime-local"]').first().fill(`${dia}T19:00`);
   await f.locator('input[inputmode="numeric"]').fill("2");
   await f.locator('input[inputmode="decimal"]').fill("3.000");
   await f.locator('button[type="submit"]').click();
