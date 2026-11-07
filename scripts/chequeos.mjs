@@ -15,12 +15,12 @@ const iUrl = process.argv.indexOf("--url");
 const url = iUrl >= 0 ? process.argv[iUrl + 1] : process.env.DB_PRUEBAS_URL || process.env.SUPABASE_DB_URL;
 
 // ── Listas cerradas de excepciones (docs/SCHEMA.md § Excepciones) ────
-const SIN_GIMNASIO_ID = new Set(["gimnasios", "administradores_plataforma", "plataforma_planes", "eventos_webhook", "documentos_legales", "novedades_plataforma", "pedidos_codigo", "pedidos_demo_brik", "ayudas_usuario"]);
+const SIN_GIMNASIO_ID = new Set(["gimnasios", "administradores_plataforma", "plataforma_planes", "eventos_webhook", "documentos_legales", "novedades_plataforma", "pedidos_codigo", "pedidos_demo_brik", "plataforma_contacto", "ayudas_usuario"]);
 const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key", "eventos_webhook_origen_tipo_id_externo_key",
 ]);
 const EJECUTABLES = {
-  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_emergencia", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.kiosco_salida_activa", "public.kiosco_salir", "public.clases_para_probar", "public.reservar_prueba_publica", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.foto_equipo"]),
+  anon: new Set(["public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_emergencia", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.kiosco_salida_activa", "public.kiosco_salir", "public.clases_para_probar", "public.reservar_prueba_publica", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.contacto_plataforma_publico", "public.foto_equipo"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
@@ -53,7 +53,7 @@ const EJECUTABLES = {
     "public.cerrar_horario", "public.clase_detalle", "public.mi_socio",
     "public.admin_entrar_gimnasio", "public.admin_salir_gimnasio", "public.estado_soporte", "public.soportes_del_gimnasio", "public.admin_soportes",
     "public.admin_salud_v2", "public.admin_uso_semanal", "public.admin_metricas", "public.pedir_ayuda_brik", "public.admin_ayudas",
-    "public.admin_resolver_ayuda", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.admin_pedidos_demo", "public.admin_atender_demo", "public.admin_guardar_marca", "public.admin_notas", "public.admin_agregar_nota","public.admin_gimnasio", "public.admin_agregar_persona",
+    "public.admin_resolver_ayuda", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.admin_pedidos_demo", "public.admin_atender_demo", "public.admin_guardar_contacto_plataforma", "public.contacto_plataforma_publico", "public.guardar_video_portada", "public.admin_guardar_marca", "public.admin_notas", "public.admin_agregar_nota","public.admin_gimnasio", "public.admin_agregar_persona",
     "public.admin_agregar_dominio", "public.admin_quitar_dominio", "public.cuenta_para_nueva_clave", "public.persona_para_dar_acceso",
     "public.servicios_gimnasio", "public.guardar_servicio", "public.asignar_servicio", "public.ajustes_planes", "public.guardar_ajustes_plan", "public.ordenar_planes",
     "public.productos_mostrador", "public.guardar_ficha_producto", "public.preparar_foto_producto", "public.confirmar_foto_producto", "public.quitar_foto_producto",

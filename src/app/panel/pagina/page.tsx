@@ -8,6 +8,7 @@ import { direccionPagina } from "@/lib/panel/direccion-pagina";
 import { Editor, type PaginaPanel } from "./Editor";
 import { Altas, type AltasPanel } from "./Altas";
 import { PruebaSocial, type PruebaSocialPanel } from "./PruebaSocial";
+import { VideoPortada } from "./VideoPortada";
 import { MedicionPagina, type MedicionPanel } from "./MedicionPagina";
 
 export const metadata: Metadata = { title: "Tu página" };
@@ -29,6 +30,7 @@ export default async function Pagina() {
         <Encabezado emoji="🌐" titulo="Tu página" bajada="Lo que ve la gente antes de hacerse socio. Cambiá los textos, mostrá u ocultá secciones, ordenalas y mirá cómo queda antes de guardar." />
         <Editor inicial={pagina} agenda={agenda} puedeEditar={panel.yo.rol === "dueno"} direccion={await direccionPagina(pagina.vista.marca.slug)}
           altas={<Altas inicial={altas} puedeEditar={panel.yo.rol === "dueno"} />} />
+        <VideoPortada inicial={pagina.vista.portada?.video_url ?? null} puedeEditar={panel.yo.rol === "dueno"} />
         <PruebaSocial inicial={prueba} puedeEditar={panel.yo.rol === "dueno"} />
         <MedicionPagina inicial={medicion} puedeEditar={panel.yo.rol === "dueno"} />
       </>

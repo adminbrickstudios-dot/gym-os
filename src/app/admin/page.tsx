@@ -16,6 +16,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Ayudas, type PedidoAyuda } from "./Ayudas";
 import { Metricas, type MetricasPlataforma } from "./Metricas";
 import { PedidosDemo, type PedidoDemo } from "./PedidosDemo";
+import { ContactoPlataformaForm, type ContactoPlataforma } from "./ContactoPlataforma";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
 type Gimnasio = {
@@ -44,6 +45,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let metricas: MetricasPlataforma;
   let ayudas: PedidoAyuda[];
   let pedidosDemo: PedidoDemo[] = [];
+  let contactoPlataforma: ContactoPlataforma = { whatsapp: null, mensaje_demo: "" };
   let novedades: NovedadPlataforma[] = [];
   let abonos: Record<string, EstadoAbono> = {};
   let planesBrik: PlanBrik[] = [];
@@ -55,6 +57,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik"),
       rpc<Record<string, SaludV2>>("admin_salud_v2"), rpc<MetricasPlataforma>("admin_metricas"), rpc<PedidoAyuda[]>("admin_ayudas", { p_pendientes: true })]);
     pedidosDemo = await rpc<PedidoDemo[]>("admin_pedidos_demo", { p_pendientes: true });
+    contactoPlataforma = await rpc<ContactoPlataforma>("contacto_plataforma_publico");
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
@@ -90,6 +93,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <AltaGimnasio dominio={dominioBase()} />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />
+      <ContactoPlataformaForm inicial={contactoPlataforma} />
 
       <section className="space-y-3">
         <p className="titulo-grupo">Todos los gimnasios</p>

@@ -1,6 +1,7 @@
 // VD-26 · La página de Gym OS (la dirección de la plataforma, sin gimnasio): una landing corta para
 // venderle Gym OS a dueños de gimnasios. Componente de servidor: cero JS salvo el formulario de la demo.
 // Las "capturas" son ilustraciones en CSS (no fotos pesadas) y no llevan cifras ni nombres inventados.
+import Image from "next/image";
 import { formatearPesos } from "@/lib/formato";
 import { FormDemo } from "./FormDemo";
 
@@ -67,7 +68,29 @@ function IlustracionRetencion() {
   );
 }
 
-export function PlataformaLanding({ planes }: { planes: PlanBrikPublico[] }) {
+/** Capturas reales del demo (las genera scripts/capturas-pagina-gymos.mjs y deja la lista en src/lib/capturas-gymos.json). */
+export type CapturaGymOS = { archivo: string; ancho: number; alto: number; alt: string; titulo: string };
+
+function Capturas({ capturas }: { capturas: CapturaGymOS[] }) {
+  if (!capturas.length) return null;
+  return (
+    <section className="mx-auto max-w-5xl px-4 sm:px-8 py-12 space-y-6" aria-labelledby="capturas" data-capturas-gymos>
+      <p id="capturas" className="titulo-grupo">Así se ve, de verdad</p>
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {capturas.map((c) => (
+          <li key={c.archivo} className="space-y-2">
+            {/* Tamaño reservado (ancho y alto): la captura carga sin mover la página. */}
+            <Image src={c.archivo} alt={c.alt} width={c.ancho} height={c.alto} sizes="(min-width: 640px) 512px, 100vw" loading="lazy" quality={72}
+              className="w-full h-auto rounded-[var(--radio-grande)] border border-[var(--borde)]" />
+            <p className="texto-suave text-sm">{c.titulo}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { planes: PlanBrikPublico[]; linkDemo?: string | null; capturas?: CapturaGymOS[] }) {
   return (
     <main className="overflow-x-clip" data-plataforma>
       <header className="mx-auto max-w-5xl px-4 sm:px-8 pt-5 flex items-center justify-between gap-3">
@@ -81,8 +104,14 @@ export function PlataformaLanding({ planes }: { planes: PlanBrikPublico[] }) {
         <p className="texto-suave text-xl sm:text-2xl mt-6 max-w-[34ch]">
           Gym OS responde eso en un segundo, te deja cobrar en un toque y te avisa quién dejó de venir.
         </p>
+        <ul className="mt-7 space-y-2 text-lg max-w-[40ch]" data-tres-lineas>
+          <li><strong>Quién entra:</strong> verde, amarillo o rojo, con el motivo escrito.</li>
+          <li><strong>Quién paga:</strong> cobrás en un toque y la caja cierra sola.</li>
+          <li><strong>Quién dejó de venir:</strong> la lista para escribirle a tiempo.</li>
+        </ul>
         <div className="flex flex-wrap gap-3 mt-9">
           <a href="#demo" className="boton boton-principal text-lg px-8" data-quiero-demo>🙋 Quiero una demo</a>
+          {linkDemo && <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="boton text-lg" data-demo-whatsapp>💬 Pedí una demo por WhatsApp</a>}
           <a href="#que-resuelve" className="boton text-lg">Ver qué resuelve</a>
         </div>
       </section>
@@ -113,6 +142,8 @@ export function PlataformaLanding({ planes }: { planes: PlanBrikPublico[] }) {
           <IlustracionRetencion />
         </div>
       </section>
+
+      <Capturas capturas={capturas} />
 
       <section className="mx-auto max-w-5xl px-4 sm:px-8 py-12 space-y-6">
         <p className="titulo-grupo">Pensado para cada gimnasio</p>
@@ -156,6 +187,7 @@ export function PlataformaLanding({ planes }: { planes: PlanBrikPublico[] }) {
         <h2 className="titular text-4xl sm:text-5xl">Pedí tu demo</h2>
         <p className="texto-suave text-lg">Dejanos tus datos y te mostramos Gym OS funcionando, con el ejemplo de un gimnasio como el tuyo.</p>
         <FormDemo />
+        {linkDemo && <p className="texto-suave">¿Preferís WhatsApp? <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Escribinos y te mostramos Gym OS</a>.</p>}
       </section>
 
       <footer className="mx-auto max-w-5xl px-4 sm:px-8 py-12 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--borde)]">

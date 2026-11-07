@@ -109,6 +109,8 @@ html { accent-color: var(--acento); }
     scroll-behavior: auto !important;
   }
   .esqueleto { animation: none !important; }
+  /* VD-62: con "reducir movimiento" el video de la portada no se reproduce: queda la foto (el póster). */
+  .video-portada { display: none; }
 }
 
 /* En @layer components: las utilidades de Tailwind (hidden, w-full, mt-*) las pueden pisar. */

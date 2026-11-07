@@ -1,0 +1,73 @@
+// VD-62 · Textos por defecto de la página del gimnasio. Si el dueño no cargó el texto de una sección, la página
+// no muestra un hueco: pone un texto sensato según el tipo de gimnasio. El tipo se deduce de lo que el gimnasio
+// ya cargó (actividades y planes), no se hardcodea nada de un gimnasio en particular. Los textos no afirman
+// cifras, precios ni servicios concretos: son lo que sirve para cualquier gimnasio de ese tipo. Lo que el dueño
+// escribe siempre manda.
+import type { LandingPublicada, Seccion } from "@/lib/landing";
+
+export type TipoGimnasio = "funcional" | "mente_cuerpo" | "lucha" | "general";
+
+const PISTAS: [TipoGimnasio, RegExp][] = [
+  ["lucha", /box|muay|kick|jiu|mma|judo|karate|lucha/i],
+  ["funcional", /crossfit|funcional|hiit|functional|cross|wod/i],
+  ["mente_cuerpo", /yoga|pilates|stretch|barre|movilidad|meditaci/i],
+];
+
+/** Deduce el tipo de gimnasio por los nombres de sus actividades y planes. Sin pistas: general. */
+export function tipoDeGimnasio(landing: Pick<LandingPublicada, "secciones" | "planes">): TipoGimnasio {
+  const nombres: string[] = [];
+  for (const s of landing.secciones) if (s.tipo === "actividades") for (const a of s.contenido.items ?? []) nombres.push(a.nombre);
+  for (const p of landing.planes) nombres.push(p.nombre);
+  const texto = nombres.join(" ");
+  for (const [tipo, re] of PISTAS) if (re.test(texto)) return tipo;
+  return "general";
+}
+
+const SOBRE: Record<TipoGimnasio, (n: string) => string> = {
+  general: (n) => `En ${n} entrenás a tu ritmo, con gente que te acompaña y un ambiente en el que dan ganas de volver. Si es tu primera vez, te explicamos todo y te ayudamos a arrancar.`,
+  funcional: (n) => `En ${n} entrenás en grupo, con clases guiadas y ejercicios que se adaptan a tu nivel. Venís a moverte, a superarte y a hacerlo con otros. Si es tu primera vez, te acompañamos desde el primer día.`,
+  mente_cuerpo: (n) => `En ${n} trabajás el cuerpo y la cabeza con clases tranquilas, bien guiadas y para todos los niveles. Venís a moverte mejor, a soltar tensión y a darte un rato para vos.`,
+  lucha: (n) => `En ${n} aprendés técnica y entrenás en serio, con profes que te corrigen y un grupo que te empuja. Podés empezar de cero: arrancás a tu ritmo y vas subiendo.`,
+};
+
+const BAJADA: Record<TipoGimnasio, string> = {
+  general: "Entrená con nosotros. Planes, horarios y cómo llegar, todo acá.",
+  funcional: "Clases en grupo, para todos los niveles. Mirá los horarios y probá una.",
+  mente_cuerpo: "Clases para moverte mejor, a tu ritmo. Mirá los horarios y probá una.",
+  lucha: "Técnica y entrenamiento de verdad, desde el primer día. Mirá los horarios y probá una clase.",
+};
+
+const PROBAR_TEXTO = "Dejanos tu nombre y tu WhatsApp, o elegí una clase, y te esperamos para que pruebes sin compromiso.";
+
+type Pregunta = { pregunta: string; respuesta: string };
+
+function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: boolean): Pregunta[] {
+  const q: Pregunta[] = [
+    { pregunta: "¿Necesito experiencia previa?", respuesta: tipo === "lucha" || tipo === "funcional"
+      ? "No. Podés empezar desde cero: el profe te indica cómo hacer cada ejercicio y se adapta a tu nivel."
+      : "No. Podés empezar desde cero: te explicamos cómo hacer cada ejercicio y arrancás a tu ritmo." },
+    { pregunta: "¿Qué tengo que llevar?", respuesta: tipo === "mente_cuerpo"
+      ? "Ropa cómoda, una botella de agua y ganas de moverte. Si necesitás algo más para una clase, te avisamos."
+      : "Ropa cómoda, zapatillas, una toalla y agua. Si necesitás algo más para una clase, te avisamos." },
+  ];
+  if (hayProbar) q.push({ pregunta: "¿Puedo probar antes de anotarme?", respuesta: "Sí. Dejanos tus datos en “Probá gratis” y coordinamos tu primera clase." });
+  if (hayPlanes) q.push({ pregunta: "¿Cómo me anoto y cómo pago?", respuesta: "Elegí tu plan más abajo y escribinos por WhatsApp o pasá por el gimnasio: te decimos los medios de pago y empezás ese mismo día." });
+  q.push({ pregunta: "¿Puedo ir a cualquier hora?", respuesta: "Los horarios de apertura y de cada clase están en esta página, siempre al día. Si tenés dudas, escribinos." });
+  return q;
+}
+
+/** La misma landing, pero sin secciones vacías: lo que el dueño no cargó se completa con un texto sensato. */
+export function conTextosPorDefecto(landing: LandingPublicada): LandingPublicada {
+  const tipo = tipoDeGimnasio(landing);
+  const nombre = landing.marca.nombre;
+  const hayProbar = landing.secciones.some((s) => s.tipo === "probar");
+  const hayPlanes = landing.planes.length > 0;
+  const secciones = landing.secciones.map((s): Seccion => {
+    if (s.tipo === "sobre_nosotros" && !s.contenido.texto?.trim()) return { ...s, contenido: { texto: SOBRE[tipo](nombre) } };
+    if (s.tipo === "preguntas" && !(s.contenido.items ?? []).length) return { ...s, contenido: { items: preguntasPorDefecto(tipo, hayProbar, hayPlanes) } };
+    if (s.tipo === "probar" && !s.contenido.texto?.trim()) return { ...s, contenido: { texto: PROBAR_TEXTO } };
+    return s;
+  });
+  const bajada = landing.portada.bajada?.trim() ? landing.portada.bajada : BAJADA[tipo];
+  return { ...landing, secciones, portada: { ...landing.portada, bajada } };
+}

@@ -7,6 +7,7 @@ import { AnotarseEvento } from "./AnotarseEvento";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
+import { conTextosPorDefecto } from "@/lib/landing-defaults";
 import { FormProbar } from "./FormProbar";
 import { Foto } from "./Foto";
 
@@ -338,7 +339,7 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
             <li key={e.evento_id} className="tarjeta p-6 space-y-2" data-evento-pagina={e.nombre}>
               {e.flyer && urlFotoProducto(e.flyer) && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} className="w-full max-h-80 rounded-[var(--radio)] object-cover" loading="lazy" />
+                <img src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} className="w-full aspect-[4/3] rounded-[var(--radio)] object-cover" loading="lazy" decoding="async" />
               )}
               <p className="titulo text-2xl">{e.nombre}</p>
               <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas && e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>
@@ -419,8 +420,11 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   );
 }
 
-export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
+export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
+  // VD-62: lo que el dueño no cargó se completa con un texto sensato según el tipo de gimnasio (nunca un hueco).
+  const landing = conTextosPorDefecto(landingCargada);
   const { marca, portada, contacto } = landing;
+  const video = portada.video_url ?? null;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
   const hayPlanes = landing.planes.length > 0 && landing.secciones.some((s) => s.tipo === "planes");
   const hayProbar = landing.secciones.some((s) => s.tipo === "probar");
@@ -446,19 +450,24 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       </header>
       <AvisoCierres agenda={agenda} />
 
-      {foto ? (
+      {foto || video ? (
         <section className="px-4 pt-4 pb-6">
-          <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end">
-            <Foto src={foto} alt="" prioridad sizes="(min-width: 1024px) 1024px, 100vw" />
+          <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end bg-neutral-900" data-portada={video ? "video" : "foto"}>
+            {foto && <Foto src={foto} alt="" prioridad sizes="(min-width: 1024px) 1024px, 100vw" />}
+            {/* Video mudo y en bucle sobre la foto (que hace de póster). Con "reducir movimiento" no se muestra: queda la foto. */}
+            {video && (
+              <video className="video-portada absolute inset-0 w-full h-full object-cover" src={video} poster={foto ?? undefined}
+                autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="relative p-6 sm:p-12 text-white">
+            <div className="relative p-6 sm:p-12 text-white aparecer">
               <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
-              {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/80 max-w-[36ch]">{portada.bajada}</p>}
+              {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
               <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
-                {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+                {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis>🎁 Probá gratis</a>}
+                {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
                 {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
-                {hayProbar && <a href="#probar" className="boton text-lg px-8 bg-white/15 text-white border-white/30">🙋 Probá una clase</a>}
               </div>
             </div>
           </div>
@@ -471,9 +480,9 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
             <Senales landing={landing} ahora={ahora} />
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
-              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis>🎁 Probá gratis</a>}
+              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
               {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
-              {hayProbar && <a href="#probar" className="boton text-lg px-8 w-full sm:w-auto">🙋 Probá una clase</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>
