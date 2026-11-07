@@ -70,6 +70,8 @@ function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: s
           </div>
         );
       })}
+      {/* VD-63: el centro de ayuda, para todos los roles (no depende de ninguna sección). */}
+      <div className="space-y-0.5"><Item s={{ ruta: "/panel/ayuda", emoji: "❓", titulo: "Ayuda", descripcion: "Preguntas cortas y cómo se hace" }} actual={actual} alElegir={alElegir} /></div>
     </nav>
   );
 }
@@ -118,7 +120,7 @@ export function Navegacion(props: Props) {
       {/* Compu: barra lateral fija */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
         <p className="titulo text-2xl px-3 flex items-center gap-3 min-w-0"><Logo url={props.logo} tam="h-10 max-w-28" /><span className="truncate">{props.gimnasio}</span></p>
-        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} /></div>
+        <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} rol={props.rol} /></div>
         <Menu props={props} actual={actual} pendientes={pendientes} />
         <div className="mt-auto pt-8 space-y-3">
           <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
@@ -131,7 +133,7 @@ export function Navegacion(props: Props) {
       <header className="lg:hidden sticky top-0 z-30 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
         <div className="flex items-center gap-3 px-4 h-14">
           <p className="titulo text-xl flex-1 flex items-center gap-2 min-w-0"><Logo url={props.logo} tam="h-8 max-w-24" /><span className="truncate">{props.gimnasio}</span></p>
-          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} compacto />
+          <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} rol={props.rol} compacto />
         </div>
       </header>
 

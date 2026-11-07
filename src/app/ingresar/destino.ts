@@ -24,6 +24,13 @@ export function sinConexion(e: { message?: string; status?: number; name?: strin
 }
 export const TEXTO_SIN_CONEXION = "No pudimos conectarnos. Revisá tu internet y probá de nuevo.";
 
+/** VD-61: true cuando el servicio de cuentas frenó por demasiados intentos seguidos (el límite es de ellos; el nuestro es SEG-1). */
+export function demasiadosIntentos(e: { message?: string; status?: number; code?: string } | null | undefined) {
+  return !!e && (e.status === 429 || /rate.?limit|over_.*_(limit|rate)|too many|security purposes/i.test(`${e.code ?? ""} ${e.message ?? ""}`));
+}
+export const TEXTO_DEMASIADOS_INTENTOS = "Hiciste muchos intentos seguidos. Probá de nuevo en 1 minuto.";
+export const TEXTO_CODIGO_MALO = "El código no es correcto o venció. Pedí uno nuevo.";
+
 type Cliente = Awaited<ReturnType<typeof crearClienteServidor>>;
 export type Destino = { destino?: string; error?: string };
 

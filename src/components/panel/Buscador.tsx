@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { crearTareaRapida } from "@/app/panel/tareas/acciones";
-import type { Seccion } from "@/lib/panel/secciones";
+import type { Rol, Seccion } from "@/lib/panel/secciones";
 import { accionesPara, comandoPermitido, ejemplosDe, NECESITA_ARG, sinAcentos, sinVerboIr, verbosPermitidos, type Accion } from "@/lib/panel/comandos";
+import { buscarPreguntas, preguntasPara, type PreguntaAyuda } from "@/lib/ayuda-preguntas";
 import { Hoja } from "@/components/ui/Hoja";
 import { PuntoEstado } from "./Estado";
 import { abrirCobrar } from "./cobrar/evento";
@@ -15,14 +16,15 @@ import { EVENTO_ABRIR_ENTRADA_CON } from "./VentanaEntrada";
 type Fila =
   | { grupo: "Acciones"; clave: string; accion: Accion }
   | { grupo: "Socios"; clave: string; socio: ResultadoSocio }
-  | { grupo: "Pantallas"; clave: string; seccion: Seccion };
+  | { grupo: "Pantallas"; clave: string; seccion: Seccion }
+  | { grupo: "Ayuda"; clave: string; pregunta: PreguntaAyuda };
 
 /**
  * Ctrl+K: ir a una pantalla, abrir la ficha de un socio o hacer una acción ("cobrar juan", "entrada 12345678",
  * "nuevo socio", "tarea llamar a Pedro"). VD-29: lo que se ofrece sale de las secciones que ve el rol (nada de
  * una lista de permisos aparte) y el intérprete es `lib/panel/comandos.ts`.
  */
-export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = false, puedeCobrar = false }: { secciones: Seccion[]; buscaSocios: boolean; compacto?: boolean; soloVer?: boolean; puedeCobrar?: boolean }) {
+export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = false, puedeCobrar = false, rol }: { secciones: Seccion[]; buscaSocios: boolean; compacto?: boolean; soloVer?: boolean; puedeCobrar?: boolean; rol?: string }) {
   const [abierto, setAbierto] = useState(false);
   const [texto, setTexto] = useState("");
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
@@ -79,6 +81,10 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
     ...sociosVisibles.map((s): Fila => ({ grupo: "Socios", clave: s.socio_id, socio: s })),
     ...secc.map((s): Fila => ({ grupo: "Pantallas", clave: s.clave, seccion: s })),
   ];
+  // VD-63: preguntas del centro de ayuda ("¿cómo anulo un cobro?"). Solo con una búsqueda de texto, y solo las de pantallas que esta persona ve.
+  const preguntas = useMemo(() => preguntasPara("panel", { rol: rol as Rol | undefined, secciones }), [rol, secciones]);
+  const ayudas = !cmd && texto.trim().length >= 3 ? buscarPreguntas(preguntas, texto, 4) : [];
+  filas.push(...ayudas.map((p): Fila => ({ grupo: "Ayuda", clave: p.id, pregunta: p })));
   const tope = filas.length;
   useEffect(() => setMarcado(0), [texto, socios.length]);
   useEffect(() => { document.querySelector("[data-fila-marcada]")?.scrollIntoView({ block: "nearest" }); }, [marcado, tope]);
@@ -113,6 +119,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
     if (!f) return;
     if (f.grupo === "Acciones") ejecutar(f.accion);
     else if (f.grupo === "Socios") ir(`/panel/socios/${f.socio.socio_id}`);
+    else if (f.grupo === "Ayuda") ir(`/panel/ayuda?p=${f.pregunta.id}`);
     else ir(f.seccion.ruta);
   };
 
@@ -209,6 +216,22 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                         </Link>
                         {puedeCobrar && !s.dado_de_baja && <button type="button" className="boton !min-h-11 flex-none" data-buscador-cobrar onClick={() => cobrarA(s.socio_id)}>💵 Cobrar</button>}
                       </div>
+                    </div>
+                  );
+                }
+                if (f.grupo === "Ayuda") {
+                  const q = f.pregunta;
+                  return (
+                    <div key={`h-${f.clave}`}>
+                      {cab}
+                      <Link href={`/panel/ayuda?p=${q.id}`} onClick={() => setAbierto(false)} {...marcaProps} data-buscador-ayuda={q.id}
+                        className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
+                        <span className="text-xl w-7 text-center flex-none" aria-hidden>❓</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold truncate">{q.pregunta}</span>
+                          <span className="block text-sm texto-suave truncate">{q.pantalla}</span>
+                        </span>
+                      </Link>
                     </div>
                   );
                 }

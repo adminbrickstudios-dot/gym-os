@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -86,7 +87,10 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{texto.titulo}</p>
             <p className="texto-suave mt-0.5">{texto.texto}</p>
-            <button type="button" data-ayuda-entendido onClick={entendido} className="boton mt-3 !min-h-11">Entendido</button>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button type="button" data-ayuda-entendido onClick={entendido} className="boton !min-h-11">Entendido</button>
+              <Link href={ambito === "panel" ? "/panel/ayuda" : "/app/ayuda"} onClick={entendido} data-ayuda-mas className="underline texto-suave inline-flex items-center min-h-11 px-2">Más ayuda</Link>
+            </div>
           </div>
         </section>
       )}

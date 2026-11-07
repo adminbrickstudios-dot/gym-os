@@ -30,33 +30,34 @@ export const RUTAS_APP: Record<string, string> = {
 };
 
 export const AYUDAS: Record<string, Ayuda> = {
+  // VD-63: una línea que dice qué es y qué hacer. Sin repetir el título ni llenar.
   inicio: {
     emoji: "🏠", titulo: "Tu inicio",
-    texto: "Acá ves cómo viene el día y lo que hay que hacer. Tocá un número o un acceso para ir directo.",
+    texto: "Así viene el día y lo que falta hacer. Tocá un número o un acceso para ir directo.",
     porRol: {
-      recepcion: "Lo primero que necesitás para el mostrador: quién vence hoy y lo pendiente. Tocá un acceso para ir directo.",
-      profe: "Tus clases de hoy y tus socios, al alcance. Tocá un acceso para ir directo.",
+      recepcion: "Quién vence hoy y lo pendiente del mostrador. Tocá un acceso para ir directo.",
+      profe: "Tus clases de hoy y tus socios. Tocá un acceso para ir directo.",
     },
   },
   entrada: {
     emoji: "🚪", titulo: "Entrada",
-    texto: "Tipeá el DNI o escaneá el QR: la pantalla dice si pasa y, si no, por qué. Verde pasa, rojo se frena.",
-    porRol: { recepcion: "Cuando llega alguien, tipeá su DNI: te dice si pasa y por qué. Si no pasa, desde acá le cobrás." },
+    texto: "Tipeá el DNI o escaneá el QR: verde pasa, rojo se frena y dice por qué.",
+    porRol: { recepcion: "Tipeá el DNI de quien llega: te dice si pasa y por qué; si no pasa, cobrale desde acá." },
   },
   socios: {
     emoji: "👥", titulo: "Socios",
-    texto: "Buscá por nombre, DNI o teléfono. Tocá un socio para ver su ficha, cobrarle o escribirle.",
-    porRol: { recepcion: "Escribí nombre, DNI o teléfono y tocá al socio: desde su ficha cobrás y anotás. Para uno nuevo, “Nuevo socio”." },
+    texto: "Buscá por nombre, DNI o teléfono y tocá al socio: desde su ficha cobrás, anotás y escribís.",
+    porRol: { recepcion: "Buscá al socio y tocalo: desde su ficha cobrás y anotás. Para uno nuevo, “Nuevo socio”." },
   },
   vencen_hoy: {
     emoji: "⏰", titulo: "Vencen y cobrar",
-    texto: "Esta es la lista de a quién avisarle y cobrarle antes de que se vaya. Tocá “Cobrar” en cada uno o mandale el mensaje listo.",
-    porRol: { recepcion: "Los que vencen hoy o ya vencieron. Tocá “Cobrar” cuando pasen por el mostrador, o mandales el aviso." },
+    texto: "A quién avisarle y cobrarle antes de que se vaya: tocá “Cobrar” o mandale el mensaje listo.",
+    porRol: { recepcion: "Los que vencen hoy o ya vencieron: cobrales en el mostrador o mandales el aviso." },
   },
   caja: {
     emoji: "💵", titulo: "Caja",
-    texto: "Abrí la caja al empezar el turno y cerrala al terminar, contando la plata. Todo lo que cobrás queda anotado acá.",
-    porRol: { recepcion: "Abrí tu turno al llegar y cerralo al irte, contando lo que hay. Lo que cobrás queda a tu nombre." },
+    texto: "Abrí la caja al empezar el turno y cerrala contando la plata: todo lo que cobrás queda anotado.",
+    porRol: { recepcion: "Abrí tu turno al llegar y cerralo al irte contando lo que hay: lo que cobrás queda a tu nombre." },
   },
   cobrar: {
     emoji: "🛒", titulo: "Productos y cobros",
@@ -64,23 +65,23 @@ export const AYUDAS: Record<string, Ayuda> = {
   },
   tareas: {
     emoji: "✅", titulo: "Para hacer hoy",
-    texto: "Lo que hay que hacer hoy, con quién y para cuándo. Tildá lo que vayas terminando; lo que sobra pasa a mañana.",
+    texto: "Lo que hay que hacer hoy, con quién y para cuándo: tildá lo terminado y lo que sobra pasa a mañana.",
   },
   planes: {
     emoji: "🏷️", titulo: "Planes y servicios",
-    texto: "Lo que vendés y cuánto cuesta. Tocá un plan para cambiar precio o reglas; los socios que ya lo tienen no se tocan.",
+    texto: "Lo que vendés y cuánto cuesta: tocá un plan para cambiar precio o reglas (los socios que ya lo tienen no se tocan).",
   },
   configuracion: {
     emoji: "⚙️", titulo: "Configuración",
-    texto: "Tu marca, tus horarios, las reglas de cobro y qué secciones usás. Si buscás algo, escribilo arriba.",
+    texto: "Tu marca, horarios, reglas de cobro y secciones. Escribí arriba lo que buscás.",
   },
   control: {
     emoji: "🛡️", titulo: "Control",
-    texto: "Todo lo que pasó con la plata y la puerta, en orden y con quién lo hizo. Filtrá por día o por persona para revisar algo puntual.",
+    texto: "Todo lo que pasó con la plata y la puerta, y quién lo hizo. Filtrá por día o por persona.",
   },
   app_inicio: {
     emoji: "👋", titulo: "Tu inicio",
-    texto: "Acá ves si estás al día y qué te toca hoy. Tu código QR para entrar está abajo.",
+    texto: "Si estás al día y qué te toca hoy. Tu QR para entrar está más abajo.",
   },
   app_clases: {
     emoji: "🗓️", titulo: "Clases",
@@ -88,7 +89,7 @@ export const AYUDAS: Record<string, Ayuda> = {
   },
   app_rutina: {
     emoji: "💪", titulo: "Tu rutina",
-    texto: "Tu rutina del día. Anotá el peso de cada ejercicio y marcá cuando terminás: así ves cómo progresás.",
+    texto: "Tu rutina del día: anotá el peso de cada ejercicio y marcá cuando terminás.",
   },
   app_yo: {
     emoji: "🙋", titulo: "Yo",

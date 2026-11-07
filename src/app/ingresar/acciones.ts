@@ -2,7 +2,7 @@
 import { headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
-import { TEXTO_SIN_CONEXION, destinoTrasEntrar, sinConexion } from "./destino";
+import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_SIN_CONEXION, demasiadosIntentos, destinoTrasEntrar, sinConexion } from "./destino";
 import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
@@ -20,6 +20,7 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
   if (error) {
     // Mismo texto para toda falla de la cuenta (no existe, clave mala, sin confirmar): no revela quién tiene cuenta.
     if (sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email };
+    if (demasiadosIntentos(error)) return { error: TEXTO_DEMASIADOS_INTENTOS, email };
     return { error: (error.status ?? 400) >= 500 ? "No pudimos iniciar sesión ahora. Probá de nuevo en un rato." : "El mail o la contraseña no son correctos", email };
   }
   const r = await destinoTrasEntrar(supabase, String(form.get("siguiente") ?? "") || null);
@@ -63,7 +64,7 @@ export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<Esta
   if (limite) return { error: limite, telefono };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ phone: telefono });
-  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : `No pudimos mandarte el código: ${error.message}`, telefono };
+  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : `No pudimos mandarte el código: ${error.message}`, telefono };
   return { enviado: true, telefono };
 }
 
@@ -77,7 +78,7 @@ export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase.auth.verifyOtp({ phone: telefono, token: codigo, type: "sms" });
   if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION, telefono, enviado: true };
-  if (error || !data.user) return { error: "El código no es correcto o venció. Pedí uno nuevo.", telefono, enviado: true };
+  if (error || !data.user) return { error: demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : TEXTO_CODIGO_MALO, telefono, enviado: true };
 
   const gimnasioId = (await headers()).get("x-gimnasio-id");
   if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", telefono };
@@ -103,7 +104,7 @@ export async function pedirCodigoMail(_: EstadoCodigoMail, form: FormData): Prom
   if (limite) return { error: limite, email };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : `No pudimos mandarte el código: ${error.message}`, email };
+  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : `No pudimos mandarte el código: ${error.message}`, email };
   return { enviado: true, email };
 }
 
@@ -114,7 +115,7 @@ export async function verificarCodigoMail(_: EstadoCodigoMail, form: FormData): 
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase.auth.verifyOtp({ email, token: codigo, type: "email" });
   if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email, enviado: true };
-  if (error || !data.user) return { error: "El código no es correcto o venció. Pedí uno nuevo.", email, enviado: true };
+  if (error || !data.user) return { error: demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : TEXTO_CODIGO_MALO, email, enviado: true };
 
   const gimnasioId = (await headers()).get("x-gimnasio-id");
   if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", email };
@@ -147,7 +148,7 @@ export async function pedirRecuperacion(_: EstadoRecuperar, form: FormData): Pro
   // se traga a propósito (solo quedan visibles la falta de conexión y el límite de envíos).
   const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
   if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email };
-  if (error && /rate.?limit|over_/i.test(`${error.code ?? ""} ${error.message}`)) return { error: "Pediste muchos códigos seguidos. Esperá un minuto y probá de nuevo.", email };
+  if (error && demasiadosIntentos(error)) return { error: TEXTO_DEMASIADOS_INTENTOS, email };
   return { enviado: true, email };
 }
 
@@ -157,7 +158,7 @@ export async function verificarRecuperacion(_: EstadoRecuperar, form: FormData):
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase.auth.verifyOtp({ email, token: codigo, type: "email" });
   if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email, enviado: true };
-  if (error || !data.user) return { error: "El código no es correcto o venció. Pedí uno nuevo.", email, enviado: true };
+  if (error || !data.user) return { error: demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : TEXTO_CODIGO_MALO, email, enviado: true };
   return { email, enviado: true, verificado: true };
 }
 

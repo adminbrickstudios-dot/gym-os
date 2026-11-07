@@ -64,7 +64,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
           )}
           {/* CAJ-3: en esta compu alguien puso su PIN: lo que se haga queda a su nombre. */}
           {atiende && (
-            <p className="pildora mb-6 !text-base" data-atiende={atiende}>👤 Atiende {atiende} · <Link href="/panel/pin" className="underline">Cambiar</Link></p>
+            // VD-61: fija arriba mientras se scrollea: cambiar de persona (con el PIN, sin cerrar sesión) siempre a un toque.
+            <p className="pildora mb-6 !text-base sticky top-2 z-30 !pr-1 backdrop-blur" data-atiende={atiende}>👤 Atiende {atiende} · <Link href="/panel/pin" className="underline inline-flex items-center min-h-11 px-3" data-cambiar-persona>Cambiar</Link></p>
           )}
           <ProveedorSecciones rol={rol} apagadas={panel.secciones_apagadas}>{children}</ProveedorSecciones>
         </main>
