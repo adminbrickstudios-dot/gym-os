@@ -1,3 +1,5 @@
+> **06/11: reemplazado por `CIERRE.md`** (el cierre corre en Claude Code en la nube). Esto queda como historia de la noche del 05/11.
+
 # La noche desde Windows (Claude Code en la compu de Mateo)
 
 Sos el agente de Gym OS trabajando toda la noche desde la compu de Mateo

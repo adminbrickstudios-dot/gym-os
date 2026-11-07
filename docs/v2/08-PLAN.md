@@ -320,3 +320,55 @@ LISTO SI: tabla de tiempos antes/después en el LOG (15 pantallas × rol,
 como mucho 1 viaje a Supabase por pedido (contado en la prueba); cambiar la
 marca o un plan se ve al instante (revalidación); ningún dato de permisos o
 plata en caché (prueba: dos roles ven lo suyo).
+
+## F · Cierre (06/11, bloque 21 · `CIERRE.md`)
+
+**VD-48 · Salida opcional (D30)** (`17` §1)
+Configuración → Entrada: "Registrar la salida" no / opcional / obligatoria.
+Con salida: el segundo paso dentro de la visita pregunta "¿Entra o sale?"
+(o se elige "Salida" en la ventana con la tecla S); en el kiosco y el QR de
+pared, un botón "Me voy". La salida cierra la visita (hecho, no columna);
+"adentro ahora" cuenta visitas abiertas. Sin salida, la visita se cierra
+sola a las N horas (D24). Nunca cambia quién puede entrar.
+LISTO SI: db con momentos fijos: entrar → salir → "adentro" baja; salida
+sin entrada abierta no rompe; obligatoria: entrar de nuevo sin salir avisa;
+e2e: DNI → entra → DNI + S → "Chau, estuviste 1 h 20".
+
+**VD-49 · Efectivo sin caja (D32)** (`17` §2-3)
+LISTO SI: db: venta en efectivo sin caja abierta de esa persona/sede da
+error claro; esperado = fondo + efectivo − retiros con números fijos; e2e:
+Cobrar en efectivo sin turno → "Abrir mi turno" con el fondo en la misma
+hoja → cobra → la caja muestra el cobro.
+
+**VD-50 · Doble cobro (D29)**
+LISTO SI: db: misma cuota y período del mismo socio cobrada hace < N min
+por otra operación → error 'ya_cobrada' con quién y cuándo, salvo
+`confirmar=true` con motivo (queda el motivo); e2e con dos sesiones.
+
+**VD-51 · Prueba gratis (D31)**
+Configuración → Planes: prueba gratis no / 1 día / 1 clase, una vez por DNI
+y gimnasio. Desde la Entrada (DNI nuevo o interesado: "Dar prueba gratis")
+y desde la página ("Probá una clase": elige clase, deja nombre, DNI y
+celular, queda Interesado con la reserva). `calcular_acceso` da verde "En
+prueba" ese día/clase; segunda vez con el mismo DNI: "ya usó su prueba el…".
+LISTO SI: db: una vez por DNI, cuenta como entrada, no como socio activo;
+e2e: interesado reserva desde la página → la recepción lo deja entrar en
+verde → al día siguiente rojo con "Hacete socio".
+
+**VD-52 · Liquidación de profes (D33)**
+Regla por profe (por clase dictada, por presente, por hora con el fichaje
+de VD-53 o cargada a mano) con montos; resumen del mes por profe para el
+dueño (y encargado si se prende); el profe ve el suyo en Mi cuenta; "pagar"
+registra el pago (sale de caja o transferencia) con comprobante.
+LISTO SI: db: corregir una asistencia recalcula; el profe no ve a otros;
+e2e: dueño ve el mes, marca pagado, el profe lo ve.
+
+**VD-60 · Grilla y TV para recepción y profe (D34)**
+LISTO SI: barrido: recepción y profe abren y usan grilla y TV sin "sin
+permiso" ni pantalla rota; la base permite lo mismo que la página.
+
+**VD-59 · "Che, me pasó esto"** (`17`, `CHE-ME-PASO.md`)
+LISTO SI: 40 consultas con su respuesta o su ítem.
+
+**VD-53 a VD-58**: ver `20-LO-QUE-FALTA.md`. Cada uno con prueba de base
+(permisos por rol, montos con números fijos) y e2e del recorrido.

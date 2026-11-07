@@ -35,6 +35,11 @@ quién paga, cuándo paga, y quién dejó de venir**.
 | `13-CONFIABILIDAD-Y-ESCALA.md` | Nada dos veces, nada se pierde, nada se cae, miles a la vez |
 | `14-SITUACIONES.md` | Lo que pasa todos los días en un gimnasio, del más grande al más chico |
 | `15-RECOMENDACIONES.md` | Lo que se puede estar escapando (producto, negocio, mañana) |
+| `CIERRE.md` | **Cómo se termina (06/11)**: verificar todo con sesión real, lo que decidió Mateo, sección por sección, publicar |
+| `17-SECCION-POR-SECCION.md` | Qué tiene que andar en cada sección, con sus opciones, y "che, me pasó esto" |
+| `18-DOMINIO-Y-NEGOCIOS.md` | El dominio, cada gimnasio separado, y cómo crear un gimnasio nuevo |
+| `19-SEMANA-DE-PRUEBA.md` | La semana de prueba con el primer gimnasio |
+| `20-LO-QUE-FALTA.md` | Lo que no estábamos pensando (bloque 21) |
 | `16-RAPIDEZ-Y-FLUIDEZ.md` | Dónde se va el tiempo hoy, cómo se hace rápido, y el sistema de movimiento |
 | `NOCHE-WINDOWS.md` | Cómo trabaja el agente de noche desde la compu de Mateo (Windows) |
 
@@ -86,6 +91,7 @@ de ruta (D17 a D28) con su ✅.
 | D26 | Socio que se registra solo | **Socio sin pagar** con su plan; paga desde la app y entra cuando paga. |
 | D27 | Consultas y quejas | **Mensajes en la app**, que llegan al panel con número de pendientes. |
 | D28 | Cambiar de plan desde la app | **Sí, lo pide y lo paga** (con lo que le queda a favor). |
+| D29-D35 | (06/11) Doble cobro frena · salida opcional · prueba gratis · efectivo pide abrir la caja · liquidación de profes · grilla y TV también para recepción y profe · repo público y cierre en la nube | ver la hoja de ruta |
 
 ## Cómo se trabaja
 

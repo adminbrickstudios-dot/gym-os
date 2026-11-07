@@ -73,6 +73,13 @@ mientras no tenga ✅).
 | D26 | Socio que se registra solo | Queda socio sin pagar con el plan que eligió; ve horarios y paga desde la app; entra cuando paga. El dueño lo puede apagar. | ✅ |
 | D27 | Dudas, consultas y quejas de los socios | Mensajes dentro de la app con categoría y foto; llegan al panel con número de pendientes y se contestan ahí. | ✅ |
 | D28 | ¿El socio cambia de plan o compra pases desde la app? | Sí: elige, ve lo que le queda a favor (D6) y paga online o por transferencia; aprobación del dueño opcional. | ✅ |
+| D29 | Dos personas cobran la misma cuota casi a la vez (REV-6a) (06/11) | Frena: "Sofi ya cobró esta cuota hace 40 s" y solo sigue con confirmación y motivo. | ✅ |
+| D30 | ¿Se registra la salida? | Opcional y configurable: si escanea o pone el DNI al irse, se anota y "adentro ahora" es exacto; si no, la visita se cierra sola a las N horas. | ✅ |
+| D31 | Prueba gratis (REV-1c, CLA-6) | Sí, configurable: 1 día o 1 clase gratis, una vez por DNI; desde la Entrada y clase de prueba para interesados desde la página. Todo registrado. | ✅ |
+| D32 | Efectivo sin caja abierta | Cobrar ofrece abrir el turno con el fondo en la misma hoja y sigue; transferencia y tarjeta cobran sin caja. | ✅ |
+| D33 | Liquidación de los profes (COM-15) | Sí, con reglas por profe: por clase dictada, por alumno presente o por hora; resumen del mes; el profe ve el suyo; se recalcula si se corrige la asistencia. | ✅ |
+| D34 | Grilla de clases y TV de la sala | Recepción y profe también pueden abrirlas y usarlas (como hoy). Se deja consistente: la página y la base permiten lo mismo. | ✅ |
+| D35 | GitHub Actions bloqueado por facturación | El repo pasa a público (Actions gratis). El cierre corre en Claude Code en la nube, donde se prueba todo en la máquina. | ✅ |
 
 ### Decisiones que tomó el agente
 
@@ -357,7 +364,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [x] CLA-3 · 🟢 · Cancelar una clase avisando a los anotados — verificado: db (bandeja-avisos: el anotado con el mensaje armado, primero, avisado ✓; mensajes: 11), e2e:cla-3 (la recepción cancela, Avisos de hoy y la campana del socio)
 - [x] CLA-4 · 🟢 · WOD / rutina del día en la clase — verificado: db (wod: el profe en su clase, no en otra, la recepción no, vacío lo borra, lo ve el anotado), e2e:cla-4
 - [x] CLA-5 · 🟢 · Ocupación por horario — verificado: db (ocupacion: promedio de los que vinieron contra el cupo, canceladas no cuentan, la recepción no), e2e:clases (la sección en la grilla)
-- [!] CLA-6 · 🟢 · Clase de prueba para prospectos — trabado: hoy toda reserva es de un socio y la clase de prueba da entrada sin pagar (toca "¿puede entrar?"). Decidí: ¿se lo da de alta como socio sin plan con una clase gratis, o se anota el prospecto sin ser socio? ¿y la puerta lo deja pasar ese día?
+- [x] CLA-6 · 🟢 · (destrabado por D31: se hace en VD-51) Clase de prueba para prospectos — trabado: hoy toda reserva es de un socio y la clase de prueba da entrada sin pagar (toca "¿puede entrar?"). Decidí: ¿se lo da de alta como socio sin plan con una clase gratis, o se anota el prospecto sin ser socio? ¿y la puerta lo deja pasar ese día?
 - [x] CLA-7 · 🟢 · Anular un presente marcado por error — verificado: db (anular-presente: con motivo, el profe solo en sus clases, dos veces no, la recepción dentro del día), e2e:clases (deshacer con motivo)
 - [x] CLA-8 · 🟢 · Editar actividades y horarios sin sacarlos (de AUD-9) — verificado: db (editar-horario: cupo y profe a las clases futuras, la reservada conserva la hora, sin duplicados, el cupo no baja de lo reservado), e2e:clases (editar hora y cupo)
 - [x] CLA-9 · 🟢 · Faltas: descontar la clase del pack (tercera opción de D16) — verificado: db (faltas-pack: puerta, reserva, ficha; presente, entró ese día y regla en "nada" no cuentan; presente tarde), e2e:cla-9 (pendiente de la tanda final)
@@ -432,10 +439,10 @@ bloque 18.
 ### 18 · Lo que encontró la segunda pasada
 - [x] REV-1a · 🟢 · "Le prometió pagar": al que dejaron pasar con un motivo de pago ("paga a la tarde", "paga mañana"), recordárselo a la recepción esa tarde y al día siguiente (Vencen hoy / Avisos), calculado de las entradas forzadas, sin guardar estado — verificado: db (prometieron-pagar: hoy y ayer, sale solo al pagar, la recepción ve los suyos), e2e:rev-1 (en la tanda)
 - [x] REV-1b · 🟢 · El WhatsApp al prospecto lleva el link de la página del gimnasio — hecho sin tocar la plantilla: el link va abajo del mensaje, solo si la página está publicada (verificado: e2e:rev-1, en la tanda)
-- [ ] REV-1c · 🟡 · Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
+- [x] REV-1c · 🟡 · (decidido D31: se hace en VD-51) Pase de prueba gratis, una vez por DNI (lo pide el día a día de las 10:00) — da acceso sin pagar: decide Mateo si se hace y con qué tope
 - [ ] REV-1d · 🟡 · Retiro de caja para el proveedor: sumar el stock en el mismo paso (la foto del ticket ya estaba, CAJ-4). La entrada de mercadería hoy la cargan solo el dueño y el encargado: ¿la recepción también, cuando paga al proveedor? — decide Mateo (es darle un permiso)
 - [x] REV-2a · 🟢 · Sumar una sede desde Configuración (hoy solo se editan las que hay): con su caja (ya se crea sola), su entrada y su grilla — verificado: db (sumar-sede: caja sola, repetida y vacía avisan, encargado y recepción no), e2e:cliente (en la tanda)
-- [ ] REV-6a · 🟡 · Dos personas cobran la cuota del mismo socio a la vez: hoy quedan las dos ventas (cubre dos meses). El día a día pide que la segunda vea "ya se cobró hace 10 s" — toca plata: decide Mateo cómo (frenar la segunda cuota del mismo período en unos segundos, o avisar y dejar)
+- [x] REV-6a · 🟡 · (decidido D29: se hace en VD-50) Dos personas cobran la cuota del mismo socio a la vez: hoy quedan las dos ventas (cubre dos meses). El día a día pide que la segunda vea "ya se cobró hace 10 s" — toca plata: decide Mateo cómo (frenar la segunda cuota del mismo período en unos segundos, o avisar y dejar)
 
 ### 19 · Lo que tiene la competencia y nos falta (pedido de Mateo, 04/11 · `docs/producto/12-COMPETENCIA.md`)
 - [x] COM-1 · 🟢 · Riesgo de baja de cada socio, con el porqué y la acción al lado — verificado: db (riesgo-baja: dejó de venir y vence → alto, viene igual → nada, pidió la baja → alto, vencido → no, la ficha de uno, sin permiso → error); demo de 3.000: 289 en riesgo en 0,13 s; e2e:com-1 (en la tanda). "No abre la app" no entra: la app no registra cuándo se abre
@@ -455,7 +462,7 @@ bloque 18.
 - [x] COM-12 · 🟢 · Reservar un lugar puntual (bici, reformer) en el mapa de la sala — verificado: db (lugares-sala: numerar, fuera de servicio, dos no tienen el mismo lugar por índice único, en espera no elige, cancelar libera, profe solo sus clases), vitest (leerNumeros), e2e:com-12 (en la tanda)
 - [x] COM-13 · 🟢 · Grados y cinturones (artes marciales) con "listos para rendir" — verificado: db (grados: armar, listos para rendir, profe otorga, fecha futura no, socio ve su progreso, anular vuelve al grado anterior), vitest (textoRequisitos), e2e:com-13 (en la tanda)
 - [x] COM-14 · 🟢 · TV de la sala: clase de ahora, WOD y anotados en grande — verificado: db (tv-sala: solo dueño/encargado crea, token se ve una vez y no se lee la tabla, clase de ahora con WOD y anotados con inicial, el que vino sin reservar aparece presente, el token no sirve de tablet, revocada no ve), e2e:com-14 (en la tanda)
-- [ ] COM-15 · 🟡 · Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
+- [x] COM-15 · 🟡 · (decidido D33: se hace en VD-52) Liquidación de los profes (clases dictadas → lo que se le paga) — toca plata: decide Mateo
 - [ ] COM-16 · 🔌 · Factura electrónica ARCA por cada cobro (necesita el certificado de cada gimnasio; P3)
 - [ ] COM-17 · 🔌 · Wellhub y TotalPass: el check-in de la plataforma cuenta como entrada
 
@@ -491,7 +498,7 @@ bloque 18.
 - [ ] VD-33F · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
 - [x] VD-6B · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular) — verificado: prospectos.dni y el alta lo ofrece por DNI; base en verde en GitHub (interesados-dni)
 - [ ] VD-6C · 🟢 · El primer pago del alta muestra el proporcional exacto del día fijo (depende de VD-7)
-- [ ] VD-2C · 🟡 CLA-6 · Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
+- [x] VD-2C · 🟡 CLA-6 · (pasa a VD-51) Situación "En prueba" definitiva (hoy provisoria: primera vez con pase o pack, solo informativa)
 - [ ] VD-3B · 🟢 · Foto del socio en el amarillo de anti-préstamo; chip de alertas de préstamo de la semana en Inicio del dueño; UltimasEntradas de Inicio con el mismo polling de 4 s (LISTO SI: aparece una entrada por QR en < 6 s sin recargar)
 - [ ] VD-4B · 🟢 · Aviso en vivo con el nombre de la sede para el dueño con varias sedes
 - [ ] VD-7B · 🟢 · La deuda de la puerta (para_regularizar) de quien se anota con día fijo usa el proporcional que cobra la hoja (LISTO SI: db: para_regularizar de un socio sin cobertura con día fijo = lo que cobra la hoja)
@@ -626,6 +633,21 @@ bloque 18.
 - [ ] VD-45 · 🔌 · SMTP propio (Resend) para que los mails de ingreso y "olvidé mi contraseña" anden en producción (Supabase manda 2 por hora sin esto)
 - [ ] VD-45B · 🔌 · Sentry para ver los errores de producción (la integración queda lista detrás de una variable)
 - [ ] VD-45C · 🔌 · Turnstile (CAPTCHA) en el registro y el envío de códigos
+
+### 21 · Cierre de Gym OS v2 (06/11 · `docs/v2/CIERRE.md`, detalle en `docs/v2/08-PLAN.md` §F)
+- [ ] VD-48 · 🟢 · Salida opcional (D30): marcar la salida con QR o DNI, "adentro ahora" exacto, la visita se cierra sola si no
+- [ ] VD-49 · 🟢 · Efectivo sin caja (D32): Cobrar ofrece abrir el turno en la misma hoja; la caja siempre cuadra (prueba con números fijos)
+- [ ] VD-50 · 🟢 · Doble cobro (D29): la misma cuota cobrada hace poco desde otra compu frena y pide confirmación con motivo
+- [ ] VD-51 · 🟢 · Prueba gratis (D31): 1 día o 1 clase, una vez por DNI, desde la Entrada; clase de prueba para interesados desde la página; situación "En prueba" definitiva
+- [ ] VD-52 · 🟢 · Liquidación de profes (D33): reglas por profe, resumen del mes, el profe ve el suyo, se recalcula al corregir asistencia
+- [ ] VD-60 · 🟢 · Grilla de clases y TV para recepción y profe (D34): página y base consistentes; barrido actualizado
+- [ ] VD-59 · 🟢 · "Che, me pasó esto": 40 consultas reales sección por sección (`docs/v2/17`), resueltas o convertidas en ítems (`docs/v2/CHE-ME-PASO.md`)
+- [ ] VD-53 · 🟢 · Fichaje del equipo con PIN (entrada y salida del staff, horas del mes)
+- [ ] VD-54 · 🟢 · Mantenimiento de máquinas: fuera de servicio con foto, responsable e historial
+- [ ] VD-55 · 🟢 · Lockers: alquiler con vencimiento, asignado a un socio, libre u ocupado
+- [ ] VD-56 · 🟢 · Recibo descargable o para compartir de cada pago
+- [ ] VD-57 · 🟢 · Día cerrado suma al vencimiento (regla del gimnasio)
+- [ ] VD-58 · 🟢 · Turnos con personal trainer (sesiones 1 a 1 con pack y agenda del PT)
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
