@@ -41,6 +41,10 @@ try {
   await regla.waitFor({ timeout: 30000 });
   await d.locator('[data-regla-cierres="no-suma"]').waitFor({ timeout: 30000 });
   ok("la regla de días cerrados arranca en “No suma días”");
+  // El socio testigo tiene que estar cubierto en los días del cierre: se le suma una cortesía de 40 días desde hoy (si no, la regla no tiene a quién correr).
+  await db.query(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, motivo)
+    select su.gimnasio_id, su.id, su.socio_id, privado.medianoche(((now() at time zone $2)::date), $2), privado.medianoche(((now() at time zone $2)::date) + 40, $2), 'cortesia', 'e2e vd-57'
+      from public.suscripciones su where su.socio_id = $1 and su.baja_en is null limit 1`, [socio, "America/Argentina/Buenos_Aires"]);
   const antes = await vence();
   let { cierres, previo } = await cargarCierre(d, "Feriado e2e 1");
   chequear((await previo.locator("[data-previo-texto]").innerText()).includes("no corre ningún vencimiento"), "con “no suma” el aviso dice que no corre ningún vencimiento", "el aviso no dice que no corre vencimientos");

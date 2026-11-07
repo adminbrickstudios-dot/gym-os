@@ -60,7 +60,7 @@ try {
   await rc.locator("[data-fichar-con-pin]").click();
   await rc.getByText(/Entrada fichada a las .*Ana/).waitFor({ timeout: 30000 });
   ok("con el PIN correcto ficha a nombre de quien lo puso");
-  chequear(await rc.locator("[data-mis-horas] [data-turno-estado]").count() >= 2, "Mis horas lista los turnos del mes", "Mis horas no lista los turnos");
+  await rc.waitForFunction(() => document.querySelectorAll("[data-mis-horas] [data-turno-estado]").length >= 2, null, { timeout: 30000 }).then(() => ok("Mis horas lista los turnos del mes (el que está en curso también)"), () => falla("Mis horas no lista los turnos"));
 
   // ── Un profe que se olvidó de fichar la salida (anteayer) ──
   await db.query(`insert into public.fichajes (gimnasio_id, equipo_id, entrada_en) values ($1,$2, now() - interval '2 days')`, [g, diego]);
