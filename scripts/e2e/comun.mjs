@@ -79,7 +79,11 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   };
   for (const metodo of ["goto", "reload", "waitForURL"]) {
     const original = p[metodo].bind(p);
-    p[metodo] = async (...a) => { const r = await original(...a); await listo(); return r; };
+    p[metodo] = async (...a) => {
+      // Antes de irse de una pantalla se espera a que terminen sus pedidos (una acción del servidor a medio contestar al cortar la carga deja errores de React en la página vieja).
+      if (metodo === "goto" && ultimaPagina === p) await p.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+      const r = await original(...a); await listo(); return r;
+    };
   }
   p.on("pageerror", (e) => p.errores.push(`error en la página (${p.url().replace(/^https?:[/][/][^/]+/, "")}): ${e.message.slice(0, 200)}`));
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
