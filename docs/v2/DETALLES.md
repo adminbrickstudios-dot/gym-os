@@ -88,7 +88,7 @@ VD-43B · VD-43C
 
 ## Grupo 8 · Navegación, configuración, números y velocidad
 VD-21B · VD-21C · VD-28B · VD-28C · VD-28D · VD-29B · VD-29C · VD-29D ·
-VD-30B · VD-16C · VD-25D
+VD-30B · VD-16C · VD-25D · VD-62 (el video de portada que queda después de borrarlo) · VD-63 (Ctrl+K → ayuda)
 
 ## Grupo 9 · Cierre
 VD-32 (segunda pasada de punta a punta: un día del dueño, de la recepción y
