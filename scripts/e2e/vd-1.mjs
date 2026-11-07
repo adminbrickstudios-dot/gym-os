@@ -123,7 +123,7 @@ try {
   // La recepción no abre Configuración: la barra "en esta compu" la deja puesta quien configuró esa compu (queda en el navegador).
   await r.evaluate(() => localStorage.setItem("gymos.entrada.en-esta-compu", JSON.stringify({ barra_fija: true })));
   await r.goto(`${G}/panel/caja`);
-  const barra = r.locator("[data-barra-entrada]");
+  const barra = r.locator("aside[data-barra-entrada]");
   await barra.waitFor({ timeout: 30000 });
   ok("barra fija: aparece a la derecha en Caja");
   await r.locator("[data-barra-dni]").fill(dni);
