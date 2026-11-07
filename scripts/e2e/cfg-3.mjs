@@ -57,7 +57,7 @@ try {
     "con un solo medio, Vender no ofrece pagar con dos", `Vender con un medio: ${enVender.join(", ")}`);
   await p.goto(`${G}/panel/configuracion?pestana=secciones`);
   await p.locator('fieldset[data-pestana-activa="secciones"]').waitFor({ timeout: 30000 });
-  await cont.locator("label", { hasText: "Caja" }).locator('input[role="switch"]').uncheck();
+  await cont.locator("label", { hasText: /^W*Caja(s|$)/ }).locator('input[role="switch"]').uncheck();
   m = await guardar("secciones");
   chequear(/Sin Caja no se cobra en efectivo/.test(m), `apagar Caja con solo efectivo → “${m}”`, `apagar Caja con solo efectivo dio “${m}”`);
 

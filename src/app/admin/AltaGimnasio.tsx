@@ -123,8 +123,8 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
           <div className="flex flex-wrap gap-2">
             {paso > 1 && <button type="button" className="boton" onClick={() => { setFalta(""); setPaso((p) => p - 1); }}>← Atrás</button>}
             {paso < 3
-              ? <button type="button" className="boton boton-principal" onClick={siguiente}>Siguiente →</button>
-              : <button type="submit" disabled={creando} className="boton boton-principal">{creando ? "Creando…" : "🏋️ Crear gimnasio"}</button>}
+              ? <button key="siguiente" type="button" className="boton boton-principal" onClick={siguiente}>Siguiente →</button>
+              : <button key="crear" type="submit" disabled={creando} className="boton boton-principal">{creando ? "Creando…" : "🏋️ Crear gimnasio"}</button>}
           </div>
         </form>
       )}

@@ -81,7 +81,7 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
     const original = p[metodo].bind(p);
     p[metodo] = async (...a) => { const r = await original(...a); await listo(); return r; };
   }
-  p.on("pageerror", (e) => p.errores.push(`error en la página: ${e.message.slice(0, 200)}`));
+  p.on("pageerror", (e) => p.errores.push(`error en la página (${p.url().replace(/^https?:[/][/][^/]+/, "")}): ${e.message.slice(0, 200)}`));
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
   p.on("dialog", (d) => d.accept());
   // E2E_CONSOLA=1: muestra los errores y advertencias de la consola del navegador (para investigar).
