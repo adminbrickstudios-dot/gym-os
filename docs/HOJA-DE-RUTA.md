@@ -256,9 +256,9 @@ que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 22 · Pedidos de Mateo del 07/11 (se hacen en la fase 5 de `docs/v2/CIERRE.md`, detalle en `docs/v2/21-PEDIDOS-07-11.md`)
-- [ ] VD-61 · 🟢 · Ingreso: segunda pasada (más lindo, cada caso de error y de "olvidé mi contraseña", registro claro, cambio rápido de persona en la recepción, probado en iPhone)
-- [ ] VD-62 · 🟢 · Página del gimnasio y página de Gym OS: segunda pasada visual y de contenido (fotos reales, prueba gratis, reseñas, planes, WhatsApp, rápida en el celular)
-- [ ] VD-63 · 🟢 · Información y ayuda: centro de ayuda por rol, "Info del gimnasio" en la app del socio, y los textos de ayuda de cada pantalla revisados
+- [x] VD-61 · 🟢 · Ingreso: segunda pasada (más lindo, cada caso de error y de "olvidé mi contraseña", registro claro, cambio rápido de persona en la recepción, probado en iPhone) — verificado: base en verde + e2e vd-61: 58 pasos en verde con sesión real (cierre 07/11)
+- [~] VD-62 · 🟢 · Página del gimnasio y página de Gym OS: segunda pasada visual y de contenido (fotos reales, prueba gratis, reseñas, planes, WhatsApp, rápida en el celular) — código y base en verde; el e2e no pasó del todo en el cierre (ver LOG)
+- [~] VD-63 · 🟢 · Información y ayuda: centro de ayuda por rol, "Info del gimnasio" en la app del socio, y los textos de ayuda de cada pantalla revisados — código y base en verde; el e2e no pasó del todo en el cierre (ver LOG)
 
 ### 0 · Base
 - [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
@@ -647,12 +647,12 @@ bloque 18.
 - [x] VD-52 · 🟢 · Liquidación de profes (D33): reglas por profe, resumen del mes, el profe ve el suyo, se recalcula al corregir asistencia — verificado: base en verde (db:pruebas) + e2e vd-52: 12 pasos en verde con sesión real (cierre 07/11)
 - [x] VD-60 · 🟢 · Grilla de clases y TV para recepción y profe (D34): página y base consistentes; barrido actualizado — verificado: base en verde (db:pruebas) + e2e vd-60: 24 pasos en verde con sesión real (cierre 07/11)
 - [ ] VD-59 · 🟢 · "Che, me pasó esto": 40 consultas reales sección por sección (`docs/v2/17`), resueltas o convertidas en ítems (`docs/v2/CHE-ME-PASO.md`)
-- [ ] VD-53 · 🟢 · Fichaje del equipo con PIN (entrada y salida del staff, horas del mes)
-- [ ] VD-54 · 🟢 · Mantenimiento de máquinas: fuera de servicio con foto, responsable e historial
-- [ ] VD-55 · 🟢 · Lockers: alquiler con vencimiento, asignado a un socio, libre u ocupado
-- [ ] VD-56 · 🟢 · Recibo descargable o para compartir de cada pago
-- [ ] VD-57 · 🟢 · Día cerrado suma al vencimiento (regla del gimnasio)
-- [ ] VD-58 · 🟢 · Turnos con personal trainer (sesiones 1 a 1 con pack y agenda del PT)
+- [x] VD-53 · 🟢 · Fichaje del equipo con PIN (entrada y salida del staff, horas del mes) — verificado: base en verde + e2e vd-53: 14 pasos en verde con sesión real (cierre 07/11)
+- [x] VD-54 · 🟢 · Mantenimiento de máquinas: fuera de servicio con foto, responsable e historial — verificado: base en verde + e2e vd-54: 13 pasos en verde con sesión real (cierre 07/11)
+- [x] VD-55 · 🟢 · Lockers: alquiler con vencimiento, asignado a un socio, libre u ocupado — verificado: base en verde + e2e vd-55: 15 pasos en verde con sesión real (cierre 07/11)
+- [x] VD-56 · 🟢 · Recibo descargable o para compartir de cada pago — verificado: base en verde + e2e vd-56: 12 pasos en verde con sesión real (cierre 07/11)
+- [x] VD-57 · 🟢 · Día cerrado suma al vencimiento (regla del gimnasio) — verificado: base en verde + e2e vd-57: 10 pasos en verde con sesión real (cierre 07/11)
+- [x] VD-58 · 🟢 · Turnos con personal trainer (sesiones 1 a 1 con pack y agenda del PT) — verificado: base en verde + e2e vd-58: 15 pasos en verde con sesión real (cierre 07/11)
 
 ### Necesitan una cuenta externa (🔌: el agente deja todo listo, Mateo conecta)
 - [ ] AVI-2 · 🔌 · Mails automáticos (Resend)
