@@ -36,6 +36,7 @@ const EJECUTABLES = {
     "public.config_liquidacion", "public.guardar_config_liquidacion", "public.liquidacion_profes", "public.liquidacion_profe_detalle", "public.mi_liquidacion",
     "public.guardar_regla_profe", "public.cargar_horas_profe", "public.anular_horas_profe", "public.pagar_profe", "public.anular_pago_profe",
     "public.recibo_venta",
+    "public.config_cierres", "public.guardar_config_cierres", "public.previsualizar_cierre",
     "public.fichar", "public.fichar_con_pin", "public.config_fichaje", "public.guardar_config_fichaje", "public.mi_fichaje", "public.mis_horas", "public.horas_equipo", "public.fichajes_persona", "public.corregir_fichaje", "public.anular_fichaje",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",
