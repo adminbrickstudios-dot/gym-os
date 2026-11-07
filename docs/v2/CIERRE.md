@@ -97,7 +97,7 @@ máquina):
 
 ## Fase 5 · Lo que sigue en la COLA
 
-Los seguimientos B/C/D del bloque 20, VD-53 a VD-58 del bloque 21, y VD-32
+Primero el bloque 22 (VD-61 ingreso, VD-62 páginas, VD-63 información y ayuda: `21-PEDIDOS-07-11.md`). Después los seguimientos B/C/D del bloque 20, VD-53 a VD-58 del bloque 21, y VD-32
 (segunda pasada de punta a punta). Al terminar una tanda de ítems en verde,
 volvés a publicar igual que en la fase 4 (rama `publicar/<fecha>-<n>`).
 
