@@ -7,7 +7,7 @@ import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
 import { cobrar, preciosPara, registrarUsoCupon, validarCupon, type Venta } from "./acciones";
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
-import { DeshacerVenta, MandarComprobante, MEDIOS } from "./compartido";
+import { DeshacerVenta, MandarComprobante, MEDIOS, VerRecibo } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
 import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
@@ -140,7 +140,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         {usoCupon && <p className="mt-3 texto-suave" data-uso-cupon>{usoCupon}</p>}
-        {socio && <MandarComprobante ventaId={venta.venta_id} />}
+        {socio ? <MandarComprobante ventaId={venta.venta_id} /> : <VerRecibo ventaId={venta.venta_id} />}
         <DeshacerVenta ventaId={venta.venta_id} puedeAnular={puedeAnular} socioId={socio?.socio_id ?? null} />
         <div className="flex flex-wrap gap-2 mt-8">
           {/* Vino de la Entrada (ENT-9): vuelve con el socio y su veredicto nuevo, para anotarlo. */}

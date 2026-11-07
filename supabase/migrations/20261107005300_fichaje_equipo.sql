@@ -101,7 +101,7 @@ revoke all on table public.correcciones_fichaje from anon;
 revoke all on table public.correcciones_fichaje from authenticated;   -- todo por funciones
 drop trigger if exists correcciones_fichaje_inmutable on public.correcciones_fichaje;
 create trigger correcciones_fichaje_inmutable before update or delete on public.correcciones_fichaje
-  for each row execute function privado.hecho_inmutable();
+  for each row execute function privado.hecho_inmutable('ninguna_columna');   -- sin argumentos la función no frena nada: se pasa una columna que no existe
 
 -- ── El cálculo (una sola fuente) ────────────────────────────────────
 -- Los turnos cuya entrada (ya corregida) cae en [p_desde, p_hasta), con su estado a la hora p_ahora.

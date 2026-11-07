@@ -383,3 +383,11 @@ html { accent-color: var(--acento); }
   animation: brillo 2.4s ease-out;
   scroll-margin-top: 6rem;
 }
+
+/* VD-56: al imprimir (o guardar como PDF) sale solo la hoja del recibo, sin menú ni botones. */
+@media print {
+  body * { visibility: hidden !important; }
+  .recibo-hoja, .recibo-hoja * { visibility: visible !important; }
+  .recibo-hoja { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: none !important; background: #fff !important; color: #000 !important; }
+  [data-no-imprimir] { display: none !important; }
+}

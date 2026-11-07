@@ -133,6 +133,7 @@ test("el dueño corrige con motivo y queda la historia; el encargado no; nunca s
   assert.equal((await mesTotal("Ramiro")).minutos, 240 + 480);
   assert.equal((await t.q(`select count(*)::int n from public.correcciones_fichaje where fichaje_id = $1`, [id]))[0].n, 2);
   await t.falla(() => t.q(`delete from public.correcciones_fichaje where id = $1`, [c.id]), /no se borran/);
+  await t.falla(() => t.q(`update public.correcciones_fichaje set motivo = 'otro' where id = $1`, [c.id]), /solo se puede cambiar/);
   // Anular: queda con motivo y deja de sumar.
   const [{ id: otro }] = await t.q(`select id from public.fichajes where equipo_id = $1 and salida_en = $2::timestamptz`, [eq["Rita"], await at(3, 22)]);
   await como(u["Sofía"], async () => {
