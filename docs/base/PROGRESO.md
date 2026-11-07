@@ -1,0 +1,294 @@
+# PROGRESO de Base
+
+Estados: ✅ hecho y verificado ejecutando · 🟡 a medias (dice qué falta) ·
+❌ no empezado · ⛔ trabado (dice por qué y qué hace falta).
+
+Cada ✅ dice **cómo se verificó**: qué prueba, qué pantalla abierta con qué
+usuario, qué número medido. "Lo leí y cumple" no es un ✅.
+
+---
+
+## RESUMEN PARA MATEO (el agente lo reescribe al final de cada bloque)
+
+> Mientras el P0 no esté terminado, este bloque dice qué bloque va, qué ya está
+> publicado y qué falta. Cuando termine, el título pasa a
+> **"P0 LISTO PARA MAÑANA"**.
+
+**Estado:** el P0 todavía no arrancó.
+
+**Lo que está publicado en producción:** todo Gym OS v2 hasta el PR #4 (07/11).
+
+**Links por rol** (se completan en BASE-2):
+
+| Rol | Link | Usuario de prueba |
+|---|---|---|
+| Super admin | | la cuenta de Mateo |
+| Dueño | | |
+| Recepción | | |
+| Profe | | |
+| Socio | | |
+
+**Cómo crear el gimnasio de mañana:** (se escribe en BASE-2, paso por paso)
+
+**Qué probar primero:** (se escribe al cerrar el P0)
+
+**Bloqueado / qué tenés que hacer vos:** (comandos exactos, en orden)
+
+**Preguntas abiertas:** ver `PREGUNTAS.md`
+
+---
+
+## P0: tiene que estar perfecto para mañana
+
+Va en este orden. Cada bloque se cierra entero (base → lógica → pantalla →
+prueba → commit/push → publicar) antes del siguiente. Se publica **al cerrar
+cada bloque**, no al final.
+
+### BASE-0 · Que nada se cuelgue ni falle ❌
+Pasar a **Next 16.4** (era VD-64): `npx @next/codemod@latest upgrade`, la guía
+15 → 16 (`middleware` → `proxy`, `next lint` ya no existe, APIs async, caché),
+React 19.2 estable. Misma app, otra versión: no se cambia comportamiento.
+Después, los 19 recorridos que fallan en Linux con la app compilada (lista en
+`00-LEEME.md`). Por cada uno: si la pantalla cambió a propósito, se actualiza
+la prueba; si está rota, se arregla.
+**LISTO SI:** `node scripts/diag/accion-colgada.mjs 50` da `colgadas 0 de 50`
+con la app compilada; `npm run verificar` en verde; la cadena e2e entera y el
+barrido en verde con `APP_MODO=produccion`. Se publica.
+
+### BASE-1 · Velocidad: diagnóstico con números, después arreglos ❌
+**Primero medir**, todo en `VELOCIDAD.md`:
+- Tiempos con la app compilada y 5.000 socios: ingreso, inicio del dueño,
+  recepción, búsqueda, registrar un ingreso, ficha, página del gimnasio, app del
+  socio. Medidos desde que se toca hasta que se ve, no solo la función de base.
+- Regiones: Vercel (`vercel.json` / panel) y Supabase. Plan de cada uno.
+- Si el middleware/proxy va a la base en cada pedido y cuánto tarda.
+- `EXPLAIN ANALYZE` de las funciones de pantalla (`scripts/medir/explain.mjs`).
+- Funciones de RLS que se evalúan fila por fila (`auth.uid()` sin `(select …)`).
+- Tamaño del JS por ruta (`next build`), imágenes, re-renders que se ven.
+
+**Después arreglar** lo que el diagnóstico muestre, con número antes y después:
+regiones alineadas (si Supabase está en São Paulo, Vercel en `gru1`), resolución
+del gimnasio en caché, índices (gimnasio, DNI, nombre con `unaccent`, fechas),
+RLS con `(select auth.uid())`, paginación, componentes de servidor, imágenes,
+esqueletos. **Se mide antes de tocar cada cosa.** Si algo ya está bien (VD-47
+y VD-30 ya hicieron mucho), se anota y no se toca.
+`cubierto_hasta` (D36) es BASE-5, aparte.
+**LISTO SI:** `VELOCIDAD.md` con la tabla antes/después; con 5.000 socios y
+100.000 ingresos, buscar y registrar un ingreso tardan menos de 1 s y cualquier
+pantalla menos de 2 s. Si la región o el plan no se pueden cambiar sin Mateo,
+queda ⛔ con el paso exacto que tiene que hacer él.
+
+### BASE-2 · Usuarios, contraseñas y links por rol ❌
+Mucho ya existe (VD-40 alta de gimnasio en 3 pasos, Equipo, VD-33 ingreso, VD-42
+Mi cuenta). Lo que se completa:
+- **Super admin:** al crear el gimnasio, crea al dueño con mail y **contraseña
+  que escribe él** o un link (D42). Ve y maneja todos los gimnasios. Le
+  restablece la contraseña a cualquier dueño. "Entrar como" con motivo y
+  registro (ya existe como soporte con motivo: verificar).
+- **Dueño → Equipo:** crea recepcionistas, profes y encargados con contraseña o
+  link, los desactiva sin borrarlos, les restablece la contraseña.
+- **Links fijos por rol** (D41): `/dueno`, `/recepcion`, `/profe`, `/socio`,
+  `/super`. Escritos arriba en el resumen.
+- **Ingreso con la marca del gimnasio** (logo y color): mail, contraseña, botón
+  grande, "Olvidé mi contraseña" que funciona de verdad, errores claros
+  ("Ese mail no tiene cuenta en Gimnasio X", no "error 400"). Después de entrar,
+  va al panel de su rol.
+- **Socio:** al darlo de alta con mail se le manda un link para crear su
+  contraseña (también se puede copiar o mandar por wa.me).
+- `ACCESOS.md` en `.gitignore` con los links y los usuarios demo (D48).
+- Nota: "Olvidé mi contraseña" en producción depende del SMTP propio (VD-45 🔌):
+  Supabase manda 2 mails por hora sin él. Si no está, ⛔ con el paso para Mateo
+  y mientras tanto el dueño/super admin restablece a mano.
+
+**LISTO SI:** e2e con sesión real: super admin crea un gimnasio con dueño y
+contraseña propia → el dueño entra por `/dueno` → crea una recepcionista con
+contraseña y un profe con link → los dos entran por su link y caen en su panel →
+el dueño desactiva a la recepcionista y ella ya no entra → le restablece la
+contraseña y vuelve a entrar → un socio recibe el link, crea su contraseña y
+entra por `/socio`. "Olvidé mi contraseña" probado contra supabase-local.
+
+### BASE-3 · Ingreso rápido con aviso flotante y panel lateral ❌
+Sobre la Entrada que ya existe (VD-1, VD-2, VD-3, VD-48, VD-50, VD-51), cambia
+**cómo se muestra el resultado** (D40):
+- Botón grande en recepción + atajo global **F2** y **/** (sin dispararse dentro
+  de un campo de texto) + lo de D17 (tipear un número abre).
+- Un solo campo: DNI, nombre o teléfono, o el lector de QR/tarjeta. Enter
+  registra.
+- **Aviso flotante abajo a la derecha**, con franja de color:
+  🟢 válido (nombre, plan, días que le quedan) · 🔴 no vigente con el motivo ·
+  🟡 por vencer (3 días o menos) · 🔵 en prueba con fecha de fin.
+  Los últimos 3 se apilan. Se esconde solo, pero se queda mientras el mouse o
+  el dedo está encima. Sonido (D50).
+- **Tocar el aviso abre el panel lateral** (ficha rápida): nombre, foto, DNI,
+  estado, plan y tipo, vigencia (desde/hasta, meses y días que le quedan,
+  barra), último pago (cuándo, cuánto, cómo), próximo pago (fecha y monto),
+  historial de pagos. Si no está vigente: cuánto debe, desde cuándo, qué plan
+  pagaría y cuánto, y **COBRAR AHORA** grande con el monto sugerido (la hoja
+  Cobrar que ya existe). "Dejar pasar igual" con motivo obligatorio (VD-8),
+  últimos ingresos, notas, wa.me.
+- Esc y la X cierran. Nunca se traba. Un ingreso repetido a los pocos minutos
+  no cuenta dos veces (VD-3: ventana de 5 h).
+- Todo sale de `registrar_ingreso` / `calcular_acceso`. Nada se recalcula en
+  TypeScript.
+
+**LISTO SI:** e2e en compu y en tablet: 20 ingresos con el atajo, los 4
+colores, un rojo cobrado desde el aviso → panel → Cobrar ahora, uno dejado
+pasar con motivo que queda en Control, un repetido que dice "ya entró" sin
+sumar. Cada ingreso, de Enter a aviso, en menos de 1 s con 5.000 socios.
+Capturas mirándolas.
+
+### BASE-4 · Siempre a la vista ❌
+Ya existe Inicio con números (VD-12) y entradas en vivo (VD-12B). Se ordena así:
+- **Recepción:** adentro ahora (VD-48), entraron hoy, vencen hoy, deben, caja
+  del turno, lista en vivo de ingresos (cada uno se puede tocar → panel lateral).
+- **Dueño**, además: cobrado hoy, por vencer esta semana, plata en riesgo
+  (VD-16, "plata en riesgo" de Retención).
+- Botones rápidos: Cobrar, Alta, Pase diario.
+- Arreglar de paso las pruebas `vd-12` (más de 4 números) y `vd-12b` (gráficos):
+  decidir la regla y que pantalla y prueba digan lo mismo.
+
+**LISTO SI:** e2e: con la recepción y con el dueño, cada número coincide con la
+lista que lo forma (tocarlo lleva a esa lista), y un ingreso nuevo aparece en
+la lista en vivo sin recargar.
+
+### BASE-5 · Vigencia guardada: `cubierto_hasta` (D36) ❌
+Ver `REGLAS-NEGOCIO.md` § Vigencia. Migración aditiva: columna nullable →
+función que la calcula desde los hechos → trigger en cada tabla de hechos →
+backfill → índice. `calcular_acceso` la usa para la parte de cobertura; todo lo
+demás (suspensión, franja, tope semanal, pack, familiar) sigue igual.
+**Toca la pregunta central: no puede cambiar ningún veredicto.**
+**LISTO SI:** prueba de base que compara, para cada socio del demo de 5.000 y
+en 6 momentos fijos, el veredicto antes y después: idénticos. Chequeo nuevo en
+`npm run chequeos`: `cubierto_hasta` guardado = recalculado, para todos. Vencen
+hoy, buscador y listas usan el índice (EXPLAIN en `VELOCIDAD.md`). `CLAUDE.md`
+actualizado (la regla "se calcula, nunca se guarda" con esta excepción
+escrita).
+
+### BASE-6 · Diseño de Base: claro, íconos de línea, nombre ❌
+`DISENO.md`. En este orden, para que el primer gimnasio ya lo vea:
+1. Nombre **Base** en todo lo visible (D39).
+2. Tokens de color para claro y oscuro; claro por defecto, elegible por
+   gimnasio y por usuario (D37). Ningún color suelto en el código.
+3. Íconos de línea en lugar de emojis (D38): menú, botones, Inicio, app,
+   página. Un solo componente `Icono`.
+4. Tipografía: condensada fuerte para títulos y números con cifras tabulares,
+   sans legible para el texto (`DISENO.md`).
+5. Recepción como mostrador (`DISENO.md` § Recepción).
+6. Modales: X visible, Esc y click afuera cierran, nunca se apilan ni se traban.
+   Todos, revisados uno por uno.
+
+**LISTO SI:** barrido con cada rol en compu y celular, en claro y en oscuro,
+con capturas mirándolas; un chequeo que falla si aparece un color hex fuera de
+los tokens o un emoji usado como ícono en `src/`.
+
+### BASE-7 · Asistente de 9 pasos ❌
+Sobre los Primeros pasos de VD-43 (D44). Reanudable, muestra el avance, cada
+paso explica para qué sirve:
+1. Datos del gimnasio · 2. Logo, colores y portada con vista previa ·
+3. Horarios · 4. Planes y precios (+ prueba gratis) · 5. Cómo cobra
+(MercadoPago con "Probar conexión") · 6. Cómo entra la gente (modos,
+tolerancia, qué pasa con los que deben) · 7. Clases y profes (se puede
+saltar) · 8. Equipo · 9. Cargar socios (a mano o Excel con validación y vista
+previa).
+Al final: "Tu gimnasio está listo" con los links de cada rol.
+**LISTO SI:** e2e: un gimnasio recién creado hace los 9 pasos, sale a la mitad,
+vuelve y sigue donde estaba, carga un Excel con 2 filas malas que se marcan
+antes de importar, y termina en "Tu gimnasio está listo".
+
+### BASE-8 · Seguridad ❌
+- **8a · Logs públicos:** el repo es público y sus logs de Actions también.
+  `usuarios-demo` no imprime la contraseña; `estado` y `hacer-admin` no
+  imprimen mails; ningún workflow imprime datos de socios. Revisar todos.
+- RLS probado con cada rol (dueño, encargado, recepción, profe, socio, otro
+  gimnasio, anónimo) contra la matriz de `PERMISOS.md`.
+- Límite de intentos en el ingreso, en "Olvidé mi contraseña" y en los
+  formularios públicos. Anti-robot en "Quiero ser socio" (D49).
+- Validación en el servidor de todo lo que llega. Claves solo en variables de
+  entorno. Encabezados de seguridad (CSP, HSTS, X-Frame-Options,
+  Referrer-Policy, Permissions-Policy).
+- Registro de quién cobró, anuló, dejó pasar, creó o desactivó (ya existe en
+  Control: verificar que no falte ninguno).
+- Ley 25.326 (D52).
+- Contraseñas demo: ninguna débil en producción. Qué plan pago hace falta (D51).
+
+**LISTO SI:** prueba de base de RLS por rol en verde; `curl -I` a producción
+muestra los encabezados; 20 intentos fallidos de ingreso seguidos quedan
+frenados; `PERMISOS.md` escrito desde la base real.
+
+### BASE-9 · Página del gimnasio predeterminada ❌
+Ya existe (VD-25). Se ajusta al pedido: portada con la foto real, nombre y
+dirección; "Soy socio" y "Quiero ser socio"; planes y precios; clases de la
+semana; horarios; mapa; wa.me. Grilla más limpia. Editable en Configuración
+(logo, colores, portada, textos, qué secciones y en qué orden). SEO: título,
+descripción, imagen OG, datos estructurados (`HealthClub`), sitemap. Lista para
+un dominio propio (`docs/v2/18-DOMINIO-Y-NEGOCIOS.md`).
+Nada inventado: sin testimonios ni números falsos, sin fotos de banco. Una
+sección sin datos no se muestra.
+**LISTO SI:** e2e: un gimnasio sin cargar nada muestra una página digna, y al
+cargar datos aparecen; Lighthouse celular ≥ 90 (VD-25D); el validador de datos
+estructurados no da errores.
+
+### BASE-10 · Panel del socio ❌
+Ya existe (VD-36, VD-23, VD-39). Se verifica y completa: ingreso con mail y
+contraseña con "Olvidé" (D43); vigente en grande; días que le quedan; cuánto
+debe y cuándo paga; historial de pagos; QR que rota y no se puede reenviar;
+clases; botón de pagar. PWA (ya hay manifest e instalar: verificar en
+celular).
+**LISTO SI:** e2e en celular: un socio al día, uno que debe y uno en prueba ven
+lo suyo; el QR de una captura de hace 2 minutos no deja entrar.
+
+### BASE-11 · La simulación de "terminado" ❌
+El §8 del pedido, entero, con 5.000 socios y la app compilada:
+1. Super admin crea gimnasio y dueño, entra como él.
+2. 9 pasos completos; la página se ve bien; crea recepcionista y profe.
+3. 20 ingresos con el atajo: los 4 colores, un rojo cobrado desde el aviso,
+   uno dejado pasar con motivo.
+4. Cada ingreso en menos de 1 s.
+5. Pago de prueba de MercadoPago actualiza la vigencia; el webhook repetido no
+   duplica (evento firmado contra el endpoint, como en VD-46A).
+6. El socio ve vigencia, deuda y QR en el celular.
+7. El profe toma asistencia sin ver plata.
+8. Un segundo gimnasio no ve nada del primero.
+9. `VELOCIDAD.md` antes y después.
+10. Ningún botón ni modal roto, ningún color fuera de la paleta.
+
+**LISTO SI:** un script `scripts/e2e/base-simulacion.mjs` hace los 10 pasos y
+da verde, con capturas. Recién ahí el resumen de arriba dice
+**"P0 LISTO PARA MAÑANA"**, con el usuario del super admin (sin contraseña),
+cómo crear el gimnasio y su dueño, los links por rol y qué probar primero.
+
+### BASE-DOC · Documentación al día (se hace en la primera vuelta) ❌
+`CONTEXTO.md`, `PERMISOS.md` (desde la base real), `INVESTIGACION.md`,
+`docs/SCHEMA.md` (actualizar con lo real), `docs/CONVENCIONES.md` y
+`docs/LECCIONES.md` (escribirlos, `CLAUDE.md` los pide). Lo que esté
+desactualizado o se contradiga se reescribe; lo viejo de `docs/v2/` que choque
+con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
+"reemplazado por `docs/base/`".
+
+---
+
+## P1: los 70 detalles y lo chico
+
+1. **Los 70 detalles** de `DETALLES-70.md`, en su orden. Muchos ya existen
+   (marcados ✅ verificar): se verifican con sesión real y se pasan a ✅ con la
+   prueba que los cubre. Los 🟡 y ❌ se hacen.
+2. **Los grupos 2 a 9 de `docs/v2/DETALLES.md`** (VD-*), que no estén ya
+   cubiertos por uno de los 70.
+
+## P2: propuestas
+
+[PROPUESTA] del pedido, después de P1:
+- Pantalla para la TV de la sala con quién entra y la ocupación (la TV de clases
+  ya existe, VD-60: sumar el modo entradas).
+- Pase de invitado (un socio trae a alguien una vez por mes).
+- Ocupación en vivo para el socio ("ahora hay 23 personas").
+- El socio congela su plan solo, dentro del tope.
+- Modo "tengo que cobrar" el día 1: la recepción ve una lista de cobro rápida.
+- Tablet kiosco en la puerta (ya existe `/kiosco`: verificar y pulir).
+
+---
+
+## Registro de vueltas
+
+| Vuelta | Fecha y hora | Qué se cerró | Publicado |
+|---|---|---|---|

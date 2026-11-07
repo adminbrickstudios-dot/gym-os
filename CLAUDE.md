@@ -1,4 +1,6 @@
-# Gym OS — reglas para el agente
+# Base (Gym OS) — reglas para el agente
+
+**El producto se llama Base** (D39). El repo y el código siguen diciendo gym-os.
 
 Sistema de gestión multi-tenant para gimnasios. Línea BRIK.
 Stack: Next.js (App Router) + Supabase + Vercel.
@@ -7,7 +9,7 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 (pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
-**Lo que se está construyendo ahora (Gym OS v2: dueño, recepción y socio): `docs/v2/` — empezar por `docs/v2/00-LEEME.md`.**
+**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`, la lista es `docs/base/PROGRESO.md`. Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
 **Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
 Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
 **Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche
@@ -22,7 +24,12 @@ Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
 - **Se calcula, nunca se guarda.** No existe una columna `al_dia`,
   `estado`, `vencido` ni parecida. Se guardan **hechos** (pagos,
   coberturas, congelamientos, suspensiones, consumos) y el estado sale
-  de la función `estado_acceso(socio_id, momento)`.
+  de `privado.calcular_acceso(socio, momento, sede)`.
+  **Única excepción (D36): `socios.cubierto_hasta`**, el final de la
+  cobertura derivado de los hechos, mantenido por trigger en la misma
+  transacción y verificado por `npm run chequeos` (guardado = recalculado).
+  No depende de la hora, así que no se pudre. El color y la deuda se siguen
+  calculando contra el momento.
 - **Una sola fuente de verdad.** Recepción, kiosco, QR, app del socio,
   listas de retención y "Vencen hoy" usan la misma función SQL.
   Prohibido reimplementar el cálculo en TypeScript.

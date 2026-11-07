@@ -50,3 +50,6 @@ capturas/
 
 # supabase-local: códigos de verificación de prueba
 .local/
+
+# Accesos locales de Base (D48): nunca al repo, que es público
+ACCESOS.md

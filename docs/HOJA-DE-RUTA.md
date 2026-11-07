@@ -80,6 +80,11 @@ mientras no tenga ✅).
 | D33 | Liquidación de los profes (COM-15) | Sí, con reglas por profe: por clase dictada, por alumno presente o por hora; resumen del mes; el profe ve el suyo; se recalcula si se corrige la asistencia. | ✅ |
 | D34 | Grilla de clases y TV de la sala | Recepción y profe también pueden abrirlas y usarlas (como hoy). Se deja consistente: la página y la base permiten lo mismo. | ✅ |
 | D35 | GitHub Actions bloqueado por facturación | El repo pasa a público (Actions gratis). El cierre corre en Claude Code en la nube, donde se prueba todo en la máquina. | ✅ |
+| D36 | Vigencia guardada (07/11, Base) | Se guarda `cubierto_hasta` en el socio por trigger en la misma transacción; el color se calcula comparando con el momento. Ni estado ni deuda guardados. Detalle: `docs/base/REGLAS-NEGOCIO.md`. | ✅ |
+| D37 | Fondo de los paneles (07/11) | Claro por defecto; el gimnasio y cada usuario pueden pasar a oscuro. Reemplaza el oscuro del 05/11. | ✅ |
+| D38 | Emojis (07/11) | Íconos de línea propios (tipo Lucide) en el color del gimnasio, en todos lados. | ✅ |
+| D39 | Nombre (07/11) | El producto se llama **Base** en todo lo visible; repo y código sin cambios. | ✅ |
+| D40-D52 | Decididas por defecto al armar `docs/base/` (07/11) | Ver `docs/base/00-LEEME.md` y `docs/base/PREGUNTAS.md`. | por defecto |
 
 ### Decisiones que tomó el agente
 
@@ -255,8 +260,23 @@ Panel por panel. Cada panel arranca con su **auditoría botón por botón (AUD)*
 que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
+### 24 · Base (07/11 · `docs/base/`, empezar por `docs/base/00-LEEME.md`; la lista con su LISTO SI es `docs/base/PROGRESO.md`)
+- [ ] BASE-0 · 🟢 · Next 16.4 (era VD-64) y los 19 recorridos que fallan con la app compilada
+- [ ] BASE-1 · 🟢 · Velocidad: diagnóstico con números (`docs/base/VELOCIDAD.md`), después arreglos, con 5.000 socios y 100.000 ingresos
+- [ ] BASE-2 · 🟢 · Usuarios, contraseñas (la escribe quien crea la cuenta) y links fijos por rol
+- [ ] BASE-3 · 🟢 · Ingreso rápido: aviso flotante abajo a la derecha y panel lateral con Cobrar ahora
+- [ ] BASE-4 · 🟢 · Siempre a la vista: números de recepción y dueño, lista en vivo, botones rápidos
+- [ ] BASE-5 · 🟢 · `cubierto_hasta` por trigger (D36) sin cambiar ningún veredicto
+- [ ] BASE-6 · 🟢 · Diseño de Base: nombre, claro/oscuro, íconos de línea, tipografía, recepción como mostrador, modales
+- [ ] BASE-7 · 🟢 · Asistente de 9 pasos sobre Primeros pasos
+- [ ] BASE-8 · 🟢 · Seguridad: logs públicos de Actions, RLS por rol, límites de intentos, encabezados, Ley 25.326
+- [ ] BASE-9 · 🟢 · Página del gimnasio predeterminada, editable, con SEO
+- [ ] BASE-10 · 🟢 · Panel del socio: ingreso con mail y contraseña, vigencia, deuda, QR, PWA
+- [ ] BASE-11 · 🟢 · La simulación de "terminado" con 5.000 socios y "P0 LISTO PARA MAÑANA"
+- [ ] BASE-DOC · 🟢 · CONTEXTO, PERMISOS, INVESTIGACION, SCHEMA, CONVENCIONES y LECCIONES al día
+
 ### 23 · Detalles (07/11 · orden y grupos en `docs/v2/DETALLES.md`)
-- [ ] VD-64 · 🟢 · Pasar a Next 16.4 (trae el React que arregla las acciones que quedan en "Guardando…"): `scripts/diag/accion-colgada.mjs 50` sin ningún cuelgue con la app compilada, y todo lo demás como antes
+- [ ] VD-64 · 🟢 · (pasa a BASE-0) Pasar a Next 16.4 (trae el React que arregla las acciones que quedan en "Guardando…"): `scripts/diag/accion-colgada.mjs 50` sin ningún cuelgue con la app compilada, y todo lo demás como antes
 
 ### 22 · Pedidos de Mateo del 07/11 (se hacen en la fase 5 de `docs/v2/CIERRE.md`, detalle en `docs/v2/21-PEDIDOS-07-11.md`)
 - [x] VD-61 · 🟢 · Ingreso: segunda pasada (más lindo, cada caso de error y de "olvidé mi contraseña", registro claro, cambio rápido de persona en la recepción, probado en iPhone) — verificado: base en verde + e2e vd-61: 58 pasos en verde con sesión real (cierre 07/11)
