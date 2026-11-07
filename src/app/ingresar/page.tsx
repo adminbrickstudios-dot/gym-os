@@ -27,7 +27,13 @@ export default async function Ingresar({ searchParams }: { searchParams: Promise
       {marca && socio && google && googleActivo() && AVISOS_GOOGLE[google] && <div className="mt-4"><Mensaje tipo="aviso">{AVISOS_GOOGLE[google]}</Mensaje></div>}
       {marca && socio ? <IngresoSocio google={googleActivo()} /> : <div className="mt-6"><FormularioIngreso siguiente={siguiente ?? null} /></div>}
       {marca && socio && nuevo && (
-        <p className="mt-6 text-center texto-suave" data-soy-nuevo>¿Todavía no sos socio? <Link href="/hacete-socio" className="underline font-semibold">Soy nuevo, quiero anotarme</Link></p>
+        <p className="mt-6 text-center texto-suave" data-soy-nuevo>¿Todavía no sos socio? <Link href="/hacete-socio" className="underline font-semibold inline-flex items-center min-h-11">Soy nuevo, quiero anotarme</Link></p>
+      )}
+      {marca && socio && !nuevo && (
+        <p className="mt-6 text-center texto-suave" data-sin-cuenta>¿Todavía no sos socio? Pedile a la recepción que te anote y después entrás acá con tu celular.</p>
+      )}
+      {marca && !socio && (
+        <p className="mt-4 text-center texto-suave text-sm" data-sin-cuenta>¿No tenés cuenta? Si sos socio, <Link href="/ingresar?modo=socio" className="underline font-semibold">entrá con tu celular</Link>. Si sos del equipo, el acceso lo crea el dueño del gimnasio.</p>
       )}
     </CascaraIngreso>
   );
