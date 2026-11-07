@@ -345,6 +345,8 @@ const BUCKETS = {
   mensajes_fotos: { publico: false, max: 4 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
   // VD-44: la foto del equipo (privada; se sirve por /foto-equipo después de que la base autoriza).
   fotos_equipo: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
+  // VD-54: la foto de una máquina rota (privada; sube el servidor con la clave de servicio).
+  fotos_maquinas: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp"] },
   remitos_stock: { publico: false, max: 6 * 1024 * 1024, tipos: ["image/jpeg", "image/png", "image/webp", "application/pdf"] },
 };
 const CARPETA_STORAGE = path.join(CARPETA, "storage");
