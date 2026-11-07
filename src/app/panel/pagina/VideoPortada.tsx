@@ -18,6 +18,7 @@ export function VideoPortada({ inicial, puedeEditar }: { inicial: string | null;
           placeholder="https://…/portada.mp4" aria-label="Link del video de portada" /></label>
       {puedeEditar && <button type="button" className="boton" disabled={ocupado || url.trim() === guardado}
         onClick={() => empezar(async () => {
+          setMsj({});
           const r = await guardarVideoPortada(url);
           if (r.error) { setMsj({ error: r.error }); return; }
           setGuardado(r.url ?? ""); setUrl(r.url ?? "");
