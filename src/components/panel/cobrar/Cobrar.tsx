@@ -12,8 +12,9 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
+import { AbrirTurnoCobrar } from "@/components/panel/cobrar/AbrirTurnoCobrar";
 import { formatearPesos, leerMonto } from "@/lib/formato";
-import { cobrar, datosCobro, guardarMedioDefecto, registrarUsoCupon, subirComprobanteCobro, validarCupon, type DatosCobro, type Venta } from "@/app/panel/vender/acciones";
+import { cajaParaCobrar, cobrar, datosCobro, guardarMedioDefecto, registrarUsoCupon, subirComprobanteCobro, validarCupon, type CajaCobro, type DatosCobro, type Venta } from "@/app/panel/vender/acciones";
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/compartido";
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio } from "@/app/panel/vender/tipos";
 import type { OrigenCobro } from "./evento";
@@ -81,10 +82,13 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
 
   const [lineas, setLineas] = useState<Linea[]>(() => lineasIniciales(precios));
   const [otroDia, setOtroDia] = useState<{ fecha: string; motivo: string } | null>(null);
-  // El de siempre del gimnasio; sin caja abierta no arranca en efectivo (no se podría cobrar).
+  // VD-49 (D32): mi turno de caja en esta sede. Se abre en la misma hoja (sin perder lo cargado) y el efectivo cae ahí.
+  const [caja, setCaja] = useState<CajaCobro>(d.caja);
+  const turnoId = caja.turno_id;
+  // El de siempre del gimnasio; sin turno abierto no arranca en efectivo (elegirlo ofrece abrir el turno acá mismo).
   const [medio, setMedio] = useState<Medio | null>(() => {
     const opciones = [ctx.medio_defecto, ...medios.map((m) => m.medio)].filter((m) => medios.some((x) => x.medio === m));
-    return opciones.find((m) => m !== "efectivo" || d.turnoId) ?? opciones[0] ?? null;
+    return opciones.find((m) => m !== "efectivo" || d.caja.turno_id) ?? opciones[0] ?? null;
   });
   const [defecto, setDefecto] = useState<Medio>(ctx.medio_defecto);
   const [mixto, setMixto] = useState(false);
@@ -114,7 +118,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
   const monto = (x: string) => { const n = leerMonto(x); return Number.isNaN(n) ? 0 : n; };
   const sumaMixto = partes.reduce((s, p) => s + monto(p.monto), 0);
   const usaEfectivo = mixto ? partes.some((p) => p.medio === "efectivo" && monto(p.monto) > 0) : medioOk === "efectivo";
-  const faltaCaja = usaEfectivo && !d.turnoId && (total ?? 0) > 0;
+  const faltaCaja = usaEfectivo && !turnoId && !otroDia && (total ?? 0) > 0;
   const sinMedios = medios.length === 0;
   const hayCuota = lineas.some((l) => l.tipo === "cuota");
   const parcial = precios.cuota?.parcial ?? null;   // VD-7: la primera cuota con día fijo, con el cálculo a la vista
@@ -150,10 +154,18 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
     // VD-34: la misma operación lleva la misma clave hasta que se cobra; un reintento no cobra dos veces.
     clave.current ??= crypto.randomUUID();
     const r = await cobrar({
-      sedeId: d.sedeId, socioId: socio.socio_id, turnoId: otroDia ? null : d.turnoId, items: armarItems(lineas), pagos, claveOperacion: clave.current, comprobantePath,
+      sedeId: d.sedeId, socioId: socio.socio_id, turnoId: otroDia ? null : turnoId, items: armarItems(lineas), pagos, claveOperacion: clave.current, comprobantePath,
       ...(otroDia ? { cobradoEn: new Date(otroDia.fecha).toISOString(), motivoOtroDia: otroDia.motivo.trim() } : {}),
     });
-    if (r.error || !r.venta) { setError(r.error ?? "No se pudo cobrar"); return; }
+    if (r.error || !r.venta) {
+      setError(r.error ?? "No se pudo cobrar");
+      // La base dijo que la caja no sirve (se cerró, venció o es de otra persona): se vuelve a leer y se ofrece abrir el turno. Lo cargado queda.
+      if (r.codigo === "sin_caja" || r.codigo === "caja_ajena" || /sin contar: nadie puede cobrar/.test(r.error ?? "")) {
+        const c = await cajaParaCobrar(d.sedeId);
+        if (c.caja) setCaja(c.caja);
+      }
+      return;
+    }
     clave.current = null;
     setVenta(r.venta);
     if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
@@ -365,6 +377,10 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
             <p className="text-sm texto-suave mt-2" data-fiado>📒 Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
           )}
 
+          {usaEfectivo && turnoId && !otroDia && <p className="text-sm texto-tenue mt-2" data-cobrar-caja>💵 El efectivo queda en tu caja{caja.caja ? ` (${caja.caja})` : ""}.</p>}
+          {/* VD-49: efectivo sin turno → abrirlo acá, con el fondo, y seguir con este cobro */}
+          {faltaCaja && <div className="mt-3"><AbrirTurnoCobrar caja={caja} alAbrir={(id, nombre) => { setCaja({ ...caja, turno_id: id, caja: nombre, vencido: false, libres: [] }); setError(null); }} /></div>}
+
           {/* Transferencia: la foto del comprobante, si la trae */}
           {!mixto && medioOk === "transferencia" && (
             <div className="mt-3 flex flex-wrap items-center gap-2" data-cobrar-comprobante>
@@ -412,7 +428,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
           <span className="texto-suave text-lg">Total</span>
           <span className="numero text-4xl sm:text-5xl" data-cobrar-total={total ?? ""}>{total == null ? "—" : formatearPesos(total)}</span>
         </div>
-        {faltaCaja && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 w-full">💵 Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
+        {faltaCaja && <p className="texto-suave text-sm" data-cobrar-falta-caja>💵 Abrí tu turno (arriba, en “¿Cómo paga?”) para cobrar en efectivo.</p>}
         {error && <Mensaje tipo="error">{error}</Mensaje>}
         <BotonAccion data-cobrar-confirmar ocupadoTexto="Cobrando…" onClick={confirmar} className="boton boton-principal text-lg w-full"
           disabled={sinMedios || lineas.length === 0 || total == null || faltaCaja || faltaOtroDia || (mixto && sumaMixto !== total)}>

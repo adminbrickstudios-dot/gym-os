@@ -86,10 +86,11 @@ test("descuento: la recepción tiene tope y necesita motivo; el encargado no tie
   assert.equal(Number(enc.total), 7500);
 });
 
-test("efectivo sin caja abierta no se cobra", async () => {
+// VD-49: la caja es la de QUIEN cobra. La recepción tiene la suya abierta (la base la encuentra sola); el encargado no tiene ninguna.
+test("efectivo sin caja abierta de quien cobra no se cobra", async () => {
   const prod = await producto();
-  await como(uRec, () => t.falla(() => t.q(`select public.vender($1, $2, $3)`, [
-    t.sede, JSON.stringify([{ tipo: "producto", producto_id: prod }]), JSON.stringify([{ medio: "efectivo", monto: 1500 }])]), /caja abierta/));
+  await como(uEnc, () => t.falla(() => t.q(`select public.vender($1, $2, $3)`, [
+    t.sede, JSON.stringify([{ tipo: "producto", producto_id: prod }]), JSON.stringify([{ medio: "efectivo", monto: 1500 }])]), /sin_caja: .*caja abierta/));
 });
 
 test("movimientos y cierre con arqueo: esperado y diferencia", async () => {

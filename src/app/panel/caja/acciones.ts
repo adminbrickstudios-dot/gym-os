@@ -16,10 +16,10 @@ export type Resumen = {
 const num = (s: string) => leerMonto(s);
 const MAL = "No entiendo el monto: escribilo como 84.500 o 84500,50";
 
-export async function abrirCaja(cajaId: string, monto: string): Promise<{ error?: string }> {
+export async function abrirCaja(cajaId: string, monto: string): Promise<{ error?: string; turnoId?: string }> {
   if (String(monto).trim() && Number.isNaN(num(monto))) return { error: MAL };
   if (!(num(monto) >= 0)) return { error: "Escribí con cuánto abrís (0 si está vacía)" };
-  try { await rpc("abrir_caja", { p_caja_id: cajaId, p_monto_inicial: num(monto) }); revalidatePath("/panel/caja"); return {}; }
+  try { const turnoId = await rpc<string>("abrir_caja", { p_caja_id: cajaId, p_monto_inicial: num(monto) }); revalidatePath("/panel/caja"); return { turnoId }; }
   catch (e) { return { error: (e as Error).message }; }
 }
 

@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, ErrorDatos, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import type { Veredicto } from "@/app/panel/entrada/acciones";
@@ -17,6 +17,18 @@ export async function preciosPara(sedeId: string, socioId: string | null): Promi
 
 export type Venta = { venta_id: string; total: number; veredicto: Veredicto | null };
 
+/**
+ * VD-49 / VD-50: la base manda errores con un código estable (SQLSTATE) y el texto ya escrito para mostrar
+ * ("sin_caja: …", "caja_ajena: …", "ya_cobrada: …"); acá se separa el código del texto para que la pantalla lo reconozca.
+ */
+export type CodigoCobro = "sin_caja" | "caja_ajena" | "ya_cobrada";
+const CODIGOS_COBRO: Record<string, CodigoCobro> = { CJ001: "sin_caja", CJ002: "caja_ajena", DC001: "ya_cobrada" };
+function errorDeCobro(e: unknown): { error: string; codigo?: CodigoCobro } {
+  const mensaje = (e as Error).message;
+  const codigo = e instanceof ErrorDatos && e.codigo ? CODIGOS_COBRO[e.codigo] : undefined;
+  return { error: codigo ? mensaje.replace(new RegExp(`^${codigo}: `), "") : mensaje, codigo };
+}
+
 export async function cobrar(datos: {
   sedeId: string; socioId: string | null; turnoId: string | null;
   items: Record<string, unknown>[]; pagos: { medio: string; monto: number }[]; claveOperacion?: string;
@@ -24,7 +36,7 @@ export async function cobrar(datos: {
   cobradoEn?: string; motivoOtroDia?: string;
   /** VD-5: la foto del comprobante de la transferencia (ya subida con `subirComprobanteCobro`). */
   comprobantePath?: string;
-}): Promise<{ venta?: Venta; error?: string }> {
+}): Promise<{ venta?: Venta; error?: string; codigo?: CodigoCobro }> {
   const panel = await contextoPanel();
   try {
     const { sede } = sedeActiva(panel, datos.sedeId);
@@ -36,7 +48,7 @@ export async function cobrar(datos: {
     revalidatePath("/panel");
     if (datos.socioId) revalidatePath(`/panel/socios/${datos.socioId}`);
     return { venta };
-  } catch (e) { return { error: (e as Error).message }; }
+  } catch (e) { return errorDeCobro(e); }
 }
 
 /** VEN-1: a qué celular y qué texto, armado en la base con el mensaje editable del gimnasio. */
@@ -67,11 +79,26 @@ export type ContextoCobro = {
   cubre: { desde: string; hasta: string } | null;
   reciente: { hace_seg: number; quien: string | null; total: number } | null;
 };
+/** VD-49: mi caja para cobrar en efectivo en esta sede (caja_para_cobrar): la base dice cuál sirve y qué cajas puedo abrir. */
+export type CajaCobro = {
+  turno_id: string | null; caja: string | null; vencido: boolean; otra_sede: string | null; modo: string;
+  libres: { caja_id: string; nombre: string; fondo_sugerido: number; dejo_anterior: number | null; con_vencida: boolean }[];
+};
 export type DatosCobro = {
-  sedeId: string; zona: string; turnoId: string | null;
+  sedeId: string; zona: string; caja: CajaCobro;
   socio: { socio_id: string; nombre: string; numero: number | null; color: string; texto: string };
   precios: PreciosVenta; ctx: ContextoCobro; puedeAnular: boolean; sinProductos: boolean;
 };
+
+/** Mi caja de esta sede, de nuevo (después de un error de caja, o para refrescar lo que ofrece la hoja). */
+export async function cajaParaCobrar(sedeId: string): Promise<{ caja?: CajaCobro; error?: string }> {
+  const panel = await contextoPanel();
+  try {
+    exigirRol(panel, ["dueno", "encargado", "recepcion"]);
+    const { sede } = sedeActiva(panel, sedeId);
+    return { caja: await rpc<CajaCobro>("caja_para_cobrar", { p_sede_id: sede.id }, { lectura: true }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
 
 /** Todo junto, en paralelo: el socio, qué debe, qué cubre, cómo se cobra acá, la caja y el aviso de doble cobro. */
 export async function datosCobro(sedeId: string | null, socioId: string): Promise<{ datos?: DatosCobro; error?: string }> {
@@ -80,14 +107,14 @@ export async function datosCobro(sedeId: string | null, socioId: string): Promis
     exigirSeccion(panel, "vender");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede } = sedeActiva(panel, sedeId ?? undefined);
-    const [precios, cajas, ficha, ctx] = await Promise.all([
+    const [precios, caja, ficha, ctx] = await Promise.all([
       rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
-      rpc<{ turno_id: string | null; vencida?: boolean }[]>("cajas_sede", { p_sede_id: sede.id }, { lectura: true }),
+      rpc<CajaCobro>("caja_para_cobrar", { p_sede_id: sede.id }, { lectura: true }),
       rpc<Ficha>("ficha_socio", { p_socio_id: socioId }, { lectura: true }),
       rpc<ContextoCobro>("contexto_cobro", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
     ]);
     return { datos: {
-      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, turnoId: cajas.find((c) => c.turno_id && !c.vencida)?.turno_id ?? null,
+      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, caja,
       socio: { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), numero: ficha.socio.numero ?? null, color: ficha.acceso.color, texto: ficha.acceso.texto },
       precios, ctx, puedeAnular: panel.yo.rol === "dueno" || panel.yo.rol === "encargado",
       sinProductos: panel.yo.rol === "recepcion" && !panel.permisos.recepcion_vende_productos,
