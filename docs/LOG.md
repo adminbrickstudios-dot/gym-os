@@ -24,7 +24,7 @@ QUÉ CORRÉS VOS                  comandos exactos, en orden
 ```
 1. Poné el repo público (D35) o arreglá la facturación de Actions: hoy los jobs terminan en 5 s con "recent account payments have failed".
 2. Tanda 1: `gh workflow run base-de-datos.yml --ref publicar/2026-11-06-1 -f accion=prevuelo` → `gh run watch` ("Pre-vuelo OK") → mismo comando con `-f accion=aplicar` → PR `publicar/2026-11-06-1` → `main` (`gh pr create --fill`, `gh pr merge --merge`) → a los 3 min `curl` a `https://gym-os-pied.vercel.app/ingresar`, `/g/demo`, `/admin`, `/g/demo/app`. **No mergear antes de aplicar**: Vercel publicaría código que espera tablas que faltan.
-3. Tanda 2 (fase 5): cuando estén en verde los e2e de vd-53/55/57/58/61/62, repetir con `publicar/2026-11-06-2` (se crea desde `cierre/2026-11-06`).
+3. Tanda 2 (fase 5): cuando estén en verde los e2e de vd-53/55/57/58/61/62, repetir con `publicar/2026-11-07-2` (se crea desde `cierre/2026-11-06`).
 4. Probar en Vercel un botón con revalidación (ver arriba).
 5. Borrar a mano las ramas viejas `publicar/2026-11-06` (quedó atrás) y las bases locales `gymos_*`.
 
