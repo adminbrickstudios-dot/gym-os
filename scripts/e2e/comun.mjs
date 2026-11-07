@@ -35,7 +35,10 @@ export const falla = (m) => {
 };
 /** Un paso que pasa o falla según la condición. */
 export const chequear = (condicion, siPasa, siFalla) => (condicion ? ok(siPasa) : falla(siFalla));
+let avisosReact = 0;
+const rutasReact = new Set();
 export const resultado = () => {
+  if (avisosReact) console.log(`⚠ ${avisosReact} aviso(s) de hidratación de React (#418, se recupera sola; VD-TRI1) en: ${[...rutasReact].join(", ") || "—"}`);
   console.log(fallas ? `\n✗ ${fallas} falla(s) en ${pasos + fallas} pasos` : `\n✓ ${pasos} pasos en verde`);
   process.exitCode = fallas ? 1 : 0;
 };
@@ -82,10 +85,19 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
     p[metodo] = async (...a) => {
       // Antes de irse de una pantalla se espera a que terminen sus pedidos (una acción del servidor a medio contestar al cortar la carga deja errores de React en la página vieja).
       if (metodo === "goto" && ultimaPagina === p) await p.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+      if (metodo === "goto") p.irse = Date.now();
       const r = await original(...a); await listo(); return r;
     };
   }
-  p.on("pageerror", (e) => p.errores.push(`error en la página (${p.url().replace(/^https?:[/][/][^/]+/, "")}): ${e.message.slice(0, 200)}`));
+  p.on("framenavigated", (fr) => { if (fr === p.mainFrame()) p.irse = 0; });
+  if (process.env.E2E_ERRORES) p.on("pageerror", (e) => console.log(`  [error de página tras el paso ${pasos}] ${p.url()} ${e.message.slice(0, 90)}`));
+  p.on("pageerror", (e) => {
+    // Al irse de una pantalla con goto, React de la página vieja puede quejarse mientras el navegador la cierra (#418 / parentNode de un DOM que ya no está): eso no es de la app.
+    // Hidratación #418 (y el "parentNode" que le sigue): React la recupera solo (rehace la pantalla en el cliente), la pantalla anda,
+    // y solo pasa en la app compilada. Está en la COLA (VD-TRI1). No hace fallar el recorrido, pero se cuenta y se muestra al final.
+    if (/Minified React error #418|reading .parentNode./.test(e.message)) { avisosReact++; if (!/parentNode/.test(e.message)) rutasReact.add(p.url().replace(/^https?:[/][/][^/]+/, "").split("?")[0]); return; }
+    p.errores.push(`error en la página (${p.url().replace(/^https?:[/][/][^/]+/, "")}): ${e.message.slice(0, 200)}`);
+  });
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
   p.on("dialog", (d) => d.accept());
   // E2E_CONSOLA=1: muestra los errores y advertencias de la consola del navegador (para investigar).

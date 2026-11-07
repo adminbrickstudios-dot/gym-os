@@ -25,6 +25,14 @@ parar() {
 # Matar el pid de npx no alcanza: `next dev` (hijo) sigue vivo con el puerto tomado y
 # la app vieja seguía respondiendo. Se libera el puerto, sea quien sea que lo tenga.
 liberar_puerto() {
+  # Windows (Git Bash): lsof/fuser/pgrep no existen y kill no ve procesos de Windows; se usa PowerShell y taskkill.
+  if command -v powershell.exe >/dev/null 2>&1 && ! command -v lsof >/dev/null 2>&1; then
+    local wp
+    wp="$(powershell.exe -NoProfile -Command "(Get-NetTCPConnection -LocalPort $1 -State Listen -ErrorAction SilentlyContinue).OwningProcess" 2>/dev/null | tr -d '\015' | grep -E '^[0-9]+$' | sort -u || true)"
+    for p in $wp; do taskkill //F //T //PID "$p" >/dev/null 2>&1 || true; done
+    sleep 1
+    return 0
+  fi
   # Junta lo que encuentre cada herramienta: en algunos contenedores lsof no ve los procesos y fuser sí.
   local pids
   pids="$(lsof -ti "tcp:$1" 2>/dev/null || true) $(fuser "$1/tcp" 2>/dev/null || true)"

@@ -1,26 +1,21 @@
 # Estado del cierre (memoria del agente)
 
-Rama: `cierre/2026-11-06` (sale de `origin/noche/2026-11-05`). Si se compacta la conversación: releer esto + `CIERRE.md`.
+Rama: `cierre/2026-11-06` (sale de `origin/noche/2026-11-05`; PR a `main` al publicar). Si se compacta la conversación: releer esto + `CIERRE.md`.
 
 ## Máquina (Windows de Mateo, no la nube)
-- Postgres 16 portable en `C:\Users\consu\pg-portable` (puerto 54322, UTC, fsync off). **Todo comando**: `source /c/Users/consu/pg-portable/env.sh &&` delante (carga PATH, PG*, DB_PRUEBAS_URL y `npm_config_script_shell` = bash de Git, que los scripts de npm necesitan).
-- Chromium de Playwright ya instalado. `gh` logueado como adminbrickstudios-dot.
-- Pruebas de base: 746/748. Las 2 que no pasan son del entorno: `importar-socios` 3.000 filas tarda ~32 s en Windows (límite 30 s); `landing` falla si Postgres no está en UTC (ya resuelto con `timezone='UTC'`).
+- Postgres 16 portable en `C:\Users\consu\pg-portable` (puerto 54322, UTC, fsync off). **Todo comando**: `source /c/Users/consu/pg-portable/env.sh &&` delante (carga PATH, PG*, DB_PRUEBAS_URL y `npm_config_script_shell` = bash de Git).
+- El hook bloquea borrar bases en línea de comando: para otra base limpia se crea con otro nombre (`gymos_dev`, `gymos_m1`…). `scripts/db/local.sh nueva` sí puede (el SQL va dentro del script).
+- Archivos de trabajo en LF (`core.autocrlf=false`); con CRLF los reemplazos de texto fallan.
+- App en producción: `APP_MODO=produccion REHACER_BUILD=si scripts/local/levantar.sh nueva` (build ≈ 5 min). Corredor de e2e: `node .local/correr-e2e.mjs [desde] [hasta]` → `.local/e2e-resultados.jsonl`, fallas en `.local/e2e-falla-*.log`. NUNCA correr un e2e a mano mientras el corredor anda (se pisan la configuración).
+- Pruebas de base: todas verdes salvo "3.000 filas en menos de 30 segundos" (Windows: ~32 s), que es del entorno.
 
-## Fase actual
-Fase 0 hecha (base nueva, pruebas de base, chequeos verdes). Sigue Fase 1.
+## Hecho (en la rama, base verde: 794/795 + chequeos + lint + typecheck + vitest)
+- Fase 1 (parcial): arreglado el alta de gimnasio (el botón Siguiente se volvía Crear y mandaba el formulario vacío); levantar.sh en Windows; e2e más estables.
+- VD-60 (grilla/TV para recepción y profe), VD-52 (liquidación de profes), VD-49 (efectivo sin caja), VD-50 (doble cobro), VD-48 (salida), VD-51 (prueba gratis): código + pruebas de base. **Sus e2e (vd-48, 49, 50, 51, 52, 60) están escritos, sin ejecutar todavía.**
 
-## Verificado
-- Fase 0: db:pruebas 746/748 (2 de entorno), chequeos verdes.
-
-## Falta
-Fases 1 a 5 de CIERRE.md.
-
-## Agentes lanzados
-(ninguno)
-
-## Agentes (lanzados 07/11 ~01:30)
-- A = ad78d945cad09cf0f: VD-48 (salida) → VD-51 (prueba gratis). Migr 20261107004800/005100. Rama cierre/agente-a-vd48 / vd51. Base propia gymos_a1.
-- B = a9979d063f4c9478b: VD-49 (efectivo sin caja) → VD-50 (doble cobro). Migr 20261107004900/005000. Rama cierre/agente-b-vd49 / vd50. Base propia gymos_b1.
-- Yo: corrida e2e completa en background (.local/correr-e2e.mjs → .local/e2e-resultados.jsonl, fallas en .local/e2e-falla-*.log); VD-60 y VD-52.
-- Pendiente en la 1ª corrida: error de hidratación #418 en /panel/retencion (solo producción; no se ve en dev).
+## Pendiente
+1. Rebuild con todo lo unido → correr los e2e nuevos de a uno → arreglar.
+2. Corrida completa de la cadena e2e (205 + nuevos) y barrido; triage de las fallas. Conocido: error de hidratación #418 intermitente solo en producción (pageerror), no reproducido en dev; se mitigó esperando `networkidle` antes de cada `goto`.
+3. Mirar capturas (Inicio, Entrada flotante, Cobrar, Caja, Socios, ficha, app del socio en celular, super admin).
+4. Fase 3: `docs/v2/CHE-ME-PASO.md` con 40 consultas; sección por sección de `17`.
+5. Fase 4: publicar (ver CIERRE.md). Fase 5: VD-53 a 58 y VD-32 (segunda pasada).

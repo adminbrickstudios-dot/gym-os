@@ -60,7 +60,7 @@ function Tarjeta({ p, mes, esDueno, turnoId, hoy }: { p: FilaProfe; mes: string;
   const [ok, setOk] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [detalle, setDetalle] = useState<Detalle | null>(null);
-  const [regla, setRegla] = useState({ modo: p.regla?.modo ?? "por_clase", monto: p.regla ? String(p.regla.monto).replace(".", ",") : "", desde: "" });
+  const [regla, setRegla] = useState({ modo: p.regla?.modo ?? "por_clase", monto: p.regla ? String(p.regla.monto).replace(".", ",") : "", desde: mes });
   const [h, setH] = useState({ fecha: hoy, horas: "", nota: "" });
   const [pago, setPago] = useState({ monto: String(p.pendiente).replace(".", ","), medio: "transferencia", nota: "" });
   const clave = useRef(crypto.randomUUID());   // el mismo pago mandado dos veces es uno solo (la base lo reconoce)
@@ -110,7 +110,7 @@ function Tarjeta({ p, mes, esDueno, turnoId, hoy }: { p: FilaProfe; mes: string;
           <label className="space-y-1"><span className="etiqueta">Desde el día</span>
             <input className="campo" type="date" name="desde" value={regla.desde} onChange={(e) => setRegla({ ...regla, desde: e.target.value })} /></label>
           <button type="submit" className="boton boton-principal" disabled={ocupado || !regla.monto.trim()}>Guardar</button>
-          <p className="texto-tenue text-sm sm:col-span-4">Vale desde ese día (si lo dejás vacío, desde hoy): lo ya dictado antes sigue con la regla que tenía. Por hora usa los minutos de las clases, o las horas que cargues a mano.</p>
+          <p className="texto-tenue text-sm sm:col-span-4">Por defecto vale desde el primer día del mes que estás viendo, así el mes entero se recalcula. Si la ponés desde otro día, lo dictado antes sigue con la regla que tenía. Por hora usa los minutos de las clases, o las horas que cargues a mano.</p>
         </form>
       )}
 
