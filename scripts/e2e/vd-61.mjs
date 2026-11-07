@@ -27,6 +27,8 @@ const medidas = (p) => p.evaluate(() => {
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
 await db.connect();
 await db.query("delete from privado.intentos_pin");
+// SEG-1 cuenta 20 pedidos de código por hora desde la misma conexión (acá todos salen de localhost): las corridas anteriores de este y otros recorridos agotan ese cupo y el sexto pedido del mismo celular recibiría el aviso de la conexión en vez del del celular.
+await db.query("delete from public.pedidos_codigo where creado_en is not null");
 const b = await navegador();
 try {
   for (const [tam, vp, extra] of [["compu", COMPU, {}], ["celu", CELU, {}], ["iphone", { width: 390, height: 844 }, IPHONE]]) {
@@ -101,7 +103,7 @@ try {
     await d.locator('main input[name=codigo], main [role="alert"]').first().waitFor({ timeout: 30000 });
     ultimo = await d.locator("main").innerText();
   }
-  chequear(/Pediste muchos códigos/.test(ultimo) && await d.locator('main [role="alert"]').count() >= 1, "demasiados pedidos: mensaje claro dentro del componente común", ultimo.slice(0, 160));
+  chequear(/Pediste muchos códigos/.test(ultimo) && await d.locator('main [role="alert"]').count() >= 1, "demasiados pedidos: mensaje claro dentro del componente común", ultimo.replace(/\s+/g, " ").slice(0, 240));
   await capturar(d, "vd61-celu-demasiados");
   await d.context().close();
 
