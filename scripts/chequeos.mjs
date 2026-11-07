@@ -33,6 +33,8 @@ const EJECUTABLES = {
     "public.plan_familiar_estado", "public.guardar_plan_familiar", "public.fijar_titular_familia", "public.quitar_titular_familia", "public.plan_familiar_socio",
     "public.motivos_beneficio_gimnasio", "public.guardar_motivo_beneficio", "public.guardar_topes_beneficios", "public.dar_cortesia", "public.anular_cortesia", "public.cortesias_socio", "public.beneficios_mes",
     "public.suspender_socio", "public.levantar_suspension", "public.revisar_suspension", "public.suspension_socio", "public.moderacion_control",
+    "public.config_liquidacion", "public.guardar_config_liquidacion", "public.liquidacion_profes", "public.liquidacion_profe_detalle", "public.mi_liquidacion",
+    "public.guardar_regla_profe", "public.cargar_horas_profe", "public.anular_horas_profe", "public.pagar_profe", "public.anular_pago_profe",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",
     "public.estado_emergencia_puerta", "public.habilitar_emergencia_puerta", "public.activar_emergencia_puerta", "public.entradas_de_emergencia", "public.cerrar_emergencia_puerta", "public.historial_emergencias_puerta",

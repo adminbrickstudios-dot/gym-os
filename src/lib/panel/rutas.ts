@@ -27,6 +27,7 @@ export const DESTINO = {
   transferencias: "/panel/transferencias",
   resultado: "/panel/resultado",
   gastos: "/panel/gastos",
+  profes: "/panel/profes",             // VD-52: liquidación de profes
   control: "/panel/control",
   resumen: "/panel/resumen",
   planes: "/panel/planes",

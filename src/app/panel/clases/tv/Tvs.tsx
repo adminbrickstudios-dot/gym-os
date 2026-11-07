@@ -6,7 +6,8 @@ import { crearTv, revocarTv } from "../acciones";
 export type TvPanel = { id: string; nombre: string; sede: string; creado_en: string };
 
 /** COM-14: crear la TV (da un link que se abre una vez en ella) y sacarla. */
-export function Tvs({ gimnasioId, sedes, tvs }: { gimnasioId: string; sedes: { id: string; nombre: string }[]; tvs: TvPanel[] }) {
+/** `puedeSacar` (VD-60, D34): la recepción y el profe ponen y miran las TVs; sacarlas es del dueño y el encargado. */
+export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId: string; sedes: { id: string; nombre: string }[]; tvs: TvPanel[]; puedeSacar?: boolean }) {
   const [nombre, setNombre] = useState("");
   const [sede, setSede] = useState(sedes[0]?.id ?? "");
   const [link, setLink] = useState<string | null>(null);
@@ -48,21 +49,21 @@ export function Tvs({ gimnasioId, sedes, tvs }: { gimnasioId: string; sedes: { i
       <section>
         <h2 className="titulo text-2xl mb-3">Las TVs</h2>
         {tvs.length === 0 ? <p className="texto-suave">Todavía no hay ninguna.</p> : (
-          <ul className="space-y-2">{tvs.map((t) => <FilaTv key={t.id} t={t} />)}</ul>
+          <ul className="space-y-2">{tvs.map((t) => <FilaTv key={t.id} t={t} puedeSacar={puedeSacar} />)}</ul>
         )}
       </section>
     </div>
   );
 }
 
-function FilaTv({ t }: { t: TvPanel }) {
+function FilaTv({ t, puedeSacar }: { t: TvPanel; puedeSacar: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   return (
     <li className="tarjeta px-4 py-3 flex flex-wrap items-center gap-3" data-tv-fila={t.nombre}>
       <span className="grow">📺 <span className="font-semibold">{t.nombre}</span> <span className="texto-suave">· {t.sede}</span></span>
-      <button type="button" className="underline text-sm" disabled={ocupado}
-        onClick={() => empezar(async () => { const r = await revocarTv(t.id); setError(r.error ?? null); })}>Sacar</button>
+      {puedeSacar && <button type="button" className="underline text-sm" disabled={ocupado}
+        onClick={() => empezar(async () => { const r = await revocarTv(t.id); setError(r.error ?? null); })}>Sacar</button>}
       {error && <Mensaje tipo="error" className="w-full">{error}</Mensaje>}
     </li>
   );

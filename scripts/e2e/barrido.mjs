@@ -12,10 +12,10 @@ const RUTAS = ["/panel/control", "/panel/gastos", "/panel", "/panel/entrada", "/
 const PROHIBIDO = {
   duena: [],
   encargado: ["/panel/gastos"],
-  recepcion: ["/panel/control", "/panel/gastos", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos", "/panel/cupones", "/panel/clases/tv"],
+  recepcion: ["/panel/control", "/panel/gastos", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos", "/panel/cupones"],   // VD-60 (D34): grilla y TV sí
   profe: ["/panel/control", "/panel/gastos", "/panel/entrada", "/panel/vencen-hoy", "/panel/socios", "/panel/socios/nuevo", "/panel/retencion", "/panel/vender",
-          "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla",
-          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones", "/panel/clases/tv"],
+          "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion",
+          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones"],
 };
 const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso/i;
 const soloRol = process.argv.find((a) => a.startsWith("--rol="))?.slice(6);

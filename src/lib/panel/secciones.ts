@@ -53,6 +53,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "resultado", ruta: DESTINO.resultado, emoji: "📈", titulo: "Resultado", descripcion: "La plata del mes: cuánto entró, de dónde y contra el anterior", grupo: "Plata", roles: GESTION },
   // "gastos" lo apaga panel_gimnasio para el encargado sin permiso (VD-41b); "control" lo apaga contextoPanel (VD-10).
   { clave: "gastos", ruta: DESTINO.gastos, emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
+  { clave: "profes", ruta: DESTINO.profes, emoji: "🧑‍🏫", titulo: "Liquidación de profes", corto: "Profes", descripcion: "Lo que se le debe a cada profe y sus pagos", grupo: "Plata", roles: GESTION, tambien: "profesores pago sueldo liquidacion" },
   { clave: "control", ruta: DESTINO.control, emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control", tambien: "auditoria" },
   { clave: "resumen", ruta: DESTINO.resumen, emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
   // GIMNASIO

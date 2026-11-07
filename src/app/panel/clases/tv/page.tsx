@@ -11,13 +11,13 @@ export default async function PaginaTvs() {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "clases");
-    exigirRol(panel, ["dueno", "encargado"]);
+    exigirRol(panel, ["dueno", "encargado", "recepcion", "profe"]);
     const tvs = await rpc<TvPanel[]>("tvs_panel", { p_gimnasio_id: panel.gimnasio.id });
     return (
       <>
         <Encabezado emoji="📺" titulo="TV de la sala" volver={{ href: "/panel/clases", texto: "Clases" }} volverAlOrigen
           bajada="Una pantalla en la sala con la clase de ahora, los anotados con nombre grande, el WOD y la que sigue. Se actualiza sola, sin que nadie inicie sesión." />
-        <Tvs gimnasioId={panel.gimnasio.id} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))} tvs={tvs} />
+        <Tvs gimnasioId={panel.gimnasio.id} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))} tvs={tvs} puedeSacar={["dueno", "encargado"].includes(panel.yo.rol)} />
       </>
     );
   });

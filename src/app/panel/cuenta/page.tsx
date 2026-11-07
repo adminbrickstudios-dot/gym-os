@@ -11,6 +11,7 @@ import { AjustesAyuda } from "./AjustesAyuda";
 import { DosPasos } from "./DosPasos";
 import { ActivarPush } from "@/components/ActivarPush";
 import { Sesiones } from "@/components/cuenta/Sesiones";
+import { MiLiquidacion } from "./MiLiquidacion";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
 import { rpc } from "@/lib/panel/servidor";
 
@@ -27,6 +28,8 @@ export default async function Cuenta() {
     <>
       <Encabezado emoji="👤" titulo={panel.yo.nombre} bajada={`${NOMBRE_ROL[panel.yo.rol]} · ${data.user?.email ?? ""}`} />
       <CambiarContrasena tieneContrasena={seguridad.tiene_contrasena} />
+      {/* VD-52: el profe (y quien tenga clases o regla) ve su mes. */}
+      <MiLiquidacion />
       {/* VD-33b: dónde está abierta la cuenta y cerrar las demás. */}
       <Sesiones sesiones={seguridad.sesiones} zona={panel.gimnasio.zona_horaria} />
       {/* VD-42: la verificación en dos pasos protege exportar, el equipo y los cobros (la exige la base). */}
