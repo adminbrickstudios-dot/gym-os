@@ -92,7 +92,7 @@ if [[ "${APP_MODO:-dev}" == "produccion" ]]; then
   fi
   npx next start -p "$PUERTO_APP" > .local/app.log 2>&1 &
 else
-  npx next dev -p "$PUERTO_APP" > .local/app.log 2>&1 &
+  NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=${MEMORIA_APP_MB:-4096}" npx next dev -p "$PUERTO_APP" > .local/app.log 2>&1 &
 fi
 echo $! > .local/app.pid
 esperar "http://localhost:$PUERTO_APP/" app

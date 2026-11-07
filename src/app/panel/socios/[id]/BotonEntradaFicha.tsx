@@ -3,9 +3,12 @@
 // elegido, sin salir de la ficha. Si la ventana no está montada (sin sede activa) lleva a la pantalla de Entrada.
 import Link from "next/link";
 import { EVENTO_ABRIR_SOCIO } from "@/components/panel/AvisosEntrada";
+import { useRutaDisponible } from "@/components/panel/LinkPanel";
 import type { ResultadoSocio } from "@/app/panel/acciones";
 
 export function BotonEntradaFicha({ socio, className = "boton" }: { socio: ResultadoSocio; className?: string }) {
+  // Con la sección Entrada apagada no hay a dónde ir: el botón no se muestra.
+  if (!useRutaDisponible("/panel/entrada")) return null;
   return (
     <Link href={`/panel/entrada?socio=${socio.socio_id}`} className={className} data-ficha-entrada
       onClick={(e) => {

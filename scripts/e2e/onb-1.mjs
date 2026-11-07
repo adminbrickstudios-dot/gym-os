@@ -23,13 +23,13 @@ try {
   }
   await tarjeta.waitFor({ timeout: 30000 });
   const hechos0 = Number(await tarjeta.getAttribute("data-primeros-pasos"));
-  ok(`Inicio muestra los primeros pasos: ${hechos0} de 8`);
+  ok(`Inicio muestra los primeros pasos: ${hechos0} de 9`);
   await capturar(p, "onb1-compu-inicio");
 
   // ── Cada paso lleva a una pantalla que abre ──
   await tarjeta.locator('button:has-text("Ver todos los pasos")').click();
   const links = await tarjeta.locator("[data-paso] a").evaluateAll((xs) => xs.map((x) => x.getAttribute("href")));
-  chequear(links.length === 8, "la lista tiene los 8 pasos", `la lista tiene ${links.length} pasos`);
+  chequear(links.length === 9, "la lista tiene los 9 pasos", `la lista tiene ${links.length} pasos`);
   let abren = 0;
   for (const l of links) {
     const v = await p.context().newPage();
@@ -38,7 +38,7 @@ try {
     else falla(`el paso ${l} dio ${r.status()}`);
     await v.close();
   }
-  chequear(abren === links.length, "las 8 pantallas de los pasos abren", `abrieron ${abren} de ${links.length}`);
+  chequear(abren === links.length, "las 9 pantallas de los pasos abren", `abrieron ${abren} de ${links.length}`);
 
   // ── Subir el logo en su pantalla marca el paso solo ──
   const logoHecho = await tarjeta.locator('[data-paso="marca"]').getAttribute("data-hecho");

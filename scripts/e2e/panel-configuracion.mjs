@@ -25,7 +25,7 @@ try {
     await p.waitForFunction(([sel, n]) => Number(document.querySelector(sel)?.getAttribute("data-respuestas")) > n,
       [`[data-pie="${clave}"]`, antes], { timeout: 30000 });
   };
-  const switchDe = (texto) => cont.locator("label", { hasText: typeof texto === "string" && texto === "Caja" ? /^W*Caja(s|$)/ : texto }).locator('input[role="switch"]');
+  const switchDe = (texto) => cont.locator("label", { hasText: typeof texto === "string" && texto === "Caja" ? /^\W*Caja(?![a-záéíóúñ])/ : texto }).locator('input[role="switch"]');
   await cont.waitFor({ timeout: 30000 });
   await capturar(p, "cfg1-compu-gimnasio", true);
 
