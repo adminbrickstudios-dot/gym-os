@@ -11,6 +11,7 @@ import { DeshacerVenta, MandarComprobante, MEDIOS } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
 import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { AvisoDobleCobro, motivoDobleValido, type EstadoDobleCobro } from "@/components/panel/cobrar/AvisoDobleCobro";
 import { urlFotoProducto } from "@/lib/url-producto";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
@@ -58,6 +59,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [otro, setOtro] = useState<{ descripcion: string; monto: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [venta, setVenta] = useState<Venta | null>(null);
+  // VD-50 (D29): la cuota ya cobrada hace poco frena (lo dice la base al cobrar) y sigue solo con "Cobrar igual" + motivo.
+  const [doble, setDoble] = useState<EstadoDobleCobro | null>(null);
   const claveOperacion = useRef<string | null>(null);
   const [ocupado, empezar] = useTransition();
 
@@ -68,7 +71,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   }, [texto, buscando]);
 
   const elegirSocio = (s: Socio | null) => empezar(async () => {
-    setSocio(s); setBuscando(false); setTexto("");
+    setSocio(s); setBuscando(false); setTexto(""); setDoble(null);
     // Las cuotas, pases y packs son de un socio: al cambiarlo se recalculan.
     setLineas((ls) => ls.filter((l) => l.tipo === "producto" || l.tipo === "otro"));
     const r = await preciosPara(sedeId, s?.socio_id ?? null);
@@ -104,12 +107,15 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
     const items = armarItems(lineas);
     // VD-34: la misma operación lleva la misma clave hasta que se cobra; un reintento no cobra dos veces.
     claveOperacion.current ??= crypto.randomUUID();
-    const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos, claveOperacion: claveOperacion.current });
+    const r = await cobrar({ sedeId, socioId: socio?.socio_id ?? null, turnoId, items, pagos, claveOperacion: claveOperacion.current,
+      ...(doble && lineas.some((l) => l.tipo === "cuota") ? { confirmarDoble: true, motivoDoble: doble.motivo.trim() } : {}) });
+    if (r.codigo === "ya_cobrada") { setDoble({ texto: r.error ?? "Esta cuota ya se cobró hace un momento.", abierto: false, motivo: "" }); return; }
     if (r.error) setError(r.error);
     else {
       // Lo vendido sale del stock que se muestra (la base lo calcula igual).
       setStock((st) => Object.fromEntries(Object.entries(st).map(([id, x]) => [id, { ...x, stock: x.stock - lineas.filter((l) => l.producto_id === id).reduce((n, l) => n + l.cantidad, 0) }])));
       claveOperacion.current = null;
+      setDoble(null);
       setVenta(r.venta!); setLineas([]);
       if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
         const u = await registrarUsoCupon(r.venta!.venta_id, cupon);
@@ -364,8 +370,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           <span className="numero text-5xl">{total == null ? "—" : formatearPesos(total)}</span>
         </div>
         {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-2xl !px-4 !py-3">💵 Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
+        {doble && lineas.some((l) => l.tipo === "cuota") && <div className="mt-4"><AvisoDobleCobro estado={doble} alCambiar={setDoble} alCancelar={() => setDoble(null)} /></div>}
         {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
-        <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (mixto && sumaMixto !== total)}
+        <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (!!doble && lineas.some((l) => l.tipo === "cuota") && !motivoDobleValido(doble)) || (mixto && sumaMixto !== total)}
           className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `✅ Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
       </aside>
     </div>

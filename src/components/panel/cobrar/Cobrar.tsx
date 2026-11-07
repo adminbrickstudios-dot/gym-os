@@ -13,6 +13,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { AbrirTurnoCobrar } from "@/components/panel/cobrar/AbrirTurnoCobrar";
+import { AvisoDobleCobro, motivoDobleValido, textoDobleCobro, type EstadoDobleCobro } from "@/components/panel/cobrar/AvisoDobleCobro";
 import { formatearPesos, leerMonto } from "@/lib/formato";
 import { cajaParaCobrar, cobrar, datosCobro, guardarMedioDefecto, registrarUsoCupon, subirComprobanteCobro, validarCupon, type CajaCobro, type DatosCobro, type Venta } from "@/app/panel/vender/acciones";
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/compartido";
@@ -91,6 +92,8 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
     return opciones.find((m) => m !== "efectivo" || d.caja.turno_id) ?? opciones[0] ?? null;
   });
   const [defecto, setDefecto] = useState<Medio>(ctx.medio_defecto);
+  // VD-50 (D29): la cuota ya cobrada hace poco frena y pide un motivo. Viene de contexto_cobro al abrir, o del error de la base al cobrar.
+  const [doble, setDoble] = useState<EstadoDobleCobro | null>(() => (ctx.reciente ? { texto: textoDobleCobro(ctx.reciente, formatearPesos), abierto: false, motivo: "" } : null));
   const [mixto, setMixto] = useState(false);
   const [partes, setPartes] = useState<{ medio: Medio; monto: string }[]>(medios.slice(0, 2).map((m) => ({ medio: m.medio, monto: "" })));
   const [cupon, setCupon] = useState<string | null>(null);
@@ -123,6 +126,8 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
   const hayCuota = lineas.some((l) => l.tipo === "cuota");
   const parcial = precios.cuota?.parcial ?? null;   // VD-7: la primera cuota con día fijo, con el cálculo a la vista
   const cuotas = lineas.filter((l) => l.tipo === "cuota").reduce((n, l) => n + l.cantidad, 0);
+  const frenaDoble = hayCuota && !!doble;            // el aviso solo vale mientras haya una cuota en el cobro
+  const faltaMotivoDoble = frenaDoble && !motivoDobleValido(doble);
   const faltaOtroDia = !!otroDia && (!otroDia.fecha || otroDia.motivo.trim().length < 3);
 
   const conRecargo = (ls: Linea[]) => conRecargoLineas(ls, precios.recargo, precios.servicios);
@@ -155,8 +160,14 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
     clave.current ??= crypto.randomUUID();
     const r = await cobrar({
       sedeId: d.sedeId, socioId: socio.socio_id, turnoId: otroDia ? null : turnoId, items: armarItems(lineas), pagos, claveOperacion: clave.current, comprobantePath,
+      ...(frenaDoble && doble ? { confirmarDoble: true, motivoDoble: doble.motivo.trim() } : {}),
       ...(otroDia ? { cobradoEn: new Date(otroDia.fecha).toISOString(), motivoOtroDia: otroDia.motivo.trim() } : {}),
     });
+    if (r.codigo === "ya_cobrada") {
+      // La base frenó: alguien cobró esta cuota hace un momento. Se muestra quién y hace cuánto; sigue solo con motivo.
+      setDoble({ texto: r.error ?? "Esta cuota ya se cobró hace un momento.", abierto: false, motivo: "" });
+      return;
+    }
     if (r.error || !r.venta) {
       setError(r.error ?? "No se pudo cobrar");
       // La base dijo que la caja no sirve (se cerró, venció o es de otra persona): se vuelve a leer y se ofrece abrir el turno. Lo cargado queda.
@@ -209,7 +220,6 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
     );
   }
 
-  const primerNombre = socio.nombre.split(" ")[0];
   return (
     <div onKeyDown={(e) => {
       // Enter fuera de un campo cobra (los botones y links hacen lo suyo).
@@ -229,11 +239,8 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
           <button type="button" className="boton-texto" onClick={alCerrar} aria-label="Cerrar">✕</button>
         </div>
 
-        {/* Doble cobro: se avisa, nunca se frena (REV-6a sigue en revisión). */}
-        {hayCuota && ctx.reciente && (
-          <Mensaje tipo="aviso"><span data-cobrar-doble>Ya se cobró una cuota de {primerNombre} hace {ctx.reciente.hace_seg < 90 ? `${ctx.reciente.hace_seg} s` : "casi 2 minutos"}
-            {ctx.reciente.quien ? ` (${ctx.reciente.quien})` : ""} por {formatearPesos(ctx.reciente.total)}. Si es otro cobro, seguí.</span></Mensaje>
-        )}
+        {/* Doble cobro (VD-50, D29): frena y pregunta; solo sigue con "Cobrar igual (con motivo)" */}
+        {frenaDoble && doble && <AvisoDobleCobro estado={doble} alCambiar={setDoble} alCancelar={alCerrar} />}
 
         {/* Qué debe, qué cubre */}
         <section aria-label="Qué se cobra" data-cobrar-lineas>
@@ -431,8 +438,8 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
         {faltaCaja && <p className="texto-suave text-sm" data-cobrar-falta-caja>💵 Abrí tu turno (arriba, en “¿Cómo paga?”) para cobrar en efectivo.</p>}
         {error && <Mensaje tipo="error">{error}</Mensaje>}
         <BotonAccion data-cobrar-confirmar ocupadoTexto="Cobrando…" onClick={confirmar} className="boton boton-principal text-lg w-full"
-          disabled={sinMedios || lineas.length === 0 || total == null || faltaCaja || faltaOtroDia || (mixto && sumaMixto !== total)}>
-          ✅ Cobrar{total ? ` ${formatearPesos(total)}` : ""} <kbd className="text-xs opacity-70 font-sans">Enter</kbd>
+          disabled={sinMedios || lineas.length === 0 || total == null || faltaCaja || faltaOtroDia || faltaMotivoDoble || (mixto && sumaMixto !== total)}>
+          ✅ Cobrar{frenaDoble ? " igual" : ""}{total ? ` ${formatearPesos(total)}` : ""} <kbd className="text-xs opacity-70 font-sans">Enter</kbd>
         </BotonAccion>
       </div>
     </div>

@@ -1,4 +1,28 @@
 # Gy
+
+## 2026-11-07 · Cierre · VD-49 (efectivo sin caja, D32) y VD-50 (doble cobro, D29)
+
+**QUÉ HICE**
+- **VD-49 (4900)**: `public.vender` exige, para un pago en efectivo, el turno abierto de QUIEN cobra en esa sede (con PIN, el de esa persona). Sin turno → `sin_caja` (CJ001); con el turno de otra persona → `caja_ajena` (CJ002); transferencia, tarjeta y a cuenta cobran sin caja. `caja_para_cobrar(sede)` dice cuál es mi turno, si el de ayer quedó sin contar y qué cajas puedo abrir (fondo sugerido y lo que dejó el turno anterior). La hoja Cobrar ofrece "Abrir mi turno" con el fondo en la misma hoja (aviso si no coincide con lo que dejó el anterior) y sigue sin perder lo cargado; Vender usa el mismo turno propio. Prueba de base con números fijos: fondo 10.000 + efectivo 7.500 − retiro 2.000 + ingreso 500 = 16.000 (la transferencia de 1.500, la venta anulada de 1.500 y los 6.000 de otra persona no entran), contando 15.800 → FALTAN 200, y el reporte coincide.
+- **VD-50 (5000)**: la cuota del mismo socio cobrada (pago aprobado o cobertura vigente, venta no anulada) hace menos de N minutos por OTRA operación frena con `ya_cobrada` (DC001): "Sofi ya cobró esta cuota hace 40 s (por $25.000)…". Sigue solo con `p_confirmar = true` y un motivo escrito (mín. 3 letras), que queda en `ventas.doble_cobro_motivo` y `doble_cobro_de`. La misma clave sigue siendo idempotente; un producto o un pase nunca se frena; con candado por socio, dos personas a la vez se turnan. N: `configuracion_cobro.doble_cobro_minutos` (2 por defecto, 0 = apagado), lo cambia solo el dueño en Configuración → Cobros (queda en `cambios_cobro`). La firma de `vender` suma `p_confirmar` y `p_motivo_doble` (la anterior se borró). La hoja Cobrar y Vender muestran el aviso con "Cobrar igual (con motivo)" y "Cancelar".
+- Pruebas: `efectivo-sin-caja`, `doble-cobro` y `doble-cobro-carrera` (dos conexiones reales). Se ajustaron tres pruebas viejas que asumían lo anterior: `caja.test` (el efectivo sin caja ahora se prueba con quien no abrió), `caja-sin-contar.test` (apaga el aviso porque cobra la misma cuota varias veces) y `cobrar-flujo.test` (la firma nueva de vender). e2e escritos: `vd-49`, `vd-50`; `vd-5` ajustado (el doble cobro ahora frena).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `datosCobro` y la página Vender tomaban "el primer turno abierto de la sede", aunque fuera de otra persona: el efectivo podía caer en la caja de un compañero. Quedó arreglado por VD-49 (la base elige el de quien cobra).
+- (Sin tocar, toca plata) `anular_venta_panel` devuelve el efectivo de una caja ya cerrada desde "cualquier caja abierta de la sede" (la más antigua), no desde la de quien anula.
+- (Sin tocar) el aviso de caja sin contar de VD-9B y el aviso de fondo de VD-9E en la pantalla Caja siguen pendientes; VD-49 solo mostró el aviso del fondo dentro de Cobrar.
+- Los eventos de doble cobro confirmado (`doble_cobro_motivo`) no se sumaron a la línea de tiempo de Control (la consulta de `moderacion_control` se reemplaza en cadena en varias migraciones; quedó anotado, no tocado).
+
+**QUÉ CORRÉS VOS**
+1. `scripts/db/local.sh nueva && npm run db:pruebas && npm run chequeos` (migraciones `20261107004900` y `20261107005000`).
+2. Con la app levantada: `npm run e2e:vd-49` y `npm run e2e:vd-50` (y de nuevo `e2e:vd-5`, `e2e:rev-6`, `e2e:vd-9`).
+3. `npm run db:types` (necesita el proyecto de Supabase).
+
+**QUÉ CONFIGURÁS VOS**: nada. El tiempo del aviso arranca en 2 minutos en todos los gimnasios.
+
+**SIN ARREGLAR**: ver arriba. Decisiones del agente: (a) sin turno abierto, la hoja Cobrar NO arranca en efectivo aunque sea el de siempre (se elige y ofrece abrir el turno), para que "C → Enter → Enter" no quede trabado; (b) "mismo período" se interpreta como "ya se cobró una cuota de este socio hace menos de N minutos" (sin comparar fechas de cobertura): pagar dos meses es una sola venta con cantidad 2; (c) `Cobrar igual` lo puede confirmar toda persona que cobra (la documentación habla de "dos personas confirmaron"), con motivo obligatorio; si Mateo lo quiere solo para dueño o encargado es una línea en `vender`.
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos `vd-49` y `vd-50` (y los e2e existentes tocados) están escritos según la documentación, pero no están ejecutados: no se corrió ni la app ni el navegador en esta máquina. `npm run db:types` no se corrió (necesita el proyecto de Supabase). `next build` no se corrió; sí typecheck, lint, npm test, chequeos y las pruebas de la base (falla conocida del entorno: "3.000 filas en menos de 30 segundos").
 ## 2026-11-06 · Cierre de la noche (frenada por la facturación de GitHub Actions)
 
 **QUÉ HICE**

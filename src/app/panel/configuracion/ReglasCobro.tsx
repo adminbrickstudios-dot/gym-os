@@ -7,8 +7,8 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Restablecer } from "./Restablecer";
 import { formatearPesos } from "@/lib/formato";
 import {
-  guardarConfigDejarPasar, guardarReglaPlan, guardarReglaVencimiento, simularCuota,
-  type ConfigDejarPasar, type ModoDejarPasar, type PrimeraCuotaModo, type Renovacion, type ReglasVencimiento, type Simulacion,
+  guardarConfigDejarPasar, guardarDobleCobro, guardarReglaPlan, guardarReglaVencimiento, simularCuota,
+  type ConfigDejarPasar, type ConfigDobleCobro, type ModoDejarPasar, type PrimeraCuotaModo, type Renovacion, type ReglasVencimiento, type Simulacion,
 } from "./cobros-acciones";
 
 const RENOVACIONES: { clave: Renovacion; titulo: string; ejemplo: string }[] = [
@@ -252,6 +252,54 @@ export function ConfigDejarPasarCard({ inicial, puedeEditar }: { inicial: Config
           }} />
       )}
       {c.ultimo_cambio && <p className="texto-tenue text-sm">Último cambio: {c.ultimo_cambio.por ?? "alguien"}, {fechaCorta(c.ultimo_cambio.cuando)}.</p>}
+    </section>
+  );
+}
+
+// ── VD-50 · Aviso de doble cobro ─────────────────────────────────────
+export function DobleCobroCard({ inicial, puedeEditar }: { inicial: ConfigDobleCobro; puedeEditar: boolean }) {
+  const [c, setC] = useState(inicial);
+  const [minutos, setMinutos] = useState<number | "">(inicial.doble_cobro_minutos);
+  const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
+  const sucio = minutos !== c.doble_cobro_minutos;
+  const guardar = async () => {
+    setMsj(null);
+    if (minutos === "") { setMsj({ tipo: "error", texto: "Escribí cuántos minutos (0 lo apaga)." }); return; }
+    const x = await guardarDobleCobro(minutos);
+    if (x.error || !x.config) { setMsj({ tipo: "error", texto: x.error ?? "No se pudo guardar." }); return; }
+    setC(x.config); setMinutos(x.config.doble_cobro_minutos);
+    setMsj({ tipo: "exito", texto: x.config.doble_cobro_minutos === 0 ? "Guardado. El aviso de doble cobro queda apagado." : "Guardado. Vale desde el próximo cobro." });
+  };
+  return (
+    <section className="tarjeta p-5 space-y-4" data-doble-cobro-config>
+      <div>
+        <h2 className="titulo text-2xl">⚠️ Aviso de doble cobro</h2>
+        <p className="texto-suave">Si dos personas cobran la misma cuota casi a la vez (por ejemplo desde dos compus), la segunda se frena y dice
+          “Sofi ya cobró esta cuota hace 40 s”. Solo sigue si quien cobra toca “Cobrar igual” y escribe por qué; el motivo queda anotado en la venta.
+          Un producto o un pase nunca se frena, y pagar varios meses juntos se hace en un solo cobro.</p>
+      </div>
+      <label className="block space-y-1 max-w-xs">
+        <span className="etiqueta">Minutos desde que se cobró la cuota (0 = apagado)</span>
+        <input type="number" inputMode="numeric" min={0} max={60} className="campo" disabled={!puedeEditar} value={minutos} aria-label="Minutos del aviso de doble cobro"
+          onChange={(e) => setMinutos(e.target.value === "" ? "" : Number(e.target.value))} />
+      </label>
+      <p className="texto-tenue text-sm">{minutos === 0 ? "Apagado: nadie frena un segundo cobro de la misma cuota." : `Pasados ${minutos === "" ? "…" : minutos} min desde el cobro, la misma cuota se cobra sin preguntar.`}</p>
+      {puedeEditar ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}>💾 Guardar</BotonAccion>
+          {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
+        </div>
+      ) : <p className="texto-tenue text-sm">Lo cambia el dueño.</p>}
+      {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
+      {puedeEditar && (
+        <Restablecer id="doble-cobro" recomendado="2 minutos."
+          alConfirmar={async () => {
+            const x = await guardarDobleCobro(2);
+            if (x.error || !x.config) return x.error ?? "No se pudo restablecer.";
+            setC(x.config); setMinutos(x.config.doble_cobro_minutos); return null;
+          }} />
+      )}
+      {c.doble_cobro_ultimo_cambio && <p className="texto-tenue text-sm">Último cambio: {c.doble_cobro_ultimo_cambio.por ?? "alguien"}, {fechaCorta(c.doble_cobro_ultimo_cambio.cuando)}.</p>}
     </section>
   );
 }

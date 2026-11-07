@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // VD-5 · Cobrar: un solo flujo en todos lados. La hoja flotante se abre desde la Entrada (C),
 // la ficha y Ctrl+K; la recepción no ve "cobré otro día" y la dueña sí; el total de la hoja es el
-// que guarda la base; avisa del doble cobro sin frenarlo; el celular no desborda.
+// que guarda la base; frena el doble cobro (VD-50: lo prueba vd-50); el celular no desborda.
 //   node scripts/e2e/vd-5.mjs     (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
@@ -59,7 +59,7 @@ try {
   await capturar(r, "vd5-compu-entro");
   await r.keyboard.press("Escape");
 
-  // ── Ctrl+K "cobrar …" abre la hoja; con la recién cobrada avisa del doble cobro (sin frenar) ──
+  // ── Ctrl+K "cobrar …" abre la hoja; con la recién cobrada avisa del doble cobro (VD-50: frena y pide motivo) ──
   await r.goto(`${G}/panel/socios`);
   await r.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
   await r.keyboard.press("Control+k");
@@ -68,7 +68,7 @@ try {
   await r.keyboard.press("Enter");
   await abierta(r);
   chequear(await r.locator("[data-cobrar-doble]").count() === 1, "Ctrl+K “cobrar …”: avisa que se cobró hace un momento", "no avisó el doble cobro");
-  chequear(await r.locator("[data-cobrar-confirmar]").isEnabled(), "el aviso de doble cobro no frena (el botón Cobrar sigue andando)", "el aviso bloquea el cobro");
+  chequear(await r.locator("[data-cobrar-confirmar]").isDisabled(), "VD-50: el doble cobro frena (Cobrar queda apagado hasta “Cobrar igual” con motivo)", "el aviso no frena");
   await r.keyboard.press("Escape");
   chequear(await hoja(r).count() === 0, "Esc cierra la hoja", "Esc no cerró");
 

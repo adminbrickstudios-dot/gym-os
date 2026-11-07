@@ -36,6 +36,8 @@ export async function cobrar(datos: {
   cobradoEn?: string; motivoOtroDia?: string;
   /** VD-5: la foto del comprobante de la transferencia (ya subida con `subirComprobanteCobro`). */
   comprobantePath?: string;
+  /** VD-50: seguir aunque la cuota ya se cobró hace poco ("Cobrar igual"), con el motivo escrito que guarda la base. */
+  confirmarDoble?: boolean; motivoDoble?: string;
 }): Promise<{ venta?: Venta; error?: string; codigo?: CodigoCobro }> {
   const panel = await contextoPanel();
   try {
@@ -44,6 +46,7 @@ export async function cobrar(datos: {
       p_sede_id: sede.id, p_items: datos.items, p_pagos: datos.pagos, p_socio_id: datos.socioId, p_turno_id: datos.turnoId, p_clave_operacion: datos.claveOperacion ?? null,
       ...(datos.cobradoEn ? { p_cobrado_en: datos.cobradoEn, p_motivo_otro_dia: datos.motivoOtroDia ?? null } : {}),
       ...(datos.comprobantePath ? { p_comprobante_path: datos.comprobantePath } : {}),
+      ...(datos.confirmarDoble ? { p_confirmar: true, p_motivo_doble: datos.motivoDoble ?? null } : {}),
     });
     revalidatePath("/panel");
     if (datos.socioId) revalidatePath(`/panel/socios/${datos.socioId}`);
@@ -77,7 +80,9 @@ export type ContextoCobro = {
   medio_defecto: Medio; operador: string | null; hay_pines: boolean; rol: string;
   puede_otro_dia: boolean; puede_cambiar_medio: boolean;
   cubre: { desde: string; hasta: string } | null;
-  reciente: { hace_seg: number; quien: string | null; total: number } | null;
+  /** VD-50: la cuota de este socio ya cobrada hace menos de N minutos (la misma regla que frena en vender). */
+  reciente: { hace_seg: number; quien: string | null; total: number; venta_id?: string } | null;
+  doble_cobro_minutos?: number;
 };
 /** VD-49: mi caja para cobrar en efectivo en esta sede (caja_para_cobrar): la base dice cuál sirve y qué cajas puedo abrir. */
 export type CajaCobro = {
