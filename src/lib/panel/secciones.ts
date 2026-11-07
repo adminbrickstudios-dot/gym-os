@@ -33,11 +33,15 @@ export const SECCIONES: Seccion[] = [
   // HOY
   { clave: "entrada", ruta: DESTINO.entrada, emoji: "🚪", titulo: "Entrada", descripcion: "Quién entra, y si no puede, por qué", grupo: "Hoy", roles: MOSTRADOR, apagable: "entrada" },
   { clave: "tareas", ruta: DESTINO.tareas, emoji: "✅", titulo: "Para hacer hoy", descripcion: "Lo que hay que hacer, para quién y para cuándo", grupo: "Hoy", roles: TODOS, tambien: "tareas pendientes" },
+  // VD-53: solo se ve si el gimnasio usa fichaje (contextoPanel la apaga si no) y no la ve el dueño.
+  { clave: "fichar", ruta: DESTINO.fichar, emoji: "⏱️", titulo: "Fichar y mis horas", corto: "Fichar", descripcion: "Marcar tu entrada y salida, y ver tus horas del mes", grupo: "Hoy", roles: ["encargado", "recepcion", "profe"], tambien: "fichaje entrada salida horas turno" },
   { clave: "avisos", ruta: DESTINO.avisos, emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: DESTINO.vencen_hoy, emoji: "⏰", titulo: "Vencen y cobrar", descripcion: "A quién avisarle y cobrarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy", tambien: "vencen hoy vencimientos" },
   { clave: "clases", ruta: DESTINO.clases, emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
   // VD-46I: todo el equipo anota; el dueño y el encargado ven todos (lo exige la base).
   { clave: "incidentes", ruta: DESTINO.incidentes, emoji: "🩹", titulo: "Incidentes", descripcion: "Lo que pasó en la sala, sin diagnóstico", grupo: "Hoy", roles: TODOS, apagable: "incidentes", tambien: "accidente caída mareo" },
+  // VD-54: todo el equipo marca una máquina rota; el dueño y el encargado la cierran (lo exige la base).
+  { clave: "maquinas", ruta: DESTINO.maquinas, emoji: "🛠️", titulo: "Máquinas", descripcion: "Qué está fuera de servicio y quién la arregla", grupo: "Hoy", roles: TODOS, apagable: "maquinas", tambien: "mantenimiento rota arreglar" },
   // SOCIOS
   { clave: "socios", ruta: DESTINO.socios, emoji: "👥", titulo: "Socios", descripcion: "Buscar, dar de alta y ver su ficha", grupo: "Socios", roles: MOSTRADOR, apagable: "socios" },
   { clave: "prospectos", ruta: DESTINO.prospectos, emoji: "🌱", titulo: "Interesados", descripcion: "Los que quieren probar, para escribirles", grupo: "Socios", roles: MOSTRADOR, tambien: "prospectos" },
@@ -46,6 +50,10 @@ export const SECCIONES: Seccion[] = [
   { clave: "retencion", ruta: DESTINO.retencion, emoji: "📉", titulo: "Retención y números", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion", tambien: "retencion" },
   { clave: "rutinas", ruta: DESTINO.rutinas, emoji: "💪", titulo: "Rutinas", descripcion: "Ejercicios y rutinas para los socios", grupo: "Socios", roles: ["dueno", "encargado", "profe"], apagable: "rutinas" },
   { clave: "eventos", ruta: DESTINO.eventos, emoji: "🎟️", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", roles: MOSTRADOR },
+  // VD-58: turnos 1 a 1 con un personal trainer (cada uno ve su agenda; el dueño y el encargado, todas).
+  { clave: "pt", ruta: DESTINO.pt, emoji: "🏃", titulo: "Personal trainer", corto: "PT", descripcion: "Agenda del PT, packs de sesiones y turnos reservados", grupo: "Socios", roles: ["dueno", "encargado", "recepcion", "profe"], apagable: "pt", tambien: "pt entrenador sesiones turnos personal" },
+  // VD-55: alquiler de lockers con vencimiento (se cobra con Vender; el estado se calcula).
+  { clave: "lockers", ruta: DESTINO.lockers, emoji: "🔐", titulo: "Lockers", descripcion: "Quién tiene cada locker y cuándo vence", grupo: "Socios", roles: MOSTRADOR, apagable: "lockers", tambien: "casillero alquiler" },
   // PLATA
   { clave: "caja", ruta: DESTINO.caja, emoji: "💵", titulo: "Caja", descripcion: "Abrir, cerrar y contar la plata", grupo: "Plata", roles: MOSTRADOR, apagable: "caja" },
   { clave: "vender", ruta: DESTINO.vender, emoji: "🛒", titulo: "Productos y stock", corto: "Productos", descripcion: "Vender productos, pases y packs; el stock que queda", grupo: "Plata", roles: MOSTRADOR, apagable: "vender", tambien: "vender cobrar cuotas" },
@@ -54,6 +62,7 @@ export const SECCIONES: Seccion[] = [
   // "gastos" lo apaga panel_gimnasio para el encargado sin permiso (VD-41b); "control" lo apaga contextoPanel (VD-10).
   { clave: "gastos", ruta: DESTINO.gastos, emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
   { clave: "profes", ruta: DESTINO.profes, emoji: "🧑‍🏫", titulo: "Liquidación de profes", corto: "Profes", descripcion: "Lo que se le debe a cada profe y sus pagos", grupo: "Plata", roles: GESTION, tambien: "profesores pago sueldo liquidacion" },
+  { clave: "horas", ruta: DESTINO.horas, emoji: "⏱️", titulo: "Horas del equipo", corto: "Horas", descripcion: "Las horas fichadas de cada uno en el mes", grupo: "Plata", roles: GESTION, tambien: "fichaje turnos asistencia equipo" },
   { clave: "control", ruta: DESTINO.control, emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control", tambien: "auditoria" },
   { clave: "resumen", ruta: DESTINO.resumen, emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
   // GIMNASIO

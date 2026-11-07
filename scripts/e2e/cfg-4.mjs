@@ -86,6 +86,7 @@ try {
   await cierres.locator('label:has-text("Motivo") input').fill(MOTIVO);
   const r0 = Number(await cierres.getAttribute("data-respuestas"));
   await cierres.locator('button:has-text("Cargar cierre")').click();
+  await cierres.locator("[data-confirmar-cierre]").click();   // VD-57: primero el aviso, después se confirma
   await p.waitForFunction((n) => Number(document.querySelector("[data-cierres]")?.getAttribute("data-respuestas")) > n, r0, { timeout: 30000 });
   m = (await cierres.locator(".mensaje").first().innerText()).replace(/\s+/g, " ");
   chequear(/Listo: cerrado/.test(m) && new RegExp(`Se cancelaron ${antes} clase`).test(m), `cargar el feriado → “${m}”`, `cargar el feriado dio “${m}”`);

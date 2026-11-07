@@ -9,6 +9,7 @@ import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { MetaVisitas } from "./MetaVisitas";
 import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
+import { ReglaCierres } from "./ReglaCierres";
 import { ReglasBeneficios, type ReglasBeneficiosDatos } from "./ReglasBeneficios";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
@@ -88,6 +89,12 @@ const SECCIONES: [string, string, string, string][] = [
     "Los socios no ven “Escribile al gimnasio” en la app y no hay bandeja de Mensajes en el panel. Lo ya escrito se conserva."],
   ["incidentes", "🩹 Incidentes", "El registro de lo que pasa en la sala (caídas, mareos, roturas), sin diagnósticos.",
     "No hay pantalla de Incidentes en el panel. Lo ya anotado se conserva."],
+  ["maquinas", "🛠️ Máquinas", "Marcar una máquina fuera de servicio, con foto y quién la arregla, y ver su historial.",
+    "No hay pantalla de Máquinas ni aviso en el Inicio. Lo ya anotado se conserva."],
+  ["lockers", "🔐 Lockers", "Alquilar lockers a los socios con vencimiento, cobrados con Vender, y ver cuáles vencen.",
+    "No hay pantalla de Lockers ni aviso de vencimientos, y el socio no ve su locker en la app. Los alquileres ya hechos se conservan."],
+  ["pt", "🏃 Personal trainer", "Turnos 1 a 1 con un PT: packs de sesiones, agenda y reservas desde la app.",
+    "No hay pantalla de Personal trainer y el socio no ve los turnos en la app. Las sesiones ya reservadas se conservan."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */
@@ -640,6 +647,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <div data-opcion="meta-visitas"><MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} /></div>
           <div data-opcion="plan-familiar-seccion"><PlanFamiliarConfig inicial={planFamiliar} puedeEditar={puedeEditar} /></div>
           <div data-opcion="prueba-gratis"><PruebaGratisConfig puedeEditar={puedeEditar} /></div>
+          <div data-opcion="cierres-suma-dias"><ReglaCierres puedeEditar={puedeEditar} /></div>
           {beneficios && <div data-opcion="beneficios"><ReglasBeneficios datos={beneficios} /></div>}
           {pie("reglas")}
         </>}

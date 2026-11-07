@@ -16,13 +16,16 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     const s = yo.socio!;
     const zona = yo.zona!;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
-    const [referido, invitados, mensajes, compra] = await Promise.all([
+    const [referido, invitados, mensajes, compra, locker, pt] = await Promise.all([
       rpc<unknown | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
       rpc<unknown | null>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       // VD-38 (D27): escribirle al gimnasio. Si la sección está apagada o la base no responde, la fila no se muestra.
       rpc<{ activo: boolean; sin_leer: number }>("mensajes_estado_socio", { p_socio_id: s.socio_id }).catch(() => null),
       // VD-39: "Cambiar de plan o comprar un pase" solo si el dueño lo dejó prendido y hay algo para elegir.
       rpc<{ habilitado: boolean; planes: unknown[] }>("opciones_compra_app", { p_socio_id: s.socio_id }, { lectura: true }).catch(() => null),
+      // VD-55: "Mi locker" solo si el gimnasio usa lockers y el socio tiene uno. VD-58: "Mi personal trainer" solo si el gimnasio lo ofrece o ya tiene un pack.
+      rpc<{ prendido: boolean; lockers: unknown[] }>("mi_locker", { p_socio_id: s.socio_id }).catch(() => null),
+      rpc<{ prendido: boolean; ofrece?: boolean; packs?: unknown[]; sesiones?: unknown[] }>("pt_socio", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
@@ -57,6 +60,9 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
 
         <ul className="space-y-2" aria-label="Mi cuenta">
           {compra?.habilitado && compra.planes.length > 0 && fila(`/app/plan${q}`, "🔄", "Cambiar de plan o comprar un pase", "Con lo que te queda a favor", "plan")}
+          {fila(`/app/info${q}`, "ℹ️", "Info del gimnasio", "Horarios, reglamento, contacto y cómo llegar", "info")}
+          {locker?.prendido && locker.lockers.length > 0 && fila(`/app/locker${q}`, "🔐", "Mi locker", "Cuál es y hasta cuándo es tuyo", "locker")}
+          {pt?.prendido && (pt.ofrece || (pt.packs?.length ?? 0) > 0 || (pt.sesiones?.length ?? 0) > 0) && fila(`/app/pt${q}`, "🏃", "Mi personal trainer", "Tus sesiones y los horarios para reservar", "pt")}
           {fila(`/app/historial${q}`, "🧾", "Mis pagos y cuándo vine", "Pagos, recibos y asistencia", "historial")}
           {fila(`/app/novedades${q}`, "🔔", "Novedades", "Avisos del gimnasio y de tu cuenta", "novedades")}
           {fila(`/app/cuenta${q}`, "⏸️", "Mi membresía", "Pausar, dar de baja, contraseña", "cuenta")}
@@ -66,6 +72,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
           <h2 id="mas" className="titulo text-2xl">Más</h2>
           <ul className="space-y-2">
             {mensajes?.activo && fila(`/app/mensajes${q}`, "💬", "Escribile al gimnasio", mensajes.sin_leer > 0 ? (mensajes.sin_leer === 1 ? "1 respuesta nueva" : `${mensajes.sin_leer} respuestas nuevas`) : "Una consulta, una queja o algo que perdiste", "mensajes")}
+            {fila(`/app/ayuda${q}`, "❓", "Ayuda", "Preguntas cortas y cómo se hace", "ayuda")}
             {referido != null && fila(`/app${q}#referir`, "🤝", "Invitá a un amigo", "Tu link para que se anote", "referir")}
             {invitados != null && fila(`/app${q}`, "🎫", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
             <li><a href={`/app/mis-datos${q}`} download className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila="mis-datos">

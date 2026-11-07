@@ -144,6 +144,11 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
+        <Link href={`/app/info${q}`} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-info-gimnasio-acceso>
+          <span className="text-2xl" aria-hidden>ℹ️</span>
+          <span className="flex-1 min-w-0"><span className="block font-semibold">Info del gimnasio</span><span className="block texto-suave text-sm truncate">Horarios, reglamento, contacto y cómo llegar</span></span>
+          <span aria-hidden className="texto-tenue">›</span>
+        </Link>
         {encuesta.pendiente && <Encuesta socioId={s.socio_id} />}
         {grados.length > 0 && (
           <section className="space-y-2" data-grados-app={grados.length}>
