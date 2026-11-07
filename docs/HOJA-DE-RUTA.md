@@ -255,6 +255,11 @@ Panel por panel. Cada panel arranca con su **auditoría botón por botón (AUD)*
 que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
+### 22 · Pedidos de Mateo del 07/11 (se hacen en la fase 5 de `docs/v2/CIERRE.md`, detalle en `docs/v2/21-PEDIDOS-07-11.md`)
+- [ ] VD-61 · 🟢 · Ingreso: segunda pasada (más lindo, cada caso de error y de "olvidé mi contraseña", registro claro, cambio rápido de persona en la recepción, probado en iPhone)
+- [ ] VD-62 · 🟢 · Página del gimnasio y página de Gym OS: segunda pasada visual y de contenido (fotos reales, prueba gratis, reseñas, planes, WhatsApp, rápida en el celular)
+- [ ] VD-63 · 🟢 · Información y ayuda: centro de ayuda por rol, "Info del gimnasio" en la app del socio, y los textos de ayuda de cada pantalla revisados
+
 ### 0 · Base
 - [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
 - [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
