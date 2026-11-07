@@ -9,7 +9,7 @@ import { anularHoras, anularPago, cargarHoras, guardarConfigLiquidacion, guardar
 export type FilaProfe = {
   profe_id: string; nombre: string; rol: string; activo: boolean;
   regla: { modo: string; monto: number; vigente_desde: string } | null;
-  clases: number; presentes: number; horas_clases: number; horas_cargadas: number | null;
+  clases: number; presentes: number; horas_clases: number; horas_cargadas: number | null; horas_fuente?: "fichaje" | "carga" | null; fichajes_sin_salida?: number;
   total: number; pagado: number; pendiente: number; sin_regla: boolean;
 };
 
@@ -84,7 +84,7 @@ function Tarjeta({ p, mes, esDueno, turnoId, hoy }: { p: FilaProfe; mes: string;
       <dl className="grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
         <Dato t="Clases" v={String(p.clases)} />
         <Dato t="Presentes" v={String(p.presentes)} />
-        <Dato t={p.horas_cargadas != null ? "Horas cargadas" : "Horas de clase"} v={horas(p.horas_cargadas ?? p.horas_clases)} />
+        <Dato t={p.horas_fuente === "fichaje" ? "Horas fichadas" : p.horas_cargadas != null ? "Horas cargadas" : "Horas de clase"} v={horas(p.horas_cargadas ?? p.horas_clases)} />
         <Dato t="Se le debe" v={formatearPesos(p.total)} fuerte clave="total" />
         <Dato t="Pagado" v={formatearPesos(p.pagado)} clave="pagado" />
         <Dato t="Falta" v={formatearPesos(p.pendiente)} fuerte clave="pendiente" />

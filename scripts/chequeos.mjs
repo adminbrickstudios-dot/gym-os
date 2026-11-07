@@ -35,6 +35,7 @@ const EJECUTABLES = {
     "public.suspender_socio", "public.levantar_suspension", "public.revisar_suspension", "public.suspension_socio", "public.moderacion_control",
     "public.config_liquidacion", "public.guardar_config_liquidacion", "public.liquidacion_profes", "public.liquidacion_profe_detalle", "public.mi_liquidacion",
     "public.guardar_regla_profe", "public.cargar_horas_profe", "public.anular_horas_profe", "public.pagar_profe", "public.anular_pago_profe",
+    "public.fichar", "public.fichar_con_pin", "public.config_fichaje", "public.guardar_config_fichaje", "public.mi_fichaje", "public.mis_horas", "public.horas_equipo", "public.fichajes_persona", "public.corregir_fichaje", "public.anular_fichaje",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",
     "public.lista_clase", "public.anular_asistencia",
     "public.estado_emergencia_puerta", "public.habilitar_emergencia_puerta", "public.activar_emergencia_puerta", "public.entradas_de_emergencia", "public.cerrar_emergencia_puerta", "public.historial_emergencias_puerta",

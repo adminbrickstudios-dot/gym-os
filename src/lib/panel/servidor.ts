@@ -88,7 +88,13 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   // VD-10: el Control es del dueño; el encargado lo ve solo si el dueño le dio el Resultado (EQU-1).
   // La base lo exige igual (linea_de_control): acá solo se saca del menú y de la campana.
   if (panel.yo.rol === "encargado" && !panel.permisos.encargado_ve_resultado && !panel.secciones_apagadas.includes("control")) {
-    return { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "control"] };
+    panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "control"] };
+  }
+  // VD-53: el fichaje es opcional (por defecto apagado). Fichar y las Horas del equipo solo aparecen si el gimnasio lo prendió;
+  // el dueño ve siempre las Horas (ahí lo prende). La base lo exige igual en cada función.
+  if (panel.yo.rol !== "dueno") {
+    const usa = await rpcLectura<{ usa: boolean }>("config_fichaje", { p_gimnasio_id: g.id }).then((c) => c.usa).catch(() => false);
+    if (!usa) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "fichar", "horas"] };
   }
   return panel;
 });

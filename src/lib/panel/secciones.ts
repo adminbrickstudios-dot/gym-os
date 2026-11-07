@@ -33,6 +33,8 @@ export const SECCIONES: Seccion[] = [
   // HOY
   { clave: "entrada", ruta: DESTINO.entrada, emoji: "🚪", titulo: "Entrada", descripcion: "Quién entra, y si no puede, por qué", grupo: "Hoy", roles: MOSTRADOR, apagable: "entrada" },
   { clave: "tareas", ruta: DESTINO.tareas, emoji: "✅", titulo: "Para hacer hoy", descripcion: "Lo que hay que hacer, para quién y para cuándo", grupo: "Hoy", roles: TODOS, tambien: "tareas pendientes" },
+  // VD-53: solo se ve si el gimnasio usa fichaje (contextoPanel la apaga si no) y no la ve el dueño.
+  { clave: "fichar", ruta: DESTINO.fichar, emoji: "⏱️", titulo: "Fichar y mis horas", corto: "Fichar", descripcion: "Marcar tu entrada y salida, y ver tus horas del mes", grupo: "Hoy", roles: ["encargado", "recepcion", "profe"], tambien: "fichaje entrada salida horas turno" },
   { clave: "avisos", ruta: DESTINO.avisos, emoji: "📬", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: DESTINO.vencen_hoy, emoji: "⏰", titulo: "Vencen y cobrar", descripcion: "A quién avisarle y cobrarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy", tambien: "vencen hoy vencimientos" },
   { clave: "clases", ruta: DESTINO.clases, emoji: "🗓️", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
@@ -54,6 +56,7 @@ export const SECCIONES: Seccion[] = [
   // "gastos" lo apaga panel_gimnasio para el encargado sin permiso (VD-41b); "control" lo apaga contextoPanel (VD-10).
   { clave: "gastos", ruta: DESTINO.gastos, emoji: "🧮", titulo: "Gastos", descripcion: "Lo que gastás, los fijos del mes y la ganancia", grupo: "Plata", roles: GESTION, apagable: "gastos" },
   { clave: "profes", ruta: DESTINO.profes, emoji: "🧑‍🏫", titulo: "Liquidación de profes", corto: "Profes", descripcion: "Lo que se le debe a cada profe y sus pagos", grupo: "Plata", roles: GESTION, tambien: "profesores pago sueldo liquidacion" },
+  { clave: "horas", ruta: DESTINO.horas, emoji: "⏱️", titulo: "Horas del equipo", corto: "Horas", descripcion: "Las horas fichadas de cada uno en el mes", grupo: "Plata", roles: GESTION, tambien: "fichaje turnos asistencia equipo" },
   { clave: "control", ruta: DESTINO.control, emoji: "🛡️", titulo: "Control", descripcion: "Todo lo que pasó con la plata y la puerta, en una línea de tiempo", grupo: "Plata", roles: GESTION, apagable: "control", tambien: "auditoria" },
   { clave: "resumen", ruta: DESTINO.resumen, emoji: "📊", titulo: "Resumen", descripcion: "El día y la semana: quién cobró, caja, altas y bajas", grupo: "Plata", roles: GESTION },
   // GIMNASIO

@@ -28,6 +28,8 @@ export const DESTINO = {
   resultado: "/panel/resultado",
   gastos: "/panel/gastos",
   profes: "/panel/profes",             // VD-52: liquidación de profes
+  fichar: "/panel/fichar",             // VD-53: fichaje del equipo y mis horas
+  horas: "/panel/horas",               // VD-53: horas del equipo
   control: "/panel/control",
   resumen: "/panel/resumen",
   planes: "/panel/planes",
