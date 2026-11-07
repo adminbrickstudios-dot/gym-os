@@ -1,3 +1,55 @@
+## 2026-11-07 · Cierre de Gym OS v2 (rama `cierre/2026-11-06`) — verificado en una compu Windows, con sesión real
+
+```
+QUÉ HICE                        por punto, y cómo lo verifiqué
+```
+- **Entorno**: CIERRE.md asume la nube; acá no había Postgres. Armé un Postgres 16 portable (`C:\Users\consu\pg-portable`, puerto 54322) y adapté `levantar.sh` a Windows. Base: migraciones nuevas aplicadas en base limpia; `db:pruebas` 818/819 con todo unido (la que falla, "3.000 filas en menos de 30 segundos", tarda ~32 s en Windows); `chequeos`, `lint`, `typecheck`, `vitest` (164) en verde.
+- **Fase 1 (ver todo con sesión real)**: app en modo producción, cadena completa de e2e (211 recorridos) y barrido (cada rol × cada pantalla, compu y celular: **248 pasos en verde**). Última cadena: **158 en verde, 53 sin pasar**; después se arreglaron y pasaron vd-1 (19 pasos), com-4, com-8. Bugs reales hallados y arreglados: el alta de gimnasio enviaba el formulario vacío al pasar al paso 3; la hoja Cobrar quedaba debajo del veredicto de la Entrada (los botones no recibían el clic); la ficha ofrecía "Entrada" con la sección apagada; la app del socio tenía dos botones verdes; la regla de pago de profes no cubría el mes que se miraba. Se actualizaron e2e viejos (onb-1 con 9 pasos, selectores repetidos, la recepción no abre Configuración).
+- **Tanda 1 (bloque 21)**: VD-48 salida opcional, VD-49 efectivo sin caja, VD-50 doble cobro, VD-51 prueba gratis, VD-52 liquidación de profes, VD-60 grilla y TV para recepción y profe. Cada uno con prueba de base y su e2e en verde (vd-48 14 pasos, vd-49 14, vd-50 16, vd-51 11, vd-52 12, vd-60 24; vd-49 falla dentro de la cadena por estado de otras cajas, pasa solo).
+- **Fase 5 (escrita por 6 agentes, rama `cierre/union-fase5`, ya unida a esta)**: VD-61 ingreso, VD-62 páginas, VD-63 ayuda, VD-53 fichaje, VD-54 máquinas, VD-55 lockers, VD-56 recibo, VD-57 día cerrado, VD-58 turnos con PT. Base y estáticos en verde; e2e corridos por primera vez: vd-54 (13) y vd-56 (12) y cfg-4 en verde; vd-53, 55, 57, 58, 61, 62 con fallas puntuales en reparación al cierre de esta entrada (ver ESTADO-CIERRE.md).
+- **Fase 3**: `docs/v2/CHE-ME-PASO.md` con 40 consultas, cada una con su pantalla y su prueba; el estado sale de la corrida real (19 ✅, 2 solo base, 18 ❌ por e2e que no pasaron).
+- **COLA** marcada con los resultados reales (20 en verde con sus pasos; 23 con "NO pasó en el cierre").
+
+```
+LO QUE ENCONTRÉ SIN PEDIRTELO
+```
+- **Acciones del servidor colgadas en la app compilada de esta compu**: una acción con `revalidatePath` deja el botón en "Sumando…" ~35-70 % de las veces aunque la respuesta llegó completa (medido con CDP). Pasa también con el código de `main` del 05/11, con y sin compresión, con Chrome/Edge/Chromium; no pasa en `next dev`; el login (sin revalidación) en Vercel real anda. **Mirá en Vercel un botón con revalidación (p. ej. "Sumar una dirección" en el super admin)**. Es la causa probable de muchos e2e que "se quedan esperando".
+- Error de hidratación #418 + "parentNode" intermitente solo en la app compilada (los e2e lo cuentan como aviso).
+- Agente E: `privado.hecho_inmutable()` sin argumentos no frena nada; conviene revisar las tablas viejas que la usen así.
+- Agente B (plata, sin tocar): `anular_venta_panel` devuelve el efectivo a la caja abierta más antigua de la sede, no a la de quien anula; el doble cobro confirmado no sale en la línea de tiempo de Control.
+- `.claude/worktrees/*` de las noches anteriores siguen registrados (algunos "locked"): no los borré.
+
+```
+QUÉ CORRÉS VOS                  comandos exactos, en orden
+```
+1. Poné el repo público (D35) o arreglá la facturación de Actions: hoy los jobs terminan en 5 s con "recent account payments have failed".
+2. Tanda 1: `gh workflow run base-de-datos.yml --ref publicar/2026-11-06-1 -f accion=prevuelo` → `gh run watch` ("Pre-vuelo OK") → mismo comando con `-f accion=aplicar` → PR `publicar/2026-11-06-1` → `main` (`gh pr create --fill`, `gh pr merge --merge`) → a los 3 min `curl` a `https://gym-os-pied.vercel.app/ingresar`, `/g/demo`, `/admin`, `/g/demo/app`. **No mergear antes de aplicar**: Vercel publicaría código que espera tablas que faltan.
+3. Tanda 2 (fase 5): cuando estén en verde los e2e de vd-53/55/57/58/61/62, repetir con `publicar/2026-11-06-2` (se crea desde `cierre/2026-11-06`).
+4. Probar en Vercel un botón con revalidación (ver arriba).
+5. Borrar a mano las ramas viejas `publicar/2026-11-06` (quedó atrás) y las bases locales `gymos_*`.
+
+```
+QUÉ CONFIGURÁS VOS              variables, paneles, DNS
+```
+Dominio (`18`), región de Supabase, SMTP (sin SMTP la pantalla de ingreso lo avisa: `SMTP_CONFIGURADO=1`), Google (`ENTRAR_CON_GOOGLE`), Turnstile, VAPID (push), Sentry; WhatsApp de BRIK para "Pedí una demo" en /admin.
+
+```
+SIN ARREGLAR                    lo que quedó, y por qué
+```
+- 53 e2e de la cadena sin pasar (lista en `ESTADO-CIERRE.md` y en la COLA): mezcla de acciones colgadas (arriba), pruebas viejas contra pantallas que cambiaron y datos que dependen del orden/hora (com-3, com-13). No se les tocó la app sin entender el motivo.
+- Seguimientos B/C/D del bloque 20, VD-32 (segunda pasada) y los 🔌: no se hicieron.
+- Publicación: no se pudo (Actions bloqueado).
+
+```
+LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
+```
+- Nada se publicó ni se aplicó en Supabase/Vercel; prevuelo y aplicar no corrieron.
+- Fase 5 por pantalla solo parcialmente (arriba); Lighthouse, iPhone real y capturas de VD-62 sin medir.
+- En Vercel no sé si pasa el cuelgue de acciones.
+- vd-22 y partes de vd-62 piden `demo.localhost` fuera del navegador (no resuelve en Windows).
+
+---
+
 # Gy
 
 ## 2026-11-07 · Cierre · VD-53 (fichaje del equipo), VD-56 (recibo de cada pago) y VD-57 (día cerrado suma al vencimiento)

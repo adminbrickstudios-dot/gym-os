@@ -180,7 +180,8 @@ try {
   // ── 4. Gimnasio demo: compu y celular ──
   await paginaGimnasio(COMPU, "gimnasio compu");
   await paginaGimnasio(CELU, "gimnasio celular");
-  const smG = await (await admin.request.get(`${G}/sitemap.xml`)).text();
+  // En Windows demo.localhost no resuelve fuera del navegador: se pide a 127.0.0.1 con el Host del gimnasio.
+  const smG = await new Promise((res, rej) => import("node:http").then(({ default: h }) => h.get({ host: "127.0.0.1", port: Number(process.env.PUERTO_APP ?? 3123), path: "/sitemap.xml", headers: { host: `demo.localhost:${process.env.PUERTO_APP ?? 3123}` } }, (r) => { let d = ""; r.setEncoding("utf8"); r.on("data", (c) => (d += c)); r.on("end", () => res(d)); }).on("error", rej)));
   chequear(smG.includes("<loc>"), "sitemap del gimnasio publicado", "el sitemap del gimnasio está vacío");
 
   // ── 5. El dueño pega un video de portada: la portada lo muestra (y uno inválido se rechaza) ──
