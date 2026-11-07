@@ -43,6 +43,8 @@ async function ventaDelPack() {
   const { rows: [pk] } = await db.query(`select id, nombre from public.productos where gimnasio_id = $1 and pt_sesiones is not null and nombre = $2`, [s.gimnasio_id, PACK]);
   const { rows: [sede] } = await db.query(`select id from public.sedes where gimnasio_id = $1 order by es_principal desc limit 1`, [s.gimnasio_id]);
   const { rows: [eq] } = await db.query(`select id from public.equipo where gimnasio_id = $1 and rol = 'recepcion' limit 1`, [s.gimnasio_id]);
+  // Corridas anteriores dejaron packs a este socio: se anulan para que el saldo sea solo el de este pack (la reserva gasta primero el más viejo).
+  await db.query(`update public.ventas set estado = 'anulada', anulada_en = now(), anulada_motivo = 'limpieza e2e', anulada_por = $2 where socio_id = $1 and estado = 'confirmada' and id in (select it.venta_id from public.venta_items it join public.productos p on p.id = it.producto_id where p.pt_sesiones is not null)`, [s.id, eq.id]);
   const { rows: [v] } = await db.query(`insert into public.ventas (gimnasio_id, sede_id, socio_id, estado, origen, creado_por, confirmada_en) values ($1,$2,$3,'confirmada','recepcion',$4, now()) returning id`, [s.gimnasio_id, sede.id, s.id, eq.id]);
   await db.query(`insert into public.venta_items (gimnasio_id, venta_id, tipo, producto_id, descripcion, cantidad, precio_unitario) values ($1,$2,'producto',$3,$4,1,90000)`, [s.gimnasio_id, v.id, pk.id, pk.nombre]);
 }
