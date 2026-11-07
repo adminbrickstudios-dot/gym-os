@@ -23,6 +23,9 @@ También: error de hidratación #418 + "parentNode" intermitente solo en la app 
 ## Publicación (fase 4)
 `publicar/2026-11-06` empujada (tanda 1). GitHub Actions sigue bloqueado por facturación (el repo sigue privado; el job termina en 5 s con "recent account payments have failed"): prevuelo y aplicar NO se pudieron correr. NO mergear a `main` antes de aplicar las migraciones nuevas (Vercel publicaría código que espera tablas que no están).
 
+## Estado final de la tanda 2 (fase 5)
+En verde con la app real: vd-53, 54, 55, 56, 57, 58, 61. Sin pasar: vd-62 (video de portada queda tras borrar el link; puede ser la caché de la landing), vd-63 (Ctrl+K → ayuda). Rama: `publicar/2026-11-06-2` (incluye todo).
+
 ## Pendiente
 1. Cadena de e2e en curso (5.ª; `.local/e2e-resultados.jsonl`).
 2. Tanda 2: unir `cierre/union-fase5`, correr sus e2e (vd-53, 54, 55, 56, 57, 58, 61, 62, 63) y los de la tanda 1 de nuevo, `publicar/2026-11-06-2`.

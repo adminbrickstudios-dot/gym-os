@@ -21,7 +21,7 @@ corrida real de pantallas de este cierre** (✅ pasó, ❌ falló, ⏳ no se cor
 | 12 | Recepción | Me pagó la mitad. | Pago parcial: queda la deuda del resto y el período no se cubre hasta completar. | Cobrar | vd-5 ❌ | `cobro`, `cobrar-flujo`, `cuenta-corriente` | ❌ revisar |
 | 13 | Recepción | Quiere pagar 3 meses juntos. | Se elige la cantidad de períodos en Cobrar: es una sola venta (no es doble cobro) y la cobertura corre 3 períodos. | Cobrar | vd-5 ❌ | `cobrar-flujo`, `vencimiento-cuotas` | ❌ revisar |
 | 14 | Dueño | Subí el precio y él había pagado adelantado. | El aumento se programa con aviso previo: hasta ese día se cobra el precio de hoy y lo ya cobrado no cambia. | Planes · Aumento | pla-4 ❌ | `aumento-precios`, `aumento-aviso` | ❌ revisar |
-| 15 | Recepción | Cobro en efectivo pero no abrí la caja. | Cobrar ofrece “Abrir mi turno” con el fondo en la misma hoja y sigue sin perder lo cargado; transferencia y tarjeta cobran sin caja. | Cobrar · Caja | vd-49 ❌ | `efectivo-sin-caja` | ❌ revisar |
+| 15 | Recepción | Cobro en efectivo pero no abrí la caja. | Cobrar ofrece “Abrir mi turno” con el fondo en la misma hoja y sigue sin perder lo cargado; transferencia y tarjeta cobran sin caja. | Cobrar · Caja | vd-49 ✅ | `efectivo-sin-caja` | ✅ |
 | 16 | Recepción | Un socio paga con transferencia. | Se elige Transferencia en Cobrar (con el alias del gimnasio); si el socio sube el comprobante, se aprueba en Transferencias y la puerta lo deja pasar. | Cobrar · Transferencias | vd-46f ❌ | `comprobante-pago`, `chip-transferencia` | ❌ revisar |
 | 17 | Recepción | Dice que paga mañana, dejalo pasar. | Dejar pasar con motivo según el modo de fiado que eligió el dueño (hasta N días sola; más con PIN del dueño; o siempre con PIN). Todo queda anotado con nombre y motivo. | Entrada | vd-8 ❌, ent-4 ✅ | `dejar-pasar-modos`, `dejar-pasar` | ❌ revisar |
 | 18 | Dueño | La caja de anoche quedó abierta. | La caja se cierra sola a la hora de corte: queda “cerrada sin contar” y el dueño la cuenta después; la alerta sale una sola vez. | Caja · Inicio | vd-9 ❌, caj-5 ❌ | `caja-sin-contar`, `caja-olvidada` | ❌ revisar |
@@ -44,11 +44,11 @@ corrida real de pantallas de este cierre** (✅ pasó, ❌ falló, ⏳ no se cor
 | 35 | Socio | Quiero pagar desde la app. | Pago online (Mercado Pago, simulado acá) o transferencia con comprobante; entra cuando se acredita. | App · Pagar | pay-1 ✅ | `pagos-online` | ✅ |
 | 36 | Socio | ¿Cuántos días me quedan? | El Inicio de la app muestra el semáforo, “vence el …”, los días que faltan y la racha del mes. | App · Inicio | vd-36 ✅, app-7 ✅ | `racha` | ✅ |
 | 37 | Socio | Le quiero escribir una queja al gimnasio. | Yo → Más → Escribile al gimnasio (con foto); llega al panel con el número de pendientes y se contesta ahí. | App · Yo · Mensajes | vd-38 ❌ | `mensajes-socios` | ❌ revisar |
-| 38 | Socio | ¿Dónde veo los horarios y el reglamento? | La app tiene “Info del gimnasio” con horarios, feriados, reglamento, contacto y cómo llegar (los mismos datos de la página). Es de la fase 5 (VD-63). | App · Info | vd-63 ⏳ | `info-gimnasio-socio` | ⏳ sin correr |
+| 38 | Socio | ¿Dónde veo los horarios y el reglamento? | La app tiene “Info del gimnasio” con horarios, feriados, reglamento, contacto y cómo llegar (los mismos datos de la página). Es de la fase 5 (VD-63). | App · Info | vd-63 ❌ | `info-gimnasio-socio` | ❌ revisar |
 | 39 | Dueño | No tengo clases, ¿cómo saco todo eso? | Configuración → Secciones: al apagar Clases desaparece de todos los paneles; nada queda con un botón a la nada. | Configuración | cfg-7 ✅ | `secciones-cfg7` | ✅ |
 | 40 | Dueño | Armé un gimnasio nuevo y no sé cómo darle acceso a la recepcionista (o se olvidó la contraseña). | El super admin crea el gimnasio en 3 pasos y le da el acceso al dueño; desde el equipo se genera una contraseña nueva por persona (se muestra una sola vez). | Super admin · Equipo | super-admin ❌, vd-40 ❌ | `super-admin`, `super-admin-v2` | ❌ revisar |
 
-**Resumen de esta corrida:** 19 verificadas con pantalla · 2 solo con prueba de base · 18 con falla · 1 sin correr.
+**Resumen de esta corrida:** 20 verificadas con pantalla · 2 solo con prueba de base · 18 con falla · 0 sin correr.
 
 ## Qué se encontró mientras se escribían
 - La alta de gimnasio del super admin mandaba el formulario vacío al pasar al paso 3 (el botón “Siguiente” se convertía en “Crear” en el mismo lugar y el navegador lo enviaba). Arreglado (`key` en cada botón).
