@@ -1,0 +1,159 @@
+# Las pruebas que una compu con Windows no puede correr: la base de prueba
+# (Postgres con la simulación de Supabase), sus pruebas, los chequeos contra
+# la base y las pantallas con sesión real (e2e + barrido).
+# Corre sola en cada push a una rama noche/** o dia/** (la base, ~5 min).
+# Las pantallas (2 a 4 h) corren si el mensaje del commit dice [pantallas],
+# o a mano: Actions → Pruebas completas → Run workflow.
+# El agente la mira con:  gh run list --workflow pruebas-completas.yml
+name: Pruebas completas
+
+on:
+  push:
+    branches: ["noche/**", "dia/**"]
+  workflow_dispatch:
+    inputs:
+      pantallas:
+        description: "Correr también las pantallas (e2e y barrido, 2 a 4 h)"
+        type: boolean
+        default: true
+      solo:
+        description: "Solo estos recorridos, separados por coma (p. ej. vd-12,ent-2; barrido para el barrido). Vacío = todos"
+        type: string
+        default: ""
+      app_modo:
+        description: "Cómo corre la app: dev (next dev) o produccion (next build + next start)"
+        type: string
+        default: "produccion"
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  base:
+    name: Base (migraciones, pruebas y chequeos)
+    runs-on: ubuntu-latest
+    # Un push nuevo cancela la base del anterior (solo importa la última).
+    concurrency:
+      group: base-${{ github.ref }}
+      cancel-in-progress: true
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva con todas las migraciones
+        run: scripts/db/local.sh nueva
+      - name: Pruebas de la base
+        run: npm run db:pruebas
+      - name: Chequeos del proyecto
+        run: DB_PRUEBAS_URL="$(scripts/db/local.sh url)" npm run chequeos
+      - name: El demo se siembra
+        run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost
+
+  pantallas:
+    name: Pantallas (e2e y barrido)
+    # Las pantallas no se cancelan con un push normal: hacen cola.
+    concurrency:
+      group: pantallas-${{ github.ref }}
+      cancel-in-progress: false
+    if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: ffmpeg (los recorridos de QR y video lo usan)
+        timeout-minutes: 6
+        continue-on-error: true   # si el espejo de apt se cuelga, solo fallan los recorridos que graban video
+        run: sudo timeout 300 apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y -qq ffmpeg || sudo timeout 120 apt-get update -qq && sudo timeout 300 apt-get install -y -qq ffmpeg
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Levantar la app con la imitación de Supabase
+        env:
+          APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: scripts/local/levantar.sh
+      - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
+        run: |
+          mkdir -p .local
+          nohup bash -c 'while true; do echo "== $(date +%T) =="; free -m | sed -n 2p; ps -eo rss,args --sort=-rss | head -4 | cut -c1-140; sleep 20; done' > .local/memoria.log 2>&1 &
+      - name: Pantallas (e2e, cada recorrido aunque falle otro)
+        env:
+          SOLO: ${{ inputs.solo }}
+          E2E_DEPURAR: "1"
+          E2E_CONSOLA: "1"
+          APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          mkdir -p .local
+          : > .local/fallas.txt
+          : > .local/caidas.txt
+          if [ -n "$SOLO" ]; then
+            LISTA=$(echo "$SOLO" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | grep -vx barrido | sed 's#^#scripts/e2e/#; s#$#.mjs#' | tr '\n' ' ')
+          else
+            LISTA=$(node -p "require('./package.json').scripts.e2e.split('&&').map((x) => x.trim().replace(/^node /, '')).join(' ')")
+          fi
+          for s in $LISTA; do
+            if ! curl -s -o /dev/null --max-time 20 http://localhost:3123/; then
+              echo "::warning::la app no responde antes de $s; últimos 200 renglones de .local/app.log:"
+              tail -n 200 .local/app.log || true
+              tail -n 12 .local/memoria.log || true
+              echo "app caída antes de $s" >> .local/caidas.txt
+              scripts/local/levantar.sh || true
+            fi
+            echo "::group::$s"
+            if ! node "$s"; then
+              echo "✗ $s" >> .local/fallas.txt
+              echo "::warning::falló $s; últimos 200 renglones de .local/app.log:"
+              tail -n 200 .local/app.log || true
+              tail -n 6 .local/memoria.log || true
+            fi
+            echo "::endgroup::"
+          done
+          if [ -s .local/fallas.txt ]; then echo "Recorridos con fallas:"; cat .local/fallas.txt; exit 1; fi
+          echo "Todos los recorridos en verde"
+      - name: Barrido (cada rol abre cada pantalla)
+        if: always() && (inputs.solo == '' || contains(inputs.solo, 'barrido'))
+        run: node scripts/e2e/barrido.mjs
+      - name: Tiempos (VD-47, avisa y no corta)
+        if: always() && inputs.solo == ''
+        continue-on-error: true
+        run: node scripts/medir/tiempos.mjs | tee .local/tiempos.md
+      - name: Guardar capturas y logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pantallas
+          include-hidden-files: true
+          path: |
+            .local/*.log
+            .local/fallas.txt
+            .local/caidas.txt
+            .local/tiempos.md
+            .local/capturas/
+          if-no-files-found: ignore
+          retention-days: 7

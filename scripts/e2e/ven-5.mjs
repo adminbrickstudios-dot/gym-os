@@ -5,6 +5,7 @@
 // apaga el fiado.
 //   npm run e2e:ven-5            (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -33,9 +34,10 @@ try {
 
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Fiado${s5}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ label: await d.locator('select[aria-label="Plan"] option', { hasText: "Plan Full" }).first().innerText() });
+  await elegirPlan(d, "Plan Full");
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.waitForURL(/\/panel\/vender\?socio=/, { timeout: 30000 });
+  // VD-5b: "Dar de alta y cobrar" abre la hoja Cobrar sobre el alta; después se sigue en Vender con el socio.
+  await irAVender(d, await hojaDeAlta(d));
   const id = new URL(d.url()).searchParams.get("socio");
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("A cuenta")').click();

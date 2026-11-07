@@ -69,7 +69,7 @@ try {
   // Productos: agregar, editar, ocultar, mostrar.
   await d.locator('input[aria-label="Producto nuevo"]').fill(`Agua${s5}`);
   await d.locator('input[aria-label="Precio del producto nuevo"]').fill("800");
-  await d.locator('button:has-text("Agregar")').click();
+  await d.locator('form:has(input[aria-label="Producto nuevo"]) button:has-text("Agregar")').click();
   const prod = d.locator(`li[data-producto="Agua${s5}"]`);
   await prod.waitFor({ timeout: 30000 });
   await prod.locator('button:has-text("Editar")').click();

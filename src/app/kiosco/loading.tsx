@@ -1,6 +1,6 @@
 // Con la forma real de la tablet: saludo, el campo del DNI y el teclado.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <main className="min-h-dvh grid place-items-center p-6" aria-busy="true" aria-label="Cargando">
       <div className="w-full max-w-md space-y-6">

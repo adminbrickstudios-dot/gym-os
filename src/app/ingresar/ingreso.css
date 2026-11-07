@@ -1,0 +1,29 @@
+/* Ingreso (VD-33): fondo con un degradé lento del color del gimnasio, logo que aparece y tarjeta de vidrio.
+   Todo en CSS; con reduced-motion no se mueve nada (queda el estado final). */
+.ingreso-fondo { position: relative; isolation: isolate; overflow: clip; }
+.ingreso-fondo::before {
+  content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 18% 12%, color-mix(in oklab, var(--acento) 30%, transparent), transparent 70%),
+    radial-gradient(50% 45% at 86% 92%, color-mix(in oklab, var(--acento) 18%, transparent), transparent 70%);
+  animation: ingreso-deriva 18s ease-in-out infinite alternate;
+}
+/* VD-61: con foto de portada, la foto cubre toda la pantalla y un velo del color del fondo la hace legible. */
+.ingreso-foto { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.ingreso-fondo[data-con-foto]::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--fondo) 55%, transparent), color-mix(in oklab, var(--fondo) 88%, transparent));
+}
+.ingreso-fondo[data-con-foto]::before { display: none; }
+.ingreso-logo { animation: ingreso-logo 200ms var(--curva, ease-out) both; }
+.ingreso-tarjeta {
+  background: color-mix(in oklab, var(--tarjeta) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  padding: 1.5rem; animation: aparecer var(--dur-rapida, 160ms) var(--curva, ease-out) 80ms both; }
+@keyframes ingreso-deriva { to { transform: translate3d(4%, -3%, 0) scale(1.08); } }
+@keyframes ingreso-logo { from { opacity: 0; transform: scale(0.9); } }
+@media (prefers-reduced-motion: reduce) {
+  .ingreso-fondo::before, .ingreso-logo, .ingreso-tarjeta { animation: none !important; }
+}
+/* Código de 6 dígitos: grande, con aire entre los números, sin desbordar en 390 px. */
+.ingreso-codigo { letter-spacing: 0.35em; padding-left: 0.35em; }

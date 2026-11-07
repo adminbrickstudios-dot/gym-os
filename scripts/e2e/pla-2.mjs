@@ -5,6 +5,7 @@
 // "solo Yoga" en la lista. Un horario al revés avisa qué poner.
 //   npm run e2e:pla-2            (con scripts/local/levantar.sh corriendo)
 import { COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -30,7 +31,7 @@ try {
   // Un socio con ese plan, al día.
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Franjo${s5}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ label: await d.locator('select[aria-label="Plan"] option', { hasText: `Franja${s5}` }).innerText() });
+  await elegirPlan(d, `Franja${s5}`);
   await d.locator('button:has-text("Solo dar de alta")').click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 30000 });
   const id = d.url().split("/").pop();

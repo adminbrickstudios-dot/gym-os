@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
+import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
@@ -13,7 +15,7 @@ import { Calendario, type Asistencia } from "./Calendario";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import { Foto } from "./Foto";
-import { Familia, type Familiar } from "./Familia";
+import { Familia, type Familiar, type PlanFamiliar } from "./Familia";
 import { Pausas, type DatosPausas } from "./Pausas";
 import { AptoFisico, type DatosApto } from "./AptoFisico";
 import { Origen, type DatosOrigen } from "./Origen";
@@ -22,7 +24,13 @@ import { Convenio, type ConvenioSocio } from "./Convenio";
 import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
+import { FaltasSocio, type DetalleFaltas } from "./FaltasSocio";
+import { BotonEntradaFicha } from "./BotonEntradaFicha";
+import { ConstanciaBaja, ModeracionFicha } from "./ModeracionFicha";
+import { Suspense } from "react";
+import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
+import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
@@ -40,7 +48,7 @@ const PESTANAS = [
 ] as const;
 type Pestana = (typeof PESTANAS)[number]["clave"];
 
-export default async function FichaSocio({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; mes?: string; sin_plan?: string }> }) {
+export default async function FichaSocio({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pestana?: string; mes?: string; sin_plan?: string; desde?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const pestana: Pestana = PESTANAS.find((p) => p.clave === sp.pestana)?.clave ?? "resumen";
@@ -51,6 +59,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     exigirSeccion(panel, "socios");
     const veVentas = pestana === "pagos" && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
     const mostrador = panel.yo.rol !== "profe" && panel.modo_clases === "reserva";
+    // VD-38: lo que este socio le escribió al gimnasio. Sin permiso (recepción sin el interruptor) la tarjeta no se muestra; la base exige el permiso igual.
+    const pMensajes: Promise<FilaHistorial[] | null> = pestana === "resumen" && panel.yo.rol !== "profe" && !panel.secciones_apagadas.includes("mensajes")
+      ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
+    // VD-46G: si el plan familiar está prendido, quién es el titular de su grupo (la tarjeta Familia lo muestra).
+    const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
     const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -68,12 +81,12 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" ? rpc<ConvenioSocio>("convenio_socio", { p_socio_id: id }) : Promise.resolve(null),
       pestana === "resumen" ? rpc<{ convenio_id: string; nombre: string; tipo: string; valor: number; activo: boolean }[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve([]),
       // CLA-1: las clases que reservó y no vino (sin cancelar), últimos 60 días.
-      pestana === "asistencia" && panel.modo_clases === "reserva" ? rpc<{ clase_id: string; actividad: string; inicio: string }[]>("faltas_socio", { p_socio_id: id }) : Promise.resolve([]),
+      pestana === "asistencia" && panel.modo_clases === "reserva" ? rpc<DetalleFaltas>("faltas_socio_detalle", { p_socio_id: id }) : Promise.resolve(null),   // VD-46Q: con el perdón
       // CLA-2: turnos fijos (si el gimnasio los usa), desde el mostrador.
       pestana === "resumen" && mostrador ? rpc<{ prendido: boolean; turnos: Turno[] }>("turnos_socio", { p_socio_id: id }) : Promise.resolve(null),
       pestana === "resumen" && mostrador ? rpc<HorarioLibre[]>("horarios_para_turno", { p_socio_id: id }) : Promise.resolve([]),
       // APP-8: si pidió la baja desde la app.
-      rpc<{ pedido_id: string; motivo: string; nota: string | null } | null>("pedido_baja_socio", { p_socio_id: id }),
+      rpc<{ pedido_id: string; motivo: string; nota: string | null; codigo?: string; pedido_en?: string } | null>("pedido_baja_socio", { p_socio_id: id }),
       // COM-1: si está en riesgo de irse, el porqué (los mismos que ven Retención).
       pestana === "resumen" && panel.yo.rol !== "profe" ? rpc<{ nivel: "alto" | "medio"; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }) : Promise.resolve([]),
       // COM-2: los primeros 30 días del socio nuevo.
@@ -83,6 +96,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       // COM-13: su grado en las actividades con grados (cinturones).
       pestana === "resumen" && !panel.secciones_apagadas.includes("clases") ? rpc<GradosSocio>("grados_socio", { p_socio_id: id }) : Promise.resolve([] as GradosSocio),
     ]);
+    const mensajesFicha = await pMensajes;
+    const planFamiliar = await pPlanFamiliar;
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
     const momento = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -95,7 +110,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       <div className="space-y-10">
         {sp.sin_plan && !f.membresia && <p role="alert" className="pildora pildora-amarillo whitespace-normal">⚠️ Quedó dado de alta, pero el plan no se pudo asignar: asignalo con “🏷️ Asignar plan”.</p>}
         <header>
-          <Link href="/panel/socios" className="texto-suave hover:text-[var(--texto)]">← Socios</Link>
+          {sp.desde === "entrada"
+            ? <VolverAEntrada socioId={s.id} nombre={`${s.nombre} ${s.apellido}`.trim()} />
+            : <VolverAlOrigen href="/panel/socios" texto="Socios" className="texto-suave hover:text-[var(--texto)]" />}
           <div className="flex items-start gap-4 mt-4">
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
               version={foto ? foto.slice(-36, -4) : null} />
@@ -132,11 +149,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {s.dado_de_baja_en && (
             <div className="mt-6 space-y-2" data-dado-de-baja>
               <p className="texto-suave">¿Volvió? Dalo de alta de nuevo y después asignale un plan y cobrale. La baja queda en su historial.</p>
+              <Suspense fallback={null}><ConstanciaBaja socioId={s.id} zona={zona} verDevoluciones={["dueno", "encargado"].includes(panel.yo.rol)} /></Suspense>
               <VolverADarDeAlta socioId={s.id} />
               {panel.yo.rol === "dueno" && !(s.nombre === "Socio" && /^borrado #/.test(s.apellido)) && <BorrarDatos socioId={s.id} />}
             </div>
           )}
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
+          {!s.dado_de_baja_en && <Suspense fallback={null}><ModeracionFicha socioId={s.id} zona={zona} /></Suspense>}
           {!s.dado_de_baja_en && panel.yo.rol !== "profe" && (
             <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico">📌 Anotar una tarea sobre este socio</LinkPanel></p>
           )}
@@ -151,10 +170,15 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </p>
           )}
           {!s.dado_de_baja_en && (
-            <div className="flex flex-wrap gap-2 mt-6">
+            <div className="flex flex-wrap gap-2 mt-6" data-ficha-acciones>
+              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
+              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
               {!v.puede || v.color === "amarillo"
-                ? <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</LinkPanel>
-                : <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>}
+                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
+                : <>
+                    <BotonCobrar socioId={s.id} origen="ficha" className="boton">💵 Cobrar</BotonCobrar>
+                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>
+                  </>}
               {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
               <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
@@ -195,7 +219,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} /></div>
           </div>
           {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
-          <Familia socioId={s.id} familia={familia} />
+          <Familia socioId={s.id} familia={familia} plan={planFamiliar} puedeArmar={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} />
         </section>
 
         <section>
@@ -212,6 +236,27 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </ul>
           )}
         </section>
+        {mensajesFicha && (
+          <section data-historial-mensajes>
+            <h2 className="titulo text-3xl mb-4">💬 Mensajes</h2>
+            {mensajesFicha.length === 0 ? <p className="texto-suave">Todavía no le escribió al gimnasio desde la app.</p> : (
+              <ul className="space-y-2">
+                {mensajesFicha.map((m) => (
+                  <li key={m.hilo_id}>
+                    <Link href={`/panel/mensajes?estado=todos&hilo=${m.hilo_id}`} className="tarjeta flex items-start gap-3 p-4">
+                      <span aria-hidden>{motivoDe(m.motivo).emoji}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold">{motivoDe(m.motivo).titulo} · {estadoDe(m.estado).titulo}{m.sin_responder && <span className="pildora pildora-rojo ml-2 !text-xs">Sin responder</span>}</span>
+                        {m.extracto && <span className="block texto-suave truncate">{m.extracto}</span>}
+                        <span className="block text-sm texto-tenue">{momento(m.ultimo_en)}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
         {turnos?.prendido && !s.dado_de_baja_en && <TurnosFijos socioId={s.id} turnos={turnos.turnos} horarios={horariosTurno} quien="equipo" />}
 
         </>}
@@ -227,14 +272,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         {pestana === "pagos" && !ventas && <p className="texto-suave">Los pagos los ven el dueño y el encargado.</p>}
 
         {pestana === "asistencia" && asistencia && <Calendario a={asistencia} socioId={s.id} />}
-        {pestana === "asistencia" && faltas.length > 0 && (
-          <section className="mt-8" data-faltas-socio>
-            <h2 className="titulo text-2xl mb-2">🙈 Reservó y no vino</h2>
-            <ul className="space-y-1">{faltas.map((x) => (
-              <li key={x.clase_id} className="texto-suave">{x.actividad} · <span className="first-letter:uppercase">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.inicio))}</span></li>
-            ))}</ul>
-          </section>
-        )}
+        {pestana === "asistencia" && faltas && <FaltasSocio socioId={s.id} d={faltas} zona={zona} />}
 
         {pestana === "notas" && <Notas socioId={s.id} notas={ne.notas} zona={zona} notaVieja={s.notas} />}
       </div>

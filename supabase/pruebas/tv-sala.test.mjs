@@ -14,7 +14,7 @@ async function como(usuario, fn) {
 async function comoAnon(fn) { await t.db.query("set role anon"); try { return await fn(); } finally { await t.db.query("reset role"); } }
 before(async () => {
   t = await abrir("prueba-tv");
-  for (const rol of ["dueno", "recepcion"]) {
+  for (const rol of ["dueno", "recepcion", "profe"]) {
     const [{ id }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`${rol}${Math.random()}@ejemplo.invalid`]);
     await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,$3,$4)`, [t.g, id, rol, rol]);
     u[rol] = id;
@@ -30,7 +30,23 @@ before(async () => {
 after(async () => t && t.cerrar());
 
 test("crear, ver la clase de ahora y la próxima, aparece un anotado nuevo, revocar", async () => {
-  await como(u.recepcion, () => t.falla(() => t.q(`select public.crear_tv($1, $2, 'Sala')`, [t.g, t.sede]), /permiso|rol|acceso/i));
+  // VD-60 (D34): la recepción y el profe también ponen una TV y ven la lista; sacarla sigue siendo del dueño y el encargado.
+  await como(u.recepcion, async () => {
+    const [{ r }] = await t.q(`select public.crear_tv($1, $2, 'Sala de recepción') r`, [t.g, t.sede]);
+    const [{ l }] = await t.q(`select public.tvs_panel($1) l`, [t.g]);
+    assert.equal(l.length, 1);
+    await t.falla(() => t.q(`select public.revocar_tv($1)`, [r.id]), /permiso|rol|acceso/i);
+  });
+  await como(u.profe, async () => {
+    const [{ l }] = await t.q(`select public.tvs_panel($1) l`, [t.g]);
+    assert.equal(l.length, 1, "el profe ve las TVs");
+    const [{ r }] = await t.q(`select public.crear_tv($1, $2, 'Sala del profe') r`, [t.g, t.sede]);
+    await t.falla(() => t.q(`select public.revocar_tv($1)`, [r.id]), /permiso|rol|acceso/i);
+  });
+  await como(u.dueno, async () => {
+    const [{ l }] = await t.q(`select public.tvs_panel($1) l`, [t.g]);
+    for (const v of l) await t.q(`select public.revocar_tv($1)`, [v.id]);
+  });
   const { id, token } = await como(u.dueno, async () => {
     await t.falla(() => t.q(`select public.crear_tv($1, $2, '  ')`, [t.g, t.sede]), /Ponele un nombre/);
     const [{ r }] = await t.q(`select public.crear_tv($1, $2, 'Sala grande') r`, [t.g, t.sede]);

@@ -22,6 +22,29 @@ export async function guardarAltas(prendidas: boolean, reglamento: string): Prom
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-25: "+N socios" y reseñas de la portada (la base valida el puntaje y la cantidad). */
+export async function guardarPruebaSocial(socios: boolean, puntaje: string, cantidad: string): Promise<{ error?: string; prueba?: import("./PruebaSocial").PruebaSocialPanel }> {
+  const panel = await contextoPanel();
+  const num = (t: string) => (t.trim() === "" ? null : Number(t.trim().replace(",", ".")));
+  const pt = num(puntaje), cn = num(cantidad);
+  if ((pt !== null && !Number.isFinite(pt)) || (cn !== null && (!Number.isInteger(cn)))) return { error: "Reseñas: el puntaje es un número (ej: 4,8) y la cantidad un número entero" };
+  try {
+    const prueba = await rpc<import("./PruebaSocial").PruebaSocialPanel>("guardar_prueba_social", { p_gimnasio_id: panel.gimnasio.id, p_mostrar_socios: socios, p_puntaje: pt, p_cantidad: cn });
+    revalidatePath("/", "layout");
+    return { prueba };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-62: el video de la portada (link directo a .mp4/.webm; la base lo valida). */
+export async function guardarVideoPortada(url: string): Promise<{ error?: string; url?: string | null }> {
+  const panel = await contextoPanel();
+  try {
+    const guardado = await rpc<string | null>("guardar_video_portada", { p_gimnasio_id: panel.gimnasio.id, p_url: url });
+    revalidatePath("/", "layout");
+    return { url: guardado };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** COM-11: IDs del píxel de Meta y de Google Analytics (la base los valida). */
 export async function guardarMedicion(pixel: string, ga: string): Promise<{ error?: string; medicion?: import("./MedicionPagina").MedicionPanel }> {
   const panel = await contextoPanel();

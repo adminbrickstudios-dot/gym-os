@@ -1,6 +1,8 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { LinkPanel } from "@/components/panel/LinkPanel";
-import { useState, useTransition } from "react";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { useOptimistic, useState, useTransition } from "react";
 import { anotarContacto } from "@/app/panel/retencion/acciones";
 import { marcarAvisado } from "@/app/panel/avisos/acciones";
 
@@ -18,10 +20,15 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
   /** COM-4: "📌 Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
   tarea?: boolean;
 }) {
-  const [anotado, setAnotado] = useState<string | null>(null);
+  const ruta = usePathname();
+  const [anotadoReal, setAnotado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  // VD-47X: el "anotado" aparece al instante; si la base dice que no, vuelve atrás y muestra el error.
+  const [anotado, anotarYa] = useOptimistic<string | null, string>(anotadoReal, (_, r) => r);
   const anotar = (resultado: string) => empezar(async () => {
+    setError(null);
+    anotarYa(resultado);
     const r = await anotarContacto(socioId, lista, resultado);
     if (r.error) setError(r.error); else setAnotado(resultado);
   });
@@ -38,7 +45,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
           {whatsapp
             ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}>💬 WhatsApp</a>
             : <span className="pildora">📵 Sin teléfono</span>}
-          {cobrar && <LinkPanel href={`/panel/vender?socio=${socioId}&cuota=1`} className="boton !min-h-11">💵 Cobrar</LinkPanel>}
+          {cobrar && <BotonCobrar socioId={socioId} cuota origen={ruta.includes("retencion") ? "retencion" : "vencen"} className="boton !min-h-11">💵 Cobrar</BotonCobrar>}
           {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}
           {tarea && <LinkPanel href={`/panel/tareas?socio=${socioId}`} className="boton !min-h-11">📌 Tarea</LinkPanel>}
         </div>

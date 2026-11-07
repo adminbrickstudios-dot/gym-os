@@ -27,7 +27,11 @@ try {
   await s.locator("input[name=codigo]").waitFor({ timeout: 30000 });
   const codigos = JSON.parse(readFileSync(join(process.cwd(), ".local", "codigos.json"), "utf8"));
   await s.fill("input[name=codigo]", String(codigos[MAIL]));
-  await s.getByRole("button", { name: /Entrar/ }).click();
+  // Con 6 dígitos se manda solo (VD-33): solo se toca "Entrar" si el botón sigue ahí.
+  await s.waitForURL(/\/app/, { timeout: 5000 }).catch(async () => {
+    const entrar = s.getByRole("button", { name: /Entrar/ });
+    if (await entrar.count()) await entrar.click({ timeout: 5000 }).catch(() => {});
+  });
   await s.waitForURL(/\/app/, { timeout: 60000 });
   await s.getByText(/Hola, Entra/).waitFor({ timeout: 60000 });
   ok("✉️ Mail + código: entra a la app como su socio");
@@ -46,7 +50,11 @@ try {
   await s.getByRole("button", { name: /Contraseña/ }).click();
   await s.fill("input[type=email]", MAIL);
   await s.fill("input[type=password]", CLAVE);
-  await s.getByRole("button", { name: /Entrar/ }).click();
+  // Con 6 dígitos se manda solo (VD-33): solo se toca "Entrar" si el botón sigue ahí.
+  await s.waitForURL(/\/app/, { timeout: 5000 }).catch(async () => {
+    const entrar = s.getByRole("button", { name: /Entrar/ });
+    if (await entrar.count()) await entrar.click({ timeout: 5000 }).catch(() => {});
+  });
   await s.waitForURL(/\/app/, { timeout: 60000 });
   await s.getByText(/Hola, Entra/).waitFor({ timeout: 60000 });
   ok("sale y vuelve a entrar con mail y contraseña");

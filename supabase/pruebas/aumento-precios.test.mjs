@@ -26,7 +26,7 @@ async function como(sub, fn) {
 }
 
 test("vista previa y aplicar: 10% redondeado a $100, con el precio en efectivo", async () => {
-  const [{ d }] = await t.q(`select (privado.dia_local(now(), $1) + 5)::text as d`, [t.ctx.zona]);
+  const [{ d }] = await t.q(`select (privado.dia_local(now(), $1) + 35)::text as d`, [t.ctx.zona]);
   const v = await como(u.dueno, async () => (await t.q(`select public.vista_aumento($1, $2, 'porcentaje', 10, 100, $3::date) as v`, [t.g, [a, b], d]))[0].v);
   const pa = v.planes.find((x) => x.plan_id === a), pb = v.planes.find((x) => x.plan_id === b);
   assert.equal(Number(pa.nuevo), 33000); assert.equal(Number(pa.variantes[0].monto), 29700); assert.equal(pa.problema, null);
@@ -36,9 +36,9 @@ test("vista previa y aplicar: 10% redondeado a $100, con el precio en efectivo",
   // Hoy sigue el viejo; desde el día elegido, el nuevo (y el de efectivo).
   const precio = async (p, medio, cuando) => Number((await t.q(`select privado.precio_para($1, ${cuando}, $2, null, true) as p`, [p, medio]))[0].p);
   assert.equal(await precio(a, null, "now()"), 30000);
-  assert.equal(await precio(a, "efectivo", "now() + interval '6 days'"), 29700);
-  assert.equal(await precio(a, "credito", "now() + interval '6 days'"), 33000);
-  assert.equal(await precio(b, null, "now() + interval '6 days'"), 13600);
+  assert.equal(await precio(a, "efectivo", "now() + interval '36 days'"), 29700);
+  assert.equal(await precio(a, "credito", "now() + interval '36 days'"), 33000);
+  assert.equal(await precio(b, null, "now() + interval '36 days'"), 13600);
 });
 
 test("monto fijo; un plan sin precio frena todo y no guarda nada; la recepción no", async () => {

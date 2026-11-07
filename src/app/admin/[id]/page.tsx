@@ -11,6 +11,13 @@ import { BotonEntrar } from "../BotonEntrar";
 import { AgregarPersona, Direcciones } from "./Formularios";
 import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
 import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
+import { Notas, type NotaBrik } from "./Notas";
+
+type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
+type Semana = { desde: string; entradas: number; ventas: number; socios_nuevos: number };
+type Soporte = { id: string; quien: string; motivo: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
+const COLOR = { rojo: ["🔴 Urgente", "pildora-rojo"], amarillo: ["🟡 Atención", "pildora-amarillo"], verde: ["🟢 Todo bien", "pildora-verde"] } as const;
+const diaCorto = (d: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
 export const metadata: Metadata = { title: "BRIK · Gimnasio" };
 
@@ -29,12 +36,17 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { id } = await params;
   let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
+  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[];
   try {
-    [g, cambios, abonos, planes] = await Promise.all([
+    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas] = await Promise.all([
       rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<Record<string, EstadoAbono>>("admin_abonos"),
       rpc<PlanBrik[]>("admin_planes_brik"),
+      rpc<Record<string, SaludFicha>>("admin_salud_v2"),
+      rpc<Semana[]>("admin_uso_semanal", { p_gimnasio_id: id }),
+      rpc<Soporte[]>("admin_soportes", { p_gimnasio_id: id, p_limite: 20 }),
+      rpc<NotaBrik[]>("admin_notas", { p_gimnasio_id: id }),
     ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
@@ -57,6 +69,28 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           )}
         </div>
       </header>
+
+      {saludTodos[g.gimnasio_id] && !g.es_demo && (
+        <section className="space-y-3" data-ficha-salud>
+          <p className="titulo-grupo">Cómo viene</p>
+          <div className="tarjeta p-5 space-y-3">
+            <p><span className={`pildora ${COLOR[saludTodos[g.gimnasio_id].color][1]}`} data-color={saludTodos[g.gimnasio_id].color}>{COLOR[saludTodos[g.gimnasio_id].color][0]}</span></p>
+            {saludTodos[g.gimnasio_id].motivos.length > 0
+              ? <div className="space-y-1">{saludTodos[g.gimnasio_id].motivos.map((m) => <p key={m} className="texto-suave">⚑ {m}</p>)}</div>
+              : <p className="texto-suave">Usa el panel, entra gente y el abono está al día.</p>}
+            <p className="texto-tenue text-sm">Último ingreso del equipo: {fecha(saludTodos[g.gimnasio_id].ultimo_acceso_equipo)}</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-uso-semanal>
+            {semanas.map((s) => (
+              <div key={s.desde} className="tarjeta p-4">
+                <p className="texto-tenue text-sm">Semana del {diaCorto(s.desde)}</p>
+                <p className="numero text-2xl">{s.entradas}</p><p className="texto-tenue text-sm">entradas</p>
+                <p className="texto-suave text-sm mt-1">{s.ventas} cobros · {s.socios_nuevos} socios nuevos</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="space-y-3">
         <p className="titulo-grupo">Equipo y claves</p>
@@ -86,6 +120,26 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       </section>
 
       {abonos[g.gimnasio_id] && !g.es_demo && <AbonoGimnasio gimnasioId={g.gimnasio_id} abono={abonos[g.gimnasio_id]} planes={planes} />}
+
+      <section className="space-y-3" data-admin-soportes>
+        <p className="titulo-grupo">Entradas de Soporte BRIK</p>
+        <p className="texto-suave">Cada vez que alguien de BRIK entra a este gimnasio queda escrito quién, por qué y cuándo. El dueño lo ve en su Control.</p>
+        {soportes.length === 0 ? <p className="texto-tenue">Nadie de BRIK entró todavía.</p> : (
+          <div className="space-y-2">
+            {soportes.map((s) => (
+              <div key={s.id} className="tarjeta p-4" data-soporte={s.en_curso ? "en-curso" : "cerrado"}>
+                <p className="font-semibold break-words">{s.motivo}</p>
+                <p className="texto-suave text-sm break-all">{s.quien} · entró {fecha(s.entro_en)}{s.en_curso ? ` · adentro hasta ${fecha(s.vence_en)}` : ` · salió ${fecha(s.salio_en)}`}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <p className="titulo-grupo">Notas internas de BRIK</p>
+        <Notas gimnasioId={g.gimnasio_id} notas={notas} />
+      </section>
 
       <section className="space-y-3" data-admin-cambios>
         <p className="titulo-grupo">Últimos cambios de configuración</p>

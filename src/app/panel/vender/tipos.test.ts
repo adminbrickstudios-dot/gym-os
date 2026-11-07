@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest";
-import { aplicarCupon, descuentoConvenio, precioUnitario, totalCarrito, type Linea } from "./tipos";
+import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type PreciosVenta } from "./tipos";
 
 const cuota: Linea = { clave: "c", tipo: "cuota", nombre: "Cuota", cantidad: 2, precios: { lista: 25000, efectivo: 22000, transferencia: null, debito: null, credito: 27000 } };
 const agua: Linea = { clave: "a", tipo: "producto", nombre: "Agua", cantidad: 3, precio_fijo: 1500 };
@@ -52,4 +52,47 @@ describe("COM-9: aplicarCupon", () => {
   it("si el cupón es de otro plan, no aplica a nada", () => {
     expect(aplicarCupon([cuota], { cupon_id: "x", codigo: "OTRO", tipo: "porcentaje", valor: 10, planes: ["otro"] }, "efectivo", "full").aplicadas).toBe(0);
   });
+});
+
+// VD-5 · lo que comparten Vender y la hoja Cobrar
+const preciosVenta = (extra: Partial<PreciosVenta> = {}): PreciosVenta => ({
+  tope_descuento: null, medios: ["efectivo"], pases: [], packs: [], productos: [],
+  cuota: { plan_id: "p1", plan: "Full", duracion_meses: 1, precios: cuota.precios! }, ...extra,
+});
+
+test("lineasIniciales: la cuota de su plan, con la matrícula y el recargo si los debe", () => {
+  expect(lineasIniciales(preciosVenta({ cuota: null }))).toEqual([]);
+  expect(lineasIniciales(preciosVenta()).map((l) => l.tipo)).toEqual(["cuota"]);
+  const todo = lineasIniciales(preciosVenta({ matricula: { plan_id: "p1", plan: "Full", monto: 5000, anual: false }, recargo: { monto: 800, atraso: 4, dias: 3 } }));
+  expect(todo.map((l) => l.tipo)).toEqual(["cuota", "matricula", "recargo"]);
+  expect(totalCarrito(todo, "transferencia")).toBe(25000 + 5000 + 800);
+});
+
+test("conRecargoLineas: el recargo entra con la cuota y sale sin ella", () => {
+  const recargo = { monto: 800, atraso: 4, dias: 3 };
+  const con = conRecargoLineas([{ ...cuota, cantidad: 1 }], recargo);
+  expect(con.map((l) => l.tipo)).toEqual(["cuota", "recargo"]);
+  expect(conRecargoLineas(con, recargo)).toBe(con);
+  expect(conRecargoLineas([agua], recargo)).toEqual([agua]);
+  expect(conRecargoLineas(con.filter((l) => l.tipo !== "cuota"), recargo)).toEqual([]);
+});
+
+test("VD-17: los servicios del socio acompañan a la cuota por los mismos meses y se van con ella", () => {
+  const locker = [{ producto_id: "p1", nombre: "Locker", precio: 3000 }];
+  const con = conRecargoLineas([cuota], undefined, locker);
+  expect(con.map((l) => l.tipo)).toEqual(["cuota", "servicio"]);
+  expect(con[1]).toMatchObject({ nombre: "Locker (servicio)", producto_id: "p1", precio_fijo: 3000, cantidad: 2 });
+  // Cambia la cantidad de cuotas: el servicio la sigue y conserva su descuento.
+  const tres = conRecargoLineas([{ ...con[0], cantidad: 3 }, { ...con[1], descuento: 500, descuento_motivo: "Amigo" }], undefined, locker);
+  expect(tres[1]).toMatchObject({ cantidad: 3, descuento: 500 });
+  // Sin cuota no hay servicio; y un producto común no lo lleva.
+  expect(conRecargoLineas(con.filter((l) => l.tipo !== "cuota"), undefined, locker)).toEqual([]);
+  expect(conRecargoLineas([agua], undefined, locker)).toEqual([agua]);
+});
+
+test("armarItems: lo que recibe vender() en la base", () => {
+  const [item, otra] = armarItems([{ ...cuota, descuento: 1000, descuento_motivo: "Amigo" }, { clave: "o", tipo: "otro", nombre: "Candado", cantidad: 1, precio_fijo: 4000 }]);
+  expect(item).toMatchObject({ tipo: "cuota", cantidad: 2, descuento: 1000, descuento_motivo: "Amigo" });
+  expect(item.descripcion).toBeUndefined();
+  expect(otra).toMatchObject({ tipo: "otro", descripcion: "Candado", precio_unitario: 4000 });
 });

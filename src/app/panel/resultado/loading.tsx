@@ -1,6 +1,6 @@
 // Con la forma real del Resultado: título, meses, 4 números y la lista.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <div className="space-y-10" aria-busy="true" aria-label="Cargando">
       <div className={`${bloque} h-24 w-2/3`} />

@@ -12,7 +12,7 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/vencen-hoy`);
   await r.locator("main h1").waitFor({ timeout: 60000 });
-  const filas = r.locator("main ul > li");
+  const filas = r.locator("main div.space-y-3 > ul > li");
   if (await filas.count() === 0) {
     chequear(await r.getByText("Hoy no vence nadie").count() > 0, "sin vencimientos hoy: “Hoy no vence nadie” y el camino a Retención", "vacío sin texto");
   } else {
@@ -21,9 +21,8 @@ try {
     chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "cada fila tiene “💵 Cobrar”", "no hay Cobrar");
     chequear(await f.locator('button:has-text("Dice que vuelve")').count() === 1, "la recepción también anota “Dice que vuelve” (D2)", "la recepción no puede anotar");
     await f.locator('a:has-text("Cobrar")').click();
-    await r.waitForURL(/\/panel\/vender\?socio=.*cuota=1/, { timeout: 30000 });
-    await r.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-    ok("“💵 Cobrar” abre Vender con su cuota en el carrito");
+    await r.locator("[data-cobrar-linea=cuota]").waitFor({ timeout: 30000 });
+    ok("“💵 Cobrar” abre la hoja Cobrar con su cuota ya elegida (VD-5)");
   }
   const d = await pagina(b, CELU);
   await entrar(d, "duena@ejemplo.invalid");

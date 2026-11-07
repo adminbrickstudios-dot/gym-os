@@ -25,7 +25,7 @@ try {
     await p.waitForFunction(([sel, n]) => Number(document.querySelector(sel)?.getAttribute("data-respuestas")) > n,
       [`[data-pie="${clave}"]`, antes], { timeout: 30000 });
   };
-  const switchDe = (texto) => cont.locator("label", { hasText: texto }).locator('input[role="switch"]');
+  const switchDe = (texto) => cont.locator("label", { hasText: typeof texto === "string" && texto === "Caja" ? /^\W*Caja(?![a-záéíóúñ])/ : texto }).locator('input[role="switch"]');
   await cont.waitFor({ timeout: 30000 });
   await capturar(p, "cfg1-compu-gimnasio", true);
 
@@ -130,9 +130,9 @@ try {
   // ── Clases: cada modo; apagadas desaparecen de la pestaña y del menú ──
   await ir("clases");
   await cont.locator("button", { hasText: "Sin reserva" }).click();
-  chequear(await cont.locator("input").count() === 0, "sin reserva no pide días ni horas", "sin reserva muestra campos de reserva");
+  chequear(await cont.locator('input[type="number"]').count() === 0, "sin reserva no pide días ni horas", "sin reserva muestra campos de reserva");
   await cont.locator("button", { hasText: "Con reserva" }).click();
-  chequear(await cont.locator("input").count() === 2, "con reserva pide anticipación y cancelación", "con reserva no muestra sus dos campos");
+  chequear(await cont.locator('input[type="number"]').count() === 2, "con reserva pide anticipación y cancelación", "con reserva no muestra sus dos campos");
   await ir("secciones");
   await switchDe("Clases").uncheck();
   chequear(await p.locator('button[data-pestana="clases"]').count() === 0, "apagar Clases saca su pestaña", "la pestaña Clases sigue");

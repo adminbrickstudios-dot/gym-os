@@ -28,7 +28,7 @@ test("el día de cada uno y lo que hay que mirar", async () => {
   let venta;
   await como(u.recepcion, async () => {
     const [{ id: turno }] = await t.q(`select public.abrir_caja($1, 1000) as id`, [caja]);
-    await t.q(`select public.vender($1, $2, $3, null, $4)`, [t.sede, JSON.stringify([{ tipo: "producto", producto_id: agua, cantidad: 2, descuento: 100, descuento_motivo: "Cliente fiel" }]),
+    await t.q(`select public.vender($1, $2, $3, null, $4)`, [t.sede, JSON.stringify([{ tipo: "producto", producto_id: agua, cantidad: 2, descuento: 100, descuento_motivo: "Amigo o familiar del gimnasio" }]),
       JSON.stringify([{ medio: "efectivo", monto: 1900 }]), turno]);
     [{ r: venta }] = await t.q(`select public.vender($1, $2, $3, null, $4) as r`, [t.sede, JSON.stringify([{ tipo: "producto", producto_id: agua }]), JSON.stringify([{ medio: "efectivo", monto: 1000 }]), turno]);
     u.turno = turno;

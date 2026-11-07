@@ -22,7 +22,7 @@ try {
   await form.locator("input[name=nombre]").fill(NOMBRE);
   await form.locator("select[name=rol]").selectOption("profe");
   await form.getByRole("button", { name: /Sumar al equipo/ }).click();
-  const fila = d.locator("li", { hasText: NOMBRE });
+  const fila = d.locator("li", { hasText: NOMBRE }).first();
   await fila.waitFor({ timeout: 30000 });
   chequear(/sin acceso al sistema/.test(await fila.innerText()), "➕ suma a alguien sin mail: queda “sin acceso al sistema”", await fila.innerText());
 

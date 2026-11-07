@@ -39,7 +39,7 @@ try {
   await form.locator("input[name=nombre]").fill(NOMBRE);
   await form.locator("select[name=rol]").selectOption("recepcion");
   await form.getByRole("button", { name: /Sumar al equipo/ }).click();
-  const fila = d.locator("li", { hasText: NOMBRE });
+  const fila = d.locator("li", { hasText: NOMBRE }).first();
   await fila.waitFor({ timeout: 30000 });
   await fila.locator('button:has-text("Dar acceso")').click();
   await fila.locator("input[name=email]").fill(`nueva-rev${s}@ejemplo.invalid`);
@@ -54,7 +54,7 @@ try {
 
   // Miércoles: la echa: un toque y su historia queda.
   await d.reload();
-  const fila2 = d.locator("li", { hasText: NOMBRE });
+  const fila2 = d.locator("li", { hasText: NOMBRE }).first();
   await fila2.getByRole("button", { name: "Sacar acceso" }).click();
   await fila2.getByRole("button", { name: "Devolver acceso" }).waitFor({ timeout: 30000 });
   ok("la echa: “Sacar acceso” en un toque; sigue en la lista para su historia");

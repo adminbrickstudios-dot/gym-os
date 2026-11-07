@@ -1,6 +1,6 @@
 // Con la forma real de las clases: volver, el título, los días y la lista.
 export default function Cargando() {
-  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] animate-pulse";
+  const bloque = "rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto";
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Cargando">
       <div className={`${bloque} h-5 w-20`} />

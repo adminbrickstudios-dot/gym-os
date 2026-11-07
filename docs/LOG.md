@@ -1,4 +1,691 @@
-# Gym OS — Registro
+## 2026-11-07 · Cierre de Gym OS v2 (rama `cierre/2026-11-06`) — verificado en una compu Windows, con sesión real
+
+```
+QUÉ HICE                        por punto, y cómo lo verifiqué
+```
+- **Entorno**: CIERRE.md asume la nube; acá no había Postgres. Armé un Postgres 16 portable (`C:\Users\consu\pg-portable`, puerto 54322) y adapté `levantar.sh` a Windows. Base: migraciones nuevas aplicadas en base limpia; `db:pruebas` 818/819 con todo unido (la que falla, "3.000 filas en menos de 30 segundos", tarda ~32 s en Windows); `chequeos`, `lint`, `typecheck`, `vitest` (164) en verde.
+- **Fase 1 (ver todo con sesión real)**: app en modo producción, cadena completa de e2e (211 recorridos) y barrido (cada rol × cada pantalla, compu y celular: **248 pasos en verde**). Última cadena: **158 en verde, 53 sin pasar**; después se arreglaron y pasaron vd-1 (19 pasos), com-4, com-8. Bugs reales hallados y arreglados: el alta de gimnasio enviaba el formulario vacío al pasar al paso 3; la hoja Cobrar quedaba debajo del veredicto de la Entrada (los botones no recibían el clic); la ficha ofrecía "Entrada" con la sección apagada; la app del socio tenía dos botones verdes; la regla de pago de profes no cubría el mes que se miraba. Se actualizaron e2e viejos (onb-1 con 9 pasos, selectores repetidos, la recepción no abre Configuración).
+- **Tanda 1 (bloque 21)**: VD-48 salida opcional, VD-49 efectivo sin caja, VD-50 doble cobro, VD-51 prueba gratis, VD-52 liquidación de profes, VD-60 grilla y TV para recepción y profe. Cada uno con prueba de base y su e2e en verde (vd-48 14 pasos, vd-49 14, vd-50 16, vd-51 11, vd-52 12, vd-60 24; vd-49 falla dentro de la cadena por estado de otras cajas, pasa solo).
+- **Fase 5 (escrita por 6 agentes, rama `cierre/union-fase5`, ya unida a esta)**: VD-61 ingreso, VD-62 páginas, VD-63 ayuda, VD-53 fichaje, VD-54 máquinas, VD-55 lockers, VD-56 recibo, VD-57 día cerrado, VD-58 turnos con PT. Base y estáticos en verde; e2e corridos por primera vez con la app real: **vd-53 (14 pasos), vd-54 (13), vd-55 (15), vd-56 (12), vd-57 (10), vd-58 (15), vd-61 (58), cfg-4 (18) en verde** (varios fallaban por errores de las propias pruebas escritas a ciegas; los arreglaron los agentes); **vd-62 (96 de 97 pasos: queda el video de portada después de borrar el link) y vd-63 (el recorrido no llega a la ayuda desde Ctrl+K) sin pasar**.
+- **Fase 3**: `docs/v2/CHE-ME-PASO.md` con 40 consultas, cada una con su pantalla y su prueba; el estado sale de la corrida real (19 ✅, 2 solo base, 18 ❌ por e2e que no pasaron).
+- **COLA** marcada con los resultados reales (20 en verde con sus pasos; 23 con "NO pasó en el cierre").
+
+```
+LO QUE ENCONTRÉ SIN PEDIRTELO
+```
+- **Acciones del servidor colgadas en la app compilada de esta compu**: una acción con `revalidatePath` deja el botón en "Sumando…" ~35-70 % de las veces aunque la respuesta llegó completa (medido con CDP). Pasa también con el código de `main` del 05/11, con y sin compresión, con Chrome/Edge/Chromium; no pasa en `next dev`; el login (sin revalidación) en Vercel real anda. **Mirá en Vercel un botón con revalidación (p. ej. "Sumar una dirección" en el super admin)**. Es la causa probable de muchos e2e que "se quedan esperando".
+- Error de hidratación #418 + "parentNode" intermitente solo en la app compilada (los e2e lo cuentan como aviso).
+- Agente E: `privado.hecho_inmutable()` sin argumentos no frena nada; conviene revisar las tablas viejas que la usen así.
+- Agente B (plata, sin tocar): `anular_venta_panel` devuelve el efectivo a la caja abierta más antigua de la sede, no a la de quien anula; el doble cobro confirmado no sale en la línea de tiempo de Control.
+- `.claude/worktrees/*` de las noches anteriores siguen registrados (algunos "locked"): no los borré.
+
+```
+QUÉ CORRÉS VOS                  comandos exactos, en orden
+```
+1. Poné el repo público (D35) o arreglá la facturación de Actions: hoy los jobs terminan en 5 s con "recent account payments have failed".
+2. Tanda 1: `gh workflow run base-de-datos.yml --ref publicar/2026-11-06-1 -f accion=prevuelo` → `gh run watch` ("Pre-vuelo OK") → mismo comando con `-f accion=aplicar` → PR `publicar/2026-11-06-1` → `main` (`gh pr create --fill`, `gh pr merge --merge`) → a los 3 min `curl` a `https://gym-os-pied.vercel.app/ingresar`, `/g/demo`, `/admin`, `/g/demo/app`. **No mergear antes de aplicar**: Vercel publicaría código que espera tablas que faltan.
+3. Tanda 2 (fase 5): cuando estén en verde los e2e de vd-53/55/57/58/61/62, repetir con `publicar/2026-11-06-2` (se crea desde `cierre/2026-11-06`).
+4. Probar en Vercel un botón con revalidación (ver arriba).
+5. Borrar a mano las ramas viejas `publicar/2026-11-06` (quedó atrás) y las bases locales `gymos_*`.
+
+```
+QUÉ CONFIGURÁS VOS              variables, paneles, DNS
+```
+Dominio (`18`), región de Supabase, SMTP (sin SMTP la pantalla de ingreso lo avisa: `SMTP_CONFIGURADO=1`), Google (`ENTRAR_CON_GOOGLE`), Turnstile, VAPID (push), Sentry; WhatsApp de BRIK para "Pedí una demo" en /admin.
+
+```
+SIN ARREGLAR                    lo que quedó, y por qué
+```
+- 53 e2e de la cadena sin pasar (lista en `ESTADO-CIERRE.md` y en la COLA): mezcla de acciones colgadas (arriba), pruebas viejas contra pantallas que cambiaron y datos que dependen del orden/hora (com-3, com-13). No se les tocó la app sin entender el motivo.
+- Seguimientos B/C/D del bloque 20, VD-32 (segunda pasada) y los 🔌: no se hicieron.
+- Publicación: no se pudo (Actions bloqueado).
+
+```
+LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
+```
+- Nada se publicó ni se aplicó en Supabase/Vercel; prevuelo y aplicar no corrieron.
+- Fase 5 por pantalla solo parcialmente (arriba); Lighthouse, iPhone real y capturas de VD-62 sin medir.
+- En Vercel no sé si pasa el cuelgue de acciones.
+- vd-22 y partes de vd-62 piden `demo.localhost` fuera del navegador (no resuelve en Windows).
+
+---
+
+# Gy
+
+## 2026-11-07 · Cierre · VD-53 (fichaje del equipo), VD-56 (recibo de cada pago) y VD-57 (día cerrado suma al vencimiento)
+
+**QUÉ HICE**
+- **VD-53 (5300)**: `configuracion_fichaje` (por defecto apagado; tope de horas para cerrar una entrada olvidada, 12), `fichajes` (un turno por fila, hecho inmutable: la salida se pone una vez, anular con motivo, nunca se borra), `correcciones_fichaje` (el dueño corrige con motivo; queda cada versión con quién y cuándo). `fichar` (quien opera: sesión o PIN puesto) y `fichar_con_pin` (PIN directo en la compu del mostrador, con el mismo límite de 5 errores). Una entrada que pasó el tope queda "sin salida" y NO suma horas hasta que el dueño la corrige; la salida sin entrada y la entrada repetida no rompen ni escriben. `mi_fichaje`, `mis_horas`, `horas_equipo`, `fichajes_persona` (dueño y encargado; el profe y la recepción ven solo lo suyo). Pantallas `/panel/fichar` y `/panel/horas`, botón en el Inicio. La liquidación de profes (`liquidacion_calculo`) toma las horas del fichaje si la persona fichó en el mes; si no, las cargadas a mano.
+- **VD-56 (5600)**: `recibos` (número correlativo por gimnasio asignado una sola vez por trigger al cobrar, sin saltos; las ventas ya cobradas se numeraron en orden) y `recibo_venta` (todo armado de los hechos; equipo con dueño, encargado y recepción; el socio solo los suyos). Página imprimible `/panel/recibo/[venta]` y `/app/recibo/[venta]` (Imprimir / Guardar como PDF, WhatsApp, Compartir); engancha desde Cobrar, la ficha (Pagos) y Mi historial. Anulado: el recibo lo dice.
+- **VD-57 (5700)**: regla del gimnasio `configuracion_cierres.suma_dias` (por defecto NO). `crear_cierre` ya no deja elegir por cierre: nace con `compensa` = la regla (y solo si cierra todo el gimnasio); un pedido que la contradiga es error. `previsualizar_cierre` avisa "esto corre el vencimiento de N socios N días" ANTES de confirmar. El cálculo sigue siendo uno solo (`recalcular_compensacion`).
+- Pruebas de base nuevas: `fichaje-equipo`, `recibo-pago`, `cierre-suma-dias`. Se ajustó `revision.test` A7 (declara que ese gimnasio suma los días cerrados) y las pruebas de secciones del menú (suma "Fichar").
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `privado.hecho_inmutable()` llamada SIN argumentos no frena nada (con la lista vacía `k = any(NULL)` da NULL y nunca levanta el error). Las tablas nuevas usan `hecho_inmutable('ninguna_columna')`. Las existentes que la llaman sin argumentos no se tocaron: revisar si hay alguna.
+- El comportamiento previo de los cierres no era "no suma": cada cierre traía su tilde "Devolver los días" prendido de entrada (compensa = true). Con la regla nueva el valor por defecto pasa a NO sumar (lo pedido, y lo prudente en plata). Los cierres ya cargados conservan su valor; los nuevos siguen la regla. El dueño que quiera lo de antes elige "Suma los días cerrados" en Configuración → Reglas.
+
+**QUÉ CORRÉS VOS**
+1. `scripts/db/local.sh nueva && npm run db:pruebas && npm run chequeos` (migraciones `20261107005300`, `…5600`, `…5700`).
+2. Con la app levantada: `npm run e2e:vd-53`, `e2e:vd-56`, `e2e:vd-57` y de nuevo `e2e:cfg-4` (ahora el cierre pide confirmar el aviso), `e2e:vd-52`, `e2e:vd-5`, `e2e:barrido`.
+3. `npm run db:types` (necesita el proyecto de Supabase).
+
+**QUÉ CONFIGURÁS VOS**: el fichaje arranca apagado (Horas del equipo → "El gimnasio usa fichaje"). La regla de días cerrados arranca en "No suma" (Configuración → Reglas → Días cerrados). El CUIT del gimnasio no existe en los datos: el recibo no lo muestra.
+
+**SIN ARREGLAR**: el recibo no descarga imagen/PDF por sí mismo (se usa Imprimir → Guardar como PDF, sin dependencias nuevas). Cargar a mano un turno olvidado por completo (sin entrada) no está: el dueño corrige uno existente, no inventa uno. El recibo de una venta cobrada por la app (MercadoPago) sale con el cobrador "Pago desde la app".
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos `vd-53`, `vd-56` y `vd-57` (y `cfg-4` modificado) están escritos según la documentación, pero no están ejecutados: no se corrió la app ni el navegador. `npm run db:types` no se corrió (necesita el proyecto de Supabase).
+
+
+## 2026-11-07 · Cierre · VD-49 (efectivo sin caja, D32) y VD-50 (doble cobro, D29)
+
+**QUÉ HICE**
+- **VD-49 (4900)**: `public.vender` exige, para un pago en efectivo, el turno abierto de QUIEN cobra en esa sede (con PIN, el de esa persona). Sin turno → `sin_caja` (CJ001); con el turno de otra persona → `caja_ajena` (CJ002); transferencia, tarjeta y a cuenta cobran sin caja. `caja_para_cobrar(sede)` dice cuál es mi turno, si el de ayer quedó sin contar y qué cajas puedo abrir (fondo sugerido y lo que dejó el turno anterior). La hoja Cobrar ofrece "Abrir mi turno" con el fondo en la misma hoja (aviso si no coincide con lo que dejó el anterior) y sigue sin perder lo cargado; Vender usa el mismo turno propio. Prueba de base con números fijos: fondo 10.000 + efectivo 7.500 − retiro 2.000 + ingreso 500 = 16.000 (la transferencia de 1.500, la venta anulada de 1.500 y los 6.000 de otra persona no entran), contando 15.800 → FALTAN 200, y el reporte coincide.
+- **VD-50 (5000)**: la cuota del mismo socio cobrada (pago aprobado o cobertura vigente, venta no anulada) hace menos de N minutos por OTRA operación frena con `ya_cobrada` (DC001): "Sofi ya cobró esta cuota hace 40 s (por $25.000)…". Sigue solo con `p_confirmar = true` y un motivo escrito (mín. 3 letras), que queda en `ventas.doble_cobro_motivo` y `doble_cobro_de`. La misma clave sigue siendo idempotente; un producto o un pase nunca se frena; con candado por socio, dos personas a la vez se turnan. N: `configuracion_cobro.doble_cobro_minutos` (2 por defecto, 0 = apagado), lo cambia solo el dueño en Configuración → Cobros (queda en `cambios_cobro`). La firma de `vender` suma `p_confirmar` y `p_motivo_doble` (la anterior se borró). La hoja Cobrar y Vender muestran el aviso con "Cobrar igual (con motivo)" y "Cancelar".
+- Pruebas: `efectivo-sin-caja`, `doble-cobro` y `doble-cobro-carrera` (dos conexiones reales). Se ajustaron tres pruebas viejas que asumían lo anterior: `caja.test` (el efectivo sin caja ahora se prueba con quien no abrió), `caja-sin-contar.test` (apaga el aviso porque cobra la misma cuota varias veces) y `cobrar-flujo.test` (la firma nueva de vender). e2e escritos: `vd-49`, `vd-50`; `vd-5` ajustado (el doble cobro ahora frena).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `datosCobro` y la página Vender tomaban "el primer turno abierto de la sede", aunque fuera de otra persona: el efectivo podía caer en la caja de un compañero. Quedó arreglado por VD-49 (la base elige el de quien cobra).
+- (Sin tocar, toca plata) `anular_venta_panel` devuelve el efectivo de una caja ya cerrada desde "cualquier caja abierta de la sede" (la más antigua), no desde la de quien anula.
+- (Sin tocar) el aviso de caja sin contar de VD-9B y el aviso de fondo de VD-9E en la pantalla Caja siguen pendientes; VD-49 solo mostró el aviso del fondo dentro de Cobrar.
+- Los eventos de doble cobro confirmado (`doble_cobro_motivo`) no se sumaron a la línea de tiempo de Control (la consulta de `moderacion_control` se reemplaza en cadena en varias migraciones; quedó anotado, no tocado).
+
+**QUÉ CORRÉS VOS**
+1. `scripts/db/local.sh nueva && npm run db:pruebas && npm run chequeos` (migraciones `20261107004900` y `20261107005000`).
+2. Con la app levantada: `npm run e2e:vd-49` y `npm run e2e:vd-50` (y de nuevo `e2e:vd-5`, `e2e:rev-6`, `e2e:vd-9`).
+3. `npm run db:types` (necesita el proyecto de Supabase).
+
+**QUÉ CONFIGURÁS VOS**: nada. El tiempo del aviso arranca en 2 minutos en todos los gimnasios.
+
+**SIN ARREGLAR**: ver arriba. Decisiones del agente: (a) sin turno abierto, la hoja Cobrar NO arranca en efectivo aunque sea el de siempre (se elige y ofrece abrir el turno), para que "C → Enter → Enter" no quede trabado; (b) "mismo período" se interpreta como "ya se cobró una cuota de este socio hace menos de N minutos" (sin comparar fechas de cobertura): pagar dos meses es una sola venta con cantidad 2; (c) `Cobrar igual` lo puede confirmar toda persona que cobra (la documentación habla de "dos personas confirmaron"), con motivo obligatorio; si Mateo lo quiere solo para dueño o encargado es una línea en `vender`.
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos `vd-49` y `vd-50` (y los e2e existentes tocados) están escritos según la documentación, pero no están ejecutados: no se corrió ni la app ni el navegador en esta máquina. `npm run db:types` no se corrió (necesita el proyecto de Supabase). `next build` no se corrió; sí typecheck, lint, npm test, chequeos y las pruebas de la base (falla conocida del entorno: "3.000 filas en menos de 30 segundos").
+## 2026-11-07 · VD-48 (salida opcional) y VD-51 (prueba gratis)
+
+**QUÉ HICE**
+- VD-48 · `20261107004800_salida_opcional.sql`: `configuracion_visita.registrar_salida` (no / opcional / obligatoria, por defecto no), tabla de hechos `salidas` (una por ingreso, FK compuesta, inmutable), `registrar_salida` (cierra la visita abierta; sin entrada abierta contesta "No tenía entrada abierta", sin error), `kiosco_salir`, `salir_por_qr_pared`, `adentro_ahora` y `numeros_inicio` ("Adentro ahora" exacto con la salida prendida). `registrar_ingreso` avisa en "obligatoria" y trata volver tras salir como reingreso que no consume. `calcular_acceso` no se tocó. Pantallas: Configuración → Entrada, tecla S y botón Salida en la ventana y en la pantalla de Entrada, "Me voy" en la tablet y en la app (QR de la pared). Verificado: `supabase/pruebas/salida-opcional.test.mjs` (15 pruebas, momentos fijos).
+- VD-51 · `20261107005100_prueba_gratis.sql`: `configuracion_gimnasio.prueba_gratis` (no / dia / clase, solo el dueño), tabla de hechos `pruebas_gratis` (una por DNI y gimnasio, FK compuestas), cuarta vía `via_prueba` en `calcular_acceso` (prioridad más baja: verde "En prueba", después rojo "Ya usó su prueba gratis el 12/10 · Hacete socio"), `guia_entrada` con "En prueba" definitiva (reemplaza la provisoria de VD-2b), `dar_prueba_gratis`, `prueba_por_dni`, `anular_prueba_gratis`, `clases_para_probar` y `reservar_prueba_publica` (página). Cuenta como entrada (vía "prueba") y no como socio activo. Pantallas: Configuración → Reglas, botón y tecla P en la ventana de Entrada y en la pantalla de Entrada, "Probá una clase" con clase, nombre, DNI y celular en la página. Verificado: `supabase/pruebas/prueba-gratis.test.mjs` (9 pruebas).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La ventana de Entrada no se monta en /panel/entrada (ahí vive Puerta.tsx): se sumaron la salida y la prueba a las dos.
+- `registrar_ingreso` buscaba la visita anterior sin tope hacia adelante; ahora solo mira entradas anteriores o iguales al momento.
+
+**QUÉ CORRÉS VOS**: `scripts/db/aplicar.mjs` (prevuelo → aplicar) con las dos migraciones, `npm run db:types`, y `npm run e2e:vd-48` y `npm run e2e:vd-51` con la app levantada.
+
+**SIN ARREGLAR**: "Me voy" del QR de la pared solo tiene prueba de base (la cámara no se simula). El cupo de la clase de prueba se cuenta al reservar; los paneles de ocupación de clases no suman todavía las pruebas reservadas.
+
+**LO QUE NO PUDE VERIFICAR**: el código de pantallas está escrito y pasa typecheck, lint y vitest, pero no está ejecutado en el navegador; los recorridos `scripts/e2e/vd-48.mjs` y `vd-51.mjs` están escritos, no ejecutados. `npm run db:types` necesita el proyecto de Supabase y no se corrió.
+## 2026-11-06 · Cierre de la noche (frenada por la facturación de GitHub Actions)
+
+**QUÉ HICE**
+- Rama `noche/2026-11-05` (PR #2): **todo el bloque 20 de la COLA hecho en código salvo lo que sigue**, mergeado ítem por ítem: tanda 1 (VD-34, 47, 27, 33, 1, 2, 5, 6, 12, 36, 23 y sus seguimientos VD-47X, 12B/C/D, 33B/C, 23B/C, 5B, 1B, 2B, 6B, 12E), tanda 2 (VD-7, 8, 9, 10, 3, 4, 41), tanda 3 (VD-11, 37, 13, 14, 15, 38, 16, 17, 18, 44), tanda 4 (VD-35, 39, 22 —listo hasta las credenciales—, 24 y 38B, 25, 19, 20), tanda 5 (VD-40, 42, 43, 21), tanda 6 (el análisis de las 89 situaciones y VD-46A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, T, U, W) y de la tanda 7 VD-26, 28, 29, 30 (con VD-47Y y VD-16B) y 31. Detalle por ítem: las entradas de arriba de este LOG.
+- Migraciones nuevas de la noche: `20261106000100` hasta `20261106007804` (más de 60, todas aditivas, con guarda de entrada y verificación al final). Funciones que varias migraciones reemplazan en cadena (siempre copiando la versión más nueva): `vender` (4800 → 7802), `calcular_acceso` y `retencion_con` (7700 → 7800), `para_hacer_hoy` (7100 con parches 7200–7403), `guia_entrada` (7501), `registrar_ingreso` privada (7501), `landing_completa` (6101), `moderacion_control` (7803), `avisos_pagos_mp` (7804), `panel_gimnasio` (4900), `privado.secciones_validas` (leer la vigente y agregar).
+- Se detectó y arregló una caída en cascada de las pantallas en Actions (la app corría con `next dev`; ahora `next start` en producción) y se encontró un bug real con la medición (variable `fin` en `para_hacer_hoy`).
+- Verificado ejecutando: la base (migraciones en una base limpia, pruebas, chequeos y demo) en verde en GitHub hasta el merge de VD-46N/O/T/U/W (corrida 42216716432). Después: se mergeó el triaje de la tanda 1 (workflow y e2e, arreglos de la app) y en local pasan lint, typecheck, 150 pruebas unitarias y `npm run build` con las variables de prueba.
+
+**TABLA DE TIEMPOS** (3.019 socios y 202 gimnasios; antes/después en la misma corrida): ver la entrada de VD-30. Ocho funciones de pantalla dentro de 300 ms; `pendientes_panel` (203 ms contra 50), `filtros_socios` (541), `exportar_socios` (689) y `vencen_pestanas` (319) no cumplen: VD-30B.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El primer recorrido completo de pantallas de la tanda 1 falló en ~60 recorridos: la mayoría eran la cascada por `next dev`; tras el cambio a producción quedaron 37 sin arreglo confirmado (ver VD-TRI1 en la COLA).
+- Revisar a mano (permisos): el barrido dice que `/panel/clases/grilla` y `/panel/clases/tv` muestran la pantalla a recepción y profe aunque las páginas piden dueño o encargado; no se tocó (permisos). `privado.hecho_inmutable()` usado sin argumentos (p. ej. en `pedidos_demo_brik`) no frena nada.
+- REV-6a (doble cobro simultáneo a la misma cuota) sigue sin resolver; la clave de operación de VD-34 cubre el reintento del mismo envío.
+
+**QUÉ CORRÉS VOS**
+1. **Resolver la facturación de GitHub Actions** (Settings → Billing & plans): hoy todos los jobs terminan en 2 s con "recent account payments have failed or your spending limit needs to be increased". Hasta que se arregle no corre ni la base ni las pantallas.
+2. Cuando vuelva: `gh workflow run pruebas-completas.yml --ref noche/2026-11-05 --raw-field pantallas=true` (o desde Actions → Run workflow, ~1 h) y, con el resultado, arreglar los recorridos que fallen (VD-TRI1).
+3. **Publicar por tandas** (no se publicó nada: ninguna tanda tiene la corrida de pantallas en verde): para cada tanda, `git branch publicar/<fecha>-tanda-<n> <commit>`, push, Actions → Base de datos → `prevuelo` y después `aplicar` con esa rama, PR a `main` y merge. Orden de las migraciones: las `…0001xx` a `…007804` en el orden de su nombre. Después `npm run db:types`.
+
+**QUÉ CONFIGURÁS VOS**
+- Región de Vercel igual a la de Supabase (si es São Paulo, `gru1`) y Supabase → JWT Signing Keys (claves asimétricas) para que `getClaims` ahorre el viaje.
+- SMTP propio (Resend o Postmark) en Supabase Auth: sin eso Supabase manda 2 mails por hora (VD-45).
+- Google (VD-22B): consola de Google Cloud → OAuth → Supabase Providers → Redirect URLs `https://*.<dominio-base>/auth/callback` y la variable `ENTRAR_CON_GOOGLE=1` en Vercel (paso a paso en la entrada de VD-22).
+- Turnstile (VD-33C): crear el widget en Cloudflare y cargar `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel.
+- Claves VAPID para el push; cargar los planes de BRIK en el super admin (para que aparezcan precios en la landing); el dueño carga sus reseñas y el link de Google; cada dueño prende lo que arranca apagado (plan familiar, modo emergencia de la puerta, registro abierto, compras en la app).
+- Sentry (VD-45B) y el resto de los 🔌 siguen sin hacerse.
+
+**SIN ARREGLAR**: ver la COLA: quedan ~69 ítems (seguimientos B/C/D de casi todos los VD, VD-32 —la segunda pasada de punta a punta, que necesita las pantallas en verde—, y los 🔌). Las decisiones del agente en plata y permisos están en "Decisiones que tomó el agente" de la hoja de ruta para que las revises.
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos de pantallas (e2e y barrido) de TODO lo hecho desde VD-34: nada se vio con sesión real; el código de pantallas está escrito según la documentación, pero no está ejecutado. La base de lo mergeado después de la corrida 42216716432 (el triaje) no corrió en Actions. `npm run db:types` no se corrió en ningún ítem.
+
+## 2026-11-06 · Noche · VD-46N, O, T, U y W · No escribirle, ex socios, motivo de descuento, anular devolución y baja con pausas
+
+**QUÉ HICE**
+- **46N (7800)**: "No escribirle" es un hecho del socio (cuándo, quién, por qué), con historial inmutable al sacarlo. Deja de aparecer en la bandeja de avisos, en Retención, en cumpleaños y en avisar a la clase; SIGUE en Vencen para cobrar y en vencidos y por vencer (se le sigue cobrando). La recepción marca; solo dueño y encargado sacan, con motivo. Sobre `retencion_con` se rehízo sobre la de 7700 (VD-46G) para no perder los vinculados del plan familiar.
+- **46O (7801)**: "Se fueron" sale de `ex_socios` con filtro por motivo de baja y antigüedad y muestra "X de Y contactados volvieron a pagar" (180 días; "volvió" = una cobertura de pago creada después del primer contacto); quien está marcado "No escribirle" no aparece.
+- **46T (7802)**: `privado.vender` (copia de 4800, con servicios, stock y vencimiento) rechaza un descuento cuyo motivo no esté entre los activos de `motivos_beneficio` o que no sea "Cupón X" con un cupón activo, para todos los roles. Se cambiaron los motivos libres de cinco pruebas viejas (`actividad-equipo`, `alertas-caja`, `caja`, `recargo`, `revision2`) a "Amigo o familiar del gimnasio".
+- **46U (7803)**: tarjeta nueva en Configuración → Reglas con topes, regla de devolución y motivos (mismo componente que sigue en Control). Anular una devolución no la borra: escribe un hecho aparte con motivo y quién; los períodos vuelven a estar para devolver y Control marca la devolución como ANULADA; solo dueño y encargado; si era en efectivo y el dueño confirma que la plata volvió, se anota un ingreso en su caja abierta; la ficha lista las devoluciones y tiene el botón Anular.
+- **46W (7804)**: al dar de baja se rechazan los pedidos de pausa pendientes; un aviso "approved" tardío de MercadoPago nunca aprueba un pago ya rechazado por la baja o por el equipo, ni uno de una venta anulada: como MercadoPago sí cobró, queda escrito (`cobro_tarde_en`) y se avisa al dueño en la campana para devolver o cobrar a mano; si el rechazo lo informó la propia MercadoPago sigue devolviendo "ya_rechazado" sin alarma.
+- **Cadena de funciones (importante para lo que venga)**: la vigente de `retencion_con` es la de 7800; la 7803 redefine `moderacion_control` (copia de 7203; quien la toque después, p. ej. VD-46X, debe copiar la de 7803); la 7804 redefine `avisos_pagos_mp` (copia de 6800; VD-46S debe copiar esa).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub.
+
+**SIN ARREGLAR**: VD-46N2 (los avisos automáticos por push o mail, si los hay, también respeten la marca: hoy solo las cuatro listas pedidas), VD-46O2 (mensaje masivo a los ex socios filtrados), VD-46W2 (resolver el cobro tardío de MercadoPago y cerrar la alerta).
+**LO QUE NO PUDE VERIFICAR**: los cinco e2e `vd-46n/o/t/u/w` y las pantallas nuevas (ficha, `ExSocios`, tarjeta de Reglas, anular devolución, que solo está probada en la base): escritos según la documentación, pero no ejecutados; `db:types` no se corrió.
+
+## 2026-11-06 · Noche · VD-46G · Plan familiar y corporativo: el titular paga por los vinculados
+
+**QUÉ HICE**
+- Migración 7700: `grupos_familiares` tiene titular y tipo (familiar o corporativo). `privado.calcular_acceso` (copia de 6700) hereda la membresía del titular para los miembros sin cobertura propia: "Cubierto por X · …" (`cubierto_por_titular`); titular vencido, sin pagar, congelado o sin membresía → "El plan familiar de X venció el dd/mm" (`titular_vencido`); titular dado de baja → "Plan individual pendiente" (rojo). Quien tiene pase, pack o membresía propia entra con lo propio y una congelación propia no se pisa; la suspensión de un miembro lo alcanza y la del titular no alcanza al grupo. En `privado.retencion_con` (copia de 7100) los vinculados no aparecen como vencidos ni por vencer y la fila del titular dice "· paga por N vinculados": Vencen, Retención y Para hacer hoy salen de ahí sin duplicados.
+- ARRANCA APAGADO (`configuracion_gimnasio.plan_familiar_activo = false`; apagado, todo anda como antes); interruptor `plan_familiar_estado`/`guardar_plan_familiar` (solo el dueño, sin `guardar_configuracion`) en Configuración → Reglas. `fijar_titular_familia` y `quitar_titular_familia` son de dueño y encargado y no se usan con el plan apagado; `vincular_familia` y `sacar_de_familia` pasan a exigir dueño o encargado en grupos con titular (si no, la recepción podría regalar o quitar el plan). Tarjeta Familia de la ficha con `plan_familiar_socio`. Caso testigo nuevo en `CASOS_FAMILIA`/`sembrarFamilia` (aparte de `CASOS_TESTIGO` para no alterar el seed).
+- No se tocaron `guia_entrada` ni `registrar_ingreso`: los motivos nuevos caen en su rama genérica ("Anotale la entrada" / "Miralo en la ficha").
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`vd-46g-plan-familiar`).
+
+**SIN ARREGLAR**: VD-46G2 (el miembro no respeta franja horaria, tope semanal ni sede del plan del titular), VD-46G3 (cobrar la cuota del titular desde un miembro; resumen corporativo), VD-46G4 (avisar a los miembros cuando el titular vence).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46g` (prende el interruptor, arma el grupo desde la ficha, mira al miembro en 390 px): escrito según la documentación, pero no ejecutado; `npm run db:types` no se corrió.
+
+## 2026-11-06 · Noche · VD-46D, L, P y R · Aviso previo de aumentos, deuda con los socios, resultado por sede y firma propia al cumplir 18
+
+**QUÉ HICE**
+- **46D (7400)**: `aplicar_aumento` pasa a 7 argumentos (`p_motivo_sin_aviso`; la firma vieja se borra) y exige 30 días de aviso por defecto (el dueño lo configura entre 7 y 90). Con menos días solo puede el dueño, con un motivo de al menos 10 letras; el encargado no puede saltearlo. Cada aumento queda registrado (quién, cuándo, desde cuándo, motivo de la excepción) y cada socio con membresía activa en un plan afectado recibe un aviso en su app (tarjeta con "Entendido", queda registrado que lo vio; `AvisosSocio.tsx`, sin tocar funciones ajenas). Panel: días de aviso, a cuántos socios llega, "Poner el …" (lleva la fecha al mínimo) y "Aumentos anteriores" con avisados y vistos. Lo ya cobrado no cambia: el precio nuevo rige para el próximo pago. Se subieron las fechas de `aumento-precios.test.mjs` y `pla-4.mjs`, que usaban menos de 30 días.
+- **46L (7401)**: `deuda_con_socios` (solo lectura) suma los usos que quedan de packs vigentes y la parte futura de las cuotas pagadas, al neto pagado (precio menos descuento); lo que no tiene venta detrás (cortesías, cargas sin venta) se cuenta aparte sin sumarlo; tarjeta en Resultado, solo mes en curso, con los permisos de Resultado.
+- **46P (7402)**: `resultado_por_sede` da por sede lo cobrado, entradas, socios y "para repartir" (la parte de cuotas, pases y packs de lo que paga cada socio, dividida entre sedes según sus entradas del mes; el resto queda donde se cobró; el total repartido es igual al cobrado); se muestra solo con más de una sede.
+- **46R (7403)**: sin estado guardado: se compara la fecha de nacimiento con la de cada firma; lo que firmó un responsable antes de cumplir 18 se vuelve a pedir, y la firma propia va a `firmas_propias_documento` (la anterior queda de constancia). Se redefinieron `privado.documentos_de` y `firmar_documento` (copia de `20261104012600`). La tarea automática "mayores_de_edad" se engancha con un parche de texto con `replace` sobre `para_hacer_hoy_con` y el catálogo, con guarda que corta con error si no encuentra el texto (frágil si otro ítem cambia la rama `clases_espera`). La prueba `para-hacer-hoy` pasa de "13 automáticas" a "al menos 13".
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`aumento-aviso`, `deuda-socios`, `resultado-por-sede`, `firma-propia`).
+
+**SIN ARREGLAR**: VD-46Z (anular un aumento no avisa a los socios y deja el aviso anterior; aviso por push o mail; plan con menores y mayores; prueba con venta mixta en `resultado_por_sede`, que reparte por proporción de cuotas, pases y packs sobre el total de la venta).
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46d/l/p/r` (`vd-46p` y `vd-46l` dependen de los datos del demo), la tarjeta del Inicio de la app del socio y el flujo de firma propia en pantalla (ningún e2e abre la app del socio): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-46H, I, K y Q · Datos de salud, incidentes, reemplazo de profe y perdón de faltas
+
+**QUÉ HICE**
+- **46H** (sin migración): `src/lib/salud.ts` con su prueba ("operado de rodilla" y "tiene diabetes" se detectan, "operación de caja" no). Avisa en vivo (`AvisoSalud`) y deshabilita el guardado en las notas de la ficha, `FormMensaje.tsx`, el motivo y la nota de las pausas y las tareas (en `FormSocio.tsx` solo aviso en vivo); el servidor lo rechaza igual pidiendo reescribir; en los mensajes del socio el envío se frena.
+- **46I** (7601): tabla `incidentes` (dónde, qué pasó, testigos, qué se hizo, socio opcional) con trigger propio que frena el UPDATE después de 24 h y todo DELETE; crea cualquiera del equipo, dueño y encargado listan todos y los demás solo los suyos; pantalla `/panel/incidentes` (loading y error propios, sección apagable, grupo Hoy del menú) que usa el detector de 46H. Se ajustaron `secciones.test.ts` y `menu-vd11.test.ts` porque el profe ahora ve "Incidentes".
+- **46K** (7602): `reemplazar_profe(clase, profe, motivo)` y `reemplazos_profe` (no se edita ni se borra); cambia solo esa clase, el profe anterior deja de ver la lista y marcar presentes y el nuevo puede; solo dueño y encargado; UI en `panel/clases/[id]`.
+- **46Q** (7603): `faltas_perdonadas` (inmutable); `privado.faltas` y `privado.faltas_pack` ignoran las perdonadas (se levanta el bloqueo y el pack recupera la clase); `perdonar_falta`, `perdonar_bloqueo`, `faltas_socio_detalle`, `faltas_clase`; botón en la lista de la clase y en la pestaña Asistencia de la ficha.
+- **Decisiones de plata y permisos (revisar)**: reemplazar profe y perdonar son solo de dueño y encargado (perdonar devuelve una clase de un pack y reemplazar toca la liquidación del profe); la recepción no ve esos botones.
+- Verificado: lint, typecheck, 150 pruebas, build y base/chequeos/demo en verde en GitHub (`incidentes`, `reemplazar-profe`, `perdonar-falta`).
+
+**SIN ARREGLAR**: VD-46Y (deshacer un perdón, que un reemplazo sobreviva a editar el horario —`editar_horario` pisa el profe de las clases futuras—, perdones y reemplazos en Control, hora real del incidente, perdón pedido por la recepción con aprobación).
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46h/i/k/q` y los viejos de clases y socios (cla-*, panel-clases, soc-*): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-46F y VD-46M · Chip de transferencia pendiente y modo emergencia de la puerta
+
+**QUÉ HICE**
+- **46F (migración 7500)**: copia de `privado.guia_entrada` con el chip `transferencia_pendiente` ("Subió un comprobante hace 3 horas por $25.000", y "(y N más)" si hay varios) que enlaza a Transferencias; aparece solo si el socio no puede entrar (o está en gracia) y tiene un pago por transferencia pendiente; NO cambia el color, el motivo, el botón ni quién entra. Lo dibujan `Puerta.tsx` y `VentanaEntrada.tsx` (el tipo `Guia` suma `href?`).
+- **46M (migración 7501)**: tabla `emergencias_puerta`, `ingresos.emergencia_id` y el flag `emergencia_puerta_habilitada` (arranca APAGADO; lo prende solo el dueño). Dueño y encargado la activan por sede con motivo de al menos 5 caracteres y de 1 a 12 horas; vence sola (se calcula, sin cron). `privado.registrar_ingreso` (copia de 4200, conserva el reingreso por visita y el anti-préstamo) hace que quien no podía entrar pase como `entro_modo_aviso` con el color real guardado y la emergencia atada; `kiosco_ultimo` (misma firma) hace que la tablet muestre amarillo y no el rojo real; botón "Anotar entrada (emergencia)"; al cerrar se lista quiénes entraron ("no estaba al día") y queda un historial. Cartel rojo "EMERGENCIA activa" en `/panel/entrada`, la ventana de Entrada y la tablet; panel de control en `PanelEmergencia.tsx`.
+- **Decisiones de permisos y plata (revisar)**: un suspendido o dado de baja NO entra por la emergencia; un "dejar pasar" a mano con motivo manda sobre la emergencia (queda `forzado` con su promesa de pago); apagar el modo corta la emergencia en curso; la recepción ve el cartel pero no activa, cierra ni lee la lista.
+- Verificado: lint, typecheck, 147 pruebas, build y base/chequeos/demo en verde en GitHub (`chip-transferencia`, `emergencia-puerta`).
+
+**SIN ARREGLAR**: VD-46X (las emergencias no aparecen en Control porque copiar `avisos_moderacion` de 7203 pisaría a otros; el llavero y el hábito del kiosco no tienen prueba de emergencia propia).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46f`/`vd-46m`, los de Entrada (ent-*, vd-1 a vd-4, panel-entrada) y la tablet en pantalla: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-46B, C, E y J · Suspender, cortesías, baja con constancia y devolución
+
+**QUÉ HICE**
+- **46B (migración 7200)**: `suspender_socio` (la recepción solo suspende; la expulsión es de dueño o encargado), `levantar_suspension` y `revisar_suspension` (solo dueño o encargado, con motivo), `suspension_socio` para la ficha; fecha de revisión (30 días por defecto) con aviso en la campana; un DNI suspendido no entra ni de invitado; aparece en Control y hay botón en la ficha.
+- **46C (7201)**: `dar_cortesia` y `anular_cortesia` con tope BAJO por defecto (recepción 1 día por cortesía y 5 por mes, encargado 7 y 30, dueño hasta 31; los edita el dueño en Control); lista de motivos del gimnasio (`motivos_beneficio`, 6 de partida); el motivo del descuento en Cobrar y Vender pasa a un select de esa lista; la campana avisa si un socio recibe 2 cortesías en 60 días; Control muestra descuentos y cortesías del mes por persona. No se tocó `vender`.
+- **46E (7202)**: cada baja tiene un código `BAJA-XXXXXXXX` visible en la app y en la ficha; un pedido sin responder hace más de 24 h aparece en la campana, en Inicio y en Para hacer hoy; `dar_de_baja` devuelve jsonb y cierra lo pendiente (rechaza los pagos por aprobar y anula sus ventas, saca los turnos fijos y cancela las reservas futuras; lo ya cobrado no se toca); un motivo fuera de la lista queda como `otro`.
+- **46J (7203)**: `calcular_devolucion_baja` (la recepción solo ve si hay algo para evaluar, no los montos) y `registrar_devolucion` (solo dueño o encargado, con motivo, HECHO NUEVO que no toca el pago original; en efectivo sale de la caja abierta del que la registra como retiro y baja lo esperado del cierre). Regla del gimnasio: `ninguna`, `cuotas_adelantadas` (por defecto) o `proporcional`, editable en Control. Control las lista y la campana avisa la baja reciente con una devolución por decidir.
+- **Decisiones de plata y permisos (revisar)**: la baja no devuelve nada sola; si la devolución es en efectivo y quien la registra no tiene caja abierta, falla; un período se devuelve una sola vez (se puede devolver menos de lo calculado dejando anotado cuánto era).
+- **Funciones compartidas**: `para_hacer_hoy` se parcha en el lugar apuntando a `privado.para_hacer_hoy_con` (falla con un mensaje claro si el texto de las bajas cambió); `campana_control` y `moderacion_control` se redefinieron copiando la versión anterior; `privado.avisos_moderacion` es un gancho que 7200 a 7203 van reemplazando acumulando avisos: un ítem posterior que lo redefina tiene que copiar la versión de 7203.
+- **Bugs encontrados**: la variable `fin` de `para_hacer_hoy` (ya corregida también por VD-30/7100); `privado.hecho_inmutable()` sin argumentos no frena nada porque `tg_argv` queda nulo: se arregló en los triggers nuevos; `pedidos_demo_brik` (6300:80) lo usa igual sin argumentos y probablemente no es inmutable.
+- Verificado: lint, typecheck, 147 pruebas, mapa y base/chequeos/demo en verde en GitHub (`vd-46b-suspender`, `vd-46c-cortesias`, `vd-46e-baja`, `vd-46j-devolucion`), con VD-30 ya adentro de su rama.
+
+**SIN ARREGLAR**: VD-46T (la base rechaza descuentos manuales con motivo fuera de la lista), VD-46U (topes y motivos en Configuración → Reglas; anular una devolución), VD-46V (suspensión por sede o de toda la cadena; el dueño no deja pasar a un expulsado), VD-46W (rechazar también pedidos de pausa al dar de baja; aviso tardío de MercadoPago). Además queda por revisar `hecho_inmutable` en `pedidos_demo_brik`.
+**LO QUE NO PUDE VERIFICAR**: los cuatro e2e `vd-46b/c/e/j` y las pantallas (botón de suspender, constancia de baja, select de motivos): escritos según la documentación, pero no ejecutados; el build de Next no se corrió en la rama.
+
+## 2026-11-06 · Noche · VD-30 (con VD-47Y y VD-16B) · Velocidad medida y escala
+
+**QUÉ HICE**
+- Sembrado y carga: `sembrar-demo.mjs` ya aceptaba `--socios 3000`; nuevo `scripts/datos/cargar-gimnasios.mjs` (`--gimnasios 200 --socios 15`, datos fijos). Medición: `scripts/medir/explain.mjs` reescrito (30 llamadas con el rol correcto y presupuesto de 300 ms, 50 ms para `pendientes_panel`; `--anidado` muestra lo que gasta cada función por dentro), `comparar.mjs` (tabla antes/después), y el workflow `medir-escala.yml`, que mide antes y después en la MISMA corrida (los runners varían hasta 2x entre corridas), deja la tabla en el resumen y como artefacto. Como `gh workflow run` da 404 mientras el workflow no esté en `main`, también corre con un push a `noche/**`/`dia/**` cuyo mensaje lleve `[medir]`.
+- Migración 7100: `retencion_con` busca la última visita y la frecuencia por el índice de ingresos (firma nueva con `p_liviano`, la vieja se borra), `privado.retencion_liviana` para `pendientes_panel` y `para_hacer_hoy`, `pendientes_panel` calcula la retención una vez (antes, dos), `resultado_mes` calcula el precio por plan, `precio_para` y `deuda_socio` pasan a plpgsql. Paginación: Socios y Retención muestran de a 60 y 50 con "Ver más"; el exportar socios corta en 5.000 filas avisándolo en la última línea; Control ya tenía cursor y tope.
+- **Bug encontrado midiendo**: en `para_hacer_hoy` una variable `fin` chocaba con la columna `clases.fin`: la tarea "clases con lista de espera" nunca andaba y `pendientes_panel` (que la llama) fallaba entero en un gimnasio con clases. Corregido en la misma migración.
+- Verificado: lint, typecheck, 128 pruebas, build, y base/chequeos/demo en verde en GitHub con los resultados sin cambiar.
+
+**TABLA DE TIEMPOS (3.019 socios, 202 gimnasios; las dos columnas salen de la misma corrida, el ratio importa más que los ms)**
+
+| función | antes (ms) | después (ms) | presupuesto |
+|---|---:|---:|---|
+| `pendientes_panel` | error (bug de `fin`) | 203 | 50, NO cumple |
+| `numeros_inicio` / `panel_inicio` | 978 / 960 | 284 / 288 | ok |
+| `para_hacer_hoy` | error (bug de `fin`) | 188 | ok |
+| `vencen_hoy` | 935 | 269 | ok |
+| `vencen_pestanas` | 1012 | 319 | 300, NO cumple |
+| `retencion` | 1012 | 269 | ok |
+| `retencion_resumen` | 979 | 276 | ok |
+| `resultado_mes` | 563 | 17 | ok |
+| `filtros_socios` | 733 | 541 | 300, NO cumple |
+| `exportar_socios` | 821 | 689 | 300, NO cumple |
+
+`registrar_ingreso` y `estado_acceso` ya tardaban 1–2 ms; el resto de las funciones de pantalla no se movió (todas por debajo de 200 ms). Esa corrida cayó en un runner lento: en la anterior, más rápida, `retencion` pasó de 659 a 192 ms y `filtros_socios` de 460 a 355 ms. La retención quedó 3 a 4 veces más rápida.
+
+**POR QUÉ NO CUMPLEN**: `pendientes_panel` — la retención de 3.000 socios cuesta ~190 ms y es la misma clasificación de la pantalla de Retención (el menú la llama como server action desde el cliente, así que no bloquea el render); `filtros_socios` y `exportar_socios` llaman a `calcular_acceso` por socio (0,13 a 0,25 ms cada vez) porque esa es la fuente única de verdad que no se reimplementa; `vencen_pestanas` quedó a 319 contra 300 en un runner lento (con el runner rápido cumplía).
+
+**SIN ARREGLAR**: VD-30B (retención incremental o contadores/caché de 60 s para bajar `pendientes_panel` a < 50 ms y `filtros_socios` a < 300 ms).
+**LO QUE NO PUDE VERIFICAR**: "Ver más" en Socios y Retención en pantalla y `tiempos.mjs` (UI; el input `pantallas` de `medir-escala.yml` está en `false` por defecto): escritos según la documentación, pero no ejecutados. Si otra tanda redefine `para_hacer_hoy`, `pendientes_panel`, `retencion_con`, `precio_para` o `deuda_socio`, hay que fusionar a mano con la 7100.
+
+## 2026-11-06 · Noche · VD-29 · Ctrl+K con acciones
+
+**QUÉ HICE**
+- Sin migración. Intérprete de comandos puro (`comandos.ts`, 19 pruebas): `cobrar juan` (o `cobrale a juan`) ofrece "Cobrar a Juan Pérez" y abre Cobrar con esa persona; `entrada 12345678` abre la ventana de Entrada con ese DNI; `ficha juan`; `nuevo socio` (abre el alta de siempre, no la hoja); `vender` / `vender juan`; `abrir turno` / `cerrar turno` (llevan a Caja); `tarea …` anota una tarea para hoy para vos sin salir del buscador (`crear_tarea` existente); `nuevo gasto`. Resultados agrupados en Acciones · Socios · Pantallas con el primero marcado, flechas, Enter y Esc; el campo vacío muestra ejemplos clicables por rol. Las acciones salen de las secciones que ya ve el rol y de las que el gimnasio tiene prendidas (la recepción no ve "gasto"; el profe solo anota tareas; una sección apagada apaga su acción). Lo que Ctrl+K ya hacía sigue igual; debounce de 180 a 120 ms y una respuesta vieja no pisa a la nueva. El placeholder "Socio, DNI, sección o acción: “cobrar Juan”" contiene "ección" para no romper el selector de vd-11.
+- Verificado: lint, typecheck, 147 pruebas (19 nuevas), build y base en verde en GitHub.
+
+**SIN ARREGLAR**: VD-29B (`entrada <dni>` desde `/panel/entrada`, donde la ventana no se monta), VD-29C (Caja con acción directa), VD-29D (alta con el nombre ya cargado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-29` y los viejos del Buscador (dis-*, vd-5, vd-11, vd-27) y el foco al abrir la Entrada desde Ctrl+K: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-31 · Ayuda y onboarding por pantalla
+
+**QUÉ HICE**
+- Migración 6900: globo de ayuda corto la primera vez que cada persona abre cada pantalla importante, con "Entendido" y un "?" fijo para volver a verlo; la segunda vez no sale. "Ya lo vio" se guarda en la base por usuario (`ayudas_usuario`, RLS, sin escritura directa; `ayudas_vistas`, `marcar_ayuda`, `apagar_ayudas`, `reiniciar_ayudas`; sin sesión dan error), así que sigue entre dispositivos. Panel: Inicio, Entrada, Socios, Vencen y cobrar, Caja, Productos y cobros (la hoja Cobrar no es ruta: su ayuda está en `/panel/vender`), Para hacer hoy, Planes, Configuración y Control; app del socio: Inicio, Clases, Rutina y Yo. Textos por rol en `src/lib/ayuda.ts` (la recepción ve el suyo). El globo va en el flujo de la página: no tapa la ventana de Entrada ni la hoja Cobrar, no intercepta clics, no sale en pantallas de error y no se mueve con reduced-motion. En Mi cuenta: interruptor para apagar las ayudas y "Volver a ver todas".
+- Para los e2e viejos: `levantar.sh` arranca la app con `PERMITIR_SIN_AYUDA=1` y `pagina()` de `comun.mjs` pone la cookie `gymos_sin_ayuda=1`; solo `vd-31.mjs` pide los globos (`{ conAyuda: true }`). Documentado en `docs/DISENO.md`; `ayudas_usuario` va como excepción a `gimnasio_id` en `docs/SCHEMA.md`. `PERMITIR_SIN_AYUDA` no se define en Vercel.
+- Verificado: lint, typecheck, 128 pruebas, build y base/chequeos/demo en verde en GitHub (`ayuda-pantalla`).
+
+**SIN ARREGLAR**: VD-31B (apagar las ayudas desde Yo en la app del socio; tour de la hoja Cobrar).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-31` y los e2e viejos con la cookie `gymos_sin_ayuda`; cómo queda el globo a 390 px (se reservaron 7 rem a la derecha para la campana y el "?"): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-44 · Equipo con foto, clases y horario
+
+**QUÉ HICE**
+- Migración 5400: en `/panel/equipo`, sección "Fotos, clases y horarios": cada persona tiene foto, las actividades que da y su horario de trabajo (varias franjas por día, validadas en la base). Opción general "Mostrar al equipo en la página y en la app" (solo el dueño) y una tilda por persona. En `/app/clases` cada clase muestra "Profe: Ana" con su foto, y la sección Equipo de la página pública suma a las personas tildadas con su foto y las clases que dan — solo si la opción general está prendida y la persona tildada.
+- **Decisiones de permisos**: la foto va en un bucket privado (`fotos_equipo`) y se sirve por `/foto-equipo/[id]` solo cuando la base autoriza (apagar la opción o destildar a alguien la oculta al instante, sin borrar archivos); el horario de trabajo es interno y no sale en la página ni en la app; editan dueño y encargado; cada persona puede cambiar su propia foto en la base pero todavía no hay pantalla.
+- **Choque de migraciones resuelto**: la 5400 y la 6100 (VD-25) copiaron `privado.landing_completa` de la 0032 por separado; como la 6100 corre después, sola le sacaba el equipo a la página. Se agregó la migración 6101, que deja la función con las dos cosas (prueba social y equipo), con guarda de entrada y verificación. `guardar_equipo` (reescrita por VD-42 en la 6400) no fue tocada por VD-44: sin choque.
+- Verificado: lint, typecheck y pruebas, y base en verde en GitHub (`equipo-perfil`); la 6101 corre por primera vez en la corrida de la rama de la noche.
+
+**SIN ARREGLAR**: VD-44B (pantalla "Mi foto" para cada persona), VD-44C (foto del profe en la TV de la sala y en el detalle de la clase del panel). La liquidación sigue en COM-15.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-44` y el build local (se colgó): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-46A · MercadoPago: reembolso, contracargo y conciliación
+
+**QUÉ HICE**
+- Migración 6800: un pago aprobado que MercadoPago devuelve o contracarga pasa a `devuelto`; la venta se anula con la lógica de `anular_venta` y el socio pierde la cobertura. El pago conserva su ID y cuándo se aprobó y la venta queda marcada "anulada por MercadoPago" sin persona; nada se borra. Causa raíz: el webhook deduplicaba por ID de pago, así que el contracargo de un pago ya aprobado quedaba como "ya procesado"; ahora el evento en `eventos_webhook` es por pago y estado. Cada aviso trae la fecha en que MercadoPago actualizó el pago y uno más viejo que lo aplicado se ignora (un `approved` posterior a un `refunded` no revive nada).
+- Reconsulta sin cron: al abrir `/app/pago` si el pago lleva más de 15 minutos colgado, y con el botón "Revisar con MercadoPago" en Transferencias (dueño y encargado; la recepción no lo ve), que mira los pendientes de más de 15 minutos y los aprobados de los últimos 30 días. Revierte SOLO el webhook firmado o la reconsulta del servidor con la clave de servicio, nunca el navegador. Alerta en la campana para dueño y encargado (se suma en `campana/datos.ts` sin redefinir `campana_panel`). `/app/pago` muestra "Este pago se devolvió".
+- **Decisiones de plata (revisar)**: si la venta tenía otro pago aprobado no se anula sola (el pago queda `devuelto`, la cobertura sigue y la alerta dice "revisala a mano"); un reembolso parcial no toca la cobertura (queda anotado y avisa); un `refunded`/`charged_back` sobre un pago pendiente queda rechazado, como antes. El webhook ahora lee el pago de la API antes de registrar el evento.
+- Verificado: lint, typecheck, 128 pruebas y base/chequeos/demo en verde en GitHub (`mercadopago-devoluciones`).
+
+**QUÉ CORRÉS VOS**: después de aplicar, `npm run db:types`. En MercadoPago el webhook debe incluir `payment` (ya era el único tipo que se procesaba).
+**SIN ARREGLAR**: VD-46S (devueltos en Control, botón también en Ventas, estado `in_mediation` con aviso, etiqueta `devuelto` en la ficha de pagos).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-46a` y que pay-1, rev-3 y cliente sigan pasando (riesgo: el reenvío del mismo aviso debería seguir devolviendo `ya:true`): escritos según la documentación, pero no ejecutados; el build local no se leyó.
+
+## 2026-11-06 · Noche · VD-28 · Navegación con memoria y Volver al origen
+
+**QUÉ HICE**
+- Sin migración. Al salir de una lista hacia una ficha o detalle se guarda de dónde (ruta, query y scroll), por pestaña (`OrigenPanel`, montado una vez en el Marco, `origen.ts`). `VolverAlOrigen` ("← Volver a Socios") lleva a esa lista con su búsqueda, filtros y scroll, con `<Link>`; si la pantalla se abrió directo queda el "← Socios" de siempre. Lo usan la ficha del socio, `clases/[id]` y 9 pantallas más a través de la prop opcional `volverAlOrigen` de `Encabezado`. `useMemoriaLista` generaliza la memoria de Socios (VD-15; `MemoriaSocios` quedó como una llamada al hook) y toma solas Vencen hoy, Retención, Transferencias, Caja, Clases, Eventos, Planes, Tareas y Novedades sin tocar sus páginas. El scroll se restaura esperando a que la lista cargue y no pelea si la persona la mueve.
+- Cobrar: si se cobra desde una ficha a la que se llegó desde una lista, al cerrar la hoja se vuelve a esa lista con el aviso "Cobro registrado: $…"; desde la Entrada (`desde=entrada`) o con la ficha abierta directo no cambia nada.
+- Verificado: lint, typecheck, pruebas, build y base en verde en GitHub. Se editó una línea de `vd-15.mjs` (el link ahora puede decir "← Volver a Socios").
+
+**SIN ARREGLAR**: VD-28B (desde=entrada y origen conviven: hoy gana la Entrada), VD-28C (el alta nueva pierde el origen), VD-28D (Mensajes y Resultado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-28` (Socios filtrado → ficha → Cobrar → vuelve con filtro y scroll; Vencen; 390 px), en especial la restauración del scroll en el celular y el aviso post-cobro; otros e2e que busquen el texto exacto del link viejo no se revisaron más allá de un grep. Escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-26 · Página de Gym OS para vender
+
+**QUÉ HICE**
+- Migración 6700: la dirección de la plataforma (sin gimnasio) muestra la landing para venderle Gym OS a dueños: hero "¿Este socio puede entrar hoy?", tres bloques (semáforo de entrada, cobrar en un toque, quién dejó de venir) con ilustraciones en CSS (sin imágenes ni cifras inventadas), preguntas frecuentes con `<details>` sin JavaScript, "Ingresar" arriba y abajo hacia `/ingresar`, y formulario "Quiero una demo". Los planes de BRIK salen solo si hay activos en `plataforma_planes` (si no hay, la sección no aparece; si la consulta falla, sale sin precios). Server components, mobile-first. La página de cada gimnasio (`Landing.tsx`) no se tocó.
+- `pedidos_demo_brik`: recibe pedidos sin sesión con campo trampa, no duplica un contacto con pedido sin atender en 7 días, tope de 20 por hora en total, valida mail o WhatsApp. En `/admin`, tarjeta con los pendientes y "Ya lo contacté".
+- Decisión: un plan con `activo = true` se considera público (un plan interno activo aparecería en la landing). Sin WhatsApp de BRIK hardcodeado.
+- Verificado: lint, typecheck, 118 pruebas, build y base/chequeos/demo en verde en GitHub (`pedidos-demo-brik`).
+
+**QUÉ CONFIGURÁS VOS**: cargar los planes de BRIK en el super admin para que aparezcan los precios.
+**SIN ARREGLAR**: VD-26B (avisar a BRIK de cada pedido por mail o WhatsApp; flag propio de plan público).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-26` y los viejos (super-admin, adm-*, landing/pag-*): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-21 · Configuración con buscador, explicación y restablecer
+
+**QUÉ HICE**
+- Sin migración. Arriba de las pestañas, "Buscar una opción" (sin tildes ni mayúsculas, con todas las palabras a la vez): cada resultado muestra título, pestaña, la explicación de una línea y el valor recomendado; al elegirlo cambia de pestaña, baja a la opción y la resalta 3 segundos. Índice único `indice.ts` con unas 60 opciones de todas las pestañas (`indice.test.ts` verifica que cada una tenga su ancla en la pantalla). "Reingreso" devuelve primero la visita y después volver a entrar el mismo día.
+- "Restablecer a lo recomendado" por tarjeta, con confirmación en la misma tarjeta, guardando por la función propia de cada tarjeta (`guardarConfiguracion` para cobros, medios, recargo, fiado, reglas, retención, accesos, clases y secciones; las propias para vencimiento, dejar pasar, caja, entrada, visita, meta de visitas y autoservicio). No se sacó ninguna pestaña ni opción.
+- **Decisiones a revisar**: los valores recomendados salen de los defaults de la base; dos son elección del agente: vencimiento "desde el día que paga" con primera cuota proporcional, y accesos solo recepción (QR, tablet y llavero apagados); "Restablecer secciones" las deja todas prendidas.
+- Verificado: lint, typecheck, pruebas, build y base en verde en GitHub.
+
+**SIN ARREGLAR**: VD-21b (historial de cambios desde cada opción) y VD-21c (vista previa en vivo de mensajes y página). Una opción que depende de otra apagada cambia de pestaña pero no resalta nada.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-21` (buscar, restablecer Reglas y la meta, 390 px) y `panel-configuracion`/`cfg-2…cfg-9` (solo se agregaron atributos `data-opcion` y `div` envolventes): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-42 y VD-43 · Mi cuenta y seguridad; onboarding con datos de ejemplo
+
+**QUÉ HICE**
+- VD-42 (migración 6400): `privado.exigir_aal2(gimnasio)` exige aal2 SOLO si el usuario tiene un factor TOTP verificado (quien no lo activó sigue igual); copiando las definiciones más nuevas se agregó en `exportar_gimnasio`, `exportar_socios`, `guardar_equipo`, `guardar_permisos_equipo`, `guardar_mercadopago`, `quitar_mercadopago`, `cuenta_para_nueva_clave` y `persona_para_dar_acceso` (si exportar choca con aal2, la pantalla redirige a Mi cuenta). `dar_de_baja_equipo` (y `guardar_equipo(activo=false)` / "Sacar acceso") desactiva a la persona, borra su PIN, cierra su turno de caja "sin contar" y corta sus sesiones (solo si esa cuenta no es de otro equipo ni de un socio); el historial queda. Alertas de seguridad al dueño (`alertas_seguridad`, `huellas_equipo`, cerradas por RLS): dispositivo nuevo de alguien del equipo (el primero no, ni el dueño) y cada baja, en Inicio con "Entendido"; y recomendación de activar los dos pasos. Mi cuenta: enrolamiento TOTP (QR, código, confirmar, desactivar) y Equipo: "Dar de baja" con confirmación.
+- VD-43 (migración 6500): paso 9 "Probá la entrada con un DNI" (se tacha con una entrada de un socio real); socios de ejemplo marcados (`socios.es_ejemplo`, no tachan "Tus socios"); `cargar_socios_ejemplo` (10 socios con teléfonos `+54 9 000…` y mails `@ejemplo.invalid`, con plan y vencimientos variados si hay plan de membresía) y `borrar_socios_ejemplo` (sin tocar lo real; un ejemplo con entrada o cobro se queda y se avisa); Inicio del dueño los ofrece mientras no hay socios reales y muestra "Estás viendo datos de ejemplo · Borrarlos".
+- Conflicto resuelto a mano en `panel/layout.tsx`: conviven `RegistrarSesion` (VD-42) con el banner de soporte y la ayuda a BRIK (VD-40).
+- Verificado: lint, typecheck, 115 pruebas, build y base/chequeos/demo en verde en GitHub (`dos-pasos-y-baja`, `onboarding-ejemplos`; `primeros-pasos` pasa de 8 a 9 pasos).
+
+**QUÉ CONFIGURÁS VOS**: nada; cada persona activa su 2FA desde Mi cuenta.
+**SIN ARREGLAR**: VD-42b (el super admin con 2FA obligatorio: `/admin` es de VD-40), VD-42c (pedir el código al ingresar), VD-42d (más alertas y aal2 en `exportar_mes`/`exportar_gastos`), VD-43b (ventas y clases de ejemplo), VD-43c (fecha objetivo y pistas por rol).
+**LO QUE NO PUDE VERIFICAR**: el enrolamiento TOTP real (el imitador no hace MFA de GoTrue; `vd-42` prueba la sección y el redirect con un factor verificado en la base, y la regla aal2 está cubierta en SQL con tokens aal1/aal2), que `postgres` pueda borrar de `auth.sessions` en Supabase real (la baja igual vale: `exigir_equipo` le niega todo), y los e2e `vd-42`/`vd-43`.
+
+## 2026-11-06 · Noche · VD-40 · Super admin v2
+
+**QUÉ HICE**
+- Migración 6300: alta de gimnasio en 3 pasos (tipo, datos y marca con vista previa del nombre y los colores, dueño) que termina con mensaje de bienvenida (mail, contraseña y link de WhatsApp si hay celular); salud de cada gimnasio en rojo, amarillo o verde con el motivo escrito, ordenada de "necesitan atención" a "no", demo al final, con filtros y búsqueda (se calcula en el momento, no se guarda ningún estado); entrar como soporte pide motivo obligatorio y guarda quién, por qué y cuándo, vence a los 60 minutos (se cierra cuando alguien mira, sin cron), muestra marco y cartel con el motivo y el botón Salir, y el dueño lo ve en su Control ("Cuando BRIK entró a ayudarte"); el botón "¿Necesitás ayuda?" (dueño y encargado) manda gimnasio, quién, pantalla y último error al tablero de BRIK con tope de 5 por hora por persona; métricas de la plataforma (entradas por día, abonos por mes); ficha del gimnasio con uso de 4 semanas, registro de soporte y notas internas.
+- `admin_entrar_gimnasio` pasa a llevar el motivo (la firma sin motivo se borra en la misma migración) y se actualizaron las llamadas en `super-admin.test.mjs`; los e2e que dan de alta o entran como soporte (adm-1, adm-3, cliente, rev-5, super-admin) pasan por el helper `alta-gimnasio.mjs`. Un soporte que ya estaba adentro antes de la migración debe entrar de nuevo escribiendo el motivo.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`super-admin-v2`).
+
+**SIN ARREGLAR**: VD-40b (avisos por segmento, campana del dueño para "BRIK entró", módulos por gimnasio, logo en el alta, errores de 24 h y migraciones en la ficha). El 2FA del super admin es VD-42.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-40` y los viejos reescritos con el helper (no se confirmó que ninguno se haya roto): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-22 · Entrar con Google y sesión recordada (D23)
+
+**QUÉ HICE**
+- Migración 6200: botón "Continuar con Google" en el ingreso del socio (`/auth/google`, `signInWithOAuth` PKCE), visible solo con `ENTRAR_CON_GOOGLE=1`: sin la variable no se dibuja y nada cambia. `/auth/callback` cambia el código por la sesión: un Google ya vinculado entra directo a `/app`, si no va a `/auth/vincular`, y una cuenta del equipo se cierra con aviso. Vínculo seguro la primera vez: DNI + código al celular o mail que el gimnasio ya tiene cargado (misma respuesta exista o no el DNI; a un menor, al adulto responsable); nunca por nombre ni mail suelto; si el Google ya sostiene a otra persona o el socio ya tenía otro Google, pide confirmar. Tabla `vinculos_google` (FK compuesta, RLS, un Google activo por socio), `socio_para_vincular_google`, `vincular_google`, `entrar_con_google`. Sesión recordada: la cookie de Supabase dura 400 días y `/salir` la corta.
+- **Toca ingresos existentes (revisar)**: se redefinieron `vincular_socios_por_telefono` y `vincular_socios_por_email` (copiando las versiones vigentes) para que el código de celular o mail recupere al socio que hoy sostiene un Google; sin eso, quien vinculó Google quedaba sin poder entrar por celular.
+- Imitador local: `/auth/v1/authorize` y `token?grant_type=pkce` con un Google falso (`.local/google-falso.json`); `levantar.sh` prende `ENTRAR_CON_GOOGLE=1`. Middleware: las rutas `/auth/*` se resuelven al gimnasio elegido también desde la dirección de la plataforma.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`entrar-con-google`).
+
+**QUÉ CONFIGURÁS VOS 🔌 (VD-22B)**
+1. Google Cloud Console → crear o elegir un proyecto → APIs y servicios → Pantalla de consentimiento OAuth: Externa, con nombre de la app y alcances `email`, `profile`, `openid`.
+2. Credenciales → Crear credenciales → ID de cliente OAuth → Aplicación web.
+3. URI de redirección autorizados: `https://<ref-del-proyecto>.supabase.co/auth/v1/callback` (el callback de Supabase, no el de Gym OS).
+4. Copiar Client ID y Client Secret.
+5. Supabase → Authentication → Providers → Google: activar y pegarlos.
+6. Supabase → Authentication → URL Configuration → Redirect URLs: `https://*.<dominio-base>/auth/callback` y `https://<dominio-plataforma>/auth/callback` (y el dominio propio de cada gimnasio si lo tienen).
+7. Vercel: variable `ENTRAR_CON_GOOGLE=1` (solo servidor); recién ahí aparece el botón.
+8. Si la pantalla de consentimiento queda en "Prueba", solo entran los mails cargados como usuarios de prueba; para abrirla a todos hay que publicarla.
+
+**SIN ARREGLAR**: VD-22c ("Sumar a otra persona" en /app y desvincular desde la ficha), VD-22d (un solo usuario por socio con varias identidades: hoy, si alguien usa Google y celular en dos dispositivos, cada ingreso le saca el socio al otro).
+**LO QUE NO PUDE VERIFICAR**: un Google real (el imitador no valida credenciales ni redirecciones), que las cookies de `/auth/callback` lleguen con sesión persistente y el e2e `vd-22`: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-19 y VD-20 · Eventos completos y rutinas
+
+**QUÉ HICE**
+- VD-19 (migración 5900): evento con flyer, lugar, responsable, fin, varias fechas, precio general y de socio, borrador/publicar; anotarse desde la app y desde la página (la reserva se paga en recepción en Vender y la venta reemplaza a la reserva sin contar doble); lista de espera calculada (si alguien se baja, sube la siguiente) con tope y campo trampa contra spam desde la página; check-in: la ventana de Entrada muestra "Hoy: evento" al reconocer al socio y marca presencia con un toque; cierre con "Asistieron X de Y"; si se cancela, la app avisa al anotado 7 días. Panel: CSV, WhatsApp por persona, si pagó o falta. `crear_evento` suma parámetros (firma vieja borrada; las llamadas anteriores siguen andando).
+- VD-20 (migración 6000): biblioteca de ejercicios con equipo, buscador y filtros; plantillas que se copian sin tocar la original; asignar a varios con tildes y fecha de cambio salteando a los dados de baja; la rutina de hoy en la app (el día que sigue al último que hizo el socio, "Hice el Día N" guarda un hecho por día); sección para el profe "Quién la hizo" (veces en 30 días y "Toca cambiarla"). Solo pesos y repeticiones: ningún dato de salud. `guardar_ejercicio` suma parámetros (firma vieja borrada).
+- **Decisiones de plata y permisos**: Vender cobra el precio general del producto (el de socio queda acordado en la reserva y la recepción lo aplica con el descuento); una reserva no bloquea Vender (podrían venderse más lugares que el cupo si hay reservas sin pagar); cierra o publica un evento el dueño o el encargado y la recepción marca presencias; los teléfonos de la página se normalizan a +54.
+- Se ajustó el selector de `rut-1.mjs` (el formulario tiene más selects).
+- Verificado: lint, typecheck, 113 pruebas, build y base/chequeos/demo en verde en GitHub (`eventos-completos`, `rutinas-completas`).
+
+**SIN ARREGLAR**: VD-19b (editar un evento ya creado, check-in por DNI para no socios, aviso al subir de la espera), VD-19c (🔌 pago online del evento), VD-20b (aviso de rutina vencida y gráfico de progreso).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-19`/`vd-20` y los viejos de eventos y rutinas: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-25 · Página del gimnasio rediseñada
+
+**QUÉ HICE**
+- Migración 6100: portada con una fila de confianza (píldora "abierto ahora", "★ 4,8 · 120 reseñas en Google" que lleva al link de reseñas de Configuración, "+N socios" calculado por la base con los socios sin baja redondeado hacia abajo y oculto por debajo de 20; cada dato solo si el dueño lo prendió), "¿Primera vez? Empezá acá" en tres pasos armados con lo que la página tiene prendido, WhatsApp flotante en compu, "Dejanos tu reseña" en el pie, fotos con `next/image` en producción (con tamaño reservado). Tarjeta "Confianza en la portada" en Tu página (`prueba_social_panel` / `guardar_prueba_social`; la base rechaza un puntaje de 9). `landing_completa` copiada de la versión más nueva (0032) más la clave `prueba_social`; no cambiaron las firmas de `landing_publica`, `agenda_publica` ni `pagina_panel`. Todo lo que el dueño ya editaba sigue igual.
+- Verificado: lint, typecheck, 113 pruebas, build y base/chequeos/demo en verde en GitHub (`prueba-social`).
+
+**QUÉ CONFIGURÁS VOS**: el dueño carga puntaje y cantidad de reseñas en Tu página y pega el link de Google en Configuración → Mensajes.
+**SIN ARREGLAR**: VD-25b (grilla de clases con cupo en la página pública), VD-25c (🔌 reseñas desde la API de Google), VD-25d (medir Lighthouse en el despliegue).
+**LO QUE NO PUDE VERIFICAR**: Lighthouse celular ≥ 90 no se midió acá (apoyado en prioridad de la portada, tamaño reservado, server components y un solo JS de cliente); e2e `vd-25` y los viejos (pag-1…pag-4, panel-pagina, landing, cliente): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-24 y VD-38b · Lista de espera automática, motivo de "no podés reservar" y mensajes en el menú
+
+**QUÉ HICE**
+- VD-24 (migración 5700): `cancelar_reserva` (privada y pública, con la firma vieja borrada) ahora devuelve quién subió de la espera; push de "lugar liberado" una sola vez por reserva (`destinos_push_clases`); `motivo_reserva`/`motivos_reserva` devuelven si puede, el código, la frase y el botón (reservar, espera, pagar, cambiar de plan) para cupo lleno, plan que no incluye la clase, vencido, pack sin clases, límite semanal, clase cerrada o cancelada, fuera de plazo, congelada y suspendido; `avisos_lugar_socio` trae los avisos de los últimos 2 días. La pantalla de clases del socio muestra los avisos arriba, la frase y el botón; el estado vacío ofrece ver el día siguiente. Dos cancelaciones simultáneas no confirman a la misma persona dos veces (prueba con dos conexiones reales).
+- VD-38b (migración 5800): `pendientes_panel` suma `mensajes_sin_responder` (la recepción sin permiso sigue viendo 0) y el menú muestra el contador de Mensajes (neutro, no rojo); contestar refresca el número.
+- Verificado: lint, typecheck, 113 pruebas, mapa y base/chequeos/demo en verde en GitHub (`espera-motivo`, `espera-concurrente`, `pendientes-panel`).
+
+**SIN ARREGLAR**: VD-24b (la recepción no puede cancelar una reserva suelta desde el panel; subir el cupo de una clase no promueve a nadie de la espera). No hay motivo propio de "fuera de franja": cae en "el plan no incluye".
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-24` y `vd-38b` y la pantalla del socio: escritos según la documentación, pero no ejecutados; `npm run db:types` no se corrió.
+
+## 2026-11-06 · Noche · VD-35 y VD-39 · Registro del socio y cambio de plan desde la app (D26, D28)
+
+**QUÉ HICE**
+- VD-35 (migración 5500): `alta_online` exige fecha de nacimiento (sin ella la base no sabe si es menor, D10); interruptor "Registro abierto" (`registro_socios_panel` / `guardar_registro_socios`, solo el dueño, sin tocar `guardar_configuracion`; usa `altas_online` y no deja abrir sin reglamento) en Configuración → Página → "Lo que hacen los socios solos"; "Soy nuevo, quiero anotarme" en el ingreso del socio solo si está abierto; en Socios el que se anotó solo y no pagó muestra "🌐 A cobrar"; los pagos de la app (`informar_transferencia`, `iniciar_pago_online`, firmas viejas borradas) llevan clave de operación: el mismo envío dos veces devuelve el mismo pago.
+- VD-39 (migración 5600): `/app/plan` ("Cambiar de plan o comprar un pase", solo si el dueño lo dejó prendido y hay algo para elegir) con los días a favor (regla D6) calculados por la base (`vista_compra_app`); paga con MercadoPago o transferencia (con clave de operación); el plan cambia al acreditarse el pago, por un trigger sobre `pagos` (sirve para aprobación del equipo y para MercadoPago; si se rechaza, el plan queda igual); pases y packs son una venta común. Tablas `ajustes_autoservicio` y `cambios_plan_app`.
+- **Decisiones de plata y permisos (revisar)**: se cambió un check de `pagos` (rechazado o anulado sin `mp_pago_id` ahora es válido; aprobado sigue exigiéndolo) porque `rechazar_pendientes_de_suscripcion` fallaba con un pago de MercadoPago abierto y no terminado, y con él también el cambio de plan de la recepción; la transferencia siempre pasa por aprobación del equipo y MercadoPago acredita solo; el cambio de plan cobra la cuota del plan nuevo sin matrícula; solo compra el socio dueño de la cuenta.
+- Verificado: lint, typecheck, 110 pruebas y base/chequeos/demo en verde en GitHub (`registro-cambio-plan-app`, y `alta-online` actualizada para pasar fecha); se actualizaron reg-1 y rev-3 por la fecha obligatoria.
+
+**SIN ARREGLAR**: VD-39b (aprobación previa del dueño para cambios por MercadoPago, deshacer un cambio de plan, mensaje de /app/pago que nombre lo comprado).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-35`/`vd-39` y los viejos (reg-1, rev-3, pay-1…): escritos según la documentación, pero no ejecutados; el build local no corrió con el disco lleno (lo cubre la corrida del merge); `npm run db:types` no se corrió.
+
+## 2026-11-06 · Noche · VD-38 · Mensajes de los socios al gimnasio (D27)
+
+**QUÉ HICE**
+- Migración 5300: en la app, Yo → Más → "Escribile al gimnasio" (`/app/mensajes`, formulario con motivo —consulta, queja, objeto perdido, otro—, foto opcional achicada en el celular y el aviso de no contar diagnósticos). Al contestarle, push y "N respuestas nuevas" en Yo y en Novedades. Panel: `/panel/mensajes` (bandeja con filtros por estado, detalle, foto, respuestas rápidas, marcar resuelto) e historial en la ficha del socio. Un socio ve solo los suyos; dueño y encargado siempre; la recepción solo si el dueño lo prende (interruptor en la bandeja); el profe nunca; sin permiso, error y no bandeja vacía (y `ver_mensajes_equipo` saca "Mensajes" del menú sin tocar `panel_gimnasio`). Sección `mensajes` apagable por gimnasio (suma a la lista vigente de `secciones_validas()`). Bucket privado `mensajes_fotos`.
+- Decisiones: fotos hasta 2,5 MB (límite de las acciones del servidor 3 MB); el push usa su propia función y se avisa una sola vez por mensaje; tres respuestas rápidas de ejemplo en los gimnasios existentes.
+- Verificado: lint, typecheck, 110 pruebas, build y base/chequeos/demo en verde en GitHub (`mensajes-socios`).
+
+**QUÉ CONFIGURÁS VOS**: si querés que la recepción vea los mensajes, prender el interruptor en `/panel/mensajes`; el push necesita las claves VAPID.
+**SIN ARREGLAR**: VD-38b (`pendientes_panel` sigue contando mensajes en 0: falta llamar a `mensajes_sin_responder`) y VD-38c (respuestas de ejemplo para gimnasios nuevos, foto en las respuestas del equipo).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-38`, capturas y el push real: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-37 · Pendientes (números y puntitos) y centro de notificaciones
+
+**QUÉ HICE**
+- Migración 5200: `pendientes_panel(gimnasio)` devuelve todos los contadores del menú en un pedido y por rol (la recepción no ve control, pedidos de socios ni plata; quien no es del equipo recibe error, no vacío); `mensajes` en 0 hasta VD-38; llama a `para_hacer_hoy` sin copiarla. `campana_panel` une la campana de siempre con la del Control, suma el tipo a cada aviso y saca los tipos apagados; tabla `preferencias_aviso` (RLS, canal `app`) con `preferencias_aviso_panel` y `guardar_preferencia_aviso`.
+- Menú con números ("9+" desde 10, punto en el botón Menú del celular; rojo solo en Vencen y cobrar, Transferencias y Caja; Inicio nunca lleva número), que se renuevan al cargar, al cambiar de pantalla, al cobrar o aprobar/rechazar, al volver a la pestaña y cada 60 s. Campana `/panel/campana` agrupada por día con "Para atender ahora" y "Marcar todo como leído", preferencias por tipo en una sección plegable, push ofrecido solo ante un aviso de comprobantes, caja o pedidos.
+- Decisiones: Vencen cuenta solo los que vencen hoy (doc 12); "Para hacer hoy" suma `para_hacer_hoy` (que no incluye tareas manuales: verificado, sin doble conteo) más mis tareas de hoy o atrasadas; la recepción no ve el número de pedidos de pausa y baja.
+- Verificado: lint, typecheck, 110 pruebas, build y base/chequeos/demo en verde en GitHub (`pendientes-panel`).
+
+**QUÉ CONFIGURÁS VOS**: para que llegue el push siguen haciendo falta las claves VAPID.
+**SIN ARREGLAR**: VD-37b (solo lo urgente por defecto), VD-37c (canales mail y WhatsApp), VD-37d (punto en Yo y Clases de la app, depende de VD-38).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-37` ("Marcar todo" no se prueba si nadie tiene avisos), los 50 ms con 3.000 socios (`pendientes_panel` llama dos veces a `privado.retencion`: la parte a mirar) y 390 px: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-13 · Para hacer hoy: tareas inteligentes
+
+**QUÉ HICE**
+- Migración 5000: `/panel/tareas` pasó a ser "Para hacer hoy" sin sacar nada (`/panel/hoy` redirige). Tres bloques: 13 automáticas calculadas, cada una con su dato y sus nombres (las 5 de antes — vencen hoy, prometieron pagar, transferencias por aprobar, caja abierta, no vienen — más caja sin contar, vencen en N días, nuevos sin venir, cumpleaños, stock bajo, pausas, bajas y clases con lista de espera); checklist de apertura y cierre (lo arman dueño y encargado, se tilda por día); tareas manuales con repetición diaria, semanal o mensual (al tildar una repetida nace la siguiente, una sola vez). En "vencen hoy" y "prometieron pagar" hay 💵 Cobrar por persona que abre la hoja de VD-5 y la saca de la lista.
+- Configuración "Qué se avisa y a quién" (dueño y encargado): prender o apagar cada automática, asignarla a un rol, una persona o "lo de siempre" y elegir los días de las que llevan N. Tablas `tareas_auto`, `tareas_checklist`, `tareas_checklist_hechas`; `para_hacer_hoy` reescrita con la misma firma sobre la versión vigente; `crear_tarea` suma un parámetro y la firma vieja se borra.
+- Decisiones: "no vienen" sigue solo para dueño y encargado (el dueño puede asignarla a la recepción); las tarjetas muestran cantidades y nombres, nunca montos; caja sin contar, stock, pausas y bajas son de gestión y no se asignan a la recepción; el profe no ve ninguna.
+- Verificado: lint, typecheck, 104 pruebas, build y base/chequeos/demo en verde en GitHub (`para-hacer-hoy`, `inicio-en-vivo`).
+
+**SIN ARREGLAR**: VD-13b (avisos automáticos en la app del socio: la base no tiene bandeja de avisos para el socio), VD-13c (firmas pendientes, hitos de entradas, pedir reseña), VD-13d (Para hacer hoy como bloque principal del Inicio). Vencen hoy, prometieron y transferencias solo se prueban con el e2e.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-13` (depende de que el demo tenga a quien venza hoy) y las pantallas con sesión real: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-15 y VD-6b · Socios con memoria, Interesados y ficha con acciones (D22)
+
+**QUÉ HICE**
+- Socios recuerda búsqueda, filtros y scroll en `sessionStorage` (al volver de una ficha los restaura; "Todos" o sacar un filtro no los vuelve a poner). Pestañas Socios · Interesados (`/panel/socios?vista=interesados`) con todas las funciones de Prospectos (seguimiento, "Ya le escribí", "Hacerlo socio", WhatsApp armado); `/panel/prospectos` redirige (si Socios está apagado se sigue mostrando la pantalla vieja). 🌐 en la lista y píldora "Se anotaron por la web" para los de autoalta. La ficha tiene en el encabezado "🚪 Entrada" (abre la ventana de VD-1 con ese socio) y "💵 Cobrar" (hoja de VD-5).
+- VD-6b (migración 5100): `prospectos.dni` (opcional, único por gimnasio, 6 a 12 números); `crear_prospecto` con `p_dni` (firma vieja borrada); el alta ofrece al Interesado por DNI aunque el celular sea otro y "Hacerlo socio" trae nombre, celular y DNI; `buscar_socios` devuelve `autoalta` y acepta `p_origen='web'` (firma vieja borrada).
+- Verificado: lint, typecheck, 105 pruebas y base/chequeos/demo en verde en GitHub (`interesados-dni`).
+
+**SIN ARREGLAR**: VD-15b (la píldora 🌐 no distingue si ya pagó, encabezado fijo al scrollear, línea de tiempo única en la ficha).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-15` y los viejos (panel-socios, soc-*, pro-*, reg-1, pag-3, rev-1, vd-6): escritos según la documentación, pero no ejecutados; el tramo de autoalta 🌐 del e2e es condicional y solo está probado en la base.
+
+## 2026-11-06 · Noche · VD-11 · Menú nuevo y redirecciones
+
+**QUÉ HICE**
+- Menú en el orden del doc 03 §1: Hoy (Entrada, Para hacer hoy, Avisos de hoy, Vencen y cobrar, Clases de hoy), Socios (Socios, Interesados, Retención y números, Rutinas, Eventos), Plata (Caja, Productos y stock, Transferencias, Resultado, Gastos, Control, Resumen) y Gimnasio (Planes y servicios, Tu página, Equipo, Configuración). Las claves de las secciones no cambiaron: los accesos rápidos guardados siguen andando y ninguna ruta se sacó ni necesitó redirección. Mapa central `src/lib/panel/rutas.ts` (`DESTINO`, rutas viejas, `REDIRECCIONES` vacío): VD-13/15/18 solo cambian el destino ahí. Ctrl+K encuentra por el nombre viejo y por el nuevo.
+- Migración 4900: `panel_gimnasio` (redefinida entera, misma firma) apaga "gastos" para el encargado sin `encargado_ve_gastos` y manda ese permiso (VD-41b). Control ya lo apagaba `contextoPanel`.
+- Decisiones: "Productos y stock" apunta a `/panel/vender` para que la recepción conserve su pantalla de venta (los productos siguen en Planes y servicios); "Avisos de hoy" queda aparte hasta que VD-13 lo junte.
+- Verificado: lint, typecheck, 109 pruebas, build y base/chequeos/demo en verde en GitHub (`menu-gastos`).
+
+**SIN ARREGLAR**: cuando VD-13/15/18 creen sus rutas nuevas hay que cargarlas en `REDIRECCIONES`.
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-11` (nombres y orden, 16 rutas viejas, accesos rápidos, Ctrl+K, menús por rol y 390 px) y el barrido: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-17 y VD-18 · Planes y servicios; productos y stock (D21)
+
+**QUÉ HICE**
+- VD-17 (migración 4700): "Ajustes" por plan: cómo vence (el del gimnasio, continua, desde el pago o día fijo; solo el dueño la cambia), días de tolerancia, cuándo el pack descuenta, visible en la página y el alta online (apagado = solo lo vende la recepción), sedes donde vale; orden con subir/bajar y "Cómo lo ve el socio". Servicios adicionales recurrentes (locker, toalla) como productos asignados al socio: `precios_venta` los trae y la cuota los suma sola en Cobrar y en Vender por los mismos meses; la base rechaza servicios sin cuota, no contratados o con otros meses.
+- VD-18 (migración 4800): producto con foto (achicada al subir), costo, margen y categoría; entrada de mercadería con foto del remito e historial; "Queda poco" y lista "Para reponer"; botones de Vender con foto y "Quedan N", bloqueados en cero; `vender` rechaza si el stock no alcanza salvo que el producto lo permita (apagado de origen); en Vender, con un socio elegido, "Cobrar a …" abre la hoja Cobrar (los botones viejos de cuota siguen). Buckets `fotos_productos` (público) y `remitos_stock` (privado, también en supabase-local).
+- `privado.vender` y `precios_venta` se copiaron en cadena 4000 → 4700 → 4800 (verificado: cada una arrastra lo anterior).
+- Verificado: lint, typecheck, 99 pruebas, build y base/chequeos/demo en verde en GitHub (`planes-servicios`, `productos-stock`).
+
+**SIN ARREGLAR**: VD-18b (margen por producto en Resultado, servicios contratados en la ficha del socio, costo unitario en cada entrada). La hoja Cobrar no controla stock por pantalla (solo la frena la base).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-17`/`vd-18` y los viejos (panel-planes, pla-*, ven-*, panel-vender), y subir foto o remito contra el storage: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-14 y VD-16 · Vencen y cobrar con pestañas; Retención y números
+
+**QUÉ HICE**
+- VD-14 (migración 4400, `vencen_pestanas`): `/panel/vencen-hoy` con pestañas Vencen hoy · Vencidos · Por vencer · Prometieron pagar, cada una con su cuenta; arriba "$X a cobrar hoy · $Y vencido · $Z por vencer"; con día fijo "Período de pago, día 4 de 10". Cobrar abre la hoja de VD-5. La recepción ve cantidades y lo que debe cada vencido, no lo que paga cada socio por mes (decisión prudente). El bloque Prometieron pagar sigue en la pestaña de hoy para que `rev-1` y `vd-8` sigan pasando.
+- VD-16 (migración 1600, `retencion_periodo`): churn general y de 90 días, ingreso por socio, visitas por socio, los de una vez por semana o menos, mapa de calor, ocupación de clases y ausentes, por período (este mes, mes pasado, 3, 6, 12 meses) con "¿Qué es esto?" y link a la lista que lo forma; "Exportar a Excel" (CSV); solo dueño y encargado; índices para que responda rápido. Prueba de exactitud con datos y momento fijos.
+- Verificado: lint, typecheck, 98 pruebas, build y base/chequeos/demo en verde en GitHub.
+
+**SIN ARREGLAR**: VD-16b (sembrador con cantidad y medir los 300 ms con 3.000 socios) y VD-16c (posponer una fila de riesgo, gráficos mes a mes, cobrado por mes y por medio).
+**LO QUE NO PUDE VERIFICAR**: el tiempo < 300 ms con 3.000 socios no se midió; pantallas y e2e `vd-14`/`vd-16` y los viejos (panel-vencen, veh-1, avi-*, panel-retencion, ret-*): escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-10 · Control: todo queda escrito, con alertas al dueño
+
+**QUÉ HICE**
+- Migración 4300: `linea_de_control(gimnasio, desde, hasta, tipos[], quien, limite, cursor)`, paginada por cursor con índices por gimnasio y fecha, con 11 tipos: cobros, anulaciones (quién la pidió y quién la aprobó), descuentos, "cobré otro día", dejados pasar (con la promesa), cajas (abrió, cerró, sin contar), precios, configuración, entradas anuladas, invitados y anti-préstamo. La ve el dueño, y el encargado solo si tiene `encargado_ve_resultado` (decisión prudente: no se creó un permiso aparte); recepción y profe reciben error.
+- Alertas a la campana (`campana_control`): cobro con fecha atrasada y posible préstamo de entrada; anulación y descuento grande ya llegaban por `alertas_caja` (no se duplicaron). Llega una sola vez (clave = id del hecho). El cambio de precio de un producto ahora deja historial (trigger).
+- `/panel/control`: filtros por tipo, persona y fechas (se recuerdan), lista por día con "Más viejos", CSV con tope de 5.000 filas (avisa si corta), enlaces desde Control de la puerta, "Qué hizo cada uno" y Equipo. Sección apagable por gimnasio (`control` suma a `secciones_validas()` leyendo la lista vigente, que ya incluye `gastos`).
+- Barrido: `/panel/control` y `/panel/gastos` sumados a RUTAS y prohibidos para recepción y profe (gastos también para el encargado sin permiso).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`control`).
+
+**SIN ARREGLAR**: VD-10b (filtro por socio, e2e del cobro atrasado en la campana, conteo en el resumen del día).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-10` (selectores de Descuento/Anular copiados de e2e viejos), el filtro recordado en localStorage, la descarga del CSV, 390 px y una consulta con miles de filas: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-41 · Gastos y presupuesto: la ganancia del mes
+
+**QUÉ HICE**
+- Migración 4150: seis categorías de gasto (alquiler, sueldos, servicios, mantenimiento, proveedores, otros) con día calendario y comprobante opcional (bucket privado `comprobantes_gastos`); `gastos_fijos` que valen desde el mes en que se cargan hasta que se dejan de repetir (se calculan al consultar, sin cron); `presupuestos_gasto` mensual por categoría; `ganancia_mes` (ingresos − gastos − fijos y el desvío contra el presupuesto), que ahora usa Resultado. Tablas con `gimnasio_id`, FK compuesta y RLS; `gastos` suma a `secciones_validas()` (se apaga por gimnasio).
+- Pantalla `/panel/gastos` (cargar, lista con comprobante, fijos, presupuesto, mes a mes, CSV, esqueleto, estado vacío), en el menú de PLATA. Resultado muestra ganancia, desvío y carga rápida con link a Gastos; `res-3` sigue válido.
+- **Decisión de permisos**: el encargado ve y carga gastos solo si el dueño prende `encargado_ve_gastos` (apagado de origen: no se reutilizó `encargado_ve_resultado` porque abriría los sueldos por defecto); con permiso no ve la lista de fijos (solo el total). Fijos, presupuesto y el interruptor son del dueño. Recepción y profe: error.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`gastos-presupuesto`).
+
+**QUÉ CORRÉS VOS**: después de aplicar, `npm run db:types`. El bucket se crea con la migración.
+**SIN ARREGLAR**: VD-41b (el menú muestra Gastos al encargado sin permiso y recibe el error al abrirla; se arregla en VD-11), VD-41c (interruptor también en Equipo → Permisos), VD-41d (presupuesto por mes y aviso).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-41`, la subida del comprobante contra Storage real y 390 px: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-9 · Caja por turno que se cierra sola, sin cron (D20)
+
+**QUÉ HICE**
+- Migraciones 4100 y 4101: una caja abierta de otro día, o con más de N horas (14 por defecto, hora de corte 00:00 por defecto), cuenta como "sin contar"; al primer acceso queda registrada cerrada sin contar con el esperado y sin responsable. Un trigger `before insert` sobre `pagos`, `ventas` y `movimientos_caja` impide cobrar en ella (`vender` no se tocó). "Para revisar" en Caja para dueño y encargado: "conté $X" o dejarla con motivo, siempre con quién y cuándo.
+- Mi turno desde la Entrada (abrir con fondo sugerido sin ponerlo solo, cerrar, aviso si quedó vencido). Reporte X (turno abierto, solo dueño/encargado: arqueo ciego) y de cierre; Z del día con SOBRAN/FALTAN grande y lo sin contar aparte; por WhatsApp. Calculadora de billetes opcional (la base re-suma). Configuración → Cobros → Caja: por turno o una caja por día, pedir billetes, fondo fijo, hora de corte, horas máximas (solo dueño; queda en el historial).
+- Decisiones: `abrir_caja` registra como sin contar toda caja vencida antes de abrir (reemplaza la regla CAJ-5 "cerrala antes de abrir otra"; sigue sin permitir dos turnos abiertos); si la recepción cierra su propia caja vencida antes de que se registre, cuenta, pero queda anotado que se cerró sola; la recepción ve solo reportes de turnos que abrió o cerró. Se actualizó `caja-olvidada` para esa regla nueva.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`caja-sin-contar`, `caja-olvidada`).
+
+**SIN ARREGLAR**: VD-9b (alerta al dueño en la campana), VD-9c (abrir turno en Inicio para dueño/encargado), VD-9d (etiquetas de `caja.*` en el historial), VD-9e (fondo que no coincide con el turno anterior).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-9` y los viejos caj-1, caj-3, caj-4, caj-5 (no modificados): escritos según la documentación, pero no ejecutados; `npm run db:types` no se corrió.
+
+## 2026-11-06 · Noche · VD-7 y VD-8 · Cómo vencen las cuotas y dejar pasar sin pagar (D18, D19)
+
+**QUÉ HICE**
+- VD-7 (migración 4000): regla de vencimiento por gimnasio y por plan: con día fijo, quien se anota a mitad de mes paga proporcional a los días hasta el día fijo (redondeo a $100 configurable), mes entero, gratis hasta el día fijo, o "como hasta ahora". La cuenta está en la base (11 de 30 = $11.000; 21 de 31 = $20.300; 14 de 28 = $15.000); la hoja Cobrar muestra "N días de M" y a qué día cubre; Configuración → Cobros con simulador "¿y si se anota el…?" y la regla de cada plan; cada cambio queda en `cambios_cobro`; cambiar de modo no toca lo ya cobrado. Un gimnasio sin configurar queda como antes (ningún cobro cambia solo). Copia `privado.vender` y `precios_venta` de la definición más nueva (6700).
+- VD-8 (migración 4001): tres modos de "dejar pasar" por deuda: la recepción hasta N días (3 por defecto), siempre con PIN del dueño o encargado, o libre con registro; solo el dueño lo cambia. El PIN se canjea por un token de esa sola entrada. Cada caso queda en `promesas_pago` (quién pidió, quién autorizó, regla vigente, día prometido). Aparece en Inicio, Vencen hoy ("Le prometieron pagar"), Para hacer hoy y como chip "Ayer dijo que pagaba hoy" en la Entrada del día. Componente compartido `FormDejarPasar`. La firma de `registrar_ingreso` suma `p_promete_pagar_el` y la vieja se borra ahí mismo.
+- Verificado: lint, typecheck, 94 pruebas, build y base/chequeos/demo en verde en GitHub (`vencimiento-cuotas`, `dejar-pasar-modos`).
+
+**QUÉ CONFIGURÁS VOS**: elegir en Configuración → Cobros la regla de vencimiento y el modo de dejar pasar (hasta entonces todo sigue como estaba) y cargar el PIN en Mi cuenta (dueño y encargado).
+**SIN ARREGLAR**: sumados VD-7b (la deuda de la puerta usa el precio entero para quien nunca pagó con día fijo), VD-7c (ventana de pago en Vencen), VD-7d (default de gimnasio nuevo), VD-8b (promesas incumplidas).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-7` y `vd-8`, la hoja Cobrar con primera cuota gratis ($0) en pantalla y 390 px: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-3 y VD-4 · Reingreso por visita, anti-préstamo y entradas en vivo
+
+**QUÉ HICE**
+- VD-3 (migración 4200): `registrar_ingreso` reemplaza los 60 s fijos por una visita de N horas (5 por defecto, `configuracion_visita`): dentro de ella devuelve "Ya entró/entraste a las HH:MM" sin crear entrada, sin contar ni descontar pack o pase y con el mismo color. Otra vía o dispositivo antes de N minutos (60) → amarillo "¿es la misma persona?" y alerta en `alertas_prestamo` para dueño y encargado (Control de la puerta). `antiprestamo_minutos = 0` lo apaga; `visita_horas = 0` deja solo el doble toque de 60 s. Configuración → Entrada. No se tocó `calcular_acceso` ni `guardar_configuracion`. Prueba con momentos fijos (4 h 59 m, 5 h 01 m, QR dos veces, otra vía a los 4 y a los 61 min, 0). Se ajustó el test viejo "reingreso el mismo día" de `acceso` apagando la visita larga para seguir probando ese cálculo.
+- VD-4 (migración 4201): `entradas_desde` + un solo polling de 4 s con la pestaña visible; toasts de vidrio (verde 6 s, amarillo 12 s, rojo queda con Cobrar que abre la hoja); la barra fija de la ventana usa el mismo polling; "Hoy" se actualiza sola; no avisa las entradas hechas por la misma recepción. Interruptor en Configuración → Entrada (prendido por defecto).
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`reingreso-visita`, `entradas-en-vivo`, y las viejas de acceso, kiosco y QR).
+
+**SIN ARREGLAR**: VD-3b (foto en el amarillo, chip en Inicio, mismo polling en UltimasEntradas) y VD-4b (nombre de sede en el aviso del dueño con varias sedes).
+**LO QUE NO PUDE VERIFICAR**: e2e `vd-3` y `vd-4` (el segundo supone `ffmpeg` y a `socio@ejemplo.invalid` como "Testigo Al Día") y los e2e viejos de entrada, kiosco y TV: escritos según la documentación, pero no ejecutados; el aviso en 390 px no se vio.
+
+## 2026-11-06 · Noche · VD-6, VD-5b, VD-1b y VD-2b · Alta rápida y ventana de Entrada completa
+
+**QUÉ HICE**
+- VD-6 (migración 3800): en la ventana de Entrada, un DNI inexistente ofrece "Darlo de alta" (tecla A): datos → plan con tarjetas y primer pago → "Guardar y cobrar" abre la hoja Cobrar → vuelve en verde para anotar. Alta completa en Socios en 4 pasos en una pantalla (datos, plan con tarjetas y primer pago, hoja Cobrar sobre el alta, Listo con bienvenida). Un Interesado con ese celular se ofrece. Un error o celular a medio escribir no borra nada. `planes_para_alta` calcula cuota, matrícula y totales en la base; `prospecto_por_telefono` busca al Interesado. "Dar de alta" sin plan sigue yendo a la ficha.
+- VD-5b: "Dar de alta y cobrar" y el Cobrar de `Puerta.tsx` abren la hoja Cobrar (si no está montada, respaldo a Vender); `Puerta` recalcula el veredicto al cobrar. Actualicé ent-9, pla-3, pla-6, soc-13, vd-1, vd-34, ven-5 y ven-6, y los 12 e2e que usaban el select de plan usan el helper `scripts/e2e/alta.mjs` (el plan pasó a tarjetas).
+- VD-1b: F abre la ficha con `?desde=entrada` y su Volver reabre la ventana con el mismo socio; el dueño con varias sedes elige sede en la ventana (queda en esa compu).
+- VD-2b (migración 3802): chips "Tiene clase hoy a las HH:MM" y "En prueba" en `guia_entrada`.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`alta-rapida`, `guia-clase-hoy`).
+
+**Decisiones del agente**: "En prueba" es provisoria (primera vez con pase o pack), solo informativa y sin cambiar quién entra: queda atada a CLA-6/REV-1c (VD-2c, 🟡).
+**SIN ARREGLAR**: VD-6b (el Interesado no guarda DNI: solo se cruza por celular), VD-6c (proporcional del día fijo depende de VD-7); al cambiar de pestaña en la ficha se pierde `desde=entrada`.
+**LO QUE NO PUDE VERIFICAR**: todo lo de pantallas y los e2e nuevos y actualizados: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
+## 2026-11-06 · Noche · VD-33b, VD-33c y VD-12e · Mi cuenta, anti-robot e Inicio sin repetir
+
+**QUÉ HICE**
+- VD-33b (migración 3301, `mi_seguridad`): cambiar contraseña pide la actual si ya hay una (cliente aparte, no abre sesión nueva); una cuenta sin contraseña pone la primera sin pedirla; "Mi cuenta" muestra dónde está abierta (dispositivo, última actividad, "Este dispositivo") y "Cerrar las otras" (`signOut scope others`); el cliente de servidor reenvía el User-Agent. En panel y en la app del socio.
+- VD-33c: desafío Turnstile antes de mandar códigos (SMS, mail del socio, recuperar contraseña) solo si están `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY`; sin ellas todo sigue igual; si Cloudflare no responde no sale el código; cookie firmada de 10 min por destino para reenviar.
+- VD-12e: "Ahora y lo que sigue" ya no repite lo que está en "Para hacer hoy".
+- Verificado: lint, typecheck, 91 pruebas, base/chequeos/demo en verde en GitHub (`mi-seguridad`).
+
+**QUÉ CONFIGURÁS VOS 🔌**: crear el widget Turnstile en Cloudflare y cargar las dos variables en Vercel (con ambas vacías no cambia nada).
+**SIN ARREGLAR**: sumados VD-33d (2FA), VD-33e (cerrar sesiones al cambiar contraseña), VD-33f (aviso de dispositivo nuevo).
+**LO QUE NO PUDE VERIFICAR**: `vd-33b` y `vd-12e`, el widget real contra Cloudflare, `signOut others` y el User-Agent contra Supabase real: escritos según la documentación, pero no ejecutados.
+
+## 2026-11-06 · Noche · VD-5 · Cobrar: un solo flujo en todos lados
+
+**QUÉ HICE**
+- Hoja flotante `Cobrar` única, abierta desde la ventana de Entrada (tecla C), la ficha, Vencen hoy, Retención y Ctrl+K (botón por socio o "cobrar Juan" + Enter). Muestra la cuota de su plan con su período y las líneas de matrícula, recargo, convenio y cupón; medios en botones, dos medios, comprobante de transferencia (hasta 2,5 MB), descuento con motivo, agregar producto/pase/pack/deuda/otra cosa, "atiende X" (PIN), recibo por WhatsApp y aviso de doble cobro que nunca frena. Medio por defecto configurable desde la hoja (dueño/encargado). Desde la Entrada, al cobrar la hoja se cierra y el veredicto se recalcula (C → Enter → Enter deja al vencido adentro); desde las demás, "Cobrado" con Anular y Volver.
+- "Cobré otro día": solo dueño/encargado, con motivo, hasta 90 días atrás, nunca en efectivo ni a cuenta (decisión prudente para no mezclar la caja de hoy); lo exige la base. La venta guarda motivo, quién la cargó y cuándo.
+- Comparte con `/panel/vender` las acciones y las cuentas (`compartido.tsx`, `tipos.ts`); `/panel/vender` sigue igual. Migración 3450 (`vender` con fecha de cobro, motivo y comprobante opcionales y la firma vieja borrada; `contexto_cobro`; medio por defecto). Número 3450 y no 0500: depende de `vender` de VD-34.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`cobrar-flujo`).
+
+**SIN ARREGLAR**: VD-5b (el alta y `Puerta.tsx` todavía redirigen a `/panel/vender?…&cuota=1`; hay e2e viejos que esperan esa URL) y VD-5c (prueba de que Transferencias no mezcla comprobantes).
+**LO QUE NO PUDE VERIFICAR**: la hoja, el foco/Enter entre la hoja y la Entrada, la subida del comprobante contra el storage local y `vd-5.mjs` (y el `panel-vencen.mjs` actualizado): escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
+## 2026-11-06 · Noche · VD-47X, VD-12b/c/d y VD-23b/c · Rapidez restante e Inicio en vivo
+
+**QUÉ HICE**
+- VD-47X (migración 4701): filtros y buscador de Socios y listas de Retención con la lista anterior atenuada mientras llega la nueva (nunca en blanco); `useOptimistic` en marcar contactado y en tareas con vuelta atrás; fotos de logo/Configuración/ticket de Caja achicadas a 800 px webp al subir (si falla, sube la original); 7 índices que empiezan por `gimnasio_id` (sacados de leer las funciones, no de `explain` real); pruebas de que dos gimnasios no se ven, que pedir otro gimnasio da error y que la recepción no ve `plata_en_riesgo`; test que prohíbe `unstable_cache` fuera de lo público; `scripts/medir/explain.mjs`.
+- VD-12b/c/d y VD-23b/c (migración 3700, renumerada para correr después de la 2300): Inicio con "Últimas entradas en vivo" (hora, vía, ⛔ y Cobrar, se renueva cada 20 s) y "Para hacer hoy" con [Ver] (el profe no los ve); `numeros_inicio` respeta el interruptor existente "la recepción ve lo cobrado" (apagado por defecto); mini gráfico de 7 días en los 8 números; editor de la meta de visitas del mes en Configuración → Reglas (dueño; encargado lo ve); socio demo vencido `socio-vencido@ejemplo.invalid`.
+- Verificado: lint, typecheck, pruebas, build y base/chequeos/demo en verde en GitHub (`rapidez-cache`, `inicio-en-vivo`).
+
+**SIN ARREGLAR**: sumados VD-47Y (correr `explain.mjs` con 3.000 socios y la tabla antes/después) y VD-12e (Inicio repite filas). No se usó `next/image` en listas de socios (las fotos pasan por una ruta con sesión). "Escribile al gimnasio" espera a VD-38.
+**QUÉ CONFIGURÁS VOS**: nada. Para ver el socio vencido en el demo hay que correr `usuarios-demo`.
+**LO QUE NO PUDE VERIFICAR**: pantallas y e2e `vd-47x`, `vd-12b`, `vd-23c`, e `explain.mjs`: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`. No hay tabla de tiempos todavía.
+
+## 2026-11-06 · Noche · VD-1 y VD-2 · Ventana de Entrada en todas las pantallas y guía del veredicto
+
+**QUÉ HICE**
+- VD-1 (migración 0100): la ventana de Entrada vive en el layout del panel y se abre tipeando un número fuera de un campo (teclado numérico incluido), con el botón (centrado sobre la barra en el celular), con F2/Ctrl+E y con un lector USB (teclas < 30 ms: reconoce QR `GYMOS1.` y llavero). Escribir (DNI con puntos, hasta 3 coincidencias) → veredicto → anotado; se cierra sola a los N segundos; Esc devuelve el foco. Barra fija opcional a la derecha (≥ 1280 px) con las últimas 5 entradas. Usa solo las funciones de la base de siempre. `/panel/entrada` queda igual (la ventana se desactiva ahí). El botón grande de Inicio abre la ventana. Configuración → Entrada (por gimnasio, tabla `configuracion_entrada`, y "en esta compu" en el navegador, que le gana).
+- VD-2 (migración 0200): `guia_entrada` devuelve por situación el botón principal y el segundo, "lo que hay que decirle", cuánto le falta y los chips (primer día, entrada 100, cumple, debe, falta firmar, menor con o sin responsable, lo dejaron pasar, cerrado). La ventana y /panel/entrada solo dibujan lo que dice la base. Una prueba de base por cada fila de la tabla con casos testigo y momento fijo.
+- Verificado: lint, typecheck, 79 pruebas, base/chequeos/demo en verde en GitHub (`config-entrada`, `guia-entrada`).
+
+**Decisiones del agente**: con "anotar solo en verde" Enter anota solo si está en verde; la ventana usa la sede principal; "Fuera del horario" ofrece Dejar pasar y Cobrar (no existe "cobrar la diferencia").
+**QUÉ CORRÉS VOS**: nada; ojo, la migración 0200 debe estar aplicada antes que el código (`veredicto()` llama a `guia_entrada`): la publicación por tanda lo hace en ese orden.
+**SIN ARREGLAR**: VD-1b (F abre la ficha y vuelve; sede), VD-2b (chip "tiene clase hoy", "En prueba"); alta rápida dentro de la ventana es VD-6; Cobrar en la ventana es un link a Vender hasta VD-5.
+**LO QUE NO PUDE VERIFICAR**: la ventana y los e2e `vd-1`/`vd-2` (y que los e2e viejos de Entrada sigan pasando): escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`.
+
+## 2026-11-06 · Noche · VD-36 y VD-23 · App del socio en 4 pestañas, progreso y bienvenida
+
+**QUÉ HICE**
+- VD-36 (migración 3600, `pestanas_app`): barra Inicio · Clases · Rutina · Yo; Clases y Rutina salen de la base (sin clases o con la sección apagada no aparecen; si la base falla quedan Inicio y Yo). `/app/yo`: mi plan, packs, pagos y asistencia, novedades, membresía y Más (invitar, referir, descargar datos, salir). Las pantallas viejas siguen accesibles; Inicio conserva Invitar, Referir e Instalar. Editados app-3, app-8 y panel-app para entrar por Yo.
+- VD-23 (migración 2300, `progreso_inicio`, `marcar_bienvenida`): semana, semanas seguidas, meta del mes (dato por gimnasio, 12 por defecto), hitos 10/50/100/250/500/1000 con felicitación, "Entraste 19:04 ✓ · llevás N este mes", bienvenida de 3 pasos (tarjeta; los socios existentes no la ven), Pagar pegado al semáforo si debe o está por vencer. Nada recalculado en TypeScript.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub (incluye `app-pestanas` e `inicio-progreso`).
+
+**SIN ARREGLAR**: sumados VD-23b (editor de la meta y "Escribile al gimnasio") y VD-23c (socio demo vencido y su e2e). Una corrida intermedia (42148233313) quedó colgada en GitHub "in_progress"; se puede ignorar.
+**LO QUE NO PUDE VERIFICAR**: pantallas y e2e vd-36, vd-23, app-3, app-8, panel-app: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]` de la tanda.
+
+## 2026-11-06 · Noche · VD-33 · Ingreso más lindo y "primero quién, después cómo"
+
+**QUÉ HICE**
+- Pantalla de ingreso con la marca del gimnasio (o de Gym OS en la plataforma), degradé lento, logo y tarjeta de vidrio; sin animación con reduced-motion. Socio: un solo campo "celular o mail" (con `@` pasa a mail) y debajo los tres métodos de siempre. Código de 6 dígitos que se completa solo, acepta pegado, verifica al sexto y "Reenviar en 0:59". "Olvidé mi contraseña" (`/ingresar/recuperar`) por código al mail. Errores iguales exista o no la cuenta. Sin migración; la lógica de destino pasó a `destino.ts` sin cambiar comportamiento; los selectores de los e2e viejos se mantienen.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub.
+
+**QUÉ CONFIGURÁS VOS**: SMTP propio (Resend/Postmark) en Supabase Auth: sin eso Supabase manda 2 mails por hora y el código por mail / olvidé mi contraseña no sirven en producción (VD-45).
+**SIN ARREGLAR**: sumados VD-33b (mi cuenta: contraseña y sesiones) y VD-33c (Turnstile). El límite de 5 pedidos de código por destino por hora cuenta también los reenvíos.
+**LO QUE NO PUDE VERIFICAR**: `vd-33` y los e2e viejos que entran por /ingresar (app-9, panel-acceso, entrarSocio) no corrieron: escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]` de la tanda.
+
+## 2026-11-06 · Noche · VD-12 · Inicio del dueño y de la recepción
+
+**QUÉ HICE**
+- Botón Entrada grande (dueño, encargado, recepción) hacia `/panel/entrada` (VD-1 lo cambia por la ventana). 4 números configurables por gimnasio de 8 posibles, traídos por `numeros_inicio` en un viaje (migración 1200, sólo el dueño los guarda, la base valida claves); mini gráfico de 7 días en "Entraron hoy" y "Cobrado hoy"; cada número es un link a su lista. Recepción: barra de su turno de caja y sin "Cobrado hoy" (prudente: el interruptor no existe aún). Se conservan todos los bloques anteriores y el streaming de VD-47.
+- Verificado: lint, typecheck, 79 pruebas, base/chequeos/demo en verde en GitHub (incluye `inicio-numeros.test.mjs`).
+
+**SIN ARREGLAR**: sumados VD-12b (últimas entradas en vivo), VD-12c (interruptor de lo cobrado para la recepción), VD-12d (gráficos en los demás números).
+**LO QUE NO PUDE VERIFICAR**: pantallas, e2e `vd-12` y celular 390 px: escritos según la documentación, pero no ejecutados; el build local en Windows no se pudo leer (lo cubre Verificar en GitHub).
+
+## 2026-11-06 · Noche · VD-27 · Diseño v2: vidrio, movimiento, componentes únicos
+
+**QUÉ HICE**
+- `globals.css`: variables de movimiento y clases `.aparecer .hoja .lista-entra .tilde .pulso .brillo .esqueleto`, `:active` 0,97, tarjetas de vidrio sutil con los tokens del gimnasio, foco y selección con su acento, `prefers-reduced-motion` sin animaciones.
+- Componentes nuevos `Hoja` (Esc, foco atrapado, sube desde abajo en celular), `Tilde`, `Brillo`; aplicados en Mensaje, Ctrl+K, menú móvil, avisos/tareas, cobro, entrada (el veredicto aparece al instante, el pulso solo acompaña) y los 54 `loading.tsx`. Documentado en `docs/DISENO.md`.
+- Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub.
+
+**SIN ARREGLAR**: `.lista-entra` anima la entrada pero no el achicarse al salir.
+**LO QUE NO PUDE VERIFICAR**: el aspecto (vidrio, blur, esqueleto) y el e2e `vd-27` (reduced-motion, hoja, foco, 390 px) están escritos según la documentación, pero no ejecutados; corren en la corrida `[pantallas]`. El ✅ de Puerta y Carrito pasó a un svg: ningún e2e dependía del emoji, sin correrlos.
+
+## 2026-11-06 · Noche · VD-47 · Rapidez de verdad (parte central)
+
+**QUÉ HICE**
+- Middleware: el gimnasio por dirección en memoria 60 s (los "no existe" no se recuerdan); sesión con `getClaims` (con clave simétrica cae solo a `getUser`); matcher sin estáticos.
+- `rpc()` corta a 10 s con "La base está tardando — Reintentar"; `rpcLectura` reintenta una vez (las escrituras nunca). Inicio muestra primero saludo y accesos y los números entran con Suspense y esqueleto.
+- Caché 60 s con etiqueta `landing` de lo público (landing y medición), invalidada por cualquier `guardar_/publicar_/…`. Permisos, plata y socios no se cachean. Lector QR bajo demanda (`next/dynamic`).
+- `scripts/medir/tiempos.mjs` (14 pantallas × 4 roles + app del socio) y paso en Pruebas completas que avisa sin cortar.
+- Verificado: base, chequeos y demo en verde en GitHub; lint, typecheck, 79 pruebas unitarias y build.
+
+**QUÉ CONFIGURÁS VOS**
+- Confirmar la región de Supabase (Settings → General) y ponerla en Vercel → Settings → Functions → Region (São Paulo = `gru1`): es lo que más se nota.
+- Supabase → JWT Signing Keys: migrar a claves asimétricas; sin eso `getClaims` cae a `getUser`.
+
+**SIN ARREGLAR**
+- Se sumó VD-47X: useTransition/useOptimistic, fotos a 800 px, next/image, índices por `explain analyze`, prueba de dos roles con caché y la tabla antes/después.
+
+**LO QUE NO PUDE VERIFICAR**
+- El código del middleware, `getClaims`, el timeout, la caché y el esqueleto de Inicio está escrito según la documentación, pero no está ejecutado (las pantallas corren en la corrida `[pantallas]` de la tanda). `tiempos.mjs` no se corrió: no hay tabla de tiempos todavía.
+
+## 2026-11-06 · Noche · VD-34 · Confiabilidad base: nada dos veces, nada se pisa en silencio
+
+**QUÉ HICE**
+- **Clave de operación en los cobros** (migración 3400): `ventas.clave_operacion` con unique por gimnasio; `vender(…, p_clave_operacion)` toma un lock por clave y, si la operación ya existe, devuelve la venta hecha (`repetida: true`) sin cobrar de nuevo. Cobrar genera el uuid al primer intento y lo conserva hasta que se cobra. La firma vieja se borra en la misma migración. Probado en la base: misma clave dos veces = una venta, claves distintas = ventas distintas, dos envíos simultáneos = una venta.
+- **Versión en lo que se edita** (socios, planes, configuración): `actualizado_en` / `actualizado_por` con trigger (`clock_timestamp`), `version_registro` y `verificar_version`. Si otra persona guardó mientras el formulario estaba abierto, aparece "Beto lo cambió hace 1 min. Recargá… o tocá Guardar otra vez para guardar igual" y no se borra lo escrito; el segundo Guardar sí guarda. Probado en la base (quién, cuándo, y que la recepción no ve la versión de configuración).
+- El historial de configuración no cuenta `actualizado_por` como un cambio (una prueba vieja lo detectó).
+- `BotonAccion` (un solo componente: se deshabilita, "Guardando…", ignora el segundo toque) en el alta/edición de socio y en el flujo de cobro; el resto de los botones ya se deshabilitaban mientras trabajan.
+- `error.tsx` en la raíz, `/panel`, `/app` y `/admin` y `not-found.tsx`, todos con Reintentar · Volver · Ir al inicio (`PantallaError`).
+- Verificado ejecutando: corrida de base en GitHub en verde (migraciones, pruebas de la base, chequeos, demo); lint, typecheck y 75 pruebas unitarias en verde.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- Todos los formularios con `useActionState` ya devuelven lo escrito ante un error salvo los listados abajo en SIN ARREGLAR; los botones de escritura ya se deshabilitaban (los cambios de este ítem son la red de seguridad: la clave de operación cubre el reintento por red, que un botón deshabilitado no cubre).
+
+**QUÉ CORRÉS VOS**
+- Nada: se publica por tanda (prevuelo → aplicar de la migración 3400 con el resto de la tanda 1).
+
+**SIN ARREGLAR**
+- Los pagos de la app del socio (transferencia, online) todavía no llevan clave de operación: se suma cuando se toque VD-39 (cambio de plan y compra de pases).
+- `npm run db:types` no se pudo correr (no hay Postgres en esta compu).
+
+**LO QUE NO PUDE VERIFICAR**
+- El e2e `scripts/e2e/vd-34.mjs` (doble clic en Cobrar, dos sesiones sobre la misma ficha, pantalla inexistente con salida): el código está escrito según la documentación, pero no está ejecutado; corre en la corrida `[pantallas]` de la tanda.
+
+m OS — Registro
 
 Una entrada por capa cerrada, la más nueva arriba. Siempre con esta
 estructura. `docs/ESTADO.md` es una copia local de este archivo y no se

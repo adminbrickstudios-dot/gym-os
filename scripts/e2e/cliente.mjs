@@ -10,6 +10,7 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, PLATAFORMA, GIMNASIO, capturar, chequear, entrar, entrarSocio, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { altaGimnasio } from "./alta-gimnasio.mjs";
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
 const db = new pg.Client({ connectionString: url }); await db.connect();
@@ -35,11 +36,7 @@ try {
   // ── 1. BRIK crea el gimnasio ──
   const a = await nueva(COMPU);
   await entrar(a, "admin@ejemplo.invalid", undefined, PLATAFORMA);
-  await a.fill("input[name=nombre]", NOMBRE);
-  await a.fill("input[name=dueno]", "Dueño Cliente");
-  await a.fill("input[name=email]", MAIL_DUENO);
-  await a.locator("select[name=tipo]").selectOption("box");
-  await a.click('button:has-text("Crear gimnasio")');
+  await altaGimnasio(a, { nombre: NOMBRE, dueno: "Dueño Cliente", email: MAIL_DUENO, tipo: "box" });
   await a.locator("strong.numero").first().waitFor({ timeout: 60000 });
   const claveDueno = (await a.locator("strong.numero").first().innerText()).trim();
   const gim = (await a.locator("a[data-alta-equipo]").getAttribute("href")).split("/").pop();
@@ -123,7 +120,7 @@ try {
   await formE.locator("input[name=nombre]").fill("Recepción Cliente");
   await formE.locator("select[name=rol]").selectOption("recepcion");
   await formE.getByRole("button", { name: /Sumar al equipo/ }).click();
-  const filaR = d.locator("li", { hasText: "Recepción Cliente" });
+  const filaR = d.locator("li", { hasText: "Recepción Cliente" }).first();
   await filaR.waitFor({ timeout: 30000 });
   await filaR.locator('button:has-text("Dar acceso")').click();
   await filaR.locator("input[name=email]").fill(MAIL_RECEP);

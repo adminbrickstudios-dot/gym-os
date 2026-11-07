@@ -75,7 +75,7 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
       <input value={nota} onChange={(e) => setNota(e.target.value)} maxLength={300} placeholder="Contanos algo más (opcional)" className="campo w-full" />
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado || !motivo} className="boton boton-peligro"
-          onClick={() => empezar(async () => { const r = await pedirBajaSocio(socioId, motivo!, nota); setMsj(r.error ? { error: r.error } : { ok: "Listo: el gimnasio te va a contactar." }); })}>
+          onClick={() => empezar(async () => { const r = await pedirBajaSocio(socioId, motivo!, nota); setMsj(r.error ? { error: r.error } : { ok: `Listo: el gimnasio te va a contactar.${r.codigo ? ` Tu código de baja: ${r.codigo}. Guardalo: es tu constancia.` : ""}` }); })}>
           {ocupado ? "Enviando…" : "Pedir la baja"}
         </button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
@@ -86,18 +86,20 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
 }
 
 /** APP-9: crear o cambiar la contraseña (para entrar con mail y contraseña). */
-export function CrearContrasena({ email }: { email: string | null }) {
+export function CrearContrasena({ email, tieneContrasena = false }: { email: string | null; tieneContrasena?: boolean }) {
+  const [actual, setActual] = useState("");
   const [clave, setClave] = useState("");
   const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
   const [ocupado, empezar] = useTransition();
   if (!email) return <p className="texto-suave text-sm" data-sin-mail>🔑 Para entrar con contraseña, entrá una vez con tu mail (“✉️ Mail” al ingresar).</p>;
   return (
     <form className="tarjeta p-5 space-y-3" data-crear-contrasena
-      onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearContrasena(clave); setMsj(r.error ? { error: r.error } : { ok: "Listo: ya podés entrar con tu mail y esta contraseña." }); if (!r.error) setClave(""); }); }}>
+      onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearContrasena(clave, actual || undefined); setMsj(r.error ? { error: r.error } : { ok: "Listo: ya podés entrar con tu mail y esta contraseña." }); if (!r.error) { setClave(""); setActual(""); } }); }}>
       <h2 className="titulo text-2xl">🔑 Mi contraseña</h2>
       <p className="texto-suave">Para entrar con <strong>{email}</strong> sin esperar un código.</p>
+      {tieneContrasena && <input type="password" value={actual} onChange={(e) => setActual(e.target.value)} required autoComplete="current-password" placeholder="Tu contraseña actual" className="campo w-full" aria-label="Contraseña actual" />}
       <input type="password" value={clave} onChange={(e) => setClave(e.target.value)} minLength={8} required autoComplete="new-password" placeholder="8 letras o más" className="campo w-full" aria-label="Contraseña nueva" />
-      <button type="submit" disabled={ocupado || clave.length < 8} className="boton w-full">{ocupado ? "Guardando…" : "Guardar contraseña"}</button>
+      <button type="submit" disabled={ocupado || clave.length < 8 || (tieneContrasena && !actual)} className="boton w-full">{ocupado ? "Guardando…" : "Guardar contraseña"}</button>
       {msj.ok && <p role="status" className="mensaje mensaje-exito">✅ {msj.ok}</p>}
       {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
     </form>

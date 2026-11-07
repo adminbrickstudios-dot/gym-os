@@ -57,6 +57,7 @@ try {
     await f.locator('input[name="apellido"]').fill(`Online${s}`);
     await f.locator('input[name="dni"]').fill(dni);
     await f.locator('input[name="telefono"]').fill(tel);
+    await f.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
   };
   await llenar(form, DNI1, TEL1);
   await form.locator('button[type="submit"]').click();
@@ -91,7 +92,7 @@ try {
   await llenar(f3, DNI2, TEL2);
   await f3.locator('input[name="nombre"]').fill("Bruno");
   await f3.locator('input[name="acepto"]').check();
-  await f3.locator('label:has-text("En el gimnasio")').click();
+  await f3.locator('label:has(input[value="mostrador"])').click();
   await f3.locator('button[type="submit"]').click();
   await v2.locator('[data-alta-lista="mostrador"]').waitFor({ timeout: 30000 });
   chequear(/Pasá por recepción/.test(await v2.locator('[data-alta-lista="mostrador"]').innerText()), "en el mostrador: “Pasá por recepción y pagá tu plan”", "no dice que pague en recepción");

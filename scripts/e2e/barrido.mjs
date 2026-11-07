@@ -5,19 +5,19 @@
 //   npm run e2e:barrido            (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, capturar, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
-const RUTAS = ["/panel", "/panel/entrada", "/panel/clases", "/panel/clases/grilla", "/panel/vencen-hoy", "/panel/socios",
+const RUTAS = ["/panel/control", "/panel/gastos", "/panel", "/panel/entrada", "/panel/clases", "/panel/clases/grilla", "/panel/vencen-hoy", "/panel/socios",
   "/panel/socios/nuevo", "/panel/retencion", "/panel/vender", "/panel/caja", "/panel/transferencias", "/panel/planes",
   "/panel/equipo", "/panel/configuracion", "/panel/cuenta", "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/campana", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/tareas", "/panel/documentos", "/panel/eventos", "/panel/cupones", "/panel/grados", "/panel/clases/tv"];
 // Lo que cada rol NO tiene que poder abrir (debe ver "sin permiso", no la pantalla).
 const PROHIBIDO = {
   duena: [],
-  encargado: [],
-  recepcion: ["/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos", "/panel/cupones", "/panel/clases/tv"],
-  profe: ["/panel/entrada", "/panel/vencen-hoy", "/panel/socios", "/panel/socios/nuevo", "/panel/retencion", "/panel/vender",
-          "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/clases/grilla",
-          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones", "/panel/clases/tv"],
+  encargado: ["/panel/gastos"],
+  recepcion: ["/panel/control", "/panel/gastos", "/panel/planes", "/panel/equipo", "/panel/configuracion", "/panel/pagina", "/panel/resumen", "/panel/resultado", "/panel/rutinas", "/panel/equipo/actividad", "/panel/documentos", "/panel/cupones"],   // VD-60 (D34): grilla y TV sí
+  profe: ["/panel/control", "/panel/gastos", "/panel/entrada", "/panel/vencen-hoy", "/panel/socios", "/panel/socios/nuevo", "/panel/retencion", "/panel/vender",
+          "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion",
+          "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones"],
 };
-const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso/i;
+const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso|sección está apagada/i;
 const soloRol = process.argv.find((a) => a.startsWith("--rol="))?.slice(6);
 
 let b = await navegador();

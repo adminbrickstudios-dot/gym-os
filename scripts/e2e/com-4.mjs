@@ -22,7 +22,7 @@ try {
   await form.waitFor({ timeout: 60000 });
   await form.locator("input").first().fill(QUE);
   const ana = await form.locator("select option", { hasText: "Ana" }).first().getAttribute("value");
-  await form.locator("select").selectOption(ana);
+  await form.locator("select").first().selectOption(ana);
   await form.locator('button[type="submit"]').click();
   await form.getByText("Tarea anotada").waitFor({ timeout: 30000 });
   ok("desde la ficha: “📌 Anotar una tarea” para Ana, hoy, sobre el socio");

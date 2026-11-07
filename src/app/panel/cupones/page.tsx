@@ -19,7 +19,7 @@ export default async function PaginaCupones() {
     const esDueno = panel.yo.rol === "dueno";
     return (
       <>
-        <Encabezado emoji="🏷️" titulo="Cupones" volver={{ href: "/panel/planes", texto: "Planes y precios" }}
+        <Encabezado emoji="🏷️" titulo="Cupones" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
           bajada="Un código para una campaña: en Vender se escribe y el descuento se carga solo en lo que corresponde. Cada uno dice cuántos socios trajo." />
         {esDueno && <div className="mb-8"><NuevoCupon planes={planes.filter((p) => p.activo)} /></div>}
         {cupones.length === 0

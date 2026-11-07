@@ -38,8 +38,8 @@ try {
   await r.locator('input[placeholder="$"]').fill("500,50");
   await r.locator('input[placeholder^="Motivo"]').fill("Cambio");
   await r.locator('button:has-text("Anotar")').click();
-  await r.locator('button:has-text("Sale plata")').waitFor({ timeout: 30000 });
-  await r.locator('button:has-text("Sale plata")').click();
+  await r.locator('button:has-text("Sale plata")').first().waitFor({ timeout: 30000 });
+  await r.locator('button:has-text("Sale plata")').first().click();
   await r.locator('input[placeholder="$"]').fill("200");
   await r.locator('input[placeholder^="Motivo"]').fill("Artículos de limpieza");
   await r.locator('button:has-text("Anotar")').click();

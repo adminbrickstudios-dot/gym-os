@@ -4,6 +4,7 @@
 // deja el plan asignado; sin plan, el botón es el de siempre.
 //   npm run e2e:soc-13           (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, pagina, resultado } from "./comun.mjs";
+import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -14,13 +15,13 @@ try {
   await p.goto(`${G}/panel/socios/nuevo`);
   await p.locator('input[name="nombre"]').fill(`Alta${s}`);
   chequear(await p.locator('button:has-text("Dar de alta y cobrar")').count() === 0, "sin plan elegido: solo “Dar de alta”", "aparece cobrar sin plan");
-  const opciones = await p.locator('select[aria-label="Plan"] option').allInnerTexts();
-  await p.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
-  const plan = opciones[1].split(" · ")[0];
+  const plan = await elegirPlan(p, 0);
+  chequear(await p.locator("[data-primer-pago]").count() === 1, "el plan elegido muestra su primer pago", "no hay primer pago");
   await p.locator('button:has-text("Dar de alta y cobrar")').waitFor();
   await capturar(p, "soc13-celu-alta");
   await p.locator('button:has-text("Dar de alta y cobrar")').click();
-  await p.waitForURL(/\/panel\/vender\?socio=.*cuota=1/, { timeout: 30000 });
+  // VD-5b: "Dar de alta y cobrar" abre la hoja Cobrar sobre el alta; después se sigue en Vender con el socio.
+  await irAVender(p, await hojaDeAlta(p));
   await p.getByText(`Cuota ${plan}`).first().waitFor({ timeout: 30000 });
   chequear(await p.getByText(`Alta${s}`).count() > 0, `Vender: con Alta${s} y la “Cuota ${plan}” ya en el carrito`, "no está el socio en Vender");
   const ancho = await p.evaluate(() => document.documentElement.scrollWidth);
@@ -32,7 +33,7 @@ try {
   await entrar(d, "recepcion@ejemplo.invalid");
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill(`Solo${s}`);
-  await d.locator('select[aria-label="Plan"]').selectOption({ index: 1 });
+  await elegirPlan(d, 0);
   await d.locator('button:has-text("Solo dar de alta")').click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 30000 });
   await d.locator("h1").waitFor();

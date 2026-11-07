@@ -2,6 +2,8 @@
 // Pausas (D7): el dueño o el encargado pausan la membresía; la recepción la
 // pide y la aprueban ellos. Los días pagos se devuelven solos (lo hace la base).
 import { useState, useTransition } from "react";
+import { AvisoSalud } from "@/components/ui/AvisoSalud";
+import { detectarSalud } from "@/lib/salud";
 import { anularPausa, darPausa, pedirPausa, resolverPedidoPausa, volvioAntes } from "../acciones";
 
 type Pausa = { id: string; desde: string; vuelve: string; categoria: string; nota: string | null; estado: "programada" | "en_curso" | "terminada" | "anulada" };
@@ -76,7 +78,8 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
               {anulando === x.id && (
                 <div className="flex flex-wrap gap-2">
                   <input className="campo flex-1 basis-48" value={porque} onChange={(e) => setPorque(e.target.value)} placeholder="¿Por qué se anula?" aria-label="Por qué se anula la pausa" />
-                  <button type="button" className="boton" disabled={ocupado || !porque.trim()} onClick={() => correr(() => anularPausa(socioId, x.id, porque), "Pausa anulada.")}>Anular la pausa</button>
+                  <AvisoSalud texto={porque} />
+                  <button type="button" className="boton" disabled={ocupado || !porque.trim() || !!detectarSalud(porque)} onClick={() => correr(() => anularPausa(socioId, x.id, porque), "Pausa anulada.")}>Anular la pausa</button>
                   <button type="button" className="boton texto-suave" onClick={() => setAnulando(null)}>Cancelar</button>
                 </div>
               )}
@@ -100,11 +103,12 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
               </select></label>
           </div>
           <input className="campo" value={nota} onChange={(e) => setNota(e.target.value)} maxLength={300} placeholder="Nota (opcional): a dónde va, cuándo avisó…" aria-label="Nota de la pausa" />
+          <AvisoSalud texto={nota} />
           <p className={`text-sm ${n > quedan ? "text-[var(--rojo)]" : "texto-tenue"}`} data-dias-pausa={n}>
             {n > 0 ? `Son ${n} ${n === 1 ? "día" : "días"}. Le ${quedan === 1 ? "queda" : "quedan"} ${quedan} este año.` : "El día que vuelve tiene que ser después del primero."}
           </p>
           <div className="flex flex-wrap gap-2">
-            <button type="submit" className="boton boton-principal" disabled={ocupado || n <= 0}>
+            <button type="submit" className="boton boton-principal" disabled={ocupado || n <= 0 || !!detectarSalud(nota)}>
               {ocupado ? "Guardando…" : p.puede_dar ? `⏸️ Pausar ${n > 0 ? `${n} días` : ""}` : `📨 Pedir pausa${n > 0 ? ` de ${n} días` : ""}`}
             </button>
             <button type="button" className="boton" onClick={() => { setAbierto(false); setError(null); }}>Cancelar</button>

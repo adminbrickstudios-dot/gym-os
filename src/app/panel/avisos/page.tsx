@@ -40,7 +40,7 @@ export default async function Avisos() {
                   <h2 className="titulo text-2xl flex-1">{GRUPO[k]} <span className="texto-tenue text-lg">{lista.length}</span></h2>
                   <TandaAvisos avisos={lista} etiqueta="Avisar a los que faltan" />
                 </div>
-                <ul className="space-y-2">{lista.map((a) => <FilaAviso key={`${a.clave}-${a.socio_id}-${a.referencia}`} a={a} hora={hora(a.avisado_en)} />)}</ul>
+                <ul className="lista-entra space-y-2">{lista.map((a) => <FilaAviso key={`${a.clave}-${a.socio_id}-${a.referencia}`} a={a} hora={hora(a.avisado_en)} />)}</ul>
               </section>
             ))}
           </div>

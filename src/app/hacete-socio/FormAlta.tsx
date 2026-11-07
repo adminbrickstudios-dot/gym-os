@@ -5,6 +5,7 @@
 import { useActionState, useState } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { unidadPlan, variantesPlan } from "@/lib/landing-textos";
+import { Mensaje } from "@/components/ui/Mensaje";
 import { altaOnline, type ResultadoAlta } from "./acciones";
 import type { DatosAlta } from "./page";
 
@@ -16,6 +17,8 @@ function Copiar({ texto, etiqueta }: { texto: string; etiqueta: string }) {
     </button>
   );
 }
+
+const PASOS: [string, string][] = [["plan", "Tu plan"], ["datos", "Tus datos"], ["reglamento", "Reglamento"], ["pago", "Cómo pagás"]];
 
 export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial: string | null }) {
   const [r, accion, enviando] = useActionState<ResultadoAlta, FormData>(altaOnline, {});
@@ -62,7 +65,11 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
 
   return (
     <form action={accion} className="space-y-8" data-form-alta>
-      <fieldset className="space-y-3">
+      {/* VD-61: cuatro pasos cortos, cada uno con su nombre; tocar uno lleva a ese paso. */}
+      <nav aria-label="Pasos para hacerte socio" className="flex flex-wrap gap-2" data-pasos-alta>
+        {PASOS.map(([id, t], i) => <a key={id} href={"#paso-" + id} className="pildora !min-h-11 inline-flex items-center">{i + 1}. {t}</a>)}
+      </nav>
+      <fieldset id="paso-plan" className="space-y-3 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">1. Tu plan</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">
           {planes.map((p) => (
@@ -77,17 +84,17 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         </div>
       </fieldset>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
+      <fieldset id="paso-datos" className="grid gap-4 sm:grid-cols-2 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">2. Tus datos</legend>
         <label className="block space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required maxLength={80} autoComplete="given-name" className="campo" defaultValue={v("nombre")} /></label>
         <label className="block space-y-1"><span className="etiqueta">Apellido</span><input name="apellido" required maxLength={80} autoComplete="family-name" className="campo" defaultValue={v("apellido")} /></label>
         <label className="block space-y-1"><span className="etiqueta">DNI</span><input name="dni" required inputMode="numeric" className="campo" defaultValue={v("dni")} /><span className="text-sm texto-tenue">Solo números</span></label>
         <label className="block space-y-1"><span className="etiqueta">Celular</span><input name="telefono" required type="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={v("telefono")} /><span className="text-sm texto-tenue">Con él entrás a la app</span></label>
         <label className="block space-y-1"><span className="etiqueta">Mail <span className="texto-tenue font-normal">(opcional)</span></span><input name="email" type="email" autoComplete="email" className="campo" defaultValue={v("email")} /></label>
-        <label className="block space-y-1"><span className="etiqueta">Fecha de nacimiento <span className="texto-tenue font-normal">(opcional)</span></span><input name="fecha_nacimiento" type="date" className="campo" defaultValue={v("fecha_nacimiento")} /><span className="text-sm texto-tenue">Para saludarte en tu cumpleaños</span></label>
+        <label className="block space-y-1"><span className="etiqueta">Fecha de nacimiento</span><input name="fecha_nacimiento" type="date" required className="campo" defaultValue={v("fecha_nacimiento")} /><span className="text-sm texto-tenue">Si tenés menos de 18, el alta la hace un adulto en el gimnasio</span></label>
       </fieldset>
 
-      <fieldset className="space-y-3">
+      <fieldset id="paso-reglamento" className="space-y-3 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">3. Reglamento</legend>
         <div className="tarjeta p-5 max-h-64 overflow-auto whitespace-pre-line texto-suave" data-reglamento>{datos.reglamento!.texto}</div>
         <input type="hidden" name="version" value={datos.reglamento!.version} />
@@ -95,7 +102,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
           <span>Leí y acepto el reglamento de {datos.marca.nombre}.</span></label>
       </fieldset>
 
-      <fieldset className="space-y-3">
+      <fieldset id="paso-pago" className="space-y-3 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">4. Cómo pagás</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Cómo pagás">
           {datos.transferencia && (
@@ -114,7 +121,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
       </fieldset>
 
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      {r.error && <p role="alert" className="mensaje mensaje-error">⚠️ {r.error}</p>}
+      {r.error && <Mensaje tipo="error">{r.error}</Mensaje>}
       <button type="submit" disabled={enviando || !plan} className="boton boton-principal text-lg w-full sm:w-auto px-10">
         {enviando ? "Anotándote…" : plan ? "💪 Hacerme socio" : "Elegí un plan"}
       </button>

@@ -1,0 +1,124 @@
+"use client";
+// VD-4 · Los avisos de vidrio de la puerta, en cualquier pantalla del panel (docs/v2/01 §5).
+// "✅ Juan Pérez entró por QR · al día hasta 30/11" se va solo; "⛔ Ana Gómez intentó entrar: vencida" se queda
+// hasta que se toca la ✕, con el botón Cobrar. Tocar el aviso abre el veredicto en la ventana de Entrada.
+// Los datos vienen del "oído" compartido (entradas-vivo.ts): un solo pedido cada 4 s para todo el panel.
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { AlertaViva, EntradaViva } from "@/app/panel/entrada/ventana-acciones";
+import type { ResultadoSocio } from "@/app/panel/acciones";
+import { colorVar } from "./Estado";
+import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
+import { escucharEntradas } from "./entradas-vivo";
+
+/** La ventana de Entrada escucha este evento para abrir el veredicto de un socio (detail: ResultadoSocio). */
+export const EVENTO_ABRIR_SOCIO = "gymos:abrir-entrada-socio";
+
+const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con QR", qr_pared: "por QR", kiosco: "en la tablet", nfc: "con el llavero", molinete: "por el molinete" };
+const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
+const MAX_VISIBLES = 4;
+const VERDE_MS = 6000;
+const AMARILLO_MS = 12000;
+
+type Aviso = {
+  id: string; color: "verde" | "amarillo" | "rojo"; emoji: string; texto: string;
+  socioId: string; nombre: string; numero: number | null; cobrar: boolean; puede: boolean; textoSocio: string; colorSocio: string;
+};
+
+function deEntrada(x: EntradaViva): Aviso {
+  const quien = x.socio;
+  const rechazado = x.resultado === "rechazado";
+  const color = rechazado || x.color === "rojo" ? "rojo" : x.resultado === "forzado" || x.color === "amarillo" || x.color === "naranja" ? "amarillo" : "verde";
+  const via = VIA[x.via_acceso] ?? "";
+  const texto = rechazado ? `${quien} intentó entrar${x.via_acceso === "recepcion" ? "" : ` ${via}`}: ${minuscula(x.texto)}`
+    : x.resultado === "forzado" ? `${quien} entró ${via} (lo dejaron pasar): ${minuscula(x.texto)}`
+    : `${quien} entró ${via}${x.texto ? ` · ${x.texto}` : ""}`;
+  return {
+    id: x.ingreso_id, color, emoji: color === "rojo" ? "⛔" : color === "amarillo" ? "⚠️" : "✅", texto,
+    socioId: x.socio_id, nombre: x.socio, numero: x.numero, cobrar: x.cobrar, puede: !rechazado && x.resultado !== "forzado", textoSocio: x.texto, colorSocio: x.color,
+  };
+}
+function deAlerta(a: AlertaViva): Aviso {
+  return {
+    id: a.alerta_id, color: "amarillo", emoji: "⚠️",
+    texto: `${a.socio} volvió a entrar por ${VIA_PRESTAMO[a.via_nueva] ?? a.via_nueva} ${a.minutos < 1 ? "hace menos de 1 min" : `a los ${a.minutos} min`} de haber entrado por ${VIA_PRESTAMO[a.via_anterior] ?? a.via_anterior}: ¿es la misma persona?`,
+    socioId: a.socio_id, nombre: a.socio, numero: null, cobrar: false, puede: true, textoSocio: "", colorSocio: "amarillo",
+  };
+}
+const minuscula = (t: string) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
+
+export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: { gimnasioId: string; sedeId: string; puedeCobrar: boolean; conVentana: boolean }) {
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const ruta = usePathname();
+  const router = useRouter();
+  const temporizadores = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+
+  const cerrar = useCallback((id: string) => {
+    const t = temporizadores.current.get(id);
+    if (t) clearTimeout(t);
+    temporizadores.current.delete(id);
+    setAvisos((a) => a.filter((x) => x.id !== id));
+  }, []);
+
+  useEffect(() => {
+    const mapa = temporizadores.current;
+    const quitar = escucharEntradas(gimnasioId, (lote) => {
+      if (!lote.avisar) return;
+      // Lo que anota esta misma recepción ya lo vio en su pantalla: el aviso es para lo que entró por otro lado.
+      const nuevos = [...lote.entradas.filter((x) => x.via_acceso !== "recepcion").map(deEntrada), ...lote.alertas.map(deAlerta)];
+      if (nuevos.length === 0) return;
+      setAvisos((previos) => {
+        let todos = [...previos, ...nuevos.filter((n) => !previos.some((p) => p.id === n.id))];
+        // Si hay de más, se van primero los verdes más viejos; los rojos nunca se pierden solos.
+        while (todos.length > MAX_VISIBLES) {
+          const i = todos.findIndex((x) => x.color === "verde");
+          const j = i >= 0 ? i : todos.findIndex((x) => x.color === "amarillo");
+          if (j < 0) break;
+          const [fuera] = todos.splice(j, 1);
+          const t = mapa.get(fuera.id); if (t) clearTimeout(t); mapa.delete(fuera.id);
+          todos = [...todos];
+        }
+        return todos;
+      });
+      for (const n of nuevos) {
+        if (n.color === "rojo") continue;   // el rojo queda hasta que se toca
+        mapa.set(n.id, setTimeout(() => cerrar(n.id), n.color === "verde" ? VERDE_MS : AMARILLO_MS));
+      }
+    });
+    return () => { quitar(); mapa.forEach((t) => clearTimeout(t)); mapa.clear(); };
+  }, [gimnasioId, cerrar]);
+
+  const abrirVeredicto = (a: Aviso) => {
+    cerrar(a.id);
+    if (conVentana && !ruta.startsWith("/panel/entrada")) {
+      const socio: ResultadoSocio = { socio_id: a.socioId, numero: a.numero, nombre: a.nombre, color: a.colorSocio, texto: a.textoSocio, puede: a.puede, dado_de_baja: false };
+      window.dispatchEvent(new CustomEvent<ResultadoSocio>(EVENTO_ABRIR_SOCIO, { detail: socio }));
+    } else {
+      router.push(`/panel/entrada?socio=${a.socioId}`);
+    }
+  };
+  const cobrar = (a: Aviso) => {
+    cerrar(a.id);
+    if (hayHojaCobrar()) abrirCobrar({ socioId: a.socioId, origen: "otro", sedeId });
+    else router.push(`/panel/vender?socio=${a.socioId}&cuota=1`);
+  };
+
+  if (avisos.length === 0) return null;
+  return (
+    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 top-[4.5rem] sm:top-20 flex flex-col gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
+      {avisos.map((a) => (
+        <div key={a.id} data-aviso-entrada={a.color} data-aviso-socio={a.socioId}
+          className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
+          <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
+            <span className="text-xl leading-6" aria-hidden>{a.emoji}</span>
+            <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
+          </button>
+          <div className="flex flex-col items-end gap-1 flex-none">
+            <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-8 rounded-lg texto-tenue active:opacity-60">✕</button>
+            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm">💵 Cobrar</button>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

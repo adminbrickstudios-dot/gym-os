@@ -19,7 +19,7 @@ export function Campana() {
       className={`relative grid place-items-center size-11 rounded-full border border-[var(--borde)] bg-[var(--tarjeta)] text-xl active:scale-95 transition ${activa ? "ring-2 ring-[var(--acento)]" : ""}`}>
       <span aria-hidden>🔔</span>
       {!!n && (
-        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center text-white" style={{ background: "var(--rojo)" }} aria-hidden>
+        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center text-white" style={{ background: "var(--acento)" }} aria-hidden>
           {n > 99 ? "99+" : n}
         </span>
       )}

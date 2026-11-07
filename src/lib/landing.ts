@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import type { Agenda } from "@/lib/horarios";
 
@@ -40,17 +41,25 @@ export type Seccion =
 
 export type Sede = { nombre: string; direccion: string | null; mapa_url: string | null; telefono: string | null };
 
+/** VD-44: la gente del equipo que el dueño eligió mostrar (sin horarios de trabajo). */
+export type EquipoPublico = { equipo_id: string; nombre: string; rol: string; tiene_foto: boolean; actividades: string[] };
+
 export type LandingPublicada = {
   publicada: true;
   marca: Marca;
-  portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string };
+  portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string;
+    /** VD-62: link directo a un .mp4/.webm que el dueño pegó; se muestra mudo y en bucle, con la foto de fondo. */
+    video_url?: string | null };
   contacto: { whatsapp: string | null; mensaje_whatsapp: string; instagram: string | null; email: string | null };
   mostrar_precios: boolean;
   /** Se puede hacer socio desde la página (0032). */
   altas_online?: boolean;
+  /** VD-25: "+N socios" (si el dueño lo prende; redondeado por la base) y reseñas de Google (si las cargó). */
+  prueba_social?: { socios: number | null; resena: { puntaje: number | string; cantidad: number; link: string | null } | null };
   secciones: Seccion[];
   planes: PlanPublico[];
   sedes: Sede[];
+  equipo_publico?: EquipoPublico[];
 };
 
 /** Sin publicar: la marca y el WhatsApp (0029), para el "Próximamente". */
@@ -58,12 +67,17 @@ export type LandingSinPublicar = { publicada: false; marca: Marca; contacto?: { 
 export type Landing = LandingPublicada | LandingSinPublicar;
 
 /** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
-export async function traerLanding(host: string): Promise<Landing | null> {
+// VD-47: la marca, los planes, las secciones y los horarios casi no cambian: se guardan 60 s por direccion y se
+// invalidan al guardar (etiqueta "landing", ver rpc() en lib/panel/servidor.ts). Es informacion publica, igual
+// para todos: nunca permisos, plata ni socios.
+const landingEnCache = unstable_cache(async (host: string): Promise<Landing | null> => {
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("landing_publica", { p_host: host });
   if (error) throw new Error(`No se pudo leer la página del gimnasio: ${error.message}`);
   return (data as Landing | null) ?? null;
-}
+}, ["landing_publica"], { tags: ["landing"], revalidate: 60 });
+
+export const traerLanding = (host: string): Promise<Landing | null> => landingEnCache(host);
 
 /** Horarios, "abierto ahora" y próximos cierres del gimnasio del host (agenda_publica, sin sesión). */
 export async function traerAgenda(host: string): Promise<Agenda | null> {
@@ -77,7 +91,8 @@ export async function traerAgenda(host: string): Promise<Agenda | null> {
 export { urlMarca } from "@/lib/url-marca";
 
 /** COM-8: un evento suelto (seminario, clase especial) tal como se muestra afuera. */
-export type EventoPublico = { evento_id: string; nombre: string; inicio: string; precio: number; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string };
+export type EventoPublico = { evento_id: string; nombre: string; inicio: string; fechas?: string[]; precio: number; precio_socio?: number | null; descripcion: string | null; cupo: number; para: "todos" | "socios"; quedan: number; zona: string;
+  lugar?: string | null; responsable?: string | null; flyer?: string | null; lista_espera?: boolean };
 
 /** Los eventos que vienen del gimnasio del host (solo con la página publicada). */
 export async function traerEventos(host: string): Promise<EventoPublico[]> {
@@ -90,9 +105,11 @@ export async function traerEventos(host: string): Promise<EventoPublico[]> {
 /** COM-11: los IDs de medición que cargó el dueño (solo con la página publicada; la base los valida). */
 export type Medicion = { pixel_meta?: string | null; google_analytics?: string | null };
 
-export async function traerMedicion(host: string): Promise<Medicion> {
+const medicionEnCache = unstable_cache(async (host: string): Promise<Medicion> => {
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
   if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
   return (data as Medicion) ?? {};
-}
+}, ["medicion_publica"], { tags: ["landing"], revalidate: 60 });
+
+export const traerMedicion = (host: string): Promise<Medicion> => medicionEnCache(host);

@@ -3,15 +3,20 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
+import { RefrescarAlEntrar } from "@/components/panel/RefrescarAlEntrar";
 import { Puerta } from "./Puerta";
 import { SinInternet } from "./SinInternet";
 import { Hoy, type Ingreso } from "./Hoy";
 import type { ResultadoSocio } from "@/app/panel/acciones";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { Invitados } from "./Invitados";
+import { TurnoEntrada } from "./TurnoEntrada";
+import type { MiTurno } from "@/app/panel/caja/tipos";
 import type { Invitado } from "./acciones";
+import { PanelEmergencia } from "./PanelEmergencia";
+import type { EmergenciaHistorial, EstadoEmergencia } from "./emergencia-tipos";
 
 export const metadata: Metadata = { title: "Entrada" };
 
@@ -23,13 +28,20 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const sp = await searchParams;
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
-    const [hoy, formas, invitados] = await Promise.all([
-      rpc<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
-      rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+    const conCaja = !panel.secciones_apagadas.includes("caja");
+    const equipoCompleto = panel.yo.rol !== "recepcion";
+    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias] = await Promise.all([
+      rpcLectura<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
+      rpcLectura<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
+      rpcLectura<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      // VD-9: mi turno de caja (se ofrece abrirlo desde acá). Si algo falla no rompe la Entrada.
+      conCaja ? rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }).catch(() => null) : Promise.resolve(null),
+      // VD-46M: ¿la puerta está en emergencia? Si no se puede leer, el cartel lo vuelve a preguntar solo (no rompe la Entrada).
+      rpcLectura<EstadoEmergencia>("estado_emergencia_puerta", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }).catch(() => null),
+      equipoCompleto ? rpcLectura<EmergenciaHistorial[]>("historial_emergencias_puerta", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 }).catch(() => []) : Promise.resolve([] as EmergenciaHistorial[]),
     ]);
     // ?socio= (al volver de cobrar): se abre su veredicto.
-    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
+    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpcLectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
     const vuelto: ResultadoSocio | null = ficha ? { socio_id: ficha.socio.id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(),
       color: ficha.acceso.color, texto: ficha.acceso.texto, puede: ficha.acceso.puede, dado_de_baja: !!ficha.socio.dado_de_baja_en } : null;
 
@@ -37,12 +49,15 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
       <>
         <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
           accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
+        <RefrescarAlEntrar gimnasioId={panel.gimnasio.id} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">
           <div className="flex flex-col gap-6">
             {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
-            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} />
+            {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} emergenciaInicial={emergencia?.activa ?? null} />
+            {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias} />}
           </div>
           <div>
             <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />

@@ -4,7 +4,17 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { COOKIE_TABLET } from "./cookie";
 
-export type Resultado = { nombre?: string; resultado?: string; repetido?: boolean; color?: string; texto?: string; error?: string };
+export type Resultado = { nombre?: string; resultado?: string; repetido?: boolean; color?: string; texto?: string; error?: string; salida?: boolean; registrada?: boolean };
+
+/** VD-48 · "Me voy": el socio marca la salida con su DNI (o su QR). La base decide: sin entrada abierta contesta "no tenías entrada abierta", sin error. */
+export async function salirEnKiosco(codigo: string): Promise<Resultado> {
+  const token = (await cookies()).get(COOKIE_TABLET)?.value;
+  if (!token) return { error: "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas." };
+  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("kiosco_salir", { p_token: token, p_codigo: codigo });
+  if (error) return { error: error.message };
+  return { ...(data as Resultado), salida: true };
+}
 
 /** La tablet no tiene sesión: la autoriza su token (en una cookie que no lee el navegador). Lo decide la base. */
 export async function entrarEnKiosco(codigo: string): Promise<Resultado> {
@@ -35,6 +45,12 @@ export async function ultimoDeLaTablet(desde: string): Promise<Resultado | null>
 export async function habitualesDeLaTablet(): Promise<{ socio_id: string; nombre: string }[]> {
   const { data, error } = await cliente().rpc("kiosco_habituales", { p_token: await token() });
   return error || !data ? [] : data;
+}
+
+/** VD-46M: ¿la puerta está en emergencia? (la tablet muestra el cartel rojo; lo decide la base con el token de la tablet). */
+export async function emergenciaDeLaTablet(): Promise<{ activa: boolean; vence_en: string | null } | null> {
+  const { data, error } = await cliente().rpc("kiosco_emergencia", { p_token: await token() });
+  return error || !data ? null : (data as { activa: boolean; vence_en: string | null });   // sin respuesta: la tablet deja el cartel como estaba
 }
 
 /** Tocó su nombre: entra con los últimos 3 números del DNI (lo decide la base, igual que con el DNI entero). */

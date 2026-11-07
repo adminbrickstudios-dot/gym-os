@@ -25,8 +25,9 @@ try {
   await sinDesborde(s, "inicio");
   await capturar(s, "app-inicio");
 
-  for (const [que, sel, destino] of [["🔔 Novedades", "[data-campana]", /\/app\/novedades/], ["🧾 Historial", "[data-link-historial]", /\/app\/historial/],
-                                      ["⏸️ Mi membresía", "[data-link-cuenta]", /\/app\/cuenta/]]) {
+  for (const [que, sel, destino] of [["🔔 Novedades", "[data-campana]", /\/app\/novedades/], ["🧾 Historial", "[data-yo-fila=historial]", /\/app\/historial/],
+                                      ["⏸️ Mi membresía", "[data-yo-fila=cuenta]", /\/app\/cuenta/]]) {
+    if (sel.startsWith("[data-yo-fila")) await s.goto(`${G}/app/yo`);
     await s.locator(sel).first().click();
     await s.waitForURL(destino, { timeout: 30000 });
     await s.locator("main h1").waitFor({ timeout: 60000 });

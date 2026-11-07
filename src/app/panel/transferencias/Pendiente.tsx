@@ -2,6 +2,7 @@
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
+import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { aprobar, rechazar, verComprobante } from "./acciones";
 
 export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: string; socio: string; monto: number; descripcion: string | null }; cuando: string }) {
@@ -10,7 +11,7 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
   const [error, setError] = useState<string | null>(null);
   const [hecho, setHecho] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const correr = (f: () => Promise<{ error?: string }>, ok: string) => empezar(async () => { const r = await f(); if (r.error) setError(r.error); else setHecho(ok); });
+  const correr = (f: () => Promise<{ error?: string }>, ok: string) => empezar(async () => { const r = await f(); if (r.error) setError(r.error); else { setHecho(ok); refrescarPendientes(); } });
   // La pestaña se abre en el mismo toque (si se abre después de esperar al servidor, el celular la bloquea) y después se le pone el link.
   const abrir = () => {
     const pestana = window.open("", "_blank");

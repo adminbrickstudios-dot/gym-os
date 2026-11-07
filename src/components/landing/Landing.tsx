@@ -1,11 +1,15 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import type { EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import type { EquipoPublico, EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
 import { urlMarca } from "@/lib/url-marca";
+import { urlFotoProducto } from "@/lib/url-producto";
+import { AnotarseEvento } from "./AnotarseEvento";
 import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { propsMarca } from "@/lib/marca";
 import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
+import { conTextosPorDefecto } from "@/lib/landing-defaults";
 import { FormProbar } from "./FormProbar";
+import { Foto } from "./Foto";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -214,9 +218,8 @@ function Galeria({ s, nombre }: { s: Extract<Seccion, { tipo: "galeria" }>; nomb
     <Bloque id="galeria" tipo={s.tipo} titulo={s.titulo}>
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-3">
         {fotos.map((u, i) => (
-          <li key={u} className={i === 0 ? "col-span-2 row-span-2" : ""}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={u} alt={`Foto ${i + 1} de ${nombre}`} loading="lazy" className="w-full h-full aspect-square object-cover rounded-[var(--radio)]" />
+          <li key={u} className={`relative overflow-hidden rounded-[var(--radio)] aspect-square ${i === 0 ? "col-span-2 row-span-2" : ""}`}>
+            <Foto src={u} alt={`Foto ${i + 1} de ${nombre}`} sizes={i === 0 ? "(min-width: 1024px) 66vw, 100vw" : "(min-width: 1024px) 33vw, 50vw"} />
           </li>
         ))}
       </ul>
@@ -224,19 +227,23 @@ function Galeria({ s, nombre }: { s: Extract<Seccion, { tipo: "galeria" }>; nomb
   );
 }
 
-function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
-  const personas = s.contenido.personas ?? [];
+// VD-44: además de las personas que escribe el dueño en el editor, las del equipo real que él tildó
+// (foto servida por /foto-equipo, que la base autoriza; con las clases que da).
+function Equipo({ s, reales }: { s: Extract<Seccion, { tipo: "equipo" }>; reales: EquipoPublico[] }) {
+  const manuales = (s.contenido.personas ?? []).map((p) => ({ nombre: p.nombre, rol: p.rol, foto: urlMarca(p.foto), real: false, detalle: null as string | null }));
+  const delEquipo = reales.map((p) => ({ nombre: p.nombre, rol: p.rol, foto: p.tiene_foto ? `/foto-equipo/${p.equipo_id}` : null, real: true,
+    detalle: p.actividades.length ? p.actividades.join(" · ") : null }));
+  const personas = [...manuales, ...delEquipo];
   if (!personas.length) return null;
   return (
     <Bloque id="equipo" tipo={s.tipo} titulo={s.titulo}>
-      <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4" data-equipo-publico>
         {personas.map((p, i) => {
-          const foto = urlMarca(p.foto);
+          const foto = p.foto;
           return (
-            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6">
+            <li key={`${i}-${p.nombre}`} className="tarjeta p-5 sm:p-6" {...(p.real ? { "data-persona-equipo": p.nombre } : {})}>
               {foto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={foto} alt={p.nombre} className="size-16 rounded-2xl object-cover" />
+                <span className="relative block size-16 rounded-2xl overflow-hidden"><Foto src={foto} alt={p.nombre} sizes="64px" /></span>
               ) : (
                 <span aria-hidden className="size-16 rounded-2xl grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">
                   {iniciales(p.nombre)}
@@ -244,6 +251,7 @@ function Equipo({ s }: { s: Extract<Seccion, { tipo: "equipo" }> }) {
               )}
               <p className="titulo text-xl mt-5">{p.nombre}</p>
               {p.rol && <p className="texto-suave text-[15px]">{p.rol}</p>}
+              {p.detalle && <p className="texto-tenue text-sm mt-1">{p.detalle}</p>}
             </li>
           );
         })}
@@ -300,7 +308,7 @@ function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPu
     case "planes": return <Planes s={s} landing={landing} />;
     case "horarios": return <Horarios s={s} agenda={agenda} />;
     case "galeria": return <Galeria s={s} nombre={landing.marca.nombre} />;
-    case "equipo": return <Equipo s={s} />;
+    case "equipo": return <Equipo s={s} reales={landing.equipo_publico ?? []} />;
     case "preguntas": return <Preguntas s={s} />;
     case "ubicacion": return <Ubicacion s={s} sedes={landing.sedes} />;
     case "probar": return (
@@ -328,16 +336,25 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
         </h2>
         <ul className="grid sm:grid-cols-2 gap-4">
           {eventos.map((e) => (
-            <li key={e.evento_id} className="tarjeta p-6 space-y-2">
+            <li key={e.evento_id} className="tarjeta p-6 space-y-2" data-evento-pagina={e.nombre}>
+              {e.flyer && urlFotoProducto(e.flyer) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} className="w-full aspect-[4/3] rounded-[var(--radio)] object-cover" loading="lazy" decoding="async" />
+              )}
               <p className="titulo text-2xl">{e.nombre}</p>
-              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}</p>
+              <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas && e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>
+              {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `📍 ${e.lugar}`, e.responsable && `👤 ${e.responsable}`].filter(Boolean).join(" · ")}</p>}
               {e.descripcion && <p>{e.descripcion}</p>}
               <p className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="numero text-3xl">{Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"}</span>
+                {e.precio_socio != null && Number(e.precio) > 0 && Number(e.precio_socio) < Number(e.precio) && <span className="pildora pildora-verde">Socios {formatearPesos(e.precio_socio)}</span>}
                 <span className={`pildora ${e.quedan === 0 ? "pildora-rojo" : ""}`}>{e.quedan === 0 ? "Sin lugares" : `Quedan ${e.quedan} ${e.quedan === 1 ? "lugar" : "lugares"}`}</span>
                 {e.para === "socios" && <span className="pildora">Para socios</span>}
               </p>
-              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Quiero anotarme</a>}
+              {e.para === "todos"
+                ? <AnotarseEvento eventoId={e.evento_id} lleno={e.quedan === 0} conEspera={e.lista_espera !== false} />
+                : <p className="texto-suave">Anotate desde la app del gimnasio.</p>}
+              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Consultar por WhatsApp</a>}
             </li>
           ))}
         </ul>
@@ -346,8 +363,68 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
   );
 }
 
-export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
+/** VD-25: lo primero que se ve después del título: abierto ahora, reseñas y socios. Solo lo que el dueño prendió. */
+function Senales({ landing, ahora }: { landing: LandingPublicada; ahora: Agenda["sedes"][number] | null }) {
+  const ps = landing.prueba_social;
+  const resena = ps?.resena ?? null;
+  const socios = ps?.socios ?? null;
+  const estado = ahora?.texto ? ahora : null;
+  if (!estado && !resena && !socios) return null;
+  const puntaje = resena ? Number(resena.puntaje).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : "";
+  const contenidoResena = resena && (
+    <>
+      <span aria-hidden className="text-[#f5b50a]">★</span>
+      <span className="numero">{puntaje}</span>
+      <span>· {resena.cantidad.toLocaleString("es-AR")} {resena.cantidad === 1 ? "reseña" : "reseñas"} en Google</span>
+    </>
+  );
+  return (
+    <ul className="mt-5 flex flex-wrap items-center gap-2" data-prueba-social>
+      {estado && <li><EstadoAhora texto={estado.texto} abierto={estado.abierto} /></li>}
+      {resena && (
+        <li>
+          {resena.link
+            ? <a href={resena.link} target="_blank" rel="noopener noreferrer" className="pildora" data-resenas>{contenidoResena}</a>
+            : <span className="pildora" data-resenas>{contenidoResena}</span>}
+        </li>
+      )}
+      {socios && <li><span className="pildora" data-socios>👥 +{socios.toLocaleString("es-AR")} socios</span></li>}
+    </ul>
+  );
+}
+
+/** VD-25: tres pasos para el que nunca vino. Salen de lo que la página tiene prendido (probar, planes, altas). */
+function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boolean; altas: boolean }) {
+  const pasos = [
+    probar && { href: "#probar", titulo: "Probá una clase", texto: "Dejás tu WhatsApp y te escribimos para arreglar día y hora." },
+    planes && { href: "#planes", titulo: "Elegí tu plan", texto: "Mirá los precios y quedate con el que te cierra." },
+    altas && { href: "/hacete-socio", titulo: "Hacete socio", texto: "Te anotás desde el celular y empezás." },
+  ].filter(Boolean) as { href: string; titulo: string; texto: string }[];
+  if (pasos.length < 2) return null;
+  return (
+    <section aria-labelledby="empezar" className="px-4 pt-4 pb-2" data-como-empezar>
+      <div className="mx-auto max-w-5xl">
+        <h2 id="empezar" className="titulo text-2xl sm:text-3xl mb-4">🚀 ¿Primera vez? Empezá acá</h2>
+        <ol className="grid gap-3 sm:grid-cols-3">
+          {pasos.map((p, i) => (
+            <li key={p.titulo}>
+              <a href={p.href} className="tarjeta p-5 flex gap-4 items-start h-full">
+                <span aria-hidden className="numero text-3xl" style={{ color: "var(--acento)" }}>{i + 1}</span>
+                <span><span className="titulo text-xl block">{p.titulo}</span><span className="texto-suave text-[15px] leading-snug">{p.texto}</span></span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
+  // VD-62: lo que el dueño no cargó se completa con un texto sensato según el tipo de gimnasio (nunca un hueco).
+  const landing = conTextosPorDefecto(landingCargada);
   const { marca, portada, contacto } = landing;
+  const video = portada.video_url ?? null;
   const whatsapp = linkWhatsapp(contacto.whatsapp, contacto.mensaje_whatsapp);
   const hayPlanes = landing.planes.length > 0 && landing.secciones.some((s) => s.tipo === "planes");
   const hayProbar = landing.secciones.some((s) => s.tipo === "probar");
@@ -373,20 +450,24 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       </header>
       <AvisoCierres agenda={agenda} />
 
-      {foto ? (
+      {foto || video ? (
         <section className="px-4 pt-4 pb-6">
-          <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={foto} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end bg-neutral-900" data-portada={video ? "video" : "foto"}>
+            {foto && <Foto src={foto} alt="" prioridad sizes="(min-width: 1024px) 1024px, 100vw" />}
+            {/* Video mudo y en bucle sobre la foto (que hace de póster). Con "reducir movimiento" no se muestra: queda la foto. */}
+            {video && (
+              <video className="video-portada absolute inset-0 w-full h-full object-cover" src={video} poster={foto ?? undefined}
+                autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="relative p-6 sm:p-12 text-white">
+            <div className="relative p-6 sm:p-12 text-white aparecer">
               <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
-              {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/80 max-w-[36ch]">{portada.bajada}</p>}
-              {ahora?.texto && <p className="mt-5"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
+              {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
+              <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
-                {accion && <BotonPrincipal href={accion} className={`px-8 ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+                {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis>🎁 Probá gratis</a>}
+                {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
                 {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
-                {hayProbar && <a href="#probar" className="boton text-lg px-8 bg-white/15 text-white border-white/30">🙋 Probá una clase</a>}
               </div>
             </div>
           </div>
@@ -396,12 +477,12 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
           <div className="mx-auto max-w-5xl">
             <h1 className="titular text-[clamp(3.5rem,15vw,8.5rem)] max-w-[11ch]">{portada.titulo}</h1>
             {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
-            {ahora?.texto && <p className="mt-6"><EstadoAhora texto={ahora.texto} abierto={ahora.abierto} /></p>}
+            <Senales landing={landing} ahora={ahora} />
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
-              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
+              {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis>🎁 Probá gratis</a>}
+              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
               {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
-              {hayProbar && <a href="#probar" className="boton text-lg px-8 w-full sm:w-auto">🙋 Probá una clase</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>
@@ -409,7 +490,12 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
       )}
 
       <main>
+        <ComoEmpezar probar={hayProbar} planes={hayPlanes} altas={!!landing.altas_online} />
         {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
+        {/* VD-44: si el dueño no armó la sección Equipo pero mostró a su gente, aparece igual. */}
+        {(landing.equipo_publico?.length ?? 0) > 0 && !landing.secciones.some((s) => s.tipo === "equipo") && (
+          <Equipo s={{ tipo: "equipo", titulo: "Nuestro equipo", contenido: {} }} reales={landing.equipo_publico ?? []} />
+        )}
         {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
 
@@ -425,6 +511,7 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
               <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton">📷 Instagram</a>
             )}
             {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
+            {landing.prueba_social?.resena?.link && <a href={landing.prueba_social.resena.link} target="_blank" rel="noopener noreferrer" className="boton">⭐ Dejanos tu reseña</a>}
           </div>
         </div>
         <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
@@ -433,6 +520,11 @@ export function LandingGimnasio({ landing, agenda = null, eventos = [] }: { land
         </div>
       </footer>
 
+      {whatsapp && (
+        <a href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Escribinos por WhatsApp" data-whatsapp-flotante
+          className="hidden sm:grid fixed right-6 bottom-6 z-30 size-14 place-items-center rounded-full text-2xl shadow-lg"
+          style={{ background: "var(--acento)", color: "var(--acento-texto)" }}>💬</a>
+      )}
       {whatsapp && (
         <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-[color-mix(in_oklab,var(--fondo)_88%,transparent)] backdrop-blur-md">
           <BotonPrincipal href={whatsapp} className="w-full">💬 {portada.boton_texto}</BotonPrincipal>

@@ -3,7 +3,18 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco, type Abono } from "@/components/panel/Marco";
+import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { redirect } from "next/navigation";
+import { AyudaBrik } from "@/components/panel/AyudaBrik";
+import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
+import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
+import { BannerSoporte } from "@/components/panel/BannerSoporte";
+
+type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
+import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
+import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
+import { rutaDisponible } from "@/lib/panel/secciones";
+import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
@@ -45,6 +56,43 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
   // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
-  const abono = await rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
-  return <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono}>{children}</Marco>;
+  const [abono, ayudas] = await Promise.all([
+    rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
+    ayudasDeUsuario(),   // VD-31: qué globos de ayuda ya vio esta persona (si falla, no hay globos: nunca bloquea)
+  ]);
+  // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
+  let entrada: DatosEntrada | null = null;
+  if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
+    try {
+      const { sede, puedeCambiar } = sedeActiva(panel);
+      const [config, formas] = await Promise.all([
+        rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO),
+        rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]),
+      ]);
+      entrada = {
+        sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc"),
+        // VD-1b: el dueño con varias sedes elige en cuál anota; VD-6: el alta rápida cobra solo si Vender está disponible.
+        sedes: puedeCambiar ? panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre })) : [],
+        puedeCobrar: rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas),
+      };
+    } catch { entrada = null; }   // sin sede activa: la pantalla de Entrada lo dice con todas las letras
+  }
+  // VD-40: si es Soporte BRIK, marco de color y cartel con el motivo; vencida la sesión (60 min), vuelve al super admin.
+  let soporte: EstadoSoporte | null = null;
+  if (panel.yo.nombre === "Soporte BRIK") {
+    soporte = await rpc<EstadoSoporte>("estado_soporte", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+    if (soporte && !soporte.activo) redirect(`/admin?error=${encodeURIComponent("Terminó tu entrada de soporte (dura 60 minutos). Para volver a entrar, escribí el motivo otra vez.")}`);
+  }
+  const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
+  return (
+    <>
+      <RegistrarSesion />
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+        {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
+        {children}
+        {pideAyuda && <AyudaBrik />}
+      </Marco>
+    </>
+  );
 }

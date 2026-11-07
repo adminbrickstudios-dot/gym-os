@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { Vacio } from "@/components/ui/Vacio";
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Turnos de caja" };
 type Turno = {
   turno_id: string; caja: string; abierto_en: string; cerrado_en: string | null; abierto_por: string | null; cerrado_por: string | null;
   monto_inicial: number; efectivo: number; ingresos: number; retiros: number; esperado: number; contado: number | null; diferencia: number | null;
-  otros_medios: Record<string, number>; nota: string | null; ventas: number; anuladas: number;
+  otros_medios: Record<string, number>; nota: string | null; ventas: number; anuladas: number; estado?: string;
   movimientos: { tipo: "ingreso" | "retiro"; monto: number; motivo: string; en: string; por: string | null }[];
 };
 const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago", cuenta_corriente: "📒 A cuenta" };
@@ -32,7 +33,7 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }}
+        <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
           bajada="Quién abrió y cerró, cuánto tenía que haber, cuánto se contó y qué entró o salió del cajón." />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/historial" />}
         {turnos.length === 0 ? <Vacio emoji="🗂️" titulo="Todavía no hubo turnos">Cuando se abra y se cierre la caja, cada turno queda acá.</Vacio> : (
@@ -44,7 +45,9 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
                 <li key={t.turno_id} className="tarjeta p-5" data-turno={t.turno_id} data-diferencia={t.diferencia ?? ""}>
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <p className="font-semibold text-lg flex-1 min-w-0">{t.caja} · {cuando(t.abierto_en)}{t.cerrado_en ? ` a ${hora(t.cerrado_en)}` : ""}</p>
-                    {t.cerrado_en
+                    {t.estado === "sin_contar" || t.estado === "sin_contar_dejada"
+                      ? <span className="pildora pildora-amarillo" data-sin-contar>🧾 Sin contar</span>
+                      : t.cerrado_en
                       ? <span className={`pildora ${dif === 0 ? "pildora-verde" : dif > 0 ? "pildora-amarillo" : "pildora-rojo"}`}>{dif === 0 ? "✅ Justa" : dif > 0 ? `Sobraron ${formatearPesos(dif)}` : `Faltaron ${formatearPesos(-dif)}`}</span>
                       : <span className="pildora pildora-azul">🔓 Abierta</span>}
                   </div>
@@ -65,6 +68,7 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
                     </ul>
                   )}
                   {t.nota && <p className="text-sm mt-2">📝 {t.nota}</p>}
+                  <Link className="boton boton-chico mt-3 mr-2" href={`/panel/caja/reporte?turno=${t.turno_id}`}>📋 Reporte</Link>
                   {t.cerrado_en && (
                     <a className="boton boton-chico mt-3" target="_blank" rel="noopener noreferrer" data-compartir-cierre
                       href={linkCompartir(textoCierre({ ...t, abrio: t.abierto_por, cerro: t.cerrado_por, cuando: `${cuando(t.abierto_en)} a ${hora(t.cerrado_en)}` }))}>📲 Compartir</a>

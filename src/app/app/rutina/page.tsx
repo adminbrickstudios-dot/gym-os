@@ -4,10 +4,12 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Anotar } from "./Anotar";
+import { MarcarDia } from "./MarcarDia";
 import { MarcasProgreso, type Progreso } from "@/components/rutinas/Progreso";
 
 export const metadata: Metadata = { title: "Mi rutina" };
-export type MiRutina = { nombre: string; descripcion: string | null;
+export type MiRutina = { nombre: string; descripcion: string | null; cambiar_en?: string | null;
+  hoy?: { dia: number; hecho: boolean }; hechos?: { dia: number; fecha: string }[];
   items: { dia: number; ejercicio_id: string; ejercicio: string; video_url: string | null; series: number; repeticiones: string; nota: string | null;
     ultimo: { peso: number | null; repeticiones: number | null; momento: string } | null }[] };
 
@@ -26,15 +28,26 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     if (!r) return (<><Link href={`/app${q()}`} className="texto-suave">← Volver</Link><h1 className="titular text-5xl mt-4">Mi rutina</h1>
       <p className="texto-suave text-lg mt-4">Todavía no tenés una rutina. Pedísela a tu profe.</p></>);
     const dias = [...new Set(r.items.map((x) => x.dia))].sort();
-    const dia = dias.includes(Number(sp.dia)) ? Number(sp.dia) : dias[0];
+    // VD-20: la de hoy va primero (la calcula la base: el día que sigue al último que hizo).
+    const diaHoy = r.hoy && dias.includes(r.hoy.dia) ? r.hoy.dia : dias[0];
+    const dia = dias.includes(Number(sp.dia)) ? Number(sp.dia) : diaHoy;
+    const esHoy = dia === diaHoy;
+    const hechosRecientes = new Set((r.hechos ?? []).map((h) => h.dia));
+    const cambiarEn = r.cambiar_en ? `${r.cambiar_en.slice(8, 10)}/${r.cambiar_en.slice(5, 7)}` : null;
     const fecha = (m: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: yo.zona! }).format(new Date(m));
     return (
       <div className="space-y-6">
         <Link href={`/app${q()}`} className="texto-suave">← Volver</Link>
         <div><h1 className="titular text-5xl">💪 {r.nombre}</h1>{r.descripcion && <p className="texto-suave text-lg mt-2">{r.descripcion}</p>}</div>
+        {cambiarEn && <p className="texto-suave" data-cambiar-en>🔄 Tu profe te la cambia el {cambiarEn}.</p>}
+        <div className="tarjeta p-4 space-y-3" data-rutina-hoy={diaHoy}>
+          <p className="titulo text-2xl">{esHoy ? `Hoy te toca el Día ${diaHoy}` : `Hoy te toca el Día ${diaHoy} (estás viendo el Día ${dia})`}</p>
+          {!esHoy && <Link href={`/app/rutina${q()}`} className="boton">Ver el de hoy</Link>}
+          <MarcarDia socioId={s.socio_id} dia={diaHoy} hecho={!!r.hoy?.hecho} />
+        </div>
         {dias.length > 1 && (
           <nav className="flex gap-2 overflow-x-auto -mx-4 px-4" aria-label="Día de la rutina">
-            {dias.map((d) => <Link key={d} href={`/app/rutina${q(String(d))}`} className={`boton !min-h-11 whitespace-nowrap ${d === dia ? "!border-[var(--acento)]" : "opacity-70"}`}>Día {d}</Link>)}
+            {dias.map((d) => <Link key={d} href={`/app/rutina${q(d === diaHoy ? "" : String(d))}`} className={`boton !min-h-11 whitespace-nowrap ${d === dia ? "!border-[var(--acento)]" : "opacity-70"}`}>Día {d}{d === diaHoy ? " · hoy" : ""}{hechosRecientes.has(d) ? " ✓" : ""}</Link>)}
           </nav>
         )}
         <ul className="space-y-2" data-rutina-dia={dia}>{r.items.filter((x) => x.dia === dia).map((x) => (

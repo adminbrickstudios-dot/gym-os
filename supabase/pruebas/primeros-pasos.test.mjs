@@ -23,7 +23,7 @@ const hecho = (p, clave) => p.pasos.find((x) => x.clave === clave).hecho;
 test("el progreso sale de los datos: cada dato que se carga marca su paso", async () => {
   await t.comoUsuario(u.dueno, async () => {
     const p = await pasos();
-    assert.equal(p.total, 8);
+    assert.equal(p.total, 9);
     // Los casos testigo ya traen planes con precio, socios y equipo (el encargado).
     assert.equal(hecho(p, "planes"), true);
     assert.equal(hecho(p, "socios"), true);

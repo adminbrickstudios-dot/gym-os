@@ -9,7 +9,8 @@ type Opcion = { id: string; nombre: string };
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-export function Grilla({ actividades, horarios, sedes, profes, hoy }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[]; hoy: string }) {
+/** `soloLectura` (VD-60, D34): la recepción y el profe ven la grilla pero no la arman (la base solo deja escribir al dueño y al encargado). */
+export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura = false }: { actividades: Actividad[]; horarios: Horario[]; sedes: Opcion[]; profes: Opcion[]; hoy: string; soloLectura?: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [nueva, setNueva] = useState({ nombre: "", emoji: "" });
@@ -30,7 +31,11 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy }: { activida
         <h2 className="titulo text-3xl mb-4">💪 Actividades</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {actividades.map((a) => (
-            <button key={a.actividad_id} type="button" onClick={() => setActEdit({ id: a.actividad_id, nombre: a.nombre, emoji: a.emoji ?? "", activa: a.activa })}
+            soloLectura ? (
+              <span key={a.actividad_id} className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`}>
+                {a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
+              </span>
+            ) : <button key={a.actividad_id} type="button" onClick={() => setActEdit({ id: a.actividad_id, nombre: a.nombre, emoji: a.emoji ?? "", activa: a.activa })}
               className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`} aria-label={`Editar ${a.nombre}`}>
               {a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
             </button>
@@ -71,11 +76,11 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy }: { activida
                       <span className="block font-semibold truncate">{x.actividad}</span>
                       <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}{x.vigente_hasta ? ` · hasta el ${x.vigente_hasta.slice(8, 10)}/${x.vigente_hasta.slice(5, 7)}` : ""}{x.vigente_desde > hoy ? ` · desde el ${x.vigente_desde.slice(8, 10)}/${x.vigente_desde.slice(5, 7)}` : ""}</span>
                     </span>
-                    {editando?.id !== x.horario_id && sacando !== x.horario_id && (
+                    {!soloLectura && editando?.id !== x.horario_id && sacando !== x.horario_id && (
                       <button type="button" className="boton boton-chico" onClick={() => setEditando({ id: x.horario_id, hora: x.hora_inicio.slice(0, 5), duracion: x.duracion_min, cupo: x.cupo ? String(x.cupo) : "", profe: x.profe_id ?? "" })}
                         aria-label={`Editar ${x.actividad} de los ${d.toLowerCase()} ${x.hora_inicio.slice(0, 5)}`}>Editar</button>
                     )}
-                    {editando?.id === x.horario_id ? (
+                    {soloLectura ? null : editando?.id === x.horario_id ? (
                       <form className="basis-full grid grid-cols-2 sm:grid-cols-5 gap-2 items-end" data-editar-horario onSubmit={(e) => {
                         e.preventDefault();
                         correr(() => editarHorario(x.horario_id, { hora: editando.hora, duracion: editando.duracion, cupo: editando.cupo ? Number(editando.cupo) : null, profe: editando.profe || null }), () => setEditando(null));
@@ -105,7 +110,7 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy }: { activida
         })}
         {horarios.length === 0 && <p className="texto-suave mb-4">La grilla está vacía.</p>}
 
-        {activas.length > 0 && (
+        {!soloLectura && activas.length > 0 && (
           <form className="tarjeta p-5 mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3" onSubmit={(e) => {
             e.preventDefault();
             correr(() => agregarHorario({ sede: h.sede, actividad: h.actividad, dia: h.dia, hora: h.hora, duracion: h.duracion, cupo: h.cupo ? Number(h.cupo) : null, profe: h.profe || null }));

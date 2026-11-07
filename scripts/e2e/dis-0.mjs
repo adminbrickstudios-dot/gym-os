@@ -36,7 +36,7 @@ try {
   const p = await pagina(b);
   await entrar(p, "duena@ejemplo.invalid");
   await p.goto(`${GIMNASIO()}/panel`);
-  const numeros = p.locator('section[aria-label="Números de hoy"] a');
+  const numeros = p.locator('section[aria-label="Números de hoy"] a[data-numero]');
   const cuantos = await numeros.count();
   chequear(cuantos === 4, `Inicio: los 4 números se pueden tocar`, `Inicio: ${cuantos} números con link (esperaba 4)`);
   await capturar(p, "dis0-compu-inicio");

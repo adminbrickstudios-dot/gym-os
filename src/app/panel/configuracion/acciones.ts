@@ -1,15 +1,20 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { conflictoDe, versionDe } from "@/lib/panel/version";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { svgSeguro, tipoReal } from "@/lib/imagenes";
+import { achicarFoto } from "@/lib/imagenes-servidor";
 
-export async function guardarConfiguracion(datos: Record<string, unknown>): Promise<{ error?: string }> {
+export async function guardarConfiguracion(datos: Record<string, unknown>, version?: string | null): Promise<{ error?: string; version?: string }> {
   const panel = await contextoPanel();
+  // VD-34: si otra persona guardó la configuración mientras esta estaba abierta, se avisa antes de pisarla.
+  const choque = await conflictoDe(panel.gimnasio.id, "configuracion", panel.gimnasio.id, version);
+  if (choque) return choque;
   try {
     await rpc("guardar_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_datos: datos });
     revalidatePath("/panel", "layout");
-    return {};
+    return { version: (await versionDe(panel.gimnasio.id, "configuracion", panel.gimnasio.id)) ?? undefined };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
@@ -47,12 +52,14 @@ export async function subirImagen(formulario: FormData): Promise<{ error?: strin
   const archivo = formulario.get("archivo");
   if (!TIPOS.includes(tipo) || !(archivo instanceof File)) return { error: "Elegí un archivo." };
   try {
-    const bytes = new Uint8Array(await archivo.arrayBuffer());
-    const mime = tipoReal(bytes);
+    let bytes: Uint8Array = new Uint8Array(await archivo.arrayBuffer());
+    let mime = tipoReal(bytes);
     if (!mime) return { error: `“${archivo.name}” no es una imagen que podamos usar (PNG, JPG, WEBP o SVG).` };
     if (mime === "image/svg+xml" && !svgSeguro(new TextDecoder().decode(bytes))) {
       return { error: "Ese SVG trae código o links adentro y no lo podemos mostrar. Exportalo de nuevo como PNG." };
     }
+    // VD-47X: logos y fotos se guardan a 800 px como mucho y en webp (el ícono y el SVG quedan como vienen).
+    if (mime !== "image/svg+xml" && tipo !== "favicon") { const a = await achicarFoto(bytes, mime); bytes = a.bytes; mime = a.mime; }
     const ruta = await rpc<string>("preparar_imagen_marca", { p_gimnasio_id: panel.gimnasio.id, p_tipo: tipo, p_tipo_mime: mime, p_bytes: bytes.length });
     const { error } = await clienteServicio().storage.from("marcas").upload(ruta, Buffer.from(bytes), { contentType: mime, upsert: false, cacheControl: "31536000" });
     if (error) return { error: `No se pudo subir la imagen: ${error.message}` };
@@ -112,14 +119,41 @@ async function listasDeCierres(gimnasioId: string) {
   return { cierres, agenda };
 }
 
-export async function crearCierre(c: { desde: string; hasta: string; motivo: string; compensa: boolean; sedeId: string | null }): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+/** VD-57: lo que le pasa al vencimiento de los socios si se carga este cierre (lo calcula la base según la regla del gimnasio). */
+export type PrevioCierre = { suma_dias: boolean; dias: number; socios: number };
+export async function previsualizarCierre(c: { desde: string; hasta: string; sedeId: string | null }): Promise<{ error?: string; previo?: PrevioCierre }> {
   const panel = await contextoPanel();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(c.desde) || !/^\d{4}-\d{2}-\d{2}$/.test(c.hasta)) return { error: "Elegí las fechas del cierre." };
   if (c.hasta < c.desde) return { error: "El último día no puede ser antes del primero." };
   try {
+    return { previo: await rpc<PrevioCierre>("previsualizar_cierre", { p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_sede_id: c.sedeId }, { lectura: true }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-57 · La regla del gimnasio: ¿los días cerrados se suman al vencimiento? (la ve el equipo que carga cierres; la cambia solo el dueño). */
+export async function leerReglaCierres(): Promise<{ suma?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { suma: (await rpc<{ suma_dias: boolean }>("config_cierres", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true })).suma_dias };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarReglaCierres(suma: boolean): Promise<{ suma?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ suma_dias: boolean }>("guardar_config_cierres", { p_gimnasio_id: panel.gimnasio.id, p_suma_dias: suma });
+    revalidatePath("/panel/configuracion");
+    return { suma: r.suma_dias };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function crearCierre(c: { desde: string; hasta: string; motivo: string; sedeId: string | null }): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+  const panel = await contextoPanel();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(c.desde) || !/^\d{4}-\d{2}-\d{2}$/.test(c.hasta)) return { error: "Elegí las fechas del cierre." };
+  if (c.hasta < c.desde) return { error: "El último día no puede ser antes del primero." };
+  try {
+    // Si suma o no los días lo decide la regla del gimnasio (la base): el cierre ya no lo elige.
     await rpc("crear_cierre", {
-      p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_motivo: c.motivo,
-      p_compensa: c.compensa, p_sede_id: c.sedeId,
+      p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_motivo: c.motivo, p_sede_id: c.sedeId,
     });
     revalidatePath("/", "layout");
     return await listasDeCierres(panel.gimnasio.id);
@@ -217,6 +251,17 @@ export async function guardarTurnosFijos(prendido: boolean): Promise<{ error?: s
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-23b: la meta de visitas del mes que ve el socio en su Inicio (solo el dueño; la base valida 1 a 31). */
+export async function guardarMetaVisitas(meta: number): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_meta_visitas", { p_gimnasio_id: panel.gimnasio.id, p_meta: meta });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/app");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** REV-2a: suma una sede (la base valida: solo el dueño, nombre único) y devuelve los datos como quedaron. */
 export async function sumarSede(nombre: string): Promise<{ error?: string; datos?: unknown }> {
   const panel = await contextoPanel();
@@ -232,4 +277,33 @@ export async function guardarLinkResena(link: string): Promise<{ error?: string 
   const panel = await contextoPanel();
   try { await rpc("guardar_link_resena", { p_gimnasio_id: panel.gimnasio.id, p_link: link }); revalidatePath("/panel/configuracion"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-51 · La prueba gratis del gimnasio: no / 1 día / 1 clase (la lee el equipo de la puerta; solo el dueño la cambia). */
+export type ModoPrueba = "no" | "dia" | "clase";
+export async function leerPruebaGratis(): Promise<{ modo?: ModoPrueba; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { modo: (await rpc<{ modo: ModoPrueba }>("config_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id })).modo };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarPruebaGratis(modo: ModoPrueba): Promise<{ modo?: ModoPrueba; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ modo: ModoPrueba }>("guardar_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id, p_modo: modo });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/panel", "layout");
+    return { modo: r.modo };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-46G: prende o apaga el plan familiar/corporativo (solo el dueño; arranca apagado). */
+export async function guardarPlanFamiliar(activo: boolean): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_plan_familiar", { p_gimnasio_id: panel.gimnasio.id, p_activo: activo });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/panel/socios");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
 }
