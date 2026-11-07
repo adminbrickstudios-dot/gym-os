@@ -7,7 +7,7 @@ import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, registrarSalida, terminarPausa, veredicto, type ResultadoSalida, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type ResultadoSalida, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
 import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmergencia";
@@ -53,6 +53,10 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   // VD-48: la salida (si el gimnasio la registra): DNI + S o la tecla S con el socio elegido.
   const [salidaModo, setSalidaModo] = useState<RegistrarSalida>("no");
   const [salio, setSalio] = useState<(ResultadoSalida & { nombre: string }) | null>(null);
+  // VD-51: prueba gratis para un DNI que no existe (o que reservó desde la página).
+  const [pruebaModo, setPruebaModo] = useState<"no" | "dia" | "clase">("no");
+  const [prueba, setPrueba] = useState<{ nombre: string; apellido: string; telefono: string; reservada: boolean; error: string | null } | null>(null);
+  useEffect(() => { void modoPrueba().then((r) => { if (r.modo) setPruebaModo(r.modo); }); }, []);
   useEffect(() => { void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); }); }, []);
   const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
@@ -136,6 +140,21 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     setHecho({ ...r.r!, nombre: elegido.nombre, socioId: elegido.socio_id });
     reiniciar();
   });
+  const dniEscrito = texto.replace(/\./g, "").trim();
+  const abrirPrueba = () => empezar(async () => {
+    const r = await pruebaPorDni(dniEscrito);
+    if (r.error || !r.p) { setError(r.error ?? "No se pudo mirar la prueba"); return; }
+    if (r.p.existe && r.p.usada) { setError(`Ya usó su prueba gratis el ${r.p.dia} · Hacete socio.`); return; }
+    setError(null);
+    setPrueba({ nombre: r.p.existe ? r.p.nombre ?? "" : "", apellido: "", telefono: r.p.existe ? r.p.telefono ?? "" : "", reservada: !!r.p.existe, error: null });
+  });
+  const darPrueba = () => empezar(async () => {
+    if (!prueba) return;
+    const x = await darPruebaGratis(sedeId, { dni: dniEscrito, nombre: prueba.nombre, apellido: prueba.apellido, telefono: prueba.telefono });
+    if (x.error || !x.socioId) { setPrueba((p) => (p ? { ...p, error: x.error ?? "No se pudo dar la prueba" } : p)); return; }
+    setPrueba(null);
+    elegir({ socio_id: x.socioId, numero: x.numero ?? null, nombre: x.nombre ?? prueba.nombre, color: "gris", texto: "", puede: false, dado_de_baja: false });
+  });
   const marcarSalida = (socioId: string, nombre: string) => empezar(async () => {
     const r = await registrarSalida(socioId, sedeId);
     if (r.error || !r.r) { setError(r.error ?? "No se pudo marcar la salida"); return; }
@@ -190,7 +209,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     <div className="space-y-5">
       <CartelEmergencia e={emergencia} />
       <input
-        ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); setSalio(null); }}
+        ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); setSalio(null); setPrueba(null); }}
         onKeyDown={(e) => {
           // VD-48: DNI + S marca la salida (solo si el gimnasio la registra).
           if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !e.ctrlKey && !e.metaKey && !e.altKey && /^\d{6,9}$/.test(texto.replace(/\./g, "").trim())) {
@@ -249,7 +268,33 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         </ul>
       )}
       {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
-        <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
+        <div className="space-y-3">
+          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
+          {pruebaModo !== "no" && /^\d{6,9}$/.test(dniEscrito) && !prueba && (
+            <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}>🎁 Dar prueba gratis</button>
+          )}
+        </div>
+      )}
+      {prueba && (
+        <form data-ventana-prueba-form className="tarjeta p-5 space-y-3" onSubmit={(e) => { e.preventDefault(); if (!ocupado && prueba.nombre.trim()) darPrueba(); }}>
+          <p className="titulo text-xl">🎁 Prueba gratis · {dniEscrito}</p>
+          {prueba.reservada && <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada>🙋 Reservó desde la página. Confirmá y lo dejás entrar.</p>}
+          <label className="block space-y-1"><span className="etiqueta">Nombre</span>
+            <input data-prueba-nombre className="campo" value={prueba.nombre} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, nombre: e.target.value, error: null })} /></label>
+          {!prueba.reservada && (
+            <>
+              <label className="block space-y-1"><span className="etiqueta">Apellido <span className="texto-tenue font-normal">(opcional)</span></span>
+                <input className="campo" value={prueba.apellido} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, apellido: e.target.value })} /></label>
+              <label className="block space-y-1"><span className="etiqueta">Celular <span className="texto-tenue font-normal">(opcional)</span></span>
+                <input className="campo" type="tel" inputMode="tel" value={prueba.telefono} placeholder="387 555 1234" autoComplete="off" onChange={(e) => setPrueba({ ...prueba, telefono: e.target.value })} /></label>
+            </>
+          )}
+          {prueba.error && <Mensaje tipo="error">{prueba.error}</Mensaje>}
+          <div className="flex flex-wrap gap-2">
+            <button type="submit" className="boton boton-principal" disabled={ocupado || !prueba.nombre.trim()} data-prueba-dar>🎁 Dejarlo entrar con la prueba</button>
+            <button type="button" className="boton-texto px-3" onClick={() => setPrueba(null)}>Volver</button>
+          </div>
+        </form>
       )}
 
       {elegido && v && (

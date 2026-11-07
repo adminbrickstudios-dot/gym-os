@@ -1,5 +1,5 @@
 // VD-2b (0140): la guía de la Entrada suma el chip "Tiene clase hoy" (reserva confirmada de hoy)
-// y "En prueba" (primera vez con un pase o pack). Momento fijo: sábado 14/11/2026, 19:00.
+// (la prueba gratis "En prueba" se prueba en prueba-gratis.test.mjs). Momento fijo: sábado 14/11/2026, 19:00.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { abrir, HOY } from "./_comun.mjs";
@@ -40,14 +40,10 @@ test("una reserva confirmada de hoy muestra 'Tiene clase hoy' con la hora; la de
   });
 });
 
-test("'En prueba' solo con pase o pack y primera vez; quien está al día con cuota no", async () => {
+test("'En prueba' ya no es la primera vez con un pase suelto: solo lo es la prueba gratis real (VD-51)", async () => {
   assert.equal(chip(await guia("al_dia"), "en_prueba"), undefined);
   const g = await guia("pase_hoy");
   assert.equal(g.puede, true, "el testigo del pase de hoy puede entrar");
-  assert.ok(chip(g, "en_prueba"), "pase de hoy y sin entradas: en prueba");
-  await aparte(async () => {
-    await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, via_habilitante, color, motivo, texto)
-               values ($1,$2,$3, $4::timestamptz - interval '3 days', 'recepcion', 'entro', 'pase', 'verde', 'pase_de_hoy', 'Pase')`, [t.g, t.sede, t.ctx.socios.pase_hoy, momento]);
-    assert.equal(chip(await guia("pase_hoy"), "en_prueba"), undefined, "ya vino antes");
-  });
+  assert.equal(chip(g, "en_prueba"), undefined, "un pase suelto en su primera vez no es una prueba");
+  assert.equal(chip(await guia("pack_con_clases"), "en_prueba"), undefined, "ni un pack");
 });

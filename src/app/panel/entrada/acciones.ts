@@ -26,6 +26,35 @@ export type ResultadoIngreso = {
 /** VD-48: lo que contesta la base al marcar la salida: "Chau Juan, estuviste 1 h 20" o "No tenía entrada abierta" (sin error). */
 export type ResultadoSalida = { registrada: boolean; texto: string; nombre?: string; minutos?: number };
 
+/** VD-51 · La prueba gratis desde la Entrada. La base decide todo: si el gimnasio la da, una vez por DNI, solo a quien nunca fue socio. */
+export type PruebaDni = { modo: "no" | "dia" | "clase"; existe: boolean; nombre?: string; telefono?: string | null; reservada?: boolean; usada?: boolean; dia?: string; clase?: string | null };
+export async function modoPrueba(): Promise<{ modo?: "no" | "dia" | "clase"; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { modo: (await rpc<{ modo: "no" | "dia" | "clase" }>("config_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id })).modo };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function pruebaPorDni(dni: string): Promise<{ p?: PruebaDni; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { p: await rpc<PruebaDni>("prueba_por_dni", { p_gimnasio_id: panel.gimnasio.id, p_dni: dni }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function darPruebaGratis(sedeId: string, datos: { dni?: string; nombre?: string; apellido?: string; telefono?: string; socioId?: string }):
+  Promise<{ socioId?: string; numero?: number | null; nombre?: string; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const { sede } = sedeActiva(panel, sedeId);
+    const r = await rpc<{ socio_id: string; numero: number | null; nombre: string }>("dar_prueba_gratis", {
+      p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id, p_dni: datos.dni?.trim() || null, p_nombre: datos.nombre?.trim() || null,
+      p_apellido: datos.apellido?.trim() || null, p_telefono: datos.telefono?.trim() || null, p_socio_id: datos.socioId ?? null,
+    });
+    revalidatePath("/panel/socios");
+    revalidatePath("/panel/prospectos");
+    return { socioId: r.socio_id, numero: r.numero, nombre: r.nombre };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** VD-48 · Marcar la salida de un socio (la ventana de Entrada: DNI + S). La base decide si el gimnasio la registra y si había entrada abierta. */
 export async function registrarSalida(socioId: string, sedeId: string): Promise<{ r?: ResultadoSalida; error?: string }> {
   try {
