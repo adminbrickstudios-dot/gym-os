@@ -37,7 +37,7 @@ export function Hoja({ abierta, alCerrar, etiqueta, children, className = "", al
 
   if (!abierta) return null;
   return (
-    <div className={`aparecer fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-center px-3 ${alineacion === "arriba" ? "items-start pt-[10vh]" : "items-end sm:items-center pb-3 sm:pb-0"}`} onClick={alCerrar}>
+    <div className={`aparecer fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex justify-center px-3 ${alineacion === "arriba" ? "items-start pt-[10vh]" : "items-end sm:items-center pb-3 sm:pb-0"}`} onClick={alCerrar}>
       <div ref={panel} role="dialog" aria-modal="true" aria-label={etiqueta} tabIndex={-1} onClick={(e) => e.stopPropagation()}
         className={`hoja vidrio w-full max-w-xl overflow-hidden rounded-[var(--radio-grande)] outline-none ${className}`}>
         {children}

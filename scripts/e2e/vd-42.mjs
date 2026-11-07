@@ -72,7 +72,7 @@ try {
 
   // ── Dar de baja en un botón ──
   await d.goto(`${G}/panel/equipo`);
-  const fila = d.locator("li", { hasText: NOMBRE });
+  const fila = d.locator("li", { hasText: NOMBRE }).first();
   await fila.waitFor({ timeout: 60000 });
   await fila.locator(`[data-dar-de-baja="${equipo}"]`).click();
   await fila.locator("[data-confirmar-baja]").waitFor({ timeout: 10000 });

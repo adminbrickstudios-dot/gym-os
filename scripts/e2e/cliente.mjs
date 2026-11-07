@@ -120,7 +120,7 @@ try {
   await formE.locator("input[name=nombre]").fill("Recepción Cliente");
   await formE.locator("select[name=rol]").selectOption("recepcion");
   await formE.getByRole("button", { name: /Sumar al equipo/ }).click();
-  const filaR = d.locator("li", { hasText: "Recepción Cliente" });
+  const filaR = d.locator("li", { hasText: "Recepción Cliente" }).first();
   await filaR.waitFor({ timeout: 30000 });
   await filaR.locator('button:has-text("Dar acceso")').click();
   await filaR.locator("input[name=email]").fill(MAIL_RECEP);
