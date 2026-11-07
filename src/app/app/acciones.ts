@@ -58,6 +58,15 @@ export async function escanearEntrada(gimnasioId: string, socioId: string, codig
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-48 · "Me voy": el socio escanea el mismo QR de la tablet para marcar su salida (la base valida el código y si había entrada abierta). */
+export async function escanearSalida(gimnasioId: string, socioId: string, codigo: string): Promise<{ registrada?: boolean; texto?: string; error?: string }> {
+  try {
+    const r = await rpc<{ registrada: boolean; texto: string }>("salir_por_qr_pared", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_codigo: codigo });
+    revalidatePath("/app");
+    return r;
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** VD-23: el socio vio (o salteó) la bienvenida de la primera vez; queda anotado en la base. */
 export async function marcarBienvenida(socioId: string): Promise<{ error?: string }> {
   try { await rpc("marcar_bienvenida", { p_socio_id: socioId }); revalidatePath("/app"); return {}; }

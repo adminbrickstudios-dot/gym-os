@@ -252,6 +252,24 @@ export async function guardarLinkResena(link: string): Promise<{ error?: string 
   catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-51 · La prueba gratis del gimnasio: no / 1 día / 1 clase (la lee el equipo de la puerta; solo el dueño la cambia). */
+export type ModoPrueba = "no" | "dia" | "clase";
+export async function leerPruebaGratis(): Promise<{ modo?: ModoPrueba; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { modo: (await rpc<{ modo: ModoPrueba }>("config_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id })).modo };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarPruebaGratis(modo: ModoPrueba): Promise<{ modo?: ModoPrueba; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ modo: ModoPrueba }>("guardar_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id, p_modo: modo });
+    revalidatePath("/panel/configuracion");
+    revalidatePath("/panel", "layout");
+    return { modo: r.modo };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** VD-46G: prende o apaga el plan familiar/corporativo (solo el dueño; arranca apagado). */
 export async function guardarPlanFamiliar(activo: boolean): Promise<{ error?: string }> {
   try {

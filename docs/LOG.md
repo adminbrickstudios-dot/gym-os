@@ -23,6 +23,21 @@
 **SIN ARREGLAR**: ver arriba. Decisiones del agente: (a) sin turno abierto, la hoja Cobrar NO arranca en efectivo aunque sea el de siempre (se elige y ofrece abrir el turno), para que "C → Enter → Enter" no quede trabado; (b) "mismo período" se interpreta como "ya se cobró una cuota de este socio hace menos de N minutos" (sin comparar fechas de cobertura): pagar dos meses es una sola venta con cantidad 2; (c) `Cobrar igual` lo puede confirmar toda persona que cobra (la documentación habla de "dos personas confirmaron"), con motivo obligatorio; si Mateo lo quiere solo para dueño o encargado es una línea en `vender`.
 
 **LO QUE NO PUDE VERIFICAR**: los recorridos `vd-49` y `vd-50` (y los e2e existentes tocados) están escritos según la documentación, pero no están ejecutados: no se corrió ni la app ni el navegador en esta máquina. `npm run db:types` no se corrió (necesita el proyecto de Supabase). `next build` no se corrió; sí typecheck, lint, npm test, chequeos y las pruebas de la base (falla conocida del entorno: "3.000 filas en menos de 30 segundos").
+## 2026-11-07 · VD-48 (salida opcional) y VD-51 (prueba gratis)
+
+**QUÉ HICE**
+- VD-48 · `20261107004800_salida_opcional.sql`: `configuracion_visita.registrar_salida` (no / opcional / obligatoria, por defecto no), tabla de hechos `salidas` (una por ingreso, FK compuesta, inmutable), `registrar_salida` (cierra la visita abierta; sin entrada abierta contesta "No tenía entrada abierta", sin error), `kiosco_salir`, `salir_por_qr_pared`, `adentro_ahora` y `numeros_inicio` ("Adentro ahora" exacto con la salida prendida). `registrar_ingreso` avisa en "obligatoria" y trata volver tras salir como reingreso que no consume. `calcular_acceso` no se tocó. Pantallas: Configuración → Entrada, tecla S y botón Salida en la ventana y en la pantalla de Entrada, "Me voy" en la tablet y en la app (QR de la pared). Verificado: `supabase/pruebas/salida-opcional.test.mjs` (15 pruebas, momentos fijos).
+- VD-51 · `20261107005100_prueba_gratis.sql`: `configuracion_gimnasio.prueba_gratis` (no / dia / clase, solo el dueño), tabla de hechos `pruebas_gratis` (una por DNI y gimnasio, FK compuestas), cuarta vía `via_prueba` en `calcular_acceso` (prioridad más baja: verde "En prueba", después rojo "Ya usó su prueba gratis el 12/10 · Hacete socio"), `guia_entrada` con "En prueba" definitiva (reemplaza la provisoria de VD-2b), `dar_prueba_gratis`, `prueba_por_dni`, `anular_prueba_gratis`, `clases_para_probar` y `reservar_prueba_publica` (página). Cuenta como entrada (vía "prueba") y no como socio activo. Pantallas: Configuración → Reglas, botón y tecla P en la ventana de Entrada y en la pantalla de Entrada, "Probá una clase" con clase, nombre, DNI y celular en la página. Verificado: `supabase/pruebas/prueba-gratis.test.mjs` (9 pruebas).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La ventana de Entrada no se monta en /panel/entrada (ahí vive Puerta.tsx): se sumaron la salida y la prueba a las dos.
+- `registrar_ingreso` buscaba la visita anterior sin tope hacia adelante; ahora solo mira entradas anteriores o iguales al momento.
+
+**QUÉ CORRÉS VOS**: `scripts/db/aplicar.mjs` (prevuelo → aplicar) con las dos migraciones, `npm run db:types`, y `npm run e2e:vd-48` y `npm run e2e:vd-51` con la app levantada.
+
+**SIN ARREGLAR**: "Me voy" del QR de la pared solo tiene prueba de base (la cámara no se simula). El cupo de la clase de prueba se cuenta al reservar; los paneles de ocupación de clases no suman todavía las pruebas reservadas.
+
+**LO QUE NO PUDE VERIFICAR**: el código de pantallas está escrito y pasa typecheck, lint y vitest, pero no está ejecutado en el navegador; los recorridos `scripts/e2e/vd-48.mjs` y `vd-51.mjs` están escritos, no ejecutados. `npm run db:types` necesita el proyecto de Supabase y no se corrió.
 ## 2026-11-06 · Cierre de la noche (frenada por la facturación de GitHub Actions)
 
 **QUÉ HICE**

@@ -9,11 +9,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
-import { type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
@@ -36,7 +36,9 @@ export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 const ES_QR = /^GYMOS1\./;
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
-type Paso = "escribir" | "veredicto" | "anotado" | "alta";
+type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio" | "prueba";
+/** VD-51: lo que se escribe para darle la prueba gratis a un DNI nuevo (o a quien reservó desde la página). */
+type FormPrueba = { dni: string; nombre: string; apellido: string; telefono: string; info: PruebaDni | null; error: string | null };
 /** VD-6 · El alta rápida dentro de la ventana: datos → plan → (cobro en la hoja) → entra. */
 type Alta = {
   dni: string; nombre: string; apellido: string; telefono: string; plan: string;
@@ -128,6 +130,17 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [motivo, setMotivo] = useState("");
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [sonido, setSonido] = useState(true);
+  // VD-48: ¿el gimnasio registra la salida? (se lee de la base la primera vez que se abre la ventana; null = todavía no se sabe)
+  const [salidaModo, setSalidaModo] = useState<RegistrarSalida | null>(null);
+  const [salio, setSalio] = useState<(ResultadoSalida & { nombre: string }) | null>(null);
+  // VD-51: ¿el gimnasio da prueba gratis? (se lee de la base al abrir la ventana)
+  const [pruebaModo, setPruebaModo] = useState<"no" | "dia" | "clase" | null>(null);
+  const [prueba, setPrueba] = useState<FormPrueba | null>(null);
+  const iniciarPruebaRef = useRef<(dni: string) => void>(() => {});
+  const salidaModoRef = useRef<RegistrarSalida | null>(null);
+  const pruebaModoRef = useRef<"no" | "dia" | "clase" | null>(null);
+  const salirRef = useRef<() => void>(() => {});
+  const salirConDniRef = useRef<(dni: string) => void>(() => {});
   const [ocupado, empezar] = useTransition();
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
@@ -204,7 +217,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   const reiniciar = useCallback((inicial = "", enfocar = true) => {
     setPaso("escribir"); setTexto(inicial); setSocios([]); setListaPara(""); setMarcado(0); setNadie(null); setElegido(null);
-    setV(null); setGuia(null); setApto(null); setFirmar(null); setEventosHoy([]); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
+    setV(null); setGuia(null); setApto(null); setFirmar(null); setEventosHoy([]); setHecho(null); setSalio(null); setPrueba(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
@@ -238,6 +251,76 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       anotado(r.r!, elegido);
     });
   }, [elegido, sedeId, via, anotado]);
+
+  // VD-48 · La salida: la base dice "Chau Juan, estuviste 1 h 20" o "No tenía entrada abierta" (eso no es un error).
+  useEffect(() => {
+    if (!abierta || salidaModo !== null) return;
+    void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); });
+  }, [abierta, salidaModo]);
+  useEffect(() => {
+    if (!abierta || pruebaModo !== null) return;
+    void modoPrueba().then((r) => { if (r.modo) setPruebaModo(r.modo); });
+  }, [abierta, pruebaModo]);
+  // VD-51 · Prueba gratis: DNI que no existe (o que reservó desde la página) → un formulario corto y queda en verde "En prueba".
+  const iniciarPrueba = useCallback((dniEscrito: string) => {
+    setPrueba({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", info: null, error: null });
+    setPaso("prueba"); setError(null);
+    void pruebaPorDni(dniEscrito).then((r) => setPrueba((p) => {
+      if (!p) return p;
+      if (r.error) return { ...p, error: r.error };
+      const info = r.p ?? null;
+      if (info?.existe && info.usada) return { ...p, info, error: `Ya usó su prueba gratis el ${info.dia} · Hacete socio.` };
+      return { ...p, info, nombre: info?.existe ? info.nombre ?? "" : p.nombre, telefono: info?.existe ? info.telefono ?? "" : p.telefono };
+    }));
+    setTimeout(() => document.querySelector<HTMLInputElement>("[data-prueba-nombre]")?.focus(), 0);
+  }, []);
+  const guardarPrueba = () => {
+    if (!prueba || trabajando.current) return;
+    trabajando.current = true;
+    empezar(async () => {
+      const x = await darPruebaGratis(sedeId, { dni: prueba.dni, nombre: prueba.nombre, apellido: prueba.apellido, telefono: prueba.telefono });
+      trabajando.current = false;
+      if (x.error || !x.socioId) { setPrueba((p) => (p ? { ...p, error: x.error ?? "No se pudo dar la prueba" } : p)); return; }
+      const nuevo: ResultadoSocio = { socio_id: x.socioId, numero: x.numero ?? null, nombre: x.nombre ?? prueba.nombre, color: "gris", texto: "", puede: false, dado_de_baja: false };
+      setPrueba(null);
+      elegir(nuevo);   // el veredicto sale en verde "En prueba": Enter anota la entrada
+    });
+  };
+  // A un socio que ya está, sin plan y que nunca tuvo prueba: la misma función de la base, con su ficha.
+  const darPruebaAlSocio = (s: ResultadoSocio) => {
+    if (trabajando.current) return;
+    trabajando.current = true;
+    empezar(async () => {
+      const x = await darPruebaGratis(sedeId, { socioId: s.socio_id });
+      trabajando.current = false;
+      if (x.error) { setError(x.error); return; }
+      elegir(s);
+    });
+  };
+  const marcarSalida = useCallback((s: ResultadoSocio) => {
+    if (trabajando.current) return;
+    trabajando.current = true;
+    empezar(async () => {
+      const r = await registrarSalida(s.socio_id, sedeId);
+      trabajando.current = false;
+      if (r.error || !r.r) { setError(r.error ?? "No se pudo marcar la salida"); return; }
+      setError(null); setElegido(s);
+      setSalio({ ...r.r, nombre: s.nombre });
+      setPaso("salio"); setSocios([]); setTexto(""); setNadie(null);
+      if (sonido) sonar(r.r.registrada ? "verde" : "amarillo");
+    });
+  }, [sedeId, sonido]);
+  // DNI + S: se busca por el DNI y se marca la salida de esa persona.
+  const salirConDni = useCallback((dniEscrito: string) => {
+    if (trabajando.current) return;
+    empezar(async () => {
+      const r = await buscarSociosRapido(dniEscrito);
+      if (r.error) { setError(r.error); return; }
+      const lista = r.socios ?? [];
+      if (lista.length === 0) { setNadie(dniEscrito); return; }
+      marcarSalida(lista[0]);
+    });
+  }, [marcarSalida]);
 
   // QR (cámara no: acá solo el lector USB) o llavero: si puede entrar se anota solo; si no, queda el veredicto con el porqué.
   const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
@@ -326,10 +409,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   // Anotado: se cierra sola a los N segundos (o nunca).
   useEffect(() => {
-    if (!abierta || paso !== "anotado" || cfg.cerrar_sola_seg === 0) return;
+    if (!abierta || (paso !== "anotado" && paso !== "salio") || cfg.cerrar_sola_seg === 0) return;
     const id = setTimeout(() => cerrar(), cfg.cerrar_sola_seg * 1000);
     return () => clearTimeout(id);
-  }, [abierta, paso, hecho, cfg.cerrar_sola_seg, cerrar]);
+  }, [abierta, paso, hecho, salio, cfg.cerrar_sola_seg, cerrar]);
 
   // Al cambiar de pantalla (ficha, cobrar…) la ventana se cierra.
   useEffect(() => { if (abiertaRef.current) cerrar(); }, [ruta, cerrar]);
@@ -376,11 +459,21 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         if (p === "alta") return;   // el alta tiene sus propios campos
         if (p === "escribir") {
           if (e.key.toLowerCase() === "a" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarAltaRef.current(nadieRef.current!); return; }
+          if (e.key.toLowerCase() === "p" && pruebaModoRef.current && pruebaModoRef.current !== "no" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarPruebaRef.current(nadieRef.current!); return; }
+          // VD-48: DNI + S = marcar la salida (solo si el gimnasio la registra)
+          if (e.key.toLowerCase() === "s" && salidaModoRef.current && salidaModoRef.current !== "no" && /^\d{6,9}$/.test(sinPuntos(textoRef.current).trim())) {
+            e.preventDefault(); salirConDniRef.current(sinPuntos(textoRef.current).trim()); return;
+          }
           if (imprimible) { e.preventDefault(); setTexto((x) => x + e.key); setTimeout(() => campo.current?.focus(), 0); }
           else if (e.key === "Enter" && textoRef.current.trim()) { e.preventDefault(); resolver(textoRef.current); }
           return;
         }
-        if (p === "anotado") { if (digito) { e.preventDefault(); reiniciar(e.key); } return; }
+        if (p === "salio") { if (digito) { e.preventDefault(); reiniciar(e.key); } return; }
+        if (p === "anotado") {
+          if (digito) { e.preventDefault(); reiniciar(e.key); }
+          else if (e.key.toLowerCase() === "s" && salidaModoRef.current && salidaModoRef.current !== "no" && t?.tagName !== "BUTTON") { e.preventDefault(); salirRef.current(); }
+          return;
+        }
         // Veredicto
         if (formandoRef.current) return;
         if (digito) { e.preventDefault(); reiniciar(e.key); return; }
@@ -389,6 +482,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         if (k === "c") { e.preventDefault(); cobrarRef.current?.click(); }
         else if (k === "f") { e.preventDefault(); fichaRef.current?.click(); }
         else if (k === "d") { e.preventDefault(); dejarRef.current(); }
+        else if (k === "s" && salidaModoRef.current && salidaModoRef.current !== "no") { e.preventDefault(); salirRef.current(); }
         return;
       }
 
@@ -419,6 +513,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
     puedeEnterRef.current = puedeAnotarConEnter; anotarRef.current = () => anotar();
     nadieRef.current = nadie; iniciarAltaRef.current = iniciarAlta;
+    pruebaModoRef.current = pruebaModo; iniciarPruebaRef.current = iniciarPrueba;
+    salidaModoRef.current = salidaModo; salirRef.current = () => { if (elegido) marcarSalida(elegido); }; salirConDniRef.current = salirConDni;
     dejarRef.current = () => { if (v && !v.puede && !(esRecepcion && (guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue"))) { setForzando(true); void cupoDejarPasar().then(setCupo); } };
   });
 
@@ -477,6 +573,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Esc en el alta vuelve a la búsqueda (no tira lo escrito de golpe); otra vez, cierra.
   const alCerrarHoja = () => {
     if (forzando) setForzando(false);
+    else if (paso === "prueba") { const dniP = prueba?.dni ?? ""; setPrueba(null); setPaso("escribir"); setTexto(dniP); setNadie(dniP); setTimeout(() => campo.current?.focus(), 0); }
     else if (paso === "alta") { const dniAlta = alta?.dni ?? ""; setAlta(null); setPaso("escribir"); setTexto(dniAlta); setNadie(dniAlta); setTimeout(() => campo.current?.focus(), 0); }
     else cerrar();
   };
@@ -599,6 +696,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 onKeyDown={(e) => {
                   if (e.code === "NumpadDecimal") { e.preventDefault(); return; }   // el punto del teclado numérico no va en un DNI
                   if (e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey && !e.altKey && dni) { e.preventDefault(); iniciarAlta(nadie!); }
+                  else if (e.key.toLowerCase() === "p" && !e.ctrlKey && !e.metaKey && !e.altKey && dni && pruebaModo && pruebaModo !== "no") { e.preventDefault(); iniciarPrueba(nadie!); }
+                  else if (e.key.toLowerCase() === "s" && !e.ctrlKey && !e.metaKey && !e.altKey && salidaModo && salidaModo !== "no" && /^\d{6,9}$/.test(sinPuntos(texto).trim())) {
+                    e.preventDefault(); if (!ocupado) salirConDni(sinPuntos(texto).trim());
+                  }
                   else if (e.key === "ArrowDown" && hayLista) { e.preventDefault(); setMarcado((m) => Math.min(m + 1, Math.min(socios.length, 3) - 1)); }
                   else if (e.key === "ArrowUp" && hayLista) { e.preventDefault(); setMarcado((m) => Math.max(m - 1, 0)); }
                   else if (e.key === "Enter") {
@@ -637,11 +738,41 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                     {dni
                       ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}>➕ Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
                       : <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Darlo de alta</Link>}
+                    {dni && pruebaModo && pruebaModo !== "no" && (
+                      <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}>🎁 Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
+                    )}
                     {dni && <Link href="/panel/socios/nuevo" className="boton" data-ventana-alta-completa>Alta completa</Link>}
                   </div>
                 </div>
               )}
             </div>
+          )}
+
+          {paso === "prueba" && prueba && (
+            <form data-ventana-prueba-form className="p-6 sm:p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); if (!ocupado && !(prueba.info?.existe && prueba.info.usada)) guardarPrueba(); }}>
+              <p className="titulo text-2xl text-center">🎁 Prueba gratis · {conPuntos(prueba.dni)}</p>
+              {prueba.info?.existe && !prueba.info.usada && (
+                <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada>
+                  🙋 Reservó desde la página{prueba.info.clase ? `: ${prueba.info.clase}` : ""}. Confirmá y lo dejás entrar.
+                </p>
+              )}
+              <label className="block space-y-1"><span className="etiqueta">Nombre</span>
+                <input data-prueba-nombre className="campo" value={prueba.nombre} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, nombre: e.target.value, error: null })} /></label>
+              {!prueba.info?.existe && (
+                <>
+                  <label className="block space-y-1"><span className="etiqueta">Apellido <span className="texto-tenue font-normal">(opcional)</span></span>
+                    <input className="campo" value={prueba.apellido} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, apellido: e.target.value })} /></label>
+                  <label className="block space-y-1"><span className="etiqueta">Celular <span className="texto-tenue font-normal">(opcional)</span></span>
+                    <input className="campo" type="tel" inputMode="tel" value={prueba.telefono} placeholder="387 555 1234" autoComplete="off" onChange={(e) => setPrueba({ ...prueba, telefono: e.target.value })} /></label>
+                </>
+              )}
+              {prueba.error && <Mensaje tipo="error">{prueba.error}</Mensaje>}
+              <div className="flex flex-wrap gap-2">
+                <button type="submit" className="boton boton-principal" disabled={ocupado || !!(prueba.info?.existe && prueba.info.usada) || !prueba.nombre.trim()} data-prueba-dar>🎁 Dejarlo entrar con la prueba</button>
+                <button type="button" className="boton-texto px-3" onClick={alCerrarHoja}>Volver</button>
+              </div>
+              <p className="text-sm texto-tenue">Es una vez por DNI. No es socio ni gasta ningún plan; queda registrado quién la dio.</p>
+            </form>
           )}
 
           {paso === "alta" && alta && (
@@ -745,6 +876,12 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                     {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>}
                     <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}?desde=entrada`} className="boton" data-ventana-ficha
                       onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}>👤 Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
+                    {pruebaModo && pruebaModo !== "no" && v.motivo === "sin_plan" && (
+                      <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton" data-ventana-prueba>🎁 Dar prueba gratis</button>
+                    )}
+                    {salidaModo && salidaModo !== "no" && (
+                      <button type="button" onClick={() => marcarSalida(elegido)} disabled={ocupado} className="boton" data-ventana-salida-boton>👋 Salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                    )}
                     <button type="button" onClick={() => reiniciar()} className="boton-texto px-3">Otro socio</button>
                   </div>
 
@@ -771,6 +908,26 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               {error && <Mensaje tipo="error">{error}</Mensaje>}
               <div className="flex flex-wrap justify-center gap-2">
                 {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
+                {hecho.repetido && hecho.puede_salir && elegido && (
+                  <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} onClick={() => marcarSalida(elegido)} data-ventana-salida-boton>👋 Marcar salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                )}
+                <button type="button" className={`boton ${hecho.avisar_salida ? "" : "boton-principal"}`} onClick={() => reiniciar()}>Siguiente</button>
+              </div>
+              <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>
+            </div>
+          )}
+
+          {paso === "salio" && salio && (
+            <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
+              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "👋" : "ℹ️"}</div>
+              {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
+                <>
+                  <p className="titular text-4xl break-words">{salio.nombre}</p>
+                  <p className="text-xl font-semibold">{salio.texto}</p>
+                </>
+              )}
+              {error && <Mensaje tipo="error">{error}</Mensaje>}
+              <div className="flex flex-wrap justify-center gap-2">
                 <button type="button" className="boton boton-principal" onClick={() => reiniciar()}>Siguiente</button>
               </div>
               <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>

@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
-import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, ultimoDeLaTablet, type Resultado } from "./acciones";
+import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
@@ -53,7 +53,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   );
 }
 
-export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean }) {
+export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean }) {
   const [dni, setDni] = useState("");
   const [r, setR] = useState<Resultado | null>(null);
   const [camara, setCamara] = useState(false);
@@ -85,6 +85,13 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   }), []);
+  // VD-48 · "Me voy": con el DNI (o el QR que escribió el lector) en el campo.
+  const irme = (codigo: string) => empezar(async () => {
+    setCamara(false);
+    const x = await salirEnKiosco(codigo);
+    setR(x); setDni(""); setElegido(null);
+    sonar(!x.error && !!x.registrada);
+  });
   const mostrar = useCallback((x: Resultado) => { setR(x); sonar(x.resultado === "entro" || x.resultado === "entro_modo_aviso"); }, []);
   // Vuelve solo al inicio, para el que sigue.
   useEffect(() => {
@@ -105,6 +112,18 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
     else setDni((d) => (d.length < largo ? d + k : d));
   };
 
+  if (r?.salida) {
+    return (
+      <section className="fixed inset-0 grid place-items-center p-8 text-center" data-kiosco-resultado={r.error ? "error" : r.registrada ? "salio" : "sin-entrada"}
+        style={{ background: `color-mix(in oklab, ${colorVar(r.error ? "gris" : r.registrada ? "verde" : "amarillo")}, var(--fondo) 55%)` }} onClick={() => setR(null)}>
+        <div className="space-y-6 max-w-2xl">
+          <p className="text-8xl" aria-hidden>{r.error ? "🤔" : r.registrada ? "👋" : "ℹ️"}</p>
+          <p className="titular text-6xl sm:text-7xl">{r.error ? "Probá de nuevo" : r.registrada ? "¡Hasta pronto!" : "Listo"}</p>
+          <p className="text-3xl font-semibold">{r.error ?? r.texto}</p>
+        </div>
+      </section>
+    );
+  }
   if (r) {
     const entro = !r.error && (r.resultado === "entro" || r.resultado === "entro_modo_aviso");
     const color = r.error ? "gris" : entro ? (r.color ?? "verde") : "rojo";
@@ -153,6 +172,11 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared }: { tablet: string; s
         ))}
       </div>
       {!elegido && con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}>📷 Mostrar mi QR</button>}
+      {!elegido && con_salida && (
+        <button type="button" className="boton w-full !min-h-16 text-xl" data-kiosco-me-voy disabled={ocupado || !(dni.length >= 6 || /^GYMOS1\./.test(dni))} onClick={() => irme(dni)}>
+          👋 Me voy <span className="texto-tenue text-base font-normal">(escribí tu DNI y tocá acá)</span>
+        </button>
+      )}
       {camara && <Camara frente alLeer={mandar} alCerrar={() => setCamara(false)} />}
       {qr_pared && <QrPared alEntrar={mostrar} />}
     </div>
