@@ -3,7 +3,7 @@
 Mateo pega en Claude Code (en su compu, después de `/clear`):
 
 ```
-/loop Leé docs/base/PROMPT.md y hacé una vuelta. Si P0, P1 y P2 de docs/base/PROGRESO.md están todos en ✅ o ⛔, pará el loop.
+/loop Pasate a la rama base/2026-11-07 (git fetch origin; git switch base/2026-11-07, o git switch -c base/2026-11-07 origin/base/2026-11-07 si no la tenés), leé docs/base/PROMPT.md y hacé una vuelta. Si P0, P1 y P2 de docs/base/PROGRESO.md están todos en ✅ o ⛔, pará el loop.
 ```
 
 Si el loop se corta, se vuelve a pegar lo mismo: todo lo que importa está en
