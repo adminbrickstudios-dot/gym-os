@@ -7,6 +7,8 @@ export type Venta = {
   venta_id: string; fecha: string; estado: "pendiente" | "confirmada" | "anulada"; sede_id: string; socio_id: string | null; socio: string | null;
   total: number; detalle: string | null; medios: string[]; cobro: string | null; anulada_motivo: string | null; anulada_por: string | null;
   pedido: { pedido_id: string; motivo: string; por: string; en: string } | null;
+  /** VD-56: el número de su recibo, si se cobró alguna vez. */
+  recibo_n?: number | null;
 };
 
 const refrescar = (socioId?: string | null) => { revalidatePath("/panel"); if (socioId) revalidatePath(`/panel/socios/${socioId}`); };

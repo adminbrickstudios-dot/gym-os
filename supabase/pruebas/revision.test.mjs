@@ -136,6 +136,7 @@ test("A6 congelamiento y cierre en las mismas fechas devuelven esos días una so
 test("A7 un cierre no se puede reaplicar ni editar a mano", async () => {
   const u = await usuario("encargado");
   await sp("a7");
+  await t.q(`insert into public.configuracion_cierres (gimnasio_id, suma_dias) values ($1, true)`, [t.g]);   // VD-57: este gimnasio suma los días cerrados
   await como(u);
   const [{ c }] = await t.q(`select public.crear_cierre($1, $2::date, $3::date, 'Vacaciones') as c`, [t.g, D(1), D(4)]);
   const upd = await t.db.query(`update public.cierres set compensa = false where id = $1`, [c]);

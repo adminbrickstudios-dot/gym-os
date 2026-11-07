@@ -1,5 +1,6 @@
 "use client";
 // Lo que comparten Vender (el carrito de siempre) y Cobrar (la hoja flotante de VD-5).
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { comprobante } from "./acciones";
 import { anularVenta, pedirAnulacion } from "../ventas-acciones";
@@ -45,9 +46,19 @@ export function MandarComprobante({ ventaId, className = "mt-5" }: { ventaId: st
     comprobante(ventaId).then((r) => { if (vivo) setC({ link: r.error ? null : linkWhatsappSocio(r.telefono, r.mensaje), mensaje: r.mensaje ?? "", error: r.error }); });
     return () => { vivo = false; };
   }, [ventaId]);
-  if (!c) return null;
-  if (c.error) return <p role="alert" className={`pildora pildora-rojo ${className}`}>⚠️ {c.error}</p>;
-  return c.link
-    ? <a href={c.link} target="_blank" rel="noopener noreferrer" className={`boton ${className}`} data-comprobante>🧾 Mandar comprobante por WhatsApp</a>
-    : <p className={`${className} texto-suave`} data-comprobante>Sin celular cargado para mandarle el comprobante.</p>;
+  return (
+    <>
+      <VerRecibo ventaId={ventaId} className={className} />
+      {c && (c.error
+        ? <p role="alert" className={`pildora pildora-rojo ${className}`}>⚠️ {c.error}</p>
+        : c.link
+          ? <a href={c.link} target="_blank" rel="noopener noreferrer" className={`boton ${className}`} data-comprobante>🧾 Mandar comprobante por WhatsApp</a>
+          : <p className={`${className} texto-suave`} data-comprobante>Sin celular cargado para mandarle el comprobante.</p>)}
+    </>
+  );
+}
+
+/** VD-56: el recibo de lo recién cobrado, en una pestaña aparte para no perder la pantalla de cobro. */
+export function VerRecibo({ ventaId, className = "mt-5" }: { ventaId: string; className?: string }) {
+  return <Link href={`/panel/recibo/${ventaId}`} target="_blank" rel="noopener" className={`boton ${className}`} data-ver-recibo>📄 Ver recibo (imprimir o PDF)</Link>;
 }

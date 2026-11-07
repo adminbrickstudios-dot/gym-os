@@ -8,7 +8,7 @@ import { rpc } from "@/lib/panel/servidor";
 
 export const metadata: Metadata = { title: "Mi historial" };
 type Historial = {
-  pagos: { fecha: string; monto: number; medio: string; estado: string; detalle: string | null; motivo: string | null }[];
+  pagos: { fecha: string; monto: number; medio: string; estado: string; detalle: string | null; motivo: string | null; venta_id?: string; recibo?: boolean }[];
   entradas: { momento: string; tipo: "entrada" | "clase"; actividad: string | null }[];
 };
 const ESTADO: Record<string, string> = { aprobado: "✅", pendiente: "⏳ revisando", rechazado: "❌ rechazado" };
@@ -34,6 +34,7 @@ export default async function HistorialSocio({ searchParams }: { searchParams: P
               <li key={i} className="px-4 py-3">
                 <div className="flex justify-between gap-3"><span className="first-letter:uppercase">{dia(p.fecha)} · {p.detalle ?? "Pago"}</span><span className="numero">{formatearPesos(p.monto)}</span></div>
                 <p className="text-sm texto-suave">{MEDIO[p.medio] ?? p.medio} · {ESTADO[p.estado] ?? p.estado}{p.motivo ? `: ${p.motivo}` : ""}</p>
+                {p.recibo && p.venta_id && <Link href={`/app/recibo/${p.venta_id}${q}`} className="text-sm underline" data-ver-recibo>🧾 Ver recibo</Link>}
               </li>
             ))}</ul>
           )}

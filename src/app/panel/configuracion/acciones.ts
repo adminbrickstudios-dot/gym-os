@@ -119,14 +119,41 @@ async function listasDeCierres(gimnasioId: string) {
   return { cierres, agenda };
 }
 
-export async function crearCierre(c: { desde: string; hasta: string; motivo: string; compensa: boolean; sedeId: string | null }): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+/** VD-57: lo que le pasa al vencimiento de los socios si se carga este cierre (lo calcula la base según la regla del gimnasio). */
+export type PrevioCierre = { suma_dias: boolean; dias: number; socios: number };
+export async function previsualizarCierre(c: { desde: string; hasta: string; sedeId: string | null }): Promise<{ error?: string; previo?: PrevioCierre }> {
   const panel = await contextoPanel();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(c.desde) || !/^\d{4}-\d{2}-\d{2}$/.test(c.hasta)) return { error: "Elegí las fechas del cierre." };
   if (c.hasta < c.desde) return { error: "El último día no puede ser antes del primero." };
   try {
+    return { previo: await rpc<PrevioCierre>("previsualizar_cierre", { p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_sede_id: c.sedeId }, { lectura: true }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** VD-57 · La regla del gimnasio: ¿los días cerrados se suman al vencimiento? (la ve el equipo que carga cierres; la cambia solo el dueño). */
+export async function leerReglaCierres(): Promise<{ suma?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { suma: (await rpc<{ suma_dias: boolean }>("config_cierres", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true })).suma_dias };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarReglaCierres(suma: boolean): Promise<{ suma?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ suma_dias: boolean }>("guardar_config_cierres", { p_gimnasio_id: panel.gimnasio.id, p_suma_dias: suma });
+    revalidatePath("/panel/configuracion");
+    return { suma: r.suma_dias };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function crearCierre(c: { desde: string; hasta: string; motivo: string; sedeId: string | null }): Promise<{ error?: string; cierres?: unknown; agenda?: unknown }> {
+  const panel = await contextoPanel();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(c.desde) || !/^\d{4}-\d{2}-\d{2}$/.test(c.hasta)) return { error: "Elegí las fechas del cierre." };
+  if (c.hasta < c.desde) return { error: "El último día no puede ser antes del primero." };
+  try {
+    // Si suma o no los días lo decide la regla del gimnasio (la base): el cierre ya no lo elige.
     await rpc("crear_cierre", {
-      p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_motivo: c.motivo,
-      p_compensa: c.compensa, p_sede_id: c.sedeId,
+      p_gimnasio_id: panel.gimnasio.id, p_desde: c.desde, p_hasta: diaSiguiente(c.hasta), p_motivo: c.motivo, p_sede_id: c.sedeId,
     });
     revalidatePath("/", "layout");
     return await listasDeCierres(panel.gimnasio.id);

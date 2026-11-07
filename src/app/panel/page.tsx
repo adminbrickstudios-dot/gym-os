@@ -1,5 +1,6 @@
 import { NovedadesGymOS, type NovedadGymOS } from "@/components/panel/NovedadesGymOS";
 import { BotonEntrada } from "@/components/panel/BotonEntrada";
+import { BotonFichar } from "@/components/panel/BotonFichar";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import Link from "next/link";
@@ -25,6 +26,7 @@ type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number
 
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
 type Inicio = { hoy: string; numeros: NumeroInicio[]; ahora: Ahora[] };
+type MiFichaje = { usa: boolean; nombre: string; puede: boolean; en_turno: boolean; entrada_en: string | null; sin_salida_desde: string | null };
 type NumerosElegidos = { numeros: NumeroInicio[]; elegidos: string[]; disponibles: { clave: string; emoji: string; etiqueta: string }[] };
 
 // Las rutas que devuelve la base son relativas al panel.
@@ -83,7 +85,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo] = await Promise.all([
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo, fichaje] = await Promise.all([
       rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? rpcLectura<NumerosElegidos>("numeros_inicio", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -115,6 +117,8 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
       // VD-12b: Para hacer hoy y las últimas entradas (el profe no las ve: su Inicio es el de sus clases).
       rol !== "profe" ? rpcLectura<ParaHacer[]>("para_hacer_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
       rol !== "profe" ? rpcLectura<EntradaVivo[]>("ultimas_entradas", { p_gimnasio_id: panel.gimnasio.id, p_limite: 8 }) : [],
+      // VD-53: el botón de fichar, solo si el gimnasio usa fichaje y esta persona ficha.
+      rutaDisponible("/panel/fichar", rol, panel.secciones_apagadas) ? rpcLectura<MiFichaje>("mi_fichaje", { p_gimnasio_id: panel.gimnasio.id }) : null,
     ]);
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
     const hacerHoy = paraHacer.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));
@@ -131,6 +135,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
     return (
       <>
+        {fichaje?.usa && fichaje.puede && <BotonFichar nombre={fichaje.nombre} enTurno={fichaje.en_turno} entradaEn={fichaje.entrada_en} sinSalidaDesde={fichaje.sin_salida_desde} zona={zona} />}
         {rol === "recepcion" && (() => {
           const turno = datos.ahora.find((a) => a.tipo === "caja");
           return turno && rutaDisponible("/panel/caja", rol, panel.secciones_apagadas) ? (

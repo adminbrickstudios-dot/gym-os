@@ -1,5 +1,29 @@
 # Gy
 
+## 2026-11-07 · Cierre · VD-53 (fichaje del equipo), VD-56 (recibo de cada pago) y VD-57 (día cerrado suma al vencimiento)
+
+**QUÉ HICE**
+- **VD-53 (5300)**: `configuracion_fichaje` (por defecto apagado; tope de horas para cerrar una entrada olvidada, 12), `fichajes` (un turno por fila, hecho inmutable: la salida se pone una vez, anular con motivo, nunca se borra), `correcciones_fichaje` (el dueño corrige con motivo; queda cada versión con quién y cuándo). `fichar` (quien opera: sesión o PIN puesto) y `fichar_con_pin` (PIN directo en la compu del mostrador, con el mismo límite de 5 errores). Una entrada que pasó el tope queda "sin salida" y NO suma horas hasta que el dueño la corrige; la salida sin entrada y la entrada repetida no rompen ni escriben. `mi_fichaje`, `mis_horas`, `horas_equipo`, `fichajes_persona` (dueño y encargado; el profe y la recepción ven solo lo suyo). Pantallas `/panel/fichar` y `/panel/horas`, botón en el Inicio. La liquidación de profes (`liquidacion_calculo`) toma las horas del fichaje si la persona fichó en el mes; si no, las cargadas a mano.
+- **VD-56 (5600)**: `recibos` (número correlativo por gimnasio asignado una sola vez por trigger al cobrar, sin saltos; las ventas ya cobradas se numeraron en orden) y `recibo_venta` (todo armado de los hechos; equipo con dueño, encargado y recepción; el socio solo los suyos). Página imprimible `/panel/recibo/[venta]` y `/app/recibo/[venta]` (Imprimir / Guardar como PDF, WhatsApp, Compartir); engancha desde Cobrar, la ficha (Pagos) y Mi historial. Anulado: el recibo lo dice.
+- **VD-57 (5700)**: regla del gimnasio `configuracion_cierres.suma_dias` (por defecto NO). `crear_cierre` ya no deja elegir por cierre: nace con `compensa` = la regla (y solo si cierra todo el gimnasio); un pedido que la contradiga es error. `previsualizar_cierre` avisa "esto corre el vencimiento de N socios N días" ANTES de confirmar. El cálculo sigue siendo uno solo (`recalcular_compensacion`).
+- Pruebas de base nuevas: `fichaje-equipo`, `recibo-pago`, `cierre-suma-dias`. Se ajustó `revision.test` A7 (declara que ese gimnasio suma los días cerrados) y las pruebas de secciones del menú (suma "Fichar").
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- `privado.hecho_inmutable()` llamada SIN argumentos no frena nada (con la lista vacía `k = any(NULL)` da NULL y nunca levanta el error). Las tablas nuevas usan `hecho_inmutable('ninguna_columna')`. Las existentes que la llaman sin argumentos no se tocaron: revisar si hay alguna.
+- El comportamiento previo de los cierres no era "no suma": cada cierre traía su tilde "Devolver los días" prendido de entrada (compensa = true). Con la regla nueva el valor por defecto pasa a NO sumar (lo pedido, y lo prudente en plata). Los cierres ya cargados conservan su valor; los nuevos siguen la regla. El dueño que quiera lo de antes elige "Suma los días cerrados" en Configuración → Reglas.
+
+**QUÉ CORRÉS VOS**
+1. `scripts/db/local.sh nueva && npm run db:pruebas && npm run chequeos` (migraciones `20261107005300`, `…5600`, `…5700`).
+2. Con la app levantada: `npm run e2e:vd-53`, `e2e:vd-56`, `e2e:vd-57` y de nuevo `e2e:cfg-4` (ahora el cierre pide confirmar el aviso), `e2e:vd-52`, `e2e:vd-5`, `e2e:barrido`.
+3. `npm run db:types` (necesita el proyecto de Supabase).
+
+**QUÉ CONFIGURÁS VOS**: el fichaje arranca apagado (Horas del equipo → "El gimnasio usa fichaje"). La regla de días cerrados arranca en "No suma" (Configuración → Reglas → Días cerrados). El CUIT del gimnasio no existe en los datos: el recibo no lo muestra.
+
+**SIN ARREGLAR**: el recibo no descarga imagen/PDF por sí mismo (se usa Imprimir → Guardar como PDF, sin dependencias nuevas). Cargar a mano un turno olvidado por completo (sin entrada) no está: el dueño corrige uno existente, no inventa uno. El recibo de una venta cobrada por la app (MercadoPago) sale con el cobrador "Pago desde la app".
+
+**LO QUE NO PUDE VERIFICAR**: los recorridos `vd-53`, `vd-56` y `vd-57` (y `cfg-4` modificado) están escritos según la documentación, pero no están ejecutados: no se corrió la app ni el navegador. `npm run db:types` no se corrió (necesita el proyecto de Supabase).
+
+
 ## 2026-11-07 · Cierre · VD-49 (efectivo sin caja, D32) y VD-50 (doble cobro, D29)
 
 **QUÉ HICE**

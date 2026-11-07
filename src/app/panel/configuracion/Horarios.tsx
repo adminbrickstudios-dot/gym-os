@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { DIAS, textoCierre, type Agenda, type Franja } from "@/lib/horarios";
-import { anularCierre, crearCierre, guardarHorarios } from "./acciones";
+import { anularCierre, crearCierre, guardarHorarios, previsualizarCierre, type PrevioCierre } from "./acciones";
 
 export type CierrePanel = {
   cierre_id: string; desde: string; hasta: string; motivo: string; compensa: boolean; sede: string | null;
@@ -69,21 +69,30 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
   const [motivo, setMotivo] = useState("");
-  const [compensa, setCompensa] = useState(true);
+  const [previo, setPrevio] = useState<PrevioCierre | null>(null);   // VD-57: el aviso antes de confirmar
   const [sedeCierre, setSedeCierre] = useState<string>("");
   const [anulando, setAnulando] = useState<{ id: string; motivo: string } | null>(null);
-  const cargar = () => {
+  // Primero el aviso (cuántos socios y cuántos días se corren, según la regla del gimnasio); recién después se carga.
+  const revisar = () => {
     if (!desde) { setMsjC((m) => ({ error: "Elegí el primer día que cierra.", n: m.n + 1 })); return; }
     if (!motivo.trim()) { setMsjC((m) => ({ error: "Escribí el motivo (lo ven los socios): por ejemplo “Feriado” o “Vacaciones”.", n: m.n + 1 })); return; }
     empezar(async () => {
-      const r = await crearCierre({ desde, hasta: hasta || desde, motivo, compensa: sedeCierre ? false : compensa, sedeId: sedeCierre || null });
+      const r = await previsualizarCierre({ desde, hasta: hasta || desde, sedeId: sedeCierre || null });
+      if (r.error || !r.previo) { setMsjC((m) => ({ error: r.error ?? "No se pudo revisar el cierre", n: m.n + 1 })); return; }
+      setMsjC((m) => ({ n: m.n }));
+      setPrevio(r.previo);
+    });
+  };
+  const cargar = () => {
+    empezar(async () => {
+      const r = await crearCierre({ desde, hasta: hasta || desde, motivo, sedeId: sedeCierre || null });
       if (r.error || !r.cierres) { setMsjC((m) => ({ error: r.error ?? "No se pudo cargar", n: m.n + 1 })); return; }
       const lista = r.cierres as CierrePanel[];
       setCierres(lista); if (r.agenda) setAgenda(r.agenda as Agenda);
       const nuevo = lista.find((c) => c.desde === desde);
       const clases = nuevo?.clases_canceladas ?? 0;
       setMsjC((m) => ({ ok: `Listo: cerrado ${textoCierre({ desde, hasta: hasta || desde })}.${clases ? ` Se cancelaron ${clases} ${clases === 1 ? "clase" : "clases"} y se avisó en la app.` : ""}`, n: m.n + 1 }));
-      setDesde(""); setHasta(""); setMotivo(""); setCompensa(true); setSedeCierre("");
+      setDesde(""); setHasta(""); setMotivo(""); setSedeCierre(""); setPrevio(null);
     });
   };
   const confirmarAnular = () => {
@@ -175,13 +184,31 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
                 {sedes.map((x) => <option key={x.sede_id} value={x.sede_id}>Solo {x.sede}</option>)}
               </select></label>
           )}
-          <div className="sm:col-span-2">
-            <Interruptor etiqueta="🎁 Devolver los días a los socios"
-              ayuda={sedeCierre ? "Con una sola sede cerrada no se devuelven días (los socios pueden ir a otra)." : "A cada membresía se le suman los días cerrados, para que nadie pague por días que no pudo venir."}
-              checked={!sedeCierre && compensa} disabled={!!sedeCierre} onChange={(e) => setCompensa(e.target.checked)} />
-          </div>
-          <div className="sm:col-span-2"><button type="button" className="boton" onClick={cargar}>{ocupado ? "Cargando…" : "🚫 Cargar cierre"}</button></div>
+          <p className="sm:col-span-2 text-sm texto-tenue" data-regla-cierres-ayuda>
+            {sedeCierre
+              ? "Con una sola sede cerrada no se suman días al vencimiento (los socios pueden ir a otra)."
+              : "Si los días cerrados se suman al vencimiento de los socios lo decide la regla del gimnasio (Configuración → Reglas → Días cerrados). Antes de cargar te decimos a cuántos socios les corre el vencimiento."}
+          </p>
+          <div className="sm:col-span-2"><button type="button" className="boton" onClick={revisar} data-revisar-cierre>{ocupado && !previo ? "Revisando…" : "🚫 Cargar cierre"}</button></div>
         </fieldset>
+        {previo && (
+          <div className="tarjeta p-4 space-y-3 border-2 border-[var(--acento)]" role="group" aria-label="Confirmar el cierre" data-previo-cierre={previo.suma_dias ? "suma" : "no-suma"}>
+            <p className="font-semibold" data-previo-texto>
+              {previo.suma_dias
+                ? `🎁 Esto corre el vencimiento de ${previo.socios} ${previo.socios === 1 ? "socio" : "socios"} ${previo.dias} ${previo.dias === 1 ? "día" : "días"}.`
+                : "Esto no corre ningún vencimiento: el gimnasio no suma los días cerrados."}
+            </p>
+            <p className="text-sm texto-suave">
+              {previo.suma_dias
+                ? "Se les suman los días cerrados a quienes estaban cubiertos esos días (no a los que ya habían vencido). Si lo anulás, vuelve todo como estaba."
+                : "Para que los días cerrados se sumen, el dueño cambia la regla en Configuración → Reglas → Días cerrados, antes de cargar el cierre."}
+              {" "}Se cancelan las clases de esos días y se avisa en la página y en la app.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="boton boton-principal" disabled={ocupado} onClick={cargar} data-confirmar-cierre>{ocupado ? "Cargando…" : "✅ Confirmar y cargar el cierre"}</button>
+              <button type="button" className="boton-texto" disabled={ocupado} onClick={() => setPrevio(null)}>Cambiar algo</button>
+            </div>
+          </div>)}
         {msjC.error && <Mensaje tipo="error">{msjC.error}</Mensaje>}
         {msjC.ok && <Mensaje tipo="exito">{msjC.ok}</Mensaje>}
 

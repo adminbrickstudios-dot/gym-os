@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { anularVenta, resolverAnulacion, type Venta } from "@/app/panel/ventas-acciones";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
@@ -21,6 +22,7 @@ export function FilaVenta({ v, zona, conSocio = false }: { v: Venta; zona: strin
           <span className="block truncate">{conSocio && v.socio ? `${v.socio} · ` : ""}{v.detalle ?? "Venta"}</span>
           <span className="block text-sm texto-tenue">{fechaCorta(v.fecha, zona)} · {v.medios.map((m) => MEDIO[m] ?? m).join(" + ") || "sin pago"}{v.cobro ? ` · cobró ${v.cobro}` : ""}</span>
         </span>
+        {v.recibo_n != null && <Link href={`/panel/recibo/${v.venta_id}`} className="boton boton-chico" data-ver-recibo>🧾 Recibo</Link>}
         {anulada && <span className="pildora pildora-rojo">Anulada</span>}
         {v.estado === "pendiente" && <span className="pildora pildora-azul">Esperando aprobación</span>}
         {!anulada && !v.pedido && !anulando && <button type="button" className="boton boton-chico" onClick={() => setAnulando(true)}>↩️ Anular</button>}
