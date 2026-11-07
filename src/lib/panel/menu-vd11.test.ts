@@ -34,7 +34,7 @@ describe("VD-11 · menú nuevo", () => {
 
   it("cada rol ve su menú y las apagadas no aparecen", () => {
     const claves = (rol: Parameters<typeof seccionesPara>[0], ap: string[] = []) => seccionesPara(rol, ap).map((s) => s.clave);
-    expect(claves("profe")).toEqual(["tareas", "fichar", "clases", "incidentes", "rutinas"]);
+    expect(claves("profe")).toEqual(["tareas", "fichar", "clases", "incidentes", "maquinas", "rutinas", "pt"]);
     expect(claves("recepcion")).not.toContain("gastos");
     expect(claves("recepcion")).not.toContain("control");
     expect(claves("recepcion")).toContain("prospectos");

@@ -20,6 +20,8 @@ import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
 import { FilaTarea, type Tarea } from "./tareas/Tareas";
 import { UltimasEntradas, type EntradaVivo } from "@/components/panel/UltimasEntradas";
+import { FueraDeServicio, type MaquinaFuera } from "@/components/panel/FueraDeServicio";
+import { LockersVencen, type LockerVence } from "@/components/panel/LockersVencen";
 
 // VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
 type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
@@ -85,7 +87,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo, fichaje] = await Promise.all([
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen] = await Promise.all([
       rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? rpcLectura<NumerosElegidos>("numeros_inicio", { p_gimnasio_id: panel.gimnasio.id }) : null,
@@ -119,6 +121,10 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
       rol !== "profe" ? rpcLectura<EntradaVivo[]>("ultimas_entradas", { p_gimnasio_id: panel.gimnasio.id, p_limite: 8 }) : [],
       // VD-53: el botón de fichar, solo si el gimnasio usa fichaje y esta persona ficha.
       rutaDisponible("/panel/fichar", rol, panel.secciones_apagadas) ? rpcLectura<MiFichaje>("mi_fichaje", { p_gimnasio_id: panel.gimnasio.id }) : null,
+      // VD-54: las máquinas fuera de servicio hoy (dueño, encargado y recepción; la base devuelve vacío con la sección apagada).
+      rol !== "profe" && !panel.secciones_apagadas.includes("maquinas") ? rpcLectura<MaquinaFuera[]>("maquinas_fuera_de_servicio", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      // VD-55: lockers que vencen esta semana (la base devuelve vacío con la sección apagada).
+      rol !== "profe" && !panel.secciones_apagadas.includes("lockers") ? rpcLectura<LockerVence[]>("lockers_vencen_semana", { p_gimnasio_id: panel.gimnasio.id }) : [],
     ]);
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
     const hacerHoy = paraHacer.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));
@@ -145,6 +151,8 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
             </p>
           ) : null;
         })()}
+        <FueraDeServicio items={maquinasFuera} zona={zona} />
+        <LockersVencen items={lockersVencen} />
         <NovedadesGymOS novedades={novedadesGymOS} />
         {pasos && <PrimerosPasos datos={pasos} />}
         {/* VD-43: socios de ejemplo (y su aviso fijo) · VD-42: dos pasos y alertas de seguridad. Solo el dueño. */}

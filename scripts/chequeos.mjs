@@ -71,6 +71,12 @@ const EJECUTABLES = {
     "public.marcar_no_escribirle", "public.no_escribirle_socio",   // VD-46N
     "public.ex_socios",   // VD-46O
     "public.anular_devolucion", "public.devoluciones_socio", "public.reglas_beneficios",   // VD-46U
+    "public.crear_maquina", "public.dar_de_baja_maquina", "public.reportar_falla", "public.asignar_responsable_falla", "public.arreglar_falla",   // VD-54
+    "public.preparar_foto_falla", "public.confirmar_foto_falla", "public.foto_falla", "public.maquinas_panel", "public.historial_maquina", "public.maquinas_fuera_de_servicio",
+    "public.crear_locker", "public.crear_lockers_serie", "public.dar_de_baja_locker", "public.guardar_tarifa_locker", "public.alquilar_locker",   // VD-55
+    "public.renovar_alquiler_locker", "public.liberar_locker", "public.lockers_panel", "public.mi_locker", "public.lockers_vencen_semana",
+    "public.guardar_pack_pt", "public.guardar_config_pt", "public.cargar_franjas_pt", "public.quitar_franja_pt", "public.reservar_sesion_pt",   // VD-58
+    "public.cancelar_sesion_pt", "public.marcar_sesion_pt", "public.agenda_pt", "public.pt_socio", "public.sesiones_dictadas_pt",
   ]),
 };
 
