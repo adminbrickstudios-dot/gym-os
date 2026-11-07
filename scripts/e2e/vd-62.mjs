@@ -198,7 +198,9 @@ try {
     ok(`un video que no es .mp4/.webm se rechaza: “${(await vid.locator('[role="alert"]').innerText()).trim().slice(0, 70)}”`);
     await campo.fill("https://ejemplo.invalid/portada.mp4");
     await vid.getByRole("button", { name: "Guardar video" }).click();
-    await vid.getByText("Guardado.").waitFor({ timeout: 30000 });
+    // El botón se apaga recién cuando el guardado volvió (antes quedaba el "Guardado." del paso anterior).
+    await vid.getByRole("button", { name: "Guardar video" }).waitFor({ state: "attached" });
+    await vid.page().waitForFunction(() => [...document.querySelectorAll("[data-video-portada-panel] button")].some((x) => /Guardar video/.test(x.textContent) && x.disabled), null, { timeout: 30000 });
     const v = await pagina(b, COMPU);
     await v.goto(`${G}/`);
     await v.locator("[data-video-portada]").waitFor({ state: "attached", timeout: 60000 }).catch(() => falla("la portada no muestra el video que cargó el dueño"));
@@ -206,7 +208,9 @@ try {
     // Se deja como estaba: sin video.
     await campo.fill("");
     await vid.getByRole("button", { name: "Guardar video" }).click();
-    await vid.getByText("Guardado.").waitFor({ timeout: 30000 });
+    // El botón se apaga recién cuando el guardado volvió (antes quedaba el "Guardado." del paso anterior).
+    await vid.getByRole("button", { name: "Guardar video" }).waitFor({ state: "attached" });
+    await vid.page().waitForFunction(() => [...document.querySelectorAll("[data-video-portada-panel] button")].some((x) => /Guardar video/.test(x.textContent) && x.disabled), null, { timeout: 30000 });
     await v.reload();
     chequear(await v.locator("[data-video-portada]").count() === 0, "sin link, la portada vuelve a la foto", "quedó el video después de borrar el link");
   }
