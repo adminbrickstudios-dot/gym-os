@@ -47,8 +47,13 @@ try {
     await capturar(p, `vd61-${tam}-socio`);
 
     // 2 · Google: aparece solo con las credenciales (la app local lo prende con ENTRAR_CON_GOOGLE=1).
-    const conGoogle = process.env.ENTRAR_CON_GOOGLE === "1";
-    chequear((await p.locator("[data-entrar-google]").count() === 1) === conGoogle, `${tam} · botón de Google ${conGoogle ? "visible" : "oculto"} según las credenciales`, `${tam} · el botón de Google no coincide con ENTRAR_CON_GOOGLE`);
+    // La variable la lee el SERVIDOR de la app, no este script: si acá está definida (ENTRAR_CON_GOOGLE=1 o 0) se exige que coincida;
+    // si no, se acepta cualquiera de los dos estados pero, si el botón está, tiene que ser el link real a /auth/google.
+    const hayGoogle = await p.locator("[data-entrar-google]").count() === 1;
+    const declarada = process.env.ENTRAR_CON_GOOGLE;
+    if (declarada !== undefined) chequear(hayGoogle === (declarada === "1"), `${tam} · botón de Google ${hayGoogle ? "visible" : "oculto"} según las credenciales`, `${tam} · el botón de Google (${hayGoogle ? "visible" : "oculto"}) no coincide con ENTRAR_CON_GOOGLE=${declarada}`);
+    else if (hayGoogle) chequear(await p.locator("[data-entrar-google] a").getAttribute("href") === "/auth/google" && await sinDesborde(p), `${tam} · botón de Google visible, con su link y sin desborde`, `${tam} · el botón de Google está mal armado`);
+    else ok(`${tam} · botón de Google oculto (sin credenciales en el servidor)`);
 
     // 3 · Código malo / vencido: avisa con el mensaje común, deja el cursor en el código y ofrece pedir otro.
     await p.fill("input[name=telefono]", `000 ${String(Date.now()).slice(-7)}`);
@@ -152,6 +157,7 @@ try {
     if (tam === "celu") await capturar(pc, "vd61-celu-atiende");
     await pc.locator("[data-cambiar-persona]").click();
     await pc.waitForURL(/\/panel\/pin/, { timeout: 30000 });
+    await pc.locator("[data-teclado-pin]").waitFor({ timeout: 30000 }).catch(() => {});
     chequear(await pc.locator("[data-teclado-pin]").count() === 1, `${tam} · “Cambiar” abre el teclado del PIN sin cerrar la sesión`, `${tam} · “Cambiar” no abrió el PIN`);
     chequear(await sinDesborde(pc), `${tam} · PIN sin desborde`, `${tam} · PIN se desborda`);
     if (pc.errores.length) falla(`${tam} recepción: ${pc.errores.join(" | ")}`);
