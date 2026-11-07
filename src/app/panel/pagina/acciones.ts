@@ -35,6 +35,16 @@ export async function guardarPruebaSocial(socios: boolean, puntaje: string, cant
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** VD-62: el video de la portada (link directo a .mp4/.webm; la base lo valida). */
+export async function guardarVideoPortada(url: string): Promise<{ error?: string; url?: string | null }> {
+  const panel = await contextoPanel();
+  try {
+    const guardado = await rpc<string | null>("guardar_video_portada", { p_gimnasio_id: panel.gimnasio.id, p_url: url });
+    revalidatePath("/", "layout");
+    return { url: guardado };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** COM-11: IDs del píxel de Meta y de Google Analytics (la base los valida). */
 export async function guardarMedicion(pixel: string, ga: string): Promise<{ error?: string; medicion?: import("./MedicionPagina").MedicionPanel }> {
   const panel = await contextoPanel();

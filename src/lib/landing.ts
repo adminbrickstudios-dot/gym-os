@@ -47,7 +47,9 @@ export type EquipoPublico = { equipo_id: string; nombre: string; rol: string; ti
 export type LandingPublicada = {
   publicada: true;
   marca: Marca;
-  portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string };
+  portada: { titulo: string; bajada: string | null; foto_path: string | null; boton_texto: string;
+    /** VD-62: link directo a un .mp4/.webm que el dueño pegó; se muestra mudo y en bucle, con la foto de fondo. */
+    video_url?: string | null };
   contacto: { whatsapp: string | null; mensaje_whatsapp: string; instagram: string | null; email: string | null };
   mostrar_precios: boolean;
   /** Se puede hacer socio desde la página (0032). */

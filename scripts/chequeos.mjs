@@ -53,7 +53,7 @@ const EJECUTABLES = {
     "public.cerrar_horario", "public.clase_detalle", "public.mi_socio",
     "public.admin_entrar_gimnasio", "public.admin_salir_gimnasio", "public.estado_soporte", "public.soportes_del_gimnasio", "public.admin_soportes",
     "public.admin_salud_v2", "public.admin_uso_semanal", "public.admin_metricas", "public.pedir_ayuda_brik", "public.admin_ayudas",
-    "public.admin_resolver_ayuda", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.admin_pedidos_demo", "public.admin_atender_demo", "public.admin_guardar_contacto_plataforma", "public.guardar_video_portada", "public.admin_guardar_marca", "public.admin_notas", "public.admin_agregar_nota","public.admin_gimnasio", "public.admin_agregar_persona",
+    "public.admin_resolver_ayuda", "public.pedir_demo_brik", "public.planes_brik_publicos", "public.admin_pedidos_demo", "public.admin_atender_demo", "public.admin_guardar_contacto_plataforma", "public.contacto_plataforma_publico", "public.guardar_video_portada", "public.admin_guardar_marca", "public.admin_notas", "public.admin_agregar_nota","public.admin_gimnasio", "public.admin_agregar_persona",
     "public.admin_agregar_dominio", "public.admin_quitar_dominio", "public.cuenta_para_nueva_clave", "public.persona_para_dar_acceso",
     "public.servicios_gimnasio", "public.guardar_servicio", "public.asignar_servicio", "public.ajustes_planes", "public.guardar_ajustes_plan", "public.ordenar_planes",
     "public.productos_mostrador", "public.guardar_ficha_producto", "public.preparar_foto_producto", "public.confirmar_foto_producto", "public.quitar_foto_producto",

@@ -7,7 +7,9 @@ import { traerAgenda, traerEventos, traerLanding, traerMedicion, urlMarca } from
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 import { PlataformaLanding } from "@/components/landing/Plataforma";
-import { planesBrikPublicos } from "@/lib/plataforma-venta";
+import { contactoPlataforma, planesBrikPublicos } from "@/lib/plataforma-venta";
+import { linkWhatsapp } from "@/lib/landing-textos";
+import capturasGymos from "@/lib/capturas-gymos.json";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
 //   plataforma → la página de Gym OS
@@ -26,9 +28,14 @@ const landingDelHost = cache(async () => {
 export async function generateMetadata(): Promise<Metadata> {
   const r = await landingDelHost();
   if (r.tipo === "plataforma") {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+    const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
     const descripcion = "Gym OS responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.";
     return { title: { absolute: "Gym OS · El sistema para tu gimnasio" }, description: descripcion,
-             openGraph: { type: "website", title: "Gym OS", description: descripcion, locale: "es_AR" } };
+             openGraph: { type: "website", title: "Gym OS", description: descripcion, siteName: "Gym OS", locale: "es_AR", images: [{ url: `${origen}/og`, width: 1200, height: 630, alt: "Gym OS" }] },
+             twitter: { card: "summary_large_image", title: "Gym OS", description: descripcion, images: [`${origen}/og`] },
+             alternates: { canonical: `${origen}/` } };
   }
   const { marca } = r.landing;
   const icono = urlMarca(marca.favicon_path ?? marca.logo_path);
@@ -74,5 +81,17 @@ export default async function Inicio() {
   }
   // VD-26: la plataforma muestra la página para venderle Gym OS a los dueños. Los precios salen de los planes
   // que BRIK dejó activos en el super admin; si no hay ninguno, no se muestra ningún precio.
-  return <PlataformaLanding planes={await planesBrikPublicos()} />;
+  const [planes, contacto] = await Promise.all([planesBrikPublicos(), contactoPlataforma()]);
+  // Datos para Google: el producto y, solo si BRIK cargó planes, sus precios (nunca uno inventado).
+  const ld = {
+    "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Gym OS", applicationCategory: "BusinessApplication", operatingSystem: "Web",
+    description: "Sistema de gestión para gimnasios: control de acceso, cobros y retención de socios.",
+    ...(planes.length ? { offers: planes.map((p) => ({ "@type": "Offer", name: p.nombre, price: Number(p.precio_mensual), priceCurrency: "ARS" })) } : {}),
+  };
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
+      <PlataformaLanding planes={planes} linkDemo={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />
+    </>
+  );
 }

@@ -174,3 +174,12 @@ export const agregarNotaBrik = async (gimnasioId: string, texto: string) =>
 
 // ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──
 export const atenderDemo = async (id: string) => hechoAdmin(() => rpc("admin_atender_demo", { p_id: id }), ["/admin"]);
+
+// ── VD-62: el WhatsApp de la página de Gym OS ("Pedí una demo") ──
+export async function guardarContactoPlataforma(whatsapp: string, mensaje: string): Promise<{ error?: string; contacto?: { whatsapp: string | null; mensaje_demo: string } }> {
+  try {
+    const contacto = await rpc<{ whatsapp: string | null; mensaje_demo: string }>("admin_guardar_contacto_plataforma", { p_whatsapp: whatsapp, p_mensaje: mensaje });
+    revalidatePath("/admin"); revalidatePath("/");
+    return { contacto };
+  } catch (e) { return { error: (e as Error).message }; }
+}
