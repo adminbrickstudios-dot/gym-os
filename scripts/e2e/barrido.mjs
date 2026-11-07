@@ -17,7 +17,7 @@ const PROHIBIDO = {
           "/panel/caja", "/panel/transferencias", "/panel/planes", "/panel/equipo", "/panel/configuracion",
           "/panel/pagina", "/panel/prospectos", "/panel/avisos", "/panel/resumen", "/panel/resultado", "/panel/equipo/actividad", "/panel/documentos", "/panel/eventos", "/panel/cupones"],
 };
-const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso/i;
+const SIN_PERMISO = /No tenés acceso|Tu rol no tiene acceso|Sin permiso|no tiene acceso|sección está apagada/i;
 const soloRol = process.argv.find((a) => a.startsWith("--rol="))?.slice(6);
 
 let b = await navegador();

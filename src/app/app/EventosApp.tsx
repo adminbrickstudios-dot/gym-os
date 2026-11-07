@@ -52,7 +52,7 @@ function Tarjeta({ socioId, e }: { socioId: string; e: EventoApp }) {
           {error && <Mensaje tipo="error">{error}</Mensaje>}
           <div className="flex flex-wrap gap-2">
             {!e.anotado && !e.en_espera_pos && (e.quedan > 0 || e.lista_espera) && (
-              <button type="button" className="boton boton-principal" disabled={ocupado} data-anotarme
+              <button type="button" className="boton" disabled={ocupado} data-anotarme
                 onClick={() => empezar(async () => { const r = await anotarmeEvento(socioId, e.evento_id); setError(r.error ?? null); })}>
                 {ocupado ? "Anotando…" : e.quedan > 0 ? "🎟️ Anotarme" : "⏳ Ponerme en la lista de espera"}
               </button>

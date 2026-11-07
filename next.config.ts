@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   // Logos y fotos se suben por una acción del servidor: hasta 2 MB por archivo
   // (lo decide la base) más lo que agrega el formulario.
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
+  // En desarrollo no mirar las copias de trabajo de los agentes ni las carpetas locales: cada archivo que cambiaban recompilaba toda la app.
+  webpack: (config, { dev }) => {
+    if (dev) config.watchOptions = { ...config.watchOptions, ignored: ["**/node_modules/**", "**/.git/**", "**/.claude/worktrees/**", "**/.local/**", "**/.next*/**"] };
+    return config;
+  },
 };
 
 export default nextConfig;
