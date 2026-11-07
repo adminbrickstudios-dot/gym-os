@@ -57,6 +57,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
 
         <ul className="space-y-2" aria-label="Mi cuenta">
           {compra?.habilitado && compra.planes.length > 0 && fila(`/app/plan${q}`, "🔄", "Cambiar de plan o comprar un pase", "Con lo que te queda a favor", "plan")}
+          {fila(`/app/info${q}`, "ℹ️", "Info del gimnasio", "Horarios, reglamento, contacto y cómo llegar", "info")}
           {fila(`/app/historial${q}`, "🧾", "Mis pagos y cuándo vine", "Pagos, recibos y asistencia", "historial")}
           {fila(`/app/novedades${q}`, "🔔", "Novedades", "Avisos del gimnasio y de tu cuenta", "novedades")}
           {fila(`/app/cuenta${q}`, "⏸️", "Mi membresía", "Pausar, dar de baja, contraseña", "cuenta")}
@@ -66,6 +67,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
           <h2 id="mas" className="titulo text-2xl">Más</h2>
           <ul className="space-y-2">
             {mensajes?.activo && fila(`/app/mensajes${q}`, "💬", "Escribile al gimnasio", mensajes.sin_leer > 0 ? (mensajes.sin_leer === 1 ? "1 respuesta nueva" : `${mensajes.sin_leer} respuestas nuevas`) : "Una consulta, una queja o algo que perdiste", "mensajes")}
+            {fila(`/app/ayuda${q}`, "❓", "Ayuda", "Preguntas cortas y cómo se hace", "ayuda")}
             {referido != null && fila(`/app${q}#referir`, "🤝", "Invitá a un amigo", "Tu link para que se anote", "referir")}
             {invitados != null && fila(`/app${q}`, "🎫", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
             <li><a href={`/app/mis-datos${q}`} download className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila="mis-datos">

@@ -14,7 +14,7 @@ export function NavSocio({ clases, rutina }: { clases: boolean; rutina: boolean 
     { clave: "inicio", ruta: "/app", emoji: "🏠", titulo: "Inicio", activa: (p) => p === "/app" },
     clases && { clave: "clases", ruta: "/app/clases", emoji: "🗓️", titulo: "Clases", activa: (p) => p.startsWith("/app/clases") },
     rutina && { clave: "rutina", ruta: "/app/rutina", emoji: "💪", titulo: "Rutina", activa: (p) => p.startsWith("/app/rutina") },
-    { clave: "yo", ruta: "/app/yo", emoji: "👤", titulo: "Yo", activa: (p) => /^\/app\/(yo|historial|cuenta|novedades|pago|mensajes)/.test(p) },
+    { clave: "yo", ruta: "/app/yo", emoji: "👤", titulo: "Yo", activa: (p) => /^\/app\/(yo|historial|cuenta|novedades|pago|mensajes|info|ayuda)/.test(p) },
   ];
   const pestanas = todas.filter((x): x is Pestana => !!x);
   return (
