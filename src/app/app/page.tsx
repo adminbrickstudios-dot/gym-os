@@ -74,7 +74,9 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       // COM-13: su grado (cinturón) en las actividades que los usan.
       rpc<GradosSocio>("grados_socio", { p_socio_id: s.socio_id }),
     ]);
-    const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
+    // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
+    const registraSalida = qrPared ? (await rpc<string>("registra_salida", { p_gimnasio_id: g.id }).catch(() => "no")) !== "no" : false;
+    const q =yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     // VD-23: vencido o por vencer, pagar va arriba de todo (pegado al semáforo); al día, más abajo.
     const bloquePago = (
       <>
@@ -125,7 +127,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
         {progreso && <ProgresoInicio p={progreso} />}
 
-        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} />}
+        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (

@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
-import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
+import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
+import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, registrarSalida, terminarPausa, veredicto, type ResultadoSalida, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
 import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmergencia";
@@ -48,7 +49,11 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
-  const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string }) | null>(null);
+  const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string; socioId?: string }) | null>(null);
+  // VD-48: la salida (si el gimnasio la registra): DNI + S o la tecla S con el socio elegido.
+  const [salidaModo, setSalidaModo] = useState<RegistrarSalida>("no");
+  const [salio, setSalio] = useState<(ResultadoSalida & { nombre: string }) | null>(null);
+  useEffect(() => { void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); }); }, []);
   const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
   const [firmar, setFirmar] = useState<string | null>(null);
@@ -97,7 +102,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     if (r.v!.puede) {
       const e = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
       if (e.error) { setError(e.error); return; }
-      setHecho({ ...e.r!, nombre: s.nombre });
+      setHecho({ ...e.r!, nombre: s.nombre, socioId: s.socio_id });
       campo.current?.focus();
       return;
     }
@@ -128,7 +133,25 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     if (!elegido) return;
     const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
     if (r.error) { setError(r.error); return; }
-    setHecho({ ...r.r!, nombre: elegido.nombre });
+    setHecho({ ...r.r!, nombre: elegido.nombre, socioId: elegido.socio_id });
+    reiniciar();
+  });
+  const marcarSalida = (socioId: string, nombre: string) => empezar(async () => {
+    const r = await registrarSalida(socioId, sedeId);
+    if (r.error || !r.r) { setError(r.error ?? "No se pudo marcar la salida"); return; }
+    setError(null); setHecho(null); setSalio({ ...r.r, nombre });
+    if (sonido) sonar(r.r.registrada ? "verde" : "amarillo");
+    reiniciar();
+  });
+  const salirConDni = (dni: string) => empezar(async () => {
+    const r = await buscarSociosRapido(dni);
+    if (r.error) { setError(r.error); return; }
+    const s = (r.socios ?? [])[0];
+    if (!s) { setError(`No hay nadie con el DNI ${dni}.`); return; }
+    const p = await registrarSalida(s.socio_id, sedeId);
+    if (p.error || !p.r) { setError(p.error ?? "No se pudo marcar la salida"); return; }
+    setError(null); setHecho(null); setSalio({ ...p.r, nombre: s.nombre });
+    if (sonido) sonar(p.r.registrada ? "verde" : "amarillo");
     reiniciar();
   });
 
@@ -155,6 +178,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       if (forzando || ((e.target as HTMLElement)?.tagName === "INPUT" && e.target !== campo.current)) return;
       if (e.key === "Escape") { e.preventDefault(); reiniciar(); }
       else if (e.key === "Enter" && v.puede && !ocupado && (e.target as HTMLElement)?.tagName !== "BUTTON" && (e.target as HTMLElement)?.tagName !== "A") { e.preventDefault(); anotar(); }
+      else if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !ocupado && e.target !== campo.current && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); marcarSalida(elegido.socio_id, elegido.nombre); }
       // Una letra con el foco en otro lado: va al buscador, reemplazando lo que había (el onChange cierra el veredicto).
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== campo.current) { campo.current?.focus(); campo.current?.select(); }
     };
@@ -166,8 +190,12 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     <div className="space-y-5">
       <CartelEmergencia e={emergencia} />
       <input
-        ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); }}
+        ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); setSalio(null); }}
         onKeyDown={(e) => {
+          // VD-48: DNI + S marca la salida (solo si el gimnasio la registra).
+          if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !e.ctrlKey && !e.metaKey && !e.altKey && /^\d{6,9}$/.test(texto.replace(/\./g, "").trim())) {
+            e.preventDefault(); if (!ocupado) salirConDni(texto.replace(/\./g, "").trim()); return;
+          }
           if (e.key === "Enter" && ES_QR.test(texto.trim())) { e.preventDefault(); porQr(texto); return; }   // lector USB
           if (e.key === "Enter" && !elegido && conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(texto.trim())) {
             e.preventDefault(); const primero = socios[0]; porLlavero(texto, () => { if (primero) elegir(primero); }); return;
@@ -191,6 +219,16 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
           {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
+          {hecho.repetido && hecho.puede_salir && hecho.socioId && (
+            <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} data-ventana-salida-boton
+              onClick={() => marcarSalida(hecho.socioId!, hecho.nombre)}>👋 Marcar salida</button>
+          )}
+        </div>
+      )}
+      {salio && (
+        <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"}>
+          <span className="text-3xl" aria-hidden>{salio.registrada ? "👋" : "ℹ️"}</span>
+          <p className="text-lg font-semibold min-w-0 flex-1">{salio.registrada ? salio.texto : `${salio.nombre}: ${salio.texto}`}</p>
         </div>
       )}
       {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -255,6 +293,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
               </>
             )}
             <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>
+            {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton>👋 Salida</button>}
             <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
           </div>
 

@@ -37,7 +37,8 @@ export async function entradasDesde(gimnasioId: string, desde: string | null): P
 }
 
 /** VD-3: cuánto dura una visita y cuándo se avisa de un posible préstamo (por gimnasio). */
-export type ConfigVisita = { visita_horas: number; antiprestamo_minutos: number; avisar_en_vivo: boolean };
+export type RegistrarSalida = "no" | "opcional" | "obligatoria";
+export type ConfigVisita = { visita_horas: number; antiprestamo_minutos: number; avisar_en_vivo: boolean; registrar_salida: RegistrarSalida };
 
 export async function leerConfigVisita(): Promise<{ config?: ConfigVisita; error?: string }> {
   try {

@@ -136,7 +136,7 @@ test("la configuración: el dueño la cambia, todos la leen, y se valida", async
   const guardar = (usuario, datos) => como(usuario, async () => (await t.q(`select public.guardar_config_visita($1, $2::jsonb) c`, [t.g, JSON.stringify(datos)]))[0].c);
   const leer = (usuario) => como(usuario, async () => (await t.q(`select public.config_visita($1) c`, [t.g]))[0].c);
   const r = await guardar(uDueno, { visita_horas: 3, antiprestamo_minutos: 30 });
-  assert.deepEqual(r, { visita_horas: 3, antiprestamo_minutos: 30, avisar_en_vivo: true });
+  assert.deepEqual(r, { visita_horas: 3, antiprestamo_minutos: 30, avisar_en_vivo: true, registrar_salida: "no" });   // VD-48: la salida arranca apagada
   assert.deepEqual(await leer(uRec), r);
   await como(uRec, () => t.falla(() => t.q(`select public.guardar_config_visita($1, '{"visita_horas": 1}'::jsonb)`, [t.g]), /permiso|rol|acceso/i));
   await como(uDueno, () => t.falla(() => t.q(`select public.guardar_config_visita($1, '{"visita_horas": 30}'::jsonb)`, [t.g]), /de 0 a 24/));

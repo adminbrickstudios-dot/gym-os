@@ -9,11 +9,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "@/app/panel/entrada/acciones";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
-import { type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
+import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
@@ -36,7 +36,7 @@ export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 const ES_QR = /^GYMOS1\./;
 const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
 
-type Paso = "escribir" | "veredicto" | "anotado" | "alta";
+type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio";
 /** VD-6 · El alta rápida dentro de la ventana: datos → plan → (cobro en la hoja) → entra. */
 type Alta = {
   dni: string; nombre: string; apellido: string; telefono: string; plan: string;
@@ -128,6 +128,12 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [motivo, setMotivo] = useState("");
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [sonido, setSonido] = useState(true);
+  // VD-48: ¿el gimnasio registra la salida? (se lee de la base la primera vez que se abre la ventana; null = todavía no se sabe)
+  const [salidaModo, setSalidaModo] = useState<RegistrarSalida | null>(null);
+  const [salio, setSalio] = useState<(ResultadoSalida & { nombre: string }) | null>(null);
+  const salidaModoRef = useRef<RegistrarSalida | null>(null);
+  const salirRef = useRef<() => void>(() => {});
+  const salirConDniRef = useRef<(dni: string) => void>(() => {});
   const [ocupado, empezar] = useTransition();
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
@@ -204,7 +210,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   const reiniciar = useCallback((inicial = "", enfocar = true) => {
     setPaso("escribir"); setTexto(inicial); setSocios([]); setListaPara(""); setMarcado(0); setNadie(null); setElegido(null);
-    setV(null); setGuia(null); setApto(null); setFirmar(null); setEventosHoy([]); setHecho(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
+    setV(null); setGuia(null); setApto(null); setFirmar(null); setEventosHoy([]); setHecho(null); setSalio(null); setError(null); setForzando(false); setMotivo(""); setVia("recepcion"); setCobrado(null); setAlta(null);
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
@@ -238,6 +244,36 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       anotado(r.r!, elegido);
     });
   }, [elegido, sedeId, via, anotado]);
+
+  // VD-48 · La salida: la base dice "Chau Juan, estuviste 1 h 20" o "No tenía entrada abierta" (eso no es un error).
+  useEffect(() => {
+    if (!abierta || salidaModo !== null) return;
+    void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); });
+  }, [abierta, salidaModo]);
+  const marcarSalida = useCallback((s: ResultadoSocio) => {
+    if (trabajando.current) return;
+    trabajando.current = true;
+    empezar(async () => {
+      const r = await registrarSalida(s.socio_id, sedeId);
+      trabajando.current = false;
+      if (r.error || !r.r) { setError(r.error ?? "No se pudo marcar la salida"); return; }
+      setError(null); setElegido(s);
+      setSalio({ ...r.r, nombre: s.nombre });
+      setPaso("salio"); setSocios([]); setTexto(""); setNadie(null);
+      if (sonido) sonar(r.r.registrada ? "verde" : "amarillo");
+    });
+  }, [sedeId, sonido]);
+  // DNI + S: se busca por el DNI y se marca la salida de esa persona.
+  const salirConDni = useCallback((dniEscrito: string) => {
+    if (trabajando.current) return;
+    empezar(async () => {
+      const r = await buscarSociosRapido(dniEscrito);
+      if (r.error) { setError(r.error); return; }
+      const lista = r.socios ?? [];
+      if (lista.length === 0) { setNadie(dniEscrito); return; }
+      marcarSalida(lista[0]);
+    });
+  }, [marcarSalida]);
 
   // QR (cámara no: acá solo el lector USB) o llavero: si puede entrar se anota solo; si no, queda el veredicto con el porqué.
   const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
@@ -326,10 +362,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   // Anotado: se cierra sola a los N segundos (o nunca).
   useEffect(() => {
-    if (!abierta || paso !== "anotado" || cfg.cerrar_sola_seg === 0) return;
+    if (!abierta || (paso !== "anotado" && paso !== "salio") || cfg.cerrar_sola_seg === 0) return;
     const id = setTimeout(() => cerrar(), cfg.cerrar_sola_seg * 1000);
     return () => clearTimeout(id);
-  }, [abierta, paso, hecho, cfg.cerrar_sola_seg, cerrar]);
+  }, [abierta, paso, hecho, salio, cfg.cerrar_sola_seg, cerrar]);
 
   // Al cambiar de pantalla (ficha, cobrar…) la ventana se cierra.
   useEffect(() => { if (abiertaRef.current) cerrar(); }, [ruta, cerrar]);
@@ -376,11 +412,20 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         if (p === "alta") return;   // el alta tiene sus propios campos
         if (p === "escribir") {
           if (e.key.toLowerCase() === "a" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarAltaRef.current(nadieRef.current!); return; }
+          // VD-48: DNI + S = marcar la salida (solo si el gimnasio la registra)
+          if (e.key.toLowerCase() === "s" && salidaModoRef.current && salidaModoRef.current !== "no" && /^\d{6,9}$/.test(sinPuntos(textoRef.current).trim())) {
+            e.preventDefault(); salirConDniRef.current(sinPuntos(textoRef.current).trim()); return;
+          }
           if (imprimible) { e.preventDefault(); setTexto((x) => x + e.key); setTimeout(() => campo.current?.focus(), 0); }
           else if (e.key === "Enter" && textoRef.current.trim()) { e.preventDefault(); resolver(textoRef.current); }
           return;
         }
-        if (p === "anotado") { if (digito) { e.preventDefault(); reiniciar(e.key); } return; }
+        if (p === "salio") { if (digito) { e.preventDefault(); reiniciar(e.key); } return; }
+        if (p === "anotado") {
+          if (digito) { e.preventDefault(); reiniciar(e.key); }
+          else if (e.key.toLowerCase() === "s" && salidaModoRef.current && salidaModoRef.current !== "no" && t?.tagName !== "BUTTON") { e.preventDefault(); salirRef.current(); }
+          return;
+        }
         // Veredicto
         if (formandoRef.current) return;
         if (digito) { e.preventDefault(); reiniciar(e.key); return; }
@@ -389,6 +434,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         if (k === "c") { e.preventDefault(); cobrarRef.current?.click(); }
         else if (k === "f") { e.preventDefault(); fichaRef.current?.click(); }
         else if (k === "d") { e.preventDefault(); dejarRef.current(); }
+        else if (k === "s" && salidaModoRef.current && salidaModoRef.current !== "no") { e.preventDefault(); salirRef.current(); }
         return;
       }
 
@@ -419,6 +465,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
     puedeEnterRef.current = puedeAnotarConEnter; anotarRef.current = () => anotar();
     nadieRef.current = nadie; iniciarAltaRef.current = iniciarAlta;
+    salidaModoRef.current = salidaModo; salirRef.current = () => { if (elegido) marcarSalida(elegido); }; salirConDniRef.current = salirConDni;
     dejarRef.current = () => { if (v && !v.puede && !(esRecepcion && (guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue"))) { setForzando(true); void cupoDejarPasar().then(setCupo); } };
   });
 
@@ -599,6 +646,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 onKeyDown={(e) => {
                   if (e.code === "NumpadDecimal") { e.preventDefault(); return; }   // el punto del teclado numérico no va en un DNI
                   if (e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey && !e.altKey && dni) { e.preventDefault(); iniciarAlta(nadie!); }
+                  else if (e.key.toLowerCase() === "s" && !e.ctrlKey && !e.metaKey && !e.altKey && salidaModo && salidaModo !== "no" && /^\d{6,9}$/.test(sinPuntos(texto).trim())) {
+                    e.preventDefault(); if (!ocupado) salirConDni(sinPuntos(texto).trim());
+                  }
                   else if (e.key === "ArrowDown" && hayLista) { e.preventDefault(); setMarcado((m) => Math.min(m + 1, Math.min(socios.length, 3) - 1)); }
                   else if (e.key === "ArrowUp" && hayLista) { e.preventDefault(); setMarcado((m) => Math.max(m - 1, 0)); }
                   else if (e.key === "Enter") {
@@ -745,6 +795,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                     {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>}
                     <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}?desde=entrada`} className="boton" data-ventana-ficha
                       onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}>👤 Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
+                    {salidaModo && salidaModo !== "no" && (
+                      <button type="button" onClick={() => marcarSalida(elegido)} disabled={ocupado} className="boton" data-ventana-salida-boton>👋 Salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                    )}
                     <button type="button" onClick={() => reiniciar()} className="boton-texto px-3">Otro socio</button>
                   </div>
 
@@ -771,6 +824,26 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               {error && <Mensaje tipo="error">{error}</Mensaje>}
               <div className="flex flex-wrap justify-center gap-2">
                 {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
+                {hecho.repetido && hecho.puede_salir && elegido && (
+                  <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} onClick={() => marcarSalida(elegido)} data-ventana-salida-boton>👋 Marcar salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                )}
+                <button type="button" className={`boton ${hecho.avisar_salida ? "" : "boton-principal"}`} onClick={() => reiniciar()}>Siguiente</button>
+              </div>
+              <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>
+            </div>
+          )}
+
+          {paso === "salio" && salio && (
+            <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
+              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "👋" : "ℹ️"}</div>
+              {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
+                <>
+                  <p className="titular text-4xl break-words">{salio.nombre}</p>
+                  <p className="text-xl font-semibold">{salio.texto}</p>
+                </>
+              )}
+              {error && <Mensaje tipo="error">{error}</Mensaje>}
+              <div className="flex flex-wrap justify-center gap-2">
                 <button type="button" className="boton boton-principal" onClick={() => reiniciar()}>Siguiente</button>
               </div>
               <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>

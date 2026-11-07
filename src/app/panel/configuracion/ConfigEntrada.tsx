@@ -14,7 +14,12 @@ const SEGUNDOS: { valor: Config["cerrar_sola_seg"]; texto: string }[] = [
 type Eleccion = "gimnasio" | "si" | "no";
 const aEleccion = (x: boolean | undefined): Eleccion => (x === undefined ? "gimnasio" : x ? "si" : "no");
 
-const VISITA_POR_DEFECTO: ConfigVisita = { visita_horas: 5, antiprestamo_minutos: 60, avisar_en_vivo: true };
+const VISITA_POR_DEFECTO: ConfigVisita = { visita_horas: 5, antiprestamo_minutos: 60, avisar_en_vivo: true, registrar_salida: "no" };
+const SALIDAS: [ConfigVisita["registrar_salida"], string, string][] = [
+  ["no", "No", "No se anota la salida. \"Adentro\" es aproximado y cada visita se cierra sola a las horas de arriba."],
+  ["opcional", "Opcional", "Quien quiere marca la salida (DNI + S en la ventana, \"Me voy\" en la tablet y en la app). \"Adentro ahora\" cuenta las visitas abiertas."],
+  ["obligatoria", "Obligatoria", "Igual que opcional, y si alguien intenta entrar de nuevo sin haber salido, la recepción lo ve y puede marcarle la salida. Nunca le impide entrar."],
+];
 
 export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config; puedeEditar?: boolean }) {
   const [c, setC] = useState(inicial);
@@ -110,7 +115,7 @@ function ConfigVisitaSeccion({ puedeEditar }: { puedeEditar: boolean }) {
   });
   const entero = (t: string) => (t === "" ? 0 : Math.max(0, Math.trunc(Number(t)) || 0));
   return (
-    <section className="tarjeta p-5 space-y-3" data-config-visita data-opcion="visita-horas antiprestamo avisar-en-vivo">
+    <section className="tarjeta p-5 space-y-3" data-config-visita data-opcion="visita-horas antiprestamo registrar-salida avisar-en-vivo">
       <h2 className="titulo text-2xl">🔁 Volver a entrar y avisos de la puerta</h2>
       <p className="texto-suave">Una visita dura unas horas: si el mismo socio pasa de nuevo por cualquier vía (DNI, QR, tablet) dentro de ese tiempo, se le dice a qué hora entró y no se cuenta otra entrada ni se gasta otra clase.</p>
       {!c ? <div className="esqueleto h-24" aria-hidden /> : (
@@ -127,6 +132,17 @@ function ConfigVisitaSeccion({ puedeEditar }: { puedeEditar: boolean }) {
               onChange={(e) => setC({ ...c, antiprestamo_minutos: entero(e.target.value) })} />
             <span className="block texto-tenue text-sm mt-1">Si entra por el QR y a los pocos minutos por la tablet (o al revés), la recepción ve un aviso amarillo y te queda anotado en Control de la puerta. 0 = apagado.</span>
           </label>
+          <div data-registrar-salida={c.registrar_salida}>
+            <p className="font-semibold">Registrar la salida</p>
+            <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Registrar la salida">
+              {SALIDAS.map(([k, t]) => (
+                <button key={k} type="button" aria-pressed={c.registrar_salida === k} data-salida={k}
+                  className={`pestana ${c.registrar_salida === k ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}
+                  onClick={() => setC({ ...c, registrar_salida: k })}>{t}</button>
+              ))}
+            </div>
+            <span className="block texto-tenue text-sm mt-1">{SALIDAS.find(([k]) => k === c.registrar_salida)?.[2]}</span>
+          </div>
           <Interruptor etiqueta="Avisar las entradas por QR o tablet en todas las pantallas" ayuda="Un aviso chiquito arriba a la derecha cuando alguien entra por el QR o la tablet, o intenta entrar y no puede (ese queda hasta que lo cierres, con el botón Cobrar)."
             checked={c.avisar_en_vivo} onChange={(e) => setC({ ...c, avisar_en_vivo: e.target.checked })} />
           <div className="flex flex-wrap items-center gap-3 pt-1">
