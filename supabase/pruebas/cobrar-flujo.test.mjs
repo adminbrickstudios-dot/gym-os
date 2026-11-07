@@ -113,7 +113,7 @@ test("contexto_cobro: el dueño puede cobrar otro día y la recepción no; dice 
   assert.equal(dueno.operador, null);
 });
 
-test("contexto_cobro avisa del doble cobro (sin frenar) y no deja ver otro gimnasio", async () => {
+test("contexto_cobro avisa del doble cobro (VD-50: lo frena vender) y no deja ver otro gimnasio", async () => {
   const [{ id: su }] = await t.q(`select id from public.suscripciones where socio_id = $1`, [socio]);
   const [{ id: eq }] = await t.q(`select id from public.equipo where usuario_id = $1`, [uRec]);
   const [{ id: v }] = await t.q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, origen, creado_por) values ($1, $2, $3, 'recepcion', $4) returning id`,
@@ -134,6 +134,6 @@ test("contexto_cobro avisa del doble cobro (sin frenar) y no deja ver otro gimna
 test("anon no ejecuta nada de esto", async () => {
   const [{ a, b, c }] = await t.q(`select has_function_privilege('anon', 'public.contexto_cobro(uuid, uuid)', 'execute') a,
     has_function_privilege('anon', 'public.guardar_config_cobro(uuid, text)', 'execute') b,
-    has_function_privilege('anon', 'public.vender(uuid, jsonb, jsonb, uuid, uuid, uuid, timestamptz, text, text)', 'execute') c`);
+    has_function_privilege('anon', 'public.vender(uuid, jsonb, jsonb, uuid, uuid, uuid, timestamptz, text, text, boolean, text)', 'execute') c`);
   assert.deepEqual([a, b, c], [false, false, false]);
 });

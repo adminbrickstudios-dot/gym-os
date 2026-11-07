@@ -19,6 +19,21 @@ export type ConfigDejarPasar = {
   ultimo_cambio: { detalle: string; por: string | null; cuando: string } | null;
 };
 
+/** VD-50 (D29) · Aviso de doble cobro: cuántos minutos después de cobrar una cuota otra operación de la misma cuota frena y pregunta (0 = apagado). */
+export type ConfigDobleCobro = {
+  doble_cobro_minutos: number;
+  doble_cobro_ultimo_cambio: { detalle: string; por: string | null; cuando: string } | null;
+};
+
+export async function guardarDobleCobro(minutos: number): Promise<{ error?: string; config?: ConfigDobleCobro }> {
+  try {
+    const panel = await contextoPanel();
+    const config = await rpc<ConfigDobleCobro>("guardar_doble_cobro", { p_gimnasio_id: panel.gimnasio.id, p_minutos: minutos });
+    revalidatePath("/panel", "layout");
+    return { config };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function guardarReglaVencimiento(datos: { renovacion?: Renovacion; dia_fijo?: number | null; primera_cuota?: PrimeraCuotaModo; redondeo?: number }): Promise<{ error?: string; reglas?: ReglasVencimiento }> {
   try {
     const panel = await contextoPanel();

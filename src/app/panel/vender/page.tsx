@@ -10,7 +10,7 @@ import { Carrito } from "./Carrito";
 import type { PreciosVenta } from "./tipos";
 
 export const metadata: Metadata = { title: "Vender" };
-type Caja = { caja_id: string; nombre: string; activa: boolean; turno_id: string | null; vencida?: boolean };
+type MiCaja = { turno_id: string | null };
 
 export default async function Vender({ searchParams }: { searchParams: Promise<{ socio?: string; sede?: string; cuota?: string; desde?: string }> }) {
   const sp = await searchParams;
@@ -19,14 +19,14 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
     exigirSeccion(panel, "vender");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
-    const [precios, cajas, ficha, stock] = await Promise.all([
+    const [precios, miCaja, ficha, stock] = await Promise.all([
       rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: sp.socio ?? null }),
-      rpc<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
+      rpc<MiCaja>("caja_para_cobrar", { p_sede_id: sede.id }),
       sp.socio ? rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }) : Promise.resolve(null),
       rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
-    // VD-9: una caja abierta de otro día figura sin contar y no se cobra en ella.
-    const turno = cajas.find((c) => c.turno_id && !c.vencida)?.turno_id ?? null;
+    // VD-9 / VD-49: el efectivo cae en MI turno de esta sede (con PIN, el de esa persona); uno abierto de otro día (sin contar) no sirve.
+    const turno = miCaja.turno_id;
     const socio = ficha ? { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), color: ficha.acceso.color, texto: ficha.acceso.texto } : null;
     return (
       <>

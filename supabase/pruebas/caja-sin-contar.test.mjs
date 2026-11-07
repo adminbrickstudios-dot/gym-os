@@ -15,6 +15,8 @@ before(async () => {
     await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,$3,$4)`, [t.g, u, n, rol]);
     return u;
   };
+  // VD-50: estas pruebas cobran la misma cuota varias veces seguidas a propósito; el aviso de doble cobro se apaga (se prueba en doble-cobro.test.mjs).
+  await t.q(`insert into public.configuracion_cobro (gimnasio_id, doble_cobro_minutos) values ($1, 0)`, [t.g]);
   uRec = await crear("recepcion", "Ana"); uRec2 = await crear("recepcion", "Beto"); uEnc = await crear("encargado", "Elena"); uDueno = await crear("dueno", "Sofía");
 });
 after(async () => t && t.cerrar());

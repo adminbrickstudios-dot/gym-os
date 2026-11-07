@@ -18,8 +18,8 @@ import { HorariosYCierres, type CierrePanel } from "./Horarios";
 import { Tablets } from "./Tablets";
 import { LinkResena } from "./LinkResena";
 import { ConfigEntrada } from "./ConfigEntrada";
-import { ConfigDejarPasarCard, ReglasVencimiento } from "./ReglasCobro";
-import type { ConfigDejarPasar, ReglasVencimiento as DatosVencimiento } from "./cobros-acciones";
+import { ConfigDejarPasarCard, DobleCobroCard, ReglasVencimiento } from "./ReglasCobro";
+import type { ConfigDejarPasar, ConfigDobleCobro, ReglasVencimiento as DatosVencimiento } from "./cobros-acciones";
 import { ConfigCaja } from "./ConfigCaja";
 import { Autoservicio } from "./Autoservicio";
 import type { AutoservicioPanel } from "./autoservicio-acciones";
@@ -203,8 +203,8 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, cajaConfig = null, autoservicio = null, beneficios = null }: {
-  beneficios?: ReglasBeneficiosDatos | null; autoservicio?: AutoservicioPanel | null; metaVisitas?: number; planFamiliar?: boolean; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; cajaConfig?: DatosConfigCaja | null;
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null }: {
+  beneficios?: ReglasBeneficiosDatos | null; autoservicio?: AutoservicioPanel | null; metaVisitas?: number; planFamiliar?: boolean; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; dobleCobro: ConfigDobleCobro; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
 }) {
@@ -554,6 +554,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           {pie("cobros")}
           <div data-opcion="vencimiento"><ReglasVencimiento inicial={vencimiento} puedeEditar={puedeEditar} /></div>
           <div data-opcion="dejar-pasar"><ConfigDejarPasarCard inicial={dejarPasar} puedeEditar={puedeEditar} /></div>
+          <div data-opcion="doble-cobro"><DobleCobroCard inicial={dobleCobro} puedeEditar={puedeEditar} /></div>
           <div data-opcion="mercado-pago"><MercadoPago estado={mercadopago} puedeEditar={puedeEditar} /></div>
           {cajaConfig && <div data-opcion="caja"><ConfigCaja inicial={cajaConfig} puedeEditar={puedeEditar} /></div>}
         </>}
