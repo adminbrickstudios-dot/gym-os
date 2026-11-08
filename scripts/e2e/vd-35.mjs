@@ -35,8 +35,9 @@ try {
   const estado = d.locator('[data-autoservicio] [role="status"], [data-autoservicio] [role="alert"]');
   const poner = async (abierto) => {
     if ((await registro.isChecked()) === abierto) return;
-    await registro.setChecked(abierto);
-    await estado.first().waitFor({ timeout: 30000 });
+    await registro.click();
+    // El aviso de la vez anterior sigue en pantalla: se espera a que el valor quede guardado (recargando).
+    for (let i = 0; i < 20; i++) { await d.waitForTimeout(700); await d.reload(); await registro.waitFor({ timeout: 60000 }); if ((await registro.isChecked()) === abierto) break; }
     chequear(await registro.isChecked() === abierto, `Configuración: registro ${abierto ? "abierto" : "cerrado"}`, "el interruptor no quedó como se pidió");
   };
 

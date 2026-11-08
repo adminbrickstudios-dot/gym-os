@@ -39,7 +39,7 @@ try {
   await d.goto(`${G}/panel/configuracion?pestana=pagina`);
   const compras = d.locator("[data-autoservicio] input[data-compras-app]");
   await compras.waitFor({ timeout: 60000 });
-  if (!(await compras.isChecked())) { await compras.setChecked(true); await d.locator('[data-autoservicio] [role="status"]').first().waitFor({ timeout: 30000 }); }
+  if (!(await compras.isChecked())) { await compras.click(); await d.locator('[data-autoservicio] [role="status"]').first().waitFor({ timeout: 30000 }); }
   ok("Configuración: cambiar de plan y comprar pases desde la app, prendido");
 
   // ── El socio elige un plan más caro ──
@@ -103,12 +103,12 @@ try {
   } else ok("el gimnasio demo no vende pases del día: nada para comprar");
 
   // ── Apagadas las compras, la fila desaparece ──
-  await compras.setChecked(false);
+  await compras.click();
   await d.locator('[data-autoservicio] [role="status"]').first().waitFor({ timeout: 30000 });
   await a.goto(`${G}/app/yo`);
   await a.locator("[data-yo]").waitFor({ timeout: 60000 });
   chequear(await a.locator('[data-yo-fila="plan"]').count() === 0, "compras apagadas: “Cambiar de plan” ya no aparece en Yo", "la fila sigue con las compras apagadas");
-  await compras.setChecked(true);
+  await compras.click();
   await d.locator('[data-autoservicio] [role="status"]').first().waitFor({ timeout: 30000 });
 
   for (const [n, p] of [["dueña", d], ["socio", a], ["recepción", r]]) if (p.errores.length) falla(`${n}: ${p.errores.join(" | ")}`);
