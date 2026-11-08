@@ -84,7 +84,7 @@ Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300
 ## Arreglos y su antes/después
 | Qué | Antes | Después | Cómo |
 |---|---|---|---|
-| `numeros_inicio` (regresión de BASE-4: 4 recorridos de Retención) | 1796 ms | pendiente de la próxima corrida (esperado ≈ 450 ms: una pasada) | migración `20261108050200_numeros_inicio_una_pasada` |
+| `numeros_inicio` (regresión de BASE-4: 4 recorridos de Retención) | 1796 ms | **465 ms** (corrida 42496822825, misma base de 5.000 socios) | migración `20261108050200_numeros_inicio_una_pasada` |
 | Región de las funciones de Vercel | iad1 (Washington) con Supabase en São Paulo | gru1 | `vercel.json` `{"regions":["gru1"]}` (Mateo confirmó São Paulo) |
 | Vigencia guardada `socios.cubierto_hasta` + índice `(gimnasio_id, cubierto_hasta)` | — | disponible para las listas | BASE-5, migración `20261108050100` |
 

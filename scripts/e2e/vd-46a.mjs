@@ -4,6 +4,8 @@
 // el socio pierde el acceso, su pantalla de pago dice "se devolvió" y la dueña ve la alerta en la campana; un
 // approved tardío no revive nada; y si el aviso se pierde, "Revisar con MercadoPago" (sin cron) lo encuentra.
 //   node scripts/e2e/vd-46a.mjs      (con scripts/local/levantar.sh corriendo)
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
@@ -88,6 +90,10 @@ try {
   ok(`vuelve a pagar (pago ${idMP2}) y entra`);
   await post(`/__estado/${idMP2}?estado=refunded&avisar=0`);   // MercadoPago devolvió, pero el aviso no llegó
   await d.goto(`${G}/panel/transferencias`);
+  // El demo trae pagos de MercadoPago con ids de mentira: se marcan como recién revisados para que "Revisar" (40 por vez) mire los de este recorrido.
+  const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() }); await db.connect();
+  await db.query(`update public.pagos set mp_revisado_en = now() where medio = 'mercadopago' and (mp_pago_id is null or mp_pago_id::text not in ($1, $2))`, [String(idMP), String(idMP2)]);
+  await db.end();
   const rev = d.locator("[data-revisar-mp]");
   await rev.waitFor({ timeout: 30000 });
   await rev.getByRole("button", { name: /Revisar con MercadoPago/ }).click();

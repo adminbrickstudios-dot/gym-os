@@ -1,3 +1,45 @@
+## 2026-11-08 · Base: P0 (BASE-0 a BASE-11) — rama `base/2026-11-07`, publicado por bloque
+
+```
+QUÉ HICE                        por punto, y cómo lo verifiqué
+LO QUE ENCONTRÉ SIN PEDIRTELO   lo que apareció solo
+QUÉ CORRÉS VOS                  comandos exactos, en orden
+QUÉ CONFIGURÁS VOS              variables, paneles, DNS
+SIN ARREGLAR                    lo que quedó, y por qué
+LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
+```
+
+**QUÉ HICE** (cada bloque con PR mergeado y chequeos en verde; las migraciones, con `prevuelo` y `aplicar` desde Actions)
+- **BASE-0**: Next 15.5 → 16.4.5 y React 19.3 (middleware → proxy, eslint plano, Turbopack). `accion-colgada.mjs 50` → 0 colgadas de 50. Cadena e2e en tandas de 20 con base nueva; arreglé los rotos de verdad y actualicé las pruebas viejas (PR #5).
+- **BASE-2** (PR #6): contraseña que escribe quien crea la cuenta (D42) y puertas `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super` (D41). `base-2.mjs`, 13 pasos.
+- **BASE-3** (PR #7): panel lateral con la ficha rápida y COBRAR AHORA, avisos abajo a la derecha. `base-3.mjs`, 11 pasos.
+- **BASE-4** (PR #8, migración `20261108040100`): Inicio con Deben, Vencen esta semana y Plata en riesgo; hasta 8 números.
+- **BASE-5 y BASE-1** (PR #9, migraciones `…050100` y `…050200`): `socios.cubierto_hasta` por trigger + índice + chequeo; `numeros_inicio` de 1796 a 465 ms; `vercel.json` en `gru1`; medición con 5.000 socios en Actions (`VELOCIDAD.md`).
+- **BASE-6 parcial** (PR #10, migración `…060100`): el producto se llama Base; claro por defecto.
+- **BASE-7** (PR #11): asistente de 9 pasos reanudable (`/panel/asistente`).
+- **BASE-8 parcial** (PR #12, migración `…070100`): encabezados de seguridad, tope de ingresos fallidos, logs de Actions sin datos, `PERMISOS.md` desde la base real.
+- **BASE-9/10/11 y BASE-DOC**: HealthClub en los datos estructurados; el socio ve cuántos días le quedan; `base-simulacion.mjs` (10 pasos) en verde; `CONTEXTO`, `INVESTIGACION`, `CONVENCIONES`, `LECCIONES`, `PERMISOS`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** (todo arreglado y probado)
+- La vista previa del aumento de precios no andaba (`vista_aumento` recibía un argumento que no tiene).
+- El alta online (`/hacete-socio`) perdía el plan elegido después de cualquier error (React 19 vacía el formulario).
+- Ctrl+K "entrada <dni>" y el botón Entrada de la ficha nunca abrían la ventana (atributo renombrado).
+- Regresión mía de BASE-4: `numeros_inicio` llamaba 4 veces a Retención (1,8 s).
+- `medir-escala.yml` no arrancaba (apartaba una migración de la que dependen las siguientes).
+
+**QUÉ CORRÉS VOS**: nada obligatorio. Si querés repetir la prueba de punta a punta: `APP_MODO=produccion scripts/local/levantar.sh nueva` y `TOPE_MS=3500 node scripts/e2e/base-simulacion.mjs`.
+
+**QUÉ CONFIGURÁS VOS**: confirmar en Vercel que el proyecto tomó `regions: ["gru1"]`; contratar planes pagos si corresponde (D51: Vercel Hobby no permite uso comercial, Supabase Free pausa el proyecto y no guarda copias).
+
+**SIN ARREGLAR** (anotado en `docs/base/PROGRESO.md`): 24 recorridos e2e viejos sin verde (no muestran pantallas rotas); BASE-6 sin íconos de línea ni Barlow ni elección de tema por usuario; BASE-8 sin Ley 25.326 ni anti-robot en "Quiero ser socio" ni RLS por rol; BASE-5: usar `cubierto_hasta` dentro de Retención para bajar las listas de ~450 ms; socio con mail y contraseña (D43); "Caja del turno" en Inicio.
+
+**LO QUE NO PUDE VERIFICAR**
+- Lighthouse celular ≥ 90 de la página del gimnasio: la API pública de PageSpeed sin clave agotó la cuota; no está medido.
+- El tope de 1 s por ingreso: en la compu de Windows (base simulada, poca memoria) el peor caso fue 2,7 s y la mediana 1,5 s; la función de base tarda ~1 ms con 5.000 socios. En producción (`gru1`) no está medido.
+- Las pantallas con la app compilada y 5.000 socios: Actions las midió en modo desarrollo.
+- Que Vercel esté sirviendo desde `gru1` después del merge (la cabecera `x-vercel-id` lo dice; no la revisé después).
+- El barrido completo (cada rol × cada pantalla) con los cambios de BASE-6.
+
 ## 2026-11-07 · Cierre de Gym OS v2 (rama `cierre/2026-11-06`) — verificado en una compu Windows, con sesión real
 
 ```

@@ -119,7 +119,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <p className="text-5xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
           <p className="titular text-5xl mt-4">{v.puede ? "Podés entrar" : "No podés entrar"}</p>
           <p className="text-xl mt-2 font-semibold">{v.texto}</p>
-          {v.vence_en && v.puede && <p className="texto-suave mt-1">Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}</p>}
+          {v.vence_en && v.puede && <p className="texto-suave mt-1" data-cubierto-hasta>Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}{(() => { const n = Math.ceil((new Date(v.vence_en).getTime() - Date.now()) / 86400000); return n >= 0 ? ` · te ${n === 1 ? "queda 1 día" : `quedan ${n} días`}` : ""; })()}</p>}
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
 
