@@ -86,7 +86,7 @@ try {
   await form(r).locator('[data-promete-pagar] button:has-text("En una semana")').click();
   await form(r).locator('input[aria-label="PIN del dueño o del encargado"]').fill("0000");
   await boton(r).click();
-  const alerta = r.locator('[role="alert"]').first();
+  const alerta = r.locator('[role="alert"], [role="status"]').filter({ hasText: /PIN|intento/i }).first();
   await alerta.waitFor({ timeout: 30000 });
   chequear(/PIN|intento/i.test(await alerta.innerText()), `un PIN equivocado no autoriza: “${(await alerta.innerText()).slice(0, 70)}”`, "el PIN equivocado no avisó");
   await form(r).locator('input[aria-label="PIN del dueño o del encargado"]').fill(PIN);

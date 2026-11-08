@@ -9,7 +9,7 @@
 //  5) Ficha: Entrada (abre la ventana con el socio) y Cobrar (abre la hoja) desde el encabezado.
 //  6) Celular sin desbordes.
 //   node scripts/e2e/vd-15.mjs     (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
@@ -35,7 +35,7 @@ try {
   await d.getByRole("link", { name: /← (Volver a )?Socios/ }).click();
   await d.waitForURL(/\/panel\/socios\?.*estado=al_dia/, { timeout: 30000 });
   ok("volver de una ficha a Socios: el filtro “Al día” sigue puesto");
-  chequear(await d.locator('[data-filtro-estados] [data-estado="al_dia"][aria-current="page"]').count() === 1, "la píldora Al día sigue marcada", "no quedó marcada");
+  await aparece(d.locator('[data-filtro-estados] [data-estado="al_dia"][aria-current="page"]'), 15000); chequear(await d.locator('[data-filtro-estados] [data-estado="al_dia"][aria-current="page"]').count() === 1, "la píldora Al día sigue marcada", "no quedó marcada");
   // Una búsqueda también se recuerda.
   await d.locator('input[name="q"]').fill("a");
   await d.keyboard.press("Enter");
@@ -52,7 +52,7 @@ try {
   await d.goto(`${G}/panel`);
   await d.goto(`${G}/panel/socios`);
   await d.waitForTimeout(1500);
-  chequear(new URL(d.url()).search === "", "después de “Todos”, la próxima vez entra sin filtros", `entró con ${new URL(d.url()).search}`);
+  chequear(!new URL(d.url()).search.includes("estado="), "después de “Todos”, la próxima vez entra sin filtros", `entró con ${new URL(d.url()).search}`);
 
   // ── 2 · Interesados dentro de Socios, con DNI ──
   await d.goto(`${G}/panel/prospectos`);

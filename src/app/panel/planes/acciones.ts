@@ -106,7 +106,7 @@ const argsAumento = (g: string, a: Aumento) => {
 /** La vista previa y el aplicar usan la misma cuenta en la base (PLA-4). */
 export async function vistaAumento(a: Aumento): Promise<{ error?: string; vista?: VistaAumento }> {
   const panel = await contextoPanel();
-  try { return { vista: await rpc<VistaAumento>("vista_aumento", argsAumento(panel.gimnasio.id, a)) }; }
+  try { return { vista: await rpc<VistaAumento>("vista_aumento", (({ p_motivo_sin_aviso: _m, ...resto }) => resto)(argsAumento(panel.gimnasio.id, a))) }; }
   catch (e) { return { error: (e as Error).message }; }
 }
 

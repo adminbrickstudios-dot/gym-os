@@ -1,16 +1,20 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTs,
+  {
+    // Next 16 trae reglas nuevas del compilador de React. La migración no cambia comportamiento: quedan apagadas y se revisan una por una más adelante.
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/error-boundaries": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+    },
+  },
   {
     ignores: [
       "node_modules/**",

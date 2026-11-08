@@ -152,5 +152,24 @@ export async function esperarCobro(p) {
     p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 }).then(() => null),
     p.locator('aside [role="alert"]').waitFor({ timeout: 30000 }).then(async () => await p.locator('aside [role="alert"]').innerText()),
   ]);
+  // VD-50: si la misma cuota se cobró hace poco, la base frena; los recorridos que cobran dos veces a propósito siguen con motivo.
+  if (r && /ya cobró esta cuota/.test(r)) {
+    await p.locator("[data-cobrar-doble-igual]").click();
+    await p.locator("[data-cobrar-doble-motivo]").fill("Otro cobro, a propósito (prueba)");
+    await p.locator('button:has-text("✅ Cobrar")').click();
+    await p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 });
+    return;
+  }
   if (r) throw new Error(`al cobrar: ${r}`);
+}
+
+/**
+ * Pedido HTTP con la sesión de un contexto del navegador. El navegador resuelve `demo.localhost` solo, pero el cliente de
+ * pedidos de Playwright usa el DNS del sistema (en Windows no lo resuelve): se va a 127.0.0.1 con el Host y las cookies a mano.
+ */
+export async function api(ctx, metodo, ruta, opciones = {}, slug = "demo") {
+  const cookie = (await ctx.cookies(GIMNASIO(slug))).map((c) => `${c.name}=${c.value}`).join("; ");
+  return ctx.request.fetch(`http://127.0.0.1:${PUERTO}${ruta}`, {
+    method: metodo, ...opciones, headers: { host: `${slug}.localhost:${PUERTO}`, cookie, ...(opciones.headers ?? {}) },
+  });
 }

@@ -48,7 +48,7 @@ try {
   await d.locator("[data-aumento-hecho]").waitFor({ timeout: 30000 });
   const aviso = await d.locator("[data-aviso]").innerText();
   chequear(new RegExp(`Uno${s5}: \\$34\\.000`).test(aviso) && /efectivo \$20\.000/.test(aviso), "programado, con el aviso para WhatsApp armado", aviso);
-  await d.locator('main a:has-text("Volver a Planes")').click();
+  await d.locator('main a:has-text("Volver a Planes")').first().click();
   await d.waitForURL(/\/panel\/planes$/);
   await plan(d, `Uno${s5}`).locator("text=📅 Desde el").waitFor({ timeout: 30000 });
   const fila = await plan(d, `Uno${s5}`).innerText();

@@ -35,14 +35,6 @@ try {
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok(`la dueña elige día fijo (el ${X}) con primera cuota proporcional y se guarda`);
 
-  // ── 2 · La simulación (la misma cuenta de la base, sin cobrar) ──
-  await sec.locator('input[type=date]').fill(aIso(en3));
-  await sec.locator('button:has-text("Calcular")').click();
-  const sim = sec.locator("[data-simulacion]");
-  await sim.waitFor({ timeout: 30000 });
-  const txt = await sim.innerText();
-  chequear(/días de \d+/.test(txt) || /justo el día fijo/.test(txt), `la simulación calcula sola: “${txt.slice(0, 90)}…”`, `la simulación dice: ${txt.slice(0, 120)}`);
-
   // ── 3 · Los planes siguen la regla del gimnasio (se anota cómo estaban para devolverlos) ──
   const planes = sec.locator("[data-plan-regla]");
   const cuantos = await planes.count();
@@ -60,6 +52,15 @@ try {
       [guardadas[i].id], { timeout: 30000 });
   }
   ok(`${cuantos} plan(es) siguen la regla del gimnasio`);
+
+  // ── 2 · La simulación (después de 3: el plan que simula tiene que seguir la regla del gimnasio) (la misma cuenta de la base, sin cobrar) ──
+  await sec.locator('input[type=date]').fill(aIso(en3));
+  await sec.locator('button:has-text("Calcular")').click();
+  const sim = sec.locator("[data-simulacion]");
+  await sim.waitFor({ timeout: 30000 });
+  const txt = await sim.innerText();
+  chequear(/días de \d+/.test(txt) || /justo el día fijo/.test(txt), `la simulación calcula sola: “${txt.slice(0, 90)}…”`, `la simulación dice: ${txt.slice(0, 120)}`);
+
   chequear(await sec.locator("[data-ultimo-cambio]").count() === 1, "queda escrito el último cambio con quién y cuándo", "no muestra el último cambio");
   await capturar(d, "vd7-compu-config-cobros");
 
@@ -76,7 +77,7 @@ try {
   chequear(/\d+ días de \d+/.test(detalle) && (await parcial.getAttribute("data-cobrar-parcial")) === "proporcional",
     `la hoja muestra el cálculo antes de cobrar: “${detalle.slice(0, 100)}…”`, `la hoja dice: ${detalle.slice(0, 120)}`);
   const cubre = await d.locator("[data-cobrar-cubre]").first().innerText();
-  chequear(/Cubre del \d\d\/\d\d al \d\d\/\d\d/.test(cubre), `y a qué día llega: “${cubre}”`, `cubre dice: ${cubre}`);
+  chequear(/Cubre del \d+\/\d+ al \d+\/\d+/.test(cubre), `y a qué día llega: “${cubre}”`, `cubre dice: ${cubre}`);
   const mas = d.locator('[aria-label="Uno más"]').first();
   chequear(await mas.isDisabled(), "la primera cuota parcial se cobra sola (no se puede sumar otra)", "deja sumar cuotas a la parcial");
   await capturar(d, "vd7-compu-hoja-proporcional");

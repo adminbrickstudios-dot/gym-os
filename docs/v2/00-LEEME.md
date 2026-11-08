@@ -35,6 +35,7 @@ quién paga, cuándo paga, y quién dejó de venir**.
 | `13-CONFIABILIDAD-Y-ESCALA.md` | Nada dos veces, nada se pierde, nada se cae, miles a la vez |
 | `14-SITUACIONES.md` | Lo que pasa todos los días en un gimnasio, del más grande al más chico |
 | `15-RECOMENDACIONES.md` | Lo que se puede estar escapando (producto, negocio, mañana) |
+| `DETALLES.md` | **Lo que sigue (07/11)**: los ~75 detalles en 9 grupos, empezando por Next 16 (el cuelgue de "Guardando…") |
 | `CIERRE.md` | **Cómo se termina (06/11)**: verificar todo con sesión real, lo que decidió Mateo, sección por sección, publicar |
 | `17-SECCION-POR-SECCION.md` | Qué tiene que andar en cada sección, con sus opciones, y "che, me pasó esto" |
 | `18-DOMINIO-Y-NEGOCIOS.md` | El dominio, cada gimnasio separado, y cómo crear un gimnasio nuevo |

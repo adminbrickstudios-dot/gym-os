@@ -19,7 +19,7 @@ try {
   const id = new URL(d.url()).pathname.split("/").pop();
   ok(`socio con plan creado (${id.slice(0, 8)})`);
 
-  await d.goto(`${G}/panel/vender?socio=${id}`);
+  await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button:has-text("🏷️ Descuento")').first().click();
   await d.locator('input[aria-label="Monto del descuento"]').fill("100");

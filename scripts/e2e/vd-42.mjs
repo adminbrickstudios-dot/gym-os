@@ -11,7 +11,7 @@
 import { execSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, CLAVE_DEMO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { api, CELU, COMPU, GIMNASIO, CLAVE_DEMO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -104,7 +104,7 @@ try {
   await d.goto(`${G}/panel/cuenta`);
   await d.locator("[data-dos-pasos]").waitFor({ timeout: 60000 });
   ok("Mi cuenta tiene la sección de verificación en dos pasos");
-  const pedir = () => d.context().request.get(`${G}/panel/exportar`, { maxRedirects: 0 });
+  const pedir = () => api(d.context(), "GET", "/panel/exportar", { maxRedirects: 0 });
   const sin = await pedir();
   chequear(sin.status() === 200 && /zip/.test(sin.headers()["content-type"] ?? ""), "sin dos pasos activos, la dueña exporta como siempre (zip)", `estado ${sin.status()}`);
   [{ id: factor }] = await q(`insert into auth.mfa_factors (user_id, factor_type, status) values ($1, 'totp', 'verified') returning id`, [duenaUsuario]);

@@ -26,7 +26,9 @@ try {
   await m.locator("[data-carrito]").getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await m.locator('[data-carrito] button:has-text("Descuento")').first().click();
   await m.locator('[data-carrito] input[aria-label="Monto del descuento"]').first().fill("5.000");
-  await m.locator('[data-carrito] input[placeholder^="Motivo"]').first().fill(`Amigo del dueño ${s5}`);
+  // VD-46C: el motivo del descuento sale de la lista del gimnasio (ya no es texto libre).
+  await m.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });
+  await m.locator("[data-carrito] select[data-motivo-descuento]").first().selectOption({ index: 1 });
   await m.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await m.locator('button:has-text("✅ Cobrar")').click();
   await esperarCobro(m);

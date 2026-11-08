@@ -120,7 +120,7 @@ try {
   const { rows } = await db.query(`select t.sin_contar, t.monto_contado, t.cerrado_en is not null as cerrada,
       (select count(*)::int from public.pagos p where p.turno_caja_id = t.id) as pagos
     from public.turnos_caja t join public.equipo e on e.id = t.abierto_por
-    where e.nombre like 'Ana%' order by t.abierto_en desc limit 3`);
+    where e.nombre like 'Ana%' order by t.abierto_en desc limit 30`);
   const vieja = rows.find((x) => x.sin_contar);
   chequear(!!vieja && vieja.cerrada && vieja.monto_contado === null && vieja.pagos === 1,
     "el turno de ayer quedó cerrado sin contar y con su único cobro: el de ahora entró en el turno nuevo", JSON.stringify(rows));

@@ -36,7 +36,7 @@ try {
   chequear((await r.locator("[data-anular-cortesia], [data-cortesia] button:has-text('Anular')").count()) === 0, "la recepción no ve “Anular”", "la recepción ve “Anular”");
 
   // Vender: el motivo del descuento es una lista.
-  await d.goto(`${G}/panel/vender?socio=${id}`);
+  await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button:has-text("🏷️ Descuento")').first().click();
   const sel = d.locator("select[data-motivo-descuento]");

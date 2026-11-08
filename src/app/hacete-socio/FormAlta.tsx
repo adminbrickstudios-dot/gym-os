@@ -69,12 +69,15 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
       <nav aria-label="Pasos para hacerte socio" className="flex flex-wrap gap-2" data-pasos-alta>
         {PASOS.map(([id, t], i) => <a key={id} href={"#paso-" + id} className="pildora !min-h-11 inline-flex items-center">{i + 1}. {t}</a>)}
       </nav>
+      {/* React 19 vacía el formulario después de cada envío con error: los radios controlados se ven elegidos pero no viajan. Por eso el valor viaja en campos ocultos. */}
+      <input type="hidden" name="plan" value={plan ?? ""} />
+      <input type="hidden" name="medio" value={medio} />
       <fieldset id="paso-plan" className="space-y-3 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">1. Tu plan</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">
           {planes.map((p) => (
             <label key={p.id} className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${plan === p.id ? "border-[var(--acento)]" : "border-transparent"}`} data-plan={p.nombre}>
-              <input type="radio" name="plan" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id ?? null)} className="sr-only" />
+              <input type="radio" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id ?? null)} className="sr-only" />
               <span className="block titulo text-xl">{p.nombre}</span>
               {datos.mostrar_precios && p.precio != null && <span className="block mt-2"><span className="numero text-3xl">{formatearPesos(p.precio)}</span> <span className="texto-suave">{unidadPlan(p)}</span></span>}
               {datos.mostrar_precios && variantesPlan(p).map((x) => <span key={x} className="block text-sm mt-1" style={{ color: "var(--acento)" }}>💸 {x}</span>)}
@@ -107,13 +110,13 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Cómo pagás">
           {datos.transferencia && (
             <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "transferencia" ? "border-[var(--acento)]" : "border-transparent"}`}>
-              <input type="radio" name="medio" value="transferencia" checked={medio === "transferencia"} onChange={() => setMedio("transferencia")} className="sr-only" />
+              <input type="radio" value="transferencia" checked={medio === "transferencia"} onChange={() => setMedio("transferencia")} className="sr-only" />
               <span className="block titulo text-xl">🏦 Transferencia</span>
               <span className="block texto-suave text-sm mt-1">Te mostramos el alias y mandás el comprobante desde la app.</span>
             </label>
           )}
           <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "mostrador" ? "border-[var(--acento)]" : "border-transparent"}`}>
-            <input type="radio" name="medio" value="mostrador" checked={medio === "mostrador"} onChange={() => setMedio("mostrador")} className="sr-only" />
+            <input type="radio" value="mostrador" checked={medio === "mostrador"} onChange={() => setMedio("mostrador")} className="sr-only" />
             <span className="block titulo text-xl">🛎️ En el gimnasio</span>
             <span className="block texto-suave text-sm mt-1">Pagás en recepción cuando vengas.</span>
           </label>
