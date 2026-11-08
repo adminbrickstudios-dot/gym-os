@@ -19,7 +19,7 @@ try {
   // El producto: nombre y precio, y después costo, categoría y foto.
   await d.locator('input[aria-label="Producto nuevo"]').fill(NOMBRE);
   await d.locator('input[aria-label="Precio del producto nuevo"]').fill("1.500");
-  await d.locator('button:has-text("Agregar")').first().click();
+  await d.locator('form:has(input[aria-label="Producto nuevo"]) button[type="submit"]').click();
   const fila = d.locator(`li[data-producto="${NOMBRE}"]`);
   await fila.waitFor({ timeout: 30000 });
   await fila.locator('button:has-text("Editar")').click();
