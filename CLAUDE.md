@@ -30,6 +30,7 @@ Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
   transacción y verificado por `npm run chequeos` (guardado = recalculado).
   No depende de la hora, así que no se pudre. El color y la deuda se siguen
   calculando contra el momento.
+- **Única excepción (D36, BASE-5): `socios.cubierto_hasta`.** Se guarda el *fin de la cobertura* (el último `hasta` de las coberturas no anuladas), por trigger, en la misma transacción que el hecho que lo mueve. Es un hecho derivado, no un estado: el color y el "al día" siguen saliendo de comparar esa fecha con el momento (`estado_acceso`), nunca se guardan, y la puerta sigue haciendo la cuenta completa. Lo usan las listas de muchos socios. `npm run chequeos` verifica que lo guardado sea lo recalculado.
 - **Una sola fuente de verdad.** Recepción, kiosco, QR, app del socio,
   listas de retención y "Vencen hoy" usan la misma función SQL.
   Prohibido reimplementar el cálculo en TypeScript.

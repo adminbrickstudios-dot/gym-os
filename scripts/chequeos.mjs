@@ -187,6 +187,11 @@ if (!url) {
      where n.nspname = 'public' and c.relkind = 'r' and has_table_privilege(rol, c.oid, priv)
      order by 1`)).map((r) => r.p));
 
+  // BASE-5: la vigencia guardada nunca queda vieja: lo guardado es lo que dan los hechos, para todos los socios.
+  chequeo("socios.cubierto_hasta guardado = recalculado desde las coberturas", (await q(`
+    select s.id::text || ' guardado ' || coalesce(s.cubierto_hasta::text, 'null') || ' recalculado ' || coalesce(privado.calcular_cubierto_hasta(s.id)::text, 'null') as p
+      from public.socios s where s.cubierto_hasta is distinct from privado.calcular_cubierto_hasta(s.id) limit 20`)).map((r) => r.p));
+
   chequeo("Gimnasios demo sin teléfonos con pinta de reales", (await q(`
     select s.telefono from public.socios s join public.gimnasios g on g.id = s.gimnasio_id
      where g.es_demo and s.telefono is not null and s.telefono not like '+549000%' limit 20`)).map((r) => r.telefono));

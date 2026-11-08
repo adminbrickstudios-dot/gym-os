@@ -54,3 +54,42 @@ Cómo se mide:
 
 ## Hallazgo 1 (08/11): región de las funciones
 Si Supabase está en **sa-east-1 (São Paulo)**, cada consulta de una pantalla cruza el continente dos veces (Washington ↔ São Paulo, ~120-140 ms de ida y vuelta) y una pantalla con 6 a 10 consultas en serie suma casi un segundo solo en viajes. El arreglo es de una línea: `vercel.json` con `{"regions": ["gru1"]}`. **No se aplica sin saber la región de Supabase** (si estuviera en EE.UU. empeoraría). Paso para Mateo: confirmar la región y decirlo; el agente deja listo el commit.
+
+## Medición con 5.000 socios y 200 gimnasios (Actions, 08/11, corrida 42495312345, rama base/2026-11-07)
+Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300 ms; `pendientes_panel` 50 ms.
+
+| Función | Rol | ms | Presupuesto | |
+|---|---|---:|---:|---|
+| estado_acceso (calcular_acceso) | recepción | 0,6 | 300 | ok |
+| registrar_ingreso | recepción | 1,2 | 300 | ok |
+| ingresos_del_dia / ultimas_entradas | recepción | 0,4 / 0,3 | 300 | ok |
+| buscar_socios (sin filtro / texto / al día / nuevos / bajas) | dueño | 12,8 / 25,0 / 36,9 / 15,3 / 7,8 | 300 | ok |
+| ficha_socio | dueño | 1,2 | 300 | ok |
+| panel_gimnasio | dueño | 0,3 | 300 | ok |
+| resumen_dueño / resultado_mes / ganancia_mes / linea_de_control / campana_panel | dueño | 9,6 / 25,1 / 0,9 / 7,3 / 8,5 | 300 | ok |
+| retencion_periodo (mes) / retencion_numeros / tablero_retencion | dueño | 34,9 / 78,3 / 235,4 | 300 | ok |
+| **numeros_inicio** | dueño | **1796,3** | 300 | PASADO → arreglado abajo |
+| filtros_socios | dueño | 882,0 | 300 | PASADO |
+| exportar_socios | dueño | 1051,8 | 300 | PASADO (es una descarga, no una pantalla) |
+| vencen_hoy / vencen_pestanas | dueño | 438,9 / 452,6 | 300 | PASADO |
+| retencion / retencion_resumen | dueño | 441,4 / 441,5 | 300 | PASADO |
+| panel_inicio | dueño | 446,3 | 300 | PASADO |
+| pendientes_panel (dueño / recepción) | | 385,5 / 306,6 | 50 | PASADO |
+| para_hacer_hoy | dueño | 308,2 | 300 | PASADO |
+
+**Lo que dice la tabla.** La puerta (buscar, ver el veredicto, registrar un ingreso) tarda **menos de 40 ms** con 5.000 socios: el objetivo de "buscar y registrar en menos de 1 s" se cumple con mucho margen y no hace falta tocar `calcular_acceso`. Lo lento son las listas que recorren a todos los socios: la causa común es `privado.retencion` (~440 ms), que calcula el veredicto completo de cada socio vencido.
+
+**Las pantallas medidas en Actions (`tiempos.mjs`) corren en modo desarrollo** (compila al abrir): ~1,5 s hasta la pantalla más simple, así que no sirven para el objetivo de 2 s; esa medida se hace con la app compilada (pendiente, en la compu de Mateo o con un runner que haga `next build`).
+
+## Arreglos y su antes/después
+| Qué | Antes | Después | Cómo |
+|---|---|---|---|
+| `numeros_inicio` (regresión de BASE-4: 4 recorridos de Retención) | 1796 ms | pendiente de la próxima corrida (esperado ≈ 450 ms: una pasada) | migración `20261108050200_numeros_inicio_una_pasada` |
+| Región de las funciones de Vercel | iad1 (Washington) con Supabase en São Paulo | gru1 | `vercel.json` `{"regions":["gru1"]}` (Mateo confirmó São Paulo) |
+| Vigencia guardada `socios.cubierto_hasta` + índice `(gimnasio_id, cubierto_hasta)` | — | disponible para las listas | BASE-5, migración `20261108050100` |
+
+## Pendiente de BASE-1 (anotado)
+- Usar `cubierto_hasta` dentro de `privado.retencion` (y de ahí `vencen_hoy`, `retencion`, `panel_inicio`, `pendientes_panel`, `para_hacer_hoy`) para no calcular el veredicto completo de los vencidos: bajar de ~440 a menos de 300 ms.
+- `filtros_socios` (880 ms): contar con el índice en vez de recorrer.
+- Medir las pantallas con la app compilada y 5.000 socios.
+- No hace falta tocar: RLS con `(select auth.uid())`, índices de búsqueda y paginación (la búsqueda ya tarda menos de 40 ms).

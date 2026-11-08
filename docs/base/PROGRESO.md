@@ -73,7 +73,7 @@ barrido en verde con `APP_MODO=produccion`. Se publica.
   - Falta el barrido y un `npm run verificar` entero en una sola corrida (se corrió por partes).
 - Las reglas nuevas del compilador de React (49 errores de lint) quedaron apagadas en `eslint.config.mjs`; revisarlas más adelante.
 
-### BASE-1 · Velocidad: diagnóstico con números, después arreglos ❌
+### BASE-1 · Velocidad: diagnóstico con números, después arreglos 🟡 (la puerta cumple; listas por bajar, ver VELOCIDAD.md)
 **Primero medir**, todo en `VELOCIDAD.md`:
 - Tiempos con la app compilada y 5.000 socios: ingreso, inicio del dueño,
   recepción, búsqueda, registrar un ingreso, ficha, página del gimnasio, app del
@@ -178,7 +178,7 @@ Ya existe Inicio con números (VD-12) y entradas en vivo (VD-12B). Se ordena as�
 lista que lo forma (tocarlo lleva a esa lista), y un ingreso nuevo aparece en
 la lista en vivo sin recargar.
 
-### BASE-5 · Vigencia guardada: `cubierto_hasta` (D36) ❌
+### BASE-5 · Vigencia guardada: `cubierto_hasta` (D36) ✅ (columna, trigger, backfill, índice y chequeo; el uso en listas sigue en BASE-1)
 Ver `REGLAS-NEGOCIO.md` § Vigencia. Migración aditiva: columna nullable →
 función que la calcula desde los hechos → trigger en cada tabla de hechos →
 backfill → índice. `calcular_acceso` la usa para la parte de cobertura; todo lo
