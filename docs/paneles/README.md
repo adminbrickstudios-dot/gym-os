@@ -35,6 +35,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/auth/callback` | acción (POST/GET) |  |  | `entrar_con_google`, `mi_sesion` |  |
 | `/auth/google` | acción (POST/GET) |  |  |  |  |
 | `/auth/vincular` | pantalla |  |  | `mi_sesion` | `/ingresar` |
+| `/dueno` | acción (POST/GET) |  |  |  |  |
 | `/elegir` | pantalla |  |  | `mi_sesion` | `/admin` `/entrar/` `/g/` |
 | `/entrar/[slug]` | acción (POST/GET) |  |  | `mi_sesion` |  |
 | `/foto-equipo/[id]` | acción (POST/GET) |  |  | `foto_equipo` |  |
@@ -45,6 +46,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/kiosco` | pantalla |  |  | `kiosco_emergencia`, `kiosco_entrar`, `kiosco_entrar_habitual`, `kiosco_estado`, `kiosco_habituales`, `kiosco_qr`, `kiosco_salida_activa`, `kiosco_salir`, `kiosco_ultimo` |  |
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
 | `/panel` | pantalla |  |  | `anular_venta_panel`, `borrar_socios_ejemplo`, `buscar_socios`, `cargar_socios_ejemplo`, `cerrar_novedad_plataforma`, `config_entrada`, `dar_de_baja_equipo`, `estado_abono_panel`, `estado_soporte`, `formas_de_entrada`, `guardar_accesos_rapidos`, `guardar_numeros_inicio`, `marcar_alertas_vistas`, `ocultar_primeros_pasos`, `pedir_anulacion`, `pedir_ayuda_brik`, `pendientes_panel`, `registrar_sesion_equipo`, `resolver_pedido_anulacion`, `ultimas_entradas` | `/elegir` `/panel/caja` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
+| `/panel/asistente` | pantalla | 👑 |  | `primeros_pasos` |  |
 | `/panel/avisos` | pantalla | 👑 🧭 🛎️ |  | `bandeja_avisos`, `marcar_avisado`, `novedades_panel`, `publicar_novedad`, `quitar_novedad` | `/panel/socios/` |
 | `/panel/ayuda` | pantalla |  |  |  |  |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_para_revisar`, `cerrar_caja`, `confirmar_ticket`, `contar_caja_sin_contar`, `dejar_caja_sin_contar`, `guardar_config_caja`, `movimiento_caja`, `preparar_ticket`, `ticket_movimiento` | `/panel/caja/historial` `/panel/caja/reporte` |
@@ -61,7 +63,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/cuenta` | pantalla |  |  | `ayudas_vistas`, `mi_liquidacion`, `mi_seguridad` | `/panel/pin` |
 | `/panel/cupones` | pantalla | 👑 🧭 |  | `cupones_panel`, `desactivar_cupon`, `guardar_cupon`, `planes_gimnasio` |  |
 | `/panel/documentos` | pantalla | 👑 🧭 |  | `archivar_documento`, `documentos_panel`, `firmar_documento`, `firmas_propias_pendientes`, `guardar_documento` | `/panel/socios/` |
-| `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `activar_emergencia_puerta`, `anular_ingreso`, `apto_socio`, `cerrar_emergencia_puerta`, `config_prueba_gratis`, `config_visita`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `dar_prueba_gratis`, `descongelar`, `documentos_socio`, `entradas_de_emergencia`, `entrar_con_pin`, `estado_acceso`, `estado_emergencia_puerta`, `eventos_del_dia_socio`, `guardar_config_entrada`, `guardar_config_visita`, `guia_entrada`, `habilitar_emergencia_puerta`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `prueba_por_dni`, `registrar_ingreso`, `registrar_invitado`, `registrar_salida`, `sincronizar_sin_internet` | `/panel/caja` `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` |
+| `/panel/entrada` | pantalla | 👑 🧭 🛎️ | entrada | `activar_emergencia_puerta`, `anular_ingreso`, `apto_socio`, `cerrar_emergencia_puerta`, `config_prueba_gratis`, `config_visita`, `confirmar_invitado`, `copia_entrada`, `cupo_dejar_pasar`, `dar_prueba_gratis`, `descongelar`, `documentos_socio`, `entradas_de_emergencia`, `entrar_con_pin`, `estado_acceso`, `estado_emergencia_puerta`, `eventos_del_dia_socio`, `ficha_socio`, `guardar_config_entrada`, `guardar_config_visita`, `guia_entrada`, `habilitar_emergencia_puerta`, `ingresos_del_dia`, `invitados_de_hoy`, `leer_llavero`, `leer_qr`, `pausas_socio`, `prueba_por_dni`, `registrar_ingreso`, `registrar_invitado`, `registrar_salida`, `sincronizar_sin_internet` | `/panel/caja` `/panel/entrada/control` `/panel/socios/` `/panel/socios/nuevo` |
 | `/panel/entrada/control` | pantalla | 👑 🧭 | entrada | `alertas_prestamo`, `control_entrada` | `/panel/control` `/panel/socios/` |
 | `/panel/entrada/ultimas` | acción (POST/GET) |  |  |  |  |
 | `/panel/equipo` | pantalla | 👑 🧭 |  | `equipo_gimnasio`, `equipo_perfiles`, `guardar_equipo`, `guardar_equipo_ajuste`, `guardar_foto_equipo`, `guardar_perfil_equipo`, `guardar_permisos_equipo`, `permisos_equipo`, `preparar_foto_equipo` | `/panel/configuracion` `/panel/control` `/panel/equipo/actividad` |
@@ -107,7 +109,11 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `estado_pagos_online`, `pagos_por_aprobar`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy |  | `/panel/retencion` |
 | `/panel/vender` | pantalla | 👑 🧭 🛎️ | vender | `caja_para_cobrar`, `comprobante_venta`, `contexto_cobro`, `ficha_socio`, `guardar_config_cobro`, `precios_venta`, `registrar_uso_cupon`, `validar_cupon`, `vender` | `/panel/caja` `/panel/entrada` `/panel/recibo/` `/panel/socios/` `/panel/socios/nuevo` |
+| `/profe` | acción (POST/GET) |  |  |  |  |
+| `/recepcion` | acción (POST/GET) |  |  |  |  |
 | `/salir` | acción (POST/GET) |  |  |  |  |
+| `/socio` | acción (POST/GET) |  |  |  |  |
+| `/super` | acción (POST/GET) |  |  |  |  |
 | `/tv` | pantalla |  |  | `tv_estado` |  |
 | `/tv/activar` | acción (POST/GET) |  |  |  |  |
 
@@ -174,7 +180,6 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `perdonar_falta`
 - `planes_brik_publicos`
 - `preparar_foto_mensaje`
-- `primeros_pasos`
 - `productos_gimnasio`
 - `prometieron_pagar`
 - `quiero_probar`
