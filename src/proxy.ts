@@ -52,7 +52,7 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   return respuesta;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const base = process.env.NEXT_PUBLIC_DOMINIO_BASE;
   const plataforma = process.env.NEXT_PUBLIC_DOMINIO_PLATAFORMA;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -73,7 +73,7 @@ const pantallas = recorrer(app).map((archivo) => {
   return { ruta, tipo, rpcs, roles, secciones, lleva };
 }).sort((a, b) => a.ruta.localeCompare(b.ruta));
 // El middleware no es una pantalla, pero resuelve el gimnasio de cada pedido.
-const mw = readFileSync(join(raiz, "src", "middleware.ts"), "utf8");
+const mw = readFileSync(join(raiz, "src", "proxy.ts"), "utf8");
 pantallas.unshift({
   ruta: "(middleware)", tipo: "cada pedido", roles: [], secciones: [], lleva: [],
   rpcs: unico([...mw.matchAll(/resolver\(\s*"([a-z_]+)"/g), ...mw.matchAll(RPC)].map((m) => m[1])),

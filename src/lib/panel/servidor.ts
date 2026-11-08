@@ -43,7 +43,7 @@ export const TIEMPO_MAXIMO_MS = 10_000;
 // (cuesta una consulta); falta invalidar nunca.
 const GUARDA_LO_PUBLICO = /^(guardar|publicar|programar|aplicar|anular_precio|anular_cierre|crear_cierre|confirmar_imagen|quitar_imagen|ordenar_fotos|sumar_sede|configurar|archivar|reordenar|activar|desactivar|apagar|prender|editar)_/;
 function invalidarLoPublico() {
-  try { revalidateTag("landing"); } catch { /* llamado durante el render: no se puede, vence solo en 60 s */ }
+  try { revalidateTag("landing", { expire: 0 }); } catch { /* llamado durante el render: no se puede, vence solo en 60 s */ }
 }
 /** Cortada por el tiempo máximo (AbortError / TimeoutError que supabase-js devuelve como error). */
 const esDemora = (e: { message?: string; name?: string; code?: string }) =>
