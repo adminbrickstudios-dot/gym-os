@@ -57,3 +57,11 @@ Sin motivo en el resumen (el script cae con una excepción): `vd-3`, `vd-37`, `v
 `vd-22` y `vd-44`: `ENOTFOUND demo.localhost` (el entorno de esta compu no resuelve el host de pruebas para la API; no es de la app).
 `vd-35`, `vd-39`: el checkbox no cambia de estado al tocarlo.
 Los logs de cada una quedan en `.local/e2e-falla-*.log` (no se suben).
+
+### Vuelta 2 (08/11): quedan 30
+Arreglados además: vd-46c/j/t (Vender ya no arma la cuota sin `&cuota=1`), vd-22/42/44 (helper `api` en `comun.mjs`: el cliente de pedidos no resuelve
+`demo.localhost` en Windows), vd-10 y panel-vender (el motivo del descuento es una lista, VD-46C), rev-3 (`esperarCobro` sigue con motivo si la base frena el doble cobro, VD-50),
+vd-18 (botón Agregar del producto), pla-4/vd-46d (falla real, ver arriba).
+Siguen fallando, al correrlos de nuevo en 2 tandas con base nueva: caj-4, caj-5 (tickets de caja), panel-equipo, com-11, com-13 (no hay clase pasada en el demo),
+vd-3, vd-5 (recibo), vd-6, vd-9, vd-11, vd-12, vd-12b, vd-15, vd-19, vd-20, vd-27, vd-29 (la ventana de Entrada no se monta en /panel para esa sesión), vd-31, vd-35, vd-37, vd-38,
+vd-39, vd-40, vd-46a, vd-46e, vd-46f, vd-46r, vd-49 (plata), vd-62, vd-63.

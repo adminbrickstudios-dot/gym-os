@@ -60,9 +60,10 @@ barrido en verde con `APP_MODO=produccion`. Se publica.
 - ✅ Next 16.4.5 + React 19.3 (commit 5d48a71): build, lint (0 errores), typecheck y vitest en verde. `accion-colgada.mjs 50` → **colgadas 0 de 50**.
 - ✅ Base (base limpia): 847/848, la que falla es "3.000 filas en 30 s" (Windows, ~32 s, ya conocida); chequeos en verde; mapa de pantallas ok.
   Ojo: `db:pruebas` falla en cascada si se corre sobre la base que ya tiene los usuarios demo; hay que correrlo sobre `scripts/db/local.sh nueva`.
-- 🟡 Cadena e2e en tandas de 20 con base nueva: 220 recorridos, 171 en verde, 49 fallan; al repetir solo esos, 42 siguen fallando.
-  Arreglados: `pla-4`/`vd-46d` (la vista previa del aumento estaba rota de verdad), `vd-41`, `vd-7`, `vd-8`. El resto, clasificado en
-  `DIAGNOSTICO-BASE0.md`. Falta: arreglar o actualizar esos 42 y correr el barrido. **No publicado.**
+- 🟡 Cadena e2e en tandas de 20 con base nueva: 220 recorridos, 171 en verde, 49 fallan. Vuelta 2: **19 arreglados** (pla-4 y vd-46d eran una
+  falla real de la app: la vista previa del aumento mandaba un argumento que la función no tiene; vd-41 dice "falta el permiso"; el resto, pruebas
+  contra pantallas que cambiaron en VD-5/VD-46C/VD-50 o que dependían del DNS del sistema). **Quedan 30** (lista y motivo en
+  `DIAGNOSTICO-BASE0.md`). Falta: revisarlos, correr el barrido, `verificar` completo. **No publicado.**
 - Las reglas nuevas del compilador de React (49 errores de lint) quedaron apagadas en `eslint.config.mjs`; revisarlas más adelante.
 
 ### BASE-1 · Velocidad: diagnóstico con números, después arreglos ❌
@@ -302,4 +303,5 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 
 | Vuelta | Fecha y hora | Qué se cerró | Publicado |
 |---|---|---|---|
+| 2 | 08/11 | 19 e2e arreglados (1 falla real de la app); quedan 30 | no |
 | 1 | 07-08/11 | Next 16.4.5 (0 colgadas de 50); pla-4/vd-46d/vd-41/vd-7/vd-8; 42 e2e por revisar | no |
