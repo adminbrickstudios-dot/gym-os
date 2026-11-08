@@ -15,14 +15,18 @@ import { EVENTO_ABRIR_PANEL_SOCIO } from "./PanelSocioLateral";
 /** La ventana de Entrada escucha este evento para abrir el veredicto de un socio (detail: ResultadoSocio). */
 export const EVENTO_ABRIR_SOCIO = "gymos:abrir-entrada-socio";
 
+/** La ventana de Entrada manda este evento con lo que acaba de anotar la recepción (BASE-3, modo aviso): sale como aviso abajo a la derecha. */
+export const EVENTO_AVISO_LOCAL = "gymos:aviso-local";
+export type AvisoLocal = { id: string; color: string; texto: string; socioId: string; nombre: string; numero: number | null; cobrar: boolean; puede: boolean; textoSocio: string };
+
 const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con QR", qr_pared: "por QR", kiosco: "en la tablet", nfc: "con el llavero", molinete: "por el molinete" };
 const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
-const MAX_VISIBLES = 4;
+const MAX_VISIBLES = 3;
 const VERDE_MS = 6000;
 const AMARILLO_MS = 12000;
 
 type Aviso = {
-  id: string; color: "verde" | "amarillo" | "rojo"; emoji: string; texto: string;
+  id: string; color: "verde" | "amarillo" | "rojo" | "azul"; emoji: string; texto: string;
   socioId: string; nombre: string; numero: number | null; cobrar: boolean; puede: boolean; textoSocio: string; colorSocio: string;
 };
 
@@ -91,6 +95,32 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   const pausar = (id: string) => { const t = temporizadores.current.get(id); if (t) clearTimeout(t); temporizadores.current.delete(id); };
   const reanudar = (a: Aviso) => { if (a.color === "rojo") return; temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS)); };
+  // BASE-3: lo que anota la propia recepción (modo aviso) llega por acá.
+  useEffect(() => {
+    const mapa = temporizadores.current;
+    const local = (e: Event) => {
+      const x = (e as CustomEvent<AvisoLocal>).detail;
+      const color = x.color as Aviso["color"];
+      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "⛔" : color === "amarillo" ? "⚠️" : color === "azul" ? "🎁" : "✅", texto: x.texto,
+        socioId: x.socioId, nombre: x.nombre, numero: x.numero, cobrar: x.cobrar, puede: x.puede, textoSocio: x.textoSocio, colorSocio: color === "rojo" ? "rojo" : color === "amarillo" ? "amarillo" : "verde" };
+      setAvisos((previos) => {
+        let todos = [...previos.filter((p) => p.id !== n.id), n];
+        while (todos.length > MAX_VISIBLES) {
+          const i = todos.findIndex((q) => q.color === "verde" || q.color === "azul");
+          const j = i >= 0 ? i : todos.findIndex((q) => q.color === "amarillo");
+          if (j < 0) break;
+          const [fuera] = todos.splice(j, 1);
+          const t = mapa.get(fuera.id); if (t) clearTimeout(t); mapa.delete(fuera.id);
+          todos = [...todos];
+        }
+        return todos;
+      });
+      if (color !== "rojo") mapa.set(n.id, setTimeout(() => cerrar(n.id), color === "verde" ? VERDE_MS : AMARILLO_MS));
+    };
+    window.addEventListener(EVENTO_AVISO_LOCAL, local);
+    return () => window.removeEventListener(EVENTO_AVISO_LOCAL, local);
+  }, [cerrar]);
+
   const abrirVeredicto = (a: Aviso) => {
     cerrar(a.id);
     // BASE-3: tocar el aviso abre el panel lateral con la ficha rápida (la ventana de Entrada sigue en F2).
@@ -112,7 +142,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
   return (
     <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 bottom-4 flex flex-col-reverse gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
       {avisos.map((a) => (
-        <div key={a.id} data-aviso-entrada={a.color} data-aviso-socio={a.socioId}
+        <div key={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
           className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>

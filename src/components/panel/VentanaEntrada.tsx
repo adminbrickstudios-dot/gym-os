@@ -21,7 +21,7 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
-import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
+import { EVENTO_ABRIR_SOCIO, EVENTO_AVISO_LOCAL, type AvisoLocal } from "./AvisosEntrada";
 import { EventosHoyEntrada } from "./EventosHoyEntrada";
 import { CartelEmergencia, useEmergencia } from "./CartelEmergencia";
 import { escucharEntradas } from "./entradas-vivo";
@@ -225,13 +225,33 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
-  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion") => empezar(async () => {
+  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia(forma); setPaso("veredicto"); setV(null);
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); setElegido(null); return; }
+    // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
+    if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande && r.v) {
+      const vv = r.v;
+      const solo = !cfgRef.current.anotar_solo_en_verde || vv.color === "verde";
+      const anotable = vv.puede && r.guia?.boton === "anotar" && solo && !r.apto && !r.firmar;
+      const aviso = (id: string, color: AvisoLocal["color"], texto: string, cobrar: boolean, puede: boolean): AvisoLocal => ({ id, color, texto, socioId: s.socio_id, nombre: s.nombre, numero: s.numero, cobrar, puede, textoSocio: vv.texto });
+      let a: AvisoLocal;
+      if (anotable) {
+        const x = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
+        if (x.error) { setError(x.error); setPaso("veredicto"); setV(vv); setGuia(r.guia ?? null); return; }
+        const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
+        a = aviso(x.r!.ingreso_id, color, x.r!.repetido ? `${s.nombre} ya había entrado: ${x.r!.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
+      } else {
+        a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
+      }
+      if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
+      window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
+      cerrar();
+      return;
+    }
     setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setEventosHoy(r.eventosHoy ?? []);
     if (sonido) sonar(r.v!.color);
-  }), [sedeId, sonido]);
+  }), [sedeId, sonido, cerrar]);
 
   const anotado = useCallback((r: ResultadoIngreso, s: ResultadoSocio) => {
     setHecho({ ...r, nombre: s.nombre, hora: hora(new Date()), socioId: s.socio_id });
@@ -544,7 +564,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const abrirSocio = (e: Event) => {
       const s = (e as CustomEvent<ResultadoSocio>).detail;
       abrir();
-      setTimeout(() => elegir(s), 0);
+      setTimeout(() => elegir(s, "recepcion", true), 0);   // desde un aviso o el panel lateral: la ventana grande, con todos sus botones
     };
     window.addEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
     return () => window.removeEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);

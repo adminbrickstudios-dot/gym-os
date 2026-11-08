@@ -8,6 +8,7 @@ import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { formatearPesos } from "@/lib/formato";
 import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
+import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
 
 /** Quien quiera abrir el panel lateral de un socio manda este evento (detail: { socioId }). */
 export const EVENTO_ABRIR_PANEL_SOCIO = "gymos:abrir-panel-socio";
@@ -80,6 +81,9 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
               <button type="button" onClick={cobrar} data-panel-socio-cobrar className="boton boton-principal w-full !min-h-14 text-xl">
                 💵 COBRAR AHORA{debe ? ` ${formatearPesos(debe)}` : ""}
               </button>
+            )}
+            {puedeCobrar && !vigente && (
+              <button type="button" data-panel-socio-dejar-pasar className="boton w-full" onClick={() => { const id = socioId; setSocioId(null); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_SOCIO, { detail: { socio_id: id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`, color: a.color, texto: a.texto, puede: a.puede, dado_de_baja: false } })); }}>Dejar pasar igual…</button>
             )}
             <section aria-label="Último pago">
               <h3 className="titulo text-lg">Último pago</h3>

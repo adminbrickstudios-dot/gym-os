@@ -1,6 +1,6 @@
 // El color del semáforo de acceso, siempre con su texto al lado: nunca solo color.
 const VAR: Record<string, string> = {
-  verde: "var(--verde)", amarillo: "var(--amarillo)", naranja: "var(--naranja)", rojo: "var(--rojo)", gris: "var(--texto-tenue)",
+  verde: "var(--verde)", amarillo: "var(--amarillo)", naranja: "var(--naranja)", rojo: "var(--rojo)", azul: "var(--azul)", gris: "var(--texto-tenue)",
 };
 const NOMBRE: Record<string, string> = { verde: "Puede entrar", amarillo: "Puede entrar, con aviso", naranja: "Atención", rojo: "No puede entrar", gris: "Sin plan" };
 

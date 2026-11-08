@@ -8,7 +8,7 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ---
 
-## P0 LISTO PARA MAÑANA
+## P0 EN CURSO (un bloque es ✅ solo si cumple su LISTO SI completo; BASE-1, 3, 6, 8, 9 y 10 siguen en 🟡)
 
 **Estado (08/11, noche):** el P0 (BASE-0 a BASE-11 y BASE-DOC) está **publicado en producción**, bloque por bloque, con PR mergeado y chequeos en verde. La simulación de "terminado" (`scripts/e2e/base-simulacion.mjs`) pasa entera. Cada bloque dice qué quedó pendiente (cosas chicas, nada que impida entregar el primer gimnasio).
 

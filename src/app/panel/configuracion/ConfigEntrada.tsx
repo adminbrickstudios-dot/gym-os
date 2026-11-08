@@ -47,6 +47,17 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
       <section className="tarjeta p-5 space-y-2">
         <h2 className="titulo text-2xl">🚪 La Entrada en todo el panel</h2>
         <p className="texto-suave">La ventana de Entrada se abre desde cualquier pantalla: con el botón verde, con F2 o Ctrl+E, tipeando un DNI o pasando el lector.</p>
+        <div className="py-2" data-opcion="entrada-resultado">
+          <p className="font-semibold">Mostrar el resultado de la entrada</p>
+          <p className="texto-suave text-sm">Con el aviso, Enter anota y el resultado sale abajo a la derecha (con la franja de color); tocarlo abre la ficha rápida. Con la ventana grande, el veredicto ocupa la pantalla como siempre.</p>
+          <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Mostrar el resultado de la entrada">
+            {([["aviso", "Aviso en la esquina"], ["ventana", "Ventana grande"]] as const).map(([valor, texto]) => (
+              <button key={valor} type="button" aria-pressed={c.resultado_entrada === valor} data-resultado={valor}
+                className={`pestana ${c.resultado_entrada === valor ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}
+                onClick={() => setC({ ...c, resultado_entrada: valor })}>{texto}</button>
+            ))}
+          </div>
+        </div>
         <Interruptor etiqueta="Abrir al tipear un número" data-opcion="entrada-abrir-al-tipear" ayuda="Si no estás escribiendo en un campo, tocar un número abre la Entrada con ese número. Un lector de QR o llavero la abre siempre."
           checked={c.abrir_al_tipear} onChange={(e) => setC({ ...c, abrir_al_tipear: e.target.checked })} />
         <Interruptor etiqueta="Barra fija a la derecha" data-opcion="entrada-barra-fija" ayuda="Solo en compus de pantalla ancha: el campo DNI siempre a la vista y las últimas 5 entradas. Pensada para la compu del mostrador."
