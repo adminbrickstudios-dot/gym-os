@@ -10,29 +10,25 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ## RESUMEN PARA MATEO (el agente lo reescribe al final de cada bloque)
 
-> Mientras el P0 no esté terminado, este bloque dice qué bloque va, qué ya está
-> publicado y qué falta. Cuando termine, el título pasa a
-> **"P0 LISTO PARA MAÑANA"**.
+**Estado (08/11, tarde):** el P0 va por el bloque 6. **Publicado en producción:** BASE-0 (Next 16.4.5, sin acciones colgadas), BASE-2 (contraseña que escribe quien crea la cuenta + puertas `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super`), BASE-3 (panel lateral con COBRAR AHORA), BASE-4 (Inicio con Deben / Vencen esta semana / Plata en riesgo, migración aplicada por vos), BASE-5 (`socios.cubierto_hasta`, migración aplicada) y BASE-1 en parte (Inicio en una pasada, funciones de Vercel en gru1). Todo con PR mergeado y chequeos en verde.
 
-**Estado:** el P0 todavía no arrancó.
+**Medido con 5.000 socios:** la puerta tarda menos de 40 ms (buscar, ver el veredicto, registrar un ingreso). Lo lento son las listas de muchos socios (~440 ms, 1,8 s el número de Inicio antes de arreglarlo); detalle y plan en `VELOCIDAD.md`.
 
-**Lo que está publicado en producción:** todo Gym OS v2 hasta el PR #4 (07/11).
+**Links por rol** (cada gimnasio en su dirección; las puertas fijas llevan al ingreso con la marca del gimnasio):
 
-**Links por rol** (se completan en BASE-2):
-
-| Rol | Link | Usuario de prueba |
+| Rol | Link | Usuario de prueba (demo) |
 |---|---|---|
-| Super admin | | la cuenta de Mateo |
-| Dueño | | |
-| Recepción | | |
-| Profe | | |
-| Socio | | |
+| Super admin | `/super` (o `/admin`) en la dirección de la plataforma | la cuenta de Mateo |
+| Dueño | `/dueno` | duena@ejemplo.invalid |
+| Recepción | `/recepcion` | recepcion@ejemplo.invalid |
+| Profe | `/profe` | profe@ejemplo.invalid |
+| Socio | `/socio` | socio@ejemplo.invalid |
 
-**Cómo crear el gimnasio de mañana:** (se escribe en BASE-2, paso por paso)
+**Cómo crear el gimnasio de mañana:** entrá a `/super` → alta en 3 pasos (tipo, marca, dueño). En el paso 3 escribí el mail del dueño y, si querés, **su contraseña** (si la dejás vacía se genera una provisoria y se muestra una sola vez). Pasale el link `/dueno` de su gimnasio. Desde Equipo el dueño crea a la recepción y a los profes de la misma manera.
 
-**Qué probar primero:** (se escribe al cerrar el P0)
+**Qué probar primero:** el alta de un gimnasio de prueba, entrar por `/dueno`, crear una recepcionista, entrar por `/recepcion`, registrar un ingreso con F2 y tocar un aviso para ver el panel lateral.
 
-**Bloqueado / qué tenés que hacer vos:** (comandos exactos, en orden)
+**Bloqueado / qué tenés que hacer vos:** nada por ahora. Pendientes chicos están anotados dentro de cada bloque (p. ej. el socio con mail que crea su contraseña, "Caja del turno" en Inicio, usar `cubierto_hasta` dentro de Retención para bajar las listas de ~440 ms).
 
 **Preguntas abiertas:** ver `PREGUNTAS.md`
 
