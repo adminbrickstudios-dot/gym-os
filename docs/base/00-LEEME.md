@@ -59,13 +59,15 @@ Están en `PREGUNTAS.md` con el porqué. El agente trabaja con esto sin frenar.
   Next 15.5 (`19.2.0-canary-0bdb9206-20250818`). Next 16.4 lo trae arreglado.
   Va primero: **BASE-0** (era VD-64). Con esto colgándose, nada del P0 se
   puede probar en serio.
-- **Verificación en Linux con la app compilada** (07/11, 148 de ~211 recorridos):
-  fallan 19. Entran en BASE-0.
-  `super-admin` (el cuelgue), `ent-6`, `pla-4`, `panel-vender`, `caj-4`,
-  `caj-5`, `cla-2`, `panel-equipo`, `rut-1`, `adm-3`, `cliente`, `rev-3`,
-  `rev-5`, `com-3` (el demo no tiene clases futuras con reservas), `com-11`,
-  `vd-27` (click que no termina), `vd-12` (Inicio muestra más de 4 números),
-  `vd-2` (Cobrar no es el principal), `vd-12b` (0 gráficos para 6 números).
+- **Verificación en Linux con la app compilada** (07/11, la cadena entera:
+  221 recorridos + barrido): **fallan 58**. Entran en BASE-0. Muchos se cortan
+  esperando algo que no llega (el mismo cuelgue); otros son pruebas que quedaron
+  viejas o cosas rotas de verdad, y hay que mirar cada uno:
+  `super-admin`, `ent-6`, `pla-4`, `panel-vender`, `caj-4`, `caj-5`, `cla-2`, `panel-equipo`, `rut-1`, `adm-3`, `cliente`, `rev-3`, `rev-5`, `com-3`, `com-11`, `vd-27`, `vd-12`, `vd-2`, `vd-12b`, `vd-6`, `vd-2b`, `vd-3`, `vd-4`, `vd-7`, `vd-8`, `vd-9`, `vd-41`, `vd-10`, `vd-18`, `vd-11`, `vd-15`, `vd-13`, `vd-37`, `vd-38`, `vd-35`, `vd-39`, `vd-24`, `vd-19`, `vd-20`, `vd-22`, `vd-40`, `vd-42`, `vd-26`, `vd-46a`, `vd-44`, `vd-31`, `vd-29`, `vd-46c`, `vd-46e`, `vd-46j`, `vd-46f`, `vd-46d`, `vd-46r`, `vd-46t`, `vd-49`, `vd-58`, `vd-62`, `vd-63`.
+  Errores vistos: `com-3` el demo no tiene clases futuras con reservas · `vd-12`
+  Inicio muestra más de 4 números · `vd-2` Cobrar no es el principal · `vd-12b`
+  0 gráficos para 6 números · `vd-40` el veredicto no quedó en rojo con el
+  motivo. Logs de cada uno: se reproducen con `npm run e2e` del script.
 - **Los logs de GitHub Actions son públicos** (el repo es público). El paso
   `usuarios-demo` imprime la contraseña de los usuarios demo, y `estado` y
   `hacer-admin` imprimen nombres de gimnasios y el mail del admin. Hasta ahora

@@ -261,7 +261,7 @@ que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
 ### 24 · Base (07/11 · `docs/base/`, empezar por `docs/base/00-LEEME.md`; la lista con su LISTO SI es `docs/base/PROGRESO.md`)
-- [ ] BASE-0 · 🟢 · Next 16.4 (era VD-64) y los 19 recorridos que fallan con la app compilada
+- [ ] BASE-0 · 🟢 · Next 16.4 (era VD-64) y los 58 recorridos que fallan con la app compilada
 - [ ] BASE-1 · 🟢 · Velocidad: diagnóstico con números (`docs/base/VELOCIDAD.md`), después arreglos, con 5.000 socios y 100.000 ingresos
 - [ ] BASE-2 · 🟢 · Usuarios, contraseñas (la escribe quien crea la cuenta) y links fijos por rol
 - [ ] BASE-3 · 🟢 · Ingreso rápido: aviso flotante abajo a la derecha y panel lateral con Cobrar ahora

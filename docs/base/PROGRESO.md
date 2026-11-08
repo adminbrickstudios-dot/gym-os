@@ -48,8 +48,9 @@ cada bloque**, no al final.
 Pasar a **Next 16.4** (era VD-64): `npx @next/codemod@latest upgrade`, la guía
 15 → 16 (`middleware` → `proxy`, `next lint` ya no existe, APIs async, caché),
 React 19.2 estable. Misma app, otra versión: no se cambia comportamiento.
-Después, los 19 recorridos que fallan en Linux con la app compilada (lista en
-`00-LEEME.md`). Por cada uno: si la pantalla cambió a propósito, se actualiza
+Después, los 58 recorridos que fallan en Linux con la app compilada (lista en
+`00-LEEME.md`): primero se vuelven a correr con Next 16, porque muchos son el
+mismo cuelgue. Por cada uno: si la pantalla cambió a propósito, se actualiza
 la prueba; si está rota, se arregla.
 **LISTO SI:** `node scripts/diag/accion-colgada.mjs 50` da `colgadas 0 de 50`
 con la app compilada; `npm run verificar` en verde; la cadena e2e entera y el
