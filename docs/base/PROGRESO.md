@@ -224,7 +224,7 @@ Al final: "Tu gimnasio está listo" con los links de cada rol.
 vuelve y sigue donde estaba, carga un Excel con 2 filas malas que se marcan
 antes de importar, y termina en "Tu gimnasio está listo".
 
-### BASE-8 · Seguridad ❌
+### BASE-8 · Seguridad 🟡 (publicado: encabezados, tope de ingresos, logs, PERMISOS.md; resto pendiente)
 - **8a · Logs públicos:** el repo es público y sus logs de Actions también.
   `usuarios-demo` no imprime la contraseña; `estado` y `hacer-admin` no
   imprimen mails; ningún workflow imprime datos de socios. Revisar todos.
@@ -239,6 +239,9 @@ antes de importar, y termina en "Tu gimnasio está listo".
   Control: verificar que no falte ninguno).
 - Ley 25.326 (D52).
 - Contraseñas demo: ninguna débil en producción. Qué plan pago hace falta (D51).
+
+**Hecho (08/11):** (8a) `estado` imprime solo números, `usuarios-demo` no imprime la contraseña ni `hacer-admin` el mail cuando corren en Actions (log público); encabezados de seguridad en todas las rutas (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy; HSTS ya estaba); tope de intentos fallidos de ingreso (8 por mail y 20 por conexión cada 15 min; migración `20261108070100`, el servidor ni prueba la contraseña pasado el tope); `docs/base/PERMISOS.md` generado desde la base real (`node scripts/datos/permisos-md.mjs`). Verificado: `base-8` (encabezados y 20 intentos frenados), `limite-ingresos.test.mjs`, y los e2e de ingreso, panel, página y app del socio con la CSP puesta.
+**Pendiente de BASE-8:** límite en "Olvidé mi contraseña" y formularios públicos (los códigos ya tienen SEG-1); anti-robot de "Quiero ser socio" (D49: campo trampa + tope por IP); prueba de RLS por rol contra la matriz; Ley 25.326 (D52: política de privacidad, consentimiento en el alta, pedido de datos del socio); qué plan pago hace falta (D51: Vercel Hobby no permite uso comercial; Supabase Free pausa el proyecto y no guarda copias — contratar es de Mateo); contraseñas demo débiles en producción.
 
 **LISTO SI:** prueba de base de RLS por rol en verde; `curl -I` a producción
 muestra los encabezados; 20 intentos fallidos de ingreso seguidos quedan

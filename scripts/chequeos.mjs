@@ -15,7 +15,7 @@ const iUrl = process.argv.indexOf("--url");
 const url = iUrl >= 0 ? process.argv[iUrl + 1] : process.env.DB_PRUEBAS_URL || process.env.SUPABASE_DB_URL;
 
 // ── Listas cerradas de excepciones (docs/SCHEMA.md § Excepciones) ────
-const SIN_GIMNASIO_ID = new Set(["gimnasios", "administradores_plataforma", "plataforma_planes", "eventos_webhook", "documentos_legales", "novedades_plataforma", "pedidos_codigo", "pedidos_demo_brik", "plataforma_contacto", "ayudas_usuario"]);
+const SIN_GIMNASIO_ID = new Set(["gimnasios", "administradores_plataforma", "plataforma_planes", "eventos_webhook", "documentos_legales", "novedades_plataforma", "pedidos_codigo", "intentos_ingreso_fallidos", "pedidos_demo_brik", "plataforma_contacto", "ayudas_usuario"]);
 const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key", "eventos_webhook_origen_tipo_id_externo_key",
 ]);

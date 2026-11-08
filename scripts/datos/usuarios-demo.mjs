@@ -71,5 +71,6 @@ for (const u of USUARIOS_DEMO) {
   }
 }
 await db.end();
-console.log(`Usuarios demo listos (contraseña: ${contrasena}):`);
+// BASE-8a: el log de Actions es público: en el servidor de integración nunca se imprime la contraseña.
+console.log(`Usuarios demo listos (${process.env.GITHUB_ACTIONS ? "contraseña: la que escribiste al correr el workflow" : `contraseña: ${contrasena}`}):`);
 for (const u of USUARIOS_DEMO.filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);
