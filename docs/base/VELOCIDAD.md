@@ -17,8 +17,8 @@ Cómo se mide:
 
 | Qué | Dónde está | Cómo se vio |
 |---|---|---|
-| Vercel (región de las funciones) | | |
-| Supabase (región) | | |
+| Vercel (región de las funciones) | Las funciones corren en **iad1 (Washington, EE.UU.)**; el borde que atiende es gru1 (São Paulo) | Cabecera `x-vercel-id: gru1::iad1::…` de `https://gym-os-pied.vercel.app/ingresar` (08/11). No hay `vercel.json`: la región es la de por defecto. |
+| Supabase (región) | **Sin confirmar**: el proyecto de Gym OS no aparece en la cuenta conectada por MCP (los dos proyectos visibles están en sa-east-1 pero no tienen las tablas de Gym OS) | Mateo: Supabase → proyecto de Gym OS → Settings → General → Region |
 | Plan de Vercel | | |
 | Plan de Supabase | | |
 
@@ -50,3 +50,7 @@ Cómo se mide:
 | JS por ruta (`next build`) | | |
 | Imágenes | | |
 | Re-renders que se notan | | |
+
+
+## Hallazgo 1 (08/11): región de las funciones
+Si Supabase está en **sa-east-1 (São Paulo)**, cada consulta de una pantalla cruza el continente dos veces (Washington ↔ São Paulo, ~120-140 ms de ida y vuelta) y una pantalla con 6 a 10 consultas en serie suma casi un segundo solo en viajes. El arreglo es de una línea: `vercel.json` con `{"regions": ["gru1"]}`. **No se aplica sin saber la región de Supabase** (si estuviera en EE.UU. empeoraría). Paso para Mateo: confirmar la región y decirlo; el agente deja listo el commit.

@@ -64,7 +64,7 @@ echo $! > .local/supabase.pid
 esperar "http://127.0.0.1:$PUERTO_SUPABASE/" supabase
 
 if [[ "$(psql -Atc "select count(*) from public.gimnasios where slug = 'demo'" "$URL" | tr -d '\015')" == "0" ]]; then
-  node scripts/datos/sembrar-demo.mjs --url "$URL" --dominio localhost
+  node scripts/datos/sembrar-demo.mjs --url "$URL" --dominio localhost --socios "${SOCIOS_DEMO:-300}"
 fi
 node scripts/datos/usuarios-demo.mjs --url "$URL" --supabase "http://127.0.0.1:$PUERTO_SUPABASE" --servicio "$SUPABASE_SERVICE_ROLE_KEY"
 
