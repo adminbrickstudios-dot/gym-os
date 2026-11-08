@@ -15,9 +15,15 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
   const contrasena = String(form.get("contrasena") ?? "");
   if (!email || !contrasena) return { error: "Escribí tu mail y tu contraseña", email };
 
+  // BASE-8: pasado el tope de intentos fallidos (8 por mail, 20 por conexión cada 15 min) ni se prueba la contraseña.
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const permitido = await clienteServicio().rpc("ingreso_permitido", { p_destino: email, p_ip: ip });
+  if (!permitido.error && permitido.data === false) return { error: "Hiciste muchos intentos seguidos. Probá de nuevo en 15 minutos.", email };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithPassword({ email, password: contrasena });
   if (error) {
+    if (!sinConexion(error) && !demasiadosIntentos(error)) await clienteServicio().rpc("registrar_ingreso_fallido", { p_destino: email, p_ip: ip });
     // Mismo texto para toda falla de la cuenta (no existe, clave mala, sin confirmar): no revela quién tiene cuenta.
     if (sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email };
     if (demasiadosIntentos(error)) return { error: TEXTO_DEMASIADOS_INTENTOS, email };
