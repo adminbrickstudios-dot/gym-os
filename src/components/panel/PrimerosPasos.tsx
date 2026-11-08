@@ -34,6 +34,7 @@ export function PrimerosPasos({ datos }: { datos: PrimerosPasosDatos }) {
       <div className="h-2.5 rounded-full bg-[var(--tarjeta-alta)] overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={datos.total} aria-valuenow={datos.hechos} aria-label="Progreso">
         <div className="h-full rounded-full transition-all" style={{ width: `${porcentaje}%`, background: "var(--acento)" }} />
       </div>
+      <Link href="/panel/asistente" className="boton w-full sm:w-auto !justify-start" data-abrir-asistente>🧭 Abrir el asistente de 9 pasos</Link>
       <Link href={`/panel${proximo.href}`} className="boton w-full sm:w-auto !justify-start text-lg !border-[var(--acento)]" data-proximo={proximo.clave}>
         <span aria-hidden>{proximo.emoji}</span> {proximo.titulo}
       </Link>

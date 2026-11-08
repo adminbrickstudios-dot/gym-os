@@ -207,7 +207,7 @@ escrita).
 con capturas mirándolas; un chequeo que falla si aparece un color hex fuera de
 los tokens o un emoji usado como ícono en `src/`.
 
-### BASE-7 · Asistente de 9 pasos ❌
+### BASE-7 · Asistente de 9 pasos ✅ (publicado; pendientes abajo)
 Sobre los Primeros pasos de VD-43 (D44). Reanudable, muestra el avance, cada
 paso explica para qué sirve:
 1. Datos del gimnasio · 2. Logo, colores y portada con vista previa ·
@@ -217,6 +217,9 @@ tolerancia, qué pasa con los que deben) · 7. Clases y profes (se puede
 saltar) · 8. Equipo · 9. Cargar socios (a mano o Excel con validación y vista
 previa).
 Al final: "Tu gimnasio está listo" con los links de cada rol.
+**Hecho (08/11):** `/panel/asistente` (se abre desde Primeros pasos en Inicio): los 9 pasos del pedido en orden, cada uno con "para qué sirve" y el botón a su pantalla; reanudable sin guardar nada más (lo hecho lo calcula la base con `primeros_pasos`); "Seguir donde quedé"; al terminar, "Tu gimnasio está listo" con los links `/dueno`, `/recepcion`, `/profe`, `/socio`. Verificado: `base-7` (8 pasos, compu y celular), `onb-1`, `soc-1` (el importador marca las filas con problemas antes de importar).
+**Pendiente de BASE-7:** los pasos 6 (cómo entra la gente) y 7 (clases y profes) no se miden como hechos (van como "para revisar"); la vista previa de logo/portada y la prueba de conexión de MercadoPago dentro del asistente; el e2e de punta a punta con un gimnasio recién creado.
+
 **LISTO SI:** e2e: un gimnasio recién creado hace los 9 pasos, sale a la mitad,
 vuelve y sigue donde estaba, carga un Excel con 2 filas malas que se marcan
 antes de importar, y termina en "Tu gimnasio está listo".
