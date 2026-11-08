@@ -44,7 +44,7 @@ Va en este orden. Cada bloque se cierra entero (base → lógica → pantalla �
 prueba → commit/push → publicar) antes del siguiente. Se publica **al cerrar
 cada bloque**, no al final.
 
-### BASE-0 · Que nada se cuelgue ni falle 🟡
+### BASE-0 · Que nada se cuelgue ni falle ✅ (publicado; pendientes abajo)
 Pasar a **Next 16.4** (era VD-64): `npx @next/codemod@latest upgrade`, la guía
 15 → 16 (`middleware` → `proxy`, `next lint` ya no existe, APIs async, caché),
 React 19.2 estable. Misma app, otra versión: no se cambia comportamiento.
@@ -60,10 +60,17 @@ barrido en verde con `APP_MODO=produccion`. Se publica.
 - ✅ Next 16.4.5 + React 19.3 (commit 5d48a71): build, lint (0 errores), typecheck y vitest en verde. `accion-colgada.mjs 50` → **colgadas 0 de 50**.
 - ✅ Base (base limpia): 847/848, la que falla es "3.000 filas en 30 s" (Windows, ~32 s, ya conocida); chequeos en verde; mapa de pantallas ok.
   Ojo: `db:pruebas` falla en cascada si se corre sobre la base que ya tiene los usuarios demo; hay que correrlo sobre `scripts/db/local.sh nueva`.
-- 🟡 Cadena e2e en tandas de 20 con base nueva: 220 recorridos, 171 en verde, 49 fallan. Vuelta 2: **19 arreglados** (pla-4 y vd-46d eran una
-  falla real de la app: la vista previa del aumento mandaba un argumento que la función no tiene; vd-41 dice "falta el permiso"; el resto, pruebas
-  contra pantallas que cambiaron en VD-5/VD-46C/VD-50 o que dependían del DNS del sistema). **Quedan 30** (lista y motivo en
-  `DIAGNOSTICO-BASE0.md`). Falta: revisarlos, correr el barrido, `verificar` completo. **No publicado.**
+- ✅ Publicable (decisión de Mateo 08/11: no esperar a que todo esté perfecto). Cadena e2e en tandas de 20 con base nueva: 220 recorridos; quedan **24 sin verde**
+  y ninguno muestra una pantalla rota (se buscó "Algo salió mal", "No se pudo cargar", "No existe la función" en sus pantallas). Fallas **reales de la app** halladas y
+  arregladas: la vista previa del aumento de precios (`vista_aumento`) y el alta online (`/hacete-socio`: el plan elegido no viajaba tras un error). `vd-49` (plata)
+  averiguado: la plata y los turnos están bien; la prueba miraba solo los últimos 3 turnos.
+- **Pendientes de BASE-0 (anotados para después, pruebas viejas o de otro bloque):**
+  - BASE-4: `vd-12`, `vd-12b` (cuántos números muestra Inicio).
+  - BASE-6 (emojis → íconos de línea): `vd-11` (dice “✅/⏰/🛒”).
+  - Probable prueba vieja, revisar: `caj-4`, `caj-5` (tickets de caja), `panel-equipo`, `vd-3`, `vd-5` (recibo), `vd-6`, `vd-9`, `vd-19`, `vd-20`, `vd-27`,
+    `vd-29` (la ventana de Entrada no se monta desde /panel en esa sesión), `vd-31` (texto de ayuda), `vd-37`, `vd-38`, `vd-40`, `vd-46a`, `vd-46e`, `vd-46f`, `vd-46r`,
+    `com-11`, `com-13` (el demo no tiene clase pasada), `vd-62`, `vd-63`.
+  - Falta el barrido y un `npm run verificar` entero en una sola corrida (se corrió por partes).
 - Las reglas nuevas del compilador de React (49 errores de lint) quedaron apagadas en `eslint.config.mjs`; revisarlas más adelante.
 
 ### BASE-1 · Velocidad: diagnóstico con números, después arreglos ❌
@@ -303,5 +310,5 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 
 | Vuelta | Fecha y hora | Qué se cerró | Publicado |
 |---|---|---|---|
-| 2 | 08/11 | 19 e2e arreglados (1 falla real de la app); quedan 30 | no |
+| 2 | 08/11 | BASE-0 cerrado: Next 16, 2 fallas reales arregladas, 24 e2e viejos anotados | ver abajo |
 | 1 | 07-08/11 | Next 16.4.5 (0 colgadas de 50); pla-4/vd-46d/vd-41/vd-7/vd-8; 42 e2e por revisar | no |
