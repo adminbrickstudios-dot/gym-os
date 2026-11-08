@@ -12,7 +12,7 @@ export function BotonEntradaFicha({ socio, className = "boton" }: { socio: Resul
   return (
     <Link href={`/panel/entrada?socio=${socio.socio_id}`} className={className} data-ficha-entrada
       onClick={(e) => {
-        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || document.documentElement.dataset.ventanaEntrada !== "si") return;
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || document.documentElement.dataset.entradaLista !== "si") return;
         e.preventDefault();
         window.dispatchEvent(new CustomEvent<ResultadoSocio>(EVENTO_ABRIR_SOCIO, { detail: socio }));
       }}>

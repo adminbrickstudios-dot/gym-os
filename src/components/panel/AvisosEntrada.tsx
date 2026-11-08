@@ -10,6 +10,7 @@ import type { ResultadoSocio } from "@/app/panel/acciones";
 import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
 import { escucharEntradas } from "./entradas-vivo";
+import { EVENTO_ABRIR_PANEL_SOCIO } from "./PanelSocioLateral";
 
 /** La ventana de Entrada escucha este evento para abrir el veredicto de un socio (detail: ResultadoSocio). */
 export const EVENTO_ABRIR_SOCIO = "gymos:abrir-entrada-socio";
@@ -88,8 +89,12 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
     return () => { quitar(); mapa.forEach((t) => clearTimeout(t)); mapa.clear(); };
   }, [gimnasioId, cerrar]);
 
+  const pausar = (id: string) => { const t = temporizadores.current.get(id); if (t) clearTimeout(t); temporizadores.current.delete(id); };
+  const reanudar = (a: Aviso) => { if (a.color === "rojo") return; temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS)); };
   const abrirVeredicto = (a: Aviso) => {
     cerrar(a.id);
+    // BASE-3: tocar el aviso abre el panel lateral con la ficha rápida (la ventana de Entrada sigue en F2).
+    if (conVentana) { window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_PANEL_SOCIO, { detail: { socioId: a.socioId } })); return; }
     if (conVentana && !ruta.startsWith("/panel/entrada")) {
       const socio: ResultadoSocio = { socio_id: a.socioId, numero: a.numero, nombre: a.nombre, color: a.colorSocio, texto: a.textoSocio, puede: a.puede, dado_de_baja: false };
       window.dispatchEvent(new CustomEvent<ResultadoSocio>(EVENTO_ABRIR_SOCIO, { detail: socio }));
@@ -105,9 +110,10 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   if (avisos.length === 0) return null;
   return (
-    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 top-[4.5rem] sm:top-20 flex flex-col gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
+    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 bottom-4 flex flex-col-reverse gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
       {avisos.map((a) => (
         <div key={a.id} data-aviso-entrada={a.color} data-aviso-socio={a.socioId}
+          onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
           className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
             <span className="text-xl leading-6" aria-hidden>{a.emoji}</span>

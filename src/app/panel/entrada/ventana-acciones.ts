@@ -63,3 +63,12 @@ export async function guardarConfigEntrada(datos: Partial<ConfigEntrada>): Promi
     return { config };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** BASE-3: la ficha rápida del panel lateral. Todo sale de `ficha_socio` (el veredicto lo calcula la base; acá no se recalcula nada). */
+export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/app/panel/socios/[id]/tipos").Ficha; puedeCobrar?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const ficha = await rpc<import("@/app/panel/socios/[id]/tipos").Ficha>("ficha_socio", { p_socio_id: socioId });
+    return { ficha, puedeCobrar: panel.yo.rol !== "profe" };
+  } catch (e) { return { error: (e as Error).message }; }
+}

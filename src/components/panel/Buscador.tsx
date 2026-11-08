@@ -97,7 +97,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
     if (a.tipo === "entrada") {
       setAbierto(false);
       // Con la ventana montada se abre ahí mismo; si no (pantalla de Entrada, sin sede), lleva a la pantalla de siempre.
-      if (document.documentElement.dataset.ventanaEntrada === "si") window.dispatchEvent(new CustomEvent<string>(EVENTO_ABRIR_ENTRADA_CON, { detail: a.texto ?? "" }));
+      if (document.documentElement.dataset.entradaLista === "si") window.dispatchEvent(new CustomEvent<string>(EVENTO_ABRIR_ENTRADA_CON, { detail: a.texto ?? "" }));
       else router.push("/panel/entrada");
       return;
     }

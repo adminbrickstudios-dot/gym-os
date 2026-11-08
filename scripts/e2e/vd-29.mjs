@@ -59,7 +59,7 @@ try {
 
   // ── "entrada <dni>": la ventana de Entrada con ese DNI ──
   await d.goto(`${G}/panel`);   // en la pantalla Entrada la acción usa la Puerta de esa pantalla; la ventana se abre desde cualquier otra
-  await d.waitForFunction(() => document.documentElement.dataset.ventanaEntrada === "si", null, { timeout: 30000 });
+  await d.waitForFunction(() => document.documentElement.dataset.entradaLista === "si", null, { timeout: 30000 });
   await abrirBuscador(d);
   await escribir(d, `entrada ${dni}`);
   await accion(d, "entrada").first().waitFor({ timeout: 15000 });

@@ -128,7 +128,7 @@ el dueño desactiva a la recepcionista y ella ya no entra → le restablece la
 contraseña y vuelve a entrar → un socio recibe el link, crea su contraseña y
 entra por `/socio`. "Olvidé mi contraseña" probado contra supabase-local.
 
-### BASE-3 · Ingreso rápido con aviso flotante y panel lateral ❌
+### BASE-3 · Ingreso rápido con aviso flotante y panel lateral 🟡 (publicado lo que anda; pendientes abajo)
 Sobre la Entrada que ya existe (VD-1, VD-2, VD-3, VD-48, VD-50, VD-51), cambia
 **cómo se muestra el resultado** (D40):
 - Botón grande en recepción + atajo global **F2** y **/** (sin dispararse dentro
@@ -151,6 +151,9 @@ Sobre la Entrada que ya existe (VD-1, VD-2, VD-3, VD-48, VD-50, VD-51), cambia
   no cuenta dos veces (VD-3: ventana de 5 h).
 - Todo sale de `registrar_ingreso` / `calcular_acceso`. Nada se recalcula en
   TypeScript.
+
+**Hecho (08/11):** panel lateral con la ficha rápida (`PanelSocioLateral`, datos de `ficha_socio`: estado que dice la base, plan, vigencia y días que quedan, último pago, historial, últimos ingresos, COBRAR AHORA con el monto, WhatsApp); los avisos de la puerta ahora van abajo a la derecha, se quedan mientras el mouse o el dedo está encima, y tocarlos abre el panel; F2 y Ctrl+E ya existían. Arreglado de paso un defecto real: Ctrl+K "entrada <dni>" y el botón Entrada de la ficha nunca abrían la ventana (leían un atributo con el nombre viejo). Verificado: `scripts/e2e/base-3.mjs` (11 pasos, compu y celular) y `vd-29` (28 pasos).
+**Pendiente de BASE-3:** que lo que anota la propia recepción también salga como aviso (hoy el aviso es para lo que entra por QR/tablet; la ventana grande sigue siendo el resultado de la recepción) y la opción en Configuración "aviso en la esquina / ventana grande" (D40); "Dejar pasar igual" dentro del panel; atajo `/`; el e2e de 20 ingresos y la medida de menos de 1 s con 5.000 socios (BASE-1).
 
 **LISTO SI:** e2e en compu y en tablet: 20 ingresos con el atajo, los 4
 colores, un rojo cobrado desde el aviso → panel → Cobrar ahora, uno dejado
