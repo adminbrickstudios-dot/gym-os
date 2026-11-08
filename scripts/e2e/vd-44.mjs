@@ -38,7 +38,8 @@ try {
   await ficha.locator('[data-franja] input[aria-label="Hasta"]').fill("13:00");
   await ficha.locator("[data-mostrar-persona]").check();
   await ficha.getByRole("button", { name: "Guardar", exact: true }).click();
-  await ficha.getByRole("status").waitFor({ timeout: 30000 });
+  // El aviso "Foto guardada" de antes sigue en pantalla: se espera a que la base tenga lo nuevo.
+  await d.waitForFunction(() => true); for (let i = 0; i < 30; i++) { const [{ k }] = (await db.query(`select count(*) as k from public.equipo_actividades where equipo_id = $1`, [diego])).rows; if (Number(k) > 0) break; await d.waitForTimeout(500); }
   const [{ n }] = (await db.query(`select (select count(*) from public.equipo_actividades where equipo_id = $1) + (select count(*) from public.equipo_horario_trabajo where equipo_id = $1) as n`, [diego])).rows;
   chequear(Number(n) === 2, "se guardan la clase que da y su horario de trabajo", `hay ${n} filas`);
   await capturar(d, "vd44-compu-equipo");
