@@ -322,6 +322,27 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 
 ## P1: los 70 detalles y lo chico
 
+**0. Super admin (08/11, primero del P1):** `SUPER-ADMIN.md`, en su orden
+(SA-3 ficha con links, equipo y módulos → SA-4 soporte con rol y motivo → SA-5
+buscar a cualquiera → SA-2 lista → SA-1 tablero → el resto). Cada SA-* con su
+estado acá abajo y publicado al cerrarlo.
+
+| SA | Qué | Estado |
+|---|---|---|
+| SA-3 | Ficha del gimnasio (todo de un local) | ❌ |
+| SA-4 | Entrar como soporte con rol, motivo y aviso al dueño | ❌ |
+| SA-5 | Buscar a cualquiera en todos los gimnasios | ❌ |
+| SA-2 | Lista de gimnasios con filtros | ❌ |
+| SA-1 | Tablero con "necesitan atención" | ❌ |
+| SA-6 | Alta, lanzamiento, pausa, baja y papelera | ❌ |
+| SA-11 | Datos personales (Ley 25.326) | ❌ |
+| SA-10 | Segundo factor, roles de BRIK y registro | ❌ |
+| SA-7 | Abonos, ventas y demos | ❌ |
+| SA-8 | Comunicación | ❌ |
+| SA-9 | Plataforma | ❌ |
+| SA-12 | Detalles chicos | ❌ |
+
+
 1. **Los 70 detalles** de `DETALLES-70.md`, en su orden. Muchos ya existen
    (marcados ✅ verificar): se verifican con sesión real y se pasan a ✅ con la
    prueba que los cubre. Los 🟡 y ❌ se hacen.
