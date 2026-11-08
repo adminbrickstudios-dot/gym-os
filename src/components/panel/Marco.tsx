@@ -59,10 +59,10 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
           <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10"><Campana /></div>
           <SinConexion />
           {abono?.estado === "vencido" && (
-            <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura>🔒 El abono de Gym OS está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
+            <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura>🔒 El abono de Base está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
           )}
           {abono?.estado === "por_vencer" && panel.yo.rol === "dueno" && (
-            <p className="mensaje mensaje-aviso mb-6 pr-14" data-abono-por-vencer>⏰ Tu abono de Gym OS{abono.plan ? ` (${abono.plan})` : ""} vence {abono.dias === 0 ? "hoy" : abono.dias === 1 ? "mañana" : `en ${abono.dias} días`}. Si vence, el panel queda en solo lectura (la puerta sigue andando).</p>
+            <p className="mensaje mensaje-aviso mb-6 pr-14" data-abono-por-vencer>⏰ Tu abono de Base{abono.plan ? ` (${abono.plan})` : ""} vence {abono.dias === 0 ? "hoy" : abono.dias === 1 ? "mañana" : `en ${abono.dias} días`}. Si vence, el panel queda en solo lectura (la puerta sigue andando).</p>
           )}
           {/* CAJ-3: en esta compu alguien puso su PIN: lo que se haga queda a su nombre. */}
           {atiende && (

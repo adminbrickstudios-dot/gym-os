@@ -187,7 +187,7 @@ hoy, buscador y listas usan el índice (EXPLAIN en `VELOCIDAD.md`). `CLAUDE.md`
 actualizado (la regla "se calcula, nunca se guarda" con esta excepción
 escrita).
 
-### BASE-6 · Diseño de Base: claro, íconos de línea, nombre ❌
+### BASE-6 · Diseño de Base: claro, íconos de línea, nombre 🟡 (publicado: nombre y claro por defecto; resto pendiente)
 `DISENO.md`. En este orden, para que el primer gimnasio ya lo vea:
 1. Nombre **Base** en todo lo visible (D39).
 2. Tokens de color para claro y oscuro; claro por defecto, elegible por
@@ -199,6 +199,9 @@ escrita).
 5. Recepción como mostrador (`DISENO.md` § Recepción).
 6. Modales: X visible, Esc y click afuera cierran, nunca se apilan ni se traban.
    Todos, revisados uno por uno.
+
+**Hecho (08/11):** (1) el nombre **Base** en todo lo que se ve (ingreso, landing de venta, títulos, manifest, mails de bienvenida, abono, WhatsApp); (2) claro por defecto: lo que no dice tono es claro (`#F4F5F6`), el alta de gimnasio y Configuración arrancan en claro, migración `20261108060100` (default de `color_fondo`); el oscuro sigue elegible por gimnasio. Verificado: `vd-33`, `push-1`, `vd-26`, `base-2`, capturas del ingreso y la landing.
+**Pendiente de BASE-6:** que cada usuario elija claro/oscuro en Mi cuenta; íconos de línea en lugar de emojis (un solo componente `Icono`); tipografía Barlow con `next/font`; recepción como mostrador; revisar los modales uno por uno; el chequeo que falla con un color hex suelto o un emoji como ícono; barrido en claro y oscuro con capturas.
 
 **LISTO SI:** barrido con cada rol en compu y celular, en claro y en oscuro,
 con capturas mirándolas; un chequeo que falla si aparece un color hex fuera de

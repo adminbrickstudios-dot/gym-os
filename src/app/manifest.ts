@@ -8,7 +8,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const host = (await headers()).get("x-gimnasio-host");
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const icono = urlMarca(landing?.marca.favicon_path ?? landing?.marca.logo_path);
-  const nombre = landing?.marca.nombre ?? "Gym OS";
+  const nombre = landing?.marca.nombre ?? "Base";
   return {
     name: nombre, short_name: nombre.slice(0, 12), start_url: "/app", scope: "/", display: "standalone",
     // Los colores del gimnasio (sin gimnasio, el manifest no fija colores).

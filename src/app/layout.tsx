@@ -5,14 +5,14 @@ import { Hidratado } from "@/components/Hidratado";
 // El título y el favicon de cada gimnasio salen de sus datos, en el
 // layout de sus paneles. Este es el de la plataforma.
 export const metadata: Metadata = {
-  title: { default: "Gym OS", template: "%s · Gym OS" },
+  title: { default: "Base", template: "%s · Base" },
   description: "Sistema de gestión para gimnasios.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#14161b",
+  themeColor: "#F4F5F6",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

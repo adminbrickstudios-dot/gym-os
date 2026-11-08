@@ -12,9 +12,9 @@ export async function GET() {
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host) : null;
-  const nombre = landing?.marca.nombre ?? "Gym OS";
+  const nombre = landing?.marca.nombre ?? "Base";
   const frase = landing?.publicada ? landing.portada.titulo : landing ? "Estamos armando nuestra página" : "El sistema para tu gimnasio";
-  const fondo = landing?.marca.color_fondo ?? "#14161b";
+  const fondo = landing?.marca.color_fondo ?? "#F4F5F6";
   const acento = landing?.marca.color_acento ?? "#2fbf5b";
   const texto = tonoDeFondo(fondo) === "oscuro" ? "#f5f5f4" : "#1c1917";
   return new ImageResponse(

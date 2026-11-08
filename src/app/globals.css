@@ -15,7 +15,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  --fondo: #14161b;            /* grafito: el piso de goma del gimnasio */
+  --fondo: #F4F5F6;            /* D37: claro por defecto (gris muy claro, frío); el oscuro se elige por gimnasio */
   --acento: #2fbf5b;           /* un solo acento: la acción principal */
   --acento-texto: #0d1a11;
 
@@ -39,7 +39,7 @@
 }
 
 /* Superficies y textos, derivados del fondo. */
-:root, [data-tono="oscuro"] {
+[data-tono="oscuro"] {
   --tarjeta: color-mix(in oklab, var(--fondo), white 5%);
   --tarjeta-alta: color-mix(in oklab, var(--fondo), white 10%);
   --borde: color-mix(in oklab, var(--fondo), white 11%);
@@ -49,7 +49,8 @@
   --sombra-vidrio: 0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 10px 28px -16px rgb(0 0 0 / 0.55);
   color-scheme: dark;
 }
-[data-tono="claro"] {
+/* claro: lo que no dice nada es claro (D37) */
+:root:not([data-tono]), [data-tono="claro"] {
   --tarjeta: color-mix(in oklab, var(--fondo), white 70%);
   --tarjeta-alta: color-mix(in oklab, var(--fondo), black 5%);
   --borde: color-mix(in oklab, var(--fondo), black 10%);

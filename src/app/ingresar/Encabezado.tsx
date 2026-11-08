@@ -51,7 +51,7 @@ export function CascaraIngreso({ marca, children }: { marca: MarcaIngreso; child
           ) : (
             <span className="icono !size-12 !text-2xl" aria-hidden>🏋️</span>
           )}
-          <span className="titulo text-2xl break-words min-w-0" data-marca-ingreso>{marca?.nombre ?? "Gym OS"}</span>
+          <span className="titulo text-2xl break-words min-w-0" data-marca-ingreso>{marca?.nombre ?? "Base"}</span>
         </div>
         <section className="tarjeta ingreso-tarjeta">{children}</section>
       </div>

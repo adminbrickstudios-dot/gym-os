@@ -515,7 +515,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
           </div>
         </div>
         <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm texto-tenue">Página hecha con Gym OS</p>
+          <p className="text-sm texto-tenue">Página hecha con Base</p>
           <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4">🛎️ Soy del equipo</a>
         </div>
       </footer>

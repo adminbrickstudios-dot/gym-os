@@ -39,7 +39,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
     // Un intento anterior sin terminar deja un factor sin verificar: se limpia para empezar de cero.
     const { data: todos } = await sb.auth.mfa.listFactors();
     for (const f of todos?.all ?? []) if (f.status === "unverified") await sb.auth.mfa.unenroll({ factorId: f.id });
-    const { data, error } = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: `Gym OS ${new Date().toISOString().slice(0, 10)}` });
+    const { data, error } = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: `Base ${new Date().toISOString().slice(0, 10)}` });
     if (error || !data) { setMsj({ texto: `No se pudo empezar: ${error?.message ?? "sin respuesta"}` }); return; }
     setCodigo("");
     setEstado({ tipo: "enrolando", factorId: data.id, qr: data.totp.qr_code, secreto: data.totp.secret });

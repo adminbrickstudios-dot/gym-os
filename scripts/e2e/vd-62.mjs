@@ -137,7 +137,7 @@ async function paginaPlataforma(vp, nombre, esperaNumero) {
     ld: [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => s.textContent ?? ""),
     sinAlt: [...document.images].filter((i) => !i.hasAttribute("alt")).length,
   }));
-  chequear(/Gym OS/.test(meta.titulo) && !!meta.og, `${nombre}: título y Open Graph`, `${nombre}: faltan metadatos ${JSON.stringify(meta.titulo)}`);
+  chequear(/Base/.test(meta.titulo) && !!meta.og, `${nombre}: título y Open Graph`, `${nombre}: faltan metadatos ${JSON.stringify(meta.titulo)}`);
   chequear(meta.ld.some((t) => { try { return JSON.parse(t)["@type"] === "SoftwareApplication"; } catch { return false; } }), `${nombre}: datos estructurados SoftwareApplication`, `${nombre}: sin JSON-LD`);
   chequear(meta.sinAlt === 0, `${nombre}: todas las imágenes tienen alt`, `${nombre}: ${meta.sinAlt} imagen(es) sin alt`);
   if (p.errores.length) falla(`${nombre}: ${p.errores.join(" | ")}`);
@@ -151,7 +151,7 @@ try {
   const form = admin.locator("[data-contacto-plataforma]");
   await form.waitFor({ timeout: 60000 }).catch(() => falla("el super admin no tiene el formulario del WhatsApp de la demo"));
   await form.locator('input[aria-label="WhatsApp de BRIK"]').fill("");
-  await form.locator('input[aria-label="Mensaje de la demo"]').fill("Hola! Quiero ver una demo de Gym OS.");
+  await form.locator('input[aria-label="Mensaje de la demo"]').fill("Hola! Quiero ver una demo de Base.");
   const guardar = form.getByRole("button", { name: "Guardar" });
   if (await guardar.isEnabled()) { await guardar.click(); await form.getByText("Guardado.").waitFor({ timeout: 30000 }); }
   await paginaPlataforma(COMPU, "plataforma compu (sin número)", null);
