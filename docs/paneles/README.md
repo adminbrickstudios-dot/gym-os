@@ -9,15 +9,18 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 |---|---|---|---|---|---|
 | `(middleware)` | cada pedido |  |  | `gimnasio_por_host`, `gimnasio_por_slug` |  |
 | `/` | pantalla |  |  | `abonar_turno`, `apagar_ayudas`, `borrar_suscripcion_push`, `guardar_suscripcion_push`, `marcar_ayuda`, `quitar_turno`, `registrar_pedido_codigo`, `reiniciar_ayudas`, `socio_para_vincular_google`, `suscripcion_push`, `vincular_google` |  |
-| `/admin` | pantalla |  |  | `admin_agregar_dominio`, `admin_agregar_nota`, `admin_agregar_persona`, `admin_anular_pago_brik`, `admin_aplicar_plantilla`, `admin_asignar_plan_brik`, `admin_atender_demo`, `admin_ayudas`, `admin_crear_gimnasio`, `admin_gimnasios`, `admin_guardar_marca`, `admin_guardar_plan_brik`, `admin_metricas`, `admin_novedades`, `admin_pedidos_demo`, `admin_planes_brik`, `admin_publicar_novedad`, `admin_quitar_dominio`, `admin_registrar_pago_brik`, `admin_resolver_ayuda`, `admin_retirar_novedad`, `cuenta_para_nueva_clave`, `mi_sesion`, `persona_para_dar_acceso`, `usuario_por_mail` | `/admin/` `/g/` |
+| `/admin` | pantalla |  |  | `admin_agregar_dominio`, `admin_agregar_nota`, `admin_agregar_persona`, `admin_anular_pago_brik`, `admin_aplicar_plantilla`, `admin_asignar_plan_brik`, `admin_atender_demo`, `admin_ayudas`, `admin_crear_gimnasio`, `admin_gimnasios`, `admin_guardar_contacto_plataforma`, `admin_guardar_marca`, `admin_guardar_plan_brik`, `admin_metricas`, `admin_novedades`, `admin_pedidos_demo`, `admin_planes_brik`, `admin_publicar_novedad`, `admin_quitar_dominio`, `admin_registrar_pago_brik`, `admin_resolver_ayuda`, `admin_retirar_novedad`, `contacto_plataforma_publico`, `cuenta_para_nueva_clave`, `mi_sesion`, `persona_para_dar_acceso`, `usuario_por_mail` | `/admin/` `/g/` |
 | `/admin/[id]` | pantalla |  |  | `admin_gimnasio`, `admin_notas`, `admin_planes_brik`, `admin_soportes`, `admin_uso_semanal`, `historial_configuracion` | `/admin` `/g/` |
 | `/admin/entrar` | acción (POST/GET) |  |  | `admin_entrar_gimnasio` |  |
 | `/admin/salir-gimnasio` | acción (POST/GET) |  |  | `admin_salir_gimnasio` |  |
 | `/api/webhooks/mercadopago` | acción (POST/GET) |  |  | `cerrar_evento_webhook`, `credenciales_mp`, `registrar_evento_webhook` |  |
-| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_inscripcion_evento`, `cancelar_reserva`, `constancia_baja`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_compra_app`, `informar_transferencia`, `iniciar_compra_online`, `iniciar_pago_online`, `inscribirse_evento`, `invitar`, `marcar_aviso_leido`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_avisos`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `registra_salida`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `salir_por_qr_pared`, `usa_qr_pared`, `vista_compra_app` | `/app/clases` `/app/novedades` `/app/rutina` |
+| `/app` | pantalla |  |  | `anotar_ejercicio`, `campana_socio`, `cancelar_inscripcion_evento`, `cancelar_reserva`, `constancia_baja`, `credenciales_mp`, `documentos_socio`, `elegir_lugar`, `encuesta_socio`, `entrar_por_qr_pared`, `eventos_socio`, `grados_socio`, `informar_compra_app`, `informar_transferencia`, `iniciar_compra_online`, `iniciar_pago_online`, `inscribirse_evento`, `invitar`, `marcar_aviso_leido`, `marcar_bienvenida`, `mi_link_referido`, `mi_qr`, `mis_avisos`, `mis_invitados`, `novedades_socio`, `pago_online`, `pago_online_disponible`, `pedir_baja_socio`, `pedir_pausa_socio`, `pestanas_app`, `progreso_inicio`, `registra_salida`, `reservar`, `responder_encuesta`, `rutina_de_socio`, `salir_por_qr_pared`, `usa_qr_pared`, `vista_compra_app` | `/app/clases` `/app/info` `/app/novedades` `/app/rutina` |
+| `/app/ayuda` | pantalla |  |  | `pestanas_app` | `/app/info` |
 | `/app/clases` | pantalla |  |  | `avisos_lugar_socio`, `clases_del_dia`, `horarios_para_turno`, `lugares_clase`, `politica_reservas`, `profes_de_clases`, `turnos_socio`, `wods_socio` | `/app` `/app/yo` |
 | `/app/cuenta` | pantalla |  |  | `mi_seguridad`, `pedido_baja_socio` | `/app` `/app/mis-datos` |
-| `/app/historial` | pantalla |  |  | `mi_historial` | `/app` |
+| `/app/historial` | pantalla |  |  | `mi_historial` | `/app` `/app/recibo/` |
+| `/app/info` | pantalla |  |  | `info_gimnasio_socio` | `/app` `/app/mensajes/nuevo` |
+| `/app/locker` | pantalla |  |  | `mi_locker` | `/app` `/app/yo` |
 | `/app/mensajes` | pantalla |  |  | `escribir_al_gimnasio`, `mensajes_estado_socio`, `mis_mensajes`, `responder_hilo_socio` | `/app` `/app/mensajes/` `/app/mensajes/nuevo` `/app/yo` |
 | `/app/mensajes/[id]` | pantalla |  |  | `mi_hilo` | `/app` `/app/mensajes` |
 | `/app/mensajes/nuevo` | pantalla |  |  | `mensajes_estado_socio` | `/app` `/app/mensajes` |
@@ -25,8 +28,10 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/app/novedades` | pantalla |  |  | `campana_socio`, `leer_campana`, `mensajes_estado_socio` | `/app` `/app/mensajes` |
 | `/app/pago` | pantalla |  |  | `pago_online`, `pago_online_revisable` |  |
 | `/app/plan` | pantalla |  |  | `opciones_compra_app` | `/app` `/app/yo` |
+| `/app/pt` | pantalla |  |  | `cancelar_sesion_pt`, `pt_socio`, `reservar_sesion_pt` | `/app` `/app/yo` |
+| `/app/recibo/[venta]` | pantalla |  |  | `recibo_venta` | `/app` `/app/historial` |
 | `/app/rutina` | pantalla |  |  | `progreso_socio`, `rutina_de_socio` | `/app` |
-| `/app/yo` | pantalla |  |  | `mensajes_estado_socio`, `mi_link_referido`, `mis_invitados`, `opciones_compra_app` | `/app` `/app/mis-datos` |
+| `/app/yo` | pantalla |  |  | `mensajes_estado_socio`, `mi_link_referido`, `mi_locker`, `mis_invitados`, `opciones_compra_app`, `pt_socio` | `/app` `/app/mis-datos` |
 | `/auth/callback` | acción (POST/GET) |  |  | `entrar_con_google`, `mi_sesion` |  |
 | `/auth/google` | acción (POST/GET) |  |  |  |  |
 | `/auth/vincular` | pantalla |  |  | `mi_sesion` | `/ingresar` |
@@ -41,6 +46,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/kiosco/activar` | acción (POST/GET) |  |  |  |  |
 | `/panel` | pantalla |  |  | `anular_venta_panel`, `borrar_socios_ejemplo`, `buscar_socios`, `cargar_socios_ejemplo`, `cerrar_novedad_plataforma`, `config_entrada`, `dar_de_baja_equipo`, `estado_abono_panel`, `estado_soporte`, `formas_de_entrada`, `guardar_accesos_rapidos`, `guardar_numeros_inicio`, `marcar_alertas_vistas`, `ocultar_primeros_pasos`, `pedir_anulacion`, `pedir_ayuda_brik`, `pendientes_panel`, `registrar_sesion_equipo`, `resolver_pedido_anulacion`, `ultimas_entradas` | `/elegir` `/panel/caja` `/panel/entrada/control` `/panel/planes` `/panel/resumen` `/panel/socios/` `/panel/tareas` |
 | `/panel/avisos` | pantalla | 👑 🧭 🛎️ |  | `bandeja_avisos`, `marcar_avisado`, `novedades_panel`, `publicar_novedad`, `quitar_novedad` | `/panel/socios/` |
+| `/panel/ayuda` | pantalla |  |  |  |  |
 | `/panel/caja` | pantalla | 👑 🧭 🛎️ | caja | `abrir_caja`, `cajas_para_revisar`, `cerrar_caja`, `confirmar_ticket`, `contar_caja_sin_contar`, `dejar_caja_sin_contar`, `guardar_config_caja`, `movimiento_caja`, `preparar_ticket`, `ticket_movimiento` | `/panel/caja/historial` `/panel/caja/reporte` |
 | `/panel/caja/historial` | pantalla | 👑 🧭 | caja | `historial_caja` | `/panel/caja/reporte` |
 | `/panel/caja/reporte` | pantalla | 👑 🧭 🛎️ | caja | `reporte_dia`, `reporte_turno` | `/panel/caja` |
@@ -49,7 +55,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/clases/[id]` | pantalla |  | clases | `avisos_clase`, `clase_detalle`, `equipo_gimnasio`, `faltas_clase`, `lista_clase`, `reemplazos_clase` | `/panel/clases` |
 | `/panel/clases/grilla` | pantalla | 👑 🧭 💪 🛎️ | clases | `actividades_gimnasio`, `agregar_horario`, `cerrar_horario`, `editar_horario`, `equipo_gimnasio`, `guardar_actividad`, `horarios_gimnasio`, `ocupacion_horarios` | `/panel/clases` |
 | `/panel/clases/tv` | pantalla | 👑 🧭 💪 🛎️ | clases | `tvs_panel` |  |
-| `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `autorizar_tablet`, `autoservicio_panel`, `cierres_panel`, `config_caja`, `config_cobro`, `config_dejar_pasar`, `config_entrada`, `config_prueba_gratis`, `config_turnos_fijos`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `encuestas_panel`, `estado_pagos_online`, `guardar_compras_app`, `guardar_config_dejar_pasar`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_doble_cobro`, `guardar_horarios_apertura`, `guardar_link_resena`, `guardar_mensaje`, `guardar_mercadopago`, `guardar_meta_visitas`, `guardar_plan_familiar`, `guardar_prueba_gratis`, `guardar_registro_socios`, `guardar_regla_plan`, `guardar_regla_vencimiento`, `guardar_turnos_fijos`, `historial_configuracion`, `horarios_apertura_panel`, `mensajes_panel`, `meta_visitas_panel`, `ordenar_fotos`, `plan_familiar_estado`, `preparar_imagen_marca`, `publicar_pagina`, `quitar_imagen_marca`, `quitar_mercadopago`, `reglas_vencimiento`, `restaurar_mensaje`, `revocar_tablet`, `simular_cuota`, `sumar_sede`, `tablets_panel`, `vista_previa_mensaje` | `/panel/documentos` `/panel/exportar` `/panel/pagina` `/panel/socios` |
+| `/panel/configuracion` | pantalla | 👑 🧭 |  | `anular_cierre`, `autorizar_tablet`, `autoservicio_panel`, `cierres_panel`, `config_caja`, `config_cierres`, `config_cobro`, `config_dejar_pasar`, `config_entrada`, `config_prueba_gratis`, `config_turnos_fijos`, `configuracion_panel`, `confirmar_imagen_marca`, `crear_cierre`, `datos_gimnasio_panel`, `encuestas_panel`, `estado_pagos_online`, `guardar_compras_app`, `guardar_config_cierres`, `guardar_config_dejar_pasar`, `guardar_configuracion`, `guardar_datos_gimnasio`, `guardar_doble_cobro`, `guardar_horarios_apertura`, `guardar_link_resena`, `guardar_mensaje`, `guardar_mercadopago`, `guardar_meta_visitas`, `guardar_plan_familiar`, `guardar_prueba_gratis`, `guardar_registro_socios`, `guardar_regla_plan`, `guardar_regla_vencimiento`, `guardar_turnos_fijos`, `historial_configuracion`, `horarios_apertura_panel`, `mensajes_panel`, `meta_visitas_panel`, `ordenar_fotos`, `plan_familiar_estado`, `preparar_imagen_marca`, `previsualizar_cierre`, `publicar_pagina`, `quitar_imagen_marca`, `quitar_mercadopago`, `reglas_vencimiento`, `restaurar_mensaje`, `revocar_tablet`, `simular_cuota`, `sumar_sede`, `tablets_panel`, `vista_previa_mensaje` | `/panel/documentos` `/panel/exportar` `/panel/pagina` `/panel/socios` |
 | `/panel/control` | pantalla | 👑 🧭 | control | `beneficios_mes`, `devolucion_baja_config`, `equipo_gimnasio`, `linea_de_control`, `moderacion_control`, `soportes_del_gimnasio` | `/panel/control/exportar` `/panel/entrada/control` `/panel/equipo/actividad` |
 | `/panel/control/exportar` | acción (POST/GET) |  |  | `linea_de_control` |  |
 | `/panel/cuenta` | pantalla |  |  | `ayudas_vistas`, `mi_liquidacion`, `mi_seguridad` | `/panel/pin` |
@@ -62,18 +68,24 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/equipo/actividad` | pantalla | 👑 🧭 |  | `actividad_equipo` | `/panel/control` `/panel/equipo` |
 | `/panel/eventos` | pantalla | 👑 🧭 🛎️ |  | `cerrar_evento`, `confirmar_foto_producto`, `crear_evento`, `eventos_panel`, `preparar_foto_producto`, `publicar_evento` | `/panel/socios/` `/panel/vender` |
 | `/panel/exportar` | acción (POST/GET) |  |  | `exportar_gimnasio` |  |
+| `/panel/fichar` | pantalla | 🧭 💪 🛎️ | fichar | `fichar`, `fichar_con_pin`, `mi_fichaje`, `mis_horas` |  |
 | `/panel/gastos` | pantalla | 👑 🧭 | gastos | `anular_gasto`, `cargar_gasto`, `comprobante_gasto`, `confirmar_comprobante_gasto`, `ganancia_mes`, `guardar_gasto_fijo`, `guardar_permiso_gastos`, `guardar_presupuesto_gasto`, `preparar_comprobante_gasto`, `terminar_gasto_fijo` | `/panel/gastos/exportar` |
 | `/panel/gastos/exportar` | acción (POST/GET) |  |  | `exportar_gastos` |  |
 | `/panel/grados` | pantalla |  | clases | `anular_grado_socio`, `archivar_grado`, `grados_panel`, `guardar_grado`, `otorgar_grado` | `/panel/socios/` |
+| `/panel/horas` | pantalla | 👑 🧭 |  | `anular_fichaje`, `config_fichaje`, `corregir_fichaje`, `fichajes_persona`, `guardar_config_fichaje`, `horas_equipo` |  |
 | `/panel/hoy` | pantalla |  |  |  |  |
 | `/panel/incidentes` | pantalla |  | incidentes | `corregir_incidente`, `crear_incidente`, `incidentes_panel` | `/panel/socios/` |
+| `/panel/lockers` | pantalla |  | lockers | `alquilar_locker`, `crear_locker`, `crear_lockers_serie`, `dar_de_baja_locker`, `guardar_tarifa_locker`, `liberar_locker`, `lockers_panel`, `renovar_alquiler_locker` | `/panel/socios/` |
+| `/panel/maquinas` | pantalla |  | maquinas | `arreglar_falla`, `asignar_responsable_falla`, `confirmar_foto_falla`, `crear_maquina`, `dar_de_baja_maquina`, `foto_falla`, `historial_maquina`, `maquinas_panel`, `preparar_foto_falla`, `reportar_falla` |  |
 | `/panel/mensajes` | pantalla | 👑 🧭 🛎️ | mensajes | `bandeja_mensajes`, `cambiar_estado_hilo`, `guardar_permisos_mensajes`, `guardar_respuesta_rapida`, `hilo_mensajes`, `permisos_mensajes`, `quitar_respuesta_rapida`, `responder_mensaje`, `respuestas_rapidas` | `/panel/socios/` |
-| `/panel/pagina` | pantalla | 👑 🧭 |  | `altas_panel`, `guardar_altas`, `guardar_medicion`, `guardar_pagina`, `guardar_prueba_social`, `medicion_panel`, `pagina_panel`, `prueba_social_panel` | `/panel/configuracion` |
+| `/panel/pagina` | pantalla | 👑 🧭 |  | `altas_panel`, `guardar_altas`, `guardar_medicion`, `guardar_pagina`, `guardar_prueba_social`, `guardar_video_portada`, `medicion_panel`, `pagina_panel`, `prueba_social_panel` | `/panel/configuracion` |
 | `/panel/pin` | pantalla |  |  | `entrar_con_pin`, `guardar_mi_pin`, `operador_actual` | `/panel/cuenta` |
 | `/panel/planes` | pantalla | 👑 🧭 |  | `actividades_gimnasio`, `ajustes_planes`, `anular_precio_programado`, `aplicar_aumento`, `asignar_servicio`, `aviso_previo_aumento`, `configurar_stock`, `confirmar_foto_producto`, `confirmar_remito_stock`, `contar_stock`, `convenios_gimnasio`, `entrada_stock`, `guardar_actividades_plan`, `guardar_ajustes_plan`, `guardar_config_aumento`, `guardar_convenio`, `guardar_ficha_producto`, `guardar_matricula_plan`, `guardar_plan`, `guardar_producto`, `guardar_regla_plan`, `guardar_servicio`, `lista_precios_plan`, `movimientos_stock_producto`, `ordenar_planes`, `planes_gimnasio`, `preparar_foto_producto`, `preparar_remito_stock`, `productos_mostrador`, `programar_lista_precios`, `programar_precio`, `quitar_foto_producto`, `remito_stock`, `servicios_gimnasio`, `vista_aumento` | `/panel/cupones` `/panel/planes/aumento` |
 | `/panel/planes/aumento` | pantalla | 👑 🧭 |  | `aumentos_hechos`, `config_aumento`, `planes_gimnasio` | `/panel/planes` |
 | `/panel/profes` | pantalla | 👑 🧭 |  | `anular_horas_profe`, `anular_pago_profe`, `cargar_horas_profe`, `config_liquidacion`, `guardar_config_liquidacion`, `guardar_regla_profe`, `liquidacion_profe_detalle`, `liquidacion_profes`, `pagar_profe` | `/panel/caja` |
 | `/panel/prospectos` | pantalla | 👑 🧭 🛎️ |  | `actualizar_prospecto`, `crear_prospecto`, `prospectos_panel` | `/panel/socios/` `/panel/socios/nuevo` |
+| `/panel/pt` | pantalla |  | pt | `agenda_pt`, `cancelar_sesion_pt`, `cargar_franjas_pt`, `guardar_config_pt`, `guardar_pack_pt`, `marcar_sesion_pt`, `pt_socio`, `quitar_franja_pt`, `reservar_sesion_pt` | `/panel/socios/` |
+| `/panel/recibo/[venta]` | pantalla | 👑 🧭 🛎️ |  | `recibo_venta` | `/panel` |
 | `/panel/resultado` | pantalla | 👑 🧭 |  | `anular_gasto`, `cargar_gasto`, `cupones_panel`, `deuda_con_socios`, `encuestas_panel`, `ganancia_mes`, `motivos_baja_mes`, `repetir_gastos`, `resultado_mes`, `resultado_por_sede`, `retencion_numeros` | `/panel/gastos` `/panel/resultado/exportar` `/panel/socios/` |
 | `/panel/resultado/exportar` | acción (POST/GET) |  |  | `exportar_mes` |  |
 | `/panel/resumen` | pantalla | 👑 🧭 |  | `resumen_dueno` | `/panel/caja/historial` |
@@ -94,7 +106,7 @@ Quién la ve: los roles que exige la pantalla (👑 dueño · 🧭 encargado · 
 | `/panel/tareas` | pantalla |  |  | `checklist_hoy`, `crear_tarea`, `ficha_socio`, `guardar_checklist_item`, `guardar_tarea_auto`, `marcar_tarea`, `para_hacer_hoy`, `tareas_auto_config`, `tareas_panel`, `tildar_checklist` | `/panel` `/panel/socios/` |
 | `/panel/transferencias` | pantalla | 👑 🧭 🛎️ | transferencias | `aprobar_pago`, `estado_pagos_online`, `pagos_por_aprobar`, `rechazar_pago` | `/panel/socios/` |
 | `/panel/vencen-hoy` | pantalla | 👑 🧭 🛎️ | vencen_hoy |  | `/panel/retencion` |
-| `/panel/vender` | pantalla | 👑 🧭 🛎️ | vender | `caja_para_cobrar`, `comprobante_venta`, `contexto_cobro`, `ficha_socio`, `guardar_config_cobro`, `precios_venta`, `registrar_uso_cupon`, `validar_cupon`, `vender` | `/panel/caja` `/panel/entrada` `/panel/socios/` `/panel/socios/nuevo` |
+| `/panel/vender` | pantalla | 👑 🧭 🛎️ | vender | `caja_para_cobrar`, `comprobante_venta`, `contexto_cobro`, `ficha_socio`, `guardar_config_cobro`, `precios_venta`, `registrar_uso_cupon`, `validar_cupon`, `vender` | `/panel/caja` `/panel/entrada` `/panel/recibo/` `/panel/socios/` `/panel/socios/nuevo` |
 | `/salir` | acción (POST/GET) |  |  |  |  |
 | `/tv` | pantalla |  |  | `tv_estado` |  |
 | `/tv/activar` | acción (POST/GET) |  |  |  |  |
@@ -111,6 +123,7 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `alertas_caja`
 - `anular_asistencia`
 - `anular_invitado`
+- `anular_prueba_gratis`
 - `anular_registro`
 - `anular_venta`
 - `autoaltas_web`
@@ -121,6 +134,7 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `cambiar_plan`
 - `campana`
 - `campana_control`
+- `clases_para_probar`
 - `confirmar_foto_mensaje`
 - `cumplen_hoy`
 - `datos_ejemplo`
@@ -138,6 +152,8 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `historial_emergencias_puerta`
 - `inscribirse_evento_publico`
 - `landing_publica`
+- `lockers_vencen_semana`
+- `maquinas_fuera_de_servicio`
 - `marcar_dia_rutina`
 - `matriculas_planes`
 - `medicion_publica`
@@ -167,8 +183,10 @@ Habilitadas para el equipo o el socio pero sin pantalla que las use (candidatas 
 - `racha_socio`
 - `registro_socios_panel`
 - `reglas_beneficios`
+- `reservar_prueba_publica`
 - `resumen_caja`
 - `seguridad_dueno`
+- `sesiones_dictadas_pt`
 - `stock_productos`
 - `vencen_hoy`
 - `vencen_pestanas`

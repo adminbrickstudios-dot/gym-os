@@ -44,7 +44,7 @@ Va en este orden. Cada bloque se cierra entero (base → lógica → pantalla �
 prueba → commit/push → publicar) antes del siguiente. Se publica **al cerrar
 cada bloque**, no al final.
 
-### BASE-0 · Que nada se cuelgue ni falle ❌
+### BASE-0 · Que nada se cuelgue ni falle 🟡
 Pasar a **Next 16.4** (era VD-64): `npx @next/codemod@latest upgrade`, la guía
 15 → 16 (`middleware` → `proxy`, `next lint` ya no existe, APIs async, caché),
 React 19.2 estable. Misma app, otra versión: no se cambia comportamiento.
@@ -55,6 +55,15 @@ la prueba; si está rota, se arregla.
 **LISTO SI:** `node scripts/diag/accion-colgada.mjs 50` da `colgadas 0 de 50`
 con la app compilada; `npm run verificar` en verde; la cadena e2e entera y el
 barrido en verde con `APP_MODO=produccion`. Se publica.
+
+**Estado (08/11, vuelta 1):**
+- ✅ Next 16.4.5 + React 19.3 (commit 5d48a71): build, lint (0 errores), typecheck y vitest en verde. `accion-colgada.mjs 50` → **colgadas 0 de 50**.
+- ✅ Base (base limpia): 847/848, la que falla es "3.000 filas en 30 s" (Windows, ~32 s, ya conocida); chequeos en verde; mapa de pantallas ok.
+  Ojo: `db:pruebas` falla en cascada si se corre sobre la base que ya tiene los usuarios demo; hay que correrlo sobre `scripts/db/local.sh nueva`.
+- 🟡 Cadena e2e en tandas de 20 con base nueva: 220 recorridos, 171 en verde, 49 fallan; al repetir solo esos, 42 siguen fallando.
+  Arreglados: `pla-4`/`vd-46d` (la vista previa del aumento estaba rota de verdad), `vd-41`, `vd-7`, `vd-8`. El resto, clasificado en
+  `DIAGNOSTICO-BASE0.md`. Falta: arreglar o actualizar esos 42 y correr el barrido. **No publicado.**
+- Las reglas nuevas del compilador de React (49 errores de lint) quedaron apagadas en `eslint.config.mjs`; revisarlas más adelante.
 
 ### BASE-1 · Velocidad: diagnóstico con números, después arreglos ❌
 **Primero medir**, todo en `VELOCIDAD.md`:
@@ -293,3 +302,4 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 
 | Vuelta | Fecha y hora | Qué se cerró | Publicado |
 |---|---|---|---|
+| 1 | 07-08/11 | Next 16.4.5 (0 colgadas de 50); pla-4/vd-46d/vd-41/vd-7/vd-8; 42 e2e por revisar | no |
