@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Qué hay en la base de producción, sin datos personales ni claves:
-// gimnasios, sus direcciones, cuántos socios y si el dueño tiene acceso.
+// Qué hay en la base de producción, solo en números (el log de Actions es público):
+// cuántos gimnasios, cuántos son reales y cuántos socios tienen.
 // Lo corre el workflow "Base de datos" → estado.
 import pg from "pg";
 
@@ -25,9 +25,8 @@ const gs = await q(`
          (select count(*)::int from public.equipo e where e.gimnasio_id = g.id and e.activo and e.rol = 'dueno'
              and ${noSoporte} and e.usuario_id is not null) as duenos_con_acceso
     from public.gimnasios g order by g.creado_en`);
-if (!gs.length) console.log("No hay ningún gimnasio todavía.");
-for (const g of gs) {
-  console.log(`• ${g.nombre} (${g.slug})${g.es_demo ? " [demo]" : ""} · ${g.socios} socios · ${g.equipo} en el equipo · dueños con acceso: ${g.duenos_con_acceso}`);
-  console.log(`    ${g.hosts.join(", ")}`);
-}
+// BASE-8a: el repo es público y sus logs también. Solo números: nada de nombres, direcciones ni mails.
+const reales = gs.filter((g) => !g.es_demo);
+console.log(`Gimnasios: ${gs.length} (reales: ${reales.length}, demo: ${gs.length - reales.length}) · socios en los reales: ${reales.reduce((n, g) => n + g.socios, 0)} · equipo en los reales: ${reales.reduce((n, g) => n + g.equipo, 0)}`);
+console.log(reales.length ? "HAY GIMNASIOS REALES: las migraciones las aplica Mateo (crear .claude/BASE_CON_DATOS_REALES)." : "No hay gimnasios reales: el agente puede aplicar migraciones.");
 await db.end();
