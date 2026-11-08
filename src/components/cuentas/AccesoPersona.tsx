@@ -1,4 +1,5 @@
 "use client";
+import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState } from "react";
 import { darAccesoPersona, nuevaClavePersona, type Resultado } from "@/app/admin/acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -43,6 +44,7 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
       <>
         <form action={pedirClave} onSubmit={(e) => { if (!confirm(`¿Darle a ${nombre} una contraseña nueva? La que tiene deja de servir.`)) e.preventDefault(); }}>
           <input type="hidden" name="equipo_id" value={equipoId} />
+          <CampoContrasena className="campo !w-48" />
           <button className="boton boton-chico" disabled={cambiando}>{cambiando ? "Generando…" : "🔑 Nueva contraseña"}</button>
         </form>
         <ContrasenaNueva r={clave} />
@@ -55,6 +57,7 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
         <form action={darAcceso} className="flex flex-wrap gap-2 basis-full sm:basis-auto">
           <input type="hidden" name="equipo_id" value={equipoId} />
           <input name="email" type="email" required autoFocus className="campo sm:!w-64" placeholder={`Mail de ${nombre}`} aria-label={`Mail de ${nombre}`} />
+          <CampoContrasena className="campo sm:!w-56" />
           <button className="boton boton-principal boton-chico" disabled={dando}>{dando ? "Dando acceso…" : "Dar acceso"}</button>
         </form>
       ) : (

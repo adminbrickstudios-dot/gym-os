@@ -1,4 +1,5 @@
 "use client";
+import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import Link from "next/link";
 import { useRef, useState, useActionState } from "react";
 import { crearGimnasio, type EstadoAlta } from "./acciones";
@@ -113,6 +114,7 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
             <label className="space-y-1"><span className="etiqueta">Nombre del dueño</span><input name="dueno" className="campo" placeholder="Nombre y apellido" /></label>
             <label className="space-y-1"><span className="etiqueta">Mail del dueño</span>
               <input name="email" type="email" className="campo" placeholder="Para crearle la cuenta" />
+              <CampoContrasena />
               <span className="block text-sm texto-tenue">Si lo dejás vacío, le das acceso después.</span></label>
             <label className="space-y-1"><span className="etiqueta">Celular del dueño (opcional)</span>
               <input name="celular" type="tel" inputMode="tel" className="campo" placeholder="+54 9 387 …" />

@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
+import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
 import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
 import { rpc } from "@/lib/panel/servidor";
 
@@ -57,7 +57,7 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
   if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
-    const { contrasena } = await darAcceso(r.equipo_id, email, dueno);
+    const { contrasena } = await darAcceso(r.equipo_id, email, dueno, contrasenaElegida(f));
     return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla,
       bienvenida: contrasena ? bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? "")) : undefined } };
   } catch (e) {
@@ -83,7 +83,7 @@ export async function agregarPersona(_: Resultado, f: FormData): Promise<Resulta
   revalidatePath(`/admin/${gimnasioId}`);
   if (!email) return { aviso: `${nombre} quedó en el equipo, sin acceso al sistema.` };
   try {
-    const { contrasena } = await darAcceso(equipoId, email, nombre);
+    const { contrasena } = await darAcceso(equipoId, email, nombre, contrasenaElegida(f));
     return contrasena
       ? { email, contrasena, aviso: `Pasale a ${nombre} su mail y esta contraseña provisoria.` }
       : { email, aviso: `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
@@ -99,7 +99,7 @@ export async function darAccesoPersona(_: Resultado, f: FormData): Promise<Resul
   if (!mailValido(email)) return { error: "Escribí un mail válido" };
   try {
     const p = await rpc<{ nombre: string }>("persona_para_dar_acceso", { p_equipo_id: equipoId });
-    const { contrasena } = await darAcceso(equipoId, email, p.nombre);
+    const { contrasena } = await darAcceso(equipoId, email, p.nombre, contrasenaElegida(f));
     revalidatePath("/admin", "layout");
     revalidatePath("/panel/equipo");
     return contrasena
@@ -115,7 +115,7 @@ export async function nuevaClavePersona(_: Resultado, f: FormData): Promise<Resu
   const equipoId = String(f.get("equipo_id") ?? "");
   try {
     const c = await rpc<{ usuario_id: string; email: string | null; nombre: string }>("cuenta_para_nueva_clave", { p_equipo_id: equipoId });
-    const contrasena = await nuevaContrasena(c.usuario_id);
+    const contrasena = await nuevaContrasena(c.usuario_id, contrasenaElegida(f));
     return { email: c.email ?? undefined, contrasena, aviso: `Contraseña nueva para ${c.nombre}. La anterior ya no sirve.` };
   } catch (e) {
     return { error: (e as Error).message };
