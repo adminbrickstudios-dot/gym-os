@@ -13,20 +13,28 @@ export function contrasenaProvisoria() {
   return `${PALABRAS[randomInt(PALABRAS.length)]}-${randomInt(1000, 9999)}-${PALABRAS[randomInt(PALABRAS.length)]}`;
 }
 
+/** D42: quien crea la cuenta puede escribir la contraseña. Vacía = se genera una provisoria. */
+export function contrasenaElegida(f: FormData): string | undefined {
+  const c = String(f.get("contrasena_elegida") ?? "").trim();
+  if (!c) return undefined;
+  if (c.length < 8) throw new Error("La contraseña tiene que tener 8 letras o más");
+  return c;
+}
+
 export const mailValido = (m: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);
 
 /**
  * Vincula una persona del equipo a la cuenta de ese mail; si no existe, la
  * crea con una contraseña provisoria y la devuelve para mostrarla UNA vez.
  */
-export async function darAcceso(equipoId: string, email: string, nombre: string): Promise<{ contrasena?: string }> {
+export async function darAcceso(equipoId: string, email: string, nombre: string, elegida?: string): Promise<{ contrasena?: string }> {
   const servicio = clienteServicio();
   const { data: existente, error: errBusca } = await servicio.rpc("usuario_por_mail", { p_email: email });
   if (errBusca) throw new Error(`No se pudo buscar la cuenta: ${errBusca.message}`);
   let usuarioId = existente as string | null;
   let contrasena: string | undefined;
   if (!usuarioId) {
-    contrasena = contrasenaProvisoria();
+    contrasena = elegida ?? contrasenaProvisoria();
     const { data, error } = await servicio.auth.admin.createUser({ email, password: contrasena, email_confirm: true, user_metadata: { nombre } });
     if (error) throw new Error(`No se pudo crear la cuenta: ${error.message}`);
     usuarioId = data.user.id;
@@ -37,8 +45,8 @@ export async function darAcceso(equipoId: string, email: string, nombre: string)
 }
 
 /** Pone una contraseña provisoria nueva y la devuelve para mostrarla una vez. */
-export async function nuevaContrasena(usuarioId: string): Promise<string> {
-  const contrasena = contrasenaProvisoria();
+export async function nuevaContrasena(usuarioId: string, elegida?: string): Promise<string> {
+  const contrasena = elegida ?? contrasenaProvisoria();
   const { data, error } = await clienteServicio().auth.admin.updateUserById(usuarioId, { password: contrasena });
   if (error || !data.user) throw new Error(`No se pudo cambiar la contraseña: ${error?.message ?? "la cuenta no existe"}`);
   return contrasena;

@@ -1,4 +1,5 @@
 "use client";
+import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState, useTransition } from "react";
 import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
@@ -96,6 +97,7 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
           <p className="titulo text-2xl sm:col-span-2">➕ Sumar a alguien</p>
           <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
           <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" placeholder="Vacío: solo figura en la grilla" /></label>
+          <label className="space-y-1"><span className="etiqueta">Contraseña</span><CampoContrasena /></label>
           <label className="space-y-1"><span className="etiqueta">Rol</span>
             <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{EMOJI[r]} {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
           {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>

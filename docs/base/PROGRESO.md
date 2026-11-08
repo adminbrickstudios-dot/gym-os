@@ -96,7 +96,7 @@ y VD-30 ya hicieron mucho), se anota y no se toca.
 pantalla menos de 2 s. Si la región o el plan no se pueden cambiar sin Mateo,
 queda ⛔ con el paso exacto que tiene que hacer él.
 
-### BASE-2 · Usuarios, contraseñas y links por rol ❌
+### BASE-2 · Usuarios, contraseñas y links por rol ✅ (publicado 08/11; pendientes abajo)
 Mucho ya existe (VD-40 alta de gimnasio en 3 pasos, Equipo, VD-33 ingreso, VD-42
 Mi cuenta). Lo que se completa:
 - **Super admin:** al crear el gimnasio, crea al dueño con mail y **contraseña
@@ -117,6 +117,9 @@ Mi cuenta). Lo que se completa:
 - Nota: "Olvidé mi contraseña" en producción depende del SMTP propio (VD-45 🔌):
   Supabase manda 2 mails por hora sin él. Si no está, ⛔ con el paso para Mateo
   y mientras tanto el dueño/super admin restablece a mano.
+
+**Hecho (08/11):** contraseña que escribe quien crea la cuenta (D42) en el alta del gimnasio, Equipo del dueño, Equipo del super admin, "dar acceso" y "nueva contraseña" (campo opcional; vacío = provisoria); puertas fijas `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super` (D41) con título del rol; `ACCESOS.md` ya está en `.gitignore`; "Olvidé mi contraseña" ya existía. Verificado: `scripts/e2e/base-2.mjs` (13 pasos, sesión real, app compilada): alta con contraseña propia → dueño por `/dueno` → recepcionista y profe → entran por su puerta → sacar y devolver acceso con contraseña nueva.
+**Pendiente de BASE-2 (anotado para después):** el socio con mail recibe un link para crear su contraseña (D43; hoy entra con celular + código); errores con nombre ("Ese mail no tiene cuenta en Gimnasio X"); probar "Olvidé mi contraseña" contra supabase-local con un e2e propio; "Entrar como" ya existe como soporte con motivo (vd-40).
 
 **LISTO SI:** e2e con sesión real: super admin crea un gimnasio con dueño y
 contraseña propia → el dueño entra por `/dueno` → crea una recepcionista con

@@ -1,4 +1,5 @@
 "use client";
+import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState, useTransition } from "react";
 import { ContrasenaNueva } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
@@ -13,6 +14,7 @@ export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
       <input type="hidden" name="gimnasio_id" value={gimnasioId} />
       <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
       <label className="space-y-1"><span className="etiqueta">Mail</span><input name="email" type="email" className="campo" placeholder="Para que entre al sistema" /></label>
+      <label className="space-y-1"><span className="etiqueta">Contraseña</span><CampoContrasena /></label>
       <label className="space-y-1"><span className="etiqueta">Rol</span>
         <select name="rol" className="campo" defaultValue="dueno">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]}</option>)}</select></label>
       <div className="sm:col-span-3"><ContrasenaNueva r={estado} /></div>
