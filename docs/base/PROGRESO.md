@@ -161,7 +161,7 @@ pasar con motivo que queda en Control, un repetido que dice "ya entró" sin
 sumar. Cada ingreso, de Enter a aviso, en menos de 1 s con 5.000 socios.
 Capturas mirándolas.
 
-### BASE-4 · Siempre a la vista ❌
+### BASE-4 · Siempre a la vista ✅ (publicar con la migración 20261108040100; pendientes abajo)
 Ya existe Inicio con números (VD-12) y entradas en vivo (VD-12B). Se ordena así:
 - **Recepción:** adentro ahora (VD-48), entraron hoy, vencen hoy, deben, caja
   del turno, lista en vivo de ingresos (cada uno se puede tocar → panel lateral).
@@ -170,6 +170,9 @@ Ya existe Inicio con números (VD-12) y entradas en vivo (VD-12B). Se ordena as�
 - Botones rápidos: Cobrar, Alta, Pase diario.
 - Arreglar de paso las pruebas `vd-12` (más de 4 números) y `vd-12b` (gráficos):
   decidir la regla y que pantalla y prueba digan lo mismo.
+
+**Hecho (08/11):** migración `20261108040100_numeros_siempre_a_la_vista` (Inicio suma *Deben*, *Vencen esta semana* y *Plata en riesgo*; todos salen de la lista de Retención; la recepción no ve la plata; el dueño elige hasta 8 en vez de 4; por defecto la recepción ve adentro, entraron, vencen hoy, vencen esta semana y deben, y el dueño además cobrado y plata en riesgo). Regla de `vd-12`/`vd-12b`: de 4 a 8 números; los que cuentan una lista no llevan mini gráfico. Verificado: `base4-numeros.test.mjs` (el número = la lista que lo forma), base 850/851 (la de 3.000 filas es de Windows), `vd-12` (15 pasos), `vd-12b` (10), `vd-12e` (3) con la app compilada. También `estado` de Actions ahora imprime solo números (BASE-8a).
+**Pendiente de BASE-4:** *Caja del turno* como número de la recepción; botones rápidos Cobrar / Alta / Pase diario en Inicio.
 
 **LISTO SI:** e2e: con la recepción y con el dueño, cada número coincide con la
 lista que lo forma (tocarlo lleva a esa lista), y un ingreso nuevo aparece en

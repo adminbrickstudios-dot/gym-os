@@ -14,7 +14,9 @@ try {
   await d.locator("[data-boton-entrada]").waitFor({ timeout: 30000 });
   ok("la dueña ve el botón Entrada grande");
   await d.locator("[data-numero]").first().waitFor({ timeout: 30000 });
-  chequear((await d.locator("[data-numero]").count()) === 4, "la dueña ve 4 números", "no son 4 números");
+  // BASE-4: siempre a la vista: la dueña ve entre 4 y 8 números (cobrado, a cobrar, vencen esta semana, deben, plata en riesgo…).
+  const nd = await d.locator("dl [data-numero]").count();
+  chequear(nd >= 4 && nd <= 8, `la dueña ve ${nd} números`, `la dueña ve ${nd} números (esperaba de 4 a 8)`);
   chequear((await d.locator('[data-numero="cobrado"]').count()) === 1, "la dueña ve lo cobrado hoy", "falta Cobrado hoy");
   chequear((await d.getByText("Ahora y lo que sigue").count()) === 1, "sigue 'Ahora y lo que sigue'", "se perdió 'Ahora y lo que sigue'");
   await capturar(d, "vd12-compu-duena");
@@ -43,7 +45,7 @@ try {
   await d.locator("[data-elegir-numeros] [role=status]").waitFor({ timeout: 30000 });
   await d.reload();
   await d.locator("[data-numero]").first().waitFor({ timeout: 30000 });
-  const claves = await d.locator("[data-numero]").evaluateAll((els) => els.map((e) => e.getAttribute("data-numero")));
+  const claves = await d.locator("dl [data-numero]").evaluateAll((els) => els.map((e) => e.getAttribute("data-numero")));
   chequear(quiero.every((c) => claves.includes(c)) && claves.length === 4, "los 4 números elegidos quedan guardados", `se ven: ${claves.join(", ")}`);
   // Se deja como estaba (sin elección = los de siempre).
   await d.locator("[data-elegir-numeros] summary").click();
@@ -57,7 +59,8 @@ try {
   await r.goto(`${G}/panel`);
   await r.locator("[data-boton-entrada]").waitFor({ timeout: 30000 });
   await r.locator("[data-numero]").first().waitFor({ timeout: 30000 });
-  chequear((await r.locator("[data-numero]").count()) === 4, "la recepción ve 4 números", "la recepción no ve 4 números");
+  const nr = await r.locator("dl [data-numero]").count();
+  chequear(nr >= 4 && nr <= 8 && (await r.locator('dl [data-numero="plata_riesgo"]').count()) === 0, `la recepción ve ${nr} números, sin la plata en riesgo`, `la recepción ve ${nr} números o ve la plata en riesgo`);
   chequear((await r.locator('[data-numero="cobrado"]').count()) === 0, "la recepción no ve lo cobrado hoy", "la recepción ve la plata del día");
   chequear((await r.locator("[data-elegir-numeros]").count()) === 0, "la recepción no elige los números", "la recepción ve el selector");
   chequear((await r.getByText("Ahora y lo que sigue").count()) === 1, "la recepción ve 'Ahora y lo que sigue'", "falta 'Ahora y lo que sigue' en recepción");
