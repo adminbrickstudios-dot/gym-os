@@ -32,3 +32,28 @@ cuelgue.
    encontró, o no depender de lo que dejó la anterior.
 3. `vd-7` y `vd-8` tocan plata y permisos: se averigua, se escribe en
    `PREGUNTAS.md` y se sigue con lo demás.
+
+---
+
+## Ronda en la compu de Mateo (08/11, Next 16.4.5, app compilada, tandas de 20 con base nueva)
+
+- `scripts/diag/accion-colgada.mjs 50` → **colgadas 0 de 50** (el cuelgue está resuelto con Next 16).
+- Cadena entera en tandas: 220 recorridos, **171 en verde, 49 fallan**. Vueltos a correr solo los 49 en tandas nuevas: **42 siguen fallando**
+  (7 eran arrastre: `vd-13`, `vd-41`, `vd-8`, `ent-6`, `ent-9`, `adm-3`, `super-admin` pasan al correrlos aparte).
+
+### Arreglado en esta ronda
+| Recorrido | Qué era |
+|---|---|
+| `pla-4`, `vd-46d` | **Roto de verdad**: la vista previa del aumento de precios mandaba a `vista_aumento` un argumento (`p_motivo_sin_aviso`) que la función no tiene → "No existe la función". Arreglado en `planes/acciones.ts`. |
+| `vd-41` | El encargado sin permiso veía "sección apagada"; ahora dice que le falta el permiso. |
+| `vd-7`, `vd-8` | Defectos de la prueba (orden y selector); la base no cambió. Ver `PREGUNTAS.md`. |
+
+### Todavía fallan (42): hay que mirarlos uno por uno
+Se cortan por espera (selector que ya no existe porque la pantalla cambió en VD-5/VD-12): `vd-10`, `vd-18`, `vd-6`, `vd-9`, `vd-29`, `vd-46a`, `vd-46r`,
+`vd-63`, `panel-vender`, `panel-equipo`, `caj-4`, `caj-5` (tickets de caja / Storage simulado), `vd-27`.
+Dicen qué esperaban: `vd-12` y `vd-12b` (más de 4 números / gráficos: hay que decidir la regla, BASE-4), `vd-2` (Cobrar no es el principal), `vd-11`, `vd-15`,
+`vd-19`, `vd-20`, `vd-31`, `vd-38` (aviso de salud), `vd-40`, `vd-46e`, `vd-49` (caja: **plata**), `vd-5` (recibo), `vd-62`, `com-11`, `rev-3`.
+Sin motivo en el resumen (el script cae con una excepción): `vd-3`, `vd-37`, `vd-42`, `vd-46c`, `vd-46f`, `vd-46j`, `vd-46t`, `com-13`.
+`vd-22` y `vd-44`: `ENOTFOUND demo.localhost` (el entorno de esta compu no resuelve el host de pruebas para la API; no es de la app).
+`vd-35`, `vd-39`: el checkbox no cambia de estado al tocarlo.
+Los logs de cada una quedan en `.local/e2e-falla-*.log` (no se suben).
