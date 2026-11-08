@@ -34,7 +34,7 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
       <ul className="space-y-2">
         {dominios.map((d) => (
           <li key={d.dominio_id} className="tarjeta p-4 flex flex-wrap items-center gap-3">
-            <span className="flex-1 min-w-0 break-all"><strong>{d.host}</strong> <span className="texto-tenue text-sm">· {d.tipo === "propio" ? "dirección propia" : "subdominio de Gym OS"}</span></span>
+            <span className="flex-1 min-w-0 break-all"><strong>{d.host}</strong> <span className="texto-tenue text-sm">· {d.tipo === "propio" ? "dirección propia" : "subdominio de Base"}</span></span>
             {d.tipo === "propio" && (
               <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
                 onClick={() => { if (confirm(`¿Quitar ${d.host}? El gimnasio deja de abrir en esa dirección.`)) empezar(async () => setError((await quitarDominio(gimnasioId, d.dominio_id)).error ?? null)); }}>

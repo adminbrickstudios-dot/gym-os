@@ -17,7 +17,7 @@ export default async function GimnasioNoEncontrado({
           La dirección <strong className="text-[var(--texto)] break-all">{host || "(sin dirección)"}</strong> no corresponde a ningún gimnasio.
         </p>
         <p className="texto-suave text-lg mt-2">Revisá que esté bien escrita o pedile el link a tu gimnasio.</p>
-        {/* Para quien configura: si esta dirección debía ser la de Gym OS, la variable no coincide. */}
+        {/* Para quien configura: si esta dirección debía ser la de Base, la variable no coincide. */}
         <p className="texto-tenue text-sm mt-10">
           Dirección de la plataforma configurada: <code>{process.env.NEXT_PUBLIC_DOMINIO_PLATAFORMA || "(vacía)"}</code>
         </p>

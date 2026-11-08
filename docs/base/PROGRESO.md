@@ -10,29 +10,25 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ## RESUMEN PARA MATEO (el agente lo reescribe al final de cada bloque)
 
-> Mientras el P0 no esté terminado, este bloque dice qué bloque va, qué ya está
-> publicado y qué falta. Cuando termine, el título pasa a
-> **"P0 LISTO PARA MAÑANA"**.
+**Estado (08/11, tarde):** el P0 va por el bloque 6. **Publicado en producción:** BASE-0 (Next 16.4.5, sin acciones colgadas), BASE-2 (contraseña que escribe quien crea la cuenta + puertas `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super`), BASE-3 (panel lateral con COBRAR AHORA), BASE-4 (Inicio con Deben / Vencen esta semana / Plata en riesgo, migración aplicada por vos), BASE-5 (`socios.cubierto_hasta`, migración aplicada) y BASE-1 en parte (Inicio en una pasada, funciones de Vercel en gru1). Todo con PR mergeado y chequeos en verde.
 
-**Estado:** el P0 todavía no arrancó.
+**Medido con 5.000 socios:** la puerta tarda menos de 40 ms (buscar, ver el veredicto, registrar un ingreso). Lo lento son las listas de muchos socios (~440 ms, 1,8 s el número de Inicio antes de arreglarlo); detalle y plan en `VELOCIDAD.md`.
 
-**Lo que está publicado en producción:** todo Gym OS v2 hasta el PR #4 (07/11).
+**Links por rol** (cada gimnasio en su dirección; las puertas fijas llevan al ingreso con la marca del gimnasio):
 
-**Links por rol** (se completan en BASE-2):
-
-| Rol | Link | Usuario de prueba |
+| Rol | Link | Usuario de prueba (demo) |
 |---|---|---|
-| Super admin | | la cuenta de Mateo |
-| Dueño | | |
-| Recepción | | |
-| Profe | | |
-| Socio | | |
+| Super admin | `/super` (o `/admin`) en la dirección de la plataforma | la cuenta de Mateo |
+| Dueño | `/dueno` | duena@ejemplo.invalid |
+| Recepción | `/recepcion` | recepcion@ejemplo.invalid |
+| Profe | `/profe` | profe@ejemplo.invalid |
+| Socio | `/socio` | socio@ejemplo.invalid |
 
-**Cómo crear el gimnasio de mañana:** (se escribe en BASE-2, paso por paso)
+**Cómo crear el gimnasio de mañana:** entrá a `/super` → alta en 3 pasos (tipo, marca, dueño). En el paso 3 escribí el mail del dueño y, si querés, **su contraseña** (si la dejás vacía se genera una provisoria y se muestra una sola vez). Pasale el link `/dueno` de su gimnasio. Desde Equipo el dueño crea a la recepción y a los profes de la misma manera.
 
-**Qué probar primero:** (se escribe al cerrar el P0)
+**Qué probar primero:** el alta de un gimnasio de prueba, entrar por `/dueno`, crear una recepcionista, entrar por `/recepcion`, registrar un ingreso con F2 y tocar un aviso para ver el panel lateral.
 
-**Bloqueado / qué tenés que hacer vos:** (comandos exactos, en orden)
+**Bloqueado / qué tenés que hacer vos:** nada por ahora. Pendientes chicos están anotados dentro de cada bloque (p. ej. el socio con mail que crea su contraseña, "Caja del turno" en Inicio, usar `cubierto_hasta` dentro de Retención para bajar las listas de ~440 ms).
 
 **Preguntas abiertas:** ver `PREGUNTAS.md`
 
@@ -191,7 +187,7 @@ hoy, buscador y listas usan el índice (EXPLAIN en `VELOCIDAD.md`). `CLAUDE.md`
 actualizado (la regla "se calcula, nunca se guarda" con esta excepción
 escrita).
 
-### BASE-6 · Diseño de Base: claro, íconos de línea, nombre ❌
+### BASE-6 · Diseño de Base: claro, íconos de línea, nombre 🟡 (publicado: nombre y claro por defecto; resto pendiente)
 `DISENO.md`. En este orden, para que el primer gimnasio ya lo vea:
 1. Nombre **Base** en todo lo visible (D39).
 2. Tokens de color para claro y oscuro; claro por defecto, elegible por
@@ -203,6 +199,9 @@ escrita).
 5. Recepción como mostrador (`DISENO.md` § Recepción).
 6. Modales: X visible, Esc y click afuera cierran, nunca se apilan ni se traban.
    Todos, revisados uno por uno.
+
+**Hecho (08/11):** (1) el nombre **Base** en todo lo que se ve (ingreso, landing de venta, títulos, manifest, mails de bienvenida, abono, WhatsApp); (2) claro por defecto: lo que no dice tono es claro (`#F4F5F6`), el alta de gimnasio y Configuración arrancan en claro, migración `20261108060100` (default de `color_fondo`); el oscuro sigue elegible por gimnasio. Verificado: `vd-33`, `push-1`, `vd-26`, `base-2`, capturas del ingreso y la landing.
+**Pendiente de BASE-6:** que cada usuario elija claro/oscuro en Mi cuenta; íconos de línea en lugar de emojis (un solo componente `Icono`); tipografía Barlow con `next/font`; recepción como mostrador; revisar los modales uno por uno; el chequeo que falla con un color hex suelto o un emoji como ícono; barrido en claro y oscuro con capturas.
 
 **LISTO SI:** barrido con cada rol en compu y celular, en claro y en oscuro,
 con capturas mirándolas; un chequeo que falla si aparece un color hex fuera de

@@ -12,7 +12,7 @@ export async function planesBrikPublicos(): Promise<{ nombre: string; precio_men
 
 /** VD-62: el WhatsApp de BRIK para "Pedí una demo" (lo carga el super admin; nunca un número en el código). */
 export async function contactoPlataforma(): Promise<{ whatsapp: string | null; mensaje_demo: string }> {
-  const respaldo = "Hola! Quiero ver una demo de Gym OS.";
+  const respaldo = "Hola! Quiero ver una demo de Base.";
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("contacto_plataforma_publico");
   if (error) { console.error("contacto_plataforma_publico:", error.message); return { whatsapp: null, mensaje_demo: respaldo }; }

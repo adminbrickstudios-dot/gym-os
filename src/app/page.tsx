@@ -31,10 +31,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
     const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
-    const descripcion = "Gym OS responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.";
-    return { title: { absolute: "Gym OS · El sistema para tu gimnasio" }, description: descripcion,
-             openGraph: { type: "website", title: "Gym OS", description: descripcion, siteName: "Gym OS", locale: "es_AR", images: [{ url: `${origen}/og`, width: 1200, height: 630, alt: "Gym OS" }] },
-             twitter: { card: "summary_large_image", title: "Gym OS", description: descripcion, images: [`${origen}/og`] },
+    const descripcion = "Base responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.";
+    return { title: { absolute: "Base · El sistema para tu gimnasio" }, description: descripcion,
+             openGraph: { type: "website", title: "Base", description: descripcion, siteName: "Base", locale: "es_AR", images: [{ url: `${origen}/og`, width: 1200, height: 630, alt: "Base" }] },
+             twitter: { card: "summary_large_image", title: "Base", description: descripcion, images: [`${origen}/og`] },
              alternates: { canonical: `${origen}/` } };
   }
   const { marca } = r.landing;
@@ -84,7 +84,7 @@ export default async function Inicio() {
   const [planes, contacto] = await Promise.all([planesBrikPublicos(), contactoPlataforma()]);
   // Datos para Google: el producto y, solo si BRIK cargó planes, sus precios (nunca uno inventado).
   const ld = {
-    "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Gym OS", applicationCategory: "BusinessApplication", operatingSystem: "Web",
+    "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Base", applicationCategory: "BusinessApplication", operatingSystem: "Web",
     description: "Sistema de gestión para gimnasios: control de acceso, cobros y retención de socios.",
     ...(planes.length ? { offers: planes.map((p) => ({ "@type": "Offer", name: p.nombre, price: Number(p.precio_mensual), priceCurrency: "ARS" })) } : {}),
   };

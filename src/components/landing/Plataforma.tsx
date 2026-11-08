@@ -13,7 +13,7 @@ const PREGUNTAS: [string, string][] = [
   ["¿Mis socios tienen que instalar algo?", "No. Entran con un código QR o con su número, y si quieren ven su estado y reservan desde el celular, sin descargar nada."],
   ["¿Cada gimnasio tiene su propia marca?", "Sí. Cada gimnasio tiene su dirección, su logo, sus colores y su página, y decide qué secciones prender."],
   ["¿Los datos de mi gimnasio quedan separados de los de otros?", "Sí. Cada gimnasio ve solo lo suyo; esa separación la hace la base de datos, no la pantalla."],
-  ["¿Cómo se paga Gym OS?", "Con un abono mensual. Pedí la demo y te contamos cómo sería para tu gimnasio."],
+  ["¿Cómo se paga Base?", "Con un abono mensual. Pedí la demo y te contamos cómo sería para tu gimnasio."],
 ];
 
 /** El semáforo de la puerta: lo que ve la recepción al tipear un número. */
@@ -94,7 +94,7 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
   return (
     <main className="overflow-x-clip" data-plataforma>
       <header className="mx-auto max-w-5xl px-4 sm:px-8 pt-5 flex items-center justify-between gap-3">
-        <span className="titulo text-2xl">🏋️ Gym OS</span>
+        <span className="titulo text-2xl">🏋️ Base</span>
         <a href="/ingresar" className="boton boton-chico" data-ingresar>🔑 Ingresar</a>
       </header>
 
@@ -102,7 +102,7 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
         <p className="pildora pildora-azul mb-5">Para dueños de gimnasios</p>
         <h1 className="titular text-[clamp(2.5rem,9vw,5.5rem)] max-w-[18ch]">¿Este socio puede entrar hoy?</h1>
         <p className="texto-suave text-xl sm:text-2xl mt-6 max-w-[34ch]">
-          Gym OS responde eso en un segundo, te deja cobrar en un toque y te avisa quién dejó de venir.
+          Base responde eso en un segundo, te deja cobrar en un toque y te avisa quién dejó de venir.
         </p>
         <ul className="mt-7 space-y-2 text-lg max-w-[40ch]" data-tres-lineas>
           <li><strong>Quién entra:</strong> verde, amarillo o rojo, con el motivo escrito.</li>
@@ -185,13 +185,13 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
 
       <section id="demo" className="mx-auto max-w-3xl px-4 sm:px-8 py-12 space-y-5 scroll-mt-6">
         <h2 className="titular text-4xl sm:text-5xl">Pedí tu demo</h2>
-        <p className="texto-suave text-lg">Dejanos tus datos y te mostramos Gym OS funcionando, con el ejemplo de un gimnasio como el tuyo.</p>
+        <p className="texto-suave text-lg">Dejanos tus datos y te mostramos Base funcionando, con el ejemplo de un gimnasio como el tuyo.</p>
         <FormDemo />
-        {linkDemo && <p className="texto-suave">¿Preferís WhatsApp? <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Escribinos y te mostramos Gym OS</a>.</p>}
+        {linkDemo && <p className="texto-suave">¿Preferís WhatsApp? <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Escribinos y te mostramos Base</a>.</p>}
       </section>
 
       <footer className="mx-auto max-w-5xl px-4 sm:px-8 py-12 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--borde)]">
-        <p className="texto-tenue">Gym OS · una línea de BRIK</p>
+        <p className="texto-tenue">Base · una línea de BRIK</p>
         <a href="/ingresar" className="boton">🔑 Ingresar</a>
       </footer>
     </main>

@@ -37,7 +37,7 @@ try {
   chequear(sw.ok && /showNotification/.test(sw.texto), "el service worker se sirve", `sw.js ${sw.status}`);
   const m = await bajar(s, `${G}/manifest.webmanifest`);
   const man = m.ok ? JSON.parse(m.texto) : null;
-  chequear(man?.display === "standalone" && man?.start_url === "/app" && man?.name && man.name !== "Gym OS", `manifest con la marca: “${man?.name}”, se instala como app`, JSON.stringify(man));
+  chequear(man?.display === "standalone" && man?.start_url === "/app" && man?.name && man.name !== "Base", `manifest con la marca: “${man?.name}”, se instala como app`, JSON.stringify(man));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 }

@@ -16,7 +16,7 @@ export function ContactoPlataformaForm({ inicial }: { inicial: ContactoPlataform
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-contacto-plataforma>
       <p className="titulo text-2xl">💬 WhatsApp para pedidos de demo</p>
-      <p className="texto-suave">Es el número del botón “Pedí una demo por WhatsApp” de la página de Gym OS. Con el + y la característica, sin espacios (ej: +5493875551234). Vacío = el botón no se muestra.</p>
+      <p className="texto-suave">Es el número del botón “Pedí una demo por WhatsApp” de la página de Base. Con el + y la característica, sin espacios (ej: +5493875551234). Vacío = el botón no se muestra.</p>
       <div className="grid gap-3 sm:grid-cols-2 max-w-3xl">
         <label className="block"><span className="text-sm">WhatsApp</span>
           <input className="campo w-full" inputMode="tel" maxLength={20} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} aria-label="WhatsApp de BRIK" /></label>

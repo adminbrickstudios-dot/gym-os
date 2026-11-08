@@ -10,7 +10,7 @@ export function FormDemo() {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-demo-listo>
         <p className="titulo text-2xl">🙌 ¡Listo, {estado.nombre}!</p>
-        <p className="texto-suave text-lg">Recibimos tu pedido. Te escribimos para mostrarte Gym OS con los datos de tu gimnasio.</p>
+        <p className="texto-suave text-lg">Recibimos tu pedido. Te escribimos para mostrarte Base con los datos de tu gimnasio.</p>
       </div>
     );
   }

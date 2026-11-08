@@ -94,7 +94,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
 
       <section className="space-y-3">
         <p className="titulo-grupo">Equipo y claves</p>
-        <p className="texto-suave">Si alguien se olvidó la contraseña, generale una nueva y pasásela. Entra en {dominioPlataforma() || "la dirección de Gym OS"}, con “Entrá a tu gimnasio”.</p>
+        <p className="texto-suave">Si alguien se olvidó la contraseña, generale una nueva y pasásela. Entra en {dominioPlataforma() || "la dirección de Base"}, con “Entrá a tu gimnasio”.</p>
         <ul className="space-y-2">
           {g.equipo.map((p) => (
             <li key={p.equipo_id} className={`tarjeta p-4 flex flex-wrap items-center gap-4 ${p.activo ? "" : "opacity-50"}`}>

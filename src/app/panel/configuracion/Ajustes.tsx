@@ -63,7 +63,8 @@ const MEDIOS: [string, string, string][] = [
   ["debito", "💳 Débito", "Con tu posnet o lector."],
   ["credito", "💳 Crédito", "Con tu posnet o lector."],
 ];
-const FONDOS = ["#14161b", "#101418", "#16121f", "#1a1512", "#0f1a14", "#faf7f0"];
+// D37: claro por defecto; los oscuros siguen elegibles.
+const FONDOS = ["#F4F5F6", "#faf7f0", "#14161b", "#101418", "#16121f", "#1a1512", "#0f1a14"];
 const ACENTOS = ["#2fbf5b", "#f5c518", "#3b82f6", "#a78bfa", "#ef4444", "#f97316", "#14b8a6"];
 /** [clave, nombre, qué es, qué cambia si se apaga] — el aviso se ve apenas se apaga, antes de guardar. */
 const SECCIONES: [string, string, string, string][] = [
@@ -710,7 +711,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 <li key={x.host} className="py-3 flex flex-wrap items-center gap-2 justify-between">
                   <span className="font-semibold break-all">{x.host}</span>
                   <span className="flex flex-wrap gap-2">
-                    <span className="pildora">{x.tipo === "propio" ? "Dominio propio" : "Dirección de Gym OS"}</span>
+                    <span className="pildora">{x.tipo === "propio" ? "Dominio propio" : "Dirección de Base"}</span>
                     {x.tipo === "propio" && (x.verificado
                       ? <span className="pildora pildora-verde">✅ Funcionando</span>
                       : <span className="pildora pildora-amarillo">⏳ Esperando la configuración del dominio</span>)}

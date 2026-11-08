@@ -20,7 +20,7 @@ const COLOR = /^#[0-9a-fA-F]{6}$/;
 function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string, celular: string) {
   const base = dominioBase();
   const host = subdominiosFuncionan(base) ? `${slug}.${base}` : (dominioPlataforma() || base);
-  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Gym OS. Entrá en https://${host} con “Entrá a tu gimnasio”.\nMail: ${email}\nContraseña provisoria: ${contrasena}\nCambiala apenas entres (Mi cuenta).`;
+  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base. Entrá en https://${host} con “Entrá a tu gimnasio”.\nMail: ${email}\nContraseña provisoria: ${contrasena}\nCambiala apenas entres (Mi cuenta).`;
   const digitos = celular.replace(/\D/g, "");
   return { texto, wa: digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : null };
 }

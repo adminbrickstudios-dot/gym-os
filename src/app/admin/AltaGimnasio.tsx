@@ -23,7 +23,7 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
   const [slug, setSlug] = useState("");
   const [tocado, setTocado] = useState(false);
   const [acento, setAcento] = useState("#16a34a");
-  const [fondo, setFondo] = useState("#faf7f0");
+  const [fondo, setFondo] = useState("#F4F5F6");
   const [falta, setFalta] = useState("");
   const formulario = useRef<HTMLFormElement>(null);
   const ok = estado.ok;

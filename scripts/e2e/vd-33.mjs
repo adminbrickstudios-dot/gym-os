@@ -25,7 +25,7 @@ try {
   // Marca: Gym OS en la plataforma; la del demo en su dirección y en /g/demo.
   const m = await pagina(b, CELU);
   await m.goto(`${PLATAFORMA}/ingresar`);
-  chequear(((await m.locator("[data-marca-ingreso]").textContent())?.trim()) === "Gym OS", "plataforma: la marca de Gym OS", "la plataforma no muestra Gym OS");
+  chequear(((await m.locator("[data-marca-ingreso]").textContent())?.trim()) === "Base", "plataforma: la marca de Gym OS", "la plataforma no muestra Gym OS");
   await m.goto(`${G}/ingresar?modo=socio`);
   const marcaDemo = (await m.locator("[data-marca-ingreso]").textContent())?.trim();
   chequear(marcaDemo === nombreGim, `en la dirección del demo se ve su marca (${marcaDemo})`, `marca ${marcaDemo} ≠ ${nombreGim}`);
