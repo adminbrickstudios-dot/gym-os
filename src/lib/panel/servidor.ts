@@ -107,6 +107,8 @@ export function exigirRol(panel: PanelGimnasio, roles: Rol[]) {
 /** Una sección que el gimnasio apagó no se ve en ningún panel, ni entrando por la dirección. */
 export function exigirSeccion(panel: PanelGimnasio, clave: string) {
   if (panel.secciones_apagadas.includes(clave)) {
+    // Gastos se apaga solo para quien no tiene el permiso (VD-41b): se dice que es un permiso, no que el gimnasio la apagó.
+    if (clave === "gastos" && panel.yo.rol !== "dueno") throw new ErrorDatos("No tenés permiso para ver los gastos. Lo da el dueño desde Configuración.", "42501", 403);
     throw new ErrorDatos("Esta sección está apagada en este gimnasio. La prende el dueño desde Configuración.", "apagada", 404);
   }
 }
