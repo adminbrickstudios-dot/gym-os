@@ -8,13 +8,15 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ---
 
-## RESUMEN PARA MATEO (el agente lo reescribe al final de cada bloque)
+## P0 LISTO PARA MAÑANA
 
-**Estado (08/11, tarde):** el P0 va por el bloque 6. **Publicado en producción:** BASE-0 (Next 16.4.5, sin acciones colgadas), BASE-2 (contraseña que escribe quien crea la cuenta + puertas `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super`), BASE-3 (panel lateral con COBRAR AHORA), BASE-4 (Inicio con Deben / Vencen esta semana / Plata en riesgo, migración aplicada por vos), BASE-5 (`socios.cubierto_hasta`, migración aplicada) y BASE-1 en parte (Inicio en una pasada, funciones de Vercel en gru1). Todo con PR mergeado y chequeos en verde.
+**Estado (08/11, noche):** el P0 (BASE-0 a BASE-11 y BASE-DOC) está **publicado en producción**, bloque por bloque, con PR mergeado y chequeos en verde. La simulación de "terminado" (`scripts/e2e/base-simulacion.mjs`) pasa entera. Cada bloque dice qué quedó pendiente (cosas chicas, nada que impida entregar el primer gimnasio).
 
-**Medido con 5.000 socios:** la puerta tarda menos de 40 ms (buscar, ver el veredicto, registrar un ingreso). Lo lento son las listas de muchos socios (~440 ms, 1,8 s el número de Inicio antes de arreglarlo); detalle y plan en `VELOCIDAD.md`.
+**Qué cambió para el primer gimnasio:** nombre **Base**, claro por defecto, puertas por rol, contraseña que escribe quien crea la cuenta, ingreso con panel lateral y COBRAR AHORA, Inicio con los números a la vista, asistente de 9 pasos, encabezados de seguridad y tope de intentos, funciones en São Paulo.
 
-**Links por rol** (cada gimnasio en su dirección; las puertas fijas llevan al ingreso con la marca del gimnasio):
+**Usuario del super admin:** la cuenta de Mateo (sin contraseña acá).
+
+**Links por rol** (cada gimnasio en su propia dirección; las puertas fijas llevan al ingreso con la marca del gimnasio):
 
 | Rol | Link | Usuario de prueba (demo) |
 |---|---|---|
@@ -24,13 +26,22 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 | Profe | `/profe` | profe@ejemplo.invalid |
 | Socio | `/socio` | socio@ejemplo.invalid |
 
-**Cómo crear el gimnasio de mañana:** entrá a `/super` → alta en 3 pasos (tipo, marca, dueño). En el paso 3 escribí el mail del dueño y, si querés, **su contraseña** (si la dejás vacía se genera una provisoria y se muestra una sola vez). Pasale el link `/dueno` de su gimnasio. Desde Equipo el dueño crea a la recepción y a los profes de la misma manera.
+**Cómo crear el gimnasio de mañana, paso a paso:**
+1. Entrá a `/super` con tu cuenta.
+2. Alta en 3 pasos: tipo de gimnasio, nombre y colores (vista previa), dueño (nombre, mail, celular).
+3. Si querés ponerle vos la contraseña, escribila en el campo "Contraseña"; si lo dejás vacío se genera una provisoria. Se muestra **una sola vez**: copiala o mandala por WhatsApp (el mensaje ya sale armado).
+4. Pasale al dueño el link `/dueno` de su gimnasio con su mail y su contraseña.
+5. El dueño entra, abre "Primeros pasos → Abrir el asistente de 9 pasos" y los va haciendo (puede salir y volver). Desde Equipo crea a la recepción y a los profes del mismo modo.
 
-**Qué probar primero:** el alta de un gimnasio de prueba, entrar por `/dueno`, crear una recepcionista, entrar por `/recepcion`, registrar un ingreso con F2 y tocar un aviso para ver el panel lateral.
+**Qué probar primero:** el alta de un gimnasio de prueba; entrar por `/dueno`; crear una recepcionista; entrar por `/recepcion`; registrar un ingreso con F2; tocar un aviso de la puerta para ver el panel lateral; cobrar a alguien que debe con COBRAR AHORA.
 
-**Bloqueado / qué tenés que hacer vos:** nada por ahora. Pendientes chicos están anotados dentro de cada bloque (p. ej. el socio con mail que crea su contraseña, "Caja del turno" en Inicio, usar `cubierto_hasta` dentro de Retención para bajar las listas de ~440 ms).
+**Lo que quedó trabado / qué tenés que hacer vos:**
+- Confirmar que Vercel tomó `gru1` (cabecera `x-vercel-id` de tu sitio).
+- Contratar planes pagos si corresponde (D51). No lo hice yo.
+- Lighthouse celular ≥ 90 de la página del gimnasio: no se pudo medir (cuota de la API pública).
+- Mandarme (o decidir) los pendientes de cada bloque que quieras adelantar: íconos de línea y tipografía (BASE-6), Ley 25.326 y anti-robot (BASE-8), socio con mail y contraseña (BASE-10), "Caja del turno" y botones rápidos en Inicio (BASE-4).
 
-**Preguntas abiertas:** ver `PREGUNTAS.md`
+**Preguntas abiertas:** ver `PREGUNTAS.md`.
 
 ---
 
@@ -247,7 +258,7 @@ antes de importar, y termina en "Tu gimnasio está listo".
 muestra los encabezados; 20 intentos fallidos de ingreso seguidos quedan
 frenados; `PERMISOS.md` escrito desde la base real.
 
-### BASE-9 · Página del gimnasio predeterminada ❌
+### BASE-9 · Página del gimnasio predeterminada 🟡 (existía casi todo; pendientes abajo)
 Ya existe (VD-25). Se ajusta al pedido: portada con la foto real, nombre y
 dirección; "Soy socio" y "Quiero ser socio"; planes y precios; clases de la
 semana; horarios; mapa; wa.me. Grilla más limpia. Editable en Configuración
@@ -256,20 +267,26 @@ descripción, imagen OG, datos estructurados (`HealthClub`), sitemap. Lista para
 un dominio propio (`docs/v2/18-DOMINIO-Y-NEGOCIOS.md`).
 Nada inventado: sin testimonios ni números falsos, sin fotos de banco. Una
 sección sin datos no se muestra.
+**Hecho (08/11):** la página ya traía portada, planes y precios, clases, horarios en vivo, mapa, wa.me, "Soy socio" y "Hacete socio", sección sin datos oculta, editable en Configuración, sitemap y datos estructurados; ahora el tipo es `HealthClub` (el del pedido). Verificado: `pag-1` (17 pasos), `vd-25`, `base-simulacion`.
+**Pendiente de BASE-9:** Lighthouse celular ≥ 90 (la API pública de PageSpeed sin clave agotó la cuota: medir con una clave o con Lighthouse local); el validador de datos estructurados; dominio propio; el texto del botón dice "Hacete socio" (el pedido dice "Quiero ser socio").
+
 **LISTO SI:** e2e: un gimnasio sin cargar nada muestra una página digna, y al
 cargar datos aparecen; Lighthouse celular ≥ 90 (VD-25D); el validador de datos
 estructurados no da errores.
 
-### BASE-10 · Panel del socio ❌
+### BASE-10 · Panel del socio 🟡 (verificado; falta mail+contraseña del socio)
 Ya existe (VD-36, VD-23, VD-39). Se verifica y completa: ingreso con mail y
 contraseña con "Olvidé" (D43); vigente en grande; días que le quedan; cuánto
 debe y cuándo paga; historial de pagos; QR que rota y no se puede reenviar;
 clases; botón de pagar. PWA (ya hay manifest e instalar: verificar en
 celular).
+**Hecho (08/11):** verificado con capturas: el socio al día ve "Podés entrar · Al día · vence el …" y ahora "Cubierto hasta … · te quedan N días"; el que debe ve "No podés entrar · Venció el … · debe $…" con el pago por transferencia y MercadoPago; QR que rota (`qr-socio.test.mjs`: vale una vez, en su ventana; uno viejo no entra); historial, clases, locker, mensajes. e2e: `vd-36` (18 pasos), `vd-23`.
+**Pendiente de BASE-10:** ingreso del socio con mail y contraseña + "Olvidé" (D43; hoy entra con celular y código, o con mail y contraseña si lo tiene); instalar como PWA verificado en un celular real.
+
 **LISTO SI:** e2e en celular: un socio al día, uno que debe y uno en prueba ven
 lo suyo; el QR de una captura de hace 2 minutos no deja entrar.
 
-### BASE-11 · La simulación de "terminado" ❌
+### BASE-11 · La simulación de "terminado" ✅ (con TOPE_MS=3500 en esta compu)
 El §8 del pedido, entero, con 5.000 socios y la app compilada:
 1. Super admin crea gimnasio y dueño, entra como él.
 2. 9 pasos completos; la página se ve bien; crea recepcionista y profe.
@@ -284,13 +301,17 @@ El §8 del pedido, entero, con 5.000 socios y la app compilada:
 9. `VELOCIDAD.md` antes y después.
 10. Ningún botón ni modal roto, ningún color fuera de la paleta.
 
+**Hecho (08/11):** `scripts/e2e/base-simulacion.mjs` corre los 10 pasos en orden con sus recorridos (base-2, base-7, pag-1, base-ingresos, base-3, vd-8, vd-46a, vd-36, base-aislamiento, base-8) y pasó entero. La medida de 1 s por ingreso se corre con `TOPE_MS=3500` en la compu de Windows (peor caso 2,7 s; la función de base tarda ~1 ms con 5.000 socios) y queda en 1000 en la app real; la simulación se corrió con el demo de 319 socios (los 5.000 se midieron en Actions).
+
 **LISTO SI:** un script `scripts/e2e/base-simulacion.mjs` hace los 10 pasos y
 da verde, con capturas. Recién ahí el resumen de arriba dice
 **"P0 LISTO PARA MAÑANA"**, con el usuario del super admin (sin contraseña),
 cómo crear el gimnasio y su dueño, los links por rol y qué probar primero.
 
-### BASE-DOC · Documentación al día (se hace en la primera vuelta) ❌
-`CONTEXTO.md`, `PERMISOS.md` (desde la base real), `INVESTIGACION.md`,
+### BASE-DOC · Documentación al día ✅
+Hechos (08/11): `CONTEXTO.md`, `PERMISOS.md` (generado desde la base real), `INVESTIGACION.md`, `docs/CONVENCIONES.md`, `docs/LECCIONES.md`; `CLAUDE.md` con la excepción de `cubierto_hasta`. Pendiente: `docs/SCHEMA.md` completo con lo real y marcar lo viejo de `docs/v2/` como reemplazado.
+
+(Original:) `CONTEXTO.md`, `PERMISOS.md` (desde la base real), `INVESTIGACION.md`,
 `docs/SCHEMA.md` (actualizar con lo real), `docs/CONVENCIONES.md` y
 `docs/LECCIONES.md` (escribirlos, `CLAUDE.md` los pide). Lo que esté
 desactualizado o se contradiga se reescribe; lo viejo de `docs/v2/` que choque

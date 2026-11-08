@@ -1,4 +1,4 @@
-// Datos para Google (schema.org ExerciseGym): todo sale de lo que ya cargó el
+// Datos para Google (schema.org HealthClub): todo sale de lo que ya cargó el
 // dueño (nombre, logo, sedes, WhatsApp, Instagram y horarios). Función pura.
 import type { Agenda } from "@/lib/horarios";
 import type { LandingPublicada } from "@/lib/landing";
@@ -12,7 +12,7 @@ export function datosEstructurados(l: LandingPublicada, agenda: Agenda | null, o
     const tel = s.telefono ?? l.contacto.whatsapp;
     return Object.fromEntries(Object.entries({
       "@context": "https://schema.org",
-      "@type": "ExerciseGym",
+      "@type": "HealthClub",
       "@id": `${origen}/#sede-${i + 1}`,
       name: sedes.length > 1 ? `${l.marca.nombre} · ${s.nombre}` : l.marca.nombre,
       description: l.portada.bajada ?? l.portada.titulo,
