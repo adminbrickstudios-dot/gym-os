@@ -152,6 +152,14 @@ export async function esperarCobro(p) {
     p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 }).then(() => null),
     p.locator('aside [role="alert"]').waitFor({ timeout: 30000 }).then(async () => await p.locator('aside [role="alert"]').innerText()),
   ]);
+  // VD-50: si la misma cuota se cobró hace poco, la base frena; los recorridos que cobran dos veces a propósito siguen con motivo.
+  if (r && /ya cobró esta cuota/.test(r)) {
+    await p.locator("[data-cobrar-doble-igual]").click();
+    await p.locator("[data-cobrar-doble-motivo]").fill("Otro cobro, a propósito (prueba)");
+    await p.locator('button:has-text("✅ Cobrar")').click();
+    await p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 });
+    return;
+  }
   if (r) throw new Error(`al cobrar: ${r}`);
 }
 
