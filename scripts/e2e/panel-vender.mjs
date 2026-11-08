@@ -55,7 +55,9 @@ try {
   // Descuento más alto que el tope de la recepción (10%): lo frena la base.
   await carrito(r).locator('button:has-text("Descuento")').click();
   await carrito(r).locator('input[aria-label="Monto del descuento"]').fill("1.000");
-  await carrito(r).locator('input[placeholder^="Motivo"]').fill("Amigo");
+  // VD-46C: el motivo del descuento sale de la lista del gimnasio.
+  await r.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });
+  await carrito(r).locator("select[data-motivo-descuento]").first().selectOption({ index: 1 });
   await r.locator('button:has-text("✅ Cobrar")').click();
   await carrito(r).locator('[role="alert"]:has-text("descuento máximo")').waitFor({ timeout: 30000 });
   ok("descuento de $1.000 sobre $3.000: “Tu descuento máximo es 10 %”");
