@@ -51,11 +51,10 @@ jobs:
           cache: npm
       - run: npm ci
       # ANTES y DESPUÉS salen de la misma corrida (misma máquina y misma base): entre una corrida y otra los
-      # runners de GitHub varían hasta el doble. La migración "velocidad_escala" se aplica recién después de medir.
+      # runners de GitHub varían hasta el doble. (Desde BASE-1 la migración de velocidad ya no se aparta: otras migraciones dependen de ella.)
       - name: Base nueva (sin la migración de velocidad)
         run: |
           mkdir -p .local/aparte
-          mv supabase/migrations/*_velocidad_escala.sql .local/aparte/ || true
           scripts/db/local.sh nueva
       - name: Demo con muchos socios
         run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios "${{ inputs.socios || '3000' }}"
