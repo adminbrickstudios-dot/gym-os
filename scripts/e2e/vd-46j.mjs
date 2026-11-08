@@ -19,7 +19,7 @@ try {
   const id = new URL(d.url()).pathname.split("/").pop();
 
   // Tres cuotas juntas, por transferencia.
-  await d.goto(`${G}/panel/vender?socio=${id}`);
+  await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   const mas = d.locator('button:has-text("+")').first();
   await mas.click(); await mas.click();

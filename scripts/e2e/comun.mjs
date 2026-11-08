@@ -154,3 +154,14 @@ export async function esperarCobro(p) {
   ]);
   if (r) throw new Error(`al cobrar: ${r}`);
 }
+
+/**
+ * Pedido HTTP con la sesión de un contexto del navegador. El navegador resuelve `demo.localhost` solo, pero el cliente de
+ * pedidos de Playwright usa el DNS del sistema (en Windows no lo resuelve): se va a 127.0.0.1 con el Host y las cookies a mano.
+ */
+export async function api(ctx, metodo, ruta, opciones = {}, slug = "demo") {
+  const cookie = (await ctx.cookies(GIMNASIO(slug))).map((c) => `${c.name}=${c.value}`).join("; ");
+  return ctx.request.fetch(`http://127.0.0.1:${PUERTO}${ruta}`, {
+    method: metodo, ...opciones, headers: { host: `${slug}.localhost:${PUERTO}`, cookie, ...(opciones.headers ?? {}) },
+  });
+}

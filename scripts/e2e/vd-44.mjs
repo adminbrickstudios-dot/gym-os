@@ -5,7 +5,7 @@
 //   node scripts/e2e/vd-44.mjs     (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { api, CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -50,7 +50,7 @@ try {
   await s.locator("main h1, h1").first().waitFor({ timeout: 60000 });
   await s.waitForLoadState("networkidle").catch(() => {});
   chequear((await s.locator("[data-profe-clase]").count()) === 0, "con la opción apagada, el socio no ve al profe con foto", "aparece el profe");
-  const sin = await s.request.get(`${G}/foto-equipo/${diego}`);
+  const sin = await api(s.context(), "GET", `/foto-equipo/${diego}`);
   chequear(sin.status() === 204, "la foto sin permiso no se sirve (204)", `devolvió ${sin.status()}`);
 
   // Prendido.

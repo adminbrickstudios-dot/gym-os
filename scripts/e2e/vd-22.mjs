@@ -102,8 +102,9 @@ try {
   chequear(!/vincular/.test(p2.url()), "Google ya vinculado: entra directo a la app", `fue a ${p2.url()}`);
 
   // 6 · Cerrar sesión la corta.
-  const salida = await p2.context().request.post(`${G}/salir`);
-  chequear(salida.ok(), "cerrar sesión responde bien", `salir: ${salida.status()}`);
+  await p2.goto(`${G}/app`);
+  const salida = await p2.evaluate(() => fetch("/salir", { method: "POST", redirect: "manual" }).then((r) => ({ ok: r.ok || r.type === "opaqueredirect", status: r.status })));
+  chequear(salida.ok, "cerrar sesión responde bien", `salir: ${salida.status}`);
   await p2.goto(`${G}/app`);
   chequear(/\/ingresar/.test(p2.url()), "después de cerrar sesión, /app manda al ingreso", `fue a ${p2.url()}`);
 
