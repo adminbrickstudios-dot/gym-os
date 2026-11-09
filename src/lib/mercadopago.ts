@@ -43,6 +43,9 @@ export function crearPreferencia(token: string, p: { pagoId: string; titulo: str
   });
 }
 
+/** BASE-7: "Probar conexión": la cuenta a la que pertenece el token (GET /users/me). Si el token no sirve, MercadoPago responde 401 y llamar() tira. */
+export const cuentaDelToken = (token: string) => llamar<{ id: number | string; nickname?: string | null; email?: string | null; site_id?: string | null }>(token, "/users/me");
+
 export const leerPago = (token: string, id: string) => llamar<PagoMP>(token, `/v1/payments/${encodeURIComponent(id)}`);
 
 /**
