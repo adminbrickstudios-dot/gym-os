@@ -142,6 +142,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const salirRef = useRef<() => void>(() => {});
   const salirConDniRef = useRef<(dni: string) => void>(() => {});
   const [ocupado, empezar] = useTransition();
+  const enterPendiente = useRef(false);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
   const [camara, setCamara] = useState(false);
@@ -225,33 +226,38 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
-  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => empezar(async () => {
+  // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
+  // Va fuera de la transición a propósito: si no, la ventana queda "ocupada" mientras el panel se refresca y el próximo Enter se pierde.
+  const elegirAviso = useCallback(async (s: ResultadoSocio) => {
+    const r = await veredicto(s.socio_id, sedeId);
+    if (r.error || !r.v) { setError(r.error ?? "No se pudo ver el estado"); return; }
+    const vv = r.v;
+    const solo = !cfgRef.current.anotar_solo_en_verde || vv.color === "verde";
+    const anotable = vv.puede && r.guia?.boton === "anotar" && solo && !r.apto && !r.firmar;
+    const aviso = (id: string, color: AvisoLocal["color"], texto: string, cobrar: boolean, puede: boolean): AvisoLocal => ({ id, color, texto, socioId: s.socio_id, nombre: s.nombre, numero: s.numero, cobrar, puede, textoSocio: vv.texto });
+    let a: AvisoLocal;
+    if (anotable) {
+      const x = await registrarEntrada(s.socio_id, sedeId, undefined, "recepcion");
+      if (x.error) { setError(x.error); return; }
+      const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
+      a = aviso(`${x.r!.ingreso_id}-${Date.now()}`, color, x.r!.repetido ? `${s.nombre} ya había entrado: ${x.r!.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
+    } else {
+      a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
+    }
+    if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
+    window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
+    cerrar();
+  }, [sedeId, sonido, cerrar]);
+
+  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => {
+    if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande) { void elegirAviso(s); return; }
+    empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia(forma); setPaso("veredicto"); setV(null);
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); setElegido(null); return; }
-    // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
-    if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande && r.v) {
-      const vv = r.v;
-      const solo = !cfgRef.current.anotar_solo_en_verde || vv.color === "verde";
-      const anotable = vv.puede && r.guia?.boton === "anotar" && solo && !r.apto && !r.firmar;
-      const aviso = (id: string, color: AvisoLocal["color"], texto: string, cobrar: boolean, puede: boolean): AvisoLocal => ({ id, color, texto, socioId: s.socio_id, nombre: s.nombre, numero: s.numero, cobrar, puede, textoSocio: vv.texto });
-      let a: AvisoLocal;
-      if (anotable) {
-        const x = await registrarEntrada(s.socio_id, sedeId, undefined, forma);
-        if (x.error) { setError(x.error); setPaso("veredicto"); setV(vv); setGuia(r.guia ?? null); return; }
-        const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
-        a = aviso(x.r!.ingreso_id, color, x.r!.repetido ? `${s.nombre} ya había entrado: ${x.r!.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
-      } else {
-        a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
-      }
-      if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
-      window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
-      cerrar();
-      return;
-    }
     setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setEventosHoy(r.eventosHoy ?? []);
     if (sonido) sonar(r.v!.color);
-  }), [sedeId, sonido, cerrar]);
+  }); }, [sedeId, sonido, elegirAviso]);
 
   const anotado = useCallback((r: ResultadoIngreso, s: ResultadoSocio) => {
     setHecho({ ...r, nombre: s.nombre, hora: hora(new Date()), socioId: s.socio_id });
@@ -377,6 +383,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     if (lista.length === 0) { setNadie(t); return; }
     elegir(lista[0]);
   }), [conLlavero, directo, elegir]);
+
+  // BASE-3: el Enter que llegó mientras se terminaba de buscar corre ahora (con lo que haya en pantalla).
+  useEffect(() => {
+    if (ocupado || !enterPendiente.current) return;
+    enterPendiente.current = false;
+    if (paso !== "escribir") return;
+    if (socios.length > 0) elegir(socios[Math.min(marcado, socios.length - 1)]); else if (texto.trim()) resolver(texto);
+  }, [ocupado, paso, socios, marcado, texto, elegir, resolver]);
 
   // VD-6 · DNI que no existe → alta en la misma ventana. Los planes y su primer pago los trae la base.
   const iniciarAlta = useCallback((dniEscrito: string) => {
@@ -724,7 +738,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   else if (e.key === "ArrowUp" && hayLista) { e.preventDefault(); setMarcado((m) => Math.max(m - 1, 0)); }
                   else if (e.key === "Enter") {
                     e.preventDefault();
-                    if (ocupado) return;
+                    // Si todavía está terminando una búsqueda, el Enter no se pierde: queda anotado y corre apenas termina.
+                    if (ocupado) { enterPendiente.current = true; return; }
                     if (hayLista) elegir(socios[Math.min(marcado, socios.length - 1)]); else resolver(texto);
                   }
                 }}

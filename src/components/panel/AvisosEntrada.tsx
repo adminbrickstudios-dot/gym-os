@@ -22,6 +22,7 @@ export type AvisoLocal = { id: string; color: string; texto: string; socioId: st
 const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con QR", qr_pared: "por QR", kiosco: "en la tablet", nfc: "con el llavero", molinete: "por el molinete" };
 const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
 const MAX_VISIBLES = 3;
+let memoriaAvisos: Aviso[] = [];
 const VERDE_MS = 6000;
 const AMARILLO_MS = 12000;
 
@@ -53,7 +54,12 @@ function deAlerta(a: AlertaViva): Aviso {
 const minuscula = (t: string) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 
 export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: { gimnasioId: string; sedeId: string; puedeCobrar: boolean; conVentana: boolean }) {
-  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  // Los avisos viven también fuera del componente: si la pantalla se vuelve a montar (p. ej. después de anotar una entrada y refrescar
+  // el panel) no se pierden. Al volver a montar se les rearma el tiempo.
+  const [avisos, setAvisosRaw] = useState<Aviso[]>(() => memoriaAvisos);
+  const setAvisos = useCallback((f: Aviso[] | ((p: Aviso[]) => Aviso[])) => {
+    setAvisosRaw((p) => { const n = typeof f === "function" ? f(p) : f; memoriaAvisos = n; return n; });
+  }, []);
   const ruta = usePathname();
   const router = useRouter();
   const temporizadores = useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -95,6 +101,12 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   const pausar = (id: string) => { const t = temporizadores.current.get(id); if (t) clearTimeout(t); temporizadores.current.delete(id); };
   const reanudar = (a: Aviso) => { if (a.color === "rojo") return; temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS)); };
+  useEffect(() => {
+    const mapa = temporizadores.current;
+    for (const a of memoriaAvisos) if (a.color !== "rojo" && !mapa.has(a.id)) mapa.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // BASE-3: lo que anota la propia recepción (modo aviso) llega por acá.
   useEffect(() => {
     const mapa = temporizadores.current;
@@ -106,9 +118,10 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
       setAvisos((previos) => {
         let todos = [...previos.filter((p) => p.id !== n.id), n];
         while (todos.length > MAX_VISIBLES) {
-          const i = todos.findIndex((q) => q.color === "verde" || q.color === "azul");
-          const j = i >= 0 ? i : todos.findIndex((q) => q.color === "amarillo");
-          if (j < 0) break;
+          // Se apilan los últimos 3: se va el más viejo (primero un verde o azul, después un amarillo, y si no queda otro, el rojo más viejo). El nuevo nunca.
+          const viejos = todos.slice(0, -1);
+          const i = viejos.findIndex((q) => q.color === "verde" || q.color === "azul");
+          const j = i >= 0 ? i : viejos.findIndex((q) => q.color === "amarillo") >= 0 ? viejos.findIndex((q) => q.color === "amarillo") : 0;
           const [fuera] = todos.splice(j, 1);
           const t = mapa.get(fuera.id); if (t) clearTimeout(t); mapa.delete(fuera.id);
           todos = [...todos];
@@ -142,7 +155,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
   return (
     <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 bottom-4 flex flex-col-reverse gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
       {avisos.map((a) => (
-        <div key={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
+        <div key={a.id} data-aviso-id={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
           className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>

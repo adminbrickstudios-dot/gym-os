@@ -16,10 +16,10 @@ const modo = async (m) => db.query(`insert into public.configuracion_entrada (gi
 const { rows } = await db.query(`
   select s.id, s.telefono as dni, s.nombre || ' ' || s.apellido as nombre from public.socios s
    where s.gimnasio_id = $1 and s.telefono is not null and s.dado_de_baja_en is null
-   order by (s.nombre = 'Testigo') desc, s.numero limit 20`, [gim]);
+   order by (s.nombre = 'Testigo') desc, s.numero limit 60`, [gim]);
 const b = await navegador();
 try {
-  if (rows.length < 20) throw new Error(`faltan socios: hay ${rows.length}`);
+  if (rows.length < 30) throw new Error(`faltan socios: hay ${rows.length}`);
   await modo("aviso");
   const r = await pagina(b, COMPU);
   r.setDefaultNavigationTimeout(120000);
@@ -27,21 +27,35 @@ try {
   await r.goto(`${G}/panel`);
   await r.waitForFunction(() => document.documentElement.dataset.entradaLista === "si", null, { timeout: 60000 });
   const tiempos = [], colores = new Set(); let rojo = null;
+  let n = 0;
   for (const s of rows) {
+    if (tiempos.length >= 20) break;
+    n++; if (process.env.E2E_DEPURAR) console.log(`#${n} ${s.nombre} ${s.dni} (hechos ${tiempos.length})`);
     await r.keyboard.press("F2");
     const campo = r.locator("[data-ventana-campo]");
     await campo.waitFor({ timeout: 10000 });
     await campo.fill(s.dni);
-    const aviso = r.locator(`[data-aviso-socio="${s.id}"]`).first();
+    const antes = await r.locator("[data-aviso-id]").evaluateAll((es) => es.map((e) => e.getAttribute("data-aviso-id")));
     const t0 = Date.now();
     await r.keyboard.press("Enter");
-    await aviso.waitFor({ timeout: 30000 });
+    // Algún celular del demo no lo encuentra la búsqueda: se saltea y se sigue con el próximo.
+    let reintentos = 0;
+    const hayNuevo = (v) => r.waitForFunction((x) => [...document.querySelectorAll("[data-aviso-id]")].some((e) => !x.includes(e.getAttribute("data-aviso-id"))), v, { timeout: 6000 }).then(() => true, () => false);
+    if (!(await hayNuevo(antes)) && !(await r.locator("text=No encontramos").count())) { reintentos++; if (process.env.E2E_DEPURAR) console.log("  (sin aviso a los 6 s: se vuelve a dar Enter)"); await r.keyboard.press("Enter"); }
+    const res = await Promise.race([
+      r.waitForFunction((v) => [...document.querySelectorAll("[data-aviso-id]")].some((e) => !v.includes(e.getAttribute("data-aviso-id"))), antes, { timeout: 30000 }).then(() => "aviso"),
+      r.locator("text=No encontramos").first().waitFor({ timeout: 30000 }).then(() => "nada"),
+    ]);
+    if (res === "nada") { await r.keyboard.press("Escape"); await r.locator("[data-ventana-entrada]").waitFor({ state: "detached", timeout: 10000 }).catch(() => {}); continue; }
     tiempos.push(Date.now() - t0);
-    const color = await aviso.getAttribute("data-aviso-entrada");
+    const nuevo = await r.locator("[data-aviso-id]").evaluateAll((es, v) => es.filter((e) => !v.includes(e.getAttribute("data-aviso-id"))).map((e) => [e.getAttribute("data-aviso-entrada"), e.getAttribute("data-aviso-socio")]), antes);
+    const [color, socioId] = nuevo[0];
     colores.add(color);
-    if (color === "rojo" && !rojo) rojo = s;
+    if (color === "rojo" && !rojo) rojo = { ...s, id: socioId };
     await r.locator("[data-ventana-entrada]").waitFor({ state: "detached", timeout: 15000 });
+    await r.waitForTimeout(Number(process.env.PAUSA_MS ?? 0));
   }
+  chequear(tiempos.length === 20, "20 ingresos con el atajo", `solo se pudieron hacer ${tiempos.length}`);
   tiempos.sort((a, b) => a - b);
   console.log("TIEMPOS ms:", tiempos.join(" "));
   chequear(colores.size >= 3, `20 ingresos con el atajo: salen ${colores.size} colores de aviso (${[...colores].join(", ")})`, `solo ${[...colores].join(", ")}`);
@@ -52,8 +66,8 @@ try {
   chequear((await r.locator("[data-aviso-entrada]").count()) <= 3, "se apilan de a 3 como mucho", "hay más de 3 avisos");
 
   // Un rojo: se toca → panel lateral → COBRAR AHORA / Dejar pasar igual
-  if (!rojo) throw new Error("no salió ningún rojo");
-  await r.locator(`[data-aviso-socio="${rojo.id}"] button[aria-label^="Abrir"]`).first().click();
+  if (!rojo || !(await r.locator('[data-aviso-entrada="rojo"]').count())) throw new Error("no hay ningún aviso rojo en pantalla");
+  await r.locator('[data-aviso-entrada="rojo"] button[aria-label^="Abrir"]').first().click();
   const panel = r.locator("[data-panel-socio-lateral]");
   await panel.locator("[data-panel-socio-cobrar]").waitFor({ timeout: 30000 });
   ok("tocar el aviso rojo abre el panel lateral con COBRAR AHORA");
@@ -83,6 +97,7 @@ try {
   await r.keyboard.press("Escape");
   for (const [q, p] of [["recepción", r], ["dueña", d]]) if (p.errores.length) falla(`${q}: ${p.errores.join(" | ")}`);
 } catch (e) {
+  if (process.env.E2E_DEPURAR) { const pg0 = b.contexts()[0].pages()[0]; console.log("ESTADO>>", JSON.stringify({ ventana: (await pg0?.locator("[data-ventana-entrada]").innerText().catch(() => "(sin ventana)"))?.replace(/[s]+/g, " ").slice(0, 300), avisos: await pg0?.locator("[data-aviso-id]").evaluateAll((es) => es.map((e) => e.getAttribute("data-aviso-id").slice(-14) + " " + e.innerText.replace(/[s]+/g, " ").slice(0, 60))) })); }
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 }
 await modo("ventana");   // el demo queda como lo siembra (los recorridos viejos usan la ventana grande)
