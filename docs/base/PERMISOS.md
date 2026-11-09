@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 312 funciones piden un rol del equipo con `privado.exigir_equipo`; 350 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 309 funciones piden un rol del equipo con `privado.exigir_equipo`; 370 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -92,7 +92,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `desactivar_cupon` | ✓ | — | — | — |
 | `deshacer_importacion` | ✓ | ✓ | — | — |
 | `devolucion_baja_config` | ✓ | ✓ | — | — |
-| `diferencia_caja_por_cajero` | ✓ | ✓ | — | — |
 | `documentos_panel` | ✓ | ✓ | — | — |
 | `documentos_socio` | ✓ | ✓ | ✓ | — |
 | `editar_horario` | ✓ | ✓ | — | — |
@@ -123,7 +122,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `foto_estado_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio_permitida_gimnasio` | ✓ | ✓ | — | — |
-| `fotos_de_clase` | ✓ | ✓ | ✓ | ✓ |
 | `gastos_mes` | ✓ | — | — | — |
 | `grados_panel` | ✓ | ✓ | ✓ | ✓ |
 | `grados_socio` | ✓ | ✓ | ✓ | ✓ |
@@ -214,8 +212,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `motivos_reserva` | ✓ | ✓ | ✓ | — |
 | `movimientos_stock_producto` | ✓ | ✓ | — | — |
 | `no_escribirle_socio` | ✓ | ✓ | ✓ | — |
-| `no_escribirles_de` | ✓ | ✓ | ✓ | — |
 | `novedades_dueno` | ✓ | — | — | — |
+| `novedades_historial` | ✓ | ✓ | — | — |
 | `novedades_panel` | ✓ | ✓ | ✓ | — |
 | `numeros_inicio` | ✓ | ✓ | ✓ | — |
 | `ocultar_primeros_pasos` | ✓ | — | — | — |
@@ -301,7 +299,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `tablets_panel` | ✓ | ✓ | — | — |
 | `tareas_auto_config` | ✓ | ✓ | — | — |
 | `tareas_panel` | ✓ | ✓ | ✓ | ✓ |
-| `tasa_de_cobro` | ✓ | ✓ | — | — |
 | `ticket_movimiento` | ✓ | ✓ | — | — |
 | `tildar_checklist` | ✓ | ✓ | ✓ | — |
 | `turnos_socio` | ✓ | ✓ | ✓ | ✓ |
@@ -333,11 +330,14 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_asignar_plan_brik`
 - `admin_atender_demo`
 - `admin_ayudas`
+- `admin_borrar_definitivo`
 - `admin_borrar_demos_vencidas`
 - `admin_borrar_socio`
 - `admin_buscar_persona`
 - `admin_cambiar_dueno`
 - `admin_cambiar_slug`
+- `admin_cancelar_mantenimiento`
+- `admin_clonar_configuracion`
 - `admin_crear_demo`
 - `admin_crear_gimnasio`
 - `admin_dar_de_baja`
@@ -346,27 +346,39 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_entrar_gimnasio`
 - `admin_errores`
 - `admin_estado_seguridad`
+- `admin_evento_webhook`
 - `admin_exigir_2fa`
 - `admin_exportar_gimnasio`
 - `admin_exportar_socio`
 - `admin_ficha_extra`
+- `admin_funciones_prueba`
 - `admin_gimnasio`
 - `admin_gimnasios`
 - `admin_guardar_ciudad`
 - `admin_guardar_contacto_plataforma`
+- `admin_guardar_descuento`
+- `admin_guardar_link_pago`
 - `admin_guardar_marca`
 - `admin_guardar_modulos`
 - `admin_guardar_plan_brik`
+- `admin_guardar_prueba`
 - `admin_lanzamiento`
+- `admin_link_pago`
 - `admin_lista_gimnasios`
+- `admin_mantenimientos`
 - `admin_marcar_favorito`
 - `admin_metricas`
 - `admin_notas`
 - `admin_novedades`
+- `admin_papelera`
 - `admin_pausar_gimnasio`
 - `admin_pedidos_demo`
 - `admin_planes_brik`
+- `admin_plataforma_estado`
+- `admin_prender_funcion`
+- `admin_programar_mantenimiento`
 - `admin_publicar_novedad`
+- `admin_quitar_descuento`
 - `admin_quitar_dominio`
 - `admin_quitar_rol_brik`
 - `admin_reanudar_gimnasio`
@@ -374,12 +386,15 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_registro_brik`
 - `admin_resolver_ayuda`
 - `admin_restaurar_baja`
+- `admin_restaurar_plan`
+- `admin_restaurar_socio`
 - `admin_retirar_novedad`
 - `admin_salir_gimnasio`
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
 - `admin_soportes`
 - `admin_tablero`
+- `admin_uso_gimnasios`
 - `admin_uso_semanal`
 - `agenda_pt`
 - `agenda_publica (también anónimo)`
@@ -486,6 +501,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `foto_mensaje`
 - `foto_propia`
 - `foto_propia_permitida`
+- `funcion_prendida`
 - `ganancia_mes`
 - `gimnasio_por_host (también anónimo)`
 - `gimnasio_por_slug (también anónimo)`
@@ -545,6 +561,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `llavero_socio`
 - `lockers_panel`
 - `lugares_clase`
+- `mantenimiento_vigente (también anónimo)`
 - `maquinas_panel`
 - `marcar_aviso_leido`
 - `marcar_ayuda`

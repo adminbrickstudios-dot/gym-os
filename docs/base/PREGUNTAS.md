@@ -130,9 +130,39 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
-- **SA-8 (comunicación):** sin hacer: novedades por plan/ciudad/módulo, "cuántos la vieron", aviso de mantenimiento programado.
-- **SA-7:** hechas las demos; el recordatorio de abono por wa.me, la prueba gratis y los descuentos quedan sin hacer.
-- **SA-9 (plataforma):** hechos los errores; falta estado del deploy y de las migraciones, uso por gimnasio y funciones a prueba por gimnasio.
+#### Carril B, tercera tanda (migración 20261109020300)
+
+- **Borrado definitivo = anonimizar (decidido por defecto, opción recomendada).** `admin_borrar_definitivo(gimnasio, nombre)`:
+  solo el principal, con la baja de más de 30 días y escribiendo el nombre exacto. Borra los datos personales de los socios
+  (nombre, DNI, mail, teléfono, foto, notas), desactiva al equipo y le saca la cuenta, borra las direcciones y despublica la
+  página; el gimnasio queda "Gimnasio borrado" (`borrado_en`). Pagos, ventas e ingresos se quedan (plata y hechos no se borran).
+  No toca `auth.users` (una cuenta puede estar en otros gimnasios). Si Mateo prefiere un purge físico, es otra migración revisada.
+- **Reprocesar webhook: a pedido, idempotente, sin tocar la ruta.** `admin_evento_webhook` (principal y soporte) lee el evento
+  fallido y deja registro; la acción del servidor `reprocesarWebhook` lee el pago de la API de MercadoPago con el token del
+  gimnasio y llama a `procesarPagoMP` (el mismo camino del webhook, idempotente por pago y estado), y recién ahí cierra el
+  evento. Un pago ya acreditado no se duplica. **Sin probar contra MercadoPago real** (la lógica de `procesarPagoMP` ya tiene sus pruebas).
+- **SA-8:** novedades por plan, ciudad y módulo (`para_*`), "le llega a N" y "la cerraron N". "Cuántos la vieron" = cuántos la
+  cerraron: no hay marca de "vista" (habría que registrarla desde el panel del dueño, carril A/D). "Qué hay de nuevo" del dueño:
+  `novedades_historial(gimnasio)` existe; **falta la pantalla** en el panel del dueño. Mantenimiento: `mantenimiento_vigente()`
+  (pública) devuelve el aviso de las próximas 48 h; **falta pintar la franja** en los layouts de los paneles (carril A).
+- **SA-7:** prueba gratis por gimnasio (`prueba_dias`, 14 por defecto: igual que antes), descuento con motivo y fecha de fin
+  (`precio_con_descuento` sale en `estado_abono`), recordatorio por wa.me con monto y link de pago (el link lo carga Mateo en `/admin`).
+  Se redefinió `privado.estado_abono` desde su única definición (0110); agrega claves, no cambia las que había.
+  **El descuento solo se muestra: no cambia lo que el gimnasio paga ni cobra nada** (BRIK cobra a mano). Confirmar que es lo que se quiere.
+  ARCA/factura electrónica sigue en 🔌.
+- **SA-9:** estado (migraciones, tamaño de la base, commit y región de Vercel), uso por gimnasio (socios, fotos, entradas 30 días,
+  sedes; los límites del plan no existen como datos, así que no hay "se acerca al límite") y funciones a prueba
+  (`funcion_prendida(gimnasio, clave)`; nadie la consulta todavía: la usa quien construya la función nueva).
+- **Papelera:** socios dados de baja en 30 días y planes archivados, con restaurar. Las clases archivadas no se incluyeron
+  (necesitan decidir qué es "archivar" una clase).
+- **Clonar configuración:** copia planes activos con su precio de hoy, actividades, modo de clases, qué cobra y módulos apagados, a un
+  gimnasio sin planes. No copia horarios, reglas finas ni la página.
+- **Carga de socios con Excel:** ya existe en el panel del dueño (`/socios/importar`); BRIK la usa entrando como soporte. No se
+  duplicó dentro de `/admin`. Los botones "Abrir como soporte en esta pantalla" de la ficha quedan sin hacer.
+- **Parches de otras migraciones:** antes de redefinir `estado_abono`, `novedades_dueno`, `admin_novedades` y
+  `admin_publicar_novedad` verifiqué que ninguna otra migración las vuelve a definir. `privado.avisos_moderacion` y
+  `privado.soy_admin_plataforma` ya estaban envueltas/redefinidas en la tanda anterior.
+- **Sin hacer de la lista:** nada de los 5 puntos quedó sin tocar; lo parcial está arriba.
 ### Carril C · Socio, página e ingreso (ayudante 2, 09/11) — opción recomendada ya aplicada, avisame si no
 - **"Ese mail no tiene cuenta en Gimnasio X" contra VD-33 ("el mismo mensaje exista o no la cuenta").** El pedido (F1.2) manda el error con nombre. Se aplicó **solo desde la dirección de un gimnasio, solo después de una contraseña mala y con el tope de BASE-8 ya aplicado** (8 fallos por mail y 20 por conexión cada 15 min); si el mail tiene ficha de socio o usuario del equipo ahí, el texto sigue siendo "El mail o la contraseña no son correctos". Costo: alguien puede averiguar si un mail es socio de un gimnasio (hasta 8 veces por mail cada 15 min). Si preferís el mensaje único, es borrar la llamada a `mail_para_ingresar` en `src/app/ingresar/acciones.ts`. **`scripts/e2e/vd-33.mjs` línea 58 compara con cuenta y sin cuenta y va a fallar: hay que cambiarla** (es del carril A).
 - **Mail y contraseña adelante para el socio (D43).** Cambia lo que se ve primero en `/ingresar?modo=socio`: ya no es el campo de celular. **Todas las pruebas e2e que entran con `entrarSocio` (`scripts/e2e/comun.mjs`) dejan de andar** hasta que `entrarSocio` haga clic en el botón "Celular" antes de llenar `input[name=telefono]` (una línea, del carril A).

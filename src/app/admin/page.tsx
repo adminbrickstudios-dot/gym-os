@@ -11,6 +11,7 @@ import { AltaGimnasio } from "./AltaGimnasio";
 import { Tablero } from "./Tablero";
 import { Demos, type DemoVencida } from "./Demos";
 import { ErroresPlataforma } from "./ErroresPlataforma";
+import { PlataformaDatos } from "./PlataformaDatos";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
 import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
@@ -105,6 +106,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <div id="alta"><AltaGimnasio dominio={dominioBase()} /></div>
       <Demos vencidas={demosVencidas} />
       <ErroresPlataforma />
+      <PlataformaDatos />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />
       <ContactoPlataformaForm inicial={contactoPlataforma} />
