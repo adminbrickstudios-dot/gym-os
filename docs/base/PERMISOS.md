@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 302 funciones piden un rol del equipo con `privado.exigir_equipo`; 316 no (las decide la propia función con la sesión, el socio o RLS); 25 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 305 funciones piden un rol del equipo con `privado.exigir_equipo`; 331 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -66,6 +66,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `configurar_stock` | ✓ | ✓ | — | — |
 | `confirmar_foto_producto` | ✓ | ✓ | — | — |
 | `confirmar_foto_socio` | ✓ | ✓ | ✓ | — |
+| `confirmar_foto_subida` | ✓ | ✓ | ✓ | — |
 | `confirmar_imagen_marca` | ✓ | — | — | — |
 | `confirmar_ticket` | ✓ | ✓ | ✓ | — |
 | `constancia_baja` | ✓ | ✓ | ✓ | — |
@@ -117,6 +118,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `firmar_documento` | ✓ | ✓ | ✓ | — |
 | `firmas_propias_pendientes` | ✓ | ✓ | ✓ | — |
 | `formas_de_entrada` | ✓ | ✓ | ✓ | — |
+| `foto_estado_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio` | ✓ | ✓ | ✓ | ✓ |
 | `gastos_mes` | ✓ | — | — | — |
 | `grados_panel` | ✓ | ✓ | ✓ | ✓ |
@@ -145,6 +147,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_equipo` | ✓ | — | — | — |
 | `guardar_equipo_ajuste` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
+| `guardar_foto_socio_permitida` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
 | `guardar_horarios_apertura` | ✓ | — | — | — |
 | `guardar_link_resena` | ✓ | — | — | — |
@@ -323,13 +326,20 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_asignar_plan_brik`
 - `admin_atender_demo`
 - `admin_ayudas`
+- `admin_buscar_persona`
+- `admin_cambiar_dueno`
+- `admin_cambiar_slug`
 - `admin_crear_gimnasio`
 - `admin_entrar_gimnasio`
+- `admin_ficha_extra`
 - `admin_gimnasio`
 - `admin_gimnasios`
 - `admin_guardar_contacto_plataforma`
 - `admin_guardar_marca`
+- `admin_guardar_modulos`
 - `admin_guardar_plan_brik`
+- `admin_lista_gimnasios`
+- `admin_marcar_favorito`
 - `admin_metricas`
 - `admin_notas`
 - `admin_novedades`
@@ -344,6 +354,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
 - `admin_soportes`
+- `admin_tablero`
 - `admin_uso_semanal`
 - `agenda_pt`
 - `agenda_publica (también anónimo)`
@@ -402,6 +413,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `confirmar_comprobante_gasto`
 - `confirmar_foto_falla`
 - `confirmar_foto_mensaje`
+- `confirmar_foto_propia`
 - `confirmar_invitado`
 - `confirmar_remito_stock`
 - `congelar`
@@ -447,6 +459,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `foto_equipo (también anónimo)`
 - `foto_falla`
 - `foto_mensaje`
+- `foto_propia`
+- `foto_propia_permitida`
 - `ganancia_mes`
 - `gimnasio_por_host (también anónimo)`
 - `gimnasio_por_slug (también anónimo)`
@@ -511,6 +525,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `marcar_ayuda`
 - `marcar_bienvenida`
 - `marcar_dia_rutina`
+- `marcar_serie_rutina`
 - `marcar_sesion_pt`
 - `medicion_publica (también anónimo)`
 - `mensajes_estado_socio`
@@ -562,6 +577,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `preparar_foto_equipo`
 - `preparar_foto_falla`
 - `preparar_foto_mensaje`
+- `preparar_foto_propia`
 - `previsualizar_cierre`
 - `profes_de_clases`
 - `progreso_socio`
@@ -603,6 +619,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `respuestas_rapidas`
 - `resultado_mes`
 - `resultado_por_sede`
+- `resumen_app_socio`
 - `resumen_caja`
 - `retencion`
 - `retencion_resumen`
@@ -611,6 +628,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `rutina_de_socio`
 - `sacar_etiqueta`
 - `salir_por_qr_pared`
+- `series_hechas_hoy`
 - `sesiones_dictadas_pt`
 - `sincronizar_sin_internet`
 - `suscripcion_push`
@@ -638,6 +656,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `destinos_push_mensajes`
 - `entrar_con_google`
 - `ingreso_permitido`
+- `mail_para_ingresar`
 - `precio_cuota`
 - `registrar_envio_publico`
 - `registrar_evento_webhook`

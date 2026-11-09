@@ -23,6 +23,14 @@
   "hex": 0,
   "emoji": 4
  },
+ "src/app/admin/gimnasios/Favorito.tsx": {
+  "hex": 1,
+  "emoji": 0
+ },
+ "src/app/admin/gimnasios/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
  "src/app/admin/Metricas.tsx": {
   "hex": 2,
   "emoji": 0
@@ -175,6 +183,10 @@
   "hex": 0,
   "emoji": 4
  },
+ "src/app/app/Recomendacion.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
  "src/app/app/Referir.tsx": {
   "hex": 0,
   "emoji": 3
@@ -191,9 +203,17 @@
   "hex": 0,
   "emoji": 4
  },
+ "src/app/app/rutina/Series.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/yo/MiFoto.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
  "src/app/app/yo/page.tsx": {
   "hex": 0,
-  "emoji": 14
+  "emoji": 15
  },
  "src/app/auth/vincular/VincularGoogle.tsx": {
   "hex": 0,
@@ -209,7 +229,7 @@
  },
  "src/app/hacete-socio/FormAlta.tsx": {
   "hex": 0,
-  "emoji": 10
+  "emoji": 11
  },
  "src/app/hacete-socio/page.tsx": {
   "hex": 0,
@@ -977,7 +997,7 @@
  },
  "src/components/panel/AvisosEntrada.tsx": {
   "hex": 0,
-  "emoji": 7
+  "emoji": 11
  },
  "src/components/panel/AyudaBrik.tsx": {
   "hex": 0,

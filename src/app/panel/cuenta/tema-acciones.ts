@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 
 export type Tema = "gimnasio" | "claro" | "oscuro";
-export const COOKIE_TEMA = "tema";
+const COOKIE_TEMA = "tema";
 
 /** BASE-6 (D37): guardar el tema de esta persona en la base (vale en todos sus dispositivos) y en la cookie que lee el layout. */
 export async function guardarTema(tema: Tema): Promise<{ error?: string }> {
