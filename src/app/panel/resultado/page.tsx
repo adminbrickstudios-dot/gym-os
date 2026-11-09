@@ -5,6 +5,7 @@ import { MEDIO } from "@/lib/caja";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { TasaCobro, type TasaDeCobro } from "./TasaCobro";
 import { Gastos, type GastosMes } from "./Gastos";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { LinkPanel } from "@/components/panel/LinkPanel";
@@ -48,6 +49,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       // VD-46P: por sede, dónde se cobró y dónde se usó (solo se muestra si el gimnasio tiene más de una).
       rpc<ResultadoPorSede>("resultado_por_sede", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
     ]);
+    const tasa = await rpc<TasaDeCobro>("tasa_de_cobro", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });   // FA-10
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -87,6 +89,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           ))}
         </dl>
         <p className="text-sm texto-tenue -mt-6">Recurrente: lo que entra por mes si todos los que hoy tienen la membresía al día la renuevan, al precio de hoy.</p>
+
+        <TasaCobro t={tasa} />
 
         <section aria-labelledby="dias">
           <h2 id="dias" className="titulo text-2xl mb-3">Día por día</h2>

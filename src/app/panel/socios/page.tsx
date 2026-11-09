@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PuntoEstado } from "@/components/panel/Estado";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
@@ -10,6 +9,7 @@ import { Pestanas } from "@/components/ui/Pestanas";
 import { cargarInteresados } from "../prospectos/Interesados";
 import { Prospectos } from "../prospectos/Prospectos";
 import { MemoriaSocios } from "./MemoriaSocios";
+import { ListaSocios } from "./ListaSocios";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -146,21 +146,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
-          <ul className="space-y-2">
-            {filas.map((s) => (
-              <li key={s.socio_id}>
-                <Link href={`/panel/socios/${s.socio_id}`} className={`tarjeta flex items-center gap-4 px-4 py-3 min-h-[68px] hover:bg-[var(--tarjeta-alta)] ${s.dado_de_baja ? "opacity-60" : ""}`}>
-                  <PuntoEstado color={s.color} grande />
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-lg truncate">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></span>
-                    <span className="block texto-suave truncate">{s.dado_de_baja ? "Dado de baja" : s.texto}</span>
-                  </span>
-                  {s.autoalta && <span className={`pildora flex-none ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined} title="Se registró solo desde la página">🌐{s.puede === false && " A cobrar"}<span className="hidden sm:inline">{s.puede !== false ? " Se anotó por la web" : " · se anotó por la web"}</span></span>}
-                  {s.plan && <span className="hidden sm:inline pildora">{s.plan}</span>}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} />
         )}
         </div>
         {filas.length >= limite && (

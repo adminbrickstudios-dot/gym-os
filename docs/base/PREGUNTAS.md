@@ -150,3 +150,12 @@ Respuesta de Mateo: (vacío)
 - **Tema por usuario (BASE-6).** Se guarda en `equipo.preferencias.tema` (`guardar_tema_usuario`, `mi_tema`) y en la cookie `tema` (`claro` | `oscuro`; sin cookie = el del gimnasio). Mi cuenta ya tiene el selector. **Falta del principal:** que el layout lea la cookie y pinte `data-tono` con ese valor en vez del que calcula `propsMarca` (y que `globals.css` tenga los tokens de los dos tonos completos).
 - **Chequeo de diseño.** `scripts/diseno-chequeo.mjs` (dentro de `npm run chequeos`): falla si un archivo suma un color hex suelto o un emoji más que su número guardado en `scripts/diseno-base.json`. Hoy quedan 32 colores y ~1.670 emojis por convertir al componente `Icono`; **el chequeo no queda en cero hasta que el principal cree `Icono` y se conviertan** (`node scripts/chequeos.mjs --actualizar-diseno` baja los números a medida que se convierte).
 - (09/11, decidido por defecto) Se subió la base de `diseno-base.json` para los emojis y colores que sumaron los carriles B y C: bajan a cero cuando exista `Icono` (F1.4).
+
+### Carril D (ayudante 3, 09/11, segunda tanda) · decisiones tomadas por defecto
+
+- **Detalle #24, pagos parciales.** Hoy una cuota se paga entera (en Vender) o se fía hasta un tope (cuenta corriente). Pagarla en partes cambia plata y qué cubre cada parte: no lo hice. Recomendado: no hacerlo en el P0; el fiado cubre el caso.
+- **Detalle #43, matriz de permisos editable.** Toca permisos: no lo hice. Recomendado: dejar los interruptores de hoy (Equipo → Permisos). Una matriz rol × acción editable puede dejar a un rol con algo que la base no le da; hay que decidirlo con Mateo.
+- **FA-21, "cajero".** Es quien cierra el turno (quien cuenta responde por el cajón). Alternativa: quien lo abrió. Recomendado: quien cierra.
+- **FA-10, "tasa de cobro".** De los socios sin baja cuya cobertura venció dentro del mes (y ya pasó), cuántos tienen hoy cobertura posterior. No cuenta a los que vencen más tarde en el mes. Recomendado así.
+- **FA-9, WhatsApp en lote.** No manda solo: arma un chat con el mensaje listo por cada socio y lo manda la persona. Los marcados "no escribirle" se sacan. Recomendado así (un envío automático necesitaría la API de WhatsApp Business).
+- **Búsqueda con errores de tipeo.** Umbral 0,6 de similitud de palabra y solo con 4 letras o más: "gonzales" encuentra "González" y "zzzzqq" no trae a nadie. Si en la práctica trae de más o de menos, se ajusta el número en `buscar_socios`.

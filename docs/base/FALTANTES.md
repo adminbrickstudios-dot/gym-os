@@ -16,9 +16,9 @@ que ya se está haciendo.
 | FA-6 | **(va antes, F1.6)** Arriba de `VELOCIDAD.md`, un párrafo en palabras simples de por qué andaba lento. Y listas virtualizadas donde haya más de 200 filas (Socios, Vencen, Control) | Pedido 4.1 | ❌ |
 | FA-7 | "Avisar sin bloquear" la primera semana: la base ya lo tiene (`configuracion.avisar_sin_bloquear_hasta`). Falta una pantalla en Configuración y un paso opcional en el asistente: "los primeros N días, la entrada avisa pero no frena". Es para el primer gimnasio real | Arranque §6.10 | 🟡 pantalla en Configuración y función de base (`avisar_sin_bloquear_estado`/`guardar_avisar_sin_bloquear`, probada); falta el paso opcional en el asistente y el e2e |
 | FA-8 | En la configuración de MercadoPago, escrito: "La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK." | Arranque §6.1 | 🟡 texto puesto en la tarjeta de MercadoPago; sin e2e |
-| FA-9 | Socios: selección múltiple (WhatsApp, etiqueta, exportar) y columnas a elección | `v2/03` §5, `v2/17` §5 | ❌ |
-| FA-10 | Números: "tasa de cobro" (qué parte de lo que había que cobrar este mes se cobró), con su lista | `v2/03` §6 | ❌ |
-| FA-11 | Lista de anotados de una clase con la foto de cada uno | `producto/10` | ❌ |
+| FA-9 | Socios: selección múltiple (WhatsApp, etiqueta, exportar) y columnas a elección | `v2/03` §5, `v2/17` §5 | 🟡 hecho en la lista de Socios: "Elegir varios" (WhatsApp uno por uno con el mensaje listo y sin los marcados "no escribirle", etiqueta en lote, exportar a Excel) y columnas a elección recordadas en el navegador; base probada (`no_escribirles_de`); falta correrlo con sesión real y un e2e |
+| FA-10 | Números: "tasa de cobro" (qué parte de lo que había que cobrar este mes se cobró), con su lista | `v2/03` §6 | 🟡 "Tasa de cobro" en Resultado con la lista de los que faltan renovar (`tasa_de_cobro`, probada en la base); falta e2e y ponerla en Inicio (carril A) |
+| FA-11 | Lista de anotados de una clase con la foto de cada uno | `producto/10` | 🟡 la lista de la clase muestra la foto de cada anotado (`fotos_de_clase`, probada); falta correrla con sesión real |
 | FA-12 | Avisos en la app, que solo avisan y no deciden nada: la clase reservada (1 h antes, si el socio lo quiere), el evento el día antes, y al profe y al encargado "clase sin anotados" 2 h antes o "clase llena" | `v2/03` §9, `v2/12`, `producto/07` | ❌ |
 | FA-13 | Interesado que nadie contactó en 24 h: aparece en Para hacer hoy y en la campana | `producto/07` | ❌ |
 | FA-14 | App del socio: recomendación con regla clara ("hace 10 días que no venís, hoy hay Funcional 19:00"), insignias simples y resumen del año | `v2/05` §3 | ❌ |
@@ -27,8 +27,8 @@ que ya se está haciendo.
 | FA-17 | Borrador automático en formularios largos (alta completa, plan, configuración de la página): al volver, "¿Seguimos donde dejaste?" | `v2/13` §3, `FLUIDEZ.md` regla 7 | ❌ |
 | FA-18 | Transiciones entre pantallas en la app del socio (View Transitions), respetando `prefers-reduced-motion` | `v2/05` §4 | ❌ |
 | FA-19 | Términos del servicio entre BRIK y el gimnasio, y contrato de encargado del tratamiento (Ley 25.326). El dueño los acepta al entrar por primera vez y se guarda la fecha y la versión. Si la versión cambia, los vuelve a aceptar. El texto lo escribe el agente como borrador, marcado "revisar con un abogado" | Arranque §6.6 | ❌ |
-| FA-20 | Página pública `/estado`: si la base responde y el último deploy, sin datos de nadie | `v2/13` §4 | ❌ |
-| FA-21 | Diferencia de caja acumulada por cajero, en Control y en Caja | `14-SITUACIONES` #21 | ❌ |
+| FA-20 | Página pública `/estado`: si la base responde y el último deploy, sin datos de nadie | `v2/13` §4 | 🟡 página `/estado` escrita (`src/app/estado/page.tsx`); sin correr. Puede necesitar que el proxy la deje pasar en el host de la plataforma (carril A) |
+| FA-21 | Diferencia de caja acumulada por cajero, en Control y en Caja | `14-SITUACIONES` #21 | 🟡 "Diferencia por cajero" arriba de Turnos de caja (`diferencia_caja_por_cajero`, probada); falta el número en Control y e2e |
 | FA-22 | Alertas por patrón: el mismo socio en dos sedes con pocos minutos de diferencia, o entradas muy por encima de su promedio. Solo avisa al dueño, no frena | `14-SITUACIONES` #3 | ❌ |
 | FA-23 | Lista de espera: el lugar que se libera se ofrece con un plazo para aceptar (configurable). Si no acepta, pasa al siguiente. Se calcula al consultar, sin cron | `14-SITUACIONES` #51 | ❌ |
 | FA-24 | El invitado de un socio (el pase ya existe, INV-1) queda como interesado, con quién lo trajo | Pedido §7 | ❌ |

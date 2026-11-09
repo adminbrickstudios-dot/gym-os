@@ -28,6 +28,8 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
     exigirRol(panel, ["dueno", "encargado"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const turnos = await rpc<Turno[]>("historial_caja", { p_sede_id: sede.id, p_limite: 60 });
+    // FA-21: lo que faltó o sobró, acumulado por cajero (quien cerró el turno), últimos 90 días.
+    const cajeros = await rpc<{ equipo_id: string; cajero: string; turnos: number; diferencia: number | string; sobrante: number | string; faltante: number | string; con_diferencia: number }[]>("diferencia_caja_por_cajero", { p_gimnasio_id: panel.gimnasio.id, p_dias: 90 });
     const zona = panel.gimnasio.zona_horaria;
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
@@ -35,6 +37,21 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
       <>
         <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
           bajada="Quién abrió y cerró, cuánto tenía que haber, cuánto se contó y qué entró o salió del cajón." />
+        {cajeros.length > 0 && (
+          <section className="mb-6" aria-labelledby="por-cajero" data-diferencia-cajeros>
+            <h2 id="por-cajero" className="titulo text-2xl mb-2">Diferencia por cajero (90 días)</h2>
+            <ul className="tarjeta divide-y divide-[var(--borde)]">{cajeros.map((c) => {
+              const d = Number(c.diferencia);
+              return (
+                <li key={c.equipo_id} className="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3" data-cajero={c.cajero}>
+                  <span className="font-semibold">{c.cajero} <span className="texto-tenue text-sm font-normal">· {c.turnos} {c.turnos === 1 ? "turno" : "turnos"}, {c.con_diferencia} con diferencia</span></span>
+                  <span className={`pildora ${d === 0 ? "pildora-verde" : d > 0 ? "pildora-amarillo" : "pildora-rojo"}`}>{d === 0 ? "Justo" : d > 0 ? `Sobraron ${formatearPesos(d)}` : `Faltaron ${formatearPesos(-d)}`}</span>
+                </li>
+              );
+            })}</ul>
+            <p className="text-sm texto-tenue mt-1">Suma lo que faltó y lo que sobró en cada cierre; el turno lo cuenta quien lo cierra. Solo avisa: no cambia ninguna caja.</p>
+          </section>
+        )}
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/historial" />}
         {turnos.length === 0 ? <Vacio emoji="🗂️" titulo="Todavía no hubo turnos">Cuando se abra y se cierre la caja, cada turno queda acá.</Vacio> : (
           <ul className="space-y-3" data-turnos>
