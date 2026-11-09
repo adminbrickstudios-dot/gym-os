@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 309 funciones piden un rol del equipo con `privado.exigir_equipo`; 370 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 313 funciones piden un rol del equipo con `privado.exigir_equipo`; 370 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -92,6 +92,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `desactivar_cupon` | ✓ | — | — | — |
 | `deshacer_importacion` | ✓ | ✓ | — | — |
 | `devolucion_baja_config` | ✓ | ✓ | — | — |
+| `diferencia_caja_por_cajero` | ✓ | ✓ | — | — |
 | `documentos_panel` | ✓ | ✓ | — | — |
 | `documentos_socio` | ✓ | ✓ | ✓ | — |
 | `editar_horario` | ✓ | ✓ | — | — |
@@ -122,6 +123,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `foto_estado_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio_permitida_gimnasio` | ✓ | ✓ | — | — |
+| `fotos_de_clase` | ✓ | ✓ | ✓ | ✓ |
 | `gastos_mes` | ✓ | — | — | — |
 | `grados_panel` | ✓ | ✓ | ✓ | ✓ |
 | `grados_socio` | ✓ | ✓ | ✓ | ✓ |
@@ -212,6 +214,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `motivos_reserva` | ✓ | ✓ | ✓ | — |
 | `movimientos_stock_producto` | ✓ | ✓ | — | — |
 | `no_escribirle_socio` | ✓ | ✓ | ✓ | — |
+| `no_escribirles_de` | ✓ | ✓ | ✓ | — |
 | `novedades_dueno` | ✓ | — | — | — |
 | `novedades_historial` | ✓ | ✓ | — | — |
 | `novedades_panel` | ✓ | ✓ | ✓ | — |
@@ -299,6 +302,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `tablets_panel` | ✓ | ✓ | — | — |
 | `tareas_auto_config` | ✓ | ✓ | — | — |
 | `tareas_panel` | ✓ | ✓ | ✓ | ✓ |
+| `tasa_de_cobro` | ✓ | ✓ | — | — |
 | `ticket_movimiento` | ✓ | ✓ | — | — |
 | `tildar_checklist` | ✓ | ✓ | ✓ | — |
 | `turnos_socio` | ✓ | ✓ | ✓ | ✓ |
