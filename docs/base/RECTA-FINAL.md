@@ -52,7 +52,7 @@ Dónde quedó (09/11, mediodía):
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
 | F3.1 | `scripts/e2e/botones.mjs`: los 6 roles en compu y celular, cada botón | `FLUIDEZ.md` | ❌ |
-| F3.2 | `FLUIDEZ-PANTALLAS.md`: cada pantalla contra las 14 reglas, arreglada | `FLUIDEZ.md` | ❌ |
+| F3.2 | `FLUIDEZ-PANTALLAS.md`: cada pantalla contra las 19 reglas, arreglada; y todos los textos revisados con la regla de `DISENO.md` § Textos | `FLUIDEZ.md` | ❌ |
 
 ## Fase 4 · Los 70 detalles
 

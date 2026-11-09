@@ -6,7 +6,7 @@ botón, cada hoja y cada pantalla**, con cada rol, en compu y en celular.
 Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
 (rapidez, que no se trabe), que siguen valiendo.
 
-## Las 14 reglas (cada botón y cada pantalla las cumple todas)
+## Las 19 reglas (cada botón y cada pantalla las cumple todas)
 
 1. **Responde al instante.** Entre el toque y el primer cambio en pantalla
    pasan menos de 100 ms: el botón se ve apretado, y si la acción tarda dice
@@ -54,13 +54,24 @@ Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
     celular del socio (entradas, caja, pendientes, mensajes) aparece sin
     recargar.
 
+15. **Errores con salida.** "No encontrado", error, sesión vencida y pago
+    fallido tienen página propia, con el estilo del gimnasio o del panel, y
+    siempre ofrecen "Volver" e "Ir al inicio".
+16. **Internet y celular lentos.** Con la red y la CPU lentas simuladas
+    (Playwright: 4G lento y CPU x4), todo muestra que está cargando y nada
+    queda congelado ni en blanco.
+17. **Nada salta al cargar.** Las imágenes tienen su lugar reservado, carga
+    diferida y un color de fondo mientras llegan.
+18. **El teclado del celular no tapa el botón** de guardar o confirmar.
+19. **Cero errores en la consola**, y los errores del servidor quedan
+    registrados para encontrarlos después.
+
 ## Cómo se hace
 
 1. **Un recorrido automático** `scripts/e2e/botones.mjs`: por cada rol (dueño,
    encargado, recepción, profe, socio, super admin), en compu y en celular,
    abre cada pantalla de `scripts/mapa-pantallas.mjs` y toca cada botón y
-   link que no esté marcado `data-peligro`. Chequea las reglas 1, 2, 3, 5, 6 y
-   11:
+   link que no esté marcado `data-peligro`. Chequea las reglas 1, 2, 3, 5, 6, 11, 16 y 19:
    - El botón cambia en menos de 100 ms.
    - Ningún "…ando" queda más de 10 s.
    - No hay errores de consola.
@@ -71,7 +82,7 @@ Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
    Los botones peligrosos (anular, borrar, dar de baja) se prueban en su propio
    e2e con datos de prueba.
 2. **Una revisión a mano, pantalla por pantalla,** para lo que la máquina no
-   ve: las reglas 4, 7, 8, 9, 10, 12, 13 y 14. Va en una tabla en
+   ve: las reglas 4, 7, 8, 9, 10, 12, 13, 14, 15, 17 y 18. Va en una tabla en
    `FLUIDEZ-PANTALLAS.md` (pantalla × regla, con ✅ o lo que se arregló), con
    capturas mirándolas.
 3. Cada falla se arregla en la pantalla. Si toca plata o permisos, se anota en

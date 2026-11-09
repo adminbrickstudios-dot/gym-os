@@ -82,6 +82,18 @@ GIMNASIO): van en mayúsculas chicas y en gris, como pidió Mateo.
 - **Ningún emoji como ícono**, en ningún panel, app ni página. (Un emoji que el
   dueño escribe en un texto suyo es de él y se respeta.)
 
+## Textos (que no parezcan hechos por una IA)
+
+- Valen para todo lo que se lee: paneles, app, página del gimnasio, página de
+  venta de Base, super admin, mensajes de WhatsApp armados y mails.
+- Voz concreta y corta, en español rioplatense neutro. Cada texto dice algo que
+  se puede comprobar: "Te quedan 12 días", no "Disfrutá tu experiencia".
+- Nada de frases de IA: "experiencia única", "llevá tu gimnasio al siguiente
+  nivel", "sin complicaciones", "potenciá", "solución integral".
+- Los paneles son sobrios y densos donde se trabaja (recepción, caja, socios), y
+  más aireados donde se lee (la página del gimnasio, la app del socio).
+- En la fase de fluidez se revisan **todos** los textos visibles con esta regla.
+
 ## Lo prohibido
 
 - Degradados violeta o azul, y degradados de decoración en general.

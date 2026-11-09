@@ -68,7 +68,7 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 5. **Verificá ejecutando:**
    - `npm run db:pruebas` si tocaste la base (con `scripts/db/local.sh nueva`).
    - El e2e del recorrido, con sesión real y `APP_MODO=produccion`.
-   - Las 14 reglas de `FLUIDEZ.md` en lo que tocaste.
+   - Las 19 reglas de `FLUIDEZ.md` en lo que tocaste.
    - Capturas en compu y celular **mirándolas**.
    - `npm run verificar`.
 
