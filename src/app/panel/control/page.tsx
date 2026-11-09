@@ -6,6 +6,7 @@ import { detalleControl, enlaceControl, META_TIPO, TIPOS_CONTROL, tituloControl,
 import { formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { AlertasPatron, type AlertasPatronDatos } from "./AlertasPatron";
 import { Beneficios, type BeneficiosMes } from "./Beneficios";
 import { FiltrosControl, type PersonaControl } from "./FiltrosControl";
 
@@ -56,6 +57,8 @@ export default async function Control({ searchParams }: { searchParams: Promise<
       rpc<string>("devolucion_baja_config", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
 
+    // FA-22: avisos por patrón (dos sedes en pocos minutos, muchas entradas en un día). Solo en la primera página.
+    const patrones = cursor ? null : await rpc<AlertasPatronDatos>("alertas_patron_entradas", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
     const filtros = new URLSearchParams();
     tipos.forEach((t) => filtros.append("tipos", t));
     filtros.set("desde", desde); filtros.set("hasta", hasta);
@@ -78,6 +81,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
             <Link href="/panel/entrada/control" className="underline">🔎 Control de la puerta</Link>
             <Link href="/panel/equipo/actividad" className="underline">📋 Qué hizo cada uno</Link>
           </p>
+          {patrones && <AlertasPatron datos={patrones} zona={zona} />}
           {pagina.items.length === 0 ? (
             <Vacio emoji={cursor ? "🏁" : "🌿"} titulo={cursor ? "No hay más movimientos" : "Nada para mostrar con estos filtros"}
               acciones={<Link href={cursor ? `/panel/control?${base}` : "/panel/control"} className="boton">{cursor ? "Volver al principio" : "Ver los últimos 7 días"}</Link>}>
