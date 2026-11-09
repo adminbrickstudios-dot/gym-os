@@ -6,6 +6,7 @@ import { useActionState, useState } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { altaOnline, type ResultadoAlta } from "./acciones";
 import type { DatosAlta } from "./page";
 
@@ -40,6 +41,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
     const t = r.transferencia;
     return (
       <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio}>
+        <BorradorAutomatico clave="alta-socio" borrar />
         <p className="titulo text-3xl">🎉 ¡Bienvenido/a a {datos.marca.nombre}, {r.nombre}!</p>
         <p className="text-lg">Ya estás anotado/a{r.plan ? <> en <strong>{r.plan}</strong></> : null}.
           {r.precio != null && <> Son <strong>{formatearPesos(r.precio)}</strong>.</>}</p>
@@ -58,13 +60,18 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
             </div>
           </div>
         ) : <p className="texto-suave text-lg">Pasá por recepción y pagá tu plan: desde ese momento ya podés entrenar.</p>}
-        <a href="/ingresar?modo=socio" className="boton boton-principal">💪 Entrar a la app con mi celular</a>
+        {r.linkContrasena && (
+          <a href={r.linkContrasena} className="boton boton-principal" data-crear-contrasena>🔑 Crear mi contraseña</a>
+        )}
+        <a href="/ingresar?modo=socio" className={r.linkContrasena ? "boton" : "boton boton-principal"}>💪 Entrar a la app</a>
       </div>
     );
   }
 
   return (
     <form action={accion} className="space-y-8" data-form-alta>
+      {/* FA-17: "¿Seguimos donde dejaste?" con lo que ya escribió (solo en este dispositivo; nunca el reglamento aceptado). */}
+      <BorradorAutomatico clave="alta-socio" />
       {/* VD-61: cuatro pasos cortos, cada uno con su nombre; tocar uno lleva a ese paso. */}
       <nav aria-label="Pasos para hacerte socio" className="flex flex-wrap gap-2" data-pasos-alta>
         {PASOS.map(([id, t], i) => <a key={id} href={"#paso-" + id} className="pildora !min-h-11 inline-flex items-center">{i + 1}. {t}</a>)}

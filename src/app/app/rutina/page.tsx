@@ -5,6 +5,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Anotar } from "./Anotar";
 import { MarcarDia } from "./MarcarDia";
+import { Series } from "./Series";
 import { MarcasProgreso, type Progreso } from "@/components/rutinas/Progreso";
 
 export const metadata: Metadata = { title: "Mi rutina" };
@@ -21,9 +22,10 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     if (yo.elegir || !yo.socio) return <p className="texto-suave">Elegí primero <Link href="/app" className="underline">qué socio sos</Link>.</p>;
     const s = yo.socio;
     const q = (extra = "") => { const p = new URLSearchParams(); if (yo.socios.length > 1) p.set("socio", s.socio_id); if (extra) p.set("dia", extra); const x = p.toString(); return x ? `?${x}` : ""; };
-    const [r, progreso] = await Promise.all([
+    const [r, progreso, seriesHoy] = await Promise.all([
       rpc<MiRutina | null>("rutina_de_socio", { p_socio_id: s.socio_id }),
       rpc<Progreso>("progreso_socio", { p_socio_id: s.socio_id }),
+      rpc<{ dia: number; ejercicio_id: string; serie: number }[]>("series_hechas_hoy", { p_socio_id: s.socio_id }),   // FA-15
     ]);
     if (!r) return (<><Link href={`/app${q()}`} className="texto-suave">← Volver</Link><h1 className="titular text-5xl mt-4">Mi rutina</h1>
       <p className="texto-suave text-lg mt-4">Todavía no tenés una rutina. Pedísela a tu profe.</p></>);
@@ -59,6 +61,8 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
             </span>
             {x.video_url && <a href={x.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico">▶️</a>}
             <Anotar socioId={s.socio_id} ejercicioId={x.ejercicio_id} nombre={x.ejercicio} />
+            <Series socioId={s.socio_id} dia={x.dia} ejercicioId={x.ejercicio_id} series={x.series}
+              hechas={(seriesHoy ?? []).filter((h) => h.dia === x.dia && h.ejercicio_id === x.ejercicio_id).map((h) => h.serie)} />
           </li>
         ))}</ul>
         <section className="space-y-3 pt-4"><h2 className="titulo text-3xl">🏆 Mis marcas</h2><MarcasProgreso datos={progreso} zona={yo.zona!} /></section>

@@ -27,7 +27,7 @@ async function datos(): Promise<DatosAlta | null> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const d = await datos();
-  return { title: { absolute: d ? `Hacete socio · ${d.marca.nombre}` : "Hacete socio" } };
+  return { title: { absolute: d ? `Quiero ser socio · ${d.marca.nombre}` : "Quiero ser socio" } };
 }
 
 export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
@@ -43,7 +43,7 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 space-y-8">
         <div>
-          <h1 className="titular text-5xl sm:text-6xl">💪 Hacete socio</h1>
+          <h1 className="titular text-5xl sm:text-6xl">💪 Quiero ser socio</h1>
           <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y empezá a entrenar.</p>
         </div>
         {d.abierta && d.planes?.length && d.reglamento

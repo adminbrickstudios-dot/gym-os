@@ -6,16 +6,16 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
 
 /** Tres pasos en el mismo lugar: el mail, el código de 6 dígitos y la contraseña nueva. Nunca dice si el mail tiene cuenta. */
-export function Recuperar({ siguiente }: { siguiente: string | null }) {
+export function Recuperar({ siguiente, emailInicial }: { siguiente: string | null; emailInicial?: string }) {
   const [intento, setIntento] = useState(0);
-  return <Pasos key={intento} siguiente={siguiente} otraVez={() => setIntento((i) => i + 1)} />;
+  return <Pasos key={intento} siguiente={siguiente} emailInicial={emailInicial} otraVez={() => setIntento((i) => i + 1)} />;
 }
 
-function Pasos({ siguiente, otraVez }: { siguiente: string | null; otraVez: () => void }) {
+function Pasos({ siguiente, emailInicial, otraVez }: { siguiente: string | null; emailInicial?: string; otraVez: () => void }) {
   const [pedido, pedir, pidiendo] = useActionState<EstadoRecuperar, FormData>(pedirRecuperacion, {});
   const [verif, verificar, verificando] = useActionState<EstadoRecuperar, FormData>(verificarRecuperacion, {});
   const [nueva, guardar, guardando] = useActionState<EstadoRecuperar, FormData>(guardarContrasenaNueva, {});
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailInicial ?? "");
   const [enCodigo, setEnCodigo] = useState(false);
   const [visto, setVisto] = useState<EstadoRecuperar>(pedido);
   if (pedido !== visto) { setVisto(pedido); if (pedido.enviado) setEnCodigo(true); }

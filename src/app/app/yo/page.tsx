@@ -4,6 +4,7 @@ import { fechaCorta } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
+import { MiFoto } from "./MiFoto";
 
 export const metadata: Metadata = { title: "Yo" };
 
@@ -16,7 +17,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     const s = yo.socio!;
     const zona = yo.zona!;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
-    const [referido, invitados, mensajes, compra, locker, pt] = await Promise.all([
+    const [referido, invitados, mensajes, compra, locker, pt, fotoPermitida, fotoActual] = await Promise.all([
       rpc<unknown | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
       rpc<unknown | null>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       // VD-38 (D27): escribirle al gimnasio. Si la sección está apagada o la base no responde, la fila no se muestra.
@@ -26,6 +27,9 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
       // VD-55: "Mi locker" solo si el gimnasio usa lockers y el socio tiene uno. VD-58: "Mi personal trainer" solo si el gimnasio lo ofrece o ya tiene un pack.
       rpc<{ prendido: boolean; lockers: unknown[] }>("mi_locker", { p_socio_id: s.socio_id }).catch(() => null),
       rpc<{ prendido: boolean; ofrece?: boolean; packs?: unknown[]; sesiones?: unknown[] }>("pt_socio", { p_socio_id: s.socio_id }).catch(() => null),
+      // FA-16 (D57): "Mi foto" solo si el gimnasio dejó que el socio la suba (apagado por defecto).
+      rpc<boolean>("foto_propia_permitida", { p_socio_id: s.socio_id }).catch(() => false),
+      rpc<string | null>("foto_propia", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
@@ -43,6 +47,8 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
           <p className="texto-tenue mt-1">Socio #{s.numero}</p>
           {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue underline">Cambiar de socio</Link>}
         </div>
+
+        {fotoPermitida && <MiFoto socioId={s.socio_id} iniciales={`${s.nombre.charAt(0)}${s.apellido.charAt(0)}`.toUpperCase()} tieneFoto={!!fotoActual} />}
 
         <section className="space-y-2" aria-label="Mi plan">
           <div className="tarjeta p-5" data-mi-plan>
@@ -64,6 +70,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
           {locker?.prendido && locker.lockers.length > 0 && fila(`/app/locker${q}`, "🔐", "Mi locker", "Cuál es y hasta cuándo es tuyo", "locker")}
           {pt?.prendido && (pt.ofrece || (pt.packs?.length ?? 0) > 0 || (pt.sesiones?.length ?? 0) > 0) && fila(`/app/pt${q}`, "🏃", "Mi personal trainer", "Tus sesiones y los horarios para reservar", "pt")}
           {fila(`/app/historial${q}`, "🧾", "Mis pagos y cuándo vine", "Pagos, recibos y asistencia", "historial")}
+          {fila(`/app/resumen${q}`, "🏅", "Mi año e insignias", "Cuánto viniste y lo que fuiste logrando", "resumen")}
           {fila(`/app/novedades${q}`, "🔔", "Novedades", "Avisos del gimnasio y de tu cuenta", "novedades")}
           {fila(`/app/cuenta${q}`, "⏸️", "Mi membresía", "Pausar, dar de baja, contraseña", "cuenta")}
         </ul>
