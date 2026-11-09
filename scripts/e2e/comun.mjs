@@ -121,6 +121,8 @@ export async function entrar(p, mail, clave = CLAVE_DEMO, base = GIMNASIO()) {
 /** Socio: celular → código (lo lee de .local/codigos.json, que escribe supabase-local). */
 export async function entrarSocio(p, telefono, base = GIMNASIO()) {
   await p.goto(`${base}/ingresar?modo=socio`);
+  // Desde BASE-2 lo primero es mail y contraseña: el código por celular está en la vía "Celular".
+  if (!(await p.locator("input[name=telefono]").count())) await p.getByRole("button", { name: /Celular/ }).click();
   await p.fill("input[name=telefono]", telefono);
   await p.click('button:has-text("código")');
   await p.locator("input[name=codigo]").waitFor({ timeout: 30000 });
