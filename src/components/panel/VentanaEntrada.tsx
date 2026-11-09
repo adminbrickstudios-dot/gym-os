@@ -142,6 +142,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const salirRef = useRef<() => void>(() => {});
   const salirConDniRef = useRef<(dni: string) => void>(() => {});
   const router = useRouter();
+  const refrescoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ocupado, empezar] = useTransition();
   const enterPendiente = useRef(false);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
@@ -239,7 +240,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
       a = aviso(`${r.r.ingreso_id}-${Date.now()}`, color, r.r.repetido ? `${s.nombre} ya había entrado: ${r.r.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
       // El aviso sale ya; los números de la pantalla se actualizan después, sin frenar el próximo Enter.
-      startTransition(() => router.refresh());
+      // Un solo refresco, 2 s después del último ingreso: con varios seguidos no se encolan re-renders de toda la pantalla.
+      if (refrescoRef.current) clearTimeout(refrescoRef.current);
+      refrescoRef.current = setTimeout(() => startTransition(() => router.refresh()), 2000);
     } else {
       a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
     }
