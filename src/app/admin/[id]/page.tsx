@@ -13,7 +13,8 @@ import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
 import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
 import { Notas, type NotaBrik } from "./Notas";
 import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
-import { enlacesPorRol } from "@/lib/admin/lista";
+import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
+import { Ciudad, CicloDeVida, QrGimnasio } from "./FichaGestion";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
 type Semana = { desde: string; entradas: number; ventas: number; socios_nuevos: number };
@@ -22,7 +23,9 @@ type FichaExtraDatos = {
   webhooks_fallidos: { id: string; tipo: string; recibido_en: string; intentos: number; error: string | null }[];
   registro: { accion: string; quien: string; detalle: Record<string, unknown>; cuando: string }[];
 };
-const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como soporte", cambiar_dueno: "Cambió el dueño", guardar_modulos: "Cambió los módulos", cambiar_slug: "Cambió el slug", buscar_persona: "Buscó a una persona" };
+const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como soporte", cambiar_dueno: "Cambió el dueño", guardar_modulos: "Cambió los módulos", cambiar_slug: "Cambió el slug", buscar_persona: "Buscó a una persona", guardar_ciudad: "Cambió la ciudad", pausar_gimnasio: "Pausó el gimnasio", reanudar_gimnasio: "Reanudó el gimnasio", dar_de_baja: "Dio de baja el gimnasio", restaurar_baja: "Restauró el gimnasio", exportar_gimnasio: "Exportó el gimnasio", exportar_socio: "Exportó los datos de un socio", borrar_socio: "Borró los datos de un socio" };
+type PasoLanzamiento = { clave: string; titulo: string; falta: string; hecho: boolean };
+type ErrorPantalla = { pantalla: string; cantidad: number; ultimo: string; mensaje: string };
 type Soporte = { id: string; quien: string; motivo: string; rol?: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
 const COLOR = { rojo: ["🔴 Urgente", "pildora-rojo"], amarillo: ["🟡 Atención", "pildora-amarillo"], verde: ["🟢 Todo bien", "pildora-verde"] } as const;
 const diaCorto = (d: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
@@ -44,9 +47,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { id } = await params;
   let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
-  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos;
+  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos, lanzamiento: PasoLanzamiento[], errores: ErrorPantalla[];
   try {
-    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra] = await Promise.all([
+    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra, lanzamiento, errores] = await Promise.all([
       rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<Record<string, EstadoAbono>>("admin_abonos"),
@@ -56,15 +59,19 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       rpc<Soporte[]>("admin_soportes", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<NotaBrik[]>("admin_notas", { p_gimnasio_id: id }),
       rpc<FichaExtraDatos>("admin_ficha_extra", { p_gimnasio_id: id }),
+      rpc<PasoLanzamiento[]>("admin_lanzamiento", { p_gimnasio_id: id }),
+      rpc<ErrorPantalla[]>("admin_errores", { p_gimnasio_id: id, p_horas: 168 }),
     ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
     throw e;
   }
+  const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
+  const wa = fila ? whatsappDueno(fila.dueno_telefono, `Hola ${fila.dueno ?? ""}, te escribo de BRIK por ${g.nombre}.`) : null;
   const yoSoporte = g.equipo.find((p) => p.soy_yo && p.es_soporte && p.activo);
   return (
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-10">
-      <header className="space-y-4">
+      <header className="space-y-4" id="entrar">
         <Link href="/admin" className="texto-suave">← Gimnasios</Link>
         <h1 className="titular text-6xl">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
         <div className="flex flex-wrap gap-2">
@@ -127,12 +134,47 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3" data-ficha-datos>
         <p className="titulo-grupo">Datos</p>
         <p className="texto-suave">Zona horaria: {extra.zona_horaria}. El resto de los datos del gimnasio los cambia su dueño, o BRIK entrando como soporte.</p>
+        <Ciudad gimnasioId={g.gimnasio_id} ciudad={fila?.ciudad ?? null} />
         <CambiarSlug gimnasioId={g.gimnasio_id} slug={g.slug} />
+      </section>
+
+      {!g.es_demo && (
+        <section className="space-y-3" data-ficha-lanzamiento>
+          <p className="titulo-grupo">Lista de lanzamiento</p>
+          <ul className="space-y-2">
+            {lanzamiento.map((p) => (
+              <li key={p.clave} className="tarjeta p-3 flex flex-wrap items-center gap-3" data-paso={p.clave} data-hecho={p.hecho ? "si" : "no"}>
+                <span className={`pildora ${p.hecho ? "pildora-verde" : "pildora-amarillo"}`}>{p.hecho ? "Hecho" : "Falta"}</span>
+                <span className="min-w-0 flex-1"><span className="block font-semibold">{p.titulo}</span>{!p.hecho && <span className="block texto-suave text-sm">{p.falta}</span>}</span>
+                {!p.hecho && wa && <a className="boton" target="_blank" rel="noopener noreferrer" href={`${wa}${encodeURIComponent(` Te falta: ${p.titulo.toLowerCase()}. ${p.falta}.`)}`}>Avisarle por WhatsApp</a>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="space-y-3" data-ficha-ciclo>
+        <p className="titulo-grupo">Pausar o dar de baja</p>
+        <CicloDeVida gimnasioId={g.gimnasio_id} nombre={g.nombre} pausado={!!fila?.suspendido} paraBorrar={!!fila?.para_borrar} />
+      </section>
+
+      <section className="space-y-3" data-ficha-errores>
+        <p className="titulo-grupo">Errores de los últimos 7 días</p>
+        {errores.length === 0 ? <p className="texto-tenue">Ningún error registrado.</p> : (
+          <ul className="space-y-2">
+            {errores.map((e) => (
+              <li key={e.pantalla} className="tarjeta p-3 text-sm" data-error-pantalla>
+                <span className="font-semibold">{e.pantalla}</span> · {e.cantidad} {e.cantidad === 1 ? "vez" : "veces"} · última {fecha(e.ultimo)}<span className="texto-suave"> · {e.mensaje}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="space-y-3" data-ficha-links>
         <p className="titulo-grupo">Links por rol</p>
         <LinksPorRol links={enlacesPorRol(g.dominios[0]?.host)} />
+        {g.dominios[0] && <QrGimnasio url={`https://${g.dominios[0].host}/`} nombre={g.nombre} />}
       </section>
 
       <section className="space-y-3" data-ficha-modulos>

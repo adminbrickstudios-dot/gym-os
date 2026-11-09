@@ -24,7 +24,7 @@ describe("lista del super admin", () => {
   });
   it("el CSV escapa comas y fórmulas", () => {
     const csv = csvGimnasios([fila]);
-    expect(csv.startsWith("﻿Gimnasio,Slug")).toBe(true);
+    expect(csv.startsWith("﻿Gimnasio,Slug,Ciudad")).toBe(true);
     expect(csv).toContain('"Olympo, Centro"');
     expect(csv).toContain("'=Ana");
     expect(csv).toContain("Por vencer");

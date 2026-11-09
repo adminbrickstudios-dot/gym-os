@@ -4,6 +4,7 @@ export type FilaGimnasio = {
   gimnasio_id: string; slug: string; nombre: string; es_demo: boolean; alta: string; favorito: boolean; suspendido: boolean;
   socios_activos: number; entradas_hoy: number; ultimo_uso: string | null; abono: string; plan: string | null;
   color: "rojo" | "amarillo" | "verde"; motivos: string[]; dueno: string | null; dueno_telefono: string | null; hosts: string[];
+  ciudad?: string | null; para_borrar?: boolean; demo_vencida?: boolean; modulos_apagados?: string[];
 };
 
 export const ROLES_PUERTA = [["dueno", "Dueño", "/dueno"], ["recepcion", "Recepción", "/recepcion"], ["profe", "Profe", "/profe"], ["socio", "Socio", "/socio"]] as const;
@@ -40,8 +41,8 @@ const celda = (v: unknown) => {
 
 /** Exportar la lista (SA-2): CSV con BOM para que Excel respete los acentos. */
 export function csvGimnasios(filas: FilaGimnasio[]): string {
-  const cab = ["Gimnasio", "Slug", "Socios activos", "Entradas hoy", "Último uso del panel", "Abono", "Plan", "Salud", "Motivos", "Dueño", "Celular del dueño", "Direcciones", "Alta"];
-  const lineas = filas.map((f) => [f.nombre, f.slug, f.socios_activos, f.entradas_hoy, f.ultimo_uso ?? "", nombreAbono(f.abono), f.plan ?? "", f.color,
+  const cab = ["Gimnasio", "Slug", "Ciudad", "Socios activos", "Entradas hoy", "Último uso del panel", "Abono", "Plan", "Salud", "Motivos", "Dueño", "Celular del dueño", "Direcciones", "Alta"];
+  const lineas = filas.map((f) => [f.nombre, f.slug, f.ciudad ?? "", f.socios_activos, f.entradas_hoy, f.ultimo_uso ?? "", nombreAbono(f.abono), f.plan ?? "", f.color,
     f.motivos.join(" | "), f.dueno ?? "", f.dueno_telefono ?? "", f.hosts.join(" "), f.alta].map(celda).join(","));
   return "﻿" + [cab.map(celda).join(","), ...lineas].join("\r\n") + "\r\n";
 }

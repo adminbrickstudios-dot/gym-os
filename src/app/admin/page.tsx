@@ -9,6 +9,8 @@ import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
 import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
 import { Tablero } from "./Tablero";
+import { Demos, type DemoVencida } from "./Demos";
+import { ErroresPlataforma } from "./ErroresPlataforma";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
 import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
@@ -46,6 +48,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let metricas: MetricasPlataforma;
   let ayudas: PedidoAyuda[];
   let pedidosDemo: PedidoDemo[] = [];
+  let demosVencidas: DemoVencida[] = [];
   let contactoPlataforma: ContactoPlataforma = { whatsapp: null, mensaje_demo: "" };
   let novedades: NovedadPlataforma[] = [];
   let abonos: Record<string, EstadoAbono> = {};
@@ -58,9 +61,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik"),
       rpc<Record<string, SaludV2>>("admin_salud_v2"), rpc<MetricasPlataforma>("admin_metricas"), rpc<PedidoAyuda[]>("admin_ayudas", { p_pendientes: true })]);
     pedidosDemo = await rpc<PedidoDemo[]>("admin_pedidos_demo", { p_pendientes: true });
+    demosVencidas = await rpc<DemoVencida[]>("admin_demos_vencidas").catch(() => []);
     contactoPlataforma = await rpc<ContactoPlataforma>("contacto_plataforma_publico");
   } catch (e) {
-    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
+    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}<span className="block mt-2"><Link href="/admin/seguridad" className="underline">Confirmar mi código de dos pasos</Link></span></Aviso></main>;
     throw e;
   }
   const reales = gimnasios.filter((g) => !g.es_demo);
@@ -90,13 +94,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <nav className="flex flex-wrap gap-2" aria-label="Super admin">
         <Link href="/admin/gimnasios" className="boton">Lista de gimnasios</Link>
         <Link href="/admin/buscar" className="boton">Buscar a una persona</Link>
+        <Link href="/admin/seguridad" className="boton">Seguridad</Link>
+        <Link href="/admin/registro" className="boton">Registro</Link>
       </nav>
       <Tablero />
       <div id="ayudas"><Ayudas pedidos={ayudas} /></div>
       <PedidosDemo pedidos={pedidosDemo} />
       <Metricas m={metricas} />
       <EstadoPlataforma />
-      <AltaGimnasio dominio={dominioBase()} />
+      <div id="alta"><AltaGimnasio dominio={dominioBase()} /></div>
+      <Demos vencidas={demosVencidas} />
+      <ErroresPlataforma />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />
       <ContactoPlataformaForm inicial={contactoPlataforma} />

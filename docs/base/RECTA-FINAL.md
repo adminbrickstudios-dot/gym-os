@@ -48,15 +48,15 @@ Dónde quedó (09/11, mediodía):
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: datos, links, equipo (cambiar dueño), módulos, integraciones (sin reprocesar), registro; falta QR, errores, abrir como soporte por pantalla |
-| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol y motivo, el dueño ve el rol; falta marco, aviso en campana, plata, ver app como socio |
-| F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: /admin/buscar con motivo y registro; falta Ctrl+K |
-| F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: /admin/gimnasios con filtros, favoritos, WhatsApp, links, CSV; falta ciudad y módulos |
-| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con números que llevan a su lista y necesitan atención; falta errores 24 h y medir con 200 gimnasios |
-| F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | ❌ |
-| F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | ❌ |
-| F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | ❌ |
-| F2.9 | SA-7, SA-8, SA-9 y SA-12 | `SUPER-ADMIN.md` | ❌ |
+| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: ficha con datos, ciudad, links y QR, equipo, módulos, integraciones, lanzamiento, errores, registro y ciclo de vida; falta reprocesar webhook, papelera y clonar |
+| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol, motivo, aviso en la campana; falta restricción de plata y "ver la app como este socio" |
+| F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
+| F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
+| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con errores; falta alimentar errores_app desde error.tsx y medir con 200 gimnasios |
+| F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | 🟡 carril/b-super: lanzamiento, pausa, baja y restauración; falta borrado definitivo, papelera, clonar y cargar socios con Excel |
+| F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | 🟡 carril/b-super: exportar y borrar a un socio, exportar el gimnasio; falta estado de copias |
+| F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | 🟡 carril/b-super: 2FA exigible, roles y registro; roles solo en lo nuevo, faltan aviso de equipo nuevo y cerrar sesiones |
+| F2.9 | SA-7, SA-8, SA-9 y SA-12 | `SUPER-ADMIN.md` | 🟡 carril/b-super: demo para reunión, errores de plataforma; faltan SA-8, resto de SA-7 y SA-9 |
 
 ## Fase 3 · Fluidez: la pasada botón por botón
 
