@@ -171,6 +171,10 @@
   "hex": 0,
   "emoji": 4
  },
+ "src/app/app/pedir-datos/PedirDatos.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
  "src/app/app/plan/ComprarPlan.tsx": {
   "hex": 0,
   "emoji": 6
@@ -213,7 +217,7 @@
  },
  "src/app/app/yo/page.tsx": {
   "hex": 0,
-  "emoji": 15
+  "emoji": 16
  },
  "src/app/auth/vincular/VincularGoogle.tsx": {
   "hex": 0,
@@ -981,7 +985,7 @@
  },
  "src/components/landing/Landing.tsx": {
   "hex": 1,
-  "emoji": 45
+  "emoji": 46
  },
  "src/components/landing/Plataforma.tsx": {
   "hex": 0,
