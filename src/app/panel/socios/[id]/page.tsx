@@ -64,12 +64,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
     // VD-46G: si el plan familiar está prendido, quién es el titular de su grupo (la tarjeta Familia lo muestra).
     const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
-    const [f, planes, asistencia, ne, foto, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
+    const [f, planes, asistencia, ne, foto, fotoEstado, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       pestana === "asistencia" ? rpc<Asistencia>("asistencia_socio", { p_socio_id: id, p_mes: mes }) : Promise.resolve(null),
       rpc<NotasYEtiquetas>("notas_y_etiquetas", { p_socio_id: id }),
       rpc<string | null>("foto_socio", { p_socio_id: id }),
+      rpc<{ subida_por_el_socio: boolean }>("foto_estado_socio", { p_socio_id: id }).catch(() => null),   // FA-16
       rpc<Familiar[]>("familia_socio", { p_socio_id: id }),
       rpc<DatosPausas>("pausas_socio", { p_socio_id: id }),
       rpc<DatosApto>("apto_socio", { p_socio_id: id }),
@@ -115,7 +116,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             : <VolverAlOrigen href="/panel/socios" texto="Socios" className="texto-suave hover:text-[var(--texto)]" />}
           <div className="flex items-start gap-4 mt-4">
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
-              version={foto ? foto.slice(-36, -4) : null} />
+              version={foto ? foto.slice(-36, -4) : null} subidaPorSocio={!!fotoEstado?.subida_por_el_socio} puedeConfirmar={panel.yo.rol !== "profe"} />
             <div className="min-w-0">
               <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
               <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · 👧 menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · 📱 el responsable usa la app" : " · 📱 usa la app") : ""}</p>

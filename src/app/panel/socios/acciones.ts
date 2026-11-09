@@ -1,6 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { prepararLinkContrasenaSocio } from "@/lib/app/acceso-socio-servidor";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { errorSiHaySalud } from "@/lib/salud";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -10,6 +12,8 @@ export type EstadoForm = {
   error?: string; destino?: string; valores?: Record<string, string>; version?: string;
   /** VD-6: el alta salió bien: el socio, si hay que cobrar ahora y si el plan no se pudo asignar. */
   socioId?: string; cobrar?: boolean; sinPlan?: boolean; nombre?: string;
+  /** F1.2: el alta con mail deja el link para que el socio cree su contraseña (se copia o se manda por WhatsApp). */
+  linkContrasena?: { link: string; texto: string; wa: string | null } | null; avisoLink?: string;
 };
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
@@ -51,9 +55,21 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   }
   // VD-5b/VD-6: con cobro, la pantalla abre la hoja Cobrar en el lugar (el destino a Vender queda de respaldo,
   // si la hoja no está montada). Desde un prospecto se vuelve al alta con el socio ya creado ("listo").
+  // F1.2 (D43): con mail, el socio recibe el link para crear su contraseña. Si falla, el alta ya quedó: se avisa y se sigue.
+  let linkContrasena: EstadoForm["linkContrasena"] = null; let avisoLink: string | undefined;
+  if (!socioId && datos.email) {
+    try {
+      const h = await headers();
+      const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+      const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127.|[^.]+.localhost)/.test(host) ? "http" : "https");
+      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}` });
+      const tel = (datos.telefono ?? "").replace(/D/g, "");
+      linkContrasena = { ...r, wa: tel.length >= 8 ? `https://wa.me/${tel}?text=${encodeURIComponent(r.texto)}` : null };
+    } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }
+  }
   const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;
   if (prospecto) redirect(cobrar && conPlan ? `/panel/socios/nuevo?listo=${id}&cobrar=1` : destino);
-  return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim() };
+  return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim(), linkContrasena, avisoLink };
 }
 
 export type PlanParaAlta = {
@@ -181,6 +197,12 @@ export async function guardarFoto(socioId: string, form: FormData): Promise<{ er
     revalidatePath(`/panel/socios/${socioId}`);
     return {};
   } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** FA-16: la recepción confirma la foto que subió el socio (deja de estar marcada "foto nueva"). */
+export async function confirmarFotoSubida(socioId: string): Promise<{ error?: string }> {
+  try { await rpc("confirmar_foto_subida", { p_socio_id: socioId }); revalidatePath(`/panel/socios/${socioId}`); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
 }
 
 export async function quitarFoto(socioId: string): Promise<{ error?: string }> {

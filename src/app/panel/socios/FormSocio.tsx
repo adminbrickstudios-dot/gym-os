@@ -69,12 +69,23 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   // VD-6: el socio ya está creado (pasos 3 y 4), lo cobrado, y el Interesado con ese celular si lo hay.
   const [creado, setCreado] = useState<{ socioId: string; nombre: string } | null>(creadoInicial ?? null);
   const [cobro, setCobro] = useState<CobroHecho | null>(null);
+  const [linkSocio, setLinkSocio] = useState<{ link: string; texto: string; wa: string | null } | null>(null);
+  const [avisoLink, setAvisoLink] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
   const [despues, setDespues] = useState(false);
   const [ofrecido, setOfrecido] = useState<ProspectoOfrecido | null>(null);
   const [vinculado, setVinculado] = useState<string | null>(null);
   const planElegido = planes.find((p) => p.plan_id === plan) ?? null;
   useEffect(() => {
     if (!estado.destino) return;
+    // F1.2: con link de contraseña (o un aviso de que no se pudo armar) se queda en el "listo" para mostrarlo.
+    if (!socioId && estado.socioId && (estado.linkContrasena || estado.avisoLink)) {
+      setCreado({ socioId: estado.socioId, nombre: estado.nombre ?? "" });
+      setLinkSocio(estado.linkContrasena ?? null); setAvisoLink(estado.avisoLink ?? null);
+      if (estado.cobrar && hayHojaCobrar()) abrirCobrar({ socioId: estado.socioId, origen: "otro" });
+      else setDespues(true);
+      return;
+    }
     // VD-5b: con cobro, la hoja Cobrar se abre acá mismo; si no está montada, se va a Vender como antes.
     if (!socioId && estado.cobrar && estado.socioId && hayHojaCobrar()) {
       setCreado({ socioId: estado.socioId, nombre: estado.nombre ?? "" });
@@ -82,7 +93,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
       return;
     }
     router.push(estado.destino);
-  }, [estado.destino, estado.cobrar, estado.socioId, estado.nombre, socioId, router]);
+  }, [estado.destino, estado.cobrar, estado.socioId, estado.nombre, estado.linkContrasena, estado.avisoLink, socioId, router]);
   // Viene de un Interesado con el alta hecha: la hoja de cobro se abre sola.
   useEffect(() => {
     if (creadoInicial?.cobrar && hayHojaCobrar()) abrirCobrar({ socioId: creadoInicial.socioId, origen: "otro" });
@@ -137,6 +148,18 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
               ? <Mensaje tipo="exito"><span data-alta-cobrado={cobro.total}>Cobrado {formatearPesos(cobro.total)}.</span> <MandarComprobante ventaId={cobro.ventaId} className="mt-2" /></Mensaje>
               : <Mensaje tipo="info">Todavía no se cobró nada: se cobra desde su ficha o cuando venga.</Mensaje>}
             <p className="texto-suave">Dale la bienvenida: ya puede entrar con su DNI.</p>
+            {avisoLink && <Mensaje tipo="aviso">{avisoLink}</Mensaje>}
+            {linkSocio && (
+              <div className="space-y-2" data-link-contrasena>
+                <p className="font-semibold">Que cree su contraseña</p>
+                <p className="texto-suave text-sm">Mandale este link: elige su contraseña y entra a su app con mail y contraseña.</p>
+                <input className="campo font-mono text-sm" readOnly value={linkSocio.link} onFocus={(e) => e.currentTarget.select()} aria-label="Link para crear la contraseña" />
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" className="boton" data-copiar-link onClick={async () => { try { await navigator.clipboard.writeText(linkSocio.texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? "Copiado" : "Copiar mensaje"}</button>
+                  {linkSocio.wa && <a className="boton" href={linkSocio.wa} target="_blank" rel="noopener noreferrer" data-wa-link>Mandar por WhatsApp</a>}
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               <Link href={`/panel/socios/${creado.socioId}`} className="boton boton-principal" data-alta-ficha>👤 Ver su ficha</Link>
               <button type="button" className="boton" data-alta-otro onClick={otro}>➕ Dar de alta a otro</button>

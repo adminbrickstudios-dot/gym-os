@@ -328,3 +328,35 @@ export async function guardarPlanFamiliar(activo: boolean): Promise<{ error?: st
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── FA-16 (D57): que el socio suba su foto desde la app. Apagado por defecto; lo prende solo el dueño. ──
+export async function leerFotoSocioPermitida(): Promise<{ permitida?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { permitida: await rpc<boolean>("foto_socio_permitida_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarFotoSocioPermitida(si: boolean): Promise<{ permitida?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_foto_socio_permitida", { p_gimnasio_id: panel.gimnasio.id, p_si: si });
+    revalidatePath("/panel/configuracion");
+    return { permitida: si };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── FA-7: los primeros días, la entrada avisa pero no frena ──
+export async function leerAvisarSinBloquear(): Promise<{ hasta?: string | null; activo?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return await rpc<{ hasta: string | null; activo: boolean }>("avisar_sin_bloquear_estado", { p_gimnasio_id: panel.gimnasio.id });
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarAvisarSinBloquear(dias: number): Promise<{ hasta?: string | null; activo?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ hasta: string | null; activo: boolean }>("guardar_avisar_sin_bloquear", { p_gimnasio_id: panel.gimnasio.id, p_dias: dias });
+    revalidatePath("/panel", "layout");
+    return r;
+  } catch (e) { return { error: (e as Error).message }; }
+}

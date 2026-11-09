@@ -14,8 +14,8 @@ que ya se está haciendo.
 | FA-4 | **(va antes, F1.4)** Sacar el vidrio (`backdrop-filter`), las sombras grandes, el degradé y las esquinas de 16 px (`globals.css` y componentes): esquinas de 10 y 8 px, una sola sombra para lo que flota | `DISENO.md` | ❌ |
 | FA-5 | **(va antes, F1.5)** El asistente de 9 pasos se abre solo la primera vez que entra el dueño | Pedido 4.7 | ❌ |
 | FA-6 | **(va antes, F1.6)** Arriba de `VELOCIDAD.md`, un párrafo en palabras simples de por qué andaba lento. Y listas virtualizadas donde haya más de 200 filas (Socios, Vencen, Control) | Pedido 4.1 | ❌ |
-| FA-7 | "Avisar sin bloquear" la primera semana: la base ya lo tiene (`configuracion.avisar_sin_bloquear_hasta`). Falta una pantalla en Configuración y un paso opcional en el asistente: "los primeros N días, la entrada avisa pero no frena". Es para el primer gimnasio real | Arranque §6.10 | ❌ |
-| FA-8 | En la configuración de MercadoPago, escrito: "La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK." | Arranque §6.1 | ❌ |
+| FA-7 | "Avisar sin bloquear" la primera semana: la base ya lo tiene (`configuracion.avisar_sin_bloquear_hasta`). Falta una pantalla en Configuración y un paso opcional en el asistente: "los primeros N días, la entrada avisa pero no frena". Es para el primer gimnasio real | Arranque §6.10 | 🟡 pantalla en Configuración y función de base (`avisar_sin_bloquear_estado`/`guardar_avisar_sin_bloquear`, probada); falta el paso opcional en el asistente y el e2e |
+| FA-8 | En la configuración de MercadoPago, escrito: "La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK." | Arranque §6.1 | 🟡 texto puesto en la tarjeta de MercadoPago; sin e2e |
 | FA-9 | Socios: selección múltiple (WhatsApp, etiqueta, exportar) y columnas a elección | `v2/03` §5, `v2/17` §5 | ❌ |
 | FA-10 | Números: "tasa de cobro" (qué parte de lo que había que cobrar este mes se cobró), con su lista | `v2/03` §6 | ❌ |
 | FA-11 | Lista de anotados de una clase con la foto de cada uno | `producto/10` | ❌ |
@@ -23,7 +23,7 @@ que ya se está haciendo.
 | FA-13 | Interesado que nadie contactó en 24 h: aparece en Para hacer hoy y en la campana | `producto/07` | ❌ |
 | FA-14 | App del socio: recomendación con regla clara ("hace 10 días que no venís, hoy hay Funcional 19:00"), insignias simples y resumen del año | `v2/05` §3 | ❌ |
 | FA-15 | Rutina: marcar cada serie como hecha | `v2/05` §3 | ❌ |
-| FA-16 | El socio sube su foto desde la app solo si el gimnasio lo permite. Por defecto, apagado. La recepción ve "foto nueva, subida por el socio" hasta que la confirma (D57) | `v2/05` §3 | ❌ |
+| FA-16 | El socio sube su foto desde la app solo si el gimnasio lo permite. Por defecto, apagado. La recepción ve "foto nueva, subida por el socio" hasta que la confirma (D57) | `v2/05` §3 | 🟡 lado del panel hecho (interruptor en Configuración, marca "foto nueva, subida por el socio" y Confirmar en la ficha); falta correrlo con sesión real. El lado de la app es del carril C |
 | FA-17 | Borrador automático en formularios largos (alta completa, plan, configuración de la página): al volver, "¿Seguimos donde dejaste?" | `v2/13` §3, `FLUIDEZ.md` regla 7 | ❌ |
 | FA-18 | Transiciones entre pantallas en la app del socio (View Transitions), respetando `prefers-reduced-motion` | `v2/05` §4 | ❌ |
 | FA-19 | Términos del servicio entre BRIK y el gimnasio, y contrato de encargado del tratamiento (Ley 25.326). El dueño los acepta al entrar por primera vez y se guarda la fecha y la versión. Si la versión cambia, los vuelve a aceptar. El texto lo escribe el agente como borrador, marcado "revisar con un abogado" | Arranque §6.6 | ❌ |

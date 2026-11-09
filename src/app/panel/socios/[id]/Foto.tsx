@@ -2,7 +2,7 @@
 // Foto del socio: con la cámara (compu o celular) o eligiendo una imagen. Se
 // recorta cuadrada y se achica a 480 px en el navegador, y la sube el servidor.
 import { useEffect, useRef, useState, useTransition } from "react";
-import { guardarFoto, quitarFoto } from "../acciones";
+import { confirmarFotoSubida, guardarFoto, quitarFoto } from "../acciones";
 
 const LADO = 480;
 
@@ -15,7 +15,10 @@ function aJpg(fuente: CanvasImageSource, ancho: number, alto: number): Promise<B
   return new Promise((ok, mal) => c.toBlob((b) => (b ? ok(b) : mal(new Error("No se pudo armar la foto"))), "image/jpeg", 0.85));
 }
 
-export function Foto({ socioId, iniciales, version, color }: { socioId: string; iniciales: string; version: string | null; color: string }) {
+export function Foto({ socioId, iniciales, version, color, subidaPorSocio = false, puedeConfirmar = false }: { socioId: string; iniciales: string; version: string | null; color: string; subidaPorSocio?: boolean; puedeConfirmar?: boolean }) {
+  const [confirmada, setConfirmada] = useState(false);
+  const [errorConfirmar, setErrorConfirmar] = useState<string | null>(null);
+  const [confirmando, confirmar] = useTransition();
   const [abierta, setAbierta] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subiendo, empezar] = useTransition();
@@ -62,6 +65,14 @@ export function Foto({ socioId, iniciales, version, color }: { socioId: string; 
           : iniciales}
         <span className="absolute bottom-0 inset-x-0 text-xs bg-black/50 text-white py-0.5 opacity-80" aria-hidden>📷</span>
       </button>
+      {subidaPorSocio && !confirmada && version && (
+        <div className="mt-2 max-w-40 space-y-1" data-foto-sin-confirmar>
+          <p className="pildora pildora-amarillo whitespace-normal text-xs">Foto nueva, subida por el socio</p>
+          {puedeConfirmar && <button type="button" className="boton boton-chico" disabled={confirmando}
+            onClick={() => confirmar(async () => { const r = await confirmarFotoSubida(socioId); if (r.error) setErrorConfirmar(r.error); else setConfirmada(true); })}>{confirmando ? "Confirmando…" : "Confirmar la foto"}</button>}
+          {errorConfirmar && <p role="alert" className="text-xs">{errorConfirmar}</p>}
+        </div>
+      )}
       {abierta && (
         <div className="fixed inset-0 z-50 bg-black/70 grid place-items-center p-4" role="dialog" aria-label="Foto del socio">
           <div className="tarjeta p-5 w-full max-w-md space-y-4">
