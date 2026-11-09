@@ -48,11 +48,11 @@ Dónde quedó (09/11, mediodía):
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | ❌ |
-| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | ❌ |
-| F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | ❌ |
-| F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | ❌ |
-| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | ❌ |
+| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: datos, links, equipo (cambiar dueño), módulos, integraciones (sin reprocesar), registro; falta QR, errores, abrir como soporte por pantalla |
+| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol y motivo, el dueño ve el rol; falta marco, aviso en campana, plata, ver app como socio |
+| F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: /admin/buscar con motivo y registro; falta Ctrl+K |
+| F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: /admin/gimnasios con filtros, favoritos, WhatsApp, links, CSV; falta ciudad y módulos |
+| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con números que llevan a su lista y necesitan atención; falta errores 24 h y medir con 200 gimnasios |
 | F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | ❌ |
 | F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | ❌ |
 | F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | ❌ |

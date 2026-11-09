@@ -73,3 +73,27 @@ Respuesta de Mateo: (vacío)
 - Decidido por defecto: lo que dice la hoja Cobrar y lo que dice la simulación vienen de la misma regla; no se cambió ninguna función.
 - vd-41: la sección Gastos, apagada para el encargado sin permiso, decía "sección apagada por el gimnasio". Ahora dice
   "No tenés permiso para ver los gastos" (solo cambia el texto, quién ve qué no cambió).
+
+### Carril B · Super admin (09/11, ayudante 1)
+
+- **SA-4 plata como soporte: NO está aplicada.** Pide que, entrando como soporte, cobrar/anular/tocar la caja no se
+  permita salvo "lo pidió el dueño" en el motivo. Eso cambia quién puede cobrar en `vender`, `anular_*` y la caja
+  (permisos y plata), así que no lo toqué. Hoy el soporte entra con el rol elegido (dueño, recepción o profe) y puede
+  lo que ese rol. Recomendado: una sola función `privado.exigir_equipo` que mire `soportes_gimnasio` y rechace
+  esas acciones si el motivo no dice "lo pidió el dueño". Lo hace el principal.
+- **SA-5 buscar a cualquiera:** devuelve nombre, gimnasio y rol (nunca DNI, mail ni teléfono), pide motivo y deja
+  registro en `registro_brik` con lo buscado y cuántos encontró, no con el resultado. Busca socios por mail exacto,
+  DNI exacto o teléfono (últimos dígitos) y al equipo por mail exacto. Decidido: coincidencia exacta, para que nadie
+  explore la base de a letras.
+- **Registro de BRIK (`registro_brik`):** tabla nueva sin `gimnasio_id` obligatorio (la búsqueda no tiene gimnasio).
+  La sumé a la lista de excepciones de `scripts/chequeos.mjs` (junto con `favoritos_brik`): el principal debe confirmarlo.
+- **Bug de base encontrado:** `privado.hecho_inmutable()` sin argumentos NO frena los UPDATE (con la lista de columnas
+  permitidas vacía, la comparación da NULL). Por eso `registro_brik` lo usa con un argumento que no es columna. Otras
+  tablas que lo usen sin argumentos podrían dejarse editar: conviene revisarlo (permisos, no lo arreglé).
+- **Ciudad del gimnasio:** no existe la columna, así que la lista no filtra ni muestra ciudad. Recomendado: agregarla a
+  `configuracion_gimnasio` cuando el dueño la cargue en el asistente.
+- **Errores de las últimas 24 h (tablero y ficha):** no hay tabla de errores de la app, solo `ultimo_error` en las ayudas.
+  Quedó sin hacer hasta decidir dónde se guardan (recomendado: `errores_app` alimentada desde `error.tsx`).
+- **Reprocesar webhook:** la ficha lista los fallidos pero no los reprocesa: eso toca la ruta del webhook de MercadoPago
+  (plata). Recomendado: función que vuelva a correr el mismo handler idempotente por `id_externo`.
+- **Cambiar quién es el dueño:** el anterior queda como encargado (no pierde el acceso). Decidido por defecto.

@@ -10,8 +10,9 @@ export async function POST(req: NextRequest) {
   const f = await req.formData();
   const gimnasioId = String(f.get("gimnasio_id") ?? "");
   const motivo = String(f.get("motivo") ?? "");
+  const rol = String(f.get("rol") ?? "dueno");
   const supabase = await crearClienteServidor();
-  const { data: slug, error } = await supabase.rpc("admin_entrar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo });
+  const { data: slug, error } = await supabase.rpc("admin_entrar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo, p_rol: rol });
   const destino = req.nextUrl.clone();
   destino.search = "";
   if (error || typeof slug !== "string") {
