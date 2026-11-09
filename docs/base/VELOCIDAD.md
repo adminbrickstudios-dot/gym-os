@@ -85,12 +85,21 @@ Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300
 | Qué | Antes | Después | Cómo |
 |---|---|---|---|
 | `numeros_inicio` (regresión de BASE-4: 4 recorridos de Retención) | 1796 ms | **465 ms** (corrida 42496822825, misma base de 5.000 socios) | migración `20261108050200_numeros_inicio_una_pasada` |
+| **Retención con `cubierto_hasta` (F1.6 / F0.3, carril C, 09/11).** Escala usada: **1.500 socios** en una compu local cargada (mínimo de 9 corridas, tiempos relativos); los de 5.000 los toma `medir-escala.yml` en Actions (ver abajo) | | | migraciones `20261109010100` a `010300` |
+| · lista liviana de Pendientes / Para hacer hoy (`retencion_liviana` filtrada a 3 listas → `retencion_pendientes`) | 253 ms (mediana 308) | **74 ms** (mediana 77) | misma clasificación; sin precios, frecuencia, mensajes ni socios sin cobertura vigente; solo arma islas de quien tiene una cobertura que empieza después del momento |
+| · `retencion_listas` (3 listas, liviana: la que usa `numeros_inicio`) | 253 ms | **169 ms** | el socio con `cubierto_hasta` vencido no arma islas de coberturas |
+| · solo `por_vencer` (`vencen_hoy`, `panel_inicio`) | 340 ms | **90 ms** | pide solo esa lista: los socios vencidos ni se recorren |
+| · `retencion` / `retencion_resumen` / `vencen_pestanas` (completa, con deuda de los vencidos) | 293 ms | 256 ms | **casi no cambia**: lo caro es `via_membresia` por cada vencido (deuda y texto), que no se tocó para no mover ningún veredicto |
 | Región de las funciones de Vercel | iad1 (Washington) con Supabase en São Paulo | gru1 | `vercel.json` `{"regions":["gru1"]}` (Mateo confirmó São Paulo) |
 | Vigencia guardada `socios.cubierto_hasta` + índice `(gimnasio_id, cubierto_hasta)` | — | disponible para las listas | BASE-5, migración `20261108050100` |
 
+**Cómo se garantiza que ningún veredicto cambió.** `privado.retencion_referencia` es una copia de la función de antes (solo la usa la prueba). `supabase/pruebas/retencion-cubierto.test.mjs` compara, con 18 momentos fijos (de 45 días antes a 45 días después de HOY, a las 00:00 y a las 19:00), los casos testigo más 16 socios armados a propósito (huecos, coberturas futuras, encimadas, anuladas, bajas, sin pagos, nuevos, que dejaron de venir): `retencion_con` completa y liviana, `retencion_listas` en 8 combinaciones de listas, y `retencion_pendientes` (columnas, filas y orden) contra la de antes. Falla si difiere una sola fila. Además `pendientes_panel` se compara con la cuenta vieja de "vencen hoy". Pasa 7/7.
+
+Medición de las pantallas (`explain.mjs`, demo de 1.500 socios, el mejor de 2 corridas; la compu estaba cargada y varía ±40 %): `pendientes_panel` 346 → 118-151 ms (dueño), 194 → 75-120 ms (recepción); `numeros_inicio` 300 → 100-263; `panel_inicio` 269 → 57-151; `vencen_hoy` 308 → 104-124; `para_hacer_hoy` 234 → 80-113. **`pendientes_panel` todavía no baja de 50 ms**: lo que queda es el recorrido de los socios con cobertura y sus últimas visitas. Hace falta la medición en 5.000 de Actions y, si sigue arriba, contar `no_viene` y `nuevo` con una consulta propia sobre `ingresos` recientes (no se hizo en esta pasada).
+
 ## Pendiente de BASE-1 (anotado)
-- Usar `cubierto_hasta` dentro de `privado.retencion` (y de ahí `vencen_hoy`, `retencion`, `panel_inicio`, `pendientes_panel`, `para_hacer_hoy`) para no calcular el veredicto completo de los vencidos: bajar de ~440 a menos de 300 ms.
-- `filtros_socios` (880 ms): contar con el índice en vez de recorrer.
+- `retencion`, `retencion_resumen` y `vencen_pestanas` (completas): el costo es `via_membresia` por cada vencido; bajarlo exige cambiar cómo se calcula la deuda, y no se tocó en esta pasada para no arriesgar ningún veredicto.
+- `filtros_socios` (880 ms con 5.000; ~2 s en la compu local con 1.500): el grupo de cada socio sale del veredicto completo (`calcular_acceso`: membresía, pases, packs, pausas); `cubierto_hasta` solo no alcanza para probar el resultado. Queda para una pasada propia con su prueba viejo-vs-nuevo.
 - Medir las pantallas con la app compilada y 5.000 socios.
 - No hace falta tocar: RLS con `(select auth.uid())`, índices de búsqueda y paginación (la búsqueda ya tarda menos de 40 ms).
 
