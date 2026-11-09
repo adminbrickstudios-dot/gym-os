@@ -25,12 +25,13 @@ Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
   `estado`, `vencido` ni parecida. Se guardan **hechos** (pagos,
   coberturas, congelamientos, suspensiones, consumos) y el estado sale
   de `privado.calcular_acceso(socio, momento, sede)`.
-  **Única excepción (D36): `socios.cubierto_hasta`**, el final de la
-  cobertura derivado de los hechos, mantenido por trigger en la misma
-  transacción y verificado por `npm run chequeos` (guardado = recalculado).
-  No depende de la hora, así que no se pudre. El color y la deuda se siguen
-  calculando contra el momento.
-- **Única excepción (D36, BASE-5): `socios.cubierto_hasta`.** Se guarda el *fin de la cobertura* (el último `hasta` de las coberturas no anuladas), por trigger, en la misma transacción que el hecho que lo mueve. Es un hecho derivado, no un estado: el color y el "al día" siguen saliendo de comparar esa fecha con el momento (`estado_acceso`), nunca se guardan, y la puerta sigue haciendo la cuenta completa. Lo usan las listas de muchos socios. `npm run chequeos` verifica que lo guardado sea lo recalculado.
+  **Única excepción (D36, BASE-5): `socios.cubierto_hasta`**, el fin de la
+  cobertura (el último `hasta` de las coberturas no anuladas), mantenido por
+  trigger en la misma transacción que el hecho que lo mueve y verificado por
+  `npm run chequeos` (guardado = recalculado). No depende de la hora, así que
+  no se pudre. El color, el "al día" y la deuda se siguen calculando contra
+  el momento; la puerta sigue haciendo la cuenta completa. Lo usan las listas
+  de muchos socios.
 - **Una sola fuente de verdad.** Recepción, kiosco, QR, app del socio,
   listas de retención y "Vencen hoy" usan la misma función SQL.
   Prohibido reimplementar el cálculo en TypeScript.

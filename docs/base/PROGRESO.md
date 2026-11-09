@@ -8,7 +8,14 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ---
 
-## P0 LISTO PARA MAÑANA
+## EN CURSO: la recta final (09/11)
+
+**Desde el 09/11 el loop sigue `RECTA-FINAL.md`** (fases 1 a 8). El P0 de abajo
+está publicado, pero BASE-1, 3, 6, 8, 9 y 10 siguen en 🟡: se cierran en la
+fase 1. Cuando toda la recta esté en ✅ o ⛔, este título pasa a
+**"LISTO PARA TU PASADA"** y queda armada `PRUEBA-DUENO.md`.
+
+Lo que sigue es el resumen del 08/11 a la noche, como lo dejó el agente.
 
 **Estado (08/11, noche):** el P0 (BASE-0 a BASE-11 y BASE-DOC) está **publicado en producción**, bloque por bloque, con PR mergeado y chequeos en verde. La simulación de "terminado" (`scripts/e2e/base-simulacion.mjs`) pasa entera. Cada bloque dice qué quedó pendiente (cosas chicas, nada que impida entregar el primer gimnasio).
 
