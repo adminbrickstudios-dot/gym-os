@@ -23,7 +23,10 @@ export async function rpc<T>(nombre: string, args?: Record<string, unknown>, opc
   // repite sola (podría cobrar dos veces): ante la demora, se avisa y la persona decide.
   const intentos = opciones.lectura ? 2 : 1;
   for (let i = 1; ; i++) {
+    const t0 = performance.now();
     const { data, error, status } = await supabase.rpc(nombre, args).abortSignal(AbortSignal.timeout(TIEMPO_MAXIMO_MS));
+    // F0.1: cada viaje a la base queda en el log de Vercel con su nombre y sus ms (sin datos ni argumentos).
+    console.log(`[rpc] ${nombre} ${Math.round(performance.now() - t0)}ms${error ? " error" : ""}`);
     if (!error) {
       if (!opciones.lectura && GUARDA_LO_PUBLICO.test(nombre)) invalidarLoPublico();
       return data as T;
@@ -75,15 +78,21 @@ export type MiSesion = {
 export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   const g = await gimnasioActual();
   const supabase = await crearClienteServidor();
+  // F0.2: todo lo que no depende de lo demás sale en el mismo instante (antes eran 4 viajes en fila).
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
-  const { data } = await supabase.auth.getClaims();
-  if (!data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
-  let panel = await rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id });
+  const [claims, panelRes, ve, fichaje] = await Promise.all([
+    supabase.auth.getClaims(),
+    rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id }).then((v) => ({ v }), (e: unknown) => ({ e })),
+    rpcLectura<boolean>("ver_mensajes_equipo", { p_gimnasio_id: g.id }).catch(() => false),
+    rpcLectura<{ usa: boolean }>("config_fichaje", { p_gimnasio_id: g.id }).then((c) => c.usa).catch(() => false),
+  ]);
+  if (!claims.data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
+  if ("e" in panelRes) throw panelRes.e;
+  let panel = panelRes.v;
   // VD-38: los Mensajes de los socios los ve la recepción solo si el dueño se lo prendió (tabla propia: panel_gimnasio no se toca).
   // La base lo exige igual en cada función; acá solo se saca del menú, de Ctrl+K y de los accesos. Solo la recepción pregunta.
-  if (panel.yo.rol === "recepcion" && !panel.secciones_apagadas.includes("mensajes")) {
-    const ve = await rpcLectura<boolean>("ver_mensajes_equipo", { p_gimnasio_id: g.id }).catch(() => false);
-    if (!ve) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "mensajes"] };
+  if (panel.yo.rol === "recepcion" && !panel.secciones_apagadas.includes("mensajes") && !ve) {
+    panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "mensajes"] };
   }
   // VD-10: el Control es del dueño; el encargado lo ve solo si el dueño le dio el Resultado (EQU-1).
   // La base lo exige igual (linea_de_control): acá solo se saca del menú y de la campana.
@@ -93,8 +102,7 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   // VD-53: el fichaje es opcional (por defecto apagado). Fichar y las Horas del equipo solo aparecen si el gimnasio lo prendió;
   // el dueño ve siempre las Horas (ahí lo prende). La base lo exige igual en cada función.
   if (panel.yo.rol !== "dueno") {
-    const usa = await rpcLectura<{ usa: boolean }>("config_fichaje", { p_gimnasio_id: g.id }).then((c) => c.usa).catch(() => false);
-    if (!usa) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "fichar", "horas"] };
+    if (!fichaje) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "fichar", "horas"] };
   }
   return panel;
 });

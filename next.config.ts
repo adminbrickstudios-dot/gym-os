@@ -42,7 +42,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Logos y fotos se suben por una acción del servidor: hasta 2 MB por archivo
   // (lo decide la base) más lo que agrega el formulario.
-  experimental: { serverActions: { bodySizeLimit: "3mb" } },
+  // F0.4: volver a una pantalla ya vista no hace viajes (30 s de memoria en el navegador).
+  experimental: { serverActions: { bodySizeLimit: "3mb" }, staleTimes: { dynamic: 30, static: 180 } },
   // Next 16 compila con Turbopack. La raíz es el proyecto (hay otro package-lock.json más arriba, en la carpeta del usuario).
   turbopack: { root: process.cwd() },
 };

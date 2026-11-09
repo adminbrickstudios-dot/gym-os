@@ -53,6 +53,14 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
 }
 
 export async function proxy(req: NextRequest) {
+  // F0.1: cuánto tarda el proxy (resolver gimnasio + sesión), a la vista en la cabecera Server-Timing.
+  const t0 = performance.now();
+  const r = await proxyInterno(req);
+  r.headers.append("Server-Timing", `proxy;dur=${Math.round(performance.now() - t0)}`);
+  return r;
+}
+
+async function proxyInterno(req: NextRequest) {
   const base = process.env.NEXT_PUBLIC_DOMINIO_BASE;
   const plataforma = process.env.NEXT_PUBLIC_DOMINIO_PLATAFORMA;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

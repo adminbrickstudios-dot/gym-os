@@ -55,20 +55,19 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     throw e;
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
-  // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
-  const [abono, ayudas] = await Promise.all([
+  // ADM-2/ADM-3 + VD-1: el abono, las ayudas, la config de Entrada y las formas salen juntos, en un solo viaje de espera.
+  const conEntrada = panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas);
+  const [abono, ayudas, config, formas] = await Promise.all([
     rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
     ayudasDeUsuario(),   // VD-31: qué globos de ayuda ya vio esta persona (si falla, no hay globos: nunca bloquea)
+    conEntrada ? rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO) : null,
+    conEntrada ? rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]) : null,
   ]);
   // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
   let entrada: DatosEntrada | null = null;
-  if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
+  if (conEntrada && config && formas) {
     try {
       const { sede, puedeCambiar } = sedeActiva(panel);
-      const [config, formas] = await Promise.all([
-        rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO),
-        rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]),
-      ]);
       entrada = {
         sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc"),
         // VD-1b: el dueño con varias sedes elige en cuál anota; VD-6: el alta rápida cobra solo si Vender está disponible.
