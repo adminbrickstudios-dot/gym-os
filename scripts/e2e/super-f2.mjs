@@ -31,13 +31,20 @@ p.setDefaultTimeout(30000);
 /** Captura la pantalla en compu y en celular, y mira que en el celular no se desborde. */
 async function ver(nombre) {
   await p.setViewportSize(CELU);
+  await p.waitForFunction((w) => window.innerWidth === w, CELU.width);
+  await p.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
   await capturar(p, `f2-${nombre}-celu`, true);
   const ancho = await p.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width + 4, `celular: ${nombre} sin desborde (${ancho}px)`, `celular: ${nombre} mide ${ancho}px y se desborda`);
   await p.setViewportSize(COMPU);
   await capturar(p, `f2-${nombre}-compu`, true);
 }
-const abrir = async (ruta) => { await p.goto(`${B}${ruta}`); };
+// Después de abrir, se espera a que la red se calme: /admin llega por partes (Suspense) y sin esto se mira la pantalla a medio cargar.
+const abrir = async (ruta) => {
+  await p.goto(`${B}${ruta}`);
+  await p.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
+  if (ruta === "/admin") await p.locator("[data-tablero]").waitFor({ timeout: 30000 }).catch(() => {});
+};
 const existe = async (loc, ms = 20000) => aparece(loc, ms);
 /** Espera (hasta 20 s) a que una consulta a la base devuelva algo verdadero: así no se depende de cuándo termina la acción del servidor. */
 async function esperarBase(sql, params, que = (r) => r.length > 0) {
@@ -53,7 +60,12 @@ try {
   // ── 1. Entrar y el tablero ──
   await entrar(p, "admin@ejemplo.invalid", undefined, B);
   chequear(p.url().endsWith("/admin"), "el admin entra al super admin", `el admin cayó en ${p.url()}`);
-  chequear(await existe(p.locator("[data-tablero]")), "el tablero está en el inicio", "no aparece el tablero");
+  await p.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
+  if (!(await existe(p.locator("[data-tablero]"), 30000))) {
+    // Sin el tablero no tiene sentido seguir: el resto depende de las pantallas nuevas.
+    throw new Error("la app corriendo no tiene el super admin nuevo en /admin (¿es un build anterior a carril/b-super? hay que recompilar)");
+  }
+  ok("el tablero está en el inicio");
   chequear((await p.locator("[data-numero]").count()) === 7, "el tablero tiene sus 7 números", `el tablero tiene ${await p.locator("[data-numero]").count()} números`);
   const hrefs = await p.locator("[data-numero]").evaluateAll((l) => l.map((a) => a.getAttribute("href")));
   chequear(hrefs.every((h) => h && h.startsWith("/admin")), "cada número lleva a su lista", `hay números sin destino: ${hrefs.join(", ")}`);
