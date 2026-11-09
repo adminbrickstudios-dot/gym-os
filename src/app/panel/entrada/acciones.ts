@@ -90,6 +90,39 @@ export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: 
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/**
+ * F1.1/F0: el ingreso del aviso en UNA sola llamada del navegador y dos esperas a la base (antes eran dos llamadas y cuatro):
+ * primero, a la vez, el contexto y todo lo que mira el veredicto; después, solo si corresponde anotar, el ingreso.
+ * No revalida la pantalla (eso frenaba el aviso): el navegador la refresca después de mostrarlo.
+ * La decisión de anotar es la de siempre: la base dice si puede (estado_acceso) y la guía dice si el botón es "anotar".
+ */
+export async function entradaRapida(socioId: string, sedeId: string, soloEnVerde: boolean): Promise<{ v?: Veredicto; guia?: Guia; apto?: string | null; firmar?: string | null; eventosHoy?: EventoHoy[]; r?: ResultadoIngreso; error?: string }> {
+  const panelP = contextoPanel();
+  panelP.catch(() => undefined);   // si falla, se vuelve a tirar abajo: acá no debe quedar sin atender
+  let datos;
+  try {
+    datos = await Promise.all([
+      rpc<Veredicto>("estado_acceso", { p_socio_id: socioId, p_sede_id: sedeId }),
+      rpc<Apto>("apto_socio", { p_socio_id: socioId }),
+      rpc<{ pendientes: { titulo: string }[] }>("documentos_socio", { p_socio_id: socioId }),
+      rpc<Guia>("guia_entrada", { p_socio_id: socioId, p_sede_id: sedeId }),
+      rpc<EventoHoy[]>("eventos_del_dia_socio", { p_socio_id: socioId }).catch((): EventoHoy[] => []),
+    ]);
+  } catch (e) { await panelP; return { error: (e as Error).message }; }
+  const panel = await panelP;   // sin sesión redirige; sin permiso tira el error de siempre
+  try {
+    const { sede } = sedeActiva(panel, sedeId);
+    const [v, a, docs, guia, eventosHoy] = datos;
+    const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+    const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
+    const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
+    const anotable = v.puede && guia.boton === "anotar" && (!soloEnVerde || v.color === "verde") && !apto && !firmar;
+    if (!anotable) return { v, guia, apto, firmar, eventosHoy };
+    const r = await rpc<ResultadoIngreso>("registrar_ingreso", { p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: "recepcion", p_forzar_motivo: null, p_promete_pagar_el: null });
+    return { v, guia, apto, firmar, eventosHoy, r };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** VD-19: un evento de hoy en el que está anotado el socio que está en la puerta. */
 export type EventoHoy = { evento_id: string; nombre: string; espera: boolean; presente: boolean; inscripcion_id: string | null };
 

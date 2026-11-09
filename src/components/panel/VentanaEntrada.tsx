@@ -7,9 +7,9 @@
 // acá no se calcula nada.
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition, startTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, entradaRapida, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
@@ -141,6 +141,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const pruebaModoRef = useRef<"no" | "dia" | "clase" | null>(null);
   const salirRef = useRef<() => void>(() => {});
   const salirConDniRef = useRef<(dni: string) => void>(() => {});
+  const router = useRouter();
   const [ocupado, empezar] = useTransition();
   const enterPendiente = useRef(false);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
@@ -229,25 +230,23 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
   // Va fuera de la transición a propósito: si no, la ventana queda "ocupada" mientras el panel se refresca y el próximo Enter se pierde.
   const elegirAviso = useCallback(async (s: ResultadoSocio) => {
-    const r = await veredicto(s.socio_id, sedeId);
+    const r = await entradaRapida(s.socio_id, sedeId, !!cfgRef.current.anotar_solo_en_verde);
     if (r.error || !r.v) { setError(r.error ?? "No se pudo ver el estado"); return; }
     const vv = r.v;
-    const solo = !cfgRef.current.anotar_solo_en_verde || vv.color === "verde";
-    const anotable = vv.puede && r.guia?.boton === "anotar" && solo && !r.apto && !r.firmar;
     const aviso = (id: string, color: AvisoLocal["color"], texto: string, cobrar: boolean, puede: boolean): AvisoLocal => ({ id, color, texto, socioId: s.socio_id, nombre: s.nombre, numero: s.numero, cobrar, puede, textoSocio: vv.texto });
     let a: AvisoLocal;
-    if (anotable) {
-      const x = await registrarEntrada(s.socio_id, sedeId, undefined, "recepcion");
-      if (x.error) { setError(x.error); return; }
+    if (r.r) {
       const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
-      a = aviso(`${x.r!.ingreso_id}-${Date.now()}`, color, x.r!.repetido ? `${s.nombre} ya había entrado: ${x.r!.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
+      a = aviso(`${r.r.ingreso_id}-${Date.now()}`, color, r.r.repetido ? `${s.nombre} ya había entrado: ${r.r.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
+      // El aviso sale ya; los números de la pantalla se actualizan después, sin frenar el próximo Enter.
+      startTransition(() => router.refresh());
     } else {
       a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
     }
     if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
     window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
     cerrar();
-  }, [sedeId, sonido, cerrar]);
+  }, [sedeId, sonido, cerrar, router]);
 
   const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => {
     if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande) { void elegirAviso(s); return; }

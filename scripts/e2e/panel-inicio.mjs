@@ -24,8 +24,8 @@ try {
     await p.locator("main h1").first().waitFor({ timeout: 60000 });
     const h1 = await p.locator("main h1").first().innerText();
     const numeros = await p.locator('section[aria-label="Números de hoy"] dd').count();
-    chequear(/👋/.test(h1) && numeros === 4 && await p.getByRole("heading", { name: "Ahora y lo que sigue" }).isVisible(),
-      `${rol}: saludo, 4 números y “Ahora y lo que sigue”`, `${rol}: ${h1} · ${numeros} números`);
+    chequear(/👋/.test(h1) && numeros >= 4 && (rol !== "profe" || numeros === 4) && await p.getByRole("heading", { name: "Ahora y lo que sigue" }).isVisible(),
+      `${rol}: saludo, sus números (4 la profe, 5 a 8 el resto) y “Ahora y lo que sigue”`, `${rol}: ${h1} · ${numeros} números`);
     const accesos = await p.locator('main a[href^="/panel/"].boton').evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute("href")))]);
     const rotos = [];
     for (const href of accesos) {
