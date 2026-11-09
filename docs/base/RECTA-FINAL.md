@@ -1,4 +1,4 @@
-# La recta final de Base (09/11)
+🟡 `staleTimes` 30 s puesto; faltan `useOptimistic` en ingreso, cobrar, asistencia, tareas y reservas |🟡 el menú ya llega después de pintar (cliente); falta bajar `pendientes_panel` de 300 a <50 ms (va con F1.6, `cubierto_hasta`) |🟡 contexto y layout en paralelo (de 7 viajes en fila a 3); falta `contexto_pantalla` en una sola función y la caché por gimnasio |🟡 script `scripts/medir/produccion.mjs` + `medir-produccion.yml` escritos, `Server-Timing` del proxy y log `[rpc] nombre ms` puestos; falta correrlo en producción (⛔ faltan secretos, ver PROGRESO) |# La recta final de Base (09/11)
 
 **La única lista que sigue el loop desde ahora.** Al terminarla, a Mateo le
 queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`). Todo lo

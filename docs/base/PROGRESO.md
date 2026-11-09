@@ -10,6 +10,10 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ## EN CURSO: la recta final (09/11)
 
+**Fase 0 (velocidad), 09/11 tarde:** en curso, nada publicado todavía. Hecho en la rama: los viajes a Supabase del panel salen en paralelo (contexto, mensajes, fichaje, abono, ayudas, config de Entrada), cada RPC deja su tiempo en el log de Vercel, el proxy manda `Server-Timing`, `staleTimes` de 30 s, y el workflow **Medir producción**. Medido hoy desde afuera (sin sesión): `/ingresar` 1,5 a 3,0 s y `/g/demo` 0,8 a 3,5 s de TTFB; las funciones ya están en gru1.
+**⛔ Lo que necesito de vos para medir en producción (credenciales, no las toco yo):** en GitHub → Settings → Secrets and variables → Actions, cargar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `DEMO_CONTRASENA` (10 o más letras, la que quieras). Después correr Actions → Base de datos → `usuarios-demo` con esa contraseña y Actions → Medir producción. Hoy los usuarios demo no existen en producción.
+**Ayudantes:** carril B (super admin), C (socio y página) y D (diseño y panel) trabajando en `carril/b-super`, `carril/c-socio`, `carril/d-panel`.
+
 **Desde el 09/11 el loop sigue `RECTA-FINAL.md`** (fases 1 a 8). El P0 de abajo
 está publicado, pero BASE-1, 3, 6, 8, 9 y 10 siguen en 🟡: se cierran en la
 fase 1. Cuando toda la recta esté en ✅ o ⛔, este título pasa a

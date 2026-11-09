@@ -73,3 +73,6 @@ Respuesta de Mateo: (vacío)
 - Decidido por defecto: lo que dice la hoja Cobrar y lo que dice la simulación vienen de la misma regla; no se cambió ninguna función.
 - vd-41: la sección Gastos, apagada para el encargado sin permiso, decía "sección apagada por el gimnasio". Ahora dice
   "No tenés permiso para ver los gastos" (solo cambia el texto, quién ve qué no cambió).
+
+- (09/11, decidido por defecto) **Medición en producción sin usuarios demo:** se escribió igual el script y el workflow, y se mide desde afuera lo público; las pantallas con sesión quedan ⛔ hasta que Mateo cargue los tres secretos. Recomendada: cargarlos y correr `usuarios-demo`.
+- (09/11, decidido por defecto) **F0.2:** primero se paralelizaron los viajes (ganancia inmediata, sin migración); `contexto_pantalla` en una sola función queda para después de medir.
