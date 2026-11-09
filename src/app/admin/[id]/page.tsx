@@ -15,6 +15,7 @@ import { Notas, type NotaBrik } from "./Notas";
 import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { Ciudad, CicloDeVida, QrGimnasio } from "./FichaGestion";
+import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
 type Semana = { desde: string; entradas: number; ventas: number; socios_nuevos: number };
@@ -47,9 +48,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { id } = await params;
   let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
-  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos, lanzamiento: PasoLanzamiento[], errores: ErrorPantalla[];
+  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos, lanzamiento: PasoLanzamiento[], errores: ErrorPantalla[], papelera: EnPapelera, linkPago: string | null, otros: { gimnasio_id: string; nombre: string }[];
   try {
-    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra, lanzamiento, errores] = await Promise.all([
+    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra, lanzamiento, errores, papelera, linkPago, otros] = await Promise.all([
       rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<Record<string, EstadoAbono>>("admin_abonos"),
@@ -61,6 +62,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       rpc<FichaExtraDatos>("admin_ficha_extra", { p_gimnasio_id: id }),
       rpc<PasoLanzamiento[]>("admin_lanzamiento", { p_gimnasio_id: id }),
       rpc<ErrorPantalla[]>("admin_errores", { p_gimnasio_id: id, p_horas: 168 }),
+      rpc<EnPapelera>("admin_papelera", { p_gimnasio_id: id }),
+      rpc<string | null>("admin_link_pago"),
+      rpc<{ gimnasio_id: string; nombre: string }[]>("admin_gimnasios"),
     ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
@@ -153,9 +157,17 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         </section>
       )}
 
+      <section className="space-y-3" data-ficha-papelera>
+        <p className="titulo-grupo">Papelera (30 días)</p>
+        <Papelera gimnasioId={g.gimnasio_id} papelera={papelera} />
+        <p className="titulo-grupo">Copiar la configuración de otro gimnasio</p>
+        <Clonar destino={g.gimnasio_id} otros={otros.filter((o) => o.gimnasio_id !== g.gimnasio_id).map((o) => ({ id: o.gimnasio_id, nombre: o.nombre }))} />
+      </section>
+
       <section className="space-y-3" data-ficha-ciclo>
         <p className="titulo-grupo">Pausar o dar de baja</p>
         <CicloDeVida gimnasioId={g.gimnasio_id} nombre={g.nombre} pausado={!!fila?.suspendido} paraBorrar={!!fila?.para_borrar} />
+        {fila?.para_borrar && <BorrarDefinitivo gimnasioId={g.gimnasio_id} nombre={g.nombre} />}
       </section>
 
       <section className="space-y-3" data-ficha-errores>
@@ -189,7 +201,8 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           <ul className="space-y-2">
             {extra.webhooks_fallidos.map((w) => (
               <li key={w.id} className="tarjeta p-3 text-sm" data-webhook-fallido>
-                <span className="font-semibold">{w.tipo}</span> · {fecha(w.recibido_en)} · {w.intentos} {w.intentos === 1 ? "intento" : "intentos"}{w.error ? ` · ${w.error}` : ""}
+                <span className="font-semibold">{w.tipo}</span> · {fecha(w.recibido_en)} · {w.intentos} {w.intentos === 1 ? "intento" : "intentos"}{w.error ? ` · ${w.error}` : ""}{" "}
+                <Reprocesar eventoId={w.id} gimnasioId={g.gimnasio_id} />
               </li>
             ))}
           </ul>
@@ -202,6 +215,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       </section>
 
       {abonos[g.gimnasio_id] && !g.es_demo && <AbonoGimnasio gimnasioId={g.gimnasio_id} abono={abonos[g.gimnasio_id]} planes={planes} />}
+      {abonos[g.gimnasio_id]?.plan_id && !g.es_demo && <AbonoExtra gimnasioId={g.gimnasio_id} nombre={g.nombre} abono={abonos[g.gimnasio_id]} telefono={fila?.dueno_telefono ?? null} dueno={fila?.dueno ?? null} linkPago={linkPago} />}
 
       <section className="space-y-3" data-admin-soportes>
         <p className="titulo-grupo">Entradas de Soporte BRIK</p>

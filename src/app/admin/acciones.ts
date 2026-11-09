@@ -3,6 +3,9 @@ import { revalidatePath } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
 import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
 import { rpc } from "@/lib/panel/servidor";
+import { leerPago } from "@/lib/mercadopago";
+import { procesarPagoMP } from "@/lib/mp-procesar";
+import { clienteServicio } from "@/lib/supabase/servicio";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
 // valida con la sesión de quien pide (admin_* / *_para_*), recién después el
@@ -205,6 +208,57 @@ export async function crearDemo(interesado: string, tipo: string): Promise<{ err
   } catch (e) { return { error: (e as Error).message }; }
 }
 export const borrarDemosVencidas = async () => hechoAdmin(() => rpc("admin_borrar_demos_vencidas"), ["/admin"]);
+
+// ── Carril B (F2, tercera tanda): comunicación, abonos, plataforma, papelera, clonar y borrado ──
+export async function publicarNovedadPara(titulo: string, texto: string, link: string, plan: string, ciudad: string, modulo: string): Promise<{ error?: string }> {
+  try {
+    await rpc("admin_publicar_novedad", { p_titulo: titulo, p_texto: texto, p_link: link || null, p_plan: plan || null, p_ciudad: ciudad || null, p_modulo: modulo || null });
+    revalidatePath("/admin"); return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const programarMantenimiento = async (desde: string, hasta: string, texto: string) =>
+  hechoAdmin(() => rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }), ["/admin"]);
+export const cancelarMantenimiento = async (id: string) => hechoAdmin(() => rpc("admin_cancelar_mantenimiento", { p_id: id }), ["/admin"]);
+export const guardarPrueba = async (gimnasioId: string, dias: number) =>
+  hechoAdmin(() => rpc("admin_guardar_prueba", { p_gimnasio_id: gimnasioId, p_dias: dias }), [`/admin/${gimnasioId}`, "/admin"]);
+export const guardarDescuento = async (gimnasioId: string, porcentaje: number, motivo: string, hasta: string) =>
+  hechoAdmin(() => rpc("admin_guardar_descuento", { p_gimnasio_id: gimnasioId, p_porcentaje: porcentaje, p_motivo: motivo, p_hasta: hasta }), [`/admin/${gimnasioId}`]);
+export const quitarDescuento = async (gimnasioId: string) => hechoAdmin(() => rpc("admin_quitar_descuento", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`]);
+export const guardarLinkPago = async (link: string) => hechoAdmin(() => rpc("admin_guardar_link_pago", { p_link: link }), ["/admin"]);
+export const prenderFuncion = async (gimnasioId: string, clave: string, prendida: boolean) =>
+  hechoAdmin(() => rpc("admin_prender_funcion", { p_gimnasio_id: gimnasioId, p_clave: clave, p_prendida: prendida }), ["/admin"]);
+export const restaurarSocio = async (gimnasioId: string, socioId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_socio", { p_gimnasio_id: gimnasioId, p_socio_id: socioId }), [`/admin/${gimnasioId}`]);
+export const restaurarPlan = async (gimnasioId: string, planId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_plan", { p_gimnasio_id: gimnasioId, p_plan_id: planId }), [`/admin/${gimnasioId}`]);
+export async function clonarConfiguracion(origen: string, destino: string): Promise<{ error?: string; aviso?: string }> {
+  try {
+    const r = await rpc<{ planes: number; actividades: number }>("admin_clonar_configuracion", { p_origen: origen, p_destino: destino });
+    revalidatePath(`/admin/${destino}`); return { aviso: `Copiados ${r.planes} planes y ${r.actividades} actividades (sin socios).` };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const borrarDefinitivo = async (gimnasioId: string, nombre: string) =>
+  hechoAdmin(() => rpc("admin_borrar_definitivo", { p_gimnasio_id: gimnasioId, p_nombre: nombre }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
+
+/**
+ * Reprocesar un aviso de MercadoPago que falló, a pedido y con la misma lógica idempotente del webhook (por pago y estado).
+ * La base valida quién es (admin_evento_webhook); la ruta del webhook no se toca. Si el pago ya estaba procesado, no se duplica.
+ */
+export async function reprocesarWebhook(eventoId: string, gimnasioId: string): Promise<{ error?: string; aviso?: string }> {
+  try {
+    const ev = await rpc<{ evento_id: string; gimnasio_id: string; id_externo: string; payload: unknown }>("admin_evento_webhook", { p_id: eventoId });
+    const pagoId = ev.id_externo.split(":")[0];
+    const db = clienteServicio();
+    const { data: cred, error } = await db.rpc("credenciales_mp", { p_gimnasio_id: ev.gimnasio_id });
+    const c = cred as { token: string } | null;
+    if (error || !c?.token) return { error: error?.message ?? "Ese gimnasio ya no tiene MercadoPago conectado" };
+    const pago = await leerPago(c.token, pagoId);
+    const r = await procesarPagoMP(db, ev.gimnasio_id, pago, { reprocesado: true, evento: ev.evento_id });
+    await db.rpc("cerrar_evento_webhook", { p_evento_id: ev.evento_id, p_error: null });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return { aviso: r.ya ? "Ese pago ya estaba acreditado: no se duplicó." : `Reprocesado: ${r.resultado}.` };
+  } catch (e) { return { error: (e as Error).message }; }
+}
 
 export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
 /** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
