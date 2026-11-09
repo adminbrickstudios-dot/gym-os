@@ -12,6 +12,7 @@ import { DosPasos } from "./DosPasos";
 import { ActivarPush } from "@/components/ActivarPush";
 import { Sesiones } from "@/components/cuenta/Sesiones";
 import { MiLiquidacion } from "./MiLiquidacion";
+import { Tema } from "./Tema";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
 import { rpc } from "@/lib/panel/servidor";
 
@@ -19,10 +20,11 @@ export const metadata: Metadata = { title: "Mi cuenta" };
 
 export default async function Cuenta() {
   const panel = await contextoPanel();
-  const [{ data }, seguridad, ayudas] = await Promise.all([
+  const [{ data }, seguridad, ayudas, miTema] = await Promise.all([
     crearClienteServidor().then((c) => c.auth.getUser()),
     rpc<MiSeguridad>("mi_seguridad"),
     rpc<{ apagadas: boolean }>("ayudas_vistas", undefined, { lectura: true }).catch(() => null),   // VD-31
+    rpc<string | null>("mi_tema", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true }).catch(() => null),   // BASE-6
   ]);
   return (
     <>
@@ -46,6 +48,7 @@ export default async function Cuenta() {
           <ActivarPush />
         </section>
       )}
+      <Tema inicial={miTema === "claro" || miTema === "oscuro" ? miTema : "gimnasio"} />
       {ayudas && <AjustesAyuda apagadas={ayudas.apagadas} />}
       <form action="/salir" method="post" className="mt-8"><button className="boton">🚪 Cerrar sesión</button></form>
     </>

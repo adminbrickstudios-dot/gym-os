@@ -54,16 +54,33 @@ export function UnaImagen({ tipo, ruta, reglas, puedeEditar, alListo, vista }: {
   const entrada = useRef<HTMLInputElement>(null);
   const { ocupado, error, ok, setError, correr } = useAccion(alListo);
   const nombre = tipo === "logo" ? "logo" : "ícono";
+  // BASE-7: vista previa ANTES de guardar. Elegir un archivo lo muestra como se va a ver; recién "Usar este" lo sube.
+  const [pendiente, setPendiente] = useState<{ archivo: File; url: string } | null>(null);
+  const descartar = () => { if (pendiente) URL.revokeObjectURL(pendiente.url); setPendiente(null); };
   const elegir = (f: File | undefined) => {
     if (!f) return;
     const mal = problemaArchivo(f, reglas);
     if (mal) { setError(mal); return; }
+    setError(null); descartar();
+    setPendiente({ archivo: f, url: URL.createObjectURL(f) });
+  };
+  const usar = () => {
+    if (!pendiente) return;
+    const f = pendiente.archivo;
+    descartar();
     correr(() => subir(tipo, f), tipo === "logo" ? "Logo listo" : "Ícono listo");
   };
   return (
     <div className="space-y-3" data-imagen={tipo}>
-      {vista(urlMarca(ruta))}
-      {puedeEditar && (
+      {vista(pendiente ? pendiente.url : urlMarca(ruta))}
+      {pendiente && (
+        <div className="flex flex-wrap items-center gap-2" data-vista-previa={tipo}>
+          <span className="texto-suave">Así se va a ver. ¿Lo usamos?</span>
+          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={usar}>{ocupado ? "Subiendo…" : `Usar este ${nombre}`}</button>
+          <button type="button" className="boton-texto" disabled={ocupado} onClick={descartar}>Elegir otro</button>
+        </div>
+      )}
+      {puedeEditar && !pendiente && (
         <div className="flex flex-wrap items-center gap-2">
           <input ref={entrada} type="file" accept={reglas.tipos.join(",")} className="sr-only" aria-label={`Elegir ${nombre}`}
             onChange={(e) => { elegir(e.target.files?.[0]); e.target.value = ""; }} />

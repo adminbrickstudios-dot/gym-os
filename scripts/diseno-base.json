@@ -1,0 +1,1142 @@
+{
+ "src/app/admin/Abono.tsx": {
+  "hex": 0,
+  "emoji": 9
+ },
+ "src/app/admin/AltaGimnasio.tsx": {
+  "hex": 5,
+  "emoji": 19
+ },
+ "src/app/admin/Ayudas.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/admin/BotonEntrar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/admin/ContactoPlataforma.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/admin/EstadoPlataforma.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/admin/Metricas.tsx": {
+  "hex": 2,
+  "emoji": 0
+ },
+ "src/app/admin/NovedadesDuenos.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/admin/page.tsx": {
+  "hex": 1,
+  "emoji": 13
+ },
+ "src/app/admin/PedidosDemo.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/admin/[id]/Formularios.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/admin/[id]/Notas.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/admin/[id]/page.tsx": {
+  "hex": 0,
+  "emoji": 12
+ },
+ "src/app/app/AvisosSocio.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/Bienvenida.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/CancelarReserva.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/clases/ElegirLugar.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/clases/page.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/app/clases/Reservar.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/cuenta/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/cuenta/Pedidos.tsx": {
+  "hex": 0,
+  "emoji": 21
+ },
+ "src/app/app/Encuesta.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/Entraste.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/EscanearEntrada.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/app/app/EventosApp.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/app/historial/page.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/app/info/page.tsx": {
+  "hex": 0,
+  "emoji": 14
+ },
+ "src/app/app/Instalar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/Invitar.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/app/locker/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/mensajes/FormMensaje.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/mensajes/nuevo/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/mensajes/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/mensajes/[id]/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/MiQR.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/NavSocio.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/novedades/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/Pagar.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/PagarOnline.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/page.tsx": {
+  "hex": 0,
+  "emoji": 22
+ },
+ "src/app/app/pago/Confirmando.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/plan/ComprarPlan.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/app/ProgresoInicio.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/pt/MisSesiones.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/Referir.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/rutina/Anotar.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/app/rutina/MarcarDia.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/app/rutina/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/app/yo/page.tsx": {
+  "hex": 0,
+  "emoji": 14
+ },
+ "src/app/auth/vincular/VincularGoogle.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/elegir/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/gimnasio-no-encontrado/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/hacete-socio/FormAlta.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/hacete-socio/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/ingresar/Encabezado.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/ingresar/error.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/ingresar/FormularioIngreso.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/ingresar/IngresoSocio.tsx": {
+  "hex": 4,
+  "emoji": 5
+ },
+ "src/app/ingresar/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/ingresar/recuperar/Recuperar.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/kiosco/Kiosco.tsx": {
+  "hex": 0,
+  "emoji": 11
+ },
+ "src/app/kiosco/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/layout.tsx": {
+  "hex": 1,
+  "emoji": 0
+ },
+ "src/app/not-found.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/asistente/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/avisos/Aviso.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/avisos/Novedades.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/avisos/page.tsx": {
+  "hex": 0,
+  "emoji": 11
+ },
+ "src/app/panel/avisos/Tanda.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/ayuda/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/caja/historial/page.tsx": {
+  "hex": 0,
+  "emoji": 16
+ },
+ "src/app/panel/caja/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/caja/ParaRevisar.tsx": {
+  "hex": 0,
+  "emoji": 11
+ },
+ "src/app/panel/caja/reporte/page.tsx": {
+  "hex": 0,
+  "emoji": 19
+ },
+ "src/app/panel/caja/Turno.tsx": {
+  "hex": 0,
+  "emoji": 33
+ },
+ "src/app/panel/campana/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/clases/grilla/Grilla.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/clases/grilla/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/clases/page.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/clases/tv/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/clases/tv/Tvs.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/clases/[id]/Avisar.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/clases/[id]/Lista.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/clases/[id]/Lugares.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/clases/[id]/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/clases/[id]/ReemplazarProfe.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/clases/[id]/Wod.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/configuracion/Ajustes.tsx": {
+  "hex": 14,
+  "emoji": 80
+ },
+ "src/app/panel/configuracion/Autoservicio.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/BuscadorConfig.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/ConfigCaja.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/configuracion/ConfigEntrada.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/configuracion/Historial.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/configuracion/Horarios.tsx": {
+  "hex": 0,
+  "emoji": 11
+ },
+ "src/app/panel/configuracion/Imagenes.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/configuracion/LinkResena.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/Mensajes.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/configuracion/MercadoPago.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/configuracion/MetaVisitas.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/PlanFamiliarConfig.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/configuracion/PruebaGratisConfig.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/ReglaCierres.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/ReglasBeneficios.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/ReglasCobro.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/configuracion/Restablecer.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/configuracion/Tablets.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/configuracion/TurnosFijosConfig.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/control/Beneficios.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/control/FiltrosControl.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/control/page.tsx": {
+  "hex": 0,
+  "emoji": 15
+ },
+ "src/app/panel/cuenta/AjustesAyuda.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/cuenta/CambiarContrasena.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/cuenta/DosPasos.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/cuenta/MiLiquidacion.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/cuenta/MiPin.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/cuenta/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/cupones/Cupones.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/cupones/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/datos-personales/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/documentos/Documentos.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/documentos/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/entrada/Camara.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/entrada/control/page.tsx": {
+  "hex": 0,
+  "emoji": 9
+ },
+ "src/app/panel/entrada/Hoy.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/entrada/Invitados.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/entrada/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/entrada/PanelEmergencia.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/entrada/Puerta.tsx": {
+  "hex": 0,
+  "emoji": 29
+ },
+ "src/app/panel/entrada/SinInternet.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/entrada/TurnoEntrada.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/equipo/actividad/page.tsx": {
+  "hex": 0,
+  "emoji": 13
+ },
+ "src/app/panel/equipo/Equipo.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/equipo/page.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/equipo/Perfiles.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/equipo/Permisos.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/eventos/Eventos.tsx": {
+  "hex": 0,
+  "emoji": 15
+ },
+ "src/app/panel/eventos/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/fichar/FicharPin.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/fichar/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/gastos/Formularios.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/gastos/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/grados/Grados.tsx": {
+  "hex": 1,
+  "emoji": 4
+ },
+ "src/app/panel/grados/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/horas/HorasEquipo.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/horas/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/incidentes/Incidentes.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/incidentes/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/layout.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/lockers/Lockers.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/lockers/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/maquinas/Maquinas.tsx": {
+  "hex": 0,
+  "emoji": 13
+ },
+ "src/app/panel/maquinas/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/mensajes/Ajustes.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/mensajes/page.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/mensajes/Respuesta.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/page.tsx": {
+  "hex": 0,
+  "emoji": 20
+ },
+ "src/app/panel/pagina/Altas.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/pagina/Editor.tsx": {
+  "hex": 0,
+  "emoji": 27
+ },
+ "src/app/panel/pagina/MedicionPagina.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/pagina/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/pagina/PruebaSocial.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/pagina/VideoPortada.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/pin/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/pin/Teclado.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/planes/Ajustes.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/planes/aumento/Aumento.tsx": {
+  "hex": 0,
+  "emoji": 12
+ },
+ "src/app/panel/planes/aumento/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/planes/Convenios.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/planes/Editor.tsx": {
+  "hex": 0,
+  "emoji": 15
+ },
+ "src/app/panel/planes/page.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/planes/Precios.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/app/panel/planes/Productos.tsx": {
+  "hex": 0,
+  "emoji": 19
+ },
+ "src/app/panel/planes/Servicios.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/profes/Liquidacion.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/profes/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/prospectos/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/prospectos/Prospectos.tsx": {
+  "hex": 0,
+  "emoji": 18
+ },
+ "src/app/panel/pt/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/pt/Pt.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/resultado/DeudaSocios.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/resultado/Gastos.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/resultado/page.tsx": {
+  "hex": 0,
+  "emoji": 18
+ },
+ "src/app/panel/resultado/PorSede.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/resumen/page.tsx": {
+  "hex": 0,
+  "emoji": 15
+ },
+ "src/app/panel/retencion/ExSocios.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/retencion/page.tsx": {
+  "hex": 0,
+  "emoji": 16
+ },
+ "src/app/panel/rutinas/editar/AccionesRutina.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/rutinas/editar/Asignar.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/rutinas/editar/Editor.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/rutinas/editar/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/rutinas/Ejercicios.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/rutinas/page.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/rutinas/socio/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/socios/duplicados/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/socios/duplicados/Pares.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/socios/FormSocio.tsx": {
+  "hex": 0,
+  "emoji": 13
+ },
+ "src/app/panel/socios/importar/Importador.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/app/panel/socios/importar/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/socios/nuevo/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/socios/page.tsx": {
+  "hex": 0,
+  "emoji": 26
+ },
+ "src/app/panel/socios/[id]/Acciones.tsx": {
+  "hex": 0,
+  "emoji": 26
+ },
+ "src/app/panel/socios/[id]/AptoFisico.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/socios/[id]/BotonEntradaFicha.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/socios/[id]/Calendario.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/socios/[id]/Convenio.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/socios/[id]/DevolucionesHechas.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/socios/[id]/editar/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/socios/[id]/FaltasSocio.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/socios/[id]/Familia.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/app/panel/socios/[id]/Foto.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/socios/[id]/GradosFicha.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/socios/[id]/Llavero.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/app/panel/socios/[id]/Moderacion.tsx": {
+  "hex": 0,
+  "emoji": 24
+ },
+ "src/app/panel/socios/[id]/ModeracionFicha.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/socios/[id]/NoEscribirle.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/socios/[id]/NotasEtiquetas.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/app/panel/socios/[id]/Origen.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/socios/[id]/page.tsx": {
+  "hex": 0,
+  "emoji": 30
+ },
+ "src/app/panel/socios/[id]/Pausas.tsx": {
+  "hex": 0,
+  "emoji": 13
+ },
+ "src/app/panel/socios/[id]/reglamento/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/tareas/Hoy.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/app/panel/tareas/page.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/tareas/Tareas.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/app/panel/transferencias/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/panel/transferencias/Pendiente.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/app/panel/transferencias/RevisarMP.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/panel/vencen-hoy/page.tsx": {
+  "hex": 0,
+  "emoji": 10
+ },
+ "src/app/panel/vender/Carrito.tsx": {
+  "hex": 0,
+  "emoji": 29
+ },
+ "src/app/panel/vender/compartido.tsx": {
+  "hex": 0,
+  "emoji": 11
+ },
+ "src/app/panel/vender/page.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/tv/page.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/app/tv/PantallaTv.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/components/ActivarPush.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/cuenta/Sesiones.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/cuentas/AccesoPersona.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/components/cuentas/PasoCodigo.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/landing/AnotarseEvento.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/components/landing/FormDemo.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/landing/FormProbar.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/components/landing/Landing.tsx": {
+  "hex": 1,
+  "emoji": 45
+ },
+ "src/components/landing/Plataforma.tsx": {
+  "hex": 0,
+  "emoji": 9
+ },
+ "src/components/panel/AlertasCaja.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/components/panel/AlertasSeguridad.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/panel/AvisosEntrada.tsx": {
+  "hex": 0,
+  "emoji": 7
+ },
+ "src/components/panel/AyudaBrik.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/panel/BannerSoporte.tsx": {
+  "hex": 3,
+  "emoji": 2
+ },
+ "src/components/panel/BotonEntrada.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/BotonFichar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/BotonPin.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/Buscador.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/components/panel/CalculadoraBilletes.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/Campana.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/CartelEmergencia.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/cobrar/AbrirTurnoCobrar.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/components/panel/cobrar/AvisoDobleCobro.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/cobrar/BotonCobrar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/cobrar/Cobrar.tsx": {
+  "hex": 0,
+  "emoji": 29
+ },
+ "src/components/panel/cobrar/MotivoDescuento.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/DatosEjemplo.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/ElegirNumeros.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/EventosHoyEntrada.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/FilaContacto.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/components/panel/FueraDeServicio.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/panel/GrillaAccesos.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/components/panel/LockersVencen.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/Marco.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/components/panel/Navegacion.tsx": {
+  "hex": 0,
+  "emoji": 8
+ },
+ "src/components/panel/NovedadesGymOS.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/NumerosPeriodo.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/PanelSocioLateral.tsx": {
+  "hex": 0,
+  "emoji": 2
+ },
+ "src/components/panel/PrimerosPasos.tsx": {
+  "hex": 0,
+  "emoji": 5
+ },
+ "src/components/panel/SelectorSede.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/panel/UltimasEntradas.tsx": {
+  "hex": 0,
+  "emoji": 6
+ },
+ "src/components/panel/Venta.tsx": {
+  "hex": 0,
+  "emoji": 9
+ },
+ "src/components/panel/VentanaEntrada.tsx": {
+  "hex": 0,
+  "emoji": 39
+ },
+ "src/components/Recibo.tsx": {
+  "hex": 0,
+  "emoji": 3
+ },
+ "src/components/rutinas/Progreso.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/TurnosFijos.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/components/ui/AvisoSalud.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/ui/Mensaje.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/components/ui/PantallaError.tsx": {
+  "hex": 0,
+  "emoji": 4
+ },
+ "src/components/ui/Reintentar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/components/ui/SinConexion.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/lib/panel/intentar.tsx": {
+  "hex": 0,
+  "emoji": 3
+ }
+}

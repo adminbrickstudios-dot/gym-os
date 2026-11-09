@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { conectarMercadoPago, desconectarMercadoPago, type EstadoMP } from "./acciones";
+import { conectarMercadoPago, desconectarMercadoPago, probarMercadoPago, type EstadoMP } from "./acciones";
 
 /**
  * PAY-1: conectar MercadoPago para que los socios paguen desde la app. El
@@ -21,6 +21,10 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
     const r = await desconectarMercadoPago();
     setMsj(r.error ? { error: r.error } : { ok: "Desconectado: la app ya no ofrece pagar con MercadoPago." });
   });
+  const probar = () => empezar(async () => {
+    const r = await probarMercadoPago();
+    setMsj(r.error ? { error: r.error } : { ok: `La conexión funciona: es la cuenta de ${r.cuenta}.` });
+  });
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-mercadopago={estado.conectado ? "conectado" : "no"}>
       <div>
@@ -33,6 +37,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
       {puedeEditar && !abierto && (
         <div className="flex flex-wrap gap-2">
           <button type="button" className="boton" onClick={() => setAbierto(true)}>{estado.conectado ? "Cambiar credenciales" : "Conectar MercadoPago"}</button>
+          {estado.conectado && <button type="button" className="boton" disabled={ocupado} onClick={probar} data-probar-mp>{ocupado ? "Probando…" : "Probar conexión"}</button>}
           {estado.conectado && <button type="button" className="boton texto-suave" disabled={ocupado} onClick={desconectar}>Desconectar</button>}
         </div>
       )}

@@ -232,6 +232,27 @@ export async function conectarMercadoPago(token: string, secreto: string, modo: 
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+/** BASE-7: "Probar conexión": usa el token ya guardado (nunca vuelve al navegador) y le pregunta a MercadoPago a qué cuenta pertenece. */
+export async function probarMercadoPago(): Promise<{ error?: string; cuenta?: string }> {
+  try {
+    const panel = await contextoPanel();
+    // Solo el dueño y el encargado: la base decide con el mismo permiso que usa para ver el estado de los pagos online.
+    await rpc("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id });
+    const { data, error } = await clienteServicio().rpc("credenciales_mp", { p_gimnasio_id: panel.gimnasio.id });
+    if (error) return { error: error.message };
+    const c = data as { token: string; modo: string } | null;
+    if (!c?.token) return { error: "Todavía no conectaste MercadoPago: guardá tus credenciales y probá de nuevo." };
+    const { cuentaDelToken } = await import("@/lib/mercadopago");
+    try {
+      const u = await cuentaDelToken(c.token);
+      return { cuenta: u.nickname ?? u.email ?? String(u.id) };
+    } catch (e) {
+      const m = (e as Error).message;
+      if (/ 40[13] /.test(m)) return { error: "MercadoPago no aceptó el Access Token: copialo de nuevo desde Credenciales (el de producción, o el de prueba si elegiste Prueba)." };
+      return { error: "No pudimos hablar con MercadoPago. Probá de nuevo en un rato." };
+    }
+  } catch (e) { return { error: (e as Error).message }; }
+}
 export async function desconectarMercadoPago(): Promise<{ error?: string }> {
   try {
     const panel = await contextoPanel();

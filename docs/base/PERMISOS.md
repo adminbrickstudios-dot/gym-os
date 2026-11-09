@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 295 funciones piden un rol del equipo con `privado.exigir_equipo`; 314 no (las decide la propia función con la sesión, el socio o RLS); 24 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 302 funciones piden un rol del equipo con `privado.exigir_equipo`; 316 no (las decide la propia función con la sesión, el socio o RLS); 25 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -157,6 +157,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_perfil_equipo` | ✓ | ✓ | — | — |
 | `guardar_plan` | ✓ | ✓ | — | — |
 | `guardar_plan_familiar` | ✓ | — | — | — |
+| `guardar_politica_privacidad` | ✓ | — | — | — |
 | `guardar_preferencia_aviso` | ✓ | ✓ | ✓ | ✓ |
 | `guardar_producto` | ✓ | ✓ | — | — |
 | `guardar_prueba_gratis` | ✓ | — | — | — |
@@ -170,6 +171,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_servicio` | ✓ | ✓ | — | — |
 | `guardar_socio` | ✓ | ✓ | ✓ | — |
 | `guardar_tarea_auto` | ✓ | ✓ | — | — |
+| `guardar_tema_usuario` | ✓ | ✓ | ✓ | ✓ |
 | `guardar_video_portada` | ✓ | — | — | — |
 | `habilitar_emergencia_puerta` | ✓ | — | — | — |
 | `historial_configuracion` | ✓ | ✓ | — | — |
@@ -198,6 +200,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `meta_visitas_panel` | ✓ | ✓ | — | — |
 | `mi_historial` | ✓ | ✓ | ✓ | — |
 | `mi_locker` | ✓ | ✓ | ✓ | — |
+| `mi_tema` | ✓ | ✓ | ✓ | ✓ |
 | `motivos_baja_mes` | ✓ | ✓ | — | — |
 | `motivos_beneficio_gimnasio` | ✓ | ✓ | ✓ | — |
 | `motivos_reserva` | ✓ | ✓ | ✓ | — |
@@ -213,9 +216,11 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `otorgar_grado` | ✓ | ✓ | — | ✓ |
 | `pagar_profe` | ✓ | — | — | — |
 | `pagina_panel` | ✓ | ✓ | — | — |
+| `pasos_asistente` | ✓ | — | — | — |
 | `pedido_baja_socio` | ✓ | ✓ | ✓ | — |
 | `pedidos_anulacion_pendientes` | ✓ | ✓ | — | — |
 | `pedidos_baja_pendientes` | ✓ | ✓ | ✓ | — |
+| `pedidos_datos_panel` | ✓ | ✓ | — | — |
 | `pedidos_pausa_pendientes` | ✓ | ✓ | — | — |
 | `pedir_ayuda_brik` | ✓ | ✓ | — | — |
 | `pendientes_panel` | ✓ | ✓ | ✓ | ✓ |
@@ -225,6 +230,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `permisos_mensajes` | ✓ | ✓ | — | — |
 | `plan_familiar_estado` | ✓ | ✓ | — | — |
 | `planes_para_alta` | ✓ | ✓ | ✓ | — |
+| `politica_privacidad_propia` | ✓ | ✓ | — | — |
 | `posibles_duplicados` | ✓ | ✓ | — | — |
 | `precios_venta` | ✓ | ✓ | ✓ | — |
 | `preferencias_aviso_panel` | ✓ | ✓ | ✓ | ✓ |
@@ -261,6 +267,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `reglas_beneficios` | ✓ | ✓ | — | — |
 | `reglas_vencimiento` | ✓ | ✓ | — | — |
 | `remito_stock` | ✓ | ✓ | — | — |
+| `resolver_pedido_datos` | ✓ | ✓ | — | — |
 | `resolver_pedido_pausa` | ✓ | ✓ | — | — |
 | `restaurar_mensaje` | ✓ | ✓ | — | — |
 | `resumen_dueno` | ✓ | ✓ | — | — |
@@ -540,6 +547,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `pedir_anulacion`
 - `pedir_baja_socio`
 - `pedir_demo_brik (también anónimo)`
+- `pedir_mis_datos`
 - `pedir_pausa`
 - `pedir_pausa_socio`
 - `persona_para_dar_acceso`
@@ -547,6 +555,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `plan_familiar_socio`
 - `planes_brik_publicos (también anónimo)`
 - `planes_gimnasio`
+- `politica_privacidad_publica (también anónimo)`
 - `politica_reservas`
 - `poner_etiqueta`
 - `preparar_comprobante_gasto`
@@ -630,6 +639,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `entrar_con_google`
 - `ingreso_permitido`
 - `precio_cuota`
+- `registrar_envio_publico`
 - `registrar_evento_webhook`
 - `registrar_ingreso_fallido`
 - `registrar_pedido_codigo`
