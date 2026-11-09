@@ -9,7 +9,7 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 (pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
-**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`, la lista es `docs/base/PROGRESO.md`. Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
+**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`; la lista que manda es `docs/base/RECTA-FINAL.md` (el detalle de cada BASE-* está en `docs/base/PROGRESO.md`). Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
 **Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
 Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
 **Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche
