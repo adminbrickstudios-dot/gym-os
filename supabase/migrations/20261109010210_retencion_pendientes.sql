@@ -24,37 +24,37 @@ sus as (
    order by s.socio_id, (s.baja_en is null) desc, s.inicio desc
 ),
 -- Solo los socios con algo cubierto que termina después del momento (los demás no pueden ser por_vencer, nuevo ni no_viene).
-sus_a as (
+sus_a as materialized (
   select s.* from sus s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id where so.cubierto_hasta > p_momento
 ),
 -- Los que ya tienen una cobertura que EMPIEZA después del momento (una cuota pagada por adelantado) necesitan las islas. Los demás no:
 -- toda su cobertura que termina después del momento ya empezó, así que se superpone con las otras en ese instante y forma una sola
 -- isla cuyo fin es cubierto_hasta (el mayor "hasta" de todo).
-con_futuro as (
+con_futuro as materialized (
   select distinct c.socio_id from public.coberturas c
    where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.desde > p_momento
 ),
-sus_c as (select a.* from sus_a a where a.socio_id in (select socio_id from con_futuro)),
-antiguedad as (
+sus_c as materialized (select a.* from sus_a a where a.socio_id in (select socio_id from con_futuro)),
+antiguedad as materialized (
   select s.socio_id, min(s.inicio) as primer_inicio from public.suscripciones s
    where s.gimnasio_id = p_gimnasio_id and s.socio_id in (select a.socio_id from sus_a a) group by s.socio_id
 ),
-cob as (
+cob as materialized (
   select c.socio_id, c.desde, c.hasta,
          max(c.hasta) over (partition by c.socio_id order by c.desde, c.hasta
                             rows between unbounded preceding and 1 preceding) as hasta_previo
     from public.coberturas c
    where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus_c s)
 ),
-islas_marcadas as (
+islas_marcadas as materialized (
   select *, sum(case when hasta_previo is null or desde > hasta_previo then 1 else 0 end)
               over (partition by socio_id order by desde, hasta) as isla
     from cob
 ),
-islas as (
+islas as materialized (
   select socio_id, min(desde) as desde, max(hasta) as hasta from islas_marcadas group by socio_id, isla
 ),
-estado as (
+estado as materialized (
   select s.socio_id,
          max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
          max(i.hasta) filter (where i.hasta <= p_momento) as ultimo_fin,

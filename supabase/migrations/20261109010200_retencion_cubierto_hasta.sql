@@ -38,32 +38,32 @@ sus as (
 -- BASE-1 / D36: el socio cuyo fin de cobertura guardado (socios.cubierto_hasta) ya pasó, o que nunca pagó, NO tiene cobertura
 -- vigente ni futura: fin_actual = null, tiene_futuro = false y ultimo_fin = cubierto_hasta (el mayor "hasta" de todo lo que
 -- pagó). Ese no necesita las islas. Solo se arman las islas de los que tienen algo que termina después del momento.
-sus_a as (
+sus_a as materialized (
   select s.* from sus s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id where so.cubierto_hasta > p_momento
 ),
 -- Desde cuándo es socio: su primera membresía (un cambio de plan no lo hace "nuevo").
-antiguedad as (
+antiguedad as materialized (
   select s.socio_id, min(s.inicio) as primer_inicio from public.suscripciones s
    where s.gimnasio_id = p_gimnasio_id group by s.socio_id
 ),
 -- Islas de coberturas contiguas POR SOCIO, sumando todas sus membresías
 -- (lo pagado en el plan viejo cuenta para ver desde cuándo debe).
-cob as (
+cob as materialized (
   select c.socio_id, c.desde, c.hasta,
          max(c.hasta) over (partition by c.socio_id order by c.desde, c.hasta
                             rows between unbounded preceding and 1 preceding) as hasta_previo
     from public.coberturas c
    where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus_a s)
 ),
-islas_marcadas as (
+islas_marcadas as materialized (
   select *, sum(case when hasta_previo is null or desde > hasta_previo then 1 else 0 end)
               over (partition by socio_id order by desde, hasta) as isla
     from cob
 ),
-islas as (
+islas as materialized (
   select socio_id, min(desde) as desde, max(hasta) as hasta from islas_marcadas group by socio_id, isla
 ),
-estado as (
+estado as materialized (
   select s.socio_id,
          max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
          max(i.hasta) filter (where i.hasta <= p_momento) as ultimo_fin,
