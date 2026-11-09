@@ -30,7 +30,7 @@ qué e2e o prueba de base lo cubre. Lo que es P0 está marcado con su BASE-*.
 | 13 | Pase diario en 2 toques | Pase diario desde la Entrada | 🟡 contar los toques; botón rápido | BASE-4 | |
 | 14 | Alta en menos de 30 s | Alta rápida desde la Entrada (VD-6) | ✅? medir con cronómetro en el e2e | | |
 | 15 | Foto con la cámara | Foto del socio (se achica a 800 px webp, VD-47X) | 🟡 verificar que en tablet y celular abre la cámara | | |
-| 16 | Sin internet no se pierden ingresos | VD-34 (clave de operación, nada dos veces) | ❌ cola local que manda al volver, con la misma clave | | |
+| 16 | Sin internet no se pierden ingresos | VD-34 (clave de operación, nada dos veces) | ✅ | | `sin-internet.test.mjs` (base, corrida 09/11: 866/867 con la suite) y `e2e/seg-5.mjs` (SEG-5, cola local con la misma clave de operación: se anota al volver internet, sin duplicar). Estaba mal marcado ❌: existe desde SEG-5. |
 | 17 | Historial de ingresos | Ficha del socio | ✅? | | |
 | 18 | Vencen hoy a la vista | VD-14 | ✅? | BASE-4 | |
 | 19 | Cumpleaños | Automáticas de Para hacer hoy (VD-13) | 🟡 verificar que esté, y que se vea en el aviso | | |
@@ -50,27 +50,27 @@ qué e2e o prueba de base lo cubre. Lo que es P0 está marcado con su BASE-*.
 | 28 | Congelamiento con tope | Pausas con pedido | ✅? verificar el tope | | |
 | 29 | Packs que se descuentan con la asistencia | Packs de clases | ✅? | | |
 | 30 | Recargo por pagar tarde | Reglas de vencimiento (VD-7) | 🟡 verificar si hay recargo; si no, regla configurable | | |
-| 31 | Descuentos | Cupones, cortesías con motivo y tope (VD-46C, VD-46T) | ✅? | | |
-| 32 | Comprobante por wa.me | Recibo para compartir (VD-56) | ✅? | | |
+| 31 | Descuentos | Cupones, cortesías con motivo y tope (VD-46C, VD-46T) | ✅ | | `cupones.test.mjs` y `beneficios` en la base (corridas 09/11). |
+| 32 | Comprobante por wa.me | Recibo para compartir (VD-56) | ✅ | | `comprobante-pago.test.mjs` (base, corrida 09/11); el wa.me lo arma la pantalla. |
 | 33 | Link de MercadoPago por socio con monto exacto y vencimiento | Pago online desde la app | 🟡 generarlo desde el panel; las credenciales de MP del gimnasio son 🔌 | | |
 | 34 | Webhook idempotente y fuera del middleware | `eventos_webhook`, VD-46A | ✅? verificar el matcher del proxy después de Next 16 | BASE-0 | |
-| 35 | Anular con motivo y registro | Control (VD-10) | ✅? | | |
-| 36 | Caja por turno con arqueo por medio | VD-9 (reportes X y Z) | ✅? | | |
+| 35 | Anular con motivo y registro | Control (VD-10) | ✅ | | `anular-ventas.test.mjs`, `control.test.mjs` (base, corridas 09/11). |
+| 36 | Caja por turno con arqueo por medio | VD-9 (reportes X y Z) | ✅ | | `caja.test.mjs`, `historial-caja.test.mjs` (base, corridas 09/11): arqueo por medio, reportes X y Z. |
 | 37 | La recepción ve su caja, el dueño todas | VD-9, VD-49 | ✅? | BASE-8 | |
-| 38 | Importar Excel con vista previa | | 🟡 verificar si existe; es el paso 9 del asistente | BASE-7 | |
+| 38 | Importar Excel con vista previa | | ✅ | BASE-7 | `importar-socios.test.mjs` (base, corrida) y `e2e/soc-1.mjs` (CSV y Excel: filas malas marcadas antes de importar, deshacer). Es el paso 9 del asistente. |
 
 ## Equipo (39 a 46)
 
 | # | Detalle | Lo que existe | Estado | Ítem | Prueba |
 |---|---|---|---|---|---|
-| 39 | El super admin crea al dueño con su contraseña | Alta de gimnasio en 3 pasos (VD-40) | 🟡 falta "la escribo yo" | BASE-2 | |
-| 40 | El dueño crea usuarios | Equipo | 🟡 falta "con contraseña" | BASE-2 | |
+| 39 | El super admin crea al dueño con su contraseña | Alta de gimnasio en 3 pasos (VD-40) | ✅ | BASE-2 | BASE-2: el super admin escribe la contraseña del dueño al crear el gimnasio (D42). `e2e/base-2.mjs` (13 pasos, verificado el 08/11 por el principal). |
+| 40 | El dueño crea usuarios | Equipo | ✅ | BASE-2 | BASE-2: Equipo del dueño con contraseña propia o provisoria. `e2e/base-2.mjs`; `equipo-perfil.test.mjs` (base, corrida). |
 | 41 | Desactivar sin borrar | VD-42 | ✅? | BASE-2 | |
-| 42 | Restablecer contraseñas | | 🟡 | BASE-2 | |
+| 42 | Restablecer contraseñas | | ✅ | BASE-2 | BASE-2: "nueva contraseña" para el equipo (dueño) y para los dueños (super admin); "Olvidé mi contraseña" con tope (SEG-1, `limite-codigos.test.mjs`). `e2e/base-2.mjs`. |
 | 43 | Matriz de permisos editable por el dueño | Interruptores sueltos (Equipo → Permisos, VD-41C, VD-12C) | 🟡 una matriz rol × acción. **Toca permisos**: valores por defecto los de hoy, un rol nunca puede ganar algo que la base no le permite, prueba por rol | | |
-| 44 | Registro de quién hizo qué | Control (VD-10) | ✅? | BASE-8 | |
+| 44 | Registro de quién hizo qué | Control (VD-10) | ✅ | BASE-8 | `control.test.mjs`, `control-entrada.test.mjs` (base, corridas 09/11). |
 | 45 | Entrar como (con registro) | Soporte con motivo (VD-40) | ✅? | BASE-2 | |
-| 46 | Links fijos por rol | | ❌ | BASE-2 | |
+| 46 | Links fijos por rol | | ✅ | BASE-2 | BASE-2 (D41): `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super` con título del rol. `e2e/base-2.mjs`. |
 
 ## Profes (47 a 52)
 
@@ -111,7 +111,7 @@ qué e2e o prueba de base lo cubre. Lo que es P0 está marcado con su BASE-*.
 |---|---|---|---|---|---|
 | 65 | Números | Inicio (VD-12), Retención (VD-16) | ✅? | BASE-4 | |
 | 66 | Retención con wa.me | Retención | ✅? | | |
-| 67 | Plata en riesgo | Retención | ✅? verificar que el número exista con ese nombre | BASE-4 | |
+| 67 | Plata en riesgo | Retención | ✅ | BASE-4 | `base4-numeros.test.mjs` (base, corrida 09/11): "plata en riesgo" = suma mensual de vencidos, por vencer, nuevos y no vienen. |
 | 68 | Horarios pico | Asistencia (VD-16) | 🟡 gráfico por hora y día de la semana | | |
 | 69 | Reporte mensual | Resumen, exportar el mes | 🟡 un reporte del mes que se pueda mandar | | |
 | 70 | Asistente de 9 pasos | Primeros pasos (VD-43) | 🟡 | BASE-7 | |

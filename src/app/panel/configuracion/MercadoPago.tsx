@@ -30,6 +30,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
       <div>
         <p className="titulo text-2xl">💳 Pagos online con MercadoPago</p>
         <p className="texto-suave">Que los socios paguen la cuota desde la app. Queda al día apenas MercadoPago avisa; la plata va a tu cuenta de MercadoPago.</p>
+        <p className="font-semibold" data-mp-plata-directa>La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK.</p>
       </div>
       {estado.conectado ? (
         <p className="pildora pildora-verde !text-base">✓ Conectado{estado.modo === "prueba" ? " en modo prueba" : ""}{estado.por ? ` por ${estado.por}` : ""}</p>

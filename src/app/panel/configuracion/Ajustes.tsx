@@ -9,6 +9,8 @@ import { TurnosFijosConfig } from "./TurnosFijosConfig";
 import { MetaVisitas } from "./MetaVisitas";
 import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
+import { FotoSocioConfig } from "./FotoSocioConfig";
+import { AvisarSinBloquear } from "./AvisarSinBloquear";
 import { ReglaCierres } from "./ReglaCierres";
 import { ReglasBeneficios, type ReglasBeneficiosDatos } from "./ReglasBeneficios";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -649,6 +651,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <div data-opcion="meta-visitas"><MetaVisitas inicial={metaVisitas} puedeEditar={puedeEditar} /></div>
           <div data-opcion="plan-familiar-seccion"><PlanFamiliarConfig inicial={planFamiliar} puedeEditar={puedeEditar} /></div>
           <div data-opcion="prueba-gratis"><PruebaGratisConfig puedeEditar={puedeEditar} /></div>
+          <div data-opcion="avisar-sin-bloquear"><AvisarSinBloquear puedeEditar={puedeEditar} /></div>
+          <div data-opcion="foto-socio"><FotoSocioConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="cierres-suma-dias"><ReglaCierres puedeEditar={puedeEditar} /></div>
           {beneficios && <div data-opcion="beneficios"><ReglasBeneficios datos={beneficios} /></div>}
           {pie("reglas")}
