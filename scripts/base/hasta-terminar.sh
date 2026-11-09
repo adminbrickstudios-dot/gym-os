@@ -30,7 +30,7 @@ git fetch -q origin
 git switch -q "$RAMA" 2>/dev/null || git switch -q -c "$RAMA" "origin/$RAMA"
 git pull -q --rebase origin "$RAMA" || dice "No pude traer lo último de $RAMA: sigo con lo que hay."
 
-PROMPT='Leé docs/base/PROMPT.md y hacé UNA vuelta: el próximo ítem de docs/base/RECTA-FINAL.md que no esté en ✅ ni ⛔, completo y verificado. Al terminar la vuelta: commit y push, cerrá los navegadores y procesos que levantaste, y escribí como ÚLTIMA línea de tu respuesta exactamente "SIGUE: <qué hiciste>" o, si toda la RECTA-FINAL está en ✅ o ⛔, "TERMINADO".'
+PROMPT='Leé docs/base/PROMPT.md y docs/base/REPARTO.md y hacé UNA vuelta: lanzá un ayudante por cada carril libre (B, C, D) con su próximo ítem de docs/base/RECTA-FINAL.md, hacé vos el próximo ítem del carril A, esperá los informes de los ayudantes antes de terminar, verificalos ejecutando, integrá y publicá si cerró una fase. Al terminar la vuelta: commit y push, cerrá los navegadores y procesos que levantaste, y escribí como ÚLTIMA línea de tu respuesta exactamente "SIGUE: <qué se hizo>" o, si toda la RECTA-FINAL está en ✅ o ⛔, "TERMINADO".'
 
 fallas=0
 for (( v = 1; v <= VUELTAS; v++ )); do
