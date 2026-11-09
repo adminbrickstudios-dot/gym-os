@@ -74,7 +74,7 @@ test("insignias: 10 visitas y 4 semanas seguidas salen de contar; un ingreso rec
   for (const d of ["2026-10-20", "2026-10-27", "2026-11-03", "2026-11-10"]) await visita(d);       // 4 martes seguidos
   for (const d of ["2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24", "2026-10-28", "2026-10-29"]) await visita(d);
   await visita("2026-11-11", "19:00:00", "rechazado");
-  const [{ id: anul }] = await t.q(`select id from public.ingresos where socio_id = $1 and anulado_en is null and resultado = 'entro' limit 1`, [S().al_dia]);
+  const [{ id: anul }] = await t.q(`select id from public.ingresos where socio_id = $1 and anulado_en is null and resultado = 'entro' order by momento limit 1 offset 1`, [S().al_dia]);   // la del 21/10: no rompe la racha de martes
   await t.q(`update public.ingresos set anulado_en = now(), anulado_motivo = 'prueba' where id = $1`, [anul]);
   await como(socioU, async () => {
     const r = await resumen();
