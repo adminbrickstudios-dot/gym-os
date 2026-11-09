@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Aviso } from "@/components/panel/Marco";
+import { anotarErrorPantalla } from "@/lib/errores-acciones";
 
 /**
  * Un error o una pantalla que no existe, siempre con salida (VD-34): Reintentar, Volver e Ir al inicio.
@@ -15,6 +16,8 @@ export function PantallaError({ error, reset, inicio = "/", titulo, emoji }: {
   // VD-40: el último error que vio la persona viaja con su pedido de ayuda a BRIK.
   useEffect(() => { if (error) { try { sessionStorage.setItem("gymos:ultimo-error", error.message.slice(0, 400)); } catch { /* sin almacenamiento */ } } }, [error]);
   const sinPermiso = !!error && /permiso|acceso/i.test(error.message);
+  // SA-1: anotar el error para el tablero del super admin (los de permiso no son fallas).
+  useEffect(() => { if (error && !sinPermiso) void anotarErrorPantalla(location.pathname.replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, ":id"), error.message); }, [error, sinPermiso]);
   return (
     <div data-pantalla-error>
     <Aviso emoji={emoji ?? (sinPermiso ? "🔒" : "⚠️")} titulo={titulo ?? (sinPermiso ? "No tenés acceso a esta pantalla" : "No se pudo cargar esta pantalla")}>
