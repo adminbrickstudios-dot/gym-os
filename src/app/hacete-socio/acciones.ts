@@ -21,6 +21,13 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
+  // BASE-8: tope de envíos (10 por hora por conexión, 3 por hora por persona). El campo trampa ya se resolvió arriba.
+  {
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { error: errTope } = await clienteServicio().rpc("registrar_envio_publico", { p_formulario: "alta_online", p_ip: ip, p_clave: datos.dni || datos.email || null });
+    if (errTope) return { error: errTope.message, datos };
+  }
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("alta_online", {
     p_host: host, p_plan_id: datos.plan, p_version: Number(datos.version), p_medio: datos.medio,

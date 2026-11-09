@@ -511,6 +511,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton">📷 Instagram</a>
             )}
             {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
+            <a href="/privacidad" className="boton" data-privacidad-link>🔒 Privacidad</a>
             {landing.prueba_social?.resena?.link && <a href={landing.prueba_social.resena.link} target="_blank" rel="noopener noreferrer" className="boton">⭐ Dejanos tu reseña</a>}
           </div>
         </div>

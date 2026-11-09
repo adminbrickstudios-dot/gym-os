@@ -131,6 +131,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
       </fieldset>
 
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+      <p className="texto-suave text-sm">Usamos tus datos para anotarte y cobrarte. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
       {r.error && <Mensaje tipo="error">{r.error}</Mensaje>}
       <button type="submit" disabled={enviando || !plan} className="boton boton-principal text-lg w-full sm:w-auto px-10">
         {enviando ? "Anotándote…" : plan ? "💪 Hacerme socio" : "Elegí un plan"}

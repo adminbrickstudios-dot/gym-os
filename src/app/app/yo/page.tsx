@@ -82,6 +82,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
             {fila(`/app/ayuda${q}`, "❓", "Ayuda", "Preguntas cortas y cómo se hace", "ayuda")}
             {referido != null && fila(`/app${q}#referir`, "🤝", "Invitá a un amigo", "Tu link para que se anote", "referir")}
             {invitados != null && fila(`/app${q}`, "🎫", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
+            {fila(`/app/pedir-datos${q}`, "🔒", "Pedir mis datos", "Ver, corregir o borrar lo que guardan de vos", "pedir-datos")}
             <li><a href={`/app/mis-datos${q}`} download className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila="mis-datos">
               <span className="text-2xl" aria-hidden>⬇️</span><span className="flex-1 font-semibold">Descargar mis datos</span></a></li>
           </ul>
