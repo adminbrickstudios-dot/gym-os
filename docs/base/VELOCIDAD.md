@@ -121,11 +121,18 @@ a dos segundos por toque.
 
 ## Plan de la fase 0 (`RECTA-FINAL.md` F0): que tocar y ver sea instantáneo
 
-Objetivos, **medidos en producción**, en celular con 4G:
-- El primer cambio en pantalla, en menos de 100 ms (siempre, con esqueleto o
-  cambio optimista).
-- Los datos de una pantalla del panel, en menos de 800 ms (p75).
-- Volver a una pantalla ya vista: instantáneo.
+Objetivos (Mateo, 09/11: "rapidísimo, toco y al toque ya está, por debajo del
+promedio"), **medidos en producción**, en celular con 4G:
+- Primer cambio en pantalla al tocar: **menos de 50 ms**, siempre (estado
+  apretado, esqueleto o cambio optimista).
+- Datos de una pantalla del panel: **menos de 500 ms p75** y menos de 800 ms
+  p95.
+- Registrar un ingreso, de Enter al aviso: **menos de 300 ms p75**.
+- Buscar un socio mientras se tipea: **menos de 150 ms** por tecla.
+- Volver a una pantalla ya vista: **instantáneo**, sin viajes.
+- Página del gimnasio y app del socio: LCP **menos de 1,5 s** en 4G y
+  Lighthouse celular **95 o más**.
+- Nada salta al cargar: CLS menor a 0,05.
 
 1. **Medir de verdad, primero.**
    - `Server-Timing` en cada respuesta (proxy, auth y cada RPC con su nombre),
@@ -162,13 +169,22 @@ Objetivos, **medidos en producción**, en celular con 4G:
    - Así `getClaims()` verifica sin viajar a Auth.
    - Lo hace **Mateo**, desde el panel de Supabase; el agente deja los pasos
      exactos. Puede cerrar las sesiones abiertas una vez.
-6. **Planes** (D51, los paga Mateo):
+6. **Lo demás que suma**, cada cosa medida antes y después:
+   - Imágenes con `next/image`, tamaño justo y AVIF/WebP.
+   - Fuentes con `next/font` y sin bloquear.
+   - JS por ruta lo más chico posible: lo pesado con carga diferida y
+     componentes de servidor.
+   - Búsqueda con `pg_trgm` y debounce corto.
+   - Realtime solo donde hace falta.
+   - Ningún re-render que se note.
+   - Índices que falten según `EXPLAIN`.
+7. **Planes** (D51, los paga Mateo):
    - Supabase Pro trae una máquina más grande que la de Free.
    - En Vercel, revisar que esté prendido Fluid Compute, que reduce los
      arranques en frío.
    - El agente mide con y sin, si Mateo los activa, y anota la diferencia.
 
 **LISTO SI:** la tabla de `medir-produccion.yml` muestra, antes y después, cada
-pantalla clave del panel en menos de 800 ms p75 y el ingreso en menos de 1 s.
+objetivo de arriba cumplido en producción.
 Volver a una pantalla vista no hace ningún viaje. Con la red lenta simulada,
 siempre hay respuesta en menos de 100 ms.

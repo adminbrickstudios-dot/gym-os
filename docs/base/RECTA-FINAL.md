@@ -19,7 +19,7 @@ Dónde quedó (09/11, mediodía):
 
 ---
 
-## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento)
+## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
@@ -27,7 +27,8 @@ Dónde quedó (09/11, mediodía):
 | F0.2 | Un solo viaje para el contexto (`contexto_pantalla`), caché de lo que no cambia, el proxy sin viajes de más | `VELOCIDAD.md` | ❌ |
 | F0.3 | El menú (`pendientes_panel`) después de pintar y en menos de 50 ms | `VELOCIDAD.md` | ❌ |
 | F0.4 | Navegación instantánea: `staleTimes`, `prefetch`, `useOptimistic` en las acciones de todos los días | `VELOCIDAD.md` | ❌ |
-| F0.5 | Pasos para Mateo (claves asimétricas de Supabase, planes) escritos arriba de `PROGRESO.md`; la tabla de después | `VELOCIDAD.md` | ❌ |
+| F0.5 | Imágenes, fuentes, JS por ruta, búsqueda, índices y re-renders (punto 6 del plan) | `VELOCIDAD.md` | ❌ |
+| F0.6 | Pasos para Mateo (claves asimétricas de Supabase, planes) escritos arriba de `PROGRESO.md`; la tabla de después con todos los objetivos cumplidos en producción | `VELOCIDAD.md` | ❌ |
 
 ## Fase 1 · Cerrar lo que quedó a medias del P0
 
