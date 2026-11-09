@@ -84,7 +84,7 @@ mientras no tenga ✅).
 | D37 | Fondo de los paneles (07/11) | Claro por defecto; el gimnasio y cada usuario pueden pasar a oscuro. Reemplaza el oscuro del 05/11. | ✅ |
 | D38 | Emojis (07/11) | Íconos de línea propios (tipo Lucide) en el color del gimnasio, en todos lados. | ✅ |
 | D39 | Nombre (07/11) | El producto se llama **Base** en todo lo visible; repo y código sin cambios. | ✅ |
-| D40-D52 | Decididas por defecto al armar `docs/base/` (07/11) | Ver `docs/base/00-LEEME.md` y `docs/base/PREGUNTAS.md`. | por defecto |
+| D40-D60 | Decididas por defecto al armar `docs/base/` (07/11) y en la revisión del 09/11 | Ver `docs/base/00-LEEME.md` y `docs/base/PREGUNTAS.md`. | por defecto |
 
 ### Decisiones que tomó el agente
 
@@ -260,20 +260,20 @@ Panel por panel. Cada panel arranca con su **auditoría botón por botón (AUD)*
 que puede sumar ítems nuevos al final de su propio bloque. El loop toma el
 primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 
-### 24 · Base (07/11 · `docs/base/`, empezar por `docs/base/00-LEEME.md`; la lista con su LISTO SI es `docs/base/PROGRESO.md`)
-- [ ] BASE-0 · 🟢 · Next 16.4 (era VD-64) y los 58 recorridos que fallan con la app compilada
-- [ ] BASE-1 · 🟢 · Velocidad: diagnóstico con números (`docs/base/VELOCIDAD.md`), después arreglos, con 5.000 socios y 100.000 ingresos
-- [ ] BASE-2 · 🟢 · Usuarios, contraseñas (la escribe quien crea la cuenta) y links fijos por rol
-- [ ] BASE-3 · 🟢 · Ingreso rápido: aviso flotante abajo a la derecha y panel lateral con Cobrar ahora
-- [ ] BASE-4 · 🟢 · Siempre a la vista: números de recepción y dueño, lista en vivo, botones rápidos
-- [ ] BASE-5 · 🟢 · `cubierto_hasta` por trigger (D36) sin cambiar ningún veredicto
-- [ ] BASE-6 · 🟢 · Diseño de Base: nombre, claro/oscuro, íconos de línea, tipografía, recepción como mostrador, modales
-- [ ] BASE-7 · 🟢 · Asistente de 9 pasos sobre Primeros pasos
-- [ ] BASE-8 · 🟢 · Seguridad: logs públicos de Actions, RLS por rol, límites de intentos, encabezados, Ley 25.326
-- [ ] BASE-9 · 🟢 · Página del gimnasio predeterminada, editable, con SEO
-- [ ] BASE-10 · 🟢 · Panel del socio: ingreso con mail y contraseña, vigencia, deuda, QR, PWA
-- [ ] BASE-11 · 🟢 · La simulación de "terminado" con 5.000 socios y "P0 LISTO PARA MAÑANA"
-- [ ] BASE-DOC · 🟢 · CONTEXTO, PERMISOS, INVESTIGACION, SCHEMA, CONVENCIONES y LECCIONES al día
+### 24 · Base (07/11 · `docs/base/`, empezar por `docs/base/00-LEEME.md`; **desde el 09/11 la lista que manda es `docs/base/RECTA-FINAL.md`**, esta es solo un resumen)
+- [x] BASE-0 · 🟢 · Next 16.4 (era VD-64) y los 58 recorridos que fallan con la app compilada
+- [~] BASE-1 · 🟢 · Velocidad: diagnóstico con números (`docs/base/VELOCIDAD.md`), después arreglos, con 5.000 socios y 100.000 ingresos
+- [x] BASE-2 · 🟢 · Usuarios, contraseñas (la escribe quien crea la cuenta) y links fijos por rol
+- [~] BASE-3 · 🟢 · Ingreso rápido: aviso flotante abajo a la derecha y panel lateral con Cobrar ahora
+- [x] BASE-4 · 🟢 · Siempre a la vista: números de recepción y dueño, lista en vivo, botones rápidos
+- [x] BASE-5 · 🟢 · `cubierto_hasta` por trigger (D36) sin cambiar ningún veredicto
+- [~] BASE-6 · 🟢 · Diseño de Base: nombre, claro/oscuro, íconos de línea, tipografía, recepción como mostrador, modales
+- [x] BASE-7 · 🟢 · Asistente de 9 pasos sobre Primeros pasos
+- [~] BASE-8 · 🟢 · Seguridad: logs públicos de Actions, RLS por rol, límites de intentos, encabezados, Ley 25.326
+- [~] BASE-9 · 🟢 · Página del gimnasio predeterminada, editable, con SEO
+- [~] BASE-10 · 🟢 · Panel del socio: ingreso con mail y contraseña, vigencia, deuda, QR, PWA
+- [x] BASE-11 · 🟢 · La simulación de "terminado" con 5.000 socios y "P0 LISTO PARA MAÑANA"
+- [x] BASE-DOC · 🟢 · CONTEXTO, PERMISOS, INVESTIGACION, SCHEMA, CONVENCIONES y LECCIONES al día
 
 ### 23 · Detalles (07/11 · orden y grupos en `docs/v2/DETALLES.md`)
 - [ ] VD-64 · 🟢 · (pasa a BASE-0) Pasar a Next 16.4 (trae el React que arregla las acciones que quedan en "Guardando…"): `scripts/diag/accion-colgada.mjs 50` sin ningún cuelgue con la app compilada, y todo lo demás como antes
@@ -521,7 +521,7 @@ bloque 18.
 - [x] VD-12E · 🟢 · Inicio: "Ahora y lo que sigue" no repite lo que ya está en Para hacer hoy (LISTO SI: nada aparece dos veces) — verificado: base en verde en GitHub (mi-seguridad); e2e vd-33b/vd-12e en la corrida de la tanda
 - [x] VD-5B · 🟢 · El alta ("Dar de alta y cobrar") y la pantalla de Entrada abren la hoja Cobrar en vez de ir a /panel/vender?…&cuota=1; actualizar ent-9, pla-3, pla-6, soc-13, vd-1 y vd-34 que esperan esa URL (LISTO SI: todos siguen verdes) — verificado: base en verde en GitHub; e2e (vd-6, vd-1b, vd-2b y los 12 viejos actualizados) en la corrida de la tanda
 - [ ] VD-5C · 🟢 · Prueba: Transferencias no mezcla comprobantes de mostrador con los del socio
-- [ ] VD-33D · 🟢 · 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
+- [ ] VD-33D · 🟢 · (pasa a SA-10, `docs/base/SUPER-ADMIN.md`) 2FA TOTP para dueño y super admin (LISTO SI: sin segundo factor no se entra a plata ni a equipo)
 - [ ] VD-33E · 🟢 · Al cambiar la contraseña, ofrecer cerrar las demás sesiones
 - [ ] VD-33F · 🟢 · Aviso al dueño cuando el equipo entra desde un dispositivo nuevo
 - [x] VD-6B · 🟢 · Interesados con DNI: la tabla guarda el DNI y el alta lo ofrece por DNI (hoy solo por celular) — verificado: prospectos.dni y el alta lo ofrece por DNI; base en verde en GitHub (interesados-dni)
@@ -563,9 +563,9 @@ bloque 18.
 - [ ] VD-20B · 🟢 · Aviso de rutina vencida al socio y gráfico de progreso por rutina y por socio para el profe
 - [ ] VD-22C · 🟢 · Botón "Sumar a otra persona" en /app y desvincular un Google desde la ficha (recepción)
 - [ ] VD-22D · 🟢 · Un solo usuario por socio con varias identidades (Google, celular, mail) sin que un ingreso desplace a otro
-- [ ] VD-40B · 🟢 · Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
-- [ ] VD-42B · 🟢 · Super admin con 2FA obligatorio: sin factor no entra a /admin y las admin_* exigen aal2
-- [ ] VD-42C · 🟢 · Pedir el código TOTP justo después de la contraseña al ingresar
+- [ ] VD-40B · 🟢 · (pasa a SA-1/3/4/8/9, `docs/base/SUPER-ADMIN.md`) Super admin: avisos a dueños por segmento y vigencia; campana del dueño para "BRIK entró a ayudarte"; módulos por gimnasio desde el super admin; logo en el alta; errores de 24 h, migraciones aplicadas y primeros pasos en la ficha
+- [ ] VD-42B · 🟢 · (pasa a SA-10, `docs/base/SUPER-ADMIN.md`) Super admin con 2FA obligatorio: sin factor no entra a /admin y las admin_* exigen aal2
+- [ ] VD-42C · 🟢 · (pasa a SA-10, `docs/base/SUPER-ADMIN.md`) Pedir el código TOTP justo después de la contraseña al ingresar
 - [ ] VD-42D · 🟢 · Alerta al dueño por exportes grandes e intentos fallidos de PIN; aal2 en exportar_mes y exportar_gastos
 - [ ] VD-43B · 🟢 · Ventas y clases de ejemplo borrables sin dejar plata en Resultado
 - [ ] VD-43C · 🟢 · Fecha objetivo "abrimos el…" y pista de primera vez por rol

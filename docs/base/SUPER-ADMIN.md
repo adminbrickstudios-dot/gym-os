@@ -149,8 +149,10 @@ Toca datos personales de todos los gimnasios:
   1. Primero exporta todo (zip con CSV de socios, pagos, ingresos y planes).
   2. Después queda 30 días en "para borrar", y se puede restaurar.
   3. El borrado final pide escribir el nombre del gimnasio y solo lo puede hacer el super admin principal.
-- **Papelera**: lo que un gimnasio borra (socio, plan, cobro anulado) se puede
-  restaurar desde la ficha por 30 días.
+- **Papelera**: lo que un gimnasio quita (un socio dado de baja por error, un plan
+  o una clase archivados) se puede restaurar desde la ficha por 30 días. Los
+  hechos de plata no se borran nunca: un cobro anulado se corrige con un hecho
+  nuevo, como hoy.
 
 ## SA-7 · Lo de BRIK: abonos y ventas
 
@@ -159,7 +161,10 @@ Toca datos personales de todos los gimnasios:
 - Prueba gratis de Base para un gimnasio nuevo: días, y qué pasa al terminar.
 - Descuentos por gimnasio, con motivo y fecha de fin.
 - **Demo para mostrar**: un botón "Crear demo para una reunión" que arma un
-  gimnasio con datos ficticios y el nombre del interesado. Se borra solo a los 7 días.
+  gimnasio `[demo]` aparte, con datos ficticios y el nombre del interesado. A
+  los 7 días queda "vencida" (se calcula, no hace falta un cron): deja de
+  abrirse y aparece en "Borrar demos vencidas". Un gimnasio `[demo]` sí se
+  puede borrar entero, porque no tiene datos reales. Esto destraba ADM-5.
 - Factura electrónica (ARCA): 🔌, cuando Mateo tenga el servicio.
 
 ## SA-8 · Comunicación

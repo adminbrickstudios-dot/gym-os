@@ -58,13 +58,14 @@ Dónde quedó (09/11, mediodía):
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre, o hecha si es 🟡 o ❌ | `DETALLES-70.md` | ❌ |
+| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | ❌ |
 
 ## Fase 5 · Lo que faltaba de todo lo que pidió Mateo
 
 Revisado el 09/11 contra todos los pedidos (`docs/v2/`, `PEDIDO-ORIGINAL.md`,
 el mensaje de arranque). Lo que no estaba en ninguna lista está en
-`FALTANTES.md`, y se hace en ese orden.
+`FALTANTES.md`, y se hace en ese orden. FA-1 a FA-6 van antes, en la fase 1
+(dentro del ítem que dice cada una).
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|

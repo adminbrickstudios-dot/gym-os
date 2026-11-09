@@ -359,9 +359,11 @@ estado acá abajo y publicado al cerrarlo.
 ## P2: propuestas
 
 [PROPUESTA] del pedido, después de P1:
-- Pantalla para la TV de la sala con quién entra y la ocupación (la TV de clases
-  ya existe, VD-60: sumar el modo entradas).
-- Pase de invitado (un socio trae a alguien una vez por mes).
+- TV de la sala: las clases de hoy, los cupos y el profe, como pidió Mateo (ya
+  existe, VD-60: pulirla), más la ocupación como número. Nunca nombres de socios
+  en una pantalla pública (D52).
+- Pase de invitado: ya existe (INV-1). Lo que falta, que el invitado quede como
+  interesado, está en `FALTANTES.md` FA-24.
 - Ocupación en vivo para el socio ("ahora hay 23 personas").
 - El socio congela su plan solo, dentro del tope.
 - Modo "tengo que cobrar" el día 1: la recepción ve una lista de cobro rápida.
