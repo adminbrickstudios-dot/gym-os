@@ -1,0 +1,39 @@
+# TEMPORAL (carril C, F1.6): reproduce la escala de medir-escala.yml y muestra el plan de la Retención. Se borra al cerrar F1.6.
+name: Perfil retención (temporal)
+
+on:
+  push:
+    branches: ["dia/c-perfil-retencion"]
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  perfil:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[perfil]')
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: scripts/db/local.sh nueva
+      - run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios 5000
+      - run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios 200
+      - run: psql "$(scripts/db/local.sh url)" -c "vacuum analyze"
+      - name: Perfil
+        run: |
+          node scripts/medir/perfil-retencion.mjs --url "$(scripts/db/local.sh url)" --plan | tee .local-perfil.txt
+          { echo '```'; cat .local-perfil.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
