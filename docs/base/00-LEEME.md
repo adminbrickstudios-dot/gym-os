@@ -109,6 +109,7 @@ como "decidido por defecto" y se sigue.
 | `RECTA-FINAL.md` | **Desde el 09/11, la única lista que sigue el loop**: 8 fases hasta "LISTO PARA TU PASADA" | Armado el 09/11, el agente marca el estado |
 | `PROGRESO.md` | El detalle de cada BASE-* del P0, y arriba el resumen para Mateo | El agente lo mantiene |
 | `SUPER-ADMIN.md` | El super admin mejorado (SA-1 a SA-12) | Armado el 08/11 |
+| `REPARTO.md` | Los 4 carriles: el agente principal y sus 3 ayudantes sin pisarse | Armado el 09/11 |
 | `FLUIDEZ.md` | La pasada botón por botón: las 14 reglas | Armado el 09/11 |
 | `FALTANTES.md` | Lo que Mateo pidió y no estaba en ninguna lista (FA-1 a FA-24) | Armado el 09/11 |
 | `PRUEBA-DUENO.md` | La pasada visual y la prueba del dueño que hace Mateo al final | Armado el 09/11, el agente lo prepara |

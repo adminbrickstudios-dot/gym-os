@@ -19,6 +19,16 @@ Dónde quedó (09/11, mediodía):
 
 ---
 
+## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento)
+
+| # | Qué | Detalle | Estado |
+|---|---|---|---|
+| F0.1 | Medir en producción: `Server-Timing` y `medir-produccion.yml` (Playwright contra producción desde Actions), con la tabla de antes | `VELOCIDAD.md` § Plan de la fase 0 | ❌ |
+| F0.2 | Un solo viaje para el contexto (`contexto_pantalla`), caché de lo que no cambia, el proxy sin viajes de más | `VELOCIDAD.md` | ❌ |
+| F0.3 | El menú (`pendientes_panel`) después de pintar y en menos de 50 ms | `VELOCIDAD.md` | ❌ |
+| F0.4 | Navegación instantánea: `staleTimes`, `prefetch`, `useOptimistic` en las acciones de todos los días | `VELOCIDAD.md` | ❌ |
+| F0.5 | Pasos para Mateo (claves asimétricas de Supabase, planes) escritos arriba de `PROGRESO.md`; la tabla de después | `VELOCIDAD.md` | ❌ |
+
 ## Fase 1 · Cerrar lo que quedó a medias del P0
 
 | # | Qué | Detalle | Estado |
@@ -28,7 +38,7 @@ Dónde quedó (09/11, mediodía):
 | F1.3 | **BASE-4**: "Caja del turno" como número de la recepción; botones rápidos Cobrar, Alta y Pase diario en Inicio | `PROGRESO.md` BASE-4 | ❌ |
 | F1.4 | **BASE-6**: tema claro u oscuro elegible por usuario, íconos de línea en lugar de emojis (componente `Icono`), letra Barlow, recepción como mostrador, modales revisados, chequeo que falla con un color suelto o un emoji como ícono, barrido en claro y oscuro con capturas | `DISENO.md`, `PROGRESO.md` BASE-6 | ❌ |
 | F1.5 | **BASE-7**: pasos 6 y 7 medidos como hechos, vista previa de logo y portada, "Probar conexión" de MercadoPago dentro del asistente, e2e con un gimnasio recién creado | `PROGRESO.md` BASE-7 | ❌ |
-| F1.6 | **BASE-1**: las listas usan `cubierto_hasta` (retención, vencen hoy, panel de inicio, pendientes, para hacer hoy, filtros de socios) y bajan de 300 ms con 5.000 socios. Pantallas medidas con la app compilada. El ingreso medido en producción contra el demo, en menos de 1 s | `VELOCIDAD.md` | ❌ |
+| F1.6 | **BASE-1** (lo que no cubrió la fase 0): las listas usan `cubierto_hasta` (retención, vencen hoy, panel de inicio, pendientes, para hacer hoy, filtros de socios) y bajan de 300 ms con 5.000 socios. Pantallas medidas con la app compilada. El ingreso medido en producción contra el demo, en menos de 1 s | `VELOCIDAD.md` | ❌ |
 | F1.7 | **BASE-8**: tope en "Olvidé mi contraseña" y en los formularios públicos, anti-robot de "Quiero ser socio" (D49), prueba de permisos por rol contra `PERMISOS.md`, Ley 25.326 (D52), ninguna contraseña demo débil en producción | `PROGRESO.md` BASE-8 | ❌ |
 | F1.8 | **BASE-9**: el botón dice "Quiero ser socio", Lighthouse local en celular ≥ 90, validador de datos estructurados sin errores | `PROGRESO.md` BASE-9 | ❌ |
 | F1.9 | Los **24 recorridos e2e viejos** sin verde: cada uno arreglado (la pantalla o la prueba) | `DIAGNOSTICO-BASE0.md` | ❌ |

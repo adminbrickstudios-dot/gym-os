@@ -39,7 +39,8 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 1. `git fetch origin`, `git switch base/2026-11-07`,
    `git pull --rebase origin base/2026-11-07`. En Windows, los comandos de base
    con `source /c/Users/consu/pg-portable/env.sh &&` adelante.
-2. Leé `CLAUDE.md`, `docs/base/00-LEEME.md`, `docs/base/RECTA-FINAL.md`, y de
+2. Leé `CLAUDE.md`, `docs/base/00-LEEME.md`, `docs/base/RECTA-FINAL.md`,
+   `docs/base/REPARTO.md`, y de
    `docs/base/PREGUNTAS.md` lo abierto. Del resto, solo lo que el ítem señala:
    - `PROGRESO.md`, para los BASE-*.
    - `SUPER-ADMIN.md`.
@@ -132,12 +133,19 @@ datos → `estado` no muestra ningún gimnasio real (sin `[demo]`):
 Si hay un gimnasio real: dejás la rama, el PR abierto y los pasos 3 a 5
 escritos arriba en `PROGRESO.md` para Mateo.
 
-## Agentes en paralelo
+## Agentes en paralelo (`REPARTO.md`)
 
-Podés usar hasta 2 agentes más en worktrees, para ítems que no tocan los mismos
-archivos ni la misma migración. Cada uno con su rama; vos mergeás y verificás.
-Migraciones con número `20261109FFNN00` (FF = fase y número del ítem, NN =
-orden).
+Trabajás con **hasta 3 ayudantes a la vez**, en worktrees, cada uno en su
+carril (B super admin, C socio y página, D diseño y detalles del panel). Vos
+hacés el carril A (velocidad y recepción), integrás, compilás, corrés los e2e y
+publicás.
+
+- Al empezar la vuelta, mirá qué carriles no tienen un ayudante trabajando y
+  lanzá uno por cada carril con su próximo ítem.
+- Al recibir el informe de un ayudante: verificalo ejecutando, mergealo y
+  marcá el estado.
+- Lo pesado (`next build`, la app, Playwright) solo lo corrés vos. Los
+  ayudantes no levantan nada.
 
 ## Al terminar todo
 
