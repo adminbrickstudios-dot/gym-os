@@ -19,6 +19,10 @@ export function BotonEntrar({ gimnasioId, principal = true, texto = "🚪 Entrar
         <span className="etiqueta">¿Para qué entrás? El dueño lo va a ver</span>
         <input name="motivo" required minLength={5} maxLength={300} autoFocus defaultValue={motivoInicial} className="campo" placeholder="Me pidió ayuda con los planes" />
       </label>
+      <label className="space-y-1"><span className="etiqueta">Con qué rol</span>
+        <select name="rol" className="campo" defaultValue="dueno" data-rol-soporte>
+          <option value="dueno">Dueño</option><option value="recepcion">Recepción</option><option value="profe">Profe</option>
+        </select></label>
       <button className={`boton ${principal ? "boton-principal" : ""}`}>Entrar como soporte</button>
       <button type="button" className="boton texto-suave" onClick={() => setAbierto(false)}>Cancelar</button>
     </form>

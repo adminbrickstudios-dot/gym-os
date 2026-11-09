@@ -172,6 +172,23 @@ export const resolverAyuda = async (id: string) => hechoAdmin(() => rpc("admin_r
 export const agregarNotaBrik = async (gimnasioId: string, texto: string) =>
   hechoAdmin(() => rpc("admin_agregar_nota", { p_gimnasio_id: gimnasioId, p_texto: texto }), [`/admin/${gimnasioId}`]);
 
+// ── Carril B (F2): ficha, favoritos y búsqueda. Todo pasa por funciones admin_* (la base valida y deja registro). ──
+export const cambiarDueno = async (gimnasioId: string, equipoId: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_dueno", { p_gimnasio_id: gimnasioId, p_equipo_id: equipoId }), [`/admin/${gimnasioId}`, "/admin/gimnasios"]);
+export const guardarModulos = async (gimnasioId: string, apagadas: string[]) =>
+  hechoAdmin(() => rpc("admin_guardar_modulos", { p_gimnasio_id: gimnasioId, p_apagadas: apagadas }), [`/admin/${gimnasioId}`]);
+export const cambiarSlug = async (gimnasioId: string, slug: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_slug", { p_gimnasio_id: gimnasioId, p_slug: slug }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
+export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>
+  hechoAdmin(() => rpc("admin_marcar_favorito", { p_gimnasio_id: gimnasioId, p_favorito: favorito }), ["/admin/gimnasios"]);
+
+export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean };
+/** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
+export async function buscarPersona(q: string, motivo: string): Promise<{ error?: string; personas?: PersonaEncontrada[] }> {
+  try { return { personas: await rpc<PersonaEncontrada[]>("admin_buscar_persona", { p_q: q, p_motivo: motivo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 // ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──
 export const atenderDemo = async (id: string) => hechoAdmin(() => rpc("admin_atender_demo", { p_id: id }), ["/admin"]);
 

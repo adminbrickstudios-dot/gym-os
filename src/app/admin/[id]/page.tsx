@@ -12,10 +12,18 @@ import { AgregarPersona, Direcciones } from "./Formularios";
 import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
 import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
 import { Notas, type NotaBrik } from "./Notas";
+import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
+import { enlacesPorRol } from "@/lib/admin/lista";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
 type Semana = { desde: string; entradas: number; ventas: number; socios_nuevos: number };
-type Soporte = { id: string; quien: string; motivo: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
+type FichaExtraDatos = {
+  zona_horaria: string; secciones_apagadas: string[]; secciones_validas: string[]; ultimo_webhook: string | null;
+  webhooks_fallidos: { id: string; tipo: string; recibido_en: string; intentos: number; error: string | null }[];
+  registro: { accion: string; quien: string; detalle: Record<string, unknown>; cuando: string }[];
+};
+const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como soporte", cambiar_dueno: "Cambió el dueño", guardar_modulos: "Cambió los módulos", cambiar_slug: "Cambió el slug", buscar_persona: "Buscó a una persona" };
+type Soporte = { id: string; quien: string; motivo: string; rol?: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
 const COLOR = { rojo: ["🔴 Urgente", "pildora-rojo"], amarillo: ["🟡 Atención", "pildora-amarillo"], verde: ["🟢 Todo bien", "pildora-verde"] } as const;
 const diaCorto = (d: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
@@ -36,9 +44,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   const { id } = await params;
   let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
-  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[];
+  let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos;
   try {
-    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas] = await Promise.all([
+    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra] = await Promise.all([
       rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<Record<string, EstadoAbono>>("admin_abonos"),
@@ -47,6 +55,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       rpc<Semana[]>("admin_uso_semanal", { p_gimnasio_id: id }),
       rpc<Soporte[]>("admin_soportes", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<NotaBrik[]>("admin_notas", { p_gimnasio_id: id }),
+      rpc<FichaExtraDatos>("admin_ficha_extra", { p_gimnasio_id: id }),
     ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
@@ -112,6 +121,37 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           ))}
         </ul>
         <AgregarPersona gimnasioId={g.gimnasio_id} />
+        <CambiarDueno gimnasioId={g.gimnasio_id} candidatos={g.equipo.filter((p) => p.activo && !p.es_soporte && p.rol !== "dueno").map((p) => ({ equipo_id: p.equipo_id, nombre: p.nombre }))} />
+      </section>
+
+      <section className="space-y-3" data-ficha-datos>
+        <p className="titulo-grupo">Datos</p>
+        <p className="texto-suave">Zona horaria: {extra.zona_horaria}. El resto de los datos del gimnasio los cambia su dueño, o BRIK entrando como soporte.</p>
+        <CambiarSlug gimnasioId={g.gimnasio_id} slug={g.slug} />
+      </section>
+
+      <section className="space-y-3" data-ficha-links>
+        <p className="titulo-grupo">Links por rol</p>
+        <LinksPorRol links={enlacesPorRol(g.dominios[0]?.host)} />
+      </section>
+
+      <section className="space-y-3" data-ficha-modulos>
+        <p className="titulo-grupo">Módulos</p>
+        <Modulos key={extra.secciones_apagadas.join(",")} gimnasioId={g.gimnasio_id} validas={extra.secciones_validas} apagadas={extra.secciones_apagadas} />
+      </section>
+
+      <section className="space-y-3" data-ficha-integraciones>
+        <p className="titulo-grupo">Integraciones</p>
+        <p className="texto-suave">MercadoPago: último aviso recibido {fecha(extra.ultimo_webhook)}. Nunca se muestran las claves.</p>
+        {extra.webhooks_fallidos.length === 0 ? <p className="texto-tenue">Ningún aviso fallido.</p> : (
+          <ul className="space-y-2">
+            {extra.webhooks_fallidos.map((w) => (
+              <li key={w.id} className="tarjeta p-3 text-sm" data-webhook-fallido>
+                <span className="font-semibold">{w.tipo}</span> · {fecha(w.recibido_en)} · {w.intentos} {w.intentos === 1 ? "intento" : "intentos"}{w.error ? ` · ${w.error}` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="space-y-3">
@@ -128,7 +168,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           <div className="space-y-2">
             {soportes.map((s) => (
               <div key={s.id} className="tarjeta p-4" data-soporte={s.en_curso ? "en-curso" : "cerrado"}>
-                <p className="font-semibold break-words">{s.motivo}</p>
+                <p className="font-semibold break-words">{s.motivo}{s.rol && <span className="pildora ml-2 align-middle">{NOMBRE_ROL[s.rol as Rol] ?? s.rol}</span>}</p>
                 <p className="texto-suave text-sm break-all">{s.quien} · entró {fecha(s.entro_en)}{s.en_curso ? ` · adentro hasta ${fecha(s.vence_en)}` : ` · salió ${fecha(s.salio_en)}`}</p>
               </div>
             ))}
@@ -139,6 +179,20 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3">
         <p className="titulo-grupo">Notas internas de BRIK</p>
         <Notas gimnasioId={g.gimnasio_id} notas={notas} />
+      </section>
+
+      <section className="space-y-3" data-ficha-registro>
+        <p className="titulo-grupo">Registro de BRIK en este gimnasio</p>
+        {extra.registro.length === 0 ? <p className="texto-tenue">BRIK todavía no hizo nada acá.</p> : (
+          <ul className="space-y-2">
+            {extra.registro.map((r, i) => (
+              <li key={i} className="tarjeta p-3 text-sm">
+                <span className="font-semibold">{ACCION[r.accion] ?? r.accion}</span> · {r.quien} · {fecha(r.cuando)}
+                {typeof r.detalle.motivo === "string" && <span className="texto-suave"> · {r.detalle.motivo}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="space-y-3" data-admin-cambios>
