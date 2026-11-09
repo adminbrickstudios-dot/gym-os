@@ -13,6 +13,8 @@ export async function GET(req: NextRequest) {
     p_q: u.get("q")?.slice(0, 80) || null, p_salud: ok(u.get("salud"), ["verde", "amarillo", "rojo"]),
     p_abono: ok(u.get("abono"), ["al_dia", "por_vencer", "vencido", "sin_abono"]), p_plan: u.get("plan")?.slice(0, 60) || null,
     p_alta_desde: fecha(u.get("desde")), p_alta_hasta: fecha(u.get("hasta")),
+    p_ciudad: u.get("ciudad")?.slice(0, 80) || null, p_modulo: ok(u.get("modulo"), ["clases", "caja", "vender", "rutinas", "retencion", "transferencias", "pt"]),
+    p_con_bajas: u.get("bajas") === "1",
   });
   if (error) return new NextResponse(error.message, { status: 403 });
   return new NextResponse(csvGimnasios(data as FilaGimnasio[]), {

@@ -182,7 +182,31 @@ export const cambiarSlug = async (gimnasioId: string, slug: string) =>
 export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>
   hechoAdmin(() => rpc("admin_marcar_favorito", { p_gimnasio_id: gimnasioId, p_favorito: favorito }), ["/admin/gimnasios"]);
 
-export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean };
+export const guardarCiudad = async (gimnasioId: string, ciudad: string) =>
+  hechoAdmin(() => rpc("admin_guardar_ciudad", { p_gimnasio_id: gimnasioId, p_ciudad: ciudad }), [`/admin/${gimnasioId}`, "/admin/gimnasios"]);
+export const pausarGimnasio = async (gimnasioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_pausar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const reanudarGimnasio = async (gimnasioId: string) =>
+  hechoAdmin(() => rpc("admin_reanudar_gimnasio", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const darDeBajaGimnasio = async (gimnasioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_dar_de_baja", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const restaurarBaja = async (gimnasioId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_baja", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const borrarSocio = async (gimnasioId: string, socioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_borrar_socio", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_motivo: motivo }), []);
+export const exigir2fa = async (exigir: boolean) => hechoAdmin(() => rpc("admin_exigir_2fa", { p_exigir: exigir }), ["/admin/seguridad"]);
+export const darRolBrik = async (email: string, rol: string) => hechoAdmin(() => rpc("admin_dar_rol_brik", { p_email: email, p_rol: rol }), ["/admin/seguridad"]);
+export const quitarRolBrik = async (usuarioId: string) => hechoAdmin(() => rpc("admin_quitar_rol_brik", { p_usuario_id: usuarioId }), ["/admin/seguridad"]);
+export async function crearDemo(interesado: string, tipo: string): Promise<{ error?: string; aviso?: string; gimnasioId?: string }> {
+  try {
+    const r = await rpc<{ gimnasio_id: string; host: string }>("admin_crear_demo", { p_interesado: interesado, p_tipo: tipo || null, p_dominio_base: dominioBase() });
+    revalidatePath("/admin");
+    return { aviso: `Demo lista en ${r.host}. Vence en 7 días.`, gimnasioId: r.gimnasio_id };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const borrarDemosVencidas = async () => hechoAdmin(() => rpc("admin_borrar_demos_vencidas"), ["/admin"]);
+
+export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
 /** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
 export async function buscarPersona(q: string, motivo: string): Promise<{ error?: string; personas?: PersonaEncontrada[] }> {
   try { return { personas: await rpc<PersonaEncontrada[]>("admin_buscar_persona", { p_q: q, p_motivo: motivo }) }; }

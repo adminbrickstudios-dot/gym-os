@@ -13,7 +13,8 @@ export const metadata: Metadata = { title: "BRIK · Lista de gimnasios" };
 const SALUD = [["rojo", "Urgente"], ["amarillo", "Atención"], ["verde", "Todo bien"]] as const;
 const ABONO = [["al_dia", "Al día"], ["por_vencer", "Por vencer"], ["vencido", "Vencido"], ["sin_abono", "Sin abono / prueba"]] as const;
 const PILDORA = { rojo: "pildora-rojo", amarillo: "pildora-amarillo", verde: "pildora-verde" } as const;
-type Parametros = { q?: string; salud?: string; abono?: string; plan?: string; desde?: string; hasta?: string };
+type Parametros = { q?: string; salud?: string; abono?: string; plan?: string; desde?: string; hasta?: string; ciudad?: string; modulo?: string; bajas?: string };
+const MODULOS = [["clases", "Clases"], ["caja", "Caja"], ["vender", "Vender"], ["rutinas", "Rutinas"], ["retencion", "Retención"], ["transferencias", "Transferencias"], ["pt", "Turnos de entrenador"]] as const;
 const fechaValida = (s?: string) => (s && /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null);
 
 /** SA-2: la lista de gimnasios con buscador, filtros, favoritos y botones directos por fila. */
@@ -26,6 +27,9 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
     p_abono: ABONO.some(([k]) => k === p.abono) ? p.abono : null,
     p_plan: p.plan?.slice(0, 60) || null,
     p_alta_desde: fechaValida(p.desde), p_alta_hasta: fechaValida(p.hasta),
+    p_ciudad: p.ciudad?.slice(0, 80) || null,
+    p_modulo: MODULOS.some(([k]) => k === p.modulo) ? p.modulo : null,
+    p_con_bajas: p.bajas === "1",
   };
   let filas: FilaGimnasio[];
   try { filas = await rpc<FilaGimnasio[]>("admin_lista_gimnasios", args); }
@@ -35,6 +39,7 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
   }
   const exportar = new URLSearchParams(Object.entries(p).filter(([, v]) => v) as [string, string][]).toString();
   const hayFiltro = Object.values(args).some((v) => v);
+  const ciudades = [...new Set(filas.map((f) => f.ciudad).filter((c): c is string => !!c))];
   return (
     <main className="mx-auto max-w-6xl px-4 sm:px-8 py-10 space-y-6">
       <header className="space-y-2">
@@ -53,6 +58,11 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
         <label className="space-y-1"><span className="etiqueta">Plan de BRIK</span><input name="plan" defaultValue={p.plan ?? ""} className="campo" maxLength={60} /></label>
         <label className="space-y-1"><span className="etiqueta">Alta desde</span><input type="date" name="desde" defaultValue={args.p_alta_desde ?? ""} className="campo" /></label>
         <label className="space-y-1"><span className="etiqueta">Alta hasta</span><input type="date" name="hasta" defaultValue={args.p_alta_hasta ?? ""} className="campo" /></label>
+        <label className="space-y-1"><span className="etiqueta">Ciudad</span>
+          <input name="ciudad" list="ciudades" defaultValue={p.ciudad ?? ""} className="campo" maxLength={80} /><datalist id="ciudades">{ciudades.map((c) => <option key={c} value={c} />)}</datalist></label>
+        <label className="space-y-1"><span className="etiqueta">Tiene prendido</span>
+          <select name="modulo" defaultValue={args.p_modulo ?? ""} className="campo"><option value="">Cualquier módulo</option>{MODULOS.map(([k, t]) => <option key={k} value={k}>{t}</option>)}</select></label>
+        <label className="flex items-center gap-2 sm:col-span-3 lg:col-span-2"><input type="checkbox" name="bajas" value="1" defaultChecked={p.bajas === "1"} /><span>Mostrar los dados de baja (papelera)</span></label>
         <div className="flex gap-2 sm:col-span-3 lg:col-span-6">
           <button className="boton boton-principal">Filtrar</button>
           {hayFiltro && <Link href="/admin/gimnasios" className="boton texto-suave">Quitar filtros</Link>}
@@ -75,10 +85,12 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
                   <p className="titulo text-xl">
                     {g.nombre} {g.es_demo && <span className="pildora align-middle">demo</span>}{" "}
                     {!g.es_demo && <span className={`pildora ${PILDORA[g.color]} align-middle`}>{SALUD.find(([k]) => k === g.color)?.[1]}</span>}{" "}
-                    {g.suspendido && <span className="pildora pildora-rojo align-middle">suspendido</span>}{" "}
+                    {g.suspendido && !g.para_borrar && <span className="pildora pildora-rojo align-middle">pausado</span>}{" "}
+                    {g.para_borrar && <span className="pildora pildora-rojo align-middle">para borrar</span>}{" "}
+                    {g.demo_vencida && <span className="pildora pildora-amarillo align-middle">demo vencida</span>}{" "}
                     <span className="pildora align-middle" data-abono={g.abono}>{nombreAbono(g.abono)}{g.plan ? ` · ${g.plan}` : ""}</span>
                   </p>
-                  <p className="texto-suave text-sm mt-1">Dueño: {g.dueno ?? "sin dueño"} · {g.hosts[0] ?? "sin dirección"}</p>
+                  <p className="texto-suave text-sm mt-1">{g.ciudad ? `${g.ciudad} · ` : ""}Dueño: {g.dueno ?? "sin dueño"} · {g.hosts[0] ?? "sin dirección"}</p>
                   {!g.es_demo && g.motivos.length > 0 && <p className="texto-suave text-sm mt-1">{g.motivos.join(" · ")}</p>}
                 </div>
                 <dl className="flex gap-5 text-right">

@@ -99,6 +99,40 @@ Respuesta de Mateo: (vacío)
 - **Reprocesar webhook:** la ficha lista los fallidos pero no los reprocesa: eso toca la ruta del webhook de MercadoPago
   (plata). Recomendado: función que vuelva a correr el mismo handler idempotente por `id_externo`.
 - **Cambiar quién es el dueño:** el anterior queda como encargado (no pierde el acceso). Decidido por defecto.
+
+#### Carril B, segunda tanda (migración 20261109020200)
+
+- **Roles de BRIK (SA-10): aplicados solo a lo nuevo.** `privado.exigir_brik(roles)` manda en entrar como soporte, buscar,
+  lista, tablero, pausa, baja, demos, exportar, borrar y registro. Las 31 funciones `admin_*` viejas (abono, novedades, alta,
+  equipo, claves, dominios) siguen aceptando a cualquier admin: un "solo lectura" todavía podría llamarlas. Recomendado:
+  que el principal les ponga `exigir_brik` una por una (es permisos, no lo toqué). Todos los admins existentes quedan `principal`.
+- **Segundo factor (SA-10):** `privado.soy_admin_plataforma()` ahora exige `aal2` cuando `plataforma_ajustes.exigir_2fa` es
+  true. Por defecto está apagado (nada cambia hoy). Mateo lo prende desde `/admin/seguridad` después de activar y confirmar
+  su código; la base no deja prenderlo si quien lo prende no confirmó. Cambia una función central de permisos: revisar.
+  No hice "aviso por equipo o lugar nuevo" ni "cerrar todas las sesiones de un gimnasio" (necesita la API de admin de Supabase).
+- **Pausa:** pausar = `suspension_manual_*` y `privado.solo_lectura` devuelve true (panel en solo lectura; puerta y app siguen).
+  El mensaje del trigger sigue hablando del abono vencido: cambiar el texto toca `frenar_si_solo_lectura` (otro carril/permisos).
+  "Muestra: pausado, hablá con BRIK" en la pantalla no está: lo mostraría el layout del panel (carril A).
+- **Baja:** deja el gimnasio pausado y "para borrar" 30 días, restaurable, con exportación primero (zip de CSV en
+  `/admin/[id]/exportar`). **El borrado definitivo NO está hecho**: los hechos (pagos, ingresos) no se pueden borrar por
+  diseño y falta un procedimiento revisado. Decidir si "borrar" es anonimizar todo (como con un socio) o un purge manual.
+- **Papelera (socio, plan o clase quitados por error):** sin hacer.
+- **Clonar la configuración de otro gimnasio:** sin hacer (los planes tienen historial de precios: hay que decidir qué se copia).
+- **Demo para reunión:** crea el gimnasio `[demo]` con la plantilla elegida y vence a los 7 días (se calcula); no carga socios
+  ficticios (los pone `scripts/` del seed, fuera de la base). "Deja de abrirse" al vencer: no está aplicado (tocaría `gimnasio_por_slug`
+  y el proxy, carril A); hoy aparece como "demo vencida" y "Borrar demos vencidas" la pone en baja.
+- **Errores (SA-9):** tabla `errores_app` y `registrar_error_app(gimnasio, pantalla, mensaje)`. **Falta llamarla** desde las
+  pantallas `error.tsx` de los paneles (`src/app/panel/error.tsx`, carril D/A) y de `/app`. Hasta entonces el tablero muestra 0 errores.
+- **Campana del dueño:** "BRIK entró a ayudarte (como X)" + motivo, por 7 días. Envuelvo `privado.avisos_moderacion` (el
+  original queda como `avisos_moderacion_base`). Si otro carril redefine `avisos_moderacion`, pierde el aviso: usar la base.
+- **Marco de color de soporte:** ya existía (`BannerSoporte` en `src/app/panel/layout.tsx`, carril A). No dice con qué rol entró:
+  pedirle al principal que lo muestre con `estado_soporte`.
+- **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
+  y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
+  Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+- **SA-8 (comunicación):** sin hacer: novedades por plan/ciudad/módulo, "cuántos la vieron", aviso de mantenimiento programado.
+- **SA-7:** hechas las demos; el recordatorio de abono por wa.me, la prueba gratis y los descuentos quedan sin hacer.
+- **SA-9 (plataforma):** hechos los errores; falta estado del deploy y de las migraciones, uso por gimnasio y funciones a prueba por gimnasio.
 ### Carril C · Socio, página e ingreso (ayudante 2, 09/11) — opción recomendada ya aplicada, avisame si no
 - **"Ese mail no tiene cuenta en Gimnasio X" contra VD-33 ("el mismo mensaje exista o no la cuenta").** El pedido (F1.2) manda el error con nombre. Se aplicó **solo desde la dirección de un gimnasio, solo después de una contraseña mala y con el tope de BASE-8 ya aplicado** (8 fallos por mail y 20 por conexión cada 15 min); si el mail tiene ficha de socio o usuario del equipo ahí, el texto sigue siendo "El mail o la contraseña no son correctos". Costo: alguien puede averiguar si un mail es socio de un gimnasio (hasta 8 veces por mail cada 15 min). Si preferís el mensaje único, es borrar la llamada a `mail_para_ingresar` en `src/app/ingresar/acciones.ts`. **`scripts/e2e/vd-33.mjs` línea 58 compara con cuenta y sin cuenta y va a fallar: hay que cambiarla** (es del carril A).
 - **Mail y contraseña adelante para el socio (D43).** Cambia lo que se ve primero en `/ingresar?modo=socio`: ya no es el campo de celular. **Todas las pruebas e2e que entran con `entrarSocio` (`scripts/e2e/comun.mjs`) dejan de andar** hasta que `entrarSocio` haga clic en el botón "Celular" antes de llenar `input[name=telefono]` (una línea, del carril A).
