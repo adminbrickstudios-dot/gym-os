@@ -24,13 +24,30 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
   const { error } = await supabase.auth.signInWithPassword({ email, password: contrasena });
   if (error) {
     if (!sinConexion(error) && !demasiadosIntentos(error)) await clienteServicio().rpc("registrar_ingreso_fallido", { p_destino: email, p_ip: ip });
-    // Mismo texto para toda falla de la cuenta (no existe, clave mala, sin confirmar): no revela quién tiene cuenta.
     if (sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email };
     if (demasiadosIntentos(error)) return { error: TEXTO_DEMASIADOS_INTENTOS, email };
-    return { error: (error.status ?? 400) >= 500 ? "No pudimos iniciar sesión ahora. Probá de nuevo en un rato." : "El mail o la contraseña no son correctos", email };
+    if ((error.status ?? 400) >= 500) return { error: "No pudimos iniciar sesión ahora. Probá de nuevo en un rato.", email };
+    return { error: await textoCredencialesMalas(email), email };
   }
   const r = await destinoTrasEntrar(supabase, String(form.get("siguiente") ?? "") || null);
   return r.error ? { error: r.error, email } : r;
+}
+
+/**
+ * F1.2 · Error con nombre: desde la dirección de un gimnasio, si el mail no tiene ficha ni usuario ahí, lo dice
+ * ("Ese mail no tiene cuenta en Gimnasio X"). Solo se pregunta después de una contraseña mala, con el tope de intentos
+ * fallidos ya aplicado (8 por mail y 20 por conexión cada 15 min). Si la cuenta existe, o la base no responde, o no es
+ * la dirección de un gimnasio, queda el texto de siempre.
+ */
+async function textoCredencialesMalas(email: string): Promise<string> {
+  const generico = "El mail o la contraseña no son correctos";
+  const gimnasioId = (await headers()).get("x-gimnasio-id");
+  if (!gimnasioId) return generico;
+  const { clienteServicio } = await import("@/lib/supabase/servicio");
+  const { data, error } = await clienteServicio().rpc("mail_para_ingresar", { p_gimnasio_id: gimnasioId, p_email: email });
+  const r = data as { gimnasio: string | null; existe: boolean | null } | null;
+  if (error || !r?.gimnasio || r.existe !== false) return generico;
+  return `Ese mail no tiene cuenta en ${r.gimnasio}. Revisalo, o pedile a la recepción que te anote con ese mail.`;
 }
 
 // ── Socios: entrar con el celular y un código ───────────────────────
@@ -165,6 +182,14 @@ export async function verificarRecuperacion(_: EstadoRecuperar, form: FormData):
   const { data, error } = await supabase.auth.verifyOtp({ email, token: codigo, type: "email" });
   if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email, enviado: true };
   if (error || !data.user) return { error: demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : TEXTO_CODIGO_MALO, email, enviado: true };
+  // F1.2: el socio dado de alta con mail recibe el link para crear su contraseña. El código que acaba de verificar prueba
+  // que el mail es suyo: ahí se vincula su cuenta a la ficha de ESTE gimnasio (igual que al entrar con el código del mail).
+  const gimnasioId = (await headers()).get("x-gimnasio-id");
+  if (gimnasioId) {
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { error: errVincula } = await clienteServicio().rpc("vincular_socios_por_email", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
+    if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, email, enviado: true };
+  }
   return { email, enviado: true, verificado: true };
 }
 

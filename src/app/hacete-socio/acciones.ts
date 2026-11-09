@@ -7,6 +7,7 @@ export type Transferencia = { alias: string | null; cbu: string | null; titular:
 export type ResultadoAlta = {
   error?: string; ya_socio?: boolean; listo?: boolean; nombre?: string; plan?: string; precio?: number | string | null;
   medio?: "transferencia" | "mostrador"; transferencia?: Transferencia | null; datos?: Record<string, string>;
+  linkContrasena?: string;
 };
 
 /** Hacerse socio: lo decide la base (altas prendidas, plan válido, reglamento vigente, sin duplicar). */
@@ -28,5 +29,15 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   if (error) return { error: error.message, datos };
   const r = data as { ya_socio: boolean; plan?: string; precio?: number | string | null; medio?: "transferencia" | "mostrador"; transferencia?: Transferencia | null };
   if (r.ya_socio) return { ya_socio: true, nombre: datos.nombre };
-  return { listo: true, nombre: datos.nombre, plan: r.plan, precio: r.precio, medio: r.medio, transferencia: r.transferencia };
+  // F1.2 (D43): con mail, el alta trae el link para crear su contraseña. Si no se puede armar, el alta igual quedó hecha
+  // y entra con el código a su celular o a su mail.
+  let linkContrasena: string | undefined;
+  if (datos.email) {
+    try {
+      const { prepararLinkContrasenaSocio } = await import("@/lib/app/acceso-socio-servidor");
+      const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
+      linkContrasena = (await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: host, origen })).link;
+    } catch { linkContrasena = undefined; }
+  }
+  return { listo: true, nombre: datos.nombre, plan: r.plan, precio: r.precio, medio: r.medio, transferencia: r.transferencia, linkContrasena };
 }

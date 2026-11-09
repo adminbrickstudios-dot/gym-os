@@ -398,7 +398,7 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   const pasos = [
     probar && { href: "#probar", titulo: "Probá una clase", texto: "Dejás tu WhatsApp y te escribimos para arreglar día y hora." },
     planes && { href: "#planes", titulo: "Elegí tu plan", texto: "Mirá los precios y quedate con el que te cierra." },
-    altas && { href: "/hacete-socio", titulo: "Hacete socio", texto: "Te anotás desde el celular y empezás." },
+    altas && { href: "/hacete-socio", titulo: "Quiero ser socio", texto: "Te anotás desde el celular y empezás." },
   ].filter(Boolean) as { href: string; titulo: string; texto: string }[];
   if (pasos.length < 2) return null;
   return (
@@ -442,7 +442,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Hacete socio</a>}
+            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Quiero ser socio</a>}
             {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
             <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           </nav>
@@ -467,7 +467,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               <div className="mt-8 flex flex-wrap gap-3">
                 {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis>🎁 Probá gratis</a>}
                 {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
+                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Quiero ser socio</a>}
               </div>
             </div>
           </div>
@@ -482,7 +482,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis>🎁 Probá gratis</a>}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
+              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Quiero ser socio</a>}
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>

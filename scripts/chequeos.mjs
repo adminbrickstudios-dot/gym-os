@@ -77,6 +77,10 @@ const EJECUTABLES = {
     "public.renovar_alquiler_locker", "public.liberar_locker", "public.lockers_panel", "public.mi_locker", "public.lockers_vencen_semana",
     "public.guardar_pack_pt", "public.guardar_config_pt", "public.cargar_franjas_pt", "public.quitar_franja_pt", "public.reservar_sesion_pt",   // VD-58
     "public.cancelar_sesion_pt", "public.marcar_sesion_pt", "public.agenda_pt", "public.pt_socio", "public.sesiones_dictadas_pt",
+    // Carril C (09/11): series hechas (FA-15), resumen de la app (FA-14), foto propia (FA-16). El de "mail para ingresar" es solo del servidor.
+    "public.marcar_serie_rutina", "public.series_hechas_hoy", "public.resumen_app_socio",
+    "public.foto_propia_permitida", "public.preparar_foto_propia", "public.confirmar_foto_propia", "public.foto_propia",
+    "public.foto_estado_socio", "public.confirmar_foto_subida", "public.guardar_foto_socio_permitida",
   ]),
 };
 
