@@ -60,7 +60,9 @@ Escala: número grande de Inicio 44 px · título de pantalla 28 px · nombre en
 aviso 22 px · texto 15 px · etiqueta 13 px. La jerarquía se hace con el tamaño
 y el peso, no con cajas.
 
-Sin mayúsculas sostenidas en etiquetas. Sin texto con letras separadas.
+Sin mayúsculas sostenidas en etiquetas ni texto con letras separadas. La única
+excepción son los títulos de grupo del menú lateral (HOY, SOCIOS, PLATA,
+GIMNASIO): van en mayúsculas chicas y en gris, como pidió Mateo.
 
 ## Forma
 
@@ -79,6 +81,18 @@ Sin mayúsculas sostenidas en etiquetas. Sin texto con letras separadas.
   color del estado.
 - **Ningún emoji como ícono**, en ningún panel, app ni página. (Un emoji que el
   dueño escribe en un texto suyo es de él y se respeta.)
+
+## Textos (que no parezcan hechos por una IA)
+
+- Valen para todo lo que se lee: paneles, app, página del gimnasio, página de
+  venta de Base, super admin, mensajes de WhatsApp armados y mails.
+- Voz concreta y corta, en español rioplatense neutro. Cada texto dice algo que
+  se puede comprobar: "Te quedan 12 días", no "Disfrutá tu experiencia".
+- Nada de frases de IA: "experiencia única", "llevá tu gimnasio al siguiente
+  nivel", "sin complicaciones", "potenciá", "solución integral".
+- Los paneles son sobrios y densos donde se trabaja (recepción, caja, socios), y
+  más aireados donde se lee (la página del gimnasio, la app del socio).
+- En la fase de fluidez se revisan **todos** los textos visibles con esta regla.
 
 ## Lo prohibido
 
@@ -134,7 +148,23 @@ y en celular.
 └────────────────────────────────────────┴─────────────────────────┘
 ```
 
+### Qué es lo principal de cada Inicio (D58)
+
+- **Recepción:** el mostrador de arriba. Primero la barra de búsqueda, después
+  la franja de números y la lista en vivo. Para hacer hoy va al costado.
+- **Dueño:** el saludo, los accesos rápidos, los números y **Para hacer hoy**
+  como bloque principal (VD-13D). La lista en vivo va debajo.
+
 ### El aviso flotante (BASE-3)
+
+Abajo a la derecha, **sin tapar nunca** el botón de Entrada ni la barra fija
+(D56):
+- Si está el botón flotante de Entrada, los avisos se apilan arriba de él.
+- Si está la barra fija a la derecha, los avisos van a la izquierda de la
+  barra.
+- En la recepción con el mostrador, la búsqueda está arriba y la esquina queda
+  libre.
+
 
 - 360 px de ancho, abajo a la derecha, encima de todo. En celular, abajo a lo
   ancho.

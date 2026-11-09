@@ -44,6 +44,19 @@ Respuesta de Mateo: (vacío)
 | D51 | ¿Planes pagos? | El agente escribe qué hace falta; no contrata. | Gastar plata es de Mateo. |
 | D52 | ¿Ley 25.326? | Política, consentimiento y pedido de datos del socio; la inscripción en la AAIP la hace el gimnasio. | Es obligación del responsable de la base, que es el gimnasio. |
 
+## Decididas por defecto en la revisión del 09/11
+
+| # | Pregunta | Por defecto | Por qué |
+|---|---|---|---|
+| D53 | El segundo factor estaba pedido en cuatro lugares (VD-33D, VD-42B, VD-42C, SA-10) | Uno solo: SA-10. Obligatorio para el super admin; para el dueño, recomendado y que él lo prenda. | Un dueño que pierde el celular no puede quedar afuera de su gimnasio el primer día. |
+| D54 | VD-40B repetía el super admin nuevo | Pasa a los SA-* de `SUPER-ADMIN.md`. | Una sola lista. |
+| D55 | La demo que "se borra sola a los 7 días" chocaba con "nada depende de un cron" y con ADM-5 | La demo es un gimnasio `[demo]` aparte. A los 7 días queda vencida (se calcula) y se borra entera con un botón. | Borrar un gimnasio sin datos reales no rompe ninguna regla, y destraba ADM-5. |
+| D56 | Los avisos de abajo a la derecha tapaban el botón de Entrada | Se apilan arriba del botón, o a la izquierda de la barra fija. | Nada tapa nada. |
+| D57 | ¿El socio sube su foto desde la app? | Solo si el gimnasio lo prende (apagado por defecto). La recepción ve "foto nueva" hasta confirmarla. | Es la foto con la que lo reconocen en la puerta (anti-préstamo). |
+| D58 | ¿Qué es lo principal del Inicio? | Recepción: el mostrador (búsqueda, números, lista en vivo). Dueño: números y Para hacer hoy. | Cada uno hace otra cosa en su primer minuto. |
+| D59 | Reseñas en la página y "+N socios" contra "nada inventado" | Reseñas solo con nombre, fecha y link a la reseña de Google; sin link no se muestran. "+N socios" sale de la base y solo aparece con 20 o más. | Así nada de la página puede ser inventado. |
+| D60 | Términos BRIK–gimnasio y contrato de encargado del tratamiento | El agente escribe un borrador, marcado "revisar con un abogado"; el dueño lo acepta al entrar y queda la fecha y la versión. | Sin texto no hay qué aceptar; la revisión legal es de Mateo. |
+
 ---
 
 ## Abiertas

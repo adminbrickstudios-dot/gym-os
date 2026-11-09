@@ -93,3 +93,98 @@ Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300
 - `filtros_socios` (880 ms): contar con el índice en vez de recorrer.
 - Medir las pantallas con la app compilada y 5.000 socios.
 - No hace falta tocar: RLS con `(select auth.uid())`, índices de búsqueda y paginación (la búsqueda ya tarda menos de 40 ms).
+
+## Hallazgo 2 (09/11): por qué se siente lento en producción, aunque la base sea rápida
+
+En la base, cada función tarda poco: la puerta, menos de 40 ms con 5.000
+socios. Lo lento está **alrededor**: cada pantalla del panel hace **6 a 8 viajes
+a Supabase, uno detrás del otro**, antes de mostrar nada (leído en el código):
+
+1. `proxy.ts`: `getClaims()`. Si el proyecto de Supabase todavía firma con la
+   clave vieja (simétrica, HS256), la librería cae a `getUser()`: es un viaje a
+   Auth en **cada pedido**. Más `gimnasio_por_host`, que está en caché solo
+   dentro de la misma función de Vercel.
+2. `contextoPanel()`: `getClaims()` otra vez, después `panel_gimnasio`, después
+   `ver_mensajes_equipo` (recepción) y después `config_fichaje`. Son **tres
+   viajes en fila**.
+3. `panel/layout.tsx`: `estado_abono_panel` y las ayudas (en paralelo), y
+   después `config_entrada` y `formas_de_entrada` (otro viaje).
+4. La pantalla: sus propias funciones.
+5. El menú: `pendientes_panel`, que tarda **300 a 385 ms** con 5.000 socios
+   (presupuesto: 50 ms), en cada pantalla.
+
+Además, Supabase Free corre en la máquina más chica y compartida, y Vercel
+Hobby arranca en frío las funciones que no se usaron hace un rato.
+
+Viajes de 40 a 80 ms, por 7 en fila, más los arranques en frío y el menú: uno
+a dos segundos por toque.
+
+## Plan de la fase 0 (`RECTA-FINAL.md` F0): que tocar y ver sea instantáneo
+
+Objetivos (Mateo, 09/11: "rapidísimo, toco y al toque ya está, por debajo del
+promedio"), **medidos en producción**, en celular con 4G:
+- Primer cambio en pantalla al tocar: **menos de 50 ms**, siempre (estado
+  apretado, esqueleto o cambio optimista).
+- Datos de una pantalla del panel: **menos de 500 ms p75** y menos de 800 ms
+  p95.
+- Registrar un ingreso, de Enter al aviso: **menos de 300 ms p75**.
+- Buscar un socio mientras se tipea: **menos de 150 ms** por tecla.
+- Volver a una pantalla ya vista: **instantáneo**, sin viajes.
+- Página del gimnasio y app del socio: LCP **menos de 1,5 s** en 4G y
+  Lighthouse celular **95 o más**.
+- Nada salta al cargar: CLS menor a 0,05.
+
+1. **Medir de verdad, primero.**
+   - `Server-Timing` en cada respuesta (proxy, auth y cada RPC con su nombre),
+     y un log por pedido en Vercel.
+   - Un workflow de Actions `medir-produccion.yml`: Playwright contra
+     producción, con los usuarios del demo. Toca cada pantalla clave 10 veces y
+     deja la tabla en el resumen de la corrida. Los runners de GitHub sí llegan
+     a vercel.app.
+   - Los usuarios del demo en producción se crean con el workflow
+     `usuarios-demo`, con la contraseña como secreto `DEMO_CONTRASENA`, que
+     nunca se imprime. Si el secreto no está, ⛔ con el paso para Mateo.
+2. **Un solo viaje para el contexto.**
+   - Una función `contexto_pantalla(p_gimnasio_id)` que devuelve de una vez:
+     - lo que hoy da `panel_gimnasio`,
+     - mensajes y fichaje,
+     - abono,
+     - config de entrada y formas,
+     - las ayudas vistas.
+   - Lo que no cambia (marca, secciones, config) va en caché por gimnasio, con
+     etiqueta, y se invalida al guardar la configuración.
+   - El proxy deja de llamar a Auth si no hace falta.
+3. **El menú no frena la pantalla.**
+   - `pendientes_panel` llega después de pintar (Suspense o pedido del lado del
+     cliente) y baja a menos de 50 ms con `cubierto_hasta` y conteos con
+     índice.
+4. **Navegación del cliente.**
+   - `staleTimes` (dinámico 30 s) para que volver sea instantáneo.
+   - `prefetch` en los links del menú y de Inicio.
+   - `useOptimistic` en las acciones de todos los días: ingreso, cobrar,
+     asistencia, tareas, reservas.
+5. **Claves de Supabase.**
+   - Si el proyecto firma con la clave vieja: pasar a claves asimétricas
+     (Supabase → Settings → JWT Keys → migrar).
+   - Así `getClaims()` verifica sin viajar a Auth.
+   - Lo hace **Mateo**, desde el panel de Supabase; el agente deja los pasos
+     exactos. Puede cerrar las sesiones abiertas una vez.
+6. **Lo demás que suma**, cada cosa medida antes y después:
+   - Imágenes con `next/image`, tamaño justo y AVIF/WebP.
+   - Fuentes con `next/font` y sin bloquear.
+   - JS por ruta lo más chico posible: lo pesado con carga diferida y
+     componentes de servidor.
+   - Búsqueda con `pg_trgm` y debounce corto.
+   - Realtime solo donde hace falta.
+   - Ningún re-render que se note.
+   - Índices que falten según `EXPLAIN`.
+7. **Planes** (D51, los paga Mateo):
+   - Supabase Pro trae una máquina más grande que la de Free.
+   - En Vercel, revisar que esté prendido Fluid Compute, que reduce los
+     arranques en frío.
+   - El agente mide con y sin, si Mateo los activa, y anota la diferencia.
+
+**LISTO SI:** la tabla de `medir-produccion.yml` muestra, antes y después, cada
+objetivo de arriba cumplido en producción.
+Volver a una pantalla vista no hace ningún viaje. Con la red lenta simulada,
+siempre hay respuesta en menos de 100 ms.
