@@ -15,6 +15,7 @@ import { Calendario, type Asistencia } from "./Calendario";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 import { Etiquetas, Notas, type NotasYEtiquetas } from "./NotasEtiquetas";
 import { Foto } from "./Foto";
+import { BarraVigencia } from "@/components/panel/BarraVigencia";
 import { Familia, type Familiar, type PlanFamiliar } from "./Familia";
 import { Pausas, type DatosPausas } from "./Pausas";
 import { AptoFisico, type DatosApto } from "./AptoFisico";
@@ -125,6 +126,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           <div className="mt-6">
             {s.dado_de_baja_en ? <span className="pildora">👋 Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
+            {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
           </div>
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (

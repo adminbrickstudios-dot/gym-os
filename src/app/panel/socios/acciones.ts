@@ -276,3 +276,27 @@ export async function anonimizarSocio(socioId: string, confirmo: string): Promis
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── FA-9: varios socios a la vez ──
+/** Los de la lista elegida a los que NO se les escribe (marca "no escribirle"): se sacan del envío por WhatsApp. */
+export async function sociosSinMensajes(ids: string[]): Promise<{ ids: string[]; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { ids: await rpc<string[]>("no_escribirles_de", { p_gimnasio_id: panel.gimnasio.id, p_socio_ids: ids }) };
+  } catch (e) { return { ids: [], error: (e as Error).message }; }
+}
+/** Poner una etiqueta (existente o nueva) a todos los elegidos. Si alguno falla, lo dice y no finge que salió todo bien. */
+export async function etiquetarVarios(ids: string[], nombre: string): Promise<{ hechos: number; error?: string }> {
+  const limpio = nombre.trim();
+  if (!limpio) return { hechos: 0, error: "Escribí la etiqueta." };
+  if (ids.length === 0 || ids.length > 600) return { hechos: 0, error: "Elegí entre 1 y 600 socios." };
+  let hechos = 0;
+  try {
+    for (const id of ids) { await rpc("poner_etiqueta", { p_socio_id: id, p_nombre: limpio }); hechos++; }
+  } catch (e) {
+    revalidatePath("/panel/socios");
+    return { hechos, error: `Se la puse a ${hechos} de ${ids.length} y se cortó: ${(e as Error).message}` };
+  }
+  revalidatePath("/panel/socios");
+  return { hechos };
+}

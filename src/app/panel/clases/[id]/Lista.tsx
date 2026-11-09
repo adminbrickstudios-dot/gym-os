@@ -13,7 +13,7 @@ const ESTADO: Record<string, string> = { confirmada: "Reservó", espera: "En esp
 
 export type FaltaClase = { socio_id: string; perdonada: boolean; motivo: string | null };
 
-export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, buscaSocios, faltas = [] }: { claseId: string; filas: Fila[]; reserva: boolean; puedeCancelar: boolean; cancelada: boolean; buscaSocios: boolean; faltas?: FaltaClase[] }) {
+export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, buscaSocios, faltas = [], fotos = {} }: { claseId: string; filas: Fila[]; reserva: boolean; puedeCancelar: boolean; cancelada: boolean; buscaSocios: boolean; faltas?: FaltaClase[]; fotos?: Record<string, string> }) {
   const [error, setError] = useState<string | null>(null);
   // VD-46Q: perdonar una falta desde la lista (solo llega `faltas` al dueño y al encargado, con la clase ya terminada).
   const [perdonando, setPerdonando] = useState<string | null>(null);
@@ -41,6 +41,13 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
         <ul className="space-y-2">
           {filas.map((f) => (
             <li key={f.socio_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3 min-h-[64px]">
+              {/* FA-11: la foto de cada anotado (o sus iniciales), para reconocerlo en la sala. */}
+              <span className="flex-none size-12 rounded-2xl overflow-hidden grid place-items-center titulo text-xl bg-[var(--tarjeta-alta)]" data-foto-anotado={fotos[f.socio_id] ? "si" : "no"} aria-hidden>
+                {fotos[f.socio_id]
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={`/panel/socios/${f.socio_id}/foto?v=${fotos[f.socio_id]}`} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  : f.nombre.trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-lg truncate">{f.nombre}</span>
                 {f.telefono && <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="block text-sm texto-suave underline" data-telefono-lista>💬 {f.telefono}</a>}
