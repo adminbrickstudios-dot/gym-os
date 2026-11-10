@@ -11,6 +11,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   // Sin foto: 204 (la pantalla muestra las iniciales; no es un error).
   if (!ruta) return new Response(null, { status: 204 });
   const { data, error } = await clienteServicio().storage.from("fotos_socios").download(ruta);
+  // El archivo ya no está en el bucket (se borró o nunca llegó a subirse): se trata como "sin foto", no como una falla del servidor.
+  const faltaArchivo = !!error && /not.?found|no.?such|does not exist|404/i.test(`${error.message} ${(error as { status?: number; statusCode?: string }).status ?? ""} ${(error as { statusCode?: string }).statusCode ?? ""}`);
+  if (faltaArchivo || (!error && !data)) return new Response(null, { status: 204 });
   if (error || !data) return new Response(`No se pudo leer la foto: ${error?.message ?? "vacía"}`, { status: 502 });
   return new Response(await data.arrayBuffer(), { headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=86400" } });
 }
