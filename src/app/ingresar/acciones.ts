@@ -2,7 +2,7 @@
 import { headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
-import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_SIN_CONEXION, demasiadosIntentos, destinoTrasEntrar, sinConexion } from "./destino";
+import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
 import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
@@ -27,6 +27,11 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
     if (sinConexion(error)) return { error: TEXTO_SIN_CONEXION, email };
     if (demasiadosIntentos(error)) return { error: TEXTO_DEMASIADOS_INTENTOS, email };
     if ((error.status ?? 400) >= 500) return { error: "No pudimos iniciar sesión ahora. Probá de nuevo en un rato.", email };
+    // PLAT-08: el motivo real queda en el registro del servidor; a la persona se le dice algo humano según el caso.
+    console.error(`[ingreso] fallo ${error.code ?? "?"} status=${error.status ?? "?"}`);
+    const motivo = motivoDeEntrada(error);
+    if (motivo === "sin_confirmar") return { error: TEXTO_SIN_CONFIRMAR, email };
+    if (motivo === "desactivada") return { error: TEXTO_DESACTIVADA, email };
     return { error: await textoCredencialesMalas(email), email };
   }
   const r = await destinoTrasEntrar(supabase, String(form.get("siguiente") ?? "") || null);
@@ -40,7 +45,7 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
  * la dirección de un gimnasio, queda el texto de siempre.
  */
 async function textoCredencialesMalas(email: string): Promise<string> {
-  const generico = "El mail o la contraseña no son correctos";
+  const generico = TEXTO_CREDENCIALES_MALAS;
   const gimnasioId = (await headers()).get("x-gimnasio-id");
   if (!gimnasioId) return generico;
   const { clienteServicio } = await import("@/lib/supabase/servicio");

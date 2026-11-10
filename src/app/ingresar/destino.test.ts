@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demasiadosIntentos, sinConexion } from "./destino";
+import { demasiadosIntentos, motivoDeEntrada, sinConexion, TEXTO_SIN_GIMNASIO } from "./destino";
 
 describe("VD-61 · casos de error del ingreso", () => {
   it("reconoce el límite de intentos de Supabase Auth", () => {
@@ -12,5 +12,17 @@ describe("VD-61 · casos de error del ingreso", () => {
     expect(demasiadosIntentos(null)).toBe(false);
     expect(demasiadosIntentos({ status: 0, message: "fetch failed" })).toBe(false);
     expect(sinConexion({ status: 0, message: "fetch failed" })).toBe(true);
+  });
+});
+
+describe("PLAT-08: el motivo real de un ingreso fallido", () => {
+  it("sin confirmar, desactivada y credenciales se distinguen", () => {
+    expect(motivoDeEntrada({ code: "email_not_confirmed", message: "Email not confirmed" })).toBe("sin_confirmar");
+    expect(motivoDeEntrada({ code: "user_banned", message: "User is banned" })).toBe("desactivada");
+    expect(motivoDeEntrada({ code: "invalid_credentials", message: "Invalid login credentials" })).toBe("credenciales");
+    expect(motivoDeEntrada(null)).toBe("credenciales");
+  });
+  it("sin gimnasio: texto honesto con salida", () => {
+    expect(TEXTO_SIN_GIMNASIO).toMatch(/no tiene un gimnasio asignado/);
   });
 });

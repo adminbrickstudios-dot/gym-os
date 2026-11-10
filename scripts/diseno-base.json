@@ -5,7 +5,7 @@
  },
  "src/app/admin/AltaGimnasio.tsx": {
   "hex": 5,
-  "emoji": 19
+  "emoji": 20
  },
  "src/app/admin/Ayudas.tsx": {
   "hex": 0,
@@ -825,7 +825,7 @@
  },
  "src/app/panel/socios/page.tsx": {
   "hex": 0,
-  "emoji": 26
+  "emoji": 25
  },
  "src/app/panel/socios/[id]/Acciones.tsx": {
   "hex": 0,

@@ -1,5 +1,11 @@
 # PROGRESO de Base
 
+## DÓNDE QUEDÉ (10/11, 00:00)
+- **Fase U en curso.** U5 ✅ (DOMINIO.md + prueba de hosts). U0.1: causa probable escrita en LECCIONES.md (mail que ya tenía cuenta: la contraseña escrita no se aplica; o la clave de servicio mal puesta en Vercel). Arreglado: `/g/<slug>/ingresar` ya no rebota al genérico (reescritura con la marca del gimnasio), errores de ingreso por motivo (PLAT-08), 0 gimnasios con mensaje con salida. En Actions (corrida 42733845572): fase-u3, base-ingresos y los e2e viejos adaptados a U4. Pendiente: U1/U2 (B: e2e del socio por /ingresar?modo=socio), U3 (D: e2e), U4 (C: planes y dirección no aparecen en la landing), U0.3 (humo en producción), después fase P.
+- **⛔ Lo que necesito de vos:** cargar en Vercel `SUPABASE_SERVICE_ROLE_KEY` (la `service_role` de ESTE proyecto de Supabase, no la anon ni la de otro proyecto) y redeployar; para medir y para el humo en producción: secretos de GitHub `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA`. No puedo ver la base de producción desde acá (el Supabase conectado tiene otros dos proyectos).
+- Ningún punto de U1 a U4 está en ✅ todavía; nada nuevo publicado en producción.
+
+
 Estados: ✅ hecho y verificado ejecutando · 🟡 a medias (dice qué falta) ·
 ❌ no empezado · ⛔ trabado (dice por qué y qué hace falta).
 
