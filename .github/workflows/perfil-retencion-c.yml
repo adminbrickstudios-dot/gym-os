@@ -3,7 +3,7 @@ name: Perfil retención (temporal)
 
 on:
   push:
-    branches: ["dia/c-perfil-retencion"]
+    branches: ["dia/c-perfil-retencion", "dia/c-perfil-retencion-2"]
 
 env:
   PGHOST: localhost
