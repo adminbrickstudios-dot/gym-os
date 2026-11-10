@@ -68,6 +68,8 @@ const pool = new pg.Pool({ connectionString: URL_DB, max: 10 });
 const CARPETA = path.join(process.cwd(), ".local");
 fs.mkdirSync(CARPETA, { recursive: true });
 const ARCHIVO_CODIGOS = path.join(CARPETA, "codigos.json");
+// Para probar la clave de servicio mal puesta (U1): si existe este archivo, todo pedido con la service_role responde 401 "Invalid API key", como Supabase.
+const ARCHIVO_CLAVE_MALA = path.join(CARPETA, "clave-servicio-mala");
 const codigos = new Map();      // destino → { codigo, tipo, vence }
 const refrescos = new Map();    // refresh_token → { id: usuario_id, sesion: session_id }
 const codigosGoogle = new Map(); // VD-22: código de Google simulado → { usuario, desafio, metodo, vence }
@@ -240,6 +242,13 @@ async function auth(req, res, ruta, q, cuerpo) {
   }
   // Admin (solo service_role): cambiar la contraseña de un usuario (updateUserById).
   const porId = /^\/admin\/users\/([0-9a-f-]{36})$/.exec(ruta);
+  // Admin (solo service_role): borrar un usuario (deleteUser): lo usa el chequeo de la clave de servicio.
+  if (porId && req.method === "DELETE") {
+    if (claims?.role !== "service_role") return errorAuth(res, 403, "not_admin", "User not allowed");
+    const { rowCount } = await pool.query(`delete from auth.users where id = $1`, [porId[1]]);
+    if (!rowCount) return errorAuth(res, 404, "user_not_found", "User not found");
+    return enviar(res, 200, {});
+  }
   if (porId && req.method === "PUT") {
     if (claims?.role !== "service_role") return errorAuth(res, 403, "not_admin", "User not allowed");
     let u = await traerUsuario("id", porId[1]);
@@ -462,6 +471,9 @@ http.createServer(async (req, res) => {
     const partes = [];
     for await (const parte of req) partes.push(parte);
     const crudo = Buffer.concat(partes);
+    if (fs.existsSync(ARCHIVO_CLAVE_MALA) && claimsDe(req)?.role === "service_role") {
+      return enviar(res, 401, { message: "Invalid API key", hint: "Double check your Supabase `anon` or `service_role` API key." });
+    }
     if (url.pathname.startsWith("/storage/v1/")) return await storage(req, res, url.pathname.slice("/storage/v1".length), crudo, url.searchParams);
     const texto = crudo.toString("utf8");
     const cuerpo = texto ? JSON.parse(texto) : {};

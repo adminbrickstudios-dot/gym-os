@@ -130,6 +130,26 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+#### Fase U (U1 y U2) · altas sin mails y errores de la clave de servicio
+
+- **U1 hecho (código), falta que Mateo cargue la clave en Vercel.** `traducirErrorSupabase` (`src/lib/admin/errores-supabase.ts`)
+  convierte "Invalid API key", "User not allowed" (clave anon o publicable), JWT de otro proyecto, "fetch failed" y "falta la variable"
+  en texto con qué variable cargar y dónde. Se usa en `darAcceso`, `nuevaContrasena`, el alta del socio y el chequeo de la plataforma.
+  El alta cortada deja el gimnasio con "Terminar alta: dar acceso al dueño" (ficha, `/admin` y lista), y repetir el alta con la misma
+  dirección termina ese gimnasio (no crea otro). El chequeo de Estado crea y borra una cuenta `chequeo-…@ejemplo.invalid` (se repite
+  cada 10 minutos si anda; si falla, en cada visita). `supabase-local` ahora soporta borrar usuarios y simular la clave mala con
+  `.local/clave-servicio-mala`.
+- **U2: verificación de cada ruta de alta.** Ninguna manda mail ni pide confirmar: dueño y equipo (`darAcceso`), socio desde
+  recepción y socio online (`prepararLinkContrasenaSocio`) crean la cuenta con `createUser` y `email_confirm: true`. Nuevo: el alta del
+  socio desde recepción acepta "Contraseña para su app (opcional)"; con ella la cuenta queda con esa contraseña y la ficha vinculada, y
+  entra al toque. Sin ella queda el link actual (el socio elige la suya con un código que él mismo pide).
+- **Lo que SÍ manda mail y no toqué (carril C, son logins que pide la propia persona, no altas):** "Entrar con un código al mail"
+  (`pedirCodigoMail`, `signInWithOtp` con `shouldCreateUser: true`), el código para vincular con Google y "Olvidé mi contraseña".
+  El primero además CREA la cuenta si no existe. Si Mateo quiere cero mails también acá, hay que sacar esos caminos (o dejar solo
+  "Olvidé", con `shouldCreateUser: false`). Recomendado: sacar `shouldCreateUser: true` de `pedirCodigoMail` y de la vinculación.
+- **Alta online del socio** (`/hacete-socio`) no tiene campo de contraseña (lo llena el propio socio y no hay quien la escriba): crea
+  la cuenta con una al azar y el link; no manda mail. Si se quiere contraseña ahí, es otra decisión de carril C.
+
 #### Carril B, tercera tanda (migración 20261109020300)
 
 - **Borrado definitivo = anonimizar (decidido por defecto, opción recomendada).** `admin_borrar_definitivo(gimnasio, nombre)`:

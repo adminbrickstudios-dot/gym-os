@@ -82,12 +82,11 @@ try {
   ok(`gimnasio ${NOMBRE} creado (contraseña provisoria ${clave1})`);
   const g = (await q(`select id, slug from public.gimnasios where nombre = $1`, [NOMBRE]))[0];
   idGim = g.id;
-  // Datos de prueba: un error de pantalla, un aviso de MercadoPago fallido, un socio buscable y otro en la papelera.
+  // Datos de prueba: un error de pantalla y un aviso de MercadoPago fallido. Los socios se siembran después de mirar el
+  // tablero: con socios cargados el gimnasio deja de figurar con el "alta sin terminar" (así lo calcula admin_salud_v2).
   await q(`insert into public.errores_app (gimnasio_id, pantalla, mensaje) values ($1, '/panel/e2e-f2', 'Error de prueba e2e')`, [idGim]);
   await q(`insert into public.eventos_webhook (origen, tipo, id_externo, gimnasio_id, error) values ('mp_cobros', 'payment', $1, $2, 'fallo de prueba e2e')`, [`e2e${s}:lectura`, idGim]);
-  await q(`insert into public.socios (gimnasio_id, nombre, apellido, dni, email) values ($1, 'Lucía', $2, $3, $4)`, [idGim, `Buscable${s}`, `7${s}00`, MAIL_SOCIO]);
-  await q(`insert into public.socios (gimnasio_id, nombre, apellido, dado_de_baja_en, motivo_baja) values ($1, 'Beto', $2, now() - interval '2 days', 'otro')`, [idGim, `Papelera${s}`]);
-  ok("datos de prueba sembrados (error, aviso fallido, dos socios)");
+  ok("datos de prueba sembrados (error y aviso fallido)");
 
   // ── 3. Tablero con lo que necesita atención, errores y plataforma ──
   await abrir("/admin");
@@ -97,6 +96,10 @@ try {
   chequear(/error/i.test(await att("errores").first().innerText()), "el aviso de errores dice cuántos son", "el aviso de errores no lo dice");
   chequear(await existe(att("webhooks")), "necesitan atención: aviso de MercadoPago fallido", "no aparece el aviso de webhooks");
   chequear((await att("salud").first().locator("a").getAttribute("href")) === `/admin/${idGim}`, "cada aviso tiene su botón a la ficha", "el botón del aviso no va a la ficha");
+  // Ahora sí: un socio buscable y otro en la papelera (el alta deja de estar "sin terminar").
+  await q(`insert into public.socios (gimnasio_id, nombre, apellido, dni, email) values ($1, 'Lucía', $2, $3, $4)`, [idGim, `Buscable${s}`, `7${s}00`, MAIL_SOCIO]);
+  await q(`insert into public.socios (gimnasio_id, nombre, apellido, dado_de_baja_en, motivo_baja) values ($1, 'Beto', $2, now() - interval '2 days', 'otro')`, [idGim, `Papelera${s}`]);
+  ok("socios de prueba sembrados (uno buscable y uno en la papelera)");
   const errPlat = p.locator("[data-errores-plataforma]");
   chequear(await existe(errPlat.getByText("/panel/e2e-f2")), "errores de 24 h de la plataforma, por pantalla", "no aparecen los errores de la plataforma");
   for (const sel of ["[data-plataforma]", "[data-uso-gimnasios]", "[data-mantenimiento]", "[data-link-pago]", "[data-funciones-prueba]", "[data-demos]"]) {

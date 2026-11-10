@@ -73,6 +73,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
   const wa = fila ? whatsappDueno(fila.dueno_telefono, `Hola ${fila.dueno ?? ""}, te escribo de BRIK por ${g.nombre}.`) : null;
   const yoSoporte = g.equipo.find((p) => p.soy_yo && p.es_soporte && p.activo);
+  const duenoSinCuenta = g.equipo.find((p) => p.rol === "dueno" && p.activo && !p.es_soporte && !p.tiene_cuenta);
   return (
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-10">
       <header className="space-y-4" id="entrar">
@@ -89,6 +90,14 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           )}
         </div>
       </header>
+
+      {duenoSinCuenta && (
+        <section className="tarjeta p-5 space-y-2" role="alert" data-terminar-alta-ficha>
+          <p className="font-semibold text-lg">Terminar alta: dar acceso al dueño</p>
+          <p className="texto-suave">El gimnasio está creado, pero {duenoSinCuenta.nombre} todavía no puede entrar. Abajo, en “Equipo y claves”, apretá “Dar acceso”, escribí su mail y una contraseña (o dejá que se genere una).</p>
+          <a href="#equipo" className="boton boton-principal">Ir a dar acceso</a>
+        </section>
+      )}
 
       {saludTodos[g.gimnasio_id] && !g.es_demo && (
         <section className="space-y-3" data-ficha-salud>
@@ -112,7 +121,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         </section>
       )}
 
-      <section className="space-y-3">
+      <section className="space-y-3" id="equipo">
         <p className="titulo-grupo">Equipo y claves</p>
         <p className="texto-suave">Si alguien se olvidó la contraseña, generale una nueva y pasásela. Entra en {dominioPlataforma() || "la dirección de Base"}, con “Entrá a tu gimnasio”.</p>
         <ul className="space-y-2">

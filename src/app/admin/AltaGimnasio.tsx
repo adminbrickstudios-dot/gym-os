@@ -41,7 +41,14 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
       <p className="titulo text-2xl">➕ Nuevo gimnasio</p>
       {ok ? (
         <div role="status" className="space-y-4">
-          <p className="text-lg">✅ <strong>{ok.nombre}</strong> está creado. {ok.aviso}</p>
+          {ok.pendiente ? (
+            <div className="space-y-2" data-alta-a-medias>
+              <p className="text-lg" role="alert">⚠️ <strong>{ok.nombre}</strong>: {ok.aviso}</p>
+              <Link href={`/admin/${ok.gimnasio_id}`} className="boton boton-principal" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>
+            </div>
+          ) : (
+            <p className="text-lg">✅ <strong>{ok.nombre}</strong> está creado. {ok.aviso}</p>
+          )}
           {ok.contrasena && (
             <div className="tarjeta !bg-[var(--tarjeta-alta)] p-4 space-y-1">
               <p className="texto-suave text-sm">Acceso del dueño (se muestra una sola vez)</p>

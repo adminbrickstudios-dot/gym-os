@@ -13,7 +13,7 @@ export type EstadoForm = {
   /** VD-6: el alta salió bien: el socio, si hay que cobrar ahora y si el plan no se pudo asignar. */
   socioId?: string; cobrar?: boolean; sinPlan?: boolean; nombre?: string;
   /** F1.2: el alta con mail deja el link para que el socio cree su contraseña (se copia o se manda por WhatsApp). */
-  linkContrasena?: { link: string; texto: string; wa: string | null } | null; avisoLink?: string;
+  linkContrasena?: { link: string; texto: string; wa: string | null; conContrasena?: boolean } | null; avisoLink?: string;
 };
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
@@ -29,6 +29,10 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   // Alta en un paso (SOC-13): el plan y, si se eligió, ir directo a cobrar.
   const plan = socioId ? "" : String(form.get("plan_id") ?? "");
   const cobrar = !!plan && form.get("despues") === "cobrar";
+  // U2: quien lo da de alta puede escribirle la contraseña (no se manda ningún mail). Se valida antes de guardar nada.
+  const contrasena = socioId ? "" : String(form.get("contrasena_elegida") ?? "").trim();
+  if (contrasena && !datos.email) return { error: "Para ponerle contraseña hace falta su mail.", valores: datos };
+  if (contrasena && contrasena.length < 8) return { error: "La contraseña tiene que tener 8 letras o más.", valores: datos };
   let id: string;
   // VD-34: si otra persona tocó la ficha desde que se abrió, se avisa en vez de pisarla.
   if (socioId) {
@@ -62,7 +66,7 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
       const h = await headers();
       const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
       const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127.|[^.]+.localhost)/.test(host) ? "http" : "https");
-      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}` });
+      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}`, contrasena: contrasena || undefined, gimnasioId: panel.gimnasio.id });
       const tel = (datos.telefono ?? "").replace(/D/g, "");
       linkContrasena = { ...r, wa: tel.length >= 8 ? `https://wa.me/${tel}?text=${encodeURIComponent(r.texto)}` : null };
     } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }

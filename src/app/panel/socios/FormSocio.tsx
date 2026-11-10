@@ -69,7 +69,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   // VD-6: el socio ya está creado (pasos 3 y 4), lo cobrado, y el Interesado con ese celular si lo hay.
   const [creado, setCreado] = useState<{ socioId: string; nombre: string } | null>(creadoInicial ?? null);
   const [cobro, setCobro] = useState<CobroHecho | null>(null);
-  const [linkSocio, setLinkSocio] = useState<{ link: string; texto: string; wa: string | null } | null>(null);
+  const [linkSocio, setLinkSocio] = useState<{ link: string; texto: string; wa: string | null; conContrasena?: boolean } | null>(null);
   const [avisoLink, setAvisoLink] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [despues, setDespues] = useState(false);
@@ -149,7 +149,8 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
               : <Mensaje tipo="info">Todavía no se cobró nada: se cobra desde su ficha o cuando venga.</Mensaje>}
             <p className="texto-suave">Dale la bienvenida: ya puede entrar con su DNI.</p>
             {avisoLink && <Mensaje tipo="aviso">{avisoLink}</Mensaje>}
-            {linkSocio && (
+            {linkSocio?.conContrasena && <Mensaje tipo="exito"><span data-socio-con-contrasena>Ya puede entrar a su app con su mail y la contraseña que escribiste. No se le mandó ningún mail.</span></Mensaje>}
+            {linkSocio && !linkSocio.conContrasena && (
               <div className="space-y-2" data-link-contrasena>
                 <p className="font-semibold">Que cree su contraseña</p>
                 <p className="texto-suave text-sm">Mandale este link: elige su contraseña y entra a su app con mail y contraseña.</p>
@@ -205,6 +206,8 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
         )}
         {vinculado && <div className="sm:col-span-2"><Mensaje tipo="info">Es {ofrecido?.nombre}: al darlo de alta queda marcado como “se hizo socio”.</Mensaje></div>}
         <Campo nombre="email" etiqueta="Mail" valor={v.email} tipo="email" />
+        {!socioId && <Campo nombre="contrasena_elegida" etiqueta="Contraseña para su app (opcional)" autoComplete="new-password" data-contrasena-socio
+          ayuda="Si la escribís (8 letras o más), entra a su app con su mail y esa contraseña, al toque: no se le manda ningún mail. Vacía: le pasás un link para que cree la suya." />}
         <Campo nombre="contacto_emergencia_nombre" etiqueta="Contacto de emergencia" valor={v.contacto_emergencia_nombre} placeholder="Nombre" />
         <Campo nombre="contacto_emergencia_telefono" etiqueta="Teléfono de emergencia" valor={v.contacto_emergencia_telefono} tipo="tel" />
       </fieldset>
