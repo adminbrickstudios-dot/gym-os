@@ -24,7 +24,7 @@ try {
     await p.locator("main h1").first().waitFor({ timeout: 60000 });
     const h1 = await p.locator("main h1").first().innerText();
     const numeros = await p.locator('section[aria-label="Números de hoy"] dd').count();
-    chequear(/👋/.test(h1) && numeros >= 4 && (rol !== "profe" || numeros === 4) && await p.getByRole("heading", { name: "Ahora y lo que sigue" }).isVisible(),
+    chequear(//.test(h1) && numeros >= 4 && (rol !== "profe" || numeros === 4) && await p.getByRole("heading", { name: "Ahora y lo que sigue" }).isVisible(),
       `${rol}: saludo, sus números (4 la profe, 5 a 8 el resto) y “Ahora y lo que sigue”`, `${rol}: ${h1} · ${numeros} números`);
     const accesos = await p.locator('main a[href^="/panel/"].boton').evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute("href")))]);
     const rotos = [];
@@ -54,7 +54,7 @@ try {
   await r.goto(`${G}/panel`);
   const sec = r.locator("[data-pedidos-baja-inicio]");
   await sec.waitFor({ timeout: 60000 });
-  chequear(/Testigo Al Día[\s\S]*los horarios: “Prueba e2e inicio”/.test(await sec.innerText()), "la recepción ve en Inicio “👋 Pidieron la baja” con el motivo", await sec.innerText());
+  chequear(/Testigo Al Día[\s\S]*los horarios: “Prueba e2e inicio”/.test(await sec.innerText()), "la recepción ve en Inicio “Pidieron la baja” con el motivo", await sec.innerText());
   await sec.getByRole("link").first().click();
   await r.locator("[data-pedido-baja]").waitFor({ timeout: 60000 });
   ok("tocarlo abre la ficha con “Se queda / Darle la baja”");

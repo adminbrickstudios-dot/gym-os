@@ -3,6 +3,7 @@
 // (quiero_probar, sin sesión) y aparece en Prospectos del panel.
 import { useActionState, useEffect, useState } from "react";
 import { clasesParaProbar, quieroProbar, reservarPrueba, type ClaseParaProbar, type EstadoProbar, type EstadoReservaPrueba } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-51: si el gimnasio da prueba gratis y hay clases, se reserva una (nombre, DNI, celular); si no, queda el pedido de siempre. */
 export function FormProbar() {
@@ -17,14 +18,14 @@ function FormReservaPrueba({ clases }: { clases: ClaseParaProbar[] }) {
   if (estado.ok) {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-probar-listo data-reserva-prueba>
-        <p className="titulo text-2xl">🙌 ¡Listo, {estado.nombre}!</p>
+        <p className="titulo text-2xl"><Icono nombre="persona" /> ¡Listo, {estado.nombre}!</p>
         <p className="texto-suave text-lg">{estado.clase ? `Te anotamos para ${estado.clase}. ` : ""}Llegá con tu DNI: en recepción te dejan entrar gratis a tu primera clase.</p>
       </div>
     );
   }
   return (
     <form action={accion} className="tarjeta p-6 space-y-4" data-form-probar data-form-reserva-prueba>
-      <p className="titulo text-xl">🎁 Tu primera clase es gratis</p>
+      <p className="titulo text-xl"><Icono nombre="regalo" /> Tu primera clase es gratis</p>
       <label className="block space-y-1"><span className="etiqueta">Elegí la clase</span>
         <select name="clase" required className="campo" defaultValue={estado.datos?.clase ?? ""}>
           <option value="" disabled>Elegí una…</option>
@@ -37,8 +38,8 @@ function FormReservaPrueba({ clases }: { clases: ClaseParaProbar[] }) {
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
         <input name="telefono" required type="tel" inputMode="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={estado.datos?.telefono} /></label>
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      {estado.error && <p role="alert" className="mensaje mensaje-error">⚠️ {estado.error}</p>}
-      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "🙋 Reservar mi clase gratis"}</button>
+      {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
+      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "Reservar mi clase gratis"}</button>
       <p className="text-sm texto-tenue">Es una prueba por persona. Usamos tu DNI y tu WhatsApp solo para esta clase.</p>
     </form>
   );
@@ -52,14 +53,14 @@ function FormPedido() {
   if (estado.ok) {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-probar-listo>
-        <p className="titulo text-2xl">🙌 ¡Listo, {estado.nombre}!</p>
+        <p className="titulo text-2xl"><Icono nombre="persona" /> ¡Listo, {estado.nombre}!</p>
         <p className="texto-suave text-lg">Te escribimos por WhatsApp para arreglar el día y el horario.</p>
       </div>
     );
   }
   return (
     <form action={accion} className="tarjeta p-6 space-y-4" data-form-probar>
-      {ref && <><input type="hidden" name="ref" value={ref} /><p className="pildora pildora-azul" data-referido>🤝 Te invitó un amigo</p></>}
+      {ref && <><input type="hidden" name="ref" value={ref} /><p className="pildora pildora-azul" data-referido><Icono nombre="usuarios" /> Te invitó un amigo</p></>}
       <label className="block space-y-1"><span className="etiqueta">Tu nombre</span>
         <input name="nombre" required maxLength={80} autoComplete="name" className="campo" defaultValue={estado.datos?.nombre} /></label>
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
@@ -68,8 +69,8 @@ function FormPedido() {
         <input name="interes" maxLength={200} placeholder="Musculación, funcional, a la tarde…" className="campo" defaultValue={estado.datos?.interes} /></label>
       {/* Para robots: una persona no ve este campo y no lo llena. */}
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      {estado.error && <p role="alert" className="mensaje mensaje-error">⚠️ {estado.error}</p>}
-      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "🙋 Quiero probar"}</button>
+      {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
+      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "Quiero probar"}</button>
       <p className="text-sm texto-tenue">Solo usamos tu WhatsApp para escribirte por la clase de prueba.</p>
     </form>
   );

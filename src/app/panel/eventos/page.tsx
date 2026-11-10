@@ -16,10 +16,10 @@ export default async function PaginaEventos() {
     const eventos = await rpc<Evento[]>("eventos_panel", { p_gimnasio_id: panel.gimnasio.id });
     return (
       <>
-        <Encabezado emoji="🎟️" titulo="Eventos" bajada="Un seminario o una clase especial, con cupo y precio. Se vende en Vender y sale en tu página y en la app." />
+        <Encabezado icono="ticket" titulo="Eventos" bajada="Un seminario o una clase especial, con cupo y precio. Se vende en Vender y sale en tu página y en la app." />
         {gestion && <div className="mb-8"><NuevoEvento zona={panel.gimnasio.zona_horaria} /></div>}
         {eventos.length === 0
-          ? <Vacio emoji="🎟️" titulo="No hay eventos">{gestion ? "Creá uno con “➕ Nuevo evento”." : "Cuando el dueño cree uno, aparece acá para venderlo."}</Vacio>
+          ? <Vacio icono="ticket" titulo="No hay eventos">{gestion ? "Creá uno con “Nuevo evento”." : "Cuando el dueño cree uno, aparece acá para venderlo."}</Vacio>
           : <ul className="space-y-3" data-eventos={eventos.length}>{eventos.map((e) => <FilaEvento key={e.evento_id} e={e} puedeCerrar={gestion} />)}</ul>}
       </>
     );

@@ -12,6 +12,6 @@ export function Dato({ valor, etiqueta, href, tono }: { valor: ReactNode; etique
     </>
   );
   return href
-    ? <Link href={href} className="block rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
+    ? <Link href={href} className="block rounded-[var(--radio)] p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
     : <div>{cuerpo}</div>;
 }

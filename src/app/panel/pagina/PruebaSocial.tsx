@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarPruebaSocial } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type PruebaSocialPanel = { mostrar_socios: boolean; resena_puntaje: number | string | null; resena_cantidad: number | null; link_resena: string | null; socios_ahora: number | null };
 
@@ -16,7 +17,7 @@ export function PruebaSocial({ inicial, puedeEditar }: { inicial: PruebaSocialPa
   const sucio = socios !== p.mostrar_socios || puntaje.trim() !== (p.resena_puntaje == null ? "" : String(p.resena_puntaje)) || cantidad.trim() !== (p.resena_cantidad == null ? "" : String(p.resena_cantidad));
   return (
     <section className="tarjeta p-5 space-y-3 mt-6" data-prueba-social-panel>
-      <p className="titulo text-xl">⭐ Confianza en la portada</p>
+      <p className="titulo text-xl"><Icono nombre="estrella" /> Confianza en la portada</p>
       <p className="texto-suave">Debajo del título, la gente ve cuántos socios son y qué puntaje tienen en Google. Solo se muestra lo que prendas acá.</p>
       <label className="flex items-center gap-3 min-h-11">
         <input type="checkbox" checked={socios} disabled={!puedeEditar} onChange={(e) => setSocios(e.target.checked)} />

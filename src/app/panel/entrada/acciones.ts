@@ -84,8 +84,8 @@ export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: 
       rpc<EventoHoy[]>("eventos_del_dia_socio", { p_socio_id: socioId }).catch((): EventoHoy[] => []),
     ]);
     const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
-    const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
-    const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
+    const apto = !a.pide ? null : !a.apto ? "No presentó el apto físico" : !a.apto.vigente ? `El apto físico venció el ${dia(a.apto.vence)}` : null;
+    const firmar = docs.pendientes.length ? `Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
     return { v, guia, apto, firmar, eventosHoy };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -114,8 +114,8 @@ export async function entradaRapida(socioId: string, sedeId: string, soloEnVerde
     const { sede } = sedeActiva(panel, sedeId);
     const [v, a, docs, guia, eventosHoy] = datos;
     const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
-    const apto = !a.pide ? null : !a.apto ? "🩺 No presentó el apto físico" : !a.apto.vigente ? `🩺 El apto físico venció el ${dia(a.apto.vence)}` : null;
-    const firmar = docs.pendientes.length ? `✍️ Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
+    const apto = !a.pide ? null : !a.apto ? "No presentó el apto físico" : !a.apto.vigente ? `El apto físico venció el ${dia(a.apto.vence)}` : null;
+    const firmar = docs.pendientes.length ? `Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
     const anotable = v.puede && guia.boton === "anotar" && (!soloEnVerde || v.color === "verde") && !apto && !firmar;
     if (!anotable) return { v, guia, apto, firmar, eventosHoy };
     const r = await rpc<ResultadoIngreso>("registrar_ingreso", { p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: "recepcion", p_forzar_motivo: null, p_promete_pagar_el: null });

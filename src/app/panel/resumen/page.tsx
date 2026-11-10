@@ -5,6 +5,7 @@ import { MEDIO } from "@/lib/caja";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Resumen" };
 
@@ -50,23 +51,23 @@ export default async function ResumenDueno({ searchParams }: { searchParams: Pro
     };
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, ...(semana ? { weekday: "short" as const } : {}), hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const numeros = [
-      { emoji: "💵", etiqueta: "Cobrado", valor: formatearPesos(a.cobrado), comp: cambio(a.cobrado, b.cobrado) },
-      { emoji: "🚪", etiqueta: "Entradas", valor: formatearNumero(a.entradas), comp: `${formatearNumero(a.socios_que_vinieron)} socios distintos` },
-      { emoji: "🌱", etiqueta: "Altas", valor: formatearNumero(a.altas), comp: cambio(a.altas, b.altas) },
-      { emoji: "👋", etiqueta: "Bajas", valor: formatearNumero(a.bajas), comp: cambio(a.bajas, b.bajas) },
+      { emoji: "plata", etiqueta: "Cobrado", valor: formatearPesos(a.cobrado), comp: cambio(a.cobrado, b.cobrado) },
+      { emoji: "puerta", etiqueta: "Entradas", valor: formatearNumero(a.entradas), comp: `${formatearNumero(a.socios_que_vinieron)} socios distintos` },
+      { emoji: "hoja", etiqueta: "Altas", valor: formatearNumero(a.altas), comp: cambio(a.altas, b.altas) },
+      { emoji: "salir", etiqueta: "Bajas", valor: formatearNumero(a.bajas), comp: cambio(a.bajas, b.bajas) },
     ];
     const atencion = [
-      a.diferencias.length > 0 && `⚖️ ${a.diferencias.length === 1 ? "1 caja cerró" : `${a.diferencias.length} cajas cerraron`} con diferencia`,
-      a.retiros.cantidad > 0 && `💸 ${formatearPesos(a.retiros.total)} en ${a.retiros.cantidad === 1 ? "1 retiro" : `${a.retiros.cantidad} retiros`}`,
-      a.descuentos.cantidad > 0 && `🏷️ ${formatearPesos(a.descuentos.total)} en descuentos${Number(a.descuentos.convenios) ? ` (${formatearPesos(a.descuentos.convenios)} de convenios)` : ""}`,
-      a.anulaciones.cantidad > 0 && `↩️ ${a.anulaciones.cantidad === 1 ? "1 venta anulada" : `${a.anulaciones.cantidad} ventas anuladas`} (${formatearPesos(a.anulaciones.total)})`,
-      a.dejados_pasar > 0 && `🚪 ${a.dejados_pasar === 1 ? "1 dejado pasar" : `${a.dejados_pasar} dejados pasar`}`,
-      a.rechazados > 0 && `⛔ ${a.rechazados === 1 ? "1 no pudo entrar" : `${a.rechazados} no pudieron entrar`}`,
-      Number(a.fiado) > 0 && `📒 ${formatearPesos(a.fiado)} quedaron a cuenta (no es plata que entró)`,
+      a.diferencias.length > 0 && `${a.diferencias.length === 1 ? "1 caja cerró" : `${a.diferencias.length} cajas cerraron`} con diferencia`,
+      a.retiros.cantidad > 0 && `${formatearPesos(a.retiros.total)} en ${a.retiros.cantidad === 1 ? "1 retiro" : `${a.retiros.cantidad} retiros`}`,
+      a.descuentos.cantidad > 0 && `${formatearPesos(a.descuentos.total)} en descuentos${Number(a.descuentos.convenios) ? ` (${formatearPesos(a.descuentos.convenios)} de convenios)` : ""}`,
+      a.anulaciones.cantidad > 0 && `${a.anulaciones.cantidad === 1 ? "1 venta anulada" : `${a.anulaciones.cantidad} ventas anuladas`} (${formatearPesos(a.anulaciones.total)})`,
+      a.dejados_pasar > 0 && `${a.dejados_pasar === 1 ? "1 dejado pasar" : `${a.dejados_pasar} dejados pasar`}`,
+      a.rechazados > 0 && `${a.rechazados === 1 ? "1 no pudo entrar" : `${a.rechazados} no pudieron entrar`}`,
+      Number(a.fiado) > 0 && `${formatearPesos(a.fiado)} quedaron a cuenta (no es plata que entró)`,
     ].filter(Boolean) as string[];
     return (
       <div className="space-y-10">
-        <Encabezado emoji="📊" titulo="Resumen" bajada={`${titulo}: plata, caja, entradas, altas y bajas. Comparado con ${contra}.`} />
+        <Encabezado icono="grafico" titulo="Resumen" bajada={`${titulo}: plata, caja, entradas, altas y bajas. Comparado con ${contra}.`} />
         <nav className="flex flex-wrap gap-2" aria-label="Período">
           {opciones.map((o) => (
             <Link key={o.texto} href={o.href} aria-current={o.activo ? "page" : undefined}
@@ -76,7 +77,7 @@ export default async function ResumenDueno({ searchParams }: { searchParams: Pro
         <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8" data-resumen-numeros>
           {numeros.map((n) => (
             <div key={n.etiqueta} className="flex flex-col-reverse">
-              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}{n.comp && <span className="block text-sm texto-tenue">{n.comp}</span>}</dt>
+              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} /></span> {n.etiqueta}{n.comp && <span className="block text-sm texto-tenue">{n.comp}</span>}</dt>
               <dd className="numero text-4xl sm:text-5xl">{n.valor}</dd>
             </div>
           ))}
@@ -84,7 +85,7 @@ export default async function ResumenDueno({ searchParams }: { searchParams: Pro
 
         <section aria-labelledby="atencion">
           <h2 id="atencion" className="titulo text-2xl mb-3">Para mirar</h2>
-          {atencion.length === 0 ? <p className="texto-suave text-lg">Nada raro: sin diferencias de caja, retiros, descuentos, anulaciones ni dejados pasar. ✨</p> : (
+          {atencion.length === 0 ? <p className="texto-suave text-lg">Nada raro: sin diferencias de caja, retiros, descuentos, anulaciones ni dejados pasar. <Icono nombre="estrella" /></p> : (
             <ul className="space-y-2" data-resumen-atencion>{atencion.map((x) => <li key={x} className="tarjeta px-4 py-3 text-lg">{x}</li>)}</ul>
           )}
         </section>
@@ -112,13 +113,13 @@ export default async function ResumenDueno({ searchParams }: { searchParams: Pro
             <ul className="space-y-2">
               {a.diferencias.map((d) => (
                 <li key={`d-${d.en}`} className="tarjeta px-4 py-3 flex flex-wrap justify-between gap-2">
-                  <span>⚖️ {d.caja} · {d.por ?? "—"} · {hora(d.en)}</span>
+                  <span>{d.caja} · {d.por ?? "—"} · {hora(d.en)}</span>
                   <span className="numero" style={{ color: d.monto < 0 ? "var(--rojo)" : undefined }}>{d.monto > 0 ? "Sobraron " : "Faltaron "}{formatearPesos(Math.abs(d.monto))}</span>
                 </li>
               ))}
               {a.retiros.lista.map((m) => (
                 <li key={`r-${m.en}`} className="tarjeta px-4 py-3 flex flex-wrap justify-between gap-2">
-                  <span>💸 {m.motivo} · {m.por ?? "—"} · {hora(m.en)}</span><span className="numero">{formatearPesos(m.monto)}</span>
+                  <span><Icono nombre="plata" /> {m.motivo} · {m.por ?? "—"} · {hora(m.en)}</span><span className="numero">{formatearPesos(m.monto)}</span>
                 </li>
               ))}
             </ul>

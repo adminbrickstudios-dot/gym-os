@@ -58,11 +58,11 @@ try {
   // VD-46C: el motivo del descuento sale de la lista del gimnasio.
   await r.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });
   await carrito(r).locator("select[data-motivo-descuento]").first().selectOption({ index: 1 });
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await carrito(r).locator('[role="alert"]:has-text("descuento máximo")').waitFor({ timeout: 30000 });
   ok("descuento de $1.000 sobre $3.000: “Tu descuento máximo es 10 %”");
   await carrito(r).locator('input[aria-label="Monto del descuento"]').fill("300");
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await carrito(r).locator('[role="alert"]').waitFor({ state: "detached", timeout: 30000 });
   await esperarCobro(r);
   chequear(await r.getByText("Cobrado $2.700").count() > 0, "con $300 de descuento (10%) cobra $2.700", "no cobró $2.700");

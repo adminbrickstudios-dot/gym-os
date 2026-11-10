@@ -5,6 +5,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { SalirPin, Teclado } from "./Teclado";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "PIN de la recepción" };
 
@@ -17,11 +18,11 @@ export default async function PaginaPin({ searchParams }: { searchParams: Promis
     const nombre = (await cookies()).get("gymos_operador_nombre")?.value || actual.nombre;
     return (
       <>
-        <Encabezado emoji="🔢" titulo="¿Quién atiende?"
+        <Encabezado icono="calculadora" titulo="¿Quién atiende?"
           bajada="En la compu de la recepción, cada uno pone su PIN y queda anotado quién cobró, abrió la caja o dejó pasar. No da más permisos que la sesión abierta." />
         {nombre && (
           <div className="tarjeta p-4 mb-6 flex flex-wrap items-center gap-3 max-w-sm" data-opera={nombre}>
-            <span className="flex-1">👤 Atiende <strong>{nombre}</strong></span>
+            <span className="flex-1"><Icono nombre="persona" /> Atiende <strong>{nombre}</strong></span>
             <SalirPin />
           </div>
         )}

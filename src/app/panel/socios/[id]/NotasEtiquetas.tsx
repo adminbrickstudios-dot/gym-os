@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { detectarSalud } from "@/lib/salud";
 import { agregarNota, borrarNota, ponerEtiqueta, sacarEtiqueta } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Etiqueta = { id: string; nombre: string };
 export type NotasYEtiquetas = { notas: { id: string; texto: string; creado_en: string; autor: string; puedo_borrar: boolean }[]; etiquetas: Etiqueta[]; todas: Etiqueta[] };
@@ -17,7 +18,7 @@ export function Etiquetas({ socioId, etiquetas, todas }: { socioId: string; etiq
     <div className="flex flex-wrap items-center gap-2" data-etiquetas={etiquetas.length}>
       {etiquetas.map((e) => (
         <span key={e.id} className="pildora pildora-azul gap-1" data-etiqueta={e.nombre}>
-          🏷️ {e.nombre}
+          <Icono nombre="etiqueta" /> {e.nombre}
           <button type="button" aria-label={`Sacar la etiqueta ${e.nombre}`} disabled={ocupado} className="ml-1 opacity-70 hover:opacity-100"
             onClick={() => empezar(async () => { const r = await sacarEtiqueta(socioId, e.id); setError(r.error ?? null); })}>✕</button>
         </span>
@@ -28,7 +29,7 @@ export function Etiquetas({ socioId, etiquetas, todas }: { socioId: string; etiq
         <datalist id={`etiquetas-${socioId}`}>{todas.filter((t) => !etiquetas.some((e) => e.id === t.id)).map((t) => <option key={t.id} value={t.nombre} />)}</datalist>
         {texto.trim() && <button type="submit" disabled={ocupado} className="boton !min-h-9 text-sm">Poner</button>}
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }
@@ -44,9 +45,9 @@ export function Notas({ socioId, notas, zona, notaVieja }: { socioId: string; no
         <label className="block space-y-1"><span className="etiqueta">Nueva nota</span>
           <textarea value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={1000} className="campo min-h-24" placeholder="Prefiere el turno mañana, viene con la hermana…" /></label>
         <AvisoSalud texto={texto} />
-        <p className="text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</p>
-        {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
-        <button type="submit" disabled={ocupado || !texto.trim() || !!detectarSalud(texto)} className="boton boton-principal">{ocupado ? "Guardando…" : "📝 Guardar nota"}</button>
+        <p className="text-sm texto-tenue"><Icono nombre="corazon" /> No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</p>
+        {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
+        <button type="submit" disabled={ocupado || !texto.trim() || !!detectarSalud(texto)} className="boton boton-principal">{ocupado ? "Guardando…" : "Guardar nota"}</button>
       </form>
       {notas.length === 0 && !notaVieja && <p className="texto-suave">Todavía no hay notas.</p>}
       <ul className="space-y-2">

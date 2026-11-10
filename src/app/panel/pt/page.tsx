@@ -14,7 +14,7 @@ export default async function PaginaPt() {
     const r = await rpc<DatosPt>("agenda_pt", { p_gimnasio_id: panel.gimnasio.id, p_entrenador_id: null, p_dias: 21 });
     return (
       <div data-pt>
-        <Encabezado emoji="🏃" titulo="Personal trainer"
+        <Encabezado icono="pesa" titulo="Personal trainer"
           bajada={r.mi_rol === "profe" ? "Tus horarios de atención y las sesiones que reservaron. Marcá cuáles diste." : "Los horarios de cada PT, las sesiones reservadas y los packs que vendés. El socio reserva desde la app o lo hace la recepción."} />
         <Pt datos={r} zona={panel.gimnasio.zona_horaria} />
       </div>

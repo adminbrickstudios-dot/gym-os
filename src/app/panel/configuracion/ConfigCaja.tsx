@@ -7,6 +7,7 @@ import type { ConfigCaja as Config } from "@/app/panel/caja/tipos";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Restablecer } from "./Restablecer";
+import { Icono } from "@/components/ui/Icono";
 
 export function ConfigCaja({ inicial, puedeEditar }: { inicial: Config; puedeEditar: boolean }) {
   const [c, setC] = useState(inicial);
@@ -23,18 +24,18 @@ export function ConfigCaja({ inicial, puedeEditar }: { inicial: Config; puedeEdi
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-config-caja>
       <div>
-        <p className="titulo text-2xl">🧾 Caja</p>
+        <p className="titulo text-2xl"><Icono nombre="recibo" /> Caja</p>
         <p className="texto-suave">Una caja abierta de un día anterior se cierra sola, sin contar: nadie puede cobrar en ella y vos la contás después en Caja → Para revisar.{puedeEditar ? "" : " La cambia el dueño."}</p>
       </div>
       <div className="grid sm:grid-cols-2 gap-2" role="group" aria-label="Cómo se usa la caja">
-        {([["por_turno", "👥 Caja por turno", "Cada persona abre y cierra la suya. Se pueden hacer varios turnos por día."], ["una_por_dia", "📅 Una caja por día", "Se abre una vez y se cierra a la noche. Si ya se cerró, no se vuelve a abrir ese día."]] as const).map(([v, t, a]) => (
+        {([["por_turno", "Caja por turno", "Cada persona abre y cierra la suya. Se pueden hacer varios turnos por día."], ["una_por_dia", "Una caja por día", "Se abre una vez y se cierra a la noche. Si ya se cerró, no se vuelve a abrir ese día."]] as const).map(([v, t, a]) => (
           <button key={v} type="button" aria-pressed={c.modo === v} disabled={!puedeEditar} onClick={() => setC({ ...c, modo: v })}
             className={`boton !flex-col !items-start !h-auto py-3 ${c.modo === v ? "!border-[var(--acento)]" : "opacity-70"}`}>
             <span>{t}</span><span className="text-sm texto-tenue font-normal">{a}</span>
           </button>
         ))}
       </div>
-      <Interruptor etiqueta="🧮 Pedir el conteo de billetes al cerrar" ayuda={c.pedir_billetes ? "Prendido: para cerrar hay que usar la calculadora de billetes." : "Apagado: la calculadora está disponible, pero es opcional."}
+      <Interruptor etiqueta="Pedir el conteo de billetes al cerrar" ayuda={c.pedir_billetes ? "Prendido: para cerrar hay que usar la calculadora de billetes." : "Apagado: la calculadora está disponible, pero es opcional."}
         checked={c.pedir_billetes} disabled={!puedeEditar} onChange={(e) => setC({ ...c, pedir_billetes: e.target.checked })} />
       <div className="grid sm:grid-cols-3 gap-4">
         <label className="block space-y-1"><span className="etiqueta">Fondo fijo ($)</span>
@@ -53,7 +54,7 @@ export function ConfigCaja({ inicial, puedeEditar }: { inicial: Config; puedeEdi
       </div>
       {puedeEditar && (
         <div className="flex flex-wrap items-center gap-3">
-          <button type="button" className="boton boton-principal" disabled={!sucio || ocupado || Number.isNaN(c.fondo_fijo) || Number.isNaN(c.horas_max)} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
+          <button type="button" className="boton boton-principal" disabled={!sucio || ocupado || Number.isNaN(c.fondo_fijo) || Number.isNaN(c.horas_max)} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
       )}

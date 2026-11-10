@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { publicarNovedad, quitarNovedad } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Novedad = { id: string; texto: string; hasta: string; por: string };
 
@@ -19,12 +20,12 @@ export function Novedades({ gimnasioId, novedades, puede, hoy }: { gimnasioId: s
   return (
     <section className="tarjeta p-5 space-y-4 mb-10" data-novedades-panel>
       <div>
-        <h2 className="titulo text-2xl">📣 En la app de los socios</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="campana" /> En la app de los socios</h2>
         <p className="texto-suave">Un aviso corto que todos ven arriba en la app, hasta el día que elijas.</p>
       </div>
       {novedades.length > 0 && (
         <ul className="lista-entra space-y-2">{novedades.map((n) => (
-          <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--borde)] px-4 py-3" data-novedad>
+          <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-[var(--radio)] border border-[var(--borde)] px-4 py-3" data-novedad>
             <span className="flex-1 min-w-0">{n.texto}<span className="block text-sm texto-tenue">Hasta el {fecha(n.hasta)} · {n.por}</span></span>
             {puede && <button type="button" disabled={ocupado} className="boton !min-h-11 texto-suave"
               onClick={() => empezar(async () => { const r = await quitarNovedad(n.id); setError(r.error ?? null); })}>Quitar</button>}
@@ -40,7 +41,7 @@ export function Novedades({ gimnasioId, novedades, puede, hoy }: { gimnasioId: s
           <button type="submit" disabled={ocupado || texto.trim().length < 3} className="boton boton-principal">{ocupado ? "Publicando…" : "Publicar"}</button>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

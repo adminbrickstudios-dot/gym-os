@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { arreglarFalla, asignarResponsable, crearMaquina, darDeBajaMaquina, historialMaquina, reportarFalla, sumarFotoFalla, verFotoFalla, type FallaHistorial } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type MaquinaPanel = {
   maquina_id: string; nombre: string; sede_id: string; sede: string; activa: boolean; estado: "fuera_de_servicio" | "en_servicio";
@@ -22,7 +23,7 @@ export function AltaMaquina({ sedes }: { sedes: { sede_id: string; nombre: strin
   const [nombre, setNombre] = useState("");
   const [sede, setSede] = useState(sedes[0]?.sede_id ?? "");
   const [error, setError] = useState<string | null>(null);
-  if (!abierto) return <button type="button" className="boton" onClick={() => setAbierto(true)} data-nueva-maquina>➕ Cargar una máquina</button>;
+  if (!abierto) return <button type="button" className="boton" onClick={() => setAbierto(true)} data-nueva-maquina><Icono nombre="mas" /> Cargar una máquina</button>;
   const guardar = async () => {
     setError(null);
     const r = await crearMaquina(sede, nombre);
@@ -56,7 +57,7 @@ function FotoVer({ fallaId }: { fallaId: string }) {
   };
   return (
     <span>
-      <button type="button" className="text-sm underline texto-suave" onClick={abrir} data-ver-foto-falla>📷 Ver la foto</button>
+      <button type="button" className="text-sm underline texto-suave" onClick={abrir} data-ver-foto-falla><Icono nombre="camara" /> Ver la foto</button>
       {error && <span className="text-sm ml-2" role="alert">{error}</span>}
     </span>
   );
@@ -72,7 +73,7 @@ function FotoSumar({ fallaId }: { fallaId: string }) {
     if (r.error) setError(r.error);
   };
   return (
-    <label className="text-sm underline texto-suave cursor-pointer">📷 Sumar una foto
+    <label className="text-sm underline texto-suave cursor-pointer"><Icono nombre="camara" /> Sumar una foto
       <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" aria-label="Foto de la falla" onChange={(e) => void subir(e.target.files?.[0])} />
       {error && <span className="block" role="alert">{error}</span>}
     </label>
@@ -107,7 +108,7 @@ function Reportar({ m, datos, cerrar }: { m: MaquinaPanel; datos: DatosMaquinas;
       )}
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <div className="flex flex-wrap gap-2">
-        <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={guardar} ocupadoTexto="Guardando…" data-guardar-falla>🟡 Marcar fuera de servicio</BotonAccion>
+        <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={guardar} ocupadoTexto="Guardando…" data-guardar-falla><Icono nombre="punto-amarillo" /> Marcar fuera de servicio</BotonAccion>
         <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
       </div>
     </form>
@@ -135,8 +136,8 @@ function Historial({ id, zona }: { id: string; zona: string }) {
             <p key={f.falla_id} className="text-sm border-l-2 border-[var(--borde)] pl-3 break-words">
               <span className="font-semibold">{dia(f.reportada_en, zona)}</span>: {f.motivo} <span className="texto-tenue">(lo marcó {f.reportada_por}{f.responsable ? `, le tocaba a ${f.responsable}` : ""})</span>
               <br />{f.arreglada_en
-                ? <>✅ Arreglada el {dia(f.arreglada_en, zona)} por {f.arreglada_por}{f.dias_fuera ? ` (${f.dias_fuera} ${f.dias_fuera === 1 ? "día" : "días"} fuera)` : ""}{f.nota_arreglo ? `: ${f.nota_arreglo}` : ""}</>
-                : <>🟡 Sigue fuera de servicio</>}
+                ? <><Icono nombre="ok" /> Arreglada el {dia(f.arreglada_en, zona)} por {f.arreglada_por}{f.dias_fuera ? ` (${f.dias_fuera} ${f.dias_fuera === 1 ? "día" : "días"} fuera)` : ""}{f.nota_arreglo ? `: ${f.nota_arreglo}` : ""}</>
+                : <><Icono nombre="punto-amarillo" /> Sigue fuera de servicio</>}
             </p>
           ))}
         </div>
@@ -169,18 +170,18 @@ export function TarjetaMaquina({ m, datos, zona, mostrarSede }: { m: MaquinaPane
   return (
     <li className="tarjeta p-4 space-y-3 min-w-0" data-maquina={m.maquina_id} data-estado={m.estado}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-semibold text-lg">🏋️ {m.nombre}</span>
+        <span className="font-semibold text-lg"><Icono nombre="pesa" /> {m.nombre}</span>
         {mostrarSede && <span className="texto-tenue text-sm">{m.sede}</span>}
         {!m.activa ? <span className="pildora">de baja</span>
-          : fuera ? <span className="pildora" data-pildora-estado="fuera">🟡 Fuera de servicio</span>
-          : <span className="pildora" data-pildora-estado="servicio">✅ En servicio</span>}
+          : fuera ? <span className="pildora" data-pildora-estado="fuera"><Icono nombre="punto-amarillo" /> Fuera de servicio</span>
+          : <span className="pildora" data-pildora-estado="servicio"><Icono nombre="ok" /> En servicio</span>}
         {m.ultima_falla_en && !fuera && <span className="texto-tenue text-sm">última falla: {dia(m.ultima_falla_en, zona)}</span>}
       </div>
 
       {fuera && m.falla && (
         <div className="space-y-1 text-sm">
           <p className="break-words"><span className="font-semibold">Desde el {fecha(m.falla.reportada_en, zona)}</span> · lo marcó {m.falla.reportada_por}: {m.falla.motivo}</p>
-          <p className="texto-suave">🔧 Le toca a: {gestiona ? (
+          <p className="texto-suave"><Icono nombre="ajustes" /> Le toca a: {gestiona ? (
             <select className="campo !min-h-9 !py-1 !w-auto inline-block" value={m.falla.responsable_id ?? ""} onChange={(e) => void cambiarResp(e.target.value)} aria-label="Quién la arregla" data-responsable>
               <option value="">Todavía no se sabe</option>
               {datos.equipo.map((q) => <option key={q.equipo_id} value={q.equipo_id}>{q.nombre}</option>)}
@@ -201,15 +202,15 @@ export function TarjetaMaquina({ m, datos, zona, mostrarSede }: { m: MaquinaPane
           <label className="block space-y-1"><span className="etiqueta">¿Qué se hizo? (opcional)</span>
             <input className="campo" maxLength={500} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Se cambió el cable, vino el técnico…" data-arreglo-nota /></label>
           <div className="flex flex-wrap gap-2">
-            <BotonAccion className="boton boton-principal" onClick={arreglar} ocupadoTexto="Guardando…" data-confirmar-arreglo>✅ Confirmar: vuelve a estar en servicio</BotonAccion>
+            <BotonAccion className="boton boton-principal" onClick={arreglar} ocupadoTexto="Guardando…" data-confirmar-arreglo><Icono nombre="ok" /> Confirmar: vuelve a estar en servicio</BotonAccion>
             <button type="button" className="boton" onClick={() => setCerrando(false)}>Cancelar</button>
           </div>
         </div>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {m.activa && !fuera && !reportando && <button type="button" className="boton" onClick={() => setReportando(true)} data-reportar-falla>🟡 Está rota</button>}
-        {fuera && gestiona && !cerrando && <button type="button" className="boton boton-principal" onClick={() => setCerrando(true)} data-arreglada>✅ Quedó arreglada</button>}
+        {m.activa && !fuera && !reportando && <button type="button" className="boton" onClick={() => setReportando(true)} data-reportar-falla><Icono nombre="punto-amarillo" /> Está rota</button>}
+        {fuera && gestiona && !cerrando && <button type="button" className="boton boton-principal" onClick={() => setCerrando(true)} data-arreglada><Icono nombre="ok" /> Quedó arreglada</button>}
         {gestiona && !fuera && (
           <BotonAccion className="text-sm underline texto-suave" onClick={async () => { const r = await darDeBajaMaquina(m.maquina_id, !m.activa); if (r.error) setError(r.error); }} ocupadoTexto="…">
             {m.activa ? "Dar de baja" : "Volver a dar de alta"}

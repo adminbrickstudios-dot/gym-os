@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { fijarTitularFamilia, quitarTitularFamilia, sacarDeFamilia, vincularFamilia } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Familiar = { socio_id: string; numero: number; nombre: string; color: string; texto: string; es_titular?: boolean };
 /** VD-46G: cómo está este socio respecto del plan familiar/corporativo (la base lo calcula). */
@@ -20,20 +21,20 @@ export function Familia({ socioId, familia, plan = null, puedeArmar = false }: {
     void buscarSociosRapido(t).then((r) => { setEncontrados((r.socios ?? []).filter((s) => s.socio_id !== socioId && !familia.some((f) => f.socio_id === s.socio_id))); setError(r.error ?? null); }); };
   return (
     <div className="tarjeta p-6 sm:col-span-2 space-y-3 min-w-0" data-familia={familia.length}>
-      <p className="titulo text-2xl">👨‍👩‍👧 Familia</p>
+      <p className="titulo text-2xl"><Icono nombre="usuarios" /> Familia</p>
       {familia.length === 0 && <p className="texto-suave">No está vinculado con nadie. Sumá a quien viene con él (hermana, hijo…) para verlos juntos.</p>}
       {plan?.activo && familia.length > 0 && (
         <div className="rounded-xl border border-[var(--borde)] p-3 space-y-2 min-w-0" data-plan-familiar={plan.titular_id ? (plan.es_titular ? "titular" : "miembro") : "sin-titular"}>
           {plan.titular_id ? (
             <>
-              <p className="font-semibold break-words">👑 {plan.es_titular ? `Paga por ${plan.vinculados ?? 0} ${plan.vinculados === 1 ? "persona" : "personas"}` : `Paga ${plan.titular_nombre}`} <span className="texto-tenue font-normal">· plan {plan.tipo === "corporativo" ? "corporativo" : "familiar"}</span></p>
+              <p className="font-semibold break-words"><Icono nombre="corona" /> {plan.es_titular ? `Paga por ${plan.vinculados ?? 0} ${plan.vinculados === 1 ? "persona" : "personas"}` : `Paga ${plan.titular_nombre}`} <span className="texto-tenue font-normal">· plan {plan.tipo === "corporativo" ? "corporativo" : "familiar"}</span></p>
               <p className="texto-suave text-sm">{plan.es_titular ? "Los demás entran con su plan. Si no paga, ellos quedan afuera y se les explica por qué." : "Entra con el plan del titular. Si el titular no está al día, acá se ve el motivo."}</p>
               {puedeArmar && <button type="button" className="text-sm texto-suave underline" disabled={ocupado} data-quitar-titular
                 onClick={() => empezar(async () => { const r = await quitarTitularFamilia(socioId); setError(r.error ?? null); })}>Dejar el grupo sin titular</button>}
             </>
           ) : (
             <>
-              <p className="font-semibold">👑 Nadie paga por el grupo todavía</p>
+              <p className="font-semibold"><Icono nombre="corona" /> Nadie paga por el grupo todavía</p>
               {puedeArmar ? (
                 <>
                   <p className="texto-suave text-sm">Elegí quién paga: los demás van a entrar con su plan.</p>
@@ -61,7 +62,7 @@ export function Familia({ socioId, familia, plan = null, puedeArmar = false }: {
           <li key={f.socio_id} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-1">
             <PuntoEstado color={f.color} />
             <Link href={`/panel/socios/${f.socio_id}`} className="font-semibold hover:underline">{f.nombre} <span className="texto-tenue font-normal">#{f.numero}</span></Link>
-            {f.es_titular && <span className="pildora">👑 Titular</span>}
+            {f.es_titular && <span className="pildora"><Icono nombre="corona" /> Titular</span>}
             <span className="texto-suave text-sm min-w-0 flex-1 basis-40">{f.texto}</span>
             <button type="button" className="text-sm texto-suave underline" disabled={ocupado}
               onClick={() => empezar(async () => { const r = await sacarDeFamilia(socioId, f.socio_id); setError(r.error ?? null); })}>Sacar</button>
@@ -69,7 +70,7 @@ export function Familia({ socioId, familia, plan = null, puedeArmar = false }: {
         ))}
       </ul>
       <div className="space-y-2">
-        <input value={texto} onChange={(e) => buscar(e.target.value)} placeholder="➕ Sumar a la familia: nombre o DNI" aria-label="Sumar a la familia" className="campo" />
+        <input value={texto} onChange={(e) => buscar(e.target.value)} placeholder="Sumar a la familia: nombre o DNI" aria-label="Sumar a la familia" className="campo" />
         {encontrados.length > 0 && (
           <ul className="space-y-1">
             {encontrados.map((s) => (
@@ -83,7 +84,7 @@ export function Familia({ socioId, familia, plan = null, puedeArmar = false }: {
           </ul>
         )}
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       <p className="text-sm texto-tenue">Estar en la misma familia no cambia el precio (los descuentos son otra cosa).{plan?.activo ? " Con titular, los demás entran con el plan de quien paga." : ""}</p>
     </div>
   );

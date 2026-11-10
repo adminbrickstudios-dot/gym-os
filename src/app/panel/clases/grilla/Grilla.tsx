@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { agregarHorario, cerrarHorario, editarActividad, editarHorario, guardarActividad } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean; horarios: number };
 export type Horario = { horario_id: string; sede: string; actividad: string; emoji: string | null; dia_semana: number; hora_inicio: string; duracion_min: number; cupo: number | null; profe: string | null; profe_id: string | null; vigente_desde: string; vigente_hasta: string | null };
@@ -28,19 +29,19 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
 
       <section>
-        <h2 className="titulo text-3xl mb-4">💪 Actividades</h2>
+        <h2 className="titulo text-3xl mb-4"><Icono nombre="pesa" /> Actividades</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {actividades.map((a) => (
             soloLectura ? (
               <span key={a.actividad_id} className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`}>
-                {a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
+                <Icono nombre={a.emoji ?? "calendario"} /> {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
               </span>
             ) : <button key={a.actividad_id} type="button" onClick={() => setActEdit({ id: a.actividad_id, nombre: a.nombre, emoji: a.emoji ?? "", activa: a.activa })}
               className={`pildora !text-base !py-2 !px-4 ${a.activa ? "" : "opacity-50"}`} aria-label={`Editar ${a.nombre}`}>
-              {a.emoji ?? "🗓️"} {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
+              <Icono nombre={a.emoji ?? "calendario"} /> {a.nombre} <span className="texto-tenue">· {a.activa ? `${a.horarios} horarios` : "apagada"}</span>
             </button>
           ))}
-          {actividades.length === 0 && <p className="texto-suave">Todavía no hay actividades. Empezá por una (ej: 🚴 Spinning).</p>}
+          {actividades.length === 0 && <p className="texto-suave">Todavía no hay actividades. Empezá por una (ej: <Icono nombre="pesa" /> Spinning).</p>}
         </div>
         {actEdit && (
           <form className="tarjeta p-4 mb-4 flex flex-wrap items-center gap-2" data-editar-actividad onSubmit={(e) => { e.preventDefault(); correr(() => editarActividad(actEdit.id, actEdit.nombre, actEdit.emoji, actEdit.activa), () => setActEdit(null)); }}>
@@ -53,14 +54,14 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
           </form>
         )}
         <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => guardarActividad(null, nueva.nombre, nueva.emoji), () => setNueva({ nombre: "", emoji: "" })); }}>
-          <input className="campo !w-20 text-center text-xl" placeholder="🚴" value={nueva.emoji} onChange={(e) => setNueva({ ...nueva, emoji: e.target.value })} aria-label="Emoji" />
+          <input className="campo !w-20 text-center text-xl" placeholder="" value={nueva.emoji} onChange={(e) => setNueva({ ...nueva, emoji: e.target.value })} aria-label="Emoji" />
           <input className="campo !w-auto flex-1 min-w-48" placeholder="Nombre de la actividad" value={nueva.nombre} onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })} aria-label="Nombre de la actividad" />
-          <button type="submit" disabled={!nueva.nombre.trim() || ocupado} className="boton">➕ Agregar actividad</button>
+          <button type="submit" disabled={!nueva.nombre.trim() || ocupado} className="boton"><Icono nombre="mas" /> Agregar actividad</button>
         </form>
       </section>
 
       <section>
-        <h2 className="titulo text-3xl mb-4">🗓️ Grilla de la semana</h2>
+        <h2 className="titulo text-3xl mb-4"><Icono nombre="calendario" /> Grilla de la semana</h2>
         {DIAS.map((d, i) => {
           const del = horarios.filter((x) => x.dia_semana === i + 1);
           if (!del.length) return null;
@@ -71,7 +72,7 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
                 {del.map((x) => (
                   <li key={x.horario_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3">
                     <span className="numero text-2xl w-16">{x.hora_inicio.slice(0, 5)}</span>
-                    <span aria-hidden className="text-xl">{x.emoji ?? "🗓️"}</span>
+                    <span aria-hidden className="text-xl"><Icono nombre={x.emoji ?? "calendario"} /></span>
                     <span className="flex-1 min-w-0">
                       <span className="block font-semibold truncate">{x.actividad}</span>
                       <span className="block text-sm texto-suave truncate">{x.duracion_min} min{x.cupo ? ` · cupo ${x.cupo}` : " · sin cupo"}{x.profe ? ` · ${x.profe}` : ""}{sedes.length > 1 ? ` · ${x.sede}` : ""}{x.vigente_hasta ? ` · hasta el ${x.vigente_hasta.slice(8, 10)}/${x.vigente_hasta.slice(5, 7)}` : ""}{x.vigente_desde > hoy ? ` · desde el ${x.vigente_desde.slice(8, 10)}/${x.vigente_desde.slice(5, 7)}` : ""}</span>
@@ -115,9 +116,9 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
             e.preventDefault();
             correr(() => agregarHorario({ sede: h.sede, actividad: h.actividad, dia: h.dia, hora: h.hora, duracion: h.duracion, cupo: h.cupo ? Number(h.cupo) : null, profe: h.profe || null }));
           }}>
-            <p className="titulo text-xl sm:col-span-2 lg:col-span-3">➕ Agregar a la grilla</p>
+            <p className="titulo text-xl sm:col-span-2 lg:col-span-3"><Icono nombre="mas" /> Agregar a la grilla</p>
             <label className="space-y-1"><span className="etiqueta">Actividad</span>
-              <select className="campo" value={h.actividad} onChange={(e) => setH({ ...h, actividad: e.target.value })}>{activas.map((a) => <option key={a.actividad_id} value={a.actividad_id}>{a.emoji} {a.nombre}</option>)}</select></label>
+              <select className="campo" value={h.actividad} onChange={(e) => setH({ ...h, actividad: e.target.value })}>{activas.map((a) => <option key={a.actividad_id} value={a.actividad_id}><Icono nombre={a.emoji} /> {a.nombre}</option>)}</select></label>
             <label className="space-y-1"><span className="etiqueta">Día</span>
               <select className="campo" value={h.dia} onChange={(e) => setH({ ...h, dia: Number(e.target.value) })}>{DIAS.map((d, i) => <option key={d} value={i + 1}>{d}</option>)}</select></label>
             <label className="space-y-1"><span className="etiqueta">Hora</span>
@@ -130,7 +131,7 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
               <select className="campo" value={h.profe} onChange={(e) => setH({ ...h, profe: e.target.value })}><option value="">Sin asignar</option>{profes.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></label>
             {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>
               <select className="campo" value={h.sede} onChange={(e) => setH({ ...h, sede: e.target.value })}>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
-            <div className="sm:col-span-2 lg:col-span-3"><button type="submit" disabled={ocupado} className="boton boton-principal">➕ Agregar</button></div>
+            <div className="sm:col-span-2 lg:col-span-3"><button type="submit" disabled={ocupado} className="boton boton-principal"><Icono nombre="mas" /> Agregar</button></div>
           </form>
         )}
       </section>

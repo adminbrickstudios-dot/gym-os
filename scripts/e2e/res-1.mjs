@@ -17,7 +17,7 @@ try {
   await cobrado.waitFor({ timeout: 60000 });
   const t = await d.locator("main").innerText();
   chequear(/\$/.test(await cobrado.innerText()) && /Socios al día/.test(t) && /Recurrente por mes/.test(t) && /Día por día/.test(t) && /Horas pico/.test(t),
-    `menú → 📈 Resultado: ${(await cobrado.innerText()).split("\n").join(" · ")}`, t.slice(0, 200));
+    `menú → Resultado: ${(await cobrado.innerText()).split("\n").join(" · ")}`, t.slice(0, 200));
   const antes = (await d.locator("nav[aria-label=Mes] [aria-current]").innerText()).trim();
   await d.locator("nav[aria-label=Mes] a").first().click();
   await d.waitForURL(/mes=\d{4}-\d{2}/, { timeout: 30000 });

@@ -1,3 +1,4 @@
+import { Icono } from "@/components/ui/Icono";
 // RUT-3: la marca de cada ejercicio y un gráfico chico de lo que fue anotando.
 // Sirve para la app del socio y para el panel (el profe). Sin librerías: un SVG.
 export type Progreso = { socio: string; ejercicios: { ejercicio_id: string; ejercicio: string; grupo: string;
@@ -28,7 +29,7 @@ export function MarcasProgreso({ datos, zona }: { datos: Progreso; zona: string 
         <li key={e.ejercicio_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3">
           <span className="flex-1 min-w-0">
             <span className="block font-semibold">{e.ejercicio}</span>
-            <span className="block texto-suave text-sm">{e.marca ? <>🏆 {kg(e.marca.peso)}{e.marca.repeticiones ? ` × ${e.marca.repeticiones}` : ""} · {fecha(e.marca.momento)}</> : `${e.registros.length} registros sin peso`}</span>
+            <span className="block texto-suave text-sm">{e.marca ? <><Icono nombre="trofeo" /> {kg(e.marca.peso)}{e.marca.repeticiones ? ` × ${e.marca.repeticiones}` : ""} · {fecha(e.marca.momento)}</> : `${e.registros.length} registros sin peso`}</span>
           </span>
           <Linea puntos={pesos} />
         </li>

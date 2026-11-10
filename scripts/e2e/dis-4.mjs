@@ -16,10 +16,10 @@ try {
   await p.locator("main button", { hasText: "Agua 500 ml" }).click();
   const barra = p.locator("[data-barra-carrito]");
   await barra.waitFor({ timeout: 30000 });
-  chequear(/1 · \$1\.500/.test(await barra.innerText()), "barra: “🛒 1 · $1.500 · Cobrar ↓”", await barra.innerText());
+  chequear(/1 · \$1\.500/.test(await barra.innerText()), "barra: “1 · $1.500 · Cobrar ↓”", await barra.innerText());
   await barra.click();
   await barra.waitFor({ state: "detached", timeout: 30000 });
-  chequear(await p.locator('button:has-text("✅ Cobrar")').isVisible(), "lleva al ticket y se esconde", "no se ve el ticket");
+  chequear(await p.locator('button:has-text("Cobrar")').isVisible(), "lleva al ticket y se esconde", "no se ve el ticket");
   for (const ruta of ["/panel/vender", "/panel/caja", "/panel/transferencias"]) {
     await p.goto(`${G}${ruta}`); await p.locator("main h1").first().waitFor({ timeout: 60000 });
     const m = await p.evaluate(() => {

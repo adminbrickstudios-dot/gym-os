@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Restablecer } from "./Restablecer";
 import { guardarMetaVisitas } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-23b: la meta de visitas del mes que cada socio ve en su Inicio (se guarda aparte del resto de la pestaña). */
 export function MetaVisitas({ inicial, puedeEditar }: { inicial: number; puedeEditar: boolean }) {
@@ -14,7 +15,7 @@ export function MetaVisitas({ inicial, puedeEditar }: { inicial: number; puedeEd
   const valida = Number.isInteger(n) && n >= 1 && n <= 31;
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-meta-visitas={guardada}>
-      <p className="titulo text-2xl">🎯 Meta de visitas del mes</p>
+      <p className="titulo text-2xl"><Icono nombre="objetivo" /> Meta de visitas del mes</p>
       <p className="texto-suave">Cuántas veces al mes queremos que venga cada socio. En su app ve “Meta X/{guardada}” y una barra que se llena.{puedeEditar ? "" : " La cambia el dueño."}</p>
       <form className="flex flex-wrap items-end gap-3"
         onSubmit={(e) => {

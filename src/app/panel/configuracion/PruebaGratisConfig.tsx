@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarPruebaGratis, leerPruebaGratis, type ModoPrueba } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const OPCIONES: [ModoPrueba, string, string][] = [
   ["no", "No", "No se da prueba gratis. La clase de prueba de la página solo deja tus datos para que te escriba el gimnasio."],
@@ -21,7 +22,7 @@ export function PruebaGratisConfig({ puedeEditar }: { puedeEditar: boolean }) {
   }, []);
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-prueba-gratis={modo ?? "cargando"}>
-      <p className="titulo text-2xl">🎁 Prueba gratis</p>
+      <p className="titulo text-2xl"><Icono nombre="regalo" /> Prueba gratis</p>
       <p className="texto-suave">Para sumar socios nuevos: una vez por DNI, la da la recepción desde la Entrada o la reserva el interesado desde tu página (“Probá una clase”). Entra como una entrada más, pero no cuenta como socio ni gasta nada de ningún plan.</p>
       {modo === null && !estado.error ? <div className="esqueleto h-16" aria-hidden /> : modo !== null && (
         <>

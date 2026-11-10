@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { asignarConvenio, quitarConvenio } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type ConvenioSocio = { convenio_id: string; nombre: string; tipo: string; valor: number; hasta: string | null } | null;
 type Opcion = { convenio_id: string; nombre: string; tipo: string; valor: number; activo: boolean };
@@ -22,7 +23,7 @@ export function Convenio({ socioId, actual, opciones, puede, hoy, zona }: { soci
   return (
     <div className="space-y-2" data-convenio-socio={actual?.nombre ?? ""}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="pildora">{actual ? `🤝 ${actual.nombre} (−${valor(actual)})${ultimo ? ` hasta el ${ultimo}` : ""}` : "🤝 Sin convenio"}</span>
+        <span className="pildora">{actual ? `${actual.nombre} (−${valor(actual)})${ultimo ? ` hasta el ${ultimo}` : ""}` : "Sin convenio"}</span>
         {puede && !abierto && <button type="button" className="text-sm texto-suave underline" onClick={() => setAbierto(true)}>{actual ? "Cambiar" : "Asignar convenio"}</button>}
         {puede && !abierto && actual && <button type="button" className="text-sm texto-tenue underline" disabled={ocupado} onClick={() => correr(() => quitarConvenio(socioId))}>Quitar</button>}
       </div>
@@ -37,7 +38,7 @@ export function Convenio({ socioId, actual, opciones, puede, hoy, zona }: { soci
           <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

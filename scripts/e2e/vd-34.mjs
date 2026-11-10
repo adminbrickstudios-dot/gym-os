@@ -24,7 +24,7 @@ try {
   const id = new URL(d.url()).searchParams.get("socio");
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').dblclick();
+  await d.locator('button:has-text("Cobrar")').dblclick();
   await esperarCobro(d);
   await d.goto(`${G}/panel/socios/${id}?pestana=pagos`);
   await d.locator("[data-ventas] li").first().waitFor({ timeout: 30000 });

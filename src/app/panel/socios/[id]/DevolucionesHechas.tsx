@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { formatearPesos } from "@/lib/formato";
 import { anularDevolucion, type DevolucionHecha } from "../moderacion-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const MEDIOS: Record<string, string> = { efectivo: "En efectivo", transferencia: "Por transferencia", mercadopago: "Por MercadoPago", otro: "Otro medio", ninguno: "No se devuelve" };
 
@@ -20,9 +21,9 @@ export function DevolucionesHechas({ socioId, devoluciones, zona }: { socioId: s
     <ul className="space-y-2" data-devoluciones-hechas>
       {devoluciones.map((d) => (
         <li key={d.id} className="tarjeta p-4 space-y-2" data-devolucion-hecha={d.anulada ? "anulada" : "vigente"}>
-          <p className={d.anulada ? "texto-tenue line-through" : "font-semibold"}>↩️ {MEDIOS[d.medio] ?? d.medio}: {formatearPesos(Number(d.monto))} · {f(d.en)}{d.por ? ` · ${d.por}` : ""}</p>
+          <p className={d.anulada ? "texto-tenue line-through" : "font-semibold"}><Icono nombre="deshacer" /> {MEDIOS[d.medio] ?? d.medio}: {formatearPesos(Number(d.monto))} · {f(d.en)}{d.por ? ` · ${d.por}` : ""}</p>
           <p className="texto-suave text-sm">{d.motivo}</p>
-          {d.anulada && <p className="text-sm" data-devolucion-anulada>🚫 Anulada el {d.anulada_en ? f(d.anulada_en) : ""}{d.anulada_por ? ` por ${d.anulada_por}` : ""}: {d.anulada_motivo}{d.reintegro_caja ? " · la plata volvió a la caja" : ""}</p>}
+          {d.anulada && <p className="text-sm" data-devolucion-anulada><Icono nombre="prohibido" /> Anulada el {d.anulada_en ? f(d.anulada_en) : ""}{d.anulada_por ? ` por ${d.anulada_por}` : ""}: {d.anulada_motivo}{d.reintegro_caja ? " · la plata volvió a la caja" : ""}</p>}
           {!d.anulada && anulando !== d.id && <button type="button" className="boton boton-chico" data-devolucion-anular-abrir onClick={() => { cerrar(); setAnulando(d.id); }}>Anular (la registré por error)</button>}
           {anulando === d.id && (
             <div className="space-y-3">
@@ -32,10 +33,10 @@ export function DevolucionesHechas({ socioId, devoluciones, zona }: { socioId: s
                 <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={reintegro} onChange={(e) => setReintegro(e.target.checked)} className="mt-1" />
                   <span>La plata volvió a la caja: anotar un ingreso de {formatearPesos(Number(d.monto))} en mi caja abierta.</span></label>
               )}
-              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
               <div className="flex flex-wrap gap-2">
                 <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3}
-                  onClick={async () => { const r = await anularDevolucion(socioId, d.id, motivo, reintegro); if (r.error) setError(r.error); else cerrar(); }}>🚫 Anular la devolución</BotonAccion>
+                  onClick={async () => { const r = await anularDevolucion(socioId, d.id, motivo, reintegro); if (r.error) setError(r.error); else cerrar(); }}><Icono nombre="prohibido" /> Anular la devolución</BotonAccion>
                 <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
               </div>
             </div>

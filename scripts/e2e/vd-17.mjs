@@ -79,7 +79,7 @@ try {
   chequear(/3\.000/.test(await ticket.innerText()), "el ticket trae el Locker de $3.000 junto con la cuota", await ticket.innerText());
   await capturar(d, "vd17-compu-cobrar");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok("cobrada la cuota con el servicio");
 

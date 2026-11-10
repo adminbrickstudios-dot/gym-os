@@ -31,7 +31,7 @@ try {
   await r.locator('button:has-text("Cerrar con este monto")').click();
   await r.getByText("Faltan $100").waitFor({ timeout: 30000 });
   const link = decodeURIComponent(await r.locator("a[data-compartir-cierre]").getAttribute("href"));
-  chequear(/^https:\/\/wa\.me\/\?text=🔒 Cierre de caja/.test(link) && /⚠️ Faltaron \$100/.test(link), "CAJ-2: “📲 Mandar el cierre por WhatsApp” con el cierre escrito", link);
+  chequear(/^https:\/\/wa\.me\/\?text=Cierre de caja/.test(link) && /Faltaron \$100/.test(link), "CAJ-2: “Mandar el cierre por WhatsApp” con el cierre escrito", link);
   await r.locator('button:has-text("Listo")').click();
   chequear(await r.locator('main a:has-text("Turnos anteriores")').count() === 0, "la recepción no ve “Turnos anteriores”", "la recepción lo ve");
   await r.goto(`${G}/panel/caja/historial`);
@@ -45,7 +45,7 @@ try {
   const turno = d.locator("[data-turnos] > li", { hasText: `Proveedor ${s5}` });
   await turno.waitFor({ timeout: 30000 });
   const t = (await turno.innerText()).replace(/\n/g, " ");
-  chequear(/Faltaron \$100/.test(t) && /Abrió Ana · cerró Ana/.test(t) && /\$1\.500/.test(t) && /\$1\.400/.test(t) && /➖ \$500/.test(t),
+  chequear(/Faltaron \$100/.test(t) && /Abrió Ana · cerró Ana/.test(t) && /\$1\.500/.test(t) && /\$1\.400/.test(t) && /\$500/.test(t),
     "la dueña ve el turno: abrió y cerró Ana, tenía que haber $1.500, contó $1.400, faltaron $100, retiro de $500 con motivo", t);
   const comp = decodeURIComponent(await turno.locator("a[data-compartir-cierre]").getAttribute("href"));
   chequear(/Abrió Ana · cerró Ana/.test(comp) && /Salió \$500/.test(comp), "CAJ-2: cada turno cerrado se comparte desde el historial", comp);

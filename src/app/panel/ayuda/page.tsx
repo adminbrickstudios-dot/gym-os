@@ -16,7 +16,7 @@ export default async function Ayuda({ searchParams }: { searchParams: Promise<{ 
     const preguntas = preguntasPara("panel", { rol: panel.yo.rol, secciones: seccionesPara(panel.yo.rol, panel.secciones_apagadas) });
     return (
       <>
-        <Encabezado emoji="❓" titulo="Ayuda" bajada="Buscá lo que no sepas hacer. Cada respuesta tiene el botón que te lleva a hacerlo. Con Ctrl+K también las encontrás." />
+        <Encabezado icono="ayuda" titulo="Ayuda" bajada="Buscá lo que no sepas hacer. Cada respuesta tiene el botón que te lleva a hacerlo. Con Ctrl+K también las encontrás." />
         <CentroAyuda preguntas={preguntas} abierta={sp.p ?? null} version={VERSION_PREGUNTAS} />
       </>
     );

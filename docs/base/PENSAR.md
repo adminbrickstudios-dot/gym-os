@@ -28,6 +28,20 @@ terminado.
 
 ---
 
+## F1.4 · BASE-6: claro y oscuro, íconos de línea, Barlow (carril D, 09/11 noche)
+1. **Qué quiso decir Mateo:** que Base se vea como un producto serio de gimnasio (un mostrador), no una app con emojis: sin emojis como ícono, un solo estilo, letra con cuerpo, y que cada persona elija claro u oscuro y se vea bien en los dos.
+2. **Cómo lo hacen otros:** Linear, Vercel y Mindbody usan un set de íconos de línea con un solo componente, tokens de color con modo claro/oscuro por usuario (cookie + preferencia guardada) y una fuente propia autoalojada.
+3. **Cómo se rompe (5):**
+   - *emoji que viene de datos* (la actividad "🚴" del dueño, íconos que arma la base): `Icono` muestra como texto lo que no es un nombre de ícono, así que un dato del dueño se respeta y no se rompe.
+   - *tema oscuro sobre un gimnasio de fondo claro:* el tema de la persona manda sobre el fondo del gimnasio (el acento sigue siendo el suyo); `propsMarca` lo recibe de la cookie `tema`.
+   - *celular:* los íconos miden 1,15 em y escalan con el texto; el barrido mide desborde y contraste en 390 px.
+   - *internet lento:* Barlow va autoalojada con `next/font/local` y `swap`: sin pedidos a Google ni texto invisible.
+   - *otros roles y pantallas de otros carriles* (super admin, app del socio, ingreso): `Encabezado`, `Aviso` y `Vacio` aceptan todavía `emoji` para no romperlas; el chequeo de diseño (trinquete) las lista hasta que cada carril convierta las suyas.
+4. **Lo que no pidió pero necesita:** un chequeo que impida volver a meter colores sueltos o emojis, y un barrido que mida el contraste de verdad (no solo mirar capturas).
+5. **Decisión y prueba:** set propio de íconos (sin dependencia nueva), codemod sobre componentes y panel, tokens en `globals.css`; tsc, eslint, vitest y `barrido-tema.mjs` (claro y oscuro, compu y celular) en Actions.
+
+---
+
 ## U0.1 · El login roto (09/11 noche)
 1. **Qué pidió y qué quiso decir.** Mateo crea un gimnasio con su dueño, entra por `/g/template-gym/ingresar` con el mail y la contraseña que puso, y lo manda al `/ingresar` genérico con "mail o contraseña incorrectos". Quiere: entrar a su gimnasio, con su marca, o un mensaje que diga exactamente qué pasa.
 2. **Cómo lo hace un producto profesional.** Vercel Platforms / Cal.com / Shopify: una sola pantalla de ingreso, la dirección del gimnasio muestra su marca y usa el mismo login; los errores distinguen "no existe", "contraseña", "sin confirmar", "sin gimnasio", y nunca caen a un gimnasio por defecto.

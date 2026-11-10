@@ -6,17 +6,17 @@ export const TIPOS_CONTROL = ["cobro", "anulacion", "descuento", "otro_dia", "de
 export type TipoControl = (typeof TIPOS_CONTROL)[number];
 
 export const META_TIPO: Record<TipoControl, { emoji: string; etiqueta: string }> = {
-  cobro: { emoji: "💰", etiqueta: "Cobros" },
-  anulacion: { emoji: "↩️", etiqueta: "Anulaciones" },
-  descuento: { emoji: "🏷️", etiqueta: "Descuentos" },
-  otro_dia: { emoji: "📅", etiqueta: "Cobré otro día" },
-  dejado_pasar: { emoji: "🚪", etiqueta: "Dejados pasar" },
-  caja: { emoji: "💵", etiqueta: "Cajas" },
-  precio: { emoji: "💲", etiqueta: "Precios" },
-  configuracion: { emoji: "⚙️", etiqueta: "Configuración" },
-  entrada_anulada: { emoji: "🚫", etiqueta: "Entradas anuladas" },
-  invitado: { emoji: "🎟️", etiqueta: "Invitados" },
-  prestamo: { emoji: "🪪", etiqueta: "Anti-préstamo" },
+  cobro: { emoji: "plata", etiqueta: "Cobros" },
+  anulacion: { emoji: "deshacer", etiqueta: "Anulaciones" },
+  descuento: { emoji: "etiqueta", etiqueta: "Descuentos" },
+  otro_dia: { emoji: "calendario", etiqueta: "Cobré otro día" },
+  dejado_pasar: { emoji: "puerta", etiqueta: "Dejados pasar" },
+  caja: { emoji: "plata", etiqueta: "Cajas" },
+  precio: { emoji: "plata", etiqueta: "Precios" },
+  configuracion: { emoji: "ajustes", etiqueta: "Configuración" },
+  entrada_anulada: { emoji: "prohibido", etiqueta: "Entradas anuladas" },
+  invitado: { emoji: "ticket", etiqueta: "Invitados" },
+  prestamo: { emoji: "", etiqueta: "Anti-préstamo" },
 };
 
 export type ItemControl = {

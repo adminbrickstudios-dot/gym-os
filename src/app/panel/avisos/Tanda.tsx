@@ -4,6 +4,7 @@ import { useState } from "react";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { marcarAvisado } from "./acciones";
 import type { Aviso } from "./Aviso";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * VEH-1: "avisar a todos" uno tras otro. Cada toque abre un WhatsApp con su
@@ -25,7 +26,7 @@ export function TandaAvisos({ avisos, etiqueta = "Avisar a todos", principal = f
   if (!abierto) {
     return (
       <button type="button" className={`boton !min-h-11 ${principal ? "boton-principal" : ""}`} data-tanda onClick={() => { setCola(pendientes); setAbierto(true); setI(0); setAvisados(0); }}>
-        📣 {etiqueta} ({pendientes.length})
+        <Icono nombre="campana" /> {etiqueta} ({pendientes.length})
       </button>
     );
   }
@@ -43,7 +44,7 @@ export function TandaAvisos({ avisos, etiqueta = "Avisar a todos", principal = f
                 void marcarAvisado(a.socio_id, a.clave, a.referencia).then((r) => r.error && setError(`${a.nombre}: ${r.error}`));
                 setAvisados((n) => n + 1); setI((n) => n + 1);
               }}>
-              💬 Abrir WhatsApp {i + 1 < cola.length ? "y seguir" : ""}
+              <Icono nombre="mensaje" /> Abrir WhatsApp {i + 1 < cola.length ? "y seguir" : ""}
             </a>
             <button type="button" className="boton !min-h-11" onClick={() => setI((n) => n + 1)}>Saltear</button>
             <button type="button" className="boton !min-h-11 texto-suave" onClick={cerrar}>Terminar</button>
@@ -55,7 +56,7 @@ export function TandaAvisos({ avisos, etiqueta = "Avisar a todos", principal = f
           <button type="button" className="boton !min-h-11" onClick={cerrar}>Cerrar</button>
         </div>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

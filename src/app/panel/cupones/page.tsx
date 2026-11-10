@@ -19,11 +19,11 @@ export default async function PaginaCupones() {
     const esDueno = panel.yo.rol === "dueno";
     return (
       <>
-        <Encabezado emoji="🏷️" titulo="Cupones" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
+        <Encabezado icono="etiqueta" titulo="Cupones" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
           bajada="Un código para una campaña: en Vender se escribe y el descuento se carga solo en lo que corresponde. Cada uno dice cuántos socios trajo." />
         {esDueno && <div className="mb-8"><NuevoCupon planes={planes.filter((p) => p.activo)} /></div>}
         {cupones.length === 0
-          ? <Vacio emoji="🏷️" titulo="Todavía no hay cupones">{esDueno ? "Creá uno con “➕ Nuevo cupón”." : "Los crea el dueño."}</Vacio>
+          ? <Vacio icono="etiqueta" titulo="Todavía no hay cupones">{esDueno ? "Creá uno con “Nuevo cupón”." : "Los crea el dueño."}</Vacio>
           : <ul className="space-y-2" data-cupones={cupones.length}>{cupones.map((c) => <FilaCupon key={c.cupon_id} c={c} puedeEditar={esDueno} zona={panel.gimnasio.zona_horaria} />)}</ul>}
       </>
     );

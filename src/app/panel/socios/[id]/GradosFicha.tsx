@@ -3,21 +3,22 @@ import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
 import { anularGradoSocio, otorgarGrado } from "@/app/panel/grados/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** COM-13: el grado del socio en cada actividad con grados, lo que le falta para el próximo y su historial. */
 export function GradosFicha({ socioId, grados, puedeOtorgar, puedeAnular, zona }: { socioId: string; grados: GradosSocio; puedeOtorgar: boolean; puedeAnular: boolean; zona: string }) {
   const fecha = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(m));
   return (
     <section className="mt-6 space-y-3" data-grados-ficha>
-      <p className="titulo-grupo">🥋 Grados</p>
+      <p className="titulo-grupo"><Icono nombre="pesa" /> Grados</p>
       {grados.map((a) => (
         <div key={a.actividad_id} className="tarjeta p-4 space-y-2" data-grado-actividad={a.actividad}>
-          <p><span className="font-semibold">{a.emoji ?? "🥋"} {a.actividad}:</span> {a.actual ? <>{a.actual.color && <span className="inline-block w-3 h-3 rounded-full border align-middle mr-1" style={{ background: a.actual.color }} aria-hidden />}{a.actual.nombre}</> : "sin grado"}</p>
-          {a.proximo && <p className="text-sm texto-suave">Para {a.proximo.nombre}: {textoRequisitos(a)}{a.listo ? " · ✅ listo para rendir" : ""}</p>}
+          <p><span className="font-semibold"><Icono nombre={a.emoji ?? "pesa"} /> {a.actividad}:</span> {a.actual ? <>{a.actual.color && <span className="inline-block w-3 h-3 rounded-full border align-middle mr-1" style={{ background: a.actual.color }} aria-hidden />}{a.actual.nombre}</> : "sin grado"}</p>
+          {a.proximo && <p className="text-sm texto-suave">Para {a.proximo.nombre}: {textoRequisitos(a)}{a.listo ? " · listo para rendir" : ""}</p>}
           {puedeOtorgar && a.proximo && <Otorgar socioId={socioId} gradoId={a.proximo.grado_id} nombre={a.proximo.nombre} />}
           {a.historial.length > 0 && (
             <ul className="text-sm texto-suave space-y-1">{a.historial.map((h) => (
-              <li key={h.id} className="flex flex-wrap items-center gap-2">✅ {h.nombre} · {fecha(h.otorgado_en)}{h.por ? ` · ${h.por}` : ""}{puedeAnular && <Anular id={h.id} />}</li>
+              <li key={h.id} className="flex flex-wrap items-center gap-2"><Icono nombre="ok" /> {h.nombre} · {fecha(h.otorgado_en)}{h.por ? ` · ${h.por}` : ""}{puedeAnular && <Anular id={h.id} />}</li>
             ))}</ul>
           )}
         </div>
@@ -32,7 +33,7 @@ function Otorgar({ socioId, gradoId, nombre }: { socioId: string; gradoId: strin
   return (
     <>
       <button type="button" className="boton boton-chico" disabled={ocupado} data-otorgar-grado
-        onClick={() => empezar(async () => { const r = await otorgarGrado(socioId, gradoId, null); setError(r.error ?? null); })}>🥋 Rindió: {nombre}</button>
+        onClick={() => empezar(async () => { const r = await otorgarGrado(socioId, gradoId, null); setError(r.error ?? null); })}><Icono nombre="pesa" /> Rindió: {nombre}</button>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
     </>
   );

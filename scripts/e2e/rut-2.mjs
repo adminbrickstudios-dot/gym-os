@@ -45,11 +45,11 @@ try {
   chequear(/60 kg × 10/.test(await item.locator("[data-ultimo]").innerText()), "el socio anota 60 kg × 10 y le queda como “Última”", await item.locator("[data-ultimo]").innerText());
   await s.reload();
   await s.locator("[data-marcas]").waitFor({ timeout: 60000 });
-  chequear(/Prensa e2e[\s\S]*🏆 60 kg × 10/.test(await s.locator("[data-marcas]").innerText()), "RUT-3: “🏆 Mis marcas” muestra 60 kg × 10", await s.locator("[data-marcas]").innerText());
+  chequear(/Prensa e2e[\s\S]*60 kg × 10/.test(await s.locator("[data-marcas]").innerText()), "RUT-3: “Mis marcas” muestra 60 kg × 10", await s.locator("[data-marcas]").innerText());
   const [{ id: socio }] = (await db.query(`select id from public.socios where gimnasio_id = $1 and nombre = 'Testigo' and apellido = 'Al Día'`, [gim])).rows;
   await p.goto(`${G}/panel/rutinas/socio?id=${socio}`);
   await p.locator("[data-marcas]").waitFor({ timeout: 60000 });
-  chequear(/🏆 60 kg/.test(await p.locator("[data-marcas]").innerText()), "el profe ve la marca en el progreso del socio", await p.locator("[data-marcas]").innerText());
+  chequear(/60 kg/.test(await p.locator("[data-marcas]").innerText()), "el profe ve la marca en el progreso del socio", await p.locator("[data-marcas]").innerText());
   const ancho = await s.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `Mi rutina en el celular sin desborde (${ancho}px)`, `desborda ${ancho}`);
   for (const x of [p, s]) if (x.errores.length) falla(x.errores.join(" | "));

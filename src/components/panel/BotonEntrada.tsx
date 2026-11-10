@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { EVENTO_ABRIR_ENTRADA } from "./VentanaEntrada";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * El botón grande de Inicio: abre la ventana de Entrada sin salir de Inicio (VD-1).
@@ -14,7 +15,7 @@ export function BotonEntrada({ className }: { className: string }) {
         e.preventDefault();
         window.dispatchEvent(new Event(EVENTO_ABRIR_ENTRADA));
       }}>
-      <span aria-hidden>🚪</span> Entrada
+      <span aria-hidden><Icono nombre="puerta" /></span> Entrada
       <span className="text-lg font-normal opacity-90 hidden sm:inline">o tipeá un DNI</span>
     </Link>
   );

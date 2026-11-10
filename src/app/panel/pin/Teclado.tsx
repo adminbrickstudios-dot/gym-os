@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useEffect, useRef } from "react";
 import { entrarConPin, salirDelPin } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** Cuatro números grandes; con el cuarto se manda solo. */
 export function Teclado({ volver }: { volver: string }) {
@@ -16,8 +17,8 @@ export function Teclado({ volver }: { volver: string }) {
           className="campo !text-4xl !min-h-20 text-center tracking-[0.6em] numero" type="password"
           onChange={(e) => { if (/^\d{4}$/.test(e.target.value)) form.current?.requestSubmit(); }} />
       </label>
-      {estado.error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {estado.error}</p>}
-      <button type="submit" className="boton boton-principal w-full" disabled={mandando}>🔢 Entrar</button>
+      {estado.error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {estado.error}</p>}
+      <button type="submit" className="boton boton-principal w-full" disabled={mandando}><Icono nombre="calculadora" /> Entrar</button>
     </form>
   );
 }

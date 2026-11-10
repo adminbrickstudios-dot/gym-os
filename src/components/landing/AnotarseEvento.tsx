@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { anotarseEvento, type EstadoAnotarse } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function AnotarseEvento({ eventoId, lleno, conEspera }: { eventoId: string; lleno: boolean; conEspera: boolean }) {
   const [abierto, setAbierto] = useState(false);
@@ -10,12 +11,12 @@ export function AnotarseEvento({ eventoId, lleno, conEspera }: { eventoId: strin
   if (estado.ok) {
     return (
       <p className="mensaje mensaje-exito" role="status" data-anotado-pagina={estado.estado}>
-        {estado.estado === "espera" ? `⏳ Quedaste en la lista de espera (lugar ${estado.posicion}). Si se libera un lugar, te escribimos.` : `✅ ¡Listo, estás anotado!${estado.precio ? ` Se paga en recepción (${formatearPesos(estado.precio)}).` : ""}`}
+        {estado.estado === "espera" ? `Quedaste en la lista de espera (lugar ${estado.posicion}). Si se libera un lugar, te escribimos.` : `¡Listo, estás anotado!${estado.precio ? ` Se paga en recepción (${formatearPesos(estado.precio)}).` : ""}`}
       </p>
     );
   }
   if (lleno && !conEspera) return null;
-  if (!abierto) return <button type="button" className="boton boton-principal mt-2" data-abrir-anotarse onClick={() => setAbierto(true)}>{lleno ? "⏳ Anotarme en la lista de espera" : "🎟️ Anotarme"}</button>;
+  if (!abierto) return <button type="button" className="boton boton-principal mt-2" data-abrir-anotarse onClick={() => setAbierto(true)}>{lleno ? "Anotarme en la lista de espera" : "Anotarme"}</button>;
   return (
     <form action={accion} className="space-y-3 pt-2" data-form-anotarse>
       <label className="block space-y-1"><span className="etiqueta">Tu nombre y apellido</span>
@@ -25,8 +26,8 @@ export function AnotarseEvento({ eventoId, lleno, conEspera }: { eventoId: strin
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
         <input name="telefono" required type="tel" inputMode="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={estado.datos?.telefono} /></label>
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      {estado.error && <p role="alert" className="mensaje mensaje-error">⚠️ {estado.error}</p>}
-      <button type="submit" disabled={enviando} className="boton boton-principal w-full sm:w-auto px-8">{enviando ? "Anotando…" : "✅ Confirmar"}</button>
+      {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
+      <button type="submit" disabled={enviando} className="boton boton-principal w-full sm:w-auto px-8">{enviando ? "Anotando…" : "Confirmar"}</button>
     </form>
   );
 }

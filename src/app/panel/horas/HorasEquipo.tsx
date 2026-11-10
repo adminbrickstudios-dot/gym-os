@@ -6,6 +6,7 @@ import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { ETIQUETA_ESTADO, aCampoLocal, horaLocal, textoMinutos, type Turno } from "@/lib/fichaje";
 import { anularTurno, corregirTurno, guardarConfigFichaje, verPersona, type DetallePersona } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type FilaHoras = { equipo_id: string; nombre: string; rol: string; activo: boolean; turnos: number; minutos: number; sin_salida: number; en_turno: boolean };
 const ROL: Record<string, string> = { recepcion: "Recepción", profe: "Profe", encargado: "Encargado" };
@@ -35,7 +36,7 @@ function Ajuste({ usa, tope }: { usa: boolean; tope: number }) {
   });
   return (
     <section className="tarjeta p-5 max-w-xl space-y-2" aria-labelledby="cfg-fichaje" data-config-fichaje>
-      <h2 id="cfg-fichaje" className="titulo text-xl">⚙️ Fichaje del equipo</h2>
+      <h2 id="cfg-fichaje" className="titulo text-xl"><Icono nombre="ajustes" /> Fichaje del equipo</h2>
       <Interruptor etiqueta="El gimnasio usa fichaje" ayuda="La recepción y los profes marcan entrada y salida con su PIN. Apagado por defecto." checked={valor} disabled={ocupado}
         onChange={(e) => { setValor(e.target.checked); guardar(e.target.checked, horas); }} />
       <label className="flex flex-wrap items-center gap-3">
@@ -101,7 +102,7 @@ function Fila({ t, esDueno, zona, correcciones, alCambiar }: { t: Turno; esDueno
       </div>
       {t.anulado_motivo && <p className="texto-suave text-sm">Anulado: {t.anulado_motivo}</p>}
       {correcciones.map((c, i) => (
-        <p key={i} className="texto-suave text-sm">✏️ {c.por} corrigió: de {horaLocal(c.entrada_antes, zona)}–{c.salida_antes ? horaLocal(c.salida_antes, zona) : "sin salida"} a {horaLocal(c.entrada_nueva, zona)}–{horaLocal(c.salida_nueva, zona)}. “{c.motivo}”</p>
+        <p key={i} className="texto-suave text-sm"><Icono nombre="lapiz" /> {c.por} corrigió: de {horaLocal(c.entrada_antes, zona)}–{c.salida_antes ? horaLocal(c.salida_antes, zona) : "sin salida"} a {horaLocal(c.entrada_nueva, zona)}–{horaLocal(c.salida_nueva, zona)}. “{c.motivo}”</p>
       ))}
       {esDueno && t.estado !== "anulado" && !modo && (
         <div className="flex gap-3 text-sm">

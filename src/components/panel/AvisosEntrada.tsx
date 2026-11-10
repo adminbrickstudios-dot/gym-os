@@ -1,6 +1,6 @@
 "use client";
 // VD-4 · Los avisos de vidrio de la puerta, en cualquier pantalla del panel (docs/v2/01 §5).
-// "✅ Juan Pérez entró por QR · al día hasta 30/11" se va solo; "⛔ Ana Gómez intentó entrar: vencida" se queda
+// "Juan Pérez entró por QR · al día hasta 30/11" se va solo; "Ana Gómez intentó entrar: vencida" se queda
 // hasta que se toca la ✕, con el botón Cobrar. Tocar el aviso abre el veredicto en la ventana de Entrada.
 // Los datos vienen del "oído" compartido (entradas-vivo.ts): un solo pedido cada 4 s para todo el panel.
 import { usePathname, useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
 import { escucharEntradas } from "./entradas-vivo";
 import { EVENTO_ABRIR_PANEL_SOCIO } from "./PanelSocioLateral";
+import { Icono } from "@/components/ui/Icono";
 
 /** La ventana de Entrada escucha este evento para abrir el veredicto de un socio (detail: ResultadoSocio). */
 export const EVENTO_ABRIR_SOCIO = "gymos:abrir-entrada-socio";
@@ -40,13 +41,13 @@ function deEntrada(x: EntradaViva): Aviso {
     : x.resultado === "forzado" ? `${quien} entró ${via} (lo dejaron pasar): ${minuscula(x.texto)}`
     : `${quien} entró ${via}${x.texto ? ` · ${x.texto}` : ""}`;
   return {
-    id: x.ingreso_id, color, emoji: color === "rojo" ? "⛔" : color === "amarillo" ? "⚠️" : "✅", texto,
+    id: x.ingreso_id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : "✓", texto,
     socioId: x.socio_id, nombre: x.socio, numero: x.numero, cobrar: x.cobrar, puede: !rechazado && x.resultado !== "forzado", textoSocio: x.texto, colorSocio: x.color,
   };
 }
 function deAlerta(a: AlertaViva): Aviso {
   return {
-    id: a.alerta_id, color: "amarillo", emoji: "⚠️",
+    id: a.alerta_id, color: "amarillo", emoji: "alerta",
     texto: `${a.socio} volvió a entrar por ${VIA_PRESTAMO[a.via_nueva] ?? a.via_nueva} ${a.minutos < 1 ? "hace menos de 1 min" : `a los ${a.minutos} min`} de haber entrado por ${VIA_PRESTAMO[a.via_anterior] ?? a.via_anterior}: ¿es la misma persona?`,
     socioId: a.socio_id, nombre: a.socio, numero: null, cobrar: false, puede: true, textoSocio: "", colorSocio: "amarillo",
   };
@@ -113,7 +114,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
     const local = (e: Event) => {
       const x = (e as CustomEvent<AvisoLocal>).detail;
       const color = x.color as Aviso["color"];
-      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "⛔" : color === "amarillo" ? "⚠️" : color === "azul" ? "🎁" : "✅", texto: x.texto,
+      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : color === "azul" ? "" : "✓", texto: x.texto,
         socioId: x.socioId, nombre: x.nombre, numero: x.numero, cobrar: x.cobrar, puede: x.puede, textoSocio: x.textoSocio, colorSocio: color === "rojo" ? "rojo" : color === "amarillo" ? "amarillo" : "verde" };
       setAvisos((previos) => {
         let todos = [...previos.filter((p) => p.id !== n.id), n];
@@ -157,14 +158,14 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
       {avisos.map((a) => (
         <div key={a.id} data-aviso-id={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
-          className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
+          className="vidrio aparecer pointer-events-auto rounded-[var(--radio)] p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
-            <span className="text-xl leading-6" aria-hidden>{a.emoji}</span>
+            <span className="text-xl leading-6" aria-hidden><Icono nombre={a.emoji} /></span>
             <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
           </button>
           <div className="flex flex-col items-end gap-1 flex-none">
             <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-8 rounded-lg texto-tenue active:opacity-60">✕</button>
-            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm">💵 Cobrar</button>}
+            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm"><Icono nombre="plata" /> Cobrar</button>}
           </div>
         </div>
       ))}

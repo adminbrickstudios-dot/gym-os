@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { BotonFichar, textoResultado } from "@/components/panel/BotonFichar";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { ficharConPin, type ResFichaje } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function FicharPin({ zona, mio }: { zona: string; mio: { nombre: string; enTurno: boolean; entradaEn: string | null; sinSalidaDesde: string | null } }) {
   const router = useRouter();
@@ -16,7 +17,7 @@ export function FicharPin({ zona, mio }: { zona: string; mio: { nombre: string; 
       <BotonFichar nombre={mio.nombre} enTurno={mio.enTurno} entradaEn={mio.entradaEn} sinSalidaDesde={mio.sinSalidaDesde} zona={zona} />
       <form className="tarjeta p-5 space-y-3" data-fichar-pin
         onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await ficharConPin(pin); setRes(r); if (!r.error) { setPin(""); router.refresh(); } }); }}>
-        <h2 className="titulo text-xl">🔢 Fichar con mi PIN</h2>
+        <h2 className="titulo text-xl"><Icono nombre="calculadora" /> Fichar con mi PIN</h2>
         <p className="texto-suave text-sm">Si otra persona está atendiendo en esta compu, poné tu PIN de 4 números: ficha tu entrada o tu salida, a tu nombre.</p>
         <label className="block">
           <span className="font-semibold block mb-1">Mi PIN</span>

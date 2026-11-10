@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { marcarNoEscribirle } from "../moderacion-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type DatosNoEscribirle = { marcado: boolean; desde: string | null; motivo: string | null; por: string | null; puede_sacar: boolean; veces_sacada: number | null };
 
@@ -19,21 +20,21 @@ export function NoEscribirle({ socioId, datos: d, zona }: { socioId: string; dat
     <div className="mt-4 space-y-2" data-no-escribirle={d.marcado ? "si" : "no"}>
       {d.marcado && (
         <Mensaje tipo="aviso">
-          <p className="text-sm" data-no-escribirle-marca>🔕 <strong>No escribirle.</strong> {d.por ? `${d.por}, ` : ""}el {d.desde ? f(d.desde) : ""}: {d.motivo}. No sale en los avisos ni en los mensajes masivos; en Vencen para cobrar sí aparece.</p>
+          <p className="text-sm" data-no-escribirle-marca><Icono nombre="prohibido" /> <strong>No escribirle.</strong> {d.por ? `${d.por}, ` : ""}el {d.desde ? f(d.desde) : ""}: {d.motivo}. No sale en los avisos ni en los mensajes masivos; en Vencen para cobrar sí aparece.</p>
         </Mensaje>
       )}
       {!abierto ? (
         (!d.marcado || d.puede_sacar)
-          ? <button type="button" className="boton boton-chico texto-suave" data-no-escribirle-abrir onClick={() => setAbierto(true)}>{d.marcado ? "🔔 Volver a escribirle" : "🔕 No escribirle"}</button>
+          ? <button type="button" className="boton boton-chico texto-suave" data-no-escribirle-abrir onClick={() => setAbierto(true)}>{d.marcado ? "Volver a escribirle" : "No escribirle"}</button>
           : <span className="texto-tenue text-sm">Sacar la marca lo hace el dueño o el encargado.</span>
       ) : (
         <div className="tarjeta p-4 space-y-3">
           <label className="block"><span className="font-semibold">{d.marcado ? "Por qué se vuelve a escribirle" : "Por qué no se le escribe"} (queda anotado con tu nombre)</span>
             <input className="campo mt-1" value={motivo} maxLength={300} onChange={(e) => setMotivo(e.target.value)}
               placeholder={d.marcado ? "Ej.: pidió volver a recibir mensajes" : "Ej.: lo pidió en la recepción"} aria-label="Motivo" /></label>
-          {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+          {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
           <div className="flex flex-wrap gap-2">
-            <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={guardar}>{d.marcado ? "🔔 Volver a escribirle" : "🔕 No escribirle"}</BotonAccion>
+            <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={guardar}>{d.marcado ? "Volver a escribirle" : "No escribirle"}</BotonAccion>
             <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
           </div>
         </div>

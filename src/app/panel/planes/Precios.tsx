@@ -2,13 +2,14 @@
 import { useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { anularProgramado, programarLista, type Variante } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Fila = { medio: string | null; hasta_dia: number | null; monto: number };
 type Lista = { desde: string; general: number | null; variantes: Fila[] };
 export type ListaPrecios = { plan_id: string; tipo: string; medios: string[]; hoy: Lista | null; proxima: Lista | null; con_sede: boolean };
 
 export const MEDIO: Record<string, string> = {
-  efectivo: "💵 Efectivo", transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📱 Mercado Pago",
+  efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "Mercado Pago",
 };
 const aTexto = (n: number | null | undefined) => (n == null ? "" : formatearNumero(Number(n), 2));
 
@@ -42,7 +43,7 @@ export function Precios({ lista, hoy, fecha, cerrar }: { lista: ListaPrecios; ho
     <form className="mt-4 space-y-4" data-precios onSubmit={(e) => { e.preventDefault(); guardar(); }}>
       {lista.proxima && (
         <p className="tarjeta p-3 text-sm flex flex-wrap items-center gap-2" data-proxima>
-          <span className="flex-1 min-w-0">📅 Desde el {fecha(lista.proxima.desde)} rige {formatearPesos(lista.proxima.general)}{lista.proxima.variantes.length ? ` (${resumenVariantes(lista.proxima)})` : ""}. Lo de abajo la reemplaza.</span>
+          <span className="flex-1 min-w-0"><Icono nombre="calendario" /> Desde el {fecha(lista.proxima.desde)} rige {formatearPesos(lista.proxima.general)}{lista.proxima.variantes.length ? ` (${resumenVariantes(lista.proxima)})` : ""}. Lo de abajo la reemplaza.</span>
           <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => correr(() => anularProgramado(lista.plan_id, lista.proxima!.desde), cerrar)}>✕ Anular ese aumento</button>
         </p>
       )}
@@ -72,7 +73,7 @@ export function Precios({ lista, hoy, fecha, cerrar }: { lista: ListaPrecios; ho
               <button type="button" className="boton boton-chico" aria-label="Quitar" onClick={() => setPorDia(porDia.filter((_, j) => j !== i))}>✕</button>
             </div>
           ))}
-          <button type="button" className="boton boton-chico" onClick={() => setPorDia([...porDia, { dia: "10", monto: "" }])}>➕ Precio por pagar antes</button>
+          <button type="button" className="boton boton-chico" onClick={() => setPorDia([...porDia, { dia: "10", monto: "" }])}><Icono nombre="mas" /> Precio por pagar antes</button>
         </fieldset>
       )}
       {combinadas.length > 0 && <p className="text-sm texto-tenue">Se mantienen: {resumenVariantes({ desde: "", general: null, variantes: combinadas })}.</p>}
@@ -80,7 +81,7 @@ export function Precios({ lista, hoy, fecha, cerrar }: { lista: ListaPrecios; ho
         <input className="campo" type="date" min={hoy} value={desde} onChange={(e) => setDesde(e.target.value)} aria-label="Desde cuándo (vacío = hoy)" />
       </label>
       <p className="text-sm texto-tenue">Se cobra el más barato que corresponde. Lo ya cobrado no cambia. La deuda y la página muestran el general.{lista.con_sede ? " Este plan tiene precios por sede: no se tocan desde acá." : ""}</p>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="boton boton-principal" disabled={!general.trim() || ocupado}>Guardar precios</button>
         <button type="button" className="boton" onClick={cerrar}>Cancelar</button>

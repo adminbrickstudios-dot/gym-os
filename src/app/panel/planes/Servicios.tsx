@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { formatearPesos } from "@/lib/formato";
 import { asignarServicio, guardarServicio, type Servicio } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 function FilaServicio({ s }: { s: Servicio }) {
   const [editando, setEditando] = useState(false);
@@ -35,8 +36,8 @@ function FilaServicio({ s }: { s: Servicio }) {
           <span className="flex-1 font-semibold min-w-0">{s.nombre}{!s.activo && <span className="texto-tenue font-normal text-sm"> · no se ofrece</span>}</span>
           <span className="numero text-xl">{formatearPesos(s.precio)}<span className="texto-tenue text-sm font-normal"> /mes</span></span>
           <span className="pildora text-sm" data-servicio-socios={s.socios.length}>{s.socios.length === 1 ? "1 socio" : `${s.socios.length} socios`}</span>
-          <button type="button" className="boton-texto" onClick={() => setAsignando(!asignando)}>👤 Asignar</button>
-          <button type="button" className="boton-texto" onClick={() => setEditando(true)}>✏️ Editar</button>
+          <button type="button" className="boton-texto" onClick={() => setAsignando(!asignando)}><Icono nombre="persona" /> Asignar</button>
+          <button type="button" className="boton-texto" onClick={() => setEditando(true)}><Icono nombre="lapiz" /> Editar</button>
           <button type="button" className="boton-texto" disabled={ocupado} onClick={() => correr(() => guardarServicio(s.producto_id, s.nombre, s.precio, !s.activo))}>{s.activo ? "Dejar de ofrecer" : "Volver a ofrecer"}</button>
         </div>
       )}
@@ -52,7 +53,7 @@ function FilaServicio({ s }: { s: Servicio }) {
       )}
       {asignando && (
         <div className="mt-3 space-y-2">
-          <input autoFocus className="campo" placeholder="🔍 Buscar el socio al que se lo cobrás" aria-label={`Buscar socio para ${s.nombre}`} value={texto} onChange={(e) => setTexto(e.target.value)} />
+          <input autoFocus className="campo" placeholder="Buscar el socio al que se lo cobrás" aria-label={`Buscar socio para ${s.nombre}`} value={texto} onChange={(e) => setTexto(e.target.value)} />
           {hallados.map((h) => (
             <button key={h.socio_id} type="button" className="fila gap-3" disabled={ocupado || ya.has(h.socio_id)}
               onClick={() => correr(() => asignarServicio(h.socio_id, s.producto_id, true), () => { setTexto(""); setHallados([]); setAsignando(false); })}>
@@ -63,7 +64,7 @@ function FilaServicio({ s }: { s: Servicio }) {
           {texto.trim().length >= 2 && hallados.length === 0 && <p className="texto-suave text-sm">No encuentro a nadie con ese nombre.</p>}
         </div>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-2"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }
@@ -74,7 +75,7 @@ export function Servicios({ servicios }: { servicios: Servicio[] }) {
   const [ocupado, empezar] = useTransition();
   return (
     <section data-servicios>
-      <h2 className="titulo text-3xl mb-1">🔑 Servicios adicionales</h2>
+      <h2 className="titulo text-3xl mb-1"><Icono nombre="llave" /> Servicios adicionales</h2>
       <p className="texto-suave mb-4">Locker, toalla, nutrición, lo que quieras: se le asigna a un socio y se suma a su cuota todos los meses. Se cobra en el mismo Cobrar.</p>
       {servicios.length === 0
         ? <p className="texto-tenue mb-4">Todavía no cargaste servicios. Ejemplo: Locker, $3.000 por mes. Agregá el primero acá abajo.</p>
@@ -85,9 +86,9 @@ export function Servicios({ servicios }: { servicios: Servicio[] }) {
       }}>
         <input className="campo !w-auto flex-1 min-w-40" aria-label="Servicio nuevo" placeholder="Servicio (ej: Locker)" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
         <input className="campo !w-32" inputMode="decimal" aria-label="Precio del servicio por mes" placeholder="$ por mes" value={nuevo.precio} onChange={(e) => setNuevo({ ...nuevo, precio: e.target.value })} />
-        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}>➕ Agregar servicio</button>
+        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}><Icono nombre="mas" /> Agregar servicio</button>
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

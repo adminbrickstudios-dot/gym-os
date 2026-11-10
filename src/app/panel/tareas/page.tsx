@@ -7,6 +7,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { AutomaticasHoy, ChecklistHoy, ConfigurarAutomaticas, type Automatica, type ConfigAuto, type ItemChecklist, type PersonaConfig } from "./Hoy";
 import { FilaTarea, NuevaTarea, type Persona, type Tarea } from "./Tareas";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Para hacer hoy" };
 
@@ -38,20 +39,20 @@ export default async function PaginaTareas({ searchParams }: { searchParams: Pro
     const hechas = datos.tareas.filter((t) => t.hecha_en);
     return (
       <>
-        <Encabezado emoji="✅" titulo="Para hacer hoy" bajada="Lo que hay que hacer hoy: lo que se calcula solo, el checklist y las tareas que anotás vos." />
+        <Encabezado icono="ok" titulo="Para hacer hoy" bajada="Lo que hay que hacer hoy: lo que se calcula solo, el checklist y las tareas que anotás vos." />
 
         {rol !== "profe" && (
           <section aria-labelledby="automaticas" className="mb-10" data-hoy-automaticas={automaticas.length}>
-            <h2 id="automaticas" className="titulo text-3xl mb-4">⚡ Se calcula solo{automaticas.length > 0 ? ` (${automaticas.length})` : ""}</h2>
+            <h2 id="automaticas" className="titulo text-3xl mb-4"><Icono nombre="rayo" /> Se calcula solo{automaticas.length > 0 ? ` (${automaticas.length})` : ""}</h2>
             {automaticas.length === 0
-              ? <Vacio emoji="✨" titulo="Todo al día">Nada para cobrar, aprobar ni avisar ahora. Cuando aparezca algo, lo ves acá y desaparece solo cuando lo resolvés.</Vacio>
+              ? <Vacio icono="estrella" titulo="Todo al día">Nada para cobrar, aprobar ni avisar ahora. Cuando aparezca algo, lo ves acá y desaparece solo cuando lo resolvés.</Vacio>
               : <AutomaticasHoy items={automaticas} />}
           </section>
         )}
 
         {rol !== "profe" && <div className="mb-10"><ChecklistHoy items={checklist.items} puedeEditar={gestion} /></div>}
 
-        <h2 className="titulo text-3xl mb-4">📌 Tareas</h2>
+        <h2 className="titulo text-3xl mb-4"><Icono nombre="chincheta" /> Tareas</h2>
         {gestion && (
           <nav className="flex gap-2 mb-6" aria-label="De quién">
             <Link href="/panel/tareas" className="pestana" aria-current={!todas ? "page" : undefined}>Mías</Link>
@@ -60,7 +61,7 @@ export default async function PaginaTareas({ searchParams }: { searchParams: Pro
         )}
         <div className="mb-8"><NuevaTarea equipo={datos.equipo} hoy={datos.hoy} socio={socio} abierta={!!socio} /></div>
         {pendientes.length === 0 ? (
-          <Vacio emoji="🎉" titulo="No hay tareas pendientes">Anotá una con “➕ Nueva tarea”, o desde la ficha de un socio.</Vacio>
+          <Vacio icono="estrella" titulo="No hay tareas pendientes">Anotá una con “<Icono nombre="mas" /> Nueva tarea”, o desde la ficha de un socio.</Vacio>
         ) : (
           <ul className="lista-entra space-y-2" data-tareas-pendientes={pendientes.length}>
             {pendientes.map((t) => <FilaTarea key={t.id} t={t} hoy={datos.hoy} mostrarPara={todas || !t.mia} />)}

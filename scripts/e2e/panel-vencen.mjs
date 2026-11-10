@@ -18,7 +18,7 @@ try {
   } else {
     chequear(/se les? termina la cuota hoy/.test(await r.locator("main").innerText()), "dice cuántos vencen hoy", "no dice cuántos");
     const f = filas.first();
-    chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "cada fila tiene “💵 Cobrar”", "no hay Cobrar");
+    chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "cada fila tiene “Cobrar”", "no hay Cobrar");
     chequear(await f.locator('button:has-text("Dice que vuelve")').count() === 1, "la recepción también anota “Dice que vuelve” (D2)", "la recepción no puede anotar");
     await f.locator('a:has-text("Cobrar")').click();
     await r.locator("[data-cobrar-linea=cuota]").waitFor({ timeout: 30000 });

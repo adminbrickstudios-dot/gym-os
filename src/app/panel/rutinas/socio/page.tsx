@@ -22,7 +22,7 @@ export default async function ProgresoSocio({ searchParams }: { searchParams: Pr
     return (
       <>
         <Link href="/panel/rutinas" className="texto-suave">← Rutinas</Link>
-        <Encabezado emoji="🏆" titulo={p.socio} bajada={r ? `Rutina: ${r.nombre}` : "Sin rutina asignada"} />
+        <Encabezado icono="trofeo" titulo={p.socio} bajada={r ? `Rutina: ${r.nombre}` : "Sin rutina asignada"} />
         <MarcasProgreso datos={p} zona={panel.gimnasio.zona_horaria} />
       </>
     );

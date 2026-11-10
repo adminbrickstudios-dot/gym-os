@@ -1,5 +1,5 @@
 "use client";
-// VD-5 · El "💵 Cobrar" de la ficha, Vencen hoy y Retención: abre la hoja Cobrar en el lugar.
+// VD-5 · El "Cobrar" de la ficha, Vencen hoy y Retención: abre la hoja Cobrar en el lugar.
 // Sigue siendo un link a Vender con el socio (se puede abrir en otra pestaña, y si la hoja no
 // está montada, navega como siempre).
 import Link from "next/link";

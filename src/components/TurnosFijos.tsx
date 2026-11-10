@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { abonarTurno, quitarTurno } from "@/app/turnos-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Turno = { turno_id: string; horario_id: string; actividad: string; emoji: string | null; dia_semana: number; hora: string };
 export type HorarioLibre = { horario_id: string; actividad: string; emoji: string | null; dia_semana: number; hora: string; sede: string; libres: number | null };
@@ -15,12 +16,12 @@ export function TurnosFijos({ socioId, turnos, horarios, quien = "socio" }: { so
   const disponibles = horarios.filter((h) => h.libres == null || h.libres > 0);
   return (
     <section className="tarjeta p-5 space-y-3" data-turnos-fijos>
-      <p className="titulo text-xl">📌 {quien === "socio" ? "Mis turnos fijos" : "Turnos fijos"}</p>
+      <p className="titulo text-xl"><Icono nombre="chincheta" /> {quien === "socio" ? "Mis turnos fijos" : "Turnos fijos"}</p>
       <p className="texto-suave text-[15px]">{quien === "socio" ? "Cada semana te queda reservado solo, mientras estés al día. Si una semana no podés, cancelá esa clase." : "Cada semana le queda reservado solo, mientras esté al día."}</p>
       {turnos.length > 0 && (
         <ul className="space-y-1">{turnos.map((t) => (
           <li key={t.turno_id} className="flex flex-wrap items-center gap-3 min-h-11">
-            <span className="flex-1">{t.emoji ?? "🗓️"} {t.actividad} · {DIA[t.dia_semana]} {t.hora}</span>
+            <span className="flex-1"><Icono nombre={t.emoji ?? "calendario"} /> {t.actividad} · {DIA[t.dia_semana]} {t.hora}</span>
             <button type="button" className="boton-texto texto-suave" disabled={ocupado} onClick={() => correr(() => quitarTurno(t.turno_id))}>Quitar</button>
           </li>
         ))}</ul>
@@ -29,12 +30,12 @@ export function TurnosFijos({ socioId, turnos, horarios, quien = "socio" }: { so
         <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); if (elegido) correr(() => abonarTurno(socioId, elegido), () => setElegido("")); }}>
           <select className="campo !w-auto flex-1 min-w-48" value={elegido} onChange={(e) => setElegido(e.target.value)} aria-label="Horario para el turno fijo">
             <option value="">Elegí un horario…</option>
-            {disponibles.map((h) => <option key={h.horario_id} value={h.horario_id}>{h.emoji ?? ""} {h.actividad} · {DIA[h.dia_semana]} {h.hora}{h.libres != null ? ` · ${h.libres} libre${h.libres === 1 ? "" : "s"}` : ""}</option>)}
+            {disponibles.map((h) => <option key={h.horario_id} value={h.horario_id}>{h.actividad} · {DIA[h.dia_semana]} {h.hora}{h.libres != null ? ` · ${h.libres} libre${h.libres === 1 ? "" : "s"}` : ""}</option>)}
           </select>
-          <button type="submit" className="boton" disabled={!elegido || ocupado}>{ocupado ? "Guardando…" : "📌 Dejarlo fijo"}</button>
+          <button type="submit" className="boton" disabled={!elegido || ocupado}>{ocupado ? "Guardando…" : "Dejarlo fijo"}</button>
         </form>
       ) : turnos.length === 0 && <p className="texto-suave">No quedan horarios con lugar fijo.</p>}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

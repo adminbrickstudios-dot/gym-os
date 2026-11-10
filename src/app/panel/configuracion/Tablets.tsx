@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import QRCode from "qrcode";
 import { autorizarTablet, revocarTablet, type Tablet } from "./acciones";
 import { fechaCorta } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; sedes: { id: string; nombre: string }[]; esDueno: boolean; zona: string }) {
   const [tablets, setTablets] = useState(inicial);
@@ -23,7 +24,7 @@ export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; 
         <ul className="divide-y divide-[var(--borde)]">
           {activas.map((t) => (
             <li key={t.id} className="flex flex-wrap items-center gap-3 py-2">
-              <span className="min-w-0 flex-1"><span className="font-semibold">📲 {t.nombre}</span>
+              <span className="min-w-0 flex-1"><span className="font-semibold"><Icono nombre="celular" /> {t.nombre}</span>
                 <span className="block text-sm texto-tenue">{sedes.length > 1 ? `${t.sede} · ` : ""}{t.ultimo_uso ? `usada el ${fechaCorta(t.ultimo_uso, zona)}` : "todavía sin usar"}</span></span>
               {esDueno && <button type="button" className="boton" disabled={ocupado} onClick={() => empezar(async () => {
                 const r = await revocarTablet(t.id); if (r.error) setError(r.error); else { setError(null); setTablets(r.tablets!); }
@@ -46,7 +47,7 @@ export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; 
             const r = await autorizarTablet(sede, nombre);
             if (r.error) { setError(r.error); return; }
             setError(null); setTablets(r.tablets!); setLink(`${window.location.origin}/kiosco/activar?t=${r.token}`);
-          })}>➕ Autorizar una tablet</button>
+          })}><Icono nombre="mas" /> Autorizar una tablet</button>
         </div>
       )}
       {link && (
@@ -55,12 +56,12 @@ export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; 
           {qr && <div className="w-44 aspect-square bg-white rounded-xl p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />}
           <p className="text-sm break-all texto-suave">{link}</p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="boton" onClick={() => void navigator.clipboard?.writeText(link)}>📋 Copiar link</button>
+            <button type="button" className="boton" onClick={() => void navigator.clipboard?.writeText(link)}><Icono nombre="lista" /> Copiar link</button>
             <button type="button" className="boton" onClick={() => setLink(null)}>Listo</button>
           </div>
         </div>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

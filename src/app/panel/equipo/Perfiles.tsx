@@ -4,6 +4,7 @@
 import { useState, useTransition } from "react";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { guardarMostrarEquipo, guardarPerfil, quitarFotoEquipo, subirFotoEquipo, type HorarioTrabajo } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type PerfilEquipo = { equipo_id: string; mostrar: boolean; tiene_foto: boolean; actividades: string[]; horario: HorarioTrabajo[] };
 export type PerfilesDatos = { mostrar_en_pagina_y_app: boolean; actividades: { id: string; nombre: string; emoji: string | null }[]; personas: PerfilEquipo[] };
@@ -20,7 +21,7 @@ export function Perfiles({ personas, datos, esDueno }: { personas: Persona[]; da
   return (
     <section className="space-y-4" data-perfiles aria-labelledby="titulo-perfiles">
       <div>
-        <h2 id="titulo-perfiles" className="titulo text-2xl">📸 Fotos, clases y horarios</h2>
+        <h2 id="titulo-perfiles" className="titulo text-2xl"><Icono nombre="camara" /> Fotos, clases y horarios</h2>
         <p className="texto-suave">La foto de cada uno, qué clases da y cuándo trabaja. El horario de trabajo es interno: no sale afuera.</p>
       </div>
       <label className="tarjeta flex items-start gap-3 px-4 py-4">
@@ -35,7 +36,7 @@ export function Perfiles({ personas, datos, esDueno }: { personas: Persona[]; da
           </span>
         </span>
       </label>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
       <ul className="space-y-2">
         {personas.map((p) => <Ficha key={p.equipo_id} persona={p} perfil={porId.get(p.equipo_id) ?? { equipo_id: p.equipo_id, mostrar: false, tiene_foto: false, actividades: [], horario: [] }} actividades={datos.actividades} />)}
       </ul>
@@ -76,9 +77,9 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
       <div className="flex flex-wrap items-center gap-4">
         {tieneFoto ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/foto-equipo/${persona.equipo_id}?v=${version}`} alt={`Foto de ${persona.nombre}`} data-foto-equipo className="size-16 rounded-2xl object-cover" />
+          <img src={`/foto-equipo/${persona.equipo_id}?v=${version}`} alt={`Foto de ${persona.nombre}`} data-foto-equipo className="size-16 rounded-[var(--radio)] object-cover" />
         ) : (
-          <span aria-hidden className="size-16 rounded-2xl grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">{iniciales(persona.nombre)}</span>
+          <span aria-hidden className="size-16 rounded-[var(--radio)] grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">{iniciales(persona.nombre)}</span>
         )}
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-lg">{persona.nombre}</span>
@@ -90,7 +91,7 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <label className="boton boton-chico cursor-pointer">
-              {tieneFoto ? "Cambiar foto" : "📷 Subir foto"}
+              {tieneFoto ? "Cambiar foto" : "Subir foto"}
               <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={`Foto de ${persona.nombre}`} disabled={ocupado}
                 onChange={(e) => { subir(e.target.files?.[0]); e.target.value = ""; }} />
             </label>
@@ -105,7 +106,7 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
                   <label key={a.id} className={`boton boton-chico cursor-pointer ${acts.includes(a.id) ? "!border-[var(--acento)]" : "opacity-70"}`}>
                     <input type="checkbox" className="sr-only" checked={acts.includes(a.id)} data-actividad={a.nombre}
                       onChange={(e) => setActs((x) => (e.target.checked ? [...x, a.id] : x.filter((y) => y !== a.id)))} />
-                    {a.emoji ?? "🗓️"} {a.nombre}
+                    <Icono nombre={a.emoji ?? "calendario"} /> {a.nombre}
                   </label>
                 ))}
               </div>
@@ -126,7 +127,7 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
                 <button type="button" className="boton-texto texto-suave" onClick={() => setHorario((x) => x.filter((_, j) => j !== i))}>Quitar</button>
               </div>
             ))}
-            <button type="button" className="boton boton-chico" onClick={() => setHorario((x) => [...x, { dia: 1, desde: "09:00", hasta: "13:00" }])}>➕ Sumar franja</button>
+            <button type="button" className="boton boton-chico" onClick={() => setHorario((x) => [...x, { dia: 1, desde: "09:00", hasta: "13:00" }])}><Icono nombre="mas" /> Sumar franja</button>
           </fieldset>
 
           <label className="flex items-center gap-3">
@@ -136,7 +137,7 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
 
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className="boton boton-principal" disabled={ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
-            {mensaje && <p role={mensaje.tipo === "error" ? "alert" : "status"} className={`pildora ${mensaje.tipo === "error" ? "pildora-rojo" : "pildora-verde"}`}>{mensaje.tipo === "error" ? "⚠️ " : "✅ "}{mensaje.texto}</p>}
+            {mensaje && <p role={mensaje.tipo === "error" ? "alert" : "status"} className={`pildora ${mensaje.tipo === "error" ? "pildora-rojo" : "pildora-verde"}`}>{mensaje.tipo === "error" ? "!" : "✓"}{mensaje.texto}</p>}
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
 import { AjustesDelPlan, resumenAjustes, VistaPrevia } from "./Ajustes";
 import { Servicios } from "./Servicios";
 import { Productos, type Producto } from "./Productos";
+import { Icono } from "@/components/ui/Icono";
 
 export type Plan = { plan_id: string; tipo: string; nombre: string; descripcion: string | null; activo: boolean; duracion_meses: number | null;
   cantidad_clases: number | null; validez_dias: number | null; max_ingresos_semana: number | null; hora_desde: string | null; hora_hasta: string | null;
@@ -17,7 +18,7 @@ export type { Producto } from "./Productos";
 const DURACION: Record<string, string> = { "1": "Mensual", "3": "Trimestral", "6": "Semestral", "12": "Anual" };
 
 const TIPO: Record<string, { emoji: string; titulo: string }> = {
-  membresia: { emoji: "🏷️", titulo: "Membresías" }, pase_diario: { emoji: "🎫", titulo: "Pases" }, pack: { emoji: "🎟️", titulo: "Packs de clases" },
+  membresia: { emoji: "etiqueta", titulo: "Membresías" }, pase_diario: { emoji: "ticket", titulo: "Pases" }, pack: { emoji: "ticket", titulo: "Packs de clases" },
 };
 
 export type Actividad = { actividad_id: string; nombre: string; emoji: string | null; activa: boolean };
@@ -58,18 +59,18 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajust
           {detalle && <p className="texto-suave text-sm">{detalle}</p>}
           {p.descripcion && <p className="texto-tenue text-sm">{p.descripcion}</p>}
           {lista?.hoy && lista.hoy.variantes.length > 0 && <p className="text-sm mt-1" data-variantes>{resumenVariantes(lista.hoy)}</p>}
-          {p.proximo_precio != null && p.proximo_desde && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}>📅 Desde el {fecha(p.proximo_desde)}: {formatearPesos(p.proximo_precio)}{lista?.proxima?.variantes.length ? ` (${resumenVariantes(lista.proxima)})` : ""}</p>}
+          {p.proximo_precio != null && p.proximo_desde && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}><Icono nombre="calendario" /> Desde el {fecha(p.proximo_desde)}: {formatearPesos(p.proximo_precio)}{lista?.proxima?.variantes.length ? ` (${resumenVariantes(lista.proxima)})` : ""}</p>}
         </div>
         <p className="numero text-3xl">{p.precio != null ? formatearPesos(p.precio) : "Sin precio"}</p>
       </div>
       {!abierto && (
         <div className="flex flex-wrap gap-2 mt-4">
-          <button type="button" className="boton boton-chico" onClick={() => setAbierto("precio")}>💲 Precios</button>
-          <button type="button" className="boton boton-chico" onClick={() => setAbierto("editar")}>✏️ Editar</button>
-          {aj && ajustes && <button type="button" className="boton boton-chico" data-ajustes-abrir onClick={() => setAbierto("ajustes")}>⚙️ Ajustes</button>}
-          <button type="button" className="boton boton-chico" data-vista-abrir onClick={() => setAbierto("vista")}>👁️ Cómo lo ve el socio</button>
-          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}>⬆️</button>
-          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}>⬇️</button>
+          <button type="button" className="boton boton-chico" onClick={() => setAbierto("precio")}><Icono nombre="plata" /> Precios</button>
+          <button type="button" className="boton boton-chico" onClick={() => setAbierto("editar")}><Icono nombre="lapiz" /> Editar</button>
+          {aj && ajustes && <button type="button" className="boton boton-chico" data-ajustes-abrir onClick={() => setAbierto("ajustes")}><Icono nombre="ajustes" /> Ajustes</button>}
+          <button type="button" className="boton boton-chico" data-vista-abrir onClick={() => setAbierto("vista")}><Icono nombre="ojo" /> Cómo lo ve el socio</button>
+          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}><Icono nombre="subir" /></button>
+          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}><Icono nombre="descargar" /></button>
           <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
         </div>
       )}
@@ -106,7 +107,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajust
                     <label key={a.actividad_id} className={`boton !min-h-11 cursor-pointer ${si ? "!border-[var(--acento)]" : ""}`}>
                       <input type="checkbox" className="sr-only" checked={si} aria-label={a.nombre}
                         onChange={() => setDatos({ ...datos, actividades: si ? datos.actividades.filter((x) => x !== a.actividad_id) : [...datos.actividades, a.actividad_id] })} />
-                      {si ? "✓ " : ""}{a.emoji ?? ""} {a.nombre}
+                      {si ? "✓ " : ""}<Icono nombre={a.emoji ?? ""} /> {a.nombre}
                     </label>
                   );
                 })}
@@ -126,7 +127,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajust
           <div className="flex gap-2 sm:col-span-2"><button type="submit" className="boton boton-principal" disabled={ocupado}>Guardar</button><button type="button" className="boton" onClick={() => setAbierto(null)}>Cancelar</button></div>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }
@@ -141,14 +142,14 @@ function NuevoPlan() {
     if (r.ok) { setAbierto(false); setTipo("membresia"); setMeses("1"); }
     return r;
   }, {});
-  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}>➕ Nuevo plan</button>;
+  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nuevo plan</button>;
   return (
     <form key={estado.ok} action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
-      <p className="titulo text-2xl sm:col-span-2">➕ Nuevo plan</p>
+      <p className="titulo text-2xl sm:col-span-2"><Icono nombre="mas" /> Nuevo plan</p>
       <div className="sm:col-span-2 flex flex-wrap gap-2">
         {Object.entries(TIPO).map(([k, v]) => (
           <label key={k} className={`boton !min-h-11 cursor-pointer ${tipo === k ? "!border-[var(--acento)]" : ""}`}>
-            <input type="radio" name="tipo" value={k} checked={tipo === k} onChange={() => setTipo(k)} className="sr-only" />{v.emoji} {v.titulo.replace(/s$/, "").replace("Packs", "Pack")}
+            <input type="radio" name="tipo" value={k} checked={tipo === k} onChange={() => setTipo(k)} className="sr-only" /><Icono nombre={v.emoji} /> {v.titulo.replace(/s$/, "").replace("Packs", "Pack")}
           </label>
         ))}
       </div>
@@ -183,8 +184,8 @@ function NuevoPlan() {
       {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Cantidad de clases</span><input name="cantidad_clases" type="number" min={1} required className="campo" /></label>}
       {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Vence a los (días)</span><input name="validez_dias" type="number" min={1} defaultValue={60} className="campo" /></label>}
       <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Descripción (se ve en la página)</span><input name="descripcion" className="campo" /></label>
-      {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2">⚠️ {estado.error}</p>}
-      <div className="flex gap-2 sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal">✅ Crear</button><button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button></div>
+      {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2"><Icono nombre="alerta" /> {estado.error}</p>}
+      <div className="flex gap-2 sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal"><Icono nombre="ok" /> Crear</button><button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button></div>
     </form>
   );
 }
@@ -215,7 +216,7 @@ export function Editor({ planes, listas, productos, zona, actividades, incluyen,
         if (!lista.length) return null;
         return (
           <section key={k}>
-            <h2 className="titulo text-3xl mb-4">{v.emoji} {v.titulo}</h2>
+            <h2 className="titulo text-3xl mb-4"><Icono nombre={v.emoji} /> {v.titulo}</h2>
             <ul className="space-y-2">{lista.map((p) => <FilaPlan key={p.plan_id} p={p} lista={listas[p.plan_id]} fecha={fecha} hoy={hoy} actividades={actividades} incluye={incluyen[p.plan_id] ?? []} matricula={matriculas[p.plan_id]} ajustes={ajustes} mover={mover} />)}</ul>
           </section>
         );

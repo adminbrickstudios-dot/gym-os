@@ -25,9 +25,9 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/socios/${id}`);
   await r.locator("[data-no-escribirle-abrir]").click();
-  chequear(await r.locator('button:has-text("🔕 No escribirle")').last().isDisabled(), "no se marca sin motivo", "se puede marcar sin motivo");
+  chequear(await r.locator('button:has-text("No escribirle")').last().isDisabled(), "no se marca sin motivo", "se puede marcar sin motivo");
   await r.locator('input[placeholder^="Ej.: lo pidió"]').fill("Lo pidió en la recepción");
-  await r.locator('button:has-text("🔕 No escribirle")').last().click();
+  await r.locator('button:has-text("No escribirle")').last().click();
   await r.locator("[data-no-escribirle-marca]").waitFor({ timeout: 30000 });
   ok("la recepción marcó “No escribirle” con motivo y la ficha muestra la marca");
   chequear((await r.locator("[data-no-escribirle-abrir]").count()) === 0, "la recepción no puede sacar la marca", "la recepción ve “Volver a escribirle”");
@@ -37,14 +37,14 @@ try {
   await d.locator("[data-no-escribirle-marca]").waitFor({ timeout: 30000 });
   await d.locator("[data-no-escribirle-abrir]").click();
   await d.locator('input[placeholder^="Ej.: pidió"]').fill("Pidió volver a recibir mensajes");
-  await d.locator('button:has-text("🔔 Volver a escribirle")').last().click();
+  await d.locator('button:has-text("Volver a escribirle")').last().click();
   await d.locator("[data-no-escribirle-marca]").waitFor({ state: "detached", timeout: 30000 });
   ok("la dueña sacó la marca con motivo");
 
   // Celular: la ficha marcada no se desborda.
   await d.locator("[data-no-escribirle-abrir]").click();
   await d.locator('input[placeholder^="Ej.: lo pidió"]').fill("Prueba de celular");
-  await d.locator('button:has-text("🔕 No escribirle")').last().click();
+  await d.locator('button:has-text("No escribirle")').last().click();
   await d.locator("[data-no-escribirle-marca]").waitFor({ timeout: 30000 });
   const m = await pagina(b, CELU);
   await entrar(m, "duena@ejemplo.invalid");

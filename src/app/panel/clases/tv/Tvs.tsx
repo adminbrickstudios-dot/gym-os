@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { crearTv, revocarTv } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type TvPanel = { id: string; nombre: string; sede: string; creado_en: string };
 
@@ -25,7 +26,7 @@ export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId:
           setLink(`${window.location.origin}/tv/activar?t=${r.token}`);
         });
       }}>
-        <p className="titulo text-xl">➕ Nueva TV</p>
+        <p className="titulo text-xl"><Icono nombre="mas" /> Nueva TV</p>
         <div className="flex flex-wrap gap-3">
           <input className="campo grow min-w-52" maxLength={40} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Sala de spinning" aria-label="Nombre de la TV" />
           {sedes.length > 1 && (
@@ -42,7 +43,7 @@ export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId:
           <p><strong>Abrí este link una vez en el navegador de la TV.</strong> Queda guardada; no lo vas a ver de nuevo.</p>
           <code className="break-all text-sm" data-link={link}>{link}</code>
           <button type="button" className="boton boton-chico" onClick={async () => { try { await navigator.clipboard.writeText(link); setCopiado(true); } catch { setCopiado(false); } }}>
-            {copiado ? "✅ Copiado" : "📋 Copiar"}
+            {copiado ? "Copiado" : "Copiar"}
           </button>
         </div>
       )}
@@ -61,7 +62,7 @@ function FilaTv({ t, puedeSacar }: { t: TvPanel; puedeSacar: boolean }) {
   const [ocupado, empezar] = useTransition();
   return (
     <li className="tarjeta px-4 py-3 flex flex-wrap items-center gap-3" data-tv-fila={t.nombre}>
-      <span className="grow">📺 <span className="font-semibold">{t.nombre}</span> <span className="texto-suave">· {t.sede}</span></span>
+      <span className="grow"><Icono nombre="pantalla" /> <span className="font-semibold">{t.nombre}</span> <span className="texto-suave">· {t.sede}</span></span>
       {puedeSacar && <button type="button" className="underline text-sm" disabled={ocupado}
         onClick={() => empezar(async () => { const r = await revocarTv(t.id); setError(r.error ?? null); })}>Sacar</button>}
       {error && <Mensaje tipo="error" className="w-full">{error}</Mensaje>}

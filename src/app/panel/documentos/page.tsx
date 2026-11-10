@@ -4,6 +4,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { EditorDocumentos, type Documento } from "./Documentos";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Documentos para firmar" };
 
@@ -19,11 +20,11 @@ export default async function PaginaDocumentos() {
     ]);
     return (
       <>
-        <Encabezado emoji="✍️" titulo="Documentos para firmar" volver={{ href: "/panel/configuracion?pestana=reglas", texto: "Configuración" }}
+        <Encabezado icono="lapiz" titulo="Documentos para firmar" volver={{ href: "/panel/configuracion?pestana=reglas", texto: "Configuración" }}
           bajada="Reglamento, deslinde y autorización de menores. El socio firma en la app o en recepción; en la Entrada, al que le falta firmar le sale un aviso (no lo frena)." />
         {mayores.length > 0 && (
           <section className="mb-8 space-y-2" data-firmas-propias>
-            <h2 className="titulo text-2xl">🎓 Cumplieron 18: tienen que firmar ellos</h2>
+            <h2 className="titulo text-2xl"><Icono nombre="persona" /> Cumplieron 18: tienen que firmar ellos</h2>
             <p className="texto-suave">Lo que firmó su responsable de menor no alcanza. Abrí la ficha y que firme la propia persona (en recepción o desde su app).</p>
             <ul className="tarjeta divide-y divide-[var(--borde)]">{mayores.map((m) => (
               <li key={m.socio_id} className="flex flex-wrap justify-between gap-x-3 px-4 py-3">

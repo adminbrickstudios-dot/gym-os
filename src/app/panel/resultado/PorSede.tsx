@@ -1,4 +1,5 @@
 import { formatearNumero, formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export type ResultadoPorSede = {
   mes: string; en_curso: boolean; cobrado: number; repartido: number; compartidos: number;
@@ -9,7 +10,7 @@ export type ResultadoPorSede = {
 export function PorSede({ d }: { d: ResultadoPorSede }) {
   return (
     <section aria-labelledby="por-sede" data-por-sede>
-      <h2 id="por-sede" className="titulo text-2xl mb-1">🏢 Por sede</h2>
+      <h2 id="por-sede" className="titulo text-2xl mb-1"><Icono nombre="sede" /> Por sede</h2>
       <p className="texto-suave mb-3">Dónde se cobró, dónde se usó y cuánto le toca a cada sede si se reparte lo que paga cada socio según en qué sede entrenó.</p>
       <ul className="space-y-2">
         {d.sedes.map((s) => (

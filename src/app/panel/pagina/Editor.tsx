@@ -11,6 +11,7 @@ import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 import { guardarPagina } from "./acciones";
 import { publicarPagina } from "../configuracion/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Portada = { titulo: string; bajada: string | null; boton_texto: string; foto_portada_path: string | null; mensaje_whatsapp: string; mostrar_precios: boolean };
 type SeccionPanel = Seccion & { visible: boolean };
@@ -18,7 +19,7 @@ type Item = Record<string, string | undefined>;
 export type PaginaPanel = { portada: Portada; secciones: SeccionPanel[]; fotos: string[]; vista: LandingPublicada | (Omit<LandingPublicada, "publicada"> & { publicada: false }) };
 
 const EMOJI: Record<Seccion["tipo"], string> = {
-  sobre_nosotros: "🏋️", actividades: "💪", planes: "🔥", horarios: "⏰", galeria: "📸", equipo: "👥", preguntas: "💬", ubicacion: "📍", probar: "🙋",
+  sobre_nosotros: "", actividades: "", planes: "", horarios: "", galeria: "", equipo: "", preguntas: "", ubicacion: "", probar: "",
 };
 /** Lo que no se edita acá, y dónde se cambia. */
 const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
@@ -26,7 +27,7 @@ const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
   horarios: "Los horarios salen de Configuración → Horarios.",
   galeria: "Las fotos se suben en Configuración → Marca.",
   ubicacion: "Las direcciones salen de Configuración → Gimnasio (sedes).",
-  probar: "Un formulario corto (nombre, WhatsApp y qué le interesa): lo que deja la gente llega a Prospectos. Arriba de todo aparece el botón “🙋 Probá una clase”.",
+  probar: "Un formulario corto (nombre, WhatsApp y qué le interesa): lo que deja la gente llega a Prospectos. Arriba de todo aparece el botón “Probá una clase”.",
 };
 /** Los campos de cada lista: [clave, etiqueta, máximo, obligatorio, área de texto]. */
 const LISTAS: Partial<Record<Seccion["tipo"], { clave: "items" | "personas"; nombre: string; campos: [string, string, number, boolean, boolean?][] }>> = {
@@ -86,16 +87,16 @@ function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicad
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-estado-pagina={publicada ? "publicada" : "borrador"}>
       <div className="flex flex-wrap items-center gap-3">
-        <span className={`pildora ${publicada ? "pildora-verde" : "pildora-amarillo"}`}>{publicada ? "🟢 Visible" : "🙈 Oculta: la gente ve solo tu portada y los botones"}</span>
+        <span className={`pildora ${publicada ? "pildora-verde" : "pildora-amarillo"}`}>{publicada ? "Visible" : "Oculta: la gente ve solo tu portada y los botones"}</span>
         <span className="texto-suave break-all">{direccion}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {puedeEditar && (publicada
-          ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "🙈 Ocultar mi página"}</button>
-          : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Guardando…" : "🌐 Mostrar mi página"}</button>)}
-        <a href={direccion} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver</a>
-        <button type="button" className="boton" onClick={copiar}>{copiado ? "✅ Copiado" : "📋 Copiar link"}</button>
-        <a className="boton" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${nombre}: ${direccion}`)}`}>💬 Compartir por WhatsApp</a>
+          ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "Ocultar mi página"}</button>
+          : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Guardando…" : "Mostrar mi página"}</button>)}
+        <a href={direccion} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver</a>
+        <button type="button" className="boton" onClick={copiar}>{copiado ? "Copiado" : "Copiar link"}</button>
+        <a className="boton" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${nombre}: ${direccion}`)}`}><Icono nombre="mensaje" /> Compartir por WhatsApp</a>
       </div>
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
@@ -167,9 +168,9 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
   const pie = (
     <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-4 z-10 tarjeta p-4 flex flex-wrap items-center gap-3 shadow-lg"
       data-pie-pagina data-respuestas={respuesta.n}>
-      <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "💾 Guardar"}</button>
-      {sucio && <button type="button" className="boton" onClick={deshacer}>↩️ Deshacer</button>}
-      <button type="button" className="boton lg:hidden" onClick={() => setVerVista(true)}>👀 Ver cómo queda</button>
+      <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "Guardar"}</button>
+      {sucio && <button type="button" className="boton" onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
+      <button type="button" className="boton lg:hidden" onClick={() => setVerVista(true)}><Icono nombre="ojo" /> Ver cómo queda</button>
       {sucio && <span className="text-sm texto-suave" data-sin-guardar>• Cambios sin guardar</span>}
       {respuesta.error && <Mensaje tipo="error" className="w-full">{respuesta.error}</Mensaje>}
       {respuesta.ok && !sucio && <Mensaje tipo="exito" className="w-full">{respuesta.ok}</Mensaje>}
@@ -181,10 +182,10 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
       <div className="space-y-4 min-w-0">
         <Estado publicadaInicial={inicial.vista.publicada} direccion={direccion} nombre={inicial.vista.marca.nombre} puedeEditar={puedeEditar} />
         {altas}
-        {!puedeEditar && <p className="pildora">👀 Solo el dueño cambia la página.</p>}
+        {!puedeEditar && <p className="pildora"><Icono nombre="ojo" /> Solo el dueño cambia la página.</p>}
         <fieldset disabled={!puedeEditar} className="space-y-4 min-w-0">
           <section className="tarjeta p-5 sm:p-6 space-y-4" data-bloque="portada">
-            <div><p className="titulo text-2xl">🏠 Portada</p><p className="texto-suave">Lo primero que se ve. Una frase que diga por qué venir.</p></div>
+            <div><p className="titulo text-2xl"><Icono nombre="inicio" /> Portada</p><p className="texto-suave">Lo primero que se ve. Una frase que diga por qué venir.</p></div>
             <Campo etiqueta="Título" ayuda={`${portada.titulo.length} de 80`}>
               <input className="campo" maxLength={80} value={portada.titulo} onChange={(e) => setP("titulo", e.target.value)} />
             </Campo>
@@ -223,7 +224,7 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
             return (
               <section key={s.tipo} className={`tarjeta p-5 sm:p-6 space-y-4 ${s.visible ? "" : "opacity-70"}`} data-seccion={s.tipo}>
                 <div className="flex items-start gap-3">
-                  <span className="icono" aria-hidden>{EMOJI[s.tipo]}</span>
+                  <span className="icono" aria-hidden><Icono nombre={EMOJI[s.tipo]} /></span>
                   <div className="min-w-0 flex-1">
                     <input className="campo font-semibold" aria-label={`Título de la sección ${i + 1}`} maxLength={60} value={s.titulo} onChange={(e) => setS(i, { titulo: e.target.value })} />
                   </div>
@@ -265,12 +266,12 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
                             onClick={() => { const ys = [...items(s)]; [ys[k - 1], ys[k]] = [ys[k], ys[k - 1]]; setItems(i, s, ys); }}>▲</button>
                           <button type="button" className="boton px-3 text-sm" aria-label={`Bajar ${lista.nombre} ${k + 1}`} disabled={k === items(s).length - 1}
                             onClick={() => { const ys = [...items(s)]; [ys[k + 1], ys[k]] = [ys[k], ys[k + 1]]; setItems(i, s, ys); }}>▼</button>
-                          <button type="button" className="boton px-3 text-sm texto-suave" onClick={() => setItems(i, s, items(s).filter((_, m) => m !== k))}>🗑️ Quitar</button>
+                          <button type="button" className="boton px-3 text-sm texto-suave" onClick={() => setItems(i, s, items(s).filter((_, m) => m !== k))}><Icono nombre="papelera" /> Quitar</button>
                         </div>
                       </div>
                     ))}
                     {items(s).length < 30 && (
-                      <button type="button" className="boton" onClick={() => setItems(i, s, [...items(s), {}])}>➕ Agregar {lista.nombre}</button>
+                      <button type="button" className="boton" onClick={() => setItems(i, s, [...items(s), {}])}><Icono nombre="mas" /> Agregar {lista.nombre}</button>
                     )}
                   </div>
                 )}
@@ -289,8 +290,8 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
       {verVista && (
         <div className="lg:hidden fixed inset-0 z-50 bg-[var(--fondo)] flex flex-col" role="dialog" aria-label="Cómo queda la página">
           <div className="p-3 flex items-center justify-between gap-2 border-b border-[var(--borde)]">
-            <p className="font-semibold">👀 Así la ve la gente</p>
-            <button type="button" className="boton" onClick={() => setVerVista(false)}>✏️ Volver a editar</button>
+            <p className="font-semibold"><Icono nombre="ojo" /> Así la ve la gente</p>
+            <button type="button" className="boton" onClick={() => setVerVista(false)}><Icono nombre="lapiz" /> Volver a editar</button>
           </div>
           <div className="flex-1 min-h-0 p-2">{VistaCelu}</div>
         </div>

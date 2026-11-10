@@ -32,7 +32,7 @@ try {
   await plan(d, `Dos${s5}`).locator("label:has-text('Nombre') input").fill(`DosX${s5}`);
   await plan(d, `Dos${s5}`).locator('button:has-text("Guardar")').click();
   await plan(d, `DosX${s5}`).waitFor({ timeout: 30000 });
-  chequear(/Martes y jueves/.test(await plan(d, `DosX${s5}`).innerText()), "✏️ Editar cambia nombre y descripción", "no cambió");
+  chequear(/Martes y jueves/.test(await plan(d, `DosX${s5}`).innerText()), "Editar cambia nombre y descripción", "no cambió");
 
   // Dejar de vender y volver: no pierde las veces por semana ni la descripción.
   await plan(d, `DosX${s5}`).locator('button:has-text("Dejar de vender")').click();
@@ -43,7 +43,7 @@ try {
   chequear(/2 veces por semana/.test(vuelta) && /Martes y jueves/.test(vuelta), "Dejar de vender → Volver a vender: sigue siendo de 2 veces y con su descripción", `quedó: ${vuelta}`);
 
   // Precio: uno mal escrito avisa; uno con fecha queda programado.
-  await plan(d, `DosX${s5}`).locator('button:has-text("💲 Precios")').click();
+  await plan(d, `DosX${s5}`).locator('button:has-text("Precios")').click();
   await plan(d, `DosX${s5}`).locator('input[aria-label="Precio general"]').fill("1,5,0");
   await plan(d, `DosX${s5}`).locator('button:has-text("Guardar precios")').click();
   await plan(d, `DosX${s5}`).locator('[role="alert"]:has-text("No entiendo el precio")').waitFor({ timeout: 30000 });
@@ -52,9 +52,9 @@ try {
   await plan(d, `DosX${s5}`).locator('input[aria-label="Precio general"]').fill("2.000");
   await plan(d, `DosX${s5}`).locator('input[type="date"]').fill(en10);
   await plan(d, `DosX${s5}`).locator('button:has-text("Guardar precios")').click();
-  await plan(d, `DosX${s5}`).locator("text=📅 Desde el").waitFor({ timeout: 30000 });
+  await plan(d, `DosX${s5}`).locator("text=Desde el").waitFor({ timeout: 30000 });
   const prog = await plan(d, `DosX${s5}`).innerText();
-  chequear(/\$2\.000/.test(prog) && /\$1\.500,50/.test(prog), "💲 Precios con fecha: sigue el de hoy y avisa el que viene", `dice: ${prog}`);
+  chequear(/\$2\.000/.test(prog) && /\$1\.500,50/.test(prog), "Precios con fecha: sigue el de hoy y avisa el que viene", `dice: ${prog}`);
 
   // Pack.
   await d.locator('button:has-text("Nuevo plan")').click();

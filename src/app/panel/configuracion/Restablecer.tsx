@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 export function Restablecer({ id, recomendado, alConfirmar }: {
   id: string;
@@ -17,7 +18,7 @@ export function Restablecer({ id, recomendado, alConfirmar }: {
   return (
     <div className="space-y-2" data-restablecer-caja={id}>
       {!pregunta ? (
-        <button type="button" className="boton" data-restablecer={id} onClick={() => { setPregunta(true); setEstado(null); }}>↩️ Restablecer a lo recomendado</button>
+        <button type="button" className="boton" data-restablecer={id} onClick={() => { setPregunta(true); setEstado(null); }}><Icono nombre="deshacer" /> Restablecer a lo recomendado</button>
       ) : (
         <div className="space-y-2" role="alertdialog" aria-label="Confirmar restablecer" data-restablecer-pregunta={id}>
           <Mensaje tipo="aviso">¿Volver esta tarjeta a lo recomendado? Queda guardado ahora: {recomendado}</Mensaje>

@@ -3,8 +3,9 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { anularVenta, resolverAnulacion, type Venta } from "@/app/panel/ventas-acciones";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
-const MEDIO: Record<string, string> = { efectivo: "💵 Efectivo", transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago" };
+const MEDIO: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago" };
 
 /** Una venta con lo que se puede hacer con ella (VEN-6): anular con motivo, o aprobar/rechazar el pedido de la recepción. */
 export function FilaVenta({ v, zona, conSocio = false }: { v: Venta; zona: string; conSocio?: boolean }) {
@@ -22,15 +23,15 @@ export function FilaVenta({ v, zona, conSocio = false }: { v: Venta; zona: strin
           <span className="block truncate">{conSocio && v.socio ? `${v.socio} · ` : ""}{v.detalle ?? "Venta"}</span>
           <span className="block text-sm texto-tenue">{fechaCorta(v.fecha, zona)} · {v.medios.map((m) => MEDIO[m] ?? m).join(" + ") || "sin pago"}{v.cobro ? ` · cobró ${v.cobro}` : ""}</span>
         </span>
-        {v.recibo_n != null && <Link href={`/panel/recibo/${v.venta_id}`} className="boton boton-chico" data-ver-recibo>🧾 Recibo</Link>}
+        {v.recibo_n != null && <Link href={`/panel/recibo/${v.venta_id}`} className="boton boton-chico" data-ver-recibo><Icono nombre="recibo" /> Recibo</Link>}
         {anulada && <span className="pildora pildora-rojo">Anulada</span>}
         {v.estado === "pendiente" && <span className="pildora pildora-azul">Esperando aprobación</span>}
-        {!anulada && !v.pedido && !anulando && <button type="button" className="boton boton-chico" onClick={() => setAnulando(true)}>↩️ Anular</button>}
+        {!anulada && !v.pedido && !anulando && <button type="button" className="boton boton-chico" onClick={() => setAnulando(true)}><Icono nombre="deshacer" /> Anular</button>}
       </div>
       {anulada && <p className="text-sm texto-suave mt-1">Anulada{v.anulada_por ? ` por ${v.anulada_por}` : ""}: “{v.anulada_motivo}”</p>}
       {v.pedido && !anulada && (
         <div className="mt-2 flex flex-wrap items-center gap-2" data-pedido-anulacion>
-          <p className="flex-1 min-w-0 text-sm">↩️ {v.pedido.por} pidió anularla: “{v.pedido.motivo}”</p>
+          <p className="flex-1 min-w-0 text-sm"><Icono nombre="deshacer" /> {v.pedido.por} pidió anularla: “{v.pedido.motivo}”</p>
           <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado} onClick={() => correr(() => resolverAnulacion(v.pedido!.pedido_id, true, v.socio_id))}>Anular</button>
           <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => correr(() => resolverAnulacion(v.pedido!.pedido_id, false, v.socio_id))}>Dejarla</button>
         </div>
@@ -43,7 +44,7 @@ export function FilaVenta({ v, zona, conSocio = false }: { v: Venta; zona: strin
         </form>
       )}
       {anulando && <p className="text-sm texto-tenue mt-2">Se revierte lo que habilitó (la cuota, el pase o el pack). Si se cobró en efectivo de una caja ya cerrada, la devolución sale de la caja abierta.</p>}
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-2"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }

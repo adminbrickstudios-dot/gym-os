@@ -55,7 +55,7 @@ try {
   await s.getByRole("link", { name: /Ver horarios/ }).waitFor({ timeout: 60000 });
   await s.getByRole("link", { name: /Ver horarios/ }).click();
   await s.locator("[data-sin-reserva]").waitFor({ timeout: 60000 });
-  chequear(await s.getByRole("button", { name: /Reservar/ }).count() === 0, "sin reserva: “🗓️ Ver horarios”, “vení directo” y ningún botón de reservar", "hay botones de reservar");
+  chequear(await s.getByRole("button", { name: /Reservar/ }).count() === 0, "sin reserva: “Ver horarios”, “vení directo” y ningún botón de reservar", "hay botones de reservar");
   await capturar(s, "app-sin-reserva");
   if (s.errores.length) falla(`socio: ${s.errores.join(" | ")}`);
 } catch (e) {

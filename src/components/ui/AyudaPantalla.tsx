@@ -1,4 +1,5 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -83,7 +84,7 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
       {abierta && (
         <section data-ayuda-globo={clave} aria-label="Ayuda de esta pantalla"
           className={`aparecer tarjeta p-4 mb-6 flex items-start gap-3 ${ambito === "panel" ? "pr-[7rem] sm:pr-[8.5rem]" : ""}`}>
-          <span className="text-2xl flex-none" aria-hidden>{texto.emoji}</span>
+          <span className="text-2xl flex-none" aria-hidden><Icono nombre={texto.emoji} sistema /></span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{texto.titulo}</p>
             <p className="texto-suave mt-0.5">{texto.texto}</p>

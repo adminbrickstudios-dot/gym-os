@@ -7,6 +7,7 @@ import { Tilde } from "@/components/ui/Tilde";
 import { ESTADOS, MAX_TEXTO, type RespuestaRapida } from "@/lib/mensajes";
 import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { cambiarEstado, responder } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** Contestar un mensaje: con respuestas rápidas para insertar, y los botones de estado. */
 export function Respuesta({ hiloId, estado, rapidas }: { hiloId: string; estado: string; rapidas: RespuestaRapida[] }) {
@@ -45,11 +46,11 @@ export function Respuesta({ hiloId, estado, rapidas }: { hiloId: string; estado:
       )}
       <textarea className="campo w-full min-h-28" value={texto} maxLength={MAX_TEXTO} onChange={(e) => setTexto(e.target.value)} placeholder="Escribí la respuesta…" aria-label="Respuesta" data-texto-respuesta />
       <div className="flex flex-wrap gap-2">
-        <BotonAccion className="boton boton-principal" ocupadoTexto="Enviando…" disabled={!texto.trim()} onClick={enviar} data-enviar-respuesta>💬 Contestar</BotonAccion>
+        <BotonAccion className="boton boton-principal" ocupadoTexto="Enviando…" disabled={!texto.trim()} onClick={enviar} data-enviar-respuesta><Icono nombre="mensaje" /> Contestar</BotonAccion>
         {estado !== "resuelto"
-          ? <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("resuelto")} data-resolver>✅ Marcar resuelto</BotonAccion>
-          : <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("en_curso")}>↩️ Volver a abrir</BotonAccion>}
-        {estado === "nuevo" && <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("en_curso")}>🕒 Lo estoy viendo</BotonAccion>}
+          ? <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("resuelto")} data-resolver><Icono nombre="ok" /> Marcar resuelto</BotonAccion>
+          : <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("en_curso")}><Icono nombre="deshacer" /> Volver a abrir</BotonAccion>}
+        {estado === "nuevo" && <BotonAccion className="boton" ocupadoTexto="Guardando…" onClick={() => estadoA("en_curso")}><Icono nombre="reloj" /> Lo estoy viendo</BotonAccion>}
       </div>
       <p className="text-sm texto-suave">Estados: {ESTADOS.map((e) => e.titulo).join(" · ")}. Al contestar pasa a “en curso”.</p>
       {error && <Mensaje tipo="error">{error}</Mensaje>}

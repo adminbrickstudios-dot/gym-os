@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-16: lo que devuelve retencion_periodo (cada número lo calcula la base; acá solo se muestra). */
 export type NumerosDelPeriodo = {
@@ -61,7 +62,7 @@ export function NumerosDelPeriodo({ n, ruta, hayClases, puedeVerResultado }: {
           <h2 className="titulo text-2xl">Los números</h2>
           <p className="texto-suave text-sm" data-rango>Del {fecha(n.desde)} al {fecha(ultimo)}</p>
         </div>
-        <a href={`/panel/retencion/exportar?periodo=${n.periodo}`} className="boton !min-h-11" data-exportar download>📥 Exportar a Excel</a>
+        <a href={`/panel/retencion/exportar?periodo=${n.periodo}`} className="boton !min-h-11" data-exportar download><Icono nombre="descargar" /> Exportar a Excel</a>
       </div>
       <nav className="pestanas mb-4" aria-label="Período" data-periodos>
         {PERIODOS.map((p) => (
@@ -106,7 +107,7 @@ export function NumerosDelPeriodo({ n, ruta, hayClases, puedeVerResultado }: {
         </>}
       </div>
       <div className="tarjeta p-4 mt-3" data-calor>
-        <h3 className="font-semibold">🔥 ¿Cuándo vienen?</h3>
+        <h3 className="font-semibold"><Icono nombre="fuego" /> ¿Cuándo vienen?</h3>
         <p className="texto-suave text-sm mb-3">{n.asistencia.entradas} {n.asistencia.entradas === 1 ? "entrada" : "entradas"} por día de la semana y hora. Más oscuro, más gente.</p>
         {n.asistencia.entradas === 0 ? <p className="texto-tenue text-sm">Todavía no hay entradas en este período.</p> : (
           <div className="grid gap-[2px]" style={{ gridTemplateColumns: `1.75rem repeat(${columnas.length}, minmax(0, 1fr))` }} role="img"

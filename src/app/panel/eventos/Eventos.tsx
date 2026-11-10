@@ -5,6 +5,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { formatearPesos } from "@/lib/formato";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { cerrarEvento, crearEvento, marcarPresente, publicarEvento, subirFlyerEvento } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Anotado = {
   clave: string; nombre: string; cantidad: number; socio_id: string | null; inscripcion_id: string | null; pago: boolean;
@@ -40,7 +41,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
   const [guardando, empezar] = useTransition();
   const archivo = useRef<HTMLInputElement>(null);
   const set = <K extends keyof typeof VACIO>(k: K, v: (typeof VACIO)[K]) => setD((x) => ({ ...x, [k]: v }));
-  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}>➕ Nuevo evento</button>;
+  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nuevo evento</button>;
 
   const guardar = (borrador: boolean) => empezar(async () => {
     if (!d.inicio) { setEstado({ error: "Elegí el día y la hora." }); return; }
@@ -84,7 +85,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
             <button type="button" className="boton" aria-label="Sacar esta fecha" onClick={() => setExtras((l) => l.filter((_, j) => j !== i))}>✕</button>
           </div>
         ))}
-        {extras.length < 20 && <button type="button" className="boton" data-otra-fecha onClick={() => setExtras((l) => [...l, ""])}>➕ Otra fecha</button>}
+        {extras.length < 20 && <button type="button" className="boton" data-otra-fecha onClick={() => setExtras((l) => [...l, ""])}><Icono nombre="mas" /> Otra fecha</button>}
       </div>
 
       <label className="block space-y-1 sm:col-span-2"><span className="etiqueta">Flyer o foto (opcional)</span>
@@ -93,8 +94,8 @@ export function NuevoEvento({ zona }: { zona: string }) {
 
       {estado.error && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
-        <button type="submit" className="boton boton-principal" disabled={guardando || d.nombre.trim().length < 3}>{guardando ? "Creando…" : "✅ Crear evento"}</button>
-        <button type="button" className="boton" disabled={guardando || d.nombre.trim().length < 3} onClick={() => guardar(true)}>📝 Guardar como borrador</button>
+        <button type="submit" className="boton boton-principal" disabled={guardando || d.nombre.trim().length < 3}>{guardando ? "Creando…" : "Crear evento"}</button>
+        <button type="button" className="boton" disabled={guardando || d.nombre.trim().length < 3} onClick={() => guardar(true)}><Icono nombre="lista" /> Guardar como borrador</button>
         <button type="button" className="boton-texto px-3" onClick={() => setAbierto(false)}>Cancelar</button>
       </div>
     </form>
@@ -143,9 +144,9 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
               {e.para === "socios" && <span className="pildora">Solo socios</span>}
             </span>
           </div>
-          {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `📍 ${e.lugar}`, e.responsable && `👤 ${e.responsable}`].filter(Boolean).join(" · ")}</p>}
+          {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `${e.lugar}`, e.responsable && `${e.responsable}`].filter(Boolean).join(" · ")}</p>}
           {e.fechas.length > 1 && (
-            <p className="texto-suave" data-fechas-evento>🗓️ {e.fechas.length} fechas: {e.fechas.map((f) => cuandoCorto(f, e.zona)).join(" · ")}</p>
+            <p className="texto-suave" data-fechas-evento><Icono nombre="calendario" /> {e.fechas.length} fechas: {e.fechas.map((f) => cuandoCorto(f, e.zona)).join(" · ")}</p>
           )}
           {e.descripcion && <p className="texto-suave">{e.descripcion}</p>}
         </div>
@@ -167,7 +168,7 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
                   <span className="min-w-0 break-words">{a.socio_id ? <LinkPanel href={`/panel/socios/${a.socio_id}`} siNoEsta="texto" className="underline">{a.nombre}</LinkPanel> : a.nombre}{a.cantidad > 1 ? ` (${a.cantidad})` : ""}</span>
                   {a.pago ? <span className="pildora pildora-verde">Pagó</span> : <span className="pildora pildora-amarillo">Falta pagar{a.precio ? ` ${formatearPesos(a.precio)}` : ""}</span>}
                   {a.origen !== "recepcion" && <span className="pildora">{a.origen === "app" ? "Por la app" : "Por la página"}</span>}
-                  {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton-texto px-2" aria-label={`WhatsApp a ${a.nombre}`}>💬</a>}
+                  {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton-texto px-2" aria-label={`WhatsApp a ${a.nombre}`}><Icono nombre="mensaje" /></a>}
                   {hoyEsDia && (a.socio_id || a.inscripcion_id) && (
                     a.presente
                       ? <button type="button" className="boton" disabled={ocupado} data-presente="si" onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }, true))}>✓ Presente (deshacer)</button>
@@ -190,18 +191,18 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <div className="flex flex-wrap gap-2">
-        {!e.cerrado && !e.borrador && !pasado && e.quedan > 0 && <LinkPanel href="/panel/vender" className="boton">🛒 Vender un lugar</LinkPanel>}
-        {puedeCerrar && !e.cerrado && e.borrador && <button type="button" className="boton boton-principal" disabled={ocupado} data-publicar onClick={() => accion(() => publicarEvento(e.evento_id))}>📢 Publicar</button>}
+        {!e.cerrado && !e.borrador && !pasado && e.quedan > 0 && <LinkPanel href="/panel/vender" className="boton"><Icono nombre="carrito" /> Vender un lugar</LinkPanel>}
+        {puedeCerrar && !e.cerrado && e.borrador && <button type="button" className="boton boton-principal" disabled={ocupado} data-publicar onClick={() => accion(() => publicarEvento(e.evento_id))}><Icono nombre="campana" /> Publicar</button>}
         {puedeCerrar && !e.cerrado && (
           <>
-            <button type="button" className="boton" disabled={ocupado} onClick={() => archivo.current?.click()}>{flyer ? "🖼️ Cambiar flyer" : "🖼️ Subir flyer"}</button>
+            <button type="button" className="boton" disabled={ocupado} onClick={() => archivo.current?.click()}>{flyer ? "Cambiar flyer" : "Subir flyer"}</button>
             <input ref={archivo} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" data-flyer-fila
               onChange={(ev) => { const f = ev.target.files?.[0]; if (!f) return; const fd = new FormData(); fd.set("flyer", f); accion(() => subirFlyerEvento(e.evento_id, fd)); ev.target.value = ""; }} />
           </>
         )}
-        {(e.anotados.length > 0 || e.espera.length > 0) && <button type="button" className="boton" onClick={() => descargarCsv(e)}>⬇️ Exportar anotados</button>}
+        {(e.anotados.length > 0 || e.espera.length > 0) && <button type="button" className="boton" onClick={() => descargarCsv(e)}><Icono nombre="descargar" /> Exportar anotados</button>}
         {puedeCerrar && !e.cerrado && <button type="button" className="boton texto-suave" disabled={ocupado} data-cerrar-evento
-          onClick={() => accion(() => cerrarEvento(e.evento_id))}>{pasado || e.asistieron > 0 ? "✅ Terminó: cerrarlo y sacarlo de Vender" : "🚫 Cancelarlo (sale de Vender)"}</button>}
+          onClick={() => accion(() => cerrarEvento(e.evento_id))}>{pasado || e.asistieron > 0 ? "Terminó: cerrarlo y sacarlo de Vender" : "Cancelarlo (sale de Vender)"}</button>}
       </div>
     </li>
   );

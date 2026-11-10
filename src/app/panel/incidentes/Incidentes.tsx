@@ -8,6 +8,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { detectarSalud } from "@/lib/salud";
 import { corregirIncidente, crearIncidente } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Incidente = {
   id: string; ocurrio_en: string; donde: string; que_paso: string; testigos: string | null; que_se_hizo: string;
@@ -29,7 +30,7 @@ function CamposIncidente({ v, cambiar }: { v: Campos; cambiar: (c: Campos) => vo
       <label className="block space-y-1"><span className="etiqueta">¿Qué se hizo?</span>
         <textarea className="campo min-h-20" maxLength={1000} value={v.que_se_hizo} onChange={(e) => cambiar({ ...v, que_se_hizo: e.target.value })} placeholder="Se lo sentó, se llamó a la ambulancia, se avisó a la familia…" data-inc-hizo /></label>
       <AvisoSalud texto={`${v.donde} ${v.que_paso} ${v.testigos} ${v.que_se_hizo}`} />
-      <p className="text-sm texto-tenue" data-aviso-sin-diagnostico>🩺 Anotá lo que pasó y lo que se hizo, no un diagnóstico ni condiciones médicas: el sistema no guarda datos de salud.</p>
+      <p className="text-sm texto-tenue" data-aviso-sin-diagnostico><Icono nombre="corazon" /> Anotá lo que pasó y lo que se hizo, no un diagnóstico ni condiciones médicas: el sistema no guarda datos de salud.</p>
     </div>
   );
 }
@@ -61,7 +62,7 @@ export function FormIncidente({ socioInicial }: { socioInicial: { id: string; no
   if (!abierto) {
     return (
       <div className="space-y-3">
-        <button type="button" className="boton boton-principal !min-h-14" onClick={() => { setAbierto(true); setListo(false); }} data-nuevo-incidente>➕ Anotar un incidente</button>
+        <button type="button" className="boton boton-principal !min-h-14" onClick={() => { setAbierto(true); setListo(false); }} data-nuevo-incidente><Icono nombre="mas" /> Anotar un incidente</button>
         {listo && <Mensaje tipo="exito"><span data-incidente-guardado>Incidente anotado. Se puede corregir durante las próximas 24 horas.</span></Mensaje>}
       </div>
     );
@@ -89,7 +90,7 @@ export function FormIncidente({ socioInicial }: { socioInicial: { id: string; no
       </div>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <div className="flex flex-wrap gap-2">
-        <BotonAccion className="boton boton-principal !min-h-12" disabled={!completo(v)} onClick={guardar} ocupadoTexto="Guardando…" data-guardar-incidente>📝 Guardar incidente</BotonAccion>
+        <BotonAccion className="boton boton-principal !min-h-12" disabled={!completo(v)} onClick={guardar} ocupadoTexto="Guardando…" data-guardar-incidente><Icono nombre="lista" /> Guardar incidente</BotonAccion>
         <button type="button" className="boton" onClick={() => { setAbierto(false); setError(null); }}>Cancelar</button>
       </div>
     </form>
@@ -110,10 +111,10 @@ export function TarjetaIncidente({ i, zona }: { i: Incidente; zona: string }) {
   return (
     <li className="tarjeta p-4 space-y-2 min-w-0" data-incidente={i.id}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-semibold">📍 {i.donde}</span>
+        <span className="font-semibold"><Icono nombre="ubicacion" /> {i.donde}</span>
         <span className="texto-tenue text-sm">{cuando(i.ocurrio_en)} · lo anotó {i.autor}</span>
         {i.corregido_en && <span className="pildora !text-xs">corregido</span>}
-        {!i.editable && <span className="texto-tenue text-sm" title="Pasadas las 24 horas queda escrito y no cambia">🔒 cerrado</span>}
+        {!i.editable && <span className="texto-tenue text-sm" title="Pasadas las 24 horas queda escrito y no cambia"><Icono nombre="candado" /> cerrado</span>}
       </div>
       {editando ? (
         <div className="space-y-3">
@@ -128,8 +129,8 @@ export function TarjetaIncidente({ i, zona }: { i: Incidente; zona: string }) {
         <>
           <p className="whitespace-pre-wrap break-words">{i.que_paso}</p>
           <p className="texto-suave break-words"><span className="font-semibold">Se hizo:</span> {i.que_se_hizo}</p>
-          {i.testigos && <p className="texto-suave text-sm break-words">👀 Testigos: {i.testigos}</p>}
-          {i.socio_nombre && <p className="text-sm">👤 <Link href={`/panel/socios/${i.socio_id}`} className="underline">{i.socio_nombre}</Link></p>}
+          {i.testigos && <p className="texto-suave text-sm break-words"><Icono nombre="ojo" /> Testigos: {i.testigos}</p>}
+          {i.socio_nombre && <p className="text-sm"><Icono nombre="persona" /> <Link href={`/panel/socios/${i.socio_id}`} className="underline">{i.socio_nombre}</Link></p>}
           {i.editable && <button type="button" className="text-sm underline texto-suave" onClick={() => setEditando(true)} data-corregir-incidente>Corregir</button>}
         </>
       )}

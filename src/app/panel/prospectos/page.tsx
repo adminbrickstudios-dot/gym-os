@@ -19,7 +19,7 @@ export default async function PaginaProspectos() {
     const { lista, pagina } = await cargarInteresados(panel);
     return (
       <>
-        <Encabezado emoji="🌱" titulo="Interesados" bajada="Los que quieren probar: de la página, del mostrador o recomendados. Escribiles rápido; el que prueba en la semana se queda." />
+        <Encabezado icono="hoja" titulo="Interesados" bajada="Los que quieren probar: de la página, del mostrador o recomendados. Escribiles rápido; el que prueba en la semana se queda." />
         <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas={false} />
       </>
     );

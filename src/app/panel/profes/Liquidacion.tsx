@@ -5,6 +5,7 @@ import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { formatearPesos } from "@/lib/formato";
 import { anularHoras, anularPago, cargarHoras, guardarConfigLiquidacion, guardarRegla, pagarProfe, verDetalle, type Detalle } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type FilaProfe = {
   profe_id: string; nombre: string; rol: string; activo: boolean;
@@ -44,7 +45,7 @@ function Ajuste({ encargadoVe }: { encargadoVe: boolean }) {
   const [ocupado, empezar] = useTransition();
   return (
     <section className="tarjeta p-5 max-w-xl" aria-labelledby="quien-ve">
-      <h2 id="quien-ve" className="titulo text-xl mb-1">👀 Quién lo ve</h2>
+      <h2 id="quien-ve" className="titulo text-xl mb-1"><Icono nombre="ojo" /> Quién lo ve</h2>
       <Interruptor etiqueta="El encargado también ve la liquidación" ayuda="Solo mirar: pagar y cambiar reglas lo hace siempre el dueño. Cada profe ve su propio mes en Mi cuenta." checked={valor} disabled={ocupado}
         onChange={(e) => { const nuevo = e.target.checked; setValor(nuevo); empezar(async () => { const r = await guardarConfigLiquidacion(nuevo); if (r.error) { setError(r.error); setValor(!nuevo); } else setError(null); }); }} />
       {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -90,9 +91,9 @@ function Tarjeta({ p, mes, esDueno, turnoId, hoy }: { p: FilaProfe; mes: string;
         <Dato t="Falta" v={formatearPesos(p.pendiente)} fuerte clave="pendiente" />
       </dl>
       <div className="flex flex-wrap gap-2">
-        {esDueno && <button type="button" className="boton boton-principal" disabled={Number(p.pendiente) <= 0} onClick={() => abrir("pagar")} data-abrir-pagar>💵 Pagar</button>}
-        {esDueno && <button type="button" className="boton" onClick={() => abrir("regla")} data-abrir-regla>📐 Cómo se le paga</button>}
-        {esDueno && <button type="button" className="boton" onClick={() => abrir("horas")} data-abrir-horas>⏱️ Cargar horas</button>}
+        {esDueno && <button type="button" className="boton boton-principal" disabled={Number(p.pendiente) <= 0} onClick={() => abrir("pagar")} data-abrir-pagar><Icono nombre="plata" /> Pagar</button>}
+        {esDueno && <button type="button" className="boton" onClick={() => abrir("regla")} data-abrir-regla><Icono nombre="grafico" /> Cómo se le paga</button>}
+        {esDueno && <button type="button" className="boton" onClick={() => abrir("horas")} data-abrir-horas><Icono nombre="reloj" /> Cargar horas</button>}
         <button type="button" className="boton" onClick={() => abrir("detalle")} data-abrir-detalle>{panel === "detalle" ? "Ocultar el detalle" : "Ver el detalle"}</button>
       </div>
       {ok && <Mensaje tipo="exito">{ok}</Mensaje>}

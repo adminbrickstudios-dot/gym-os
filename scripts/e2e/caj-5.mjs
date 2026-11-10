@@ -34,7 +34,7 @@ try {
   await r.goto(`${G}/panel`);
   const aviso = r.locator("[data-cajas-olvidadas] li").first();
   await aviso.waitFor({ timeout: 30000 });
-  chequear(/quedó abierta/.test(await aviso.innerText()) && /la abriste vos/.test(await aviso.innerText()), "Inicio de la recepción: “⏰ Caja principal quedó abierta · la abriste vos”", await aviso.innerText());
+  chequear(/quedó abierta/.test(await aviso.innerText()) && /la abriste vos/.test(await aviso.innerText()), "Inicio de la recepción: “Caja principal quedó abierta · la abriste vos”", await aviso.innerText());
   await aviso.locator("a").click();
   await r.waitForURL(/\/panel\/caja/);
   await r.locator("[data-olvidada]").waitFor({ timeout: 30000 });

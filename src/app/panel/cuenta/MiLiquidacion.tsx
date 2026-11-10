@@ -1,6 +1,7 @@
 import { formatearPesos } from "@/lib/formato";
 import { nombreMes } from "@/lib/gastos";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 type Mia = {
   mes: string;
@@ -22,7 +23,7 @@ export async function MiLiquidacion() {
   if (!esProfe && !(r && (r.clases > 0 || r.regla))) return null;
   return (
     <section className="tarjeta p-5 sm:p-6 max-w-xl mt-6" aria-labelledby="mi-liq" data-mi-liquidacion>
-      <h2 id="mi-liq" className="titulo text-2xl mb-1">🧑‍🏫 Mi liquidación · {nombreMes(m.mes)}</h2>
+      <h2 id="mi-liq" className="titulo text-2xl mb-1"><Icono nombre="persona" /> Mi liquidación · {nombreMes(m.mes)}</h2>
       {!r || (!r.regla && r.clases === 0)
         ? <p className="texto-suave">Todavía no tenés clases este mes ni una forma de pago cargada. Cuando el dueño te la ponga, la ves acá.</p>
         : (
@@ -37,7 +38,7 @@ export async function MiLiquidacion() {
             {m.clases.length > 0 && (
               <details className="mt-2"><summary className="cursor-pointer texto-suave text-sm">Ver mis clases del mes</summary>
                 <ul className="text-sm mt-2 space-y-1">{m.clases.map((c, i) => <li key={i}>{dia(c.dia)} · {c.actividad} · {c.presentes} {c.presentes === 1 ? "presente" : "presentes"} · {formatearPesos(c.importe)}</li>)}</ul></details>)}
-            {m.pagos.length > 0 && <ul className="text-sm mt-2 space-y-1">{m.pagos.map((p, i) => <li key={i}>💵 Te pagaron {formatearPesos(p.monto)} el {dia(p.pagado_en.slice(0, 10))}</li>)}</ul>}
+            {m.pagos.length > 0 && <ul className="text-sm mt-2 space-y-1">{m.pagos.map((p, i) => <li key={i}><Icono nombre="plata" /> Te pagaron {formatearPesos(p.monto)} el {dia(p.pagado_en.slice(0, 10))}</li>)}</ul>}
           </>
         )}
     </section>

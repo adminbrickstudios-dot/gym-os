@@ -34,7 +34,7 @@ try {
   await d.getByText(`Cuota Tri${s5}`).first().waitFor({ timeout: 30000 });
   chequear(/\$81\.000/.test(await d.locator("main").innerText()), "Vender: la cuota trimestral sale $81.000", "no sale $81.000");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   const ver = d.locator('[data-veredicto="verde"]');

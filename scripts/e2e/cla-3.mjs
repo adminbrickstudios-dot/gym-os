@@ -31,7 +31,7 @@ try {
   const grupo = r.locator('[data-grupo-avisos="clase_cancelada"]');
   await grupo.waitFor({ timeout: 60000 });
   const fila = grupo.locator("li", { hasText: "Testigo Al Día" }).first();
-  chequear(/se canceló .+ \(Se corta la luz \(e2e\)\)/.test(await fila.innerText()), "Avisos de hoy → ❌ Clase cancelada: “Testigo Al Día”, con el mensaje ya escrito", await fila.innerText());
+  chequear(/se canceló .+ \(Se corta la luz \(e2e\)\)/.test(await fila.innerText()), "Avisos de hoy → Clase cancelada: “Testigo Al Día”, con el mensaje ya escrito", await fila.innerText());
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 
   const s = await pagina(b, CELU);

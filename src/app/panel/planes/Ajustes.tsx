@@ -4,6 +4,7 @@
 import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { guardarAjustesPlan, type AjustesPlan, type AjustesPlanes } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Renov = "gimnasio" | "continua" | "desde_pago" | "dia_fijo";
 const NOMBRE_RENOV: Record<string, string> = { continua: "continua", desde_pago: "desde el día que paga", dia_fijo: "día fijo" };
@@ -100,7 +101,7 @@ export function AjustesDelPlan({ planId, tipo, a, r, cerrar }: {
           </>
         )}
       </fieldset>
-      {error && <p role="alert" className="pildora pildora-rojo sm:col-span-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo sm:col-span-2"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex gap-2 sm:col-span-2"><button type="submit" className="boton boton-principal" disabled={ocupado}>Guardar</button><button type="button" className="boton" onClick={cerrar}>Cancelar</button></div>
     </form>
   );

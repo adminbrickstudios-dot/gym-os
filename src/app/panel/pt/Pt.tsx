@@ -9,6 +9,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Vacio } from "@/components/ui/Vacio";
 import { formatearPesos } from "@/lib/formato";
 import { cancelarSesion, cargarFranjas, guardarAntelacion, guardarPack, marcarSesion, ptDelSocio, quitarFranja, reservarPorSocio, type PtSocio } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Franja = {
   franja_id: string; entrenador_id: string; entrenador: string; sede: string; inicio: string; fin: string;
@@ -25,7 +26,7 @@ export type DatosPt = {
 const hora = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
 const diaLargo = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", day: "numeric", month: "long" }).format(new Date(m));
 const claveDia = (m: string, zona: string) => new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date(m));
-const ETIQUETA = { libre: "Libre", reservada: "Reservada", dictada: "✅ Se dio", ausente: "🚫 No vino" } as const;
+const ETIQUETA = { libre: "Libre", reservada: "Reservada", dictada: "Se dio", ausente: "No vino" } as const;
 
 function FilaFranja({ f, zona, varios }: { f: Franja; zona: string; varios: boolean }) {
   const [accion, setAccion] = useState<null | "cancelar" | "quitar">(null);
@@ -60,8 +61,8 @@ function FilaFranja({ f, zona, varios }: { f: Franja; zona: string; varios: bool
         <div className="flex flex-wrap gap-2">
           {f.puede_marcar && f.sesion_id && (
             <>
-              <BotonAccion className="boton boton-principal" ocupadoTexto="…" data-marcar-dictada onClick={() => correr(() => marcarSesion(f.sesion_id!, "dictada"))}>✅ Se dio</BotonAccion>
-              <BotonAccion className="boton" ocupadoTexto="…" data-marcar-ausente onClick={() => correr(() => marcarSesion(f.sesion_id!, "ausente"))}>🚫 No vino</BotonAccion>
+              <BotonAccion className="boton boton-principal" ocupadoTexto="…" data-marcar-dictada onClick={() => correr(() => marcarSesion(f.sesion_id!, "dictada"))}><Icono nombre="ok" /> Se dio</BotonAccion>
+              <BotonAccion className="boton" ocupadoTexto="…" data-marcar-ausente onClick={() => correr(() => marcarSesion(f.sesion_id!, "ausente"))}><Icono nombre="prohibido" /> No vino</BotonAccion>
             </>
           )}
           {f.puede_cancelar && <button type="button" className="boton" onClick={() => setAccion("cancelar")} data-cancelar-sesion>Cancelar la sesión</button>}
@@ -81,7 +82,7 @@ function CargarHorarios({ datos }: { datos: DatosPt }) {
   const [msg, setMsg] = useState<{ tipo: "error" | "exito"; texto: string } | null>(null);
   return (
     <details className="tarjeta p-4" data-cargar-horarios>
-      <summary className="cursor-pointer font-semibold">➕ Cargar horarios de atención</summary>
+      <summary className="cursor-pointer font-semibold"><Icono nombre="mas" /> Cargar horarios de atención</summary>
       <form className="space-y-3 mt-4" onSubmit={(e) => e.preventDefault()}>
         {datos.puede_gestionar && datos.entrenadores.length > 1 && (
           <label className="block space-y-1"><span className="etiqueta">PT</span>
@@ -129,7 +130,7 @@ function ReservarPorSocio({ zona }: { zona: string }) {
   };
   return (
     <details className="tarjeta p-4" data-reservar-por-socio>
-      <summary className="cursor-pointer font-semibold">📅 Reservar una sesión por un socio</summary>
+      <summary className="cursor-pointer font-semibold"><Icono nombre="calendario" /> Reservar una sesión por un socio</summary>
       <div className="space-y-3 mt-4">
         {!socio ? (
           <>
@@ -149,10 +150,10 @@ function ReservarPorSocio({ zona }: { zona: string }) {
             {pt && (
               <>
                 {pt.packs && pt.packs.length > 0 ? (
-                  <ul className="text-sm space-y-1">{pt.packs.map((p) => <li key={p.venta_item_id}>🎟️ {p.nombre}: le quedan {p.restantes} de {p.total}{p.vence_en ? ` (hasta el ${new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "numeric", month: "short" }).format(new Date(new Date(p.vence_en).getTime() - 1))})` : ""}{!p.vigente ? " · no vigente" : ""}</li>)}</ul>
+                  <ul className="text-sm space-y-1">{pt.packs.map((p) => <li key={p.venta_item_id}><Icono nombre="ticket" /> {p.nombre}: le quedan {p.restantes} de {p.total}{p.vence_en ? ` (hasta el ${new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "numeric", month: "short" }).format(new Date(new Date(p.vence_en).getTime() - 1))})` : ""}{!p.vigente ? " · no vigente" : ""}</li>)}</ul>
                 ) : <p className="texto-suave text-sm">No tiene ningún pack de sesiones.</p>}
                 {!pt.tiene_saldo && (
-                  <p className="text-sm texto-suave">Sin sesiones disponibles: <BotonCobrar socioId={socio.socio_id} origen="otro" className="boton boton-chico">💵 Cobrar un pack</BotonCobrar> y volvé acá.
+                  <p className="text-sm texto-suave">Sin sesiones disponibles: <BotonCobrar socioId={socio.socio_id} origen="otro" className="boton boton-chico"><Icono nombre="plata" /> Cobrar un pack</BotonCobrar> y volvé acá.
                     <button type="button" className="underline ml-2" onClick={() => void cargar(socio)}>Ya cobré: actualizar</button></p>
                 )}
                 {pt.tiene_saldo && (pt.libres?.length ?? 0) === 0 && <p className="texto-suave text-sm">No hay horarios libres en los próximos días para sus packs.</p>}
@@ -184,7 +185,7 @@ function Packs({ datos }: { datos: DatosPt }) {
   const [horas, setHoras] = useState(String(datos.horas_cancelar));
   return (
     <details className="tarjeta p-4" data-packs-pt>
-      <summary className="cursor-pointer font-semibold">⚙️ Packs de sesiones y cancelación</summary>
+      <summary className="cursor-pointer font-semibold"><Icono nombre="ajustes" /> Packs de sesiones y cancelación</summary>
       <div className="space-y-5 mt-4">
         {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
         <div className="space-y-2">
@@ -238,7 +239,7 @@ export function Pt({ datos, zona }: { datos: DatosPt; zona: string }) {
       {datos.puede_reservar_por_socio && <ReservarPorSocio zona={zona} />}
       {datos.puede_gestionar && <Packs datos={datos} />}
       {porDia.size === 0 ? (
-        <Vacio emoji="🏃" titulo="Todavía no hay horarios cargados">
+        <Vacio icono="pesa" titulo="Todavía no hay horarios cargados">
           Cargá los horarios en que atiende cada PT (por ejemplo, los martes a las 10 durante 8 semanas). Con un pack de sesiones, el socio reserva desde la app.
         </Vacio>
       ) : (

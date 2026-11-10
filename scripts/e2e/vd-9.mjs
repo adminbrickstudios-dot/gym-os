@@ -32,13 +32,13 @@ try {
   await r.locator('input[aria-label="Fondo del turno"]').fill("1.000");
   await r.locator('button:has-text("Abrir turno")').click();
   await r.locator('[data-mi-turno="abierto"]').waitFor({ timeout: 30000 });
-  chequear(/Tu turno/.test(await r.locator('[data-mi-turno="abierto"]').innerText()), "Entrada: “🟢 Tu turno: … desde las …” con “Cerrar mi turno”", await r.locator('[data-mi-turno="abierto"]').innerText());
+  chequear(/Tu turno/.test(await r.locator('[data-mi-turno="abierto"]').innerText()), "Entrada: “Tu turno: … desde las …” con “Cerrar mi turno”", await r.locator('[data-mi-turno="abierto"]').innerText());
 
   // ── Cobrar en efectivo (el efectivo cae en mi turno).
   await r.goto(`${G}/panel/vender`);
   await r.locator("main button", { hasText: "Agua 500 ml" }).click();
   await r.locator('button[aria-pressed]:has-text("Efectivo")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   ok("cobré un agua en efectivo ($1.500) en mi turno");
 

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
+import { Icono } from "@/components/ui/Icono";
 
 type Estado =
   | { tipo: "cargando" }
@@ -68,7 +69,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
 
   return (
     <section id="dos-pasos" className="tarjeta p-5 sm:p-6 max-w-xl mt-6 space-y-3" aria-labelledby="dos-pasos-titulo" data-dos-pasos={estado.tipo}>
-      <h2 id="dos-pasos-titulo" className="titulo text-2xl">🛡️ Verificación en dos pasos</h2>
+      <h2 id="dos-pasos-titulo" className="titulo text-2xl"><Icono nombre="escudo" /> Verificación en dos pasos</h2>
       {estado.tipo === "cargando" && <div className="esqueleto h-12" aria-busy="true" aria-label="Cargando" />}
 
       {estado.tipo === "sin" && (
@@ -101,7 +102,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
         <>
           <p><span className="pildora pildora-verde">Activa</span></p>
           {estado.confirmada ? (
-            <p className="texto-suave" data-dos-pasos-confirmada>✅ Ya confirmaste tu código en esta sesión: podés exportar y tocar el equipo.</p>
+            <p className="texto-suave" data-dos-pasos-confirmada><Icono nombre="ok" /> Ya confirmaste tu código en esta sesión: podés exportar y tocar el equipo.</p>
           ) : (
             <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
               <p className="texto-suave">Para exportar datos, tocar el equipo o cambiar los cobros, confirmá tu código de ahora.</p>

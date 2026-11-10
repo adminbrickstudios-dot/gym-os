@@ -1,5 +1,6 @@
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { Icono } from "@/components/ui/Icono";
 
 export type DeudaConSocios = {
   momento: string; total: number;
@@ -13,7 +14,7 @@ export function DeudaSocios({ d }: { d: DeudaConSocios }) {
   const hay = Number(d.total) > 0 || d.packs.usos > 0 || d.cuotas.sin_venta > 0;
   return (
     <section aria-labelledby="deuda" data-deuda-socios>
-      <h2 id="deuda" className="titulo text-2xl mb-1">🧾 Lo que les debés a los socios</h2>
+      <h2 id="deuda" className="titulo text-2xl mb-1"><Icono nombre="recibo" /> Lo que les debés a los socios</h2>
       {!hay ? (
         <p className="texto-suave">Hoy no hay clases de packs ni cuotas pagadas por adelantado pendientes: no le debés servicio a nadie.</p>
       ) : (
@@ -22,11 +23,11 @@ export function DeudaSocios({ d }: { d: DeudaConSocios }) {
           <p className="numero text-4xl sm:text-5xl" data-deuda-total>{formatearPesos(d.total)}</p>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-6 mt-5">
             <div className="flex flex-col-reverse">
-              <dt className="texto-suave mt-1 text-[15px]">🎟️ Packs · {formatearNumero(d.packs.usos)} {d.packs.usos === 1 ? "uso" : "usos"} · {formatearNumero(d.packs.socios)} {d.packs.socios === 1 ? "socio" : "socios"}</dt>
+              <dt className="texto-suave mt-1 text-[15px]"><Icono nombre="ticket" /> Packs · {formatearNumero(d.packs.usos)} {d.packs.usos === 1 ? "uso" : "usos"} · {formatearNumero(d.packs.socios)} {d.packs.socios === 1 ? "socio" : "socios"}</dt>
               <dd className="numero text-3xl">{formatearPesos(d.packs.valor)}</dd>
             </div>
             <div className="flex flex-col-reverse">
-              <dt className="texto-suave mt-1 text-[15px]">📅 Cuotas · {formatearNumero(d.cuotas.socios)} {d.cuotas.socios === 1 ? "socio" : "socios"}</dt>
+              <dt className="texto-suave mt-1 text-[15px]"><Icono nombre="calendario" /> Cuotas · {formatearNumero(d.cuotas.socios)} {d.cuotas.socios === 1 ? "socio" : "socios"}</dt>
               <dd className="numero text-3xl">{formatearPesos(d.cuotas.valor)}</dd>
             </div>
           </dl>

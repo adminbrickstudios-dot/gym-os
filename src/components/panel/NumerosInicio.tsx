@@ -1,3 +1,4 @@
+import { Icono } from "@/components/ui/Icono";
 import Link from "next/link";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 
@@ -46,13 +47,13 @@ export function NumerosInicio({ numeros, apagadas }: { numeros: NumeroInicio[]; 
         const valor = n.formato === "pesos" ? formatearPesos(n.valor) : n.formato === "porcentaje" ? `${formatearNumero(n.valor)} %` : formatearNumero(n.valor);
         const cuerpo = (
           <>
-            <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.emoji}</span> {n.etiqueta}</dt>
+            <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} sistema /></span> {n.etiqueta}</dt>
             <dd className="numero text-5xl sm:text-6xl min-w-0 break-words">{valor}{n.serie && n.serie.length > 1 && <MiniGrafico serie={n.serie} pesos={n.formato === "pesos"} />}</dd>
           </>
         );
         const lista = LISTA_DEL_NUMERO[n.clave];
         return lista && !apagadas.includes(lista.seccion)
-          ? <Link key={n.clave} href={lista.ruta} data-numero={n.clave} className="flex flex-col-reverse justify-end rounded-2xl p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
+          ? <Link key={n.clave} href={lista.ruta} data-numero={n.clave} className="flex flex-col-reverse justify-end rounded-[var(--radio)] p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
           : <div key={n.clave} data-numero={n.clave} className="flex flex-col-reverse justify-end">{cuerpo}</div>;
       })}
     </dl>
