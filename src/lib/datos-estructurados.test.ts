@@ -13,7 +13,7 @@ const l = {
 test("un gimnasio con una sede: dirección, teléfono, Instagram y horarios por día", () => {
   const [d] = datosEstructurados(l, { sedes: [{ sede_id: "s", sede: "Sede principal", abierto: true, texto: null,
     franjas: [{ dia: 1, abre: "07:00:00", cierra: "22:00:00" }, { dia: 6, abre: "09:00", cierra: "13:00" }] }], cierres: [] }, "https://demo.gymos.app", null);
-  expect(d["@type"]).toBe("HealthClub");
+  expect(d["@type"]).toEqual(["ExerciseGym", "HealthClub"]);
   expect(d.name).toBe("Gimnasio Demo");
   expect(d.telephone).toBe("+5490000111222");
   expect(d.address).toEqual({ "@type": "PostalAddress", streetAddress: "Calle Ficticia 123", addressCountry: "AR" });
@@ -43,7 +43,7 @@ test("validador: campos obligatorios y formatos de cada entrada", () => {
   const ids = new Set<string>();
   for (const d of ds) {
     expect(d["@context"]).toBe("https://schema.org");
-    expect(d["@type"]).toBe("HealthClub");
+    expect(d["@type"]).toEqual(["ExerciseGym", "HealthClub"]);
     expect(typeof d.name).toBe("string");
     expect(new URL(String(d.url)).protocol).toBe("https:");
     expect(new URL(String(d.image)).protocol).toBe("https:");

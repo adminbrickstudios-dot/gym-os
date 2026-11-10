@@ -28,7 +28,8 @@ test("el progreso sale de los datos: cada dato que se carga marca su paso", asyn
     assert.equal(hecho(p, "planes"), true);
     assert.equal(hecho(p, "socios"), true);
     assert.equal(hecho(p, "equipo"), true);
-    for (const k of ["gimnasio", "marca", "horarios", "pagina"]) assert.equal(hecho(p, k), false, `${k} todavía no`);
+    for (const k of ["gimnasio", "marca", "horarios"]) assert.equal(hecho(p, k), false, `${k} todavía no`);
+    assert.equal(hecho(p, "pagina"), true, "la página se ve desde que se crea el gimnasio (U4)");
     assert.equal(p.hechos, p.pasos.filter((x) => x.hecho).length);
   });
   // Cargar los datos (como lo haría cada pantalla) marca los pasos.

@@ -12,7 +12,7 @@ export function datosEstructurados(l: LandingPublicada, agenda: Agenda | null, o
     const tel = s.telefono ?? l.contacto.whatsapp;
     return Object.fromEntries(Object.entries({
       "@context": "https://schema.org",
-      "@type": "HealthClub",
+      "@type": ["ExerciseGym", "HealthClub"],   // WEB-05: ExerciseGym (subtipo de lugar de actividad física) y el HealthClub del pedido
       "@id": `${origen}/#sede-${i + 1}`,
       name: sedes.length > 1 ? `${l.marca.nombre} · ${s.nombre}` : l.marca.nombre,
       description: l.portada.bajada ?? l.portada.titulo,
