@@ -27,7 +27,7 @@ export const OPCIONES: Opcion[] = [
   { id: "favicon", titulo: "Ícono de la pestaña", pestana: "marca", claves: "icono favicon pestana navegador", explicacion: "El dibujito chico de la pestaña del navegador; si no subís uno se usa el logo." },
   { id: "colores", titulo: "Colores (fondo y color principal)", pestana: "marca", claves: "color colores fondo acento paleta diseno tema", explicacion: "Se ven en tu página, en el panel y en la app del socio." },
   // ── Página
-  { id: "publicar-pagina", titulo: "Publicar tu página", pestana: "pagina", claves: "pagina publicar borrador web link compartir whatsapp sitio", explicacion: "Publicada, cualquiera la ve; en borrador, la gente ve “Estamos armando nuestra página”." },
+  { id: "publicar-pagina", titulo: "Publicar tu página", pestana: "pagina", claves: "pagina publicar borrador web link compartir whatsapp sitio", explicacion: "Tu página se ve desde que creás el gimnasio, con lo que tengas cargado. Si la ocultás, la gente ve solo tu portada con tu marca y los botones." },
   { id: "registro-abierto", titulo: "Registro abierto (anotarse solo)", pestana: "pagina", claves: "registro anotarse solo autoservicio alta web inscripcion", explicacion: "La gente se anota sola desde tu página y entra cuando paga.", recomendado: "Cerrado" },
   { id: "compras-app", titulo: "Cambiar de plan y comprar pases desde la app", pestana: "pagina", claves: "compras app plan pase autoservicio comprar mercadopago", explicacion: "El socio elige otro plan o un pase y paga desde su app.", recomendado: "Prendido" },
   { id: "fotos", titulo: "Fotos de la página", pestana: "pagina", claves: "fotos imagenes galeria portada", explicacion: "Las que ve la gente en tu página; la primera es la que más se ve." },

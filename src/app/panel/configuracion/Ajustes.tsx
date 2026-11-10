@@ -233,7 +233,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
     if (r.error || !r.datos) { setMsjPagina({ error: r.error ?? "No se pudo" }); return; }
     const nuevo = (r.datos as DatosGimnasio).publicada;
     setD((x) => ({ ...x, publicada: nuevo })); setDGuardado((x) => ({ ...x, publicada: nuevo }));
-    setMsjPagina({ ok: nuevo ? "Tu página está publicada: ya la puede ver cualquiera." : "Tu página volvió a borrador: la gente ve “Estamos armando nuestra página”." });
+    setMsjPagina({ ok: nuevo ? "Tu página está publicada: ya la puede ver cualquiera." : "Tu página quedó oculta: la gente ve solo tu portada con tu marca y los botones." });
   });
   const [, empezar] = useTransition();
   const [version, setVersion] = useVersion("configuracion", "gimnasio");
@@ -464,8 +464,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         {pestana === "pagina" && <>
           <Tarjeta emoji="🌐" titulo="Tu página" ancla="publicar-pagina" ayuda="La que comparte la gente para conocerte, ver precios y escribirte.">
             <p>{d.publicada
-              ? <span className="pildora pildora-verde">✅ Publicada</span>
-              : <span className="pildora pildora-amarillo">⏳ Sin publicar: la gente ve “Estamos armando nuestra página”</span>}</p>
+              ? <span className="pildora pildora-verde">✅ Visible</span>
+              : <span className="pildora pildora-amarillo">🙈 Oculta: la gente ve solo tu portada y los botones</span>}</p>
             <p className="campo !h-auto py-3 break-all select-all" data-direccion-pagina>{direccionPagina}</p>
             <div className="flex flex-wrap gap-2">
               <Link href="/panel/pagina" className="boton" data-opcion="prueba-social">✏️ Editar textos y secciones</Link>
@@ -477,9 +477,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             {puedeEditar && (
               <div className="flex flex-wrap items-center gap-3" data-publicar>
                 {d.publicada
-                  ? <button type="button" className="boton" disabled={publicando} onClick={() => cambiarPublicada(false)}>{publicando ? "Guardando…" : "📝 Pasar a borrador"}</button>
-                  : <button type="button" className="boton boton-principal" disabled={publicando} onClick={() => cambiarPublicada(true)}>{publicando ? "Publicando…" : "🚀 Publicar mi página"}</button>}
-                <span className="text-sm texto-tenue">{d.publicada ? "Si la pasás a borrador, la gente ve “Estamos armando nuestra página” hasta que la vuelvas a publicar." : "Antes de publicar, revisá tus datos, tu logo, tus planes y tus horarios."}</span>
+                  ? <button type="button" className="boton" disabled={publicando} onClick={() => cambiarPublicada(false)}>{publicando ? "Guardando…" : "🙈 Ocultar mi página"}</button>
+                  : <button type="button" className="boton boton-principal" disabled={publicando} onClick={() => cambiarPublicada(true)}>{publicando ? "Guardando…" : "🌐 Mostrar mi página"}</button>}
+                <span className="text-sm texto-tenue">{d.publicada ? "Si la ocultás, la gente ve solo tu portada con tu marca y los botones “Quiero ser socio” y “Soy socio”, hasta que la vuelvas a mostrar." : "Mientras esté oculta, no se indexa en Google."}</span>
               </div>
             )}
             {msjPagina.error && <Mensaje tipo="error">{msjPagina.error}</Mensaje>}

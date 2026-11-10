@@ -442,7 +442,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Quiero ser socio</a>}
+            <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Quiero ser socio</a>
             {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
             <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
           </nav>
@@ -467,7 +467,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               <div className="mt-8 flex flex-wrap gap-3">
                 {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis>🎁 Probá gratis</a>}
                 {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Quiero ser socio</a>}
+                <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Quiero ser socio</a>
               </div>
             </div>
           </div>
@@ -482,7 +482,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis>🎁 Probá gratis</a>}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Quiero ser socio</a>}
+              <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Quiero ser socio</a>
               {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
             </div>
           </div>
@@ -535,19 +535,23 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
   );
 }
 
-export function LandingProximamente({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
+/**
+ * U4 · "Ocultar mi página": solo la portada con la marca y los dos botones. Nunca un cartel de "en construcción": la página
+ * de un gimnasio es siempre su landing, y esto es lo que queda cuando el dueño decide no mostrarla.
+ */
+export function LandingOculta({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
   const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
   return (
-    <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4">
+    <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4" data-pagina-oculta>
       <div className="text-center">
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
-        <p className="texto-suave mt-4 text-lg">🚧 Estamos armando nuestra página. Volvé pronto.</p>
-        {whatsapp && <div className="mt-8 flex justify-center"><BotonPrincipal href={whatsapp} className="px-8">💬 Escribinos por WhatsApp</BotonPrincipal></div>}
-        <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
-          <a href="/ingresar" className="boton">🛎️ Soy del equipo</a>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="/hacete-socio" className="boton boton-principal text-lg px-8">💪 Quiero ser socio</a>
+          <a href="/ingresar?modo=socio" className="boton text-lg px-8">💪 Soy socio</a>
         </div>
+        {whatsapp && <div className="mt-6 flex justify-center"><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a></div>}
+        <p className="mt-10"><a href="/ingresar" className="text-sm texto-suave underline underline-offset-4">🛎️ Soy del equipo</a></p>
       </div>
     </div>
   );
