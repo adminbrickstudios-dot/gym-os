@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { crearClienteServidor, gimnasioActual } from "@/lib/supabase/servidor";
 import type { Rol } from "@/lib/panel/secciones";
+import type { Abono } from "@/components/panel/Marco";
+import type { ConfigEntrada } from "@/app/panel/entrada/config";
 
 /** Error de una función de la base, con el mensaje que la base escribió para mostrar. */
 export class ErrorDatos extends Error {
@@ -74,24 +76,35 @@ export type MiSesion = {
   socios: { socio_id: string; gimnasio_id: string; slug: string; gimnasio: string; nombre: string }[];
 };
 
-/** El contexto de cualquier pantalla del panel. Sin sesión → /ingresar. Sin permiso → error, no un panel vacío. */
-export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
+/**
+ * F0.2: TODO lo que el panel necesita para pintar sale de una sola llamada a la base (contexto_pantalla): antes eran seis viajes,
+ * tres en fila. Lo comparten contextoPanel (el menú, los permisos) y el layout (abono, Entrada).
+ */
+export type ContextoCompleto = {
+  panel: PanelGimnasio;
+  ver_mensajes?: boolean; fichaje_usa?: boolean;
+  abono?: Abono | null; config_entrada?: ConfigEntrada | null; formas_entrada?: string[] | null;
+};
+export const contextoCompleto = cache(async (): Promise<ContextoCompleto> => {
   const g = await gimnasioActual();
   const supabase = await crearClienteServidor();
-  // F0.2: todo lo que no depende de lo demás sale en el mismo instante (antes eran 4 viajes en fila).
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
-  const [claims, panelRes, ve, fichaje] = await Promise.all([
+  const [claims, res] = await Promise.all([
     supabase.auth.getClaims(),
-    rpcLectura<PanelGimnasio>("panel_gimnasio", { p_gimnasio_id: g.id }).then((v) => ({ v }), (e: unknown) => ({ e })),
-    rpcLectura<boolean>("ver_mensajes_equipo", { p_gimnasio_id: g.id }).catch(() => false),
-    rpcLectura<{ usa: boolean }>("config_fichaje", { p_gimnasio_id: g.id }).then((c) => c.usa).catch(() => false),
+    rpcLectura<ContextoCompleto>("contexto_pantalla", { p_gimnasio_id: g.id }).then((v) => ({ v }), (e: unknown) => ({ e })),
   ]);
   if (!claims.data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
-  if ("e" in panelRes) throw panelRes.e;
-  let panel = panelRes.v;
+  if ("e" in res) throw res.e;
+  return res.v;
+});
+
+/** El contexto de cualquier pantalla del panel. Sin sesión → /ingresar. Sin permiso → error, no un panel vacío. */
+export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
+  const c = await contextoCompleto();
+  let panel = c.panel;
   // VD-38: los Mensajes de los socios los ve la recepción solo si el dueño se lo prendió (tabla propia: panel_gimnasio no se toca).
   // La base lo exige igual en cada función; acá solo se saca del menú, de Ctrl+K y de los accesos. Solo la recepción pregunta.
-  if (panel.yo.rol === "recepcion" && !panel.secciones_apagadas.includes("mensajes") && !ve) {
+  if (panel.yo.rol === "recepcion" && !panel.secciones_apagadas.includes("mensajes") && !c.ver_mensajes) {
     panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "mensajes"] };
   }
   // VD-10: el Control es del dueño; el encargado lo ve solo si el dueño le dio el Resultado (EQU-1).
@@ -102,7 +115,7 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
   // VD-53: el fichaje es opcional (por defecto apagado). Fichar y las Horas del equipo solo aparecen si el gimnasio lo prendió;
   // el dueño ve siempre las Horas (ahí lo prende). La base lo exige igual en cada función.
   if (panel.yo.rol !== "dueno") {
-    if (!fichaje) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "fichar", "horas"] };
+    if (!c.fichaje_usa) panel = { ...panel, secciones_apagadas: [...panel.secciones_apagadas, "fichar", "horas"] };
   }
   return panel;
 });

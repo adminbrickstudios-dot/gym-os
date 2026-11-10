@@ -1,5 +1,12 @@
 # PROGRESO de Base
 
+## PASOS PARA MATEO (velocidad y accesos; F0.6)
+1. **Clave de servicio (urgente, destraba el alta de dueños):** Supabase → tu proyecto de Gym OS → Project Settings → API → copiá la clave **service_role** → Vercel → el proyecto → Settings → Environment Variables → `SUPABASE_SERVICE_ROLE_KEY` (Production) → pegala → Redeploy. Tiene que ser de ESTE proyecto (el mismo de `NEXT_PUBLIC_SUPABASE_URL`), no la anon ni la de otro proyecto. En /admin, "Estado de la plataforma" la prueba creando y borrando un usuario.
+2. **Claves asimétricas (hace que el proxy no viaje a Auth en cada pedido):** Supabase → Project Settings → JWT Keys → "Migrate" a claves asimétricas (ECC/RSA). Puede cerrar las sesiones abiertas una vez. Después `getClaims()` verifica sin ir a Auth.
+3. **Secretos de GitHub** (Settings → Secrets and variables → Actions): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` (10+ letras; para el demo y para medir) y, para la prueba de humo, `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (tu cuenta de super admin de producción).
+4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
+5. **Dominio:** `DOMINIO.md` (pasos exactos).
+
 ## DÓNDE QUEDÉ (10/11, 00:00)
 - **Fase U en curso.** U5 ✅ (DOMINIO.md + prueba de hosts). U0.1: causa probable escrita en LECCIONES.md (mail que ya tenía cuenta: la contraseña escrita no se aplica; o la clave de servicio mal puesta en Vercel). Arreglado: `/g/<slug>/ingresar` ya no rebota al genérico (reescritura con la marca del gimnasio), errores de ingreso por motivo (PLAT-08), 0 gimnasios con mensaje con salida. En Actions (corrida 42733845572): fase-u3, base-ingresos y los e2e viejos adaptados a U4. Pendiente: U1/U2 (B: e2e del socio por /ingresar?modo=socio), U3 (D: e2e), U4 (C: planes y dirección no aparecen en la landing), U0.3 (humo en producción), después fase P.
 - **⛔ Lo que necesito de vos:** cargar en Vercel `SUPABASE_SERVICE_ROLE_KEY` (la `service_role` de ESTE proyecto de Supabase, no la anon ni la de otro proyecto) y redeployar; para medir y para el humo en producción: secretos de GitHub `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA`. No puedo ver la base de producción desde acá (el Supabase conectado tiene otros dos proyectos).
