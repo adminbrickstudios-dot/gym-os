@@ -130,6 +130,29 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+#### P2 (PLAT-04), P3 (PLAT-06) y P9 (PLAT-05)
+
+- **P2: helper único `src/lib/urls.ts`** (`urlPlataforma`, `urlGimnasio`, `urlPanel`, `urlIngreso`, `urlDeHost`, `rutaGimnasio`, `hostGimnasio`),
+  con prueba (`urls.test.ts`) y el test `urls-sin-hardcode.test.ts` que falla si en `src` aparece `vercel.app`, un host literal, `/g/<slug>`
+  armado a mano o un link absoluto con el host interpolado. Reemplacé todo lo de `src/app/admin` y `src/lib/admin`; el test exige que esas
+  carpetas queden sin excepciones. **Lo que queda fuera (para otros carriles; está en `EXCEPCIONES` del test y solo puede achicarse):**
+  `lib/panel/direccion-pagina.ts` (A/D), `app/elegir/page.tsx` (C), `proxy.ts` (A, es una ruta reescrita, no un link), `app/app/Referir.tsx` y
+  `app/app/acciones.ts` y `lib/google.ts` (C), `app/panel/socios/acciones.ts` (D), `app/kiosco/activar/route.ts` y `app/tv/activar/route.ts` (A/D).
+  También quedan `window.location.origin` en `panel/clases/tv/Tvs.tsx` y `panel/configuracion/Tablets.tsx` (el navegador conoce su propio
+  origen: no es una dirección escrita, pero conviene pasarlo por el helper). El test no ve los links relativos del panel (`"/panel/…"`): esos
+  son rutas internas, no direcciones.
+- **P3: la lista de variables por entorno** (`src/lib/admin/entorno.ts`, en "Estado de la plataforma"): qué variables faltan (por nombre),
+  a qué Supabase apunta el entorno (ref de la URL), si coincide con `SUPABASE_REF_ESPERADO`, y si la clave anon y la de servicio son del mismo
+  proyecto y del rol correcto (lee el `ref` y el `role` del JWT; las claves nuevas `sb_secret_…` no los traen: se avisa). Nunca muestra una clave.
+  **Mateo tiene que cargar `SUPABASE_REF_ESPERADO` en Production y en Preview** (el ref de su proyecto): sin esa variable la lista solo informa
+  a cuál apunta (amarillo) en vez de dar rojo si apunta a otro.
+- **P9: dominios por la API de Vercel escrito y probado con un Vercel simulado** (`vercel-dominios.ts`, 12 pruebas). ⛔ en producción hasta
+  `VERCEL_TOKEN` y `VERCEL_PROJECT_ID` (y `VERCEL_TEAM_ID` si el proyecto es de un equipo): sin ellos la sección dice qué cargar y no deja
+  agregar nada. Solo el principal agrega o verifica (lo comprueba el servidor antes de llamar a Vercel) y queda en el registro de BRIK. **No
+  probado contra Vercel real** (sin token). Los registros DNS por defecto son los de Vercel (A 76.76.21.21 y CNAME cname.vercel-dns.com);
+  si Vercel responde otros, hay que ajustarlos. No agrega el dominio propio de un gimnasio a su ficha automáticamente: se carga igual en
+  "Direcciones" de la ficha.
+
 #### Fase P (P4 a P7) y la contraseña que no se aplicaba
 
 - **Causa probable del login roto de Mateo (hallazgo del coordinador): si el mail ya tenía cuenta, la contraseña escrita se ignoraba

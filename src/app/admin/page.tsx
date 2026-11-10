@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Aviso } from "@/components/panel/Marco";
+import { rutaGimnasio } from "@/lib/urls";
 import { dominioBase } from "@/lib/dominios";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
@@ -12,6 +13,7 @@ import { Tablero } from "./Tablero";
 import { Demos, type DemoVencida } from "./Demos";
 import { ErroresPlataforma } from "./ErroresPlataforma";
 import { PlataformaDatos } from "./PlataformaDatos";
+import { DominiosVercelDatos } from "./DominiosVercelDatos";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
 import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
@@ -107,6 +109,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <Demos vencidas={demosVencidas} />
       <ErroresPlataforma />
       <PlataformaDatos />
+      <DominiosVercelDatos />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />
       <ContactoPlataformaForm inicial={contactoPlataforma} />
@@ -165,7 +168,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <div className="flex flex-wrap gap-2">
                 <BotonEntrar gimnasioId={g.gimnasio_id} principal={false} />
                 <Link href={`/admin/${g.gimnasio_id}`} className="boton">⚙️ Equipo, claves y direcciones</Link>
-                <a href={`/g/${g.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+                <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
               </div>
             </li>
           ))}

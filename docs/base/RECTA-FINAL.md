@@ -37,14 +37,14 @@ Dónde quedó (09/11, mediodía):
 | # | Qué | Estado |
 |---|---|---|
 | P1 | PLAT-01: el mapa de direcciones en el código, listo para el dominio (con U5) | ❌ |
-| P2 | PLAT-04: ninguna dirección escrita a mano, con su chequeo | ❌ |
-| P3 | PLAT-06: variables por entorno y el chequeo de que producción apunta al Supabase correcto | ❌ |
+| P2 | PLAT-04: ninguna dirección escrita a mano, con su chequeo | 🟡 carril/b-super: src/lib/urls.ts + test que falla con direcciones a mano; reemplazado en src/app/admin y src/lib/admin; el resto está en EXCEPCIONES (otros carriles) |
+| P3 | PLAT-06: variables por entorno y el chequeo de que producción apunta al Supabase correcto | 🟡 carril/b-super: lista de variables por entorno en Estado de la plataforma (ref de la URL vs claves vs SUPABASE_REF_ESPERADO); falta que Mateo cargue SUPABASE_REF_ESPERADO |
 | P4 | EDIT-S01: crear un gimnasio en 1 minuto desde una plantilla (slug validado, único y sin tildes; dueño ya confirmado; landing publicada; filas verificadas; "Probar acceso" automático al terminar). Completar lo de U1 y SA-6, no rehacer | 🟡 carril/b-super: dirección normalizada y reservada, plan de Base, dueño confirmado, landing publicada y "Probar acceso" automático; e2e super-p.mjs escrito, sin correr |
 | P5 | EDIT-S02: tarjeta "Accesos" lista para mandar por wa.me (link del panel, mail, contraseña visible solo al crearla, link de la web) | 🟡 carril/b-super: tarjeta Accesos con panel, mail, contraseña (solo al crear), web, copiar y wa.me; no ofrece una contraseña que no se aplicó; e2e escrito, sin correr |
 | P6 | EDIT-S03: "Probar acceso" por usuario (existe, confirmado, activo, gimnasio, rol, último ingreso), en verde o rojo, con "Arreglar" | 🟡 carril/b-super: Probar acceso por persona con verde, amarillo y rojo y Arreglar (confirmar, activar, reanudar); prueba de base 5/5; e2e escrito, sin correr |
 | P7 | EDIT-S04 y S05: resetear contraseña, desactivar, cambiar rol, mover de gimnasio; "Entrar como" con la barra "Estás viendo como <gimnasio>" (completar SA-4) | 🟡 carril/b-super: desactivar, activar, cambiar rol, mover (misma cuenta) y barra "Estás viendo como"; resetear contraseña ya existía; e2e escrito, sin correr |
 | P8 | WEB-01 a 05: la landing se ve profesional con cero configuración (solo nombre y color: portada tipográfica fuerte, nunca un hueco); bloques por datos (portada, planes, clases, horarios, galería, profes, mapa, preguntas, wa.me, Soy socio, Quiero ser socio); estilo de `DISENO.md`; celular primero, menos de 2,5 s en 4G con caché por gimnasio (`revalidateTag` al editar); Google (título, imagen para compartir, sitemap y robots por gimnasio, `ExerciseGym`, favicon con el logo, 404 con el estilo del gimnasio). Completar U4 y BASE-9 | ❌ |
-| P9 | PLAT-05: dominios desde el super admin por la API de Vercel (⛔ hasta el dominio y `VERCEL_TOKEN`) | ❌ |
+| P9 | PLAT-05: dominios desde el super admin por la API de Vercel (⛔ hasta el dominio y `VERCEL_TOKEN`) | ⛔ carril/b-super: escrito y probado con un Vercel simulado; bloqueado en producción hasta VERCEL_TOKEN, VERCEL_PROJECT_ID y el dominio (pasos arriba de PROGRESO.md) |
 
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 
@@ -75,11 +75,11 @@ Dónde quedó (09/11, mediodía):
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: ficha con datos, ciudad, links y QR, equipo, módulos, integraciones, lanzamiento, errores, registro y ciclo de vida; reprocesar webhook a pedido, papelera y clonar hechos; faltan los botones "abrir como soporte en esta pantalla" |
+| F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: ficha con datos, ciudad, links y QR, equipo, módulos, integraciones, lanzamiento, errores, registro y ciclo de vida; reprocesar webhook a pedido, papelera y clonar hechos; botones "abrir como soporte en esta pantalla" hechos |
 | F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol, motivo, aviso en la campana; falta restricción de plata y "ver la app como este socio" |
 | F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
 | F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
-| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con errores; falta alimentar errores_app desde error.tsx y medir con 200 gimnasios |
+| F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con errores; medido con 200 gimnasios: tablero 429 ms y lista 758 ms (prueba de base) |
 | F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | 🟡 carril/b-super: lanzamiento, pausa, baja, restaurar, papelera, clonar y borrado definitivo (anonimizar); falta la pantalla de "pausado" y los botones "abrir como soporte en esta pantalla" |
 | F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | 🟡 carril/b-super: exportar y borrar a un socio, exportar el gimnasio; falta estado de copias |
 | F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | 🟡 carril/b-super: 2FA exigible, roles y registro; roles solo en lo nuevo, faltan aviso de equipo nuevo y cerrar sesiones |

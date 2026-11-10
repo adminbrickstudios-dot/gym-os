@@ -1,9 +1,11 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
-import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
+import { dominioBase } from "@/lib/dominios";
+import { urlGimnasio, urlPanel } from "@/lib/urls";
 import { rpc } from "@/lib/panel/servidor";
 import { normalizarSlug, errorDeSlug } from "@/lib/admin/slug";
+import { agregarDominio as agregarDominioVercel, configuracionVercel, verificarDominio as verificarDominioVercel, type EstadoDominio, type Fetch as VercelFetch } from "@/lib/admin/vercel-dominios";
 import { leerPago } from "@/lib/mercadopago";
 import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
@@ -32,10 +34,7 @@ const COLOR = /^#[0-9a-fA-F]{6}$/;
 
 /** Las direcciones del gimnasio: la web (su raíz) y la puerta del dueño. Sin subdominios propios, se abre desde la plataforma (/g/<slug>). */
 function direccionesDe(slug: string) {
-  const base = dominioBase();
-  if (subdominiosFuncionan(base)) return { web: `https://${slug}.${base}`, panel: `https://${slug}.${base}/dueno` };
-  const plataforma = dominioPlataforma() || base;
-  return { web: `https://${plataforma}/g/${slug}`, panel: `https://${plataforma}/ingresar` };
+  return { web: urlGimnasio(slug), panel: urlPanel(slug, "dueno") };
 }
 
 /** VD-40 / P5: el mensaje de bienvenida y la tarjeta "Accesos" (link del panel, mail, contraseña y link de la web). */
@@ -339,6 +338,33 @@ export const cambiarRolPersona = async (equipoId: string, gimnasioId: string, ro
   hechoAdmin(() => rpc("admin_cambiar_rol_persona", { p_equipo_id: equipoId, p_rol: rol }), [`/admin/${gimnasioId}`]);
 export const moverPersona = async (equipoId: string, gimnasioId: string, destino: string, rol: string) =>
   hechoAdmin(() => rpc("admin_mover_persona", { p_equipo_id: equipoId, p_gimnasio_destino: destino, p_rol: rol || null }), [`/admin/${gimnasioId}`, `/admin/${destino}`, "/admin/gimnasios"]);
+
+// ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
+// ⛔ en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
+const hablarConVercel: VercelFetch = async (url, init) => {
+  const r = await fetch(url, { ...init, cache: "no-store" });
+  return { status: r.status, json: () => r.json() };
+};
+async function soloPrincipal() {
+  const s = await rpc<{ mi_rol: string }>("admin_estado_seguridad");
+  if (s.mi_rol !== "principal") throw new Error("Solo el usuario principal de BRIK conecta dominios.");
+}
+export async function vercelListo(): Promise<{ lista: boolean; faltan?: string[] }> {
+  const c = configuracionVercel(process.env);
+  return c.lista ? { lista: true } : { lista: false, faltan: c.faltan };
+}
+async function operarDominio(accion: "agregar" | "verificar", dominio: string): Promise<{ error?: string; estado?: EstadoDominio }> {
+  try {
+    await soloPrincipal();
+    const c = configuracionVercel(process.env);
+    if (!c.lista) return { error: `Todavía no se puede: falta cargar ${c.faltan.join(" y ")} en Vercel (Settings → Environment Variables) y redeployar. Los pasos están arriba de docs/base/PROGRESO.md.` };
+    const estado = accion === "agregar" ? await agregarDominioVercel(hablarConVercel, c.config, dominio) : await verificarDominioVercel(hablarConVercel, c.config, dominio);
+    await rpc("admin_anotar_registro", { p_accion: accion === "agregar" ? "agregar_dominio_vercel" : "verificar_dominio_vercel", p_gimnasio_id: null, p_detalle: { dominio: estado.dominio, estado: estado.estado } });
+    return { estado };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const conectarDominioVercel = (dominio: string) => operarDominio("agregar", dominio);
+export const verificarDominioEnVercel = (dominio: string) => operarDominio("verificar", dominio);
 
 export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
 /** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
