@@ -13,6 +13,21 @@
 - Ningún punto de U1 a U4 está en ✅ todavía; nada nuevo publicado en producción.
 
 
+## ⛔ PASOS PARA MATEO: conectar el dominio desde el super admin (PLAT-05)
+
+Todo el código está escrito y probado con un Vercel simulado. En producción queda bloqueado hasta que hagas esto, **una sola vez**, cuando compres el dominio (`<dominio>`):
+
+1. **Token de Vercel.** Vercel → tu avatar → Account Settings → Tokens → Create Token (nombre "Base dominios", alcance: tu equipo). Copialo.
+2. **Cargar tres variables** en Vercel → proyecto de Base → Settings → Environment Variables (Production y Preview):
+   - `VERCEL_TOKEN` = el token del paso 1.
+   - `VERCEL_PROJECT_ID` = Project Settings → General → Project ID (empieza con `prj_`).
+   - `VERCEL_TEAM_ID` = Team Settings → General → Team ID (empieza con `team_`); solo si el proyecto es de un equipo.
+3. **Redeploy** (Deployments → los tres puntos → Redeploy).
+4. En `/super` → "Dominios (Vercel)": escribí el dominio (`<dominio>`), "Agregar a Vercel". Te muestra los **registros DNS exactos** (una A para la raíz, un CNAME para `app` y uno `*` para los gimnasios, y un TXT si Vercel pide verificar).
+5. Cargalos en el panel de donde compraste el dominio (DNS). Volvé y apretá **Verificar**: pasa de amarillo (Pendiente) a verde (Verificado). El SSL lo pone Vercel solo. Repetí con `app.<dominio>` y `*.<dominio>`.
+6. Cargá en Vercel `NEXT_PUBLIC_DOMINIO_BASE=<dominio>` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA=app.<dominio>` (sin `https://` ni barra), y en cada entorno `SUPABASE_REF_ESPERADO` (el ref de tu proyecto de Supabase: la parte de la URL antes de `.supabase.co`) para que "Estado de la plataforma" avise si algún entorno apunta a otro Supabase. Redeploy.
+7. En `/super` → "Estado de la plataforma" tiene que quedar todo en verde. Más detalle en `DOMINIO.md`.
+
 Estados: ✅ hecho y verificado ejecutando · 🟡 a medias (dice qué falta) ·
 ❌ no empezado · ⛔ trabado (dice por qué y qué hace falta).
 

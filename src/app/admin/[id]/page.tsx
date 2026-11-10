@@ -15,6 +15,7 @@ import { Notas, type NotaBrik } from "./Notas";
 import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
 import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
+import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { Ciudad, CicloDeVida, QrGimnasio } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
@@ -82,7 +83,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <h1 className="titular text-6xl">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
         <div className="flex flex-wrap gap-2">
           <BotonEntrar gimnasioId={g.gimnasio_id} />
-          <a href={`/g/${g.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+          <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
           {yoSoporte && (
             <form action="/admin/salir-gimnasio" method="post">
               <input type="hidden" name="gimnasio_id" value={g.gimnasio_id} />
@@ -178,6 +179,16 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <Clonar destino={g.gimnasio_id} otros={otros.filter((o) => o.gimnasio_id !== g.gimnasio_id).map((o) => ({ id: o.gimnasio_id, nombre: o.nombre }))} />
       </section>
 
+      <section className="space-y-3" data-ficha-soporte-directo>
+        <p className="titulo-grupo">Abrir como soporte en esta pantalla</p>
+        <p className="texto-suave">Socios, planes, clases, caja y página no se copian acá: se editan entrando como soporte, con las mismas reglas y el mismo registro que el dueño.</p>
+        <div className="flex flex-wrap gap-2">
+          {([["socios", "Socios"], ["planes", "Planes"], ["clases", "Clases"], ["caja", "Caja"], ["pagina", "Página"]] as const).map(([k, t]) => (
+            <BotonEntrar key={k} gimnasioId={g.gimnasio_id} principal={false} destino={k} texto={`Abrir ${t}`} motivoInicial={`Revisar ${t.toLowerCase()}`} />
+          ))}
+        </div>
+      </section>
+
       <section className="space-y-3" data-ficha-ciclo>
         <p className="titulo-grupo">Pausar o dar de baja</p>
         <CicloDeVida gimnasioId={g.gimnasio_id} nombre={g.nombre} pausado={!!fila?.suspendido} paraBorrar={!!fila?.para_borrar} />
@@ -200,7 +211,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3" data-ficha-links>
         <p className="titulo-grupo">Links por rol</p>
         <LinksPorRol links={enlacesPorRol(g.dominios[0]?.host)} />
-        {g.dominios[0] && <QrGimnasio url={`https://${g.dominios[0].host}/`} nombre={g.nombre} />}
+        {g.dominios[0] && <QrGimnasio url={urlDeHost(g.dominios[0].host)} nombre={g.nombre} />}
       </section>
 
       <section className="space-y-3" data-ficha-modulos>

@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 317 funciones piden un rol del equipo con `privado.exigir_equipo`; 382 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 316 funciones piden un rol del equipo con `privado.exigir_equipo`; 377 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -152,7 +152,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_ejercicio` | ✓ | ✓ | — | ✓ |
 | `guardar_equipo` | ✓ | — | — | — |
 | `guardar_equipo_ajuste` | ✓ | — | — | — |
-| `guardar_espera_plazo` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
 | `guardar_foto_socio_permitida` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
@@ -326,7 +325,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 ## Sin rol del equipo en la función (lo decide otra regla)
 - `abonar_turno`
 - `abrir_caja`
-- `aceptar_oferta`
 - `activar_emergencia_puerta`
 - `actividad_equipo`
 - `actividades_gimnasio`
@@ -334,6 +332,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_agregar_dominio`
 - `admin_agregar_nota`
 - `admin_agregar_persona`
+- `admin_anotar_registro`
 - `admin_anular_pago_brik`
 - `admin_aplicar_plantilla`
 - `admin_asignar_plan_brik`
@@ -441,8 +440,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `asignar_servicio`
 - `asistencia_socio`
 - `avisar_clase`
-- `aviso_clase_socio`
-- `avisos_app_socio`
 - `avisos_clase`
 - `avisos_lugar_socio`
 - `ayudas_vistas`
@@ -523,7 +520,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `gimnasio_por_host (también anónimo)`
 - `gimnasio_por_slug (también anónimo)`
 - `guardar_accesos_rapidos`
-- `guardar_aviso_clase`
 - `guardar_config_cierres`
 - `guardar_config_pt`
 - `guardar_devolucion_baja_modo`
@@ -608,7 +604,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `movimiento_caja`
 - `notas_y_etiquetas`
 - `novedades_socio`
-- `ofertas_socio`
 - `opciones_compra_app`
 - `operador_actual`
 - `origen_socio`
@@ -652,7 +647,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `quitar_novedad`
 - `quitar_titular_familia`
 - `quitar_turno`
-- `rechazar_oferta`
 - `rechazar_pago`
 - `reemplazar_profe`
 - `reemplazos_clase`

@@ -57,8 +57,9 @@ try {
   await p.locator("select[name=tipo]").selectOption("musculacion");
   await p.getByRole("button", { name: /Siguiente/ }).click();
   await p.fill("input[name=nombre]", NOMBRE);
-  const planOpc = p.locator("[data-plan-brik] option").nth(1);
-  if (await planOpc.count()) await p.locator("[data-plan-brik]").selectOption({ index: 1 });
+  // Se mira ANTES de crear: después el formulario se reemplaza por el resultado y ya no están las opciones.
+  const hayPlan = (await p.locator("[data-plan-brik] option").count()) > 1;
+  if (hayPlan) await p.locator("[data-plan-brik]").selectOption({ index: 1 });
   await p.getByRole("button", { name: /Siguiente/ }).click();
   await p.fill("input[name=dueno]", "Dueño Fuerte");
   await p.fill("input[name=email]", ` ${MAIL_DUENO.toUpperCase()} `);
@@ -81,7 +82,7 @@ try {
   const prueba = p.locator("[data-prueba-alta]");
   chequear(await aparece(prueba), "al terminar corre “Probar acceso” solo", "no corrió la prueba al terminar");
   chequear((await prueba.getAttribute("data-ok")) === "si", "la prueba del gimnasio nuevo da todo en verde", `la prueba dio: ${(await prueba.innerText()).replace(/\s+/g, " ").slice(0, 300)}`);
-  chequear((await q(`select 1 from public.gimnasios where id = $1 and plataforma_plan_id is not null`, [g.id])).length === (await p.locator("[data-plan-brik] option").count() > 1 ? 1 : 0), "el plan de Base elegido se asignó", "el plan de Base no se asignó");
+  chequear((await q(`select 1 from public.gimnasios where id = $1 and plataforma_plan_id is not null`, [g.id])).length === (hayPlan ? 1 : 0), "el plan de Base elegido se asignó", "el plan de Base no se asignó");
   await ver("alta");
 
   // ── P6: probar acceso del dueño y de una persona sin cuenta; arreglar ──

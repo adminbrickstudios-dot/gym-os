@@ -1,4 +1,5 @@
 "use client";
+import { rutaGimnasio } from "@/lib/urls";
 import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import Link from "next/link";
 import { useRef, useState, useActionState } from "react";
@@ -95,7 +96,7 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
           <div className="flex flex-wrap gap-2 items-start">
             <BotonEntrar gimnasioId={ok.gimnasio_id} texto="🚪 Entrar al panel a terminar de configurarlo" motivoInicial="Alta del gimnasio: terminar de configurarlo" />
             <Link href={`/admin/${ok.gimnasio_id}`} className="boton" data-alta-equipo>⚙️ Equipo, claves y direcciones</Link>
-            <a href={`/g/${ok.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+            <a href={rutaGimnasio(ok.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
             <button type="button" className="boton texto-suave" onClick={() => window.location.reload()}>➕ Crear otro</button>
           </div>
         </div>

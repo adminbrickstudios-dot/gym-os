@@ -1,4 +1,5 @@
 // Ayudas puras del super admin (lista, links por rol, WhatsApp, CSV). Sin acceso a datos: se prueban solas.
+import { urlDeHost } from "@/lib/urls";
 
 export type FilaGimnasio = {
   gimnasio_id: string; slug: string; nombre: string; es_demo: boolean; alta: string; favorito: boolean; suspendido: boolean;
@@ -12,8 +13,7 @@ export const ROLES_PUERTA = [["dueno", "Dueño", "/dueno"], ["recepcion", "Recep
 /** El link de cada rol en la dirección del gimnasio (la primera dirección que tenga). */
 export function enlacesPorRol(host: string | undefined): { rol: string; nombre: string; url: string }[] {
   if (!host) return [];
-  const base = /^https?:\/\//.test(host) ? host : `https://${host}`;
-  return ROLES_PUERTA.map(([rol, nombre, ruta]) => ({ rol, nombre, url: `${base.replace(/\/$/, "")}${ruta}` }));
+  return ROLES_PUERTA.map(([rol, nombre, ruta]) => ({ rol, nombre, url: urlDeHost(host, ruta) }));
 }
 
 /** wa.me al celular del dueño con un mensaje armado. Sin celular válido devuelve null. */

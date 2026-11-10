@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { traducirErrorSupabase } from "@/lib/admin/errores-supabase";
+import { chequearEntorno } from "@/lib/admin/entorno";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
 
-type Chequeo = { ok: boolean; titulo: string; detalle?: string };
+type Chequeo = { ok: boolean; titulo: string; detalle?: string; aviso?: boolean };
 
 /**
  * Lo que tiene que estar bien configurado para que el super admin funcione.
@@ -38,6 +39,8 @@ async function chequear(): Promise<Chequeo[]> {
       ? { ok: true, titulo: "Clave de servicio funcionando: se crea y se borra una cuenta de prueba sin problemas" }
       : { ok: false, titulo: "La clave de servicio no funciona: no se pueden crear cuentas", detalle: r.detalle });
   }
+  // PLAT-06: producción y vista previa contra el Supabase correcto, claves del mismo proyecto y variables que faltan (sin mostrar ninguna clave).
+  for (const c of chequearEntorno(process.env)) lista.push({ ok: c.nivel !== "falta", aviso: c.nivel === "aviso", titulo: c.titulo, detalle: c.detalle });
   return lista;
 }
 
@@ -68,7 +71,7 @@ export async function EstadoPlataforma() {
       <ul className="mt-4 space-y-3">
         {lista.map((c) => (
           <li key={c.titulo} className="flex gap-3">
-            <span aria-hidden>{c.ok ? "✅" : "⚠️"}</span>
+            <span aria-hidden>{c.ok && !c.aviso ? "✅" : "⚠️"}</span>
             <span><span className="font-semibold">{c.titulo}</span>{c.detalle && <span className="block texto-suave text-sm">{c.detalle}</span>}</span>
           </li>
         ))}

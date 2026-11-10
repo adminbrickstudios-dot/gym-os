@@ -41,6 +41,19 @@ terminado.
 5. **Decisión y prueba.** Reescritura en el proxy, mensajes por motivo, vitest de `motivoDeEntrada`, e2e de las tres puertas (`fase-u0-login.mjs`) en Actions.
 
 ---
+## P2, P3 y P9 · Direcciones, entornos y dominios (carril B, 10/11)
+
+1. **Qué quiso decir Mateo:** que el día que compre el dominio sea "cargar tres variables y esperar", y que nunca más una pantalla mande a alguien a una dirección vieja o a un Supabase equivocado sin que se note.
+2. **Cómo lo hacen otros:** Vercel Platforms arma cada URL desde `rootDomain` + subdominio en un solo helper y agrega dominios con la API de Vercel (`POST /v10/projects/{id}/domains`, `verify`, `config`) mostrando los registros DNS; Cal.com y Shopify muestran el estado de cada dominio en semáforo.
+3. **Cómo se rompe (5):**
+   - *otro dominio o subdominio*: sin comodín (vercel.app) las URLs caen en `/g/<slug>`; con dominio, en `<slug>.<dominio>`; el dominio propio sale de la tabla (`urlDeHost`).
+   - *variables de entorno distintas*: Preview contra el Supabase de producción es el desastre; la lista compara el ref de la URL con el de las claves y con el esperado, sin mostrar claves.
+   - *datos vacíos*: sin ninguna variable cargada las URLs son rutas relativas (nunca una dirección inventada) y la lista nombra lo que falta.
+   - *sesión vencida / otro rol*: solo el principal agrega o verifica dominios; el servidor lo comprueba antes de hablar con Vercel.
+   - *internet lento*: Vercel caído o lento devuelve un mensaje en palabras, y el token nunca aparece en un error.
+4. **Lo que no pidió y necesita:** que un test falle si alguien escribe a mano un host, `vercel.app` o `/g/<slug>`, con las excepciones listadas (solo pueden achicarse) y los pasos de Mateo arriba de PROGRESO.md.
+5. **Decisión y prueba:** `src/lib/urls.ts` + test que escanea `src`; `entorno.ts` (puro, probado con JWT falsos); `vercel-dominios.ts` con cliente inyectable, probado con un Vercel simulado; ⛔ en producción hasta `VERCEL_TOKEN` y `VERCEL_PROJECT_ID`. e2e `scripts/e2e/super-plat.mjs` para Actions.
+
 ## P4 a P7 · Crear gimnasios y gestionar personas (carril B, 09/11 noche)
 
 1. **Qué quiso decir Mateo:** que dar de alta un gimnasio sea un trámite de un minuto y que, al terminar, sepa con certeza que el dueño ENTRA. Y que si alguien no entra, la pantalla le diga por qué y lo arregle con un botón.
