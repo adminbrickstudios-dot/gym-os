@@ -86,23 +86,23 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/configuracion?pestana=pagina`);
   await d.locator('fieldset[data-pestana-activa="pagina"]').waitFor({ state: "attached", timeout: 30000 });
-  await d.locator('button:has-text("Pasar a borrador")').click();
-  await d.locator('button:has-text("Publicar mi página")').waitFor({ timeout: 30000 });
-  ok("dueña: “Pasar a borrador”");
+  await d.locator('button:has-text("Ocultar mi página")').click();
+  await d.locator('button:has-text("Mostrar mi página")').waitFor({ timeout: 30000 });
+  ok("dueña: “Ocultar mi página”");
   const v2 = await pagina(b, CELU);
   await v2.goto(`${G}/`);
   await v2.locator("h1").first().waitFor({ timeout: 30000 });
   const txt = await v2.locator("body").innerText();
-  chequear(/Estamos armando nuestra página/.test(txt), "sin publicar: “Estamos armando nuestra página”", "sin publicar no dice que se está armando");
+  chequear(!/armando/i.test(txt) && await v2.locator("[data-pagina-oculta]").count() > 0, "oculta: solo la portada, sin “armando”", "oculta: no queda la portada o dice “armando”");
   const ls2 = await revisarLinks(v2, "próximamente");
   const t2 = ls2.map((l) => l.texto).join(" · ");
-  chequear(/WhatsApp/.test(t2) && /Soy socio/.test(t2) && /Soy del equipo/.test(t2), `próximamente: ${t2}`, `próximamente le falta algo: ${t2}`);
-  chequear(!/Lo quiero|Ver planes/.test(t2), "sin publicar no muestra planes", "sin publicar muestra planes");
+  chequear(/WhatsApp/.test(t2) && /Quiero ser socio/.test(t2) && /Soy socio/.test(t2) && /Soy del equipo/.test(t2), `oculta: ${t2}`, `la página oculta le falta algo: ${t2}`);
+  chequear(!/Lo quiero|Ver planes/.test(t2), "oculta no muestra planes", "oculta muestra planes");
   await capturar(v2, "aud2-celu-proximamente");
   await v2.context().close();
-  await d.locator('button:has-text("Publicar mi página")').click();
-  await d.locator('button:has-text("Pasar a borrador")').waitFor({ timeout: 30000 });
-  ok("dueña: “Publicar mi página” la vuelve a publicar");
+  await d.locator('button:has-text("Mostrar mi página")').click();
+  await d.locator('button:has-text("Ocultar mi página")').waitFor({ timeout: 30000 });
+  ok("dueña: “Mostrar mi página” la vuelve a publicar");
   await d.context().close();
 
   // ── Un gimnasio recién creado (sin WhatsApp, sin publicar): no queda en blanco ──
@@ -112,7 +112,7 @@ try {
     await n.goto(`${GIMNASIO(slugNuevo)}/`);
     await n.locator("h1").first().waitFor({ timeout: 30000 });
     const t3 = (await links(n)).map((l) => l.texto).join(" · ");
-    chequear(/Soy socio/.test(t3) && /Soy del equipo/.test(t3), `gimnasio nuevo: “Próximamente” con ${t3}`, `gimnasio nuevo: ${t3}`);
+    chequear(/Soy socio/.test(t3) && /Soy del equipo/.test(t3), `gimnasio nuevo: su landing con ${t3}`, `gimnasio nuevo: ${t3}`);
   } else ok("(gimnasio nuevo: E2E_GIMNASIO_NUEVO sin definir; lo cubre super-admin.mjs al crear uno)");
   await n.context().close();
 } catch (e) {

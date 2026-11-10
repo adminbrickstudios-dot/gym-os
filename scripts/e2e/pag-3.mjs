@@ -29,7 +29,7 @@ try {
   await pie.locator('button:has-text("Guardar")').click();
   await d.waitForFunction((n) => Number(document.querySelector("[data-pie-pagina]")?.getAttribute("data-respuestas")) > n, n0, { timeout: 30000 });
   if (await d.locator('[data-estado-pagina="borrador"]').count()) {
-    await d.locator('button:has-text("Publicar mi página")').click();
+    await d.locator('button:has-text("Mostrar mi página")').click();
     await d.locator('[data-estado-pagina="publicada"]').waitFor({ timeout: 30000 });
   }
   ok("dueña: texto de “Probá una clase” guardado y página publicada");

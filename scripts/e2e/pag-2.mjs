@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// PAG-2 · Publicar, pasar a borrador y compartir: desde Tu página la dueña
-// pasa a borrador (la gente ve "Próximamente") y la vuelve a publicar; copia
+// PAG-2 · Mostrar, ocultar y compartir: desde Tu página la dueña
+// pasa a borrador (la gente ve solo la portada) y la vuelve a publicar; copia
 // el link; el link de WhatsApp lleva la dirección; al compartir, la página
 // tiene título, descripción e imagen (la de portada o /og con sus colores).
 //   npm run e2e:pag-2            (con scripts/local/levantar.sh corriendo)
@@ -61,7 +61,7 @@ try {
   await entrar(e, "encargado@ejemplo.invalid");
   await e.goto(`${G}/panel/pagina`);
   await e.locator("[data-estado-pagina]").waitFor({ timeout: 60000 });
-  chequear(await e.locator('[data-estado-pagina] button:has-text("borrador"), [data-estado-pagina] button:has-text("Publicar")').count() === 0
+  chequear(await e.locator('[data-estado-pagina] button:has-text("Ocultar"), [data-estado-pagina] button:has-text("Mostrar")').count() === 0
     && await e.locator('[data-estado-pagina] button:has-text("Copiar link")').count() === 1, "encargado: copia y comparte, no publica", "encargado puede publicar o no puede compartir");
   const ancho = await e.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular: sin desborde (${ancho}px)`, `celular: mide ${ancho}px`);
