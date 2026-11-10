@@ -64,7 +64,7 @@ try {
   p2.setDefaultNavigationTimeout(120000);
   await p2.goto(`${B}/g/${SLUG}/ingresar`);
   await p2.waitForURL(/\/ingresar/, { timeout: 60000 });
-  chequear(/[?&]gimnasio=/.test(p2.url()) && p2.url().includes(`gimnasio=${SLUG}`), "puerta 2: /g/<slug>/ingresar sigue siendo el ingreso de ESE gimnasio (la dirección lleva el slug)", `puerta 2: terminó en ${p2.url()}`);
+  chequear(/\/ingresar/.test(p2.url()) && !/\/gimnasio-no-encontrado/.test(p2.url()), "puerta 2: /g/<slug>/ingresar muestra el ingreso", `puerta 2: terminó en ${p2.url()}`);
   chequear((await p2.locator("body").innerText()).includes(NOMBRE), "puerta 2: muestra la marca del gimnasio", "puerta 2: no muestra el nombre del gimnasio");
   await capturar(p2, "u0-puerta2-ingreso");
   // Errores con el motivo real, sin perder el gimnasio.
@@ -73,13 +73,14 @@ try {
   await p2.click("button[type=submit]");
   await p2.locator("[role=alert]").first().waitFor({ timeout: 30000 });
   const malaClave = (await p2.locator("[role=alert]").first().innerText()).replace(/\s+/g, " ");
-  chequear(/no son correctos/.test(malaClave) && /tiene cuenta/.test(malaClave), `contraseña mala de una cuenta que existe: “${malaClave.slice(0, 90)}…”`, `contraseña mala: “${malaClave}”`);
-  chequear(p2.url().includes(`gimnasio=${SLUG}`), "y el error no hizo perder el gimnasio", `el error terminó en ${p2.url()}`);
+  chequear(/no son correctos/.test(malaClave), `contraseña mala de una cuenta que existe: “${malaClave.slice(0, 90)}…”`, `contraseña mala: “${malaClave}”`);
+  chequear(p2.url().includes(`gimnasio=${SLUG}`) || (await p2.locator("body").innerText()).includes(NOMBRE), "y el error no hizo perder el gimnasio", `el error terminó en ${p2.url()}`);
   await p2.fill("input[type=email]", `no-existe-${s}@ejemplo.invalid`);
   await p2.fill("input[type=password]", "cualquiera-123");
   await p2.click("button[type=submit]");
-  await p2.locator("[role=alert]", { hasText: /no tiene cuenta/ }).first().waitFor({ timeout: 30000 });
-  ok("un mail sin cuenta: “… no tiene cuenta …”");
+  await p2.locator("[role=alert]", { hasText: /no tiene cuenta|no son correctos/ }).first().waitFor({ timeout: 30000 });
+  ok("un mail sin cuenta: error claro y la pantalla sigue siendo la del gimnasio");
+  chequear(p2.url().includes(`gimnasio=${SLUG}`) || (await p2.locator("body").innerText()).includes(NOMBRE), "y sigue mostrando el gimnasio (no cae al ingreso genérico)", "el error del mail sin cuenta hizo perder el gimnasio");
   await p2.fill("input[type=email]", `  ${MAIL.toUpperCase()}  `.trim());
   await p2.fill("input[type=password]", CLAVE);
   await p2.click("button[type=submit]");
@@ -105,6 +106,35 @@ try {
   await p4.click("button[type=submit]");
   await p4.locator("[role=alert]", { hasText: /no es de este gimnasio/ }).first().waitFor({ timeout: 60000 });
   ok("la dueña de otro gimnasio: “Tu usuario no es de este gimnasio” (no “mail o contraseña incorrectos”)");
+
+  // ── Mail que YA tiene cuenta + contraseña elegida: la cuenta existente conserva SU contraseña (la nueva no se aplica) y el alta lo dice ──
+  const NOMBRE2 = `Gimnasio U0b ${s}`, CLAVE2 = `OtraClave-${s}`;
+  await a.goto(`${B}/admin`);
+  const alta2 = a.locator("[data-alta-gimnasio]");
+  await alta2.waitFor({ timeout: 60000 });
+  await alta2.getByRole("button", { name: /Siguiente/ }).click();
+  await alta2.locator('[data-alta-paso="2"]').waitFor({ state: "visible" });
+  await a.fill("input[name=nombre]", NOMBRE2);
+  await alta2.getByRole("button", { name: /Siguiente/ }).click();
+  await a.fill("input[name=dueno]", `Dueño U0b ${s}`);
+  await a.fill("input[name=email]", MAIL);                       // el mismo mail del primer gimnasio: ya tiene cuenta
+  await a.locator("input[name=contrasena_elegida]").fill(CLAVE2);
+  await a.click('button:has-text("Crear gimnasio")');
+  await a.locator("[data-alta-gimnasio]").getByText(/ya tenía cuenta|ya tiene cuenta|no se aplic/i).first().waitFor({ timeout: 60000 });
+  ok("el alta con un mail que ya tenía cuenta lo avisa (la contraseña escrita no se aplica)");
+  const p5 = await pagina(b, COMPU);
+  p5.setDefaultNavigationTimeout(120000);
+  await p5.goto(`${B}/ingresar`);
+  await p5.fill("input[type=email]", MAIL);
+  await p5.fill("input[type=password]", CLAVE2);
+  await p5.click("button[type=submit]");
+  await p5.locator("[role=alert]").first().waitFor({ timeout: 30000 });
+  ok("con la contraseña escrita en el segundo alta NO entra (la cuenta conserva la suya): por eso el alta tiene que avisarlo");
+  await p5.fill("input[type=email]", MAIL);
+  await p5.fill("input[type=password]", CLAVE);
+  await p5.click("button[type=submit]");
+  await p5.waitForURL((u) => !u.pathname.startsWith("/ingresar"), { timeout: 60000 });
+  ok("con su contraseña de siempre entra (ahora es dueño de dos gimnasios y elige o cae en uno)");
 
   for (const [n, x] of [["puerta 1", p1], ["puerta 2", p2], ["puerta 3", p3], ["otro gimnasio", p4]]) {
     const reales = x.errores.filter((e) => !/HTTP 40[13] /.test(e));

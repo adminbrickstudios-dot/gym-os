@@ -16,7 +16,10 @@ await db.connect();
 const q = async (sql, params) => (await db.query(sql, params)).rows;
 const [A] = await q(`select id, nombre from public.gimnasios where slug = 'demo'`);
 const [Bg] = await q(`select id, nombre from public.gimnasios where slug = 'demo-box'`);
-const sociosB = (await q(`select nombre, apellido from public.socios where gimnasio_id = $1 limit 5`, [Bg.id])).map((s) => s.nombre);
+const marca = Date.now().toString().slice(-6);
+let [socioB] = await q(`select id, nombre from public.socios where gimnasio_id = $1 limit 1`, [Bg.id]);
+if (!socioB) [socioB] = await q(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) values ($1, $2, 'Ajeno', $3) returning id, nombre`, [Bg.id, `Socioajeno${marca}`, `+5490003${marca}1`]);
+const sociosB = [...new Set([socioB.nombre, ...(await q(`select nombre from public.socios where gimnasio_id = $1 limit 5`, [Bg.id])).map((x) => x.nombre)])];
 const MAIL_A = "duena@ejemplo.invalid", MAIL_B = "box@ejemplo.invalid";
 
 // Lo que dice una pantalla del panel de B vista con la sesión de A.
@@ -84,8 +87,7 @@ try {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || claves.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const sesion = await (await fetch(`${SUPA}/auth/v1/token?grant_type=password`, { method: "POST", headers: { apikey: anon, "content-type": "application/json" }, body: JSON.stringify({ email: MAIL_A, password: CLAVE_DEMO }) })).json();
   chequear(!!sesion.access_token, "la dueña de A tiene una sesión real contra la base", `sin sesión: ${JSON.stringify(sesion).slice(0, 120)}`);
-  const [socioB] = await q(`select id from public.socios where gimnasio_id = $1 limit 1`, [Bg.id]);
-  const [sedeB] = await q(`select id from public.sedes where gimnasio_id = $1 limit 1`, [Bg.id]);
+  const [sedeB] = await q(`select id from public.sedes where gimnasio_id = $1 order by creado_en limit 1`, [Bg.id]);
   const rpc = async (nombre, args, token = sesion.access_token) => {
     const r = await fetch(`${SUPA}/rest/v1/rpc/${nombre}`, { method: "POST", headers: { apikey: anon, authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify(args) });
     return { status: r.status, cuerpo: await r.text() };
