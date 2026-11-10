@@ -19,15 +19,32 @@ Dónde quedó (09/11, mediodía):
 
 ---
 
-## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche)
+## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche): **se publica apenas está en verde, esta misma noche**
 
 | # | Qué | LISTO SI | Estado |
 |---|---|---|---|
+| U0.1 | **URG-01/02 · El login está roto** (Mateo, 09/11): entra por `/g/template-gym/ingresar` con el mail y la contraseña que creó, lo manda a `/ingresar` y le dice "mail o contraseña incorrectos". Reproducirlo **en producción**: crear un gimnasio de prueba con su dueño desde `/super`, cerrar la sesión y entrar por las 3 puertas. Anotar a qué dirección redirige, el error real de Supabase y qué filas existen (`auth.users`, equipo, gimnasio). Revisar las 7 causas de `AJUSTES-0911-NOCHE.md` (URG-02). La más probable: la cuenta nunca se creó porque el alta falló con "Invalid API key" (U1). La causa real va a `docs/LECCIONES.md` | La causa escrita con la prueba (SQL y registro); el dueño de un gimnasio nuevo entra en producción | ❌ |
+| U0.2 | **URG-03 · Login universal y errores honestos**: PLAT-02, PLAT-03, PLAT-07 y PLAT-08 de `PLATAFORMA.md` | e2e: 0, 1 y varios gimnasios; desde la puerta de un gimnasio ajeno, el mensaje claro; cada caso de PLAT-08 con su texto; nunca cae al demo | ❌ |
+| U0.3 | **URG-04 · Prueba permanente en producción**: después de cada publicación, el super admin crea un gimnasio con su dueño, se entra por las 3 puertas (`/ingresar`, `/g/<slug>/ingresar`, `/dueno`), se aterriza en el panel correcto con el rol correcto y se borra el gimnasio de prueba. Corre en Actions (`humo-produccion.yml`, junto con CAL-07) | La corrida en verde después de la publicación de la fase U | ❌ |
 | U1 | **Crear un gimnasio con su dueño desde el super admin funciona en producción.** Hoy falla con "Invalid API key": en Vercel, `SUPABASE_SERVICE_ROLE_KEY` falta, es de otro proyecto o no es la clave `service_role`. Lo carga Mateo (pasos arriba de `PROGRESO.md`). El agente: (a) el error dice en palabras qué pasa y qué hacer ("Falta la clave de servicio en Vercel: …"), nunca "Invalid API key"; (b) si el alta falla a la mitad, el gimnasio queda con "Terminar alta: dar acceso al dueño" en la ficha y en la lista, sin crear otro; (c) el chequeo de `/super` (Estado de la plataforma) prueba la clave creando y borrando un usuario de prueba | e2e contra supabase-local con la clave mal puesta: muestra el error claro y "Terminar alta" funciona después; en producción Mateo crea un gimnasio y su dueño entra | 🟡 carril/b-super: errores traducidos, Terminar alta, chequeo que crea y borra una cuenta y e2e escrito (scripts/e2e/fase-u1-u2.mjs, sin correr); falta que Mateo cargue la clave en Vercel |
 | U2 | **Sin mails: la cuenta se crea en la base con el mail y la contraseña que escribe quien la crea** (ya es así: `createUser` con `email_confirm`). Que en ningún alta (dueño, equipo, socio) se mande un mail ni se pida confirmar el mail. El acceso lo pasa Mateo por chat | e2e: alta de dueño, de recepcionista y de socio con contraseña; ninguno recibe mail (supabase-local no registra envíos) y los tres entran al toque | 🟡 carril/b-super: rutas verificadas sin mails, socio con contraseña desde recepción y e2e escrito (sin correr); los códigos al mail que pide la propia persona siguen (ver PREGUNTAS.md) |
 | U3 | **Cada cuenta entra solo a su gimnasio.** Un dueño de A no ve nada de B: ni por la dirección de B, ni por `/g/<slug-de-B>`, ni cambiando la cookie, ni llamando a las funciones con el id de B. Lo mismo recepción, profe y socio. El mismo mail puede ser dueño de dos gimnasios solo si el super admin lo da de alta en los dos | prueba de base por rol y por función (todas las `public.*` con `p_gimnasio_id` ajeno dan error 42501, nunca datos ni lista vacía) + e2e que intenta entrar a B con el dueño de A por las 4 vías | ❌ |
 | U4 | **La página del gimnasio es siempre su landing.** Se saca el "Estamos armando nuestra página": desde que se crea, cada gimnasio muestra la landing predeterminada con lo que tenga (nombre, logo, color, dirección, planes, horarios, clases, WhatsApp, "Soy socio" y "Quiero ser socio"). Las secciones sin datos no se muestran. "Soy del equipo" va chico al pie. Si el dueño no quiere página pública, la opción "Ocultar mi página" deja solo una portada con su marca y los dos botones, nunca un cartel de "en construcción". Lo mismo en la imagen OG | e2e: un gimnasio recién creado sin cargar nada muestra su landing con nombre, color y los botones; al cargar planes y horarios aparecen; con "Ocultar" queda la portada; en ningún caso aparece "armando" | ❌ |
 | U5 | **El dominio (Mateo lo compra el 10/11).** Dejar todo listo para conectarlo en minutos: `docs/base/DOMINIO.md` con los pasos exactos para Mateo (agregar el dominio y el comodín `*.dominio` en Vercel, los registros DNS, las variables `NEXT_PUBLIC_DOMINIO_BASE` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA`, redeploy). Verificar en el código que la plataforma quede en la raíz del dominio, cada gimnasio en su subdominio (`gimnasio.dominio`) y que el dominio propio de un gimnasio siga funcionando. El agente no compra nada | `DOMINIO.md` escrito; prueba local con hosts simulados (`base.localhost`, `gim.base.localhost`, un dominio propio) que resuelve cada caso; nada que diga `vercel.app` hardcodeado | ❌ |
+
+## Fase P · Plataforma, alta y web (`PLATAFORMA.md`, `AJUSTES-0911-NOCHE.md`)
+
+| # | Qué | Estado |
+|---|---|---|
+| P1 | PLAT-01: el mapa de direcciones en el código, listo para el dominio (con U5) | ❌ |
+| P2 | PLAT-04: ninguna dirección escrita a mano, con su chequeo | ❌ |
+| P3 | PLAT-06: variables por entorno y el chequeo de que producción apunta al Supabase correcto | ❌ |
+| P4 | EDIT-S01: crear un gimnasio en 1 minuto desde una plantilla (slug validado, único y sin tildes; dueño ya confirmado; landing publicada; filas verificadas; "Probar acceso" automático al terminar). Completar lo de U1 y SA-6, no rehacer | ❌ |
+| P5 | EDIT-S02: tarjeta "Accesos" lista para mandar por wa.me (link del panel, mail, contraseña visible solo al crearla, link de la web) | ❌ |
+| P6 | EDIT-S03: "Probar acceso" por usuario (existe, confirmado, activo, gimnasio, rol, último ingreso), en verde o rojo, con "Arreglar" | ❌ |
+| P7 | EDIT-S04 y S05: resetear contraseña, desactivar, cambiar rol, mover de gimnasio; "Entrar como" con la barra "Estás viendo como <gimnasio>" (completar SA-4) | ❌ |
+| P8 | WEB-01 a 05: la landing se ve profesional con cero configuración (solo nombre y color: portada tipográfica fuerte, nunca un hueco); bloques por datos (portada, planes, clases, horarios, galería, profes, mapa, preguntas, wa.me, Soy socio, Quiero ser socio); estilo de `DISENO.md`; celular primero, menos de 2,5 s en 4G con caché por gimnasio (`revalidateTag` al editar); Google (título, imagen para compartir, sitemap y robots por gimnasio, `ExerciseGym`, favicon con el logo, 404 con el estilo del gimnasio). Completar U4 y BASE-9 | ❌ |
+| P9 | PLAT-05: dominios desde el super admin por la API de Vercel (⛔ hasta el dominio y `VERCEL_TOKEN`) | ❌ |
 
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 
@@ -73,7 +90,7 @@ Dónde quedó (09/11, mediodía):
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
 | F3.1 | `scripts/e2e/botones.mjs`: los 6 roles en compu y celular, cada botón | `FLUIDEZ.md` | ❌ |
-| F3.2 | `FLUIDEZ-PANTALLAS.md`: cada pantalla contra las 19 reglas, arreglada; y todos los textos revisados con la regla de `DISENO.md` § Textos | `FLUIDEZ.md` | ❌ |
+| F3.2 | `FLUIDEZ-PANTALLAS.md`: cada pantalla contra las 21 reglas, arreglada; y todos los textos revisados con la regla de `DISENO.md` § Textos | `FLUIDEZ.md` | ❌ |
 
 ## Fase 4 · Los 70 detalles
 
@@ -103,6 +120,19 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
 | F7.1 | TV de entradas, pase de invitado, ocupación en vivo para el socio, congelar solo, modo "tengo que cobrar" el día 1, tablet kiosco pulida | `PROGRESO.md` P2 | ❌ |
+
+## Fase 9 · Edición en capas, escala y seguridad (`AJUSTES-0911-NOCHE.md`)
+
+| # | Qué | Estado |
+|---|---|---|
+| F9.1 | EDIT-S07: plantillas globales (landing, textos, mensajes): valor de la plataforma → plantilla del tipo → valor del gimnasio, con "Restaurar por defecto"; al cambiar la plantilla se actualizan los gimnasios que no la editaron | ❌ |
+| F9.2 | EDIT-D01 a D06: Configuración del dueño por secciones con buscador; Equipo (crear, permisos, desactivar, resetear); Web y estilo con vista previa en vivo; aviso de guardado, deshacer, historial y restaurar en cada cambio; estado de su dominio; exportar sus datos | ❌ |
+| F9.3 | WEB-06: términos y privacidad por gimnasio desde una plantilla editable (con FA-19) | ❌ |
+| F9.4 | ESC-01, 02 y 03: pool de conexiones de Supabase en las funciones; las páginas públicas en caché y sin auth en el proxy; EXPLAIN de lo que se usa seguido, RLS con `(select auth.uid())` y los asesores de Supabase sin errores | ❌ |
+| F9.5 | ESC-04: carga de 1.000 gimnasios demo y 500 usuarios simultáneos, **en local o en Actions, nunca contra producción**; resultados anotados y lo que falle, arreglado | ❌ |
+| F9.6 | ESC-05, 06 y 08: tablas que crecen (ingresos, registro) listas para partirse por mes y listas siempre paginadas; monitoreo propio (errores, chequeo de que responde, alertas; Sentry ⛔); límites por plan en datos | ❌ |
+| F9.7 | ESC-07: procedimiento para restaurar una copia de seguridad (⛔ hasta Supabase Pro, D51) | ❌ |
+| F9.8 | SEG-01 a 07 que no hayan quedado cubiertos por U3, BASE-8 y SA-10/11 | ❌ |
 
 ## Fase 8 · El cierre
 
