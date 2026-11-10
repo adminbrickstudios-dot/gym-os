@@ -82,8 +82,8 @@ try {
   await p2.fill("input[type=email]", MAIL);
   await p2.fill("input[type=password]", "contraseña-equivocada");
   await p2.click("button[type=submit]");
-  await p2.locator("[role=alert]").first().waitFor({ timeout: 30000 });
-  const malaClave = (await p2.locator("[role=alert]").first().innerText()).replace(/\s+/g, " ");
+  await p2.locator('[role="alert"]', { hasText: /S/ }).first().waitFor({ timeout: 30000 });
+  const malaClave = (await p2.locator('[role="alert"]', { hasText: /S/ }).first().innerText()).replace(/\s+/g, " ");
   chequear(/no son correctos/.test(malaClave), `contraseña mala de una cuenta que existe: “${malaClave.slice(0, 90)}…”`, `contraseña mala: “${malaClave}”`);
   chequear(p2.url().includes(`gimnasio=${SLUG}`) || (await p2.locator("body").innerText()).includes(NOMBRE), "y el error no hizo perder el gimnasio", `el error terminó en ${p2.url()}`);
   await p2.fill("input[type=email]", `no-existe-${s}@ejemplo.invalid`);
@@ -139,7 +139,7 @@ try {
   await p5.fill("input[type=email]", MAIL);
   await p5.fill("input[type=password]", CLAVE2);
   await p5.click("button[type=submit]");
-  await p5.locator("[role=alert]").first().waitFor({ timeout: 30000 });
+  await p5.locator('[role="alert"]', { hasText: /S/ }).first().waitFor({ timeout: 30000 });
   ok("con la contraseña escrita en el segundo alta NO entra (la cuenta conserva la suya): por eso el alta tiene que avisarlo");
   await p5.fill("input[type=email]", MAIL);
   await p5.fill("input[type=password]", CLAVE);
