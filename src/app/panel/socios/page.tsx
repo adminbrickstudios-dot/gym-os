@@ -10,6 +10,7 @@ import { cargarInteresados } from "../prospectos/Interesados";
 import { Prospectos } from "../prospectos/Prospectos";
 import { MemoriaSocios } from "./MemoriaSocios";
 import { ListaSocios } from "./ListaSocios";
+import { InvitadosPorSeguir, type InvitadoSinSeguir } from "../prospectos/InvitadosPorSeguir";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -44,10 +45,12 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     if (interesados) {
       const { lista, pagina } = await cargarInteresados(panel);
       const nuevos = lista.filter((p) => p.estado === "nuevo").length;
+      const invitados = await rpcLectura<InvitadoSinSeguir[]>("invitados_sin_seguimiento", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []);   // FA-24
       return (
         <>
           <Encabezado emoji="👥" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />
           <PestanasSocios activa="interesados" nuevos={nuevos} />
+          <InvitadosPorSeguir invitados={invitados} />
           <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas />
         </>
       );

@@ -22,3 +22,13 @@ export async function agregarProspecto(_: { error?: string; ok?: number }, form:
     return { ok: Date.now() };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** FA-24: el invitado de un socio pasa a interesado (origen "referido"), con el WhatsApp que escribió la recepción. */
+export async function invitadoAInteresado(invitadoId: string, whatsapp: string): Promise<{ error?: string }> {
+  await contextoPanel();
+  try {
+    await rpc("invitado_a_interesado", { p_invitado_id: invitadoId, p_whatsapp: whatsapp });
+    revalidatePath("/panel/prospectos"); revalidatePath("/panel/socios");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
