@@ -6,7 +6,7 @@ botón, cada hoja y cada pantalla**, con cada rol, en compu y en celular.
 Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
 (rapidez, que no se trabe), que siguen valiendo.
 
-## Las 19 reglas (cada botón y cada pantalla las cumple todas)
+## Las 21 reglas (cada botón y cada pantalla las cumple todas)
 
 1. **Responde al instante.** Entre el toque y el primer cambio en pantalla
    pasan menos de 100 ms: el botón se ve apretado, y si la acción tarda dice
@@ -65,6 +65,13 @@ Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
 18. **El teclado del celular no tapa el botón** de guardar o confirmar.
 19. **Cero errores en la consola**, y los errores del servidor quedan
     registrados para encontrarlos después.
+
+20. **Todo sincronizado entre paneles en vivo** (CAL-04): lo que se hace en
+    una compu aparece en las otras del mismo gimnasio (Supabase Realtime,
+    filtrado por gimnasio, nunca de otro).
+21. **Prueba de humo en producción después de cada publicación** (CAL-07): en
+    el gimnasio demo `[demo]`, entrar por las 3 puertas, crear un socio,
+    registrar un ingreso y cobrar. Corre en Actions (`humo-produccion.yml`).
 
 ## Cómo se hace
 
