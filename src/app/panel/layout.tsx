@@ -3,7 +3,7 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { Marco, type DatosEntrada } from "@/components/panel/Marco";
 import { redirect } from "next/navigation";
 import { AyudaBrik } from "@/components/panel/AyudaBrik";
 import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
@@ -12,13 +12,13 @@ import { BannerSoporte } from "@/components/panel/BannerSoporte";
 
 type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?: string };
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
-import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
+import { CONFIG_ENTRADA_POR_DEFECTO } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
-import { contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
+import { contextoCompleto, contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -33,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LayoutPanel({ children }: { children: ReactNode }) {
   // En la dirección de la plataforma (sin subdominio) se puede volver a elegir gimnasio.
   const enPlataforma = normalizarHost((await headers()).get("host")) === dominioPlataforma();
+  const ayudasP = ayudasDeUsuario();   // VD-31: sale a la vez que el contexto (si falla, no hay globos: nunca bloquea)
   let panel;
   try {
     panel = await contextoPanel();
@@ -55,14 +56,13 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     throw e;
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
-  // ADM-2/ADM-3 + VD-1: el abono, las ayudas, la config de Entrada y las formas salen juntos, en un solo viaje de espera.
+  // ADM-2/ADM-3 + VD-1: el abono, la config de Entrada y las formas ya vinieron con el contexto (un solo viaje); solo las ayudas piden aparte.
+  const completo = await contextoCompleto();
   const conEntrada = panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas);
-  const [abono, ayudas, config, formas] = await Promise.all([
-    rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
-    ayudasDeUsuario(),   // VD-31: qué globos de ayuda ya vio esta persona (si falla, no hay globos: nunca bloquea)
-    conEntrada ? rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO) : null,
-    conEntrada ? rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]) : null,
-  ]);
+  const abono = completo.abono ?? null;
+  const config = conEntrada ? (completo.config_entrada ?? CONFIG_ENTRADA_POR_DEFECTO) : null;
+  const formas = conEntrada ? (completo.formas_entrada ?? []) : null;
+  const ayudas = await ayudasP;
   // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
   let entrada: DatosEntrada | null = null;
   if (conEntrada && config && formas) {
