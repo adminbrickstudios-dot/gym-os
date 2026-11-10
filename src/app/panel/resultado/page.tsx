@@ -84,7 +84,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             { e: "repetir", t: "Recurrente por mes", v: formatearPesos(r.recurrente) },
           ].map((n) => (
             <div key={n.t} className="flex flex-col-reverse">
-              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.e} /></span> {n.t}</dt>
+              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.e} sistema /></span> {n.t}</dt>
               <dd className="numero text-4xl sm:text-5xl">{n.v}</dd>
             </div>
           ))}

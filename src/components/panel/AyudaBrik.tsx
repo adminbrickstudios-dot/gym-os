@@ -43,7 +43,7 @@ export function AyudaBrik() {
             <label className="space-y-1 block"><span className="etiqueta">Contale a BRIK qué necesitás</span>
               <textarea className="campo" rows={3} maxLength={1000} value={mensaje} onChange={(e) => setMensaje(e.target.value)} placeholder="No me deja cargar el plan nuevo…" /></label>
             <p className="texto-tenue text-sm">Va con tu gimnasio, tu nombre y la pantalla donde estás{pantalla ? ` (${pantalla})` : ""}, así no tenés que explicarlo.</p>
-            {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
+            {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
             <div className="flex flex-wrap gap-2">
               <BotonAccion className="boton boton-principal" ocupadoTexto="Enviando…" disabled={mensaje.trim().length < 5} onClick={enviar}>Enviar a BRIK</BotonAccion>
               <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>

@@ -9,7 +9,7 @@ export function BannerSoporte({ gimnasioId, gimnasio, motivo, minutos, rol }: { 
   return (
     <>
       <div aria-hidden className="pointer-events-none fixed inset-0 z-[80] border-[6px] border-[var(--soporte)]" data-soporte-marco />
-      <div role="status" data-soporte-banner className="mb-6 pr-14 rounded-2xl bg-[var(--soporte)] text-white px-4 py-3 space-y-2">
+      <div role="status" data-soporte-banner className="mb-6 pr-14 rounded-[var(--radio)] bg-[var(--soporte)] text-white px-4 py-3 space-y-2">
         <p className="font-semibold break-words" data-soporte-viendo><Icono nombre="caja" /> Estás viendo como {rol ? `${ROL[rol] ?? rol} de ` : ""}{gimnasio} (Soporte BRIK)</p>
         <p className="text-sm opacity-90 break-words">Motivo: {motivo} · te quedan {minutos} {minutos === 1 ? "minuto" : "minutos"}. El dueño ve esta entrada en su Control.</p>
         <form action="/admin/salir-gimnasio" method="post">

@@ -17,6 +17,8 @@ const ARCHIVOS_CON_COLOR = new Set([
   "src/app/panel/configuracion/Ajustes.tsx",   // las muestras de fondo y de acento que ofrece el selector: son datos, no estilos
   "src/app/panel/grados/Grados.tsx",           // el color inicial del cinturón nuevo: dato del gimnasio
 ]);
+// La tabla emoji → ícono de Icono.tsx tiene que nombrar los emojis para traducirlos: es lo único que los puede nombrar.
+const ARCHIVOS_CON_EMOJI = new Set(["src/components/ui/Icono.tsx"]);
 const HEX = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g;
 const EMOJI = /\p{Extended_Pictographic}/gu;
 
@@ -36,7 +38,7 @@ export function contarDiseno(raiz) {
     const rel = relative(raiz, f).split(sep).join("/");
     const texto = readFileSync(f, "utf8");
     const hex = ARCHIVOS_CON_COLOR.has(rel) ? 0 : (texto.match(HEX) ?? []).length;
-    const emoji = f.endsWith(".tsx") ? (texto.match(EMOJI) ?? []).length : 0;
+    const emoji = f.endsWith(".tsx") && !ARCHIVOS_CON_EMOJI.has(rel) ? (texto.match(EMOJI) ?? []).length : 0;
     if (hex || emoji) cuentas[rel] = { hex, emoji };
   }
   return cuentas;

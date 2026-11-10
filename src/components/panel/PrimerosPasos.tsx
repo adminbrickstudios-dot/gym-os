@@ -37,7 +37,7 @@ export function PrimerosPasos({ datos }: { datos: PrimerosPasosDatos }) {
       </div>
       <Link href="/panel/asistente" className="boton w-full sm:w-auto !justify-start" data-abrir-asistente><Icono nombre="ubicacion" /> Abrir el asistente de 9 pasos</Link>
       <Link href={`/panel${proximo.href}`} className="boton w-full sm:w-auto !justify-start text-lg !border-[var(--acento)]" data-proximo={proximo.clave}>
-        <span aria-hidden><Icono nombre={proximo.emoji} /></span> {proximo.titulo}
+        <span aria-hidden><Icono nombre={proximo.emoji} sistema /></span> {proximo.titulo}
       </Link>
       <p className="texto-suave -mt-2">{proximo.ayuda}</p>
       <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -53,7 +53,7 @@ export function PrimerosPasos({ datos }: { datos: PrimerosPasosDatos }) {
           {datos.pasos.map((p) => (
             <li key={p.clave} data-paso={p.clave} data-hecho={p.hecho}>
               <Link href={`/panel${p.href}`} className="flex items-center gap-3 py-3 hover:opacity-80">
-                <span aria-hidden className="text-xl">{p.hecho ? "✓" : <Icono nombre={p.emoji} />}</span>
+                <span aria-hidden className="text-xl">{p.hecho ? "✓" : <Icono nombre={p.emoji} sistema />}</span>
                 <span className="min-w-0 flex-1">
                   <span className={`block font-semibold ${p.hecho ? "texto-tenue line-through" : ""}`}>{p.titulo}</span>
                   {!p.hecho && <span className="block texto-tenue text-sm">{p.ayuda}</span>}

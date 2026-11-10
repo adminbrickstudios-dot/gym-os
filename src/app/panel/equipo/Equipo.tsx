@@ -103,7 +103,7 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
             <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}><Icono nombre={EMOJI[r]} /> {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
           {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>
             <select name="sede" className="campo"><option value="">Todas</option>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
-          {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {estado.error}</p>}
+          {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {estado.error}</p>}
           {estado.aviso && (
             <Mensaje tipo="exito" className="sm:col-span-2">
               <p>{estado.aviso}</p>

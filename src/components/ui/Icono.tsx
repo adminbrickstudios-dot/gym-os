@@ -94,12 +94,38 @@ export type NombreIcono = keyof typeof ICONOS;
 /** Los cuatro puntos del semáforo y el gris: círculo lleno del color de ESE estado (siempre con su texto al lado). */
 const PUNTOS = { "punto-verde": "var(--verde)", "punto-amarillo": "var(--amarillo)", "punto-rojo": "var(--rojo)", "punto-naranja": "var(--naranja)", "punto-gris": "var(--texto-tenue)" } as const;
 
+
+/**
+ * Los datos que arma la BASE (íconos de Primeros pasos, de la Campana, de la guía de la Entrada, de los números de Inicio) todavía traen un emoji.
+ * Con `sistema` se traducen al ícono de línea que corresponde; sin `sistema` (un dato del dueño) se respeta tal cual.
+ */
+const A_ICONO: Record<string, string> = {};
+const poner = (nombre: string, ...lista: string[]) => lista.forEach((e) => { A_ICONO[e] = nombre; });
+poner("alerta", "⚠"); poner("ok", "✅", "✔", "☑"); poner("cerrar", "❌", "✖"); poner("mas", "➕"); poner("menos", "➖");
+poner("plata", "💵", "💲", "💸", "💰", "🪙"); poner("mensaje", "💬", "🗨"); poner("deshacer", "↩", "↪"); poner("etiqueta", "🏷"); poner("puerta", "🚪");
+poner("regalo", "🎁"); poner("persona", "👤", "🙋", "🙂", "😕", "🧑", "👧", "🧒", "👍", "🙌", "🙈", "🎓", "🧑‍🏫"); poner("usuarios", "👥", "🤝", "🧑‍🤝‍🧑", "👨‍👩‍👧", "👨‍👧");
+poner("recibo", "🧾"); poner("prohibido", "🚫", "⛔", "🔕", "📴", "📵"); poner("reloj", "⏰", "⏱", "🕓", "🕐", "🕒", "🕘"); poner("reloj-arena", "⏳", "⌛");
+poner("salir", "👋", "🚶"); poner("lista", "📋", "📝"); poner("pesa", "💪", "🏋", "🥋", "🏃", "🚴"); poner("repetir", "🔁", "🔄"); poner("tarjeta", "💳");
+poner("camara", "📷", "📸"); poner("calendario", "🗓", "📅", "🎂"); poner("candado", "🔒", "🔐"); poner("candado-abierto", "🔓"); poner("celular", "📱", "📲");
+poner("ticket", "🎟", "🎫"); poner("buscar", "🔍", "🔎"); poner("lapiz", "✏", "✍"); poner("estrella", "⭐", "★", "✨", "🎉", "🆕", "🚀", "🎬"); poner("trofeo", "🏆");
+poner("llave", "🔑"); poner("ubicacion", "📍", "🗺", "🧭"); poner("ajustes", "⚙", "🛠", "🔧"); poner("web", "🌐"); poner("campana", "🔔", "🛎", "📣", "📢", "🔊", "🔇");
+poner("calculadora", "🧮", "🔢", "➗"); poner("carrito", "🛒"); poner("ojo", "👀", "👁"); poner("caja", "📦", "🧱"); poner("chincheta", "📌"); poner("banco", "🏦");
+poner("sede", "🏢"); poner("corazon", "🩺", "🩹", "💚"); poner("guardar", "💾"); poner("pausa", "⏸"); poner("escudo", "🛡"); poner("fuego", "🔥");
+poner("alerta-circulo", "🚨", "🆘"); poner("ayuda", "❓", "❔"); poner("info", "ℹ", "💡"); poner("descargar", "⬇", "📥"); poner("subir", "⬆", "📤");
+poner("documento", "📄", "📜", "📎"); poner("inicio", "🏠"); poner("grafico", "📊", "📐", "📏"); poner("tendencia", "📈"); poner("tendencia-baja", "📉");
+poner("papelera", "🗑"); poner("objetivo", "🎯"); poner("corona", "👑"); poner("pantalla", "📺", "🖥"); poner("derecha", "▶", "↗"); poner("izquierda", "◀"); poner("menu", "☰");
+poner("mail", "📧", "✉", "📨", "📬"); poner("enlace", "🔗"); poner("hoja", "🌱", "🌿"); poner("grilla", "🧩", "🔳", "🗂"); poner("rayo", "⚡"); poner("luna", "🌙");
+poner("imagen", "🖼", "🎨"); poner("telefono", "📞"); poner("senal", "📶", "📡");
+poner("punto-verde", "🟢"); poner("punto-amarillo", "🟡"); poner("punto-rojo", "🔴"); poner("punto-naranja", "🟠"); poner("punto-gris", "⚪");
+export const iconoDeEmoji = (e: string): string | null => A_ICONO[e.replace(/\uFE0F/g, "")] ?? null;
+
 export function esIcono(nombre: string): boolean {
   return nombre in ICONOS || nombre in PUNTOS;
 }
 
-export function Icono({ nombre, titulo, className, style }: { nombre: string | null | undefined; titulo?: string; className?: string; style?: CSSProperties }): ReactNode {
-  if (!nombre) return null;
+export function Icono({ nombre: pedido, titulo, className, style, sistema = false }: { nombre: string | null | undefined; titulo?: string; className?: string; style?: CSSProperties; sistema?: boolean }): ReactNode {
+  if (!pedido) return null;
+  const nombre = sistema && !esIcono(pedido) ? (iconoDeEmoji(pedido) ?? pedido) : pedido;
   const aria = titulo ? { role: "img" as const, "aria-label": titulo } : { "aria-hidden": true as const };
   if (nombre in PUNTOS) {
     return (

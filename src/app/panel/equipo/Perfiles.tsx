@@ -36,7 +36,7 @@ export function Perfiles({ personas, datos, esDueno }: { personas: Persona[]; da
           </span>
         </span>
       </label>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
       <ul className="space-y-2">
         {personas.map((p) => <Ficha key={p.equipo_id} persona={p} perfil={porId.get(p.equipo_id) ?? { equipo_id: p.equipo_id, mostrar: false, tiene_foto: false, actividades: [], horario: [] }} actividades={datos.actividades} />)}
       </ul>
@@ -77,9 +77,9 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
       <div className="flex flex-wrap items-center gap-4">
         {tieneFoto ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/foto-equipo/${persona.equipo_id}?v=${version}`} alt={`Foto de ${persona.nombre}`} data-foto-equipo className="size-16 rounded-2xl object-cover" />
+          <img src={`/foto-equipo/${persona.equipo_id}?v=${version}`} alt={`Foto de ${persona.nombre}`} data-foto-equipo className="size-16 rounded-[var(--radio)] object-cover" />
         ) : (
-          <span aria-hidden className="size-16 rounded-2xl grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">{iniciales(persona.nombre)}</span>
+          <span aria-hidden className="size-16 rounded-[var(--radio)] grid place-items-center titulo text-2xl bg-[var(--tarjeta-alta)]">{iniciales(persona.nombre)}</span>
         )}
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-lg">{persona.nombre}</span>

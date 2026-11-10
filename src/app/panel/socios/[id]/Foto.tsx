@@ -58,7 +58,7 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
   return (
     <div className="flex-none" data-foto={version ? "si" : "no"}>
       <button type="button" onClick={() => setAbierta(true)} aria-label={version ? "Cambiar la foto" : "Sacar una foto"}
-        className="size-16 sm:size-20 rounded-3xl grid place-items-center titulo text-3xl overflow-hidden relative group"
+        className="size-16 sm:size-20 rounded-[var(--radio)] grid place-items-center titulo text-3xl overflow-hidden relative group"
         style={{ background: `color-mix(in oklab, ${color}, var(--fondo) 75%)` }}>
         {version
           // eslint-disable-next-line @next/next/no-img-element

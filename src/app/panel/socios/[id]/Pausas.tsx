@@ -52,7 +52,7 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
       {p.pedidos.length > 0 && (
         <ul className="space-y-2">
           {p.pedidos.map((x) => (
-            <li key={x.id} className="rounded-2xl border border-[var(--borde)] p-4 space-y-2" data-pedido>
+            <li key={x.id} className="rounded-[var(--radio)] border border-[var(--borde)] p-4 space-y-2" data-pedido>
               <p><span className="font-semibold"><Icono nombre="reloj-arena" /> Pedido de pausa</span>{x.pedido_por ? ` · lo pidió ${x.pedido_por}` : ""}</p>
               <p className="texto-suave">Del {dia(x.desde)}, vuelve el {dia(x.vuelve)} ({dias(x.desde, x.vuelve)} días) · {MOTIVO[x.categoria] ?? x.categoria}{x.nota ? ` · ${x.nota}` : ""}</p>
               {p.puede_dar

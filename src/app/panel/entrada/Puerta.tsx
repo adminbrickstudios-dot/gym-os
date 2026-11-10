@@ -279,7 +279,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       {prueba && (
         <form data-ventana-prueba-form className="tarjeta p-5 space-y-3" onSubmit={(e) => { e.preventDefault(); if (!ocupado && prueba.nombre.trim()) darPrueba(); }}>
           <p className="titulo text-xl"><Icono nombre="regalo" /> Prueba gratis · {dniEscrito}</p>
-          {prueba.reservada && <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada><Icono nombre="persona" /> Reservó desde la página. Confirmá y lo dejás entrar.</p>}
+          {prueba.reservada && <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full" data-prueba-reservada><Icono nombre="persona" /> Reservó desde la página. Confirmá y lo dejás entrar.</p>}
           <label className="block space-y-1"><span className="etiqueta">Nombre</span>
             <input data-prueba-nombre className="campo" value={prueba.nombre} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, nombre: e.target.value, error: null })} /></label>
           {!prueba.reservada && (
@@ -309,7 +309,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-entrada
-              className="size-28 sm:size-36 rounded-3xl object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              className="size-28 sm:size-36 rounded-[var(--radio)] object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
           </div>
           <p className="titular text-6xl sm:text-8xl mt-4 break-words">{elegido.nombre}</p>
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>

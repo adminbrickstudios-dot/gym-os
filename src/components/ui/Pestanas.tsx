@@ -25,7 +25,7 @@ export function Pestanas({ pestanas, activa, alCambiar, etiqueta }: {
   return (
     <div ref={fila} className="pestanas" role="tablist" aria-label={etiqueta}>
       {pestanas.map((p) => {
-        const contenido = <>{p.emoji && <span aria-hidden><Icono nombre={p.emoji} /></span>}{p.texto}{p.marca && <span className="text-[var(--acento)]" aria-label={p.marca}>•</span>}</>;
+        const contenido = <>{p.emoji && <span aria-hidden><Icono nombre={p.emoji} sistema /></span>}{p.texto}{p.marca && <span className="text-[var(--acento)]" aria-label={p.marca}>•</span>}</>;
         if (p.href && p.recargar) return <a key={p.clave} href={p.href} className="pestana">{contenido}</a>;
         return p.href
           ? <Link key={p.clave} href={p.href} className="pestana" aria-current={p.clave === activa ? "page" : undefined}>{contenido}</Link>

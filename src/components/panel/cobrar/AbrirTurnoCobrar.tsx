@@ -23,7 +23,7 @@ export function AbrirTurnoCobrar({ caja, alAbrir }: { caja: CajaCobro; alAbrir: 
   // No hay con qué abrir: hay que resolverlo en Caja (otra sede con turno, o todas las cajas ocupadas).
   if (caja.otra_sede || !libre) {
     return (
-      <div className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 w-full whitespace-normal" data-cobrar-sin-caja="bloqueada">
+      <div className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3 w-full whitespace-normal" data-cobrar-sin-caja="bloqueada">
         <p><Icono nombre="plata" /> Para cobrar en efectivo necesitás tu turno de caja abierto en esta sede.</p>
         <p className="text-sm mt-1">
           {caja.otra_sede ? <>Tenés un turno abierto en {caja.otra_sede}: cerralo antes de abrir otro.</> : <>No hay una caja libre para abrir ahora.</>}

@@ -23,7 +23,7 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
           {elegidos.map((a, i) => (
             <li key={a.clave}>
               <Link href={a.ruta} className={`boton ${i === 0 ? "boton-principal" : ""} !flex-col !items-start !justify-between w-full aspect-[4/3] sm:aspect-[5/3] !p-4 sm:!p-5 !rounded-[var(--radio-grande)]`}>
-                <span className="text-4xl" aria-hidden><Icono nombre={a.emoji} /></span>
+                <span className="text-4xl" aria-hidden><Icono nombre={a.emoji} sistema /></span>
                 <span className="titulo text-xl sm:text-2xl text-left">{a.titulo}</span>
               </Link>
             </li>
@@ -49,7 +49,7 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
             <li key={a.clave}>
               <button type="button" onClick={() => alternar(a.clave)} aria-pressed={pos >= 0}
                 className={`boton w-full !justify-start ${pos >= 0 ? "!border-[var(--acento)]" : "opacity-70"}`}>
-                <span aria-hidden><Icono nombre={a.emoji} /></span>
+                <span aria-hidden><Icono nombre={a.emoji} sistema /></span>
                 <span className="flex-1 text-left">{a.titulo}</span>
                 {pos >= 0 && <span className="numero text-lg" style={{ color: "var(--acento)" }}>{pos + 1}</span>}
               </button>

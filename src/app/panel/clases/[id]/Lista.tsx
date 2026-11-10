@@ -43,7 +43,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
           {filas.map((f) => (
             <li key={f.socio_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3 min-h-[64px]">
               {/* FA-11: la foto de cada anotado (o sus iniciales), para reconocerlo en la sala. */}
-              <span className="flex-none size-12 rounded-2xl overflow-hidden grid place-items-center titulo text-xl bg-[var(--tarjeta-alta)]" data-foto-anotado={fotos[f.socio_id] ? "si" : "no"} aria-hidden>
+              <span className="flex-none size-12 rounded-[var(--radio)] overflow-hidden grid place-items-center titulo text-xl bg-[var(--tarjeta-alta)]" data-foto-anotado={fotos[f.socio_id] ? "si" : "no"} aria-hidden>
                 {fotos[f.socio_id]
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={`/panel/socios/${f.socio_id}/foto?v=${fotos[f.socio_id]}`} alt="" loading="lazy" className="w-full h-full object-cover" />

@@ -46,8 +46,8 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
   const on = activa(actual, s.ruta);
   return (
     <Link href={s.ruta} onClick={alElegir} aria-current={on ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-2xl px-3 min-h-[52px] py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
-      <span className="text-xl w-7 text-center" aria-hidden><Icono nombre={s.emoji} /></span>
+      className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
+      <span className="text-xl w-7 text-center" aria-hidden><Icono nombre={s.emoji} sistema /></span>
       <span className="min-w-0">
         <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{s.titulo}</span>
         {s.descripcion && <span className="block text-[13px] texto-tenue leading-snug truncate">{s.descripcion}</span>}
@@ -131,7 +131,7 @@ export function Navegacion(props: Props) {
       </aside>
 
       {/* Celular: barra de arriba */}
-      <header className="lg:hidden sticky top-0 z-30 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
+      <header className="lg:hidden sticky top-0 z-30 bg-[var(--fondo)] border-b border-[var(--borde)]">
         <div className="flex items-center gap-3 px-4 h-14">
           <p className="titulo text-xl flex-1 flex items-center gap-2 min-w-0"><Logo url={props.logo} tam="h-8 max-w-24" /><span className="truncate">{props.gimnasio}</span></p>
           <Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} rol={props.rol} compacto />
@@ -139,7 +139,7 @@ export function Navegacion(props: Props) {
       </header>
 
       {/* Celular: las cuatro principales + menú */}
-      <nav aria-label="Principales" className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[var(--borde)] bg-[color-mix(in_oklab,var(--fondo)_92%,transparent)] backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
+      <nav aria-label="Principales" className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[var(--borde)] bg-[var(--fondo)] pb-[env(safe-area-inset-bottom)]">
         <ul className="grid grid-cols-5">
           {props.principales.map((a) => {
             const on = activa(actual, a.ruta);
@@ -148,7 +148,7 @@ export function Navegacion(props: Props) {
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
                   <span className={`relative text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>
-                    <Icono nombre={a.emoji} />
+                    <Icono nombre={a.emoji} sistema />
                     {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
                   </span>
                   {a.corto ?? a.titulo}

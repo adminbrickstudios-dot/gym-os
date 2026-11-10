@@ -17,7 +17,7 @@ export function CalculadoraBilletes({ alCambiar }: { alCambiar: (total: number, 
     alCambiar(r.total, r.detalle);
   };
   return (
-    <fieldset className="space-y-3 rounded-2xl border border-[var(--borde)] p-4" data-billetes>
+    <fieldset className="space-y-3 rounded-[var(--radio)] border border-[var(--borde)] p-4" data-billetes>
       <legend className="etiqueta px-1"><Icono nombre="calculadora" /> Contá los billetes</legend>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {DENOMINACIONES.map((d) => (

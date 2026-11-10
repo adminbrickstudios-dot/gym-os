@@ -359,7 +359,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
             </div>
           )}
           {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "Paga con dos medios"}</button>}
-          {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
+          {sinMedios && <p className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {mixto && <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>}
           {precios.fiado && (medioOk === "cuenta_corriente" || mixto) && (
             <p className="text-sm texto-suave mt-2" data-fiado>Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
@@ -370,9 +370,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           <span className="texto-suave text-lg">Total</span>
           <span className="numero text-5xl">{total == null ? "—" : formatearPesos(total)}</span>
         </div>
-        {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-2xl !px-4 !py-3"><Icono nombre="plata" /> Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
+        {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="plata" /> Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
         {doble && lineas.some((l) => l.tipo === "cuota") && <div className="mt-4"><AvisoDobleCobro estado={doble} alCambiar={setDoble} alCancelar={() => setDoble(null)} /></div>}
-        {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="alerta" /> {error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-[var(--radio)] !px-4 !py-3 w-full"><Icono nombre="alerta" /> {error}</p>}
         <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (!!doble && lineas.some((l) => l.tipo === "cuota") && !motivoDobleValido(doble)) || (mixto && sumaMixto !== total)}
           className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
       </aside>

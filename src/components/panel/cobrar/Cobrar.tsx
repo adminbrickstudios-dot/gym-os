@@ -380,7 +380,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
               <button type="button" className="boton-texto mt-2" disabled={ocupado} onClick={fijarDefecto} data-cobrar-fijar-defecto><Icono nombre="estrella" /> Dejar este como el de siempre</button>
             )}
           </div>
-          {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 mt-2">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
+          {sinMedios && <p className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3 mt-2">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {precios.fiado && (medioOk === "cuenta_corriente" || mixto) && (
             <p className="text-sm texto-suave mt-2" data-fiado>Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
           )}

@@ -36,7 +36,7 @@ export function ElegirNumeros({ disponibles, elegidos }: { disponibles: Opcion[]
               <li key={o.clave}>
                 <label className="flex items-center gap-3 min-h-11 cursor-pointer">
                   <input type="checkbox" checked={on} disabled={!on && marcados.length >= 8} onChange={() => alternar(o.clave)} aria-label={o.etiqueta} className="size-5" />
-                  <span><span aria-hidden><Icono nombre={o.emoji} /></span> {o.etiqueta}</span>
+                  <span><span aria-hidden><Icono nombre={o.emoji} sistema /></span> {o.etiqueta}</span>
                 </label>
               </li>
             );

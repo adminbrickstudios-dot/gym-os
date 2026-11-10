@@ -80,10 +80,10 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
         <p className="texto-suave">{desde}</p>
       </div>
       {/* CAJ-5: abierta de otro día o pasada la hora de cierre. */}
-      {olvidada && !vencida && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 whitespace-normal" data-olvidada><Icono nombre="reloj" /> Esta caja quedó abierta. Contá la plata y cerrala: hasta que se cierre, quien la abrió no puede abrir otra.</p>}
+      {olvidada && !vencida && <p className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3 whitespace-normal" data-olvidada><Icono nombre="reloj" /> Esta caja quedó abierta. Contá la plata y cerrala: hasta que se cierre, quien la abrió no puede abrir otra.</p>}
       {/* VD-9 (D20): de otro día o pasadas las horas, ya figura sin contar: nadie cobra en ella. */}
       {vencida && (
-        <div className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 whitespace-normal space-y-3" data-olvidada data-sin-contar>
+        <div className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3 whitespace-normal space-y-3" data-olvidada data-sin-contar>
           <p><Icono nombre="reloj" /> Esta caja quedó abierta de otro día: figura <strong>sin contar</strong> y nadie puede cobrar en ella. Contá la plata y cerrala, o dejala para que la cuente el dueño y abrí tu turno.</p>
           {modo !== "nuevo" && <button type="button" className="boton boton-chico" onClick={() => { setModo("nuevo"); setMonto(""); setError(null); }}><Icono nombre="candado-abierto" /> Dejarla para el dueño y abrir mi turno</button>}
         </div>

@@ -85,7 +85,7 @@ function UnMensaje({ m, alGuardar, alCambiarSucio }: { m: MensajePanel; alGuarda
         </p>
         {errorVista
           ? <p className="text-sm" role="alert"><Icono nombre="alerta" /> {errorVista}</p>
-          : <p className="whitespace-pre-wrap rounded-2xl rounded-tl-sm px-4 py-3 max-w-prose" style={{ background: "color-mix(in oklab, var(--verde), var(--tarjeta) 78%)" }}>{vista?.texto ?? "…"}</p>}
+          : <p className="whitespace-pre-wrap rounded-[var(--radio)] rounded-tl-sm px-4 py-3 max-w-prose" style={{ background: "color-mix(in oklab, var(--verde), var(--tarjeta) 78%)" }}>{vista?.texto ?? "…"}</p>}
       </div>
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && !sucio && <Mensaje tipo="exito">{msj.ok}</Mensaje>}

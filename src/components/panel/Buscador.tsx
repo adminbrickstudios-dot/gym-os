@@ -184,7 +184,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                   const a = f.accion;
                   const cuerpo = (
                     <>
-                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={a.emoji} /></span>
+                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={a.emoji} sistema /></span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold truncate">{a.titulo}</span>
                         {a.detalle && <span className="block text-sm texto-suave truncate">{a.detalle}</span>}
@@ -242,7 +242,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                     {cab}
                     <Link href={s.ruta} onClick={() => setAbierto(false)} {...marcaProps}
                       className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
-                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={s.emoji} /></span>
+                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={s.emoji} sistema /></span>
                       <span className="font-semibold flex-none">{s.titulo}</span>
                       <span className="texto-tenue text-sm truncate">{s.descripcion}</span>
                     </Link>

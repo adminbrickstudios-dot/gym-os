@@ -191,7 +191,7 @@ export function Productos({ productos, stock }: { productos: Producto[]; stock: 
       <h2 className="titulo text-3xl mb-1">Productos y stock</h2>
       <p className="texto-suave mb-4">Lo que se vende en el mostrador además de los planes: agua, bebidas, suplementos. Aparecen en Vender con su foto. Las cuotas y los pases se cobran desde Cobrar.</p>
       {bajos.length > 0 && (
-        <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 mb-4" data-por-reponer>
+        <p className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3 mb-4" data-por-reponer>
           <Icono nombre="caja" /> Para reponer: {bajos.map((p) => `${p.nombre} (${stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`})`).join(", ")}
         </p>
       )}

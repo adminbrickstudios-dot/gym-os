@@ -39,7 +39,7 @@ export default async function Novedades() {
     const fila = (i: ItemCampana) => (
       <li key={i.clave} data-novedad={i.leido ? "vista" : "nueva"} data-tipo={i.tipo ?? ""}>
         <Link href={i.href} className={`tarjeta fila flex items-center gap-4 px-4 py-3 min-h-[68px] hover:bg-[var(--tarjeta-alta)] transition-colors ${i.leido ? "opacity-70" : ""}`}>
-          <span className="icono" aria-hidden><Icono nombre={i.emoji} /></span>
+          <span className="icono" aria-hidden><Icono nombre={i.emoji} sistema /></span>
           <span className="min-w-0 flex-1">
             <span className="block font-semibold text-lg leading-tight">{i.titulo}</span>
             {i.detalle && <span className="block texto-suave text-[15px] truncate">{i.detalle}</span>}

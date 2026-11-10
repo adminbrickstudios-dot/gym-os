@@ -112,7 +112,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
             <p><Icono nombre="ok" /> <b>{previo.dias_de_aviso} días de aviso</b> (el mínimo son {previo.aviso_dias}). Les llega el aviso en la app a <b>{previo.socios_a_avisar}</b> {previo.socios_a_avisar === 1 ? "socio" : "socios"} y queda la constancia.</p>
           ) : (
             <>
-              <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="alerta" /> Con {previo.dias_de_aviso} {previo.dias_de_aviso === 1 ? "día" : "días"} de aviso no alcanza: hacen falta {previo.aviso_dias}. Avisar tarde es lo que termina en multas.</p>
+              <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3 w-full"><Icono nombre="alerta" /> Con {previo.dias_de_aviso} {previo.dias_de_aviso === 1 ? "día" : "días"} de aviso no alcanza: hacen falta {previo.aviso_dias}. Avisar tarde es lo que termina en multas.</p>
               <button type="button" className="boton" onClick={() => setDatos({ ...datos, desde: previo.fecha_minima })}><Icono nombre="calendario" /> Poner el {diaTxt(previo.fecha_minima)}</button>
               {previo.puede_excepcion ? (
                 <label className="block space-y-2"><span className="etiqueta">Si es urgente, aplicalo igual: ¿por qué? (queda registrado a tu nombre)</span>

@@ -792,7 +792,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
             <form data-ventana-prueba-form className="p-6 sm:p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); if (!ocupado && !(prueba.info?.existe && prueba.info.usada)) guardarPrueba(); }}>
               <p className="titulo text-2xl text-center"><Icono nombre="regalo" /> Prueba gratis · {conPuntos(prueba.dni)}</p>
               {prueba.info?.existe && !prueba.info.usada && (
-                <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada>
+                <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full" data-prueba-reservada>
                   <Icono nombre="persona" /> Reservó desde la página{prueba.info.clase ? `: ${prueba.info.clase}` : ""}. Confirmá y lo dejás entrar.
                 </p>
               )}
@@ -878,7 +878,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 </div>
                 <div className="p-6 sm:p-8 space-y-5">
                   <div className="flex items-center gap-4">
-                    <span className="relative size-24 sm:size-32 flex-none rounded-3xl bg-[var(--tarjeta-alta)] flex items-center justify-center text-4xl font-bold overflow-hidden">
+                    <span className="relative size-24 sm:size-32 flex-none rounded-[var(--radio)] bg-[var(--tarjeta-alta)] flex items-center justify-center text-4xl font-bold overflow-hidden">
                       <Iniciales nombre={elegido.nombre} />
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-ventana
@@ -895,7 +895,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
                   {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
                     <ul className="flex flex-wrap gap-2" data-ventana-chips>
-                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
+                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
                       {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
                       {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
                       {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
