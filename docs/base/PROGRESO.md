@@ -10,6 +10,16 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ## EN CURSO: la recta final (09/11)
 
+**⛔ Para que crear un gimnasio funcione en producción (lo hace Mateo, 2 minutos):**
+1. En Supabase: tu proyecto → Project Settings → API Keys → copiá la clave
+   `service_role` (la secreta, empieza con `eyJ…`; si usás las claves nuevas,
+   la `secret`).
+2. En Vercel: proyecto gym-os → Settings → Environment Variables →
+   `SUPABASE_SERVICE_ROLE_KEY` → pegala (Production) → Save.
+3. Vercel → Deployments → el último → ⋯ → Redeploy.
+4. Entrá a `/super` → "Estado de la plataforma" tiene que decir que la clave anda.
+   Probá crear el gimnasio otra vez.
+
 **Fase 0 (velocidad), 09/11 tarde:** en curso, nada publicado todavía. Hecho en la rama: los viajes a Supabase del panel salen en paralelo (contexto, mensajes, fichaje, abono, ayudas, config de Entrada), cada RPC deja su tiempo en el log de Vercel, el proxy manda `Server-Timing`, `staleTimes` de 30 s, y el workflow **Medir producción**. Medido hoy desde afuera (sin sesión): `/ingresar` 1,5 a 3,0 s y `/g/demo` 0,8 a 3,5 s de TTFB; las funciones ya están en gru1.
 **⛔ Lo que necesito de vos para medir en producción (credenciales, no las toco yo):** en GitHub → Settings → Secrets and variables → Actions, cargar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `DEMO_CONTRASENA` (10 o más letras, la que quieras). Después correr Actions → Base de datos → `usuarios-demo` con esa contraseña y Actions → Medir producción. Hoy los usuarios demo no existen en producción.
 **09/11 tarde-noche:** integrados los 3 carriles en la rama (verificar: todo verde salvo el test de tiempo de importar-socios, que en Actions pasa). **Alerta de velocidad:** medido en Actions con 5.000 socios, `privado.retencion_pendientes` (carril C, F1.6) tardaba 9 s; el carril C lo está corrigiendo y **no se publica ninguna migración de F1.6 hasta que a 5.000 socios sea más rápida que lo de producción**.

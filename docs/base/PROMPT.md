@@ -59,7 +59,7 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 ## La vuelta
 
 1. Tomá el **primer ítem de `RECTA-FINAL.md` que no esté en ✅ ni ⛔**, en
-   orden.
+   orden (la fase U va antes que todo).
 2. **Antes de codear, buscá lo que ya existe** (código, base, e2e) y abrilo con
    sesión real y la app compilada. Casi todo existe: completá, no rehagas.
 3. Escribí el plan en 3 a 6 líneas debajo del ítem (en `PROGRESO.md` si es un
@@ -72,6 +72,11 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
    - Las 19 reglas de `FLUIDEZ.md` en lo que tocaste.
    - Capturas en compu y celular **mirándolas**.
    - `npm run verificar`.
+   - **Lo pesado (build, e2e, barrido) en GitHub Actions**, no en la compu de
+     Mateo (no le alcanza la memoria): `gh workflow run pruebas-completas.yml
+     --ref base/2026-11-07 -f pantallas=true -f solo=<recorridos> -f
+     app_modo=produccion`, y el resultado con `gh run view <id> --log`. En la
+     compu, solo código, typecheck, lint, vitest y `db:pruebas`.
 
    Los e2e en tandas de 20 como máximo, cada tanda con la base nueva. Nunca 200
    seguidos: se queda sin memoria y arrastra datos de un recorrido a otro.
@@ -121,7 +126,7 @@ Las de `CLAUDE.md`, siempre. Además:
 Solo si **no** existe `.claude/BASE_CON_DATOS_REALES` y Actions → Base de
 datos → `estado` no muestra ningún gimnasio real (sin `[demo]`):
 
-1. Todo en verde en la compu: `npm run verificar`, la base y los e2e de lo que
+1. Todo en verde: `npm run verificar` y la base en la compu, y los e2e de lo que
    se publica.
 2. Rama `publicar/base-<qué>` en ese commit, y push.
 3. Actions → Base de datos → `prevuelo` en esa rama → si da verde, `aplicar`.
