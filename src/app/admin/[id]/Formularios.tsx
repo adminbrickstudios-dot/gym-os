@@ -49,11 +49,11 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
         <p className="titulo text-xl">➕ Sumar una dirección</p>
         <p className="texto-suave text-sm">
           Un dominio del gimnasio (www.olympogym.com) o, mientras no haya dominio, una dirección gratis de Vercel
-          (olympo-gym.vercel.app). Después agregala igual en Vercel → tu proyecto → Settings → Domains.
+          (por ejemplo olympogym.com.ar). Después agregala igual en Vercel → tu proyecto → Settings → Domains.
         </p>
         <input type="hidden" name="gimnasio_id" value={gimnasioId} />
         <div className="flex flex-wrap gap-2">
-          <input name="host" required className="campo flex-1 min-w-56" placeholder="olympo-gym.vercel.app" aria-label="Dirección" />
+          <input name="host" required className="campo flex-1 min-w-56" placeholder="olympogym.com.ar" aria-label="Dirección" />
           <button className="boton" disabled={guardando}>{guardando ? "Sumando…" : "Sumar"}</button>
         </div>
         <ContrasenaNueva r={estado} />
