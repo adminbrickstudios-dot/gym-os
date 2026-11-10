@@ -110,6 +110,18 @@ Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300
 
 Ninguna función que se tocó empeoró respecto de producción; las que no se tocaron (`retencion` completa, `filtros_socios`) se ven más lentas solo por el runner. **Quedan sin cumplir:** `pendientes_panel` (90 ms: 49 son la consulta; el resto son las demás cuentas del menú) y `numeros_inicio` (389 ms; usa tres listas más `via` de `numeros` y sus propias cuentas). Siguiente paso posible para `pendientes_panel`: contar `vencen_hoy`/`vencen_pronto` desde las coberturas que terminan hoy, sin recorrer a nadie (no se hizo).
 
+**F0.3, segunda pasada (corrida 42739155563, misma escala: 5.000 socios, 200 gimnasios).** `retencion_pendientes` ya no busca por socio quién tiene una cuota adelantada ni quién vino hace poco (una pasada cada una) y mira congelado/suspendido solo para quien cayó en una lista. Misma prueba viejo-vs-nuevo (7/7).
+
+| Función | 08/11 | 1.ª pasada | 2.ª pasada | Presupuesto |
+|---|---:|---:|---:|---:|
+| `pendientes_panel` (dueño) | 385,5 ms | 89,6 ms | **52,9 ms** | 50 (por 3 ms) |
+| `pendientes_panel` (recepción) | 306,6 ms | 75,6 ms | **45,3 ms** | 50 ok |
+| `numeros_inicio` | 465 ms | 389,0 ms | **208,6 ms** | 300 ok |
+| `panel_inicio` | 446,3 ms | 238,9 ms | **135,3 ms** | 300 ok |
+| `vencen_hoy` | 438,9 ms | 233,8 ms | **134,6 ms** | 300 ok |
+| `para_hacer_hoy` | 308,2 ms | 78,0 ms | **44,7 ms** | 300 ok |
+| `retencion` (completa, sin tocar) | 441,4 ms | 665,2 ms | 316,8 ms | 300 (varía con el runner) |
+
 ## Pendiente de BASE-1 (anotado)
 - `retencion`, `retencion_resumen` y `vencen_pestanas` (completas): el costo es `via_membresia` por cada vencido; bajarlo exige cambiar cómo se calcula la deuda, y no se tocó en esta pasada para no arriesgar ningún veredicto.
 - `filtros_socios` (880 ms con 5.000; ~2 s en la compu local con 1.500): el grupo de cada socio sale del veredicto completo (`calcular_acceso`: membresía, pases, packs, pausas); `cubierto_hasta` solo no alcanza para probar el resultado. Queda para una pasada propia con su prueba viejo-vs-nuevo.

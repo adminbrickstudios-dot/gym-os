@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Recomendacion } from "./Recomendacion";
+import { AvisosDelDia } from "./AvisosDelDia";
 import { colorVar } from "@/components/panel/Estado";
 import { Aviso } from "@/components/panel/Marco";
 import { fechaCorta, formatearPesos } from "@/lib/formato";
@@ -128,6 +129,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {debePagar && bloquePago}
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
         {progreso && <ProgresoInicio p={progreso} />}
+        <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>
         <Suspense fallback={null}><Recomendacion socioId={s.socio_id} q={q} /></Suspense>
 
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}

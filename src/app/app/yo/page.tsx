@@ -5,6 +5,7 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MiFoto } from "./MiFoto";
+import { AvisoClase } from "./AvisoClase";
 
 export const metadata: Metadata = { title: "Yo" };
 
@@ -17,7 +18,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     const s = yo.socio!;
     const zona = yo.zona!;
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
-    const [referido, invitados, mensajes, compra, locker, pt, fotoPermitida, fotoActual] = await Promise.all([
+    const [referido, invitados, mensajes, compra, locker, pt, fotoPermitida, fotoActual, avisoClase] = await Promise.all([
       rpc<unknown | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
       rpc<unknown | null>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       // VD-38 (D27): escribirle al gimnasio. Si la sección está apagada o la base no responde, la fila no se muestra.
@@ -30,6 +31,8 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
       // FA-16 (D57): "Mi foto" solo si el gimnasio dejó que el socio la suba (apagado por defecto).
       rpc<boolean>("foto_propia_permitida", { p_socio_id: s.socio_id }).catch(() => false),
       rpc<string | null>("foto_propia", { p_socio_id: s.socio_id }).catch(() => null),
+      // FA-12: "Avisarme antes de mi clase" (solo si el gimnasio usa clases).
+      yo.modo_clases !== "ninguno" ? rpc<boolean>("aviso_clase_socio", { p_socio_id: s.socio_id }).catch(() => null) : Promise.resolve(null),
     ]);
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
@@ -49,6 +52,8 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         </div>
 
         {fotoPermitida && <MiFoto socioId={s.socio_id} iniciales={`${s.nombre.charAt(0)}${s.apellido.charAt(0)}`.toUpperCase()} tieneFoto={!!fotoActual} />}
+
+        {avisoClase !== null && <AvisoClase socioId={s.socio_id} inicial={avisoClase} />}
 
         <section className="space-y-2" aria-label="Mi plan">
           <div className="tarjeta p-5" data-mi-plan>

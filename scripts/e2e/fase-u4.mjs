@@ -43,7 +43,7 @@ try {
   chequear(await p.locator('footer a[href="/ingresar"]').count() > 0, "“Soy del equipo” va chico al pie", "falta “Soy del equipo” al pie");
   chequear((await p.content()).toLowerCase().includes(ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
   for (const s of ["planes", "horarios", "ubicacion"]) {
-    chequear(await p.locator(`#${s}`).count() === 0, `sin datos, la sección ${s} no se muestra`, `la sección ${s} aparece vacía`);
+    chequear(await p.locator(`section[aria-labelledby="${s}"]`).count() === 0, `sin datos, la sección ${s} no se muestra`, `la sección ${s} aparece vacía`);
   }
   chequear(!PROHIBIDO.test(`${await meta(p, "og:description")} ${await meta(p, "og:title")} ${await p.title()}`), "los metadatos para compartir no dicen “armando”", "los metadatos dicen “armando”");
   const og = await p.request.get(`${G}/og`);
@@ -58,9 +58,9 @@ try {
   for (const dia of [1, 2, 3, 4, 5]) await db.query(`insert into public.horarios_apertura (gimnasio_id, sede_id, dia, abre, cierra) values ($1, $2, $3, '07:00', '22:00')`, [gim, sede, dia]);
   await p.goto(`${G2}/`);
   await p.locator("h1").first().waitFor({ timeout: 60000 });
-  chequear(await p.locator("#planes").count() > 0 && (await p.locator("#planes").innerText()).includes("Plan U4"), "al cargar un plan con precio, aparece en la página", "el plan no aparece");
-  chequear(await p.locator("#horarios").count() > 0, "al cargar horarios, aparece la sección Horarios", "los horarios no aparecen");
-  chequear(await p.locator("#ubicacion").count() > 0, "al cargar la dirección, aparece Dónde estamos", "la dirección no aparece");
+  chequear(await p.locator('section[aria-labelledby="planes"]').count() > 0 && (await p.locator('section[aria-labelledby="planes"]').innerText()).includes("Plan U4"), "al cargar un plan con precio, aparece en la página", "el plan no aparece");
+  chequear(await p.locator('section[aria-labelledby="horarios"]').count() > 0, "al cargar horarios, aparece la sección Horarios", "los horarios no aparecen");
+  chequear(await p.locator('section[aria-labelledby="ubicacion"]').count() > 0, "al cargar la dirección, aparece Dónde estamos", "la dirección no aparece");
   chequear(!PROHIBIDO.test(await p.locator("body").innerText()), "con datos, tampoco dice “armando”", "con datos dice “armando”");
   await p.screenshot({ path: ".local/capturas/u4-celu-con-datos.png", fullPage: true }).catch(() => {});
 
@@ -72,7 +72,7 @@ try {
   const to = await o.locator("body").innerText();
   chequear(to.includes(NOMBRE), "oculta: queda la portada con el nombre", "oculta: no aparece el nombre");
   chequear(await o.locator('a[href="/ingresar?modo=socio"]').count() > 0 && await o.locator('a[href="/hacete-socio"]').count() > 0, "oculta: están “Soy socio” y “Quiero ser socio”", "oculta: faltan los botones");
-  chequear(await o.locator("#planes, #horarios").count() === 0, "oculta: no se ven planes ni horarios", "oculta: se ven secciones de la página");
+  chequear(await o.locator('section[aria-labelledby="planes"], section[aria-labelledby="horarios"]').count() === 0, "oculta: no se ven planes ni horarios", "oculta: se ven secciones de la página");
   chequear(!PROHIBIDO.test(to), "oculta: no dice “armando” ni “en construcción”", `oculta dice: ${to.match(PROHIBIDO)?.[0]}`);
   chequear(!PROHIBIDO.test(`${await meta(o, "og:description")} ${await meta(o, "og:title")} ${await o.title()}`), "oculta: los metadatos no dicen “armando”", "oculta: los metadatos dicen “armando”");
   chequear(/noindex/.test((await meta(o, "robots")) ?? ""), "oculta: no se indexa (noindex)", "oculta: se puede indexar");
@@ -84,7 +84,7 @@ try {
   await db.query(`update public.landing_gimnasio set publicada = true where gimnasio_id = $1`, [gim]);
   await o.goto(`${G4}/`);
   await o.locator("h1").first().waitFor({ timeout: 60000 });
-  chequear(await o.locator("[data-pagina-oculta]").count() === 0 && await o.locator("#planes").count() > 0, "al mostrarla otra vez, vuelve la landing completa", "no vuelve la landing");
+  chequear(await o.locator("[data-pagina-oculta]").count() === 0 && await o.locator('section[aria-labelledby="planes"]').count() > 0, "al mostrarla otra vez, vuelve la landing completa", "no vuelve la landing");
   for (const pg2 of [p, o]) if (pg2.errores?.length) falla(`errores en la página: ${pg2.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
