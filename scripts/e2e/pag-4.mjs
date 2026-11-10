@@ -34,7 +34,7 @@ try {
 
   // ── Sin publicar: noindex y robots dice que no ──
   await d.goto(`${G}/panel/pagina`);
-  await d.locator('[data-estado-pagina="publicada"] button:has-text("Pasar a borrador")').click();
+  await d.locator('[data-estado-pagina="publicada"] button:has-text("Ocultar mi página")').click();
   await d.locator('[data-estado-pagina="borrador"]').waitFor({ timeout: 30000 });
   await v.goto(`${G}/`);
   await v.locator("h1").first().waitFor();
@@ -42,7 +42,7 @@ try {
     "sin publicar: noindex y sin datos para Google", "sin publicar se puede indexar");
   const robots2 = await v.evaluate(async (u) => (await fetch(u)).text(), `${G}/robots.txt`);
   chequear(/Disallow: \/\s*$/m.test(robots2) && !/Allow: \//.test(robots2), "sin publicar: robots.txt dice que no a todo", `robots.txt sin publicar: ${robots2}`);
-  await d.locator('button:has-text("Publicar mi página")').click();
+  await d.locator('button:has-text("Mostrar mi página")').click();
   await d.locator('[data-estado-pagina="publicada"]').waitFor({ timeout: 30000 });
   if (v.errores.length) falla(`visitante: ${v.errores.join(" | ")}`);
   await d.context().close(); await v.context().close();

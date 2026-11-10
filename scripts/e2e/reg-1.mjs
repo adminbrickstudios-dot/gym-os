@@ -43,7 +43,7 @@ try {
   const v = await pagina(b, CELU);
   await v.goto(`${G}/`);
   await v.locator("h1").first().waitFor({ timeout: 30000 });
-  chequear(await v.locator('a[href="/hacete-socio"]').count() > 0, "la página muestra “Hacete socio”", "no aparece “Hacete socio”");
+  chequear(await v.locator('a[href="/hacete-socio"]').count() > 0, "la página muestra “Quiero ser socio”", "no aparece “Quiero ser socio”");
   const elegir = v.locator('a:has-text("Elegir este")').first();
   const planElegido = (await elegir.locator("xpath=ancestor::li[1]").locator(".titulo").first().innerText()).trim();
   await elegir.click();
@@ -130,7 +130,7 @@ try {
   chequear(await aparece(c.locator("[data-alta-cerrada]"), 15000) && await c.locator('a:has-text("WhatsApp")').count() > 0, "apagadas: “Consultanos por WhatsApp”", "con las altas apagadas el formulario sigue");
   await c.goto(`${G}/`);
   await c.locator("h1").first().waitFor();
-  chequear(await c.locator('a[href="/hacete-socio"]').count() === 0, "apagadas: la página no muestra “Hacete socio”", "la página sigue mostrando “Hacete socio”");
+  chequear(await c.locator('a[href="/hacete-socio"]').count() > 0, "apagadas: “Quiero ser socio” se ve igual (lleva al aviso de WhatsApp)", "apagadas: falta “Quiero ser socio”");
   await c.context().close();
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();

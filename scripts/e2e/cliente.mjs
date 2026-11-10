@@ -105,8 +105,8 @@ try {
   await estado.waitFor({ timeout: 60000 });
   // Un clic antes de que la página termine de cargar no hace nada: se espera y, si no cambió, se vuelve a tocar.
   await d.waitForLoadState("networkidle").catch(() => {});
-  for (let i = 0; i < 3 && await estado.locator('button:has-text("Publicar mi página")').count(); i++) {
-    await estado.locator('button:has-text("Publicar mi página")').click();
+  for (let i = 0; i < 3 && await estado.locator('button:has-text("Mostrar mi página")').count(); i++) {
+    await estado.locator('button:has-text("Mostrar mi página")').click();
     await d.locator('[data-estado-pagina="publicada"], [data-estado-pagina] [role="alert"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   }
   if (await estado.locator('[role="alert"]').count()) throw new Error(`al publicar: ${await estado.locator('[role="alert"]').innerText()}`);

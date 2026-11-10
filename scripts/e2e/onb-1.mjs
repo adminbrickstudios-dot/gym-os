@@ -73,15 +73,15 @@ try {
   await p.goto(`${G}/panel/configuracion?pestana=pagina`);
   await p.locator("[data-publicar]").waitFor({ timeout: 30000 });
   await p.waitForTimeout(800);
-  const yaPublicada = await p.locator('[data-publicar] button:has-text("Pasar a borrador")').count();
+  const yaPublicada = await p.locator('[data-publicar] button:has-text("Ocultar mi página")').count();
   if (yaPublicada) {
-    await p.locator('[data-publicar] button:has-text("Pasar a borrador")').click();
-    await p.locator(".mensaje", { hasText: "volvió a borrador" }).waitFor({ timeout: 30000 });
+    await p.locator('[data-publicar] button:has-text("Ocultar mi página")').click();
+    await p.locator(".mensaje", { hasText: "quedó oculta" }).waitFor({ timeout: 30000 });
   }
   const pub = await p.context().newPage();
   await pub.goto(`${G}/`);
-  chequear(await pub.locator("text=Estamos armando nuestra página").count() > 0, "sin publicar, la página dice “Estamos armando nuestra página”", "la página sin publicar no lo dice");
-  await p.locator('[data-publicar] button:has-text("Publicar mi página")').click();
+  chequear(await pub.locator("[data-pagina-oculta]").count() > 0 && await pub.locator("text=/armando/i").count() === 0 && await pub.locator('a[href="/hacete-socio"]').count() > 0, "oculta, la página muestra solo la portada con “Quiero ser socio” (nunca “armando”)", "la página oculta no muestra la portada con los botones");
+  await p.locator('[data-publicar] button:has-text("Mostrar mi página")').click();
   await p.locator(".mensaje", { hasText: "está publicada" }).waitFor({ timeout: 30000 });
   await pub.reload();
   chequear(await pub.locator("text=Estamos armando nuestra página").count() === 0 && await pub.locator("h1").count() > 0, "publicada, la página se ve completa", "publicada, la página sigue en borrador");

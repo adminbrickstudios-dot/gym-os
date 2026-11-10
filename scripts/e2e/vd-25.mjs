@@ -31,7 +31,7 @@ try {
   ok("dueña: “+N socios” prendido y reseñas 4,8 · 120 guardadas");
   await d.locator('[data-editor-pagina][data-listo="true"]').waitFor({ timeout: 60000 });
   if (await d.locator('[data-estado-pagina="borrador"]').count()) {
-    await d.locator('button:has-text("Publicar mi página")').click();
+    await d.locator('button:has-text("Mostrar mi página")').click();
     await d.locator('[data-estado-pagina="publicada"]').waitFor({ timeout: 30000 });
   }
 
