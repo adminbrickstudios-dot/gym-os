@@ -1,0 +1,38 @@
+# U0.3 · Prueba de humo en PRODUCCIÓN: crear un gimnasio con su dueño, entrar por las puertas, aterrizar en el panel correcto con el
+# rol correcto y dar de baja el gimnasio de prueba. Corre a mano o sola cuando Vercel termina un deploy de producción.
+#   gh workflow run humo-produccion.yml --ref base/2026-11-07
+# Secretos (Settings, Secrets and variables, Actions): BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE (la cuenta de super admin de producción),
+# SUPABASE_DB_URL (ya está; para dar de baja el gimnasio de prueba) y, opcional, la variable PRODUCCION_URL.
+name: Humo producción
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Dirección de producción (vacío = la variable PRODUCCION_URL)"
+        default: ""
+  deployment_status:
+
+jobs:
+  humo:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Humo
+        env:
+          BASE_URL: ${{ inputs.url || vars.PRODUCCION_URL || 'https://gym-os-pied.vercel.app' }}
+          BRIK_ADMIN_MAIL: ${{ secrets.BRIK_ADMIN_MAIL }}
+          BRIK_ADMIN_CLAVE: ${{ secrets.BRIK_ADMIN_CLAVE }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$BRIK_ADMIN_MAIL" ] || [ -z "$BRIK_ADMIN_CLAVE" ]; then echo "::error::Faltan los secretos BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE (la cuenta de super admin de producción)"; exit 1; fi
+          echo "::add-mask::$BRIK_ADMIN_CLAVE"
+          node scripts/medir/humo-produccion.mjs
