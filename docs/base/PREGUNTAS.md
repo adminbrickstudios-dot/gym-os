@@ -243,3 +243,8 @@ Respuesta de Mateo: (vacío)
 - **No se probó con esta prueba:** las funciones sin ningún id real del B para pasarles (tablas vacías en el B); esas dan error de "no existe" y no demuestran nada. Las cubre `permisos-por-rol.test.mjs`.
 - **Las 4 vías de entrada (proxy, layout, servidor).** Leí `src/proxy.ts`, `src/app/panel/layout.tsx` y `contextoPanel`: el proxy solo ELIGE el gimnasio (host, `/g/<slug>` o cookie; "la cookie no da permisos") y cada pantalla pide `panel_gimnasio` a la base, que exige `privado.exigir_equipo`; el error de permiso llega al layout, que muestra "No tenés acceso a este gimnasio" y no contenido. No encontré un camino que muestre datos sin pasar por la base. Falta correr `scripts/e2e/fase-u3.mjs` (escrito, sin correr) para confirmarlo con sesión real.
 - **El mismo mail en dos gimnasios.** Hoy lo único que lo impide es que nadie lo cree: `guardar_equipo` y "dar acceso" son del dueño de ESE gimnasio, y la prueba confirma que un dueño de A no puede dar de alta a nadie en el B. El super admin sí puede darlo de alta en los dos. Recomendado: dejarlo así.
+
+### Carril D · U0.1 (ingreso)
+
+- No toqué `src/app/ingresar` ni `src/proxy.ts` (los arregla B). Lo mío: la prueba de base `login-dueno-nuevo.test.mjs` (alta de gimnasio con dueño, filas que quedan, mail con mayúsculas y espacios, cuenta sin fila o de otro gimnasio, slug inexistente) y el e2e `scripts/e2e/fase-u0-login.mjs`.
+- Pendiente de decidir (de B): `darAcceso` no normaliza el mail adentro; hoy lo hacen los que lo llaman (`admin/acciones.ts`, `panel/equipo/acciones.ts`). Recomendado: normalizar también en `src/lib/cuentas.ts`.
