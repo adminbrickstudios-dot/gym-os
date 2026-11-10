@@ -29,6 +29,18 @@ export function demasiadosIntentos(e: { message?: string; status?: number; code?
   return !!e && (e.status === 429 || /rate.?limit|over_.*_(limit|rate)|too many|security purposes/i.test(`${e.code ?? ""} ${e.message ?? ""}`));
 }
 export const TEXTO_DEMASIADOS_INTENTOS = "Hiciste muchos intentos seguidos. Probá de nuevo en 1 minuto.";
+/** PLAT-08: lo que dice la pantalla según qué pasó de verdad (el código real queda en el registro del servidor). */
+export const TEXTO_SIN_CONFIRMAR = "Tu cuenta todavía no está confirmada. Escribinos y te la activamos.";
+export const TEXTO_DESACTIVADA = "Tu cuenta está desactivada. Escribinos o pedile al dueño que te la active.";
+export const TEXTO_SIN_GIMNASIO = "Tu usuario no tiene un gimnasio asignado. Escribinos y lo resolvemos.";
+export const TEXTO_CREDENCIALES_MALAS = "El mail o la contraseña no son correctos. Si te dieron la cuenta hace poco, pedí que te pongan una contraseña nueva.";
+/** Qué dijo el servicio de cuentas, en una sola palabra clave. */
+export function motivoDeEntrada(e: { message?: string; code?: string; status?: number } | null | undefined): "sin_confirmar" | "desactivada" | "credenciales" {
+  const t = `${e?.code ?? ""} ${e?.message ?? ""}`;
+  if (/email_not_confirmed|not confirmed/i.test(t)) return "sin_confirmar";
+  if (/user_banned|banned|disabled/i.test(t)) return "desactivada";
+  return "credenciales";
+}
 export const TEXTO_CODIGO_MALO = "El código no es correcto o venció. Pedí uno nuevo.";
 
 type Cliente = Awaited<ReturnType<typeof crearClienteServidor>>;
@@ -57,7 +69,7 @@ export async function destinoTrasEntrar(supabase: Cliente, siguiente: string | n
     return {
       error: yo.socios.length
         ? "Sos socio: entrá desde la app de tu gimnasio."
-        : "Tu cuenta no tiene ningún gimnasio. Pedile acceso al dueño.",
+        : TEXTO_SIN_GIMNASIO,
     };
   }
   if (yo.equipo.some((e) => e.gimnasio_id === gimnasioId)) return { destino: destinoSeguro(siguiente, "/panel") };

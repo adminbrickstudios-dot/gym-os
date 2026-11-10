@@ -121,7 +121,14 @@ async function proxyInterno(req: NextRequest) {
       }
       const resto = g[2] && g[2] !== "/" ? g[2] : null;
       let r: NextResponse;
-      if (resto) {
+      if (resto === "/ingresar") {
+        // U0.1/PLAT-02: /g/<slug>/ingresar se queda en esa dirección (no rebota al /ingresar de la plataforma):
+        // muestra la marca de ESE gimnasio y comprueba que la cuenta sea de él. El gimnasio queda también en la cookie.
+        marcarGimnasio(elegido);
+        const destino = req.nextUrl.clone();
+        destino.pathname = "/ingresar";
+        r = NextResponse.rewrite(destino, { request: { headers: cabeceras } });
+      } else if (resto) {
         const destino = req.nextUrl.clone();
         destino.pathname = resto;
         r = NextResponse.redirect(destino);
