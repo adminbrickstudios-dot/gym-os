@@ -14,7 +14,7 @@ try {
   await v.locator("h1").first().waitFor({ timeout: 30000 });
   const ld = JSON.parse(await v.locator('script[type="application/ld+json"]').first().textContent());
   const datos = Array.isArray(ld) ? ld[0] : ld;
-  chequear(datos["@type"] === "ExerciseGym" && datos.name && datos.url, `datos para Google: ${datos["@type"]} “${datos.name}”`, `JSON-LD: ${JSON.stringify(datos).slice(0, 200)}`);
+  chequear([].concat(datos["@type"]).includes("HealthClub") && datos.name && datos.url, `datos para Google: ${[].concat(datos["@type"]).join("+")} “${datos.name}”`, `JSON-LD: ${JSON.stringify(datos).slice(0, 200)}`);
   const direccion = (await v.locator('section[aria-labelledby="ubicacion"]').innerText().catch(() => "")).replace(/\s+/g, " ");
   chequear(!datos.address || direccion.includes(datos.address.streetAddress), `la dirección coincide con la página (${datos.address?.streetAddress ?? "sin dirección"})`, `dirección: ${datos.address?.streetAddress} no está en “${direccion}”`);
   const lunes = (datos.openingHoursSpecification ?? []).find((x) => x.dayOfWeek === "Monday");
