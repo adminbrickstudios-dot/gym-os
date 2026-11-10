@@ -1,92 +1,79 @@
 -- BASE-1 / F0.3 · Lo mínimo que necesitan Pendientes y Para hacer hoy: quién cae en por_vencer, nuevo y no_viene, con sus días.
--- Es la MISMA clasificación de privado.retencion_nucleo (misma membresía vigente, mismas islas de coberturas, mismos cortes y mismo
--- orden), sin lo que ahí no se usa: ni precios, ni plan, ni frecuencia por semana, ni último contacto, ni mensajes, ni los socios sin
--- cobertura vigente o futura (socios.cubierto_hasta <= momento: de ellos solo salen vencido y se_fue). La prueba de base
--- "retencion-cubierto" compara sus columnas (socio_id, nombre, lista, dias) y su orden contra privado.retencion_referencia.
+-- Es la MISMA clasificación de privado.retencion_referencia (misma membresía vigente, mismas islas de coberturas, mismos cortes y mismo
+-- orden), sin lo que ahí no se usa: ni precios, ni plan, ni frecuencia por semana, ni último contacto, ni mensajes.
+-- Cómo trabaja: parte de los socios con cobertura vigente o futura (socios.cubierto_hasta > momento, por el índice
+-- (gimnasio_id, cubierto_hasta)) y de CADA UNO busca lo suyo por índice (su membresía, su primer inicio, sus coberturas, su última visita).
+-- Sin uniones entre listas grandes: el plan no depende de que Postgres adivine bien cuántas filas hay (con 5.000 socios una versión con
+-- uniones entre CTE se volvió cuadrática en Actions). Las islas de coberturas solo se arman para quien tiene una cobertura que EMPIEZA
+-- después del momento (una cuota pagada por adelantado): toda cobertura que termina después del momento y ya empezó se superpone con
+-- las demás en ese instante, forma una sola isla y su fin es cubierto_hasta (el mayor "hasta" de todo).
+-- La prueba de base "retencion-cubierto" compara sus columnas (socio_id, nombre, lista, dias) y su orden contra privado.retencion_referencia.
 
 do $g$ begin
   if to_regprocedure('privado.retencion_referencia(uuid, timestamptz, jsonb, boolean)') is null then raise exception 'Guarda: falta privado.retencion_referencia'; end if;
-  if to_regprocedure('privado.retencion_nucleo(uuid, timestamptz, jsonb, boolean, text[])') is null then raise exception 'Guarda: falta privado.retencion_nucleo'; end if;
+  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'socios' and column_name = 'cubierto_hasta') then
+    raise exception 'Guarda: falta socios.cubierto_hasta (BASE-5)';
+  end if;
 end $g$;
 
 create or replace function privado.retencion_pendientes(p_gimnasio_id uuid, p_momento timestamptz)
 returns table (socio_id uuid, nombre text, lista text, dias int)
 language sql stable set search_path = '' as $$
 with
-g as (select gi.id, gi.zona_horaria as zona, c.* from public.gimnasios gi
+g as materialized (select gi.id, gi.zona_horaria as zona, c.* from public.gimnasios gi
        join public.configuracion_gimnasio c on c.gimnasio_id = gi.id where gi.id = p_gimnasio_id),
-hoy as (select ((p_momento) at time zone g.zona)::date as d from g),
-sus as (
-  select distinct on (s.socio_id) s.*
-    from public.suscripciones s, g
-   where s.gimnasio_id = g.id and s.inicio <= p_momento
-     and (s.baja_en is null or s.baja_en > p_momento - make_interval(days => g.retencion_dias_se_fue))
-   order by s.socio_id, (s.baja_en is null) desc, s.inicio desc
-),
--- Solo los socios con algo cubierto que termina después del momento (los demás no pueden ser por_vencer, nuevo ni no_viene).
-sus_a as materialized (
-  select s.* from sus s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id where so.cubierto_hasta > p_momento
-),
--- Los que ya tienen una cobertura que EMPIEZA después del momento (una cuota pagada por adelantado) necesitan las islas. Los demás no:
--- toda su cobertura que termina después del momento ya empezó, así que se superpone con las otras en ese instante y forma una sola
--- isla cuyo fin es cubierto_hasta (el mayor "hasta" de todo).
-con_futuro as materialized (
-  select distinct c.socio_id from public.coberturas c
-   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.desde > p_momento
-),
-sus_c as materialized (select a.* from sus_a a where a.socio_id in (select socio_id from con_futuro)),
-antiguedad as materialized (
-  select s.socio_id, min(s.inicio) as primer_inicio from public.suscripciones s
-   where s.gimnasio_id = p_gimnasio_id and s.socio_id in (select a.socio_id from sus_a a) group by s.socio_id
-),
-cob as materialized (
-  select c.socio_id, c.desde, c.hasta,
-         max(c.hasta) over (partition by c.socio_id order by c.desde, c.hasta
-                            rows between unbounded preceding and 1 preceding) as hasta_previo
-    from public.coberturas c
-   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus_c s)
-),
-islas_marcadas as materialized (
-  select *, sum(case when hasta_previo is null or desde > hasta_previo then 1 else 0 end)
-              over (partition by socio_id order by desde, hasta) as isla
-    from cob
-),
-islas as materialized (
-  select socio_id, min(desde) as desde, max(hasta) as hasta from islas_marcadas group by socio_id, isla
-),
-estado as materialized (
-  select s.socio_id,
-         max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
-         max(i.hasta) filter (where i.hasta <= p_momento) as ultimo_fin,
-         coalesce(bool_or(i.desde > p_momento), false) as tiene_futuro
-    from sus_c s left join islas i on i.socio_id = s.socio_id
-   group by s.socio_id
-  union all
-  select s.socio_id, so.cubierto_hasta, null::timestamptz, false
-    from sus_a s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id
-   where s.socio_id not in (select socio_id from con_futuro)
-),
+hoy as materialized (select ((p_momento) at time zone g.zona)::date as d from g),
 base as (
   select so.id as socio_id, trim(so.nombre || ' ' || so.apellido) as nombre,
-         (coalesce(g.plan_familiar_activo, false) and gf.titular_id is not null and gf.titular_id <> so.id) as vinculado,
+         (coalesce(g.plan_familiar_activo, false)
+            and exists (select 1 from public.grupos_familiares gf where gf.id = so.grupo_familiar_id and gf.titular_id is not null and gf.titular_id <> so.id)) as vinculado,
          so.dado_de_baja_en, su.baja_en, so.no_escribirle_en is not null as no_escribir,
-         an.primer_inicio, e.fin_actual, e.ultimo_fin, e.tiene_futuro, v.ultimo as ultimo_ingreso,
+         an.primer_inicio,
+         case when e.complejo then e.fin_actual else so.cubierto_hasta end as fin_actual,
+         coalesce(e.complejo and e.tiene_futuro, false) as tiene_futuro,
+         v.ultimo as ultimo_ingreso,
          exists (select 1 from public.congelamientos c where c.suscripcion_id = su.id and c.anulado_en is null
                   and c.desde <= p_momento and coalesce(c.hasta_real, c.hasta_prevista) > p_momento) as congelado,
          exists (select 1 from public.suspensiones x where x.socio_id = so.id and x.desde <= p_momento
                   and (x.hasta is null or x.hasta > p_momento) and (x.levantada_en is null or x.levantada_en > p_momento)) as suspendido
     from public.socios so
-    join sus_a su on su.socio_id = so.id
-    join antiguedad an on an.socio_id = so.id
-    join estado e on e.socio_id = so.id
-    left join public.grupos_familiares gf on gf.id = so.grupo_familiar_id
     cross join g
+    -- La membresía que importa: la activa, o la última si se cerró hace poco (la misma regla de siempre).
+    cross join lateral (
+      select s.id, s.baja_en from public.suscripciones s
+       where s.gimnasio_id = p_gimnasio_id and s.socio_id = so.id and s.inicio <= p_momento
+         and (s.baja_en is null or s.baja_en > p_momento - make_interval(days => g.retencion_dias_se_fue))
+       order by (s.baja_en is null) desc, s.inicio desc limit 1
+    ) su
+    cross join lateral (
+      select min(s.inicio) as primer_inicio from public.suscripciones s where s.gimnasio_id = p_gimnasio_id and s.socio_id = so.id
+    ) an
+    left join lateral (
+      -- Islas de coberturas contiguas, solo si tiene una que empieza después del momento.
+      select bool_or(true) as complejo,
+             max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
+             coalesce(bool_or(i.desde > p_momento), false) as tiene_futuro
+        from (
+          select min(m.desde) as desde, max(m.hasta) as hasta
+            from (
+              select k.desde, k.hasta,
+                     sum(case when k.hasta_previo is null or k.desde > k.hasta_previo then 1 else 0 end) over (order by k.desde, k.hasta) as isla
+                from (
+                  select c.desde, c.hasta,
+                         max(c.hasta) over (order by c.desde, c.hasta rows between unbounded preceding and 1 preceding) as hasta_previo
+                    from public.coberturas c
+                   where c.gimnasio_id = p_gimnasio_id and c.socio_id = so.id and c.anulada_en is null
+                ) k
+            ) m group by m.isla
+        ) i
+       where exists (select 1 from public.coberturas f where f.gimnasio_id = p_gimnasio_id and f.socio_id = so.id and f.anulada_en is null and f.desde > p_momento)
+    ) e on true
     left join lateral (
       select max(i.momento) as ultimo from public.ingresos i
        where i.gimnasio_id = p_gimnasio_id and i.socio_id = so.id and i.anulado_en is null
          and i.resultado <> 'rechazado' and i.momento <= p_momento
     ) v on true
-   where so.gimnasio_id = p_gimnasio_id
+   where so.gimnasio_id = p_gimnasio_id and so.cubierto_hasta > p_momento
 ),
 clasificado as (
   select b.*, hoy.d as hoy_d,
@@ -94,8 +81,6 @@ clasificado as (
       when b.suspendido or b.congelado then null
       when b.dado_de_baja_en is not null and b.dado_de_baja_en <= p_momento then 'se_fue'
       when b.baja_en is not null and b.baja_en <= p_momento then 'se_fue'
-      when b.fin_actual is null and not b.tiene_futuro
-           and hoy.d - ((coalesce(b.ultimo_fin, b.primer_inicio)) at time zone g.zona)::date > g.retencion_dias_vencido then 'se_fue'
       when b.fin_actual is null and not b.tiene_futuro then 'vencido'
       when b.fin_actual is not null
            and ((b.fin_actual - interval '1 microsecond') at time zone g.zona)::date - hoy.d <= g.dias_aviso then 'por_vencer'
