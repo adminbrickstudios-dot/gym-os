@@ -37,6 +37,8 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
   }
+  // U1: los gimnasios cuyo alta quedó a medias (el dueño todavía no tiene cuenta).
+  const sinAcceso = new Set((await rpc<{ gimnasio_id: string; duenos_sin_cuenta: number }[]>("admin_gimnasios").catch(() => [])).filter((x) => x.duenos_sin_cuenta > 0).map((x) => x.gimnasio_id));
   const exportar = new URLSearchParams(Object.entries(p).filter(([, v]) => v) as [string, string][]).toString();
   const hayFiltro = Object.values(args).some((v) => v);
   const ciudades = [...new Set(filas.map((f) => f.ciudad).filter((c): c is string => !!c))];
@@ -87,6 +89,7 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
                     {!g.es_demo && <span className={`pildora ${PILDORA[g.color]} align-middle`}>{SALUD.find(([k]) => k === g.color)?.[1]}</span>}{" "}
                     {g.suspendido && !g.para_borrar && <span className="pildora pildora-rojo align-middle">pausado</span>}{" "}
                     {g.para_borrar && <span className="pildora pildora-rojo align-middle">para borrar</span>}{" "}
+                    {sinAcceso.has(g.gimnasio_id) && <Link href={`/admin/${g.gimnasio_id}`} className="pildora pildora-amarillo align-middle" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>}{" "}
                     {g.demo_vencida && <span className="pildora pildora-amarillo align-middle">demo vencida</span>}{" "}
                     <span className="pildora align-middle" data-abono={g.abono}>{nombreAbono(g.abono)}{g.plan ? ` · ${g.plan}` : ""}</span>
                   </p>

@@ -1,6 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { clienteServicio } from "@/lib/supabase/servicio";
+import { traducirErrorSupabase } from "@/lib/admin/errores-supabase";
 
 // Cuentas del equipo con la clave de servicio. Quien llama YA validó el
 // permiso en la base (persona_para_dar_acceso / cuenta_para_nueva_clave /
@@ -28,6 +29,12 @@ export const mailValido = (m: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);
  * crea con una contraseña provisoria y la devuelve para mostrarla UNA vez.
  */
 export async function darAcceso(equipoId: string, email: string, nombre: string, elegida?: string): Promise<{ contrasena?: string }> {
+  // U1: un error de la clave de servicio nunca sale como "Invalid API key": sale en palabras y con qué hacer.
+  try { return await darAccesoSinTraducir(equipoId, email, nombre, elegida); }
+  catch (e) { throw new Error(traducirErrorSupabase((e as Error).message)); }
+}
+
+async function darAccesoSinTraducir(equipoId: string, email: string, nombre: string, elegida?: string): Promise<{ contrasena?: string }> {
   const servicio = clienteServicio();
   const { data: existente, error: errBusca } = await servicio.rpc("usuario_por_mail", { p_email: email });
   if (errBusca) throw new Error(`No se pudo buscar la cuenta: ${errBusca.message}`);
@@ -47,7 +54,9 @@ export async function darAcceso(equipoId: string, email: string, nombre: string,
 /** Pone una contraseña provisoria nueva y la devuelve para mostrarla una vez. */
 export async function nuevaContrasena(usuarioId: string, elegida?: string): Promise<string> {
   const contrasena = elegida ?? contrasenaProvisoria();
-  const { data, error } = await clienteServicio().auth.admin.updateUserById(usuarioId, { password: contrasena });
-  if (error || !data.user) throw new Error(`No se pudo cambiar la contraseña: ${error?.message ?? "la cuenta no existe"}`);
+  try {
+    const { data, error } = await clienteServicio().auth.admin.updateUserById(usuarioId, { password: contrasena });
+    if (error || !data.user) throw new Error(`No se pudo cambiar la contraseña: ${error?.message ?? "la cuenta no existe"}`);
+  } catch (e) { throw new Error(traducirErrorSupabase((e as Error).message)); }
   return contrasena;
 }

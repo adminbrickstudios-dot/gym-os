@@ -145,6 +145,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <p className="texto-suave text-sm mt-1">
                     👑 {g.duenos.join(", ") || "Sin dueño"}
                     {g.duenos_sin_cuenta > 0 && <span className="pildora pildora-amarillo ml-2">{g.duenos_sin_cuenta === 1 ? "el dueño no tiene acceso" : `${g.duenos_sin_cuenta} dueños sin acceso`}</span>}
+                    {g.duenos_sin_cuenta > 0 && <Link href={`/admin/${g.gimnasio_id}`} className="pildora pildora-amarillo ml-2" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>}
                   </p>
                   {!g.es_demo && sv(g).motivos.length > 0 && <p className="texto-suave text-sm mt-1" data-motivos>⚑ {sv(g).motivos.join(" · ")}</p>}
                   <p className="texto-tenue text-sm mt-1 break-all">🌐 {g.hosts.join(" · ")}</p>

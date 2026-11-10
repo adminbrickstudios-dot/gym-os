@@ -14,7 +14,7 @@ import { clienteServicio } from "@/lib/supabase/servicio";
 
 export type EstadoAlta = {
   error?: string;
-  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; bienvenida?: { texto: string; wa: string | null } };
+  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; pendiente?: boolean; bienvenida?: { texto: string; wa: string | null } };
 };
 
 const COLOR = /^#[0-9a-fA-F]{6}$/;
@@ -37,15 +37,22 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   const base = dominioBase();
   if (!base) return { error: "Falta NEXT_PUBLIC_DOMINIO_BASE en Vercel (Settings → Environment Variables) y redeployar." };
 
+  // U1: si un alta anterior se cortó a la mitad (el gimnasio quedó sin acceso para el dueño), el reintento con la misma
+  // dirección termina ESE gimnasio: no crea otro ni dice "ya existe".
+  const pendiente = await altaPendiente(slug);
   let r: { gimnasio_id: string; equipo_id: string; host: string };
-  try {
-    r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
-  } catch (e) {
-    return { error: (e as Error).message };
+  if (pendiente) {
+    r = { ...pendiente, host: "" };
+  } else {
+    try {
+      r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
+    } catch (e) {
+      return { error: (e as Error).message };
+    }
   }
   revalidatePath("/admin");
   // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde).
-  const tipo = String(f.get("tipo") ?? "");
+  const tipo = pendiente ? "" : String(f.get("tipo") ?? "");
   let avisoPlantilla = "";
   if (tipo) {
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
@@ -53,7 +60,7 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   }
   // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
   const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
-  if (COLOR.test(acento) && COLOR.test(fondo)) {
+  if (!pendiente && COLOR.test(acento) && COLOR.test(fondo)) {
     try { await rpc("admin_guardar_marca", { p_gimnasio_id: r.gimnasio_id, p_acento: acento, p_fondo: fondo }); }
     catch (e) { avisoPlantilla += ` No se pudieron guardar los colores: ${(e as Error).message}.`; }
   }
@@ -64,8 +71,21 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla,
       bienvenida: contrasena ? bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? "")) : undefined } };
   } catch (e) {
-    return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
+    // U1: el gimnasio queda creado y se dice qué falta y qué hacer; "Terminar alta" está en su ficha y en la lista.
+    return { ok: { ...creado, pendiente: true, aviso: `El alta quedó a medias: ${nombre} está creado, pero el dueño todavía no tiene acceso. ${(e as Error).message} Cuando lo arregles, entrá a la ficha y usá “Terminar alta: dar acceso al dueño” (o repetí este alta con la misma dirección: no crea otro gimnasio).` } };
   }
+}
+
+/** Un alta cortada: el gimnasio de esa dirección existe y su dueño todavía no tiene cuenta. Devuelve el gimnasio y la persona del equipo a la que falta darle acceso. */
+async function altaPendiente(slug: string): Promise<{ gimnasio_id: string; equipo_id: string } | null> {
+  try {
+    const lista = await rpc<{ gimnasio_id: string; slug: string; duenos_sin_cuenta: number }[]>("admin_gimnasios");
+    const g = lista.find((x) => x.slug === slug && x.duenos_sin_cuenta > 0);
+    if (!g) return null;
+    const d = await rpc<{ equipo: { equipo_id: string; rol: string; activo: boolean; es_soporte: boolean; tiene_cuenta: boolean }[] }>("admin_gimnasio", { p_gimnasio_id: g.gimnasio_id });
+    const e = d.equipo.find((p) => p.rol === "dueno" && p.activo && !p.es_soporte && !p.tiene_cuenta);
+    return e ? { gimnasio_id: g.gimnasio_id, equipo_id: e.equipo_id } : null;
+  } catch { return null; }
 }
 
 export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string };
