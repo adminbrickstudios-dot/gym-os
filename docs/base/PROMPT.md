@@ -53,7 +53,9 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 
    El primer pedido de Mateo, textual, está en `PEDIDO-ORIGINAL.md`: ante la
    duda de qué quiso decir, se lee ahí.
-3. Si existe `docs/base/CAMBIOS-MATEO.md` con líneas sin ✅, **eso va primero**:
+3. Leé **"DÓNDE QUEDÉ"** arriba de `PROGRESO.md` y arrancá exactamente de
+   ahí. Si lo que estaba a medias ya está en ✅, tomá el próximo ítem.
+4. Si existe `docs/base/CAMBIOS-MATEO.md` con líneas sin ✅, **eso va primero**:
    es lo que Mateo vio en su pasada.
 
 ## La vuelta
@@ -62,14 +64,18 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
    orden (la fase U va antes que todo).
 2. **Antes de codear, buscá lo que ya existe** (código, base, e2e) y abrilo con
    sesión real y la app compilada. Casi todo existe: completá, no rehagas.
-3. Escribí el plan en 3 a 6 líneas debajo del ítem (en `PROGRESO.md` si es un
+3. **Pensá antes de construir** (`PENSAR.md`): intención de Mateo, cómo lo
+   resuelve un producto profesional, las 5 formas en que se rompe, lo que no
+   pidió pero necesita, y la decisión. Después de construir, probás esas 5
+   formas.
+4. Escribí el plan en 3 a 6 líneas debajo del ítem (en `PROGRESO.md` si es un
    BASE-*, si no en el archivo de detalle).
-4. Hacelo por capas: **base → lógica → pantalla → prueba**. Cada capa, commit y
+5. Hacelo por capas: **base → lógica → pantalla → prueba**. Cada capa, commit y
    push con un mensaje que dice qué cambió y por qué.
-5. **Verificá ejecutando:**
+6. **Verificá ejecutando:**
    - `npm run db:pruebas` si tocaste la base (con `scripts/db/local.sh nueva`).
    - El e2e del recorrido, con sesión real y `APP_MODO=produccion`.
-   - Las 19 reglas de `FLUIDEZ.md` en lo que tocaste.
+   - Las 21 reglas de `FLUIDEZ.md` en lo que tocaste.
    - Capturas en compu y celular **mirándolas**.
    - `npm run verificar`.
    - **Lo pesado (build, e2e, barrido) en GitHub Actions**, no en la compu de
@@ -80,12 +86,13 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 
    Los e2e en tandas de 20 como máximo, cada tanda con la base nueva. Nunca 200
    seguidos: se queda sin memoria y arrastra datos de un recorrido a otro.
-6. El ítem pasa a ✅ **solo si cumple su LISTO SI completo**. Lo que falta no se
+7. El ítem pasa a ✅ **solo si cumple su LISTO SI completo**. Lo que falta no se
    esconde: queda 🟡 con qué falta, y la vuelta siguiente lo sigue.
-7. Al cerrar una fase, o un ítem grande, publicá (abajo) y reescribí el
+8. Al cerrar una fase, o un ítem grande, publicá (abajo) y reescribí el
    "RESUMEN PARA MATEO" de arriba de `PROGRESO.md`: qué hay publicado, qué
    sigue, qué tiene que hacer él.
-8. Al terminar la vuelta: commit y push, y cerrá los navegadores de Playwright,
+9. Al terminar la vuelta: actualizá **"DÓNDE QUEDÉ"** arriba de `PROGRESO.md`
+   (el próximo ítem exacto y lo que quedó a medias), commit y push, y cerrá los navegadores de Playwright,
    la app y los procesos que levantaste.
 
 ## Reglas que no se negocian
@@ -131,7 +138,10 @@ datos → `estado` no muestra ningún gimnasio real (sin `[demo]`):
 2. Rama `publicar/base-<qué>` en ese commit, y push.
 3. Actions → Base de datos → `prevuelo` en esa rama → si da verde, `aplicar`.
 4. PR a `main`, merge, y esperar el deploy de Vercel en verde.
-5. Probar en producción lo que cambió, y `/ingresar`, `/super` y la página del
+5. **Prueba de humo en producción** (U0.3 y CAL-07, `humo-produccion.yml` en
+   Actions): crear un gimnasio de prueba, entrar por las 3 puertas, crear un
+   socio, registrar un ingreso y cobrar en el demo. Si falla, se arregla antes
+   que cualquier otra cosa. Además, probar lo que cambió, y `/ingresar`, `/super` y la página del
    demo.
 6. Anotar en `PROGRESO.md` qué se publicó y a qué hora.
 

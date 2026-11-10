@@ -9,10 +9,10 @@ toca las de otro.
 
 | Carril | Quién | Ítems de `RECTA-FINAL.md` | Carpetas suyas (solo él las toca) |
 |---|---|---|---|
-| A · Velocidad y recepción | **Principal** | F0, F1.1, F1.3, F1.6, F1.9, F3, F8 | `src/proxy.ts`, `src/lib/panel/`, `src/app/panel/layout.tsx`, `src/app/panel/entrada/`, `src/app/panel/page.tsx`, componentes de la Entrada y del Marco, `src/app/globals.css`, `next.config.*`, `scripts/e2e/` |
-| B · Super admin | Ayudante 1 | F2 entera | `src/app/admin/`, `src/lib/admin/` (si se crea) |
-| C · Socio, página e ingreso | Ayudante 2 | F1.2, F1.8, FA-14 a FA-18 de la app | `src/app/app/`, `src/app/ingresar/`, `src/app/hacete-socio/`, `src/app/page.tsx` y la página del gimnasio, `src/lib/app/`, `src/lib/landing*` |
-| D · Diseño y detalles del panel | Ayudante 3 | F1.4, F1.5, F1.7, F4, F5 y F6 de pantallas del panel que no son la Entrada ni el Inicio | El resto de `src/app/panel/*` (cada pantalla en su carpeta), `src/components/` salvo la Entrada y el Marco |
+| A · Velocidad, login y plataforma | **Principal** | U0, U3, P1 a P3, F0, F1.1, F1.3, F1.6, F1.9, F3, F8 | `src/proxy.ts`, `src/lib/panel/`, `src/app/panel/layout.tsx`, `src/app/panel/entrada/`, `src/app/panel/page.tsx`, componentes de la Entrada y del Marco, `src/app/globals.css`, `next.config.*`, `scripts/e2e/` |
+| B · Super admin | Ayudante 1 | U1, U2, P4 a P7, P9, F2 entera, F9.1 | `src/app/admin/`, `src/lib/admin/` (si se crea) |
+| C · Socio, página e ingreso | Ayudante 2 | U4, P8, F9.3, F1.2, F1.8, FA-14 a FA-18 de la app | `src/app/app/`, `src/app/ingresar/`, `src/app/hacete-socio/`, `src/app/page.tsx` y la página del gimnasio, `src/lib/app/`, `src/lib/landing*` |
+| D · Diseño y detalles del panel | Ayudante 3 | F9.2, F1.4, F1.5, F1.7, F4, F5 y F6 de pantallas del panel que no son la Entrada ni el Inicio | El resto de `src/app/panel/*` (cada pantalla en su carpeta), `src/components/` salvo la Entrada y el Marco |
 
 Cuando una fase de un carril se termina, el principal le asigna al ayudante lo
 siguiente de la lista que no choque con otro carril. F7 (propuestas) se reparte
