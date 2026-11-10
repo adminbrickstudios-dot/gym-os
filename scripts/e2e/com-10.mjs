@@ -52,7 +52,7 @@ try {
 
   await d.goto(`${G}/panel/resultado`);
   const r = d.locator("[data-encuesta-resultado]");
-  chequear(await aparece(r, 60000) && /recomiendan/.test(await r.innerText()), "el Resultado muestra “⭐ ¿Nos recomiendan?” con el puntaje y los que recomiendan", "el Resultado no muestra la encuesta");
+  chequear(await aparece(r, 60000) && /recomiendan/.test(await r.innerText()), "el Resultado muestra “¿Nos recomiendan?” con el puntaje y los que recomiendan", "el Resultado no muestra la encuesta");
   for (const p of [d, so]) if (p.errores.length) falla(p.errores.join(" | "));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

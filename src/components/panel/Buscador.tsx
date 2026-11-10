@@ -11,6 +11,7 @@ import { Hoja } from "@/components/ui/Hoja";
 import { PuntoEstado } from "./Estado";
 import { abrirCobrar } from "./cobrar/evento";
 import { EVENTO_ABRIR_ENTRADA_CON } from "./VentanaEntrada";
+import { Icono } from "@/components/ui/Icono";
 
 /** Una fila de la lista: lo que Enter hace con ella. */
 type Fila =
@@ -131,10 +132,10 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
   return (
     <>
       {compacto ? (
-        <button ref={disparador} type="button" onClick={() => setAbierto(true)} className="boton !min-h-11 !px-3" aria-label="Buscar">🔍</button>
+        <button ref={disparador} type="button" onClick={() => setAbierto(true)} className="boton !min-h-11 !px-3" aria-label="Buscar"><Icono nombre="buscar" /></button>
       ) : (
         <button ref={disparador} type="button" onClick={() => setAbierto(true)} className="boton w-full !justify-between texto-suave !font-medium">
-          <span>🔍 Buscar…</span>
+          <span><Icono nombre="buscar" /> Buscar…</span>
           <kbd className="text-xs texto-tenue font-sans">Ctrl K</kbd>
         </button>
       )}
@@ -151,14 +152,14 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
               className="w-full bg-transparent px-5 h-16 text-lg outline-none border-b border-[var(--borde)]"
             />
             <div className="max-h-[60vh] overflow-y-auto p-2" data-buscador-lista>
-              {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-xl w-full">⚠️ {error}</p>}
+              {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-xl w-full"><Icono nombre="alerta" /> {error}</p>}
               {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-xl w-full" role="status" data-buscador-tarea-ok>✓ {aviso}</p>}
               {pista && <p className="px-3 py-2 text-sm texto-suave" data-buscador-pista>Falta {pista.verbo === "tarea" ? "qué hay que hacer" : pista.verbo === "entrada" ? "el DNI o el nombre" : "a quién"}: escribí algo más después de “{texto.trim()}”.</p>}
               {!texto.trim() && ejemplos.length > 0 && (
                 <div className="px-3 pt-2 pb-1" data-buscador-ejemplos>
                   <p className="titulo-grupo pb-1">Probá escribir</p>
                   <div className="flex flex-wrap gap-2">
-                    {ejemplos.map((e) => <button key={e} type="button" className="pildora !min-h-9" onClick={() => { setTexto(e); campo.current?.focus(); }}>{e}</button>)}
+                    {ejemplos.map((e) => <button key={e} type="button" className="pildora !min-h-9" onClick={() => { setTexto(e); campo.current?.focus(); }}><Icono nombre={e} /></button>)}
                   </div>
                 </div>
               )}
@@ -183,7 +184,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                   const a = f.accion;
                   const cuerpo = (
                     <>
-                      <span className="text-xl w-7 text-center flex-none" aria-hidden>{a.emoji}</span>
+                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={a.emoji} /></span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold truncate">{a.titulo}</span>
                         {a.detalle && <span className="block text-sm texto-suave truncate">{a.detalle}</span>}
@@ -214,7 +215,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                             <span className="block text-sm texto-suave truncate">{s.texto}</span>
                           </span>
                         </Link>
-                        {puedeCobrar && !s.dado_de_baja && <button type="button" className="boton !min-h-11 flex-none" data-buscador-cobrar onClick={() => cobrarA(s.socio_id)}>💵 Cobrar</button>}
+                        {puedeCobrar && !s.dado_de_baja && <button type="button" className="boton !min-h-11 flex-none" data-buscador-cobrar onClick={() => cobrarA(s.socio_id)}><Icono nombre="plata" /> Cobrar</button>}
                       </div>
                     </div>
                   );
@@ -226,7 +227,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                       {cab}
                       <Link href={`/panel/ayuda?p=${q.id}`} onClick={() => setAbierto(false)} {...marcaProps} data-buscador-ayuda={q.id}
                         className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
-                        <span className="text-xl w-7 text-center flex-none" aria-hidden>❓</span>
+                        <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre="ayuda" /></span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-semibold truncate">{q.pregunta}</span>
                           <span className="block text-sm texto-suave truncate">{q.pantalla}</span>
@@ -241,7 +242,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                     {cab}
                     <Link href={s.ruta} onClick={() => setAbierto(false)} {...marcaProps}
                       className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
-                      <span className="text-xl w-7 text-center flex-none" aria-hidden>{s.emoji}</span>
+                      <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={s.emoji} /></span>
                       <span className="font-semibold flex-none">{s.titulo}</span>
                       <span className="texto-tenue text-sm truncate">{s.descripcion}</span>
                     </Link>

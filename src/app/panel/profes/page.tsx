@@ -32,7 +32,7 @@ export default async function Profes({ searchParams }: { searchParams: Promise<{
     const anterior = moverMes(mes, -1), siguiente = moverMes(mes, 1);
     return (
       <div className="space-y-8">
-        <Encabezado emoji="🧑‍🏫" titulo="Liquidación de profes" bajada={`Lo que se le debe a cada profe en ${nombreMes(mes)}${mes === actual ? ", hasta hoy" : ""}. Sale de las clases que dio y de quiénes vinieron: si corregís una asistencia, se recalcula solo.`} />
+        <Encabezado icono="persona" titulo="Liquidación de profes" bajada={`Lo que se le debe a cada profe en ${nombreMes(mes)}${mes === actual ? ", hasta hoy" : ""}. Sale de las clases que dio y de quiénes vinieron: si corregís una asistencia, se recalcula solo.`} />
         <nav className="flex flex-wrap items-center gap-2" aria-label="Mes">
           <Link href={`/panel/profes?mes=${anterior.slice(0, 7)}`} className="pestana" data-mes-anterior>← {nombreMes(anterior).split(" ")[0]}</Link>
           <span className="pestana" aria-current="page">{nombreMes(mes)}</span>

@@ -26,7 +26,7 @@ export default async function EditarRutina({ searchParams }: { searchParams: Pro
     return (
       <>
         <Link href="/panel/rutinas" className="texto-suave">← Rutinas</Link>
-        <Encabezado emoji="📋" titulo={r ? r.nombre : "Nueva rutina"} bajada="Por días: en cada uno, los ejercicios con series y repeticiones." />
+        <Encabezado icono="lista" titulo={r ? r.nombre : "Nueva rutina"} bajada="Por días: en cada uno, los ejercicios con series y repeticiones." />
         <div className="space-y-10">
           {id && r && <AccionesRutina rutinaId={id} nombre={r.nombre} plantilla={meta?.plantilla ?? false} asignados={meta?.asignados ?? 0} />}
           {id && r && <AsignarRutina rutinaId={id} />}

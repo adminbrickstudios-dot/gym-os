@@ -19,6 +19,7 @@ import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
 import { contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -41,11 +42,11 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       return (
         <main className="min-h-dvh flex items-center px-4">
           <div className="mx-auto w-full max-w-xl">
-            <Aviso emoji="🔒" titulo="No tenés acceso a este gimnasio">
+            <Aviso icono="candado" titulo="No tenés acceso a este gimnasio">
               Tu usuario no es parte del equipo acá. Si debería serlo, pedile al dueño que te agregue.
               <div className="mt-6 flex flex-wrap gap-2">
-                {enPlataforma && <Link href="/elegir" className="boton boton-principal">🔁 Elegir otro gimnasio</Link>}
-                <form action="/salir" method="post"><button className="boton">🚪 Cerrar sesión</button></form>
+                {enPlataforma && <Link href="/elegir" className="boton boton-principal"><Icono nombre="repetir" /> Elegir otro gimnasio</Link>}
+                <form action="/salir" method="post"><button className="boton"><Icono nombre="puerta" /> Cerrar sesión</button></form>
               </div>
             </Aviso>
           </div>
@@ -86,7 +87,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   return (
     <>
       <RegistrarSesion />
-      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+      <Marco panel={panel} tema={(await cookies()).get("tema")?.value ?? null} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}

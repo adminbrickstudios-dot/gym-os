@@ -52,14 +52,17 @@ export function seLeePoco(acento: string, fondo: string): boolean {
 export type ColoresMarca = { color_acento: string; color_fondo: string };
 
 /** Variables CSS y atributo de tono para el wrapper de una pantalla del gimnasio. */
-export function propsMarca(m: ColoresMarca): { style: CSSProperties; "data-tono": "oscuro" | "claro" } {
+export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
+/** `tema`: lo que eligió la persona en Mi cuenta (cookie `tema`, D37). Si elige claro u oscuro manda sobre el fondo del gimnasio (el acento sigue siendo el del gimnasio). */
+export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSProperties; "data-tono": "oscuro" | "claro" } {
+  const fondo = tema === "oscuro" ? FONDO_OSCURO : tema === "claro" ? FONDO_CLARO : m.color_fondo;
   return {
     style: {
       ["--acento" as string]: m.color_acento,
       ["--acento-texto" as string]: textoSobre(m.color_acento),
-      ["--fondo" as string]: m.color_fondo,
-      background: m.color_fondo,
+      ["--fondo" as string]: fondo,
+      background: fondo,
     },
-    "data-tono": tonoDeFondo(m.color_fondo),
+    "data-tono": tonoDeFondo(fondo),
   };
 }

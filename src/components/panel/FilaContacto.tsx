@@ -5,6 +5,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { useOptimistic, useState, useTransition } from "react";
 import { anotarContacto } from "@/app/panel/retencion/acciones";
 import { marcarAvisado } from "@/app/panel/avisos/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * Un socio para contactar: el porqué, el mensaje armado por WhatsApp y,
@@ -13,11 +14,11 @@ import { marcarAvisado } from "@/app/panel/avisos/acciones";
 export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista, ultimo, puedeAnotar, cobrar = false, aviso, tarea = false }: {
   socioId: string; nombre: string; texto: string; detalle?: string | null; whatsapp: string | null; lista: string;
   ultimo?: string | null; puedeAnotar: boolean;
-  /** AUD-7: "💵 Cobrar" lleva a Vender con su cuota cargada (si Vender está prendido y el rol cobra). */
+  /** AUD-7: "Cobrar" lleva a Vender con su cuota cargada (si Vender está prendido y el rol cobra). */
   cobrar?: boolean;
   /** VEH-1: tocar WhatsApp también deja "avisado ✓" en la bandeja (la recepción incluida). */
   aviso?: { clave: string; referencia: string } | null;
-  /** COM-4: "📌 Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
+  /** COM-4: "Tarea" para anotar algo sobre este socio (llamarlo otro día, por ejemplo). */
   tarea?: boolean;
 }) {
   const ruta = usePathname();
@@ -43,14 +44,14 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
         </div>
         <div className="flex flex-wrap gap-2">
           {whatsapp
-            ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}>💬 WhatsApp</a>
-            : <span className="pildora">📵 Sin teléfono</span>}
-          {cobrar && <BotonCobrar socioId={socioId} cuota origen={ruta.includes("retencion") ? "retencion" : "vencen"} className="boton !min-h-11">💵 Cobrar</BotonCobrar>}
-          {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}>🙌 Dice que vuelve</button>}
-          {tarea && <LinkPanel href={`/panel/tareas?socio=${socioId}`} className="boton !min-h-11">📌 Tarea</LinkPanel>}
+            ? <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={() => { if (aviso) void marcarAvisado(socioId, aviso.clave, aviso.referencia); if (puedeAnotar && !anotado) anotar("enviado"); }}><Icono nombre="mensaje" /> WhatsApp</a>
+            : <span className="pildora"><Icono nombre="prohibido" /> Sin teléfono</span>}
+          {cobrar && <BotonCobrar socioId={socioId} cuota origen={ruta.includes("retencion") ? "retencion" : "vencen"} className="boton !min-h-11"><Icono nombre="plata" /> Cobrar</BotonCobrar>}
+          {puedeAnotar && !anotado && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => anotar("vuelve")}><Icono nombre="persona" /> Dice que vuelve</button>}
+          {tarea && <LinkPanel href={`/panel/tareas?socio=${socioId}`} className="boton !min-h-11"><Icono nombre="chincheta" /> Tarea</LinkPanel>}
         </div>
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }

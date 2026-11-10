@@ -57,7 +57,7 @@ try {
   anterior = await sec.locator('input[name="renovacion"]').evaluateAll((l) => l.findIndex((x) => x.checked));
   await sec.locator('input[name="renovacion"]').nth(2).check();
   await sec.locator("[data-dia-fijo] input[type=number]").first().fill(String(X));
-  await sec.locator('button:has-text("💾 Guardar")').click();
+  await sec.locator('button:has-text("Guardar")').click();
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   await abrir(d);
   const modo = await d.locator("[data-modo-cobro]").innerText();
@@ -82,7 +82,7 @@ try {
   await irACobros(d);
   sec = d.locator("[data-reglas-vencimiento]");
   await sec.locator('input[name="renovacion"]').nth(Math.max(anterior, 0)).check();
-  await sec.locator('button:has-text("💾 Guardar")').click();
+  await sec.locator('button:has-text("Guardar")').click();
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok("la regla del gimnasio vuelve a como estaba");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);

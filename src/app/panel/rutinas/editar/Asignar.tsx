@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { asignarRutinaVarios } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** RUT-2 + VD-20: buscar socios y darles esta rutina, de a uno o de a varios, con la fecha en que conviene cambiarla. */
 export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
@@ -31,10 +32,10 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
   });
   return (
     <section className="tarjeta p-4 sm:p-5 space-y-3" data-asignar-rutina>
-      <h2 className="titulo text-2xl">👤 Asignar a socios</h2>
+      <h2 className="titulo text-2xl"><Icono nombre="persona" /> Asignar a socios</h2>
       <p className="texto-suave text-sm">La ven en su app, día por día, y anotan sus pesos. Si tenían otra, se reemplaza. Tildá varios para asignarla de una vez.</p>
       <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
-        <input className="campo" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="🔍 Buscar socio por nombre" aria-label="Buscar socio para asignar" />
+        <input className="campo" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Buscar socio por nombre" aria-label="Buscar socio para asignar" />
         <label className="space-y-1"><span className="etiqueta">Cambiarla el (opcional)</span>
           <input className="campo" type="date" value={cambiarEn} onChange={(e) => setCambiarEn(e.target.value)} aria-label="Fecha de cambio" data-cambiar-en /></label>
       </div>
@@ -47,7 +48,7 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
             )}
             <PuntoEstado color={s.color} />
             <span className="flex-1 min-w-0 truncate font-semibold">{s.nombre}</span>
-            <Link href={`/panel/rutinas/socio?id=${s.socio_id}`} className="boton-texto texto-suave text-sm" aria-label={`Progreso de ${s.nombre}`}>🏆 Progreso</Link>
+            <Link href={`/panel/rutinas/socio?id=${s.socio_id}`} className="boton-texto texto-suave text-sm" aria-label={`Progreso de ${s.nombre}`}><Icono nombre="trofeo" /> Progreso</Link>
             {hechos.includes(s.socio_id) ? <span className="pildora pildora-verde">✓ Asignada</span> : (
               <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => asignar([s.socio_id])}>Asignar</button>
             )}
@@ -61,7 +62,7 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
         </div>
       )}
       {aviso && <p role="status" className="pildora pildora-verde whitespace-normal" data-aviso-asignada>{aviso}</p>}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

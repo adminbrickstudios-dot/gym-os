@@ -3,6 +3,7 @@
 // recorta cuadrada y se achica a 480 px en el navegador, y la sube el servidor.
 import { useEffect, useRef, useState, useTransition } from "react";
 import { confirmarFotoSubida, guardarFoto, quitarFoto } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const LADO = 480;
 
@@ -63,7 +64,7 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
           // eslint-disable-next-line @next/next/no-img-element
           ? <img src={`/panel/socios/${socioId}/foto?v=${version}`} alt="" className="w-full h-full object-cover" />
           : iniciales}
-        <span className="absolute bottom-0 inset-x-0 text-xs bg-black/50 text-white py-0.5 opacity-80" aria-hidden>📷</span>
+        <span className="absolute bottom-0 inset-x-0 text-xs bg-black/50 text-white py-0.5 opacity-80" aria-hidden><Icono nombre="camara" /></span>
       </button>
       {subidaPorSocio && !confirmada && version && (
         <div className="mt-2 max-w-40 space-y-1" data-foto-sin-confirmar>
@@ -76,21 +77,21 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
       {abierta && (
         <div className="fixed inset-0 z-50 bg-black/70 grid place-items-center p-4" role="dialog" aria-label="Foto del socio">
           <div className="tarjeta p-5 w-full max-w-md space-y-4">
-            <p className="titulo text-2xl">📷 Foto del socio</p>
+            <p className="titulo text-2xl"><Icono nombre="camara" /> Foto del socio</p>
             <p className="text-sm texto-tenue">Para reconocerlo en la puerta. Se guarda privada: solo la ve el equipo.</p>
             {camara === "lista" || camara === "pidiendo"
               ? <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" data-video />
               : <p className="texto-suave">No hay cámara disponible (o no diste permiso). Elegí una foto.</p>}
-            {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+            {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
             <div className="flex flex-wrap gap-2">
-              {camara === "lista" && <button type="button" className="boton boton-principal" disabled={subiendo} onClick={sacar}>{subiendo ? "Guardando…" : "📸 Sacar foto"}</button>}
+              {camara === "lista" && <button type="button" className="boton boton-principal" disabled={subiendo} onClick={sacar}>{subiendo ? "Guardando…" : "Sacar foto"}</button>}
               <label className={`boton cursor-pointer ${camara === "sin" ? "boton-principal" : ""}`}>
-                🖼️ Elegir una imagen
+                <Icono nombre="imagen" /> Elegir una imagen
                 <input type="file" accept="image/*" capture="user" className="sr-only" aria-label="Elegir una imagen"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) void elegir(f); e.target.value = ""; }} />
               </label>
               {version && <button type="button" className="boton texto-suave" disabled={subiendo}
-                onClick={() => empezar(async () => { const r = await quitarFoto(socioId); if (r.error) setError(r.error); else cerrar(); })}>🗑️ Quitar la foto</button>}
+                onClick={() => empezar(async () => { const r = await quitarFoto(socioId); if (r.error) setError(r.error); else cerrar(); })}><Icono nombre="papelera" /> Quitar la foto</button>}
               <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
             </div>
           </div>

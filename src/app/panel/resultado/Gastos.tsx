@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { CATEGORIAS_GASTO, NOMBRE_CATEGORIA, type GananciaMes } from "@/lib/gastos";
 import { agregarGasto, quitarGasto, repetirGastos } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type GastosMes = GananciaMes;
 
@@ -49,7 +50,7 @@ export function Gastos({ g }: { g: GananciaMes }) {
         <ul className="tarjeta divide-y divide-[var(--borde)] mb-4">
           {g.fijos.map((x) => (
             <li key={x.fijo_id} className="flex flex-wrap items-center gap-3 px-4 py-2 min-h-14" data-fijo>
-              <span className="flex-1 min-w-0">{NOMBRE_CATEGORIA[x.categoria] ?? x.categoria}{x.detalle && <span className="texto-suave"> · {x.detalle}</span>} <span className="pildora">🔁 fijo</span></span>
+              <span className="flex-1 min-w-0">{NOMBRE_CATEGORIA[x.categoria] ?? x.categoria}{x.detalle && <span className="texto-suave"> · {x.detalle}</span>} <span className="pildora"><Icono nombre="repetir" /> fijo</span></span>
               <span className="numero">{formatearPesos(x.monto)}</span>
             </li>
           ))}
@@ -63,7 +64,7 @@ export function Gastos({ g }: { g: GananciaMes }) {
           ))}
         </ul>
       ) : g.hay_gastos_mes_anterior ? (
-        <button type="button" className="boton mb-4" disabled={ocupado} onClick={() => hacer(() => repetirGastos(g.mes))}>🔁 Repetir los gastos del mes pasado</button>
+        <button type="button" className="boton mb-4" disabled={ocupado} onClick={() => hacer(() => repetirGastos(g.mes))}><Icono nombre="repetir" /> Repetir los gastos del mes pasado</button>
       ) : <p className="texto-suave mb-4">Todavía no cargaste gastos de este mes. Los que se repiten todos los meses (alquiler, sueldos) cargalos una vez como fijos.</p>}
       <form className="tarjeta p-4 grid gap-3 sm:grid-cols-[auto_1fr_10rem_auto] items-end"
         onSubmit={(e) => { e.preventDefault(); hacer(() => agregarGasto(g.en_curso ? null : g.mes, categoria, detalle, monto), () => { setDetalle(""); setMonto(""); }); }}>
@@ -78,9 +79,9 @@ export function Gastos({ g }: { g: GananciaMes }) {
         <label className="grid gap-1 text-sm">Monto
           <input className="campo" inputMode="decimal" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="250.000" required />
         </label>
-        <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Guardando…" : "➕ Agregar"}</button>
+        <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Guardando…" : "Agregar"}</button>
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
       <p className="mt-3"><LinkPanel href={`/panel/gastos?mes=${g.mes.slice(0, 7)}`} className="underline">Todos los gastos, fijos, comprobantes y presupuesto →</LinkPanel></p>
     </section>
   );

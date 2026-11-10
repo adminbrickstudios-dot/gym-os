@@ -9,6 +9,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Vacio } from "@/components/ui/Vacio";
 import { formatearPesos } from "@/lib/formato";
 import { alquilarLocker, bajaLocker, crearLocker, crearLockersSerie, guardarTarifa, liberarLocker, renovarLocker } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Alquiler = { alquiler_id: string; socio_id: string; socio: string; desde: string; hasta: string; ultimo_dia: string; dias: number; cortesia: boolean; cortesia_motivo: string | null };
 type Locker = { locker_id: string; numero: string; ubicacion: string | null; sede_id: string; sede: string; activo: boolean; estado: "libre" | "ocupado" | "vencido"; alquiler: Alquiler | null };
@@ -49,7 +50,7 @@ function Asignar({ socioId, socioNombre, pendientes, gestiona, etiqueta, confirm
       )}
       {propios.length === 0 && (
         <p className="text-sm texto-suave">
-          Primero se cobra el alquiler: <BotonCobrar socioId={socioId} origen="otro" className="boton boton-chico">💵 Cobrar el alquiler</BotonCobrar>{" "}
+          Primero se cobra el alquiler: <BotonCobrar socioId={socioId} origen="otro" className="boton boton-chico"><Icono nombre="plata" /> Cobrar el alquiler</BotonCobrar>{" "}
           y vuelve acá para asignar el locker.
         </p>
       )}
@@ -106,17 +107,17 @@ function TarjetaLocker({ l, datos }: { l: Locker; datos: DatosLockers }) {
   return (
     <li className="tarjeta p-4 space-y-3 min-w-0" data-locker={l.numero} data-estado={l.estado}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-semibold text-lg">🔐 {l.numero}</span>
+        <span className="font-semibold text-lg"><Icono nombre="candado" /> {l.numero}</span>
         {datos.sedes.length > 1 && <span className="texto-tenue text-sm">{l.sede}</span>}
         {l.ubicacion && <span className="texto-tenue text-sm">{l.ubicacion}</span>}
         {!l.activo ? <span className="pildora">de baja</span>
           : l.estado === "libre" ? <span className="pildora" data-pildora-estado="libre">Libre</span>
-          : l.estado === "vencido" ? <span className="pildora" data-pildora-estado="vencido">🟡 Vencido</span>
+          : l.estado === "vencido" ? <span className="pildora" data-pildora-estado="vencido"><Icono nombre="punto-amarillo" /> Vencido</span>
           : <span className="pildora" data-pildora-estado="ocupado">Ocupado</span>}
       </div>
       {a && (
         <p className="text-sm break-words">
-          👤 <Link href={`/panel/socios/${a.socio_id}`} className="underline">{a.socio}</Link> · hasta el {dia(a.ultimo_dia)} <span className="texto-tenue">({cuanto(a.dias)})</span>
+          <Icono nombre="persona" /> <Link href={`/panel/socios/${a.socio_id}`} className="underline">{a.socio}</Link> · hasta el {dia(a.ultimo_dia)} <span className="texto-tenue">({cuanto(a.dias)})</span>
           {a.cortesia && <span className="texto-tenue"> · cortesía: {a.cortesia_motivo}</span>}
         </p>
       )}
@@ -152,8 +153,8 @@ function TarjetaLocker({ l, datos }: { l: Locker; datos: DatosLockers }) {
 
       {modo === null && l.activo && (
         <div className="flex flex-wrap items-center gap-2">
-          {l.estado === "libre" && <button type="button" className="boton boton-principal" onClick={() => setModo("alquilar")} data-alquilar>➕ Alquilar</button>}
-          {a && <button type="button" className="boton" onClick={() => setModo("renovar")} data-renovar>🔄 Renovar</button>}
+          {l.estado === "libre" && <button type="button" className="boton boton-principal" onClick={() => setModo("alquilar")} data-alquilar><Icono nombre="mas" /> Alquilar</button>}
+          {a && <button type="button" className="boton" onClick={() => setModo("renovar")} data-renovar><Icono nombre="repetir" /> Renovar</button>}
           {a && <button type="button" className="boton" onClick={() => setModo("liberar")} data-liberar>Liberar</button>}
           {datos.puede_gestionar && l.estado === "libre" && (
             <BotonAccion className="text-sm underline texto-suave" ocupadoTexto="…" onClick={async () => { const r = await bajaLocker(l.locker_id, false); if (r.error) setError(r.error); }}>Dar de baja</BotonAccion>
@@ -174,7 +175,7 @@ function PorAsignarLista({ datos }: { datos: DatosLockers }) {
   if (datos.por_asignar.length === 0) return null;
   return (
     <section className="tarjeta p-4 space-y-3" data-por-asignar={datos.por_asignar.length}>
-      <h2 className="titulo text-2xl">💵 Cobrado, falta asignar el locker</h2>
+      <h2 className="titulo text-2xl"><Icono nombre="plata" /> Cobrado, falta asignar el locker</h2>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <ul className="space-y-2">
         {datos.por_asignar.map((x) => (
@@ -206,7 +207,7 @@ function Configurar({ datos }: { datos: DatosLockers }) {
   const [tMeses, setTMeses] = useState(1);
   return (
     <details className="tarjeta p-4" data-configurar-lockers>
-      <summary className="cursor-pointer font-semibold">⚙️ Configurar: lockers y precios</summary>
+      <summary className="cursor-pointer font-semibold"><Icono nombre="ajustes" /> Configurar: lockers y precios</summary>
       <div className="space-y-5 mt-4">
         {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
         <div className="space-y-2" data-tarifas>
@@ -264,7 +265,7 @@ export function Lockers({ datos }: { datos: DatosLockers; zona: string }) {
 
       {vencen.length > 0 && (
         <section className="tarjeta p-4 space-y-2" data-vencen-semana={vencen.length}>
-          <h2 className="titulo text-2xl">⏰ Vencen esta semana</h2>
+          <h2 className="titulo text-2xl"><Icono nombre="reloj" /> Vencen esta semana</h2>
           <ul className="space-y-1">
             {vencen.map((l) => <li key={l.locker_id} className="text-sm break-words"><span className="font-semibold">Locker {l.numero}</span> · {l.alquiler!.socio} · {cuanto(l.alquiler!.dias)} ({dia(l.alquiler!.ultimo_dia)})</li>)}
           </ul>
@@ -275,7 +276,7 @@ export function Lockers({ datos }: { datos: DatosLockers; zona: string }) {
       {datos.puede_gestionar && <Configurar datos={datos} />}
 
       {activos.length === 0 ? (
-        <Vacio emoji="🔐" titulo="Todavía no hay lockers cargados">
+        <Vacio icono="candado" titulo="Todavía no hay lockers cargados">
           {datos.puede_gestionar ? "Cargalos en “Configurar”: uno por uno o una tanda (del 1 al 60). Después poné la tarifa y ya se pueden alquilar." : "El dueño o el encargado tienen que cargar los lockers."}
         </Vacio>
       ) : (

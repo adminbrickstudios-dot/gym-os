@@ -8,6 +8,7 @@ import { abrirCaja } from "@/app/panel/caja/acciones";
 import type { MiTurno } from "@/app/panel/caja/tipos";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export function TurnoEntrada({ inicial, zona }: { inicial: MiTurno; zona: string }) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function TurnoEntrada({ inicial, zona }: { inicial: MiTurno; zona: string
     return (
       <p data-mi-turno="abierto" className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
         <span className="min-w-0 flex-1">
-          {t.vencido ? <>⏰ Tu turno de {t.caja} quedó abierto de otro día: no se puede cobrar en él.</> : <>🟢 Tu turno: {t.caja}, desde las {hora(t.abierto_en)}</>}
+          {t.vencido ? <><Icono nombre="reloj" /> Tu turno de {t.caja} quedó abierto de otro día: no se puede cobrar en él.</> : <><Icono nombre="punto-verde" /> Tu turno: {t.caja}, desde las {hora(t.abierto_en)}</>}
         </span>
         <Link href="/panel/caja" className="boton">{t.vencido ? "Resolverlo" : "Cerrar mi turno"}</Link>
       </p>
@@ -30,14 +31,14 @@ export function TurnoEntrada({ inicial, zona }: { inicial: MiTurno; zona: string
   }
   if (inicial.libres.length === 0) {
     return inicial.modo === "una_por_dia"
-      ? <p data-mi-turno="ninguna" className="texto-tenue text-sm">🔒 La caja de hoy ya se usó (este gimnasio tiene una sola caja por día).</p>
+      ? <p data-mi-turno="ninguna" className="texto-tenue text-sm"><Icono nombre="candado" /> La caja de hoy ya se usó (este gimnasio tiene una sola caja por día).</p>
       : null;
   }
   const libre = inicial.libres.find((l) => l.caja_id === cajaId) ?? inicial.libres[0];
   if (!abriendo) {
     return (
       <p data-mi-turno="cerrado" className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
-        <span className="min-w-0 flex-1">🔒 No tenés turno abierto. Sin turno no se cobra en efectivo.</span>
+        <span className="min-w-0 flex-1"><Icono nombre="candado" /> No tenés turno abierto. Sin turno no se cobra en efectivo.</span>
         <button type="button" className="boton boton-principal" onClick={() => setAbriendo(true)}>Abrir mi turno</button>
       </p>
     );
@@ -59,12 +60,12 @@ export function TurnoEntrada({ inicial, zona }: { inicial: MiTurno; zona: string
           Usar {formatearPesos(libre.fondo_sugerido)} (lo que quedó en el cajón)
         </button>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex gap-2">
         <BotonAccion className="boton boton-principal" ocupadoTexto="Abriendo…" onClick={async () => {
           const r = await abrirCaja(libre.caja_id, monto || "0");
           if (r.error) setError(r.error); else { setError(null); router.refresh(); }
-        }}>🔓 Abrir turno</BotonAccion>
+        }}><Icono nombre="candado-abierto" /> Abrir turno</BotonAccion>
         <button type="button" className="boton" onClick={() => setAbriendo(false)}>Cancelar</button>
       </div>
     </form>

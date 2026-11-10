@@ -54,7 +54,7 @@ try {
   chequear(await aparece(e, 60000), "con la reserva confirmada, la app dice “📍 Elegí tu lugar (bici)”", "la app no ofrece elegir el lugar");
   chequear(await e.locator('[data-lugar="1"]').isDisabled() && await e.locator('[data-lugar="7"]').isDisabled(), "la 1 está ocupada y la 7 fuera de servicio (no se pueden tocar)", "se puede tocar una ocupada o rota");
   await e.locator('[data-lugar="3"]').click();
-  chequear(await aparece(e.getByText("📍 Bici 3"), 30000), "elige la bici 3: “📍 Bici 3 · Cambiar”", await e.innerText());
+  chequear(await aparece(e.getByText("Bici 3"), 30000), "elige la bici 3: “Bici 3 · Cambiar”", await e.innerText());
   await capturar(so, "com12-celu-lugar");
 
   await d.reload();

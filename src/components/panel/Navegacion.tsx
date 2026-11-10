@@ -7,6 +7,7 @@ import { traerPendientes } from "@/app/panel/pendientes-acciones";
 import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type Pendientes } from "@/lib/panel/pendientes";
 import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
 import { Buscador } from "./Buscador";
+import { Icono } from "@/components/ui/Icono";
 
 type Props = {
   gimnasio: string;
@@ -46,7 +47,7 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
   return (
     <Link href={s.ruta} onClick={alElegir} aria-current={on ? "page" : undefined}
       className={`flex items-center gap-3 rounded-2xl px-3 min-h-[52px] py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
-      <span className="text-xl w-7 text-center" aria-hidden>{s.emoji}</span>
+      <span className="text-xl w-7 text-center" aria-hidden><Icono nombre={s.emoji} /></span>
       <span className="min-w-0">
         <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{s.titulo}</span>
         {s.descripcion && <span className="block text-[13px] texto-tenue leading-snug truncate">{s.descripcion}</span>}
@@ -59,7 +60,7 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
 function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
   return (
     <nav aria-label="Secciones" className="space-y-6">
-      <Item s={{ ruta: "/panel", emoji: "🏠", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
+      <Item s={{ ruta: "/panel", emoji: "inicio", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
       {props.grupos.map((g) => {
         const items = props.secciones.filter((s) => s.grupo === g);
         if (!items.length) return null;
@@ -71,7 +72,7 @@ function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: s
         );
       })}
       {/* VD-63: el centro de ayuda, para todos los roles (no depende de ninguna sección). */}
-      <div className="space-y-0.5"><Item s={{ ruta: "/panel/ayuda", emoji: "❓", titulo: "Ayuda", descripcion: "Preguntas cortas y cómo se hace" }} actual={actual} alElegir={alElegir} /></div>
+      <div className="space-y-0.5"><Item s={{ ruta: "/panel/ayuda", emoji: "ayuda", titulo: "Ayuda", descripcion: "Preguntas cortas y cómo se hace" }} actual={actual} alElegir={alElegir} /></div>
     </nav>
   );
 }
@@ -79,7 +80,7 @@ function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: s
 function Salir() {
   return (
     <form action="/salir" method="post">
-      <button type="submit" className="boton w-full !justify-start text-[15px]">🚪 Cerrar sesión</button>
+      <button type="submit" className="boton w-full !justify-start text-[15px]"><Icono nombre="puerta" /> Cerrar sesión</button>
     </form>
   );
 }
@@ -123,8 +124,8 @@ export function Navegacion(props: Props) {
         <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} rol={props.rol} /></div>
         <Menu props={props} actual={actual} pendientes={pendientes} />
         <div className="mt-auto pt-8 space-y-3">
-          <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
-          {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}
+          <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline"><Icono nombre="persona" /> <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
+          {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]"><Icono nombre="repetir" /> Cambiar de gimnasio</Link>}
           <Salir />
         </div>
       </aside>
@@ -147,7 +148,7 @@ export function Navegacion(props: Props) {
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
                   <span className={`relative text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>
-                    {a.emoji}
+                    <Icono nombre={a.emoji} />
                     {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
                   </span>
                   {a.corto ?? a.titulo}
@@ -158,7 +159,7 @@ export function Navegacion(props: Props) {
           <li className="col-start-5">
             <button type="button" onClick={() => setAbierto(true)} className="w-full flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold texto-tenue">
               <span className="relative text-2xl" aria-hidden>
-                ☰
+                <Icono nombre="menu" />
                 {hayAlgo(pendientes) && <span data-menu-punto={hayRojo(pendientes) ? "rojo" : "neutro"} className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: hayRojo(pendientes) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
               </span>Menú
             </button>
@@ -174,8 +175,8 @@ export function Navegacion(props: Props) {
           </div>
           <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} pendientes={pendientes} />
           <div className="mt-8 space-y-3">
-            <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline">👤 <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
-            {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]">🔁 Cambiar de gimnasio</Link>}
+            <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline"><Icono nombre="persona" /> <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
+            {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]"><Icono nombre="repetir" /> Cambiar de gimnasio</Link>}
             <Salir />
           </div>
         </div>

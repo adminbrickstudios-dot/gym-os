@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { leerNumeros, type MapaLugares, type OcupadoEquipo } from "@/lib/clases/lugares";
 import { guardarLugares } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * COM-12: la sala numerada de esta clase. El profe y la recepción ven quién
@@ -21,7 +22,7 @@ export function Lugares({ claseId, mapa, puedeNumerar }: { claseId: string; mapa
   const roto = new Set(mapa?.fuera_servicio ?? []);
   return (
     <section className="mt-10" aria-labelledby="lugares" data-lugares-clase>
-      <h2 id="lugares" className="titulo text-2xl mb-1">📍 Lugares en la sala</h2>
+      <h2 id="lugares" className="titulo text-2xl mb-1"><Icono nombre="ubicacion" /> Lugares en la sala</h2>
       {mapa ? (
         <>
           <p className="texto-suave mb-3">{mapa.ocupados.length} de {mapa.cantidad - roto.size} {mapa.etiqueta.toLowerCase()}s elegidas. Cada socio elige la suya en la app al reservar.</p>
@@ -35,7 +36,7 @@ export function Lugares({ claseId, mapa, puedeNumerar }: { claseId: string; mapa
           </ul>
         </>
       ) : <p className="texto-suave mb-3">¿Esta clase usa máquinas (bicis, reformers)? Numerá la sala y cada socio elige su lugar al reservar.</p>}
-      {puedeNumerar && !editando && <button type="button" className="boton mt-3" onClick={() => setEditando(true)}>{mapa ? "⚙️ Cambiar la sala" : "⚙️ Numerar la sala"}</button>}
+      {puedeNumerar && !editando && <button type="button" className="boton mt-3" onClick={() => setEditando(true)}>{mapa ? "Cambiar la sala" : "Numerar la sala"}</button>}
       {puedeNumerar && editando && (
         <form className="tarjeta p-5 mt-3 space-y-3" data-numerar-sala onSubmit={(e) => {
           e.preventDefault();

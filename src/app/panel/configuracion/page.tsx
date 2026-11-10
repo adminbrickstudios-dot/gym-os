@@ -47,7 +47,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
     const inicial: ClavePestana = PESTANAS.find((p) => p.clave === pestana)?.clave ?? "gimnasio";
     return (
       <>
-        <Encabezado emoji="⚙️" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
+        <Encabezado icono="ajustes" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
         <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambios} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
           direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos}
           linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} />

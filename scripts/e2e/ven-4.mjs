@@ -14,13 +14,13 @@ const quedan = async (n) => d.locator(`li[data-producto="Bebida isotónica"] [da
 try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/planes`);
-  await fila.locator('button:has-text("📦 Stock")').click();
+  await fila.locator('button:has-text("Stock")').click();
   await fila.locator('input[aria-label="Cuántos hay ahora"]').fill("3");
   await fila.locator('input[aria-label="Avisar cuando queden"]').fill("2");
   await fila.locator('button:has-text("Llevar stock")').click();
   await quedan(3);
   ok("📦 Llevar stock contando 3: “Quedan 3”");
-  await fila.locator('button:has-text("📦 Stock")').click();
+  await fila.locator('button:has-text("Stock")').click();
   await fila.locator('input[aria-label="Cuántos entraron"]').fill("5");
   await fila.locator('button:has-text("Entró mercadería")').click();
   await quedan(8);
@@ -31,7 +31,7 @@ try {
   await d.goto(`${G}/panel`);
   const rep = d.locator("[data-reponer] li", { hasText: "Bebida isotónica" });
   await rep.waitFor({ timeout: 30000 });
-  chequear(/quedan 2/.test(await rep.innerText()), "Inicio: “📦 Por reponer · Bebida isotónica: quedan 2”", await rep.innerText());
+  chequear(/quedan 2/.test(await rep.innerText()), "Inicio: “Por reponer · Bebida isotónica: quedan 2”", await rep.innerText());
 
   await d.goto(`${G}/panel/vender`);
   const tile = d.locator("main button", { hasText: "Bebida isotónica" });
@@ -40,7 +40,7 @@ try {
   await tile.click(); await tile.click();
   chequear(/Sin stock/.test(await tile.innerText()), "con 2 en el carrito: “Sin stock” (avisa, no frena)", await tile.innerText());
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await capturar(d, "ven4-compu-vender");
   await d.goto(`${G}/panel/planes`);
@@ -52,7 +52,7 @@ try {
 } finally {
   try {
     await d.goto(`${G}/panel/planes`);
-    await fila.locator('button:has-text("📦 Stock")').click();
+    await fila.locator('button:has-text("Stock")').click();
     await fila.locator('button:has-text("Dejar de llevar stock")').click();
     await fila.locator("[data-stock]").waitFor({ state: "detached", timeout: 30000 });
   } catch { falla("no pude apagar el stock al final"); }

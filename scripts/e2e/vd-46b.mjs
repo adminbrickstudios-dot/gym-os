@@ -27,7 +27,7 @@ try {
   await r.locator("[data-suspender-abrir]").click();
   chequear((await r.locator('[role="radiogroup"]').count()) === 0, "la recepción no ve “Expulsión”", "la recepción ve la expulsión");
   await r.locator('input[placeholder^="Ej.: pelea"]').fill("Pelea en el vestuario");
-  await r.locator('button:has-text("🚫 Suspender")').click();
+  await r.locator('button:has-text("Suspender")').click();
   await r.locator('[data-suspension="suspension"]').waitFor({ timeout: 30000 });
   ok("la recepción suspendió con motivo");
   chequear((await r.locator("[data-levantar-abrir]").count()) === 0, "la recepción no puede levantarla", "la recepción ve “Levantar”");
@@ -39,9 +39,9 @@ try {
   ok("la suspensión aparece en Control");
   await d.goto(`${G}/panel/socios/${id}`);
   await d.locator("[data-levantar-abrir]").click();
-  await d.locator('button:has-text("✅ Levantar")').isDisabled().then((x) => chequear(x, "no se levanta sin motivo", "se puede levantar sin motivo"));
+  await d.locator('button:has-text("Levantar")').isDisabled().then((x) => chequear(x, "no se levanta sin motivo", "se puede levantar sin motivo"));
   await d.locator('input[placeholder^="Ej.: pidió"]').fill("Pidió disculpas");
-  await d.locator('button:has-text("✅ Levantar")').click();
+  await d.locator('button:has-text("Levantar")').click();
   await d.locator("[data-suspension]").waitFor({ state: "detached", timeout: 30000 });
   ok("la dueña levantó la suspensión con motivo");
 
@@ -49,7 +49,7 @@ try {
   await d.locator("[data-suspender-abrir]").click();
   await d.locator('input[placeholder^="Ej.: pelea"]').fill("Prueba de expulsión");
   await d.locator('[role="radio"]:has-text("Expulsión")').click();
-  await d.locator('button:has-text("🚫 Expulsar")').click();
+  await d.locator('button:has-text("Expulsar")').click();
   await d.locator('[data-suspension="expulsion"]').waitFor({ timeout: 30000 });
   ok("la dueña expulsa (sin fecha de fin)");
   const m = await pagina(b, CELU);

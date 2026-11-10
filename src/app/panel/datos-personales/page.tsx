@@ -17,7 +17,7 @@ export default async function PaginaDatosPersonales() {
     ]);
     return (
       <>
-        <Encabezado emoji="🔒" titulo="Datos personales" volver={{ href: "/panel/configuracion?pestana=reglas", texto: "Configuración" }}
+        <Encabezado icono="candado" titulo="Datos personales" volver={{ href: "/panel/configuracion?pestana=reglas", texto: "Configuración" }}
           bajada="Lo que dice tu política de privacidad y lo que piden tus socios sobre sus datos (Ley 25.326)." />
         <DatosPersonales politica={politica?.texto ?? null} pedidos={pedidos} puedeEditar={panel.yo.rol === "dueno"} />
       </>

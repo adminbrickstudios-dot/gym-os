@@ -20,7 +20,7 @@ try {
   await r.locator("[data-carrito]", { hasText: `Toalla${s5}` }).waitFor({ timeout: 30000 });
   chequear(/\$1\.500/.test(await r.locator("[data-carrito]").innerText()), "“1.500” en Otra cosa es $1.500 (antes se leía $1,50)", await r.locator("[data-carrito]").innerText());
   await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   await r.locator('button:has-text("pedir que la anulen")').click();
   await r.locator('input[aria-label="Motivo de la anulación"]').fill(`Cobré de más ${s5}`);
@@ -33,7 +33,7 @@ try {
   await d.goto(`${G}/panel`);
   const fila = d.locator("[data-pedidos-anulacion] li", { hasText: `Cobré de más ${s5}` });
   await fila.waitFor({ timeout: 30000 });
-  chequear(/Ana pidió anularla/.test(await fila.innerText()), "Inicio de la dueña: “↩️ Ventas para anular”, quién y por qué", await fila.innerText());
+  chequear(/Ana pidió anularla/.test(await fila.innerText()), "Inicio de la dueña: “Ventas para anular”, quién y por qué", await fila.innerText());
   await capturar(d, "ven6-compu-inicio");
   await fila.locator('button:has-text("Anular")').click();
   await fila.waitFor({ state: "detached", timeout: 30000 });
@@ -49,7 +49,7 @@ try {
   const id = new URL(d.url()).searchParams.get("socio");
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await d.goto(`${G}/panel/socios/${id}?pestana=pagos`);
   const venta = d.locator("[data-ventas] li").first();

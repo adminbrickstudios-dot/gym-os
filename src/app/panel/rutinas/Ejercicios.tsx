@@ -2,6 +2,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { guardarEjercicio } from "./acciones";
 import { EQUIPOS, GRUPOS, nombreEquipo, nombreGrupo, type Ejercicio } from "./tipos";
+import { Icono } from "@/components/ui/Icono";
 
 const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
@@ -24,7 +25,7 @@ export function Ejercicios({ ejercicios }: { ejercicios: Ejercicio[] }) {
   const filtrando = buscar.trim() !== "" || fGrupo !== "" || fEquipo !== "";
   return (
     <section className="space-y-4" data-ejercicios>
-      <h2 className="titulo text-3xl">🏋️ Ejercicios <span className="texto-tenue text-xl">{activos.length}</span></h2>
+      <h2 className="titulo text-3xl"><Icono nombre="pesa" /> Ejercicios <span className="texto-tenue text-xl">{activos.length}</span></h2>
       <form className="tarjeta p-4 grid sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_1fr_auto] gap-3 items-end"
         onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await guardarEjercicio(null, nombre, grupo, video, true, equipo); if (r.error) setError(r.error); else { setError(null); setNombre(""); setVideo(""); } }); }}>
         <label className="space-y-1"><span className="etiqueta">Nombre</span><input className="campo" value={nombre} onChange={(e) => setNombre(e.target.value)} required maxLength={80} placeholder="Sentadilla con barra" /></label>
@@ -33,12 +34,12 @@ export function Ejercicios({ ejercicios }: { ejercicios: Ejercicio[] }) {
         <label className="space-y-1"><span className="etiqueta">Equipo</span>
           <select className="campo" value={equipo} data-equipo onChange={(e) => setEquipo(e.target.value)}>{EQUIPOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select></label>
         <label className="space-y-1"><span className="etiqueta">Video (opcional)</span><input className="campo" value={video} onChange={(e) => setVideo(e.target.value)} placeholder="https://…" type="url" /></label>
-        <button type="submit" className="boton" disabled={ocupado || nombre.trim().length < 2}>➕ Sumar</button>
+        <button type="submit" className="boton" disabled={ocupado || nombre.trim().length < 2}><Icono nombre="mas" /> Sumar</button>
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       {activos.length > 0 && (
         <div className="flex flex-wrap gap-2" data-filtros-ejercicios>
-          <input className="campo flex-1 min-w-[12rem]" type="search" value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder="🔍 Buscar ejercicio" aria-label="Buscar ejercicio" data-buscar-ejercicio />
+          <input className="campo flex-1 min-w-[12rem]" type="search" value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder="Buscar ejercicio" aria-label="Buscar ejercicio" data-buscar-ejercicio />
           <select className="campo !w-auto" value={fGrupo} onChange={(e) => setFGrupo(e.target.value)} aria-label="Filtrar por grupo muscular"><option value="">Todos los grupos</option>{GRUPOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select>
           <select className="campo !w-auto" value={fEquipo} onChange={(e) => setFEquipo(e.target.value)} aria-label="Filtrar por equipo"><option value="">Todo el equipo</option>{EQUIPOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select>
           {filtrando && <button type="button" className="boton-texto texto-suave" onClick={() => { setBuscar(""); setFGrupo(""); setFEquipo(""); }}>Limpiar</button>}
@@ -49,7 +50,7 @@ export function Ejercicios({ ejercicios }: { ejercicios: Ejercicio[] }) {
         <ul className="grid sm:grid-cols-2 gap-2" data-lista-ejercicios={visibles.length}>{visibles.map((e) => (
           <li key={e.id} className="tarjeta flex items-center gap-3 px-4 py-3 min-h-[56px]">
             <span className="flex-1 min-w-0"><span className="block font-semibold truncate">{e.nombre}</span><span className="block text-sm texto-suave">{nombreGrupo(e.grupo)} · {nombreEquipo(e.equipo)}</span></span>
-            {e.video_url && <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico">▶️ Video</a>}
+            {e.video_url && <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico"><Icono nombre="derecha" /> Video</a>}
             <button type="button" className="boton-texto texto-suave text-sm" disabled={ocupado} aria-label={`Sacar ${e.nombre}`}
               onClick={() => empezar(async () => { const r = await guardarEjercicio(e.id, e.nombre, e.grupo, e.video_url ?? "", false, e.equipo ?? "otro"); setError(r.error ?? null); })}>Sacar</button>
           </li>

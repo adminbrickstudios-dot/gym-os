@@ -10,6 +10,7 @@ import type { Resumen } from "./acciones";
 import { ParaRevisar } from "./ParaRevisar";
 import type { ConfigCaja, MiTurno, ParaRevisar as ParaRevisarT } from "./tipos";
 import { AbrirCaja, TurnoAbierto } from "./Turno";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Caja" };
 type Caja = { caja_id: string; nombre: string; activa: boolean; turno_id: string | null; abierta_en: string | null; abierta_por: string | null; vencida: boolean };
@@ -37,10 +38,10 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="💵" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
+        <Encabezado icono="plata" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
           accion={<div className="flex flex-wrap gap-2"><BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/caja" />
-            {ve && <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton">🗂️ Turnos anteriores</Link>}
-            {ve && <Link href={`/panel/caja/reporte${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton" data-reporte-dia>📋 Cierre del día</Link>}</div>} />
+            {ve && <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton"><Icono nombre="grilla" /> Turnos anteriores</Link>}
+            {ve && <Link href={`/panel/caja/reporte${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton" data-reporte-dia><Icono nombre="lista" /> Cierre del día</Link>}</div>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja" />}
         {revisar.length > 0 && <ParaRevisar cajas={revisar} zona={panel.gimnasio.zona_horaria} pedirBilletes={config.pedir_billetes} />}
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}

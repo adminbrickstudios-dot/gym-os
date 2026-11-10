@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * "Se cortó internet" (10-DIA-A-DIA): la pantalla lo dice en vez de quedarse
@@ -18,7 +19,7 @@ export function SinConexion() {
   if (!sin) return null;
   return (
     <p role="alert" className="mensaje mensaje-error mb-6 pr-14" data-sin-conexion>
-      📡 <span><strong>Sin conexión.</strong> Lo que hagas ahora puede no guardarse: anotalo en papel y cargalo cuando vuelva internet.</span>
+      <Icono nombre="senal" /> <span><strong>Sin conexión.</strong> Lo que hagas ahora puede no guardarse: anotalo en papel y cargalo cuando vuelva internet.</span>
     </p>
   );
 }

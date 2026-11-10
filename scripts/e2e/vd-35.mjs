@@ -97,7 +97,7 @@ try {
   await r.goto(`${G}/panel/socios?q=${DNI}`);
   const fila = r.locator("[data-lista] li", { hasText: `Reg${s}` }).first();
   await fila.waitFor({ timeout: 60000 });
-  chequear(await fila.locator("[data-autoalta][data-a-cobrar]").count() === 1 && /A cobrar/.test(await fila.innerText()), "Socios: aparece con 🌐 “A cobrar”", `la fila dice: ${(await fila.innerText()).replace(/\s+/g, " ")}`);
+  chequear(await fila.locator("[data-autoalta][data-a-cobrar]").count() === 1 && /A cobrar/.test(await fila.innerText()), "Socios: aparece con “A cobrar”", `la fila dice: ${(await fila.innerText()).replace(/\s+/g, " ")}`);
   await capturar(r, "vd35-compu-a-cobrar");
   await r.goto(`${G}/panel/entrada?socio=${socio}`);
   await r.locator("section[aria-live]").waitFor({ timeout: 60000 });

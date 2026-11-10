@@ -6,7 +6,7 @@ import type { CSSProperties, ReactNode } from "react";
  * Mide 1,15 em: escala con el tamaño del texto donde está. Va siempre con su texto al lado o con `titulo` (nunca solo color).
  *
  * Si `nombre` no es un ícono de la lista se muestra como texto: es lo que pasa con un emoji que escribió el dueño en un dato suyo
- * (la actividad "🚴" de una clase) y se respeta. Los íconos propios de Base nunca son emoji.
+ * (la actividad "" de una clase) y se respeta. Los íconos propios de Base nunca son emoji.
  */
 const D = (...p: string[]) => p;
 export const ICONOS = {

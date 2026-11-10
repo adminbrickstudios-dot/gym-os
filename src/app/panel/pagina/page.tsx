@@ -27,7 +27,7 @@ export default async function Pagina() {
     ]);
     return (
       <>
-        <Encabezado emoji="🌐" titulo="Tu página" bajada="Lo que ve la gente antes de hacerse socio. Cambiá los textos, mostrá u ocultá secciones, ordenalas y mirá cómo queda antes de guardar." />
+        <Encabezado icono="web" titulo="Tu página" bajada="Lo que ve la gente antes de hacerse socio. Cambiá los textos, mostrá u ocultá secciones, ordenalas y mirá cómo queda antes de guardar." />
         <Editor inicial={pagina} agenda={agenda} puedeEditar={panel.yo.rol === "dueno"} direccion={await direccionPagina(pagina.vista.marca.slug)}
           altas={<Altas inicial={altas} puedeEditar={panel.yo.rol === "dueno"} />} />
         <VideoPortada inicial={pagina.vista.portada?.video_url ?? null} puedeEditar={panel.yo.rol === "dueno"} />

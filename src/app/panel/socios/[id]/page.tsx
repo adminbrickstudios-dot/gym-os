@@ -32,6 +32,7 @@ import { Suspense } from "react";
 import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
@@ -44,8 +45,8 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor?: React.ReactNode }
 }
 
 const PESTANAS = [
-  { clave: "resumen", texto: "Resumen", emoji: "👤" }, { clave: "pagos", texto: "Pagos", emoji: "💵" },
-  { clave: "asistencia", texto: "Asistencia", emoji: "📅" }, { clave: "notas", texto: "Notas", emoji: "📝" },
+  { clave: "resumen", texto: "Resumen", emoji: "persona" }, { clave: "pagos", texto: "Pagos", emoji: "plata" },
+  { clave: "asistencia", texto: "Asistencia", emoji: "calendario" }, { clave: "notas", texto: "Notas", emoji: "lista" },
 ] as const;
 type Pestana = (typeof PESTANAS)[number]["clave"];
 
@@ -110,7 +111,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
 
     return (
       <div className="space-y-10">
-        {sp.sin_plan && !f.membresia && <p role="alert" className="pildora pildora-amarillo whitespace-normal">⚠️ Quedó dado de alta, pero el plan no se pudo asignar: asignalo con “🏷️ Asignar plan”.</p>}
+        {sp.sin_plan && !f.membresia && <p role="alert" className="pildora pildora-amarillo whitespace-normal"><Icono nombre="alerta" /> Quedó dado de alta, pero el plan no se pudo asignar: asignalo con “<Icono nombre="etiqueta" /> Asignar plan”.</p>}
         <header>
           {sp.desde === "entrada"
             ? <VolverAEntrada socioId={s.id} nombre={`${s.nombre} ${s.apellido}`.trim()} />
@@ -120,24 +121,24 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               version={foto ? foto.slice(-36, -4) : null} subidaPorSocio={!!fotoEstado?.subida_por_el_socio} puedeConfirmar={panel.yo.rol !== "profe"} />
             <div className="min-w-0">
               <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
-              <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · 👧 menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · 📱 el responsable usa la app" : " · 📱 usa la app") : ""}</p>
+              <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · el responsable usa la app" : " · usa la app") : ""}</p>
             </div>
           </div>
           <div className="mt-6">
-            {s.dado_de_baja_en ? <span className="pildora">👋 Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
+            {s.dado_de_baja_en ? <span className="pildora"><Icono nombre="salir" /> Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
           </div>
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (
             <section className="mt-6 space-y-3" data-documentos-ficha={documentos.pendientes.length}>
-              <p className="titulo-grupo">✍️ Documentos</p>
+              <p className="titulo-grupo"><Icono nombre="lapiz" /> Documentos</p>
               {documentos.pendientes.map((d) => (
-                <Firmar key={d.documento_id} socioId={s.id} doc={d} textoBoton="✍️ Firmó en recepción"
+                <Firmar key={d.documento_id} socioId={s.id} doc={d} textoBoton="Firmó en recepción"
                   nombreSugerido={d.clave === "menores" ? (s.responsable_nombre ?? "") : `${s.nombre} ${s.apellido}`.trim()} />
               ))}
               {documentos.firmados.map((f) => (
-                <p key={`${f.titulo}${f.version}`} className={`text-sm ${f.vigente ? "texto-suave" : "texto-tenue"}`}>✅ {f.titulo} (v{f.version}) · firmó {f.nombre} el {fechaCorta(f.firmado_en, zona)} {f.via === "app" ? "en la app" : "en recepción"}{f.vigente ? "" : " · versión anterior"}</p>
+                <p key={`${f.titulo}${f.version}`} className={`text-sm ${f.vigente ? "texto-suave" : "texto-tenue"}`}><Icono nombre="ok" /> {f.titulo} (v{f.version}) · firmó {f.nombre} el {fechaCorta(f.firmado_en, zona)} {f.via === "app" ? "en la app" : "en recepción"}{f.vigente ? "" : " · versión anterior"}</p>
               ))}
             </section>
           )}
@@ -160,16 +161,16 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {!s.dado_de_baja_en && pedidoBaja && <PedidoBaja socioId={s.id} pedido={pedidoBaja} />}
           {!s.dado_de_baja_en && <Suspense fallback={null}><ModeracionFicha socioId={s.id} zona={zona} /></Suspense>}
           {!s.dado_de_baja_en && panel.yo.rol !== "profe" && (
-            <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico">📌 Anotar una tarea sobre este socio</LinkPanel></p>
+            <p className="mt-4"><LinkPanel href={`/panel/tareas?socio=${s.id}`} className="boton boton-chico"><Icono nombre="chincheta" /> Anotar una tarea sobre este socio</LinkPanel></p>
           )}
           {primerMes && !s.dado_de_baja_en && (
             <p className="pildora mt-6 !text-base" data-primer-mes={primerMes.dia}>
-              🌱 Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? " ✅" : ""}
+              <Icono nombre="hoja" /> Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? "✓" : ""}
             </p>
           )}
           {riesgo[0] && (
             <p className={`mensaje ${riesgo[0].nivel === "alto" ? "mensaje-error" : "mensaje-aviso"} mt-6`} data-riesgo-ficha={riesgo[0].nivel}>
-              🎯 <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>
+              <Icono nombre="objetivo" /> <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>
             </p>
           )}
           {!s.dado_de_baja_en && (
@@ -177,13 +178,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
               {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
               {!v.puede || v.color === "amarillo"
-                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">💵 Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
+                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal"><Icono nombre="plata" /> Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
                 : <>
-                    <BotonCobrar socioId={s.id} origen="ficha" className="boton">💵 Cobrar</BotonCobrar>
-                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton">🛒 Vender</LinkPanel>
+                    <BotonCobrar socioId={s.id} origen="ficha" className="boton"><Icono nombre="plata" /> Cobrar</BotonCobrar>
+                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton"><Icono nombre="carrito" /> Vender</LinkPanel>
                   </>}
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
-              <Link href={`/panel/socios/${s.id}/editar`} className="boton">✏️ Editar</Link>
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
+              <Link href={`/panel/socios/${s.id}/editar`} className="boton"><Icono nombre="lapiz" /> Editar</Link>
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
               <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
             </div>
@@ -196,7 +197,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         {pestana === "resumen" && <>
         <section className="grid sm:grid-cols-2 gap-3">
           <div className="tarjeta p-6">
-            <p className="titulo text-2xl mb-4">🏷️ Plan</p>
+            <p className="titulo text-2xl mb-4"><Icono nombre="etiqueta" /> Plan</p>
             {f.membresia ? (
               <dl className="space-y-3">
                 <Dato etiqueta="Plan" valor={f.membresia.plan} />
@@ -206,13 +207,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               </dl>
             ) : <p className="texto-suave">Sin membresía. Puede entrar con pase o pack.</p>}
             {f.packs.map((p) => (
-              <p key={p.id} className="mt-4 pildora pildora-azul">🎟️ {p.plan}: le quedan {p.cantidad - p.usadas} de {p.cantidad}</p>
+              <p key={p.id} className="mt-4 pildora pildora-azul"><Icono nombre="ticket" /> {p.plan}: le quedan {p.cantidad - p.usadas} de {p.cantidad}</p>
             ))}
           </div>
           <div className="tarjeta p-6">
-            <p className="titulo text-2xl mb-4">📱 Contacto</p>
+            <p className="titulo text-2xl mb-4"><Icono nombre="celular" /> Contacto</p>
             <dl className="space-y-3">
-              {s.responsable_nombre && <Dato etiqueta={s.es_menor ? "👨‍👧 Responsable (es menor)" : "Responsable"} valor={`${s.responsable_nombre} · ${s.responsable_telefono ?? ""}`} />}
+              {s.responsable_nombre && <Dato etiqueta={s.es_menor ? "Responsable (es menor)" : "Responsable"} valor={`${s.responsable_nombre} · ${s.responsable_telefono ?? ""}`} />}
               <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono} />
               <Dato etiqueta="Mail" valor={s.email} />
               <Dato etiqueta="DNI" valor={s.dni} />
@@ -226,7 +227,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         </section>
 
         <section>
-          <h2 className="titulo text-3xl mb-4">🚪 Últimas entradas</h2>
+          <h2 className="titulo text-3xl mb-4"><Icono nombre="puerta" /> Últimas entradas</h2>
           {f.ingresos.length === 0 ? <p className="texto-suave">Todavía no vino.</p> : (
             <ul className="space-y-1">
               {f.ingresos.map((i) => (
@@ -241,13 +242,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
         </section>
         {mensajesFicha && (
           <section data-historial-mensajes>
-            <h2 className="titulo text-3xl mb-4">💬 Mensajes</h2>
+            <h2 className="titulo text-3xl mb-4"><Icono nombre="mensaje" /> Mensajes</h2>
             {mensajesFicha.length === 0 ? <p className="texto-suave">Todavía no le escribió al gimnasio desde la app.</p> : (
               <ul className="space-y-2">
                 {mensajesFicha.map((m) => (
                   <li key={m.hilo_id}>
                     <Link href={`/panel/mensajes?estado=todos&hilo=${m.hilo_id}`} className="tarjeta flex items-start gap-3 p-4">
-                      <span aria-hidden>{motivoDe(m.motivo).emoji}</span>
+                      <span aria-hidden><Icono nombre={motivoDe(m.motivo).emoji} /></span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold">{motivoDe(m.motivo).titulo} · {estadoDe(m.estado).titulo}{m.sin_responder && <span className="pildora pildora-rojo ml-2 !text-xs">Sin responder</span>}</span>
                         {m.extracto && <span className="block texto-suave truncate">{m.extracto}</span>}
@@ -266,7 +267,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
 
         {pestana === "pagos" && ventas && (
           <section>
-            <h2 className="titulo text-3xl mb-4">💵 Pagos</h2>
+            <h2 className="titulo text-3xl mb-4"><Icono nombre="plata" /> Pagos</h2>
             {ventas.length === 0 ? <p className="texto-suave">Todavía no se le cobró nada. Lo que se le venda aparece acá.</p> : (
               <ul className="space-y-2" data-ventas>{ventas.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} />)}</ul>
             )}

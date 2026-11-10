@@ -18,7 +18,7 @@ try {
   const zona = d.locator("[data-push]");
   await zona.waitFor({ timeout: 60000 });
   const estado = await zona.getAttribute("data-push");
-  chequear(ESTADOS.test(estado), `Mi cuenta → 🔔 Notificaciones (${estado}: ${(await zona.innerText()).split("\n")[0]})`, estado);
+  chequear(ESTADOS.test(estado), `Mi cuenta → Notificaciones (${estado}: ${(await zona.innerText()).split("\n")[0]})`, estado);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 
   const p = await pagina(b, COMPU);

@@ -32,7 +32,7 @@ export default async function Fichar({ searchParams }: { searchParams: Promise<{
     const anterior = moverMes(mes, -1), siguiente = moverMes(mes, 1);
     return (
       <div className="space-y-8">
-        <Encabezado emoji="⏱️" titulo="Fichar y mis horas" bajada="Marcá tu entrada al llegar y tu salida al irte. Si te olvidás la salida, esa entrada no suma horas hasta que el dueño la corrija." />
+        <Encabezado icono="reloj" titulo="Fichar y mis horas" bajada="Marcá tu entrada al llegar y tu salida al irte. Si te olvidás la salida, esa entrada no suma horas hasta que el dueño la corrija." />
         <FicharPin zona={zona} mio={{ nombre: mio.nombre, enTurno: mio.en_turno, entradaEn: mio.entrada_en, sinSalidaDesde: mio.sin_salida_desde }} />
         <section className="space-y-4 max-w-xl" aria-labelledby="mis-horas" data-mis-horas>
           <h2 id="mis-horas" className="titulo text-2xl">Mis horas · {nombreMes(mes)}</h2>

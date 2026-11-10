@@ -6,6 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { urlMarca } from "@/lib/url-marca";
 import { ordenarFotos, quitarImagen, subirImagen } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type TipoImagen = "logo" | "favicon" | "foto";
 export type Reglas = { tipos: string[]; max_bytes: number; maximo?: number };
@@ -85,7 +86,7 @@ export function UnaImagen({ tipo, ruta, reglas, puedeEditar, alListo, vista }: {
           <input ref={entrada} type="file" accept={reglas.tipos.join(",")} className="sr-only" aria-label={`Elegir ${nombre}`}
             onChange={(e) => { elegir(e.target.files?.[0]); e.target.value = ""; }} />
           <button type="button" className="boton" disabled={ocupado} onClick={() => entrada.current?.click()}>
-            {ocupado ? "Subiendo…" : ruta ? `🔄 Cambiar ${nombre}` : `📤 Subir ${nombre}`}
+            {ocupado ? "Subiendo…" : ruta ? `Cambiar ${nombre}` : `Subir ${nombre}`}
           </button>
           {ruta && <button type="button" className="boton-texto" disabled={ocupado} onClick={() => correr(() => quitarImagen(tipo), "Listo, sin " + nombre)}>Quitar</button>}
           <span className="text-sm texto-tenue">{textoReglas(reglas)}</span>
@@ -134,9 +135,9 @@ export function Fotos({ fotos, reglas, puedeEditar, nombre, alListo }: {
                   className="w-full aspect-square object-cover rounded-[var(--radio)] border border-[var(--borde)]" />
                 {puedeEditar && (
                   <div className="flex items-center gap-1">
-                    <button type="button" className="boton boton-chico !px-3" aria-label={`Mover la foto ${i + 1} antes`} disabled={ocupado || i === 0} onClick={() => mover(i, i - 1)}>◀</button>
-                    <button type="button" className="boton boton-chico !px-3" aria-label={`Mover la foto ${i + 1} después`} disabled={ocupado || i === fotos.length - 1} onClick={() => mover(i, i + 1)}>▶</button>
-                    <button type="button" className="boton-texto ml-auto" aria-label={`Quitar la foto ${i + 1}`} disabled={ocupado} onClick={() => correr(() => quitarImagen("foto", f), "Foto quitada")}>🗑️ Quitar</button>
+                    <button type="button" className="boton boton-chico !px-3" aria-label={`Mover la foto ${i + 1} antes`} disabled={ocupado || i === 0} onClick={() => mover(i, i - 1)}><Icono nombre="izquierda" /></button>
+                    <button type="button" className="boton boton-chico !px-3" aria-label={`Mover la foto ${i + 1} después`} disabled={ocupado || i === fotos.length - 1} onClick={() => mover(i, i + 1)}><Icono nombre="derecha" /></button>
+                    <button type="button" className="boton-texto ml-auto" aria-label={`Quitar la foto ${i + 1}`} disabled={ocupado} onClick={() => correr(() => quitarImagen("foto", f), "Foto quitada")}><Icono nombre="papelera" /> Quitar</button>
                   </div>
                 )}
               </li>
@@ -148,7 +149,7 @@ export function Fotos({ fotos, reglas, puedeEditar, nombre, alListo }: {
           <input ref={entrada} type="file" multiple accept={reglas.tipos.join(",")} className="sr-only" aria-label="Elegir fotos"
             onChange={(e) => { elegir(e.target.files); e.target.value = ""; }} />
           <button type="button" className="boton" disabled={ocupado || lugar <= 0} onClick={() => entrada.current?.click()}>
-            {ocupado ? "Guardando…" : "📤 Sumar fotos"}
+            {ocupado ? "Guardando…" : "Sumar fotos"}
           </button>
           <span className="text-sm texto-tenue">{fotos.length} de {maximo} · {textoReglas(reglas)}</span>
         </div>

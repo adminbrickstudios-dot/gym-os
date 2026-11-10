@@ -8,6 +8,7 @@ import {
   configurarStock, entradaMercaderia, guardarFichaProducto, guardarProducto, movimientosDe, moverStock, quitarFotoProducto, subirFotoProducto, verRemito,
   type Movimiento, type Stock,
 } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Producto = {
   producto_id: string; nombre: string; precio: number; activo: boolean;
@@ -22,7 +23,7 @@ function Miniatura({ p }: { p: Producto }) {
   return url
     // eslint-disable-next-line @next/next/no-img-element
     ? <img src={url} alt={`Foto de ${p.nombre}`} className="size-12 rounded-xl object-cover flex-none" data-foto />
-    : <span aria-hidden className="size-12 rounded-xl flex-none grid place-items-center text-2xl bg-[var(--tarjeta)] border border-[var(--borde)]">🥤</span>;
+    : <span aria-hidden className="size-12 rounded-xl flex-none grid place-items-center text-2xl bg-[var(--tarjeta)] border border-[var(--borde)]"></span>;
 }
 
 function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {
@@ -65,12 +66,12 @@ function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {
           <span className="numero text-xl">{formatearPesos(p.precio)}</span>
           {stock?.controla && (
             <span className={`pildora text-sm ${stock.stock <= 0 ? "pildora-rojo" : poco ? "pildora-amarillo" : ""}`} data-stock={stock.stock} {...(poco ? { "data-queda-poco": "" } : {})}>
-              📦 {stock.stock <= 0 ? "Sin stock" : `Quedan ${stock.stock}`}{poco ? " · queda poco" : ""}
+              <Icono nombre="caja" /> {stock.stock <= 0 ? "Sin stock" : `Quedan ${stock.stock}`}{poco ? " · queda poco" : ""}
             </span>
           )}
-          <button type="button" className="boton-texto" onClick={() => setEditando(true)}>✏️ Editar</button>
-          <button type="button" className="boton-texto" onClick={() => setPanelStock(!panelStock)}>📦 Stock</button>
-          <label className="boton-texto cursor-pointer">📷 Foto
+          <button type="button" className="boton-texto" onClick={() => setEditando(true)}><Icono nombre="lapiz" /> Editar</button>
+          <button type="button" className="boton-texto" onClick={() => setPanelStock(!panelStock)}><Icono nombre="caja" /> Stock</button>
+          <label className="boton-texto cursor-pointer"><Icono nombre="camara" /> Foto
             <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={`Foto de ${p.nombre}`} disabled={ocupado}
               onChange={(e) => {
                 const f = e.target.files?.[0]; e.target.value = "";
@@ -84,7 +85,7 @@ function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {
         </div>
       )}
       {panelStock && <PanelStock p={p} stock={stock} cerrar={() => setPanelStock(false)} />}
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-2"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }
@@ -106,9 +107,9 @@ function PanelStock({ p, stock, cerrar }: { p: Producto; stock?: Stock; cerrar: 
         <div className="flex flex-wrap gap-2">
           <input className="campo !w-36" inputMode="numeric" required placeholder="¿Cuántos hay?" aria-label="Cuántos hay ahora" value={contado} onChange={(e) => setContado(e.target.value)} />
           <input className="campo !w-40" inputMode="numeric" placeholder="Avisar con (opcional)" aria-label="Avisar cuando queden" value={minimo} onChange={(e) => setMinimo(e.target.value)} />
-          <button type="submit" className="boton boton-principal" disabled={ocupado || !contado.trim()}>📦 Llevar stock</button>
+          <button type="submit" className="boton boton-principal" disabled={ocupado || !contado.trim()}><Icono nombre="caja" /> Llevar stock</button>
         </div>
-        {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       </form>
     );
   }
@@ -121,14 +122,14 @@ function PanelStock({ p, stock, cerrar }: { p: Producto; stock?: Stock; cerrar: 
       }}>
         <input className="campo !w-28" inputMode="numeric" placeholder="Cuántos" aria-label="Cuántos entraron" value={cant} onChange={(e) => setCant(e.target.value)} />
         <input className="campo !w-auto flex-1 min-w-32" placeholder="De dónde (opcional)" aria-label="Motivo de la entrada" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        <label className="boton cursor-pointer">📎 {remito ? remito.name.slice(0, 18) : "Foto del remito"}
+        <label className="boton cursor-pointer"><Icono nombre="documento" /> {remito ? remito.name.slice(0, 18) : "Foto del remito"}
           <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="sr-only" aria-label="Foto del remito" onChange={(e) => setRemito(e.target.files?.[0] ?? null)} />
         </label>
-        <button type="submit" className="boton" disabled={ocupado || !cant.trim()}>➕ Entró mercadería</button>
+        <button type="submit" className="boton" disabled={ocupado || !cant.trim()}><Icono nombre="mas" /> Entró mercadería</button>
       </form>
       <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => moverStock(p.producto_id, "conteo", contado), () => setContado("")); }}>
         <input className="campo !w-28" inputMode="numeric" placeholder="Hay" aria-label="Cuántos contaste" value={contado} onChange={(e) => setContado(e.target.value)} />
-        <button type="submit" className="boton" disabled={ocupado || !contado.trim()}>🔢 Conté: ajustar</button>
+        <button type="submit" className="boton" disabled={ocupado || !contado.trim()}><Icono nombre="calculadora" /> Conté: ajustar</button>
       </form>
       <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => configurarStock(p.producto_id, true, minimo)); }}>
         <span className="text-sm">Avisar cuando queden</span>
@@ -142,7 +143,7 @@ function PanelStock({ p, stock, cerrar }: { p: Producto; stock?: Stock; cerrar: 
         <span>Vender aunque no quede stock <span className="texto-tenue">(si no, Vender frena cuando llega a cero)</span></span>
       </label>
       <Historial productoId={p.producto_id} version={`${stock.stock}`} />
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }
@@ -153,7 +154,7 @@ function Historial({ productoId, version }: { productoId: string; version: strin
   const [error, setError] = useState<string | null>(null);
   const cargar = useCallback(async () => { const r = await movimientosDe(productoId); if (r.error) setError(r.error); else setLista(r.movimientos ?? []); }, [productoId]);
   useEffect(() => { void cargar(); }, [cargar, version]);
-  if (error) return <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>;
+  if (error) return <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>;
   if (!lista?.length) return null;
   return (
     <ul className="text-sm space-y-1" data-movimientos>
@@ -174,8 +175,8 @@ function VerRemito({ id }: { id: string }) {
   return (
     <>
       <button type="button" className="boton-texto !min-h-0" data-ver-remito disabled={ocupado}
-        onClick={() => empezar(async () => { const r = await verRemito(id); if (r.url) { setError(null); window.open(r.url, "_blank", "noopener,noreferrer"); } else setError(r.error ?? "No se pudo abrir"); })}>🧾 Ver remito</button>
-      {error && <span role="alert" className="pildora pildora-rojo">⚠️ {error}</span>}
+        onClick={() => empezar(async () => { const r = await verRemito(id); if (r.url) { setError(null); window.open(r.url, "_blank", "noopener,noreferrer"); } else setError(r.error ?? "No se pudo abrir"); })}><Icono nombre="recibo" /> Ver remito</button>
+      {error && <span role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</span>}
     </>
   );
 }
@@ -187,11 +188,11 @@ export function Productos({ productos, stock }: { productos: Producto[]; stock: 
   const bajos = productos.filter((p) => p.activo && stock[p.producto_id] && (quedaPoco(stock[p.producto_id]) || (stock[p.producto_id].controla && stock[p.producto_id].stock <= 0)));
   return (
     <section data-productos>
-      <h2 className="titulo text-3xl mb-1">🥤 Productos y stock</h2>
+      <h2 className="titulo text-3xl mb-1">Productos y stock</h2>
       <p className="texto-suave mb-4">Lo que se vende en el mostrador además de los planes: agua, bebidas, suplementos. Aparecen en Vender con su foto. Las cuotas y los pases se cobran desde Cobrar.</p>
       {bajos.length > 0 && (
         <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 mb-4" data-por-reponer>
-          📦 Para reponer: {bajos.map((p) => `${p.nombre} (${stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`})`).join(", ")}
+          <Icono nombre="caja" /> Para reponer: {bajos.map((p) => `${p.nombre} (${stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`})`).join(", ")}
         </p>
       )}
       {productos.length === 0 ? <p className="texto-tenue mb-4">Todavía no cargaste productos. Agregá el primero acá abajo, y después sumale la foto y el stock.</p> : (
@@ -203,9 +204,9 @@ export function Productos({ productos, stock }: { productos: Producto[]; stock: 
       }}>
         <input className="campo !w-auto flex-1 min-w-40" aria-label="Producto nuevo" placeholder="Producto (ej: Agua)" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
         <input className="campo !w-32" inputMode="decimal" aria-label="Precio del producto nuevo" placeholder="$" value={nuevo.precio} onChange={(e) => setNuevo({ ...nuevo, precio: e.target.value })} />
-        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}>➕ Agregar</button>
+        <button type="submit" className="boton" disabled={!nuevo.nombre.trim() || !nuevo.precio || ocupado}><Icono nombre="mas" /> Agregar</button>
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

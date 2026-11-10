@@ -1,8 +1,7 @@
 @import "tailwindcss";
-@import "@fontsource-variable/archivo/wdth.css";
 
 /* ═══════════════════════════════════════════════════════════════════
-   Lenguaje visual de Gym OS: oscuro, modo gym, minimalista, con emojis.
+   Lenguaje visual de Base (BASE-6, docs/base/DISENO.md): un mostrador, no una app de IA. Claro por defecto, oscuro elegible; íconos de línea (componente Icono), nunca emojis.
 
    Todo sale de dos colores que viven en los datos de cada gimnasio
    (configuracion_gimnasio.color_fondo y color_acento). El wrapper de
@@ -19,18 +18,30 @@
   --acento: #2fbf5b;           /* un solo acento: la acción principal */
   --acento-texto: #0d1a11;
 
-  --radio: 16px;
-  --radio-grande: 24px;
+  --radio: 10px;               /* tarjetas */
+  --radio-grande: 10px;
+  --radio-campo: 8px;          /* botones y campos */
+  --sombra-flota: 0 8px 24px -12px rgb(0 0 0 / 0.35);   /* la única sombra: lo que flota (avisos, menú abierto, hojas) */
   --alto-minimo: 52px;
 
-  --verde: #2fbf5b;
-  --azul: #2d6fd8;             /* en prueba (semáforo de Base) */
-  --amarillo: #f5c518;
-  --rojo: #ef4444;
-  --azul: #3b82f6;
+  /* Semáforo: fijo, igual en claro y oscuro; nunca lo cambia el gimnasio. */
+  --ok: #1E9E5A;
+  --no: #D6383A;
+  --atencion: #D88A0B;
+  --prueba: #2D6FD8;
+  --ok-suave: color-mix(in oklab, var(--ok), var(--fondo) 85%);
+  --no-suave: color-mix(in oklab, var(--no), var(--fondo) 85%);
+  --atencion-suave: color-mix(in oklab, var(--atencion), var(--fondo) 85%);
+  --prueba-suave: color-mix(in oklab, var(--prueba), var(--fondo) 85%);
+  --verde: var(--ok);
+  --amarillo: var(--atencion);
+  --rojo: var(--no);
+  --azul: var(--prueba);
   --naranja: #f97316;
+  --soporte: #7c3aed;           /* el marco y el cartel de "estás dentro como Soporte BRIK": no se parece a nada del semáforo */
 
-  --fuente: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --fuente: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --fuente-titulo: var(--font-barlow-condensed), var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
 
   /* Sistema de movimiento (docs/v2/16 §3): sale rápido, frena suave. */
   --dur-rapida: 150ms;
@@ -47,18 +58,22 @@
   --texto: #f3f4f6;
   --texto-suave: color-mix(in oklab, #f3f4f6, var(--fondo) 40%);
   --texto-tenue: color-mix(in oklab, #f3f4f6, var(--fondo) 62%);
-  --sombra-vidrio: 0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 10px 28px -16px rgb(0 0 0 / 0.55);
+  --superficie: var(--tarjeta);
+  --texto-2: var(--texto-suave);
+  --sobre-acento: var(--acento-texto);
   color-scheme: dark;
 }
 /* claro: lo que no dice nada es claro (D37) */
 :root:not([data-tono]), [data-tono="claro"] {
-  --tarjeta: color-mix(in oklab, var(--fondo), white 70%);
-  --tarjeta-alta: color-mix(in oklab, var(--fondo), black 5%);
-  --borde: color-mix(in oklab, var(--fondo), black 10%);
-  --texto: #16181d;
-  --texto-suave: color-mix(in oklab, #16181d, var(--fondo) 38%);
-  --texto-tenue: color-mix(in oklab, #16181d, var(--fondo) 58%);
-  --sombra-vidrio: 0 1px 0 0 rgb(255 255 255 / 0.6) inset, 0 10px 28px -18px rgb(20 24 32 / 0.28);
+  --tarjeta: #ffffff;
+  --tarjeta-alta: color-mix(in oklab, var(--fondo), black 4%);
+  --borde: color-mix(in oklab, var(--fondo), black 8%);
+  --texto: #15171a;
+  --texto-suave: #5b616b;
+  --texto-tenue: color-mix(in oklab, #5b616b, var(--fondo) 28%);
+  --superficie: var(--tarjeta);
+  --texto-2: var(--texto-suave);
+  --sobre-acento: var(--acento-texto);
   color-scheme: light;
 }
 /* El texto se hereda ya calculado: sin esto, una pantalla de fondo claro dentro
@@ -90,9 +105,6 @@ body {
   font-family: var(--fuente);
   font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
-  /* Un resplandor apenas del color del gimnasio: le da algo que desenfocar al vidrio. */
-  background-image: radial-gradient(70rem 36rem at 85% -12%, color-mix(in oklab, var(--acento) 9%, transparent), transparent 70%);
-  background-repeat: no-repeat;
 }
 
 /* Foco y selección con el color del gimnasio. */
@@ -117,49 +129,44 @@ html { accent-color: var(--acento); }
 
 /* En @layer components: las utilidades de Tailwind (hidden, w-full, mt-*) las pueden pisar. */
 @layer components {
-  /* Títulos: Archivo angosta y pesada, como la cartelería de un gimnasio. */
+  /* Títulos: Barlow Condensed, pesada, como la cartelería de un gimnasio. */
   .titular {
-    font-stretch: 68%;
-    font-weight: 820;
-    line-height: 0.95;
-    letter-spacing: -0.005em;
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
     text-wrap: balance;
   }
   .titulo {
-    font-stretch: 78%;
-    font-weight: 760;
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
     line-height: 1.05;
     text-wrap: balance;
   }
   /* Números grandes (precios, contadores): angostos y con cifras tabulares. */
   .numero {
-    font-stretch: 72%;
-    font-weight: 780;
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
 
-  /* Vidrio: fondo translúcido con desenfoque suave, borde fino y sombra discreta. */
+  /* Tarjeta: fondo liso, borde de 1 px, sin sombra (lo que está quieto no la lleva). */
   .tarjeta {
-    background: color-mix(in oklab, var(--tarjeta) 84%, transparent);
-    -webkit-backdrop-filter: blur(10px) saturate(1.1);
-    backdrop-filter: blur(10px) saturate(1.1);
+    background: var(--tarjeta);
     border-radius: var(--radio);
     border: 1px solid var(--borde);
-    box-shadow: var(--sombra-vidrio);
     transition: transform var(--dur-rapida) var(--curva), background var(--dur-media) var(--curva), border-color var(--dur-media) var(--curva);
   }
-  /* Vidrio para lo que flota (hojas, menús): más opaco para que se lea sobre cualquier cosa. */
+  /* Lo que flota (hojas, menús, avisos): fondo liso y la única sombra. */
   .vidrio {
-    background: color-mix(in oklab, var(--fondo) 88%, transparent);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
-    backdrop-filter: blur(18px) saturate(1.2);
+    background: var(--tarjeta);
     border: 1px solid var(--borde);
-    box-shadow: var(--sombra-vidrio), 0 24px 60px -24px rgb(0 0 0 / 0.6);
+    box-shadow: var(--sombra-flota);
   }
   /* Tarjeta que se toca: press state en CSS. */
   a.tarjeta:active, button.tarjeta:active { transform: scale(0.97); }
-  a.tarjeta:hover, button.tarjeta:hover { background: color-mix(in oklab, var(--tarjeta-alta) 88%, transparent); }
+  a.tarjeta:hover, button.tarjeta:hover { background: var(--tarjeta-alta); }
 
   .texto-suave { color: var(--texto-suave); }
   .texto-tenue { color: var(--texto-tenue); }
@@ -167,7 +174,7 @@ html { accent-color: var(--acento); }
   /* Botones: alto mínimo 52px y press state en CSS puro (:active). */
   .boton {
     min-height: var(--alto-minimo);
-    border-radius: var(--radio);
+    border-radius: var(--radio-campo);
     padding: 0 1.25rem;
     display: inline-flex;
     align-items: center;
@@ -186,15 +193,17 @@ html { accent-color: var(--acento); }
   .boton:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
   .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
-  .boton-peligro { background: color-mix(in oklab, var(--rojo), var(--fondo) 70%); color: #fecaca; border-color: color-mix(in oklab, var(--rojo), var(--fondo) 50%); }
+  .boton-peligro { background: color-mix(in oklab, var(--rojo), var(--fondo) 70%); color: color-mix(in oklab, var(--no), white 75%); border-color: color-mix(in oklab, var(--rojo), var(--fondo) 50%); }
 
-  /* Ícono emoji en su cuadrado: el color lo pone el emoji, el cuadrado no compite. */
+  /* Ícono de línea (componente Icono): hereda el color y el tamaño del texto. */
+  .icono-svg { display: inline-block; vertical-align: -0.2em; flex: none; }
+  /* Ícono en su cuadrado (listas): el cuadrado no compite con el ícono. */
   .icono {
     display: inline-grid;
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 14px;
+    border-radius: var(--radio-campo);
     background: var(--tarjeta-alta);
     font-size: 1.4rem;
     line-height: 1;
@@ -204,7 +213,7 @@ html { accent-color: var(--acento); }
   .campo {
     min-height: var(--alto-minimo);
     width: 100%;
-    border-radius: var(--radio);
+    border-radius: var(--radio-campo);
     background: var(--tarjeta);
     border: 1px solid var(--borde);
     padding: 0 1rem;
@@ -246,7 +255,7 @@ html { accent-color: var(--acento); }
 
   /* Botón chico (acciones secundarias dentro de una fila) y botón de texto
      (Salir, Cancelar, Descuento): siempre ≥ 44px de alto para el dedo. */
-  .boton-chico { min-height: 2.75rem; padding: 0 0.9rem; font-size: 0.95rem; border-radius: 12px; }
+  .boton-chico { min-height: 2.75rem; padding: 0 0.9rem; font-size: 0.95rem; border-radius: var(--radio-campo); }
   .boton-texto {
     min-height: 2.75rem; padding: 0 0.5rem; display: inline-flex; align-items: center; gap: 0.4rem;
     font-size: 0.9rem; color: var(--texto-tenue); background: none; border: 0; cursor: pointer; border-radius: 10px;

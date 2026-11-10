@@ -1,6 +1,7 @@
 // Cómo llegó el socio y qué reglamento aceptó (SOC-14). Sale de hechos que ya están.
 import Link from "next/link";
 import { fechaCorta } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export type DatosOrigen = {
   origen: "manual" | "importacion" | "alta_web"; alta: string; por: string | null;
@@ -17,9 +18,9 @@ export function Origen({ socioId, datos: o, zona }: { socioId: string; datos: Da
     : `Lo dio de alta ${o.por ?? "el equipo"} en el mostrador el ${dia(o.alta)}`;
   return (
     <div className="space-y-1 text-sm texto-suave" data-origen={o.origen}>
-      <p>📝 {como}.{o.prospecto && ` Antes ${DE_PROSPECTO[o.prospecto.origen]} (${dia(o.prospecto.desde)}).`}</p>
+      <p><Icono nombre="lista" /> {como}.{o.prospecto && ` Antes ${DE_PROSPECTO[o.prospecto.origen]} (${dia(o.prospecto.desde)}).`}</p>
       {o.reglamento && (
-        <p data-reglamento={o.reglamento.version}>📜 Aceptó el reglamento (versión {o.reglamento.version}) el {dia(o.reglamento.aceptado_en)} · <Link href={`/panel/socios/${socioId}/reglamento`} className="underline">Ver lo que aceptó</Link></p>
+        <p data-reglamento={o.reglamento.version}><Icono nombre="documento" /> Aceptó el reglamento (versión {o.reglamento.version}) el {dia(o.reglamento.aceptado_en)} · <Link href={`/panel/socios/${socioId}/reglamento`} className="underline">Ver lo que aceptó</Link></p>
       )}
     </div>
   );

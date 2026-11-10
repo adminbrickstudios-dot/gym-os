@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { formatearPesos } from "@/lib/formato";
 import { FormDemo } from "./FormDemo";
+import { Icono } from "@/components/ui/Icono";
 
 export type PlanBrikPublico = { nombre: string; precio_mensual: number | string };
 
@@ -47,7 +48,7 @@ function IlustracionCobro() {
           <span key={m} className={`flex-1 text-center text-sm rounded-[var(--radio)] border py-2 ${i === 0 ? "border-[var(--acento)]" : "border-[var(--borde)] texto-suave"}`}>{m}</span>
         ))}
       </div>
-      <p className="boton boton-principal w-full pointer-events-none" aria-hidden>✅ Cobrar</p>
+      <p className="boton boton-principal w-full pointer-events-none" aria-hidden><Icono nombre="ok" /> Cobrar</p>
     </div>
   );
 }
@@ -94,8 +95,8 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
   return (
     <main className="overflow-x-clip" data-plataforma>
       <header className="mx-auto max-w-5xl px-4 sm:px-8 pt-5 flex items-center justify-between gap-3">
-        <span className="titulo text-2xl">🏋️ Base</span>
-        <a href="/ingresar" className="boton boton-chico" data-ingresar>🔑 Ingresar</a>
+        <span className="titulo text-2xl"><Icono nombre="pesa" /> Base</span>
+        <a href="/ingresar" className="boton boton-chico" data-ingresar><Icono nombre="llave" /> Ingresar</a>
       </header>
 
       <section className="mx-auto max-w-5xl px-4 sm:px-8 pt-12 pb-16 aparecer">
@@ -110,8 +111,8 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
           <li><strong>Quién dejó de venir:</strong> la lista para escribirle a tiempo.</li>
         </ul>
         <div className="flex flex-wrap gap-3 mt-9">
-          <a href="#demo" className="boton boton-principal text-lg px-8" data-quiero-demo>🙋 Quiero una demo</a>
-          {linkDemo && <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="boton text-lg" data-demo-whatsapp>💬 Pedí una demo por WhatsApp</a>}
+          <a href="#demo" className="boton boton-principal text-lg px-8" data-quiero-demo><Icono nombre="persona" /> Quiero una demo</a>
+          {linkDemo && <a href={linkDemo} target="_blank" rel="noopener noreferrer" className="boton text-lg" data-demo-whatsapp><Icono nombre="mensaje" /> Pedí una demo por WhatsApp</a>}
           <a href="#que-resuelve" className="boton text-lg">Ver qué resuelve</a>
         </div>
       </section>
@@ -148,10 +149,10 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
       <section className="mx-auto max-w-5xl px-4 sm:px-8 py-12 space-y-6">
         <p className="titulo-grupo">Pensado para cada gimnasio</p>
         <ul className="grid gap-3 sm:grid-cols-3">
-          {([["🎨", "Tu marca", "Tu dirección, tu logo y tus colores. Tu página con tus planes y horarios."],
-             ["📱", "Sin instalar nada", "Tus socios entran con QR y miran su estado desde el celular."],
-             ["📶", "No se frena", "Si se corta internet, la puerta sigue andando y todo se registra al volver."]] as const).map(([e, t, d]) => (
-            <li key={t} className="tarjeta p-5 space-y-2"><p className="text-3xl" aria-hidden>{e}</p><p className="titulo text-xl">{t}</p><p className="texto-suave">{d}</p></li>
+          {([["", "Tu marca", "Tu dirección, tu logo y tus colores. Tu página con tus planes y horarios."],
+             ["", "Sin instalar nada", "Tus socios entran con QR y miran su estado desde el celular."],
+             ["", "No se frena", "Si se corta internet, la puerta sigue andando y todo se registra al volver."]] as const).map(([e, t, d]) => (
+            <li key={t} className="tarjeta p-5 space-y-2"><p className="text-3xl" aria-hidden><Icono nombre={e} /></p><p className="titulo text-xl">{t}</p><p className="texto-suave">{d}</p></li>
           ))}
         </ul>
       </section>
@@ -192,7 +193,7 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
 
       <footer className="mx-auto max-w-5xl px-4 sm:px-8 py-12 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--borde)]">
         <p className="texto-tenue">Base · una línea de BRIK</p>
-        <a href="/ingresar" className="boton">🔑 Ingresar</a>
+        <a href="/ingresar" className="boton"><Icono nombre="llave" /> Ingresar</a>
       </footer>
     </main>
   );

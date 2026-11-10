@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { marcarAvisado } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Aviso = { socio_id: string; nombre: string; telefono: string | null; clave: string; motivo: string; mensaje: string; referencia: string;
   avisado_en: string | null; avisado_por: string | null };
@@ -28,13 +29,13 @@ export function FilaAviso({ a, hora }: { a: Aviso; hora: string | null }) {
         {!hecho && (
           <div className="flex flex-wrap gap-2">
             {wa
-              ? <a href={wa} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={marcar}>💬 WhatsApp</a>
-              : <span className="pildora">📵 Sin teléfono</span>}
+              ? <a href={wa} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={marcar}><Icono nombre="mensaje" /> WhatsApp</a>
+              : <span className="pildora"><Icono nombre="prohibido" /> Sin teléfono</span>}
             <button type="button" className="boton !min-h-11 texto-suave" disabled={ocupado} onClick={marcar}>✓ Ya le avisé</button>
           </div>
         )}
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo mt-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-2"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }

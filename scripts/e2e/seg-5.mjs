@@ -38,7 +38,7 @@ try {
   const buscar = panel.locator('input[aria-label="Buscar en la copia"]');
   await buscar.fill(elegido.n);
   await panel.locator(`[data-copia-socio="${elegido.n}"] button`, { hasText: "Entró" }).click();
-  chequear(await aparece(panel.locator('[data-cola="1"]'), 10000), `busca a ${elegido.n} (puede): “✅ Entró” y queda esperando a internet`, await panel.innerText());
+  chequear(await aparece(panel.locator('[data-cola="1"]'), 10000), `busca a ${elegido.n} (puede): “Entró” y queda esperando a internet`, await panel.innerText());
   if (noPuede) {
     await buscar.fill(noPuede.n);
     const fila = panel.locator(`[data-copia-socio="${noPuede.n}"]`);

@@ -6,6 +6,7 @@ import { NOMBRE_CATEGORIA, nombreMes, type GananciaMes } from "@/lib/gastos";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { CargarGasto, Fijos, ListaGastos, PermisoEncargado, Presupuesto } from "./Formularios";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Gastos" };
 
@@ -30,7 +31,7 @@ export default async function Gastos({ searchParams }: { searchParams: Promise<{
     const desvioTotal = conPresupuesto.reduce((a, c) => a + Number(c.desvio), 0);
     return (
       <div className="space-y-10">
-        <Encabezado emoji="🧮" titulo="Gastos" bajada={`Lo que gastaste en ${nombreMes(g.mes)}${g.en_curso ? " hasta hoy" : ""} y lo que te quedó.`}
+        <Encabezado icono="calculadora" titulo="Gastos" bajada={`Lo que gastaste en ${nombreMes(g.mes)}${g.en_curso ? " hasta hoy" : ""} y lo que te quedó.`}
           volver={{ href: `/panel/resultado?mes=${g.mes.slice(0, 7)}`, texto: "Resultado" }} />
         <nav className="flex flex-wrap items-center gap-2" aria-label="Mes">
           <Link href={`/panel/gastos?mes=${anterior.slice(0, 7)}`} className="pestana">← {nombreMes(anterior).split(" ")[0]}</Link>
@@ -70,12 +71,12 @@ export default async function Gastos({ searchParams }: { searchParams: Promise<{
         {g.es_dueno && (
           <>
             <section aria-labelledby="fijos">
-              <h2 id="fijos" className="titulo text-2xl mb-1">🔁 Gastos fijos</h2>
+              <h2 id="fijos" className="titulo text-2xl mb-1"><Icono nombre="repetir" /> Gastos fijos</h2>
               <p className="texto-suave mb-3">Lo que pagás todos los meses. Lo cargás una vez y cuenta en cada mes desde {nombreMes(g.mes).split(" ")[0]}; no hay que volver a cargarlo.</p>
               <Fijos mes={g.mes} />
             </section>
             <section aria-labelledby="presupuesto">
-              <h2 id="presupuesto" className="titulo text-2xl mb-1">🎯 Presupuesto por mes</h2>
+              <h2 id="presupuesto" className="titulo text-2xl mb-1"><Icono nombre="objetivo" /> Presupuesto por mes</h2>
               <p className="texto-suave mb-3">Cuánto esperás gastar en cada categoría. Vacío = sin presupuesto.</p>
               <Presupuesto g={g} />
             </section>
@@ -89,7 +90,7 @@ export default async function Gastos({ searchParams }: { searchParams: Promise<{
         <section aria-labelledby="contador">
           <h2 id="contador" className="titulo text-2xl mb-1">Para el contador</h2>
           <p className="texto-suave mb-3">Los gastos del mes fila por fila, en una planilla que se abre con Excel.</p>
-          <a href={`/panel/gastos/exportar?mes=${g.mes.slice(0, 7)}`} className="boton" download data-exportar-gastos>🧮 Gastos del mes</a>
+          <a href={`/panel/gastos/exportar?mes=${g.mes.slice(0, 7)}`} className="boton" download data-exportar-gastos><Icono nombre="calculadora" /> Gastos del mes</a>
         </section>
       </div>
     );

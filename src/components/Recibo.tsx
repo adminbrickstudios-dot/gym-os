@@ -5,6 +5,7 @@ import { useState } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { linkWhatsappRecibo, medioTexto, textoRecibo, type ReciboDatos } from "@/lib/recibo";
 import { urlMarca } from "@/lib/url-marca";
+import { Icono } from "@/components/ui/Icono";
 
 export function Recibo({ r, volver }: { r: ReciboDatos; volver?: React.ReactNode }) {
   const logo = urlMarca(r.gimnasio.logo_path);
@@ -61,9 +62,9 @@ export function Recibo({ r, volver }: { r: ReciboDatos; volver?: React.ReactNode
         <p className="texto-tenue text-xs">Comprobante de pago emitido por {r.gimnasio.nombre}. Documento no válido como factura.</p>
       </article>
       <div className="flex flex-wrap gap-3" data-no-imprimir>
-        <button type="button" className="boton boton-principal" onClick={() => window.print()} data-imprimir>🖨️ Imprimir / Guardar como PDF</button>
-        <a className="boton" href={linkWhatsappRecibo(r)} target="_blank" rel="noopener noreferrer" data-whatsapp>💬 Mandar por WhatsApp</a>
-        <button type="button" className="boton" onClick={compartir} data-compartir>↗️ Compartir</button>
+        <button type="button" className="boton boton-principal" onClick={() => window.print()} data-imprimir>Imprimir / Guardar como PDF</button>
+        <a className="boton" href={linkWhatsappRecibo(r)} target="_blank" rel="noopener noreferrer" data-whatsapp><Icono nombre="mensaje" /> Mandar por WhatsApp</a>
+        <button type="button" className="boton" onClick={compartir} data-compartir><Icono nombre="derecha" /> Compartir</button>
       </div>
       {avisoCopia && <p role="status" className="texto-suave text-sm" data-no-imprimir>{avisoCopia}</p>}
     </div>

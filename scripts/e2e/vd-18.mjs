@@ -35,12 +35,12 @@ try {
   ok("la foto del producto se sube y aparece en la fila");
 
   // Stock: lo lleva contando 3 (avisa con 2); entra mercadería con remito (+2) y se cuenta de nuevo (3).
-  await fila.locator('button:has-text("📦 Stock")').click();
+  await fila.locator('button:has-text("Stock")').click();
   await fila.locator('input[aria-label="Cuántos hay ahora"]').fill("3");
   await fila.locator('input[aria-label="Avisar cuando queden"]').fill("2");
   await fila.locator('button:has-text("Llevar stock")').click();
   await fila.locator('[data-stock="3"]').waitFor({ timeout: 30000 });
-  await fila.locator('button:has-text("📦 Stock")').click();
+  await fila.locator('button:has-text("Stock")').click();
   await fila.locator('input[aria-label="Cuántos entraron"]').fill("2");
   await fila.locator('input[aria-label="Motivo de la entrada"]').fill("Distribuidora");
   await fila.locator('input[aria-label="Foto del remito"]').setInputFiles({ name: "remito.png", mimeType: "image/png", buffer: PNG });
@@ -66,7 +66,7 @@ try {
   chequear(await tile.isDisabled() && /Sin stock/.test(await tile.innerText()), "con 3 en el carrito el botón queda en “Sin stock” y no deja agregar más", await tile.innerText());
   await capturar(d, "vd18-compu-vender");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await d.goto(`${G}/panel/planes`);
   await fila.locator('[data-stock="0"]').waitFor({ timeout: 30000 });
@@ -103,7 +103,7 @@ try {
     if (ruta === "/panel/planes") {
       const f = m.locator(`li[data-producto="${NOMBRE}"]`);
       await f.waitFor({ timeout: 30000 });
-      await f.locator('button:has-text("📦 Stock")').click();
+      await f.locator('button:has-text("Stock")').click();
       await capturar(m, "vd18-celu-stock");
     }
     const ancho = await m.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

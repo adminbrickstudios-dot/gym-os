@@ -5,6 +5,7 @@ import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { detectarSalud } from "@/lib/salud";
 import { crearTarea, marcarTarea } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Tarea = { id: string; que: string; dia: string; socio_id: string | null; socio: string | null; para_id: string; para: string; mia: boolean;
   creada_por: string; repite?: string | null; hecha_en: string | null; hecha_por: string | null; atrasada: boolean };
@@ -30,13 +31,13 @@ export function FilaTarea({ t, hoy, mostrarPara = false }: { t: Tarea; hoy: stri
   return (
     <li className={`tarjeta p-4 flex flex-wrap items-center gap-3 ${hecha ? "opacity-60" : ""}`} data-tarea={hecha ? "hecha" : t.atrasada ? "atrasada" : "pendiente"}>
       <button type="button" className="boton !min-h-11 !px-3" disabled={ocupado} onClick={cambiar} aria-label={hecha ? `Reabrir: ${t.que}` : `Marcar hecha: ${t.que}`}>
-        {hecha ? "↩️" : "✅"}
+        {hecha ? "" : "✓"}
       </button>
       <span className="min-w-0 flex-1">
         <span className={`block font-semibold ${hecha ? "line-through" : ""}`}>{t.que}</span>
         <span className="block text-sm texto-suave">
-          {t.dia === hoy ? "Hoy" : t.atrasada ? `⚠️ Era para el ${ddmm(t.dia)}` : ddmm(t.dia)}
-          {t.repite && ` · 🔁 ${REPITE[t.repite] ?? t.repite}`}
+          {t.dia === hoy ? "Hoy" : t.atrasada ? `Era para el ${ddmm(t.dia)}` : ddmm(t.dia)}
+          {t.repite && ` · ${REPITE[t.repite] ?? t.repite}`}
           {mostrarPara && ` · para ${t.mia ? "vos" : t.para}`}
           {t.socio && <> · <LinkPanel href={`/panel/socios/${t.socio_id}`} siNoEsta="texto" className="underline">{t.socio}</LinkPanel></>}
           {hecha && t.hecha_por && ` · hecha por ${t.hecha_por}`}
@@ -55,7 +56,7 @@ export function NuevaTarea({ equipo, hoy, socio, abierta = false }: { equipo: Pe
   const [repite, setRepite] = useState("");
   const [estado, setEstado] = useState<{ ok?: boolean; error?: string }>({});
   const [guardando, empezar] = useTransition();
-  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}>➕ Nueva tarea</button>;
+  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nueva tarea</button>;
   return (
     <form className="tarjeta p-5 grid gap-3 sm:grid-cols-2" data-nueva-tarea
       onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearTarea(que, para, dia, socio?.id ?? null, repite || null); setEstado(r.error ? { error: r.error } : { ok: true }); if (!r.error) setQue(""); }); }}>
@@ -73,7 +74,7 @@ export function NuevaTarea({ equipo, hoy, socio, abierta = false }: { equipo: Pe
       {estado.error && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
       {estado.ok && <Mensaje tipo="exito" className="sm:col-span-2">Tarea anotada.</Mensaje>}
       <div className="flex gap-2 sm:col-span-2">
-        <button type="submit" className="boton boton-principal" disabled={guardando || que.trim().length < 2 || !!detectarSalud(que)}>{guardando ? "Guardando…" : "✅ Anotar tarea"}</button>
+        <button type="submit" className="boton boton-principal" disabled={guardando || que.trim().length < 2 || !!detectarSalud(que)}>{guardando ? "Guardando…" : "Anotar tarea"}</button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button>
       </div>
     </form>

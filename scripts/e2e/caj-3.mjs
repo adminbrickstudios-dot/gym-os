@@ -42,7 +42,7 @@ try {
   await pc.goto(`${G}/panel/vender?socio=${id}`);
   await pc.locator("main button", { hasText: "Barrita proteica" }).click();
   await pc.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await pc.locator('button:has-text("✅ Cobrar")').click();
+  await pc.locator('button:has-text("Cobrar")').click();
   await esperarCobro(pc);
   await pc.goto(`${G}/panel/pin`);
   await pc.locator('[data-opera] button:has-text("Salir")').click();

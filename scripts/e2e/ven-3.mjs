@@ -38,9 +38,9 @@ try {
   await linea.waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   chequear(/Convenio .*−\$5\.000/.test((await linea.innerText()).replace(/\n/g, " ")) && /\$20\.000/.test(await d.locator("[data-carrito]").innerText()),
-    "Vender: “🤝 Convenio … −$5.000” como línea aparte y total $20.000 (cuota $25.000)", await d.locator("[data-carrito]").innerText());
+    "Vender: “Convenio … −$5.000” como línea aparte y total $20.000 (cuota $25.000)", await d.locator("[data-carrito]").innerText());
   await capturar(d, "ven3-compu-carrito");
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   chequear(await d.getByText("Cobrado $20.000").count() > 0, "la base cobra lo mismo: “Cobrado $20.000”", "no cobró $20.000");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);

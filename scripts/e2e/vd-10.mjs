@@ -30,7 +30,7 @@ try {
   await m.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });
   await m.locator("[data-carrito] select[data-motivo-descuento]").first().selectOption({ index: 1 });
   await m.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await m.locator('button:has-text("✅ Cobrar")').click();
+  await m.locator('button:has-text("Cobrar")').click();
   await esperarCobro(m);
   ok("el encargado cobra la cuota con $5.000 de descuento");
 
@@ -41,7 +41,7 @@ try {
   await m.locator('form:has(input[placeholder^="Qué es"]) button:has-text("Agregar")').click();
   await m.locator("[data-carrito]", { hasText: `Toalla${s5}` }).waitFor({ timeout: 30000 });
   await m.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await m.locator('button:has-text("✅ Cobrar")').click();
+  await m.locator('button:has-text("Cobrar")').click();
   await esperarCobro(m);
   await m.goto(`${G}/panel/socios/${id}?pestana=pagos`);
   const venta = m.locator("[data-ventas] li").first();

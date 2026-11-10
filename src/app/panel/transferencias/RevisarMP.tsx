@@ -4,6 +4,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { revisarConMercadoPago, type ResultadoRevision } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-46A: "Revisar con MercadoPago": el dueño y el encargado reconsultan lo dudoso a mano (no hay cron). */
 export function RevisarMP() {
@@ -25,7 +26,7 @@ export function RevisarMP() {
           <p className="font-semibold">Pagos con MercadoPago</p>
           <p className="texto-suave">Compara con MercadoPago los pagos que quedaron colgados y los del último mes. Si devolvieron o contracargaron uno, se anula la venta y el socio pierde el acceso.</p>
         </div>
-        <BotonAccion className="boton" ocupadoTexto="Revisando…" onClick={correr}>🔄 Revisar con MercadoPago</BotonAccion>
+        <BotonAccion className="boton" ocupadoTexto="Revisando…" onClick={correr}><Icono nombre="repetir" /> Revisar con MercadoPago</BotonAccion>
       </div>
       {r?.error && <Mensaje tipo="error">{r.error}</Mensaje>}
       {texto && !r?.error && <Mensaje tipo={r?.fallaron ? "aviso" : "exito"}>{texto}</Mensaje>}

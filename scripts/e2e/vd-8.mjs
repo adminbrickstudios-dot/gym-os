@@ -32,7 +32,7 @@ async function modo(d, indice, dias) {
   await card.waitFor({ timeout: 60000 });
   await card.locator('input[name="modo-dejar-pasar"]').nth(indice).check();
   if (dias != null) await card.locator('input[type=number]').fill(String(dias));
-  await card.locator('button:has-text("💾 Guardar")').click();
+  await card.locator('button:has-text("Guardar")').click();
   await card.getByText("Guardado. Vale desde ahora").waitFor({ timeout: 30000 });
 }
 async function abrirDejarPasar(r, nombre) {

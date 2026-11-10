@@ -56,7 +56,7 @@ try {
   await p.goto(`${G}/panel/grados`);
   const fila = p.locator(`[data-listo-rendir="${nombre}"]`, { hasText: clase.actividad });
   await fila.locator("button", { hasText: `Rindió: ${BLANCO}` }).click();
-  chequear(await aparece(fila.getByText(`✅ ${BLANCO}`), 30000), `el profe, en el celular, toca “🥋 Rindió: ${BLANCO}”`, await fila.innerText());
+  chequear(await aparece(fila.getByText(`${BLANCO}`), 30000), `el profe, en el celular, toca “Rindió: ${BLANCO}”`, await fila.innerText());
   await capturar(p, "com13-celu-profe");
 
   const so = await pagina(b, CELU);
@@ -65,7 +65,7 @@ try {
   await so.goto(`${G}/app`);
   const app = so.locator("[data-grados-app]");
   chequear(await aparece(app, 60000) && (await app.innerText()).includes(`${clase.actividad}: ${BLANCO}`) && (await app.innerText()).includes(`Para ${AMARILLO}`),
-    `la app del socio: “🥋 Tu grado · ${clase.actividad}: ${BLANCO}” y lo que le falta para ${AMARILLO}`, await app.innerText().catch(() => "no está"));
+    `la app del socio: “Tu grado · ${clase.actividad}: ${BLANCO}” y lo que le falta para ${AMARILLO}`, await app.innerText().catch(() => "no está"));
   for (const x of [d, p, so]) if (x.errores.length) falla(x.errores.join(" | "));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

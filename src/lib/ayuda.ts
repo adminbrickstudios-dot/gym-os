@@ -32,7 +32,7 @@ export const RUTAS_APP: Record<string, string> = {
 export const AYUDAS: Record<string, Ayuda> = {
   // VD-63: una línea que dice qué es y qué hacer. Sin repetir el título ni llenar.
   inicio: {
-    emoji: "🏠", titulo: "Tu inicio",
+    emoji: "inicio", titulo: "Tu inicio",
     texto: "Así viene el día y lo que falta hacer. Tocá un número o un acceso para ir directo.",
     porRol: {
       recepcion: "Quién vence hoy y lo pendiente del mostrador. Tocá un acceso para ir directo.",
@@ -40,59 +40,59 @@ export const AYUDAS: Record<string, Ayuda> = {
     },
   },
   entrada: {
-    emoji: "🚪", titulo: "Entrada",
+    emoji: "puerta", titulo: "Entrada",
     texto: "Tipeá el DNI o escaneá el QR: verde pasa, rojo se frena y dice por qué.",
     porRol: { recepcion: "Tipeá el DNI de quien llega: te dice si pasa y por qué; si no pasa, cobrale desde acá." },
   },
   socios: {
-    emoji: "👥", titulo: "Socios",
+    emoji: "usuarios", titulo: "Socios",
     texto: "Buscá por nombre, DNI o teléfono y tocá al socio: desde su ficha cobrás, anotás y escribís.",
     porRol: { recepcion: "Buscá al socio y tocalo: desde su ficha cobrás y anotás. Para uno nuevo, “Nuevo socio”." },
   },
   vencen_hoy: {
-    emoji: "⏰", titulo: "Vencen y cobrar",
+    emoji: "reloj", titulo: "Vencen y cobrar",
     texto: "A quién avisarle y cobrarle antes de que se vaya: tocá “Cobrar” o mandale el mensaje listo.",
     porRol: { recepcion: "Los que vencen hoy o ya vencieron: cobrales en el mostrador o mandales el aviso." },
   },
   caja: {
-    emoji: "💵", titulo: "Caja",
+    emoji: "plata", titulo: "Caja",
     texto: "Abrí la caja al empezar el turno y cerrala contando la plata: todo lo que cobrás queda anotado.",
     porRol: { recepcion: "Abrí tu turno al llegar y cerralo al irte contando lo que hay: lo que cobrás queda a tu nombre." },
   },
   cobrar: {
-    emoji: "🛒", titulo: "Productos y cobros",
+    emoji: "carrito", titulo: "Productos y cobros",
     texto: "Vendé productos, pases y packs. Para cobrar una cuota, buscá al socio y tocá “Cobrar”.",
   },
   tareas: {
-    emoji: "✅", titulo: "Para hacer hoy",
+    emoji: "ok", titulo: "Para hacer hoy",
     texto: "Lo que hay que hacer hoy, con quién y para cuándo: tildá lo terminado y lo que sobra pasa a mañana.",
   },
   planes: {
-    emoji: "🏷️", titulo: "Planes y servicios",
+    emoji: "etiqueta", titulo: "Planes y servicios",
     texto: "Lo que vendés y cuánto cuesta: tocá un plan para cambiar precio o reglas (los socios que ya lo tienen no se tocan).",
   },
   configuracion: {
-    emoji: "⚙️", titulo: "Configuración",
+    emoji: "ajustes", titulo: "Configuración",
     texto: "Tu marca, horarios, reglas de cobro y secciones. Escribí arriba lo que buscás.",
   },
   control: {
-    emoji: "🛡️", titulo: "Control",
+    emoji: "escudo", titulo: "Control",
     texto: "Todo lo que pasó con la plata y la puerta, y quién lo hizo. Filtrá por día o por persona.",
   },
   app_inicio: {
-    emoji: "👋", titulo: "Tu inicio",
+    emoji: "salir", titulo: "Tu inicio",
     texto: "Si estás al día y qué te toca hoy. Tu QR para entrar está más abajo.",
   },
   app_clases: {
-    emoji: "🗓️", titulo: "Clases",
+    emoji: "calendario", titulo: "Clases",
     texto: "Elegí una clase y tocá “Reservar”. Si no podés ir, cancelá a tiempo para no perder el cupo.",
   },
   app_rutina: {
-    emoji: "💪", titulo: "Tu rutina",
+    emoji: "pesa", titulo: "Tu rutina",
     texto: "Tu rutina del día: anotá el peso de cada ejercicio y marcá cuando terminás.",
   },
   app_yo: {
-    emoji: "🙋", titulo: "Yo",
+    emoji: "persona", titulo: "Yo",
     texto: "Tu plan, tus pagos y tus datos. Desde acá también pagás, cambiás de plan o le escribís al gimnasio.",
   },
 };

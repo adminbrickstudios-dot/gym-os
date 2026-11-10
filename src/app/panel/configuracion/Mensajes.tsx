@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarMensaje, restaurarMensaje, vistaPreviaMensaje } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type MensajePanel = {
   clave: string; titulo: string; emoji: string; cuando: string; usado_en: string[]; variables: string[];
@@ -59,7 +60,7 @@ function UnMensaje({ m, alGuardar, alCambiarSucio }: { m: MensajePanel; alGuarda
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-mensaje={m.clave} data-respuestas={msj.n}>
       <div>
-        <p className="titulo text-2xl">{m.emoji} {m.titulo}</p>
+        <p className="titulo text-2xl"><Icono nombre={m.emoji} /> {m.titulo}</p>
         <p className="texto-suave">{m.cuando}</p>
         <p className="text-sm texto-tenue mt-1">
           {m.usado_en.length ? `Lo usás en: ${m.usado_en.join(" · ")}` : "Todavía no lo manda ninguna pantalla: queda listo para cuando la uses."}
@@ -83,18 +84,18 @@ function UnMensaje({ m, alGuardar, alCambiarSucio }: { m: MensajePanel; alGuarda
           {vista?.socio ? <>Así lo recibe <b>{vista.socio}</b>{vista.situacion ? ` (${vista.situacion})` : ""}:</> : "Así se ve:"}
         </p>
         {errorVista
-          ? <p className="text-sm" role="alert">⚠️ {errorVista}</p>
+          ? <p className="text-sm" role="alert"><Icono nombre="alerta" /> {errorVista}</p>
           : <p className="whitespace-pre-wrap rounded-2xl rounded-tl-sm px-4 py-3 max-w-prose" style={{ background: "color-mix(in oklab, var(--verde), var(--tarjeta) 78%)" }}>{vista?.texto ?? "…"}</p>}
       </div>
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && !sucio && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" className="boton" disabled={ocupado || !sucio} onClick={() => empezar(async () => responder(await guardarMensaje(m.clave, texto), "Guardado"))}>
-          {ocupado ? "Guardando…" : "✅ Guardar"}
+          {ocupado ? "Guardando…" : "Guardar"}
         </button>
         {(m.modificado || texto.trim() !== m.original) && (
           <button type="button" className="boton-texto" disabled={ocupado}
-            onClick={() => empezar(async () => responder(await restaurarMensaje(m.clave), "Volvió al original"))}>↩️ Volver al original</button>
+            onClick={() => empezar(async () => responder(await restaurarMensaje(m.clave), "Volvió al original"))}><Icono nombre="deshacer" /> Volver al original</button>
         )}
         {sucio && <span className="pildora" data-sin-guardar>• Cambios sin guardar</span>}
       </div>

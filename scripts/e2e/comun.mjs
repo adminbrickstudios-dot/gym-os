@@ -158,7 +158,7 @@ export async function esperarCobro(p) {
   if (r && /ya cobró esta cuota/.test(r)) {
     await p.locator("[data-cobrar-doble-igual]").click();
     await p.locator("[data-cobrar-doble-motivo]").fill("Otro cobro, a propósito (prueba)");
-    await p.locator('button:has-text("✅ Cobrar")').click();
+    await p.locator('button:has-text("Cobrar")').click();
     await p.getByText(/^Cobrado \$/).first().waitFor({ timeout: 30000 });
     return;
   }

@@ -21,7 +21,7 @@ try {
     await d.locator('button:has-text("Crear")').click();
     await plan(d, n).waitFor({ timeout: 30000 });
   }
-  await plan(d, `Otro${s5}`).locator('button:has-text("💲 Precios")').click();
+  await plan(d, `Otro${s5}`).locator('button:has-text("Precios")').click();
   await plan(d, `Otro${s5}`).locator('input[aria-label="Precio con Efectivo"]').fill("18.000");
   await plan(d, `Otro${s5}`).locator('button:has-text("Guardar precios")').click();
   await plan(d, `Otro${s5}`).locator("[data-variantes]").waitFor({ timeout: 30000 });
@@ -50,9 +50,9 @@ try {
   chequear(new RegExp(`Uno${s5}: \\$34\\.000`).test(aviso) && /efectivo \$20\.000/.test(aviso), "programado, con el aviso para WhatsApp armado", aviso);
   await d.locator('main a:has-text("Volver a Planes")').first().click();
   await d.waitForURL(/\/panel\/planes$/);
-  await plan(d, `Uno${s5}`).locator("text=📅 Desde el").waitFor({ timeout: 30000 });
+  await plan(d, `Uno${s5}`).locator("text=Desde el").waitFor({ timeout: 30000 });
   const fila = await plan(d, `Uno${s5}`).innerText();
-  chequear(/\$31\.234/.test(fila) && /📅 Desde el .*\$34\.000/.test(fila), "Planes: hoy $31.234 y 📅 el que viene", fila);
+  chequear(/\$31\.234/.test(fila) && /Desde el .*\$34\.000/.test(fila), "Planes: hoy $31.234 y el que viene", fila);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 
   const c = await pagina(b, CELU);

@@ -13,6 +13,9 @@ const ARCHIVOS_CON_COLOR = new Set([
   "src/lib/marca.ts",             // calcula el contraste y la paleta de cada gimnasio a partir de su color
   "src/app/og/route.tsx",         // imagen para compartir: no hay CSS del sitio
   "src/app/manifest.ts",          // el manifest de la app pide colores literales
+  "src/app/layout.tsx",           // viewport.themeColor pide un color literal (el del tema claro por defecto)
+  "src/app/panel/configuracion/Ajustes.tsx",   // las muestras de fondo y de acento que ofrece el selector: son datos, no estilos
+  "src/app/panel/grados/Grados.tsx",           // el color inicial del cinturón nuevo: dato del gimnasio
 ]);
 const HEX = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g;
 const EMOJI = /\p{Extended_Pictographic}/gu;

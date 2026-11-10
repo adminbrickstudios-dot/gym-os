@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { guardarConvenio, type Convenio } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const valorTexto = (c: { tipo: string; valor: number }) => (c.tipo === "porcentaje" ? `${Number(c.valor)} %` : formatearPesos(c.valor));
 
@@ -20,7 +21,7 @@ function Formulario({ c, cerrar }: { c?: Convenio; cerrar: () => void }) {
       <input required className="campo !w-28" inputMode="decimal" placeholder={tipo === "porcentaje" ? "%" : "$"} aria-label="Cuánto descuenta" value={valor} onChange={(e) => setValor(e.target.value)} />
       <button type="submit" className="boton boton-principal" disabled={ocupado}>Guardar</button>
       <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
-      {error && <p role="alert" className="pildora pildora-rojo w-full">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo w-full"><Icono nombre="alerta" /> {error}</p>}
     </form>
   );
 }
@@ -32,7 +33,7 @@ export function Convenios({ convenios }: { convenios: Convenio[] }) {
   const [ocupado, empezar] = useTransition();
   return (
     <section data-convenios>
-      <h2 className="titulo text-3xl mb-1">🤝 Convenios</h2>
+      <h2 className="titulo text-3xl mb-1"><Icono nombre="usuarios" /> Convenios</h2>
       <p className="texto-suave mb-4">Descuentos fijos para un grupo (estudiantes, una empresa, familiares). Se asignan desde la ficha del socio y Vender los descuenta solos de la cuota.</p>
       {convenios.length === 0 && !nuevo && <p className="texto-tenue mb-3">Todavía no hay convenios.</p>}
       <ul className="grid sm:grid-cols-2 gap-2 mb-3">
@@ -43,14 +44,14 @@ export function Convenios({ convenios }: { convenios: Convenio[] }) {
                 <span className="flex-1 min-w-0 font-semibold">{c.nombre}</span>
                 <span className="numero text-xl">−{valorTexto(c)}</span>
                 <span className="texto-tenue text-sm w-full">{c.socios} {c.socios === 1 ? "socio" : "socios"}{c.activo ? "" : " · desactivado"}</span>
-                <button type="button" className="boton-texto" onClick={() => setEditando(c.convenio_id)}>✏️ Editar</button>
+                <button type="button" className="boton-texto" onClick={() => setEditando(c.convenio_id)}><Icono nombre="lapiz" /> Editar</button>
                 <button type="button" className="boton-texto" disabled={ocupado} onClick={() => empezar(async () => { await guardarConvenio(c.convenio_id, c.nombre, c.tipo, String(c.valor), !c.activo); })}>{c.activo ? "Desactivar" : "Activar"}</button>
               </div>
             )}
           </li>
         ))}
       </ul>
-      {nuevo ? <Formulario cerrar={() => setNuevo(false)} /> : <button type="button" className="boton" onClick={() => setNuevo(true)}>➕ Nuevo convenio</button>}
+      {nuevo ? <Formulario cerrar={() => setNuevo(false)} /> : <button type="button" className="boton" onClick={() => setNuevo(true)}><Icono nombre="mas" /> Nuevo convenio</button>}
     </section>
   );
 }

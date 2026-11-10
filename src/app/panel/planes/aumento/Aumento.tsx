@@ -5,6 +5,7 @@ import { formatearPesos } from "@/lib/formato";
 import { aplicarAumento, avisoPrevioAumento, guardarAvisoDias, vistaAumento, type AumentoHecho, type AvisoPrevio, type Aumento as Datos, type VistaAumento } from "../acciones";
 import type { Plan } from "../Editor";
 import { MEDIO } from "../Precios";
+import { Icono } from "@/components/ui/Icono";
 
 const REDONDEOS = [1, 10, 50, 100, 500, 1000];
 
@@ -51,13 +52,13 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
     const texto = aviso(hecho.vista);
     return (
       <div className="space-y-5" data-aumento-hecho>
-        <p role="status" className="tarjeta p-5 text-lg font-semibold">✅ Aumento programado en {hecho.n} {hecho.n === 1 ? "plan" : "planes"} desde el {fecha(hecho.vista.desde)}.</p>
-        <p className="tarjeta p-4" data-constancia>🧾 {hecho.avisados === 0 ? "No hay socios con membresía activa en esos planes: no hizo falta avisar." : `Quedó la constancia: le avisamos en su app a ${hecho.avisados} ${hecho.avisados === 1 ? "socio" : "socios"}.`}</p>
+        <p role="status" className="tarjeta p-5 text-lg font-semibold"><Icono nombre="ok" /> Aumento programado en {hecho.n} {hecho.n === 1 ? "plan" : "planes"} desde el {fecha(hecho.vista.desde)}.</p>
+        <p className="tarjeta p-4" data-constancia><Icono nombre="recibo" /> {hecho.avisados === 0 ? "No hay socios con membresía activa en esos planes: no hizo falta avisar." : `Quedó la constancia: le avisamos en su app a ${hecho.avisados} ${hecho.avisados === 1 ? "socio" : "socios"}.`}</p>
         <section className="space-y-2">
-          <h2 className="titulo text-2xl">📣 Avisales a tus socios</h2>
+          <h2 className="titulo text-2xl"><Icono nombre="campana" /> Avisales a tus socios</h2>
           <p className="texto-suave">Para mandar por WhatsApp a tu lista de difusión o pegar en el grupo:</p>
           <pre className="tarjeta p-4 whitespace-pre-wrap text-sm" data-aviso>{texto}</pre>
-          <button type="button" className="boton" onClick={async () => { try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? "✓ Copiado" : "📋 Copiar el aviso"}</button>
+          <button type="button" className="boton" onClick={async () => { try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? "✓ Copiado" : "Copiar el aviso"}</button>
         </section>
         <Link href="/panel/planes" className="boton boton-principal">← Volver a Planes</Link>
       </div>
@@ -108,11 +109,11 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
       {previo && (
         <section className="tarjeta p-4 space-y-3" data-aviso-previo={previo.cumple ? "ok" : "falta"}>
           {previo.cumple ? (
-            <p>✅ <b>{previo.dias_de_aviso} días de aviso</b> (el mínimo son {previo.aviso_dias}). Les llega el aviso en la app a <b>{previo.socios_a_avisar}</b> {previo.socios_a_avisar === 1 ? "socio" : "socios"} y queda la constancia.</p>
+            <p><Icono nombre="ok" /> <b>{previo.dias_de_aviso} días de aviso</b> (el mínimo son {previo.aviso_dias}). Les llega el aviso en la app a <b>{previo.socios_a_avisar}</b> {previo.socios_a_avisar === 1 ? "socio" : "socios"} y queda la constancia.</p>
           ) : (
             <>
-              <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full">⚠️ Con {previo.dias_de_aviso} {previo.dias_de_aviso === 1 ? "día" : "días"} de aviso no alcanza: hacen falta {previo.aviso_dias}. Avisar tarde es lo que termina en multas.</p>
-              <button type="button" className="boton" onClick={() => setDatos({ ...datos, desde: previo.fecha_minima })}>📅 Poner el {diaTxt(previo.fecha_minima)}</button>
+              <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="alerta" /> Con {previo.dias_de_aviso} {previo.dias_de_aviso === 1 ? "día" : "días"} de aviso no alcanza: hacen falta {previo.aviso_dias}. Avisar tarde es lo que termina en multas.</p>
+              <button type="button" className="boton" onClick={() => setDatos({ ...datos, desde: previo.fecha_minima })}><Icono nombre="calendario" /> Poner el {diaTxt(previo.fecha_minima)}</button>
               {previo.puede_excepcion ? (
                 <label className="block space-y-2"><span className="etiqueta">Si es urgente, aplicalo igual: ¿por qué? (queda registrado a tu nombre)</span>
                   <textarea className="campo" rows={2} maxLength={300} aria-label="Motivo para aplicar sin el aviso mínimo" value={datos.motivo ?? ""} onChange={(e) => setDatos({ ...datos, motivo: e.target.value })} />
@@ -122,7 +123,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
           )}
         </section>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       {vista && (
         <section className="space-y-2" data-vista>
           <h2 className="titulo text-2xl">Así quedan desde el {fecha(vista.desde)}</h2>
@@ -137,14 +138,14 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
                 {p.variantes.map((v, i) => (
                   <p key={i} className="text-sm texto-suave">{v.medio ? MEDIO[v.medio] : ""}{v.medio && v.hasta_dia ? " · " : ""}{v.hasta_dia ? `hasta el día ${v.hasta_dia}` : ""}: <span className="line-through">{formatearPesos(v.antes)}</span> → {formatearPesos(v.monto)}</p>
                 ))}
-                {p.despues && <p className="text-sm" style={{ color: "var(--acento)" }}>📅 Ya tiene otro precio programado desde el {fecha(p.despues)}: ese va a regir después.</p>}
-                {p.problema && <p className="pildora pildora-rojo mt-2">⚠️ {p.problema}</p>}
+                {p.despues && <p className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="calendario" /> Ya tiene otro precio programado desde el {fecha(p.despues)}: ese va a regir después.</p>}
+                {p.problema && <p className="pildora pildora-rojo mt-2"><Icono nombre="alerta" /> {p.problema}</p>}
               </li>
             ))}
           </ul>
         </section>
       )}
-      <button type="submit" className="boton boton-principal" disabled={!vista || conProblema || ocupado || bloqueado}>📈 Programar aumento</button>
+      <button type="submit" className="boton boton-principal" disabled={!vista || conProblema || ocupado || bloqueado}><Icono nombre="tendencia" /> Programar aumento</button>
 
       <section className="space-y-3 pt-4 border-t border-[var(--borde)]" data-config-aviso>
         <h2 className="titulo text-2xl">Aviso mínimo</h2>
@@ -166,7 +167,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
               <li key={h.id} className="tarjeta p-4 space-y-1" data-aumento-hecho-id={h.id}>
                 <p className="font-semibold">{h.tipo === "porcentaje" ? `${h.valor}%` : formatearPesos(h.valor)} · {h.planes.join(", ")}</p>
                 <p className="texto-suave text-sm">Desde el {fecha(h.vigente_desde)} · lo programó {h.por} el {fecha(h.creado_en)} con {h.aviso_dias_reales} días de aviso</p>
-                <p className="text-sm">🧾 Avisados en la app: {h.avisados} · lo vieron: {h.vistos}</p>
+                <p className="text-sm"><Icono nombre="recibo" /> Avisados en la app: {h.avisados} · lo vieron: {h.vistos}</p>
                 {h.excepcion_motivo && <p className="text-sm" style={{ color: "var(--acento)" }}>Sin el aviso mínimo ({h.aviso_dias_exigido} días). Motivo: {h.excepcion_motivo}</p>}
               </li>
             ))}

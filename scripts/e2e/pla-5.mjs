@@ -26,7 +26,7 @@ try {
 
   await nuevo(d, "Pase", `Pase${s5}`, "5.000");
   const pase = plan(d, `Pase${s5}`);
-  await pase.locator('button:has-text("💲 Precios")').click();
+  await pase.locator('button:has-text("Precios")').click();
   chequear(await pase.locator('input[aria-label="Hasta el día"]').count() === 0 && await pase.locator('button:has-text("Precio por pagar antes")').count() === 0,
     "un pase no ofrece “pagando antes del día” (eso es de la cuota)", "el pase ofrece precio por día");
   await pase.locator('input[aria-label="Precio con Efectivo"]').fill("5.500");
@@ -40,7 +40,7 @@ try {
 
   await nuevo(d, null, `Cuota${s5}`, "30.000");
   const cuota = plan(d, `Cuota${s5}`);
-  await cuota.locator('button:has-text("💲 Precios")').click();
+  await cuota.locator('button:has-text("Precios")').click();
   await cuota.locator('button:has-text("Precio por pagar antes")').click();
   await cuota.locator('input[aria-label="Precio hasta ese día"]').fill("27.000");
   await cuota.locator('button:has-text("Guardar precios")').click();
@@ -49,17 +49,17 @@ try {
 
   // Aumento programado, que conserva el precio por día, y se anula.
   const en10 = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
-  await cuota.locator('button:has-text("💲 Precios")').click();
+  await cuota.locator('button:has-text("Precios")').click();
   chequear(await cuota.locator('input[aria-label="Precio hasta ese día"]').inputValue() === "27.000", "al abrir trae la lista de hoy (el precio por día no se pierde al aumentar)", "no trae el precio por día");
   await cuota.locator('input[aria-label="Precio general"]').fill("33.000");
   await cuota.locator('input[aria-label="Precio hasta ese día"]').fill("30.000");
   await cuota.locator('input[type="date"]').fill(en10);
   await cuota.locator('button:has-text("Guardar precios")').click();
-  await cuota.locator("text=📅 Desde el").waitFor({ timeout: 30000 });
+  await cuota.locator("text=Desde el").waitFor({ timeout: 30000 });
   chequear(/\$33\.000 \(hasta el día 10: \$30\.000\)/.test(await cuota.innerText()), "el aumento programado se ve con su precio por día", await cuota.innerText());
-  await cuota.locator('button:has-text("💲 Precios")').click();
+  await cuota.locator('button:has-text("Precios")').click();
   await cuota.locator('button:has-text("Anular ese aumento")').click();
-  await d.waitForFunction((n) => !document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes("📅 Desde el"), `Cuota${s5}`, { timeout: 30000 });
+  await d.waitForFunction((n) => !document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes("Desde el"), `Cuota${s5}`, { timeout: 30000 });
   ok("✕ Anular ese aumento: vuelve a regir solo el de hoy");
   await capturar(d, "pla5-compu-planes");
 
@@ -79,7 +79,7 @@ try {
   const c = await pagina(b, CELU);
   await entrar(c, "encargado@ejemplo.invalid");
   await c.goto(`${G}/panel/planes`);
-  await plan(c, `Cuota${s5}`).locator('button:has-text("💲 Precios")').click();
+  await plan(c, `Cuota${s5}`).locator('button:has-text("Precios")').click();
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular con los precios abiertos, sin desborde (${ancho}px)`, `desborda: ${ancho}`);
   await capturar(c, "pla5-celu-precios");

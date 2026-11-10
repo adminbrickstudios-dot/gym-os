@@ -7,14 +7,15 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { fechaCorta } from "@/lib/formato";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { agregarProspecto, cambiarEstado } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Prospecto = {
   id: string; nombre: string; telefono: string; dni?: string | null; interes: string | null; origen: "pagina" | "recepcion" | "referido"; referido_por?: string | null;
   estado: "nuevo" | "contactado" | "vino" | "socio" | "no"; nota: string | null; socio_id: string | null;
   creado_en: string; actualizado_en: string; mensaje: string;
 };
-const ESTADOS: [Prospecto["estado"], string][] = [["nuevo", "🆕 Nuevos"], ["contactado", "💬 Contactados"], ["vino", "🏋️ Vinieron"], ["socio", "✅ Se hicieron socios"], ["no", "🚫 No les interesó"]];
-const ORIGEN: Record<Prospecto["origen"], string> = { pagina: "🌐 Página", recepcion: "🛎️ Mostrador", referido: "🤝 Recomendado" };
+const ESTADOS: [Prospecto["estado"], string][] = [["nuevo", "Nuevos"], ["contactado", "Contactados"], ["vino", "Vinieron"], ["socio", "Se hicieron socios"], ["no", "No les interesó"]];
+const ORIGEN: Record<Prospecto["origen"], string> = { pagina: "Página", recepcion: "Mostrador", referido: "Recomendado" };
 
 export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: Prospecto[]; zona: string; puedeAltas: boolean; pagina?: string | null }) {
   const [filtro, setFiltro] = useState<Prospecto["estado"]>("nuevo");
@@ -41,7 +42,7 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
       </div>
 
       {!agregar
-        ? <button type="button" className="boton" onClick={() => setAgregar(true)}>➕ Anotar uno que preguntó</button>
+        ? <button type="button" className="boton" onClick={() => setAgregar(true)}><Icono nombre="mas" /> Anotar uno que preguntó</button>
         : (
           <form ref={form} action={accionAlta} className="tarjeta p-5 grid gap-3 sm:grid-cols-2" data-form-prospecto>
             <label className="block space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required maxLength={80} className="campo" autoFocus /></label>
@@ -52,7 +53,7 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
               <select name="origen" className="campo"><option value="recepcion">Preguntó en el mostrador</option><option value="referido">Lo recomendó alguien</option></select></label>
             {estadoAlta.error && <Mensaje tipo="error" className="sm:col-span-2">{estadoAlta.error}</Mensaje>}
             <div className="flex gap-2 sm:col-span-2">
-              <button type="submit" disabled={agregando} className="boton boton-principal">{agregando ? "Guardando…" : "✅ Anotar"}</button>
+              <button type="submit" disabled={agregando} className="boton boton-principal">{agregando ? "Guardando…" : "Anotar"}</button>
               <button type="button" className="boton" onClick={() => setAgregar(false)}>Cancelar</button>
             </div>
           </form>
@@ -73,17 +74,17 @@ export function Prospectos({ lista, zona, puedeAltas, pagina = null }: { lista: 
                     <p className="text-sm texto-tenue">{p.dni ? `DNI ${p.dni} · ` : ""}{ORIGEN[p.origen]}{p.referido_por ? ` por ${p.referido_por}` : ""} · {fechaCorta(p.creado_en, zona)}</p>
                   </div>
                   {p.interes && <p className="texto-suave">“{p.interes}”</p>}
-                  {p.nota && <p className="text-sm texto-tenue">📝 {p.nota}</p>}
+                  {p.nota && <p className="text-sm texto-tenue"><Icono nombre="lista" /> {p.nota}</p>}
                   <div className="flex flex-wrap gap-2">
                     {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal"
-                      onClick={() => { if (p.estado === "nuevo") mover(p.id, "contactado"); }}>💬 Escribirle</a>}
-                    {p.estado !== "socio" && p.estado !== "contactado" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "contactado")}>💬 Ya le escribí</button>}
-                    {p.estado !== "socio" && p.estado !== "vino" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "vino")}>🏋️ Vino a probar</button>}
+                      onClick={() => { if (p.estado === "nuevo") mover(p.id, "contactado"); }}><Icono nombre="mensaje" /> Escribirle</a>}
+                    {p.estado !== "socio" && p.estado !== "contactado" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "contactado")}><Icono nombre="mensaje" /> Ya le escribí</button>}
+                    {p.estado !== "socio" && p.estado !== "vino" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "vino")}><Icono nombre="pesa" /> Vino a probar</button>}
                     {p.estado !== "socio" && puedeAltas && (
-                      <Link href={`/panel/socios/nuevo?prospecto=${p.id}`} className="boton">➕ Hacerlo socio</Link>)}
-                    {p.estado !== "socio" && p.estado !== "no" && <button type="button" className="boton texto-suave" disabled={pendiente} onClick={() => mover(p.id, "no")}>🚫 No le interesó</button>}
-                    {p.estado === "no" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "nuevo")}>↩️ Volver a nuevos</button>}
-                    {p.estado === "socio" && p.socio_id && puedeAltas && <Link href={`/panel/socios/${p.socio_id}`} className="boton">👤 Ver ficha</Link>}
+                      <Link href={`/panel/socios/nuevo?prospecto=${p.id}`} className="boton"><Icono nombre="mas" /> Hacerlo socio</Link>)}
+                    {p.estado !== "socio" && p.estado !== "no" && <button type="button" className="boton texto-suave" disabled={pendiente} onClick={() => mover(p.id, "no")}><Icono nombre="prohibido" /> No le interesó</button>}
+                    {p.estado === "no" && <button type="button" className="boton" disabled={pendiente} onClick={() => mover(p.id, "nuevo")}><Icono nombre="deshacer" /> Volver a nuevos</button>}
+                    {p.estado === "socio" && p.socio_id && puedeAltas && <Link href={`/panel/socios/${p.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</Link>}
                   </div>
                 </li>
               );

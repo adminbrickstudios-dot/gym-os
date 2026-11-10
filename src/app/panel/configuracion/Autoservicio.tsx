@@ -6,6 +6,7 @@ import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Restablecer } from "./Restablecer";
 import { guardarComprasApp, guardarRegistroAbierto, type AutoservicioPanel } from "./autoservicio-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function Autoservicio({ inicial, puedeEditar }: { inicial: AutoservicioPanel; puedeEditar: boolean }) {
   const [p, setP] = useState(inicial);
@@ -30,7 +31,7 @@ export function Autoservicio({ inicial, puedeEditar }: { inicial: AutoservicioPa
       <Interruptor etiqueta="Cambiar de plan y comprar pases desde la app" disabled={!puedeEditar || guardando} checked={p.compras_app} data-compras-app data-opcion="compras-app"
         ayuda="El socio elige otro plan o un pase, ve lo que le queda a favor y paga con MercadoPago o por transferencia. El plan cambia cuando se acredita el pago (la transferencia la aprobás vos o la recepción)."
         onChange={(e) => cambiar("compras", e.target.checked)} />
-      {p.anotados_web > 0 && <p className="text-sm texto-tenue">🌐 {p.anotados_web} {p.anotados_web === 1 ? "socio se anotó" : "socios se anotaron"} solos por la web. <Link href="/panel/socios?web=1" className="underline">Verlos</Link></p>}
+      {p.anotados_web > 0 && <p className="text-sm texto-tenue"><Icono nombre="web" /> {p.anotados_web} {p.anotados_web === 1 ? "socio se anotó" : "socios se anotaron"} solos por la web. <Link href="/panel/socios?web=1" className="underline">Verlos</Link></p>}
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
       {puedeEditar && (

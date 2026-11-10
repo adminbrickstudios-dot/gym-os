@@ -46,7 +46,7 @@ try {
   await d.goto(`${G}/panel`);
   const retiro = d.locator('[data-alerta="retiro"]', { hasText: `Ferretería ${s5}` });
   await retiro.waitFor({ timeout: 30000 });
-  chequear(/Salieron \$400 del cajón/.test(await retiro.innerText()) && /Ana/.test(await retiro.innerText()), "Inicio → 🔔 Caja: “Salieron $400 del cajón · Ana · “Ferretería …””", await retiro.innerText());
+  chequear(/Salieron \$400 del cajón/.test(await retiro.innerText()) && /Ana/.test(await retiro.innerText()), "Inicio → Caja: “Salieron $400 del cajón · Ana · “Ferretería …””", await retiro.innerText());
   const [popup] = await Promise.all([d.waitForEvent("popup"), retiro.locator('button:has-text("Ver ticket")').click()]);
   await popup.waitForURL(/tickets_caja\/.+ticket-[0-9a-f]{32}\.jpg/, { timeout: 30000 });
   ok("🧾 Ver ticket abre la foto (link firmado, bucket privado)");

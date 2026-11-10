@@ -16,7 +16,7 @@ export default async function EditarSocio({ params }: { params: Promise<{ id: st
     const f = await rpc<Ficha>("ficha_socio", { p_socio_id: id });
     return (
       <>
-        <Encabezado volver={{ href: `/panel/socios/${id}`, texto: "Ficha del socio" }} emoji="✏️" titulo={`${f.socio.nombre} ${f.socio.apellido}`.trim()} bajada="Editá sus datos." />
+        <Encabezado volver={{ href: `/panel/socios/${id}`, texto: "Ficha del socio" }} icono="lapiz" titulo={`${f.socio.nombre} ${f.socio.apellido}`.trim()} bajada="Editá sus datos." />
         <FormSocio socioId={id} socio={f.socio} />
       </>
     );

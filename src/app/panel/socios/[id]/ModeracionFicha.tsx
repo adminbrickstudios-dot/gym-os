@@ -3,6 +3,7 @@ import type { CalculoDevolucion, DevolucionHecha } from "../moderacion-acciones"
 import { DevolucionesHechas } from "./DevolucionesHechas";
 import { NoEscribirle, type DatosNoEscribirle } from "./NoEscribirle";
 import { Cortesias, DevolucionBaja, Suspension, type DatosCortesias, type DatosSuspension } from "./Moderacion";
+import { Icono } from "@/components/ui/Icono";
 
 type Constancia = { codigo: string; estado: string; motivo: string; pedido_en: string; resuelto_en: string | null; resuelto_por: string | null } | null;
 
@@ -18,7 +19,7 @@ export async function ConstanciaBaja({ socioId, zona, verDevoluciones = false }:
     <>
       {c && c.estado === "dado_de_baja" && (
         <p className="mensaje mensaje-info" data-constancia-baja>
-          🧾 <span>Constancia <strong>{c.codigo}</strong> · pedida el {f(c.pedido_en)}{c.resuelto_en ? ` · dada el ${f(c.resuelto_en)}` : ""}{c.resuelto_por ? ` por ${c.resuelto_por}` : ""}</span>
+          <Icono nombre="recibo" /> <span>Constancia <strong>{c.codigo}</strong> · pedida el {f(c.pedido_en)}{c.resuelto_en ? ` · dada el ${f(c.resuelto_en)}` : ""}{c.resuelto_por ? ` por ${c.resuelto_por}` : ""}</span>
         </p>
       )}
       <DevolucionBaja socioId={socioId} calculo={devolucion} zona={zona} />

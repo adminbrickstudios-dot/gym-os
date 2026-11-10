@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { ultimasEntradas } from "@/app/panel/inicio-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type EntradaVivo = {
   ingreso_id: string; socio_id: string; socio: string; momento: string; via: string;
@@ -32,20 +33,20 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
   return (
     <div data-ultimas-entradas={lista.length}>
       {lista.length === 0 ? (
-        <p className="texto-suave text-lg">Todavía no entró nadie hoy. Cuando entren, las ves acá. 🚪</p>
+        <p className="texto-suave text-lg">Todavía no entró nadie hoy. Cuando entren, las ves acá. <Icono nombre="puerta" /></p>
       ) : (
         <ul className="space-y-2">
           {lista.map((x) => {
             const bien = x.resultado === "entro" || x.resultado === "entro_modo_aviso";
-            const emoji = x.resultado === "rechazado" ? "⛔" : x.resultado === "forzado" ? "⚠️" : bien && x.color === "verde" ? "✅" : "⚠️";
+            const emoji = x.resultado === "rechazado" ? "" : x.resultado === "forzado" ? "!" : bien && x.color === "verde" ? "✓" : "!";
             return (
               <li key={x.ingreso_id} data-entrada-vivo={x.resultado} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
-                <span className="text-2xl" aria-hidden>{emoji}</span>
+                <span className="text-2xl" aria-hidden><Icono nombre={emoji} /></span>
                 <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1" textoClassName="min-w-0 flex-1">
                   <span className="block font-semibold text-lg truncate">{x.socio}</span>
                   <span className="block texto-suave truncate"><span className="numero">{hora(x.momento)}</span> · {VIA[x.via] ?? x.via}{!bien || x.color !== "verde" ? ` · ${x.texto}` : ""}</span>
                 </LinkPanel>
-                {x.cobrar && <LinkPanel href={`/panel/vender?socio=${x.socio_id}&cuota=1`} className="boton !min-h-11" >💵 Cobrar</LinkPanel>}
+                {x.cobrar && <LinkPanel href={`/panel/vender?socio=${x.socio_id}&cuota=1`} className="boton !min-h-11" ><Icono nombre="plata" /> Cobrar</LinkPanel>}
               </li>
             );
           })}

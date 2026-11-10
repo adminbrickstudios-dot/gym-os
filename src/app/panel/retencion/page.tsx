@@ -12,6 +12,7 @@ import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { ExSocios, MOTIVOS_EX, ANTIGUEDADES, type DatosExSocios } from "./ExSocios";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { NumerosDelPeriodo, PERIODOS, type NumerosDelPeriodo as DatosPeriodo } from "@/components/panel/NumerosPeriodo";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Retención" };
 
@@ -23,12 +24,12 @@ type Tablero = { semanas: { dia: string; al_dia: number }[]; altas_mes: number; 
 
 const LISTAS = [
   // COM-1: los que todavía pagan pero muestran señales de irse (lo calcula la base al abrir).
-  { clave: "riesgo", emoji: "🎯", titulo: "En riesgo", ayuda: "Todavía pagan, pero algo cambió: escribiles antes de que se vayan" },
-  { clave: "vencido", emoji: "🔴", titulo: "Vencidos", ayuda: "Les venció y no pagaron" },
-  { clave: "por_vencer", emoji: "⏰", titulo: "Por vencer", ayuda: "Vencen en los próximos días" },
-  { clave: "nuevo", emoji: "🌱", titulo: "Nuevos que no vienen", ayuda: "Se anotaron hace poco y aflojaron" },
-  { clave: "no_viene", emoji: "💤", titulo: "No vienen", ayuda: "Pagan pero dejaron de venir" },
-  { clave: "se_fue", emoji: "👋", titulo: "Se fueron", ayuda: "Hace rato que no pagan" },
+  { clave: "riesgo", emoji: "objetivo", titulo: "En riesgo", ayuda: "Todavía pagan, pero algo cambió: escribiles antes de que se vayan" },
+  { clave: "vencido", emoji: "punto-rojo", titulo: "Vencidos", ayuda: "Les venció y no pagaron" },
+  { clave: "por_vencer", emoji: "reloj", titulo: "Por vencer", ayuda: "Vencen en los próximos días" },
+  { clave: "nuevo", emoji: "hoja", titulo: "Nuevos que no vienen", ayuda: "Se anotaron hace poco y aflojaron" },
+  { clave: "no_viene", emoji: "", titulo: "No vienen", ayuda: "Pagan pero dejaron de venir" },
+  { clave: "se_fue", emoji: "salir", titulo: "Se fueron", ayuda: "Hace rato que no pagan" },
 ];
 
 const POR_PAGINA = 50;
@@ -91,10 +92,10 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const otra = LISTAS.find((l) => l.clave !== lista.clave && cuantos(l.clave) > 0);
     return (
       <>
-        <Encabezado emoji="📉" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
+        <Encabezado icono="tendencia-baja" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
         {tablero && resumen.plata_en_riesgo != null && <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 mb-10" data-tablero-retencion>
           <div className="flex flex-col-reverse">
-            <dt className="texto-suave mt-2 text-[15px]">👥 Al día <span className="block text-sm texto-tenue">{hoyAlDia === hace4 ? "igual que hace 4 semanas" : `${hoyAlDia > hace4 ? "↑" : "↓"} ${Math.abs(hoyAlDia - hace4)} contra hace 4 semanas`}</span></dt>
+            <dt className="texto-suave mt-2 text-[15px]"><Icono nombre="usuarios" /> Al día <span className="block text-sm texto-tenue">{hoyAlDia === hace4 ? "igual que hace 4 semanas" : `${hoyAlDia > hace4 ? "↑" : "↓"} ${Math.abs(hoyAlDia - hace4)} contra hace 4 semanas`}</span></dt>
             <dd>
               <span className="numero text-5xl">{hoyAlDia}</span>
               <span className="flex items-end gap-[2px] h-8 mt-2" role="img" aria-label="Socios al día, últimas 12 semanas">
@@ -102,9 +103,9 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
               </span>
             </dd>
           </div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">🌱 Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.altas_mes}</dd></div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">👋 Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.bajas_mes}</dd></div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]">💸 Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="hoja" /> Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.altas_mes}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="salir" /> Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.bajas_mes}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="plata" /> Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
         </dl>}
         {numeros && <NumerosDeRetencion n={numeros} />}
         {delPeriodo && <NumerosDelPeriodo n={delPeriodo}
@@ -116,35 +117,35 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           {LISTAS.map((l) => (
             <Link key={l.clave} href={url(l.clave, etiqueta)} data-transicion aria-current={l.clave === lista.clave ? "page" : undefined}
               className={`boton !min-h-12 whitespace-nowrap ${l.clave === lista.clave ? "!border-[var(--acento)]" : ""}`}>
-              {l.emoji} {l.titulo} <span className="numero text-lg texto-suave">{cuantos(l.clave)}</span>
+              <Icono nombre={l.emoji} /> {l.titulo} <span className="numero text-lg texto-suave">{cuantos(l.clave)}</span>
             </Link>
           ))}
         </nav>
         {etiquetas.length > 0 && (
           <nav className="flex flex-wrap gap-2 mb-4" aria-label="Filtrar por etiqueta" data-filtro-etiquetas>
             <Link href={url(lista.clave, null)} data-transicion className="pestana" aria-current={!etiqueta ? "page" : undefined}>Todos</Link>
-            {etiquetas.map((e) => <Link key={e.id} href={url(lista.clave, e.id)} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre}</Link>)}
+            {etiquetas.map((e) => <Link key={e.id} href={url(lista.clave, e.id)} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}><Icono nombre="etiqueta" /> {e.nombre}</Link>)}
           </nav>
         )}
         <div data-lista>
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
         {ex ? <ExSocios datos={ex} motivo={motivoEx} antiguedad={antigEx} url={urlEx} zona={zona} mostrar={mostrar} />
         : lista.clave === "riesgo" ? (riesgo.length === 0 ? (
-          <Vacio emoji="🎉" titulo="Nadie en riesgo">
-            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>.</> : "Los que pagan vienen como siempre. Se vuelve a calcular cada vez que abrís."}
+          <Vacio icono="estrella" titulo="Nadie en riesgo">
+            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline"><Icono nombre={otra.emoji} /> {otra.titulo}</Link>.</> : "Los que pagan vienen como siempre. Se vuelve a calcular cada vez que abrís."}
           </Vacio>
         ) : (
           <ul className="space-y-2" data-riesgo={riesgo.length} data-lista-retencion>
             {riesgo.slice(0, mostrar).map((r) => (
               <FilaContacto key={r.socio_id} socioId={r.socio_id} nombre={r.nombre} lista="no_viene"
-                texto={`${r.nivel === "alto" ? "🔴 Riesgo alto" : "🟡 Riesgo medio"} · ${r.porque[0]}`}
+                texto={`${r.nivel === "alto" ? "Riesgo alto" : "Riesgo medio"} · ${r.porque[0]}`}
                 detalle={r.porque.slice(1).join(" · ") || null}
                 whatsapp={linkWhatsappSocio(r.telefono, r.mensaje)} puedeAnotar tarea />
             ))}
           </ul>
         )) : visibles.length === 0 ? (
-          <Vacio emoji="🎉" titulo="Nadie en esta lista">
-            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline">{otra.emoji} {otra.titulo}</Link>: ahí sí hay a quién escribirle.</> : "Nadie se está yendo. Volvé mañana: se calcula sola."}
+          <Vacio icono="estrella" titulo="Nadie en esta lista">
+            {otra ? <>Mirá <Link href={url(otra.clave, etiqueta)} className="underline"><Icono nombre={otra.emoji} /> {otra.titulo}</Link>: ahí sí hay a quién escribirle.</> : "Nadie se está yendo. Volvé mañana: se calcula sola."}
           </Vacio>
         ) : (
           <ul className="space-y-2" data-lista-retencion>

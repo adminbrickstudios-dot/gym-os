@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, type FormEvent } from "react";
 import { META_TIPO, TIPOS_CONTROL } from "@/lib/control";
+import { Icono } from "@/components/ui/Icono";
 
 const CLAVE = "control:filtros";
 
@@ -48,7 +49,7 @@ export function FiltrosControl({ personas, tipos, quien, desde, hasta, hoy }: {
           {TIPOS_CONTROL.map((t) => (
             <label key={t} className="boton boton-chico cursor-pointer has-[:checked]:border-[var(--acento)] has-[:checked]:bg-[var(--tarjeta-alta)] has-[:focus-visible]:outline has-[:focus-visible]:outline-2">
               <input type="checkbox" name="tipos" value={t} defaultChecked={tipos.includes(t)} className="sr-only" data-tipo-filtro={t} />
-              <span aria-hidden>{META_TIPO[t].emoji}</span> {META_TIPO[t].etiqueta}
+              <span aria-hidden><Icono nombre={META_TIPO[t].emoji} /></span> {META_TIPO[t].etiqueta}
             </label>
           ))}
         </div>
@@ -66,7 +67,7 @@ export function FiltrosControl({ personas, tipos, quien, desde, hasta, hoy }: {
           </select></label>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="submit" className="boton boton-principal">🔎 Filtrar</button>
+        <button type="submit" className="boton boton-principal"><Icono nombre="buscar" /> Filtrar</button>
         <button type="button" onClick={limpiar} className="boton-texto">Limpiar filtros</button>
       </div>
     </form>

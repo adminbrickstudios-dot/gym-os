@@ -21,12 +21,12 @@ try {
 
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-  await d.locator('button:has-text("🏷️ Descuento")').first().click();
+  await d.locator('button:has-text("Descuento")').first().click();
   await d.locator('input[aria-label="Monto del descuento"]').fill("100");
   await d.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });
   await d.locator("select[data-motivo-descuento]").selectOption({ index: 1 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok("un descuento con motivo de la lista se cobra (la base lo acepta)");
   chequear(d.errores.length === 0, "sin errores de página", d.errores.join(" | "));

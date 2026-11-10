@@ -28,7 +28,7 @@ export default async function Horas({ searchParams }: { searchParams: Promise<{ 
     const anterior = moverMes(mes, -1), siguiente = moverMes(mes, 1);
     return (
       <div className="space-y-8">
-        <Encabezado emoji="⏱️" titulo="Horas del equipo" bajada={`Las horas que fichó cada uno en ${nombreMes(mes)}. Un turno sin salida no suma hasta que el dueño lo corrige; lo corregido queda anotado con motivo.`} />
+        <Encabezado icono="reloj" titulo="Horas del equipo" bajada={`Las horas que fichó cada uno en ${nombreMes(mes)}. Un turno sin salida no suma hasta que el dueño lo corrige; lo corregido queda anotado con motivo.`} />
         <nav className="flex flex-wrap items-center gap-2" aria-label="Mes">
           <Link href={`/panel/horas?mes=${anterior.slice(0, 7)}`} className="pestana" data-mes-anterior>← {nombreMes(anterior).split(" ")[0]}</Link>
           <span className="pestana" aria-current="page">{nombreMes(mes)}</span>

@@ -8,6 +8,7 @@ import { abrirCaja } from "@/app/panel/caja/acciones";
 import type { CajaCobro } from "@/app/panel/vender/acciones";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { formatearPesos, leerMonto } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export function AbrirTurnoCobrar({ caja, alAbrir }: { caja: CajaCobro; alAbrir: (turnoId: string, nombreCaja: string) => void }) {
   const [cajaId, setCajaId] = useState(caja.libres[0]?.caja_id ?? "");
@@ -23,7 +24,7 @@ export function AbrirTurnoCobrar({ caja, alAbrir }: { caja: CajaCobro; alAbrir: 
   if (caja.otra_sede || !libre) {
     return (
       <div className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 w-full whitespace-normal" data-cobrar-sin-caja="bloqueada">
-        <p>💵 Para cobrar en efectivo necesitás tu turno de caja abierto en esta sede.</p>
+        <p><Icono nombre="plata" /> Para cobrar en efectivo necesitás tu turno de caja abierto en esta sede.</p>
         <p className="text-sm mt-1">
           {caja.otra_sede ? <>Tenés un turno abierto en {caja.otra_sede}: cerralo antes de abrir otro.</> : <>No hay una caja libre para abrir ahora.</>}
           {" "}<Link href="/panel/caja" className="underline">Ir a Caja</Link>. Mientras, podés cobrar con otro medio.
@@ -35,7 +36,7 @@ export function AbrirTurnoCobrar({ caja, alAbrir }: { caja: CajaCobro; alAbrir: 
   return (
     <form className="tarjeta p-3 space-y-3" data-cobrar-sin-caja="abrir" onSubmit={(e) => e.preventDefault()}>
       <div>
-        <p className="font-semibold">💵 Para cobrar en efectivo abrí tu turno</p>
+        <p className="font-semibold"><Icono nombre="plata" /> Para cobrar en efectivo abrí tu turno</p>
         <p className="texto-suave text-sm">
           {caja.vencido ? "Tu turno anterior quedó abierto de otro día: se cierra sin contar y el dueño lo revisa. " : ""}
           El efectivo queda en tu caja. Después seguís con este cobro.
@@ -57,17 +58,17 @@ export function AbrirTurnoCobrar({ caja, alAbrir }: { caja: CajaCobro; alAbrir: 
       )}
       {noCoincide && (
         <p className="text-sm pildora pildora-amarillo whitespace-normal" data-fondo-aviso>
-          ⚠️ El turno anterior dejó {formatearPesos(deja!)} en el cajón y abrís con {formatearPesos(escrito!)}. Si es a propósito, abrí igual.
+          <Icono nombre="alerta" /> El turno anterior dejó {formatearPesos(deja!)} en el cajón y abrís con {formatearPesos(escrito!)}. Si es a propósito, abrí igual.
         </p>
       )}
-      {error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
       <BotonAccion className="boton !min-h-11 w-full" data-abrir-turno ocupadoTexto="Abriendo…" onClick={async () => {
         if (monto.trim() !== "" && (escrito == null || Number.isNaN(escrito))) { setError("No entiendo el monto: escribilo como 84.500 o 84500,50"); return; }
         const r = await abrirCaja(libre.caja_id, monto.trim() === "" ? "0" : monto);
         if (r.error || !r.turnoId) { setError(r.error ?? "No se pudo abrir el turno"); return; }
         setError(null);
         alAbrir(r.turnoId, libre.nombre);
-      }}>🔓 Abrir mi turno</BotonAccion>
+      }}><Icono nombre="candado-abierto" /> Abrir mi turno</BotonAccion>
     </form>
   );
 }

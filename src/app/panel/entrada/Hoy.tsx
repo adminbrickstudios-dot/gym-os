@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { anularEntrada } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Ingreso = { ingreso_id: string; momento: string; socio_id: string; socio: string; numero: number; resultado: string; color: string; texto: string; via_acceso: string; registrado_por: string | null };
 const ETIQUETA: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
@@ -22,7 +23,7 @@ export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
     <section aria-labelledby="hoy" data-hoy={ingresos.length}>
       <h2 id="hoy" className="titulo text-2xl mb-1">Hoy</h2>
       <p className="texto-suave mb-4">{entraron === 1 ? "Entró 1 socio" : `Entraron ${entraron} socios`}</p>
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mb-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mb-3"><Icono nombre="alerta" /> {error}</p>}
       {ingresos.length === 0 ? <p className="texto-tenue">Todavía no entró nadie.</p> : (
         <ul className="space-y-1">
           {ingresos.slice(0, 40).map((i) => (

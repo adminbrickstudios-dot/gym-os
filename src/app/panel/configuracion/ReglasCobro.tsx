@@ -10,6 +10,7 @@ import {
   guardarConfigDejarPasar, guardarDobleCobro, guardarReglaPlan, guardarReglaVencimiento, simularCuota,
   type ConfigDejarPasar, type ConfigDobleCobro, type ModoDejarPasar, type PrimeraCuotaModo, type Renovacion, type ReglasVencimiento, type Simulacion,
 } from "./cobros-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const RENOVACIONES: { clave: Renovacion; titulo: string; ejemplo: string }[] = [
   { clave: "desde_pago", titulo: "Desde el día que paga", ejemplo: "Pagó el 20/11 → vence el 20/12." },
@@ -57,7 +58,7 @@ export function ReglasVencimiento({ inicial, puedeEditar }: { inicial: ReglasVen
   return (
     <section className="tarjeta p-5 space-y-4" data-reglas-vencimiento>
       <div>
-        <h2 className="titulo text-2xl">📅 Cómo vencen las cuotas</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="calendario" /> Cómo vencen las cuotas</h2>
         <p className="texto-suave">Cada plan puede usar esta regla o tener la suya. Un cambio se aplica a los cobros nuevos: lo que ya cobraste no se toca.</p>
         {!r.configurado && <p className="texto-tenue text-sm mt-1">Todavía no la configuraste: hoy cada plan usa la suya y la primera cuota con día fijo cubre desde el último día fijo.</p>}
       </div>
@@ -107,7 +108,7 @@ export function ReglasVencimiento({ inicial, puedeEditar }: { inicial: ReglasVen
 
       {puedeEditar && (
         <div className="flex flex-wrap items-center gap-3">
-          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}>💾 Guardar</BotonAccion>
+          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}><Icono nombre="guardar" /> Guardar</BotonAccion>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
       )}
@@ -131,7 +132,7 @@ export function ReglasVencimiento({ inicial, puedeEditar }: { inicial: ReglasVen
               {r.planes.map((p) => <option key={p.plan_id} value={p.plan_id}>{p.nombre}</option>)}
             </select>
             <input type="date" className="campo" aria-label="Día en que se anota" value={diaSim} onChange={(e) => setDiaSim(e.target.value)} />
-            <BotonAccion className="boton" ocupadoTexto="Calculando…" onClick={calcular}>🧮 Calcular</BotonAccion>
+            <BotonAccion className="boton" ocupadoTexto="Calculando…" onClick={calcular}><Icono nombre="calculadora" /> Calcular</BotonAccion>
           </div>
           {errSim && <Mensaje tipo="error">{errSim}</Mensaje>}
           {sim && (
@@ -215,7 +216,7 @@ export function ConfigDejarPasarCard({ inicial, puedeEditar }: { inicial: Config
   return (
     <section className="tarjeta p-5 space-y-4" data-dejar-pasar-config>
       <div>
-        <h2 className="titulo text-2xl">🤝 Dejar pasar sin pagar</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="usuarios" /> Dejar pasar sin pagar</h2>
         <p className="texto-suave">Cuando alguien no puede entrar y dice “mañana pago”. Siempre queda anotado quién lo dejó pasar, por qué y qué día prometió pagar. A un suspendido o dado de baja solo lo deja pasar el dueño o el encargado, y el tope por día de la recepción ({c.tope_por_dia}) sigue valiendo (pestaña Reglas).</p>
         {!c.configurado && <p className="texto-tenue text-sm mt-1">Todavía no lo elegiste: hoy la recepción decide libremente (con el tope por día).</p>}
       </div>
@@ -238,7 +239,7 @@ export function ConfigDejarPasarCard({ inicial, puedeEditar }: { inicial: Config
       )}
       {puedeEditar ? (
         <div className="flex flex-wrap items-center gap-3">
-          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}>💾 Guardar</BotonAccion>
+          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}><Icono nombre="guardar" /> Guardar</BotonAccion>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
       ) : <p className="texto-tenue text-sm">Lo cambia el dueño.</p>}
@@ -273,7 +274,7 @@ export function DobleCobroCard({ inicial, puedeEditar }: { inicial: ConfigDobleC
   return (
     <section className="tarjeta p-5 space-y-4" data-doble-cobro-config>
       <div>
-        <h2 className="titulo text-2xl">⚠️ Aviso de doble cobro</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="alerta" /> Aviso de doble cobro</h2>
         <p className="texto-suave">Si dos personas cobran la misma cuota casi a la vez (por ejemplo desde dos compus), la segunda se frena y dice
           “Sofi ya cobró esta cuota hace 40 s”. Solo sigue si quien cobra toca “Cobrar igual” y escribe por qué; el motivo queda anotado en la venta.
           Un producto o un pase nunca se frena, y pagar varios meses juntos se hace en un solo cobro.</p>
@@ -286,7 +287,7 @@ export function DobleCobroCard({ inicial, puedeEditar }: { inicial: ConfigDobleC
       <p className="texto-tenue text-sm">{minutos === 0 ? "Apagado: nadie frena un segundo cobro de la misma cuota." : `Pasados ${minutos === "" ? "…" : minutos} min desde el cobro, la misma cuota se cobra sin preguntar.`}</p>
       {puedeEditar ? (
         <div className="flex flex-wrap items-center gap-3">
-          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}>💾 Guardar</BotonAccion>
+          <BotonAccion className="boton boton-principal" disabled={!sucio} onClick={guardar}><Icono nombre="guardar" /> Guardar</BotonAccion>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
       ) : <p className="texto-tenue text-sm">Lo cambia el dueño.</p>}

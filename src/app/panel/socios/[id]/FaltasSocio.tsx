@@ -7,6 +7,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { detectarSalud } from "@/lib/salud";
 import { perdonarBloqueo, perdonarFalta } from "@/app/panel/clases/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type DetalleFaltas = {
   puede_perdonar: boolean;
@@ -34,7 +35,7 @@ export function FaltasSocio({ socioId, d, zona }: { socioId: string; d: DetalleF
       <AvisoSalud texto={motivo} />
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <div className="flex flex-wrap gap-2">
-        <BotonAccion className="boton boton-principal !min-h-11" disabled={motivo.trim().length < 3 || !!detectarSalud(motivo)} onClick={perdonar} ocupadoTexto="Guardando…" data-confirmar-perdon>🤝 Perdonar</BotonAccion>
+        <BotonAccion className="boton boton-principal !min-h-11" disabled={motivo.trim().length < 3 || !!detectarSalud(motivo)} onClick={perdonar} ocupadoTexto="Guardando…" data-confirmar-perdon><Icono nombre="usuarios" /> Perdonar</BotonAccion>
         <button type="button" className="boton !min-h-11" onClick={() => { setQuien(null); setMotivo(""); setError(null); }}>Volver</button>
       </div>
     </div>
@@ -42,11 +43,11 @@ export function FaltasSocio({ socioId, d, zona }: { socioId: string; d: DetalleF
 
   return (
     <section className="mt-8 space-y-3" data-faltas-socio>
-      <h2 className="titulo text-2xl">🙈 Reservó y no vino</h2>
+      <h2 className="titulo text-2xl"><Icono nombre="persona" /> Reservó y no vino</h2>
       {d.bloqueo && (
         <div className="tarjeta p-4 flex flex-wrap items-center gap-3" data-bloqueo-reservas>
-          <p className="min-w-0 flex-1">🚫 {d.bloqueo.texto}</p>
-          {d.puede_perdonar && quien !== "bloqueo" && <button type="button" className="boton !min-h-11" onClick={() => { setQuien("bloqueo"); setMotivo(""); setError(null); }} data-perdonar-bloqueo>🤝 Perdonar el bloqueo</button>}
+          <p className="min-w-0 flex-1"><Icono nombre="prohibido" /> {d.bloqueo.texto}</p>
+          {d.puede_perdonar && quien !== "bloqueo" && <button type="button" className="boton !min-h-11" onClick={() => { setQuien("bloqueo"); setMotivo(""); setError(null); }} data-perdonar-bloqueo><Icono nombre="usuarios" /> Perdonar el bloqueo</button>}
           {quien === "bloqueo" && formulario}
         </div>
       )}
@@ -54,7 +55,7 @@ export function FaltasSocio({ socioId, d, zona }: { socioId: string; d: DetalleF
         <ul className="space-y-2">{d.faltas.map((x) => (
           <li key={x.reserva_id} className="flex flex-wrap items-center gap-3 texto-suave" data-falta={x.clase_id}>
             <span className="min-w-0 flex-1">{x.actividad} · <span className="first-letter:uppercase">{cuando(x.inicio)}</span></span>
-            {d.puede_perdonar && quien !== x.clase_id && <button type="button" className="boton !min-h-11" onClick={() => { setQuien(x.clase_id); setMotivo(""); setError(null); }} data-perdonar-falta>🤝 Perdonar</button>}
+            {d.puede_perdonar && quien !== x.clase_id && <button type="button" className="boton !min-h-11" onClick={() => { setQuien(x.clase_id); setMotivo(""); setError(null); }} data-perdonar-falta><Icono nombre="usuarios" /> Perdonar</button>}
             {quien === x.clase_id && formulario}
           </li>
         ))}</ul>

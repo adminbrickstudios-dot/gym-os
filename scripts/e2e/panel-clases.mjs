@@ -33,7 +33,7 @@ try {
     const nombre = (await fila.locator("span.font-semibold").innerText()).trim();
     await fila.getByRole("button", { name: "Presente" }).click();
     // O queda ✅, o la base dice por qué no (fuera del horario de la clase, no puede tomarla, ya estaba).
-    const presente = r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first();
+    const presente = r.locator("main ul li", { hasText: nombre }).getByText("Presente").first();
     const aviso = r.locator('main [role="alert"]').first();
     await presente.or(aviso).waitFor({ timeout: 30000 });
     if (await presente.isVisible()) {
@@ -43,7 +43,7 @@ try {
       await filaLista.getByRole("button", { name: /Deshacer el presente/ }).click();
       await filaLista.getByRole("textbox").fill("Lo marqué por error (e2e)");
       await filaLista.getByRole("button", { name: "Deshacer" }).click();
-      await r.locator("main ul li", { hasText: nombre }).getByText("✅ Presente").first().waitFor({ state: "detached", timeout: 30000 });
+      await r.locator("main ul li", { hasText: nombre }).getByText("Presente").first().waitFor({ state: "detached", timeout: 30000 });
       ok("↩️ Deshacer con motivo: el presente se va (y si gastó una clase del pack, vuelve)");
     }
     else chequear(/una hora antes|No puede tomar la clase|Ya tiene el presente/.test(await aviso.innerText()), `Presente fuera de regla: la base dice por qué (“${await aviso.innerText()}”)`, await aviso.innerText());
@@ -86,7 +86,7 @@ try {
   await editado.waitFor({ state: "detached", timeout: 30000 });
   ok("Sacar → “Sí, sacar” en pantalla (sin diálogo del navegador): ya no está");
   const ocup = d.locator("[data-ocupacion] li");
-  ok(await ocup.count() ? `📊 Ocupación de las últimas 4 semanas (${await ocup.count()} horarios, ej: “${(await ocup.first().innerText()).replace(/\s+/g, " ")}”)` : "sin clases pasadas todavía: la ocupación no aparece (lo vacío está vacío)");
+  ok(await ocup.count() ? `Ocupación de las últimas 4 semanas (${await ocup.count()} horarios, ej: “${(await ocup.first().innerText()).replace(/\s+/g, " ")}”)` : "sin clases pasadas todavía: la ocupación no aparece (lo vacío está vacío)");
 
   const p = await pagina(b, CELU);
   await entrar(p, "profe@ejemplo.invalid");

@@ -33,7 +33,7 @@ try {
   // Plan + estado combinados
   const planes = p.locator("[data-filtro-etiquetas] a[data-plan]");
   if (await planes.count()) {
-    const nombre = (await planes.first().innerText()).replace(/^📋\s*/, "").replace(/\s*\d+$/, "").trim();
+    const nombre = (await planes.first().innerText()).replace(/^\s*/, "").replace(/\s*\d+$/, "").trim();
     await planes.first().click();
     await p.waitForURL(/plan=.*estado=al_dia|estado=al_dia.*plan=/);
     await p.locator("main").waitFor();

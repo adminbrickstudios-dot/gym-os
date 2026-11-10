@@ -6,6 +6,7 @@ import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import type { RespuestaRapida } from "@/lib/mensajes";
 import { guardarRecepcionVe, guardarRespuestaRapida, quitarRespuestaRapida } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** Solo el dueño: ¿la recepción también ve los mensajes? (dueño y encargado siempre; el profe nunca). */
 export function PermisoRecepcion({ inicial, puedeEditar }: { inicial: boolean; puedeEditar: boolean }) {
@@ -19,7 +20,7 @@ export function PermisoRecepcion({ inicial, puedeEditar }: { inicial: boolean; p
   };
   return (
     <div className="space-y-2" data-permiso-mensajes>
-      <Interruptor etiqueta="🛎️ La recepción también ve los mensajes" checked={ve} disabled={!puedeEditar} onChange={(e) => void cambiar(e.target.checked)}
+      <Interruptor etiqueta="La recepción también ve los mensajes" checked={ve} disabled={!puedeEditar} onChange={(e) => void cambiar(e.target.checked)}
         ayuda={puedeEditar ? "Dueño y encargado siempre los ven. El profe, nunca." : "Lo cambia el dueño."} data-permiso="recepcion_ve_mensajes" />
       {error && <Mensaje tipo="error">{error}</Mensaje>}
     </div>
@@ -42,7 +43,7 @@ export function Rapidas({ lista, puedeEditar }: { lista: RespuestaRapida[]; pued
   const quitar = async (id: string) => { const r = await quitarRespuestaRapida(id); if (r.error) setError(r.error); else router.refresh(); };
   return (
     <details className="tarjeta p-5" data-rapidas-ajustes>
-      <summary className="font-semibold cursor-pointer min-h-[44px] flex items-center">⚡ Respuestas rápidas ({lista.length})</summary>
+      <summary className="font-semibold cursor-pointer min-h-[44px] flex items-center"><Icono nombre="rayo" /> Respuestas rápidas ({lista.length})</summary>
       <div className="space-y-3 mt-3">
         {lista.length === 0 && <p className="texto-suave">Todavía no hay. Guardá lo que más te preguntan (“El horario de feriado es…”) y lo insertás con un toque al contestar.</p>}
         <ul className="space-y-2">
@@ -54,7 +55,7 @@ export function Rapidas({ lista, puedeEditar }: { lista: RespuestaRapida[]; pued
             </li>
           ))}
         </ul>
-        {puedeEditar && editando === null && <button type="button" className="boton" onClick={() => abrir(null)} data-nueva-rapida>➕ Nueva respuesta rápida</button>}
+        {puedeEditar && editando === null && <button type="button" className="boton" onClick={() => abrir(null)} data-nueva-rapida><Icono nombre="mas" /> Nueva respuesta rápida</button>}
         {editando !== null && (
           <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); void guardar(); }}>
             <input className="campo w-full" value={titulo} maxLength={60} onChange={(e) => setTitulo(e.target.value)} placeholder="Nombre corto (ej: Horario de feriado)" aria-label="Nombre" />

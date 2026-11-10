@@ -24,7 +24,7 @@ try {
   await form.getByRole("button", { name: /Sumar al equipo/ }).click();
   const fila = d.locator("li", { hasText: NOMBRE }).first();
   await fila.waitFor({ timeout: 30000 });
-  chequear(/sin acceso al sistema/.test(await fila.innerText()), "➕ suma a alguien sin mail: queda “sin acceso al sistema”", await fila.innerText());
+  chequear(/sin acceso al sistema/.test(await fila.innerText()), "suma a alguien sin mail: queda “sin acceso al sistema”", await fila.innerText());
 
   await fila.getByLabel(`Rol de ${NOMBRE}`).selectOption("recepcion");
   await fila.getByText(/Recepción/).first().waitFor({ timeout: 30000 });

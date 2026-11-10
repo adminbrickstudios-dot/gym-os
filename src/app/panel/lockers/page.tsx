@@ -14,7 +14,7 @@ export default async function PaginaLockers() {
     const r = await rpc<DatosLockers>("lockers_panel", { p_gimnasio_id: panel.gimnasio.id });
     return (
       <div data-lockers>
-        <Encabezado emoji="🔐" titulo="Lockers"
+        <Encabezado icono="candado" titulo="Lockers"
           bajada="Quién tiene cada locker y cuándo vence. El alquiler se cobra como cualquier venta, y después se asigna el locker." />
         <Lockers datos={r} zona={panel.gimnasio.zona_horaria} />
       </div>

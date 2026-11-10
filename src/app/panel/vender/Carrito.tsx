@@ -13,6 +13,7 @@ import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { AvisoDobleCobro, motivoDobleValido, type EstadoDobleCobro } from "@/components/panel/cobrar/AvisoDobleCobro";
 import { urlFotoProducto } from "@/lib/url-producto";
+import { Icono } from "@/components/ui/Icono";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
@@ -47,7 +48,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   // Solo los medios que acepta el gimnasio (lo decide la base: sin Caja, tampoco efectivo).
   // VEN-5: "A cuenta" aparece si el gimnasio fía y hay socio elegido.
   const medios = [...MEDIOS.filter((m) => preciosIniciales.medios.includes(m.medio)),
-    ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "📒 A cuenta" }] : [])];
+    ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "A cuenta" }] : [])];
   // Sin caja abierta no arranca en efectivo (no se podría cobrar, y mostraría su precio).
   const [medio, setMedio] = useState<Medio | null>((turnoId ? medios[0] : medios.find((m) => m.medio !== "efectivo") ?? medios[0])?.medio ?? null);
   const [mixto, setMixto] = useState(false);
@@ -119,7 +120,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       setVenta(r.venta!); setLineas([]);
       if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
         const u = await registrarUsoCupon(r.venta!.venta_id, cupon);
-        setUsoCupon(u.error ? `⚠️ El cobro quedó, pero no se anotó el uso del cupón: ${u.error}` : `🏷️ Cupón ${cupon} anotado`);
+        setUsoCupon(u.error ? `El cobro quedó, pero no se anotó el uso del cupón: ${u.error}` : `Cupón ${cupon} anotado`);
       } else setUsoCupon(null);
       setCupon(null); setCodigoCupon(""); setMsjCupon({});
     }
@@ -144,17 +145,17 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         <DeshacerVenta ventaId={venta.venta_id} puedeAnular={puedeAnular} socioId={socio?.socio_id ?? null} />
         <div className="flex flex-wrap gap-2 mt-8">
           {/* Vino de la Entrada (ENT-9): vuelve con el socio y su veredicto nuevo, para anotarlo. */}
-          {desdeEntrada && socio && <LinkPanel href={`/panel/entrada?socio=${socio.socio_id}`} className="boton boton-principal">🚪 Volver a la entrada con {socio.nombre.split(" ")[0]}</LinkPanel>}
-          <button type="button" className={`boton ${desdeEntrada && socio ? "" : "boton-principal"}`} onClick={() => { setVenta(null); setSocio(null); setBuscando(true); }}>🛒 Nueva venta</button>
-          {socio && <LinkPanel href={`/panel/socios/${socio.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>}
-          {!(desdeEntrada && socio) && <LinkPanel href="/panel/entrada" className="boton">🚪 Ir a la entrada</LinkPanel>}
+          {desdeEntrada && socio && <LinkPanel href={`/panel/entrada?socio=${socio.socio_id}`} className="boton boton-principal"><Icono nombre="puerta" /> Volver a la entrada con {socio.nombre.split(" ")[0]}</LinkPanel>}
+          <button type="button" className={`boton ${desdeEntrada && socio ? "" : "boton-principal"}`} onClick={() => { setVenta(null); setSocio(null); setBuscando(true); }}><Icono nombre="carrito" /> Nueva venta</button>
+          {socio && <LinkPanel href={`/panel/socios/${socio.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</LinkPanel>}
+          {!(desdeEntrada && socio) && <LinkPanel href="/panel/entrada" className="boton"><Icono nombre="puerta" /> Ir a la entrada</LinkPanel>}
         </div>
       </section>
     );
   }
 
-  const Boton = ({ onClick, emoji, titulo, precio, deshabilitado, nota, foto }: {
-    onClick: () => void; emoji: string; titulo: string; precio: number | null; deshabilitado?: string;
+  const Boton = ({ onClick, icono, titulo, precio, deshabilitado, nota, foto }: {
+    onClick: () => void; icono: string; titulo: string; precio: number | null; deshabilitado?: string;
     nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
   }) => (
     <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
@@ -163,7 +164,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         {foto
           // eslint-disable-next-line @next/next/no-img-element
           ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
-          : <span aria-hidden className="text-xl">{emoji}</span>}
+          : <span aria-hidden className="text-xl"><Icono nombre={icono} /></span>}
         <span>{titulo}</span>
       </span>
       <span className="flex flex-wrap items-baseline gap-x-2">
@@ -192,7 +193,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       <div className="space-y-8">
         {/* ¿Para quién? */}
         <section>
-          <h2 className="titulo text-2xl mb-3">👤 Para quién</h2>
+          <h2 className="titulo text-2xl mb-3"><Icono nombre="persona" /> Para quién</h2>
           {socio && !buscando ? (
             <div className="tarjeta flex items-center gap-4 px-4 py-3">
               <PuntoEstado color={socio.color} grande />
@@ -204,7 +205,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
             </div>
           ) : (
             <div className="space-y-2">
-              <input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} className="campo !min-h-14 !text-lg" placeholder="🔍 Buscar socio (sin socio: solo productos)" aria-label="Buscar socio" />
+              <input autoFocus value={texto} onChange={(e) => setTexto(e.target.value)} className="campo !min-h-14 !text-lg" placeholder="Buscar socio (sin socio: solo productos)" aria-label="Buscar socio" />
               {encontrados.map((s) => (
                 <button key={s.socio_id} type="button" onClick={() => elegirSocio(s)} className="fila gap-3">
                   <PuntoEstado color={s.color} />
@@ -222,41 +223,41 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
 
         {/* Qué se vende */}
         <section>
-          <h2 className="titulo text-2xl mb-3">🛒 Qué se lleva</h2>
+          <h2 className="titulo text-2xl mb-3"><Icono nombre="carrito" /> Qué se lleva</h2>
           {/* VD-18 (D21): las cuotas y los pases se cobran en Cobrar; acá el mostrador es de productos. */}
           {socio && !buscando && (precios.cuota || precios.pases.length > 0 || precios.packs.length > 0) && (
             <div className="tarjeta p-4 mb-3 flex flex-wrap items-center gap-3" data-ir-cobrar>
               <p className="flex-1 min-w-48 texto-suave">La cuota, los pases y los packs de {socio.nombre.split(" ")[0]} se cobran en <strong>Cobrar</strong>, con todo lo que le toca.</p>
-              <BotonCobrar socioId={socio.socio_id} origen="otro" cuota={!!precios.cuota} className="boton boton-principal">💵 Cobrar a {socio.nombre.split(" ")[0]}</BotonCobrar>
+              <BotonCobrar socioId={socio.socio_id} origen="otro" cuota={!!precios.cuota} className="boton boton-principal"><Icono nombre="plata" /> Cobrar a {socio.nombre.split(" ")[0]}</BotonCobrar>
             </div>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {precios.cuota && (
-              <Boton emoji="🏷️" titulo={`Cuota ${precios.cuota.plan}`} precio={precioUnitario({ clave: "", tipo: "cuota", nombre: "", cantidad: 1, precios: precios.cuota.precios }, medioPrecio)}
+              <Boton icono="etiqueta" titulo={`Cuota ${precios.cuota.plan}`} precio={precioUnitario({ clave: "", tipo: "cuota", nombre: "", cantidad: 1, precios: precios.cuota.precios }, medioPrecio)}
                 onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />
             )}
             {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && (
-              <Boton emoji="📒" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
+              <Boton icono="" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
                 onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />
             )}
             {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && (
-              <Boton emoji="📝" titulo={`Matrícula ${precios.matricula.plan}`} precio={Number(precios.matricula.monto)}
+              <Boton icono="lista" titulo={`Matrícula ${precios.matricula.plan}`} precio={Number(precios.matricula.monto)}
                 onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />
             )}
             {precios.pases.map((p) => (
-              <Boton key={p.plan_id} emoji="🎫" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pase", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
+              <Boton key={p.plan_id} icono="ticket" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pase", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pase", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {precios.packs.map((p) => (
-              <Boton key={p.plan_id} emoji="🎟️" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pack", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
+              <Boton key={p.plan_id} icono="ticket" titulo={p.nombre} precio={precioUnitario({ clave: "", tipo: "pack", nombre: "", cantidad: 1, precios: p.precios }, medioPrecio)}
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {!sinProductos && precios.productos.map((p) => (
-              <Boton key={p.producto_id} emoji="🥤" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
+              <Boton key={p.producto_id} icono="" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}
             <button type="button" className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px]" onClick={() => setOtro({ descripcion: "", monto: "" })}>
-              <span className="flex items-center gap-2"><span aria-hidden className="text-xl">✍️</span>Otra cosa</span>
+              <span className="flex items-center gap-2"><span aria-hidden className="text-xl"><Icono nombre="lapiz" /></span>Otra cosa</span>
               <span className="texto-tenue text-sm">Con descripción y precio</span>
             </button>
           </div>
@@ -280,12 +281,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
       {lineas.length > 0 && !carritoVisible && (
         <a href="#carrito" data-barra-carrito
           className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(9.75rem+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] shadow-lg">
-          <span>🛒 {lineas.reduce((n, l) => n + l.cantidad, 0)} · {total == null ? "—" : formatearPesos(total)}</span>
+          <span><Icono nombre="carrito" /> {lineas.reduce((n, l) => n + l.cantidad, 0)} · {total == null ? "—" : formatearPesos(total)}</span>
           <span>Cobrar ↓</span>
         </a>
       )}
       <aside id="carrito" data-carrito className="tarjeta p-5 sm:p-6 lg:sticky lg:top-6 scroll-mt-4">
-        <h2 className="titulo text-2xl">🧾 Ticket</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="recibo" /> Ticket</h2>
         {lineas.length === 0 ? <p className="texto-tenue mt-4">Tocá lo que se lleva.</p> : (
           <ul className="mt-4 divide-y divide-[var(--borde)]">
             {lineas.map((l) => {
@@ -298,7 +299,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                   </div>
                   {descuentoConvenio(l, medioPrecio, precios.convenio) > 0 && (
                     <div className="flex items-start gap-2 mt-1 texto-suave" data-convenio>
-                      <span className="flex-1">🤝 Convenio {precios.convenio!.nombre}</span>
+                      <span className="flex-1"><Icono nombre="usuarios" /> Convenio {precios.convenio!.nombre}</span>
                       <span className="numero">−{formatearPesos(descuentoConvenio(l, medioPrecio, precios.convenio))}</span>
                     </div>
                   )}
@@ -308,7 +309,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                     <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
                       title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
-                      ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
+                      ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
                   </div>
                   {l.descuento != null && (
@@ -326,9 +327,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
         {lineas.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2" data-cupon>
             <input className="campo !w-40 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
-            <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}>🏷️ Aplicar</button>
+            <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}><Icono nombre="etiqueta" /> Aplicar</button>
             {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</span>}
-            {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal">⚠️ {msjCupon.error}</span>}
+            {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {msjCupon.error}</span>}
           </div>
         )}
         {precios.tope_descuento != null && lineas.some((l) => l.descuento != null) && (
@@ -357,11 +358,11 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
               {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
             </div>
           )}
-          {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Paga con dos medios"}</button>}
+          {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "Paga con dos medios"}</button>}
           {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {mixto && <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>}
           {precios.fiado && (medioOk === "cuenta_corriente" || mixto) && (
-            <p className="text-sm texto-suave mt-2" data-fiado>📒 Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
+            <p className="text-sm texto-suave mt-2" data-fiado>Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
           )}
         </div>
 
@@ -369,11 +370,11 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           <span className="texto-suave text-lg">Total</span>
           <span className="numero text-5xl">{total == null ? "—" : formatearPesos(total)}</span>
         </div>
-        {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-2xl !px-4 !py-3">💵 Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
+        {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-2xl !px-4 !py-3"><Icono nombre="plata" /> Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
         {doble && lineas.some((l) => l.tipo === "cuota") && <div className="mt-4"><AvisoDobleCobro estado={doble} alCambiar={setDoble} alCancelar={() => setDoble(null)} /></div>}
-        {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-2xl !px-4 !py-3 w-full">⚠️ {error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="alerta" /> {error}</p>}
         <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (!!doble && lineas.some((l) => l.tipo === "cuota") && !motivoDobleValido(doble)) || (mixto && sumaMixto !== total)}
-          className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `✅ Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
+          className="boton boton-principal text-lg w-full mt-5">{ocupado ? "Cobrando…" : `Cobrar${total ? ` ${formatearPesos(total)}` : ""}`}</button>
       </aside>
     </div>
   );

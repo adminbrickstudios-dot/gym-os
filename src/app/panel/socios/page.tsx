@@ -11,6 +11,7 @@ import { Prospectos } from "../prospectos/Prospectos";
 import { MemoriaSocios } from "./MemoriaSocios";
 import { ListaSocios } from "./ListaSocios";
 import { InvitadosPorSeguir, type InvitadoSinSeguir } from "../prospectos/InvitadosPorSeguir";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Socios" };
 
@@ -21,8 +22,8 @@ type Filtros = Record<"todos" | "al_dia" | "por_vencer" | "vencidos" | "en_pausa
 
 // Las píldoras de estado: el grupo sale del veredicto de la puerta (la base agrupa).
 const ESTADOS = [
-  ["al_dia", "🟢 Al día"], ["por_vencer", "🟡 Por vencer"], ["vencidos", "🔴 Vencidos"], ["en_pausa", "⏸️ En pausa"],
-  ["sin_plan", "⚪ Sin plan"], ["nuevos", "🆕 Nuevos (30 días)"], ["bajas", "👋 Dados de baja"],
+  ["al_dia", "Al día"], ["por_vencer", "Por vencer"], ["vencidos", "Vencidos"], ["en_pausa", "En pausa"],
+  ["sin_plan", "Sin plan"], ["nuevos", "Nuevos (30 días)"], ["bajas", "Dados de baja"],
 ] as const;
 type Estado = (typeof ESTADOS)[number][0];
 const POR_PAGINA = 60, TOPE_LISTA = 600;
@@ -48,7 +49,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
       const invitados = await rpcLectura<InvitadoSinSeguir[]>("invitados_sin_seguimiento", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []);   // FA-24
       return (
         <>
-          <Encabezado emoji="👥" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />
+          <Encabezado icono="usuarios" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />
           <PestanasSocios activa="interesados" nuevos={nuevos} />
           <InvitadosPorSeguir invitados={invitados} />
           <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas />
@@ -76,19 +77,19 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     return (
       <>
         <MemoriaSocios actual={actual} />
-        <Encabezado emoji="👥" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
+        <Encabezado icono="usuarios" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
           accion={(() => {
             const extra = panel.yo.rol !== "recepcion" && <>
-              <Link href="/panel/socios/importar" className="boton">📥 Importar</Link>
-              <Link href="/panel/socios/duplicados" className="boton">🔎 Duplicados</Link>
+              <Link href="/panel/socios/importar" className="boton"><Icono nombre="descargar" /> Importar</Link>
+              <Link href="/panel/socios/duplicados" className="boton"><Icono nombre="buscar" /> Duplicados</Link>
               {filas.length > 0 && (
                 // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
-                <a href={`/panel/socios/exportar${con({ estado: null, plan: null }).replace("/panel/socios", "")}`} className="boton" download>📤 Exportar</a>
+                <a href={`/panel/socios/exportar${con({ estado: null, plan: null }).replace("/panel/socios", "")}`} className="boton" download><Icono nombre="subir" /> Exportar</a>
               )}
             </>;
             return (
               <div className="flex flex-wrap items-start gap-2">
-                <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Nuevo socio</Link>
+                <Link href="/panel/socios/nuevo" className="boton boton-principal"><Icono nombre="mas" /> Nuevo socio</Link>
                 {extra && <div className="hidden sm:flex flex-wrap gap-2">{extra}</div>}
                 {/* En el celular lo que se usa poco va en "Más", así la búsqueda queda arriba. */}
                 {extra && (
@@ -103,7 +104,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
         <PestanasSocios activa="socios" nuevos={nuevosInteresados} />
         <Atenuable>
         <form className="mb-4" role="search" data-transicion>
-          <input name="q" defaultValue={q} placeholder="🔍 Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
+          <input name="q" defaultValue={q} placeholder="Buscar socio" className="campo !min-h-14 !text-lg" aria-label="Buscar socio" autoComplete="off" />
           {etiqueta && <input type="hidden" name="etiqueta" value={etiqueta} />}
           {estado && <input type="hidden" name="estado" value={estado} />}
           {plan && <input type="hidden" name="plan" value={plan} />}
@@ -121,7 +122,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
             ))}
             {(autoaltas > 0 || web) && (
               <a href={con({ web: !web })} data-transicion className="pestana" aria-current={web ? "page" : undefined} data-filtro-web>
-                🌐 Se anotaron por la web <span className="texto-tenue">{autoaltas}</span>
+                <Icono nombre="web" /> Se anotaron por la web <span className="texto-tenue">{autoaltas}</span>
               </a>
             )}
           </nav>
@@ -130,23 +131,23 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           <nav className="pestanas mb-6" aria-label="Filtrar por plan o etiqueta" data-filtro-etiquetas>
             {filtros.planes.length > 1 && filtros.planes.map((p) => (
               <a key={p.plan_id} href={con({ plan: plan === p.plan_id ? null : p.plan_id })} data-transicion className="pestana" aria-current={plan === p.plan_id ? "page" : undefined} data-plan={p.plan_id}>
-                📋 {p.nombre} <span className="texto-tenue">{p.socios}</span>
+                <Icono nombre="lista" /> {p.nombre} <span className="texto-tenue">{p.socios}</span>
               </a>
             ))}
             {etiquetas.map((e) => (
-              <a key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}>🏷️ {e.nombre} <span className="texto-tenue">{e.socios}</span></a>
+              <a key={e.id} href={con({ etiqueta: etiqueta === e.id ? null : e.id })} data-transicion className="pestana" aria-current={etiqueta === e.id ? "page" : undefined}><Icono nombre="etiqueta" /> {e.nombre} <span className="texto-tenue">{e.socios}</span></a>
             ))}
           </nav>
         )}
         <div data-lista>
         {filas.length === 0 ? (
           filtrado && !q
-            ? <Vacio emoji="🔍" titulo="Nadie con ese filtro" acciones={<Link href="/panel/socios" className="boton">Ver todos</Link>}>Probá con otro, o sacá el filtro.</Vacio>
+            ? <Vacio icono="buscar" titulo="Nadie con ese filtro" acciones={<Link href="/panel/socios" className="boton">Ver todos</Link>}>Probá con otro, o sacá el filtro.</Vacio>
             : q
-            ? <Vacio emoji="🔍" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton">➕ Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
-            : <Vacio emoji="👥" titulo="Todavía no hay socios" acciones={<>
-                <Link href="/panel/socios/nuevo" className="boton">➕ Cargar el primero</Link>
-                {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton">📥 Importar de un Excel</Link>}
+            ? <Vacio icono="buscar" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
+            : <Vacio icono="usuarios" titulo="Todavía no hay socios" acciones={<>
+                <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Cargar el primero</Link>
+                {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="descargar" /> Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
           <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} />
@@ -169,8 +170,8 @@ function PestanasSocios({ activa, nuevos }: { activa: "socios" | "interesados"; 
   return (
     <div className="mb-4" data-pestanas-socios>
       <Pestanas etiqueta="Socios e interesados" activa={activa} pestanas={[
-        { clave: "socios", texto: "Socios", emoji: "👥", href: "/panel/socios" },
-        { clave: "interesados", texto: nuevos > 0 ? `Interesados (${nuevos} nuevos)` : "Interesados", emoji: "🌱", href: "/panel/socios?vista=interesados" },
+        { clave: "socios", texto: "Socios", emoji: "usuarios", href: "/panel/socios" },
+        { clave: "interesados", texto: nuevos > 0 ? `Interesados (${nuevos} nuevos)` : "Interesados", emoji: "hoja", href: "/panel/socios?vista=interesados" },
       ]} />
     </div>
   );

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { DENOMINACIONES, sumarBilletes } from "@/lib/caja";
 import { formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 
 export function CalculadoraBilletes({ alCambiar }: { alCambiar: (total: number, detalle: Record<string, number>) => void }) {
@@ -17,7 +18,7 @@ export function CalculadoraBilletes({ alCambiar }: { alCambiar: (total: number, 
   };
   return (
     <fieldset className="space-y-3 rounded-2xl border border-[var(--borde)] p-4" data-billetes>
-      <legend className="etiqueta px-1">🧮 Contá los billetes</legend>
+      <legend className="etiqueta px-1"><Icono nombre="calculadora" /> Contá los billetes</legend>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {DENOMINACIONES.map((d) => (
           <label key={d} className="block space-y-1">

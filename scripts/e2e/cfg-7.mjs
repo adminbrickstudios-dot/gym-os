@@ -43,7 +43,7 @@ try {
     await interruptor(nombre).uncheck();
     if (clave !== "clases") {
       const aviso = await p.locator(`[data-al-apagar="${clave}"]`).innerText().catch(() => "");
-      chequear(/Apagada: /.test(aviso), `${nombre}: al apagarla avisa “${aviso.replace("⚠️ Apagada: ", "")}”`, `${nombre}: no avisa qué cambia`);
+      chequear(/Apagada: /.test(aviso), `${nombre}: al apagarla avisa “${aviso.replace("Apagada: ", "")}”`, `${nombre}: no avisa qué cambia`);
     }
     const m = await guardar();
     if (!/Guardado/.test(m)) { falla(`${nombre}: no se pudo apagar: ${m}`); continue; }

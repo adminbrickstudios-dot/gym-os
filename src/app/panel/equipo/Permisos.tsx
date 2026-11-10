@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { guardarPermiso } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Permisos = { recepcion_ve_cobrado: boolean; recepcion_vende_productos: boolean; profe_ve_telefono: boolean; encargado_ve_resultado: boolean; descuento_max_recepcion: number };
 const LISTA: [keyof Omit<Permisos, "descuento_max_recepcion">, string, string][] = [
-  ["recepcion_ve_cobrado", "🛎️ La recepción ve lo cobrado del día", "El número “Cobrado hoy” en su Inicio."],
-  ["recepcion_vende_productos", "🛎️ La recepción vende productos", "Si lo apagás, en Vender solo ve cuotas, pases y packs."],
-  ["profe_ve_telefono", "💪 El profe ve el teléfono del socio", "En la lista de sus clases, para escribirle."],
-  ["encargado_ve_resultado", "🧭 El encargado ve el Resultado", "Lo cobrado, los gastos y la exportación del mes."],
+  ["recepcion_ve_cobrado", "La recepción ve lo cobrado del día", "El número “Cobrado hoy” en su Inicio."],
+  ["recepcion_vende_productos", "La recepción vende productos", "Si lo apagás, en Vender solo ve cuotas, pases y packs."],
+  ["profe_ve_telefono", "El profe ve el teléfono del socio", "En la lista de sus clases, para escribirle."],
+  ["encargado_ve_resultado", "El encargado ve el Resultado", "Lo cobrado, los gastos y la exportación del mes."],
 ];
 
 /** EQU-1 (D4): roles fijos y estos interruptores, para todo el gimnasio (no persona por persona). */
@@ -23,7 +24,7 @@ export function PermisosEquipo({ inicial, puedeEditar }: { inicial: Permisos; pu
   return (
     <section className="tarjeta p-5 space-y-4" data-permisos>
       <div>
-        <h2 className="titulo text-2xl">🔐 Qué puede hacer cada rol</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="candado" /> Qué puede hacer cada rol</h2>
         <p className="texto-suave">Valen para todo el equipo de ese rol.{puedeEditar ? " Se guarda al tocar." : " Los cambia el dueño."}</p>
       </div>
       <ul className="space-y-2">{LISTA.map(([k, t, a]) => (
@@ -34,8 +35,8 @@ export function PermisosEquipo({ inicial, puedeEditar }: { inicial: Permisos; pu
           </label>
         </li>
       ))}</ul>
-      <p className="text-sm texto-suave">🏷️ La recepción hace descuentos de hasta el {p.descuento_max_recepcion}%{puedeEditar ? <> (se cambia en <Link href="/panel/configuracion?pestana=cobros" className="underline">Configuración → Cobros</Link>)</> : null}.</p>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      <p className="text-sm texto-suave"><Icono nombre="etiqueta" /> La recepción hace descuentos de hasta el {p.descuento_max_recepcion}%{puedeEditar ? <> (se cambia en <Link href="/panel/configuracion?pestana=cobros" className="underline">Configuración → Cobros</Link>)</> : null}.</p>
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

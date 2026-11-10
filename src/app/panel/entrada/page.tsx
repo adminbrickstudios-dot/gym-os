@@ -17,6 +17,7 @@ import type { MiTurno } from "@/app/panel/caja/tipos";
 import type { Invitado } from "./acciones";
 import { PanelEmergencia } from "./PanelEmergencia";
 import type { EmergenciaHistorial, EstadoEmergencia } from "./emergencia-tipos";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Entrada" };
 
@@ -47,8 +48,8 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
 
     return (
       <>
-        <Encabezado emoji="🚪" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
-          accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton">🔎 Control de la puerta</Link> : undefined} />
+        <Encabezado icono="puerta" titulo="Entrada" bajada="Buscá al socio: te dice si puede entrar y, si no, por qué."
+          accion={panel.yo.rol !== "recepcion" ? <Link href="/panel/entrada/control" className="boton"><Icono nombre="buscar" /> Control de la puerta</Link> : undefined} />
         <RefrescarAlEntrar gimnasioId={panel.gimnasio.id} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/entrada" />}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-10 [&>*]:min-w-0">

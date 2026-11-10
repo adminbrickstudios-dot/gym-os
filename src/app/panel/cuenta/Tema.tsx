@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarTema, type Tema } from "./tema-acciones";
@@ -14,13 +15,14 @@ export function Tema({ inicial }: { inicial: Tema }) {
   const [tema, setTema] = useState<Tema>(inicial);
   const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
   const [ocupado, empezar] = useTransition();
+  const router = useRouter();
   const elegir = (t: Tema) => {
     setMsj(null);
     empezar(async () => {
       const r = await guardarTema(t);
       if (r.error) { setMsj({ tipo: "error", texto: r.error }); return; }
       setTema(t);
-      document.documentElement.dataset.tema = t === "gimnasio" ? "" : t;   // se ve ya; el layout lo repinta en la próxima carga
+      router.refresh();   // el panel lee la cookie `tema` al dibujarse: se repinta ya
       setMsj({ tipo: "exito", texto: "Listo: tu tema quedó guardado." });
     });
   };

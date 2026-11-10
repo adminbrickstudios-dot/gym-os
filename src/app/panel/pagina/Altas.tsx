@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarAltas } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type AltasPanel = {
   altas_online: boolean; reglamento: { version: number; texto: string; creado_en: string } | null;
@@ -28,7 +29,7 @@ export function Altas({ inicial, puedeEditar }: { inicial: AltasPanel; puedeEdit
   });
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-altas data-respuestas={msj.n}>
-      <div><p className="titulo text-2xl">💪 Hacerse socio desde la página</p>
+      <div><p className="titulo text-2xl"><Icono nombre="pesa" /> Hacerse socio desde la página</p>
         <p className="texto-suave">Con esto prendido, la página muestra “Hacete socio” y en cada plan “Elegir este”: la persona deja sus datos, acepta el reglamento y elige pagar por transferencia o en el gimnasio. Queda como socio sin pagar hasta que cobrás.</p></div>
       <fieldset disabled={!puedeEditar} className="space-y-4">
         <Interruptor etiqueta="Aceptar altas online" ayuda={guardado.reglamento ? `Se anotaron ${guardado.aceptaciones} aceptando el reglamento.` : "Primero escribí el reglamento."}
@@ -43,7 +44,7 @@ export function Altas({ inicial, puedeEditar }: { inicial: AltasPanel; puedeEdit
       </fieldset>
       {puedeEditar && (
         <div className="flex flex-wrap items-center gap-3">
-          <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "💾 Guardar"}</button>
+          <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "Guardar"}</button>
           {sucio && <span className="text-sm texto-suave">• Cambios sin guardar</span>}
         </div>
       )}

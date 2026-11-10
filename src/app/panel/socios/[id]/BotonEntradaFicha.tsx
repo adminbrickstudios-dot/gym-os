@@ -1,10 +1,11 @@
 "use client";
-// VD-15 · "🚪 Entrada" en el encabezado de la ficha: abre la ventana de Entrada (VD-1) ya con este socio
+// VD-15 · "Entrada" en el encabezado de la ficha: abre la ventana de Entrada (VD-1) ya con este socio
 // elegido, sin salir de la ficha. Si la ventana no está montada (sin sede activa) lleva a la pantalla de Entrada.
 import Link from "next/link";
 import { EVENTO_ABRIR_SOCIO } from "@/components/panel/AvisosEntrada";
 import { useRutaDisponible } from "@/components/panel/LinkPanel";
 import type { ResultadoSocio } from "@/app/panel/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function BotonEntradaFicha({ socio, className = "boton" }: { socio: ResultadoSocio; className?: string }) {
   // Con la sección Entrada apagada no hay a dónde ir: el botón no se muestra.
@@ -16,7 +17,7 @@ export function BotonEntradaFicha({ socio, className = "boton" }: { socio: Resul
         e.preventDefault();
         window.dispatchEvent(new CustomEvent<ResultadoSocio>(EVENTO_ABRIR_SOCIO, { detail: socio }));
       }}>
-      🚪 Entrada
+      <Icono nombre="puerta" /> Entrada
     </Link>
   );
 }

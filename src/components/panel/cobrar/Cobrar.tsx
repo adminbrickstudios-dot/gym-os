@@ -19,6 +19,7 @@ import { cajaParaCobrar, cobrar, datosCobro, guardarMedioDefecto, registrarUsoCu
 import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/compartido";
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio } from "@/app/panel/vender/tipos";
 import type { OrigenCobro } from "./evento";
+import { Icono } from "@/components/ui/Icono";
 
 const VUELTA: Record<OrigenCobro, string> = { entrada: "Volver a la entrada", ficha: "Volver a la ficha", vencen: "Volver a Vencen hoy", retencion: "Volver a Retención", buscador: "Listo", tarea: "Volver a Para hacer hoy", otro: "Listo" };
 
@@ -53,11 +54,11 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
       <div data-cobrar data-origen={origen} data-estado={error ? "error" : d ? "listo" : "cargando"} className="max-h-[92dvh] overflow-y-auto">
         {error ? (
           <div className="p-6 sm:p-8 space-y-4">
-            <p className="titulo text-2xl">💵 Cobrar</p>
+            <p className="titulo text-2xl"><Icono nombre="plata" /> Cobrar</p>
             <Mensaje tipo="error">{error}</Mensaje>
             <div className="flex flex-wrap gap-2">
               <button type="button" className="boton boton-principal" onClick={() => { setError(null); setD(null); setIntento((n) => n + 1); }}>Reintentar</button>
-              <Link href={`/panel/vender?socio=${socioId}`} className="boton">🛒 Abrir Vender</Link>
+              <Link href={`/panel/vender?socio=${socioId}`} className="boton"><Icono nombre="carrito" /> Abrir Vender</Link>
               <button type="button" className="boton-texto" onClick={alCerrar}>Cerrar</button>
             </div>
           </div>
@@ -79,7 +80,7 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
 function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: OrigenCobro; alCerrar: () => void; alCobrado: (v: Venta) => void }) {
   const { precios, ctx, socio } = d;
   // Solo los medios que acepta el gimnasio (lo decide la base); "A cuenta" si el gimnasio fía.
-  const medios = [...MEDIOS.filter((m) => precios.medios.includes(m.medio)), ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "📒 A cuenta" }] : [])];
+  const medios = [...MEDIOS.filter((m) => precios.medios.includes(m.medio)), ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "A cuenta" }] : [])];
 
   const [lineas, setLineas] = useState<Linea[]>(() => lineasIniciales(precios));
   const [otroDia, setOtroDia] = useState<{ fecha: string; motivo: string } | null>(null);
@@ -181,7 +182,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
     setVenta(r.venta);
     if (cupon && lineas.some((l) => l.descuento_motivo === `Cupón ${cupon}`)) {
       const u = await registrarUsoCupon(r.venta.venta_id, cupon);
-      setUsoCupon(u.error ? `⚠️ El cobro quedó, pero no se anotó el uso del cupón: ${u.error}` : `🏷️ Cupón ${cupon} anotado`);
+      setUsoCupon(u.error ? `El cobro quedó, pero no se anotó el uso del cupón: ${u.error}` : `Cupón ${cupon} anotado`);
     }
     alCobrado(r.venta);
   };
@@ -267,19 +268,19 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                     )}
                     {l.tipo === "cuota" && parcial && (
                       <p className="text-sm mt-1" data-cobrar-parcial={parcial.modo}>
-                        📐 Primera cuota con día fijo: {parcial.modo === "proporcional" ? `${parcial.texto}${parcial.lista_entera != null ? ` de ${formatearPesos(parcial.lista_entera)}` : ""} = ${p == null ? "—" : formatearPesos(p)}`
+                        <Icono nombre="grafico" /> Primera cuota con día fijo: {parcial.modo === "proporcional" ? `${parcial.texto}${parcial.lista_entera != null ? ` de ${formatearPesos(parcial.lista_entera)}` : ""} = ${p == null ? "—" : formatearPesos(p)}`
                           : parcial.modo === "gratis" ? `no paga nada, ${parcial.texto}` : parcial.texto}.
                         {" "}Desde ahí entra al ciclo de todos.
                       </p>
                     )}
                     {conv > 0 && (
                       <div className="flex items-start gap-2 mt-1 texto-suave" data-convenio>
-                        <span className="flex-1">🤝 Convenio {precios.convenio!.nombre}</span><span className="numero">−{formatearPesos(conv)}</span>
+                        <span className="flex-1"><Icono nombre="usuarios" /> Convenio {precios.convenio!.nombre}</span><span className="numero">−{formatearPesos(conv)}</span>
                       </div>
                     )}
                     {l.descuento != null && l.descuento_motivo?.startsWith("Cupón ") && (
                       <div className="flex items-start gap-2 mt-1 texto-suave" data-cobrar-cupon-linea>
-                        <span className="flex-1">🏷️ {l.descuento_motivo}</span><span className="numero">−{formatearPesos(l.descuento)}</span>
+                        <span className="flex-1"><Icono nombre="etiqueta" /> {l.descuento_motivo}</span><span className="numero">−{formatearPesos(l.descuento)}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-2 mt-2">
@@ -290,7 +291,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                         title={l.tipo === "cuota" && parcial ? "La primera cuota es parcial: se cobra sola" : undefined}
                         onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                       {l.descuento == null
-                        ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}>🏷️ Descuento</button>
+                        ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
                         : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
                     </div>
                     {l.descuento != null && (
@@ -312,23 +313,23 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
             {lineas.length > 0 && (
               <span className="flex flex-wrap items-center gap-2" data-cupon>
                 <input className="campo !w-32 !min-h-11 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
-                <button type="button" className="boton !min-h-11" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}>🏷️ Aplicar</button>
+                <button type="button" className="boton !min-h-11" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}><Icono nombre="etiqueta" /> Aplicar</button>
               </span>
             )}
           </div>
           {msjCupon.ok && <p className="text-sm mt-2" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</p>}
-          {msjCupon.error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal mt-2">⚠️ {msjCupon.error}</p>}
+          {msjCupon.error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal mt-2"><Icono nombre="alerta" /> {msjCupon.error}</p>}
 
           {agregando && (
             <div className="tarjeta p-3 mt-3 space-y-3" data-cobrar-picker>
               <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto">
-                {precios.cuota && <Chip emoji="🏷️" texto={`Cuota ${precios.cuota.plan}`} onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />}
-                {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && <Chip emoji="📝" texto={`Matrícula ${precios.matricula.plan}`} onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />}
-                {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && <Chip emoji="📒" texto={`Lo que debe: ${formatearPesos(precios.deuda)}`} onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />}
-                {precios.pases.map((p) => <Chip key={p.plan_id} emoji="🎫" texto={p.nombre} onClick={() => agregar({ tipo: "pase", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
-                {precios.packs.map((p) => <Chip key={p.plan_id} emoji="🎟️" texto={p.nombre} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
-                {!d.sinProductos && precios.productos.map((p) => <Chip key={p.producto_id} emoji="🥤" texto={`${p.nombre} · ${formatearPesos(p.precio)}`} onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />)}
-                <Chip emoji="✍️" texto="Otra cosa" onClick={() => setOtro({ descripcion: "", monto: "" })} />
+                {precios.cuota && <Chip icono="etiqueta" texto={`Cuota ${precios.cuota.plan}`} onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />}
+                {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && <Chip icono="lista" texto={`Matrícula ${precios.matricula.plan}`} onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />}
+                {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && <Chip icono="" texto={`Lo que debe: ${formatearPesos(precios.deuda)}`} onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />}
+                {precios.pases.map((p) => <Chip key={p.plan_id} icono="ticket" texto={p.nombre} onClick={() => agregar({ tipo: "pase", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
+                {precios.packs.map((p) => <Chip key={p.plan_id} icono="ticket" texto={p.nombre} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
+                {!d.sinProductos && precios.productos.map((p) => <Chip key={p.producto_id} icono="" texto={`${p.nombre} · ${formatearPesos(p.precio)}`} onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />)}
+                <Chip icono="lapiz" texto="Otra cosa" onClick={() => setOtro({ descripcion: "", monto: "" })} />
               </div>
               {otro && (
                 <form className="flex flex-col sm:flex-row gap-2" onSubmit={(e) => {
@@ -355,7 +356,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
                   title={!permitido(m.medio) ? "Un cobro de otro día no puede ser en efectivo ni a cuenta" : undefined}
                   onClick={() => setMedio(m.medio)}
                   className={`boton !min-h-12 text-[15px] ${medioOk === m.medio ? "!border-[var(--acento)] !bg-[color-mix(in_oklab,var(--acento),var(--fondo)_82%)]" : ""}`}>
-                  {m.texto}{defecto === m.medio && <span className="texto-tenue text-xs" title="El medio de siempre en este gimnasio"> ★</span>}
+                  {m.texto}{defecto === m.medio && <span className="texto-tenue text-xs" title="El medio de siempre en este gimnasio"> <Icono nombre="estrella" /></span>}
                 </button>
               ))}
             </div>
@@ -374,17 +375,17 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
             </div>
           )}
           <div className="flex flex-wrap items-center gap-x-4">
-            {medios.length >= 2 && !otroDia && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "➗ Dos medios"}</button>}
+            {medios.length >= 2 && !otroDia && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "Dos medios"}</button>}
             {ctx.puede_cambiar_medio && !mixto && medioOk && medioOk !== "cuenta_corriente" && medioOk !== defecto && (
-              <button type="button" className="boton-texto mt-2" disabled={ocupado} onClick={fijarDefecto} data-cobrar-fijar-defecto>⭐ Dejar este como el de siempre</button>
+              <button type="button" className="boton-texto mt-2" disabled={ocupado} onClick={fijarDefecto} data-cobrar-fijar-defecto><Icono nombre="estrella" /> Dejar este como el de siempre</button>
             )}
           </div>
           {sinMedios && <p className="pildora pildora-amarillo !rounded-2xl !px-4 !py-3 mt-2">No hay medios de pago prendidos para cobrar acá. El dueño los elige en Configuración → Cobros.</p>}
           {precios.fiado && (medioOk === "cuenta_corriente" || mixto) && (
-            <p className="text-sm texto-suave mt-2" data-fiado>📒 Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
+            <p className="text-sm texto-suave mt-2" data-fiado>Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
           )}
 
-          {usaEfectivo && turnoId && !otroDia && <p className="text-sm texto-tenue mt-2" data-cobrar-caja>💵 El efectivo queda en tu caja{caja.caja ? ` (${caja.caja})` : ""}.</p>}
+          {usaEfectivo && turnoId && !otroDia && <p className="text-sm texto-tenue mt-2" data-cobrar-caja><Icono nombre="plata" /> El efectivo queda en tu caja{caja.caja ? ` (${caja.caja})` : ""}.</p>}
           {/* VD-49: efectivo sin turno → abrirlo acá, con el fondo, y seguir con este cobro */}
           {faltaCaja && <div className="mt-3"><AbrirTurnoCobrar caja={caja} alAbrir={(id, nombre) => { setCaja({ ...caja, turno_id: id, caja: nombre, vencido: false, libres: [] }); setError(null); }} /></div>}
 
@@ -394,7 +395,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
               <input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="hidden" aria-label="Foto del comprobante"
                 onChange={(e) => { const f = e.target.files?.[0] ?? null; rutaComprobante.current = null; setError(null);
                   if (f && f.size > 2.5 * 1024 * 1024) { setArchivo(null); e.target.value = ""; setError("El archivo pesa más de 2,5 MB: sacale una foto más chica"); } else setArchivo(f); }} />
-              <button type="button" className="boton !min-h-11" onClick={() => entrada.current?.click()}>📸 {archivo ? "Cambiar comprobante" : "Adjuntar comprobante"}</button>
+              <button type="button" className="boton !min-h-11" onClick={() => entrada.current?.click()}><Icono nombre="camara" /> {archivo ? "Cambiar comprobante" : "Adjuntar comprobante"}</button>
               {archivo ? <span className="texto-suave text-sm truncate max-w-48" data-cobrar-archivo>{archivo.name}</span> : <span className="texto-tenue text-sm">opcional</span>}
               {archivo && <button type="button" className="boton-texto" onClick={() => { setArchivo(null); rutaComprobante.current = null; if (entrada.current) entrada.current.value = ""; }}>Quitar</button>}
             </div>
@@ -406,7 +407,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
           <section aria-label="Cuándo se cobró" data-cobrar-cuando>
             {!otroDia ? (
               <button type="button" className="boton-texto" data-cobrar-otro-dia
-                onClick={() => { setMixto(false); setOtroDia({ fecha: paraInput(new Date(Date.now() - 24 * 3600_000)), motivo: "" }); }}>🕓 Cobré otro día</button>
+                onClick={() => { setMixto(false); setOtroDia({ fecha: paraInput(new Date(Date.now() - 24 * 3600_000)), motivo: "" }); }}><Icono nombre="reloj" /> Cobré otro día</button>
             ) : (
               <div className="tarjeta p-3 space-y-2" data-cobrar-otro-dia-campos>
                 <div className="flex items-center justify-between gap-2">
@@ -425,7 +426,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
 
         {/* Quién cobra */}
         <p className="texto-suave text-sm" data-cobrar-atiende>
-          {ctx.operador ? <>👤 Atiende {ctx.operador}</> : ctx.hay_pines ? <>🔢 Nadie puso su PIN: el cobro queda a nombre de esta sesión. <Link href={`/panel/pin?volver=${encodeURIComponent(typeof window === "undefined" ? "/panel" : window.location.pathname + window.location.search)}`} className="underline">¿Quién atiende?</Link></> : null}
+          {ctx.operador ? <><Icono nombre="persona" /> Atiende {ctx.operador}</> : ctx.hay_pines ? <><Icono nombre="calculadora" /> Nadie puso su PIN: el cobro queda a nombre de esta sesión. <Link href={`/panel/pin?volver=${encodeURIComponent(typeof window === "undefined" ? "/panel" : window.location.pathname + window.location.search)}`} className="underline">¿Quién atiende?</Link></> : null}
         </p>
       </div>
 
@@ -435,17 +436,17 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
           <span className="texto-suave text-lg">Total</span>
           <span className="numero text-4xl sm:text-5xl" data-cobrar-total={total ?? ""}>{total == null ? "—" : formatearPesos(total)}</span>
         </div>
-        {faltaCaja && <p className="texto-suave text-sm" data-cobrar-falta-caja>💵 Abrí tu turno (arriba, en “¿Cómo paga?”) para cobrar en efectivo.</p>}
+        {faltaCaja && <p className="texto-suave text-sm" data-cobrar-falta-caja><Icono nombre="plata" /> Abrí tu turno (arriba, en “¿Cómo paga?”) para cobrar en efectivo.</p>}
         {error && <Mensaje tipo="error">{error}</Mensaje>}
         <BotonAccion data-cobrar-confirmar ocupadoTexto="Cobrando…" onClick={confirmar} className="boton boton-principal text-lg w-full"
           disabled={sinMedios || lineas.length === 0 || total == null || faltaCaja || faltaOtroDia || faltaMotivoDoble || (mixto && sumaMixto !== total)}>
-          ✅ Cobrar{frenaDoble ? " igual" : ""}{total ? ` ${formatearPesos(total)}` : ""} <kbd className="text-xs opacity-70 font-sans">Enter</kbd>
+          <Icono nombre="ok" /> Cobrar{frenaDoble ? " igual" : ""}{total ? ` ${formatearPesos(total)}` : ""} <kbd className="text-xs opacity-70 font-sans">Enter</kbd>
         </BotonAccion>
       </div>
     </div>
   );
 }
 
-function Chip({ emoji, texto, onClick }: { emoji: string; texto: string; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="boton !min-h-11 !justify-start text-left"><span aria-hidden>{emoji}</span><span className="truncate">{texto}</span></button>;
+function Chip({ icono, texto, onClick }: { icono?: string; texto: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="boton !min-h-11 !justify-start text-left"><span aria-hidden><Icono nombre={icono} /></span><span className="truncate">{texto}</span></button>;
 }

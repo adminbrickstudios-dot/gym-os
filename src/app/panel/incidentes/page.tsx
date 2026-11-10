@@ -20,13 +20,13 @@ export default async function Incidentes({ searchParams }: { searchParams: Promi
     const nombreSocio = socio ? r.items.find((i) => i.socio_id === socio)?.socio_nombre ?? null : null;
     return (
       <div data-incidentes>
-        <Encabezado emoji="🩹" titulo="Incidentes"
+        <Encabezado icono="corazon" titulo="Incidentes"
           bajada={r.puede_ver_todo ? "Lo que pasó en la sala: dónde, qué pasó y qué se hizo. Sin diagnósticos. A las 24 horas queda escrito y no cambia." : "Anotá lo que pasó en la sala. Acá ves los que cargaste vos; el dueño y el encargado ven todos."} />
         <div className="space-y-6 max-w-3xl">
           <FormIncidente socioInicial={socio && nombreSocio ? { id: socio, nombre: nombreSocio } : null} />
           {socio && <p className="texto-suave">Solo los de {nombreSocio ?? "este socio"}. <Link href="/panel/incidentes" className="underline">Ver todos</Link></p>}
           {r.items.length === 0 ? (
-            <Vacio emoji="🌿" titulo="Todavía no hay incidentes anotados">
+            <Vacio icono="hoja" titulo="Todavía no hay incidentes anotados">
               Si alguien se cae, se marea o se rompe algo en la sala, anotalo acá: dónde, qué pasó y qué se hizo. Queda escrito con tu nombre y la hora.
             </Vacio>
           ) : (

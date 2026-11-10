@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { guardarAccesos } from "@/app/panel/acciones";
 import type { Acceso } from "@/lib/panel/secciones";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * Los botones grandes del inicio. El primero es el principal (con el color
@@ -22,16 +23,16 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
           {elegidos.map((a, i) => (
             <li key={a.clave}>
               <Link href={a.ruta} className={`boton ${i === 0 ? "boton-principal" : ""} !flex-col !items-start !justify-between w-full aspect-[4/3] sm:aspect-[5/3] !p-4 sm:!p-5 !rounded-[var(--radio-grande)]`}>
-                <span className="text-4xl" aria-hidden>{a.emoji}</span>
+                <span className="text-4xl" aria-hidden><Icono nombre={a.emoji} /></span>
                 <span className="titulo text-xl sm:text-2xl text-left">{a.titulo}</span>
               </Link>
             </li>
           ))}
         </ul>
         {perdidos.length > 0 && (
-          <p className="pildora pildora-amarillo mt-3">⚠️ {perdidos.length === 1 ? "Un acceso que tenías ya no está disponible" : `${perdidos.length} accesos que tenías ya no están disponibles`}: elegí de nuevo.</p>
+          <p className="pildora pildora-amarillo mt-3"><Icono nombre="alerta" /> {perdidos.length === 1 ? "Un acceso que tenías ya no está disponible" : `${perdidos.length} accesos que tenías ya no están disponibles`}: elegí de nuevo.</p>
         )}
-        <button type="button" onClick={() => setEditando(true)} className="boton-texto mt-3">✏️ Elegir mis accesos</button>
+        <button type="button" onClick={() => setEditando(true)} className="boton-texto mt-3"><Icono nombre="lapiz" /> Elegir mis accesos</button>
       </section>
     );
   }
@@ -48,7 +49,7 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
             <li key={a.clave}>
               <button type="button" onClick={() => alternar(a.clave)} aria-pressed={pos >= 0}
                 className={`boton w-full !justify-start ${pos >= 0 ? "!border-[var(--acento)]" : "opacity-70"}`}>
-                <span aria-hidden>{a.emoji}</span>
+                <span aria-hidden><Icono nombre={a.emoji} /></span>
                 <span className="flex-1 text-left">{a.titulo}</span>
                 {pos >= 0 && <span className="numero text-lg" style={{ color: "var(--acento)" }}>{pos + 1}</span>}
               </button>
@@ -56,14 +57,14 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
           );
         })}
       </ul>
-      {error && <p role="alert" className="pildora pildora-rojo mt-4">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-4"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex gap-2 mt-5">
         <button type="button" disabled={guardando || seleccion.length === 0} className="boton boton-principal"
           onClick={() => empezar(async () => {
             const r = await guardarAccesos(seleccion);
             if (r.error) setError(r.error); else { setError(null); setEditando(false); }
           })}>
-          {guardando ? "Guardando…" : "✅ Guardar"}
+          {guardando ? "Guardando…" : "Guardar"}
         </button>
         <button type="button" className="boton" onClick={() => { setSeleccion(elegidos.map((a) => a.clave)); setEditando(false); setError(null); }}>Cancelar</button>
       </div>

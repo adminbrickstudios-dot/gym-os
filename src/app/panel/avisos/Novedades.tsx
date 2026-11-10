@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { publicarNovedad, quitarNovedad } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Novedad = { id: string; texto: string; hasta: string; por: string };
 
@@ -19,7 +20,7 @@ export function Novedades({ gimnasioId, novedades, puede, hoy }: { gimnasioId: s
   return (
     <section className="tarjeta p-5 space-y-4 mb-10" data-novedades-panel>
       <div>
-        <h2 className="titulo text-2xl">📣 En la app de los socios</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="campana" /> En la app de los socios</h2>
         <p className="texto-suave">Un aviso corto que todos ven arriba en la app, hasta el día que elijas.</p>
       </div>
       {novedades.length > 0 && (
@@ -40,7 +41,7 @@ export function Novedades({ gimnasioId, novedades, puede, hoy }: { gimnasioId: s
           <button type="submit" disabled={ocupado || texto.trim().length < 3} className="boton boton-principal">{ocupado ? "Publicando…" : "Publicar"}</button>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

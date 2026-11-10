@@ -107,26 +107,26 @@ export function accionesPara(texto: string, c: Comando | null, permitidos: Set<V
     const { verbo, arg } = c;
     const porSocio = socios.filter((s) => !s.dado_de_baja);
     if (verbo === "cobrar" && arg) {
-      for (const s of porSocio) salida.push({ id: `cobrar:${s.socio_id}`, verbo, tipo: "cobrar", emoji: "💵", titulo: `Cobrar a ${s.nombre}`, socioId: s.socio_id });
+      for (const s of porSocio) salida.push({ id: `cobrar:${s.socio_id}`, verbo, tipo: "cobrar", emoji: "plata", titulo: `Cobrar a ${s.nombre}`, socioId: s.socio_id });
     } else if (verbo === "ficha" && arg) {
-      for (const s of socios) salida.push({ id: `ficha:${s.socio_id}`, verbo, tipo: "ir", emoji: "📇", titulo: `Ficha de ${s.nombre}`, ruta: `/panel/socios/${s.socio_id}` });
+      for (const s of socios) salida.push({ id: `ficha:${s.socio_id}`, verbo, tipo: "ir", emoji: "", titulo: `Ficha de ${s.nombre}`, ruta: `/panel/socios/${s.socio_id}` });
     } else if (verbo === "entrada" && arg) {
-      salida.push({ id: "entrada", verbo, tipo: "entrada", emoji: "🚪", titulo: pareceDni(arg) ? `Entrada del DNI ${arg}` : `Entrada de ${arg}`, detalle: "Abre la ventana de Entrada", texto: arg });
+      salida.push({ id: "entrada", verbo, tipo: "entrada", emoji: "puerta", titulo: pareceDni(arg) ? `Entrada del DNI ${arg}` : `Entrada de ${arg}`, detalle: "Abre la ventana de Entrada", texto: arg });
     } else if (verbo === "entrada") {
-      salida.push({ id: "entrada", verbo, tipo: "entrada", emoji: "🚪", titulo: "Abrir la Entrada", detalle: "Después tipeá un DNI", texto: "" });
+      salida.push({ id: "entrada", verbo, tipo: "entrada", emoji: "puerta", titulo: "Abrir la Entrada", detalle: "Después tipeá un DNI", texto: "" });
     } else if (verbo === "vender") {
-      for (const s of porSocio) salida.push({ id: `vender:${s.socio_id}`, verbo, tipo: "ir", emoji: "🛒", titulo: `Vender a ${s.nombre}`, ruta: `/panel/vender?socio=${s.socio_id}` });
-      salida.push({ id: "vender", verbo, tipo: "ir", emoji: "🛒", titulo: "Vender", detalle: arg ? `Productos, pases y packs (${arg})` : "Productos, pases y packs", ruta: "/panel/vender" });
+      for (const s of porSocio) salida.push({ id: `vender:${s.socio_id}`, verbo, tipo: "ir", emoji: "carrito", titulo: `Vender a ${s.nombre}`, ruta: `/panel/vender?socio=${s.socio_id}` });
+      salida.push({ id: "vender", verbo, tipo: "ir", emoji: "carrito", titulo: "Vender", detalle: arg ? `Productos, pases y packs (${arg})` : "Productos, pases y packs", ruta: "/panel/vender" });
     } else if (verbo === "nuevo_socio") {
-      salida.push({ id: "nuevo_socio", verbo, tipo: "ir", emoji: "➕", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" });
+      salida.push({ id: "nuevo_socio", verbo, tipo: "ir", emoji: "mas", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" });
     } else if (verbo === "abrir_turno") {
-      salida.push({ id: "abrir_turno", verbo, tipo: "ir", emoji: "🔓", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" });
+      salida.push({ id: "abrir_turno", verbo, tipo: "ir", emoji: "candado-abierto", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" });
     } else if (verbo === "cerrar_turno") {
-      salida.push({ id: "cerrar_turno", verbo, tipo: "ir", emoji: "🔒", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" });
+      salida.push({ id: "cerrar_turno", verbo, tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" });
     } else if (verbo === "gasto") {
-      salida.push({ id: "gasto", verbo, tipo: "ir", emoji: "🧮", titulo: "Cargar un gasto", detalle: "Gastos del mes", ruta: "/panel/gastos" });
+      salida.push({ id: "gasto", verbo, tipo: "ir", emoji: "calculadora", titulo: "Cargar un gasto", detalle: "Gastos del mes", ruta: "/panel/gastos" });
     } else if (verbo === "tarea" && arg) {
-      salida.push({ id: "tarea", verbo, tipo: "tarea", emoji: "✅", titulo: `Tarea para hoy: ${arg}`, detalle: "Se anota para vos, hoy", texto: arg });
+      salida.push({ id: "tarea", verbo, tipo: "tarea", emoji: "ok", titulo: `Tarea para hoy: ${arg}`, detalle: "Se anota para vos, hoy", texto: arg });
     }
     return salida;
   }
@@ -134,9 +134,9 @@ export function accionesPara(texto: string, c: Comando | null, permitidos: Set<V
   // Sin verbo: las acciones que se llaman parecido a lo escrito ("nuev" → Nuevo socio, "abrir t" → Abrir turno).
   if (q.length >= 3) {
     const sinArg: [Verbo, Accion][] = [
-      ["nuevo_socio", { id: "nuevo_socio", verbo: "nuevo_socio", tipo: "ir", emoji: "➕", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" }],
-      ["abrir_turno", { id: "abrir_turno", verbo: "abrir_turno", tipo: "ir", emoji: "🔓", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" }],
-      ["cerrar_turno", { id: "cerrar_turno", verbo: "cerrar_turno", tipo: "ir", emoji: "🔒", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" }],
+      ["nuevo_socio", { id: "nuevo_socio", verbo: "nuevo_socio", tipo: "ir", emoji: "mas", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" }],
+      ["abrir_turno", { id: "abrir_turno", verbo: "abrir_turno", tipo: "ir", emoji: "candado-abierto", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" }],
+      ["cerrar_turno", { id: "cerrar_turno", verbo: "cerrar_turno", tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" }],
     ];
     for (const [verbo, a] of sinArg) {
       if (permitidos.has(verbo) && FRASES[verbo].some((f) => f.startsWith(q))) salida.push(a);

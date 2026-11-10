@@ -20,7 +20,7 @@ try {
   const filas = d.locator("[data-lista-retencion] > li");
   if (await filas.count()) {
     const f = filas.first();
-    chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "vencidos: cada fila con “💵 Cobrar”", "sin Cobrar");
+    chequear(await f.locator('a:has-text("Cobrar")').count() === 1, "vencidos: cada fila con “Cobrar”", "sin Cobrar");
     const wa = await f.locator('a:has-text("WhatsApp")').getAttribute("href").catch(() => null);
     chequear(!wa || /^https:\/\/wa\.me\/\d+\?text=/.test(wa), "WhatsApp con el mensaje ya escrito", String(wa));
     const vuelve = f.getByRole("button", { name: /Dice que vuelve/ });

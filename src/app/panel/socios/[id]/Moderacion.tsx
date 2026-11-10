@@ -5,9 +5,10 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { anularCortesia, darCortesia, levantarSuspension, registrarDevolucion, revisarSuspension, suspenderSocio, type CalculoDevolucion } from "../moderacion-acciones";
 import { formatearPesos, leerMonto } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 // ── VD-46J · Devolución al dar de baja ──────────────────────────────
-const MEDIOS_DEVOLUCION: [string, string][] = [["efectivo", "💵 Efectivo (sale de mi caja)"], ["transferencia", "🏦 Transferencia"], ["mercadopago", "💳 MercadoPago"], ["otro", "Otro medio"], ["ninguno", "No se devuelve"]];
+const MEDIOS_DEVOLUCION: [string, string][] = [["efectivo", "Efectivo (sale de mi caja)"], ["transferencia", "Transferencia"], ["mercadopago", "MercadoPago"], ["otro", "Otro medio"], ["ninguno", "No se devuelve"]];
 
 export function DevolucionBaja({ socioId, calculo: c, zona }: { socioId: string; calculo: CalculoDevolucion; zona: string }) {
   const [abierto, setAbierto] = useState(false);
@@ -18,14 +19,14 @@ export function DevolucionBaja({ socioId, calculo: c, zona }: { socioId: string;
   const f = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit" }).format(new Date(m));
   if (!c.hay || c.ya_registrada) return null;
   if (c.total == null) {
-    return <p className="mensaje mensaje-aviso" data-devolucion-baja>↩️ <span>Tenía períodos pagados por adelantado: la devolución la decide el dueño o el encargado.</span></p>;
+    return <p className="mensaje mensaje-aviso" data-devolucion-baja><Icono nombre="deshacer" /> <span>Tenía períodos pagados por adelantado: la devolución la decide el dueño o el encargado.</span></p>;
   }
   const montoNum = medio === "ninguno" ? 0 : leerMonto(monto);
   const valido = medio === "ninguno" || (Number.isFinite(montoNum) && montoNum > 0 && montoNum <= (c.total ?? 0));
   const guardar = async () => { const r = await registrarDevolucion(socioId, medio, montoNum, motivo); if (r.error) setError(r.error); else setAbierto(false); };
   return (
     <div className="tarjeta p-4 space-y-3" data-devolucion-baja>
-      <p className="font-semibold">↩️ Devolución por cuota adelantada: {formatearPesos(c.total)}</p>
+      <p className="font-semibold"><Icono nombre="deshacer" /> Devolución por cuota adelantada: {formatearPesos(c.total)}</p>
       <ul className="text-sm texto-suave space-y-1">
         {(c.lineas ?? []).map((l) => (
           <li key={l.cobertura_id}>{l.concepto} del {f(l.desde)} al {f(l.hasta)}: pagó {formatearPesos(l.pagado)}{l.empezado ? `, le quedaban ${l.dias_sin_usar} de ${l.dias_total} días` : " (todavía no empezó)"} → {formatearPesos(l.a_devolver)}{l.medios ? ` · pagó con ${l.medios}` : ""}</li>
@@ -46,9 +47,9 @@ export function DevolucionBaja({ socioId, calculo: c, zona }: { socioId: string;
             )}
             <label className="block"><span className="font-semibold">Motivo (queda anotado con tu nombre)</span>
               <input className="campo mt-1" value={motivo} maxLength={300} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej.: se mudó a otra ciudad" aria-label="Motivo de la devolución" /></label>
-            {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+            {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
             <div className="flex flex-wrap gap-2">
-              <BotonAccion className="boton boton-principal" disabled={!valido || motivo.trim().length < 3} onClick={guardar}>{medio === "ninguno" ? "Dejar asentado: no se devuelve" : "↩️ Registrar la devolución"}</BotonAccion>
+              <BotonAccion className="boton boton-principal" disabled={!valido || motivo.trim().length < 3} onClick={guardar}>{medio === "ninguno" ? "Dejar asentado: no se devuelve" : "Registrar la devolución"}</BotonAccion>
               <button type="button" className="boton" onClick={() => { setAbierto(false); setError(null); }}>Cancelar</button>
             </div>
           </div>
@@ -80,13 +81,13 @@ export function Cortesias({ socioId, datos: d, zona }: { socioId: string; datos:
   return (
     <div className="mt-4 space-y-3" data-cortesias={vigentes.length}>
       {d.recientes_60_dias >= d.alerta_desde && (
-        <Mensaje tipo="aviso"><p className="text-sm">🎁 Ya le dieron {d.recientes_60_dias} cortesías en los últimos 60 días: hablalo con el dueño antes de darle otra.</p></Mensaje>
+        <Mensaje tipo="aviso"><p className="text-sm"><Icono nombre="regalo" /> Ya le dieron {d.recientes_60_dias} cortesías en los últimos 60 días: hablalo con el dueño antes de darle otra.</p></Mensaje>
       )}
       {!abierto ? (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {d.puede_dar
-            ? <button type="button" className="boton boton-chico texto-suave" data-cortesia-abrir onClick={() => setAbierto(true)}>🎁 Dar una cortesía</button>
-            : <span className="texto-tenue text-sm" data-cortesia-sin-cupo>🎁 {!d.tiene_membresia ? "Sin membresía: no se le puede dar una cortesía." : d.tope_dias === 0 ? "Tu rol no da cortesías." : "Ya usaste los días de cortesía de este mes."}</span>}
+            ? <button type="button" className="boton boton-chico texto-suave" data-cortesia-abrir onClick={() => setAbierto(true)}><Icono nombre="regalo" /> Dar una cortesía</button>
+            : <span className="texto-tenue text-sm" data-cortesia-sin-cupo><Icono nombre="regalo" /> {!d.tiene_membresia ? "Sin membresía: no se le puede dar una cortesía." : d.tope_dias === 0 ? "Tu rol no da cortesías." : "Ya usaste los días de cortesía de este mes."}</span>}
           {d.tope_mes != null && d.puede_dar && <span className="texto-tenue text-sm">Este mes diste {d.usados_mes} de {d.tope_mes} días</span>}
         </div>
       ) : (
@@ -104,9 +105,9 @@ export function Cortesias({ socioId, datos: d, zona }: { socioId: string; datos:
             </select></label>
           <label className="block"><span className="font-semibold">Nota (opcional)</span>
             <input className="campo mt-1" value={nota} maxLength={200} onChange={(e) => setNota(e.target.value)} /></label>
-          {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+          {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
           <div className="flex flex-wrap gap-2">
-            <BotonAccion className="boton boton-principal" disabled={!motivo} onClick={() => correr(() => darCortesia(socioId, dias, motivo, nota))}>🎁 Dar la cortesía</BotonAccion>
+            <BotonAccion className="boton boton-principal" disabled={!motivo} onClick={() => correr(() => darCortesia(socioId, dias, motivo, nota))}><Icono nombre="regalo" /> Dar la cortesía</BotonAccion>
             <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
           </div>
         </div>
@@ -115,11 +116,11 @@ export function Cortesias({ socioId, datos: d, zona }: { socioId: string; datos:
         <ul className="space-y-1 text-sm">
           {d.cortesias.map((c) => (
             <li key={c.id} className={c.anulada ? "texto-tenue line-through" : "texto-suave"} data-cortesia={c.anulada ? "anulada" : "vigente"}>
-              🎁 {c.dias} {c.dias === 1 ? "día" : "días"} del {f(c.desde)} al {f(c.hasta)} · {c.motivo}{c.por ? ` · ${c.por}` : ""}{c.anulada ? ` · anulada: ${c.anulada_motivo ?? ""}` : ""}
+              <Icono nombre="regalo" /> {c.dias} {c.dias === 1 ? "día" : "días"} del {f(c.desde)} al {f(c.hasta)} · {c.motivo}{c.por ? ` · ${c.por}` : ""}{c.anulada ? ` · anulada: ${c.anulada_motivo ?? ""}` : ""}
               {!c.anulada && d.puede_anular && (anulando === c.id ? (
                 <span className="block mt-1 space-y-2 no-underline" data-anular-cortesia>
                   <input className="campo" placeholder="¿Por qué se anula?" value={porque} onChange={(e) => setPorque(e.target.value)} maxLength={300} aria-label="Motivo de la anulación" />
-                  {error && <span role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</span>}
+                  {error && <span role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</span>}
                   <span className="flex gap-2">
                     <BotonAccion className="boton boton-chico" disabled={porque.trim().length < 3} onClick={() => correr(() => anularCortesia(socioId, c.id, porque))}>Anular</BotonAccion>
                     <button type="button" className="boton boton-chico" onClick={cerrar}>Cancelar</button>
@@ -159,9 +160,9 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
     return (
       <div className="mt-4 space-y-3" data-suspension={v.tipo}>
         <Mensaje tipo="error">
-          <p><strong>🚫 {nombre}</strong> desde el {fecha(v.desde, zona)}{v.por ? ` · lo cargó ${v.por}` : ""}{v.hasta ? ` · hasta el ${fecha(v.hasta, zona)}` : ""}</p>
+          <p><strong><Icono nombre="prohibido" /> {nombre}</strong> desde el {fecha(v.desde, zona)}{v.por ? ` · lo cargó ${v.por}` : ""}{v.hasta ? ` · hasta el ${fecha(v.hasta, zona)}` : ""}</p>
           <p className="break-words">{v.motivo}</p>
-          {v.revisar_en && <p className={`text-sm ${v.revision_vencida ? "font-semibold" : "texto-suave"}`}>{v.revision_vencida ? "⏰ Toca revisarla" : "Se revisa"} el {fecha(v.revisar_en, zona)}</p>}
+          {v.revisar_en && <p className={`text-sm ${v.revision_vencida ? "font-semibold" : "texto-suave"}`}>{v.revision_vencida ? "Toca revisarla" : "Se revisa"} el {fecha(v.revisar_en, zona)}</p>}
           <p className="texto-suave text-sm">No entra por la puerta, ni con QR, ni como invitado.</p>
         </Mensaje>
         {d.puede_levantar ? (
@@ -169,9 +170,9 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
             <div className="tarjeta p-4 space-y-3" data-levantar>
               <label className="block"><span className="font-semibold">¿Por qué se levanta?</span>
                 <input className="campo mt-1" value={motivo} onChange={(e) => setMotivo(e.target.value)} maxLength={300} placeholder="Ej.: pidió disculpas y se habló" /></label>
-              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
               <div className="flex flex-wrap gap-2">
-                <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={() => correr(() => levantarSuspension(socioId, v.id, motivo))}>✅ Levantar</BotonAccion>
+                <BotonAccion className="boton boton-principal" disabled={motivo.trim().length < 3} onClick={() => correr(() => levantarSuspension(socioId, v.id, motivo))}><Icono nombre="ok" /> Levantar</BotonAccion>
                 <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
               </div>
             </div>
@@ -179,7 +180,7 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
             <div className="tarjeta p-4 space-y-3" data-revisar>
               <label className="block"><span className="font-semibold">La revisé y sigue: próxima revisión</span>
                 <input type="date" className="campo mt-1" value={revisar} min={sumar(hoy, 1)} onChange={(e) => setRevisar(e.target.value)} /></label>
-              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+              {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
               <div className="flex flex-wrap gap-2">
                 <BotonAccion className="boton boton-principal" onClick={() => correr(() => revisarSuspension(socioId, v.id, revisar))}>Guardar fecha</BotonAccion>
                 <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
@@ -187,8 +188,8 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <button type="button" className="boton boton-principal" data-levantar-abrir onClick={() => setAbierto("levantar")}>✅ Levantar {v.tipo === "expulsion" ? "la expulsión" : "la suspensión"}</button>
-              <button type="button" className="boton" onClick={() => setAbierto("revisar")}>📅 La revisé, sigue</button>
+              <button type="button" className="boton boton-principal" data-levantar-abrir onClick={() => setAbierto("levantar")}><Icono nombre="ok" /> Levantar {v.tipo === "expulsion" ? "la expulsión" : "la suspensión"}</button>
+              <button type="button" className="boton" onClick={() => setAbierto("revisar")}><Icono nombre="calendario" /> La revisé, sigue</button>
             </div>
           )
         ) : <p className="texto-suave text-sm">La levanta el dueño o el encargado.</p>}
@@ -200,7 +201,7 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
   if (abierto !== "suspender") {
     return (
       <p className="mt-4">
-        <button type="button" className="boton boton-chico texto-suave" data-suspender-abrir onClick={() => setAbierto("suspender")}>🚫 Suspender</button>
+        <button type="button" className="boton boton-chico texto-suave" data-suspender-abrir onClick={() => setAbierto("suspender")}><Icono nombre="prohibido" /> Suspender</button>
         {d.historial.length > 0 && <span className="texto-tenue text-sm ml-3">Tuvo {d.historial.length} {d.historial.length === 1 ? "suspensión anterior" : "suspensiones anteriores"}</span>}
       </p>
     );
@@ -222,10 +223,10 @@ export function Suspension({ socioId, datos: d, zona, hoy }: { socioId: string; 
       )}
       <label className="block"><span className="font-semibold">Cuándo se revisa</span>
         <input type="date" className="campo mt-1" value={revisar} min={sumar(hoy, 1)} onChange={(e) => setRevisar(e.target.value)} /></label>
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex flex-wrap gap-2">
         <BotonAccion className="boton boton-peligro" disabled={motivo.trim().length < 3} onClick={() => correr(() => suspenderSocio(socioId, motivo, tipo, hasta, revisar))}>
-          🚫 {tipo === "expulsion" ? "Expulsar" : "Suspender"}
+          <Icono nombre="prohibido" /> {tipo === "expulsion" ? "Expulsar" : "Suspender"}
         </BotonAccion>
         <button type="button" className="boton" onClick={cerrar}>Cancelar</button>
       </div>

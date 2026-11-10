@@ -5,6 +5,7 @@ import { marcarAlertasVistas } from "@/app/panel/seguridad-acciones";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { nombreDispositivo } from "@/lib/cuenta/dispositivo";
+import { Icono } from "@/components/ui/Icono";
 
 export type AlertaSeguridad = {
   id: string; tipo: "dispositivo_nuevo" | "baja_equipo"; quien: string | null; creado_en: string; vista: boolean;
@@ -22,11 +23,11 @@ export function AlertasSeguridad({ alertas, zona }: { alertas: AlertaSeguridad[]
   if (sinVer.length === 0) return null;
   return (
     <section aria-labelledby="alertas-seguridad" className="tarjeta p-5 sm:p-6 space-y-3" data-alertas-seguridad={sinVer.length}>
-      <h2 id="alertas-seguridad" className="titulo text-2xl">🔔 Seguridad del equipo</h2>
+      <h2 id="alertas-seguridad" className="titulo text-2xl"><Icono nombre="campana" /> Seguridad del equipo</h2>
       <ul className="space-y-2">
         {sinVer.map((a) => (
           <li key={a.id} data-alerta={a.tipo} className="flex items-start gap-3">
-            <span aria-hidden className="text-xl">{a.tipo === "baja_equipo" ? "🚫" : "📱"}</span>
+            <span aria-hidden className="text-xl">{a.tipo === "baja_equipo" ? "" : ""}</span>
             <span className="min-w-0 flex-1">
               <span className="block font-semibold">
                 {a.tipo === "baja_equipo"

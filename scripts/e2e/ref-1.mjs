@@ -43,7 +43,7 @@ try {
   await d.goto(`${G}/panel/prospectos`);
   const fila = d.locator("li", { hasText: AMIGO }).first();
   await fila.waitFor({ timeout: 60000 });
-  chequear(/Recomendado por/.test(await fila.innerText()), "la dueña lo ve en Prospectos: “🤝 Recomendado por …”", await fila.innerText());
+  chequear(/Recomendado por/.test(await fila.innerText()), "la dueña lo ve en Prospectos: “Recomendado por …”", await fila.innerText());
   for (const p of [s, a, d]) if (p.errores.length) falla(p.errores.join(" | "));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

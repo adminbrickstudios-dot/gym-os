@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { confirmarInvitado, registrarInvitado, type Invitado } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function Invitados({ sedeId, inicial, zona }: { sedeId: string; inicial: Invitado[]; zona: string }) {
   const [lista, setLista] = useState(inicial);
@@ -22,8 +23,8 @@ export function Invitados({ sedeId, inicial, zona }: { sedeId: string; inicial: 
   return (
     <section aria-labelledby="invitados" className="mt-8" data-invitados={lista.length}>
       <div className="flex items-center justify-between gap-3 mb-2">
-        <h2 id="invitados" className="titulo text-2xl">👥 Invitados</h2>
-        {!abierto && <button type="button" className="boton" onClick={() => { setAbierto(true); setError(null); }}>➕ Invitado</button>}
+        <h2 id="invitados" className="titulo text-2xl"><Icono nombre="usuarios" /> Invitados</h2>
+        {!abierto && <button type="button" className="boton" onClick={() => { setAbierto(true); setError(null); }}><Icono nombre="mas" /> Invitado</button>}
       </div>
       {abierto && (
         <form className="tarjeta p-4 space-y-3 mb-3" data-form-invitado onSubmit={(e) => { e.preventDefault(); if (!anfitrion) { setError("Elegí al socio que lo invita."); return; }
@@ -45,7 +46,7 @@ export function Invitados({ sedeId, inicial, zona }: { sedeId: string; inicial: 
           </div>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mb-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mb-3"><Icono nombre="alerta" /> {error}</p>}
       {lista.length === 0 ? <p className="texto-tenue">Ningún invitado hoy.</p> : (
         <ul className="space-y-1">
           {lista.map((i) => (
@@ -55,7 +56,7 @@ export function Invitados({ sedeId, inicial, zona }: { sedeId: string; inicial: 
                 <span className="block text-sm texto-tenue truncate">DNI {i.dni} · invita {i.socio}{i.desde_la_app && !i.entro_en ? " · avisó por la app" : ""}</span></span>
               {!i.entro_en && <button type="button" className="boton" disabled={ocupado} onClick={() => empezar(async () => {
                 const r = await confirmarInvitado(i.id, sedeId); if (r.error) setError(r.error); else { setError(null); setLista(r.invitados!); }
-              })}>✅ Entró</button>}
+              })}><Icono nombre="ok" /> Entró</button>}
             </li>
           ))}
         </ul>

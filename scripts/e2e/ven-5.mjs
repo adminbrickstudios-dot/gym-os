@@ -42,8 +42,8 @@ try {
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("A cuenta")').click();
   await d.locator("[data-fiado]").waitFor();
-  chequear(/hasta \$30\.000 más/.test(await d.locator("[data-fiado]").innerText()), "Vender: “📒 A cuenta”, se le puede fiar hasta $30.000", await d.locator("[data-fiado]").innerText());
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  chequear(/hasta \$30\.000 más/.test(await d.locator("[data-fiado]").innerText()), "Vender: “A cuenta”, se le puede fiar hasta $30.000", await d.locator("[data-fiado]").innerText());
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok("cuota cobrada a cuenta");
 
@@ -56,7 +56,7 @@ try {
   await d.goto(`${G}/panel/vender?socio=${id}`);
   await d.locator("main button", { hasText: "Pagar lo que debe" }).click();
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   await d.locator('[data-veredicto="verde"]').waitFor({ timeout: 30000 });

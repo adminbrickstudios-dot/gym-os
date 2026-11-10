@@ -7,6 +7,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { fechaCorta } from "@/lib/formato";
 import { CAMPOS, adivinarColumnas, armarFilas, celda, leerCsv, type Campo } from "@/lib/importar";
 import { deshacer, importar, revisar } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Importacion = { id: string; archivo: string | null; filas: number; importados: number; creado_en: string; deshecha_en: string | null; puede_deshacer: boolean };
 type Revision = { validas: number; filas: { fila: number; errores: string[]; datos: Record<string, string | null> }[] };
@@ -67,11 +68,11 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
         <p className="titulo text-2xl">1. Tu archivo</p>
         <p className="texto-suave">Excel (.xlsx) o CSV, con los títulos en la primera fila. Sirve el que exportás de otro sistema o una planilla tuya.</p>
         <label className="boton boton-principal cursor-pointer w-fit">
-          📄 Elegir archivo
+          <Icono nombre="documento" /> Elegir archivo
           <input type="file" accept=".xlsx,.csv,.txt" className="sr-only" aria-label="Elegir archivo"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void leer(f); e.target.value = ""; }} />
         </label>
-        {archivo && <p className="texto-suave" data-archivo>📄 {archivo} · {datos.length} filas</p>}
+        {archivo && <p className="texto-suave" data-archivo><Icono nombre="documento" /> {archivo} · {datos.length} filas</p>}
       </section>
 
       {titulos.length > 0 && (
@@ -88,7 +89,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
               </label>
             ))}
           </div>
-          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={hacerRevision}>{ocupado && !revision ? "Revisando…" : "🔎 Revisar"}</button>
+          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={hacerRevision}>{ocupado && !revision ? "Revisando…" : "Revisar"}</button>
         </section>
       )}
 
@@ -108,14 +109,14 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
           )}
           <p className="text-sm texto-tenue">“Vence el” se carga como lo que ya pagó: entra hasta ese día. Los que no tienen fecha quedan con el plan y sin pagar.</p>
           <button type="button" className="boton boton-principal" disabled={ocupado || revision.validas === 0} onClick={hacerImportacion}>
-            {ocupado ? "Importando…" : `📥 Importar ${revision.validas} socios`}
+            {ocupado ? "Importando…" : `Importar ${revision.validas} socios`}
           </button>
         </section>
       )}
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {resultado && (
-        <Mensaje tipo="exito" accion={<Link href="/panel/socios" className="boton">👥 Ver socios</Link>}>
+        <Mensaje tipo="exito" accion={<Link href="/panel/socios" className="boton"><Icono nombre="usuarios" /> Ver socios</Link>}>
           <span data-importados={resultado.importados}>Entraron {resultado.importados} socios{resultado.salteados ? ` (${resultado.salteados} con errores quedaron afuera)` : ""}. Si algo salió mal, deshacelo abajo durante 24 horas.</span>
         </Mensaje>
       )}
@@ -127,8 +128,8 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
             {lista.map((x) => (
               <li key={x.id} className="tarjeta p-4 flex flex-wrap items-center justify-between gap-3" data-importacion={x.deshecha_en ? "deshecha" : "activa"}>
                 <span><strong>{x.archivo ?? "Archivo"}</strong> <span className="texto-suave">· {x.importados} socios · {fechaCorta(x.creado_en, zona)}</span>
-                  {x.deshecha_en && <span className="pildora ml-2">↩️ Deshecha</span>}</span>
-                {x.puede_deshacer && <button type="button" className="boton" disabled={ocupado} onClick={() => hacerDeshacer(x.id)}>↩️ Deshacer</button>}
+                  {x.deshecha_en && <span className="pildora ml-2"><Icono nombre="deshacer" /> Deshecha</span>}</span>
+                {x.puede_deshacer && <button type="button" className="boton" disabled={ocupado} onClick={() => hacerDeshacer(x.id)}><Icono nombre="deshacer" /> Deshacer</button>}
               </li>
             ))}
           </ul>

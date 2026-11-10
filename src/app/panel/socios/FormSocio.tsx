@@ -12,6 +12,7 @@ import { TarjetasPlan, PrimerPago } from "@/components/panel/TarjetasPlan";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export type PlanAlta = PlanParaAlta;
 
@@ -134,10 +135,10 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
         <Pasos actual={paso} />
         {paso === 3 ? (
           <div className="tarjeta p-6 space-y-4" data-alta-paso="cobro">
-            <p className="titulo text-2xl">💵 Cobrá el primer pago</p>
+            <p className="titulo text-2xl"><Icono nombre="plata" /> Cobrá el primer pago</p>
             <p className="texto-suave">{nombreSocio} ya está dado de alta. Falta cobrar su primera cuota para que pueda entrar.</p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" className="boton boton-principal text-lg px-8" data-alta-cobrar onClick={() => abrirCobrar({ socioId: creado.socioId, origen: "otro" })}>💵 Cobrar</button>
+              <button type="button" className="boton boton-principal text-lg px-8" data-alta-cobrar onClick={() => abrirCobrar({ socioId: creado.socioId, origen: "otro" })}><Icono nombre="plata" /> Cobrar</button>
               <button type="button" className="boton" data-alta-despues onClick={() => setDespues(true)}>Cobrar después</button>
             </div>
           </div>
@@ -162,8 +163,8 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
               </div>
             )}
             <div className="flex flex-wrap gap-2">
-              <Link href={`/panel/socios/${creado.socioId}`} className="boton boton-principal" data-alta-ficha>👤 Ver su ficha</Link>
-              <button type="button" className="boton" data-alta-otro onClick={otro}>➕ Dar de alta a otro</button>
+              <Link href={`/panel/socios/${creado.socioId}`} className="boton boton-principal" data-alta-ficha><Icono nombre="persona" /> Ver su ficha</Link>
+              <button type="button" className="boton" data-alta-otro onClick={otro}><Icono nombre="mas" /> Dar de alta a otro</button>
               <Link href="/panel/socios" className="boton">Socios</Link>
             </div>
           </div>
@@ -179,7 +180,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
       {(prospectoId || vinculado) && <input type="hidden" name="prospecto" value={prospectoId ?? vinculado ?? ""} />}
       {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
       <fieldset className="grid sm:grid-cols-2 gap-4">
-        <legend className="titulo text-2xl mb-4">👤 Datos</legend>
+        <legend className="titulo text-2xl mb-4"><Icono nombre="persona" /> Datos</legend>
         <Campo nombre="nombre" etiqueta="Nombre" valor={v.nombre} required autoFocus autoComplete="off" />
         <Campo nombre="apellido" etiqueta="Apellido" valor={v.apellido} autoComplete="off" />
         <Campo nombre="dni" etiqueta="DNI" valor={v.dni} inputMode="numeric" ayuda="Solo números, sin puntos" onBlur={(e) => void buscarInteresadoDni(e.target.value)} />
@@ -187,14 +188,14 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
       </fieldset>
       {(menor || socio?.responsable_nombre) && (
         <fieldset className="grid sm:grid-cols-2 gap-4" data-responsable>
-          <legend className="titulo text-2xl mb-1">👨‍👧 Adulto responsable</legend>
+          <legend className="titulo text-2xl mb-1"><Icono nombre="usuarios" /> Adulto responsable</legend>
           <p className="sm:col-span-2 texto-suave -mt-1 mb-2">{menor ? "Es menor de 18: se carga con un adulto responsable. Es quien entra a la app y a quien se le avisa." : "Ya es mayor de edad: podés dejarlo o borrarlo."}</p>
           <Campo nombre="responsable_nombre" etiqueta="Nombre del responsable" valor={v.responsable_nombre} required={menor} autoComplete="off" />
           <Campo nombre="responsable_telefono" etiqueta="Celular del responsable" valor={v.responsable_telefono} tipo="tel" required={menor} placeholder="387 555-1234" />
         </fieldset>
       )}
       <fieldset className="grid sm:grid-cols-2 gap-4">
-        <legend className="titulo text-2xl mb-4">📱 Contacto</legend>
+        <legend className="titulo text-2xl mb-4"><Icono nombre="celular" /> Contacto</legend>
         <Campo nombre="telefono" etiqueta="WhatsApp" valor={v.telefono} tipo="tel" placeholder="387 555-1234" ayuda="Para avisarle cuándo vence" onBlur={(e) => void buscarInteresado(e.target.value)} />
         {ofrecido && !vinculado && (
           <div className="sm:col-span-2" data-interesado-ofrecido={ofrecido.id}>
@@ -215,11 +216,11 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
         <span className="etiqueta">Notas</span>
         <textarea name="notas" defaultValue={v.notas ?? ""} onChange={(e) => setTextoNotas(e.target.value)} className="campo" placeholder="Horario que prefiere, objetivo…" />
         <AvisoSalud texto={textoNotas} />
-        <span className="block text-sm texto-tenue">🩺 No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</span>
+        <span className="block text-sm texto-tenue"><Icono nombre="corazon" /> No anotes datos de salud (lesiones, enfermedades): el sistema no los guarda.</span>
       </label>
       {!socioId && planes.length > 0 && (
         <fieldset className="space-y-2" data-plan-alta>
-          <legend className="titulo text-2xl mb-2">🏷️ Plan</legend>
+          <legend className="titulo text-2xl mb-2"><Icono nombre="etiqueta" /> Plan</legend>
           <input type="hidden" name="plan_id" value={plan} />
           <TarjetasPlan planes={planes} valor={plan} alElegir={setPlan} />
           {planElegido ? <PrimerPago plan={planElegido} /> : <p className="texto-tenue text-sm">Sin plan por ahora (viene con pase o pack). Tocá un plan para elegirlo; tocalo de nuevo para sacarlo.</p>}
@@ -229,10 +230,10 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
       <div className="flex flex-wrap gap-2">
         {!socioId && plan && puedeCobrar
           ? <>
-              <BotonAccion name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "✅ Dar de alta y cobrar"}</BotonAccion>
+              <BotonAccion name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "Dar de alta y cobrar"}</BotonAccion>
               <BotonAccion disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</BotonAccion>
             </>
-          : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "✅ Guardar cambios" : "✅ Dar de alta"}</BotonAccion>}
+          : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "Guardar cambios" : "Dar de alta"}</BotonAccion>}
         <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
       </div>
     </form>

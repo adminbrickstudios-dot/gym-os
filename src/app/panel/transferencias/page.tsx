@@ -21,9 +21,9 @@ export default async function Transferencias() {
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="🧾" titulo="Transferencias" bajada="Socios que pagaron por transferencia y subieron el comprobante. Mirá que haya llegado y aprobala." />
+        <Encabezado icono="recibo" titulo="Transferencias" bajada="Socios que pagaron por transferencia y subieron el comprobante. Mirá que haya llegado y aprobala." />
         {mp?.conectado && <div className="mb-4"><RevisarMP /></div>}
-        {filas.length === 0 ? <Vacio emoji="✨" titulo="Nada para revisar">Cuando un socio pague por transferencia desde su app y suba el comprobante, aparece acá para que lo apruebes.</Vacio> : (
+        {filas.length === 0 ? <Vacio icono="estrella" titulo="Nada para revisar">Cuando un socio pague por transferencia desde su app y suba el comprobante, aparece acá para que lo apruebes.</Vacio> : (
           <ul className="space-y-2">{filas.map((p) => <Pendiente key={p.pago_id} p={p} cuando={cuando(p.informado_en)} />)}</ul>
         )}
       </>

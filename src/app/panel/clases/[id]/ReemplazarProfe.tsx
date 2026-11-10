@@ -6,6 +6,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { detectarSalud } from "@/lib/salud";
 import { reemplazarProfe } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Reemplazo = { id: string; creado_en: string; motivo: string; anterior: string | null; nuevo: string; por: string };
 
@@ -28,7 +29,7 @@ export function ReemplazarProfe({ claseId, profeActual, profes, historial, zona,
   };
   return (
     <section className="tarjeta p-5 mb-6 space-y-3" data-reemplazar-profe>
-      <p className="titulo text-xl">🔁 Profe de esta clase</p>
+      <p className="titulo text-xl"><Icono nombre="repetir" /> Profe de esta clase</p>
       {historial.length > 0 && (
         <ul className="space-y-1 text-sm texto-suave" data-reemplazos={historial.length}>
           {historial.map((h) => <li key={h.id}>{cuando(h.creado_en)} · {h.anterior ?? "Sin profe"} → <strong>{h.nuevo}</strong> · {h.motivo} ({h.por})</li>)}

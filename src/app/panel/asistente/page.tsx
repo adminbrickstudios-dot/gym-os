@@ -4,6 +4,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { urlMarca } from "@/lib/url-marca";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Asistente de configuración" };
 
@@ -47,7 +48,7 @@ export default async function Asistente() {
     const terminado = !proximo;
     return (
       <>
-        <Encabezado emoji="🚀" titulo="Asistente de configuración" bajada="Nueve pasos cortos para dejar tu gimnasio listo. Podés salir y volver: sigue donde quedaste." />
+        <Encabezado icono="estrella" titulo="Asistente de configuración" bajada="Nueve pasos cortos para dejar tu gimnasio listo. Podés salir y volver: sigue donde quedaste." />
         <div className="space-y-6" data-asistente data-asistente-listos={listos}>
           <div className="space-y-2">
             <p className="texto-suave"><span className="numero text-xl">{listos}</span> de {medibles.length} pasos medidos listos</p>
@@ -88,7 +89,7 @@ export default async function Asistente() {
           </ol>
           {terminado && (
             <section className="tarjeta p-6 space-y-3" data-asistente-listo aria-label="Tu gimnasio está listo">
-              <h2 className="titulo text-3xl">🎉 Tu gimnasio está listo</h2>
+              <h2 className="titulo text-3xl"><Icono nombre="estrella" /> Tu gimnasio está listo</h2>
               <p className="texto-suave">Estos son los links de cada persona. Cada uno entra con su mail y su contraseña, y cae en su panel:</p>
               <ul className="space-y-1">
                 {[["Dueño", "/dueno"], ["Recepción", "/recepcion"], ["Profes", "/profe"], ["Socios", "/socio"]].map(([q, r]) => (

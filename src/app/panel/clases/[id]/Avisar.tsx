@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { avisarClase, type MensajeClase } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Previo = { texto: string; por: string; creado_en: string; personas: number };
 
@@ -20,7 +21,7 @@ export function Avisar({ claseId, anotados, previos, zona }: { claseId: string; 
   if (anotados === 0 && previos.length === 0) return null;
   return (
     <section className="tarjeta p-5 mt-8 space-y-3" data-avisar-clase>
-      <p className="titulo text-xl">📣 Avisar a los anotados</p>
+      <p className="titulo text-xl"><Icono nombre="campana" /> Avisar a los anotados</p>
       {previos.length > 0 && (
         <ul className="space-y-1 text-sm texto-suave" data-avisos-previos={previos.length}>
           {previos.map((p) => <li key={p.creado_en}>{hora(p.creado_en)} · {p.por} ({p.personas} {p.personas === 1 ? "persona" : "personas"}): “{p.texto}”</li>)}
@@ -33,7 +34,7 @@ export function Avisar({ claseId, anotados, previos, zona }: { claseId: string; 
             {mensajes.map((m) => {
               const wa = linkWhatsappSocio(m.telefono, m.mensaje);
               return <li key={m.socio_id}>{wa
-                ? <a className="boton boton-chico" href={wa} target="_blank" rel="noopener noreferrer">💬 {m.nombre}</a>
+                ? <a className="boton boton-chico" href={wa} target="_blank" rel="noopener noreferrer"><Icono nombre="mensaje" /> {m.nombre}</a>
                 : <span className="pildora" title="Sin celular cargado o sin permiso para verlo">{m.nombre} · sin celular</span>}</li>;
             })}
           </ul>
@@ -50,7 +51,7 @@ export function Avisar({ claseId, anotados, previos, zona }: { claseId: string; 
           </div>
         </form>
       ) : (
-        anotados > 0 && <button type="button" className="boton" onClick={() => setAbierto(true)}>📣 Avisar a todos ({anotados})</button>
+        anotados > 0 && <button type="button" className="boton" onClick={() => setAbierto(true)}><Icono nombre="campana" /> Avisar a todos ({anotados})</button>
       )}
     </section>
   );
