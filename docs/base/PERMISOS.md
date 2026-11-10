@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 316 funciones piden un rol del equipo con `privado.exigir_equipo`; 370 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 316 funciones piden un rol del equipo con `privado.exigir_equipo`; 376 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -342,9 +342,11 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_borrar_socio`
 - `admin_buscar_persona`
 - `admin_cambiar_dueno`
+- `admin_cambiar_rol_persona`
 - `admin_cambiar_slug`
 - `admin_cancelar_mantenimiento`
 - `admin_clonar_configuracion`
+- `admin_confirmar_cuenta`
 - `admin_crear_demo`
 - `admin_crear_gimnasio`
 - `admin_dar_de_baja`
@@ -352,6 +354,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_demos_vencidas`
 - `admin_entrar_gimnasio`
 - `admin_errores`
+- `admin_estado_persona`
 - `admin_estado_seguridad`
 - `admin_evento_webhook`
 - `admin_exigir_2fa`
@@ -375,6 +378,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_mantenimientos`
 - `admin_marcar_favorito`
 - `admin_metricas`
+- `admin_mover_persona`
 - `admin_notas`
 - `admin_novedades`
 - `admin_papelera`
@@ -383,6 +387,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_planes_brik`
 - `admin_plataforma_estado`
 - `admin_prender_funcion`
+- `admin_probar_acceso`
+- `admin_probar_acceso_gimnasio`
 - `admin_programar_mantenimiento`
 - `admin_publicar_novedad`
 - `admin_quitar_descuento`

@@ -130,6 +130,27 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+#### Fase P (P4 a P7) y la contraseña que no se aplicaba
+
+- **Causa probable del login roto de Mateo (hallazgo del coordinador): si el mail ya tenía cuenta, la contraseña escrita se ignoraba
+  en silencio.** Corregido: `darAcceso` devuelve `yaExistia` y `contrasenaNoAplicada`; el alta, "Dar acceso" y "Sumar a alguien"
+  dicen "Ese mail ya tenía cuenta: la contraseña que escribiste NO se aplicó…" y dejan a la vista el botón "Nueva contraseña"; la tarjeta
+  Accesos y el WhatsApp no llevan una contraseña que no se aplicó. e2e en `fase-u1-u2.mjs` (cuenta existente + contraseña elegida: avisa y
+  la nueva no entra). Pregunta abierta: ¿un mail existente debería poder "tomar" la contraseña nueva? No lo hago (cambiaría la clave de
+  una persona que quizá ya la usa en otro gimnasio); se ofrece "Nueva contraseña" a propósito.
+- **Mover de gimnasio (P7):** no se cambia el `gimnasio_id` de la fila (los hechos del historial la referencian con FK compuesta): se
+  desactiva la fila en el origen y se suma (o reactiva) otra en el destino con la misma cuenta. Solo el principal. Nunca deja un gimnasio
+  sin dueño (tampoco al desactivar ni al cambiar de rol).
+- **Probar acceso:** rojo = no puede entrar (sin cuenta, sin confirmar, desactivada, gimnasio dado de baja, sin dueño); amarillo = no lo
+  impide (todavía no entró, gimnasio pausado, sin planes). "Arreglar" confirma la cuenta (`admin_confirmar_cuenta`: toca `auth.users`),
+  activa a la persona o reanuda el gimnasio.
+- **Dirección reservada (P4):** `admin`, `www`, `app`, `api`, `g`, `ingresar`, `dueno`, `recepcion`, `profe`, `socio`… (lista en
+  `src/lib/admin/slug.ts`) no se pueden usar como dirección de un gimnasio. Falta el chequeo contra subdominios ya usados en Vercel
+  (depende del dominio, P1).
+- **Plan de Base en el alta (P4):** opcional; si falla, el gimnasio queda creado y se avisa.
+- **Barra "Estás viendo como…" (P7):** ya existía el marco y la barra (VD-40); ahora dice el rol y el gimnasio (`estado_soporte` devuelve
+  `rol`; tocó `BannerSoporte` y `panel/layout.tsx` de otros carriles, una línea cada uno).
+
 #### Fase U (U1 y U2) · altas sin mails y errores de la clave de servicio
 
 - **U1 hecho (código), falta que Mateo cargue la clave en Vercel.** `traducirErrorSupabase` (`src/lib/admin/errores-supabase.ts`)

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRef, useState, useActionState } from "react";
 import { crearGimnasio, type EstadoAlta } from "./acciones";
 import { BotonEntrar } from "./BotonEntrar";
+import { ListaPrueba } from "./ListaPrueba";
+import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 
 // ADM-1: el tipo de gimnasio prende lo que corresponde y crea planes de ejemplo (sin precio).
 const TIPOS: [string, string][] = [
@@ -15,7 +17,7 @@ const aSlug = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").t
 const PASOS = ["Tipo", "Datos y marca", "Dueño"];
 
 /** VD-40: el alta en 3 pasos (tipo → datos y marca con vista previa → dueño). Todos los campos viven en un solo formulario. */
-export function AltaGimnasio({ dominio }: { dominio: string }) {
+export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes?: { id: string; nombre: string }[] }) {
   const [estado, accion, creando] = useActionState<EstadoAlta, FormData>(crearGimnasio, {});
   const [paso, setPaso] = useState(1);
   const [tipo, setTipo] = useState("musculacion");
@@ -25,6 +27,7 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
   const [acento, setAcento] = useState("#16a34a");
   const [fondo, setFondo] = useState("#F4F5F6");
   const [falta, setFalta] = useState("");
+  const [copiado, setCopiado] = useState(false);
   const formulario = useRef<HTMLFormElement>(null);
   const ok = estado.ok;
 
@@ -49,14 +52,35 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
           ) : (
             <p className="text-lg">✅ <strong>{ok.nombre}</strong> está creado. {ok.aviso}</p>
           )}
-          {ok.contrasena && (
-            <div className="tarjeta !bg-[var(--tarjeta-alta)] p-4 space-y-1">
-              <p className="texto-suave text-sm">Acceso del dueño (se muestra una sola vez)</p>
-              <p className="flex flex-wrap gap-x-4 gap-y-1">
-                <span>📧 <strong className="break-all">{ok.email}</strong></span>
-                <span>🔑 <strong className="numero text-2xl select-all">{ok.contrasena}</strong></span>
-              </p>
-              <p className="texto-tenue text-sm">Entra en la misma dirección que vos, con “Entrá a tu gimnasio”.</p>
+          {ok.contrasenaNoAplicada && ok.equipoId && (
+            <div className="tarjeta p-4 space-y-2" role="alert" data-contrasena-no-aplicada>
+              <p className="font-semibold">La contraseña que escribiste no se aplicó</p>
+              <p className="texto-suave text-sm">{ok.email} ya tenía cuenta: sigue entrando con la contraseña de siempre. Si querés ponerle una nueva, usá este botón.</p>
+              <div className="flex flex-wrap gap-2 items-center"><AccesoPersona equipoId={ok.equipoId} nombre="el dueño" tieneCuenta /></div>
+            </div>
+          )}
+          {ok.accesos && (ok.contrasena || ok.yaExistia) && (
+            <div className="tarjeta !bg-[var(--tarjeta-alta)] p-4 space-y-3" data-accesos>
+              <p className="font-semibold">Accesos del dueño <span className="texto-suave text-sm font-normal">{ok.contrasena ? "(la contraseña se muestra una sola vez)" : "(ya tenía cuenta: no hay contraseña nueva)"}</span></p>
+              <dl className="grid gap-1">
+                {ok.accesos && <div className="flex flex-wrap gap-x-2"><dt className="texto-suave">Su panel</dt><dd><a href={ok.accesos.panel} target="_blank" rel="noopener noreferrer" className="underline break-all" data-acceso-panel>{ok.accesos.panel}</a></dd></div>}
+                <div className="flex flex-wrap gap-x-2"><dt className="texto-suave">Mail</dt><dd><strong className="break-all">{ok.email}</strong></dd></div>
+                {ok.contrasena && <div className="flex flex-wrap gap-x-2 items-center"><dt className="texto-suave">Contraseña</dt><dd><strong className="numero text-2xl select-all">{ok.contrasena}</strong></dd></div>}
+                {ok.accesos && <div className="flex flex-wrap gap-x-2"><dt className="texto-suave">Su web</dt><dd><a href={ok.accesos.web} target="_blank" rel="noopener noreferrer" className="underline break-all" data-acceso-web>{ok.accesos.web}</a></dd></div>}
+              </dl>
+              {ok.accesos && (
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" className="boton" data-copiar-accesos onClick={async () => { try { await navigator.clipboard.writeText(ok.accesos!.texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? "Copiado" : "Copiar los accesos"}</button>
+                  <a href={ok.accesos.wa ?? "#"} target="_blank" rel="noopener noreferrer" className="boton boton-principal" data-accesos-wa>Mandar por WhatsApp</a>
+                </div>
+              )}
+            </div>
+          )}
+          {ok.prueba && (
+            <div className="tarjeta p-4 space-y-2" data-prueba-alta data-ok={ok.prueba.ok ? "si" : "no"}>
+              <p className="font-semibold">Probar acceso: {ok.prueba.ok ? "todo en verde" : "hay algo para arreglar"}</p>
+              <ListaPrueba pasos={ok.prueba.pasos} />
+              {ok.prueba.duenos.map((d) => (<div key={d.equipo_id} className="space-y-1"><p className="texto-suave text-sm">Dueño: {d.nombre}</p><ListaPrueba pasos={d.pasos} /></div>))}
             </div>
           )}
           {ok.bienvenida && (
@@ -104,6 +128,13 @@ export function AltaGimnasio({ dominio }: { dominio: string }) {
                 <input name="color_acento" type="color" className="campo !p-1 h-12" value={acento} onChange={(e) => setAcento(e.target.value)} /></label>
               <label className="space-y-1"><span className="etiqueta">Color de fondo</span>
                 <input name="color_fondo" type="color" className="campo !p-1 h-12" value={fondo} onChange={(e) => setFondo(e.target.value)} /></label>
+              {planes.length > 0 && (
+                <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Plan de Base (opcional)</span>
+                  <select name="plan_brik" className="campo" defaultValue="" data-plan-brik>
+                    <option value="">Sin plan: lo asigno después</option>
+                    {planes.map((pl) => <option key={pl.id} value={pl.id}>{pl.nombre}</option>)}
+                  </select></label>
+              )}
               <p className="sm:col-span-2 texto-tenue text-sm">El logo lo sube el dueño (o vos, entrando a terminar de configurarlo) desde Configuración.</p>
             </div>
             <div className="rounded-2xl p-5 space-y-3 border border-[var(--borde,#0002)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">

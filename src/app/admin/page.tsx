@@ -103,7 +103,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <PedidosDemo pedidos={pedidosDemo} />
       <Metricas m={metricas} />
       <EstadoPlataforma />
-      <div id="alta"><AltaGimnasio dominio={dominioBase()} /></div>
+      <div id="alta"><AltaGimnasio dominio={dominioBase()} planes={planesBrik.filter((x) => x.activo).map((x) => ({ id: x.id, nombre: x.nombre }))} /></div>
       <Demos vencidas={demosVencidas} />
       <ErroresPlataforma />
       <PlataformaDatos />
