@@ -78,7 +78,7 @@ function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicad
     const r = await publicarPagina(p);
     if (r.error) { setMsj({ error: r.error }); return; }
     setPublicada(p);
-    setMsj({ ok: p ? "Publicada: ya la puede ver cualquiera con el link." : "Volvió a borrador: la gente ve “Estamos armando nuestra página”." });
+    setMsj({ ok: p ? "Visible: ya la puede ver cualquiera con el link." : "Oculta: la gente ve solo tu portada con tu marca y los botones." });
   });
   const copiar = async () => {
     try { await navigator.clipboard.writeText(direccion); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
@@ -86,13 +86,13 @@ function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicad
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-estado-pagina={publicada ? "publicada" : "borrador"}>
       <div className="flex flex-wrap items-center gap-3">
-        <span className={`pildora ${publicada ? "pildora-verde" : "pildora-amarillo"}`}>{publicada ? "🟢 Publicada" : "📝 Borrador: la gente ve “Estamos armando nuestra página”"}</span>
+        <span className={`pildora ${publicada ? "pildora-verde" : "pildora-amarillo"}`}>{publicada ? "🟢 Visible" : "🙈 Oculta: la gente ve solo tu portada y los botones"}</span>
         <span className="texto-suave break-all">{direccion}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {puedeEditar && (publicada
-          ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "📝 Pasar a borrador"}</button>
-          : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Publicando…" : "🚀 Publicar mi página"}</button>)}
+          ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "🙈 Ocultar mi página"}</button>
+          : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Guardando…" : "🌐 Mostrar mi página"}</button>)}
         <a href={direccion} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver</a>
         <button type="button" className="boton" onClick={copiar}>{copiado ? "✅ Copiado" : "📋 Copiar link"}</button>
         <a className="boton" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${nombre}: ${direccion}`)}`}>💬 Compartir por WhatsApp</a>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { LandingGimnasio, LandingProximamente } from "@/components/landing/Landing";
+import { LandingGimnasio, LandingOculta } from "@/components/landing/Landing";
 import { traerAgenda, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
@@ -48,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const titulo = r.landing.publicada ? `${marca.nombre} · ${r.landing.portada.titulo}` : marca.nombre;
   const descripcion = r.landing.publicada
     ? r.landing.portada.bajada ?? `${r.landing.portada.titulo}. Planes, horarios y cómo llegar.`
-    : "Estamos armando nuestra página. Escribinos por WhatsApp.";
+    : `${marca.nombre}. Soy socio · Quiero ser socio.`;   // U4: página oculta por el dueño; nunca un cartel de "en construcción"
   return {
     title: { absolute: titulo },
     description: descripcion,
@@ -56,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: { type: "website", title: titulo, description: descripcion, siteName: marca.nombre, locale: "es_AR",
                  images: [{ url: imagen, width: foto ? undefined : 1200, height: foto ? undefined : 630, alt: marca.nombre }] },
     twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
-    // Sin publicar no se indexa: Google no guarda un "Estamos armando nuestra página".
+    // Oculta por el dueño: no se indexa.
     robots: r.landing.publicada ? { index: true, follow: true } : { index: false, follow: false },
     alternates: { canonical: `${origen}/` },
   };
@@ -65,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Inicio() {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
-    if (!r.landing.publicada) return <LandingProximamente marca={r.landing.marca} contacto={r.landing.contacto} />;
+    if (!r.landing.publicada) return <LandingOculta marca={r.landing.marca} contacto={r.landing.contacto} />;
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
     const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;

@@ -1,8 +1,8 @@
 -- BASE-1 / F1.6 / F0.3 · Retención con socios.cubierto_hasta (D36/BASE-5): ningún veredicto cambia.
 -- La cuenta es la misma de siempre (privado.retencion_referencia guarda la anterior para la prueba). Lo que cambia es el trabajo:
---  1) el socio sin cobertura vigente ni futura (cubierto_hasta pasó o es null) no arma sus islas de coberturas: su estado sale
---     directo de la columna (fin_actual null, ultimo_fin = cubierto_hasta);
---  2) quien pide solo algunas listas (p_listas) y ninguna es vencido ni se_fue ni recorre a esos socios.
+--  1) quien pide solo algunas listas (p_listas) y ninguna es vencido ni se_fue no recorre a los socios sin cobertura vigente o futura
+--     (socios.cubierto_hasta <= momento): de ellos solo salen esas dos listas. Es lo único que cambia respecto de la referencia: el resto
+--     de la consulta es idéntico (una versión que además salteaba las islas con cubierto_hasta resultó MÁS lenta con 5.000 socios y se descartó).
 -- privado.retencion_con (4 argumentos) queda igual de cara afuera: llama al núcleo con p_listas = null.
 -- privado.retencion_listas(gimnasio, momento, listas, liviano) es lo nuevo para Pendientes, Vencen hoy, Inicio y Para hacer hoy.
 
@@ -35,12 +35,6 @@ sus as (
      and (s.baja_en is null or s.baja_en > p_momento - make_interval(days => g.retencion_dias_se_fue))
    order by s.socio_id, (s.baja_en is null) desc, s.inicio desc
 ),
--- BASE-1 / D36: el socio cuyo fin de cobertura guardado (socios.cubierto_hasta) ya pasó, o que nunca pagó, NO tiene cobertura
--- vigente ni futura: fin_actual = null, tiene_futuro = false y ultimo_fin = cubierto_hasta (el mayor "hasta" de todo lo que
--- pagó). Ese no necesita las islas. Solo se arman las islas de los que tienen algo que termina después del momento.
-sus_a as (
-  select s.* from sus s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id where so.cubierto_hasta > p_momento
-),
 -- Desde cuándo es socio: su primera membresía (un cambio de plan no lo hace "nuevo").
 antiguedad as (
   select s.socio_id, min(s.inicio) as primer_inicio from public.suscripciones s
@@ -53,7 +47,7 @@ cob as (
          max(c.hasta) over (partition by c.socio_id order by c.desde, c.hasta
                             rows between unbounded preceding and 1 preceding) as hasta_previo
     from public.coberturas c
-   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus_a s)
+   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.socio_id in (select s.socio_id from sus s)
 ),
 islas_marcadas as (
   select *, sum(case when hasta_previo is null or desde > hasta_previo then 1 else 0 end)
@@ -68,12 +62,8 @@ estado as (
          max(i.hasta) filter (where i.desde <= p_momento and i.hasta > p_momento) as fin_actual,
          max(i.hasta) filter (where i.hasta <= p_momento) as ultimo_fin,
          coalesce(bool_or(i.desde > p_momento), false) as tiene_futuro
-    from sus_a s left join islas i on i.socio_id = s.socio_id
+    from sus s left join islas i on i.socio_id = s.socio_id
    group by s.socio_id
-  union all
-  select s.socio_id, null::timestamptz, so.cubierto_hasta, false
-    from sus s join public.socios so on so.id = s.socio_id and so.gimnasio_id = p_gimnasio_id
-   where so.cubierto_hasta is null or so.cubierto_hasta <= p_momento
 ),
 precios as (
   select p.id as plan_id, privado.precio_base(p.id, p_momento) as precio
