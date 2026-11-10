@@ -13,7 +13,7 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
-import { PLATAFORMA as B, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CLAVE_DEMO, GIMNASIO, PLATAFORMA as B, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { altaGimnasio } from "./alta-gimnasio.mjs";
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -90,6 +90,36 @@ try {
   chequear((await idDe(NOMBRE_A)) === idA, "el reintento terminó el mismo gimnasio", "el reintento terminó otro gimnasio");
   ok(`acceso del dueño terminado con el reintento (${claveA})`);
 
+  // ── Mail que YA tiene cuenta + contraseña escrita: no se aplica, y la pantalla lo dice ──
+  // Un mail que ya existe: la cuenta demo de la recepción (su contraseña de siempre es la del demo).
+  const NOMBRE_C = `U2 Existe ${s}`, CLAVE_IGNORADA = `otra-clave-nueva-${s}`, MAIL_EXISTE = "recepcion@ejemplo.invalid";
+  await abrir("/admin");
+  await p.locator("select[name=tipo]").selectOption("");
+  await p.getByRole("button", { name: /Siguiente/ }).click();
+  await p.fill("input[name=nombre]", NOMBRE_C);
+  await p.getByRole("button", { name: /Siguiente/ }).click();
+  await p.fill("input[name=dueno]", "Dueño Existe");
+  await p.fill("input[name=email]", MAIL_EXISTE);
+  await p.fill("[data-alta-gimnasio] [data-contrasena-elegida]", CLAVE_IGNORADA);
+  await p.click('button:has-text("Crear gimnasio")');
+  const noAplicada = p.locator("[data-contrasena-no-aplicada]");
+  chequear(await aparece(noAplicada, 60000), "mail que ya tenía cuenta: la pantalla dice que la contraseña escrita NO se aplicó", "no avisa que la contraseña escrita no se aplicó");
+  chequear(/NO se aplicó/.test(await p.locator("[data-alta-gimnasio]").innerText()), "el aviso del alta lo dice en palabras (“NO se aplicó”)", "el aviso del alta no dice que no se aplicó");
+  chequear(await aparece(noAplicada.locator('button:has-text("Nueva contraseña")')), "el botón “Nueva contraseña” queda a la vista ahí mismo", "no queda el botón Nueva contraseña");
+  chequear((await p.locator("[data-accesos] strong.numero").count()) === 0, "la tarjeta Accesos no muestra ninguna contraseña", "la tarjeta Accesos muestra una contraseña que no se aplicó");
+  chequear(!decodeURIComponent((await p.locator("[data-accesos-wa]").getAttribute("href")) ?? "").includes(CLAVE_IGNORADA), "el link de WhatsApp no lleva la contraseña que no se aplicó", "el link de WhatsApp lleva la contraseña que no se aplicó");
+  const pn = await pagina(b);
+  await pn.goto(`${B}/ingresar`);
+  await pn.fill("input[type=email]", MAIL_EXISTE);
+  await pn.fill("input[type=password]", CLAVE_IGNORADA);
+  await pn.click("button[type=submit]");
+  chequear(await aparece(pn.locator("[role=alert]", { hasText: "no son correctos" }), 30000), "la contraseña que no se aplicó NO entra", "la contraseña que no se aplicó entró");
+  await pn.context().close();
+  const pv = await pagina(b);
+  await entrar(pv, MAIL_EXISTE, CLAVE_DEMO, B);
+  ok("con la contraseña de siempre sí entra");
+  await pv.context().close();
+
   // ── U1 (b), por la ficha: otro alta cortado y “Terminar alta” desde la ficha ──
   ponerClaveMala();
   try {
@@ -163,7 +193,14 @@ try {
   chequear((await p.locator("[data-link-contrasena]").count()) === 0, "con contraseña escrita no se pide ningún link ni código", "se ofrece un link de contraseña a pesar de haberla escrito");
   await capturar(p, "u2-socio-alta", true);
   const ps = await pagina(b);
-  await entrar(ps, MAIL_SOCIO, CLAVE_SOCIO, B);
+  // El socio entra por su puerta (mail y contraseña en /ingresar?modo=socio), no por la del equipo.
+  // El selector de “Soy socio” solo aparece en la dirección del gimnasio (en la de la plataforma no hay marca): se entra por su subdominio.
+  const slugA = (await q(`select slug from public.gimnasios where id = $1`, [idA]))[0].slug;
+  await ps.goto(`${GIMNASIO(slugA)}/ingresar?modo=socio`);
+  await ps.fill("input[type=email]", MAIL_SOCIO);
+  await ps.fill("input[type=password]", CLAVE_SOCIO);
+  await ps.click("button[type=submit]");
+  await ps.waitForURL(/\/app/, { timeout: 60000 });
   chequear(/\/app/.test(ps.url()), "el socio entra al toque a su app con su mail y esa contraseña", `el socio cayó en ${ps.url()}`);
   await ps.context().close();
 

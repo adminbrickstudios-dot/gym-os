@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
 import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
 import { rpc } from "@/lib/panel/servidor";
+import { normalizarSlug, errorDeSlug } from "@/lib/admin/slug";
 import { leerPago } from "@/lib/mercadopago";
 import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
@@ -14,23 +15,45 @@ import { clienteServicio } from "@/lib/supabase/servicio";
 
 export type EstadoAlta = {
   error?: string;
-  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; pendiente?: boolean; bienvenida?: { texto: string; wa: string | null } };
+  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; pendiente?: boolean;
+         equipoId?: string; yaExistia?: boolean; contrasenaNoAplicada?: boolean; bienvenida?: { texto: string; wa: string | null };
+         accesos?: Accesos; prueba?: PruebaGimnasio };
 };
+
+/** P5 (EDIT-S02): lo que se le pasa al dueño, listo para copiar o mandar por wa.me. La contraseña solo se ve al crearla. */
+export type Accesos = { panel: string; web: string; email: string; contrasena?: string; texto: string; wa: string | null };
+/** Cuando el mail ya tenía cuenta, la contraseña que escribió quien crea no se aplica: se dice en palabras y se ofrece “Contraseña nueva”. */
+const AVISO_NO_APLICADA = "Ese mail ya tenía cuenta: la contraseña que escribiste NO se aplicó. Entra con la que ya tiene, o poné una nueva con “Contraseña nueva”.";
+export type PasoPrueba = { clave: string; titulo: string; estado: "ok" | "falta" | "aviso"; detalle?: string; arreglo?: string | null };
+export type PruebaPersona = { equipo_id: string; nombre: string; rol: string; email: string | null; gimnasio: string; ok: boolean; pasos: PasoPrueba[] };
+export type PruebaGimnasio = { gimnasio_id: string; nombre: string; ok: boolean; pasos: PasoPrueba[]; duenos: PruebaPersona[] };
 
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 
-/** VD-40: el mensaje de bienvenida para pasarle al dueño por WhatsApp, con el link y la contraseña provisoria. */
-function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string, celular: string) {
+/** Las direcciones del gimnasio: la web (su raíz) y la puerta del dueño. Sin subdominios propios, se abre desde la plataforma (/g/<slug>). */
+function direccionesDe(slug: string) {
   const base = dominioBase();
-  const host = subdominiosFuncionan(base) ? `${slug}.${base}` : (dominioPlataforma() || base);
-  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base. Entrá en https://${host} con “Entrá a tu gimnasio”.\nMail: ${email}\nContraseña provisoria: ${contrasena}\nCambiala apenas entres (Mi cuenta).`;
+  if (subdominiosFuncionan(base)) return { web: `https://${slug}.${base}`, panel: `https://${slug}.${base}/dueno` };
+  const plataforma = dominioPlataforma() || base;
+  return { web: `https://${plataforma}/g/${slug}`, panel: `https://${plataforma}/ingresar` };
+}
+
+/** VD-40 / P5: el mensaje de bienvenida y la tarjeta "Accesos" (link del panel, mail, contraseña y link de la web). */
+function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string | undefined, celular: string) {
+  const { web, panel } = direccionesDe(slug);
+  const lineaClave = contrasena ? `Contraseña: ${contrasena}\n` : "Entrá con la contraseña que ya tenés.\n";
+  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base.\nTu panel: ${panel}\nMail: ${email}\n${lineaClave}Tu web: ${web}${contrasena ? "\nCambiá la contraseña apenas entres (Mi cuenta)." : ""}`;
   const digitos = celular.replace(/\D/g, "");
-  return { texto, wa: digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : null };
+  const wa = digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  return { bienvenida: { texto, wa: digitos.length >= 8 ? wa : null }, accesos: { panel, web, email, contrasena, texto, wa } satisfies Accesos };
 }
 
 export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoAlta> {
-  const slug = String(f.get("slug") ?? "").trim().toLowerCase();
+  // P4: la dirección se normaliza siempre acá (sin tildes ni espacios) y se valida antes de tocar nada.
   const nombre = String(f.get("nombre") ?? "").trim();
+  const slug = normalizarSlug(String(f.get("slug") ?? "")) || normalizarSlug(nombre);
+  const errSlug = errorDeSlug(slug);
+  if (errSlug) return { error: errSlug };
   const dueno = String(f.get("dueno") ?? "").trim();
   const email = String(f.get("email") ?? "").trim().toLowerCase();
   if (email && !mailValido(email)) return { error: "El mail del dueño no es válido" };
@@ -64,12 +87,24 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     try { await rpc("admin_guardar_marca", { p_gimnasio_id: r.gimnasio_id, p_acento: acento, p_fondo: fondo }); }
     catch (e) { avisoPlantilla += ` No se pudieron guardar los colores: ${(e as Error).message}.`; }
   }
+  // P4: el plan de Base elegido en el alta (si falla, el gimnasio ya está creado y se dice).
+  const planBrik = String(f.get("plan_brik") ?? "");
+  if (!pendiente && /^[0-9a-f-]{36}$/i.test(planBrik)) {
+    try { await rpc("admin_asignar_plan_brik", { p_gimnasio_id: r.gimnasio_id, p_plan_id: planBrik }); }
+    catch (e) { avisoPlantilla += ` No se pudo asignar el plan de Base: ${(e as Error).message}.`; }
+  }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
   if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
-    const { contrasena } = await darAcceso(r.equipo_id, email, dueno, contrasenaElegida(f));
-    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla,
-      bienvenida: contrasena ? bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? "")) : undefined } };
+    const { contrasena, yaExistia, contrasenaNoAplicada } = await darAcceso(r.equipo_id, email, dueno, contrasenaElegida(f));
+    // P4: al terminar se corre "Probar acceso" solo (filas del gimnasio y del dueño); si no se puede correr, el alta igual quedó hecha.
+    let prueba: PruebaGimnasio | undefined;
+    try { prueba = await rpc<PruebaGimnasio>("admin_probar_acceso_gimnasio", { p_gimnasio_id: r.gimnasio_id }); } catch { prueba = undefined; }
+    // P5: la tarjeta Accesos nunca ofrece una contraseña que no se aplicó (si el mail ya tenía cuenta, se manda sin contraseña).
+    const b = bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? ""));
+    const aviso = contrasenaNoAplicada ? AVISO_NO_APLICADA : contrasena ? "Pasale al dueño su mail y esta contraseña." : "El dueño ya tenía cuenta: entra con la suya.";
+    return { ok: { ...creado, email, contrasena, aviso: aviso + avisoPlantilla, equipoId: r.equipo_id, yaExistia, contrasenaNoAplicada,
+      bienvenida: contrasena ? b.bienvenida : undefined, accesos: b.accesos, prueba } };
   } catch (e) {
     // U1: el gimnasio queda creado y se dice qué falta y qué hacer; "Terminar alta" está en su ficha y en la lista.
     return { ok: { ...creado, pendiente: true, aviso: `El alta quedó a medias: ${nombre} está creado, pero el dueño todavía no tiene acceso. ${(e as Error).message} Cuando lo arregles, entrá a la ficha y usá “Terminar alta: dar acceso al dueño” (o repetí este alta con la misma dirección: no crea otro gimnasio).` } };
@@ -88,7 +123,7 @@ async function altaPendiente(slug: string): Promise<{ gimnasio_id: string; equip
   } catch { return null; }
 }
 
-export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string };
+export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string; contrasenaNoAplicada?: boolean };
 
 /** Alta de una persona en el equipo de un gimnasio, con acceso si se carga el mail. */
 export async function agregarPersona(_: Resultado, f: FormData): Promise<Resultado> {
@@ -106,10 +141,10 @@ export async function agregarPersona(_: Resultado, f: FormData): Promise<Resulta
   revalidatePath(`/admin/${gimnasioId}`);
   if (!email) return { aviso: `${nombre} quedó en el equipo, sin acceso al sistema.` };
   try {
-    const { contrasena } = await darAcceso(equipoId, email, nombre, contrasenaElegida(f));
+    const { contrasena, contrasenaNoAplicada } = await darAcceso(equipoId, email, nombre, contrasenaElegida(f));
     return contrasena
       ? { email, contrasena, aviso: `Pasale a ${nombre} su mail y esta contraseña provisoria.` }
-      : { email, aviso: `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
+      : { email, contrasenaNoAplicada, aviso: contrasenaNoAplicada ? AVISO_NO_APLICADA : `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
   } catch (e) {
     return { error: `${nombre} quedó en el equipo, pero sin acceso: ${(e as Error).message}` };
   }
@@ -122,12 +157,12 @@ export async function darAccesoPersona(_: Resultado, f: FormData): Promise<Resul
   if (!mailValido(email)) return { error: "Escribí un mail válido" };
   try {
     const p = await rpc<{ nombre: string }>("persona_para_dar_acceso", { p_equipo_id: equipoId });
-    const { contrasena } = await darAcceso(equipoId, email, p.nombre, contrasenaElegida(f));
+    const { contrasena, contrasenaNoAplicada } = await darAcceso(equipoId, email, p.nombre, contrasenaElegida(f));
     revalidatePath("/admin", "layout");
     revalidatePath("/panel/equipo");
     return contrasena
       ? { email, contrasena, aviso: `Pasale a ${p.nombre} su mail y esta contraseña provisoria.` }
-      : { email, aviso: `${email} ya tenía cuenta: ${p.nombre} entra con su contraseña de siempre.` };
+      : { email, contrasenaNoAplicada, aviso: contrasenaNoAplicada ? AVISO_NO_APLICADA : `${email} ya tenía cuenta: ${p.nombre} entra con su contraseña de siempre.` };
   } catch (e) {
     return { error: (e as Error).message };
   }
@@ -279,6 +314,31 @@ export async function reprocesarWebhook(eventoId: string, gimnasioId: string): P
     return { aviso: r.ya ? "Ese pago ya estaba acreditado: no se duplicó." : `Reprocesado: ${r.resultado}.` };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── Fase P (P6 y P7): probar el acceso de cada persona y gestionarla ──
+export async function probarAccesoPersona(equipoId: string): Promise<{ error?: string; prueba?: PruebaPersona }> {
+  try { return { prueba: await rpc<PruebaPersona>("admin_probar_acceso", { p_equipo_id: equipoId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+/** El botón "Arreglar" de cada paso rojo: confirmar la cuenta, activar a la persona o reanudar el gimnasio. Dar acceso se hace desde su fila. */
+export async function arreglarAcceso(equipoId: string, gimnasioId: string, arreglo: string): Promise<{ error?: string }> {
+  const rutas = [`/admin/${gimnasioId}`, "/admin/gimnasios"];
+  if (arreglo === "confirmar") return hechoAdmin(() => rpc("admin_confirmar_cuenta", { p_equipo_id: equipoId }), rutas);
+  if (arreglo === "activar") return hechoAdmin(() => rpc("admin_estado_persona", { p_equipo_id: equipoId, p_activo: true }), rutas);
+  if (arreglo === "reanudar") {
+    return hechoAdmin(async () => {
+      try { await rpc("admin_reanudar_gimnasio", { p_gimnasio_id: gimnasioId }); }
+      catch { await rpc("admin_restaurar_baja", { p_gimnasio_id: gimnasioId }); }
+    }, rutas);
+  }
+  return { error: "Eso se arregla dándole acceso: usá “Dar acceso” en su fila." };
+}
+export const estadoPersona = async (equipoId: string, gimnasioId: string, activo: boolean) =>
+  hechoAdmin(() => rpc("admin_estado_persona", { p_equipo_id: equipoId, p_activo: activo }), [`/admin/${gimnasioId}`]);
+export const cambiarRolPersona = async (equipoId: string, gimnasioId: string, rol: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_rol_persona", { p_equipo_id: equipoId, p_rol: rol }), [`/admin/${gimnasioId}`]);
+export const moverPersona = async (equipoId: string, gimnasioId: string, destino: string, rol: string) =>
+  hechoAdmin(() => rpc("admin_mover_persona", { p_equipo_id: equipoId, p_gimnasio_destino: destino, p_rol: rol || null }), [`/admin/${gimnasioId}`, `/admin/${destino}`, "/admin/gimnasios"]);
 
 export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
 /** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
