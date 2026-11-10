@@ -486,6 +486,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         return;
       }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // BASE-3: "/" (fuera de campos de texto) abre la Entrada, como F2.
+      if (e.key === "/" && !editable && !abiertaRef.current) { e.preventDefault(); if (conBarraRef.current) barra.current?.focus(); else abrir(); return; }
       const imprimible = e.key.length === 1;
       const digito = /^[0-9]$/.test(e.key);
 
