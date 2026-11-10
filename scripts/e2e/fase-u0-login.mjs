@@ -6,6 +6,8 @@
 // Además: el mail con espacios y otras mayúsculas entra igual, y los errores dicen el motivo real
 // (contraseña mala de una cuenta que existe / mail sin cuenta / cuenta de otro gimnasio).
 //   node scripts/e2e/fase-u0-login.mjs     (con scripts/local/levantar.sh corriendo; se corre en GitHub Actions)
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { COMPU, PLATAFORMA as B, PUERTO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const s = Date.now().toString().slice(-6);
@@ -14,6 +16,17 @@ const MAIL = `dueno-u0-${s}@ejemplo.invalid`;
 const MAIL_ESCRITO = `  Dueno-U0-${s}@Ejemplo.Invalid `;      // como lo escribe una persona: mayúsculas y espacios
 const CLAVE = `ClaveU0-${s}`;
 const b = await navegador();
+const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
+await db.connect();
+/** El slug del gimnasio se lee de la base por su nombre: la lista de /admin ya no tiene un formato fijo para parsearlo. */
+async function slugDe(nombre) {
+  for (let i = 0; i < 20; i++) {
+    const r = await db.query(`select slug from public.gimnasios where nombre = $1`, [nombre]);
+    if (r.rows[0]) return r.rows[0].slug;
+    await new Promise((ok) => setTimeout(ok, 500));
+  }
+  return null;
+}
 
 /** El panel correcto con el rol correcto: el título lleva el gimnasio y Mi cuenta dice "Dueño". */
 async function aterrizaComoDueno(p, etiqueta) {
@@ -42,11 +55,9 @@ try {
   await a.click('button:has-text("Crear gimnasio")');
   await alta.locator("strong.numero").first().waitFor({ timeout: 60000 });
   ok("el super admin creó el gimnasio con el dueño (mail con mayúsculas y contraseña propia)");
-  const fila = a.locator("li", { hasText: NOMBRE }).first();
-  await fila.waitFor({ timeout: 60000 });
-  const m = (await fila.innerText()).match(/([a-z0-9-]+)\.localhost/);
-  const SLUG = m ? m[1] : null;
-  chequear(!!SLUG, `el gimnasio quedó en la dirección ${SLUG}.localhost`, "no se pudo leer la dirección del gimnasio");
+  const SLUG = await slugDe(NOMBRE);
+  chequear(!!SLUG, `el gimnasio quedó en la dirección ${SLUG}.localhost`, "el gimnasio no quedó creado: no está en la base");
+  if (!SLUG) throw new Error("sin gimnasio no hay puertas que probar");
   const G = `http://${SLUG}.localhost:${PUERTO}`;
 
   // ── Puerta 1: /ingresar de la plataforma, con el mail como lo escribe una persona ──
@@ -144,4 +155,5 @@ try {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.stack : e.message.split("\n")[0]}`);
 }
 await b.close();
+await db.end();
 resultado();
