@@ -220,8 +220,11 @@ try {
   chequear((await filas.count()) === 1, "filtrar por “tiene prendido Vender”: sí entra", "el filtro por módulo Vender no lo encontró");
   await filtrar({ q: NOMBRE, abono: "al_dia" });
   chequear((await filas.count()) === 1, "filtrar por abono al día (en prueba)", `el filtro de abono dejó ${await filas.count()}`);
+  // Ya tiene socios y el dueño tiene cuenta: el alta está terminada, así que la salud es verde (y no amarilla).
   await filtrar({ q: NOMBRE, salud: "verde" });
-  chequear((await filas.count()) === 0, "filtrar por salud verde: no entra (tiene el alta sin terminar)", `salud verde dejó ${await filas.count()}`);
+  chequear((await filas.count()) === 1, "filtrar por salud verde: entra (el alta ya está terminada)", `salud verde dejó ${await filas.count()}`);
+  await filtrar({ q: NOMBRE, salud: "amarillo" });
+  chequear((await filas.count()) === 0, "filtrar por salud amarillo: no entra", `salud amarillo dejó ${await filas.count()}`);
   await filtrar({ q: NOMBRE });
   const fila = filas.first();
   chequear((await fila.locator(".pildora", { hasText: "Plan F2" }).count()) === 1, "la fila muestra el plan de BRIK", "la fila no muestra el plan");

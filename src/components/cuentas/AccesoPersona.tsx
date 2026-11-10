@@ -37,11 +37,13 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
   const [abierto, setAbierto] = useState(false);
   // Primero el resultado: al dar acceso la página se refresca y la persona
   // ya figura con cuenta; la contraseña recién creada no se puede perder.
-  if (acceso.aviso) return <ContrasenaNueva r={acceso} />;
+  // Si el mail ya tenía cuenta y la contraseña escrita NO se aplicó, el aviso queda y el botón “Nueva contraseña” sigue a la vista.
+  if (acceso.aviso && !acceso.contrasenaNoAplicada) return <ContrasenaNueva r={acceso} />;
   if (tieneCuenta) {
     if (!puedeNuevaClave) return null;
     return (
       <>
+        {acceso.contrasenaNoAplicada && <ContrasenaNueva r={acceso} />}
         <form action={pedirClave} onSubmit={(e) => { if (!confirm(`¿Darle a ${nombre} una contraseña nueva? La que tiene deja de servir.`)) e.preventDefault(); }}>
           <input type="hidden" name="equipo_id" value={equipoId} />
           <CampoContrasena className="campo !w-48" />

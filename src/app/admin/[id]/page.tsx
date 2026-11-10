@@ -13,6 +13,7 @@ import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
 import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
 import { Notas, type NotaBrik } from "./Notas";
 import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
+import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { Ciudad, CicloDeVida, QrGimnasio } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
@@ -137,6 +138,10 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
                 </span>
               </span>
               {!p.es_soporte && p.activo && <AccesoPersona equipoId={p.equipo_id} nombre={p.nombre} tieneCuenta={p.tiene_cuenta} />}
+              {!p.es_soporte && (
+                <GestionPersona equipoId={p.equipo_id} gimnasioId={g.gimnasio_id} nombre={p.nombre} rol={p.rol} activo={p.activo} puedeMover
+                  otros={otros.filter((o) => o.gimnasio_id !== g.gimnasio_id).map((o) => ({ id: o.gimnasio_id, nombre: o.nombre }))} />
+              )}
             </li>
           ))}
         </ul>

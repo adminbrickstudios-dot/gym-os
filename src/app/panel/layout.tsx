@@ -10,7 +10,7 @@ import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
 import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
 import { BannerSoporte } from "@/components/panel/BannerSoporte";
 
-type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
+type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?: string };
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
 import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
@@ -87,7 +87,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     <>
       <RegistrarSesion />
       <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
-        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}
         {pideAyuda && <AyudaBrik />}
