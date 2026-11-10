@@ -26,3 +26,8 @@
 **Entorno de Windows**
 - La compu se queda sin memoria con el demo de 5.000 socios y con cadenas largas de e2e: tandas de 20 con base nueva, y la medición grande en Actions (`medir-escala.yml`).
 - El cliente de pedidos de Playwright no resuelve `demo.localhost`: helper `api()` en `scripts/e2e/comun.mjs`.
+
+**Login del dueño recién creado (U0.1, 09/11)**
+- Un alta con el mail de una cuenta que YA existe no pisa su contraseña: la que escribe quien crea no se aplica, y el ingreso dice "incorrectos". Se avisa en el alta y se arregla con "Contraseña nueva". Causa más probable de "mail o contraseña incorrectos" junto con la clave de servicio mal puesta en Vercel (la cuenta nunca se creó; `Invalid API key`).
+- `/g/<slug>/ingresar` no debe rebotar al `/ingresar` genérico: se reescribe conservando el gimnasio (marca y comprobación de pertenencia). Nunca caer a un gimnasio por defecto ni al demo.
+- Un error de ingreso no se esconde bajo "incorrectos": sin confirmar, desactivada, sin gimnasio y demasiados intentos tienen su texto; el código real va al registro del servidor.
