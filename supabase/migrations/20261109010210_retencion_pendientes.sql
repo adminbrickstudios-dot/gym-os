@@ -2,11 +2,17 @@
 -- Es la MISMA clasificación de privado.retencion_referencia (misma membresía vigente, mismas islas de coberturas, mismos cortes y mismo
 -- orden), sin lo que ahí no se usa: ni precios, ni plan, ni frecuencia por semana, ni último contacto, ni mensajes.
 -- Cómo trabaja: parte de los socios con cobertura vigente o futura (socios.cubierto_hasta > momento, por el índice
--- (gimnasio_id, cubierto_hasta)) y de CADA UNO busca lo suyo por índice (su membresía, su primer inicio, sus coberturas, su última visita).
--- Sin uniones entre listas grandes: el plan no depende de que Postgres adivine bien cuántas filas hay (con 5.000 socios una versión con
--- uniones entre CTE se volvió cuadrática en Actions). Las islas de coberturas solo se arman para quien tiene una cobertura que EMPIEZA
--- después del momento (una cuota pagada por adelantado): toda cobertura que termina después del momento y ya empezó se superpone con
--- las demás en ese instante, forma una sola isla y su fin es cubierto_hasta (el mayor "hasta" de todo).
+-- (gimnasio_id, cubierto_hasta)) y de CADA UNO busca lo suyo por índice (su membresía, su primer inicio). Sin uniones entre listas grandes:
+-- el plan no depende de que Postgres adivine bien cuántas filas hay (con 5.000 socios una versión con uniones entre CTE se volvió
+-- cuadrática en Actions). Además:
+--  · Las islas de coberturas solo se arman para quien tiene una cobertura que EMPIEZA después del momento (una cuota pagada por
+--    adelantado): toda cobertura que termina después del momento y ya empezó se superpone con las demás en ese instante, forma una sola
+--    isla y su fin es cubierto_hasta (el mayor "hasta" de todo). Quién tiene una cuota adelantada sale de UNA pasada (hash), no de una
+--    búsqueda por socio.
+--  · La última visita exacta solo se busca para quien NO vino en los últimos días que importan (el menor entre 7 y los días de
+--    ausencia): quien vino hace poco no puede ser nuevo ni no_viene, y por_vencer no la usa. Quién vino hace poco sale de UNA pasada
+--    por los ingresos recientes.
+--  · Congelado y suspendido (que dejan al socio sin lista) se miran solo para quien ya cayó en una de las tres listas.
 -- La prueba de base "retencion-cubierto" compara sus columnas (socio_id, nombre, lista, dias) y su orden contra privado.retencion_referencia.
 
 do $g$ begin
@@ -23,19 +29,27 @@ with
 g as materialized (select gi.id, gi.zona_horaria as zona, c.* from public.gimnasios gi
        join public.configuracion_gimnasio c on c.gimnasio_id = gi.id where gi.id = p_gimnasio_id),
 hoy as materialized (select ((p_momento) at time zone g.zona)::date as d from g),
+-- Quién tiene una cuota pagada por adelantado (una cobertura que empieza después del momento).
+con_futuro as materialized (
+  select distinct c.socio_id from public.coberturas c
+   where c.gimnasio_id = p_gimnasio_id and c.anulada_en is null and c.desde > p_momento
+),
+-- Quién vino en los últimos días que importan (el menor entre 7 y los días de ausencia): ese no puede ser nuevo ni no_viene.
+reciente as materialized (
+  select distinct i.socio_id from public.ingresos i, g
+   where i.gimnasio_id = p_gimnasio_id and i.anulado_en is null and i.resultado <> 'rechazado'
+     and i.momento <= p_momento and i.momento > p_momento - make_interval(days => least(7, g.retencion_dias_ausencia))
+),
 base as (
   select so.id as socio_id, trim(so.nombre || ' ' || so.apellido) as nombre,
          (coalesce(g.plan_familiar_activo, false)
             and exists (select 1 from public.grupos_familiares gf where gf.id = so.grupo_familiar_id and gf.titular_id is not null and gf.titular_id <> so.id)) as vinculado,
-         so.dado_de_baja_en, su.baja_en, so.no_escribirle_en is not null as no_escribir,
+         so.dado_de_baja_en, su.id as suscripcion_id, su.baja_en, so.no_escribirle_en is not null as no_escribir,
          an.primer_inicio,
          case when e.complejo then e.fin_actual else so.cubierto_hasta end as fin_actual,
          coalesce(e.complejo and e.tiene_futuro, false) as tiene_futuro,
-         v.ultimo as ultimo_ingreso,
-         exists (select 1 from public.congelamientos c where c.suscripcion_id = su.id and c.anulado_en is null
-                  and c.desde <= p_momento and coalesce(c.hasta_real, c.hasta_prevista) > p_momento) as congelado,
-         exists (select 1 from public.suspensiones x where x.socio_id = so.id and x.desde <= p_momento
-                  and (x.hasta is null or x.hasta > p_momento) and (x.levantada_en is null or x.levantada_en > p_momento)) as suspendido
+         (so.id in (select r.socio_id from reciente r)) as vino_hace_poco,
+         v.ultimo as ultimo_ingreso
     from public.socios so
     cross join g
     -- La membresía que importa: la activa, o la última si se cerró hace poco (la misma regla de siempre).
@@ -66,11 +80,13 @@ base as (
                 ) k
             ) m group by m.isla
         ) i
-       where exists (select 1 from public.coberturas f where f.gimnasio_id = p_gimnasio_id and f.socio_id = so.id and f.anulada_en is null and f.desde > p_momento)
+       where so.id in (select f.socio_id from con_futuro f)
     ) e on true
     left join lateral (
+      -- La última visita exacta, solo para quien no vino hace poco (para los demás no se usa).
       select max(i.momento) as ultimo from public.ingresos i
-       where i.gimnasio_id = p_gimnasio_id and i.socio_id = so.id and i.anulado_en is null
+       where not (so.id in (select r.socio_id from reciente r))
+         and i.gimnasio_id = p_gimnasio_id and i.socio_id = so.id and i.anulado_en is null
          and i.resultado <> 'rechazado' and i.momento <= p_momento
     ) v on true
    where so.gimnasio_id = p_gimnasio_id and so.cubierto_hasta > p_momento
@@ -78,15 +94,14 @@ base as (
 clasificado as (
   select b.*, hoy.d as hoy_d,
     case
-      when b.suspendido or b.congelado then null
       when b.dado_de_baja_en is not null and b.dado_de_baja_en <= p_momento then 'se_fue'
       when b.baja_en is not null and b.baja_en <= p_momento then 'se_fue'
       when b.fin_actual is null and not b.tiene_futuro then 'vencido'
       when b.fin_actual is not null
            and ((b.fin_actual - interval '1 microsecond') at time zone g.zona)::date - hoy.d <= g.dias_aviso then 'por_vencer'
-      when b.fin_actual is not null and b.primer_inicio > p_momento - make_interval(days => g.retencion_dias_nuevo)
+      when b.fin_actual is not null and not b.vino_hace_poco and b.primer_inicio > p_momento - make_interval(days => g.retencion_dias_nuevo)
            and coalesce(b.ultimo_ingreso, b.primer_inicio) <= p_momento - interval '7 days' then 'nuevo'
-      when b.fin_actual is not null
+      when b.fin_actual is not null and not b.vino_hace_poco
            and coalesce(b.ultimo_ingreso, b.primer_inicio) <= p_momento - make_interval(days => g.retencion_dias_ausencia) then 'no_viene'
     end as lista
     from base b cross join g cross join hoy
@@ -101,6 +116,11 @@ final as (
    where c.lista in ('por_vencer', 'nuevo', 'no_viene')
      and not (c.vinculado and c.lista = 'por_vencer')
      and not (c.no_escribir and c.lista in ('nuevo', 'no_viene'))
+     -- Suspendido o congelado: sin lista (se mira solo ahora, para quien ya cayó en una).
+     and not exists (select 1 from public.suspensiones x where x.socio_id = c.socio_id and x.desde <= p_momento
+                      and (x.hasta is null or x.hasta > p_momento) and (x.levantada_en is null or x.levantada_en > p_momento))
+     and not exists (select 1 from public.congelamientos z where z.suscripcion_id = c.suscripcion_id and z.anulado_en is null
+                      and z.desde <= p_momento and coalesce(z.hasta_real, z.hasta_prevista) > p_momento)
 )
 select f.socio_id, f.nombre, f.lista, f.dias from final f
 order by array_position(array['vencido', 'por_vencer', 'nuevo', 'no_viene', 'se_fue'], f.lista),
