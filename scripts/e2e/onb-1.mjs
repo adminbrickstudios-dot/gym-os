@@ -60,6 +60,8 @@ try {
     return c.toDataURL("image/png").split(",")[1];
   }), "base64");
   await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.png", mimeType: "image/png", buffer: png });
+  // BASE-7: elegir el archivo muestra la vista previa; recién "Usar este logo" lo sube.
+  await p.locator('[data-vista-previa="logo"] button', { hasText: /Usar este logo/ }).click();
   await p.locator('[data-imagen="logo"] .mensaje', { hasText: "Logo listo" }).waitFor({ timeout: 30000 });
   await abrirInicio();
   const conLogo = Number(await tarjeta.getAttribute("data-primeros-pasos"));

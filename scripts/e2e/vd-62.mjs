@@ -86,7 +86,7 @@ async function paginaGimnasio(vp, nombre) {
     sinAlt: [...document.images].filter((i) => !i.hasAttribute("alt")).length,
   }));
   chequear(meta.titulo.length > 2 && meta.descripcion.length > 10 && meta.og && meta.canonical, `${nombre}: título, descripción, Open Graph y canonical`, `${nombre}: faltan metadatos ${JSON.stringify({ t: meta.titulo, d: !!meta.descripcion, og: !!meta.og, c: !!meta.canonical })}`);
-  chequear(meta.ld.some((t) => { try { return JSON.parse(t)["@type"] === "ExerciseGym"; } catch { return false; } }), `${nombre}: datos estructurados ExerciseGym`, `${nombre}: sin JSON-LD`);
+  chequear(meta.ld.some((t) => { try { return [].concat(JSON.parse(t)["@type"]).includes("ExerciseGym"); } catch { return false; } }), `${nombre}: datos estructurados ExerciseGym`, `${nombre}: sin JSON-LD`);
   chequear(meta.sinAlt === 0, `${nombre}: todas las imágenes tienen alt`, `${nombre}: ${meta.sinAlt} imagen(es) sin alt`);
   if (p.errores.length) falla(`${nombre}: ${p.errores.join(" | ")}`);
   return p;
