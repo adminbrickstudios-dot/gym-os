@@ -33,6 +33,18 @@ export async function rechazar(pagoId: string, motivo: string): Promise<{ error?
   catch (e) { return { error: (e as Error).message }; }
 }
 
+/**
+ * H1 (VD-5C): la tilde "ya la vi en el banco" de una transferencia cobrada en el mostrador. No toca el pago ni la caja:
+ * solo anota quién la miró y cuándo (dueño, encargado y recepción; la base lo verifica y rechaza lo que no sea una transferencia del mostrador).
+ */
+export async function marcarVista(pagoId: string, vista: boolean): Promise<{ error?: string; visto_en?: string | null; visto_por?: string | null }> {
+  try {
+    const r = await rpc<{ visto_en: string | null; visto_por: string | null }>("marcar_transferencia_vista", { p_pago_id: pagoId, p_vista: vista });
+    revalidatePath("/panel/transferencias");
+    return { visto_en: r.visto_en, visto_por: r.visto_por };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 export type ResultadoRevision = { error?: string; sinMercadoPago?: boolean; revisados?: number; cambios?: number; sinPago?: number; fallaron?: number };
 
 /**

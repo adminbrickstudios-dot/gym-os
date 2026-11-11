@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { achicarFoto } from "@/lib/imagenes-servidor";
-import type { Billetes, ConfigCaja, EstadoTurno } from "./tipos";
+import type { Billetes, CobrosMedio, ConfigCaja, EstadoTurno } from "./tipos";
 
 export type Resumen = {
   estado?: EstadoTurno; revisado_nota?: string | null; billetes?: Billetes | null;
@@ -62,7 +62,7 @@ export async function verTicket(movimientoId: string): Promise<{ url?: string; e
 }
 
 /** Arqueo ciego: se informa lo contado y recién ahí se ve lo esperado. `billetes`: el conteo de la calculadora (opcional). */
-export async function cerrarCaja(turnoId: string, contado: string, nota: string, billetes: Billetes | null = null): Promise<{ resumen?: Resumen; error?: string }> {
+export async function cerrarCaja(turnoId: string, contado: string, nota: string, billetes: Billetes | null = null): Promise<{ resumen?: Resumen; cobros?: CobrosMedio[] | null; error?: string }> {
   if (String(contado).trim() && Number.isNaN(num(contado))) return { error: MAL };
   if (!(num(contado) >= 0)) return { error: "Escribí cuánta plata contaste" };
   try {
@@ -70,7 +70,9 @@ export async function cerrarCaja(turnoId: string, contado: string, nota: string,
     // antes de que se vea el resultado del arqueo. La pantalla refresca al tocar "Listo".
     const resumen = await rpc<Resumen>("cerrar_caja", { p_turno_id: turnoId, p_monto_contado: num(contado), p_nota: nota || null, ...(billetes ? { p_billetes: billetes } : {}) });
     notificarDespues("caja_diferencia", turnoId);   // PUSH-1: la base decide si hubo diferencia
-    return { resumen };
+    // H1: lo cobrado por medio, para mostrarlo en el cierre. Si esta lectura falla el cierre ya quedó hecho: se muestra sin el detalle.
+    const cobros = await rpc<CobrosMedio[]>("cobros_de_turnos", { p_turno_ids: [turnoId] }).catch(() => null);
+    return { resumen, cobros };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

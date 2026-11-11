@@ -6,7 +6,8 @@ import { CalculadoraBilletes } from "@/components/panel/CalculadoraBilletes";
 import { linkCompartir, textoCierre } from "@/lib/caja";
 import { formatearPesos } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
-import type { Billetes } from "./tipos";
+import { PorMedio } from "./PorMedio";
+import type { Billetes, CobrosMedio } from "./tipos";
 import { Icono } from "@/components/ui/Icono";
 
 const MEDIO: Record<string, string> = { transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
@@ -34,14 +35,15 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
   );
 }
 
-export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada = false, vencida = false, pedirBilletes = false }: {
-  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, zona = "America/Argentina/Buenos_Aires", olvidada = false, vencida = false, pedirBilletes = false }: {
+  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; zona?: string; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
 }) {
   const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">("nada");
   const [monto, setMonto] = useState("");
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cierre, setCierre] = useState<Resumen | null>(null);
+  const [cobrosCierre, setCobrosCierre] = useState<CobrosMedio[] | null>(null);
   const [conBilletes, setConBilletes] = useState(false);
   const [billetes, setBilletes] = useState<Billetes | null>(null);
   const [ocupado, empezar] = useTransition();
@@ -59,7 +61,10 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
           <div><dt className="texto-tenue text-sm">Contaste</dt><dd className="numero text-3xl">{formatearPesos(cierre.contado)}</dd></div>
           <div><dt className="texto-tenue text-sm">Tenía que haber</dt><dd className="numero text-3xl">{formatearPesos(cierre.esperado)}</dd></div>
         </dl>
-        <OtrosMedios r={cierre} />
+        <p className="texto-suave text-sm mt-3" data-dif-efectivo>La diferencia cuenta solo el efectivo: lo que contaste menos lo que tenía que haber en el cajón. La transferencia y la tarjeta no entran.</p>
+        {cobrosCierre
+          ? <div className="mt-6"><PorMedio medios={cobrosCierre} zona={zona} titulo="Lo cobrado en el turno, por medio" /></div>
+          : <OtrosMedios r={cierre} />}
         <div className="flex flex-wrap gap-2 mt-8">
           <button type="button" className="boton boton-principal" onClick={() => router.refresh()}><Icono nombre="persona" /> Listo</button>
           {/* VD-9: el reporte del turno, con SOBRA / FALTA, para ver o mandar. */}
@@ -96,7 +101,9 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
           <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Abrir mi turno</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
-      {resumen ? (
+      {resumen && cobros ? (
+        <PorMedio medios={cobros} zona={zona} cajon={{ esperado: resumen.esperado, inicial: resumen.monto_inicial, efectivo: resumen.efectivo, ingresos: resumen.ingresos, retiros: resumen.retiros }} />
+      ) : resumen ? (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div><dt className="texto-tenue text-sm">Inicial</dt><dd className="numero text-2xl">{formatearPesos(resumen.monto_inicial)}</dd></div>
           <div><dt className="texto-tenue text-sm"><Icono nombre="plata" /> Cobrado en efectivo</dt><dd className="numero text-2xl">{formatearPesos(resumen.efectivo)}</dd></div>
@@ -106,7 +113,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
       ) : (
         <p className="texto-suave"><Icono nombre="persona" /> Al cerrar contás la plata y recién ahí ves cuánto tenía que haber.</p>
       )}
-      {resumen && <OtrosMedios r={resumen} />}
+      {resumen && !cobros && <OtrosMedios r={resumen} />}
 
       {modo === "nada" && (
         <div className="flex flex-wrap gap-2">
@@ -133,7 +140,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
         </form>
       )}
       {modo === "cerrar" && (
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await cerrarCaja(turnoId, monto, motivo, usaCalculadora ? billetes : null); if (r.error) setError(r.error); else setCierre(r.resumen!); }); }}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await cerrarCaja(turnoId, monto, motivo, usaCalculadora ? billetes : null); if (r.error) setError(r.error); else { setCobrosCierre(r.cobros ?? null); setCierre(r.resumen!); } }); }}>
           <p className="font-semibold">Contá la plata del cajón y escribí cuánto hay.</p>
           <input autoFocus className="campo !text-2xl !min-h-16" inputMode="decimal" placeholder="$ contado" value={monto} onChange={(e) => setMonto(e.target.value)} readOnly={usaCalculadora} />
           {/* VD-9: la calculadora es opcional (el gimnasio puede exigirla); el total sale solo y la base lo vuelve a sumar. */}

@@ -8,7 +8,7 @@ import { contextoPanel, exigirRol, exigirSeccion, rpc, rpcLectura } from "@/lib/
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Resumen } from "./acciones";
 import { ParaRevisar } from "./ParaRevisar";
-import type { ConfigCaja, MiTurno, ParaRevisar as ParaRevisarT } from "./tipos";
+import type { CobrosMedio, ConfigCaja, MiTurno, ParaRevisar as ParaRevisarT } from "./tipos";
 import { AbrirCaja, TurnoAbierto } from "./Turno";
 import { Icono } from "@/components/ui/Icono";
 
@@ -35,6 +35,8 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     const cajas = todas.filter((c) => c.activa);
     const sugerido = (id: string) => mi.libres.find((l) => l.caja_id === id)?.fondo_sugerido ?? 0;
     const resumenes = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpcLectura<Resumen>("resumen_caja", { p_turno_id: c.turno_id }) : Promise.resolve(null))));
+    // H1: lo cobrado por medio de cada turno abierto (misma regla de permiso que el resumen: la recepción no lo ve con la caja abierta).
+    const cobros = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpcLectura<CobrosMedio[]>("cobros_de_turnos", { p_turno_ids: [c.turno_id] }) : Promise.resolve(null))));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
@@ -47,7 +49,7 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
         <div className="space-y-4">
           {cajas.map((c, i) => c.turno_id
-            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} cajaId={c.caja_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]}
+            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} cajaId={c.caja_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]} cobros={cobros[i]} zona={panel.gimnasio.zona_horaria}
                 olvidada={olvidadas.some((o) => o.turno_id === c.turno_id)} vencida={c.vencida} pedirBilletes={config.pedir_billetes} />
             : <AbrirCaja key={c.caja_id} cajaId={c.caja_id} nombre={c.nombre} fondoSugerido={sugerido(c.caja_id)} />)}
         </div>
