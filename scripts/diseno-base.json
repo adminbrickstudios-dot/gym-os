@@ -155,6 +155,10 @@
   "hex": 0,
   "emoji": 4
  },
+ "src/app/app/OfertasLugar.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
  "src/app/app/Pagar.tsx": {
   "hex": 0,
   "emoji": 4
@@ -208,6 +212,10 @@
   "emoji": 4
  },
  "src/app/app/rutina/Series.tsx": {
+  "hex": 0,
+  "emoji": 1
+ },
+ "src/app/app/yo/AvisoClase.tsx": {
   "hex": 0,
   "emoji": 1
  },
