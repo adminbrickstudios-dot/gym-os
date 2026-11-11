@@ -40,3 +40,21 @@ export const PASOS_DESCARGAR_APP = [
   "Tocá “Soy socio” y entrá.",
   "Tocá “Instalar”. En iPhone: Compartir y “Agregar a inicio”.",
 ];
+
+/** C9 · El cartel "Anotate acá": el QR lleva directo al formulario de "Quiero ser socio" del gimnasio. */
+export const PASOS_ANOTATE = [
+  "Escaneá el QR con la cámara del celular.",
+  "Elegí tu plan y dejá tus datos.",
+  "Pagá en recepción o por transferencia y empezá a entrenar.",
+];
+export const PIE_ANOTATE = "Anotarte no te da acceso: entrás cuando pagás.";
+
+/** El mensaje que el dueño manda por WhatsApp: lleva el link directo al formulario. */
+export function mensajeAnotate(gimnasio: string, url: string): string {
+  return `Anotate en ${gimnasio} desde el celular, en un minuto: ${url}`;
+}
+
+/** wa.me sin número: WhatsApp deja elegir a quién se lo manda. */
+export function linkCompartirWhatsapp(mensaje: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+}

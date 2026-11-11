@@ -13,7 +13,7 @@ import { Icono } from "@/components/ui/Icono";
 
 export type DatosAlta = {
   abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
-  mostrar_precios?: boolean; planes?: PlanPublico[]; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
+  mostrar_precios?: boolean; planes?: PlanPublico[]; plan_sugerido?: string | null; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
 };
 
 async function datos(): Promise<DatosAlta | null> {
@@ -60,11 +60,13 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
           <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y empezá a entrenar.</p>
         </div>
         {d.abierta && d.planes?.length && d.reglamento
-          ? <FormAlta datos={d} planInicial={plan ?? null} />
+          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} />
           : (
+            // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.
             <div className="tarjeta p-6 space-y-4" data-alta-cerrada>
-              <p className="text-lg">Por ahora el alta se hace en el gimnasio o por WhatsApp.</p>
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal"><Icono nombre="mensaje" /> Consultanos por WhatsApp</a>}
+              <p className="text-lg">Hoy no te podés anotar desde acá.</p>
+              <p className="texto-suave">{wa ? "Escribinos por WhatsApp o pasá por el gimnasio y te anotamos." : "Pasá por el gimnasio y te anotamos."}</p>
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal" data-whatsapp-gimnasio><Icono nombre="mensaje" /> Consultanos por WhatsApp</a>}
             </div>
           )}
       </main>

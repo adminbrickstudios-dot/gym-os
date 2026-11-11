@@ -15,6 +15,7 @@ export default async function Carteles() {
     const filas = [
       { href: "/panel/ayuda/carteles/puerta", icono: "puerta", titulo: "Cartel de la puerta", texto: "Cómo entrar con el celular o con el DNI. Dice solo lo que tu gimnasio tiene prendido." },
       { href: "/panel/ayuda/carteles/app", icono: "celular", titulo: "Cartel “Descargá la app”", texto: "Con el QR de la página de tu gimnasio y los tres pasos para entrar a la app." },
+      { href: "/panel/ayuda/carteles/anotate", icono: "persona", titulo: "Cartel “Anotate acá”", texto: "Un QR que abre directo el formulario para hacerse socio. También el link para mandar por WhatsApp y el plan que llega elegido." },
     ];
     return (
       <>
