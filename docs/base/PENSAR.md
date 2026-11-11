@@ -28,6 +28,15 @@ terminado.
 
 ---
 
+## F3 · La pasada botón por botón (carril C, 11/11)
+1. **Qué pidió Mateo:** que nada quede "estático porque no tiene cómo volver": apretar un botón siempre hace algo visible, termina y se puede salir.
+2. **Cómo lo hace un producto profesional:** Linear/Stripe: respuesta inmediata al toque, estados de carga reales, Esc cierra todo y el "atrás" nunca deja la pantalla rota; se prueba con un robot que toca todo y mide.
+3. **Cinco formas en que se rompe:** (a) otro rol: botones que dicen "no tenés permiso"; (b) celular: botones tapados o fuera de pantalla; (c) internet lento: botón sin estado; (d) doble clic: acción repetida; (e) datos vacíos: lista sin salida.
+4. **Lo que no pidió pero necesita:** un informe que se lee (no un rojo/verde), repartido por rol para correr en Actions, y que el robot nunca toque lo que cambia datos o manda mensajes.
+5. **Decisión y prueba:** `scripts/e2e/botones.mjs` (por rol, compu y celular; mide la primera respuesta, mira consola, pantallas rotas, "atrás" y Esc; deja `.local/botones-informe.md`) + `.github/workflows/botones.yml` (una tanda por rol). `FLUIDEZ-PANTALLAS.md` revisa el carril C contra las reglas leyendo el código; el robot completa lo que solo se ve ejecutando.
+
+---
+
 ## P8 · La landing del gimnasio, profesional con cero configuración (carril C, 11/11)
 1. **Qué pidió Mateo:** que apenas crea su gimnasio, con solo el nombre y un color, ya tenga una web que parezca hecha por un profesional, sin huecos ni carteles de "armando".
 2. **Cómo lo hace un producto profesional:** Glofox/Mindbody/Shopify: portada tipográfica enorme con el nombre, el acento de la marca, bloques que aparecen solos cuando hay datos y desaparecen cuando no, y lo técnico (título, imagen para compartir, sitemap, datos estructurados) resuelto sin que el dueño toque nada.
