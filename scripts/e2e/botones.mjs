@@ -45,7 +45,8 @@ function rutasDelMapa(area) {
   } catch { return []; }
 }
 
-const informe = { sinEfecto: [], lentos: [], consola: [], rotas: [], noVuelve: [], colgados: [], sinNombre: [], noTocados: new Map(), pantallas: 0, botones: 0, tocados: 0 };
+const inicioDe = (rol) => ROLES[rol].inicio;
+const informe = { saltos: [], sinSalida: [], existen: new Map(), sinEfecto: [], lentos: [], consola: [], rotas: [], noVuelve: [], colgados: [], sinNombre: [], noTocados: new Map(), pantallas: 0, botones: 0, tocados: 0 };
 const nota = (lista, rol, vista, ruta, que) => lista.push(`- **${rol} · ${vista}** \`${ruta}\` — ${que}`);
 
 /** Instala en la página el medidor: cuándo fue el toque y cuándo cambió algo (DOM, atributos o URL). */
@@ -56,6 +57,12 @@ const medidor = () => {
   new MutationObserver(marcar).observe(document, { subtree: true, childList: true, attributes: true, characterData: false, attributeFilter: ["class", "aria-expanded", "aria-pressed", "aria-hidden", "disabled", "hidden", "open", "data-estado", "data-state", "style"] });
   addEventListener("pointerdown", () => { window.__bt.toque = performance.now(); window.__bt.primero = 0; window.__bt.cambios = 0; }, true);
   addEventListener("popstate", marcar); addEventListener("hashchange", marcar);
+};
+
+/** Regla 17: suma de los saltos de diseño (CLS) desde que se abre la pantalla. Se instala antes de cargar. */
+const medidorCLS = () => {
+  window.__cls = 0;
+  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true }); } catch {}
 };
 
 async function candidatos(p) {
@@ -137,6 +144,14 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
   const cuerpo = await p.locator("body").innerText().catch(() => "");
   if (PANTALLA_ROTA.test(cuerpo)) { nota(informe.rotas, rol, vista, ruta, "pantalla rota (error de la app)"); return []; }
   if (/No tenés acceso a esta pantalla/i.test(cuerpo)) return [];   // por la dirección directa da error con motivo: es lo correcto (regla 11)
+  // Regla 17: nada salta al cargar (CLS) · regla 5: siempre hay salida (menú, "Volver" o un enlace al inicio).
+  const cls = await p.evaluate(() => window.__cls ?? 0).catch(() => 0);
+  if (cls > 0.1) nota(informe.saltos, rol, vista, ruta, `salta al cargar: CLS ${cls.toFixed(3)} (límite 0,1)`);
+  if (ruta !== inicioDe(rol)) {
+    const zona = ruta.startsWith("/admin") ? "/admin" : ruta.startsWith("/app") ? "/app" : "/panel";
+    const salida = await p.evaluate((ini) => !!document.querySelector(`a[href="${ini}"], a[href^="${ini}/"], nav a, [role=navigation] a, header button, button[aria-label*="enú"], button[aria-label*="olver"], a[aria-label*="olver"]`) || /volver|atrás|inicio/i.test(document.body.innerText), zona).catch(() => true);
+    if (!salida) nota(informe.sinSalida, rol, vista, ruta, "no se ve ninguna salida (ni menú, ni Volver, ni enlace al inicio)");
+  }
   const cs = await candidatos(p);
   const enlaces = new Set(cs.filter((c) => c.tag === "a" && c.href.startsWith("/") && !c.href.startsWith("//")).map((c) => c.href.split("#")[0].split("?")[0]));
   let hechos = 0;
@@ -145,6 +160,7 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
     informe.botones++;
     if (!c.texto && !c.aria) { nota(informe.sinNombre, rol, vista, ruta, `un ${c.tag}${c.href ? ` (→ ${c.href})` : ""} sin texto ni aria-label`); }
     const peligroso = c.peligro || PELIGRO.test(`${c.texto} ${c.aria}`) || EXTERNO.test(c.href) || c.descarga || c.blank || c.enForm || c.deshabilitado || /\/salir|\/api\//.test(c.href);
+    if (peligroso && c.texto && !c.deshabilitado && c.tag !== "a") { const k2 = `${rol} · ${vista} \`${ruta}\``; (informe.existen.get(k2) ?? informe.existen.set(k2, new Set()).get(k2)).add(c.texto); }
     if (peligroso) { const k = `${rol}/${vista}`; informe.noTocados.set(k, (informe.noTocados.get(k) ?? 0) + 1); continue; }
     hechos++;
     await tocar(p, rol, vista, ruta, c, errores);
@@ -159,6 +175,7 @@ try {
     const R = ROLES[rol];
     for (const [vista, tam] of VISTAS) {
       const p = await pagina(b, tam);
+      await p.addInitScript(medidorCLS);
       p.setDefaultNavigationTimeout(60000);
       const errores = [];
       p.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|ERR_ABORTED|favicon/i.test(m.text())) errores.push(m.text().slice(0, 160)); });
@@ -189,10 +206,12 @@ const md = [
   `No se tocan (cambian o mandan algo, salen de la app o están deshabilitados), por rol y vista: ${[...informe.noTocados].map(([k, n]) => `${k}: ${n}`).join(" · ") || "ninguno"}.`, "",
   seccion("No hacen nada en 1 s", informe.sinEfecto), seccion(`Tardan más de ${LIMITE_RESPUESTA} ms en mostrar algo`, informe.lentos), seccion("Se cuelgan o no se pueden tocar", informe.colgados),
   seccion("Dejan un error en la consola", informe.consola), seccion("Pantallas rotas", informe.rotas), seccion("No vuelven (atrás / Esc)", informe.noVuelve), seccion("Sin nombre accesible", informe.sinNombre),
+  seccion("Saltan al cargar (CLS > 0,1)", informe.saltos), seccion("Sin salida visible", informe.sinSalida),
+  `## Botones que cambian o mandan algo: existen, NO se tocaron (${[...informe.existen.values()].reduce((a, v) => a + v.size, 0)})\n\n${[...informe.existen].map(([k, v]) => `- ${k}: ${[...v].slice(0, 12).join(" · ")}`).join("\n") || "Ninguno."}\n`,
 ].join("\n");
 writeFileSync(arg("informe", ".local/botones-informe.md"), md);
 if (process.env.GITHUB_STEP_SUMMARY) writeFileSync(process.env.GITHUB_STEP_SUMMARY, md, { flag: "a" });
 console.log(md);
-const graves = informe.sinEfecto.length + informe.colgados.length + informe.consola.length + informe.rotas.length + informe.noVuelve.length;
+const graves = informe.saltos.length + informe.sinSalida.length + informe.sinEfecto.length + informe.colgados.length + informe.consola.length + informe.rotas.length + informe.noVuelve.length;
 console.log(`${graves} hallazgo(s) graves (sin efecto, colgados, consola, rotas, no vuelven) y ${informe.lentos.length} lentos.`);
 process.exit(tiene("estricto") && graves ? 1 : 0);
