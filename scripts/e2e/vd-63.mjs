@@ -63,8 +63,7 @@ try {
       await fila.click({ timeout: 15000 }).catch(async (e) => {
         const cajas = [];
         for (let k = 0; k < 6; k++) { cajas.push(JSON.stringify(await fila.boundingBox().catch(() => null))); await d.waitForTimeout(250); }
-        throw new Error(`${e.message.split("
-")[0]} | cajas de la fila: ${cajas.join(" ; ")} | filas: ${await dialogo(d).locator("[data-buscador-ayuda]").count()}`);
+        throw new Error(`${e.message.split("\n")[0]} | cajas de la fila: ${cajas.join(" ; ")} | filas: ${await dialogo(d).locator("[data-buscador-ayuda]").count()}`);
       });
       await d.waitForURL(new RegExp(`/panel/ayuda\\?p=${id}`), { timeout: 30000 });
       const li = d.locator(`[data-pregunta="${id}"]`);
