@@ -28,7 +28,8 @@ async function guardar(d) {
 const llave = (d, texto) => d.locator("[data-accesos] label", { hasText: texto }).locator("input");
 async function ponerDni(d, nombre, dni) {
   await d.goto(`${G}/panel/socios?q=${encodeURIComponent(nombre)}`);
-  await d.locator('main ul a[href^="/panel/socios/"]').first().click();
+  // La fila exacta: "Testigo Pack Vencido" también aparece al buscar "Testigo Vencida" y sale primero por orden de nombre.
+  await d.locator('main ul a[href^="/panel/socios/"]').filter({ hasText: new RegExp(`${nombre}(?!\\p{L})`, "u") }).first().click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/);
   await d.locator('a:has-text("Editar")').click();
   await d.locator('input[name="dni"]').fill(dni);

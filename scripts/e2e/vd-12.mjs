@@ -70,7 +70,7 @@ try {
   const c = await pagina(b, CELU);
   await entrar(c, "duena@ejemplo.invalid");
   await c.goto(`${G}/panel`);
-  await c.locator("[data-numero]").first().waitFor({ timeout: 30000 });
+  await c.locator("dl [data-numero]").first().waitFor({ timeout: 30000 });   // el primer [data-numero] de la página es el globito del menú, que en celular está cerrado
   const ancho = await c.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
   chequear(ancho[0] <= ancho[1], "celular 390 px: Inicio sin desborde horizontal", `desborda: ${ancho[0]} > ${ancho[1]}`);
   await capturar(c, "vd12-celu-duena");
