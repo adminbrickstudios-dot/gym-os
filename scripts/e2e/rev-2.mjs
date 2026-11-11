@@ -22,7 +22,7 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.locator("main dl").first().waitFor({ timeout: 60000 });
   const numeros = await d.locator("main dl").first().locator("dt").count();
-  chequear(numeros === 4, "Inicio: los 4 números grandes con su etiqueta", `Inicio tiene ${numeros} números`);
+  chequear(numeros >= 4, "Inicio: los números grandes con su etiqueta (BASE-4: más de 4 por defecto)", `Inicio tiene ${numeros} números`);
   await ancho("Inicio");
   await d.goto(`${G}/panel/resumen`);
   await d.getByRole("link", { name: "Esta semana" }).click();

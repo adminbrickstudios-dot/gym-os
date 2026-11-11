@@ -26,7 +26,7 @@ export function ElegirNumeros({ disponibles, elegidos }: { disponibles: Opcion[]
   };
   return (
     <details className="mt-4" data-elegir-numeros>
-      <summary className="texto-suave cursor-pointer select-none min-h-11 flex items-center"><Icono nombre="ajustes" /> Elegir mis 4 números</summary>
+      <summary className="texto-suave cursor-pointer select-none min-h-11 flex items-center"><Icono nombre="ajustes" /> Elegir mis números</summary>
       <div className="tarjeta p-4 mt-2 space-y-3">
         <p className="texto-suave">Marcá hasta 8. Si no marcás ninguno, se muestran los de siempre.</p>
         <ul className="grid sm:grid-cols-2 gap-2">

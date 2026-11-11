@@ -36,7 +36,7 @@ try {
     await p.waitForFunction((n) => Number(document.querySelector('[data-pie="secciones"]')?.getAttribute("data-respuestas")) > n, antes, { timeout: 30000 });
     return (await pie.locator(".mensaje").first().innerText()).replace(/\s+/g, " ").trim();
   };
-  const interruptor = (nombre) => p.locator("fieldset[data-pestana-activa] label").filter({ hasText: new RegExp(`^(?:\\S+ )?${nombre}\\b`) }).locator('input[role="switch"]');
+  const interruptor = (nombre) => p.locator("fieldset[data-pestana-activa] label").filter({ hasText: new RegExp(`^${nombre}`) }).locator('input[role="switch"]');
 
   for (const [clave, nombre, ruta] of SECCIONES) {
     await secciones();
