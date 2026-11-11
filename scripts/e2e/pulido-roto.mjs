@@ -114,7 +114,7 @@ try {
   const ca = await avisos.boundingBox(), cb = await boton.boundingBox();
   const choca = ca.x < cb.x + cb.width && ca.x + ca.width > cb.x && ca.y < cb.y + cb.height && ca.y + ca.height > cb.y;
   chequear(!choca && ca.y < 200, "los avisos de la puerta salen arriba y no tapan el botón de la Entrada", `avisos en (${Math.round(ca.x)},${Math.round(ca.y)}) ${Math.round(ca.width)}x${Math.round(ca.height)}, botón en (${Math.round(cb.x)},${Math.round(cb.y)})`);
-  const barra = r.locator("[data-barra-entrada]");
+  const barra = r.locator("aside[data-barra-entrada]");   // (el <html> también lleva ese atributo)
   if (await barra.count() && await barra.isVisible()) {
     const bb = await barra.boundingBox();
     chequear(ca.x + ca.width <= bb.x + 1, "con la barra fija, los avisos quedan a su izquierda", `los avisos llegan a ${Math.round(ca.x + ca.width)} y la barra empieza en ${Math.round(bb.x)}`);
