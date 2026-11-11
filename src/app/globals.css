@@ -193,7 +193,7 @@ html { accent-color: var(--acento); }
   .boton:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
   .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
-  .boton-peligro { background: color-mix(in oklab, var(--rojo), var(--fondo) 70%); color: color-mix(in oklab, var(--no), white 75%); border-color: color-mix(in oklab, var(--rojo), var(--fondo) 50%); }
+  .boton-peligro { background: color-mix(in oklab, var(--rojo), var(--fondo) 70%); color: color-mix(in oklab, var(--no), var(--texto) 62%);   /* rojo oscuro en claro y rojo pálido en oscuro: legible en los dos */ border-color: color-mix(in oklab, var(--rojo), var(--fondo) 50%); }
 
   /* Ícono de línea (componente Icono): hereda el color y el tamaño del texto. */
   .icono-svg { display: inline-block; vertical-align: -0.2em; flex: none; }
@@ -298,6 +298,8 @@ html { accent-color: var(--acento); }
     font-weight: 650; color: var(--texto-suave); background: transparent; border: 1px solid var(--borde); cursor: pointer;
   }
   .pestana[aria-selected="true"], .pestana[aria-current="page"] { background: var(--texto); color: var(--fondo); border-color: transparent; }
+  /* El texto apagado (un contador) dentro de la pestaña activa hereda el color de la pestaña: sobre el fondo invertido el gris no se lee. */
+  .pestana[aria-selected="true"] .texto-tenue, .pestana[aria-current="page"] .texto-tenue, .pestana[aria-pressed="true"] .texto-tenue, .boton-principal .texto-tenue { color: inherit; }
 
   /* Interruptor (prender / apagar): un checkbox con forma de switch. */
   .interruptor {
