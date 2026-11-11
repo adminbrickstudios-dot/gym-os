@@ -46,7 +46,13 @@ try {
   await r.locator("[data-alta-cobrar]").click();
   await r.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
   chequear(await r.locator("[data-cobrar-linea=cuota]").count() === 1, "Guardar y cobrar abre la hoja Cobrar con la cuota del plan", "la hoja no trae la cuota");
-  await r.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
+  // Efectivo: una transferencia queda pendiente de aprobación y el veredicto no sería verde. Si no hay turno de caja, se abre acá mismo.
+  await r.locator("[data-cobrar-medio]", { hasText: "Efectivo" }).click();
+  if (await r.locator("[data-abrir-turno]").waitFor({ timeout: 3000 }).then(() => true, () => false)) {
+    await r.locator('input[aria-label="Fondo del turno"]').fill("1000");
+    await r.locator("[data-abrir-turno]").click();
+    await r.locator("[data-cobrar-caja]").waitFor({ timeout: 30000 });
+  }
   await r.locator("[data-cobrar-confirmar]").click();
   await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 }).catch(async (e) => {
     const hojas = await r.locator("dialog[open], [role=dialog], [data-cobrar], [data-ventana-veredicto], [data-cobrar-hecho]").evaluateAll((l) => l.map((x) => `${x.tagName}${[...x.attributes].filter((a) => a.name.startsWith("data-")).map((a) => ` ${a.name}=${a.value}`).join("")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 300)}`));

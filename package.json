@@ -279,5 +279,13 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "browserslist": [
+    "chrome >= 109",
+    "edge >= 109",
+    "firefox >= 109",
+    "safari >= 16",
+    "ios_saf >= 16",
+    "and_chr >= 109"
+  ]
 }

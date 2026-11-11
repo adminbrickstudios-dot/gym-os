@@ -114,6 +114,11 @@ try {
   await r.locator('input[aria-label="Fondo del turno"]').fill("500");
   await r.locator("[data-abrir-turno]").click();
   await panelTurno(r).waitFor({ state: "detached", timeout: 30000 });
+  // VD-50: si la base avisa que esa cuota ya se cobró hace segundos, la prueba sigue con motivo (cobra dos veces a propósito).
+  if (await r.locator("[data-cobrar-doble-igual]").waitFor({ timeout: 3000 }).then(() => true, () => false)) {
+    await r.locator("[data-cobrar-doble-igual]").click();
+    await r.locator("[data-cobrar-doble-motivo]").fill("Otro cobro, a propósito (prueba)");
+  }
   // Si Cobrar no se habilita se dice qué hay en la hoja (en vez de esperar 30 s a ciegas).
   await r.waitForFunction(() => { const b = document.querySelector("[data-cobrar-confirmar]"); return !!b && !b.disabled; }, null, { timeout: 10000 }).catch(async () => {
     const hoja = await r.locator("[data-cobrar]").first().innerText().catch(() => "(sin hoja)");

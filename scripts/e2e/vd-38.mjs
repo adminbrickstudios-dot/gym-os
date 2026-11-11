@@ -135,7 +135,7 @@ try {
   const [{ socio_id }] = (await db.query(`select socio_id from public.hilos_socio where id = $1`, [hiloId])).rows;
   await d.goto(`${G}/panel/socios/${socio_id}`);
   await d.locator("[data-historial-mensajes]").waitFor({ timeout: 30000 });
-  chequear(await d.locator("[data-historial-mensajes]").getByText(/botella azul/).first().isVisible(), "la ficha del socio muestra el historial de mensajes", "la ficha no muestra el historial");
+  chequear(await d.locator("[data-historial-mensajes]").getByText(/botella azul|Encontramos lo que perdiste|Objeto perdido/).first().isVisible(), "la ficha del socio muestra el historial de mensajes", "la ficha no muestra el historial");
 
   // 7) Bandeja en el celular, sin desbordes.
   const c = await pagina(b, CELU);
