@@ -35,7 +35,7 @@ try {
   await s.waitForURL(/\/app\/mensajes/, { timeout: 30000 });
   await s.locator("[data-nuevo-mensaje]").click();
   await s.waitForURL(/\/app\/mensajes\/nuevo/, { timeout: 30000 });
-  chequear(await s.locator("[data-aviso-salud]").isVisible(), "el formulario avisa que no se cuenten diagnósticos", "falta el aviso de datos de salud");
+  chequear(await s.locator("[data-aviso-salud]").waitFor({ timeout: 20000 }).then(() => true, () => false), "el formulario avisa que no se cuenten diagnósticos", "falta el aviso de datos de salud");
   await s.locator('[data-motivo="objeto_perdido"]').check({ force: true });
   await s.locator('textarea[name="texto"]').fill(TEXTO);
   await s.locator("[data-foto-mensaje]").setInputFiles({ name: "botella.png", mimeType: "image/png", buffer: PNG });

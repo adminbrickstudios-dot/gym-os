@@ -17,10 +17,21 @@ const [{ id: gim }] = (await db.query(`select id from public.gimnasios where slu
 const [{ id: socio, nombre }] = (await db.query(`select s.id, trim(s.nombre || ' ' || coalesce(s.apellido, '')) nombre from public.socios s join auth.users u on u.id = s.usuario_id
   where s.gimnasio_id = $1 and u.email = 'socio@ejemplo.invalid'`, [gim])).rows;
 // Una actividad sin grados con una clase que ya pasó: el socio fue.
-const [clase] = (await db.query(`select c.id, c.actividad_id, a.nombre actividad from public.clases c join public.actividades a on a.id = c.actividad_id
+let [clase] = (await db.query(`select c.id, c.actividad_id, a.nombre actividad from public.clases c join public.actividades a on a.id = c.actividad_id
  where c.gimnasio_id = $1 and c.inicio < now() - interval '2 hours' and c.cancelada_en is null and a.activa
    and not exists (select 1 from public.grados g where g.actividad_id = a.id and g.activo)
  order by c.inicio desc limit 1`, [gim])).rows;
+// De madrugada todavía no pasó ninguna clase del día: se crea una de hace 3 horas en una actividad sin grados.
+let claseCreada = null;
+if (!clase) {
+  const [act] = (await db.query(`select a.id, a.nombre from public.actividades a where a.gimnasio_id = $1 and a.activa and not exists (select 1 from public.grados g where g.actividad_id = a.id and g.activo) order by a.nombre limit 1`, [gim])).rows;
+  const [sede] = (await db.query(`select id from public.sedes where gimnasio_id = $1 order by creado_en limit 1`, [gim])).rows;
+  if (act) {
+    const [{ id }] = (await db.query(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin) values ($1,$2,$3, now() - interval '3 hours', now() - interval '2 hours') returning id`, [gim, sede.id, act.id])).rows;
+    claseCreada = id;
+    clase = { id, actividad_id: act.id, actividad: act.nombre };
+  }
+}
 if (!clase) { console.log("❌ no hay una clase pasada en el demo"); process.exit(1); }
 const ya = (await db.query(`select 1 from public.asistencias where clase_id = $1 and socio_id = $2 and anulada_en is null`, [clase.id, socio])).rowCount;
 const [asis] = ya ? [] : (await db.query(`insert into public.asistencias (gimnasio_id, clase_id, socio_id) values ($1,$2,$3) returning id`, [gim, clase.id, socio])).rows;

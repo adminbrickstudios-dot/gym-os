@@ -48,6 +48,8 @@ try {
   await e.locator("main li").first().waitFor({ timeout: 60000 });
   chequear(await e.getByRole("button", { name: /Sacar acceso|Sumar al equipo/ }).count() === 0, "el encargado ve la lista sin botones", "el encargado ve botones");
   await e.goto(`${G}/panel/cuenta`);
+  // Con contraseña puesta (VD-33b) el formulario pide la actual: sin ella "Guardar" queda apagado.
+  if (await e.getByLabel("Contraseña actual").count()) await e.getByLabel("Contraseña actual").fill("demo-gymos");
   await e.getByLabel("Contraseña nueva").fill("una-clave-1");
   await e.getByLabel("Repetir la contraseña").fill("otra-clave-2");
   await e.getByRole("button", { name: "Guardar" }).first().click();
