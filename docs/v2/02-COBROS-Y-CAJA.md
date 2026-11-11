@@ -1,3 +1,5 @@
+> reemplazado por docs/base/RECTA-FINAL.md (H1: Caja por medio, Transferencias en dos pestañas), docs/base/PULIDO.md y docs/base/estado/mostrador.md en lo que se contradiga; lo que no choca sigue valiendo.
+
 # 02 · Cobros y caja
 
 Hoy existe mucho (ver inventario en `00-LEEME.md` → `docs/paneles/`): medios

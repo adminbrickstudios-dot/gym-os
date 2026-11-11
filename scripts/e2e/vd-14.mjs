@@ -29,7 +29,7 @@ try {
   // ── 1 · Las cuatro pestañas, cada cuenta es la de sus filas, y los totales arriba ──
   await abrir(d);
   const claves = await d.locator("[data-pestanas] [data-pestana]").evaluateAll((l) => l.map((x) => x.getAttribute("data-pestana")));
-  chequear(claves.join() === "hoy,vencidos,por_vencer,prometieron", "las cuatro pestañas: Vencen hoy, Vencidos, Por vencer, Prometieron pagar", `pestañas: ${claves.join()}`);
+  chequear(claves.join() === "hoy,vencidos,por_vencer,prometieron,cobrar", "las cinco pestañas: Vencen hoy, Vencidos, Por vencer, Prometieron pagar, Tengo que cobrar", `pestañas: ${claves.join()}`);
   const totales = await d.locator("[data-totales]").innerText();
   chequear(/\$[\d.,]+ a cobrar hoy/.test(totales) && /\$[\d.,]+ vencido/.test(totales), `arriba: “${totales.replace(/\s+/g, " ")}”`, `los totales dicen: ${totales}`);
   for (const c of ["hoy", "vencidos", "por_vencer"]) {
@@ -57,7 +57,7 @@ try {
   anterior = await sec.locator('input[name="renovacion"]').evaluateAll((l) => l.findIndex((x) => x.checked));
   await sec.locator('input[name="renovacion"]').nth(2).check();
   await sec.locator("[data-dia-fijo] input[type=number]").first().fill(String(X));
-  await sec.locator('button:has-text("Guardar")').click();
+  await sec.locator("button.boton-principal", { hasText: "Guardar" }).click();
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   await abrir(d);
   const modo = await d.locator("[data-modo-cobro]").innerText();
@@ -82,7 +82,7 @@ try {
   await irACobros(d);
   sec = d.locator("[data-reglas-vencimiento]");
   await sec.locator('input[name="renovacion"]').nth(Math.max(anterior, 0)).check();
-  await sec.locator('button:has-text("Guardar")').click();
+  await sec.locator("button.boton-principal", { hasText: "Guardar" }).click();
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok("la regla del gimnasio vuelve a como estaba");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);

@@ -16,6 +16,10 @@ export const EVENTO_ABRIR_PANEL_SOCIO = "gymos:abrir-panel-socio";
 
 const dia = (iso: string) => new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "numeric", year: "2-digit" });
 
+const ETIQUETA_INGRESO: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
+const MEDIO_ETIQUETA: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
+const nombreMedio = (m: string) => MEDIO_ETIQUETA[m] ?? m;
+
 export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   const [socioId, setSocioId] = useState<string | null>(null);
   const [ficha, setFicha] = useState<Ficha | null>(null);
@@ -88,10 +92,10 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
             )}
             <section aria-label="Último pago">
               <h3 className="titulo text-lg">Último pago</h3>
-              {ultimo ? <p data-panel-socio-ultimo-pago>{dia(ultimo.fecha)} · {formatearPesos(ultimo.monto)} · {ultimo.medio}</p> : <p className="texto-tenue">{ficha.pagos == null ? "No tenés permiso para ver los pagos." : "Todavía no pagó."}</p>}
+              {ultimo ? <p data-panel-socio-ultimo-pago>{dia(ultimo.fecha)} · {formatearPesos(ultimo.monto)} · {nombreMedio(ultimo.medio)}</p> : <p className="texto-tenue">{ficha.pagos == null ? "No tenés permiso para ver los pagos." : "Todavía no pagó."}</p>}
               {ficha.pagos && ficha.pagos.length > 1 && (
                 <ul className="mt-2 space-y-1 text-sm texto-suave" data-panel-socio-historial>
-                  {ficha.pagos.slice(1, 6).map((p) => <li key={p.id}>{dia(p.fecha)} · {formatearPesos(p.monto)} · {p.medio}</li>)}
+                  {ficha.pagos.slice(1, 6).map((p) => <li key={p.id}>{dia(p.fecha)} · {formatearPesos(p.monto)} · {nombreMedio(p.medio)}</li>)}
                 </ul>
               )}
             </section>
@@ -99,7 +103,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
               <h3 className="titulo text-lg">Últimos ingresos</h3>
               {ficha.ingresos.length === 0 ? <p className="texto-tenue">Sin ingresos todavía.</p> : (
                 <ul className="space-y-1 text-sm texto-suave">
-                  {ficha.ingresos.slice(0, 5).map((i) => <li key={i.id}>{new Date(i.momento).toLocaleString("es-AR", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })} · {i.resultado}</li>)}
+                  {ficha.ingresos.slice(0, 5).map((i) => <li key={i.id}>{new Date(i.momento).toLocaleString("es-AR", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })} · {ETIQUETA_INGRESO[i.resultado] ?? i.resultado}</li>)}
                 </ul>
               )}
             </section>

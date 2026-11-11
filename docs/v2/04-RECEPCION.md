@@ -1,3 +1,5 @@
+> reemplazado por docs/base/PULIDO.md, docs/base/DISENO.md y docs/base/estado/mostrador.md en lo que se contradiga (aviso flotante, ventana, colores, estado de cada función); lo que no choca sigue valiendo.
+
 # 04 · La recepción
 
 La recepción está parada, atiende gente, tiene 5 segundos por persona y el

@@ -84,7 +84,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   // Una búsqueda vieja no pisa a la nueva: cada respuesta se descarta si lo escrito ya cambió. `listaPara` dice para qué texto es la lista que se ve.
   const [listaPara, setListaPara] = useState("");
   const textoVivo = useRef(texto);
-  textoVivo.current = texto;
+  useEffect(() => { textoVivo.current = texto; }, [texto]);
   useEffect(() => {
     const q = texto.trim();
     if (q.length < 2 || ES_QR.test(q)) { setSocios([]); setListaPara(""); return; }
