@@ -58,6 +58,8 @@ try {
     await f.locator('input[name="dni"]').fill(dni);
     await f.locator('input[name="telefono"]').fill(tel);
     await f.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
+    await f.locator('input[name="email"]').fill(`alta${dni}@ejemplo.invalid`);
+    await f.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   };
   await llenar(form, DNI1, TEL1);
   await esperarAntiRobot(form);
@@ -71,7 +73,7 @@ try {
   const listo = v.locator('[data-alta-lista="transferencia"]');
   await listo.waitFor({ timeout: 30000 });
   const tl = (await listo.innerText()).replace(/\s+/g, " ");
-  chequear(/Bienvenido\/a a .+, Martina/.test(tl) && /Alias/.test(tl) && /comprobante desde la app/.test(tl), `transferencia: “${tl.slice(0, 110)}…”`, `la pantalla final dice: ${tl}`);
+  chequear(/¡Listo, Martina! Ya tenés tu cuenta en/.test(tl) && /Alias/.test(tl) && /comprobante desde la app/.test(tl), `transferencia: “${tl.slice(0, 110)}…”`, `la pantalla final dice: ${tl}`);
   await capturar(v, "reg1-celu-transferencia", true);
   await v.context().close();
 

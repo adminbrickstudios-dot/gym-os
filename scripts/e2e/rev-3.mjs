@@ -48,6 +48,8 @@ try {
   await form.locator('input[name="dni"]').fill(DNI);
   await form.locator('input[name="telefono"]').fill(TEL);
   await form.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
+  await form.locator('input[name="email"]').fill(`rev${s}@ejemplo.invalid`);
+  await form.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
   await esperarAntiRobot(form);

@@ -70,6 +70,8 @@ try {
   await form.locator('input[name="dni"]').fill(DNI);
   await form.locator('input[name="telefono"]').fill(TEL);
   await form.locator('input[name="fecha_nacimiento"]').fill("1991-07-02");
+  await form.locator('input[name="email"]').fill(`qr${s}@ejemplo.invalid`);
+  await form.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has(input[value="mostrador"])').click();
   await esperarAntiRobot(form);

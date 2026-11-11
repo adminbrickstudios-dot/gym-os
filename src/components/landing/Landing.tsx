@@ -449,7 +449,35 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   );
 }
 
-export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [], clases = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[]; clases?: ClaseSemana[] }) {
+/** Quién tiene la sesión abierta en este gimnasio (lo resuelve la página: lib/app/sesion-gimnasio.ts). null = nadie. */
+export type SesionLanding = { nombre: string | null; esSocio: boolean; esEquipo: boolean } | null;
+
+/**
+ * SOCIO-FLUJO §1 · Los dos botones grandes de la portada: "Quiero ser socio" (solo si el dueño tiene las altas online prendidas) y
+ * "Ya soy socio, entrar". Con la sesión abierta: el saludo por el nombre, "Ir a mi perfil" y "Cerrar sesión". Nunca pide entrar de nuevo.
+ */
+function AccesoSocio({ altas, sesion, estilo = "" }: { altas: boolean; sesion: SesionLanding; estilo?: string }) {
+  if (sesion) {
+    return (
+      <>
+        <p className="w-full text-xl font-semibold" data-saludo-sesion>Hola{sesion.nombre ? `, ${sesion.nombre}` : ""}</p>
+        <a href={sesion.esSocio ? "/app" : "/panel"} className={`boton boton-principal text-lg px-8 w-full sm:w-auto`} data-ir-a-mi-perfil><Icono nombre="persona" /> {sesion.esSocio ? "Ir a mi perfil" : "Ir al panel"}</a>
+        <form action="/salir" method="post" className="w-full sm:w-auto">
+          <input type="hidden" name="a" value={sesion.esSocio ? "socio" : "equipo"} />
+          <button className={`boton text-lg px-8 w-full ${estilo}`} data-cerrar-sesion><Icono nombre="salir" /> Cerrar sesión</button>
+        </form>
+      </>
+    );
+  }
+  return (
+    <>
+      {altas && <a href="/hacete-socio" className={`boton boton-principal text-lg px-8 w-full sm:w-auto`} data-quiero-ser-socio><Icono nombre="mas" /> Quiero ser socio</a>}
+      <a href="/ingresar?modo=socio" className={`boton text-lg px-8 w-full sm:w-auto ${estilo}`} data-ya-soy-socio><Icono nombre="llave" /> Ya soy socio, entrar</a>
+    </>
+  );
+}
+
+export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [], clases = [], sesion = null }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[]; clases?: ClaseSemana[]; sesion?: SesionLanding }) {
   // VD-62: lo que el dueño no cargó se completa con un texto sensato según el tipo de gimnasio (nunca un hueco).
   const landing = conTextosPorDefecto(landingCargada);
   const { marca, portada, contacto } = landing;
@@ -472,9 +500,11 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            <a href="/hacete-socio" className="hidden sm:inline-flex boton"><Icono nombre="pesa" /> Quiero ser socio</a>
-            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton"><Icono nombre="fuego" /> Ver planes</a>}
-            <a href="/ingresar?modo=socio" className="boton"><Icono nombre="pesa" /> Soy socio</a>
+            {!sesion && landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton"><Icono nombre="mas" /> Quiero ser socio</a>}
+            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton"><Icono nombre="tarjeta" /> Ver planes</a>}
+            {sesion
+              ? <a href={sesion.esSocio ? "/app" : "/panel"} className="boton"><Icono nombre="persona" /> {sesion.esSocio ? "Ir a mi perfil" : "Ir al panel"}</a>
+              : <a href="/ingresar?modo=socio" className="boton"><Icono nombre="llave" /> Ya soy socio, entrar</a>}
           </nav>
         </div>
       </header>
@@ -497,7 +527,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               <div className="mt-8 flex flex-wrap gap-3">
                 {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
                 {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
-                <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30"><Icono nombre="pesa" /> Quiero ser socio</a>
+                <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo="!bg-white/15 !text-white !border-white/30" />
               </div>
             </div>
           </div>
@@ -512,8 +542,8 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
-              <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="pesa" /> Quiero ser socio</a>
-              {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="fuego" /> Ver planes</a>}
+              <AccesoSocio altas={!!landing.altas_online} sesion={sesion} />
+              {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="tarjeta" /> Ver planes</a>}
             </div>
           </div>
         </section>
@@ -569,7 +599,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
  * U4 · "Ocultar mi página": solo la portada con la marca y los dos botones. Nunca un cartel de "en construcción": la página
  * de un gimnasio es siempre su landing, y esto es lo que queda cuando el dueño decide no mostrarla.
  */
-export function LandingOculta({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
+export function LandingOculta({ marca, contacto, altas = false, sesion = null }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null }; altas?: boolean; sesion?: SesionLanding }) {
   const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
   const base = propsMarca(marca);
   return (
@@ -578,8 +608,7 @@ export function LandingOculta({ marca, contacto }: { marca: Marca; contacto?: { 
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <a href="/hacete-socio" className="boton boton-principal text-lg px-8"><Icono nombre="pesa" /> Quiero ser socio</a>
-          <a href="/ingresar?modo=socio" className="boton text-lg px-8"><Icono nombre="pesa" /> Soy socio</a>
+          <AccesoSocio altas={altas} sesion={sesion} />
         </div>
         {whatsapp && <div className="mt-6 flex justify-center"><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a></div>}
         <p className="mt-10"><a href="/ingresar" className="text-sm texto-suave underline underline-offset-4"><Icono nombre="campana" /> Soy del equipo</a></p>

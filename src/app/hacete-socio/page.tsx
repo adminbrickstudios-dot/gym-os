@@ -10,6 +10,7 @@ import { traerLanding, type Marca, type PlanPublico } from "@/lib/landing";
 import { FormAlta } from "./FormAlta";
 import type { Transferencia } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
 
 export type DatosAlta = {
   abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
@@ -47,19 +48,20 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
   const d = await datos();
   if (!d) notFound();
   const { plan } = await searchParams;
+  const raiz = await raizDelGimnasio();
   const wa = linkWhatsapp(d.contacto.whatsapp, "Hola! Quiero hacerme socio.");
   return (
     <div {...propsMarca(d.marca)} className="min-h-dvh">
       <header className="mx-auto max-w-3xl px-4 h-16 flex items-center justify-between gap-3">
-        <Link href="/" className="titulo text-xl truncate">← {d.marca.nombre}</Link>
-        <a href="/ingresar?modo=socio" className="boton"><Icono nombre="pesa" /> Soy socio</a>
+        <Link href={raiz} className="titulo text-xl truncate">← {d.marca.nombre}</Link>
+        <a href="/ingresar?modo=socio" className="boton"><Icono nombre="llave" /> Ya soy socio, entrar</a>
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 space-y-8">
         <div>
-          <h1 className="titular text-5xl sm:text-6xl"><Icono nombre="pesa" /> Quiero ser socio</h1>
-          <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y empezá a entrenar.</p>
+          <h1 className="titular text-5xl sm:text-6xl">Quiero ser socio</h1>
+          <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y creá tu cuenta. Con tu mail y tu contraseña entrás a tu perfil.</p>
         </div>
-        {d.abierta && d.planes?.length && d.reglamento
+        {d.abierta && d.planes?.length
           ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} />
           : (
             // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.
