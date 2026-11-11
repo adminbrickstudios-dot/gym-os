@@ -79,6 +79,8 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   if (tipo) {
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
     catch (e) { avisoPlantilla = ` No se pudo aplicar la plantilla: ${(e as Error).message}.`; }
+    // F9.1: el tipo queda guardado para que le lleguen las plantillas de textos de su tipo.
+    try { await rpc("admin_guardar_tipo_gimnasio", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); } catch { /* el tipo es una mejora: el alta ya quedó hecha */ }
   }
   // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
   const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
@@ -338,6 +340,27 @@ export const cambiarRolPersona = async (equipoId: string, gimnasioId: string, ro
   hechoAdmin(() => rpc("admin_cambiar_rol_persona", { p_equipo_id: equipoId, p_rol: rol }), [`/admin/${gimnasioId}`]);
 export const moverPersona = async (equipoId: string, gimnasioId: string, destino: string, rol: string) =>
   hechoAdmin(() => rpc("admin_mover_persona", { p_equipo_id: equipoId, p_gimnasio_destino: destino, p_rol: rol || null }), [`/admin/${gimnasioId}`, `/admin/${destino}`, "/admin/gimnasios"]);
+
+// ── F9.6 (ESC-08): límites por plan, en datos ──
+export const guardarLimitesPlan = async (planId: string, maxSocios: number | null, maxSedes: number | null) =>
+  hechoAdmin(() => rpc("admin_guardar_limites_plan", { p_plan_id: planId, p_max_socios: maxSocios, p_max_sedes: maxSedes }), ["/admin"]);
+
+// ── F9.1 (EDIT-S07): plantillas de textos en capas (plataforma → tipo → gimnasio) ──
+export type TextoPlantilla = {
+  clave: string; etiqueta: string; grupo: string; max: number; fabrica: string; plataforma: string | null;
+  por_tipo: Record<string, string>; gimnasios_por_tipo: Record<string, number>;
+};
+async function conteo(f: () => Promise<number>, rutas: string[]): Promise<{ error?: string; gimnasios?: number }> {
+  try { const n = await f(); for (const r of rutas) revalidatePath(r); return { gimnasios: n }; } catch (e) { return { error: (e as Error).message }; }
+}
+export const guardarPlantillaTexto = async (clave: string, tipo: string | null, valor: string) =>
+  conteo(() => rpc<number>("admin_guardar_plantilla_texto", { p_clave: clave, p_tipo: tipo, p_valor: valor }), ["/admin/plantillas"]);
+export const restaurarPlantillaTexto = async (clave: string, tipo: string | null) =>
+  conteo(() => rpc<number>("admin_restaurar_plantilla_texto", { p_clave: clave, p_tipo: tipo }), ["/admin/plantillas"]);
+export async function restaurarTextoGimnasio(gimnasioId: string, clave: string): Promise<{ error?: string; valor?: string }> {
+  try { const valor = await rpc<string>("admin_restaurar_texto_gimnasio", { p_gimnasio_id: gimnasioId, p_clave: clave }); revalidatePath(`/admin/${gimnasioId}`); return { valor }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
 
 // ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
 // ⛔ en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.

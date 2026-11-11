@@ -130,6 +130,35 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+#### Fase 9 (F9.1, F9.4, F9.5, F9.6) · plantillas, escala y monitoreo
+
+- **Pedido al principal (ESC-02), cambio exacto en `src/proxy.ts`.** Hoy el proxy ya NO consulta la autenticación en las páginas públicas
+  (solo en `/panel`, `/app`, `/admin` y `/ingresar`). Quedan dos mejoras, las dos en `src/proxy.ts` / rutas públicas (carril A):
+  1. **`/ingresar` sin cookie de sesión no necesita `getClaims()`.** En `conSesion`, justo antes de crear el cliente de Supabase:
+     ```ts
+     const hayCookieDeSesion = req.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+     if (!esProtegida(ruta) && !hayCookieDeSesion) return respuesta;   // la landing y el ingreso de alguien sin sesión no verifican nada
+     ```
+     (ahorra un `getClaims()` por cada visita anónima al ingreso, que con claves simétricas es un viaje a Auth).
+  2. **HTML público desde la caché de la red.** `Cache-Control` desde el proxy no alcanza: Next lo pisa con `private, no-store` en cualquier página
+     que lee `headers()`. Para cachear la landing hay que sacarla de lo dinámico: en el proxy, para un host de gimnasio y las rutas `/` y
+     `/hacete-socio` SIN cookies, hacer `NextResponse.rewrite` a `/sitio/<host>` y `/sitio/<host>/hacete-socio`, rutas con
+     `export const revalidate = 300` y `generateStaticParams` vacío (ISR a pedido), que usan los mismos `traerLanding(host)` (ya con `unstable_cache`
+     y `revalidateTag`, que se invalida al editar). Con cookies (o sesión) sigue como hoy. Es una decisión de arquitectura del carril A: no la toqué.
+- **Asesores de Supabase que no puedo ver (Mateo, copiá acá lo que digan):** Security Advisor y Performance Advisor del proyecto real. No tengo acceso
+  (el Supabase conectado a esta sesión tiene otros proyectos). Esperados: "RLS enabled no policy" en tablas cerradas a propósito (info);
+  "unindexed foreign keys" (arreglados los calientes en la migración 020700; el resto lo cubren índices de otra forma); "auth RLS initplan" (resuelto).
+  También: "Leaked password protection" y "MFA" (Auth → Providers/Policies, son interruptores del panel de Supabase).
+- **F9.1 plantillas:** el tipo de gimnasio no existía como dato: se agregó `gimnasios.tipo_plantilla` (lo llena el alta con plantilla; los gimnasios
+  anteriores quedan sin tipo y solo reciben la plantilla de la plataforma). Cubre hoy los textos de la web (botón, mensaje de WhatsApp y bajada);
+  los títulos de sección y los mensajes del dueño a socios viven en código (`landing-defaults.ts`, carril C) o por gimnasio: para sumarlos hay
+  que agregar una fila a `privado.textos_plantilla()` y que el dueño los guarde en una columna. "No editó" = tiene exactamente lo que le daba la
+  plantilla anterior (o el valor de creación de la bajada, o está vacío): si el dueño escribió algo idéntico a la plantilla, igual lo recibe.
+- **F9.5 carga:** escrita (`scripts/medir/carga.mjs`, `.github/workflows/carga.yml`), **sin resultados todavía**: sembrar 1.000 gimnasios tarda ~30 min
+  (cada gimnasio dispara sus triggers) y 500 usuarios necesitan memoria que acá no hay. Se corre en Actions: `gh workflow run carga.yml`.
+- **F9.6:** límites por plan guardados y mostrados pero **no aplicados** (ver `ESCALA.md`; bloquear altas sería decidir quién puede qué). Sentry ⛔
+  (sin cuenta ni DSN). El chequeo de salud se prende con la variable `SALUD_URL` en GitHub.
+
 #### P2 (PLAT-04), P3 (PLAT-06) y P9 (PLAT-05)
 
 - **P2: helper único `src/lib/urls.ts`** (`urlPlataforma`, `urlGimnasio`, `urlPanel`, `urlIngreso`, `urlDeHost`, `rutaGimnasio`, `hostGimnasio`),
@@ -271,3 +300,9 @@ Respuesta de Mateo: (vacío)
 
 - No toqué `src/app/ingresar` ni `src/proxy.ts` (los arregla B). Lo mío: la prueba de base `login-dueno-nuevo.test.mjs` (alta de gimnasio con dueño, filas que quedan, mail con mayúsculas y espacios, cuenta sin fila o de otro gimnasio, slug inexistente) y el e2e `scripts/e2e/fase-u0-login.mjs`.
 - Pendiente de decidir (de B): `darAcceso` no normaliza el mail adentro; hoy lo hacen los que lo llaman (`admin/acciones.ts`, `panel/equipo/acciones.ts`). Recomendado: normalizar también en `src/lib/cuentas.ts`.
+
+### Carril B · F2 / F9.8 (restricción de plata del soporte y "ver como socio")
+
+- **Toca plata y permisos, por eso lo reporto:** la migración `20261109020800` agrega un trigger en `ventas`, `pagos`, `movimientos_caja` y `turnos_caja` que frena (42501) cualquier escritura hecha por una cuenta de soporte de BRIK (`equipo.es_soporte`) salvo que, al entrar, se haya tildado "El dueño me pidió tocar plata" (`soportes_gimnasio.plata_autorizada`, 60 min, queda en el motivo que ve el dueño). **No cambia quién cobra en el gimnasio**: dueño, recepción y profe quedan igual. Decisión de Mateo: ¿alcanza con la casilla o prefiere que el dueño apruebe desde su panel?
+- **"Ver como este socio"** es una pantalla de solo lectura de BRIK (`/admin/ver-socio`, función `admin_ver_socio`): acceso calculado con motivo, cobertura, últimos pagos e ingresos. No entra a la cuenta del socio ni muestra la app real (es del carril C). Queda en el registro de BRIK.
+- **SEG-01 a 07:** SEG-01 ya estaba (`aislamiento-gimnasios.test.mjs`); SEG-02 y SEG-07 ahora tienen guarda en vitest (`src/lib/admin/seguridad-codigo.test.ts`: ningún archivo de navegador toca la clave de servicio, ninguna clave ni `demo-gymos` en `src`); SEG-03/04 (BASE-8), SEG-05 (registro de BRIK) y SEG-06 (exportar/borrar) ya estaban.

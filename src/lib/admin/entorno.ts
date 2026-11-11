@@ -96,6 +96,22 @@ export function chequearEntorno(env: Env): ChequeoEntorno[] {
     lista.push({ ok: true, nivel: k.ref ? "ok" : "aviso", titulo: k.ref ? `${nombre}: del mismo proyecto que la URL` : `${nombre}: clave nueva (no trae el proyecto, no se puede comparar con la URL)` });
   }
 
+  // 3b. ESC-01: la región de las funciones tiene que ser la de Supabase (São Paulo: gru1), y una conexión directa a Postgres usa el pooler.
+  const region = String(env.VERCEL_REGION ?? "").trim();
+  if (region && region !== "gru1") {
+    lista.push({ ok: true, nivel: "aviso", titulo: `Las funciones corren en ${region} y la base está en São Paulo (gru1)`,
+      detalle: `Cada consulta cruza el continente. En vercel.json: "regions": ["gru1"] y redeployá.` });
+  }
+  const directa = String(env.SUPABASE_DB_URL ?? env.DATABASE_URL ?? "").trim();
+  if (directa) {
+    const m = /@([^:/]+):(\d+)/.exec(directa);
+    const esPooler = !!m && (m[1].includes("pooler.supabase.com") || m[2] === "6543");
+    lista.push(esPooler
+      ? { ok: true, nivel: "ok", titulo: "La conexión directa a Postgres usa el pooler de Supabase" }
+      : { ok: true, nivel: "aviso", titulo: "Hay una conexión directa a Postgres que no pasa por el pooler",
+          detalle: "Con muchos usuarios a la vez se agotan las conexiones. Usá la dirección del pooler de transacciones (puerto 6543) en SUPABASE_DB_URL. Detalle en docs/base/ESCALA.md." });
+  }
+
   // 4. Solo para conectar el dominio desde el super admin (PLAT-05): no es un error mientras no haya dominio
   lista.push(String(env.VERCEL_TOKEN ?? "").trim()
     ? { ok: true, nivel: "ok", titulo: "VERCEL_TOKEN cargado: los dominios se pueden agregar desde el super admin" }

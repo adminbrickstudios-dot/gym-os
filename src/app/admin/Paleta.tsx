@@ -19,6 +19,7 @@ export function Paleta({ gimnasios }: { gimnasios: GimnasioPaleta[] }) {
     { texto: "Tablero", destino: "/admin", clave: "inicio tablero atencion" },
     { texto: "Seguridad y usuarios de BRIK", destino: "/admin/seguridad", clave: "seguridad dos pasos roles usuarios" },
     { texto: "Registro de BRIK", destino: "/admin/registro", clave: "registro auditoria" },
+    { texto: "Plantillas de textos", destino: "/admin/plantillas", clave: "plantillas textos web mensajes tipo" },
     ...gimnasios.flatMap((g) => [
       { texto: `Abrir la ficha de ${g.nombre}`, destino: `/admin/${g.id}`, clave: `${g.nombre} ${g.slug} ficha` },
       { texto: `Entrar a ${g.nombre} como soporte`, destino: `/admin/${g.id}#entrar`, clave: `entrar soporte ${g.nombre} ${g.slug}` },
