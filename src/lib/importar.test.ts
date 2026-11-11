@@ -17,3 +17,16 @@ test("celdas: fechas del Excel a AAAA-MM-DD, números a texto; filas vacías afu
   expect(celda(20111222)).toBe("20111222");
   expect(armarFilas([["Ana", 1], ["", ""]], ["nombre", "dni"])).toEqual([{ nombre: "Ana", dni: "1" }]);
 });
+
+test("mapeo por nombre en otro orden, con tildes y mayúsculas: alta y pagó hasta", () => {
+  expect(adivinarColumnas(["PAGÓ HASTA", "fecha de alta", "TELÉFONO", "Mail", "dni", "Plan", "Nombre del socio"]))
+    .toEqual(["vence", "alta", "telefono", "email", "dni", "plan", "nombre"]);
+  expect(adivinarColumnas(["Fecha de ingreso", "Fecha de nacimiento", "Cuota hasta", "Apellido", "Nombre"]))
+    .toEqual(["alta", "nacimiento", "vence", "apellido", "nombre"]);
+});
+
+test("armarFilas respeta el orden de las columnas del archivo", () => {
+  const mapa = adivinarColumnas(["Pagó hasta", "Alta", "DNI", "Nombre"]);
+  expect(armarFilas([[new Date(Date.UTC(2026, 11, 31)), "05/01/2025", 20111222, "Ana Gómez"]], mapa))
+    .toEqual([{ vence: "2026-12-31", alta: "05/01/2025", dni: "20111222", nombre: "Ana Gómez" }]);
+});
