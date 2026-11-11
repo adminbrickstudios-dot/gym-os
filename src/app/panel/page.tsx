@@ -61,6 +61,13 @@ export default async function Inicio() {
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
           <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
+        {rol === "recepcion" && (
+          <nav className="flex flex-wrap gap-2 -mt-6 sm:-mt-8" aria-label="Acciones del mostrador" data-acciones-mostrador>
+            {rutaDisponible("/panel/vender", rol, panel.secciones_apagadas) && <Link href="/panel/vender" className="boton boton-principal"><Icono nombre="plata" /> Cobrar</Link>}
+            <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Alta</Link>
+            <Link href="/panel/entrada" className="boton"><Icono nombre="ticket" /> Pase diario</Link>
+          </nav>
+        )}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 
@@ -140,8 +147,20 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
       (a.tipo === "vencen" && yaEnHacer.has("vencen_hoy"));
     const ahora = datos.ahora.filter((a) => (!a.href || rutaDisponible(`/panel${a.href}`, rol, panel.secciones_apagadas)) && !repetido(a));
 
+    const numerosDeHoy = (
+          <section aria-label="Números de hoy" {...(rol === "recepcion" ? { "data-franja-mostrador": "", className: "lg:sticky lg:top-0 z-20 bg-[var(--fondo)] py-2 -mx-1 px-1" } : {})}>
+            <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+            {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
+            {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
+            {(rol === "dueno" || rol === "encargado") && (
+              <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
+            )}
+          </section>
+    );
+
     return (
       <>
+        {rol === "recepcion" && numerosDeHoy}
         {fichaje?.usa && fichaje.puede && <BotonFichar nombre={fichaje.nombre} enTurno={fichaje.en_turno} entradaEn={fichaje.entrada_en} sinSalidaDesde={fichaje.sin_salida_desde} zona={zona} />}
         {rol === "recepcion" && (() => {
           const turno = datos.ahora.find((a) => a.tipo === "caja");
@@ -164,14 +183,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           </Suspense>
         )}
 
-        <section aria-label="Números de hoy">
-          <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
-          {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
-          {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
-          {(rol === "dueno" || rol === "encargado") && (
-            <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
-          )}
-        </section>
+        {rol !== "recepcion" && numerosDeHoy}
 
         {rol !== "profe" && (
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8 [&>*]:min-w-0">

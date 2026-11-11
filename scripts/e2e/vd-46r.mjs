@@ -14,7 +14,11 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/tareas`);
   await d.locator("main").waitFor({ timeout: 30000 });
-  await d.getByText(/Cumplieron 18/).first().waitFor({ timeout: 30000 });
+  // La lista de automáticas que se pueden prender o apagar vive en un desplegable cerrado: se abre para verla.
+  const config = d.locator("[data-config-automaticas]");
+  await config.waitFor({ timeout: 30000 });
+  if (!(await config.evaluate((x) => x.open))) await config.locator("summary").click();
+  await config.getByText(/Cumplieron 18/).first().waitFor({ timeout: 30000 });
   ok("Tareas: la automática “Cumplieron 18: tienen que firmar ellos” se puede prender, apagar o asignar");
 
   await d.goto(`${G}/panel/documentos`);

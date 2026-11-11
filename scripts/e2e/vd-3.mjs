@@ -33,9 +33,10 @@ try {
   await anotar();
   ok(`primera pasada de ${nombre}: anotada`);
   await buscar.fill("");
-  await r.locator("[data-hecho]").evaluate((e) => e.remove()).catch(() => {});   // la tarjeta vieja no confunde a la nueva
+  // (Antes se borraba la tarjeta vieja del DOM a mano: React la maneja y el borrado lo dejaba colgado. Ahora se espera a la tarjeta nueva por su texto.)
   await anotar();
-  const dice = await r.locator("[data-hecho]").innerText();
+  await r.locator("[data-hecho]", { hasText: /Ya entró/ }).first().waitFor({ timeout: 20000 }).catch(() => {});
+  const dice = await r.locator("[data-hecho]").first().innerText();
   chequear(/Ya entró (a las \d{2}:\d{2}|hace)/.test(dice), `la segunda pasada dice “${dice.replace(/\s+/g, " ").slice(0, 60)}”`, `no dijo que ya entró: “${dice}”`);
   chequear(await r.locator('[data-hecho] button:has-text("Deshacer")').count() === 0, "el repetido no ofrece Deshacer (no hay entrada nueva que deshacer)", "ofrece Deshacer en un repetido");
   await capturar(r, "vd3-compu-ya-entro");
