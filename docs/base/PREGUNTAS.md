@@ -321,3 +321,4 @@ Respuesta de Mateo: (vacío)
 - **Aprobado por Mateo:** los permisos de C1 (`cuenta_para_clave_socio`, `registrar_clave_entregada`, tabla `claves_entregadas`).
 - **Pedido de Mateo:** el socio ve en su app "Te dieron una clave nueva el <fecha>, por <nombre>" (ayudante `carril/c-aviso-clave`).
 - **Regla desde hoy:** lo que toque permisos o plata se decide con la opción más segura y se anota acá como "decidido por defecto"; no se pide revisión. Se publica al cerrar cada fase (prevuelo → aplicar → merge → humo). La publicación de la fase P y lo hecho de la fase C sale apenas C1 pase en Actions.
+- **Decidido por defecto (C4):** no hay QR fijo impreso para la pared. El de la tablet cambia cada 30 s y lo firma la base; uno impreso se podría prestar. El cartel de la puerta lleva logo, color y nombre y manda a escanear el QR de la tablet. Si Mateo quiere uno fijo, es una decisión de seguridad aparte.
