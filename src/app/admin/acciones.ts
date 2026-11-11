@@ -1,5 +1,5 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
 import { dominioBase } from "@/lib/dominios";
 import { urlGimnasio, urlPanel } from "@/lib/urls";
@@ -79,6 +79,8 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   if (tipo) {
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
     catch (e) { avisoPlantilla = ` No se pudo aplicar la plantilla: ${(e as Error).message}.`; }
+    // F9.1: el tipo queda guardado para que le lleguen las plantillas de textos de su tipo.
+    try { await rpc("admin_guardar_tipo_gimnasio", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); } catch { /* el tipo es una mejora: el alta ya quedó hecha */ }
   }
   // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
   const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
@@ -271,8 +273,8 @@ export async function publicarNovedadPara(titulo: string, texto: string, link: s
   } catch (e) { return { error: (e as Error).message }; }
 }
 export const programarMantenimiento = async (desde: string, hasta: string, texto: string) =>
-  hechoAdmin(() => rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }), ["/admin"]);
-export const cancelarMantenimiento = async (id: string) => hechoAdmin(() => rpc("admin_cancelar_mantenimiento", { p_id: id }), ["/admin"]);
+  hechoAdmin(async () => { await rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }); revalidateTag("mantenimiento", { expire: 0 }); }, ["/admin"]);
+export const cancelarMantenimiento = async (id: string) => hechoAdmin(async () => { await rpc("admin_cancelar_mantenimiento", { p_id: id }); revalidateTag("mantenimiento", { expire: 0 }); }, ["/admin"]);
 export const guardarPrueba = async (gimnasioId: string, dias: number) =>
   hechoAdmin(() => rpc("admin_guardar_prueba", { p_gimnasio_id: gimnasioId, p_dias: dias }), [`/admin/${gimnasioId}`, "/admin"]);
 export const guardarDescuento = async (gimnasioId: string, porcentaje: number, motivo: string, hasta: string) =>
@@ -339,8 +341,36 @@ export const cambiarRolPersona = async (equipoId: string, gimnasioId: string, ro
 export const moverPersona = async (equipoId: string, gimnasioId: string, destino: string, rol: string) =>
   hechoAdmin(() => rpc("admin_mover_persona", { p_equipo_id: equipoId, p_gimnasio_destino: destino, p_rol: rol || null }), [`/admin/${gimnasioId}`, `/admin/${destino}`, "/admin/gimnasios"]);
 
+// ── F9.6 (ESC-08): límites por plan, en datos ──
+export const guardarLimitesPlan = async (planId: string, maxSocios: number | null, maxSedes: number | null) =>
+  hechoAdmin(() => rpc("admin_guardar_limites_plan", { p_plan_id: planId, p_max_socios: maxSocios, p_max_sedes: maxSedes }), ["/admin"]);
+
+/** VD-26B: si el plan se muestra en la web de Base. */
+export const guardarPlanPublico = async (planId: string, publico: boolean) => {
+  const r = await hechoAdmin(() => rpc("admin_plan_publico", { p_plan_id: planId, p_publico: publico }), ["/admin"]);
+  if (!r.error) { revalidatePath("/"); }
+  return r;
+};
+
+// ── F9.1 (EDIT-S07): plantillas de textos en capas (plataforma → tipo → gimnasio) ──
+export type TextoPlantilla = {
+  clave: string; etiqueta: string; grupo: string; max: number; fabrica: string; plataforma: string | null;
+  por_tipo: Record<string, string>; gimnasios_por_tipo: Record<string, number>;
+};
+async function conteo(f: () => Promise<number>, rutas: string[]): Promise<{ error?: string; gimnasios?: number }> {
+  try { const n = await f(); for (const r of rutas) revalidatePath(r); return { gimnasios: n }; } catch (e) { return { error: (e as Error).message }; }
+}
+export const guardarPlantillaTexto = async (clave: string, tipo: string | null, valor: string) =>
+  conteo(() => rpc<number>("admin_guardar_plantilla_texto", { p_clave: clave, p_tipo: tipo, p_valor: valor }), ["/admin/plantillas"]);
+export const restaurarPlantillaTexto = async (clave: string, tipo: string | null) =>
+  conteo(() => rpc<number>("admin_restaurar_plantilla_texto", { p_clave: clave, p_tipo: tipo }), ["/admin/plantillas"]);
+export async function restaurarTextoGimnasio(gimnasioId: string, clave: string): Promise<{ error?: string; valor?: string }> {
+  try { const valor = await rpc<string>("admin_restaurar_texto_gimnasio", { p_gimnasio_id: gimnasioId, p_clave: clave }); revalidatePath(`/admin/${gimnasioId}`); return { valor }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 // ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
-// ⛔ en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
+// (pendiente) en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
 const hablarConVercel: VercelFetch = async (url, init) => {
   const r = await fetch(url, { ...init, cache: "no-store" });
   return { status: r.status, json: () => r.json() };
@@ -371,6 +401,13 @@ export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre:
 export async function buscarPersona(q: string, motivo: string): Promise<{ error?: string; personas?: PersonaEncontrada[] }> {
   try { return { personas: await rpc<PersonaEncontrada[]>("admin_buscar_persona", { p_q: q, p_motivo: motivo }) }; }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── F2.8: equipos desde los que entran los usuarios de BRIK ──
+/** Anota el equipo (por su navegador) y dice si es uno nuevo para esta cuenta. Nunca frena: si falla, no hay aviso. */
+export async function registrarEquipoBrik(): Promise<{ nuevo: boolean }> {
+  try { const r = await rpc<{ nuevo: boolean }>("admin_registrar_equipo"); return { nuevo: !!r.nuevo }; }
+  catch (e) { console.error("admin_registrar_equipo:", (e as Error).message); return { nuevo: false }; }
 }
 
 // ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──

@@ -39,7 +39,7 @@ test("revisar: cada error con su fila, sin guardar nada", async () => {
     assert.match(e2, /DNI 20111222: repetido en el archivo/);
     assert.match(e2, /Celular “abc”/);
     assert.match(e2, /Plan “Plan Inventado”: no existe/);
-    assert.match(e2, /Vence “31\/31\/2026”/);
+    assert.match(e2, /Pagó hasta “31\/31\/2026”/);
     assert.match(r.filas[3].errores.join(" | "), /Mail “caro@”/);
     const [{ n }] = await t.q(`select count(*)::int n from public.socios where gimnasio_id = $1 and origen = 'importacion'`, [t.g]);
     assert.equal(n, 0);

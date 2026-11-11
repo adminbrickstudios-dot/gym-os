@@ -28,6 +28,15 @@ terminado.
 
 ---
 
+## F3 · La pasada botón por botón (carril C, 11/11)
+1. **Qué pidió Mateo:** que nada quede "estático porque no tiene cómo volver": apretar un botón siempre hace algo visible, termina y se puede salir.
+2. **Cómo lo hace un producto profesional:** Linear/Stripe: respuesta inmediata al toque, estados de carga reales, Esc cierra todo y el "atrás" nunca deja la pantalla rota; se prueba con un robot que toca todo y mide.
+3. **Cinco formas en que se rompe:** (a) otro rol: botones que dicen "no tenés permiso"; (b) celular: botones tapados o fuera de pantalla; (c) internet lento: botón sin estado; (d) doble clic: acción repetida; (e) datos vacíos: lista sin salida.
+4. **Lo que no pidió pero necesita:** un informe que se lee (no un rojo/verde), repartido por rol para correr en Actions, y que el robot nunca toque lo que cambia datos o manda mensajes.
+5. **Decisión y prueba:** `scripts/e2e/botones.mjs` (por rol, compu y celular; mide la primera respuesta, mira consola, pantallas rotas, "atrás" y Esc; deja `.local/botones-informe.md`) + `.github/workflows/botones.yml` (una tanda por rol). `FLUIDEZ-PANTALLAS.md` revisa el carril C contra las reglas leyendo el código; el robot completa lo que solo se ve ejecutando.
+
+---
+
 ## P8 · La landing del gimnasio, profesional con cero configuración (carril C, 11/11)
 1. **Qué pidió Mateo:** que apenas crea su gimnasio, con solo el nombre y un color, ya tenga una web que parezca hecha por un profesional, sin huecos ni carteles de "armando".
 2. **Cómo lo hace un producto profesional:** Glofox/Mindbody/Shopify: portada tipográfica enorme con el nombre, el acento de la marca, bloques que aparecen solos cuando hay datos y desaparecen cuando no, y lo técnico (título, imagen para compartir, sitemap, datos estructurados) resuelto sin que el dueño toque nada.
@@ -98,3 +107,29 @@ terminado.
    - *1.000 gimnasios*: la prueba mira un solo gimnasio por vez; las listas no la corren.
 4. **Lo que no pidió y necesita:** que un gimnasio nunca se quede sin dueño (ni al desactivar, ni al cambiar rol, ni al mover), direcciones reservadas de la plataforma (`admin`, `www`, `app`…) y que mover a una persona no rompa su historial.
 5. **Decisión y prueba:** reuso lo de U1 y SA-3 a SA-5. Slug normalizado y reservado en el servidor; `admin_probar_acceso(_gimnasio)` en la base con pasos ok/aviso/falta; "Arreglar" confirma la cuenta, activa o reanuda; mover = misma cuenta, fila nueva en el destino y la vieja desactivada. Prueba: 5 pruebas de base, vitest del slug y el e2e `scripts/e2e/super-p.mjs`.
+
+## F9 · Plantillas, escala, monitoreo y plata del soporte (carril B, 11/11)
+
+1. **Qué quiso decir Mateo:** que BRIK cambie un texto una vez y lo vean todos los gimnasios que no lo tocaron; que la plataforma aguante miles de gimnasios y avise sola si algo falla; y que el soporte pueda ayudar sin poder tocar la plata de nadie por error.
+2. **Cómo lo hacen otros:** Shopify y WordPress multisitio heredan de un tema base y marcan lo "personalizado"; Stripe y Linear muestran uso contra el límite del plan; los equipos chicos usan un chequeo de salud externo antes de pagar un APM.
+3. **Cómo se rompe (5):**
+   - *gimnasio que editó el texto*: no se pisa (se compara con lo que valía la plantilla antes del cambio).
+   - *tabla enorme*: nada devuelve "todo"; el registro va por cursor de 50 y hay un tope.
+   - *rol equivocado*: la base decide (`exigir_brik`); soporte sin permiso de plata es frenado por trigger, no por la pantalla.
+   - *1.000 gimnasios*: el script de carga se niega a correr contra una base que no sea local.
+   - *datos vacíos*: sin límite cargado el plan es "sin límite"; sin SALUD_URL el chequeo se apaga.
+4. **Lo que no pidió y necesita:** que los límites NO bloqueen altas (cambia quién cobra y qué), que todo quede en el registro de BRIK y la lista de lo que Mateo tiene que mirar (asesores, región).
+5. **Decisión y prueba:** migraciones 020600 a 020800 con pruebas de base propias; guardas de seguridad del código en vitest; e2e `scripts/e2e/super-f9.mjs` para Actions.
+
+## F7.1 · TV de entradas, ocupación, congelar solo y "tengo que cobrar" (carril B, 11/11)
+
+1. **Qué quiso decir Mateo:** pantallas y atajos que le saquen trabajo a la recepción: ver quién entra y cuánta gente hay sin preguntar, que el socio resuelva su pausa solo, y llegar al día 1 con una cola de cobro lista.
+2. **Cómo lo hacen otros:** los gimnasios con molinete muestran "Bienvenido, Ana" en una pantalla; Mindbody y Gympass muestran la ocupación como número; las pausas con tope se aprueban solas en Zen Planner si el dueño lo prende.
+3. **Cómo se rompe (5):**
+   - *plata en una pantalla pública*: la TV nunca recibe color, plan ni deuda (la función no los devuelve).
+   - *sin salida registrada*: la ocupación cuenta de más; se acota a 3 horas y se dice en PREGUNTAS.
+   - *pausa fuera del tope o superpuesta*: `validar_pausa` corre antes de aprobar sola; pasado el tope de días vuelve a pendiente.
+   - *rol equivocado*: solo el dueño prende la aprobación sola y la ocupación; el socio ve el número solo si está prendido.
+   - *dos clics*: guardar es idempotente y el pedido se aprueba una sola vez (update con estado pendiente y fila afectada verificada).
+4. **Lo que no pidió y necesita:** que todo venga apagado por defecto, que quede marcado qué pausa fue aprobada sola, y que el token de la TV se pueda revocar.
+5. **Decisión y prueba:** migraciones 021000 y 021100 con pruebas de base; e2e `scripts/e2e/super-f11.mjs` para Actions.

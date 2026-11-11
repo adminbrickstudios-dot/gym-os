@@ -46,9 +46,18 @@ try {
   await r.locator("[data-alta-cobrar]").click();
   await r.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
   chequear(await r.locator("[data-cobrar-linea=cuota]").count() === 1, "Guardar y cobrar abre la hoja Cobrar con la cuota del plan", "la hoja no trae la cuota");
-  await r.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
+  // Efectivo: una transferencia queda pendiente de aprobación y el veredicto no sería verde. Si no hay turno de caja, se abre acá mismo.
+  await r.locator("[data-cobrar-medio]", { hasText: "Efectivo" }).click();
+  if (await r.locator("[data-abrir-turno]").waitFor({ timeout: 3000 }).then(() => true, () => false)) {
+    await r.locator('input[aria-label="Fondo del turno"]').fill("1000");
+    await r.locator("[data-abrir-turno]").click();
+    await r.locator("[data-cobrar-caja]").waitFor({ timeout: 30000 });
+  }
   await r.locator("[data-cobrar-confirmar]").click();
-  await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 });
+  await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 }).catch(async (e) => {
+    const hojas = await r.locator("dialog[open], [role=dialog], [data-cobrar], [data-ventana-veredicto], [data-cobrar-hecho]").evaluateAll((l) => l.map((x) => `${x.tagName}${[...x.attributes].filter((a) => a.name.startsWith("data-")).map((a) => ` ${a.name}=${a.value}`).join("")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 300)}`));
+    throw new Error(`${e.message.split("\n")[0]} | en pantalla: ${hojas.join(" || ") || "(sin hoja ni ventana)"}`);
+  });
   chequear(await r.locator("[data-ventana-cobrado]").count() === 1, "cobrado: vuelve a la ventana con el veredicto en verde", "no volvió con el cobro");
   await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-anotar"), null, { timeout: 10000 });
   await r.keyboard.press("Enter");
@@ -103,7 +112,10 @@ try {
   chequear(await d.locator("[data-primer-pago]").count() === 1, "primer pago visible (cuota + matrícula + total)", "no hay primer pago");
   await capturar(d, "vd6-compu-alta-completa");
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
+  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 }).catch(async (e) => {
+    const hoja = await d.evaluate(() => `hoja montada=${document.documentElement.dataset.cobrarHoja ?? "no"}; [data-cobrar]=${document.querySelector("[data-cobrar]")?.innerText.replace(/\s+/g, " ").slice(0, 300) ?? "(no está)"}; alertas=${[...document.querySelectorAll("[role=alert]")].map((x) => x.innerText).join(" / ")}`);
+    throw new Error(`${e.message.split("\n")[0]} | URL ${d.url()} | ${hoja}`);
+  });
   chequear(new URL(d.url()).pathname === "/panel/socios/nuevo", "cobro embebido: la hoja se abre sobre el alta, sin ir a Vender", `fue a ${d.url()}`);
   await d.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
   await d.locator("[data-cobrar-confirmar]").click();

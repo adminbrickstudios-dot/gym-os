@@ -7,6 +7,7 @@
 import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 // F1.9: un error que nadie atrapó deja de colgar el recorrido sin ✗: se escribe qué esperaba y cuándo, y se corta con código 1.
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
+process.on("uncaughtException", (e) => { console.log(`✗ se cortó: ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -92,7 +93,12 @@ try {
     if (filas) ok(`${quien}: ${filas} avisos en ${grupos} día${grupos === 1 ? "" : "s"} (Hoy / Ayer / fecha)`);
     if (!probadoMarcar && await p.locator("[data-marcar-todo]").count()) {
       await p.locator("[data-marcar-todo]").click();
-      await p.waitForFunction(() => document.querySelectorAll('[data-novedad="nueva"]').length === 0, null, { timeout: 30000 });
+      await p.waitForFunction(() => document.querySelectorAll('[data-novedad="nueva"]').length === 0, null, { timeout: 30000 }).catch(async (e) => {
+        const quedan = await p.locator('[data-novedad="nueva"]').evaluateAll((l) => l.slice(0, 5).map((x) => `${x.getAttribute("data-tipo")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 80)}`));
+        const nQuedan = await p.locator('[data-novedad="nueva"]').count();
+        const alerta = await p.locator("[role=alert]").allInnerTexts().catch(() => []);
+        throw new Error(`${e.message.split("\n")[0]} | ${quien}: quedan ${nQuedan} sin leer (${quedan.join(" ; ")}) | alerta: ${alerta.join(" / ") || "ninguna"}`);
+      });
       await p.waitForFunction(() => document.querySelector("a[data-campana]")?.getAttribute("data-campana") === "0" || !document.querySelector("a[data-campana]")?.getAttribute("data-campana"), null, { timeout: 30000 });
       ok(`${quien}: “Marcar todo como leído” deja la campana en cero`);
       probadoMarcar = true;

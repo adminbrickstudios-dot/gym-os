@@ -4,13 +4,14 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { crearTv, revocarTv } from "../acciones";
 import { Icono } from "@/components/ui/Icono";
 
-export type TvPanel = { id: string; nombre: string; sede: string; creado_en: string };
+export type TvPanel = { id: string; nombre: string; sede: string; creado_en: string; modo?: "clases" | "entradas" };
 
 /** COM-14: crear la TV (da un link que se abre una vez en ella) y sacarla. */
 /** `puedeSacar` (VD-60, D34): la recepción y el profe ponen y miran las TVs; sacarlas es del dueño y el encargado. */
 export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId: string; sedes: { id: string; nombre: string }[]; tvs: TvPanel[]; puedeSacar?: boolean }) {
   const [nombre, setNombre] = useState("");
   const [sede, setSede] = useState(sedes[0]?.id ?? "");
+  const [modo, setModo] = useState<"clases" | "entradas">("clases");
   const [link, setLink] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId:
       <form className="tarjeta p-5 space-y-3" data-nueva-tv onSubmit={(e) => {
         e.preventDefault();
         empezar(async () => {
-          const r = await crearTv(gimnasioId, sede, nombre);
+          const r = await crearTv(gimnasioId, sede, nombre, modo);
           if (r.error || !r.token) { setError(r.error ?? "No se pudo crear"); return; }
           setError(null); setNombre(""); setCopiado(false);
           setLink(`${window.location.origin}/tv/activar?t=${r.token}`);
@@ -34,6 +35,9 @@ export function Tvs({ gimnasioId, sedes, tvs, puedeSacar = true }: { gimnasioId:
               {sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
             </select>
           )}
+          <select className="campo" value={modo} onChange={(e) => setModo(e.target.value as "clases" | "entradas")} aria-label="Qué muestra" data-tv-modo>
+            <option value="clases">Muestra las clases</option><option value="entradas">Muestra las entradas</option>
+          </select>
           <button type="submit" className="boton boton-principal" disabled={ocupado}>Crear</button>
         </div>
         {error && <Mensaje tipo="error">{error}</Mensaje>}
@@ -62,7 +66,7 @@ function FilaTv({ t, puedeSacar }: { t: TvPanel; puedeSacar: boolean }) {
   const [ocupado, empezar] = useTransition();
   return (
     <li className="tarjeta px-4 py-3 flex flex-wrap items-center gap-3" data-tv-fila={t.nombre}>
-      <span className="grow"><Icono nombre="pantalla" /> <span className="font-semibold">{t.nombre}</span> <span className="texto-suave">· {t.sede}</span></span>
+      <span className="grow"><Icono nombre="pantalla" /> <span className="font-semibold">{t.nombre}</span> <span className="texto-suave">· {t.sede} · {t.modo === "entradas" ? "entradas" : "clases"}</span></span>
       {puedeSacar && <button type="button" className="underline text-sm" disabled={ocupado}
         onClick={() => empezar(async () => { const r = await revocarTv(t.id); setError(r.error ?? null); })}>Sacar</button>}
       {error && <Mensaje tipo="error" className="w-full">{error}</Mensaje>}

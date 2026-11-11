@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
-import { darDeBajaGimnasio, guardarCiudad, pausarGimnasio, reanudarGimnasio, restaurarBaja } from "../acciones";
+import { darDeBajaGimnasio, guardarCiudad, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
 
 const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{m}</p> : null);
 
@@ -18,6 +18,27 @@ export function QrGimnasio({ url, nombre }: { url: string; nombre: string }) {
       <div className="w-44 bg-white p-2 rounded-xl" dangerouslySetInnerHTML={{ __html: svg }} />
       <p className="texto-suave text-sm break-all">{url}</p>
       <button type="button" className="boton print:hidden" onClick={() => window.print()}>Imprimir</button>
+    </div>
+  );
+}
+
+const TEXTOS_WEB: [string, string][] = [["landing.boton_texto", "Botón principal"], ["landing.mensaje_whatsapp", "Mensaje de WhatsApp"], ["landing.bajada", "Bajada de la portada"]];
+
+/** EDIT-S07: vuelve un texto de la web de este gimnasio a lo que dice su plantilla (se pierde lo que había escrito el dueño). */
+export function RestaurarTextos({ gimnasioId }: { gimnasioId: string }) {
+  const [msj, setMsj] = useState<{ ok?: boolean; t?: string }>({});
+  return (
+    <div className="space-y-2" data-restaurar-textos>
+      <div className="flex flex-wrap gap-2">
+        {TEXTOS_WEB.map(([clave, t]) => (
+          <BotonAccion key={clave} className="boton boton-chico" data-restaurar-texto={clave} onClick={async () => {
+            if (!window.confirm(`Esto pisa lo que escribió el dueño en “${t}”. ¿Restaurar por defecto?`)) return;
+            const r = await restaurarTextoGimnasio(gimnasioId, clave);
+            setMsj(r.error ? { t: r.error } : { ok: true, t: `${t}: “${r.valor}”` });
+          }}>Restaurar “{t}”</BotonAccion>
+        ))}
+      </div>
+      {msj.t && <p role={msj.ok ? "status" : "alert"} className={msj.ok ? "texto-suave text-sm" : "pildora pildora-rojo !rounded-2xl !px-4 !py-3"}>{msj.t}</p>}
     </div>
   );
 }

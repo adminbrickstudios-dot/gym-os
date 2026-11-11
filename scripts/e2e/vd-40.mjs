@@ -108,13 +108,16 @@ try {
 
   // ── 5. Salud con colores y orden ──
   await db.query(`insert into public.plataforma_planes (nombre, precio_mensual) values ($1, 1000)`, [`Plan vd40 ${s}`]);
-  await db.query(`update public.gimnasios set plataforma_plan_id = (select id from public.plataforma_planes where nombre = $1), plataforma_desde = current_date - 40 where id = $2`, [`Plan vd40 ${s}`, gid]);
+  await db.query(`update public.gimnasios set plataforma_plan_id = (select id from public.plataforma_planes where nombre = $1), plataforma_desde = current_date - 400 where id = $2`, [`Plan vd40 ${s}`, gid]);
   await p.goto(`${B}/admin`);
   const colores = await p.locator("li[data-gimnasio-color]").evaluateAll((l) => l.map((e) => e.getAttribute("data-gimnasio-color")));
   const rango = { rojo: 0, amarillo: 1, verde: 2, demo: 3 };
   chequear(colores.length >= 2 && colores.every((c, i) => i === 0 || rango[colores[i - 1]] <= rango[c]), `la lista va de los que necesitan atención a los que no (${colores.join(" > ")})`, `orden roto: ${colores.join(",")}`);
-  const mia = p.locator("li", { hasText: NOMBRE }).first();
-  chequear((await mia.getAttribute("data-gimnasio-color")) === "rojo" && (await mia.locator("[data-motivos]").innerText()).includes("Abono a BRIK vencido"), "abono vencido: el gimnasio está en rojo y dice por qué", "no quedó en rojo con el motivo");
+  const mia = p.locator("li[data-gimnasio-color]", { hasText: NOMBRE }).first();
+  const colorMia = await mia.getAttribute("data-gimnasio-color");
+  const motivosMia = (await mia.locator("[data-motivos]").count()) ? await mia.locator("[data-motivos]").innerText() : "(sin motivos)";
+  const gimMia = (await db.query(`select es_demo, plataforma_plan_id is not null as con_plan, plataforma_desde, prueba_dias from public.gimnasios where id = $1`, [gid])).rows[0];
+  chequear(colorMia === "rojo" && motivosMia.includes("Abono a BRIK vencido"), "abono vencido: el gimnasio está en rojo y dice por qué", `color ${colorMia}, motivos "${motivosMia}", gimnasio ${JSON.stringify(gimMia)}`);
   chequear(colores[0] === "rojo", "el rojo va primero", `primero va ${colores[0]}`);
   await capturar(p, "vd40-compu-salud", true);
   await p.locator('[data-filtro="atencion"]').click();

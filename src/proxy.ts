@@ -28,6 +28,8 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   const ruta = req.nextUrl.pathname;
   let respuesta = NextResponse.next({ request: { headers: cabeceras } });
   if (!esProtegida(ruta) && ruta !== "/ingresar") return respuesta;
+  // ESC-02: la landing y el ingreso de alguien sin sesión no verifican nada (ahorra un getClaims por cada visita anónima).
+  if (!esProtegida(ruta) && !req.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return respuesta;
 
   const supabase = createServerClient(supabaseUrl, anon, {
     cookies: {
@@ -42,7 +44,13 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   });
   // getClaims verifica el JWT en el servidor sin ir a Auth cuando el proyecto usa claves asimétricas
   // (con clave simétrica la propia librería cae a getUser). La base decide todo con auth.uid().
-  const { data } = await supabase.auth.getClaims();
+  let { data, error } = await supabase.auth.getClaims();
+  // Un tropiezo del servicio de cuentas no es "sin sesión": se reintenta una vez y, si sigue, la página decide (nunca se echa a quien tiene sesión).
+  if (!data?.claims?.sub && error && !/session.*missing|no.*session|not.*authenticated|jwt/i.test(error.message ?? "")) {
+    await new Promise((r) => setTimeout(r, 200));
+    ({ data, error } = await supabase.auth.getClaims());
+    if (!data?.claims?.sub && error && esProtegida(ruta) && !/session.*missing|no.*session|not.*authenticated|jwt/i.test(error.message ?? "")) return respuesta;
+  }
   if (!data?.claims?.sub && esProtegida(ruta)) {
     const destino = req.nextUrl.clone();
     destino.pathname = "/ingresar";

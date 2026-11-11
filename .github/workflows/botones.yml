@@ -1,0 +1,81 @@
+# F3.1 · La pasada botón por botón (scripts/e2e/botones.mjs), una tanda por rol, en compu y en celular, contra la app compilada.
+# A mano: Actions → Botones → Run workflow. El informe de cada rol va al resumen de la corrida y se sube como artefacto (botones-<rol>).
+# No corta por los hallazgos: el informe es lo que se lee (poné estricto=true para que falle si hay hallazgos graves).
+name: Botones
+
+on:
+  # Mientras este archivo no esté en main: un push a dia/** con [botones] en el mensaje lo corre.
+  push:
+    branches: ["dia/**"]
+  workflow_dispatch:
+    inputs:
+      roles:
+        description: "Roles separados por coma (vacío = los 6)"
+        type: string
+        default: "super,dueno,encargado,recepcion,profe,socio"
+      estricto:
+        description: "Que falle si hay hallazgos graves"
+        type: boolean
+        default: false
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  armar:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[botones]')
+    runs-on: ubuntu-latest
+    outputs:
+      roles: ${{ steps.r.outputs.roles }}
+    steps:
+      - id: r
+        run: echo "roles=$(echo '${{ inputs.roles || 'super,dueno,encargado,recepcion,profe,socio' }}' | tr -d ' ' | jq -R -c 'split(",") | map(select(length > 0))')" >> "$GITHUB_OUTPUT"
+
+  botones:
+    name: Botones · ${{ matrix.rol }}
+    needs: armar
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        rol: ${{ fromJSON(needs.armar.outputs.roles) }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Levantar la app compilada con la imitación de Supabase
+        env:
+          APP_MODO: produccion
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: scripts/local/levantar.sh
+      - name: Recorrer los botones
+        env:
+          E2E_DEPURAR: "1"
+        run: node scripts/e2e/botones.mjs --rol "${{ matrix.rol }}" --informe ".local/botones-informe-${{ matrix.rol }}.md" ${{ inputs.estricto && '--estricto' || '' }}
+      - name: Guardar el informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: botones-${{ matrix.rol }}
+          path: |
+            .local/botones-informe-*.md
+            .local/capturas/
+            .local/app.log
+          if-no-files-found: ignore
+          retention-days: 30

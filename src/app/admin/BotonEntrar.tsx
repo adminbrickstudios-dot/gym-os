@@ -5,7 +5,7 @@ import { useState } from "react";
  * Entrar al panel de un gimnasio como Soporte BRIK (POST: la base valida y lo suma al equipo).
  * VD-40: pide el MOTIVO; queda escrito (quién, por qué, cuándo) y el dueño lo ve en su Control.
  */
-export function BotonEntrar({ gimnasioId, principal = true, texto = "🚪 Entrar al panel", motivoInicial = "", destino = "" }: {
+export function BotonEntrar({ gimnasioId, principal = true, texto = "Entrar al panel", motivoInicial = "", destino = "" }: {
   gimnasioId: string; principal?: boolean; texto?: string; motivoInicial?: string; destino?: string;
 }) {
   const [abierto, setAbierto] = useState(false);
@@ -24,6 +24,10 @@ export function BotonEntrar({ gimnasioId, principal = true, texto = "🚪 Entrar
         <select name="rol" className="campo" defaultValue="dueno" data-rol-soporte>
           <option value="dueno">Dueño</option><option value="recepcion">Recepción</option><option value="profe">Profe</option>
         </select></label>
+      <label className="flex items-center gap-2 w-full texto-suave">
+        <input type="checkbox" name="plata" value="si" data-plata-soporte />
+        <span>El dueño me pidió tocar plata (cobros, caja). Si no, el soporte no puede cargar ni cambiar plata.</span>
+      </label>
       <button className={`boton ${principal ? "boton-principal" : ""}`}>Entrar como soporte</button>
       <button type="button" className="boton texto-suave" onClick={() => setAbierto(false)}>Cancelar</button>
     </form>

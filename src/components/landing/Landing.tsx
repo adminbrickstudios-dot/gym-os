@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { formatearPesos } from "@/lib/formato";
-import type { EquipoPublico, EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
+import type { ClaseSemana, EquipoPublico, EventoPublico, LandingPublicada, Marca, PlanPublico, Seccion, Sede } from "@/lib/landing";
 import { urlMarca } from "@/lib/url-marca";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { AnotarseEvento } from "./AnotarseEvento";
@@ -11,6 +11,7 @@ import { conTextosPorDefecto } from "@/lib/landing-defaults";
 import { FormProbar } from "./FormProbar";
 import { Foto } from "./Foto";
 import { Icono } from "@/components/ui/Icono";
+import { agruparClases, estiloTipografia } from "@/lib/landing-estilo";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -18,15 +19,15 @@ import { Icono } from "@/components/ui/Icono";
 // solo el emoji de cada tipo de sección.
 
 const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
-  sobre_nosotros: "",
-  actividades: "",
-  planes: "",
-  horarios: "",
-  galeria: "",
-  equipo: "",
-  preguntas: "",
-  ubicacion: "",
-  probar: "",
+  sobre_nosotros: "info",
+  actividades: "pesa",
+  planes: "tarjeta",
+  horarios: "reloj",
+  galeria: "imagen",
+  equipo: "usuarios",
+  preguntas: "ayuda",
+  ubicacion: "ubicacion",
+  probar: "regalo",
 };
 
 function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
@@ -112,7 +113,7 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; wh
         </p>
       )}
       {variantes.map((v) => (
-        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "var(--acento)" }}><Icono nombre="plata" /> {v}</p>
+        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "color-mix(in oklab, var(--acento), var(--texto) 45%)" }}><Icono nombre="plata" /> {v}</p>
       ))}
       {condiciones.length > 0 && (
         <ul className="mt-5 flex flex-wrap gap-2">
@@ -153,11 +154,37 @@ function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolea
   );
 }
 
-function Horarios({ s, agenda }: { s: Extract<Seccion, { tipo: "horarios" }>; agenda: Agenda | null }) {
+/** P8: las clases de los próximos 7 días, por día. Salen de la agenda del gimnasio; sin clases no se muestra nada. */
+function ClasesSemana({ clases }: { clases: ClaseSemana[] }) {
+  const dias = agruparClases(clases);
+  if (!dias.length) return null;
+  const variasSedes = new Set(clases.map((c) => c.sede)).size > 1;
+  return (
+    <div className="mt-10 max-w-4xl" data-clases-semana>
+      <h3 className="titulo text-2xl sm:text-3xl mb-4">Clases de los próximos días</h3>
+      <dl className="tarjeta divide-y divide-[var(--borde)]">
+        {dias.map((d) => (
+          <div key={d.dia} className="grid gap-2 sm:grid-cols-[11rem_1fr] px-6 py-4" data-clases-dia={d.dia}>
+            <dt className="titulo text-xl">{d.etiqueta}</dt>
+            <dd>
+              <ul className="flex flex-wrap gap-x-6 gap-y-1">
+                {d.clases.map((c, i) => (
+                  <li key={i} className="text-lg"><span className="numero">{c.hora}</span> <span className="texto-suave">{c.actividad}{variasSedes ? ` · ${c.sede}` : ""}</span></li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function Horarios({ s, agenda, clases = [] }: { s: Extract<Seccion, { tipo: "horarios" }>; agenda: Agenda | null; clases?: ClaseSemana[] }) {
   // Con horarios cargados en el panel, salen de ahí (y dicen si está abierto); si no, el texto libre de la sección.
   const sedes = (agenda?.sedes ?? []).filter((x) => x.franjas.length);
   const filas = s.contenido.filas ?? [];
-  if (!sedes.length && !filas.length) return null;
+  if (!sedes.length && !filas.length && !clases.length) return null;
   return (
     <Bloque id="horarios" tipo={s.tipo} titulo={s.titulo}>
       {sedes.length ? (
@@ -191,6 +218,7 @@ function Horarios({ s, agenda }: { s: Extract<Seccion, { tipo: "horarios" }>; ag
           ))}
         </dl>
       )}
+      <ClasesSemana clases={clases} />
     </Bloque>
   );
 }
@@ -302,12 +330,12 @@ function Ubicacion({ s, sedes }: { s: Extract<Seccion, { tipo: "ubicacion" }>; s
   );
 }
 
-function SeccionLanding({ s, landing, agenda }: { s: Seccion; landing: LandingPublicada; agenda: Agenda | null }) {
+function SeccionLanding({ s, landing, agenda, clases }: { s: Seccion; landing: LandingPublicada; agenda: Agenda | null; clases: ClaseSemana[] }) {
   switch (s.tipo) {
     case "sobre_nosotros": return <SobreNosotros s={s} />;
     case "actividades": return <Actividades s={s} />;
     case "planes": return <Planes s={s} landing={landing} />;
-    case "horarios": return <Horarios s={s} agenda={agenda} />;
+    case "horarios": return <Horarios s={s} agenda={agenda} clases={clases} />;
     case "galeria": return <Galeria s={s} nombre={landing.marca.nombre} />;
     case "equipo": return <Equipo s={s} reales={landing.equipo_publico ?? []} />;
     case "preguntas": return <Preguntas s={s} />;
@@ -421,7 +449,7 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   );
 }
 
-export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[] }) {
+export function LandingGimnasio({ landing: landingCargada, agenda = null, eventos = [], clases = [] }: { landing: LandingPublicada; agenda?: Agenda | null; eventos?: EventoPublico[]; clases?: ClaseSemana[] }) {
   // VD-62: lo que el dueño no cargó se completa con un texto sensato según el tipo de gimnasio (nunca un hueco).
   const landing = conTextosPorDefecto(landingCargada);
   const { marca, portada, contacto } = landing;
@@ -434,8 +462,9 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
   // "Abierto ahora" en la portada solo con una sede (con varias, va en Horarios, por sede).
   const ahora = agenda?.sedes.length === 1 ? agenda.sedes[0] : null;
 
+  const base = propsMarca(marca);
   return (
-    <div {...propsMarca(marca)} className="min-h-dvh">
+    <div {...base} style={{ ...base.style, ...estiloTipografia(marca.tipografia) }} className="min-h-dvh" data-pagina-gimnasio data-tipografia={marca.tipografia ?? "condensada"}>
       <header className="sticky top-0 z-20 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_80%,transparent)]">
         <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-4">
           <a href="#" className="flex items-center gap-3 min-w-0">
@@ -461,8 +490,8 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
                 autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="relative p-6 sm:p-12 text-white aparecer">
-              <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
+            <div className="relative p-6 sm:p-10 text-white">
+              <h1 className="titular text-[clamp(3rem,11vw,5.75rem)] max-w-[14ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
               <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
@@ -474,12 +503,12 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
           </div>
         </section>
       ) : (
-        <section className="px-4 pt-14 pb-10 sm:pt-28 sm:pb-20">
+        <section className="px-4 pt-12 pb-10 sm:pt-16 sm:pb-16">
           <div className="mx-auto max-w-5xl">
-            <h1 className="titular text-[clamp(3.5rem,15vw,8.5rem)] max-w-[11ch]">{portada.titulo}</h1>
+            <h1 className="titular text-[clamp(3.25rem,13vw,6.5rem)] max-w-[14ch]">{portada.titulo}</h1>
             {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
             <Senales landing={landing} ahora={ahora} />
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
@@ -492,7 +521,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
 
       <main>
         <ComoEmpezar probar={hayProbar} planes={hayPlanes} altas={!!landing.altas_online} />
-        {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} />)}
+        {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} clases={clases} />)}
         {/* VD-44: si el dueño no armó la sección Equipo pero mostró a su gente, aparece igual. */}
         {(landing.equipo_publico?.length ?? 0) > 0 && !landing.secciones.some((s) => s.tipo === "equipo") && (
           <Equipo s={{ tipo: "equipo", titulo: "Nuestro equipo", contenido: {} }} reales={landing.equipo_publico ?? []} />
@@ -542,8 +571,9 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
  */
 export function LandingOculta({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
   const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
+  const base = propsMarca(marca);
   return (
-    <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4" data-pagina-oculta>
+    <div {...base} style={{ ...base.style, ...estiloTipografia(marca.tipografia) }} className="min-h-dvh grid place-items-center px-4" data-pagina-oculta>
       <div className="text-center">
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>

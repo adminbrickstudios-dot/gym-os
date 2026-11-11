@@ -89,11 +89,21 @@ export const contextoCompleto = cache(async (): Promise<ContextoCompleto> => {
   const g = await gimnasioActual();
   const supabase = await crearClienteServidor();
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
-  const [claims, res] = await Promise.all([
+  const [claims0, res] = await Promise.all([
     supabase.auth.getClaims(),
     rpcLectura<ContextoCompleto>("contexto_pantalla", { p_gimnasio_id: g.id }).then((v) => ({ v }), (e: unknown) => ({ e })),
   ]);
-  if (!claims.data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
+  // Sesión: solo "no hay sesión" manda al ingreso. Si la verificación FALLÓ (error de red o del servicio de cuentas) se reintenta una vez;
+  // si sigue fallando se dice (nunca se echa a alguien con sesión por un tropiezo del servicio de cuentas).
+  let claims = claims0;
+  if (!claims.data?.claims?.sub && claims.error) { await new Promise((r) => setTimeout(r, 200)); claims = await supabase.auth.getClaims(); }
+  if (!claims.data?.claims?.sub) {
+    if (claims.error && !/session.*missing|no.*session|not.*authenticated|jwt/i.test(claims.error.message ?? "")) {
+      console.error(`[sesion] getClaims fallo: ${claims.error.message}`);
+      throw new ErrorDatos("No pudimos verificar tu sesión ahora. Probá de nuevo en un momento.", "sesion", 503);
+    }
+    redirect("/ingresar?siguiente=/panel");
+  }
   if ("e" in res) throw res.e;
   return res.v;
 });
@@ -130,6 +140,8 @@ export function exigirSeccion(panel: PanelGimnasio, clave: string) {
   if (panel.secciones_apagadas.includes(clave)) {
     // Gastos se apaga solo para quien no tiene el permiso (VD-41b): se dice que es un permiso, no que el gimnasio la apagó.
     if (clave === "gastos" && panel.yo.rol !== "dueno") throw new ErrorDatos("No tenés permiso para ver los gastos. Lo da el dueño desde Configuración.", "42501", 403);
+    // Igual con Mensajes para la recepción (VD-38): la saca del menú el permiso que da el dueño, no que el gimnasio la haya apagado.
+    if (clave === "mensajes" && panel.yo.rol === "recepcion") throw new ErrorDatos("No tenés permiso para ver los mensajes de los socios. Lo da el dueño desde Configuración.", "42501", 403);
     throw new ErrorDatos("Esta sección está apagada en este gimnasio. La prende el dueño desde Configuración.", "apagada", 404);
   }
 }

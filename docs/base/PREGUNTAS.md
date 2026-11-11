@@ -130,6 +130,35 @@ Respuesta de Mateo: (vacío)
 - **Datos personales (SA-11):** borrar a un socio deja el nombre en "Socio borrado" y borra DNI, mail, teléfono, foto, emergencia
   y notas; pagos y coberturas quedan. Convive con los pedidos de datos del socio (carril D), que resuelve el dueño.
   Estado de las copias de seguridad (D51): depende del plan de Supabase, sin hacer.
+#### Fase 9 (F9.1, F9.4, F9.5, F9.6) · plantillas, escala y monitoreo
+
+- **Pedido al principal (ESC-02), cambio exacto en `src/proxy.ts`.** Hoy el proxy ya NO consulta la autenticación en las páginas públicas
+  (solo en `/panel`, `/app`, `/admin` y `/ingresar`). Quedan dos mejoras, las dos en `src/proxy.ts` / rutas públicas (carril A):
+  1. **`/ingresar` sin cookie de sesión no necesita `getClaims()`.** En `conSesion`, justo antes de crear el cliente de Supabase:
+     ```ts
+     const hayCookieDeSesion = req.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+     if (!esProtegida(ruta) && !hayCookieDeSesion) return respuesta;   // la landing y el ingreso de alguien sin sesión no verifican nada
+     ```
+     (ahorra un `getClaims()` por cada visita anónima al ingreso, que con claves simétricas es un viaje a Auth).
+  2. **HTML público desde la caché de la red.** `Cache-Control` desde el proxy no alcanza: Next lo pisa con `private, no-store` en cualquier página
+     que lee `headers()`. Para cachear la landing hay que sacarla de lo dinámico: en el proxy, para un host de gimnasio y las rutas `/` y
+     `/hacete-socio` SIN cookies, hacer `NextResponse.rewrite` a `/sitio/<host>` y `/sitio/<host>/hacete-socio`, rutas con
+     `export const revalidate = 300` y `generateStaticParams` vacío (ISR a pedido), que usan los mismos `traerLanding(host)` (ya con `unstable_cache`
+     y `revalidateTag`, que se invalida al editar). Con cookies (o sesión) sigue como hoy. Es una decisión de arquitectura del carril A: no la toqué.
+- **Asesores de Supabase que no puedo ver (Mateo, copiá acá lo que digan):** Security Advisor y Performance Advisor del proyecto real. No tengo acceso
+  (el Supabase conectado a esta sesión tiene otros proyectos). Esperados: "RLS enabled no policy" en tablas cerradas a propósito (info);
+  "unindexed foreign keys" (arreglados los calientes en la migración 020700; el resto lo cubren índices de otra forma); "auth RLS initplan" (resuelto).
+  También: "Leaked password protection" y "MFA" (Auth → Providers/Policies, son interruptores del panel de Supabase).
+- **F9.1 plantillas:** el tipo de gimnasio no existía como dato: se agregó `gimnasios.tipo_plantilla` (lo llena el alta con plantilla; los gimnasios
+  anteriores quedan sin tipo y solo reciben la plantilla de la plataforma). Cubre hoy los textos de la web (botón, mensaje de WhatsApp y bajada);
+  los títulos de sección y los mensajes del dueño a socios viven en código (`landing-defaults.ts`, carril C) o por gimnasio: para sumarlos hay
+  que agregar una fila a `privado.textos_plantilla()` y que el dueño los guarde en una columna. "No editó" = tiene exactamente lo que le daba la
+  plantilla anterior (o el valor de creación de la bajada, o está vacío): si el dueño escribió algo idéntico a la plantilla, igual lo recibe.
+- **F9.5 carga:** escrita (`scripts/medir/carga.mjs`, `.github/workflows/carga.yml`), **sin resultados todavía**: sembrar 1.000 gimnasios tarda ~30 min
+  (cada gimnasio dispara sus triggers) y 500 usuarios necesitan memoria que acá no hay. Se corre en Actions: `gh workflow run carga.yml`.
+- **F9.6:** límites por plan guardados y mostrados pero **no aplicados** (ver `ESCALA.md`; bloquear altas sería decidir quién puede qué). Sentry ⛔
+  (sin cuenta ni DSN). El chequeo de salud se prende con la variable `SALUD_URL` en GitHub.
+
 #### P2 (PLAT-04), P3 (PLAT-06) y P9 (PLAT-05)
 
 - **P2: helper único `src/lib/urls.ts`** (`urlPlataforma`, `urlGimnasio`, `urlPanel`, `urlIngreso`, `urlDeHost`, `rutaGimnasio`, `hostGimnasio`),
@@ -271,3 +300,25 @@ Respuesta de Mateo: (vacío)
 
 - No toqué `src/app/ingresar` ni `src/proxy.ts` (los arregla B). Lo mío: la prueba de base `login-dueno-nuevo.test.mjs` (alta de gimnasio con dueño, filas que quedan, mail con mayúsculas y espacios, cuenta sin fila o de otro gimnasio, slug inexistente) y el e2e `scripts/e2e/fase-u0-login.mjs`.
 - Pendiente de decidir (de B): `darAcceso` no normaliza el mail adentro; hoy lo hacen los que lo llaman (`admin/acciones.ts`, `panel/equipo/acciones.ts`). Recomendado: normalizar también en `src/lib/cuentas.ts`.
+
+### Carril B · F2 / F9.8 (restricción de plata del soporte y "ver como socio")
+
+- **Toca plata y permisos, por eso lo reporto:** la migración `20261109020800` agrega un trigger en `ventas`, `pagos`, `movimientos_caja` y `turnos_caja` que frena (42501) cualquier escritura hecha por una cuenta de soporte de BRIK (`equipo.es_soporte`) salvo que, al entrar, se haya tildado "El dueño me pidió tocar plata" (`soportes_gimnasio.plata_autorizada`, 60 min, queda en el motivo que ve el dueño). **No cambia quién cobra en el gimnasio**: dueño, recepción y profe quedan igual. Decisión de Mateo: ¿alcanza con la casilla o prefiere que el dueño apruebe desde su panel?
+- **"Ver como este socio"** es una pantalla de solo lectura de BRIK (`/admin/ver-socio`, función `admin_ver_socio`): acceso calculado con motivo, cobertura, últimos pagos e ingresos. No entra a la cuenta del socio ni muestra la app real (es del carril C). Queda en el registro de BRIK.
+- **Cierre de F2 (migración `20261109020900`):** `landing_publica` quedó envuelta (la original pasó a `landing_publica_base`) para devolver una portada neutral si el gimnasio está dado de baja o es una demo vencida; es función de la landing (otro carril), si la redefinen tiene que partir de `pg_get_functiondef` de la vigente. Pausado, baja y demo vencida cortan el panel con una pantalla (salvo el Soporte BRIK que entró con motivo); la app del socio no se corta, solo lleva la franja de mantenimiento. **Decisión de Mateo:** ¿un socio de un gimnasio pausado sigue usando su app y la puerta? (hoy sí). En `cache-prohibido.test.ts` (de D) sumé `FranjaMantenimiento` y `mantenimiento_vigente` a las excepciones: es información pública e igual para todos. F2.8: "cerrar las demás sesiones" usa `signOut({ scope: "others" })` y depende de que GoTrue lo soporte; el aviso por mail a BRIK ⛔ (no hay mail cargado). F2.7: las copias automáticas de Supabase no se ven desde acá; la ficha muestra la última exportación manual.
+- **F7.1 (migraciones `20261109021000` y `20261109021100`) — toca plata y permisos, anotado sin más cambios que lo que dice el ítem:**
+  - **Congelar solo:** `pedir_pausa_socio` ahora, si el dueño prendió "El socio pausa su plan y se aprueba solo" (Configuración → Reglas, **apagado por defecto**) y la pausa dura hasta N días (por defecto 14, de 1 a 90), la deja aprobada en el momento y corre la membresía con la misma `privado.congelar` de siempre; las reglas de `validar_pausa` (tope de días por año, fechas, superposición) corren antes. Queda marcada `pedidos_pausa.autoaprobado`. Esto cambia **quién aprueba** una pausa (que mueve el vencimiento y por lo tanto la plata): por eso está apagado y solo lo prende el dueño. Decisión de Mateo: ¿el encargado también debería poder prenderlo?
+  - **TV de entradas:** modo por TV (`pantallas_tv.modo`: clases o entradas). En entradas muestra primer nombre e inicial y la hora de las últimas 8 entradas **sin color, plan ni deuda**, más "N personas adentro". Ojo: la TV de clases ya mostraba "nombre + inicial" de los anotados; si Mateo no quiere ningún nombre en pantallas públicas, hay que sacarlo de `privado.clase_tv` y de `tv_estado`.
+  - **Ocupación en vivo para el socio:** `ocupacion_en_vivo(gimnasio)`: solo un número (entró en las últimas 3 h y no registró salida; sin salidas registradas cuenta de más). **Apagada por defecto**, la prende el dueño. La tarjeta en `src/app/app/page.tsx` (de C) es una línea; el componente es `src/app/app/OcupacionEnVivo.tsx`.
+  - **Tengo que cobrar:** pestaña nueva en Vencen hoy (solo si la persona puede cobrar): cola única de los que vencen hoy y los vencidos, los de más plata primero. No cobra por sí misma: cada fila usa el Cobrar de siempre.
+  - **Pase de invitado:** ya estaba (INV-1 y FA-24); no cambié nada.
+  - **Kiosco:** sin emojis (Icono), teclas con nombre propio (`borrar`/`entrar`); mismo flujo.
+- **VD-26B:** los pedidos de demo sin atender entran a las alertas del super admin (rojo pasado un día) y los planes de BRIK tienen casilla "Se muestra en la web" (`plataforma_planes.publico`, filtra `planes_brik_publicos`). El aviso por mail o WhatsApp a BRIK sigue ⛔ (no hay servicio de mail ni WhatsApp de envío).
+- **F6.1, lo que no hice por ser de otro carril o depender de Mateo:** VD-42C (pedir el código TOTP justo después de la contraseña) está en el ingreso (U0); VD-42D (alerta por exportes grandes y PIN, aal2 en exportar_mes/gastos) toca plata y permisos del panel; VD-33E (ofrecer cerrar sesiones al cambiar la contraseña) es de Mi cuenta (shared); VD-43B/C son del panel del dueño.
+- **SEG-01 a 07:** SEG-01 ya estaba (`aislamiento-gimnasios.test.mjs`); SEG-02 y SEG-07 ahora tienen guarda en vitest (`src/lib/admin/seguridad-codigo.test.ts`: ningún archivo de navegador toca la clave de servicio, ninguna clave ni `demo-gymos` en `src`); SEG-03/04 (BASE-8), SEG-05 (registro de BRIK) y SEG-06 (exportar/borrar) ya estaban.
+
+## 11/11 · Decisiones de Mateo y por defecto (loop)
+- **Aprobado por Mateo:** los permisos de C1 (`cuenta_para_clave_socio`, `registrar_clave_entregada`, tabla `claves_entregadas`).
+- **Pedido de Mateo:** el socio ve en su app "Te dieron una clave nueva el <fecha>, por <nombre>" (ayudante `carril/c-aviso-clave`).
+- **Regla desde hoy:** lo que toque permisos o plata se decide con la opción más segura y se anota acá como "decidido por defecto"; no se pide revisión. Se publica al cerrar cada fase (prevuelo → aplicar → merge → humo). La publicación de la fase P y lo hecho de la fase C sale apenas C1 pase en Actions.
+- **Decidido por defecto (C4):** no hay QR fijo impreso para la pared. El de la tablet cambia cada 30 s y lo firma la base; uno impreso se podría prestar. El cartel de la puerta lleva logo, color y nombre y manda a escanear el QR de la tablet. Si Mateo quiere uno fijo, es una decisión de seguridad aparte.

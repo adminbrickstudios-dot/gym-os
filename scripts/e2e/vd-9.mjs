@@ -108,7 +108,8 @@ try {
   await fila2.locator('button:has-text("Anotar lo que conté")').click();
   await d.locator("[data-revisada]").getByText("Faltaban $50").waitFor({ timeout: 30000 });
   ok("la dueña la cuenta después: “Faltaban $50”");
-  await d.locator("[data-revisada] button:has-text('Listo')").click();
+  // La pantalla se actualiza sola al contar: la tarjeta puede salir antes de que se toque "Listo" (el resultado es el mismo: ya no está en Para revisar).
+  await d.locator("[data-revisada] button:has-text('Listo')").click({ timeout: 5000 }).catch(() => {});
   await d.locator("[data-para-revisar]").waitFor({ state: "detached", timeout: 30000 });
   ok("contada, sale de Para revisar");
 } catch (e) {

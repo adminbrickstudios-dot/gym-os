@@ -7,9 +7,14 @@
 4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
 5. **Dominio:** `DOMINIO.md` (pasos exactos).
 
-## DÓNDE QUEDÉ (11/11, mañana)
+## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
+- U5, P1, P4 a P7, P8 y P8b en ✅ (Actions 43015505501 y 43020787407). Chequeos de la base relanzados en 43022741600 (lista blanca y paletas del editor ya arreglados). Ayudantes en la fase C: `carril/c-clave` (C1) y `carril/c-importar` (C2); al terminar: integrar, correr su e2e (`clave-nueva`, `importar-300`) en Actions. Yo sigo con C3 a C8. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel). Hay migraciones nuevas sin aplicar (20261111090000 y las que traigan los carriles): se aplican en la próxima publicación.
+
+## (anterior) DÓNDE QUEDÉ (11/11, mediodía)
+- **(11/11, 08:40) Fase U publicada:** prevuelo y aplicar de `publicar/base-fase-u` en verde (corridas 43012383810 y 43013698089), PR #14 mergeado (37fa0a0), deploy de Vercel en verde. El humo en producción (corrida 43014189983) no corrió: faltan los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`.
 - **Verde en Actions** (corrida 42976537928, build y chequeos incluidos): panel-inicio, base-ingresos (20 ingresos, mediana 199 ms, tope 1 s), panel-socios, panel-entrada, base-8, fase-u1-u2 (U1, U2), fase-u3 (U3), fase-u4 (U4), super-p, super-plat, panel-d, super-f2. `contexto_pantalla` (un solo viaje) anda: 3 a 18 ms en el log. `pendientes_panel` a 5.000 socios: 53 ms dueño / 45 ms recepción (era 385).
 - **En curso:** U0.1/U0.2 — falta que pase `fase-u0-login` (login correcto por `/g/<slug>/ingresar`; D lo corrigió como carrera del test, corrida 42978781658) y el contraste del tema (`barrido-tema`, D subió los tokens). Después: U0.3 (humo en producción: espera los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`), P8 (C), F1.9 (D: vd-6, vd-9, vd-46r, vd-3, vd-15, vd-37, vd-38, vd-46f, vd-49 plata), F1.4 resto (D).
+- **PR abierto: https://github.com/adminbrickstudios-dot/gym-os/pull/14 (rama `publicar/base-fase-u`), con los pasos adentro.**
 - **PUBLICAR la fase U (lo hacés vos, hay 3 gimnasios reales sin socios en producción):** cuando U0.1 esté en verde dejo la rama `publicar/base-fase-u` y el PR. Pasos: (1) GitHub → Actions → "Base de datos" → Run workflow en esa rama → acción `prevuelo` → si da verde, `aplicar`; (2) mergear el PR a main y esperar el deploy de Vercel en verde; (3) Actions → "Humo producción" (necesita los secretos); (4) Vercel: `SUPABASE_SERVICE_ROLE_KEY` correcta y redeploy (ver PASOS PARA MATEO).
 
 ## ⛔ PASOS PARA MATEO: conectar el dominio desde el super admin (PLAT-05)

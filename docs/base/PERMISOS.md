@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 384 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 324 funciones piden un rol del equipo con `privado.exigir_equipo`; 403 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -29,6 +29,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `asignar_rutina_varios` | ✓ | ✓ | — | ✓ |
 | `aumentos_hechos` | ✓ | ✓ | — | — |
 | `autoaltas_web` | ✓ | ✓ | ✓ | — |
+| `autonomia_socios_estado` | ✓ | ✓ | — | — |
 | `autorizar_tablet` | ✓ | — | — | — |
 | `autoservicio_panel` | ✓ | ✓ | — | — |
 | `avisar_sin_bloquear_estado` | ✓ | ✓ | — | — |
@@ -83,6 +84,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `crear_prospecto` | ✓ | ✓ | ✓ | — |
 | `crear_tarea` | ✓ | ✓ | ✓ | ✓ |
 | `crear_tv` | ✓ | ✓ | ✓ | ✓ |
+| `cuenta_para_clave_socio` | ✓ | — | ✓ | — |
 | `cumplen_hoy` | ✓ | ✓ | ✓ | — |
 | `cupo_dejar_pasar` | ✓ | ✓ | ✓ | — |
 | `cupones_panel` | ✓ | ✓ | — | — |
@@ -133,6 +135,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_actividades_plan` | ✓ | ✓ | — | — |
 | `guardar_ajustes_plan` | ✓ | ✓ | — | — |
 | `guardar_altas` | ✓ | — | — | — |
+| `guardar_autonomia_socios` | ✓ | — | — | — |
 | `guardar_avisar_sin_bloquear` | ✓ | — | — | — |
 | `guardar_checklist_item` | ✓ | ✓ | — | — |
 | `guardar_compras_app` | ✓ | — | — | — |
@@ -154,6 +157,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_equipo` | ✓ | — | — | — |
 | `guardar_equipo_ajuste` | ✓ | — | — | — |
 | `guardar_espera_plazo` | ✓ | — | — | — |
+| `guardar_estilo_pagina` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
 | `guardar_foto_socio_permitida` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
@@ -231,6 +235,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `otorgar_grado` | ✓ | ✓ | — | ✓ |
 | `pagar_profe` | ✓ | — | — | — |
 | `pagina_panel` | ✓ | ✓ | — | — |
+| `pagina_por_defecto` | ✓ | ✓ | — | — |
 | `pasos_asistente` | ✓ | — | — | — |
 | `pedido_baja_socio` | ✓ | ✓ | ✓ | — |
 | `pedidos_anulacion_pendientes` | ✓ | ✓ | — | — |
@@ -277,6 +282,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `quitar_rutina_socio` | ✓ | ✓ | — | ✓ |
 | `racha_socio` | ✓ | ✓ | ✓ | ✓ |
 | `recibo_venta` | ✓ | ✓ | ✓ | — |
+| `registrar_clave_entregada` | ✓ | — | ✓ | — |
 | `registrar_uso_cupon` | ✓ | ✓ | ✓ | — |
 | `registro_socios_panel` | ✓ | ✓ | — | — |
 | `reglas_beneficios` | ✓ | ✓ | — | — |
@@ -335,6 +341,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_agregar_dominio`
 - `admin_agregar_nota`
 - `admin_agregar_persona`
+- `admin_alertas`
 - `admin_anotar_registro`
 - `admin_anular_pago_brik`
 - `admin_aplicar_plantilla`
@@ -358,6 +365,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_demos_vencidas`
 - `admin_entrar_gimnasio`
 - `admin_errores`
+- `admin_estado_copias`
 - `admin_estado_persona`
 - `admin_estado_seguridad`
 - `admin_evento_webhook`
@@ -371,12 +379,16 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_guardar_ciudad`
 - `admin_guardar_contacto_plataforma`
 - `admin_guardar_descuento`
+- `admin_guardar_limites_plan`
 - `admin_guardar_link_pago`
 - `admin_guardar_marca`
 - `admin_guardar_modulos`
 - `admin_guardar_plan_brik`
+- `admin_guardar_plantilla_texto`
 - `admin_guardar_prueba`
+- `admin_guardar_tipo_gimnasio`
 - `admin_lanzamiento`
+- `admin_limites_gimnasios`
 - `admin_link_pago`
 - `admin_lista_gimnasios`
 - `admin_mantenimientos`
@@ -388,7 +400,10 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_papelera`
 - `admin_pausar_gimnasio`
 - `admin_pedidos_demo`
+- `admin_plan_publico`
 - `admin_planes_brik`
+- `admin_planes_con_limites`
+- `admin_plantillas_texto`
 - `admin_plataforma_estado`
 - `admin_prender_funcion`
 - `admin_probar_acceso`
@@ -399,20 +414,25 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_quitar_dominio`
 - `admin_quitar_rol_brik`
 - `admin_reanudar_gimnasio`
+- `admin_registrar_equipo`
 - `admin_registrar_pago_brik`
 - `admin_registro_brik`
 - `admin_resolver_ayuda`
 - `admin_restaurar_baja`
 - `admin_restaurar_plan`
+- `admin_restaurar_plantilla_texto`
 - `admin_restaurar_socio`
+- `admin_restaurar_texto_gimnasio`
 - `admin_retirar_novedad`
 - `admin_salir_gimnasio`
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
 - `admin_soportes`
 - `admin_tablero`
+- `admin_tamano_tablas`
 - `admin_uso_gimnasios`
 - `admin_uso_semanal`
+- `admin_ver_socio`
 - `agenda_pt`
 - `agenda_publica (también anónimo)`
 - `agregar_nota`
@@ -444,6 +464,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `asistencia_socio`
 - `avisar_clase`
 - `aviso_clase_socio`
+- `aviso_clave_socio`
 - `avisos_app_socio`
 - `avisos_clase`
 - `avisos_lugar_socio`
@@ -466,6 +487,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `clase_detalle`
 - `clases_del_dia`
 - `clases_para_probar (también anónimo)`
+- `clases_semana_publica (también anónimo)`
 - `comprobante_gasto`
 - `config_cierres`
 - `config_fichaje`
@@ -506,6 +528,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `escribir_al_gimnasio`
 - `estado_abono_panel`
 - `estado_acceso`
+- `estado_gimnasio_aviso`
 - `estado_soporte`
 - `eventos_publicos (también anónimo)`
 - `eventos_socio`
@@ -584,6 +607,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `lugares_clase`
 - `mantenimiento_vigente (también anónimo)`
 - `maquinas_panel`
+- `marcar_aviso_clave_visto`
 - `marcar_aviso_leido`
 - `marcar_ayuda`
 - `marcar_bienvenida`
@@ -611,6 +635,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `movimiento_caja`
 - `notas_y_etiquetas`
 - `novedades_socio`
+- `ocupacion_en_vivo`
 - `ofertas_socio`
 - `opciones_compra_app`
 - `operador_actual`
@@ -722,6 +747,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `destinos_push_mensajes`
 - `entrar_con_google`
 - `ingreso_permitido`
+- `landing_publica_base`
 - `mail_para_ingresar`
 - `precio_cuota`
 - `registrar_envio_publico`

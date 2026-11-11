@@ -34,7 +34,7 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
   let filas: FilaGimnasio[];
   try { filas = await rpc<FilaGimnasio[]>("admin_lista_gimnasios", args); }
   catch (e) {
-    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
+    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="Sin acceso">{e.message}</Aviso></main>;
     throw e;
   }
   // U1: los gimnasios cuyo alta quedó a medias (el dueño todavía no tiene cuenta).

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { contarCampana } from "@/app/panel/campana/acciones";
 import { Icono } from "@/components/ui/Icono";
+import { EVENTO_PENDIENTES } from "@/lib/panel/pendientes";
 
 /** AVI-5: el arriba a la derecha. El número se pide después de pintar: no frena la pantalla. */
 export function Campana() {
@@ -11,8 +12,11 @@ export function Campana() {
   const [n, setN] = useState<number | null>(null);
   useEffect(() => {
     let vivo = true;
-    void contarCampana().then((x) => { if (vivo) setN(x); });
-    return () => { vivo = false; };
+    const pedir = () => { void contarCampana().then((x) => { if (vivo) setN(x); }); };
+    pedir();
+    // Cuando algo se resuelve sin cambiar de pantalla (“Marcar todo como leído”), el número se vuelve a pedir.
+    window.addEventListener(EVENTO_PENDIENTES, pedir);
+    return () => { vivo = false; window.removeEventListener(EVENTO_PENDIENTES, pedir); };
   }, [ruta]);
   const activa = ruta === "/panel/campana";
   return (

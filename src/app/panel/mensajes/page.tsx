@@ -58,8 +58,8 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
           {gestiona && <Rapidas lista={rapidas} puedeEditar />}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] items-start">
-          <section aria-label="Bandeja" className={hilo ? "hidden lg:block" : ""}>
+        <div className="grid gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] items-start">
+          <section aria-label="Bandeja" className={`min-w-0 ${hilo ? "hidden lg:block" : ""}`}>
             {bandeja.items.length === 0 ? (
               <Vacio icono="mensaje" titulo={filtro === "abiertos" ? "Sin mensajes por contestar" : "No hay mensajes acá"}>
                 Cuando un socio te escriba desde su app (Yo → Escribile al gimnasio), aparece acá con un aviso.

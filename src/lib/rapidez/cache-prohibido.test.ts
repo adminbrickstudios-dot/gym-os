@@ -6,8 +6,8 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const RAIZ = join(__dirname, "..", "..");
-const PERMITIDOS = new Set(["lib/landing.ts"]);
-const RPC_PUBLICOS = new Set(["landing_publica", "medicion_publica"]);
+const PERMITIDOS = new Set(["lib/landing.ts", "components/panel/FranjaMantenimiento.tsx"]);   // la franja de mantenimiento es pública e igual para todos
+const RPC_PUBLICOS = new Set(["landing_publica", "medicion_publica", "clases_semana_publica", "mantenimiento_vigente"]);
 
 function archivos(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {

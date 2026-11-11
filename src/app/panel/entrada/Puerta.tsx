@@ -315,7 +315,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
           {guia?.decile && <p className="mt-2 text-2xl" data-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
-          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <LinkPanel href={c.href} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <LinkPanel href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}

@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingOculta } from "@/components/landing/Landing";
-import { traerAgenda, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
+import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 import { PlataformaLanding } from "@/components/landing/Plataforma";
@@ -20,9 +20,9 @@ const landingDelHost = cache(async () => {
   if (h.get("x-gymos-contexto") !== "gimnasio") return { tipo: "plataforma" as const };
   const host = h.get("x-gimnasio-host");
   if (!host) throw new Error("El middleware marcó un gimnasio pero no pasó el host.");
-  const [landing, agenda, eventos, medicion] = await Promise.all([traerLanding(host), traerAgenda(host), traerEventos(host), traerMedicion(host)]);
+  const [landing, agenda, eventos, medicion, clases] = await Promise.all([traerLanding(host), traerAgenda(host), traerEventos(host), traerMedicion(host), traerClasesSemana(host)]);
   if (!landing) notFound();
-  return { tipo: "gimnasio" as const, landing, agenda, eventos, medicion };
+  return { tipo: "gimnasio" as const, landing, agenda, eventos, medicion, clases };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -52,7 +52,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: titulo },
     description: descripcion,
-    icons: icono ? { icon: icono, apple: icono } : undefined,
+    // Con logo, el logo; sin logo, el cuadrado con su color y sus iniciales (/icono): nunca una página sin favicon.
+    icons: icono ? { icon: icono, apple: icono } : { icon: "/icono", apple: "/icono" },
     openGraph: { type: "website", title: titulo, description: descripcion, siteName: marca.nombre, locale: "es_AR",
                  images: [{ url: imagen, width: foto ? undefined : 1200, height: foto ? undefined : 630, alt: marca.nombre }] },
     twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
@@ -74,7 +75,7 @@ export default async function Inicio() {
       <>
         {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
-        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} />
+        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} />
         <Medicion medicion={r.medicion} />
       </>
     );

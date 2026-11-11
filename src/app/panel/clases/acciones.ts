@@ -50,9 +50,9 @@ export async function avisarClase(claseId: string, texto: string): Promise<{ err
 export const guardarLugares = async (claseId: string, cantidad: number, etiqueta: string, fuera: number[]) =>
   r(() => rpc("guardar_lugares", { p_clase_id: claseId, p_cantidad: cantidad, p_etiqueta: etiqueta, p_fuera_servicio: fuera }), claseId);
 /** COM-14: crear una TV de la sala (el token se ve una sola vez) y sacarla. */
-export async function crearTv(gimnasioId: string, sedeId: string, nombre: string): Promise<{ error?: string; token?: string }> {
+export async function crearTv(gimnasioId: string, sedeId: string, nombre: string, modo: "clases" | "entradas" = "clases"): Promise<{ error?: string; token?: string }> {
   try {
-    const r = await rpc<{ id: string; token: string }>("crear_tv", { p_gimnasio_id: gimnasioId, p_sede_id: sedeId, p_nombre: nombre });
+    const r = await rpc<{ id: string; token: string }>("crear_tv", { p_gimnasio_id: gimnasioId, p_sede_id: sedeId, p_nombre: nombre, p_modo: modo });
     revalidatePath("/panel/clases/tv");
     return { token: r.token };
   } catch (e) { return { error: (e as Error).message }; }

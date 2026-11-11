@@ -2,13 +2,23 @@
 import { headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
-import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
+import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
 import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
 // la acción, Next renderiza el destino en el mismo POST, sin los encabezados
 // del gimnasio que pone el middleware para esa ruta.
-export type EstadoIngreso = { error?: string; email?: string; destino?: string };
+export type EstadoIngreso = { error?: string; email?: string; destino?: string; ayuda?: string };
+
+/** PLAT-02/08: cuando la persona no puede hacer nada sola (sin gimnasio, sin confirmar, desactivada), un link directo al WhatsApp de BRIK (si está cargado). */
+async function linkAyudaBrik(email: string): Promise<string | undefined> {
+  try {
+    const { clienteServicio } = await import("@/lib/supabase/servicio");
+    const { data } = await clienteServicio().rpc("contacto_plataforma_publico");
+    const w = String((data as { whatsapp?: string | null } | null)?.whatsapp ?? "").replace(/D/g, "");
+    return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a Base con ${email}`)}` : undefined;
+  } catch { return undefined; }
+}
 
 export async function ingresar(_: EstadoIngreso, form: FormData): Promise<EstadoIngreso> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
@@ -30,12 +40,12 @@ export async function ingresar(_: EstadoIngreso, form: FormData): Promise<Estado
     // PLAT-08: el motivo real queda en el registro del servidor; a la persona se le dice algo humano según el caso.
     console.error(`[ingreso] fallo ${error.code ?? "?"} status=${error.status ?? "?"}`);
     const motivo = motivoDeEntrada(error);
-    if (motivo === "sin_confirmar") return { error: TEXTO_SIN_CONFIRMAR, email };
-    if (motivo === "desactivada") return { error: TEXTO_DESACTIVADA, email };
+    if (motivo === "sin_confirmar") return { error: TEXTO_SIN_CONFIRMAR, email, ayuda: await linkAyudaBrik(email) };
+    if (motivo === "desactivada") return { error: TEXTO_DESACTIVADA, email, ayuda: await linkAyudaBrik(email) };
     return { error: await textoCredencialesMalas(email), email };
   }
   const r = await destinoTrasEntrar(supabase, String(form.get("siguiente") ?? "") || null);
-  return r.error ? { error: r.error, email } : r;
+  return r.error ? { error: r.error, email, ayuda: r.error === TEXTO_SIN_GIMNASIO ? await linkAyudaBrik(email) : undefined } : r;
 }
 
 /**

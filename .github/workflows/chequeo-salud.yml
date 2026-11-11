@@ -1,0 +1,30 @@
+# ESC-06 · Monitoreo propio: cada 15 minutos pregunta a la plataforma publicada si responde (GET /api/salud: app y base, con tiempos).
+# Si no responde, o tarda más de 3 s, la corrida FALLA y GitHub avisa por mail a quien tenga las notificaciones de Actions prendidas.
+# Es un pedido liviano y sin datos de nadie (no es carga). Para activarlo: Settings → Secrets and variables → Actions → Variables → SALUD_URL
+# (por ejemplo https://app.<dominio>/api/salud). Sin esa variable no hace nada. Sentry queda ⛔ hasta que Mateo cree la cuenta.
+name: Chequeo de salud
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  salud:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Preguntar si responde
+        env:
+          SALUD_URL: ${{ vars.SALUD_URL }}
+        run: |
+          if [ -z "$SALUD_URL" ]; then echo "SALUD_URL no está cargada: el chequeo está apagado (ver el comentario de arriba)."; exit 0; fi
+          for intento in 1 2 3; do
+            codigo=$(curl -sS -o salud.json -w "%{http_code} %{time_total}" --max-time 20 "$SALUD_URL" || echo "000 0")
+            echo "intento $intento: $codigo"; cat salud.json 2>/dev/null || true; echo
+            http="${codigo%% *}"; seg="${codigo##* }"
+            if [ "$http" = "200" ] && awk "BEGIN{exit !($seg < 3)}"; then echo "Responde bien."; exit 0; fi
+            sleep 20
+          done
+          echo "::error::La plataforma no respondió bien 3 veces seguidas ($SALUD_URL). Revisá Vercel y Supabase."
+          exit 1

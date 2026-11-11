@@ -1,4 +1,5 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
@@ -15,19 +16,19 @@ export function PedidosDemo({ pedidos }: { pedidos: PedidoDemo[] }) {
   if (pedidos.length === 0) return null;
   return (
     <section className="space-y-3" data-pedidos-demo>
-      <p className="titulo-grupo">🙋 Pedidos de demo <span className="pildora pildora-azul align-middle" data-pedidos-demo-cantidad>{pedidos.length}</span></p>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {error}</p>}
+      <p className="titulo-grupo"><Icono nombre="persona" /> Pedidos de demo <span className="pildora pildora-azul align-middle" data-pedidos-demo-cantidad>{pedidos.length}</span></p>
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
       <div className="space-y-2">
         {pedidos.map((p) => (
           <div key={p.id} className="tarjeta p-4 space-y-2" data-pedido-demo>
             <p className="font-semibold break-words">{p.nombre}{p.gimnasio ? ` · ${p.gimnasio}` : ""} <span className="texto-tenue font-normal">· {cuando(p.creado_en)}</span></p>
-            <p className="texto-suave break-all">📞 {p.contacto}</p>
+            <p className="texto-suave break-all"><Icono nombre="telefono" /> {p.contacto}</p>
             {p.mensaje && <p className="break-words">{p.mensaje}</p>}
             <BotonAccion className="boton" onClick={async () => {
               const r = await atenderDemo(p.id);
               if (r.error) { setError(r.error); return; }
               empezar(() => router.refresh());
-            }}>✅ Ya lo contacté</BotonAccion>
+            }}><Icono nombre="ok" /> Ya lo contacté</BotonAccion>
           </div>
         ))}
       </div>

@@ -1,0 +1,77 @@
+# F1.8 / F0 · Lighthouse en celular contra la app COMPILADA (next build + next start), con una base nueva y el demo sembrado.
+# A mano: Actions → Lighthouse → Run workflow. Mide la landing de un gimnasio demo con datos, /ingresar (equipo y socio) y /hacete-socio.
+# La tabla (performance, accesibilidad, buenas prácticas, SEO, LCP, CLS, TBT) va al resumen de la corrida y se sube como artefacto.
+# Si la performance móvil de la landing queda por debajo del umbral, el job lo avisa (::warning::) pero NO falla.
+#   gh workflow run lighthouse.yml --ref <rama> --raw-field veces=3
+# La app del socio con sesión no se mide acá (pide login): queda para una pasada con cookie.
+name: Lighthouse
+
+on:
+  # Hasta que este archivo esté en main, GitHub no deja dispararlo a mano: un push a dia/** con [lighthouse] en el mensaje lo corre.
+  push:
+    branches: ["dia/**"]
+  workflow_dispatch:
+    inputs:
+      veces:
+        description: "Corridas por pantalla (se usa la mediana)"
+        type: string
+        default: "3"
+      umbral:
+        description: "Performance mínima de la landing en celular (solo avisa)"
+        type: string
+        default: "90"
+      ruta_demo:
+        description: "Dirección del gimnasio demo (sin barra final)"
+        type: string
+        default: "http://demo.localhost:3123"
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  medir:
+    name: Lighthouse móvil
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[lighthouse]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Levantar la app compilada con la imitación de Supabase
+        env:
+          APP_MODO: produccion
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: scripts/local/levantar.sh
+      - name: Chrome
+        run: |
+          echo "CHROME_PATH=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)" >> "$GITHUB_ENV"
+          "$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)" --version
+      - name: Lighthouse en celular
+        env:
+          LIGHTHOUSE_VERSION: "12.6.1"
+        run: node scripts/medir/lighthouse.mjs --base "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}" --veces "${{ inputs.veces || '3' }}" --umbral "${{ inputs.umbral || '90' }}"
+      - name: Guardar la tabla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: |
+            .local/lighthouse/
+            .local/app.log
+          if-no-files-found: ignore
+          retention-days: 30

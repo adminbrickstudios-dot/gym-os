@@ -10,7 +10,7 @@ import { deshacer, importar, revisar } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 
 export type Importacion = { id: string; archivo: string | null; filas: number; importados: number; creado_en: string; deshecha_en: string | null; puede_deshacer: boolean };
-type Revision = { validas: number; filas: { fila: number; errores: string[]; datos: Record<string, string | null> }[] };
+type Revision = { validas: number; ya_existian?: number; repetidas_en_archivo?: number; filas: { fila: number; errores: string[]; datos: Record<string, string | null> }[] };
 
 export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zona: string }) {
   const [archivo, setArchivo] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
   const [datos, setDatos] = useState<unknown[][]>([]);
   const [mapa, setMapa] = useState<(Campo | null)[]>([]);
   const [revision, setRevision] = useState<Revision | null>(null);
-  const [resultado, setResultado] = useState<{ importados: number; salteados: number } | null>(null);
+  const [resultado, setResultado] = useState<{ importados: number; salteados: number; ya_existian?: number; repetidas_en_archivo?: number; con_cobertura?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [lista, setLista] = useState(anteriores);
@@ -94,7 +94,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
       )}
 
       {revision && (
-        <section className="tarjeta p-5 sm:p-6 space-y-4" data-revision data-validas={revision.validas} data-con-error={conError.length}>
+        <section className="tarjeta p-5 sm:p-6 space-y-4" data-revision data-validas={revision.validas} data-con-error={conError.length} data-ya-existian={revision.ya_existian ?? 0} data-repetidas-archivo={revision.repetidas_en_archivo ?? 0}>
           <p className="titulo text-2xl">3. Revisión</p>
           <p className="text-lg"><strong>{revision.validas}</strong> listos para entrar{conError.length > 0 && <> · <strong>{conError.length}</strong> con algo para corregir (no entran)</>}.</p>
           {conError.length > 0 && (
@@ -107,7 +107,25 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
               ))}
             </ul>
           )}
-          <p className="text-sm texto-tenue">“Vence el” se carga como lo que ya pagó: entra hasta ese día. Los que no tienen fecha quedan con el plan y sin pagar.</p>
+          {revision.validas > 0 && (
+            <div data-vista-previa>
+              <p className="etiqueta">Así van a quedar los primeros</p>
+              <ul className="space-y-1 text-sm">
+                {revision.filas.filter((f) => !f.errores.some((e) => !e.startsWith("Celular repetido"))).slice(0, 5).map((f) => (
+                  <li key={f.fila} className="texto-suave">
+                    <strong>{f.datos.nombre} {f.datos.apellido ?? ""}</strong>{f.datos.dni ? ` · DNI ${f.datos.dni}` : ""}{f.datos.telefono ? ` · ${f.datos.telefono}` : ""}{f.datos.vence ? ` · pagó hasta ${f.datos.vence.split("-").reverse().join("/")}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {((revision.ya_existian ?? 0) > 0 || (revision.repetidas_en_archivo ?? 0) > 0) && (
+            <p className="text-sm texto-suave" data-repetidas>
+              {(revision.ya_existian ?? 0) > 0 && <>{revision.ya_existian} ya están cargados como socios (no se vuelven a crear). </>}
+              {(revision.repetidas_en_archivo ?? 0) > 0 && <>{revision.repetidas_en_archivo} aparecen más de una vez en el archivo (entra la primera).</>}
+            </p>
+          )}
+          <p className="text-sm texto-tenue">“Pagó hasta” se carga como lo que ya pagó, también si ya venció: el primer día la puerta ya muestra quién debe. Quien no tiene esa fecha queda con el plan y sin pagar.</p>
           <button type="button" className="boton boton-principal" disabled={ocupado || revision.validas === 0} onClick={hacerImportacion}>
             {ocupado ? "Importando…" : `Importar ${revision.validas} socios`}
           </button>
@@ -117,7 +135,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {resultado && (
         <Mensaje tipo="exito" accion={<Link href="/panel/socios" className="boton"><Icono nombre="usuarios" /> Ver socios</Link>}>
-          <span data-importados={resultado.importados}>Entraron {resultado.importados} socios{resultado.salteados ? ` (${resultado.salteados} con errores quedaron afuera)` : ""}. Si algo salió mal, deshacelo abajo durante 24 horas.</span>
+          <span data-importados={resultado.importados}>Entraron {resultado.importados} socios{resultado.salteados ? ` (${resultado.salteados} quedaron afuera: errores o ya cargados)` : ""}. Si algo salió mal, deshacelo abajo durante 24 horas.</span>
         </Mensaje>
       )}
 

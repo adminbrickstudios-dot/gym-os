@@ -9,10 +9,13 @@ export const metadata: Metadata = { title: "BRIK · Registro" };
 type Entrada = { accion: string; quien: string; gimnasio: string | null; gimnasio_id: string | null; detalle: Record<string, unknown>; cuando: string };
 
 /** SA-10: todo lo que hace cada usuario de BRIK. Solo se agrega: nadie lo puede borrar. */
-export default async function Registro() {
+const PAGINA = 50;
+export default async function Registro({ searchParams }: { searchParams: Promise<{ antes?: string }> }) {
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   let filas: Entrada[];
-  try { filas = await rpc<Entrada[]>("admin_registro_brik", { p_limite: 200 }); }
+  const { antes } = await searchParams;
+  const cursor = antes && !Number.isNaN(Date.parse(antes)) ? new Date(antes).toISOString() : null;
+  try { filas = await rpc<Entrada[]>("admin_registro_brik", { p_limite: PAGINA, p_antes: cursor }); }
   catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><p role="alert" className="tarjeta p-6">Sin acceso: {e.message}</p></main>;
     throw e;
@@ -35,6 +38,11 @@ export default async function Registro() {
           </li>
         ))}
       </ul>
+      {/* ESC-05: siempre paginado por cursor (la fecha de la última fila vista), nunca "todo". */}
+      <nav className="flex gap-3" aria-label="Páginas del registro">
+        {cursor && <Link href="/admin/registro" className="boton" data-registro-inicio>Volver al principio</Link>}
+        {filas.length === PAGINA && <Link href={`/admin/registro?antes=${encodeURIComponent(filas[filas.length - 1].cuando)}`} className="boton" data-registro-mas>Ver más antiguos</Link>}
+      </nav>
     </main>
   );
 }

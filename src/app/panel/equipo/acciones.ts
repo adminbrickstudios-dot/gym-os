@@ -1,7 +1,9 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
-import { contrasenaElegida, darAcceso, mailValido } from "@/lib/cuentas";
+import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
+import { origenDePeticion } from "@/lib/cuentas-clave-servidor";
+import { textoClave, type ResultadoClave } from "@/lib/cuentas-clave";
 
 export type Resultado = { error?: string; aviso?: string; contrasena?: string; email?: string };
 
@@ -109,4 +111,25 @@ export async function quitarFotoEquipo(equipoId: string): Promise<{ error?: stri
     revalidatePath("/panel/equipo");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
+}
+
+/**
+ * C1 · Clave nueva para alguien del equipo, sin mails: solo el dueño (lo decide la base con cuenta_para_nueva_clave).
+ * Devuelve la clave una sola vez, con el mensaje armado para copiar o mandar por WhatsApp, y deja el registro de quién la generó.
+ */
+export async function nuevaClaveEquipo(_: ResultadoClave, f: FormData): Promise<ResultadoClave> {
+  const equipoId = String(f.get("equipo_id") ?? "");
+  try {
+    const panel = await contextoPanel();
+    const c = await rpc<{ usuario_id: string; email: string | null; nombre: string }>("cuenta_para_nueva_clave", { p_equipo_id: equipoId });
+    if (!c.email) throw new Error(`${c.nombre} no tiene mail en su cuenta`);
+    const contrasena = await nuevaContrasena(c.usuario_id, contrasenaElegida(f));
+    let aviso = `Contraseña nueva para ${c.nombre}. La anterior ya no sirve. Se muestra una sola vez.`;
+    try { await rpc("registrar_clave_entregada", { p_equipo_id: equipoId }); }
+    catch (e) { aviso += ` Ojo: no quedó el registro de quién la generó (${(e as Error).message}).`; }
+    const origen = await origenDePeticion();
+    return { email: c.email, contrasena, aviso, texto: textoClave({ gimnasio: panel.gimnasio.nombre, nombre: c.nombre, destino: "equipo", origen, email: c.email, contrasena }) };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }

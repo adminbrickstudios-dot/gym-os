@@ -22,6 +22,7 @@ import { AptoFisico, type DatosApto } from "./AptoFisico";
 import { Origen, type DatosOrigen } from "./Origen";
 import { Llavero, type DatosLlavero } from "./Llavero";
 import { Convenio, type ConvenioSocio } from "./Convenio";
+import { NuevaClave } from "./NuevaClave";
 import type { Ficha } from "./tipos";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { GradosFicha } from "./GradosFicha";
@@ -145,6 +146,9 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           {!s.dado_de_baja_en && grados.length > 0 && <GradosFicha socioId={s.id} grados={grados} zona={zona}
             puedeOtorgar={panel.yo.rol !== "recepcion"} puedeAnular={["dueno", "encargado"].includes(panel.yo.rol)} />}
           {!s.dado_de_baja_en && llavero.usa && <div className="mt-3"><Llavero socioId={s.id} datos={llavero} /></div>}
+          {!s.dado_de_baja_en && !s.es_menor && (panel.yo.rol === "dueno" || panel.yo.rol === "recepcion") && (
+            <div className="mt-3"><NuevaClave socioId={s.id} nombre={s.nombre} telefono={s.telefono} tieneEmail={!!s.email} /></div>
+          )}
           {!s.dado_de_baja_en && pestana === "resumen" && (
             <div className="mt-3"><Convenio socioId={s.id} actual={convenio} opciones={convenios} zona={zona}
               puede={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} hoy={new Intl.DateTimeFormat("en-CA", { timeZone: zona }).format(new Date())} /></div>

@@ -11,6 +11,7 @@ import { join, relative, sep } from "node:path";
 const ARCHIVOS_CON_COLOR = new Set([
   "src/app/globals.css",          // acá viven los tokens
   "src/lib/marca.ts",             // calcula el contraste y la paleta de cada gimnasio a partir de su color
+  "src/lib/landing-estilo.ts",   // las paletas que ofrece el editor de la página: son datos que elige el dueño, no estilos de la app
   "src/app/og/route.tsx",         // imagen para compartir: no hay CSS del sitio
   "src/app/manifest.ts",          // el manifest de la app pide colores literales
   "src/app/layout.tsx",           // viewport.themeColor pide un color literal (el del tema claro por defecto)
