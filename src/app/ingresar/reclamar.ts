@@ -34,7 +34,7 @@ export async function reclamarFicha(_: EstadoReclamo, form: FormData): Promise<E
   if (r.estado === "no_coincide") return falla(TEXTO_NO_COINCIDE);
   if (r.estado === "ya_tiene_cuenta") return falla("Esa ficha ya tiene una cuenta. Entrá con tu mail y tu contraseña; si no te acordás, tocá “¿Te olvidaste la contraseña?”.");
 
-  const cuenta = await prepararCuenta(datos.email, contrasena, r.nombre ?? "");
+  const cuenta = await prepararCuenta(datos.email, contrasena, r.nombre ?? "", datos.telefono);
   if ("error" in cuenta) return falla(cuenta.error);
   const noVinculo = await vincularCuenta(gimnasioId, r.socio_id!, cuenta.usuarioId);
   if (noVinculo) { await deshacerCuenta(cuenta); return falla(noVinculo); }

@@ -41,7 +41,7 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   if (freno.error) return falla(freno.error);
 
   // 1) La cuenta (la contraseña la escribe él). Si el mail ya tiene cuenta, solo sigue con su contraseña.
-  const cuenta = await prepararCuenta(datos.email, datos.contrasena, datos.nombre);
+  const cuenta = await prepararCuenta(datos.email, datos.contrasena, datos.nombre, datos.responsable_telefono || datos.telefono);
   if ("error" in cuenta) return falla(cuenta.error, "contrasena");
 
   // 2) La ficha: la base decide. Si no se puede, la cuenta recién creada se borra.

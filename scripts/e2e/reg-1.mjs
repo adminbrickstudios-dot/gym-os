@@ -136,7 +136,8 @@ try {
   chequear(await aparece(c.locator("[data-alta-cerrada]"), 15000) && await c.locator('a:has-text("WhatsApp")').count() > 0, "apagadas: “Consultanos por WhatsApp”", "con las altas apagadas el formulario sigue");
   await c.goto(`${G}/`);
   await c.locator("h1").first().waitFor();
-  chequear(await c.locator('a[href="/hacete-socio"]').count() > 0, "apagadas: “Quiero ser socio” se ve igual (lleva al aviso de WhatsApp)", "apagadas: falta “Quiero ser socio”");
+  // H3b (SOCIO-FLUJO §1, LISTO SI 5): con las altas apagadas el botón no aparece; el link directo ya dice que hoy no se puede.
+  chequear(await c.locator('a[href="/hacete-socio"]').count() === 0 && await c.locator("[data-ya-soy-socio]").count() > 0, "apagadas: “Quiero ser socio” no aparece y queda “Ya soy socio, entrar”", "apagadas: “Quiero ser socio” sigue en la página");
   await c.context().close();
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();

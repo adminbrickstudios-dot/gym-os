@@ -14,7 +14,7 @@ import { demasiadosIntentos, elegirGimnasio, sinConexion, TEXTO_DEMASIADOS_INTEN
  */
 export type Cuenta = { usuarioId: string; creada: boolean; sesionAbierta: boolean };
 
-export async function prepararCuenta(email: string, contrasena: string, nombre: string): Promise<Cuenta | { error: string }> {
+export async function prepararCuenta(email: string, contrasena: string, nombre: string, telefono?: string): Promise<Cuenta | { error: string }> {
   const servicio = clienteServicio();
   const { data: existente, error: errBusca } = await servicio.rpc("usuario_por_mail", { p_email: email });
   if (errBusca) { console.error("[cuenta-socio] usuario_por_mail", errBusca.message); return { error: "No pudimos crear tu cuenta ahora. Probá de nuevo en un rato." }; }
@@ -25,7 +25,19 @@ export async function prepararCuenta(email: string, contrasena: string, nombre: 
       : abierta };
     return { usuarioId: existente as string, creada: false, sesionAbierta: true };
   }
-  const { data, error } = await servicio.auth.admin.createUser({ email, password: contrasena, email_confirm: true, user_metadata: { nombre } });
+  // El celular queda en la misma cuenta: si después entra con el código por SMS, es ESTA cuenta y no una segunda sin ficha.
+  // (Si ese celular ya es de otra cuenta, se crea sin él.)
+  let celular: string | null = null;
+  if (telefono) {
+    const { data: normalizado } = await servicio.rpc("telefono_para_ingresar", { p_texto: telefono });
+    if (typeof normalizado === "string" && normalizado) celular = normalizado;
+  }
+  const crear = (conCelular: boolean) => servicio.auth.admin.createUser({
+    email, password: contrasena, email_confirm: true, user_metadata: { nombre },
+    ...(conCelular && celular ? { phone: celular, phone_confirm: true } : {}),
+  });
+  let { data, error } = await crear(true);
+  if (error && celular && /phone|telef|tel[eé]fono/i.test(error.message)) ({ data, error } = await crear(false));
   if (error || !data.user) {
     console.error("[cuenta-socio] createUser", error?.message);
     if (error && sinConexion(error)) return { error: TEXTO_SIN_CONEXION };
