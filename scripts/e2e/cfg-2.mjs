@@ -35,9 +35,16 @@ try {
   const logoBox = p.locator('[data-imagen="logo"]');
   const esperar = async (zona, re) => { await zona.locator(".mensaje", { hasText: re }).waitFor({ timeout: 30000 }); return (await zona.locator(".mensaje").first().innerText()).replace(/\s+/g, " ").trim(); };
 
+  // BASE-7: elegir un archivo muestra la vista previa y recién "Usar este logo" lo sube (si el archivo ya se rechaza al elegirlo, no hay botón).
+  const usar = async (zona, nombre) => {
+    const boton = zona.locator("button", { hasText: `Usar este ${nombre}` });
+    if (await boton.waitFor({ timeout: 4000 }).then(() => true, () => false)) await boton.click();
+  };
+  const elegirLogo = async (archivo) => { await p.setInputFiles('input[aria-label="Elegir logo"]', archivo); await usar(logoBox, "logo"); };
+
   // ── Logo PNG ──
   const png = await imagen(p, { ancho: 360, alto: 120, color: "#2fbf5b", texto: "DEMO GYM" });
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.png", mimeType: "image/png", buffer: png });
+  await elegirLogo({ name: "logo.png", mimeType: "image/png", buffer: png });
   await esperar(logoBox, /Logo listo/);
   const src = await logoBox.locator("img").getAttribute("src");
   chequear(/\/storage\/v1\/object\/public\/marcas\/.+\/marca\/logo-[0-9a-f]{32}\.(png|webp)$/.test(src ?? ""), "subir un PNG lo guarda en el bucket con una ruta del gimnasio", `el logo quedó en ${src}`);
@@ -53,21 +60,21 @@ try {
 
   // ── Cambiar por un SVG: el archivo viejo se borra ──
   const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"><rect width="120" height="40" rx="8" fill="#3b82f6"/><text x="60" y="27" font-size="18" text-anchor="middle" fill="#fff">GYM</text></svg>');
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.svg", mimeType: "image/svg+xml", buffer: svg });
+  await elegirLogo({ name: "logo.svg", mimeType: "image/svg+xml", buffer: svg });
   await esperar(logoBox, /Logo listo/);
   const src2 = await logoBox.locator("img").getAttribute("src");
   const logos = archivosEn(carpeta).filter((f) => /logo-/.test(String(f)));
   chequear(src2 !== src && /\.svg$/.test(src2) && logos.length === 1, "cambiar el logo deja un solo archivo (el viejo se borra)", `quedaron ${logos.length} logos: ${logos.join(", ")}`);
 
   // ── Lo que no se acepta ──
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "malo.svg", mimeType: "image/svg+xml", buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><rect width="1" height="1"/></svg>') });
+  await elegirLogo({ name: "malo.svg", mimeType: "image/svg+xml", buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><rect width="1" height="1"/></svg>') });
   let m = await esperar(logoBox, /código/);
   ok(`SVG con código → “${m}”`);
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "factura.png", mimeType: "image/png", buffer: Buffer.from("%PDF-1.7 esto es un pdf con otro nombre") });
+  await elegirLogo({ name: "factura.png", mimeType: "image/png", buffer: Buffer.from("%PDF-1.7 esto es un pdf con otro nombre") });
   m = await esperar(logoBox, /no es una imagen/);
   ok(`un PDF con nombre .png → “${m}”`);
   const grande = Buffer.concat([png.subarray(0, 16), Buffer.alloc(3 * 1024 * 1024)]);
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "enorme.png", mimeType: "image/png", buffer: grande });
+  await elegirLogo({ name: "enorme.png", mimeType: "image/png", buffer: grande });
   m = await esperar(logoBox, /máximo es 2 MB/);
   ok(`una imagen de 3 MB → “${m}”`);
   chequear(await logoBox.locator("img").getAttribute("src") === src2, "después de los rechazos el logo sigue siendo el último bueno", "un rechazo cambió el logo");
@@ -75,6 +82,7 @@ try {
   // ── Ícono ──
   const icono = await imagen(p, { ancho: 64, alto: 64, color: "#f97316", texto: "G" });
   await p.setInputFiles('input[aria-label="Elegir ícono"]', { name: "icono.png", mimeType: "image/png", buffer: icono });
+  await usar(p.locator('[data-imagen="favicon"]'), "ícono");
   await esperar(p.locator('[data-imagen="favicon"]'), /Ícono listo/);
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   const iconos = await p.locator('link[rel="icon"]').evaluateAll((xs) => xs.map((x) => x.getAttribute("href")));
@@ -87,7 +95,7 @@ try {
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   chequear(await p.locator("aside img").count() === 0, "sin logo, la barra muestra solo el nombre", "la barra sigue con una imagen");
   // Vuelve a dejar un logo para el resto (página y app).
-  await p.setInputFiles('input[aria-label="Elegir logo"]', { name: "logo.png", mimeType: "image/png", buffer: png });
+  await elegirLogo({ name: "logo.png", mimeType: "image/png", buffer: png });
   await esperar(logoBox, /Logo listo/);
 
   // ── Fotos de la página ──
