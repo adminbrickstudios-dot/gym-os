@@ -9,6 +9,7 @@ export const LISTA_DEL_NUMERO: Record<string, { ruta: string; seccion: string }>
   adentro: { ruta: "/panel/entrada", seccion: "entrada" },
   entraron: { ruta: "/panel/entrada", seccion: "entrada" },
   cobrado: { ruta: "/panel/caja", seccion: "caja" },
+  caja_turno: { ruta: "/panel/caja", seccion: "caja" },
   a_cobrar: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
   vencen: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
   deben: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },

@@ -61,13 +61,21 @@ export default async function Inicio() {
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
           <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
-        {rol === "recepcion" && (
-          <nav className="flex flex-wrap gap-2 -mt-6 sm:-mt-8" aria-label="Acciones del mostrador" data-acciones-mostrador>
-            {rutaDisponible("/panel/vender", rol, panel.secciones_apagadas) && <Link href="/panel/vender" className="boton boton-principal"><Icono nombre="plata" /> Cobrar</Link>}
-            <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Alta</Link>
-            <Link href="/panel/entrada" className="boton"><Icono nombre="ticket" /> Pase diario</Link>
-          </nav>
-        )}
+        {/* F1.3: Cobrar, Alta y Pase diario a un toque, para todo el mostrador (recepción, encargado y dueño). Cada botón aparece solo si esa
+            pantalla está disponible para este rol y este gimnasio (nunca un botón que lleva a "no tenés permiso"). El Pase diario es una venta:
+            va a Vender y solo se ofrece si el gimnasio cobra pases. */}
+        {rol !== "profe" && (() => {
+          const puedeCobrar = rutaDisponible("/panel/vender", rol, panel.secciones_apagadas);
+          const puedeAlta = rutaDisponible("/panel/socios/nuevo", rol, panel.secciones_apagadas);
+          if (!puedeCobrar && !puedeAlta) return null;
+          return (
+            <nav className="flex flex-wrap gap-2 -mt-6 sm:-mt-8" aria-label="Acciones del mostrador" data-acciones-mostrador>
+              {puedeCobrar && <Link href="/panel/vender" className="boton boton-principal" data-accion-rapida="cobrar"><Icono nombre="plata" /> Cobrar</Link>}
+              {puedeAlta && <Link href="/panel/socios/nuevo" className="boton" data-accion-rapida="alta"><Icono nombre="mas" /> Alta</Link>}
+              {puedeCobrar && panel.cobra.pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" /> Pase diario</Link>}
+            </nav>
+          );
+        })()}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 

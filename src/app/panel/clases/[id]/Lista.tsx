@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PuntoEstado } from "@/components/panel/Estado";
 import { anotar, cancelarClase, deshacerPresente, perdonarFalta, presente } from "../acciones";
@@ -20,6 +20,13 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
   const [perdonando, setPerdonando] = useState<string | null>(null);
   const [motivoPerdon, setMotivoPerdon] = useState("");
   const [ocupado, empezar] = useTransition();
+  // F0.4 · "Presente" se ve al instante; si la base lo rechaza, vuelve atrás y dice por qué.
+  // Reservar o marcar presente a alguien que todavía no está en la lista lo suma al instante (con su estado provisorio).
+  const [filasYa, marcarYa] = useOptimistic(filas, (act: Fila[], q: { id: string; nombre: string; estado: "presente" | "reservar" }) => {
+    const esta = act.some((x) => x.socio_id === q.id);
+    if (q.estado === "presente") return esta ? act.map((x) => (x.socio_id === q.id ? { ...x, presente: true } : x)) : [...act, { socio_id: q.id, nombre: q.nombre, estado: "sin_reserva", posicion: null, presente: true }];
+    return esta ? act : [...act, { socio_id: q.id, nombre: q.nombre, estado: "confirmada", posicion: null, presente: false }];
+  });
   const [texto, setTexto] = useState("");
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
   const [cancelando, setCancelando] = useState(false);
@@ -27,7 +34,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
   // CLA-7: deshacer un presente (se pide el motivo en la misma fila).
   const [deshaciendo, setDeshaciendo] = useState<string | null>(null);
   const [porQue, setPorQue] = useState("");
-  const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); if (!r.error) { setTexto(""); setEncontrados([]); } });
+  const correr = (f: () => Promise<{ error?: string }>, ya?: { id: string; nombre: string; estado: "presente" | "reservar" }) => empezar(async () => { if (ya) marcarYa(ya); const r = await f(); setError(r.error ?? null); if (!r.error) { setTexto(""); setEncontrados([]); } });
 
   useEffect(() => {
     if (!buscaSocios || texto.trim().length < 2) { setEncontrados([]); return; }
@@ -38,9 +45,9 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
   return (
     <div className="space-y-8">
       {error && <Mensaje tipo="error">{error}</Mensaje>}
-      {filas.length === 0 ? <Vacio icono="persona" titulo="Todavía no se anotó nadie">Los socios se anotan desde su app; también los podés sumar desde la recepción.</Vacio> : (
+      {filasYa.length === 0 ? <Vacio icono="persona" titulo="Todavía no se anotó nadie">Los socios se anotan desde su app; también los podés sumar desde la recepción.</Vacio> : (
         <ul className="space-y-2">
-          {filas.map((f) => (
+          {filasYa.map((f) => (
             <li key={f.socio_id} className="tarjeta flex flex-wrap items-center gap-4 px-4 py-3 min-h-[64px]">
               {/* FA-11: la foto de cada anotado (o sus iniciales), para reconocerlo en la sala. */}
               <span className="flex-none size-12 rounded-[var(--radio)] overflow-hidden grid place-items-center titulo text-xl bg-[var(--tarjeta-alta)]" data-foto-anotado={fotos[f.socio_id] ? "si" : "no"} aria-hidden>
@@ -66,7 +73,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
                   <button type="button" className="boton-texto texto-suave text-sm" onClick={() => setDeshaciendo(f.socio_id)} aria-label={`Deshacer el presente de ${f.nombre}`}><Icono nombre="deshacer" /> Deshacer</button>
                 </span>
               )
-                : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id))}><Icono nombre="ok" /> Presente</button>}
+                : !cancelada && f.estado !== "espera" && <button type="button" disabled={ocupado} className="boton !min-h-11" onClick={() => correr(() => presente(claseId, f.socio_id), { id: f.socio_id, nombre: f.nombre, estado: "presente" })}><Icono nombre="ok" /> Presente</button>}
               {!f.presente && faltas.find((x) => x.socio_id === f.socio_id) && (() => {
                 const x = faltas.find((y) => y.socio_id === f.socio_id)!;
                 if (x.perdonada) return <span className="pildora basis-full sm:basis-auto" data-falta-perdonada><Icono nombre="usuarios" /> Falta perdonada: {x.motivo}</span>;
@@ -94,8 +101,8 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
               <li key={s.socio_id} className="flex items-center gap-3 px-2 py-2">
                 <PuntoEstado color={s.color} />
                 <span className="flex-1 truncate font-semibold">{s.nombre}</span>
-                {reserva && <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => anotar(claseId, s.socio_id))}>Reservar</button>}
-                <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => presente(claseId, s.socio_id))}>Presente</button>
+                {reserva && <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => anotar(claseId, s.socio_id), { id: s.socio_id, nombre: s.nombre, estado: "reservar" })}>Reservar</button>}
+                <button type="button" disabled={ocupado} className="boton boton-chico" onClick={() => correr(() => presente(claseId, s.socio_id), { id: s.socio_id, nombre: s.nombre, estado: "presente" })}>Presente</button>
               </li>
             ))}
           </ul>

@@ -54,7 +54,7 @@ try {
   // BASE-4: los que cuentan una lista (deben, vencen esta semana, plata en riesgo) no llevan gráfico; los de siempre sí.
   const numeros = await d.locator("dl [data-numero]").count();
   const graficos = await d.locator("dl [data-numero] [data-mini-grafico='7']").count();
-  const sinGrafico = await d.locator('dl [data-numero="deben"], dl [data-numero="por_vencer"], dl [data-numero="plata_riesgo"]').count();
+  const sinGrafico = await d.locator('dl [data-numero="deben"], dl [data-numero="por_vencer"], dl [data-numero="plata_riesgo"], dl [data-numero="caja_turno"]').count();
   chequear(numeros > 0 && graficos === numeros - sinGrafico, `los ${numeros - sinGrafico} números con serie tienen su mini gráfico de 7 días`, `hay ${graficos} gráficos para ${numeros - sinGrafico} números con serie`);
 
   // Recepción: sin la plata del día, y con ella cuando el dueño lo prende en Equipo → Permisos.
