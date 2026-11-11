@@ -194,6 +194,14 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 | N7 | Factura electrónica ARCA, opcional (🔌) | ❌ |
 | N8 | Molinete o cerradura por API (🔌 hardware) | ❌ |
 
+## Fase R · Revisión de todo lo viejo, función por función (Mateo, 11/11)
+
+| # | Qué | LISTO SI | Estado |
+|---|---|---|---|
+| R1 | Recorrer cada función que existe, pantalla por pantalla y rol por rol (dueño, encargado, recepción, profe, socio, super admin, kiosco, TV, página), con la lista de `PEDIDO-ORIGINAL.md`, `AJUSTES-0911-NOCHE.md`, `docs/v2/` (todos), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md` y la COLA de `docs/HOJA-DE-RUTA.md`. Para cada una: ¿existe?, ¿anda de punta a punta?, ¿cumple `FLUIDEZ.md` y `DISENO.md`? Lo que esté bien se marca y no se toca; lo roto o feo se arregla; lo que falta se hace. Repartido entre los ayudantes por zona | `docs/base/ESTADO-GENERAL.md` con tres listas (hecho y publicado, hecho sin publicar, falta), cada función con el e2e o la prueba que la cubre, y ningún "falta" sin su ítem | ❌ |
+| R2 | Los MD viejos que se contradigan con `docs/base/`, marcados "reemplazado por docs/base/" | Ninguna contradicción sin marcar | ❌ |
+| R3 | Prueba de todo junto: cada botón de cada pantalla con cada rol, en compu y celular (`botones.mjs` y el barrido en Actions), y que cada flujo cierre: lo cobrado aparece en caja, ficha, resultado y app del socio; lo editado se ve al toque en la página; lo que cambia en una compu aparece en las otras | Corridas en verde | ❌ |
+
 ## Fase 8 · El cierre
 
 | # | Qué | Estado |
@@ -202,4 +210,4 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 | F8.2 | La cadena e2e completa y el barrido en verde, en tandas, con la base nueva | ❌ |
 | F8.3 | Prueba de humo en producción: `/super`, `/dueno`, `/recepcion`, `/profe`, `/socio` y la página del demo, en compu y celular, con capturas | ❌ |
 | F8.4 | Preparar `PRUEBA-DUENO.md`: el "Gimnasio Prueba Mateo" `[demo]` en producción, con marca, planes, 30 socios en todos los estados, clases y equipo; links y usuarios escritos; contraseñas en `ACCESOS.md` | ❌ |
-| F8.5 | Arriba de `PROGRESO.md`: **"LISTO PARA TU PASADA"**, con qué se hizo, qué quedó ⛔ y por qué, y lo que tiene que hacer Mateo (planes pagos, mail propio, MercadoPago, dominio). Entrada final en `docs/LOG.md` | ❌ |
+| F8.5 | (también: `ESTADO-GENERAL.md` todo en ✅ o ⛔)  Arriba de `PROGRESO.md`: **"LISTO PARA TU PASADA"**, con qué se hizo, qué quedó ⛔ y por qué, y lo que tiene que hacer Mateo (planes pagos, mail propio, MercadoPago, dominio). Entrada final en `docs/LOG.md` | ❌ |
