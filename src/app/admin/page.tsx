@@ -13,6 +13,7 @@ import { Tablero } from "./Tablero";
 import { Demos, type DemoVencida } from "./Demos";
 import { ErroresPlataforma } from "./ErroresPlataforma";
 import { PlataformaDatos } from "./PlataformaDatos";
+import { EscalaDatos } from "./EscalaDatos";
 import { DominiosVercelDatos } from "./DominiosVercelDatos";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
@@ -99,6 +100,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <Link href="/admin/buscar" className="boton">Buscar a una persona</Link>
         <Link href="/admin/seguridad" className="boton">Seguridad</Link>
         <Link href="/admin/registro" className="boton">Registro</Link>
+        <Link href="/admin/plantillas" className="boton">Plantillas de textos</Link>
       </nav>
       <Tablero />
       <div id="ayudas"><Ayudas pedidos={ayudas} /></div>
@@ -109,6 +111,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <Demos vencidas={demosVencidas} />
       <ErroresPlataforma />
       <PlataformaDatos />
+      <EscalaDatos />
       <DominiosVercelDatos />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />

@@ -50,6 +50,16 @@ describe("variables por entorno", () => {
     expect(malos(l)).toEqual([]);
     expect(l.some((c) => /clave nueva/.test(c.titulo))).toBe(true);
   });
+  it("ESC-01: avisa si las funciones no corren en São Paulo o si una conexión directa no usa el pooler", () => {
+    const l = chequearEntorno({ ...BUENO, VERCEL_REGION: "iad1", SUPABASE_DB_URL: "postgres://u:p@db.abcdefghijklmnop.supabase.co:5432/postgres" });
+    expect(malos(l)).toEqual([]);
+    expect(l.some((c) => c.nivel === "aviso" && /iad1/.test(c.titulo))).toBe(true);
+    expect(l.some((c) => c.nivel === "aviso" && /no pasa por el pooler/.test(c.titulo))).toBe(true);
+    expect(JSON.stringify(l)).not.toContain("u:p@");
+    const bien = chequearEntorno({ ...BUENO, VERCEL_REGION: "gru1", SUPABASE_DB_URL: "postgres://u:p@aws-0-sa-east-1.pooler.supabase.com:6543/postgres" });
+    expect(bien.some((c) => /usa el pooler/.test(c.titulo))).toBe(true);
+    expect(bien.some((c) => /gru1/.test(c.titulo))).toBe(false);
+  });
   it("lee el ref de la URL y de las claves de la compu", () => {
     expect(refDeUrlSupabase("https://abcdefghijklmnop.supabase.co/rest/v1")).toBe("abcdefghijklmnop");
     expect(refDeUrlSupabase("http://127.0.0.1:54321")).toBe("local");

@@ -1,0 +1,88 @@
+# F9.5 · ESC-04 · Prueba de carga: 1.000 gimnasios y 500 usuarios simultáneos. A MANO (Actions → Carga → Run workflow) o con [carga] en el mensaje
+# de un push a noche/** o dia/**. Base nueva en el runner (NUNCA producción): carga.mjs se niega contra cualquier host que no sea localhost.
+# La tabla (p50 / p95 / p99 por pantalla, errores, pedidos por segundo) va al resumen de la corrida y se sube como artefacto.
+name: Carga
+
+on:
+  push:
+    branches: ["noche/**", "dia/**", "carril/**"]
+  workflow_dispatch:
+    inputs:
+      gimnasios:
+        description: "Gimnasios de carga"
+        default: "1000"
+      usuarios:
+        description: "Usuarios simultáneos"
+        default: "500"
+      conexiones:
+        description: "Conexiones del pool (como el pooler de transacciones)"
+        default: "50"
+      segundos:
+        description: "Duración de la carga"
+        default: "60"
+      con_web:
+        description: "Sumar 500 visitantes a la web pública (levanta la app, más lento)"
+        type: boolean
+        default: false
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  carga:
+    name: Carga de 1.000 gimnasios y 500 usuarios
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[carga]')
+    timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Demo y gimnasios de carga
+        run: |
+          node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost --socios 500
+          node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios || '1000' }}" --socios 15
+          psql "$(scripts/db/local.sh url)" -c "vacuum analyze" -c "select count(*) as gimnasios from public.gimnasios" -c "select count(*) as socios from public.socios" -c "select count(*) as ingresos from public.ingresos"
+      - name: App levantada (solo con web pública)
+        if: inputs.con_web
+        run: scripts/local/levantar.sh
+      - name: Carga
+        run: |
+          APP=""
+          if [ "${{ inputs.con_web }}" = "true" ]; then APP="--app http://localhost:3123"; fi
+          node scripts/medir/carga.mjs --url "$(scripts/db/local.sh url)" \
+            --usuarios "${{ inputs.usuarios || '500' }}" --conexiones "${{ inputs.conexiones || '50' }}" --segundos "${{ inputs.segundos || '60' }}" \
+            $APP --md .local/carga.md --json .local/carga.json | tee .local/carga.log
+      - name: Resumen
+        if: always()
+        run: |
+          mkdir -p .local
+          { echo "## Prueba de carga"; echo; cat .local/carga.md 2>/dev/null || echo "No se generó la tabla: mirá el log."; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Explain de las funciones con la base grande
+        if: always()
+        run: node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/explain-carga.md || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: carga
+          path: |
+            .local/carga.md
+            .local/carga.json
+            .local/carga.log
+            .local/explain-carga.md
+          if-no-files-found: ignore
+          retention-days: 30

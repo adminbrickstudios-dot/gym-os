@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 384 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 394 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -335,6 +335,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_agregar_dominio`
 - `admin_agregar_nota`
 - `admin_agregar_persona`
+- `admin_alertas`
 - `admin_anotar_registro`
 - `admin_anular_pago_brik`
 - `admin_aplicar_plantilla`
@@ -371,12 +372,16 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_guardar_ciudad`
 - `admin_guardar_contacto_plataforma`
 - `admin_guardar_descuento`
+- `admin_guardar_limites_plan`
 - `admin_guardar_link_pago`
 - `admin_guardar_marca`
 - `admin_guardar_modulos`
 - `admin_guardar_plan_brik`
+- `admin_guardar_plantilla_texto`
 - `admin_guardar_prueba`
+- `admin_guardar_tipo_gimnasio`
 - `admin_lanzamiento`
+- `admin_limites_gimnasios`
 - `admin_link_pago`
 - `admin_lista_gimnasios`
 - `admin_mantenimientos`
@@ -389,6 +394,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_pausar_gimnasio`
 - `admin_pedidos_demo`
 - `admin_planes_brik`
+- `admin_planes_con_limites`
+- `admin_plantillas_texto`
 - `admin_plataforma_estado`
 - `admin_prender_funcion`
 - `admin_probar_acceso`
@@ -404,13 +411,16 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_resolver_ayuda`
 - `admin_restaurar_baja`
 - `admin_restaurar_plan`
+- `admin_restaurar_plantilla_texto`
 - `admin_restaurar_socio`
+- `admin_restaurar_texto_gimnasio`
 - `admin_retirar_novedad`
 - `admin_salir_gimnasio`
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
 - `admin_soportes`
 - `admin_tablero`
+- `admin_tamano_tablas`
 - `admin_uso_gimnasios`
 - `admin_uso_semanal`
 - `agenda_pt`

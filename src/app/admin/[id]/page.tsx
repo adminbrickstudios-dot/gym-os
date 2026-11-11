@@ -16,7 +16,7 @@ import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
 import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
-import { Ciudad, CicloDeVida, QrGimnasio } from "./FichaGestion";
+import { Ciudad, CicloDeVida, QrGimnasio, RestaurarTextos } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
@@ -177,6 +177,11 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <Papelera gimnasioId={g.gimnasio_id} papelera={papelera} />
         <p className="titulo-grupo">Copiar la configuración de otro gimnasio</p>
         <Clonar destino={g.gimnasio_id} otros={otros.filter((o) => o.gimnasio_id !== g.gimnasio_id).map((o) => ({ id: o.gimnasio_id, nombre: o.nombre }))} />
+      </section>
+
+      <section className="space-y-3" data-ficha-textos-web>
+        <p className="titulo-grupo">Textos de la web (plantillas)</p>
+        <RestaurarTextos gimnasioId={g.gimnasio_id} />
       </section>
 
       <section className="space-y-3" data-ficha-soporte-directo>
