@@ -7,6 +7,7 @@
 import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 // F1.9: un error que nadie atrapó deja de colgar el recorrido sin ✗: se escribe qué esperaba y cuándo, y se corta con código 1.
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
+process.on("uncaughtException", (e) => { console.log(`✗ se cortó: ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");

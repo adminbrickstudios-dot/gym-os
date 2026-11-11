@@ -112,7 +112,10 @@ try {
   chequear(await d.locator("[data-primer-pago]").count() === 1, "primer pago visible (cuota + matrícula + total)", "no hay primer pago");
   await capturar(d, "vd6-compu-alta-completa");
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
+  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 }).catch(async (e) => {
+    const hoja = await d.evaluate(() => `hoja montada=${document.documentElement.dataset.cobrarHoja ?? "no"}; [data-cobrar]=${document.querySelector("[data-cobrar]")?.innerText.replace(/\s+/g, " ").slice(0, 300) ?? "(no está)"}; alertas=${[...document.querySelectorAll("[role=alert]")].map((x) => x.innerText).join(" / ")}`);
+    throw new Error(`${e.message.split("\n")[0]} | URL ${d.url()} | ${hoja}`);
+  });
   chequear(new URL(d.url()).pathname === "/panel/socios/nuevo", "cobro embebido: la hoja se abre sobre el alta, sin ir a Vender", `fue a ${d.url()}`);
   await d.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
   await d.locator("[data-cobrar-confirmar]").click();
