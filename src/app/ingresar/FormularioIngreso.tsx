@@ -21,7 +21,7 @@ export function FormularioIngreso({ siguiente, emailInicial }: { siguiente: stri
         <input className="campo" type="password" name="contrasena" autoComplete="current-password" required />
       </label>
       {estado.error && (
-        <Mensaje tipo="error">{estado.error}</Mensaje>
+        <Mensaje tipo="error">{estado.error}{estado.ayuda && <> <a href={estado.ayuda} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 font-semibold" data-ayuda-brik>Escribinos por WhatsApp</a></>}</Mensaje>
       )}
       <button type="submit" disabled={yendo} className="boton boton-principal text-lg w-full !mt-6">
         {yendo ? "Entrando…" : "🔑 Entrar"}
