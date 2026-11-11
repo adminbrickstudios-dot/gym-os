@@ -7,7 +7,10 @@
 4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
 5. **Dominio:** `DOMINIO.md` (pasos exactos).
 
-## DÓNDE QUEDÉ (11/11, mediodía)
+## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
+- U5 y P1 cerrados en ✅. Corriendo en Actions (43015505501): `super-p`, `super-plat`, `super-f2` (P4 a P7 tenían el e2e escrito y sin correr). Sigue: con ese resultado cerrar P2 a P7; después P8 y P8b (landing profesional y editor en vivo, carril C) y la fase C. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y la clave de servicio en Vercel).
+
+## (anterior) DÓNDE QUEDÉ (11/11, mediodía)
 - **(11/11, 08:40) Fase U publicada:** prevuelo y aplicar de `publicar/base-fase-u` en verde (corridas 43012383810 y 43013698089), PR #14 mergeado (37fa0a0), deploy de Vercel en verde. El humo en producción (corrida 43014189983) no corrió: faltan los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`.
 - **Verde en Actions** (corrida 42976537928, build y chequeos incluidos): panel-inicio, base-ingresos (20 ingresos, mediana 199 ms, tope 1 s), panel-socios, panel-entrada, base-8, fase-u1-u2 (U1, U2), fase-u3 (U3), fase-u4 (U4), super-p, super-plat, panel-d, super-f2. `contexto_pantalla` (un solo viaje) anda: 3 a 18 ms en el log. `pendientes_panel` a 5.000 socios: 53 ms dueño / 45 ms recepción (era 385).
 - **En curso:** U0.1/U0.2 — falta que pase `fase-u0-login` (login correcto por `/g/<slug>/ingresar`; D lo corrigió como carrera del test, corrida 42978781658) y el contraste del tema (`barrido-tema`, D subió los tokens). Después: U0.3 (humo en producción: espera los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`), P8 (C), F1.9 (D: vd-6, vd-9, vd-46r, vd-3, vd-15, vd-37, vd-38, vd-46f, vd-49 plata), F1.4 resto (D).
