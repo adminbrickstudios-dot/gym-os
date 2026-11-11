@@ -72,7 +72,7 @@ async function candidatos(p) {
     const salida = [];
     todos.forEach((e, i) => {
       e.setAttribute("data-bt", String(i));
-      const texto = (e.innerText || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
+      const texto = (e.innerText || e.textContent || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
       const enForm = !!e.closest("form") && e.tagName === "BUTTON" && (e.getAttribute("type") ?? "submit") === "submit";
       salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
     });
@@ -82,6 +82,8 @@ async function candidatos(p) {
 
 async function tocar(p, rol, vista, ruta, c, errores) {
   const antes = new URL(p.url());
+  // Un enlace a la misma pantalla en la que ya estás (la pestaña activa del menú) no tiene nada que mostrar: no es un hallazgo.
+  if (c.href && c.href.split("#")[0].split("?")[0].replace(/\/$/, "") === antes.pathname.replace(/\/$/, "") && !c.href.includes("?")) return;
   const sel = p.locator(`[data-bt="${c.i}"]`).first();
   if (!(await sel.count())) return;
   await p.evaluate(medidor);
@@ -131,7 +133,10 @@ async function tocar(p, rol, vista, ruta, c, errores) {
       await p.keyboard.press("Escape");
       await p.waitForTimeout(250);
       const sigue = await p.evaluate(() => document.querySelectorAll("[role=dialog], dialog[open], .hoja, [data-hoja]").length).catch(() => 0);
-      if (sigue > estado.dialogos) nota(informe.noVuelve, rol, vista, ruta, `«${c.texto || c.tag}» abrió algo que no se cierra con Esc`);
+      if (sigue > estado.dialogos) {
+        nota(informe.noVuelve, rol, vista, ruta, `«${c.texto || c.tag}» abrió algo que no se cierra con Esc`);
+        await p.goto(antes.href, { waitUntil: "domcontentloaded" }).catch(() => {});   // para que lo que quedó abierto no tape los botones que siguen
+      }
     }
   }
 }
@@ -153,7 +158,7 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
     if (!salida) nota(informe.sinSalida, rol, vista, ruta, "no se ve ninguna salida (ni menú, ni Volver, ni enlace al inicio)");
   }
   const cs = await candidatos(p);
-  const enlaces = new Set(cs.filter((c) => c.tag === "a" && c.href.startsWith("/") && !c.href.startsWith("//")).map((c) => c.href.split("#")[0].split("?")[0]));
+  const enlaces = new Set(cs.filter((c) => c.tag === "a" && !c.descarga && !/mis-datos|\/api\/|\/salir|\/exportar/.test(c.href) && c.href.startsWith("/") && !c.href.startsWith("//")).map((c) => c.href.split("#")[0].split("?")[0]));
   let hechos = 0;
   for (const c of cs) {
     if (hechos >= MAX_BOTONES) break;
