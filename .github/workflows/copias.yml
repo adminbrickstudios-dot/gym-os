@@ -5,11 +5,11 @@
 #
 # Secretos (Settings → Secrets and variables → Actions → pestaña Secrets):
 #   SUPABASE_DB_URL  la misma que usa "Base de datos"; este workflow solo LEE.
-#   COPIAS_CLAVE     la clave con la que se cifra (16+ caracteres al azar). Sin ella, no hay copia.
+#   COPIA_CLAVE     la clave con la que se cifra (16+ caracteres al azar). Sin ella, no hay copia.
 #
 # El repo y sus logs son PÚBLICOS: acá no se imprime ningún dato ni secreto, solo números.
 # Los artefactos de un repo público los puede bajar cualquier cuenta de GitHub, por eso
-# el archivo sale cifrado: sin COPIAS_CLAVE no sirve de nada. La copia nunca se sube al repo.
+# el archivo sale cifrado: sin COPIA_CLAVE no sirve de nada. La copia nunca se sube al repo.
 name: Copias
 
 on:
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 30
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      COPIAS_CLAVE: ${{ secrets.COPIAS_CLAVE }}
+      COPIA_CLAVE: ${{ secrets.COPIA_CLAVE }}
     steps:
       - name: Faltan secretos
         run: |
@@ -39,18 +39,18 @@ jobs:
             echo "::error::Falta el secreto SUPABASE_DB_URL. Cargalo en Settings → Secrets and variables → Actions → pestaña Secrets (no en Variables)."
             faltan=1
           fi
-          if [ -z "$COPIAS_CLAVE" ]; then
-            echo "::error::Falta el secreto COPIAS_CLAVE, la clave con la que se cifra la copia. Sin ella no se hace ninguna copia. Cargalo en Settings → Secrets and variables → Actions → pestaña Secrets, con 16 o más caracteres al azar, y guardala también en tu gestor de contraseñas: sin esa clave la copia no se puede abrir. Pasos en docs/base/COPIAS.md."
+          if [ -z "$COPIA_CLAVE" ]; then
+            echo "::error::Falta el secreto COPIA_CLAVE, la clave con la que se cifra la copia. Sin ella no se hace ninguna copia. Cargalo en Settings → Secrets and variables → Actions → pestaña Secrets, con 16 o más caracteres al azar, y guardala también en tu gestor de contraseñas: sin esa clave la copia no se puede abrir. Pasos en docs/base/COPIAS.md."
             faltan=1
-          elif [ ${#COPIAS_CLAVE} -lt 16 ]; then
-            echo "::error::COPIAS_CLAVE es demasiado corta. Usá 16 o más caracteres al azar (docs/base/COPIAS.md)."
+          elif [ ${#COPIA_CLAVE} -lt 16 ]; then
+            echo "::error::COPIA_CLAVE es demasiado corta. Usá 16 o más caracteres al azar (docs/base/COPIAS.md)."
             faltan=1
           fi
           exit $faltan
       - name: Esconder los secretos del log
         run: |
           echo "::add-mask::$SUPABASE_DB_URL"
-          echo "::add-mask::$COPIAS_CLAVE"
+          echo "::add-mask::$COPIA_CLAVE"
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
@@ -94,12 +94,12 @@ jobs:
           --health-retries 10
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      COPIAS_CLAVE: ${{ secrets.COPIAS_CLAVE }}
+      COPIA_CLAVE: ${{ secrets.COPIA_CLAVE }}
     steps:
       - name: Esconder los secretos del log
         run: |
           echo "::add-mask::$SUPABASE_DB_URL"
-          echo "::add-mask::$COPIAS_CLAVE"
+          echo "::add-mask::$COPIA_CLAVE"
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:

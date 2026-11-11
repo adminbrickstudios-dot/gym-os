@@ -4,7 +4,7 @@
 //   node scripts/db/copia.mjs exportar  --salida <carpeta> [--url <postgres://...>]
 //       Exporta el esquema (public + privado) y los datos de esas tablas, anota los
 //       conteos de cada gimnasio REAL (es_demo = false) y deja un solo archivo
-//       CIFRADO: <carpeta>/base-copia-AAAA-MM-DD.tar.gz.enc. Necesita COPIAS_CLAVE.
+//       CIFRADO: <carpeta>/base-copia-AAAA-MM-DD.tar.gz.enc. Necesita COPIA_CLAVE.
 //       Solo lee: pg_dump y selects. Nunca escribe en la base de origen.
 //
 //   node scripts/db/copia.mjs verificar --carpeta <carpeta con conteos.json> --url <base restaurada> [--origen <url de producción>]
@@ -59,8 +59,8 @@ if (modo === "exportar") {
   const url = arg("url", process.env.SUPABASE_DB_URL);
   const salida = resolve(arg("salida", "copias-salida"));
   if (!url) fallar("falta la dirección de la base (SUPABASE_DB_URL o --url)");
-  if (!process.env.COPIAS_CLAVE) fallar("falta COPIAS_CLAVE: la clave con la que se cifra la copia");
-  if (process.env.COPIAS_CLAVE.length < 16) fallar("COPIAS_CLAVE es muy corta: usá 16 caracteres o más (mejor 32 al azar)");
+  if (!process.env.COPIA_CLAVE) fallar("falta COPIA_CLAVE: la clave con la que se cifra la copia");
+  if (process.env.COPIA_CLAVE.length < 16) fallar("COPIA_CLAVE es muy corta: usá 16 caracteres o más (mejor 32 al azar)");
 
   const trabajo = mkdtempSync(join(tmpdir(), "copia-"));
   try {
@@ -79,12 +79,12 @@ if (modo === "exportar") {
     correr("tar", ["-czf", "copia.tar.gz", "esquema.sql", "datos.sql", "conteos.json"], { cwd: trabajo }); // rutas relativas: tar de Windows toma "C:" por una máquina remota
     const fecha = new Date().toISOString().slice(0, 10);
     const cifrado = join(salida, `base-copia-${fecha}.tar.gz.enc`);
-    const cifrar = (extra) => correr("openssl", ["enc", "-aes-256-cbc", "-pbkdf2", "-iter", "600000", "-salt", "-pass", "env:COPIAS_CLAVE", ...extra]);
+    const cifrar = (extra) => correr("openssl", ["enc", "-aes-256-cbc", "-pbkdf2", "-iter", "600000", "-salt", "-pass", "env:COPIA_CLAVE", ...extra]);
     cifrar(["-in", tgz, "-out", cifrado]);
 
     // Prueba de ida y vuelta: descifrar y comparar. Una copia que no se puede abrir no es una copia.
     const prueba = join(trabajo, "prueba.tar.gz");
-    correr("openssl", ["enc", "-d", "-aes-256-cbc", "-pbkdf2", "-iter", "600000", "-pass", "env:COPIAS_CLAVE", "-in", cifrado, "-out", prueba]);
+    correr("openssl", ["enc", "-d", "-aes-256-cbc", "-pbkdf2", "-iter", "600000", "-pass", "env:COPIA_CLAVE", "-in", cifrado, "-out", prueba]);
     if (!readFileSync(prueba).equals(readFileSync(tgz))) fallar("la copia cifrada no descifra igual que el original");
     console.log(`Copia cifrada: ${cifrado.split(/[\\/]/).pop()} (${statSync(cifrado).size} bytes). Descifrado de prueba: ok.`);
   } finally { rmSync(trabajo, { recursive: true, force: true }); }

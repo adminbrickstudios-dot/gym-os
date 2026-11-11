@@ -1,8 +1,14 @@
 # PROGRESO de Base
 
+## RESUMEN PARA MATEO (11/11, tarde)
+- Publicado en producción: fase P y C1, C2, aviso al socio (PR #15). **Desde que Temple Gym cobra con Base, no aplico más migraciones sin copia cifrada previa**: el botón `aplicar` de Actions ahora hace la copia y se frena solo si falta `COPIA_CLAVE`.
+- Listo para publicar apenas haya copia: recepción (inactividad), velocidad (130100-130400, filtros en lote), C9 (QR), C10 (cargar pasado), F1.2/F1.7, F1.4/F1.5, C3-C7 (guías y carteles). Esperando a los ayudantes de H1 (caja), H3/H3b (camino del socio y QR directo) y H7 (lo roto de PULIDO) para sumarlos.
+- Ensayo antes de producción (N0): un segundo proyecto de Supabase llamado "ensayo": ⛔ lo crea Mateo (5 minutos); hasta entonces se prueba en el demo y en la base local.
+
 ## LO QUE NECESITO DE MATEO (secretos de GitHub: hoy solo existe `SUPABASE_DB_URL`)
+- **`COPIA_CLAVE` (urgente, destraba todo lo que toca la base):** Settings → Secrets and variables → Actions → Secrets → New repository secret, nombre `COPIA_CLAVE`, valor una frase de 16+ caracteres al azar; guardala también en tu gestor de contraseñas. Sin ella no puedo aplicar nada. Después corré Actions → Copias para probar copia y restauración.
 - `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` → destraba el humo en producción (U0.3).
-- `COPIAS_CLAVE` (una frase larga, 16+ letras; guardala vos también, sin ella las copias no se abren) → destraba C8, corré Actions → Copias.
+- `COPIA_CLAVE` (una frase larga, 16+ letras; guardala vos también, sin ella las copias no se abren) → destraba C8, corré Actions → Copias.
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` → destraban medir producción (F0.1) y los usuarios demo.
 - `SUPABASE_SERVICE_ROLE_KEY` en Vercel (U1/U0.1).
 

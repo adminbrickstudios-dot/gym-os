@@ -10,7 +10,7 @@ por error o hay que volver a un día anterior, hay con qué.
 1. **exportar** — todos los días a las 03:17 (Argentina) y cuando apretás *Run workflow*. Con `SUPABASE_DB_URL`
    (solo lee) hace `pg_dump` del esquema `public` y `privado`: el esquema para restaurar, los datos, y los
    conteos de cada gimnasio **real** (no demo): socios, pagos, coberturas e ingresos. Lo empaqueta y lo
-   **cifra** (AES-256, clave de `COPIAS_CLAVE`). Prueba descifrarlo antes de seguir. Lo guarda como
+   **cifra** (AES-256, clave de `COPIA_CLAVE`). Prueba descifrarlo antes de seguir. Lo guarda como
    artefacto de Actions **por 30 días**. Nunca va al repo.
 2. **restaurar-prueba** — baja esa copia, la descifra, la restaura en un Postgres descartable del runner,
    compara los conteos con los que anotó al exportar (tienen que coincidir exactos), muestra los de la base de
@@ -30,7 +30,7 @@ Lo que **no** cubre: los logins (`auth.users`: mails, teléfonos, contraseñas) 
 2. **Guardala en tu gestor de contraseñas.** Sin esta clave, ninguna copia se puede abrir. Si la perdés, las
    copias viejas quedan inservibles.
 3. GitHub → el repo → Settings → Secrets and variables → Actions → pestaña **Secrets** → *New repository secret*:
-   nombre `COPIAS_CLAVE`, valor la clave. (`SUPABASE_DB_URL` ya está cargado para el workflow "Base de datos".)
+   nombre `COPIA_CLAVE`, valor la clave. (`SUPABASE_DB_URL` ya está cargado para el workflow "Base de datos".)
 4. Actions → **Copias** → Run workflow. Tiene que quedar verde en los dos jobs. Si falta un secreto, el job
    falla con un mensaje en palabras que dice cuál.
 
@@ -43,7 +43,7 @@ Desde ahí corre solo todos los días. Cada tanto (una vez por mes) mirá que el
 - O con la terminal: `gh run download <número de corrida> --name base-copia-<número>`.
 
 Los artefactos de un repo público los puede bajar cualquier cuenta de GitHub. Por eso el archivo va cifrado: sin
-`COPIAS_CLAVE` es ruido. Pasados 30 días GitHub los borra solos.
+`COPIA_CLAVE` es ruido. Pasados 30 días GitHub los borra solos.
 
 ## Cómo restaurar (en una base de prueba)
 
@@ -55,7 +55,7 @@ producción: el script se niega.
 createdb gymos_restaurada
 
 # 2. Restaurar y verificar (la clave por variable de entorno, no pegada en el comando)
-export COPIAS_CLAVE='...tu clave...'
+export COPIA_CLAVE='...tu clave...'
 scripts/db/restaurar-copia.sh ruta/a/base-copia-AAAA-MM-DD.tar.gz.enc "postgres://postgres@localhost:5432/gymos_restaurada"
 
 # 3. Los chequeos del proyecto sobre lo restaurado
@@ -86,4 +86,4 @@ script revisado, a mano y con cuidado. Eso se decide en el momento, con el probl
 Probado en una base local con datos del demo: exportar, cifrar, descifrar, restaurar en una base nueva, conteos
 coincidentes, chequeos. Pruebas del workflow: `src/lib/copias-workflow.test.ts`. **No probado todavía:** una
 corrida real de Actions contra la base de Supabase (instalación de `pg_dump` 17, tamaño real, permisos de
-`pg_dump` con la `SUPABASE_DB_URL` de producción). La primera corrida con `COPIAS_CLAVE` cargada lo dice.
+`pg_dump` con la `SUPABASE_DB_URL` de producción). La primera corrida con `COPIA_CLAVE` cargada lo dice.

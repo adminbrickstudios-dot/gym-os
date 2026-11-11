@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 # Restaura una copia (la que arma scripts/db/copia.mjs) en una base de PRUEBA y verifica los conteos.
 #
-#   COPIAS_CLAVE=... scripts/db/restaurar-copia.sh <archivo.tar.gz.enc> <url de una base VACÍA de prueba>
+#   COPIA_CLAVE=... scripts/db/restaurar-copia.sh <archivo.tar.gz.enc> <url de una base VACÍA de prueba>
 #
 # La base destino tiene que estar vacía y ser un Postgres común (local o el de servicio del runner):
 # el script le aplica supabase/local/simular-supabase.sql (roles y auth) y después el esquema y los datos
 # de la copia. Se NIEGA a tocar una base de Supabase o una que ya tenga tablas de Base: restaurar encima
 # de producción es el error que esto existe para evitar.
-# La clave entra por la variable COPIAS_CLAVE, nunca por la línea de comandos.
+# La clave entra por la variable COPIA_CLAVE, nunca por la línea de comandos.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 ARCHIVO="${1:-}"; URL="${2:-}"
-[[ -n "$ARCHIVO" && -n "$URL" ]] || { echo "Uso: COPIAS_CLAVE=... $0 <archivo.tar.gz.enc> <url de la base de prueba>"; exit 1; }
+[[ -n "$ARCHIVO" && -n "$URL" ]] || { echo "Uso: COPIA_CLAVE=... $0 <archivo.tar.gz.enc> <url de la base de prueba>"; exit 1; }
 [[ -f "$ARCHIVO" ]] || { echo "ERROR: no existe el archivo de la copia"; exit 1; }
-[[ -n "${COPIAS_CLAVE:-}" ]] || { echo "ERROR: falta COPIAS_CLAVE, la clave con la que se cifró la copia"; exit 1; }
+[[ -n "${COPIA_CLAVE:-}" ]] || { echo "ERROR: falta COPIA_CLAVE, la clave con la que se cifró la copia"; exit 1; }
 if [[ "$URL" == *supabase.co* || "$URL" == *supabase.com* || "$URL" == *pooler* ]]; then
   echo "ERROR: la base destino parece ser de Supabase. Restaurar es solo para una base de PRUEBA vacía."; exit 1
 fi
@@ -25,7 +25,7 @@ hay="$(psql -X -At -c "select count(*) from information_schema.tables where tabl
 [[ "$hay" == "0" ]] || { echo "ERROR: la base destino no está vacía o no se pudo conectar (tablas: $hay). Usá una base nueva."; exit 1; }
 
 TRABAJO="$(mktemp -d)"; trap 'rm -rf "$TRABAJO"' EXIT
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:COPIAS_CLAVE -in "$ARCHIVO" -out "$TRABAJO/copia.tar.gz" \
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:COPIA_CLAVE -in "$ARCHIVO" -out "$TRABAJO/copia.tar.gz" \
   || { echo "ERROR: no se pudo descifrar. La clave no es la de esta copia, o el archivo está dañado."; exit 1; }
 tar -xzf "$TRABAJO/copia.tar.gz" -C "$TRABAJO"
 echo "Copia descifrada."

@@ -37,7 +37,7 @@ describe("workflow de copias (C8)", () => {
   });
 
   it("esconde del log cada secreto con ::add-mask::", () => {
-    for (const s of ["SUPABASE_DB_URL", "COPIAS_CLAVE"]) {
+    for (const s of ["SUPABASE_DB_URL", "COPIA_CLAVE"]) {
       expect(yml).toContain(`echo "::add-mask::$${s}"`);
     }
   });
@@ -45,7 +45,7 @@ describe("workflow de copias (C8)", () => {
   it("no imprime variables secretas ni activa el modo que repite cada comando", () => {
     for (const l of sinComentarios) {
       if (/^\s*echo\b/.test(l) && !l.includes("::add-mask::")) {
-        expect(l).not.toMatch(/\$\{?(SUPABASE_DB_URL|COPIAS_CLAVE|ORIGEN_URL)\b/);
+        expect(l).not.toMatch(/\$\{?(SUPABASE_DB_URL|COPIA_CLAVE|ORIGEN_URL)\b/);
       }
       expect(l).not.toMatch(/\bset\s+-[a-z]*x/); // set -x muestra los valores expandidos
       expect(l).not.toMatch(/\benv\s*$|\bprintenv\b/);
@@ -60,8 +60,8 @@ describe("workflow de copias (C8)", () => {
     expect(yml).toMatch(/permissions:\s*\n\s*contents:\s*read/);
   });
 
-  it("falla con un mensaje claro si falta COPIAS_CLAVE", () => {
-    expect(yml).toMatch(/::error::Falta el secreto COPIAS_CLAVE/);
+  it("falla con un mensaje claro si falta COPIA_CLAVE", () => {
+    expect(yml).toMatch(/::error::Falta el secreto COPIA_CLAVE/);
   });
 
   it("restaura en una base de prueba (servicio del runner) y verifica", () => {
@@ -79,8 +79,8 @@ describe("scripts de copia (C8)", () => {
   it("cifran con AES-256 + pbkdf2 y la clave sale de una variable de entorno, nunca de la línea de comandos", () => {
     expect(copia).toContain("aes-256-cbc");
     expect(copia).toContain("pbkdf2");
-    expect(copia).toContain("env:COPIAS_CLAVE");
-    expect(restaurar).toContain("env:COPIAS_CLAVE");
+    expect(copia).toContain("env:COPIA_CLAVE");
+    expect(restaurar).toContain("env:COPIA_CLAVE");
     expect(copia + restaurar).not.toMatch(/-pass\s+pass:/);
     expect(copia + restaurar).not.toMatch(/-k\s/);
   });
