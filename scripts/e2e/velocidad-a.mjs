@@ -58,7 +58,7 @@ try {
   // 3. Ingreso optimista.
   const { rows: [s] } = await db.query(`
     select s.id, s.nombre || ' ' || s.apellido as nombre, s.numero from public.socios s
-     where s.gimnasio_id = $1 and s.dado_de_baja_en is null and s.cubierto_hasta > now() + interval '10 days'
+     where s.gimnasio_id = $1 and s.dado_de_baja_en is null and s.numero >= 10 and s.cubierto_hasta > now() + interval '10 days'
      order by s.numero limit 1`, [gim]);
   if (!s) throw new Error("no hay un socio al día en el demo");
   await r.goto(`${G}/panel/entrada`);
@@ -74,7 +74,7 @@ try {
     }
     return ruta.continue();
   });
-  await campo.fill(String(s.numero));
+  await campo.fill(String(s.numero));   // de 2 cifras o más: con una sola la búsqueda de Entrada no arranca
   await r.waitForTimeout(400);
   await campo.press("Enter");
   await r.locator("[data-veredicto], [data-color]").first().waitFor({ timeout: 30000 }).catch(() => {});

@@ -160,17 +160,22 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
     if (r.error) setError(r.error); else setHecho(null);
   });
-  const anotar = (forzar?: string, promesa?: PromesaPago) => empezar(async () => {
+  const anotar = (forzar?: string, promesa?: PromesaPago) => {
     if (!elegido) return;
     // F0.4 · Si el veredicto ya dice que puede entrar, el aviso "Entró Fulana" sale en el mismo instante (provisorio, sin Deshacer)
     // y la base confirma por detrás. Si la base lo rechaza, vuelve atrás: el mismo veredicto en pantalla y el error con el porqué.
+    // El aviso provisorio se pone ACÁ, fuera de la transición: dentro de ella, React lo guarda hasta que la acción del servidor termina.
     const optimista = !forzar && !promesa && !!v?.puede;
     const antes = { elegido, v, guia, apto, firmar, texto, socios };
     if (optimista) {
       setHecho({ ingreso_id: "", repetido: false, resultado: "entro", nombre: elegido.nombre, socioId: elegido.socio_id });
       reiniciar();
     }
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
+    confirmarEntrada(elegido, antes, optimista, forzar, promesa);
+  };
+  const confirmarEntrada = (elegido: ResultadoSocio, antes: { elegido: ResultadoSocio; v: Veredicto | null; guia: Guia | null; apto: string | null; firmar: string | null; texto: string; socios: ResultadoSocio[] }, optimista: boolean, forzar?: string, promesa?: PromesaPago) => empezar(async () => {
+    // Si la red se corta a mitad del pedido el servidor ni contesta (la acción lanza): se trata como un error más, con la vuelta atrás.
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa).catch(() => ({ error: "No se pudo anotar la entrada: se cortó la conexión. Revisá internet y probá de nuevo." } as Awaited<ReturnType<typeof registrarEntrada>>));
     if (r.error) {
       setError(r.error);
       if (optimista) { setHecho(null); setElegido(antes.elegido); setV(antes.v); setGuia(antes.guia); setApto(antes.apto); setFirmar(antes.firmar); setTexto(antes.texto); setSocios(antes.socios); }

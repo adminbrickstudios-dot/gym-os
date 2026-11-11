@@ -54,7 +54,7 @@ try {
   const mp = p.locator("[data-mercadopago]");
   await mp.waitFor({ timeout: 30000 });
   await mp.locator("button", { hasText: /Conectar MercadoPago|Cambiar credenciales/ }).click();
-  await mp.locator('input[placeholder="APP_USR-…"]').fill("TEST-token-de-prueba-e2e");
+  await mp.locator('input[placeholder="APP_USR-…"]').fill("TEST-token-de-prueba-e2e-0001");
   await mp.locator("label", { hasText: "Clave secreta" }).locator("input").fill("clave-secreta-e2e");
   await mp.locator("label", { hasText: /Prueba/ }).click();
   await mp.locator("button", { hasText: "Guardar y conectar" }).click();
@@ -71,12 +71,12 @@ try {
 
   // 5) Paso 6: cambiar una regla de entrada lo tacha (se mide como hecho, en la base).
   await p.goto(`${GB}/panel/configuracion?pestana=reglas`);
-  const dias = p.locator('input[type="number"]').first();
+  const dias = p.locator('label:has-text("Días de gracia al vencer") input');
   await dias.waitFor({ timeout: 30000 });
   const valor = Number(await dias.inputValue());
   await dias.fill(String(valor + 1));
-  await p.locator('button:has-text("Guardar")').first().click();
-  await p.locator(".mensaje", { hasText: /Guardado|guardad/i }).first().waitFor({ timeout: 30000 });
+  await p.locator('[data-pie="reglas"] button', { hasText: /^Guardar$/ }).click();   // el pie de la pestaña (arriba hay otros Guardar, como el de la meta de visitas)
+  await p.locator('[data-pie="reglas"] .mensaje', { hasText: /Guardado|guardad/i }).first().waitFor({ timeout: 30000 });
   const despues6 = await estado();
   chequear(despues6[5] === true && paso6Antes === false, "paso 6: pendiente antes, hecho después de cambiar una regla de entrada", `paso 6: antes ${paso6Antes}, después ${despues6[5]}`);
 

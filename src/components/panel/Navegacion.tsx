@@ -135,7 +135,7 @@ export function Navegacion(props: Props) {
   return (
     <>
       {/* Compu: barra lateral fija */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-72 flex-col border-r border-[var(--borde)] px-4 py-5 overflow-y-auto">
         <p className="titulo text-2xl px-3 flex items-center gap-3 min-w-0"><Logo url={props.logo} tam="h-10 max-w-28" /><span className="truncate">{props.gimnasio}</span></p>
         <div className="mt-5 mb-6"><Buscador secciones={props.secciones} buscaSocios={props.buscaSocios} soloVer={props.soloVerSocios} puedeCobrar={props.puedeCobrar} rol={props.rolClave ?? props.rol} /></div>
         <Menu props={props} actual={actual} pendientes={pendientes} />
