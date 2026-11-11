@@ -8,6 +8,7 @@ import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { detectarSalud } from "@/lib/salud";
 import { AVISO_SALUD, MAX_TEXTO, MOTIVOS, fotoValida } from "@/lib/mensajes";
 import { enviarMensaje, responderAlGimnasio } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * VD-38: escribirle al gimnasio. Con `hilo` sigue una conversación (sin motivo); sin `hilo` empieza una
@@ -65,14 +66,15 @@ export function FormMensaje({ socioId, hilo, q = "", motivoInicial }: { socioId:
       </label>
       <div className="space-y-2">
         <label className="boton w-full cursor-pointer">
-          📷 {foto ? "Cambiar la foto" : "Sumar una foto (opcional)"}
+          
+          <Icono nombre="camara" /> {foto ? "Cambiar la foto" : "Sumar una foto (opcional)"}
           <input ref={archivo} type="file" name="foto" accept="image/jpeg,image/png,image/webp" className="sr-only" data-foto-mensaje onChange={(e) => setFoto(e.target.files?.[0] ?? null)} />
         </label>
-        {foto && <p className="text-sm texto-suave break-words">📎 {foto.name} · <button type="button" className="underline" onClick={() => { setFoto(null); if (archivo.current) archivo.current.value = ""; }}>Sacar</button></p>}
+        {foto && <p className="text-sm texto-suave break-words"><Icono nombre="documento" /> {foto.name} · <button type="button" className="underline" onClick={() => { setFoto(null); if (archivo.current) archivo.current.value = ""; }}>Sacar</button></p>}
       </div>
       <AvisoSalud texto={texto} />
-      <p className="text-sm texto-suave" data-aviso-salud>🩺 {AVISO_SALUD}</p>
-      <BotonAccion className="boton boton-principal w-full !min-h-14" ocupadoTexto="Enviando…" disabled={!texto.trim() || !!detectarSalud(texto)} onClick={enviar} data-enviar-mensaje>✉️ Enviar</BotonAccion>
+      <p className="text-sm texto-suave" data-aviso-salud><Icono nombre="corazon" /> {AVISO_SALUD}</p>
+      <BotonAccion className="boton boton-principal w-full !min-h-14" ocupadoTexto="Enviando…" disabled={!texto.trim() || !!detectarSalud(texto)} onClick={enviar} data-enviar-mensaje><Icono nombre="mail" /> Enviar</BotonAccion>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {aviso && <Mensaje tipo="aviso">{aviso}</Mensaje>}
     </form>

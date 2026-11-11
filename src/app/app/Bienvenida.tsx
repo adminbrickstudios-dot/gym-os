@@ -11,11 +11,11 @@ export function Bienvenida({ socioId, nombre, qr, clases, pagos }: { socioId: st
   const [ocupado, empezar] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const pasos: Paso[] = [
-    { clave: "qr", emoji: "📲", titulo: `¡Bienvenido, ${nombre}!`,
+    { clave: "qr", emoji: "celular", titulo: `¡Bienvenido, ${nombre}!`,
       texto: qr ? "Acá abajo tenés tu QR para entrar: mostralo en la puerta o escaneá el de la entrada con la cámara." : "Acá ves si estás al día y cuándo vence tu cuota, todos los días." },
-    ...(clases === "ninguno" ? [] : [{ clave: "clases", emoji: "🗓️", titulo: clases === "reserva" ? "Reservá tus clases" : "Mirá los horarios",
+    ...(clases === "ninguno" ? [] : [{ clave: "clases", emoji: "calendario", titulo: clases === "reserva" ? "Reservá tus clases" : "Mirá los horarios",
       texto: clases === "reserva" ? "En la pestaña Clases elegís el día y el horario. Si no hay lugar, te anotás en la espera." : "En la pestaña Clases están todos los horarios. No hace falta reservar." }]),
-    ...(pagos ? [{ clave: "pagos", emoji: "💳", titulo: "Pagá desde acá", texto: "Cuando venza tu cuota, el botón para pagar aparece arriba de todo. Tus pagos quedan en Yo." }] : []),
+    ...(pagos ? [{ clave: "pagos", emoji: "tarjeta", titulo: "Pagá desde acá", texto: "Cuando venza tu cuota, el botón para pagar aparece arriba de todo. Tus pagos quedan en Yo." }] : []),
   ];
   const ultimo = paso >= pasos.length - 1;
   const p = pasos[paso];

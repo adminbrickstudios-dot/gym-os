@@ -5,6 +5,7 @@ import { miSocio } from "@/lib/app/socio";
 import { estadoDe, motivoDe, type FilaSocio } from "@/lib/mensajes";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Escribile al gimnasio" };
 
@@ -24,12 +25,12 @@ export default async function MisMensajes({ searchParams }: { searchParams: Prom
     return (
       <div className="space-y-6" data-mis-mensajes>
         <Link href={`/app/yo${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">💬 Escribile al gimnasio</h1>
+        <h1 className="titular text-5xl"><Icono nombre="mensaje" /> Escribile al gimnasio</h1>
         {estado.activo
-          ? <Link href={`/app/mensajes/nuevo${q}`} className="boton boton-principal w-full !min-h-14" data-nuevo-mensaje>✉️ Escribir un mensaje</Link>
+          ? <Link href={`/app/mensajes/nuevo${q}`} className="boton boton-principal w-full !min-h-14" data-nuevo-mensaje><Icono nombre="mail" /> Escribir un mensaje</Link>
           : <p className="tarjeta p-5 texto-suave">Por ahora este gimnasio no recibe mensajes por la app. Hablá con la recepción.</p>}
         {hilos.length === 0 ? (
-          <Vacio emoji="💬" titulo="Todavía no escribiste">Una consulta, una queja o algo que perdiste: escribinos y te contestamos acá, en la app.</Vacio>
+          <Vacio emoji="mensaje" titulo="Todavía no escribiste">Una consulta, una queja o algo que perdiste: escribinos y te contestamos acá, en la app.</Vacio>
         ) : (
           <ul className="space-y-2" aria-label="Mis mensajes">
             {hilos.map((h) => {

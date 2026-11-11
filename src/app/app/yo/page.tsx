@@ -6,6 +6,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MiFoto } from "./MiFoto";
 import { AvisoClase } from "./AvisoClase";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Yo" };
 
@@ -37,7 +38,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
         <Link href={href} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila={marca ?? titulo}>
-          <span className="text-2xl" aria-hidden>{emoji}</span>
+          <span className="text-2xl" aria-hidden><Icono nombre={emoji} /></span>
           <span className="flex-1 min-w-0"><span className="block font-semibold">{titulo}</span>{detalle && <span className="block texto-suave text-sm truncate">{detalle}</span>}</span>
           <span aria-hidden className="texto-tenue">›</span>
         </Link>
@@ -58,38 +59,38 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         <section className="space-y-2" aria-label="Mi plan">
           <div className="tarjeta p-5" data-mi-plan>
             <p className="texto-tenue text-sm">Mi plan</p>
-            <p className="titulo text-2xl">{yo.plan ? `🏷️ ${yo.plan.nombre}` : "Sin plan mensual"}</p>
+            <p className="titulo text-2xl">{yo.plan ? `${yo.plan.nombre}` : "Sin plan mensual"}</p>
             {yo.acceso?.vence_en && yo.acceso.puede && <p className="texto-suave mt-1">Cubierto hasta el {fechaCorta(new Date(new Date(yo.acceso.vence_en).getTime() - 1), zona)}</p>}
           </div>
           {yo.packs?.map((p) => (
             <div key={p.plan} className="tarjeta p-5">
-              <p className="titulo text-2xl">🎟️ {p.plan}</p>
+              <p className="titulo text-2xl"><Icono nombre="ticket" /> {p.plan}</p>
               <p className="texto-suave">Te quedan {p.cantidad - p.usadas} de {p.cantidad} clases{p.vence_en ? ` · vence el ${fechaCorta(p.vence_en, zona)}` : ""}</p>
             </div>
           ))}
         </section>
 
         <ul className="space-y-2" aria-label="Mi cuenta">
-          {compra?.habilitado && compra.planes.length > 0 && fila(`/app/plan${q}`, "🔄", "Cambiar de plan o comprar un pase", "Con lo que te queda a favor", "plan")}
-          {fila(`/app/info${q}`, "ℹ️", "Info del gimnasio", "Horarios, reglamento, contacto y cómo llegar", "info")}
-          {locker?.prendido && locker.lockers.length > 0 && fila(`/app/locker${q}`, "🔐", "Mi locker", "Cuál es y hasta cuándo es tuyo", "locker")}
-          {pt?.prendido && (pt.ofrece || (pt.packs?.length ?? 0) > 0 || (pt.sesiones?.length ?? 0) > 0) && fila(`/app/pt${q}`, "🏃", "Mi personal trainer", "Tus sesiones y los horarios para reservar", "pt")}
-          {fila(`/app/historial${q}`, "🧾", "Mis pagos y cuándo vine", "Pagos, recibos y asistencia", "historial")}
-          {fila(`/app/resumen${q}`, "🏅", "Mi año e insignias", "Cuánto viniste y lo que fuiste logrando", "resumen")}
-          {fila(`/app/novedades${q}`, "🔔", "Novedades", "Avisos del gimnasio y de tu cuenta", "novedades")}
-          {fila(`/app/cuenta${q}`, "⏸️", "Mi membresía", "Pausar, dar de baja, contraseña", "cuenta")}
+          {compra?.habilitado && compra.planes.length > 0 && fila(`/app/plan${q}`, "repetir", "Cambiar de plan o comprar un pase", "Con lo que te queda a favor", "plan")}
+          {fila(`/app/info${q}`, "info", "Info del gimnasio", "Horarios, reglamento, contacto y cómo llegar", "info")}
+          {locker?.prendido && locker.lockers.length > 0 && fila(`/app/locker${q}`, "candado", "Mi locker", "Cuál es y hasta cuándo es tuyo", "locker")}
+          {pt?.prendido && (pt.ofrece || (pt.packs?.length ?? 0) > 0 || (pt.sesiones?.length ?? 0) > 0) && fila(`/app/pt${q}`, "pesa", "Mi personal trainer", "Tus sesiones y los horarios para reservar", "pt")}
+          {fila(`/app/historial${q}`, "recibo", "Mis pagos y cuándo vine", "Pagos, recibos y asistencia", "historial")}
+          {fila(`/app/resumen${q}`, "trofeo", "Mi año e insignias", "Cuánto viniste y lo que fuiste logrando", "resumen")}
+          {fila(`/app/novedades${q}`, "campana", "Novedades", "Avisos del gimnasio y de tu cuenta", "novedades")}
+          {fila(`/app/cuenta${q}`, "pausa", "Mi membresía", "Pausar, dar de baja, contraseña", "cuenta")}
         </ul>
 
         <section aria-labelledby="mas" className="space-y-2" data-yo-mas>
           <h2 id="mas" className="titulo text-2xl">Más</h2>
           <ul className="space-y-2">
-            {mensajes?.activo && fila(`/app/mensajes${q}`, "💬", "Escribile al gimnasio", mensajes.sin_leer > 0 ? (mensajes.sin_leer === 1 ? "1 respuesta nueva" : `${mensajes.sin_leer} respuestas nuevas`) : "Una consulta, una queja o algo que perdiste", "mensajes")}
-            {fila(`/app/ayuda${q}`, "❓", "Ayuda", "Preguntas cortas y cómo se hace", "ayuda")}
-            {referido != null && fila(`/app${q}#referir`, "🤝", "Invitá a un amigo", "Tu link para que se anote", "referir")}
-            {invitados != null && fila(`/app${q}`, "🎫", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
-            {fila(`/app/pedir-datos${q}`, "🔒", "Pedir mis datos", "Ver, corregir o borrar lo que guardan de vos", "pedir-datos")}
+            {mensajes?.activo && fila(`/app/mensajes${q}`, "mensaje", "Escribile al gimnasio", mensajes.sin_leer > 0 ? (mensajes.sin_leer === 1 ? "1 respuesta nueva" : `${mensajes.sin_leer} respuestas nuevas`) : "Una consulta, una queja o algo que perdiste", "mensajes")}
+            {fila(`/app/ayuda${q}`, "ayuda", "Ayuda", "Preguntas cortas y cómo se hace", "ayuda")}
+            {referido != null && fila(`/app${q}#referir`, "usuarios", "Invitá a un amigo", "Tu link para que se anote", "referir")}
+            {invitados != null && fila(`/app${q}`, "ticket", "Invitar a alguien hoy", "Con tu pase, si tu plan lo permite", "invitar")}
+            {fila(`/app/pedir-datos${q}`, "candado", "Pedir mis datos", "Ver, corregir o borrar lo que guardan de vos", "pedir-datos")}
             <li><a href={`/app/mis-datos${q}`} download className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila="mis-datos">
-              <span className="text-2xl" aria-hidden>⬇️</span><span className="flex-1 font-semibold">Descargar mis datos</span></a></li>
+              <span className="text-2xl" aria-hidden><Icono nombre="descargar" /></span><span className="flex-1 font-semibold">Descargar mis datos</span></a></li>
           </ul>
         </section>
 

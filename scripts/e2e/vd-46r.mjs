@@ -4,6 +4,8 @@
 // (La firma propia, el antes y el después de los 18, lo prueba la base: firma-propia.test.mjs.)
 //   node scripts/e2e/vd-46r.mjs     (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+// F1.9: un error que nadie atrapó deja de colgar el recorrido sin ✗: se escribe qué esperaba y cuándo, y se corta con código 1.
+process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
 const b = await navegador();

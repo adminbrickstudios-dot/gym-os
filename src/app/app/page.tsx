@@ -27,8 +27,9 @@ import { AvisosInicio } from "./AvisosInicio";
 import { Entraste } from "./Entraste";
 import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
+import { Icono } from "@/components/ui/Icono";
 
-const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 export default async function AppSocio({ searchParams }: { searchParams: Promise<{ socio?: string }> }) {
   const pedido = (await searchParams).socio;
@@ -41,7 +42,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <h1 className="titular text-5xl">¿Quién entrena hoy?</h1>
           <p className="texto-suave text-lg mt-2">Tu cuenta tiene varios socios.</p>
           <ul className="mt-8 space-y-2">{yo.socios.map((s) => (
-            <li key={s.socio_id}><Link href={`/app?socio=${s.socio_id}`} className="boton w-full !justify-start text-lg">👤 {s.nombre}</Link></li>
+            <li key={s.socio_id}><Link href={`/app?socio=${s.socio_id}`} className="boton w-full !justify-start text-lg"><Icono nombre="persona" /> {s.nombre}</Link></li>
           ))}</ul>
         </>
       );
@@ -84,7 +85,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const bloquePago = (
       <>
         {yo.pendiente && (
-          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full">🧾 Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
+          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="recibo" /> Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
         )}
         {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
         {!yo.pendiente && debePagar && yo.transferencia && (
@@ -97,14 +98,14 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {progreso?.bienvenida_pendiente && <Bienvenida socioId={s.socio_id} nombre={s.nombre} qr={!!qr || qrPared} clases={(yo.modo_clases ?? "ninguno") as "reserva" | "sin_reserva" | "ninguno"} pagos={!!yo.transferencia || !!online?.disponible} />}
         <header className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <p className="texto-suave text-lg">Hola, {s.nombre} 👋</p>
+            <p className="texto-suave text-lg">Hola, {s.nombre}  <Icono nombre="salir" /></p>
             {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue">Cambiar de socio</Link>}
           </div>
           {campana && (
             <Link href={`/app/novedades?socio=${s.socio_id}`} data-campana={campana.sin_leer}
               aria-label={campana.sin_leer ? `Novedades: ${campana.sin_leer} sin ver` : "Novedades"}
               className="relative grid place-items-center size-11 flex-none rounded-full border border-[var(--borde)] bg-[var(--tarjeta)] text-xl active:scale-95 transition">
-              <span aria-hidden>🔔</span>
+              <span aria-hidden><Icono nombre="campana" /></span>
               {campana.sin_leer > 0 && (
                 <span aria-hidden className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center text-white" style={{ background: "var(--rojo)" }}>
                   {campana.sin_leer > 99 ? "99+" : campana.sin_leer}
@@ -115,11 +116,11 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </header>
 
         <AvisosInicio socioId={s.socio_id} />
-        {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app>📣 {n.texto}</p>)}
+        {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
         <section className="rounded-[var(--radio-grande)] p-6 border"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 82%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-          <p className="text-5xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
+          <p className="text-5xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
           <p className="titular text-5xl mt-4">{v.puede ? "Podés entrar" : "No podés entrar"}</p>
           <p className="text-xl mt-2 font-semibold">{v.texto}</p>
           {v.vence_en && v.puede && <p className="texto-suave mt-1" data-cubierto-hasta>Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}{(() => { const n = Math.ceil((new Date(v.vence_en).getTime() - Date.now()) / 86400000); return n >= 0 ? ` · te ${n === 1 ? "queda 1 día" : `quedan ${n} días`}` : ""; })()}</p>}
@@ -144,24 +145,24 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
               </p>
             ))}
             {agenda.cierres.slice(0, 3).map((c) => (
-              <p key={`${c.desde}-${c.sede ?? ""}`} className="mensaje mensaje-aviso" data-cierre>🚫 Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}</p>
+              <p key={`${c.desde}-${c.sede ?? ""}`} className="mensaje mensaje-aviso" data-cierre><Icono nombre="prohibido" /> Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}</p>
             ))}
           </section>
         )}
 
         <Link href={`/app/info${q}`} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-info-gimnasio-acceso>
-          <span className="text-2xl" aria-hidden>ℹ️</span>
+          <span className="text-2xl" aria-hidden><Icono nombre="info" /></span>
           <span className="flex-1 min-w-0"><span className="block font-semibold">Info del gimnasio</span><span className="block texto-suave text-sm truncate">Horarios, reglamento, contacto y cómo llegar</span></span>
           <span aria-hidden className="texto-tenue">›</span>
         </Link>
         {encuesta.pendiente && <Encuesta socioId={s.socio_id} />}
         {grados.length > 0 && (
           <section className="space-y-2" data-grados-app={grados.length}>
-            <p className="titulo text-2xl">🥋 Tu grado</p>
+            <p className="titulo text-2xl"><Icono nombre="pesa" /> Tu grado</p>
             {grados.map((a) => (
               <div key={a.actividad_id} className="tarjeta p-4">
                 <p className="font-semibold">{a.actividad}: {a.actual?.nombre ?? "sin grado todavía"}</p>
-                {a.proximo && <p className="texto-suave text-sm">Para {a.proximo.nombre}: {textoRequisitos(a)}{a.listo ? " · ✅ ya podés rendir" : ""}</p>}
+                {a.proximo && <p className="texto-suave text-sm">Para {a.proximo.nombre}: {textoRequisitos(a)}{a.listo ? <> · <Icono nombre="ok" /> ya podés rendir</> : ""}</p>}
               </div>
             ))}
           </section>
@@ -171,7 +172,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
         {documentos.pendientes.length > 0 && (
           <section className="space-y-3" data-para-firmar={documentos.pendientes.length}>
-            <p className="titulo text-2xl">✍️ Para firmar</p>
+            <p className="titulo text-2xl"><Icono nombre="lapiz" /> Para firmar</p>
             {documentos.pendientes.map((d) => <Firmar key={d.documento_id} socioId={s.socio_id} doc={d} />)}
           </section>
         )}
@@ -179,7 +180,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
 
         {rutina && (
           <Link href={`/app/rutina${q}`} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-link-rutina>
-            <span className="text-3xl" aria-hidden>💪</span>
+            <span className="text-3xl" aria-hidden><Icono nombre="pesa" /></span>
             <span className="flex-1 min-w-0"><span className="block titulo text-xl">Mi rutina</span><span className="block texto-suave truncate">{rutina.nombre}</span></span>
             <span aria-hidden className="texto-tenue">›</span>
           </Link>
@@ -191,13 +192,13 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {yo.modo_clases !== "ninguno" && (
           <section>
             <div className="flex items-end justify-between mb-3">
-              <h2 className="titulo text-3xl">🗓️ {yo.modo_clases === "reserva" ? "Mis clases" : "Clases"}</h2>
-              <Link href={`/app/clases${q}`} className="boton !min-h-11">{yo.modo_clases === "reserva" ? "➕ Reservar" : "🗓️ Ver horarios"}</Link>
+              <h2 className="titulo text-3xl"><Icono nombre="calendario" /> {yo.modo_clases === "reserva" ? "Mis clases" : "Clases"}</h2>
+              <Link href={`/app/clases${q}`} className="boton !min-h-11">{yo.modo_clases === "reserva" ? <><Icono nombre="mas" /> Reservar</> : <><Icono nombre="calendario" /> Ver horarios</>}</Link>
             </div>
             {yo.modo_clases !== "reserva" ? <p className="texto-suave">No hace falta reservar: vení directo.</p> : !yo.reservas?.length ? <p className="texto-suave">No tenés clases reservadas.</p> : (
               <ul className="space-y-2">{yo.reservas.map((r) => (
                 <li key={r.reserva_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
-                  <span className="icono" aria-hidden>{r.emoji ?? "🗓️"}</span>
+                  <span className="icono" aria-hidden>{r.emoji ?? <><Icono nombre="calendario" /></>}</span>
                   <span className="flex-1 min-w-0"><span className="block font-semibold">{r.actividad}</span>
                     <span className="block text-sm texto-suave first-letter:uppercase">{hora(r.inicio)}{r.estado === "espera" ? ` · ${r.posicion}° en espera` : ""}</span></span>
                   <CancelarReserva reservaId={r.reserva_id} />
@@ -206,7 +207,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
             )}
           </section>
         )}
-        {!v.puede && !yo.transferencia && <Aviso emoji="💬" titulo="Pasá por recepción">Para ponerte al día, pagá en el mostrador.</Aviso>}
+        {!v.puede && !yo.transferencia && <Aviso emoji="mensaje" titulo="Pasá por recepción">Para ponerte al día, pagá en el mostrador.</Aviso>}
       </div>
     );
   });

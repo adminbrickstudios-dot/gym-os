@@ -4,6 +4,7 @@ import { formatearPesos } from "@/lib/formato";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { informarPago } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 /** Datos para transferir y subir el comprobante. El pago queda pendiente hasta que el gimnasio lo aprueba. */
 export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }: { gimnasioId: string; socioId: string; monto: number | null; datos: { alias: string | null; cbu: string | null; titular: string | null; banco?: string | null }; secundario?: boolean }) {
@@ -26,18 +27,18 @@ export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }:
 
   return (
     <section className="tarjeta p-5 space-y-4">
-      <p className="titulo text-2xl">🏦 Pagar por transferencia</p>
+      <p className="titulo text-2xl"><Icono nombre="banco" /> Pagar por transferencia</p>
       {monto != null && <p><span className="numero text-4xl">{formatearPesos(monto)}</span> <span className="texto-suave">por transferencia</span></p>}
       {[["Alias", datos.alias], ["CBU / CVU", datos.cbu]].filter(([, v]) => v).map(([k, v]) => (
         <button key={k} type="button" onClick={() => copiar(v!)} className="boton w-full !justify-between">
           <span className="text-left"><span className="block text-xs texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
-          <span className="text-sm texto-suave">{copiado === v ? "✅ Copiado" : "📋 Copiar"}</span>
+          <span className="text-sm texto-suave">{copiado === v ? <><Icono nombre="ok" /> Copiado</> : <><Icono nombre="lista" /> Copiar</>}</span>
         </button>
       ))}
       {(datos.titular || datos.banco) && <p className="texto-suave text-sm">{[datos.titular && `A nombre de ${datos.titular}`, datos.banco].filter(Boolean).join(" · ")}</p>}
       <input ref={archivo} type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && subir(e.target.files[0])} />
       <button type="button" disabled={subiendo || estado.ok} onClick={() => archivo.current?.click()} className={`boton ${secundario ? "" : "boton-principal"} w-full text-lg`}>
-        {subiendo ? "Subiendo…" : "📸 Ya transferí: subir comprobante"}
+        {subiendo ? "Subiendo…" : <><Icono nombre="camara" /> Ya transferí: subir comprobante</>}
       </button>
       {estado.texto && <Mensaje tipo={estado.ok ? "exito" : "error"}>{estado.texto}</Mensaje>}
     </section>

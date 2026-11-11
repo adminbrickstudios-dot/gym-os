@@ -3,6 +3,7 @@ import Link from "next/link";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Mi locker" };
 
@@ -27,10 +28,10 @@ export default async function MiLockerPagina({ searchParams }: { searchParams: P
           <ul className="space-y-3">
             {r.lockers.map((l) => (
               <li key={l.numero} className="tarjeta p-5 space-y-1" data-locker-socio={l.numero} data-estado={l.estado}>
-                <p className="titulo text-3xl">🔐 Locker {l.numero}</p>
+                <p className="titulo text-3xl"><Icono nombre="candado" /> Locker {l.numero}</p>
                 {l.ubicacion && <p className="texto-suave">{l.ubicacion}{yo.sedes && yo.sedes.length > 1 ? ` · ${l.sede}` : ""}</p>}
                 {l.estado === "vencido"
-                  ? <p className="mensaje mensaje-aviso"><span aria-hidden>🟡</span><span>Venció el {dia(l.ultimo_dia)}. Pasá por la recepción para renovarlo.</span></p>
+                  ? <p className="mensaje mensaje-aviso"><span aria-hidden><Icono nombre="punto-amarillo" /></span><span>Venció el {dia(l.ultimo_dia)}. Pasá por la recepción para renovarlo.</span></p>
                   : <p className="texto-suave text-lg">Es tuyo hasta el {dia(l.ultimo_dia)}{l.dias <= 7 ? ` (${l.dias === 0 ? "vence hoy" : l.dias === 1 ? "vence mañana" : `faltan ${l.dias} días`})` : ""}.</p>}
               </li>
             ))}

@@ -1,11 +1,12 @@
 "use client";
 import { useState, useTransition } from "react";
 import { crearContrasena, pedirBajaSocio, pedirPausaSocio } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
-const CATEGORIAS: [string, string][] = [["viaje", "✈️ Viaje"], ["trabajo", "💼 Trabajo"], ["estudio", "📚 Estudio"], ["otro", "Otro"]];
+const CATEGORIAS: [string, string][] = [["viaje", "Viaje"], ["trabajo", "Trabajo"], ["estudio", "Estudio"], ["otro", "Otro"]];
 const MOTIVOS: [string, string][] = [
-  ["precio", "💸 El precio"], ["horario", "⏰ Los horarios"], ["mudanza", "📦 Me mudo"], ["otro_gimnasio", "🏋️ Otro gimnasio"],
-  ["sin_tiempo", "⌛ No tengo tiempo"], ["insatisfecho", "😕 No me gustó"], ["otro", "Otra cosa"],
+  ["precio", "El precio"], ["horario", "Los horarios"], ["mudanza", "Me mudo"], ["otro_gimnasio", "Otro gimnasio"],
+  ["sin_tiempo", "No tengo tiempo"], ["insatisfecho", "No me gustó"], ["otro", "Otra cosa"],
 ];
 
 /** Pedir una pausa: queda pendiente hasta que el gimnasio la aprueba. */
@@ -26,7 +27,7 @@ export function PedirPausa({ socioId, hoy }: { socioId: string; hoy: string }) {
   return (
     <form onSubmit={enviar} className="tarjeta p-5 space-y-4" data-pedir-pausa>
       <div>
-        <h2 className="titulo text-2xl">⏸️ Pausar mi membresía</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="pausa" /> Pausar mi membresía</h2>
         <p className="texto-suave">No pagás esos días y no perdés tu plan. El gimnasio lo aprueba.</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -44,8 +45,8 @@ export function PedirPausa({ socioId, hoy }: { socioId: string; hoy: string }) {
       </fieldset>
       <input value={nota} onChange={(e) => setNota(e.target.value)} maxLength={300} placeholder="Algo más (opcional)" className="campo w-full" />
       <button type="submit" disabled={ocupado || !hasta} className="boton boton-principal w-full">{ocupado ? "Enviando…" : "Pedir la pausa"}</button>
-      {msj.ok && <p role="status" className="mensaje mensaje-exito">✅ {msj.ok}</p>}
-      {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
+      {msj.ok && <p role="status" className="mensaje mensaje-exito"><Icono nombre="ok" /> {msj.ok}</p>}
+      {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </form>
   );
 }
@@ -57,12 +58,12 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
   const [nota, setNota] = useState("");
   const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
   const [ocupado, empezar] = useTransition();
-  if (msj.ok) return <p role="status" className="mensaje mensaje-exito" data-pedido-baja-ok>✅ {msj.ok}</p>;
-  if (!abierto) return <button type="button" className="boton-texto texto-suave w-full" onClick={() => setAbierto(true)}>👋 Quiero darme de baja</button>;
+  if (msj.ok) return <p role="status" className="mensaje mensaje-exito" data-pedido-baja-ok><Icono nombre="ok" /> {msj.ok}</p>;
+  if (!abierto) return <button type="button" className="boton-texto texto-suave w-full" onClick={() => setAbierto(true)}><Icono nombre="salir" /> Quiero darme de baja</button>;
   return (
     <div className="tarjeta p-5 space-y-4" data-pedir-baja>
       <div>
-        <h2 className="titulo text-2xl">👋 Darme de baja</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="salir" /> Darme de baja</h2>
         <p className="texto-suave">Le avisamos al gimnasio y te contacta para cerrarlo.{ofrecePausa ? " Si es por un tiempo, una pausa te guarda el plan." : ""}</p>
       </div>
       <fieldset className="grid grid-cols-2 gap-2"><legend className="text-sm texto-suave mb-1">¿Por qué te vas?</legend>
@@ -80,7 +81,7 @@ export function PedirBaja({ socioId, ofrecePausa }: { socioId: string; ofrecePau
         </button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
       </div>
-      {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
+      {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </div>
   );
 }
@@ -91,17 +92,17 @@ export function CrearContrasena({ email, tieneContrasena = false }: { email: str
   const [clave, setClave] = useState("");
   const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
   const [ocupado, empezar] = useTransition();
-  if (!email) return <p className="texto-suave text-sm" data-sin-mail>🔑 Para entrar con contraseña, entrá una vez con tu mail (“✉️ Mail” al ingresar).</p>;
+  if (!email) return <p className="texto-suave text-sm" data-sin-mail><Icono nombre="llave" /> Para entrar con contraseña, entrá una vez con tu mail (“<Icono nombre="mail" /> Mail” al ingresar).</p>;
   return (
     <form className="tarjeta p-5 space-y-3" data-crear-contrasena
       onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await crearContrasena(clave, actual || undefined); setMsj(r.error ? { error: r.error } : { ok: "Listo: ya podés entrar con tu mail y esta contraseña." }); if (!r.error) { setClave(""); setActual(""); } }); }}>
-      <h2 className="titulo text-2xl">🔑 Mi contraseña</h2>
+      <h2 className="titulo text-2xl"><Icono nombre="llave" /> Mi contraseña</h2>
       <p className="texto-suave">Para entrar con <strong>{email}</strong> sin esperar un código.</p>
       {tieneContrasena && <input type="password" value={actual} onChange={(e) => setActual(e.target.value)} required autoComplete="current-password" placeholder="Tu contraseña actual" className="campo w-full" aria-label="Contraseña actual" />}
       <input type="password" value={clave} onChange={(e) => setClave(e.target.value)} minLength={8} required autoComplete="new-password" placeholder="8 letras o más" className="campo w-full" aria-label="Contraseña nueva" />
       <button type="submit" disabled={ocupado || clave.length < 8 || (tieneContrasena && !actual)} className="boton w-full">{ocupado ? "Guardando…" : "Guardar contraseña"}</button>
-      {msj.ok && <p role="status" className="mensaje mensaje-exito">✅ {msj.ok}</p>}
-      {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
+      {msj.ok && <p role="status" className="mensaje mensaje-exito"><Icono nombre="ok" /> {msj.ok}</p>}
+      {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </form>
   );
 }

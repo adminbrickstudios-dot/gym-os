@@ -2,6 +2,7 @@
 // FA-16: "Mi foto". Se elige o se saca con la cámara del celular (capture="user"), se recorta cuadrada y se achica a 480 px acá, y la sube el servidor.
 import { useRef, useState, useTransition } from "react";
 import { subirMiFoto } from "./foto-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const LADO = 480;
 
@@ -46,9 +47,9 @@ export function MiFoto({ socioId, iniciales, tieneFoto }: { socioId: string; ini
         <p className="texto-suave text-sm">La recepción te reconoce más rápido. La va a revisar antes de dejarla fija.</p>
         <input ref={entrada} type="file" accept="image/*" capture="user" className="sr-only" aria-label="Elegir o sacar una foto" onChange={(e) => { void elegir(e.target.files?.[0]); e.target.value = ""; }} />
         <button type="button" className="boton !min-h-11" disabled={subiendo} onClick={() => entrada.current?.click()} data-subir-foto>
-          {subiendo ? "Subiendo…" : tieneFoto || vista ? "📷 Cambiar mi foto" : "📷 Subir mi foto"}
+          {subiendo ? "Subiendo…" : tieneFoto || vista ? <><Icono nombre="camara" /> Cambiar mi foto</> : <><Icono nombre="camara" /> Subir mi foto</>}
         </button>
-        {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
       </div>
     </div>
   );

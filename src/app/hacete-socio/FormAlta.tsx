@@ -9,12 +9,13 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { altaOnline, type ResultadoAlta } from "./acciones";
 import type { DatosAlta } from "./page";
+import { Icono } from "@/components/ui/Icono";
 
 function Copiar({ texto, etiqueta }: { texto: string; etiqueta: string }) {
   const [ok, setOk] = useState(false);
   return (
     <button type="button" className="boton" onClick={async () => { try { await navigator.clipboard.writeText(texto); setOk(true); setTimeout(() => setOk(false), 2000); } catch { setOk(false); } }}>
-      {ok ? "✅ Copiado" : `📋 Copiar ${etiqueta}`}
+      {ok ? <><Icono nombre="ok" /> Copiado</> : `Copiar ${etiqueta}`}
     </button>
   );
 }
@@ -31,9 +32,9 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
   if (r.ya_socio) {
     return (
       <div className="tarjeta p-6 space-y-4" role="status" data-alta-ya-socio>
-        <p className="titulo text-3xl">👋 ¡Ya sos socio, {r.nombre}!</p>
+        <p className="titulo text-3xl"><Icono nombre="salir" /> ¡Ya sos socio, {r.nombre}!</p>
         <p className="texto-suave text-lg">Tu DNI o tu celular ya están en {datos.marca.nombre}. Entrá a la app con tu celular para ver tu cuota y pagar.</p>
-        <a href="/ingresar?modo=socio" className="boton boton-principal">💪 Entrar a la app</a>
+        <a href="/ingresar?modo=socio" className="boton boton-principal"><Icono nombre="pesa" /> Entrar a la app</a>
       </div>
     );
   }
@@ -42,7 +43,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
     return (
       <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio}>
         <BorradorAutomatico clave="alta-socio" borrar />
-        <p className="titulo text-3xl">🎉 ¡Bienvenido/a a {datos.marca.nombre}, {r.nombre}!</p>
+        <p className="titulo text-3xl"><Icono nombre="estrella" /> ¡Bienvenido/a a {datos.marca.nombre}, {r.nombre}!</p>
         <p className="text-lg">Ya estás anotado/a{r.plan ? <> en <strong>{r.plan}</strong></> : null}.
           {r.precio != null && <> Son <strong>{formatearPesos(r.precio)}</strong>.</>}</p>
         {r.medio === "transferencia" && t ? (
@@ -61,9 +62,9 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
           </div>
         ) : <p className="texto-suave text-lg">Pasá por recepción y pagá tu plan: desde ese momento ya podés entrenar.</p>}
         {r.linkContrasena && (
-          <a href={r.linkContrasena} className="boton boton-principal" data-crear-contrasena>🔑 Crear mi contraseña</a>
+          <a href={r.linkContrasena} className="boton boton-principal" data-crear-contrasena><Icono nombre="llave" /> Crear mi contraseña</a>
         )}
-        <a href="/ingresar?modo=socio" className={r.linkContrasena ? "boton" : "boton boton-principal"}>💪 Entrar a la app</a>
+        <a href="/ingresar?modo=socio" className={r.linkContrasena ? "boton" : "boton boton-principal"}><Icono nombre="pesa" /> Entrar a la app</a>
       </div>
     );
   }
@@ -87,7 +88,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
               <input type="radio" value={p.id} checked={plan === p.id} onChange={() => setPlan(p.id ?? null)} className="sr-only" />
               <span className="block titulo text-xl">{p.nombre}</span>
               {datos.mostrar_precios && p.precio != null && <span className="block mt-2"><span className="numero text-3xl">{formatearPesos(p.precio)}</span> <span className="texto-suave">{unidadPlan(p)}</span></span>}
-              {datos.mostrar_precios && variantesPlan(p).map((x) => <span key={x} className="block text-sm mt-1" style={{ color: "var(--acento)" }}>💸 {x}</span>)}
+              {datos.mostrar_precios && variantesPlan(p).map((x) => <span key={x} className="block text-sm mt-1" style={{ color: "var(--acento)" }}><Icono nombre="plata" /> {x}</span>)}
               {p.descripcion && <span className="block texto-suave text-sm mt-2">{p.descripcion}</span>}
             </label>
           ))}
@@ -118,13 +119,13 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
           {datos.transferencia && (
             <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "transferencia" ? "border-[var(--acento)]" : "border-transparent"}`}>
               <input type="radio" value="transferencia" checked={medio === "transferencia"} onChange={() => setMedio("transferencia")} className="sr-only" />
-              <span className="block titulo text-xl">🏦 Transferencia</span>
+              <span className="block titulo text-xl"><Icono nombre="banco" /> Transferencia</span>
               <span className="block texto-suave text-sm mt-1">Te mostramos el alias y mandás el comprobante desde la app.</span>
             </label>
           )}
           <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "mostrador" ? "border-[var(--acento)]" : "border-transparent"}`}>
             <input type="radio" value="mostrador" checked={medio === "mostrador"} onChange={() => setMedio("mostrador")} className="sr-only" />
-            <span className="block titulo text-xl">🛎️ En el gimnasio</span>
+            <span className="block titulo text-xl"><Icono nombre="campana" /> En el gimnasio</span>
             <span className="block texto-suave text-sm mt-1">Pagás en recepción cuando vengas.</span>
           </label>
         </div>
@@ -134,7 +135,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
       <p className="texto-suave text-sm">Usamos tus datos para anotarte y cobrarte. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
       {r.error && <Mensaje tipo="error">{r.error}</Mensaje>}
       <button type="submit" disabled={enviando || !plan} className="boton boton-principal text-lg w-full sm:w-auto px-10">
-        {enviando ? "Anotándote…" : plan ? "💪 Hacerme socio" : "Elegí un plan"}
+        {enviando ? "Anotándote…" : plan ? <><Icono nombre="pesa" /> Hacerme socio</> : "Elegí un plan"}
       </button>
     </form>
   );

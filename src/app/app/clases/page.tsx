@@ -8,6 +8,7 @@ import { ElegirLugar } from "./ElegirLugar";
 import type { MapaLugares } from "@/lib/clases/lugares";
 import { TurnosFijos, type HorarioLibre, type Turno } from "@/components/TurnosFijos";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-24: lo que la base dice de cada clase: si puede reservar y, si no, por qué y qué botón corresponde. */
 type Motivo = { puede: boolean; motivo: string; texto: string; accion: "reservar" | "espera" | "pagar" | "cambiar_plan" | "ninguna"; etiqueta: string | null };
@@ -68,13 +69,13 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </Link>
           ))}
         </nav>
-        {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas>⛔ {politica.bloqueo.texto}</p>}
+        {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas><Icono nombre="prohibido" /> {politica.bloqueo.texto}</p>}
         {reserva && avisos.length > 0 && <div className="space-y-2 mb-4" data-avisos-lugar>{avisos.map((a) => <Mensaje key={a.clase_id + a.tipo} tipo={a.tipo === "lugar_liberado" ? "exito" : "aviso"}>{a.texto}</Mensaje>)}</div>}
         {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.{dias.indexOf(dia) < dias.length - 1 && <> <Link href={q(dias[dias.indexOf(dia) + 1])} className="underline">Ver el día siguiente</Link></>}</p> : (
           <ul className="space-y-2">{clases.map((c) => (
             <li key={c.clase_id} data-clase={c.clase_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
               <span className="numero text-2xl w-14">{hora(c.inicio)}</span>
-              <span className="text-2xl" aria-hidden>{c.emoji ?? "🗓️"}</span>
+              <span className="text-2xl" aria-hidden>{c.emoji ?? <><Icono nombre="calendario" /></>}</span>
               <span className="grow basis-36 min-w-0"><span className="block font-semibold">{c.actividad}</span>
                 <span className="block text-sm texto-suave">{reserva ? (c.cupo != null ? `${Math.max(c.cupo - c.confirmadas, 0)} lugares` : "Sin cupo") : ""}{c.profe && !profes.get(c.clase_id) ? `${reserva ? " · " : ""}${c.profe}` : ""}</span>
                 {profes.get(c.clase_id) && (
@@ -87,17 +88,17 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
                   </span>
                 )}</span>
               {!reserva ? null : c.mi_reserva && reservaDe.get(c.clase_id)
-                ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : "✅ Reservada"}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
+                ? <><span className="pildora pildora-verde">{c.mi_reserva === "espera" ? `${c.mi_posicion}° en espera` : <><Icono nombre="ok" /> Reservada</>}</span><CancelarReserva reservaId={reservaDe.get(c.clase_id)!} /></>
                 : <Accion m={motivos[c.clase_id]} claseId={c.clase_id} socioId={yo.socio!.socio_id} varios={yo.socios.length > 1} />}
               {reserva && !c.mi_reserva && motivos[c.clase_id] && motivos[c.clase_id].motivo !== "ok" && motivos[c.clase_id].motivo !== "bloqueo_faltas" && (
                 <p className="basis-full text-sm texto-suave" data-motivo={motivos[c.clase_id].motivo}>{motivos[c.clase_id].texto}</p>)}
               {mapas.get(c.clase_id) && <ElegirLugar mapa={mapas.get(c.clase_id)!} />}
-              {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio>🏋️ {wodDe.get(c.clase_id)}</p>}
+              {wodDe.get(c.clase_id) && <p className="basis-full text-[15px] whitespace-pre-line" data-wod-socio><Icono nombre="pesa" /> {wodDe.get(c.clase_id)}</p>}
             </li>
           ))}</ul>
         )}
         {reserva && turnos.prendido && <div className="mt-8"><TurnosFijos socioId={yo.socio.socio_id} turnos={turnos.turnos} horarios={horarios} /></div>}
-        {reserva && politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}>ℹ️ {r}</li>)}</ul>}
+        {reserva && politica.reglas.length > 0 && <ul className="mt-6 space-y-1 text-sm texto-suave" data-reglas-reservas>{politica.reglas.map((r) => <li key={r}><Icono nombre="info" /> {r}</li>)}</ul>}
       </>
     );
   });

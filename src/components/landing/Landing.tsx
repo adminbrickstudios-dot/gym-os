@@ -374,7 +374,7 @@ function Senales({ landing, ahora }: { landing: LandingPublicada; ahora: Agenda[
   const puntaje = resena ? Number(resena.puntaje).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : "";
   const contenidoResena = resena && (
     <>
-      <span aria-hidden className="text-[#f5b50a]"><Icono nombre="estrella" /></span>
+      <span aria-hidden className="text-[var(--amarillo)]"><Icono nombre="estrella" /></span>
       <span className="numero">{puntaje}</span>
       <span>· {resena.cantidad.toLocaleString("es-AR")} {resena.cantidad === 1 ? "reseña" : "reseñas"} en Google</span>
     </>

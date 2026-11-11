@@ -59,174 +59,6 @@
   "hex": 0,
   "emoji": 12
  },
- "src/app/app/AvisosSocio.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/Bienvenida.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/CancelarReserva.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/clases/ElegirLugar.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/clases/page.tsx": {
-  "hex": 0,
-  "emoji": 5
- },
- "src/app/app/clases/Reservar.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/cuenta/page.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/cuenta/Pedidos.tsx": {
-  "hex": 0,
-  "emoji": 21
- },
- "src/app/app/Encuesta.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/Entraste.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/EscanearEntrada.tsx": {
-  "hex": 0,
-  "emoji": 8
- },
- "src/app/app/EventosApp.tsx": {
-  "hex": 0,
-  "emoji": 7
- },
- "src/app/app/historial/page.tsx": {
-  "hex": 0,
-  "emoji": 7
- },
- "src/app/app/info/page.tsx": {
-  "hex": 0,
-  "emoji": 14
- },
- "src/app/app/Instalar.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/Invitar.tsx": {
-  "hex": 0,
-  "emoji": 5
- },
- "src/app/app/locker/page.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/mensajes/FormMensaje.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/mensajes/nuevo/page.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/mensajes/page.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/mensajes/[id]/page.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/MiQR.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/NavSocio.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/novedades/page.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/OfertasLugar.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/Pagar.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/PagarOnline.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/page.tsx": {
-  "hex": 0,
-  "emoji": 22
- },
- "src/app/app/pago/Confirmando.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/pedir-datos/PedirDatos.tsx": {
-  "hex": 0,
-  "emoji": 5
- },
- "src/app/app/plan/ComprarPlan.tsx": {
-  "hex": 0,
-  "emoji": 6
- },
- "src/app/app/ProgresoInicio.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/pt/MisSesiones.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/Recomendacion.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/Referir.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/rutina/Anotar.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/app/rutina/MarcarDia.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/rutina/page.tsx": {
-  "hex": 0,
-  "emoji": 4
- },
- "src/app/app/rutina/Series.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/yo/AvisoClase.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/app/yo/MiFoto.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/app/yo/page.tsx": {
-  "hex": 0,
-  "emoji": 16
- },
  "src/app/auth/vincular/VincularGoogle.tsx": {
   "hex": 0,
   "emoji": 2
@@ -238,14 +70,6 @@
  "src/app/gimnasio-no-encontrado/page.tsx": {
   "hex": 0,
   "emoji": 1
- },
- "src/app/hacete-socio/FormAlta.tsx": {
-  "hex": 0,
-  "emoji": 11
- },
- "src/app/hacete-socio/page.tsx": {
-  "hex": 0,
-  "emoji": 3
  },
  "src/app/ingresar/Encabezado.tsx": {
   "hex": 0,
@@ -279,10 +103,6 @@
   "hex": 0,
   "emoji": 1
  },
- "src/app/not-found.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
  "src/app/tv/page.tsx": {
   "hex": 0,
   "emoji": 2
@@ -290,10 +110,6 @@
  "src/app/tv/PantallaTv.tsx": {
   "hex": 0,
   "emoji": 6
- },
- "src/components/landing/Landing.tsx": {
-  "hex": 1,
-  "emoji": 0
  },
  "src/lib/panel/intentar.tsx": {
   "hex": 0,

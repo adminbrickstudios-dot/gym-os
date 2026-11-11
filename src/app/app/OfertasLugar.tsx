@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { aceptarOferta, rechazarOferta } from "./ofertas-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type OfertaLugarDatos = { reserva_id: string; clase_id: string; actividad: string; inicio: string; hasta: string };
 
@@ -26,7 +27,7 @@ export function OfertasLugar({ ofertas, zona }: { ofertas: OfertaLugarDatos[]; z
           </div>
         </div>
       ))}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

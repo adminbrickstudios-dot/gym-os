@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { codigoQR } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; socioId: string; inicial: { codigo: string; vence_en: string } }) {
   const [qr, setQr] = useState(inicial);
@@ -27,12 +28,12 @@ export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; soc
 
   return (
     <section className="tarjeta p-6 text-center space-y-3" data-mi-qr data-codigo={qr.codigo} aria-label="Tu QR para entrar">
-      <p className="titulo text-2xl">📱 Tu QR para entrar</p>
+      <p className="titulo text-2xl"><Icono nombre="celular" /> Tu QR para entrar</p>
       {/* Fondo blanco siempre: un lector no lee un QR sobre fondo oscuro. */}
       <div className="mx-auto w-64 max-w-full aspect-square rounded-2xl bg-white p-3" aria-hidden
         dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
       <p className="texto-suave">Mostralo en la recepción · se renueva en {quedan} s</p>
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

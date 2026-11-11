@@ -8,6 +8,7 @@ import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { informarCompraApp, pagarConMercadoPago, vistaCompraApp, type VistaCompra } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type PlanOferta = {
   plan_id: string; nombre: string; tipo: "membresia" | "pase_diario" | "pack"; descripcion: string | null;
@@ -74,7 +75,7 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
 
   const o = opciones;
   if (!o.habilitado) {
-    return <div className="tarjeta p-5 space-y-2" data-compra-apagada><p className="titulo text-2xl">🛎️ Pasá por recepción</p>
+    return <div className="tarjeta p-5 space-y-2" data-compra-apagada><p className="titulo text-2xl"><Icono nombre="campana" /> Pasá por recepción</p>
       <p className="texto-suave">Para cambiar de plan o comprar un pase, hablá con el gimnasio.</p></div>;
   }
   const grupos = (["membresia", "pase_diario", "pack"] as const).map((t) => [t, o.planes.filter((p) => p.tipo === t)] as const).filter(([, l]) => l.length > 0);
@@ -118,7 +119,7 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
           {viendo && <p className="texto-suave">Calculando…</p>}
           {vista && (
             <>
-              <p className="titulo text-2xl">{vista.cambia_plan ? `🔄 Pasarte a ${vista.nombre}` : `🎟️ ${vista.nombre}`}</p>
+              <p className="titulo text-2xl">{vista.cambia_plan ? `Pasarte a ${vista.nombre}` : `${vista.nombre}`}</p>
               {vista.cambia_plan && (
                 <div className="space-y-1" data-dias-a-favor>
                   {vista.plan_viejo && (vista.dias_a_favor ?? 0) > 0
@@ -147,13 +148,13 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
                         {[["Alias", o.transferencia.alias], ["CBU / CVU", o.transferencia.cbu]].filter(([, v]) => v).map(([k, v]) => (
                           <button key={k} type="button" onClick={() => copiar(v!)} className="boton w-full !justify-between">
                             <span className="text-left"><span className="block text-xs texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
-                            <span className="text-sm texto-suave">{copiado === v ? "✅ Copiado" : "📋 Copiar"}</span>
+                            <span className="text-sm texto-suave">{copiado === v ? <><Icono nombre="ok" /> Copiado</> : <><Icono nombre="lista" /> Copiar</>}</span>
                           </button>
                         ))}
                         {(o.transferencia.titular || o.transferencia.banco) && <p className="texto-suave text-sm">{[o.transferencia.titular && `A nombre de ${o.transferencia.titular}`, o.transferencia.banco].filter(Boolean).join(" · ")}</p>}
                         <input ref={archivo} type="file" accept="image/*,application/pdf" className="hidden" data-comprobante-compra onChange={(e) => e.target.files?.[0] && subir(e.target.files[0])} />
                         <button type="button" disabled={subiendo || vista.congelado || !!o.pendiente} onClick={() => archivo.current?.click()} className="boton w-full text-lg">
-                          {subiendo ? "Subiendo…" : "📸 Ya transferí: subir comprobante"}
+                          {subiendo ? "Subiendo…" : <><Icono nombre="camara" /> Ya transferí: subir comprobante</>}
                         </button>
                         {o.pendiente && <p className="texto-tenue text-sm">Ya tenés un comprobante esperando: cuando lo aprueben, podés mandar otro.</p>}
                       </div>

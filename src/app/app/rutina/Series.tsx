@@ -1,6 +1,7 @@
 "use client";
 import { useOptimistic, useState, useTransition } from "react";
 import { marcarSerie } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** FA-15: una casilla por serie ("1 2 3 4"); tocar la marca como hecha y volver a tocar la desmarca. Se ve al instante y la base confirma. */
 export function Series({ socioId, dia, ejercicioId, series, hechas }: { socioId: string; dia: number; ejercicioId: string; series: number; hechas: number[] }) {
@@ -26,7 +27,7 @@ export function Series({ socioId, dia, ejercicioId, series, hechas }: { socioId:
           );
         })}
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mt-2">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal mt-2"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

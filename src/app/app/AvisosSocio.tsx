@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { marcarAvisoLeido } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type AvisoApp = { id: string; tipo: string; titulo: string; texto: string; creado_en: string };
 
@@ -15,7 +16,7 @@ export function AvisosSocio({ avisos }: { avisos: AvisoApp[] }) {
     <section className="space-y-3" aria-label="Avisos del gimnasio" data-avisos-app={lista.length}>
       {lista.map((a) => (
         <div key={a.id} className="tarjeta p-5 space-y-3" data-aviso-app={a.tipo}>
-          <p className="titulo text-xl">📣 {a.titulo}</p>
+          <p className="titulo text-xl"><Icono nombre="campana" /> {a.titulo}</p>
           <p className="texto-suave">{a.texto}</p>
           <button type="button" className="boton" disabled={ocupado}
             onClick={() => empezar(async () => { const r = await marcarAvisoLeido(a.id); if (r.error) setError(r.error); else { setError(null); setVistos((v) => [...v, a.id]); } })}>
@@ -23,7 +24,7 @@ export function AvisosSocio({ avisos }: { avisos: AvisoApp[] }) {
           </button>
         </div>
       ))}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

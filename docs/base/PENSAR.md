@@ -28,6 +28,15 @@ terminado.
 
 ---
 
+## P8 · La landing del gimnasio, profesional con cero configuración (carril C, 11/11)
+1. **Qué pidió Mateo:** que apenas crea su gimnasio, con solo el nombre y un color, ya tenga una web que parezca hecha por un profesional, sin huecos ni carteles de "armando".
+2. **Cómo lo hace un producto profesional:** Glofox/Mindbody/Shopify: portada tipográfica enorme con el nombre, el acento de la marca, bloques que aparecen solos cuando hay datos y desaparecen cuando no, y lo técnico (título, imagen para compartir, sitemap, datos estructurados) resuelto sin que el dueño toque nada.
+3. **Cinco formas en que se rompe:** (a) datos vacíos: sección con título y nada adentro; (b) celular: desborde horizontal por un título largo; (c) otro dominio: sitemap/robots/canonical de la dirección equivocada; (d) 1.000 gimnasios: caché por dirección y `revalidateTag` al editar; (e) vista previa contra producción: og:image con el host correcto.
+4. **Lo que no pidió pero necesita:** 404 con la marca del gimnasio; íconos de línea en lugar de emojis (D38); que "Ocultar" deje solo la portada y no se indexe.
+5. **Decisión y prueba:** casi todo ya estaba (BASE-9, U4): se completó la 404 con marca, `ExerciseGym` + `HealthClub`, y los emojis pasaron a `Icono`. `scripts/e2e/web-p8.mjs` mira: título grande en 390 px, sin secciones vacías, sin desborde, sin imágenes rotas, sin emojis, metadatos, sitemap y robots por dirección, 404 con marca y bloques con datos.
+
+---
+
 ## F1.9 + mostrador + plazo de espera (carril D, 11/11)
 1. **Qué quiso decir Mateo:** que los e2e viejos vuelvan a andar de verdad (si falla la pantalla se arregla la pantalla; si el test quedó viejo, el test), que la recepción tenga un mostrador (barra de búsqueda gigante) y que el dueño pueda poner el plazo de la lista de espera.
 2. **Cómo lo hace un producto profesional:** las pruebas de pantalla esperan a la condición (no a un tiempo ni a una cuenta instantánea), no dependen del reloj ni de datos que dejó otra prueba, y un fallo se clasifica en "la pantalla cambió a propósito", "carrera de la prueba" o "bug".

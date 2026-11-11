@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Aviso } from "@/components/panel/Marco";
 import { traerLanding } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
+import { Icono } from "@/components/ui/Icono";
 
 /** WEB-05 · La 404 de la dirección de un gimnasio lleva su nombre y su color, y vuelve a SU página (no a la de la plataforma). */
 export default async function NoEncontrada() {
@@ -26,10 +27,10 @@ export default async function NoEncontrada() {
   }
   return (
     <main className="min-h-screen p-6 flex items-center justify-center">
-      <Aviso emoji="🔎" titulo="No encontramos esta página">
+      <Aviso emoji="buscar" titulo="No encontramos esta página">
         <p>La dirección no existe o ya no está.</p>
         <div className="flex flex-wrap gap-2 mt-6">
-          <Link href="/" className="boton boton-principal">🏠 Ir al inicio</Link>
+          <Link href="/" className="boton boton-principal"><Icono nombre="inicio" /> Ir al inicio</Link>
         </div>
       </Aviso>
     </main>
