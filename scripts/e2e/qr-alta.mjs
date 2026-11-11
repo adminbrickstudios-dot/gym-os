@@ -24,13 +24,14 @@ try {
   await d.goto(`${G}/panel/ayuda/carteles/anotate`);
   const controles = d.locator("[data-qr-alta-controles]");
   await controles.waitFor({ timeout: 60000 });
-  const llave = controles.locator('input[data-registro-abierto]');
+  const llave = controles.locator('[data-registro-abierto]').first();
+  const estaAbierto = async () => (await controles.getAttribute("data-abierto")) === "si";
   const poner = async (abierto) => {
-    if ((await llave.isChecked()) !== abierto) {
-      await (abierto ? llave.check() : llave.uncheck());
+    if ((await estaAbierto()) !== abierto) {
+      await llave.click();
       await d.waitForFunction((a) => document.querySelector("[data-qr-alta-controles]")?.getAttribute("data-abierto") === (a ? "si" : "no"), abierto, { timeout: 30000 });
     }
-    chequear(await llave.isChecked() === abierto, `registro ${abierto ? "abierto" : "cerrado"}`, "el interruptor no quedó como se pidió");
+    chequear((await estaAbierto()) === abierto, `registro ${abierto ? "abierto" : "cerrado"}`, "el interruptor no quedó como se pidió");
   };
   await poner(true);
 
