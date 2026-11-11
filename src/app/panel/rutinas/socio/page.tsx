@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { MarcasProgreso, type Progreso } from "@/components/rutinas/Progreso";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 
 export const metadata: Metadata = { title: "Progreso del socio" };
 
@@ -14,7 +14,7 @@ export default async function ProgresoSocio({ searchParams }: { searchParams: Pr
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "profe"]);
     exigirSeccion(panel, "rutinas");
-    if (!id) throw new Error("Falta el socio");
+    if (!id) throw new ErrorDatos("Falta elegir el socio. Abrí la rutina desde su ficha.");
     const [p, r] = await Promise.all([
       rpc<Progreso>("progreso_socio", { p_socio_id: id }),
       rpc<{ nombre: string } | null>("rutina_de_socio", { p_socio_id: id }),

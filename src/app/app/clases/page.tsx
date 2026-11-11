@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CancelarReserva } from "../CancelarReserva";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
-import { rpc } from "@/lib/panel/servidor";
+import { ErrorDatos, rpc } from "@/lib/panel/servidor";
 import { Reservar } from "./Reservar";
 import { ElegirLugar } from "./ElegirLugar";
 import type { MapaLugares } from "@/lib/clases/lugares";
@@ -28,7 +28,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dias = Array.from({ length: 7 }, (_, i) => { const d = new Date(`${hoy}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + i); return d.toISOString().slice(0, 10); });
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
-    if (!sede) throw new Error("El gimnasio no tiene sedes activas");
+    if (!sede) throw new ErrorDatos("El gimnasio no tiene sedes activas todavía, así que no hay clases para mostrar.");
     const [todas, politica, turnos, horarios, wods, avisos] = await Promise.all([
       rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
       // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.

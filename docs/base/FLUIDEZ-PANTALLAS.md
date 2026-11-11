@@ -50,3 +50,24 @@ Se revisaron las carpetas del carril C buscando las frases de IA que prohíbe la
 - **Carril D (panel):** el resto de `/panel/*`: sobre todo Caja y Cobrar (regla 10: la confirmación dice qué va a pasar, con nombre y monto), Equipo y Configuración (regla 7: borrador en formularios largos; el hook está en `src/lib/app/BorradorAutomatico.tsx`), y la campana (regla 14: en vivo).
 - **Regla 7 (borrador):** hoy solo lo usa el alta de `/hacete-socio`; pendientes alta completa, plan y configuración de la página.
 - **Regla 20 (sincronía en vivo):** no es de una pantalla; es Realtime (carril A).
+
+## Carril D (panel) y pasada de botones · F3.1 y F3.2 (11/11)
+
+Corridas de `Botones` en Actions sobre `carril/d-f3`, los 6 roles en compu y celular (43090684539 la primera, 43099403588 la segunda). `botones.mjs` mide ahora, además, los saltos al cargar (CLS), la salida visible de cada pantalla y lista (sin tocarlos) los botones que cambian o mandan algo: ahí solo se verifica que existen, no se aprietan.
+
+| Pantalla | Regla | Hallazgo | Estado |
+|---|---|---|---|
+| `/panel/rutinas/socio` sin `?socio` | 15, 19 | Tiraba un `Error` común: en producción llegaba como pantalla genérica y React #419 en consola | Arreglado: dice "Falta elegir el socio. Abrí la rutina desde su ficha." |
+| `/app/pago` sin `?pago` | 15, 19 | Igual (#419) | Arreglado: dice qué falta y qué hacer |
+| `/app/clases` sin sedes, `/panel/socios/nuevo` con interesado inexistente | 15 | Igual | Arreglado: el mensaje llega a la pantalla |
+| `/panel/planes/aumento` | 19 | Al salir de la pantalla con la vista previa en camino quedaba "An unexpected response was received from the server" en consola (11 a 20 por corrida) | Arreglado: los pedidos de la pantalla se descartan al salir |
+| `/panel/configuracion`, `/panel/asistente` | 9, 16 | No tenían `loading.tsx` con su forma | Arreglado |
+| Menú del celular (hoja del panel) | 5, 6 | No cerraba con Esc ni con el "atrás" del teléfono | Arreglado en `Navegacion.tsx` (Esc, atrás del teléfono, y saca la entrada de historial que suma) |
+| `/panel/hoy` | 1 | Primer toque en el menú 152 ms (redirige a `/panel/tareas`) | Anotado: es la compilación en frío del primer toque, no se repite |
+| `intentar.tsx` (`src/lib/panel/`) | texto | Los avisos usan `emoji="🧩"`, `"🐢"`, `"🔒"`; salen como ícono por `Icono` (no se ven emojis), pero el nombre del campo invita a escribirlos | Carril A: no se tocó |
+
+Falsos positivos que se sacaron del recorrido (no eran de la app): enlace a la pestaña en la que ya estás, descargas (`/mis-datos`, `/exportar`), campos con su `<label>` alrededor, contenido dentro de un `<details>` cerrado, y "Si algo salió mal, lo deshacés" en Importar socios, que no es una pantalla de error.
+
+**Confirmaciones de lo destructivo (regla 10):** el recorrido no aprieta nada que cambie datos o plata; en el informe de cada rol queda la lista por pantalla de los botones que existen y no se tocaron (Anular, Dar de baja, Cobrar, Cerrar caja, Pausar, etc.). La comprobación de que piden confirmación con nombre y monto y de que Cancelar no cambia nada sigue en los e2e propios de cada flujo (caja, ventas, socios); no se repitió acá.
+
+**Textos:** buscadas en `src/` las frases prohibidas (experiencia única, siguiente nivel, sin complicaciones, potenciá, solución integral, disfrutá, revolucionar): ninguna. Los emojis que quedan están en textos que salen por WhatsApp y notificaciones push (`src/lib/caja.ts`, `recibo.ts`, `push-acciones.ts`), no en pantallas.
