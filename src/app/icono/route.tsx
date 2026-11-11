@@ -7,7 +7,8 @@ import { textoSobre } from "@/lib/marca";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(pedido: Request) {
+  const tam = new URL(pedido.url).searchParams.get("tam") === "512" ? 512 : 192;
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host).catch(() => null) : null;
@@ -16,10 +17,10 @@ export async function GET() {
   const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "B";
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: acento, color: textoSobre(acento), fontSize: 104, fontWeight: 800, borderRadius: 40 }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: acento, color: textoSobre(acento), fontSize: Math.round(tam * 0.54), fontWeight: 800, borderRadius: Math.round(tam * 0.2) }}>
         {iniciales}
       </div>
     ),
-    { width: 192, height: 192, headers: { "cache-control": "public, max-age=300" } },
+    { width: tam, height: tam, headers: { "cache-control": "public, max-age=300" } },
   );
 }

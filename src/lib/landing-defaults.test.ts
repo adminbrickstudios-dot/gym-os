@@ -47,6 +47,18 @@ describe("textos por defecto de la página", () => {
     expect(txt).not.toMatch(/probar antes/);
   });
 
+  it("con altas online la respuesta de cómo anotarse manda al botón, y sin ellas a WhatsApp", () => {
+    const sec = [{ tipo: "preguntas" as const, titulo: "P", contenido: {} }];
+    const planes = [{ nombre: "Mensual", tipo: "membresia" as const, descripcion: null }];
+    const texto = (altas: boolean) => {
+      const s = conTextosPorDefecto(base({ secciones: sec, planes, altas_online: altas })).secciones[0];
+      return JSON.stringify(s.tipo === "preguntas" ? s.contenido.items : []);
+    };
+    expect(texto(true)).toMatch(/Quiero ser socio/);
+    expect(texto(true)).not.toMatch(/escribinos por WhatsApp/);
+    expect(texto(false)).toMatch(/escribinos por WhatsApp/);
+  });
+
   it("no deja ningún texto de relleno", () => {
     const l = conTextosPorDefecto(base({ secciones: [{ tipo: "sobre_nosotros", titulo: "Q", contenido: {} }] }));
     expect(JSON.stringify(l.secciones)).not.toMatch(/lorem|ipsum|undefined|null/i);

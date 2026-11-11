@@ -1,6 +1,6 @@
-// Service worker de Gym OS: solo notificaciones push (PUSH-1). No cachea nada.
+// Service worker de Base: solo notificaciones push (PUSH-1). No cachea nada.
 self.addEventListener("push", (evento) => {
-  let m = { titulo: "Gym OS", cuerpo: "", url: "/" };
+  let m = { titulo: "Aviso de tu gimnasio", cuerpo: "", url: "/" };
   try { m = { ...m, ...evento.data.json() }; } catch { if (evento.data) m.cuerpo = evento.data.text(); }
   evento.waitUntil(self.registration.showNotification(m.titulo, { body: m.cuerpo, data: { url: m.url }, icon: "/favicon.ico", badge: "/favicon.ico", lang: "es-AR" }));
 });

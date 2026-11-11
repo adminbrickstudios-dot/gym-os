@@ -1,3 +1,5 @@
+> **11/11: reemplazado por `docs/base/SOCIO-FLUJO.md` y `docs/base/PULIDO.md`** (app del socio en 4 pestañas, "Tu DNI para entrar" cuando el gimnasio no usa QR, sin emojis: los íconos salen de `Icono`). Donde este archivo diga otra cosa, manda `docs/base/`.
+
 # 🏃 App del socio
 
 Web instalable (PWA) con el nombre, ícono y colores del gimnasio. Se entra

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { archivarRutina, guardarRutina, type ItemRutina } from "../acciones";
 import { nombreGrupo, type Ejercicio } from "../tipos";
 import { Icono } from "@/components/ui/Icono";
@@ -19,12 +19,24 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
   const [ocupado, empezar] = useTransition();
   const router = useRouter();
   const activos = ejercicios.filter((e) => e.activo);
+  // Regla 7 de FLUIDEZ: si cerrás la pestaña con cambios sin guardar, el navegador pregunta antes de perderlos.
+  const huella = JSON.stringify([nombre, descripcion, items.map((x) => [x.dia, x.ejercicio_id, x.series, x.repeticiones, x.nota ?? ""])]);
+  const [guardada, setGuardada] = useState<string | null>(null);
+  const original = useRef<string | null>(null);
+  if (original.current === null) original.current = huella;
+  const sinGuardar = huella !== original.current && guardada !== huella;
+  useEffect(() => {
+    if (!sinGuardar) return;
+    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", avisar);
+    return () => window.removeEventListener("beforeunload", avisar);
+  }, [sinGuardar]);
   const cambiar = (clave: number, cambio: Partial<Item>) => setItems((xs) => xs.map((x) => (x.clave === clave ? { ...x, ...cambio } : x)));
   const sumar = (dia: number, ejercicio_id: string) => setItems((xs) => [...xs, { clave: siguiente++, dia, ejercicio_id, series: 3, repeticiones: "12" }]);
   const guardar = () => empezar(async () => {
     const orden = [...items].sort((a, b) => a.dia - b.dia || a.clave - b.clave).map((x) => ({ dia: x.dia, ejercicio_id: x.ejercicio_id, series: x.series, repeticiones: x.repeticiones, nota: x.nota ?? null }));
     const r = await guardarRutina(id, nombre, descripcion, orden);
-    if (r.error) setError(r.error); else router.push("/panel/rutinas");
+    if (r.error) setError(r.error); else { setGuardada(huella); router.push("/panel/rutinas"); }
   });
   return (
     <div className="space-y-8" data-editor-rutina>
@@ -43,7 +55,7 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
               return (
                 <li key={x.clave} className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_5rem_6rem_1fr_auto] gap-2 items-center border-b border-[var(--borde)] pb-2">
                   <span className="min-w-0"><span className="block font-semibold truncate">{e?.nombre ?? "Ejercicio"}</span><span className="block text-xs texto-tenue">{e ? nombreGrupo(e.grupo) : ""}</span></span>
-                  <button type="button" className="boton-texto texto-suave sm:order-last" aria-label={`Quitar ${e?.nombre ?? "ejercicio"}`} onClick={() => setItems((xs) => xs.filter((y) => y.clave !== x.clave))}>✕</button>
+                  <button type="button" className="boton-texto texto-suave sm:order-last" aria-label={`Quitar ${e?.nombre ?? "ejercicio"}`} onClick={() => setItems((xs) => xs.filter((y) => y.clave !== x.clave))}><Icono nombre="cerrar" /></button>
                   <label className="text-sm"><span className="sr-only">Series</span><input className="campo !min-h-11" type="number" min={1} max={20} value={x.series} onChange={(ev) => cambiar(x.clave, { series: Number(ev.target.value) })} aria-label="Series" /></label>
                   <label className="text-sm"><span className="sr-only">Repeticiones</span><input className="campo !min-h-11" value={x.repeticiones} maxLength={20} onChange={(ev) => cambiar(x.clave, { repeticiones: ev.target.value })} aria-label="Repeticiones" placeholder="12" /></label>
                   <input className="campo !min-h-11 col-span-2 sm:col-span-1" value={x.nota ?? ""} maxLength={120} onChange={(ev) => cambiar(x.clave, { nota: ev.target.value })} aria-label="Nota" placeholder="Nota (opcional)" />
@@ -52,7 +64,7 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
             })}</ul>
             <label className="block"><span className="sr-only">Sumar ejercicio al día {dia}</span>
               <select className="campo" value="" onChange={(ev) => { if (ev.target.value) sumar(dia, ev.target.value); }} aria-label={`Sumar ejercicio al día ${dia}`}>
-                <option value=""><Icono nombre="mas" /> Sumar ejercicio…</option>
+                <option value="">Sumar ejercicio…</option>
                 {activos.map((e) => <option key={e.id} value={e.id}>{e.nombre} · {nombreGrupo(e.grupo)}</option>)}
               </select></label>
           </section>

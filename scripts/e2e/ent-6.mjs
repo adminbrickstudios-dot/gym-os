@@ -39,7 +39,7 @@ try {
   const qr = t.locator("[data-qr-pared]");
   await t.waitForFunction(() => /^GYMOSP1\./.test(document.querySelector("[data-qr-pared]")?.getAttribute("data-qr-pared") ?? ""), null, { timeout: 30000 });
   const codigo = await qr.getAttribute("data-qr-pared");
-  chequear(await qr.locator("svg").count() === 1, "la tablet muestra su QR para escanear", "no hay QR en la tablet");
+  chequear(await qr.locator("svg[shape-rendering=\"crispEdges\"]").count() === 1, "la tablet muestra su QR para escanear", "no hay QR en la tablet");
   await capturar(t, "ent6-tablet-qr");
 
   // El socio, con una cámara de prueba que filma el QR de la tablet.

@@ -41,8 +41,8 @@ try {
   const s = await pagina(b, CELU);
   await entrar(s, "socio@ejemplo.invalid");
   let c1 = await codigoNuevo(s);
-  await s.locator("[data-mi-qr] svg").waitFor({ timeout: 15000 }).catch(() => {});
-  chequear(/^GYMOS1\./.test(c1) && await s.locator("[data-mi-qr] svg").count() === 1, "la app del socio muestra su QR", "no hay QR en la app");
+  await s.locator('[data-mi-qr] svg[shape-rendering="crispEdges"]').waitFor({ timeout: 15000 }).catch(() => {});
+  chequear(/^GYMOS1\./.test(c1) && await s.locator('[data-mi-qr] svg[shape-rendering="crispEdges"]').count() === 1, "la app del socio muestra su QR", "no hay QR en la app");
   await capturar(s, "ent2-celu-app-qr");
 
   const r = await pagina(b, COMPU);

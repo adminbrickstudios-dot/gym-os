@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { prepararLinkContrasenaSocio } from "@/lib/app/acceso-socio-servidor";
+import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { errorSiHaySalud } from "@/lib/salud";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -83,8 +84,8 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
       const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
       const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127.|[^.]+.localhost)/.test(host) ? "http" : "https");
       const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}`, contrasena: contrasena || undefined, gimnasioId: panel.gimnasio.id });
-      const tel = (datos.telefono ?? "").replace(/D/g, "");
-      linkContrasena = { ...r, wa: tel.length >= 8 ? `https://wa.me/${tel}?text=${encodeURIComponent(r.texto)}` : null };
+      // Antes la expresión era /D/ (la letra D) y el número quedaba con "+" y espacios: el link no abría el chat.
+      linkContrasena = { ...r, wa: linkWhatsappSocio(datos.telefono, r.texto) };
     } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }
   }
   const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;

@@ -23,7 +23,7 @@ export function Series({ socioId, dia, ejercicioId, series, hechas }: { socioId:
           const hecha = vistas.includes(n);
           return (
             <button key={n} type="button" aria-pressed={hecha} aria-label={`Serie ${n}${hecha ? " hecha" : ""}`} data-serie={n} onClick={() => tocar(n)}
-              className={`pildora cursor-pointer !min-h-11 !min-w-11 justify-center active:scale-95 ${hecha ? "pildora-verde" : ""}`}>{hecha ? "✓" : n}</button>
+              className={`pildora cursor-pointer !min-h-11 !min-w-11 justify-center active:scale-95 ${hecha ? "pildora-verde" : ""}`}>{hecha ? <Icono nombre="ok" /> : n}</button>
           );
         })}
       </div>

@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!publicada) return [];
   return [
     { url: `${origen}/`, changeFrequency: "weekly", priority: 1 },
+    { url: `${origen}/privacidad`, changeFrequency: "yearly" as const, priority: 0.3 },
     ...(altas ? [{ url: `${origen}/hacete-socio`, changeFrequency: "monthly" as const, priority: 0.8 }] : []),
   ];
 }

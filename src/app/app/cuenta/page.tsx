@@ -28,7 +28,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
     const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: yo.zona! }).format(new Date());
     return (
       <div className="space-y-6">
-        <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
         <h1 className="titular text-5xl">Mi membresía</h1>
         <AvisoClaveSocio socioId={s.socio_id} zona={yo.zona!} />
         {yo.plan && <p className="texto-suave text-lg"><Icono nombre="etiqueta" /> {yo.plan.nombre}</p>}

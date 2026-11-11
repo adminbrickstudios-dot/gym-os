@@ -3,9 +3,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { estadoPagoOnline } from "../acciones";
 import { Icono } from "@/components/ui/Icono";
+import { formatearPesos } from "@/lib/formato";
 
 /** Vuelve de MercadoPago: se pregunta cada 3 segundos hasta que el aviso de MercadoPago lo confirma. */
-export function Confirmando({ pagoId, inicial, volver }: { pagoId: string; inicial: string; volver: string }) {
+export function Confirmando({ pagoId, inicial, monto, descripcion, volver }: { pagoId: string; inicial: string; monto?: number | null; descripcion?: string | null; volver: string }) {
   const [estado, setEstado] = useState(inicial);
   const [motivo, setMotivo] = useState<string | null>(null);
   const [vueltas, setVueltas] = useState(0);
@@ -24,8 +25,9 @@ export function Confirmando({ pagoId, inicial, volver }: { pagoId: string; inici
       <div className="space-y-4" data-pago="aprobado">
         <p className="text-6xl" aria-hidden><Icono nombre="ok" /></p>
         <h1 className="titular text-5xl">¡Pago acreditado!</h1>
-        <p className="texto-suave text-lg">Ya quedaste al día.</p>
+        <p className="texto-suave text-lg">{monto != null ? <>Se acreditaron <strong>{formatearPesos(monto)}</strong>{descripcion ? <> por {descripcion}</> : null}. </> : null}Ya quedaste al día.</p>
         <Link href={volver} className="boton boton-principal w-full text-lg">Volver a mi gimnasio</Link>
+        <Link href="/app/historial" className="boton w-full" data-ver-historial><Icono nombre="recibo" /> Ver el recibo en mi historial</Link>
       </div>
     );
   }

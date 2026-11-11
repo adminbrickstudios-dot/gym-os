@@ -44,7 +44,7 @@ export function PedirPausa({ socioId, hoy }: { socioId: string; hoy: string }) {
         ))}
       </fieldset>
       <input value={nota} onChange={(e) => setNota(e.target.value)} maxLength={300} placeholder="Algo más (opcional)" className="campo w-full" />
-      <button type="submit" disabled={ocupado || !hasta} className="boton boton-principal w-full">{ocupado ? "Enviando…" : "Pedir la pausa"}</button>
+      <button type="submit" disabled={ocupado || !hasta || !!msj.ok} className="boton boton-principal w-full">{ocupado ? "Enviando…" : msj.ok ? "Pausa pedida" : "Pedir la pausa"}</button>
       {msj.ok && <p role="status" className="mensaje mensaje-exito"><Icono nombre="ok" /> {msj.ok}</p>}
       {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </form>

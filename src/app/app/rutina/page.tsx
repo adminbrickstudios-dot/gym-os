@@ -50,7 +50,7 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
         </div>
         {dias.length > 1 && (
           <nav className="flex gap-2 overflow-x-auto -mx-4 px-4" aria-label="Día de la rutina">
-            {dias.map((d) => <Link key={d} href={`/app/rutina${q(d === diaHoy ? "" : String(d))}`} className={`boton !min-h-11 whitespace-nowrap ${d === dia ? "!border-[var(--acento)]" : "opacity-70"}`}>Día {d}{d === diaHoy ? " · hoy" : ""}{hechosRecientes.has(d) ? " ✓" : ""}</Link>)}
+            {dias.map((d) => <Link key={d} href={`/app/rutina${q(d === diaHoy ? "" : String(d))}`} className={`boton !min-h-11 whitespace-nowrap ${d === dia ? "!border-[var(--acento)]" : "opacity-70"}`}>Día {d}{d === diaHoy ? " · hoy" : ""}{hechosRecientes.has(d) ? <> <Icono nombre="ok" /></> : null}</Link>)}
           </nav>
         )}
         <ul className="space-y-2" data-rutina-dia={dia}>{r.items.filter((x) => x.dia === dia).map((x) => (
