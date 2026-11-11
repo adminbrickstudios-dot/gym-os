@@ -13,6 +13,8 @@ import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, mod
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
+import { CierreInactividad } from "@/app/panel/pin/CierreInactividad";
+import { crearDetectorLector, esLecturaRepetida, LECTOR_MIN_CARACTERES, LECTOR_PAUSA_MAX_MS } from "@/app/panel/entrada/lector";
 import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
@@ -146,6 +148,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const refrescoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ocupado, empezar] = useTransition();
   const enterPendiente = useRef(false);
+  // C5: lector USB. El detector mide la velocidad entre teclas; la última lectura sirve para ignorar el doble Enter del lector.
+  const detector = useRef(crearDetectorLector());
+  const ultimaLectura = useRef<{ codigo: string; en: number } | null>(null);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
   const [camara, setCamara] = useState(false);
@@ -160,6 +165,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const pasoRef = useRef<Paso>("escribir");
   const trabajando = useRef(false);
   const buffer = useRef({ t: "", cuando: 0 });
+  const rafaga = useRef("");
+  const ultimaTecla = useRef(0);  // C5: cuándo fue la tecla anterior; una tecla a menos de 50 ms de otra es del lector, nunca un atajo
   const cobrarRef = useRef<HTMLAnchorElement>(null);
   const fichaRef = useRef<HTMLAnchorElement>(null);
   // Los oyentes de teclado viven mucho: leen estas copias para no quedarse con valores viejos.
@@ -225,7 +232,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
-  const cerrar = useCallback(() => { setAbierta(false); setTimeout(() => reiniciar(), 0); }, [reiniciar]);
+  // C5: después de cada ingreso el foco vuelve a donde se escribe (con la barra fija, a la barra) para que el lector siga andando.
+  const cerrar = useCallback(() => {
+    setAbierta(false);
+    setTimeout(() => { reiniciar(); if (conBarraRef.current) setTimeout(() => barra.current?.focus(), 60); }, 0);
+  }, [reiniciar]);
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
@@ -370,22 +381,38 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   }, [sedeId, sonido, anotado]);
 
   // Enter sobre lo escrito: QR del lector, llavero, o buscar y elegir (la base busca por DNI, número o nombre).
-  const resolver = useCallback((crudo: string) => empezar(async () => {
+  // `lector`: lo que entró fue una lectura (ver lector.ts). Si no se encuentra a nadie suena el error y el campo queda vacío y con el foco,
+  // así la próxima lectura no se pega a este código. Quién es y si entra lo sigue diciendo solo la base.
+  const resolver = useCallback((crudo: string, lector = false) => empezar(async () => {
     const t = sinPuntos(crudo).trim();
     if (!t) return;
+    const volverAlCampo = () => { if (lector) { setTexto(""); setTimeout(() => campo.current?.focus(), 0); } };
     setError(null); setNadie(null);
-    if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); return; }
+    if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); volverAlCampo(); return; }
     if (conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(t) && !/^\d{7,9}$/.test(t)) {
       const l = await leerLlavero(t);
-      if (l.socio || l.error) { await directo(l, "nfc"); return; }
+      if (l.socio || l.error) { await directo(l, "nfc"); volverAlCampo(); return; }
     }
     const r = await buscarSociosRapido(t);
-    if (r.error) { setError(r.error); return; }
+    if (r.error) { setError(r.error); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     const lista = r.socios ?? [];
     setSocios(lista); setListaPara(t);
-    if (lista.length === 0) { setNadie(t); return; }
+    if (lista.length === 0) { setNadie(t); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     elegir(lista[0]);
-  }), [conLlavero, directo, elegir]);
+  }), [conLlavero, directo, elegir, sonido]);
+
+  // C5: una lectura del lector USB. El mismo código dos veces seguidas (doble Enter) es un solo ingreso; y de todos modos
+  // la base no anota dos veces la misma visita (registrar_ingreso es idempotente: el segundo dice "ya había entrado").
+  const leer = useCallback((crudo: string) => {
+    const t = sinPuntos(crudo).trim();
+    if (!t) return;
+    const ahora = Date.now();
+    if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+    ultimaLectura.current = { codigo: t, en: ahora };
+    enterPendiente.current = false;
+    setTexto("");
+    resolver(t, true);
+  }, [resolver]);
 
   // BASE-3: el Enter que llegó mientras se terminaba de buscar corre ahora (con lo que haya en pantalla).
   useEffect(() => {
@@ -422,10 +449,16 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const r = await prospectoPorTelefono(celular);
     setAlta((a) => (a ? { ...a, ofrecido: r.prospecto ?? null, vinculado: r.prospecto ? a.vinculado : null } : a));
   };
-  const enviar = useCallback((crudo: string) => {
+  const enviar = useCallback((crudo: string, lector = false) => {
+    if (lector) {
+      const t = sinPuntos(crudo).trim();
+      const ahora = Date.now();
+      if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+      ultimaLectura.current = { codigo: t, en: ahora };
+    }
     setAbierta(true);
     setTexto(crudo);
-    resolver(crudo);
+    resolver(crudo, lector);
   }, [resolver]);
 
   // Coincidencias mientras escribe (hasta 3).
@@ -491,11 +524,23 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (e.key === "/" && !editable && !abiertaRef.current) { e.preventDefault(); if (conBarraRef.current) barra.current?.focus(); else abrir(); return; }
       const imprimible = e.key.length === 1;
       const digito = /^[0-9]$/.test(e.key);
+      const delLector = imprimible && e.timeStamp - ultimaTecla.current < LECTOR_PAUSA_MAX_MS;
+      if (imprimible) ultimaTecla.current = e.timeStamp;
 
       if (abiertaRef.current) {
         if (editable) return;
         const p = pasoRef.current;
         if (p === "alta") return;   // el alta tiene sus propios campos
+        // C5: con un resultado en pantalla, las teclas que llegan de corrido (un lector leyendo el código siguiente) no son atajos:
+        // una "c" o una "s" dentro del código no puede cobrar ni marcar una salida.
+        // Y si lo que llegó de corrido termina en Enter, era una lectura: se empieza de nuevo con ese código (nunca anota al de antes).
+        if (p !== "escribir") {
+          if (imprimible) rafaga.current = delLector ? rafaga.current + e.key : e.key;
+          else if (e.key === "Enter" && rafaga.current.length >= LECTOR_MIN_CARACTERES && e.timeStamp - ultimaTecla.current < LECTOR_PAUSA_MAX_MS * 2) {
+            e.preventDefault(); const c = rafaga.current; rafaga.current = ""; reiniciar(); leer(c); return;
+          }
+          if (delLector && !digito) return;
+        }
         if (p === "escribir") {
           if (e.key.toLowerCase() === "a" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarAltaRef.current(nadieRef.current!); return; }
           if (e.key.toLowerCase() === "p" && pruebaModoRef.current && pruebaModoRef.current !== "no" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarPruebaRef.current(nadieRef.current!); return; }
@@ -530,7 +575,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (document.querySelector('[aria-modal="true"]')) return;
       if (e.key === "Enter") {
         const b = buffer.current; buffer.current = { t: "", cuando: 0 };
-        if (b.t.length >= 4 && e.timeStamp - b.cuando < 60) { e.preventDefault(); enviar(b.t); }
+        if (b.t.length >= 4 && e.timeStamp - b.cuando < 60) { e.preventDefault(); enviar(b.t, true); }
         return;
       }
       if (!imprimible) return;
@@ -546,7 +591,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     };
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
-  }, [propia, abrir, cerrar, reiniciar, resolver, enviar]);
+  }, [propia, abrir, cerrar, reiniciar, resolver, enviar, leer]);
 
   useEffect(() => {
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
@@ -677,6 +722,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   return (
     <>
+      {/* C6 · Compu compartida: sin uso el tiempo que puso el gimnasio, suelta a quien atiende y después cierra la sesión (0 = apagado). */}
+      {(cfg.cerrar_por_inactividad_min ?? 0) > 0 && <CierreInactividad minutos={cfg.cerrar_por_inactividad_min} />}
       {/* B · El botón: redondo y flotante (en el celular, centrado sobre la barra de abajo). En Inicio está el grande. */}
       {ruta !== "/panel" && (
         <button type="button" data-boton-ventana onClick={() => (abierta ? cerrar() : conBarra ? barra.current?.focus() : abrir())}
@@ -695,6 +742,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           <input ref={barra} data-barra-dni value={conPuntos(textoBarra)} inputMode="numeric" autoComplete="off" aria-label="DNI, número de socio o nombre"
             onChange={(e) => setTextoBarra(sinPuntos(e.target.value))}
             onKeyDown={(e) => {
+              detector.current.tecla(e.key, e.timeStamp);
+              // C5: lectura del lector USB en la barra fija: se toma del campo, se vacía y el foco se queda para la próxima.
+              if (e.key === "Enter" && detector.current.enter(e.timeStamp) && e.currentTarget.value.trim()) {
+                e.preventDefault(); const t = sinPuntos(e.currentTarget.value); setTextoBarra(""); enviar(t, true); return;
+              }
               if (e.key === "Enter" && textoBarra.trim()) { e.preventDefault(); const t = textoBarra; setTextoBarra(""); enviar(t); }
               if (e.key === "Escape") { setTextoBarra(""); barra.current?.blur(); }
             }}
@@ -733,6 +785,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               <input ref={campo} data-ventana-campo value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
                 onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); }}
                 onKeyDown={(e) => {
+                  detector.current.tecla(e.key, e.timeStamp);
+                  // C5: tipeo de corrido terminado en Enter = lectura del lector. Se toma lo que hay en el campo (no el estado, que puede ir un render atrás).
+                  if (e.key === "Enter" && detector.current.enter(e.timeStamp)) { e.preventDefault(); leer(e.currentTarget.value); return; }
                   if (e.code === "NumpadDecimal") { e.preventDefault(); return; }   // el punto del teclado numérico no va en un DNI
                   if (e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey && !e.altKey && dni) { e.preventDefault(); iniciarAlta(nadie!); }
                   else if (e.key.toLowerCase() === "p" && !e.ctrlKey && !e.metaKey && !e.altKey && dni && pruebaModo && pruebaModo !== "no") { e.preventDefault(); iniciarPrueba(nadie!); }
