@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 322 funciones piden un rol del equipo con `privado.exigir_equipo`; 401 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 324 funciones piden un rol del equipo con `privado.exigir_equipo`; 401 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -84,6 +84,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `crear_prospecto` | ✓ | ✓ | ✓ | — |
 | `crear_tarea` | ✓ | ✓ | ✓ | ✓ |
 | `crear_tv` | ✓ | ✓ | ✓ | ✓ |
+| `cuenta_para_clave_socio` | ✓ | — | ✓ | — |
 | `cumplen_hoy` | ✓ | ✓ | ✓ | — |
 | `cupo_dejar_pasar` | ✓ | ✓ | ✓ | — |
 | `cupones_panel` | ✓ | ✓ | — | — |
@@ -281,6 +282,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `quitar_rutina_socio` | ✓ | ✓ | — | ✓ |
 | `racha_socio` | ✓ | ✓ | ✓ | ✓ |
 | `recibo_venta` | ✓ | ✓ | ✓ | — |
+| `registrar_clave_entregada` | ✓ | — | ✓ | — |
 | `registrar_uso_cupon` | ✓ | ✓ | ✓ | — |
 | `registro_socios_panel` | ✓ | ✓ | — | — |
 | `reglas_beneficios` | ✓ | ✓ | — | — |
