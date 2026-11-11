@@ -4,7 +4,7 @@ import { rutaGimnasio } from "@/lib/urls";
 import { ACENTO_POR_DEFECTO, FONDO_CLARO, textoSobre } from "@/lib/marca";
 import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import Link from "next/link";
-import { useRef, useState, useActionState } from "react";
+import { useRef, useState, useActionState, useEffect, startTransition, type FormEvent } from "react";
 import { crearGimnasio, type EstadoAlta } from "./acciones";
 import { BotonEntrar } from "./BotonEntrar";
 import { ListaPrueba } from "./ListaPrueba";
@@ -39,6 +39,15 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
     setFalta("");
     setPaso((p) => Math.min(3, p + 1));
   };
+  const enviar = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const datos = new FormData(e.currentTarget);
+    startTransition(() => {
+      accion(datos);
+    });
+  };
+  // Un error de la dirección o del nombre se ve en el paso donde se corrige, no en el último.
+  useEffect(() => { if (estado.error && /direcci[oó]n|slug|nombre del gimnasio/i.test(estado.error)) setPaso(2); }, [estado]);
   const tipoNombre = TIPOS.find(([v]) => v === tipo)?.[1] ?? "";
   const direccion = `${slug || "nombre"}.${dominio || "(falta el dominio)"}`;
 
@@ -103,7 +112,8 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
           </div>
         </div>
       ) : (
-        <form ref={formulario} action={accion} className="space-y-4"
+        // Con onSubmit (y no action) React no vacía los campos del dueño si el alta da error: se corrige y se reenvía.
+        <form ref={formulario} className="space-y-4" onSubmit={enviar}
           onKeyDown={(e) => { if (e.key === "Enter" && paso < 3 && (e.target as HTMLElement).tagName === "INPUT") { e.preventDefault(); siguiente(); } }}>
           <ol className="flex flex-wrap gap-2 text-sm" aria-label="Pasos del alta">
             {PASOS.map((n, i) => (

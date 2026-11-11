@@ -33,6 +33,8 @@ try {
   await form.locator('input[aria-label="Se ve en la página"]').uncheck();
   await form.locator('button:has-text("Guardar")').click();
   await form.waitFor({ state: "detached", timeout: 30000 });
+  // La fila se refresca con el servidor un momento después de que el formulario se cierra.
+  await d.waitForFunction((n) => /vence el día 5 de cada mes/.test(document.querySelector(`li[data-plan="${n}"]`)?.textContent ?? ""), `Ajus${s5}`, { timeout: 15000 }).catch(() => {});
   const txt = await fila.innerText();
   chequear(/vence el día 5 de cada mes/.test(txt) && /tolerancia 4 días/.test(txt) && /no se ve en la página/.test(txt),
     "la fila dice: vence el día 5, tolerancia 4 días, no se ve en la página", txt);

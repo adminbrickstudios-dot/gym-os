@@ -29,7 +29,7 @@ try {
   await r.goto(`${G}/panel/vender`);
   await r.locator("main h1").waitFor({ timeout: 60000 });
   await r.waitForLoadState("networkidle").catch(() => {});
-  chequear(await r.getByText("").count() === 0, "la recepción: en Vender no aparecen productos", "aparecen productos");
+  chequear(await r.getByText("Agua 500 ml").count() === 0, "la recepción: en Vender no aparecen productos", "aparecen productos");
 
   const e = await pagina(b, COMPU);
   await entrar(e, "encargado@ejemplo.invalid");

@@ -47,7 +47,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               className={`boton !min-h-12 whitespace-nowrap first-letter:uppercase ${d === dia ? "!border-[var(--acento)]" : "opacity-75"}`}>{nombreDia(d, i)}</Link>
           ))}
         </nav>
-        {clases.length === 0 ? <Vacio icono="calendario" titulo="No hay clases este día">Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
+        {clases.length === 0 ? <Vacio icono="calendario" titulo="No hay clases este día" acciones={<Link href="/panel/clases/grilla" className="boton boton-principal" data-vacio-grilla>{["dueno", "encargado"].includes(panel.yo.rol) ? "Armar la grilla" : "Ver la grilla"}</Link>}>Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
           <ul className="space-y-2">
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
