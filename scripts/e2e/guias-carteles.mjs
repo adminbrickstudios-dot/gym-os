@@ -36,7 +36,7 @@ const rgb = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim()); if (!m) 
 /** Abre una pantalla y espera a que cargue; false si dice que no hay acceso o se rompió. */
 async function abrir(p, ruta) {
   await p.goto(`${BASE}${ruta}`);
-  await p.locator("h1").first().waitFor({ timeout: 60000 });
+  await p.locator("h1, main, [role=alert]").first().waitFor({ timeout: 60000 });
   return !PANTALLA_ROTA.test(await p.locator("body").innerText());
 }
 

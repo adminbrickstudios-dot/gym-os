@@ -52,7 +52,7 @@ try {
   const tarjeta = p.locator("[data-autonomia-socios]");
   chequear(await aparece(tarjeta, 20000), "Configuración muestra 'Pausa solo y ocupación en vivo'", "no apareció la tarjeta de autonomía de socios");
   chequear(antes.ocupacion_visible_socios === false && antes.pausa_autoaprobar === false, "vienen apagadas por defecto", "no vienen apagadas");
-  await tarjeta.locator("[data-ocupacion-visible]").check();
+  await tarjeta.locator("[data-ocupacion-visible]").click();
   await p.waitForFunction(() => document.querySelector("[data-autonomia-socios]")?.textContent?.includes("Guardado"), null, { timeout: 20000 }).catch(() => {});
   chequear((await q(`select ocupacion_visible_socios from public.configuracion_gimnasio where gimnasio_id = $1`, [gim.id]))[0].ocupacion_visible_socios === true, "prender la ocupación queda guardado", "no se guardó la ocupación");
 
