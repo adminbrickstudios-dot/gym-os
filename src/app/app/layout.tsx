@@ -44,7 +44,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
           </Link>
           <div className="flex items-center gap-1">
             <span id="ayuda-lugar" />
-            <form action="/salir" method="post"><button className="boton-texto">Salir</button></form>
+            <form action="/salir?a=socio" method="post"><button className="boton-texto">Salir</button></form>
           </div>
         </div>
       </header>

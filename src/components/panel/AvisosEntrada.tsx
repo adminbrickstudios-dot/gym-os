@@ -41,7 +41,7 @@ function deEntrada(x: EntradaViva): Aviso {
     : x.resultado === "forzado" ? `${quien} entró ${via} (lo dejaron pasar): ${minuscula(x.texto)}`
     : `${quien} entró ${via}${x.texto ? ` · ${x.texto}` : ""}`;
   return {
-    id: x.ingreso_id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : "✓", texto,
+    id: x.ingreso_id, color, emoji: color === "rojo" ? "prohibido" : color === "amarillo" ? "alerta" : "ok", texto,
     socioId: x.socio_id, nombre: x.socio, numero: x.numero, cobrar: x.cobrar, puede: !rechazado && x.resultado !== "forzado", textoSocio: x.texto, colorSocio: x.color,
   };
 }
@@ -114,7 +114,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
     const local = (e: Event) => {
       const x = (e as CustomEvent<AvisoLocal>).detail;
       const color = x.color as Aviso["color"];
-      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : color === "azul" ? "" : "✓", texto: x.texto,
+      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "prohibido" : color === "amarillo" ? "alerta" : color === "azul" ? "info" : "ok", texto: x.texto,
         socioId: x.socioId, nombre: x.nombre, numero: x.numero, cobrar: x.cobrar, puede: x.puede, textoSocio: x.textoSocio, colorSocio: color === "rojo" ? "rojo" : color === "amarillo" ? "amarillo" : "verde" };
       setAvisos((previos) => {
         let todos = [...previos.filter((p) => p.id !== n.id), n];
@@ -154,7 +154,8 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   if (avisos.length === 0) return null;
   return (
-    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 bottom-4 flex flex-col-reverse gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
+    // Arriba a la derecha (en la compu de la barra fija, a su izquierda): abajo tapaban el botón de la Entrada, la barra de abajo del celular y el Cobrar.
+    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 top-[calc(0.75rem+env(safe-area-inset-top))] xl:right-[19rem] flex flex-col gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
       {avisos.map((a) => (
         <div key={a.id} data-aviso-id={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
@@ -164,7 +165,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
             <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
           </button>
           <div className="flex flex-col items-end gap-1 flex-none">
-            <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-8 rounded-lg texto-tenue active:opacity-60">✕</button>
+            <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-11 rounded-lg texto-tenue active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
             {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm"><Icono nombre="plata" /> Cobrar</button>}
           </div>
         </div>

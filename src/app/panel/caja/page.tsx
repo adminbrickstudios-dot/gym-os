@@ -49,8 +49,8 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
         {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
         <div className="space-y-4">
           {cajas.map((c, i) => c.turno_id
-            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} cajaId={c.caja_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]} cobros={cobros[i]} zona={panel.gimnasio.zona_horaria}
-                olvidada={olvidadas.some((o) => o.turno_id === c.turno_id)} vencida={c.vencida} pedirBilletes={config.pedir_billetes} />
+            ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} cajaId={c.caja_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]} cobros={cobros[i]}
+                olvidada={olvidadas.some((o) => o.turno_id === c.turno_id)} vencida={c.vencida} pedirBilletes={config.pedir_billetes} zona={panel.gimnasio.zona_horaria} />
             : <AbrirCaja key={c.caja_id} cajaId={c.caja_id} nombre={c.nombre} fondoSugerido={sugerido(c.caja_id)} />)}
         </div>
       </>

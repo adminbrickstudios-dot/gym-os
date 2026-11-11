@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { crearClienteServidor } from "@/lib/supabase/servidor";
+import { destinoSiYaHaySesion } from "./destino";
 import { CascaraIngreso, registroAbierto, traerMarca } from "./Encabezado";
 import { FormularioIngreso } from "./FormularioIngreso";
 import { IngresoSocio } from "./IngresoSocio";
@@ -14,6 +17,9 @@ const TITULO_ROL: Record<string, string> = { dueno: "Ingreso del dueño", recepc
 export default async function Ingresar({ searchParams }: { searchParams: Promise<{ siguiente?: string; modo?: string; google?: string; rol?: string }> }) {
   const { siguiente, modo, google, rol } = await searchParams;
   const socio = modo === "socio";
+  // Con la sesión abierta no se vuelve a pedir la contraseña: va a donde iba (el equipo al panel, el socio a su app).
+  const ya = await destinoSiYaHaySesion(await crearClienteServidor(), siguiente ?? null, socio);
+  if (ya) redirect(ya);
   const marca = await traerMarca();
   const nuevo = socio ? await registroAbierto() : false;
 

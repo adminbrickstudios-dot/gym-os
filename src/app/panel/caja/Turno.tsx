@@ -35,8 +35,10 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
   );
 }
 
-export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, zona = "America/Argentina/Buenos_Aires", olvidada = false, vencida = false, pedirBilletes = false }: {
-  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; zona?: string; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, zona }: {
+  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+  /** La zona horaria del gimnasio: la hora del cierre que se manda por WhatsApp sale en ella, no en la de la compu. */
+  zona: string;
 }) {
   const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">("nada");
   const [monto, setMonto] = useState("");
@@ -55,7 +57,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
     const dif = cierre.diferencia ?? 0;
     return (
       <section className="tarjeta p-6 sm:p-8 max-w-xl" aria-live="polite">
-        <p className="text-5xl" aria-hidden>{dif === 0 ? "✓" : dif > 0 ? "" : "!"}</p>
+        <p className="text-5xl" aria-hidden><Icono nombre={dif === 0 ? "ok" : dif > 0 ? "info" : "alerta"} /></p>
         <p className="titular text-5xl mt-4">{dif === 0 ? "Caja justa" : dif > 0 ? `Sobran ${formatearPesos(dif)}` : `Faltan ${formatearPesos(-dif)}`}</p>
         <dl className="grid grid-cols-2 gap-4 mt-6">
           <div><dt className="texto-tenue text-sm">Contaste</dt><dd className="numero text-3xl">{formatearPesos(cierre.contado)}</dd></div>
@@ -71,7 +73,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           <Link className="boton" data-ver-reporte href={`/panel/caja/reporte?turno=${cierre.turno_id}`}><Icono nombre="documento" /> Ver el reporte</Link>
           {/* CAJ-2: el cierre, escrito, para mandárselo al dueño. */}
           <a className="boton" data-compartir-cierre target="_blank" rel="noopener noreferrer"
-            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
+            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
             <Icono nombre="celular" /> Mandar el cierre por WhatsApp</a>
         </div>
       </section>

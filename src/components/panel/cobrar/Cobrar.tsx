@@ -39,6 +39,9 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
   const [d, setD] = useState<DatosCobro | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [intento, setIntento] = useState(0);
+  // Mientras "Cobrando…" no se cierra la hoja (Esc, la X o tocar afuera): se perdería el resultado de una venta que ya salió.
+  const cobrando = useRef(false);
+  const cerrar = () => { if (!cobrando.current) alCerrar(); };
 
   useEffect(() => {
     let vivo = true;
@@ -50,7 +53,7 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
   }, [sedeId, socioId, intento]);
 
   return (
-    <Hoja abierta alCerrar={alCerrar} etiqueta="Cobrar" className="!max-w-xl">
+    <Hoja abierta alCerrar={cerrar} etiqueta="Cobrar" className="!max-w-xl">
       <div data-cobrar data-origen={origen} data-estado={error ? "error" : d ? "listo" : "cargando"} className="max-h-[92dvh] overflow-y-auto">
         {error ? (
           <div className="p-6 sm:p-8 space-y-4">
@@ -70,14 +73,14 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
             <div className="h-14 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" />
           </div>
         ) : (
-          <Cuerpo d={d} origen={origen} alCerrar={alCerrar} alCobrado={alCobrado} />
+          <Cuerpo d={d} origen={origen} alCerrar={cerrar} alCobrado={alCobrado} cobrando={cobrando} />
         )}
       </div>
     </Hoja>
   );
 }
 
-function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: OrigenCobro; alCerrar: () => void; alCobrado: (v: Venta) => void }) {
+function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; origen: OrigenCobro; alCerrar: () => void; alCobrado: (v: Venta) => void; cobrando: { current: boolean } }) {
   const { precios, ctx, socio } = d;
   // Solo los medios que acepta el gimnasio (lo decide la base); "A cuenta" si el gimnasio fía.
   const medios = [...MEDIOS.filter((m) => precios.medios.includes(m.medio)), ...(precios.fiado ? [{ medio: "cuenta_corriente" as Medio, texto: "A cuenta" }] : [])];
@@ -141,6 +144,10 @@ function Cuerpo({ d, origen, alCerrar, alCobrado }: { d: DatosCobro; origen: Ori
   const quitar = (c: string) => setLineas((ls) => conRecargo(ls.filter((l) => l.clave !== c)));
 
   const confirmar = async () => {
+    cobrando.current = true;
+    try { await cobrarYa(); } finally { cobrando.current = false; }
+  };
+  const cobrarYa = async () => {
     setError(null);
     if (total == null) { setError("Hay algo en el cobro sin precio cargado"); return; }
     const pagos = total === 0 ? [] : mixto

@@ -174,7 +174,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           const turno = datos.ahora.find((a) => a.tipo === "caja");
           return turno && rutaDisponible("/panel/caja", rol, panel.secciones_apagadas) ? (
             <p data-turno className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
-              <span className="min-w-0 flex-1"><span aria-hidden><Icono nombre={turno.emoji} /></span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
+              <span className="min-w-0 flex-1"><span aria-hidden><Icono nombre={turno.emoji} sistema /></span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
               <Link href="/panel/caja" className="boton">{turno.tono ? "Abrir mi turno" : "Cerrar mi turno"}</Link>
             </p>
           ) : null;
@@ -203,7 +203,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                 <ul className="space-y-2">
                   {hacerHoy.map((x) => (
                     <li key={x.clave} data-hacer={x.clave} className="tarjeta flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                      <span className="icono" aria-hidden><Icono nombre={x.emoji} /></span>
+                      <span className="icono" aria-hidden><Icono nombre={x.emoji} sistema /></span>
                       <span className="min-w-0 flex-1 font-semibold text-lg leading-tight">{x.texto}</span>
                       <Link href={`/panel${x.href}`} className="boton !min-h-11" aria-label={`Ver: ${x.texto}`}>Ver</Link>
                     </li>
@@ -229,7 +229,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
               {ahora.map((a, i) => {
                 const contenido = (
                   <>
-                    <span className="icono" aria-hidden><Icono nombre={a.emoji} /></span>
+                    <span className="icono" aria-hidden><Icono nombre={a.emoji} sistema /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg leading-tight">{a.titulo}</span>
                       {a.detalle && <span className="block texto-suave text-[15px] truncate">{a.detalle}</span>}

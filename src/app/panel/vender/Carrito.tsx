@@ -1,11 +1,11 @@
 "use client";
-import Link from "next/link";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos, leerMonto } from "@/lib/formato";
-import { cobrar, preciosPara, registrarUsoCupon, validarCupon, type Venta } from "./acciones";
+import { cajaParaCobrar, cobrar, preciosPara, registrarUsoCupon, validarCupon, type CajaCobro, type Venta } from "./acciones";
+import { AbrirTurnoCobrar } from "@/components/panel/cobrar/AbrirTurnoCobrar";
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio, type PreciosVenta } from "./tipos";
 import { DeshacerVenta, MandarComprobante, MEDIOS, VerRecibo } from "./compartido";
 import { Tilde } from "@/components/ui/Tilde";
@@ -17,7 +17,7 @@ import { Icono } from "@/components/ui/Icono";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
-export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {}, sinProductos = false }: {
+export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {}, sinProductos = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
   /** Dueño y encargado anulan; la recepción pide (VEN-6). */
   puedeAnular?: boolean;
@@ -26,6 +26,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   stockInicial?: Record<string, { stock: number; minimo: number | null; negativo?: boolean }>;
 }) {
   const [socio, setSocio] = useState<Socio | null>(socioInicial);
+  // El turno se puede abrir acá mismo (AbrirTurnoCobrar), sin salir a Caja: salir perdía el carrito.
+  const [turnoId, setTurnoId] = useState<string | null>(turnoInicial);
+  const [cajaInfo, setCajaInfo] = useState<CajaCobro | null>(null);
   const [precios, setPrecios] = useState(preciosIniciales);
   const [stock, setStock] = useState(stockInicial);
   // COM-9: el cupón aplicado (se anota como uso al cobrar) y lo que dijo al aplicarlo.
@@ -57,6 +60,7 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const [buscando, setBuscando] = useState(!socioInicial);
   const [texto, setTexto] = useState("");
   const [encontrados, setEncontrados] = useState<ResultadoSocio[]>([]);
+  const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
   const [otro, setOtro] = useState<{ descripcion: string; monto: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [venta, setVenta] = useState<Venta | null>(null);
@@ -67,8 +71,17 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
 
   useEffect(() => {
     if (!buscando || texto.trim().length < 2) { setEncontrados([]); return; }
-    const t = setTimeout(async () => setEncontrados((await buscarSociosRapido(texto.trim())).socios ?? []), 150);
-    return () => clearTimeout(t);
+    // Una respuesta vieja no pisa a la nueva, y un error de la búsqueda se dice (no se muestra como "No está").
+    let vigente = true;
+    const t = setTimeout(async () => {
+      setErrorBusqueda(null);
+      try {
+        const r = await buscarSociosRapido(texto.trim());
+        if (!vigente) return;
+        if (r.error) { setErrorBusqueda(r.error); setEncontrados([]); } else setEncontrados(r.socios ?? []);
+      } catch { if (vigente) { setErrorBusqueda("No se pudo buscar. Revisá la conexión y probá de nuevo."); setEncontrados([]); } }
+    }, 150);
+    return () => { vigente = false; clearTimeout(t); };
   }, [texto, buscando]);
 
   const elegirSocio = (s: Socio | null) => empezar(async () => {
@@ -98,6 +111,12 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
   const sumaMixto = partes.reduce((s, p) => s + monto(p.monto), 0);
   const usaEfectivo = mixto ? partes.some((p) => p.medio === "efectivo" && monto(p.monto) > 0) : medio === "efectivo";
   const faltaCaja = usaEfectivo && !turnoId && (total ?? 0) > 0;
+  useEffect(() => {
+    if (!faltaCaja || cajaInfo) return;
+    let vivo = true;
+    void cajaParaCobrar(sedeId).then((r) => { if (vivo && r.caja) setCajaInfo(r.caja); });
+    return () => { vivo = false; };
+  }, [faltaCaja, cajaInfo, sedeId]);
 
   const confirmar = () => empezar(async () => {
     setError(null);
@@ -214,7 +233,8 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
                 </button>
               ))}
               {socio && <button type="button" className="boton" onClick={() => setBuscando(false)}>Seguir con {socio.nombre}</button>}
-              {!socio && texto.trim().length >= 2 && encontrados.length === 0 && (
+              {!socio && errorBusqueda && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {errorBusqueda}</p>}
+              {!socio && !errorBusqueda && texto.trim().length >= 2 && encontrados.length === 0 && (
                 <p className="texto-suave">No está.<LinkPanel href="/panel/socios/nuevo" className="underline"> Darlo de alta y volver.</LinkPanel></p>
               )}
             </div>
@@ -370,7 +390,9 @@ export function Carrito({ sedeId, turnoId, socioInicial, preciosIniciales, conCu
           <span className="texto-suave text-lg">Total</span>
           <span className="numero text-5xl">{total == null ? "—" : formatearPesos(total)}</span>
         </div>
-        {faltaCaja && <p className="pildora pildora-amarillo mt-4 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="plata" /> Para cobrar en efectivo abrí la caja. <Link href="/panel/caja" className="underline">Abrir caja</Link></p>}
+        {faltaCaja && (cajaInfo
+          ? <div className="mt-4"><AbrirTurnoCobrar caja={cajaInfo} alAbrir={(id) => { setTurnoId(id); setCajaInfo(null); setError(null); }} /></div>
+          : <p className="pildora pildora-amarillo mt-4 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="plata" /> Para cobrar en efectivo hace falta tu turno de caja abierto. Mirando cómo abrirlo…</p>)}
         {doble && lineas.some((l) => l.tipo === "cuota") && <div className="mt-4"><AvisoDobleCobro estado={doble} alCambiar={setDoble} alCancelar={() => setDoble(null)} /></div>}
         {error && <p role="alert" className="pildora pildora-rojo mt-4 !rounded-[var(--radio)] !px-4 !py-3 w-full"><Icono nombre="alerta" /> {error}</p>}
         <button type="button" onClick={confirmar} disabled={ocupado || sinMedios || lineas.length === 0 || total == null || faltaCaja || (!!doble && lineas.some((l) => l.tipo === "cuota") && !motivoDobleValido(doble)) || (mixto && sumaMixto !== total)}
