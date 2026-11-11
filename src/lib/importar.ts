@@ -1,11 +1,11 @@
 // Importar socios: leer un CSV y adivinar qué columna es qué. Funciones puras
 // (el Excel lo lee read-excel-file en el navegador; las filas llegan iguales).
 
-export type Campo = "nombre" | "apellido" | "dni" | "telefono" | "email" | "nacimiento" | "plan" | "vence";
+export type Campo = "nombre" | "apellido" | "dni" | "telefono" | "email" | "nacimiento" | "plan" | "alta" | "vence";
 export const CAMPOS: { campo: Campo; etiqueta: string }[] = [
   { campo: "nombre", etiqueta: "Nombre (o nombre y apellido)" }, { campo: "apellido", etiqueta: "Apellido" },
   { campo: "dni", etiqueta: "DNI" }, { campo: "telefono", etiqueta: "Celular" }, { campo: "email", etiqueta: "Mail" },
-  { campo: "nacimiento", etiqueta: "Fecha de nacimiento" }, { campo: "plan", etiqueta: "Plan" }, { campo: "vence", etiqueta: "Vence el (pagó hasta)" },
+  { campo: "nacimiento", etiqueta: "Fecha de nacimiento" }, { campo: "plan", etiqueta: "Plan" }, { campo: "alta", etiqueta: "Fecha de alta" }, { campo: "vence", etiqueta: "Pagó hasta" },
 ];
 
 /** Lee un CSV (coma, punto y coma o tabulación; comillas dobles) en filas. */
@@ -36,10 +36,12 @@ export function leerCsv(texto: string): string[][] {
 }
 
 const sinAcentos = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+// El orden importa: la primera pista que coincide gana, y cada campo se usa una sola vez.
 const PISTAS: [Campo, RegExp][] = [
-  ["nombre", /nombre|socio|cliente/], ["apellido", /apellido/], ["dni", /dni|documento|doc\b/],
-  ["telefono", /cel|tel|whats|movil/], ["email", /mail|correo/], ["nacimiento", /nac|cumple/],
-  ["vence", /venc|hasta|pago hasta|pagado/], ["plan", /plan|membres|abono|cuota/],
+  ["vence", /venc|hasta|pagado|cubierto/], ["alta", /\balta\b|ingreso|inscrip|incorpor|desde/],
+  ["nacimiento", /nac|cumple/], ["nombre", /nombre|socio|cliente/], ["apellido", /apellido/],
+  ["dni", /dni|documento|\bdoc\b/], ["telefono", /cel|tel|whats|movil/], ["email", /mail|correo/],
+  ["plan", /plan|membres|abono|cuota/],
 ];
 
 /** Adivina el campo de cada columna por su título. Un campo se usa una sola vez. */
