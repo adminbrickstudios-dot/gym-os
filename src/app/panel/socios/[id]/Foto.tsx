@@ -29,6 +29,14 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
 
   const cerrar = () => { flujo.current?.getTracks().forEach((t) => t.stop()); flujo.current = null; setAbierta(false); setCamara(null); };
   useEffect(() => () => flujo.current?.getTracks().forEach((t) => t.stop()), []);
+  // Esc cierra (y apaga la cámara), como en todas las hojas del sistema.
+  useEffect(() => {
+    if (!abierta) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") cerrar(); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierta]);
   useEffect(() => {
     if (!abierta) return;
     setCamara("pidiendo");
@@ -75,8 +83,9 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
         </div>
       )}
       {abierta && (
-        <div className="fixed inset-0 z-50 bg-black/70 grid place-items-center p-4" role="dialog" aria-label="Foto del socio">
-          <div className="tarjeta p-5 w-full max-w-md space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" role="dialog" aria-modal="true" aria-label="Foto del socio" onClick={cerrar}>
+          <div className="tarjeta p-5 w-full max-w-md space-y-4 relative" onClick={(e) => e.stopPropagation()}>
+            <button type="button" onClick={cerrar} aria-label="Cerrar" className="absolute top-2 right-2 grid place-items-center size-9 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)]"><Icono nombre="cerrar" /></button>
             <p className="titulo text-2xl"><Icono nombre="camara" /> Foto del socio</p>
             <p className="text-sm texto-tenue">Para reconocerlo en la puerta. Se guarda privada: solo la ve el equipo.</p>
             {camara === "lista" || camara === "pidiendo"

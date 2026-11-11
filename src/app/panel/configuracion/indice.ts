@@ -88,6 +88,7 @@ export const OPCIONES: Opcion[] = [
   { id: "link-resena", titulo: "Link de reseña", pestana: "mensajes", claves: "resena google opinion encuesta link estrellas", explicacion: "A dónde mandar a los socios contentos a dejar una reseña." },
   { id: "mensajes", titulo: "Textos de los mensajes", pestana: "mensajes", claves: "mensajes textos whatsapp plantillas avisos bienvenida vencimiento cobranza", explicacion: "Lo que se le escribe al socio en cada situación; con tus palabras." },
   // ── Clases
+  { id: "espera-plazo", titulo: "Lista de espera: plazo para aceptar el lugar", pestana: "clases", claves: "lista espera plazo aceptar lugar clase llena cancelar oferta", explicacion: "Cuánto tiempo tiene el primero de la espera para aceptar el lugar que se liberó; si no responde, pasa al siguiente.", recomendado: "Sin plazo (sube solo) hasta que lo necesites" },
   { id: "modo-clases", titulo: "Cómo se anota la gente a clases", pestana: "clases", claves: "clases reserva cupo sin reserva modo anotar asistencia", explicacion: "Con reserva y cupo, o sin reserva con asistencia del profe." },
   { id: "reserva-dias", titulo: "Se reserva con hasta (días)", pestana: "clases", claves: "reserva dias anticipacion antes abrir reserva", explicacion: "Cuántos días antes se abre la reserva.", recomendado: "7 días" },
   { id: "cancelacion-horas", titulo: "Cancelar hasta (horas antes)", pestana: "clases", claves: "cancelar cancelacion horas limite reserva cuenta igual", explicacion: "Después de ese límite la reserva cuenta igual.", recomendado: "2 horas" },

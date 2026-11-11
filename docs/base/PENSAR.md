@@ -28,6 +28,15 @@ terminado.
 
 ---
 
+## F1.9 + mostrador + plazo de espera (carril D, 11/11)
+1. **Qué quiso decir Mateo:** que los e2e viejos vuelvan a andar de verdad (si falla la pantalla se arregla la pantalla; si el test quedó viejo, el test), que la recepción tenga un mostrador (barra de búsqueda gigante) y que el dueño pueda poner el plazo de la lista de espera.
+2. **Cómo lo hace un producto profesional:** las pruebas de pantalla esperan a la condición (no a un tiempo ni a una cuenta instantánea), no dependen del reloj ni de datos que dejó otra prueba, y un fallo se clasifica en "la pantalla cambió a propósito", "carrera de la prueba" o "bug".
+3. **Cómo se rompe (5):** *internet lento* (comprobante que se arma después de cobrar, lista guardada 60 s: se espera con reintentos); *reloj* (la caja de ayer se cierra sola a las 14 h: caj-5 corre el corte a 23:59 y lo devuelve); *otro dominio* (el Supabase local es http y la CSP lo bloqueaba: se permite solo si es el de este despliegue); *celular* (el primer botón "Buscar" del DOM es el del menú de compu, invisible: `:visible`); *datos vacíos / de otra prueba* (la baja del socio "Testigo", no la primera de la lista).
+4. **Lo que no pidió pero necesita:** que las pruebas que no pude explicar (vd-3, 15, 37, 38, 46f cortan sin resumen; vd-6, vd-9, vd-49) queden anotadas con lo que se sabe, y que vd-49 (plata) NO se toque.
+5. **Decisión y prueba:** cambios mínimos a cada e2e y, donde era la pantalla, a la pantalla; todo se vuelve a correr en Actions. El plazo de espera: lectura nueva (`espera_plazo_gimnasio`) + interruptor en Configuración → Clases, probados en la base.
+
+---
+
 ## F1.4 · BASE-6: claro y oscuro, íconos de línea, Barlow (carril D, 09/11 noche)
 1. **Qué quiso decir Mateo:** que Base se vea como un producto serio de gimnasio (un mostrador), no una app con emojis: sin emojis como ícono, un solo estilo, letra con cuerpo, y que cada persona elija claro u oscuro y se vea bien en los dos.
 2. **Cómo lo hacen otros:** Linear, Vercel y Mindbody usan un set de íconos de línea con un solo componente, tokens de color con modo claro/oscuro por usuario (cookie + preferencia guardada) y una fuente propia autoalojada.

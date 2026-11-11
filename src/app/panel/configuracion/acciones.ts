@@ -360,3 +360,20 @@ export async function guardarAvisarSinBloquear(dias: number): Promise<{ hasta?: 
     return r;
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+// ── FA-23: plazo para aceptar el lugar de la lista de espera ──
+export async function leerEsperaPlazo(): Promise<{ minutos?: number | null; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ minutos: number | null }>("espera_plazo_gimnasio", { p_gimnasio_id: panel.gimnasio.id });
+    return { minutos: r.minutos };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarEsperaPlazo(minutos: number | null): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_espera_plazo", { p_gimnasio_id: panel.gimnasio.id, p_minutos: minutos });
+    revalidatePath("/panel/configuracion");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

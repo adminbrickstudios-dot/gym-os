@@ -11,6 +11,7 @@ import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
 import { FotoSocioConfig } from "./FotoSocioConfig";
 import { AvisarSinBloquear } from "./AvisarSinBloquear";
+import { EsperaPlazo } from "./EsperaPlazo";
 import { ReglaCierres } from "./ReglaCierres";
 import { ReglasBeneficios, type ReglasBeneficiosDatos } from "./ReglasBeneficios";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -660,6 +661,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
         </>}
 
         {pestana === "clases" && conClases && <>
+          <div data-opcion="espera-plazo"><EsperaPlazo puedeEditar={puedeEditar} /></div>
           <Tarjeta icono="calendario" titulo="Clases" ancla="modo-clases" restablecer={volver("clases")} ayuda="Cómo se anota la gente. Para no dar clases, apagalas en Secciones.">
             <div className="grid sm:grid-cols-2 gap-2">
               {[["reserva", "Con reserva y cupo", "Se anotan desde la app; cuando se llena, no entran más."], ["sin_reserva", "Sin reserva", "Vienen y el profe toma asistencia."]].map(([v, t, a]) => (

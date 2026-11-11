@@ -111,6 +111,13 @@ export function Editor({ inicial, agenda, puedeEditar, direccion, altas }: { ini
   const [secciones, setSecciones] = useState(inicial.secciones);
   const [respuesta, setRespuesta] = useState<{ ok?: string; error?: string; n: number }>({ n: 0 });
   const [verVista, setVerVista] = useState(false);
+  // La vista previa a pantalla completa (celular) se cierra con Esc además de con “Volver a editar”.
+  useEffect(() => {
+    if (!verVista) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setVerVista(false); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [verVista]);
   const [guardando, empezar] = useTransition();
   const [listo, setListo] = useState(false);
   useEffect(() => setListo(true), []);
