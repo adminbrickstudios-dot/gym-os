@@ -4,6 +4,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { urlMarca } from "@/lib/url-marca";
+import { textoSobre } from "@/lib/marca";
 import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Asistente de configuración" };
@@ -70,9 +71,9 @@ export default async function Asistente() {
                     <p className="texto-suave">{p.sirve}</p>
                     {p.n === 2 && (
                       <div className="mt-3 flex flex-wrap items-center gap-3" data-vista-marca>
-                        <span className="grid place-items-center w-20 h-20 rounded-[var(--radio)] border border-[var(--borde)] overflow-hidden" style={{ background: config.color_fondo }}>
+                        <span className="grid place-items-center w-20 h-20 rounded-[var(--radio)] border border-[var(--borde)] overflow-hidden" style={{ background: config.color_fondo, color: textoSobre(config.color_fondo) }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          {logo ? <img src={logo} alt="Tu logo" className="max-w-full max-h-full object-contain" data-vista-logo /> : <span className="texto-tenue text-xs text-center px-1">Sin logo</span>}
+                          {logo ? <img src={logo} alt="Tu logo" className="max-w-full max-h-full object-contain" data-vista-logo /> : <span className="text-xs text-center px-1">Sin logo</span>}
                         </span>
                         <span className="inline-block w-20 h-10 rounded-[var(--radio)] border border-[var(--borde)]" style={{ background: config.color_acento }} role="img" aria-label="Tu color" data-vista-acento />
                         <span className="grid place-items-center w-40 h-20 rounded-[var(--radio)] border border-[var(--borde)] overflow-hidden bg-[var(--tarjeta-alta)]">
