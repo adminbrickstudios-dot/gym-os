@@ -48,7 +48,7 @@ try {
   await retiro.waitFor({ timeout: 30000 });
   chequear(/Salieron \$400 del cajón/.test(await retiro.innerText()) && /Ana/.test(await retiro.innerText()), "Inicio → Caja: “Salieron $400 del cajón · Ana · “Ferretería …””", await retiro.innerText());
   const [popup] = await Promise.all([d.waitForEvent("popup"), retiro.locator('button:has-text("Ver ticket")').click()]);
-  await popup.waitForURL(/tickets_caja\/.+ticket-[0-9a-f]{32}\.jpg/, { timeout: 30000 });
+  await popup.waitForURL(/tickets_caja\/.+ticket-[0-9a-f]{32}\.jpg/, { timeout: 30000, waitUntil: "commit" });
   ok("🧾 Ver ticket abre la foto (link firmado, bucket privado)");
   await popup.close();
   chequear(await d.locator('[data-alerta="diferencia"]', { hasText: "$50 de menos" }).count() > 0, "y “… cerró con $50 de menos”", "no está la diferencia");
