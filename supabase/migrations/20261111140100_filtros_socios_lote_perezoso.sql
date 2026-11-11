@@ -53,7 +53,7 @@ especiales as materialized (
 ),
 -- Días distintos con ingreso por membresía en la semana en curso, sin contar hoy (la cuenta de restricciones_plan para el tope semanal).
 semana as materialized (
-  select i.socio_id, count(distinct privado.dia_local(i.momento, g.zona)) as n
+  select i.socio_id, count(distinct (i.momento at time zone g.zona)::date) as n
     from public.ingresos i cross join g cross join hoy
    where i.gimnasio_id = p_gimnasio_id and i.anulado_en is null and i.via_habilitante = 'membresia'
      and i.resultado in ('entro', 'entro_modo_aviso', 'forzado')
@@ -74,7 +74,7 @@ base as (
   select so.id, so.creado_en, s.id as suscripcion_id, s.tol, (so.id in (select z.socio_id from suspendidos z)) as suspendido,
          -- restricciones_plan: otra sede, franja horaria o tope semanal dan rojo (en la rama cubierta y en la de tolerancia).
          (s.sede_no or s.franja_no
-          or (s.max_semana is not null and coalesce((select w.n from semana w where w.socio_id = so.id), 0) >= s.max_semana)) as rojo_plan,
+          or (s.max_semana is not null and coalesce(w.n, 0) >= s.max_semana)) as rojo_plan,
          (g.modo_aviso or (g.familiar and so.grupo_familiar_id is not null)
           or so.id in (select e.socio_id from especiales e)) as especial
     from public.socios so
@@ -90,6 +90,7 @@ base as (
        where su.socio_id = so.id and su.inicio <= p_momento and (su.baja_en is null or su.baja_en > p_momento)
        order by su.inicio desc limit 1
     ) s on true
+    left join semana w on w.socio_id = so.id
    where so.gimnasio_id = p_gimnasio_id and so.dado_de_baja_en is null
 ),
 rapido as (
@@ -103,8 +104,8 @@ rapido as (
            when b.suscripcion_id in (select f.suscripcion_id from con_futuro f) then null
            when h.hasta is not null and h.hasta > p_momento then
              case when b.rojo_plan then 'vencidos'
-                  when privado.dia_local(h.hasta - interval '1 microsecond', g.zona) - hoy.d <= g.dias_aviso then 'por_vencer' else 'al_dia' end
-           when h.hasta is not null and hoy.d - privado.dia_local(h.hasta, g.zona) + 1 <= b.tol then case when b.rojo_plan then 'vencidos' else 'por_vencer' end
+                  when ((h.hasta - interval '1 microsecond') at time zone g.zona)::date - hoy.d <= g.dias_aviso then 'por_vencer' else 'al_dia' end
+           when h.hasta is not null and hoy.d - (h.hasta at time zone g.zona)::date + 1 <= b.tol then case when b.rojo_plan then 'vencidos' else 'por_vencer' end
            else 'vencidos'
          end as grupo
     from base b cross join g cross join hoy
