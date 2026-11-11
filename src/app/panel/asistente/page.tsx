@@ -6,6 +6,8 @@ import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { urlMarca } from "@/lib/url-marca";
 import { textoSobre } from "@/lib/marca";
 import { Icono } from "@/components/ui/Icono";
+import { ProbarMp } from "./ProbarMp";
+import type { EstadoMP } from "../configuracion/acciones";
 
 export const metadata: Metadata = { title: "Asistente de configuración" };
 
@@ -34,10 +36,11 @@ export default async function Asistente() {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno"]);
-    const [medidos, config, pagina] = await Promise.all([
+    const [medidos, config, pagina, mp] = await Promise.all([
       rpc<PasoAsistente[]>("pasos_asistente", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<ConfigMarca>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<PaginaMarca>("pagina_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      rpc<EstadoMP>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     const hecho = (clave: string) => medidos.find((p) => p.clave === clave)?.hecho ?? false;
     const noAplica = (clave: string) => medidos.find((p) => p.clave === clave)?.no_aplica ?? false;
@@ -65,10 +68,11 @@ export default async function Asistente() {
               const ok = hecho(p.clave);
               return (
                 <li key={p.n} data-asistente-paso={p.n} data-hecho={ok ? "si" : "no"} className="tarjeta p-4 flex flex-wrap items-start gap-3">
-                  <span className={`numero text-2xl w-9 text-center ${ok ? "texto-tenue" : ""}`} aria-hidden>{ok ? "✓" : p.n}</span>
+                  <span className={`numero text-2xl w-9 text-center ${ok ? "texto-tenue" : ""}`} aria-hidden>{ok ? <Icono nombre="ok" /> : p.n}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-lg">{p.n}. {p.titulo}{noAplica(p.clave) ? <span className="texto-tenue text-sm font-normal"> · no aplica: no das clases</span> : null}</p>
                     <p className="texto-suave">{p.sirve}</p>
+                    {p.n === 5 && <ProbarMp conectado={mp.conectado} />}
                     {p.n === 2 && (
                       <div className="mt-3 flex flex-wrap items-center gap-3" data-vista-marca>
                         <span className="grid place-items-center w-20 h-20 rounded-[var(--radio)] border border-[var(--borde)] overflow-hidden" style={{ background: config.color_fondo, color: textoSobre(config.color_fondo) }}>
