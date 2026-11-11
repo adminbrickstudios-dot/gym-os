@@ -39,22 +39,6 @@
   "hex": 0,
   "emoji": 3
  },
- "src/app/kiosco/Kiosco.tsx": {
-  "hex": 0,
-  "emoji": 11
- },
- "src/app/kiosco/page.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
- "src/app/tv/page.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/tv/PantallaTv.tsx": {
-  "hex": 0,
-  "emoji": 6
- },
  "src/lib/panel/intentar.tsx": {
   "hex": 0,
   "emoji": 3

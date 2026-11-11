@@ -7,8 +7,9 @@ import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
+import { Icono } from "@/components/ui/Icono";
 
-const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"];
+const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "entrar"];
 
 function sonar(ok: boolean) {
   try {
@@ -47,7 +48,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   }, [alEntrar]);
   return (
     <div className="tarjeta p-5 space-y-3" data-qr-pared={qr?.codigo ?? ""}>
-      <p className="text-xl font-semibold">📱 O escaneá este QR con tu app</p>
+      <p className="text-xl font-semibold"><Icono nombre="celular" /> O escaneá este QR con tu app</p>
       <div className="mx-auto w-56 aspect-square bg-white rounded-2xl p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
     </div>
   );
@@ -107,8 +108,8 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
   });
   const largo = elegido ? 3 : 9;
   const tecla = (k: string) => {
-    if (k === "⌫") setDni((d) => d.slice(0, -1));
-    else if (k === "✓") { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6) mandar(dni); }
+    if (k === "borrar") setDni((d) => d.slice(0, -1));
+    else if (k === "entrar") { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6) mandar(dni); }
     else setDni((d) => (d.length < largo ? d + k : d));
   };
 
@@ -117,7 +118,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       <section className="fixed inset-0 grid place-items-center p-8 text-center" data-kiosco-resultado={r.error ? "error" : r.registrada ? "salio" : "sin-entrada"}
         style={{ background: `color-mix(in oklab, ${colorVar(r.error ? "gris" : r.registrada ? "verde" : "amarillo")}, var(--fondo) 55%)` }} onClick={() => setR(null)}>
         <div className="space-y-6 max-w-2xl">
-          <p className="text-8xl" aria-hidden>{r.error ? "🤔" : r.registrada ? "👋" : "ℹ️"}</p>
+          <p className="text-8xl" aria-hidden><Icono nombre={r.error ? "ayuda" : r.registrada ? "ok" : "info"} /></p>
           <p className="titular text-6xl sm:text-7xl">{r.error ? "Probá de nuevo" : r.registrada ? "¡Hasta pronto!" : "Listo"}</p>
           <p className="text-3xl font-semibold">{r.error ?? r.texto}</p>
         </div>
@@ -131,7 +132,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       <section className="fixed inset-0 grid place-items-center p-8 text-center" data-kiosco-resultado={r.error ? "error" : entro ? "entro" : "no"}
         style={{ background: `color-mix(in oklab, ${colorVar(color)}, var(--fondo) 55%)` }} onClick={() => setR(null)}>
         <div className="space-y-6 max-w-2xl">
-          <p className="text-8xl" aria-hidden>{r.error ? "🤔" : entro ? "✅" : "⛔"}</p>
+          <p className="text-8xl" aria-hidden><Icono nombre={r.error ? "ayuda" : entro ? "ok" : "prohibido"} /></p>
           <p className="titular text-6xl sm:text-7xl">{r.error ? "Probá de nuevo" : entro ? `¡Pasá, ${r.nombre}!` : `${r.nombre}, hoy no podés pasar`}</p>
           <p className="text-3xl font-semibold">{r.error ?? r.texto}</p>
           {!r.error && !entro && <p className="text-2xl texto-suave">Pasá por recepción y lo resolvemos.</p>}
@@ -144,12 +145,12 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       {emergencia && (
         <div role="alert" data-kiosco-emergencia className="rounded-[var(--radio-grande)] p-4 border-2 text-2xl font-bold"
           style={{ background: `color-mix(in oklab, ${colorVar("rojo")}, var(--fondo) 75%)`, borderColor: colorVar("rojo") }}>
-          🚨 EMERGENCIA activa: pasá por la puerta
+          <Icono nombre="alerta" /> EMERGENCIA activa: pasá por la puerta
         </div>
       )}
       <div>
         <p className="texto-suave text-lg">{gimnasio}{sede ? ` · ${sede}` : ""}</p>
-        <h1 className="titular text-5xl mt-2">{elegido ? `¡Hola, ${elegido.nombre}!` : "¡Hola! 👋"}</h1>
+        <h1 className="titular text-5xl mt-2">{elegido ? `¡Hola, ${elegido.nombre}!` : "¡Hola!"}</h1>
         <p className="text-xl mt-2">{elegido ? "Los últimos 3 números de tu DNI" : `Escribí tu DNI${con_qr ? " o mostrá tu QR" : ""}${habituales.length ? ", o tocá tu nombre" : ""}`}</p>
       </div>
       {!elegido && habituales.length > 0 && (
@@ -167,14 +168,14 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       </form>
       <div className="grid grid-cols-3 gap-3" aria-label="Teclado">
         {TECLAS.map((k) => (
-          <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "✓" && (elegido ? dni.length !== 3 : dni.length < 6))}
-            className={`boton !min-h-20 !text-3xl ${k === "✓" ? "boton-principal" : ""}`} aria-label={k === "⌫" ? "Borrar" : k === "✓" ? "Entrar" : k}>{k}</button>
+          <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "entrar" && (elegido ? dni.length !== 3 : dni.length < 6))}
+            className={`boton !min-h-20 !text-3xl ${k === "entrar" ? "boton-principal" : ""}`} aria-label={k === "borrar" ? "Borrar" : k === "entrar" ? "Entrar" : k}>{k === "borrar" ? <Icono nombre="izquierda" /> : k === "entrar" ? <Icono nombre="ok" /> : k}</button>
         ))}
       </div>
-      {!elegido && con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}>📷 Mostrar mi QR</button>}
+      {!elegido && con_qr && <button type="button" className="boton w-full !min-h-16 text-xl" onClick={() => setCamara(true)}><Icono nombre="camara" /> Mostrar mi QR</button>}
       {!elegido && con_salida && (
         <button type="button" className="boton w-full !min-h-16 text-xl" data-kiosco-me-voy disabled={ocupado || !(dni.length >= 6 || /^GYMOS1\./.test(dni))} onClick={() => irme(dni)}>
-          👋 Me voy <span className="texto-tenue text-base font-normal">(escribí tu DNI y tocá acá)</span>
+          <Icono nombre="salir" /> Me voy <span className="texto-tenue text-base font-normal">(escribí tu DNI y tocá acá)</span>
         </button>
       )}
       {camara && <Camara frente alLeer={mandar} alCerrar={() => setCamara(false)} />}

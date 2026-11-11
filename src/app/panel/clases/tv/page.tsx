@@ -16,7 +16,7 @@ export default async function PaginaTvs() {
     return (
       <>
         <Encabezado icono="pantalla" titulo="TV de la sala" volver={{ href: "/panel/clases", texto: "Clases" }} volverAlOrigen
-          bajada="Una pantalla en la sala con la clase de ahora, los anotados con nombre grande, el WOD y la que sigue. Se actualiza sola, sin que nadie inicie sesión." />
+          bajada="Una pantalla en la sala: con las clases (la de ahora, los anotados, el WOD y la que sigue) o con las últimas entradas, y siempre cuánta gente hay adentro. Se actualiza sola, sin que nadie inicie sesión; el link se revoca cuando quieras." />
         <Tvs gimnasioId={panel.gimnasio.id} sedes={panel.sedes.map((s) => ({ id: s.id, nombre: s.nombre }))} tvs={tvs} puedeSacar={["dueno", "encargado"].includes(panel.yo.rol)} />
       </>
     );
