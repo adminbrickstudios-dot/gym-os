@@ -345,6 +345,13 @@ export const moverPersona = async (equipoId: string, gimnasioId: string, destino
 export const guardarLimitesPlan = async (planId: string, maxSocios: number | null, maxSedes: number | null) =>
   hechoAdmin(() => rpc("admin_guardar_limites_plan", { p_plan_id: planId, p_max_socios: maxSocios, p_max_sedes: maxSedes }), ["/admin"]);
 
+/** VD-26B: si el plan se muestra en la web de Base. */
+export const guardarPlanPublico = async (planId: string, publico: boolean) => {
+  const r = await hechoAdmin(() => rpc("admin_plan_publico", { p_plan_id: planId, p_publico: publico }), ["/admin"]);
+  if (!r.error) { revalidatePath("/"); }
+  return r;
+};
+
 // ── F9.1 (EDIT-S07): plantillas de textos en capas (plataforma → tipo → gimnasio) ──
 export type TextoPlantilla = {
   clave: string; etiqueta: string; grupo: string; max: number; fabrica: string; plataforma: string | null;

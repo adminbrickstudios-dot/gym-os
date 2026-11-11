@@ -120,3 +120,16 @@ terminado.
    - *datos vacíos*: sin límite cargado el plan es "sin límite"; sin SALUD_URL el chequeo se apaga.
 4. **Lo que no pidió y necesita:** que los límites NO bloqueen altas (cambia quién cobra y qué), que todo quede en el registro de BRIK y la lista de lo que Mateo tiene que mirar (asesores, región).
 5. **Decisión y prueba:** migraciones 020600 a 020800 con pruebas de base propias; guardas de seguridad del código en vitest; e2e `scripts/e2e/super-f9.mjs` para Actions.
+
+## F7.1 · TV de entradas, ocupación, congelar solo y "tengo que cobrar" (carril B, 11/11)
+
+1. **Qué quiso decir Mateo:** pantallas y atajos que le saquen trabajo a la recepción: ver quién entra y cuánta gente hay sin preguntar, que el socio resuelva su pausa solo, y llegar al día 1 con una cola de cobro lista.
+2. **Cómo lo hacen otros:** los gimnasios con molinete muestran "Bienvenido, Ana" en una pantalla; Mindbody y Gympass muestran la ocupación como número; las pausas con tope se aprueban solas en Zen Planner si el dueño lo prende.
+3. **Cómo se rompe (5):**
+   - *plata en una pantalla pública*: la TV nunca recibe color, plan ni deuda (la función no los devuelve).
+   - *sin salida registrada*: la ocupación cuenta de más; se acota a 3 horas y se dice en PREGUNTAS.
+   - *pausa fuera del tope o superpuesta*: `validar_pausa` corre antes de aprobar sola; pasado el tope de días vuelve a pendiente.
+   - *rol equivocado*: solo el dueño prende la aprobación sola y la ocupación; el socio ve el número solo si está prendido.
+   - *dos clics*: guardar es idempotente y el pedido se aprueba una sola vez (update con estado pendiente y fila afectada verificada).
+4. **Lo que no pidió y necesita:** que todo venga apagado por defecto, que quede marcado qué pausa fue aprobada sola, y que el token de la TV se pueda revocar.
+5. **Decisión y prueba:** migraciones 021000 y 021100 con pruebas de base; e2e `scripts/e2e/super-f11.mjs` para Actions.

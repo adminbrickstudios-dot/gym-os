@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 398 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 320 funciones piden un rol del equipo con `privado.exigir_equipo`; 400 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -29,6 +29,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `asignar_rutina_varios` | ✓ | ✓ | — | ✓ |
 | `aumentos_hechos` | ✓ | ✓ | — | — |
 | `autoaltas_web` | ✓ | ✓ | ✓ | — |
+| `autonomia_socios_estado` | ✓ | ✓ | — | — |
 | `autorizar_tablet` | ✓ | — | — | — |
 | `autoservicio_panel` | ✓ | ✓ | — | — |
 | `avisar_sin_bloquear_estado` | ✓ | ✓ | — | — |
@@ -133,6 +134,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_actividades_plan` | ✓ | ✓ | — | — |
 | `guardar_ajustes_plan` | ✓ | ✓ | — | — |
 | `guardar_altas` | ✓ | — | — | — |
+| `guardar_autonomia_socios` | ✓ | — | — | — |
 | `guardar_avisar_sin_bloquear` | ✓ | — | — | — |
 | `guardar_checklist_item` | ✓ | ✓ | — | — |
 | `guardar_compras_app` | ✓ | — | — | — |
@@ -394,6 +396,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_papelera`
 - `admin_pausar_gimnasio`
 - `admin_pedidos_demo`
+- `admin_plan_publico`
 - `admin_planes_brik`
 - `admin_planes_con_limites`
 - `admin_plantillas_texto`
@@ -625,6 +628,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `movimiento_caja`
 - `notas_y_etiquetas`
 - `novedades_socio`
+- `ocupacion_en_vivo`
 - `ofertas_socio`
 - `opciones_compra_app`
 - `operador_actual`

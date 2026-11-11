@@ -23,6 +23,7 @@ import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
 import { Bienvenida } from "./Bienvenida";
+import { OcupacionEnVivo } from "./OcupacionEnVivo";
 import { AvisosInicio } from "./AvisosInicio";
 import { Entraste } from "./Entraste";
 import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
@@ -116,6 +117,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </header>
 
         <AvisosInicio socioId={s.socio_id} />
+        <Suspense fallback={null}><OcupacionEnVivo gimnasioId={g.id} /></Suspense>
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
         <section className="rounded-[var(--radio-grande)] p-6 border"

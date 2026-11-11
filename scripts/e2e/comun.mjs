@@ -99,6 +99,12 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
     p.errores.push(`error en la página (${p.url().replace(/^https?:[/][/][^/]+/, "")}): ${e.message.slice(0, 200)}`);
   });
   p.on("response", (r) => { if (r.status() >= 500) p.errores.push(`HTTP ${r.status()} ${r.url()}`); });
+  // Diagnóstico de sesión: cuando algo redirige al ingreso (o borra la cookie de sesión), queda escrito con la ruta y el método.
+  p.on("response", (r) => {
+    const u = r.url(), loc = r.headers()["location"] ?? "", sc = r.headers()["set-cookie"] ?? "";
+    if (r.status() >= 300 && r.status() < 400 && /\/ingresar/.test(loc)) console.log(`  [sesión] ${r.status()} ${r.request().method()} ${u.slice(0, 110)} → ${loc.slice(0, 80)}`);
+    if (/sb-[^=]*auth-token[^;]*=;|Max-Age=0|expires=Thu, 01 Jan 1970/i.test(sc)) console.log(`  [sesión] cookie de sesión borrada por ${r.request().method()} ${u.slice(0, 110)} (${r.status()})`);
+  });
   p.on("dialog", (d) => d.accept());
   // E2E_CONSOLA=1: muestra los errores y advertencias de la consola del navegador (para investigar).
   if (process.env.E2E_CONSOLA) p.on("console", (m) => { if (["error", "warning"].includes(m.type())) console.log(`  [consola ${m.type()}] ${p.url()} ${m.text().slice(0, Number(process.env.E2E_CONSOLA) > 1 ? 4000 : 300)}`); });

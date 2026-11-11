@@ -4,6 +4,9 @@
 name: Botones
 
 on:
+  # Mientras este archivo no esté en main: un push a dia/** con [botones] en el mensaje lo corre.
+  push:
+    branches: ["dia/**"]
   workflow_dispatch:
     inputs:
       roles:
@@ -22,6 +25,7 @@ env:
 
 jobs:
   armar:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[botones]')
     runs-on: ubuntu-latest
     outputs:
       roles: ${{ steps.r.outputs.roles }}
