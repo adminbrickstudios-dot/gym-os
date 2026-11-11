@@ -145,7 +145,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
           filtrado && !q
             ? <Vacio icono="buscar" titulo="Nadie con ese filtro" acciones={<Link href="/panel/socios" className="boton">Ver todos</Link>}>Probá con otro, o sacá el filtro.</Vacio>
             : q
-            ? <Vacio icono="buscar" titulo={`Nadie con “${q}”`} acciones={<Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
+            ? <Vacio icono="buscar" titulo={`Nadie con “${q}”`} acciones={<Link href={`/panel/socios/nuevo${/^[\d.]{6,11}$/.test(q) ? `?dni=${q.replace(/\./g, "")}` : /^[\p{L} '.-]{2,60}$/u.test(q) ? `?nombre=${encodeURIComponent(q)}` : ""}`} className="boton"><Icono nombre="mas" /> Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
             : <Vacio icono="usuarios" titulo="Todavía no hay socios" acciones={<>
                 <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Cargar el primero</Link>
                 {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="descargar" /> Importar de un Excel</Link>}

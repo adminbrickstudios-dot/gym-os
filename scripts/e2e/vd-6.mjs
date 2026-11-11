@@ -73,6 +73,7 @@ try {
   // ── 2 · Lo escrito no se pierde: sin nombre no se guarda, un celular roto no rompe y Esc vuelve con el DNI ──
   await r.keyboard.press("F2");
   const otroDni = `37${s5}2`.padEnd(8, "5").slice(0, 8);
+  await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-campo"), null, { timeout: 10000 });   // abierta y con el foco en el campo antes de escribir
   await r.locator("[data-ventana-campo]").fill(otroDni);
   await r.keyboard.press("Enter");
   await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 }).catch(async (e) => {

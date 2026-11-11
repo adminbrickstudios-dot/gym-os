@@ -81,7 +81,7 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
                   {t.movimientos.length > 0 && (
                     <ul className="mt-3 space-y-1 text-sm">
                       {t.movimientos.map((m, i) => (
-                        <li key={i}><Icono nombre={m.tipo === "retiro" ? "menos" : "mas"} titulo={m.tipo === "retiro" ? "Salió de la caja" : "Entró a la caja"} /> {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>
+                        <li key={i}><span className="inline-flex items-center gap-1 font-semibold" data-movimiento={m.tipo}><Icono nombre={m.tipo === "retiro" ? "menos" : "mas"} /><span className="sr-only">{m.tipo === "retiro" ? "Salió" : "Entró"}</span></span> {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>
                       ))}
                     </ul>
                   )}

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { ultimasEntradas } from "@/app/panel/inicio-acciones";
 import { Icono } from "@/components/ui/Icono";
 
@@ -38,7 +39,7 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
         <ul className="space-y-2">
           {lista.map((x) => {
             const bien = x.resultado === "entro" || x.resultado === "entro_modo_aviso";
-            const emoji = x.resultado === "rechazado" ? "" : x.resultado === "forzado" ? "!" : bien && x.color === "verde" ? "✓" : "!";
+            const emoji = x.resultado === "rechazado" ? "prohibido" : x.resultado === "forzado" ? "alerta" : bien && x.color === "verde" ? "ok" : "alerta";
             return (
               <li key={x.ingreso_id} data-entrada-vivo={x.resultado} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
                 <span className="text-2xl" aria-hidden><Icono nombre={emoji} /></span>
@@ -46,7 +47,7 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
                   <span className="block font-semibold text-lg truncate">{x.socio}</span>
                   <span className="block texto-suave truncate"><span className="numero">{hora(x.momento)}</span> · {VIA[x.via] ?? x.via}{!bien || x.color !== "verde" ? ` · ${x.texto}` : ""}</span>
                 </LinkPanel>
-                {x.cobrar && <LinkPanel href={`/panel/vender?socio=${x.socio_id}&cuota=1`} className="boton !min-h-11" ><Icono nombre="plata" /> Cobrar</LinkPanel>}
+                {x.cobrar && <BotonCobrar socioId={x.socio_id} origen="otro" cuota className="boton !min-h-11"><Icono nombre="plata" /> Cobrar</BotonCobrar>}
               </li>
             );
           })}

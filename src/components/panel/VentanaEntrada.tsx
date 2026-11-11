@@ -17,6 +17,7 @@ import { CierreInactividad } from "@/app/panel/pin/CierreInactividad";
 import { crearDetectorLector, esLecturaRepetida, LECTOR_MIN_CARACTERES, LECTOR_PAUSA_MAX_MS } from "@/app/panel/entrada/lector";
 import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { Hoja } from "@/components/ui/Hoja";
@@ -37,7 +38,7 @@ export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
 export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 
 const ES_QR = /^GYMOS1\./;
-const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio" | "prueba";
 /** VD-51: lo que se escribe para darle la prueba gratis a un DNI nuevo (o a quien reservó desde la página). */
@@ -309,7 +310,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (!p) return p;
       if (r.error) return { ...p, error: r.error };
       const info = r.p ?? null;
-      if (info?.existe && info.usada) return { ...p, info, error: `Ya usó su prueba gratis el ${info.dia} · Hacete socio.` };
+      if (info?.existe && info.usada) return { ...p, info, error: `Ya usó la prueba gratis el ${info.dia}: ofrecele un plan o un pase.` };
       return { ...p, info, nombre: info?.existe ? info.nombre ?? "" : p.nombre, telefono: info?.existe ? info.telefono ?? "" : p.telefono };
     }));
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-prueba-nombre]")?.focus(), 0);
@@ -354,7 +355,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const salirConDni = useCallback((dniEscrito: string) => {
     if (trabajando.current) return;
     empezar(async () => {
-      const r = await buscarSociosRapido(dniEscrito);
+      const r = await leerConReintento(() => buscarSociosRapido(dniEscrito));
       if (r.error) { setError(r.error); return; }
       const lista = r.socios ?? [];
       if (lista.length === 0) { setNadie(dniEscrito); return; }
@@ -393,7 +394,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       const l = await leerLlavero(t);
       if (l.socio || l.error) { await directo(l, "nfc"); volverAlCampo(); return; }
     }
-    const r = await buscarSociosRapido(t);
+    const r = await leerConReintento(() => buscarSociosRapido(t));
     if (r.error) { setError(r.error); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     const lista = r.socios ?? [];
     setSocios(lista); setListaPara(t);
@@ -426,15 +427,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const iniciarAlta = useCallback((dniEscrito: string) => {
     setAlta({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", plan: "", paso: "datos", planes: null, ofrecido: null, vinculado: null, error: null });
     setPaso("alta"); setError(null);
-    // Si el pedido de planes se corta (la red, o una acción que Next aborta) no se queda esperando para siempre: reintenta y, si no puede, lo dice.
-    const cargarPlanes = (intento: number): void => {
-      void planesParaAlta(sedeId).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
-        .catch(() => {
-          if (intento < 2) setTimeout(() => cargarPlanes(intento + 1), 700);
-          else setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a));
-        });
-    };
-    cargarPlanes(0);
+    // Causa raíz del Plan sin tarjetas: Next aborta el pedido en vuelo si justo se refresca la pantalla (entrada en vivo, cierre de la hoja de cobro).
+    // Es una lectura: se repite; si no hay caso, se dice en vez de dejar el esqueleto para siempre.
+    leerConReintento(() => planesParaAlta(sedeId)).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
+      .catch(() => setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a)));
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-alta-nombre]")?.focus(), 0);
   }, [sedeId]);
   const guardarAlta = (cobrarYa: boolean) => {
@@ -475,7 +471,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const t = sinPuntos(texto).trim();
     if (t.length < 2 || ES_QR.test(t)) { setSocios([]); setListaPara(""); setNadie(null); return; }
     const id = setTimeout(async () => {
-      const r = await buscarSociosRapido(t);
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(t)); } catch { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); return; }
       if (sinPuntos(textoRef.current).trim() !== t) return;
       if (r.error) { setError(r.error); return; }
       setError(null);
@@ -739,7 +736,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           className="fixed z-40 left-1/2 -translate-x-1/2 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:left-auto lg:translate-x-0 lg:right-6 lg:bottom-6
             size-16 rounded-full bg-[var(--verde)] text-white text-3xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
           style={{ boxShadow: "0 10px 28px -10px rgb(0 0 0 / 0.6)" }}>
-          <Icono nombre={abierta ? "cerrar" : "puerta"} />
+          <span aria-hidden><Icono nombre={abierta ? "cerrar" : "puerta"} /></span>
         </button>
       )}
 

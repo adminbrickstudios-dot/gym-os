@@ -1,3 +1,5 @@
+> reemplazado por docs/base/PULIDO.md, docs/base/DISENO.md y docs/base/estado/mostrador.md en lo que se contradiga (aviso flotante, ventana, colores, estado de cada función); lo que no choca sigue valiendo.
+
 # 01 · La Entrada que está en todos lados
 
 Hoy la entrada vive en `/panel/entrada` (`Puerta.tsx`): buscador, veredicto a

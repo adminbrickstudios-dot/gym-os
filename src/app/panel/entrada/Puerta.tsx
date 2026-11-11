@@ -4,6 +4,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
@@ -80,17 +81,22 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     if (socioInicial && !abrioInicial.current) { abrioInicial.current = true; elegir(socioInicial); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Una búsqueda vieja no pisa a la nueva: cada respuesta se descarta si lo escrito ya cambió. `listaPara` dice para qué texto es la lista que se ve.
+  const [listaPara, setListaPara] = useState("");
+  const textoVivo = useRef(texto);
+  useEffect(() => { textoVivo.current = texto; }, [texto]);
   useEffect(() => {
-    if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
-    // Una búsqueda vieja que vuelve tarde no pisa a la nueva: cada efecto se marca como vigente y al limpiarse deja de serlo.
-    let vigente = true;
+    const q = texto.trim();
+    if (q.length < 2 || ES_QR.test(q)) { setSocios([]); setListaPara(""); return; }
     const t = setTimeout(async () => {
-      const r = await buscarSociosRapido(texto.trim());
-      if (!vigente) return;
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(q)); } catch { if (textoVivo.current.trim() === q) { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); setListaPara(q); } return; }
+      if (textoVivo.current.trim() !== q) return;
       setSocios(r.socios ?? []);
+      setListaPara(q);
       setError(r.error ?? null);
     }, 150);
-    return () => { vigente = false; clearTimeout(t); };
+    return () => clearTimeout(t);
   }, [texto]);
 
   const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setGuia(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
@@ -146,7 +152,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         const l = await leerLlavero(t);
         if (l.socio || l.error) { await directo(l, "nfc"); return; }
       }
-      const r = await buscarSociosRapido(t);
+      const r = await leerConReintento(() => buscarSociosRapido(t));
       if (r.error) { setError(r.error); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
       const primero = r.socios?.[0];
       if (!primero) { noEsta(); return; }
@@ -191,7 +197,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const abrirPrueba = () => empezar(async () => {
     const r = await pruebaPorDni(dniEscrito);
     if (r.error || !r.p) { setError(r.error ?? "No se pudo mirar la prueba"); return; }
-    if (r.p.existe && r.p.usada) { setError(`Ya usó su prueba gratis el ${r.p.dia} · Hacete socio.`); return; }
+    if (r.p.existe && r.p.usada) { setError(`Ya usó la prueba gratis el ${r.p.dia}: ofrecele un plan o un pase.`); return; }
     setError(null);
     setPrueba({ nombre: r.p.existe ? r.p.nombre ?? "" : "", apellido: "", telefono: r.p.existe ? r.p.telefono ?? "" : "", reservada: !!r.p.existe, error: null });
   });
@@ -210,7 +216,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     reiniciar();
   });
   const salirConDni = (dni: string) => empezar(async () => {
-    const r = await buscarSociosRapido(dni);
+    const r = await leerConReintento(() => buscarSociosRapido(dni));
     if (r.error) { setError(r.error); return; }
     const s = (r.socios ?? [])[0];
     if (!s) { setError(`No hay nadie con el DNI ${dni}.`); return; }
@@ -316,9 +322,12 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           ))}
         </ul>
       )}
-      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara !== texto.trim() && !ES_QR.test(texto.trim()) && (
+        <p className="texto-suave text-lg" data-buscando>Buscando…</p>
+      )}
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara === texto.trim() && (
         <div className="space-y-3">
-          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
+          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href={`/panel/socios/nuevo${/^\d{6,9}$/.test(dniEscrito) ? `?dni=${dniEscrito}` : /^[\p{L} '.-]{2,60}$/u.test(texto.trim()) ? `?nombre=${encodeURIComponent(texto.trim())}` : ""}`} className="underline">Darlo de alta</LinkPanel></p>
           {pruebaModo !== "no" && /^\d{6,9}$/.test(dniEscrito) && !prueba && (
             <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}><Icono nombre="regalo" /> Dar prueba gratis</button>
           )}
@@ -392,6 +401,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             <button type="button" onClick={reiniciar} className="boton"><Icono nombre="cerrar" /> Otro socio</button>
           </div>
 
+          {error && <div className="mt-4"><Mensaje tipo="error">{error}</Mensaje></div>}
           {forzando && (
             <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
           )}

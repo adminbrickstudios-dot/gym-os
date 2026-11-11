@@ -28,7 +28,8 @@ async function guardar(d) {
 const llave = (d, texto) => d.locator("[data-accesos] label", { hasText: texto }).locator("input");
 async function ponerDni(d, nombre, dni) {
   await d.goto(`${G}/panel/socios?q=${encodeURIComponent(nombre)}`);
-  await d.locator('main ul a[href^="/panel/socios/"]').first().click();
+  // La fila exacta: "Testigo Pack Vencido" también aparece al buscar "Testigo Vencida" y sale primero por orden de nombre.
+  await d.locator('main ul a[href^="/panel/socios/"]').filter({ hasText: new RegExp(`${nombre}(?!\\p{L})`, "u") }).first().click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/);
   await d.locator('a:has-text("Editar")').click();
   await d.locator('input[name="dni"]').fill(dni);
@@ -104,7 +105,12 @@ try {
   await t.locator('input[aria-label="Tu DNI"]').fill(DNI_ROJO);
   await t.locator('input[aria-label="Tu DNI"]').press("Enter");
   const rojo = r.locator('[data-aviso-entrada="rojo"]', { hasText: "Vencida" });
-  await rojo.first().waitFor({ timeout: 12000 });
+  await rojo.first().waitFor({ timeout: 12000 }).catch(async (e) => {
+    // Para saber de qué lado se cortó: qué dijo la tablet y qué avisos tiene la recepción.
+    const tab = await t.locator("main, body").first().innerText().then((x) => x.replace(/\s+/g, " ").slice(0, 300)).catch(() => "(sin tablet)");
+    const rec = await r.locator("[data-avisos-entrada]").evaluateAll((l) => l.map((x) => x.innerText.replace(/\s+/g, " ").slice(0, 200))).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | tablet: ${tab} | avisos de la recepción: ${rec.join(" || ") || "(ninguno)"}`);
+  });
   ok(`un rechazo en la tablet aparece en la recepción: “${(await rojo.first().innerText()).replace(/\s+/g, " ").slice(0, 80)}”`);
   await r.waitForTimeout(14000);
   chequear(await rojo.count() > 0, "el aviso rojo se queda (no se va solo)", "el aviso rojo desapareció");

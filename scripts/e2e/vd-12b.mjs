@@ -28,12 +28,13 @@ try {
   const vivo = d.locator('[data-entrada-vivo="rechazado"]', { hasText: "Testigo Vencida" }).first();
   await vivo.waitFor({ timeout: 30000 });
   const t = (await vivo.innerText()).replace(/\s+/g, " ");
-  chequear(t.includes("") && /\d{2}:\d{2}/.test(t) && t.includes("QR"), `última entrada: “${t.slice(0, 80)}”`, `la entrada no tiene , hora y vía: ${t}`);
+  chequear(await vivo.locator("svg").count() > 0 && /\d{2}:\d{2}/.test(t) && t.includes("QR"), `última entrada: “${t.slice(0, 80)}” (con su ícono)`, `la entrada no tiene ícono, hora y vía: ${t}`);
   await capturar(d, "vd12b-compu-duena");
   await vivo.getByRole("link", { name: /Cobrar/ }).click();
-  await d.waitForURL((u) => u.pathname === "/panel/vender" && u.searchParams.get("socio") === vencida, { timeout: 30000 });
-  ok("Cobrar lleva a Vender con el socio vencido");
-  await d.goBack();
+  await d.locator("[data-cobrar]").waitFor({ timeout: 30000 });
+  chequear(new URL(d.url()).pathname === "/panel", "Cobrar abre la hoja de cobro sobre Inicio, sin ir a Vender", `fue a ${d.url()}`);
+  await d.keyboard.press("Escape");
+  await d.locator("[data-cobrar]").waitFor({ state: "detached", timeout: 10000 });
   await d.locator("[data-numero]").first().waitFor({ timeout: 30000 });
 
   // Para hacer hoy con [Ver]: cada fila lleva a su lista y Volver deja en Inicio.
