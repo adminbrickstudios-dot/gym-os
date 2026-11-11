@@ -1,6 +1,5 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { prepararLinkContrasenaSocio } from "@/lib/app/acceso-socio-servidor";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
@@ -49,8 +48,8 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   } catch (e) {
     return { error: (e as Error).message, valores: datos };
   }
-  // Desde un prospecto se va directo a la ficha desde el servidor: la página del alta
-  // ya no sirve (el prospecto pasó a socio) y volver a dibujarla daría error.
+  // Desde un Interesado ya no se redirige desde el servidor (esa vuelta perdía la sesión en Actions): el cliente sigue solo,
+  // y la página del alta tolera que el Interesado ya sea socio mientras se vuelve a dibujar.
   // El socio ya quedó dado de alta: si el plan no se pudo asignar, se sigue en la ficha (ahí se asigna).
   let conPlan = false;
   if (plan) {
@@ -72,7 +71,6 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
     } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }
   }
   const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;
-  if (prospecto) redirect(cobrar && conPlan ? `/panel/socios/nuevo?listo=${id}&cobrar=1` : destino);
   return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim(), linkContrasena, avisoLink };
 }
 

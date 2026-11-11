@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Gimnasio no encontrado" };
 
@@ -11,7 +12,7 @@ export default async function GimnasioNoEncontrado({
   return (
     <main className="min-h-dvh flex items-center px-4 py-16">
       <div className="mx-auto w-full max-w-xl">
-        <p className="text-6xl mb-8" aria-hidden>🔍</p>
+        <p className="text-6xl mb-8" aria-hidden><Icono nombre="buscar" /></p>
         <h1 className="titular text-5xl sm:text-6xl">No encontramos este gimnasio</h1>
         <p className="texto-suave text-lg mt-6">
           La dirección <strong className="text-[var(--texto)] break-all">{host || "(sin dirección)"}</strong> no corresponde a ningún gimnasio.

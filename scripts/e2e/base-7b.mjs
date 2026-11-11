@@ -63,6 +63,12 @@ try {
   await mp.locator('[role="status"]', { hasText: /La conexión funciona/ }).waitFor({ timeout: 30000 });
   ok("“Probar conexión” responde con la cuenta de MercadoPago (simulada)");
 
+  // 4b) Lo mismo sin salir del asistente: el paso 5 trae su propio "Probar conexión".
+  await estado();
+  await p.locator("[data-asistente-probar-mp]").click();
+  await p.locator('[data-asistente-mp] [role="status"]', { hasText: /La conexión funciona/ }).waitFor({ timeout: 30000 });
+  ok("“Probar conexión” dentro del asistente (paso 5) responde con la cuenta");
+
   // 5) Paso 6: cambiar una regla de entrada lo tacha (se mide como hecho, en la base).
   await p.goto(`${GB}/panel/configuracion?pestana=reglas`);
   const dias = p.locator('input[type="number"]').first();

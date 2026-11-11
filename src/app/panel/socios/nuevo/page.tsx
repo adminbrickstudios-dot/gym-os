@@ -28,9 +28,9 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
       );
     }
     const prospecto = prospectoId
-      ? (await rpc<Prospecto[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id })).find((x) => x.id === prospectoId && x.estado !== "socio") ?? null
+      ? (await rpc<Prospecto[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id })).find((x) => x.id === prospectoId) ?? null
       : null;
-    if (prospectoId && !prospecto) throw new Error("Ese prospecto no existe o ya es socio. Volvé a Interesados.");
+    if (prospectoId && !prospecto) throw new Error("Ese interesado no existe. Volvé a Interesados.");
     const [nombre, ...resto] = (prospecto?.nombre ?? "").split(" ");
     // Las membresías con su primer pago (cuota + matrícula), calculado por la base.
     const planes = await rpc<PlanAlta[]>("planes_para_alta", { p_sede_id: sedeActiva(panel).sede.id });
