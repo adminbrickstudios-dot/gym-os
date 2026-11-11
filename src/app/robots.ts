@@ -9,7 +9,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const { origen, esGimnasio, publicada } = await hostPublico();
   if (esGimnasio && !publicada) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/panel", "/app", "/admin", "/ingresar", "/entrar", "/elegir", "/salir"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/panel", "/app", "/admin", "/ingresar", "/entrar", "/elegir", "/salir", "/recepcion", "/dueno", "/profe", "/kiosco", "/tv", "/super", "/socio", "/estado"] },
     sitemap: esGimnasio ? `${origen}/sitemap.xml` : undefined,
   };
 }

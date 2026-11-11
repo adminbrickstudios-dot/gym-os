@@ -1,3 +1,5 @@
+> **11/11: reemplazado por `docs/base/SOCIO-FLUJO.md`** en la portada (dos botones grandes, "Quiero ser socio" y "Ya soy socio, entrar"; "Quiero probar una clase" es un tercero si el gimnasio lo prende; con sesión abierta saluda y ofrece "Ir a mi perfil") y por `docs/base/AJUSTES-0911-NOCHE.md` (WEB-01 a WEB-06: la página es siempre la landing). El resto sigue vigente.
+
 # 06 · La página del gimnasio (y la de Gym OS)
 
 ## Página del gimnasio

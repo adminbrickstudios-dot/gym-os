@@ -1,3 +1,5 @@
+> **11/11: reemplazado por `docs/base/SOCIO-FLUJO.md`** en los botones de la portada ("Quiero ser socio" y "Ya soy socio, entrar" arriba, "Quiero probar una clase" como tercero) y por `docs/base/AJUSTES-0911-NOCHE.md` (WEB-01 a WEB-06). Donde este archivo diga otra cosa, manda `docs/base/`.
+
 # 🌐 Página del gimnasio
 
 Lo primero que ve un cliente nuevo. Tiene que vender sola.

@@ -38,6 +38,14 @@ try {
   const m = await bajar(s, `${G}/manifest.webmanifest`);
   const man = m.ok ? JSON.parse(m.texto) : null;
   chequear(man?.display === "standalone" && man?.start_url === "/app" && man?.name && man.name !== "Base", `manifest con la marca: “${man?.name}”, se instala como app`, JSON.stringify(man));
+  // Android ofrece "Instalar" solo con un ícono de 512; el nombre corto no corta una palabra; hay accesos directos.
+  const tam512 = (man?.icons ?? []).some((i) => /512/.test(i.sizes ?? "")) || (man?.icons ?? []).some((i) => i.sizes === "any");
+  chequear(tam512, "el manifest trae un ícono de 512 (o uno que sirve para cualquier tamaño)", JSON.stringify(man?.icons));
+  chequear(man?.id && man?.shortcuts?.length > 0 && man?.short_name && man.short_name.length <= 12, `manifest con id, accesos directos y nombre corto “${man?.short_name}”`, JSON.stringify(man));
+  const robots = await bajar(s, `${G}/robots.txt`);
+  chequear(robots.ok && ((/Disallow: \/profe/.test(robots.texto) && /Disallow: \/kiosco/.test(robots.texto) && /Disallow: \/tv/.test(robots.texto)) || /Disallow: \/\s*$/m.test(robots.texto)), "robots no deja indexar /profe, /kiosco ni /tv (o la página está sin publicar y no deja indexar nada)", robots.texto?.slice(0, 300));
+  const ic = await bajar(s, `${G}/icono?tam=512`);
+  chequear(ic.ok, "el ícono sin logo también sale en 512", `icono ${ic.status}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 }

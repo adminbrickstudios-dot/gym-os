@@ -27,11 +27,11 @@ try {
   const ed = p.locator("[data-editor-rutina]");
   await ed.waitFor({ timeout: 60000 });
   await ed.getByPlaceholder("Fuerza 3 días").fill(R);
-  await ed.getByLabel("Sumar ejercicio al día 1").selectOption({ label: `${A} · 🦵 Piernas` });
-  await ed.getByLabel("Sumar ejercicio al día 1").selectOption({ label: `${B} · 🔙 Espalda` });
+  await ed.getByLabel("Sumar ejercicio al día 1").selectOption({ label: `${A} · Piernas` });
+  await ed.getByLabel("Sumar ejercicio al día 1").selectOption({ label: `${B} · Espalda` });
   await ed.locator('[data-dia="1"]').getByLabel("Repeticiones").first().fill("8-10");
   await ed.getByRole("button", { name: /Sumar día 2/ }).click();
-  await ed.getByLabel("Sumar ejercicio al día 2").selectOption({ label: `${B} · 🔙 Espalda` });
+  await ed.getByLabel("Sumar ejercicio al día 2").selectOption({ label: `${B} · Espalda` });
   await ed.getByRole("button", { name: "Guardar rutina" }).click();
   await p.waitForURL(/\/panel\/rutinas$/, { timeout: 30000 });
   const fila = p.locator("[data-rutinas] li", { hasText: R });

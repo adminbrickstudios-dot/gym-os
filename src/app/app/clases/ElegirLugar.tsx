@@ -34,7 +34,7 @@ export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
                     setError(null);
                     const r = await elegirLugar(mapa.reserva_id!, n);
                     if (r.error) setError(r.error); else { setMio(n); setAbierto(false); }
-                  })}>{roto ? "✕" : n}</button>
+                  })}>{roto ? <Icono nombre="cerrar" /> : n}</button>
               );
             })}
           </div>

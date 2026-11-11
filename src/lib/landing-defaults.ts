@@ -41,7 +41,7 @@ const PROBAR_TEXTO = "Dejanos tu nombre y tu WhatsApp, o elegí una clase, y te 
 
 type Pregunta = { pregunta: string; respuesta: string };
 
-function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: boolean): Pregunta[] {
+function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: boolean, hayAltas = false): Pregunta[] {
   const q: Pregunta[] = [
     { pregunta: "¿Necesito experiencia previa?", respuesta: tipo === "lucha" || tipo === "funcional"
       ? "No. Podés empezar desde cero: el profe te indica cómo hacer cada ejercicio y se adapta a tu nivel."
@@ -51,8 +51,10 @@ function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: 
       : "Ropa cómoda, zapatillas, una toalla y agua. Si necesitás algo más para una clase, te avisamos." },
   ];
   if (hayProbar) q.push({ pregunta: "¿Puedo probar antes de anotarme?", respuesta: "Sí. Dejanos tus datos en “Probá gratis” y coordinamos tu primera clase." });
-  if (hayPlanes) q.push({ pregunta: "¿Cómo me anoto y cómo pago?", respuesta: "Elegí tu plan más abajo y escribinos por WhatsApp o pasá por el gimnasio: te decimos los medios de pago y empezás ese mismo día." });
-  q.push({ pregunta: "¿Puedo ir a cualquier hora?", respuesta: "Los horarios de apertura y de cada clase están en esta página, siempre al día. Si tenés dudas, escribinos." });
+  if (hayPlanes) q.push({ pregunta: "¿Cómo me anoto y cómo pago?", respuesta: hayAltas
+      ? "Tocá “Quiero ser socio”, elegí tu plan y creá tu cuenta. Después pagás en el gimnasio o por los medios que te muestre la app, y desde ese momento entrás con tu DNI."
+      : "Elegí tu plan más abajo y escribinos por WhatsApp o pasá por el gimnasio: te decimos los medios de pago y empezás ese mismo día." });
+  q.push({ pregunta: "¿Puedo ir a cualquier hora?", respuesta: "Depende de tu plan: algunos son libres y otros tienen días u horarios. Mirá abajo los planes y los horarios de apertura y de cada clase, siempre al día." });
   return q;
 }
 
@@ -64,7 +66,7 @@ export function conTextosPorDefecto(landing: LandingPublicada): LandingPublicada
   const hayPlanes = landing.planes.length > 0;
   const secciones = landing.secciones.map((s): Seccion => {
     if (s.tipo === "sobre_nosotros" && !s.contenido.texto?.trim()) return { ...s, contenido: { texto: SOBRE[tipo](nombre) } };
-    if (s.tipo === "preguntas" && !(s.contenido.items ?? []).length) return { ...s, contenido: { items: preguntasPorDefecto(tipo, hayProbar, hayPlanes) } };
+    if (s.tipo === "preguntas" && !(s.contenido.items ?? []).length) return { ...s, contenido: { items: preguntasPorDefecto(tipo, hayProbar, hayPlanes, !!landing.altas_online) } };
     if (s.tipo === "probar" && !s.contenido.texto?.trim()) return { ...s, contenido: { texto: PROBAR_TEXTO } };
     return s;
   });
