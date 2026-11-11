@@ -83,6 +83,7 @@ test("la siembra tiene 5.000 socios, y cubierto_hasta coincide con las cobertura
 test(`cada lista con ${SOCIOS} socios cabe en su presupuesto (mediana de ${VUELTAS})`, { skip: !!process.env.ESCALA_DEJAR }, async () => {
   const filas = [];
   for (const [nombre, quien, sql, presupuesto, tope = presupuesto] of LLAMADAS) {
+    if (process.env.ESCALA_SOLO && !nombre.includes(process.env.ESCALA_SOLO)) continue;   // ESCALA_SOLO=filtros: mide solo las que contienen ese texto
     const ms = [];
     for (let i = 0; i <= VUELTAS; i++) {
       const dt = await como(quien === "recepcion" ? uRecep : uDueno, async () => {
