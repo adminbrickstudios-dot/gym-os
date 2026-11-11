@@ -316,3 +316,8 @@ Respuesta de Mateo: (vacío)
 - **VD-26B:** los pedidos de demo sin atender entran a las alertas del super admin (rojo pasado un día) y los planes de BRIK tienen casilla "Se muestra en la web" (`plataforma_planes.publico`, filtra `planes_brik_publicos`). El aviso por mail o WhatsApp a BRIK sigue ⛔ (no hay servicio de mail ni WhatsApp de envío).
 - **F6.1, lo que no hice por ser de otro carril o depender de Mateo:** VD-42C (pedir el código TOTP justo después de la contraseña) está en el ingreso (U0); VD-42D (alerta por exportes grandes y PIN, aal2 en exportar_mes/gastos) toca plata y permisos del panel; VD-33E (ofrecer cerrar sesiones al cambiar la contraseña) es de Mi cuenta (shared); VD-43B/C son del panel del dueño.
 - **SEG-01 a 07:** SEG-01 ya estaba (`aislamiento-gimnasios.test.mjs`); SEG-02 y SEG-07 ahora tienen guarda en vitest (`src/lib/admin/seguridad-codigo.test.ts`: ningún archivo de navegador toca la clave de servicio, ninguna clave ni `demo-gymos` en `src`); SEG-03/04 (BASE-8), SEG-05 (registro de BRIK) y SEG-06 (exportar/borrar) ya estaban.
+
+## 11/11 · Decisiones de Mateo y por defecto (loop)
+- **Aprobado por Mateo:** los permisos de C1 (`cuenta_para_clave_socio`, `registrar_clave_entregada`, tabla `claves_entregadas`).
+- **Pedido de Mateo:** el socio ve en su app "Te dieron una clave nueva el <fecha>, por <nombre>" (ayudante `carril/c-aviso-clave`).
+- **Regla desde hoy:** lo que toque permisos o plata se decide con la opción más segura y se anota acá como "decidido por defecto"; no se pide revisión. Se publica al cerrar cada fase (prevuelo → aplicar → merge → humo). La publicación de la fase P y lo hecho de la fase C sale apenas C1 pase en Actions.
