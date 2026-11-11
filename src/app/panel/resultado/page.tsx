@@ -196,12 +196,12 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           <p className="texto-suave mb-3">{Math.max(...r.horas) ? `La hora con más gente: de ${pico} a ${pico + 1} h.` : "Sin entradas registradas este mes."}</p>
           <div className="tarjeta p-4">
             <div className="flex items-end gap-[3px] h-24" role="img" aria-label="Entradas por hora del día">
-              {r.horas.slice(6).map((n, i) => (
-                <div key={i} className="flex-1 rounded-t-sm" title={`${i + 6} h: ${n}`}
-                  style={{ height: `${Math.max(2, (n / maxHora) * 100)}%`, background: n ? "var(--acento)" : "var(--borde)", opacity: i + 6 === pico ? 1 : 0.6 }} />
+              {r.horas.map((n, i) => (
+                <div key={i} className="flex-1 rounded-t-sm" title={`${i} h: ${n}`}
+                  style={{ height: `${Math.max(2, (n / maxHora) * 100)}%`, background: n ? "var(--acento)" : "var(--borde)", opacity: i === pico ? 1 : 0.6 }} />
               ))}
             </div>
-            <div className="flex justify-between text-xs texto-tenue mt-2"><span>6 h</span><span>15 h</span><span>23 h</span></div>
+            <div className="flex justify-between text-xs texto-tenue mt-2"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>23 h</span></div>
           </div>
         </section>
       </div>

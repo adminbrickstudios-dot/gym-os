@@ -96,11 +96,11 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
       {puedeEditar && (
         <form action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
           <p className="titulo text-2xl sm:col-span-2"><Icono nombre="mas" /> Sumar a alguien</p>
-          <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
-          <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" placeholder="Vacío: solo figura en la grilla" /></label>
+          <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" defaultValue={estado.valores?.nombre} /></label>
+          <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" defaultValue={estado.valores?.email} placeholder="Vacío: solo figura en la grilla" /></label>
           <label className="space-y-1"><span className="etiqueta">Contraseña</span><CampoContrasena /></label>
           <label className="space-y-1"><span className="etiqueta">Rol</span>
-            <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}><Icono nombre={EMOJI[r]} /> {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
+            <select name="rol" className="campo" defaultValue={estado.valores?.rol ?? "recepcion"}>{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
           {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>
             <select name="sede" className="campo"><option value="">Todas</option>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
           {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {estado.error}</p>}

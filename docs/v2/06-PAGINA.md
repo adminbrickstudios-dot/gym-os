@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/AJUSTES-0911-NOCHE.md (EDIT y WEB: la página se edita en capas, con vista previa) y docs/base/DISENO.md (sin emojis, sin frases de plantilla).
+
 # 06 · La página del gimnasio (y la de Gym OS)
 
 ## Página del gimnasio

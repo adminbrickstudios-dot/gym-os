@@ -52,7 +52,7 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
             })}</ul>
             <label className="block"><span className="sr-only">Sumar ejercicio al día {dia}</span>
               <select className="campo" value="" onChange={(ev) => { if (ev.target.value) sumar(dia, ev.target.value); }} aria-label={`Sumar ejercicio al día ${dia}`}>
-                <option value=""><Icono nombre="mas" /> Sumar ejercicio…</option>
+                <option value="">Sumar ejercicio…</option>
                 {activos.map((e) => <option key={e.id} value={e.id}>{e.nombre} · {nombreGrupo(e.grupo)}</option>)}
               </select></label>
           </section>

@@ -2,6 +2,7 @@ import "server-only";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { guardaLoPublico } from "@/lib/panel/lo-publico";
 import { crearClienteServidor, gimnasioActual } from "@/lib/supabase/servidor";
 import type { Rol } from "@/lib/panel/secciones";
 import type { Abono } from "@/components/panel/Marco";
@@ -30,7 +31,7 @@ export async function rpc<T>(nombre: string, args?: Record<string, unknown>, opc
     // F0.1: cada viaje a la base queda en el log de Vercel con su nombre y sus ms (sin datos ni argumentos).
     console.log(`[rpc] ${nombre} ${Math.round(performance.now() - t0)}ms${error ? " error" : ""}`);
     if (!error) {
-      if (!opciones.lectura && GUARDA_LO_PUBLICO.test(nombre)) invalidarLoPublico();
+      if (!opciones.lectura && guardaLoPublico(nombre)) invalidarLoPublico();
       return data as T;
     }
     if (esDemora(error)) {
@@ -46,7 +47,6 @@ export const TIEMPO_MAXIMO_MS = 10_000;
 // VD-47: la landing, la marca, los planes y los horarios públicos se guardan en caché (lib/landing.ts,
 // etiqueta "landing"). Cualquier escritura que cambie eso la invalida al instante. Sobra invalidar de más
 // (cuesta una consulta); falta invalidar nunca.
-const GUARDA_LO_PUBLICO = /^(guardar|publicar|programar|aplicar|anular_precio|anular_cierre|crear_cierre|confirmar_imagen|quitar_imagen|ordenar_fotos|sumar_sede|configurar|archivar|reordenar|activar|desactivar|apagar|prender|editar)_/;
 function invalidarLoPublico() {
   try { revalidateTag("landing", { expire: 0 }); } catch { /* llamado durante el render: no se puede, vence solo en 60 s */ }
 }

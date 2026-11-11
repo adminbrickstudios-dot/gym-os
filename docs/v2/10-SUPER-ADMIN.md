@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/SUPER-ADMIN.md (SA-1 a SA-12) y docs/base/PLATAFORMA.md: este archivo describe el super admin de antes de Base.
+
 # 10 · Super admin (BRIK)
 
 Hoy (`/admin`): estado de la plataforma, alta de gimnasio con plantillas por
