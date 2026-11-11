@@ -2,7 +2,7 @@
 // Siembra 5.000 socios en un gimnasio con una mezcla realista (al día, por vencer, vencidos, sin pagos, de baja, nuevos)
 // y unos 18.000 ingresos, y mide cada función como el rol que la usa. Presupuesto: pendientes_panel 50 ms; el resto 300 ms.
 // ESCALA_ESTRICTO=1 (Actions, máquina sola): el tope es el presupuesto. En la compu de desarrollo, con otros procesos andando, el tope de
-// pendientes_panel es 150 ms y filtros_socios solo se mide (todavía no cumple 300 ms: ver docs/base/VELOCIDAD.md).
+// pendientes_panel es 150 ms.
 // Se toma la MEDIANA de 5 vueltas (se descarta la primera, que calienta cachés). Los números salen en la salida de la prueba.
 // Los veredictos NO se miden acá: los compara retencion-cubierto.test.mjs con momentos fijos.
 import { test, before, after } from "node:test";
@@ -19,7 +19,7 @@ const LLAMADAS = [
   ["panel_inicio", "dueno", "select public.panel_inicio($1)", 300],
   ["numeros_inicio", "dueno", "select public.numeros_inicio($1)", 300],
   ["vencen_hoy", "dueno", "select * from public.vencen_hoy($1)", 300],
-  ["filtros_socios", "dueno", "select public.filtros_socios($1)", 300, null],   // pendiente: el estado de cada socio sale de calcular_acceso (ver VELOCIDAD.md)
+  ["filtros_socios", "dueno", "select public.filtros_socios($1)", 300],   // en lote: los socios sin casos especiales no pasan por calcular_acceso (filtros-en-lote.test.mjs lo compara con la de antes)
   ["buscar_socios (al día)", "dueno", "select * from public.buscar_socios($1, '', 60, null, 'al_dia')", 300],
   ["buscar_socios (texto)", "dueno", "select * from public.buscar_socios($1, 'mar', 60)", 300],
 ];
