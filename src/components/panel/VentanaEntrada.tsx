@@ -17,6 +17,7 @@ import { CierreInactividad } from "@/app/panel/pin/CierreInactividad";
 import { crearDetectorLector, esLecturaRepetida, LECTOR_MIN_CARACTERES, LECTOR_PAUSA_MAX_MS } from "@/app/panel/entrada/lector";
 import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { Hoja } from "@/components/ui/Hoja";
@@ -354,7 +355,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const salirConDni = useCallback((dniEscrito: string) => {
     if (trabajando.current) return;
     empezar(async () => {
-      const r = await buscarSociosRapido(dniEscrito);
+      const r = await leerConReintento(() => buscarSociosRapido(dniEscrito));
       if (r.error) { setError(r.error); return; }
       const lista = r.socios ?? [];
       if (lista.length === 0) { setNadie(dniEscrito); return; }
@@ -393,7 +394,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       const l = await leerLlavero(t);
       if (l.socio || l.error) { await directo(l, "nfc"); volverAlCampo(); return; }
     }
-    const r = await buscarSociosRapido(t);
+    const r = await leerConReintento(() => buscarSociosRapido(t));
     if (r.error) { setError(r.error); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     const lista = r.socios ?? [];
     setSocios(lista); setListaPara(t);
@@ -426,15 +427,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const iniciarAlta = useCallback((dniEscrito: string) => {
     setAlta({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", plan: "", paso: "datos", planes: null, ofrecido: null, vinculado: null, error: null });
     setPaso("alta"); setError(null);
-    // Si el pedido de planes se corta (la red, o una acción que Next aborta) no se queda esperando para siempre: reintenta y, si no puede, lo dice.
-    const cargarPlanes = (intento: number): void => {
-      void planesParaAlta(sedeId).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
-        .catch(() => {
-          if (intento < 2) setTimeout(() => cargarPlanes(intento + 1), 700);
-          else setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a));
-        });
-    };
-    cargarPlanes(0);
+    // Causa raíz del Plan sin tarjetas: Next aborta el pedido en vuelo si justo se refresca la pantalla (entrada en vivo, cierre de la hoja de cobro).
+    // Es una lectura: se repite; si no hay caso, se dice en vez de dejar el esqueleto para siempre.
+    leerConReintento(() => planesParaAlta(sedeId)).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
+      .catch(() => setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a)));
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-alta-nombre]")?.focus(), 0);
   }, [sedeId]);
   const guardarAlta = (cobrarYa: boolean) => {
@@ -475,7 +471,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const t = sinPuntos(texto).trim();
     if (t.length < 2 || ES_QR.test(t)) { setSocios([]); setListaPara(""); setNadie(null); return; }
     const id = setTimeout(async () => {
-      const r = await buscarSociosRapido(t);
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(t)); } catch { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); return; }
       if (sinPuntos(textoRef.current).trim() !== t) return;
       if (r.error) { setError(r.error); return; }
       setError(null);

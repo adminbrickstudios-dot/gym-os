@@ -4,6 +4,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
@@ -83,7 +84,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   useEffect(() => {
     if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
     const t = setTimeout(async () => {
-      const r = await buscarSociosRapido(texto.trim());
+      const r = await leerConReintento(() => buscarSociosRapido(texto.trim()));
       setSocios(r.socios ?? []);
       setError(r.error ?? null);
     }, 150);
@@ -143,7 +144,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         const l = await leerLlavero(t);
         if (l.socio || l.error) { await directo(l, "nfc"); return; }
       }
-      const r = await buscarSociosRapido(t);
+      const r = await leerConReintento(() => buscarSociosRapido(t));
       if (r.error) { setError(r.error); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
       const primero = r.socios?.[0];
       if (!primero) { noEsta(); return; }
@@ -207,7 +208,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     reiniciar();
   });
   const salirConDni = (dni: string) => empezar(async () => {
-    const r = await buscarSociosRapido(dni);
+    const r = await leerConReintento(() => buscarSociosRapido(dni));
     if (r.error) { setError(r.error); return; }
     const s = (r.socios ?? [])[0];
     if (!s) { setError(`No hay nadie con el DNI ${dni}.`); return; }

@@ -12,7 +12,14 @@ async function primero(p, estado) {
   await p.goto(`${G}/panel/socios?estado=${estado}`);
   const a = p.locator('main ul a[href^="/panel/socios/"]').first();
   await a.waitFor({ timeout: 30000 });
-  return (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  const nombre = (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  // El demo tiene homónimos: el nombre no alcanza. Se identifica por DNI (la ficha lo muestra y la búsqueda de la Entrada lo entiende).
+  await a.click();
+  await p.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}/, { timeout: 30000 });
+  await p.locator("main").waitFor({ timeout: 30000 });
+  const dni = (await p.locator("main").innerText()).match(/DNI\s*\n?\s*([\d.]{7,11})/)?.[1]?.replace(/\D/g, "");
+  if (!dni) throw new Error(`la ficha de ${nombre} no muestra DNI`);
+  return { nombre, dni };
 }
 try {
   const r = await pagina(b, COMPU);
@@ -23,14 +30,15 @@ try {
     window.AudioContext = class extends Orig { createOscillator() { const o = super.createOscillator(); const st = o.start.bind(o); o.start = (t) => { window.__sonidos.push(o.frequency.value); return st(t); }; return o; } };
   });
   await entrar(r, "recepcion@ejemplo.invalid");
-  const verde = await primero(r, "al_dia"), rojo = await primero(r, "vencidos");
+  const V = await primero(r, "al_dia"), R = await primero(r, "vencidos");
+  const verde = V.nombre, rojo = R.nombre;
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 30000 });
   if ((await r.locator("[data-sonido]").getAttribute("data-sonido")) === "no") await r.locator("[data-sonido]").click();
 
   // Rojo: pantalla completa, Enter no anota, Esc vuelve.
-  await buscar.fill(rojo);
+  await buscar.fill(R.dni);
   await r.locator("button.fila", { hasText: rojo }).first().waitFor({ timeout: 15000 });
   await buscar.press("Enter");
   const ver = r.locator("[data-veredicto]");
@@ -49,7 +57,7 @@ try {
   chequear(await buscar.evaluate((e) => e === document.activeElement && e.value === ""), "Esc vuelve a buscar, con foco", "Esc no volvió al buscador");
 
   // Verde: Enter anota.
-  await buscar.fill(verde);
+  await buscar.fill(V.dni);
   await r.locator("button.fila", { hasText: verde }).first().waitFor({ timeout: 15000 });
   await buscar.press("Enter");
   await r.locator('[data-veredicto="verde"]').waitFor({ timeout: 30000 });
@@ -62,7 +70,7 @@ try {
   await r.locator('[data-hecho] button:has-text("Deshacer")').click();     // no dejar la prueba anotada
 
   // Escribir con el veredicto abierto arranca otra búsqueda.
-  await buscar.fill(rojo);
+  await buscar.fill(R.dni);
   await r.locator("button.fila", { hasText: rojo }).first().click();
   await ver.waitFor({ timeout: 30000 });
   await r.locator('[data-veredicto] button:has-text("Dejar pasar igual")').focus();   // el foco en otro lado, como después de un clic
@@ -75,7 +83,7 @@ try {
   await r.reload();
   await r.locator('[data-sonido="no"]').waitFor({ timeout: 30000 });
   const antes = await r.evaluate(() => window.__sonidos.length);
-  await buscar.fill(rojo);
+  await buscar.fill(R.dni);
   await r.locator("button.fila", { hasText: rojo }).first().click();
   await ver.waitFor({ timeout: 30000 });
   await r.waitForTimeout(400);
@@ -88,7 +96,7 @@ try {
   const c = await pagina(b, CELU);
   await entrar(c, "recepcion@ejemplo.invalid");
   await c.goto(`${G}/panel/entrada`);
-  await c.locator('input[aria-label="Buscar socio"]').fill(rojo);
+  await c.locator('input[aria-label="Buscar socio"]').fill(R.dni);
   await c.locator("button.fila", { hasText: rojo }).first().click();
   await c.locator("[data-veredicto]").waitFor({ timeout: 30000 });
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
