@@ -18,7 +18,7 @@ La página pública y la app del socio leen de `landing_publica` y funciones her
 | Portada, secciones, textos, altas online, prueba social, video (`guardar_*`) | Sí | `pag-1`, `pag-2`, `pag-3`, `web-p8b` |
 | Plan, precio, aumento programado, ajustes del plan (`guardar_*`, `programar_*`, `aplicar_*`) | Sí | `pla-1`, `pla-4`, `pla-5`, `vd-17` |
 | Marca, horarios, cierres, feriados | Sí | `cfg-2`, `cfg-4` |
-| **Orden de los planes** (`ordenar_planes`) | **No: tardaba hasta 60 s. Arreglado en esta rama** | `rev-dueno-1` (nuevo) y `lo-publico.test.ts` |
+| **Orden de los planes** (`ordenar_planes`) | **No (por lectura del código: la etiqueta no se invalidaba, vencía a los 60 s). Arreglado en esta rama; no corrí la versión anterior para ver el rojo** | `rev-dueno-1` (nuevo) y `lo-publico.test.ts` |
 | **Agregar o cerrar un horario de la grilla, cancelar una clase** (`agregar_horario`, `cerrar_horario`, `cancelar_clase`): "Clases de la semana" de la página | **No: tardaba hasta 60 s. Arreglado** | `lo-publico.test.ts` (nombre por nombre) |
 | **Lo que hace el super admin** (dirección, pausa, baja, módulos, marca, plantillas): la página de un gimnasio pausado o con otra dirección | **No: tardaba hasta 60 s. Arreglado** | `lo-publico.test.ts` |
 | Lo cobrado en el mostrador aparece en Resultado del mes | Sí (Resultado no usa caché: `cache-prohibido.test.ts` lo exige) | `rev-dueno-1` (nuevo): la recepción cobra $1.500 y Resultado sube |
@@ -97,6 +97,23 @@ Lo que ya estaba en `PULIDO.md` y sigue igual en el código (se verificó leyend
 | Dominios en producción | Super admin | ⛔ `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` y el dominio |
 | Segundo factor obligatorio en `/admin` en producción | Super admin | Está escrito (SA-10); falta que Mateo lo active para su cuenta |
 
-## Corridas de Actions (rama `carril/rev-dueno`)
+## Resultado de las corridas (Actions, rama `carril/rev-dueno`, app en modo producción)
 
-Ver el final de este archivo, sección "Resultado de las corridas".
+| Corrida | Qué corrió | Resultado |
+|---|---|---|
+| 43117971930 | 53 recorridos de la zona dueño (Inicio, Resultado, Control, Equipo, Configuración, Página, asistente, Planes, Rutinas, Clases, Ayuda) + `rev-dueno-1` | Base (migraciones, pruebas de la base, chequeos) en verde. Pantallas: 44 en verde, 9 en rojo. Ninguno rojo por el código de esta rama: todos eran pruebas viejas que ya no miraban lo que la pantalla dice hoy (ver abajo) |
+| 43120559934 | Los 9 rojos corregidos + 11 del super admin (`super-admin`, `super-f2`, `super-f9`, `super-f10`, `super-f11`, `super-p`, `super-plat`, `adm-1`, `adm-3`, `vd-40`, `rev-5`) + `rev-dueno-1` | 19 de 21 en verde (todo el super admin en verde); rojos `cfg-7` y `rev-2` |
+| 43122253878 | `cfg-7`, `rev-2`, `rev-dueno-1`, `panel-inicio`, `vd-12`, `dis-0` | `cfg-7`, `rev-2`, `rev-dueno-1` y `panel-inicio` en verde; rojos `vd-12` (un selector que ahora toma el menú) y `dis-0` (esperaba 4 números) |
+| 43123329812 | `vd-12`, `dis-0` | Los dos en verde (16 y 17 pasos) |
+
+Qué estaba mal en los 9 recorridos rojos de la primera corrida (ninguno era un fallo del producto):
+- `cfg-2`: el logo ahora se elige, se ve una vista previa y recién "Usar este logo" lo sube (BASE-7). La prueba no apretaba ese botón.
+- `cfg-7`: buscaba el interruptor de cada sección por un emoji que ya no está.
+- `rut-1` y `panel-clases`: elegían la opción por un texto con emoji; las opciones ya no llevan emoji.
+- `equ-1`: el texto de un emoji sacado quedó vacío y coincidía con todo ("aparecen productos" siempre).
+- `adm-6`: el botón se llama Publicar, no "Publicar para todos".
+- `pla-7`: la búsqueda "Testigo Vencida" trae primero a "Testigo Pack Vencido"; ahora se elige por nombre entero.
+- `vd-17`: leía la fila del plan antes de que el servidor la refrescara.
+- `rev-2`, `vd-12` y `dis-0`: Inicio muestra más de 4 números desde BASE-4 (lo dice la migración `20261108040100`); el desplegable seguía diciendo "Elegir mis 4 números" y ahora dice "Elegir mis números".
+
+`rev-dueno-1` (nuevo) pasó en las tres corridas en que corrió: lo cobrado en el mostrador sube Resultado, subir un plan cambia el orden en la página pública al instante, y el día sin clases ofrece la grilla.
