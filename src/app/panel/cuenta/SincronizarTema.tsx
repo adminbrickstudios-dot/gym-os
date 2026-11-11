@@ -8,8 +8,11 @@ import { sincronizarTema } from "./tema-acciones";
 export function SincronizarTema() {
   const router = useRouter();
   useEffect(() => {
-    try { if (sessionStorage.getItem("gymos_tema_sincronizado")) return; sessionStorage.setItem("gymos_tema_sincronizado", "1"); } catch { /* sin almacenamiento: se consulta igual */ }
-    void sincronizarTema().then((t) => { if (t) router.refresh(); }).catch(() => { /* sin conexión: queda el tema del gimnasio */ });
+    try { if (sessionStorage.getItem("gymos_tema_sincronizado")) return; } catch { /* sin almacenamiento: se consulta igual */ }
+    // La marca se pone recién cuando la base contestó: si la pantalla se cambia a mitad de camino, la próxima vuelve a intentar.
+    void sincronizarTema()
+      .then((t) => { try { sessionStorage.setItem("gymos_tema_sincronizado", "1"); } catch { /* idem */ } if (t) router.refresh(); })
+      .catch(() => { /* sin conexión: queda el tema del gimnasio */ });
   }, [router]);
   return null;
 }

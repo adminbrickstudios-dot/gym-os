@@ -143,7 +143,7 @@ try {
   await entrar(otro, "duena@ejemplo.invalid");
   await otro.goto(`${G}/panel/caja`);
   let cookie = null;
-  for (let i = 0; i < 20 && !cookie; i++) {
+  for (let i = 0; i < 30 && !cookie; i++) {
     cookie = (await otro.context().cookies(G)).find((c) => c.name === "tema" && c.value === "oscuro");
     if (!cookie) await otro.waitForTimeout(500);
   }
