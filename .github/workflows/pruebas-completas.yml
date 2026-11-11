@@ -85,7 +85,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+      - name: Librerías del navegador (si el espejo de apt no responde, se sigue con las que trae el runner)
+        timeout-minutes: 6
+        continue-on-error: true
+        run: npx playwright install-deps chromium
       - name: ffmpeg (los recorridos de QR y video lo usan)
         timeout-minutes: 6
         continue-on-error: true   # si el espejo de apt se cuelga, solo fallan los recorridos que graban video
