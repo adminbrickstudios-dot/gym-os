@@ -8,6 +8,7 @@ import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Sesiones } from "@/components/cuenta/Sesiones";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
 import { Icono } from "@/components/ui/Icono";
+import { AvisoClaveSocio } from "../AvisoClaveSocio";
 
 export const metadata: Metadata = { title: "Mi membresía" };
 
@@ -29,6 +30,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
       <div className="space-y-6">
         <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
         <h1 className="titular text-5xl">Mi membresía</h1>
+        <AvisoClaveSocio socioId={s.socio_id} zona={yo.zona!} />
         {yo.plan && <p className="texto-suave text-lg"><Icono nombre="etiqueta" /> {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}
         <CrearContrasena email={usuario.data.user?.email || null} tieneContrasena={seguridad.tiene_contrasena} />
