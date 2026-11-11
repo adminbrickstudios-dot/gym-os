@@ -39,7 +39,10 @@ try {
   await r.locator("[data-alta-celular]").fill(cel(1));
   await capturar(r, "vd6-compu-alta-datos");
   await r.locator("[data-alta-siguiente]").click();
-  await r.locator("[data-plan-tarjeta]").first().waitFor({ timeout: 30000 });
+  await r.locator("[data-plan-tarjeta]").first().waitFor({ timeout: 30000 }).catch(async (e) => {
+    const f = await r.locator("[data-ventana-alta-form]").evaluateAll((l) => l.map((x) => `paso=${x.getAttribute("data-alta-paso")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 400)}`)).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | alta: ${f.join(" || ") || "(sin formulario)"}`);
+  });
   await elegirPlan(r, 0);
   chequear(await r.locator("[data-primer-pago]").count() === 1, "el plan con tarjetas muestra su primer pago (lo calcula la base)", "no hay primer pago");
   await capturar(r, "vd6-compu-alta-plan");
