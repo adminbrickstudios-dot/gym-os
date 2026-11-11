@@ -363,8 +363,8 @@ async function operarDominio(accion: "agregar" | "verificar", dominio: string): 
     return { estado };
   } catch (e) { return { error: (e as Error).message }; }
 }
-export const conectarDominioVercel = (dominio: string) => operarDominio("agregar", dominio);
-export const verificarDominioEnVercel = (dominio: string) => operarDominio("verificar", dominio);
+export const conectarDominioVercel = async (dominio: string) => operarDominio("agregar", dominio);
+export const verificarDominioEnVercel = async (dominio: string) => operarDominio("verificar", dominio);
 
 export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
 /** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
