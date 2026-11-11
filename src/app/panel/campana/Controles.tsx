@@ -44,11 +44,14 @@ export function PreferenciasAvisos({ inicial }: { inicial: { tipo: string; app: 
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const cambiar = (tipo: string, app: boolean) => empezar(async () => {
-    setError(null); setOk(null);
-    // La casilla cambia en el mismo instante; si la base no lo guarda, vuelve atrás y dice por qué.
+  const cambiar = (tipo: string, app: boolean) => {
+    // La casilla cambia en el mismo instante (fuera de la transición, que la dejaría para después); si la base no lo guarda, vuelve atrás y dice por qué.
     const poner = (valor: boolean) => setPrefs((p) => p.map((x) => (x.tipo === tipo ? { ...x, app: valor } : x)));
     poner(app);
+    guardar(tipo, app, poner);
+  };
+  const guardar = (tipo: string, app: boolean, poner: (valor: boolean) => void) => empezar(async () => {
+    setError(null); setOk(null);
     const r = await guardarPreferenciaAviso(tipo, app);
     if (r.error) { poner(!app); setError(r.error); return; }
     setOk("Guardado.");

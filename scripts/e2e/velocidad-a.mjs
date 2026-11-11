@@ -58,7 +58,7 @@ try {
   // 3. Ingreso optimista.
   const { rows: [s] } = await db.query(`
     select s.id, s.nombre || ' ' || s.apellido as nombre, s.numero, s.dni from public.socios s
-     where s.gimnasio_id = $1 and s.dado_de_baja_en is null and s.cubierto_hasta > now() + interval '10 days'
+     where s.gimnasio_id = $1 and s.dado_de_baja_en is null and s.dni is not null and s.cubierto_hasta > now() + interval '10 days'
      order by s.numero limit 1`, [gim]);
   if (!s) throw new Error("no hay un socio al día en el demo");
   await r.goto(`${G}/panel/entrada`);
