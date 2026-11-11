@@ -12,6 +12,10 @@ export type ParaRevisar = {
 
 export type PorMedio = { medio: string; total: number; cantidad: number };
 
+// H1 · Lo cobrado por cada medio, con la lista (public.cobros_de_turnos). Es la misma cuenta que reporte_turno.por_medio.
+export type Cobro = { pago_id: string; en: string; monto: number; socio: string | null; cobro: string | null };
+export type CobrosMedio = { medio: string; total: number; cantidad: number; cobros: Cobro[] };
+
 export type ReporteTurno = {
   turno_id: string; caja: string; estado: EstadoTurno; abierto_en: string; cerrado_en: string | null; abierto_por: string | null; cerrado_por: string | null;
   monto_inicial: number; efectivo: number; ingresos: number; retiros: number; esperado: number; contado: number | null; diferencia: number | null;

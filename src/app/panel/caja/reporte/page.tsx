@@ -8,7 +8,8 @@ import { formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
-import type { ReporteDia, ReporteTurno } from "../tipos";
+import type { CobrosMedio, ReporteDia, ReporteTurno } from "../tipos";
+import { PorMedio } from "../PorMedio";
 import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Reporte de caja" };
@@ -35,7 +36,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
     if (/^[0-9a-f-]{36}$/.test(sp.turno ?? "")) {
       const r = await rpc<ReporteTurno>("reporte_turno", { p_turno_id: sp.turno });
       const v = veredictoCaja(r.diferencia);
-      const otros = r.por_medio.filter((m) => m.medio !== "efectivo");
+      const cobros = await rpc<CobrosMedio[]>("cobros_de_turnos", { p_turno_ids: [r.turno_id] });
       return (
         <>
           <Encabezado icono="lista" titulo={r.estado === "abierto" ? "Reporte del turno (en vivo)" : "Reporte del turno"} volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
@@ -56,6 +57,9 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
               <div><dt className="texto-tenue text-sm">Contado</dt><dd className="numero text-2xl">{r.contado == null ? "—" : formatearPesos(r.contado)}</dd></div>
               <div><dt className="texto-tenue text-sm">Diferencia</dt><dd className="numero text-2xl">{r.diferencia == null ? "—" : formatearPesos(r.diferencia)}</dd></div>
             </dl>
+            <PorMedio medios={cobros} zona={zona} pasado={r.estado !== "abierto"} titulo="Lo cobrado en el turno, por medio"
+              cajon={{ esperado: r.esperado, inicial: r.monto_inicial, efectivo: r.efectivo, ingresos: r.ingresos, retiros: r.retiros }} />
+            <p className="texto-suave text-sm" data-dif-efectivo>La diferencia cuenta solo el efectivo: lo contado menos lo que tenía que haber en el cajón.</p>
             {r.billetes && (
               <p className="texto-suave text-sm" data-billetes-contados><Icono nombre="calculadora" /> Billetes: {Object.entries(r.billetes).filter(([k]) => k !== "otros").sort((a, b) => Number(b[0]) - Number(a[0])).map(([k, n]) => `${n} × ${formatearPesos(Number(k))}`).join(" · ")}{r.billetes.otros ? ` · otros ${formatearPesos(r.billetes.otros)}` : ""}</p>
             )}
@@ -63,7 +67,6 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
               <div>
                 <p className="font-semibold mb-1">Ventas del turno</p>
                 <p className="numero text-xl">{formatearPesos(r.ventas.total)} <span className="texto-suave text-base">en {r.ventas.cantidad} {r.ventas.cantidad === 1 ? "venta" : "ventas"}</span></p>
-                {otros.length > 0 && <p className="texto-suave text-sm mt-1">Además del efectivo: {otros.map((m) => `${MEDIO[m.medio] ?? m.medio} ${formatearPesos(m.total)}`).join(" · ")}</p>}
                 {r.anuladas.cantidad > 0 && <p className="texto-suave text-sm mt-1"><Icono nombre="deshacer" /> {r.anuladas.cantidad} anulada{r.anuladas.cantidad === 1 ? "" : "s"} ({formatearPesos(r.anuladas.total)})</p>}
                 {r.dejados_pasar > 0 && <p className="texto-suave text-sm mt-1"><Icono nombre="puerta" /> Dejaron pasar sin pagar: {r.dejados_pasar}</p>}
               </div>
@@ -91,6 +94,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const diaPedido = dia_ok(sp.dia);
     const z = await rpc<ReporteDia>("reporte_dia", { p_sede_id: sede.id, p_dia: diaPedido ?? null });
+    const cobrosDia = await rpc<CobrosMedio[]>("cobros_de_turnos", { p_turno_ids: z.turnos.map((t) => t.turno_id) });
     const contados = z.turnos.filter((t) => t.contado != null).length;
     const v = veredictoCaja(contados > 0 ? z.diferencia : null);
     const sedeQ = sp.sede ? `&sede=${sp.sede}` : "";
@@ -115,7 +119,8 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
             </dl>
             {z.sin_contar > 0 && <p className="pildora pildora-amarillo !rounded-[var(--radio)] !px-4 !py-3 whitespace-normal" data-sin-contar-dia><Icono nombre="recibo" /> {z.sin_contar} {z.sin_contar === 1 ? "caja quedó" : "cajas quedaron"} sin contar (tenían que tener {formatearPesos(z.esperado_sin_contar)}). No entran en el sobra/falta: <Link href="/panel/caja" className="underline">Caja → Para revisar</Link>.</p>}
             {z.abiertos > 0 && <p className="texto-suave"><Icono nombre="candado-abierto" /> {z.abiertos} {z.abiertos === 1 ? "turno sigue abierto" : "turnos siguen abiertos"}: el día no está cerrado.</p>}
-            {z.por_medio.length > 0 && <p className="texto-suave">Por medio: {z.por_medio.map((m) => `${MEDIO[m.medio] ?? m.medio} ${formatearPesos(m.total)}`).join(" · ")}</p>}
+            <PorMedio medios={cobrosDia} zona={zona} titulo="Lo cobrado en el día, por medio" />
+            <p className="texto-suave text-sm" data-dif-efectivo>El sobra o falta cuenta solo el efectivo de las cajas contadas.</p>
             <p className="texto-suave text-sm">{z.ventas.cantidad} {z.ventas.cantidad === 1 ? "venta" : "ventas"}{z.anuladas ? ` · ${z.anuladas} anulada${z.anuladas === 1 ? "" : "s"}` : ""}{z.dejados_pasar ? ` · ${z.dejados_pasar} dejado${z.dejados_pasar === 1 ? "" : "s"} pasar sin pagar` : ""}</p>
             <ul className="space-y-2" data-turnos-dia>
               {z.turnos.map((t) => {
