@@ -150,7 +150,7 @@ try {
     if (s.errores.length) falla(`${tam} socio: ${s.errores.join(" | ")}`);
     await s.context().close();
   }
-} catch (e) { falla(`se cortó: ${e.message.split("\n")[0]}`); }
+} catch (e) { falla(`se cortó: ${e.message.split("\n").slice(0, 14).join(" | ")}`); }
 finally {
   if (creado) await db.query(`delete from public.documentos where id = $1`, [creado]).catch(() => {});
   await db.end(); await b.close(); resultado();

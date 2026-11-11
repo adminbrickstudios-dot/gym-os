@@ -65,13 +65,17 @@ try {
   chequear(new URL(r.url()).pathname === "/panel/socios", "DNI nuevo → alta → cobro → entró, sin salir de la pantalla de origen", `terminó en ${r.url()}`);
   await capturar(r, "vd6-compu-entro");
   await r.keyboard.press("Escape");
+  await r.locator("[data-ventana-campo]").waitFor({ state: "hidden", timeout: 10000 });   // F2 abre y cierra: se espera a que la ventana esté cerrada
 
   // ── 2 · Lo escrito no se pierde: sin nombre no se guarda, un celular roto no rompe y Esc vuelve con el DNI ──
   await r.keyboard.press("F2");
   const otroDni = `37${s5}2`.padEnd(8, "5").slice(0, 8);
   await r.locator("[data-ventana-campo]").fill(otroDni);
   await r.keyboard.press("Enter");
-  await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 });
+  await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 }).catch(async (e) => {
+    const v = await r.locator("[data-ventana-campo], [data-ventana-hecho], [data-ventana-veredicto], [role=alert]").evaluateAll((l) => l.map((x) => `${x.tagName}: ${(x.value ?? x.innerText ?? "").toString().replace(/\s+/g, " ").slice(0, 200)}`)).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | ventana: ${v.join(" || ") || "(cerrada)"}`);
+  });
   await r.keyboard.press("a");
   await r.locator("[data-ventana-alta-form]").waitFor({ timeout: 30000 });
   await r.locator("[data-alta-nombre]").fill("");
