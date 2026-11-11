@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { CentroAyuda } from "@/components/ayuda/CentroAyuda";
 import { intentar } from "@/lib/panel/intentar";
@@ -17,6 +18,7 @@ export default async function Ayuda({ searchParams }: { searchParams: Promise<{ 
     return (
       <>
         <Encabezado icono="ayuda" titulo="Ayuda" bajada="Buscá lo que no sepas hacer. Cada respuesta tiene el botón que te lleva a hacerlo. Con Ctrl+K también las encontrás." />
+        <p className="mb-6"><Link href="/panel/ayuda/guias" className="boton" data-ayuda-guias>Guías de uso para leer o imprimir</Link></p>
         <CentroAyuda preguntas={preguntas} abierta={sp.p ?? null} version={VERSION_PREGUNTAS} />
       </>
     );
