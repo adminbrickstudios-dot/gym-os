@@ -76,7 +76,7 @@ Dónde quedó (09/11, mediodía):
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
 | F2.1 | SA-3 Ficha del gimnasio (todo de un local) | `SUPER-ADMIN.md` | 🟡 carril/b-super: ficha con datos, ciudad, links y QR, equipo, módulos, integraciones, lanzamiento, errores, registro y ciclo de vida; reprocesar webhook a pedido, papelera y clonar hechos; botones "abrir como soporte en esta pantalla" hechos |
-| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol, motivo, aviso en la campana; falta restricción de plata y "ver la app como este socio" |
+| F2.2 | SA-4 Entrar como soporte con rol, motivo, 60 min y aviso al dueño; "ver la app como este socio" | `SUPER-ADMIN.md` | 🟡 carril/b-super: rol, motivo, aviso en la campana; restricción de plata del soporte y "ver como este socio" hechos (migración 020800) |
 | F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
 | F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
 | F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con errores; medido con 200 gimnasios: tablero 429 ms y lista 758 ms (prueba de base) |
@@ -125,14 +125,14 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 
 | # | Qué | Estado |
 |---|---|---|
-| F9.1 | EDIT-S07: plantillas globales (landing, textos, mensajes): valor de la plataforma → plantilla del tipo → valor del gimnasio, con "Restaurar por defecto"; al cambiar la plantilla se actualizan los gimnasios que no la editaron | ❌ |
+| F9.1 | EDIT-S07: plantillas globales (landing, textos, mensajes): valor de la plataforma → plantilla del tipo → valor del gimnasio, con "Restaurar por defecto"; al cambiar la plantilla se actualizan los gimnasios que no la editaron | 🟡 carril/b-super: plantillas de texto (landing) con herencia plataforma → tipo → gimnasio, restaurar y propagación; probado en la base; falta el e2e (Actions) |
 | F9.2 | EDIT-D01 a D06: Configuración del dueño por secciones con buscador; Equipo (crear, permisos, desactivar, resetear); Web y estilo con vista previa en vivo; aviso de guardado, deshacer, historial y restaurar en cada cambio; estado de su dominio; exportar sus datos | ❌ |
 | F9.3 | WEB-06: términos y privacidad por gimnasio desde una plantilla editable (con FA-19) | ❌ |
-| F9.4 | ESC-01, 02 y 03: pool de conexiones de Supabase en las funciones; las páginas públicas en caché y sin auth en el proxy; EXPLAIN de lo que se usa seguido, RLS con `(select auth.uid())` y los asesores de Supabase sin errores | ❌ |
-| F9.5 | ESC-04: carga de 1.000 gimnasios demo y 500 usuarios simultáneos, **en local o en Actions, nunca contra producción**; resultados anotados y lo que falle, arreglado | ❌ |
-| F9.6 | ESC-05, 06 y 08: tablas que crecen (ingresos, registro) listas para partirse por mes y listas siempre paginadas; monitoreo propio (errores, chequeo de que responde, alertas; Sentry ⛔); límites por plan en datos | ❌ |
+| F9.4 | ESC-01, 02 y 03: pool de conexiones de Supabase en las funciones; las páginas públicas en caché y sin auth en el proxy; EXPLAIN de lo que se usa seguido, RLS con `(select auth.uid())` y los asesores de Supabase sin errores | 🟡 carril/b-super: RLS con select auth.uid(), índices, aviso de pooler y región, ver `ESCALA.md`; ⛔ asesores de Supabase y pedido del proxy (en PREGUNTAS.md) |
+| F9.5 | ESC-04: carga de 1.000 gimnasios demo y 500 usuarios simultáneos, **en local o en Actions, nunca contra producción**; resultados anotados y lo que falle, arreglado | 🟡 carril/b-super: `scripts/medir/carga.mjs` y workflow `carga.yml`; sin resultados todavía (se corre en Actions) |
+| F9.6 | ESC-05, 06 y 08: tablas que crecen (ingresos, registro) listas para partirse por mes y listas siempre paginadas; monitoreo propio (errores, chequeo de que responde, alertas; Sentry ⛔); límites por plan en datos | 🟡 carril/b-super: registro paginado, tamaño de tablas, `/api/salud`, alertas y límites por plan; Sentry ⛔ |
 | F9.7 | ESC-07: procedimiento para restaurar una copia de seguridad (⛔ hasta Supabase Pro, D51) | ❌ |
-| F9.8 | SEG-01 a 07 que no hayan quedado cubiertos por U3, BASE-8 y SA-10/11 | ❌ |
+| F9.8 | SEG-01 a 07 que no hayan quedado cubiertos por U3, BASE-8 y SA-10/11 | 🟡 carril/b-super: guardas SEG-02/07 en vitest; restricción de plata del soporte y ver como socio hechos |
 
 ## Fase 8 · El cierre
 

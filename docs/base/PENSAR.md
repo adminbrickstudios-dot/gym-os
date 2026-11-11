@@ -98,3 +98,16 @@ terminado.
    - *1.000 gimnasios*: la prueba mira un solo gimnasio por vez; las listas no la corren.
 4. **Lo que no pidió y necesita:** que un gimnasio nunca se quede sin dueño (ni al desactivar, ni al cambiar rol, ni al mover), direcciones reservadas de la plataforma (`admin`, `www`, `app`…) y que mover a una persona no rompa su historial.
 5. **Decisión y prueba:** reuso lo de U1 y SA-3 a SA-5. Slug normalizado y reservado en el servidor; `admin_probar_acceso(_gimnasio)` en la base con pasos ok/aviso/falta; "Arreglar" confirma la cuenta, activa o reanuda; mover = misma cuenta, fila nueva en el destino y la vieja desactivada. Prueba: 5 pruebas de base, vitest del slug y el e2e `scripts/e2e/super-p.mjs`.
+
+## F9 · Plantillas, escala, monitoreo y plata del soporte (carril B, 11/11)
+
+1. **Qué quiso decir Mateo:** que BRIK cambie un texto una vez y lo vean todos los gimnasios que no lo tocaron; que la plataforma aguante miles de gimnasios y avise sola si algo falla; y que el soporte pueda ayudar sin poder tocar la plata de nadie por error.
+2. **Cómo lo hacen otros:** Shopify y WordPress multisitio heredan de un tema base y marcan lo "personalizado"; Stripe y Linear muestran uso contra el límite del plan; los equipos chicos usan un chequeo de salud externo antes de pagar un APM.
+3. **Cómo se rompe (5):**
+   - *gimnasio que editó el texto*: no se pisa (se compara con lo que valía la plantilla antes del cambio).
+   - *tabla enorme*: nada devuelve "todo"; el registro va por cursor de 50 y hay un tope.
+   - *rol equivocado*: la base decide (`exigir_brik`); soporte sin permiso de plata es frenado por trigger, no por la pantalla.
+   - *1.000 gimnasios*: el script de carga se niega a correr contra una base que no sea local.
+   - *datos vacíos*: sin límite cargado el plan es "sin límite"; sin SALUD_URL el chequeo se apaga.
+4. **Lo que no pidió y necesita:** que los límites NO bloqueen altas (cambia quién cobra y qué), que todo quede en el registro de BRIK y la lista de lo que Mateo tiene que mirar (asesores, región).
+5. **Decisión y prueba:** migraciones 020600 a 020800 con pruebas de base propias; guardas de seguridad del código en vitest; e2e `scripts/e2e/super-f9.mjs` para Actions.

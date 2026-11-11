@@ -44,6 +44,7 @@ export function BuscarPersona() {
             </div>
             {p.tipo === "socio" && p.persona_id && (
               <div className="flex flex-wrap gap-2" data-datos-personales>
+                <Link className="boton" href={`/admin/ver-socio?g=${p.gimnasio_id}&s=${p.persona_id}`} data-ver-como-socio>Ver como este socio</Link>
                 <a className="boton" href={`/admin/buscar/exportar-socio?gimnasio=${p.gimnasio_id}&socio=${p.persona_id}`}>Exportar sus datos</a>
                 <BotonAccion className="boton texto-suave" ocupadoTexto="Borrando…" onClick={async () => {
                   const why = window.prompt(`Se borran los datos personales de ${p.nombre}. Los pagos se conservan con el nombre tachado. ¿Por qué? (por ejemplo, "lo pidió el socio")`);

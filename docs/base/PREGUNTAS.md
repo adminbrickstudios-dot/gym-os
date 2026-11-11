@@ -300,3 +300,9 @@ Respuesta de Mateo: (vacío)
 
 - No toqué `src/app/ingresar` ni `src/proxy.ts` (los arregla B). Lo mío: la prueba de base `login-dueno-nuevo.test.mjs` (alta de gimnasio con dueño, filas que quedan, mail con mayúsculas y espacios, cuenta sin fila o de otro gimnasio, slug inexistente) y el e2e `scripts/e2e/fase-u0-login.mjs`.
 - Pendiente de decidir (de B): `darAcceso` no normaliza el mail adentro; hoy lo hacen los que lo llaman (`admin/acciones.ts`, `panel/equipo/acciones.ts`). Recomendado: normalizar también en `src/lib/cuentas.ts`.
+
+### Carril B · F2 / F9.8 (restricción de plata del soporte y "ver como socio")
+
+- **Toca plata y permisos, por eso lo reporto:** la migración `20261109020800` agrega un trigger en `ventas`, `pagos`, `movimientos_caja` y `turnos_caja` que frena (42501) cualquier escritura hecha por una cuenta de soporte de BRIK (`equipo.es_soporte`) salvo que, al entrar, se haya tildado "El dueño me pidió tocar plata" (`soportes_gimnasio.plata_autorizada`, 60 min, queda en el motivo que ve el dueño). **No cambia quién cobra en el gimnasio**: dueño, recepción y profe quedan igual. Decisión de Mateo: ¿alcanza con la casilla o prefiere que el dueño apruebe desde su panel?
+- **"Ver como este socio"** es una pantalla de solo lectura de BRIK (`/admin/ver-socio`, función `admin_ver_socio`): acceso calculado con motivo, cobertura, últimos pagos e ingresos. No entra a la cuenta del socio ni muestra la app real (es del carril C). Queda en el registro de BRIK.
+- **SEG-01 a 07:** SEG-01 ya estaba (`aislamiento-gimnasios.test.mjs`); SEG-02 y SEG-07 ahora tienen guarda en vitest (`src/lib/admin/seguridad-codigo.test.ts`: ningún archivo de navegador toca la clave de servicio, ninguna clave ni `demo-gymos` en `src`); SEG-03/04 (BASE-8), SEG-05 (registro de BRIK) y SEG-06 (exportar/borrar) ya estaban.
