@@ -174,7 +174,8 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     confirmarEntrada(elegido, antes, optimista, forzar, promesa);
   };
   const confirmarEntrada = (elegido: ResultadoSocio, antes: { elegido: ResultadoSocio; v: Veredicto | null; guia: Guia | null; apto: string | null; firmar: string | null; texto: string; socios: ResultadoSocio[] }, optimista: boolean, forzar?: string, promesa?: PromesaPago) => empezar(async () => {
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
+    // Si la red se corta a mitad del pedido el servidor ni contesta (la acción lanza): se trata como un error más, con la vuelta atrás.
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa).catch(() => ({ error: "No se pudo anotar la entrada: se cortó la conexión. Revisá internet y probá de nuevo." } as Awaited<ReturnType<typeof registrarEntrada>>));
     if (r.error) {
       setError(r.error);
       if (optimista) { setHecho(null); setElegido(antes.elegido); setV(antes.v); setGuia(antes.guia); setApto(antes.apto); setFirmar(antes.firmar); setTexto(antes.texto); setSocios(antes.socios); }
