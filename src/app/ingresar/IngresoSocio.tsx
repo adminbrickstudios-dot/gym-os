@@ -118,7 +118,7 @@ function PorCodigo({ via, setVia, valor, setValor, vias, otraVez }: {
       <label className="block space-y-2">
         <span className="etiqueta">Tu celular o tu mail</span>
         <input
-          className="campo !text-xl" name={mail ? "email" : "telefono"} type={mail ? "email" : "tel"} autoComplete={mail ? "email" : "tel"}
+          className="campo !text-xl" name={mail ? "email" : "telefono"} type="text" inputMode="email" autoCapitalize="none" autoCorrect="off" autoComplete={mail ? "email" : "tel"}
           required placeholder="387 555-1234 o vos@ejemplo.com" value={valor}
           onChange={(e) => {
             const v = e.target.value;

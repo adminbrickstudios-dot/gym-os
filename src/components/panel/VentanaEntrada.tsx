@@ -731,7 +731,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           className="fixed z-40 left-1/2 -translate-x-1/2 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:left-auto lg:translate-x-0 lg:right-6 lg:bottom-6
             size-16 rounded-full bg-[var(--verde)] text-white text-3xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
           style={{ boxShadow: "0 10px 28px -10px rgb(0 0 0 / 0.6)" }}>
-          <span aria-hidden>{abierta ? "✕" : ""}</span>
+          <Icono nombre={abierta ? "cerrar" : "puerta"} />
         </button>
       )}
 
@@ -991,7 +991,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "anotado" && hecho && (
             <div className="p-8 text-center space-y-4" data-ventana-hecho={hecho.resultado} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={72} />}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? <Icono nombre="prohibido" /> : hecho.alerta_prestamo ? <Icono nombre="alerta" /> : <Tilde tamano={72} />}</div>
               <p className="titular text-4xl break-words">{hecho.nombre}</p>
               <p className="text-xl font-semibold">
                 {hecho.repetido ? (hecho.texto ?? "Ya estaba anotado hace un momento")
@@ -1014,7 +1014,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "salio" && salio && (
             <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "" : ""}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? <Icono nombre="ok" /> : <Icono nombre="info" />}</div>
               {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
                 <>
                   <p className="titular text-4xl break-words">{salio.nombre}</p>

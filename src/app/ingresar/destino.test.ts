@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demasiadosIntentos, motivoDeEntrada, sinConexion, TEXTO_SIN_GIMNASIO } from "./destino";
+import { armarLinkAyuda, demasiadosIntentos, motivoDeEntrada, sinConexion, TEXTO_SIN_GIMNASIO } from "./destino";
 
 describe("VD-61 · casos de error del ingreso", () => {
   it("reconoce el límite de intentos de Supabase Auth", () => {
@@ -24,5 +24,12 @@ describe("PLAT-08: el motivo real de un ingreso fallido", () => {
   });
   it("sin gimnasio: texto honesto con salida", () => {
     expect(TEXTO_SIN_GIMNASIO).toMatch(/no tiene un gimnasio asignado/);
+  });
+  it("el link de ayuda a BRIK saca todo lo que no es número, y no borra la letra D", () => {
+    expect(armarLinkAyuda("+54 9 387 555-1234", "a@ejemplo.invalid")).toMatch(/^https:\/\/wa\.me\/5493875551234\?text=/);
+    // Con el bug viejo (/D/g) esta cadena quedaba con las letras y sin la D.
+    expect(armarLinkAyuda("+54 9 387 D555-1234", "a@ejemplo.invalid")).toMatch(/^https:\/\/wa\.me\/5493875551234\?text=/);
+    expect(armarLinkAyuda("123", "a@ejemplo.invalid")).toBeUndefined();
+    expect(armarLinkAyuda(null, "a@ejemplo.invalid")).toBeUndefined();
   });
 });

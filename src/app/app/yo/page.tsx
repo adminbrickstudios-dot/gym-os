@@ -100,7 +100,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         {/* VD-31B: apagar las ayudas (o volver a verlas) desde la app, igual que en el panel. */}
         {ayudasEstado && <AjustesAyuda apagadas={ayudasEstado.apagadas} />}
 
-        <form action="/salir" method="post"><button className="boton w-full !min-h-14">Cerrar sesión</button></form>
+        <form action="/salir?a=socio" method="post"><button className="boton w-full !min-h-14">Cerrar sesión</button></form>
       </div>
     );
   });

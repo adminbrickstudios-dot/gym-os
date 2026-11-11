@@ -17,7 +17,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { Icono } from "@/components/ui/Icono";
 
-const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 /** Un sonido por color, para no tener que mirar: agudo y corto si entra, grave y doble si no. */
 function sonar(color: string) {
@@ -82,12 +82,15 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   }, []);
   useEffect(() => {
     if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
+    // Una búsqueda vieja que vuelve tarde no pisa a la nueva: cada efecto se marca como vigente y al limpiarse deja de serlo.
+    let vigente = true;
     const t = setTimeout(async () => {
       const r = await buscarSociosRapido(texto.trim());
+      if (!vigente) return;
       setSocios(r.socios ?? []);
       setError(r.error ?? null);
     }, 150);
-    return () => clearTimeout(t);
+    return () => { vigente = false; clearTimeout(t); };
   }, [texto]);
 
   const reiniciar = () => { setTexto(""); setSocios([]); setElegido(null); setV(null); setGuia(null); setApto(null); setFirmar(null); setForzando(false); setMotivo(""); setTimeout(() => campo.current?.focus(), 0); };
@@ -236,7 +239,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       if (forzando || ((e.target as HTMLElement)?.tagName === "INPUT" && e.target !== campo.current)) return;
       if (e.key === "Escape") { e.preventDefault(); reiniciar(); }
       else if (e.key === "Enter" && v.puede && !ocupado && (e.target as HTMLElement)?.tagName !== "BUTTON" && (e.target as HTMLElement)?.tagName !== "A") { e.preventDefault(); anotar(); }
-      else if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !ocupado && e.target !== campo.current && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); marcarSalida(elegido.socio_id, elegido.nombre); }
+      // (Sin atajo "S" acá: con el foco fuera del campo, una "S" es la primera letra de un nombre. La salida es el botón "Salida" o DNI + S en el campo.)
       // Una letra con el foco en otro lado: va al buscador, reemplazando lo que había (el onChange cierra el veredicto).
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== campo.current) { campo.current?.focus(); campo.current?.select(); }
     };
@@ -274,7 +277,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
 
       {hecho && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : hecho.alerta_prestamo ? "amarillo" : "verde") }}>
-          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={32} />}</span>
+          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? <Icono nombre="prohibido" /> : hecho.alerta_prestamo ? <Icono nombre="alerta" /> : <Tilde tamano={32} />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">
             {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
@@ -287,11 +290,11 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       )}
       {salio && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"}>
-          <span className="text-3xl" aria-hidden>{salio.registrada ? "" : ""}</span>
+          <span className="text-3xl" aria-hidden>{salio.registrada ? <Icono nombre="ok" /> : <Icono nombre="info" />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">{salio.registrada ? salio.texto : `${salio.nombre}: ${salio.texto}`}</p>
         </div>
       )}
-      {error && <Mensaje tipo="error">{error}</Mensaje>}
+      {error && !(elegido && v) && <Mensaje tipo="error">{error}</Mensaje>}
 
       {!elegido && socios.length > 0 && (
         <ul className="space-y-2">
@@ -344,6 +347,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           className="fixed inset-0 z-50 overflow-y-auto p-6 sm:p-12 flex"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 62%)` }}>
           <div className="pulso m-auto w-full max-w-3xl">
+          {error && <div className="mb-4" data-veredicto-error><Mensaje tipo="error">{error}</Mensaje></div>}
           <div className="flex items-center gap-4">
             <p className="text-7xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
             {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
@@ -355,7 +359,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
           {guia?.decile && <p className="mt-2 text-2xl" data-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
-          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <LinkPanel href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <LinkPanel href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
@@ -380,7 +384,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             )}
             <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</LinkPanel>
             {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida</button>}
-            <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
+            <button type="button" onClick={reiniciar} className="boton"><Icono nombre="cerrar" /> Otro socio</button>
           </div>
 
           {forzando && (

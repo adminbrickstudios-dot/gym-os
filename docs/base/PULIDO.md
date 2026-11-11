@@ -385,3 +385,31 @@ Marcas:
 13. Super admin: notas y recordatorios por gimnasio en la lista.
 14. Super admin: "ver como el dueño", solo lectura, para revisar sin permisos de soporte.
 15. Gastos recurrentes con vencimiento ("vence el alquiler el 10") en Para hacer hoy.
+
+## Estado de los [ROTO] de H7 (11/11, rama `carril/h7-roto`)
+
+La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` para el cambio de rol). ✅ = arreglado y con prueba; 🟡 = arreglado sin prueba automática, o a medias, con el motivo.
+
+| [ROTO] | Estado |
+|---|---|
+| Kiosco: el lector USB borra la G de `GYMOS1.` | ✅ `src/app/kiosco/campo.test.ts` (vitest) y pulido-roto paso 1 |
+| Kiosco sin internet termina en la pantalla de error | ✅ pulido-roto (modo sin conexión: "Sin conexión: pasá por recepción") |
+| Mi QR vencido sin señal; al volver de la pantalla bloqueada | ✅ pulido-roto (sin señal y al volver); 🟡 el `visibilitychange` está escrito pero la prueba solo corta y devuelve la red |
+| Avisos que tapan el botón flotante y la barra | ✅ pulido-roto (posición contra el botón y la barra) |
+| Botón flotante de la Entrada vacío | ✅ pulido-roto (tiene su ícono) |
+| Íconos vacíos en el rojo, la salida y la caja (Puerta, Ventana, Turno, entradas y salidas de plata) | 🟡 reemplazados por `<Icono>`; sin prueba de pantalla propia (tsc y lint limpios) |
+| Emojis crudos de la base en Inicio y en los chips de la guía | 🟡 `sistema` en `<Icono>` (la migración entregada no se toca); sin prueba de pantalla propia |
+| Error de Anotar, Dejar pasar, Salida o Volvió antes debajo del veredicto | 🟡 el error se muestra dentro del veredicto (Puerta.tsx); sin prueba: hace falta forzar un fallo de la base |
+| Atajo "S" marca la salida al tipear un nombre | ✅ pulido-roto (la S va al buscador) |
+| Búsqueda vieja pisa a la nueva (Entrada y Vender); Vender mostraba el error como "No está" | 🟡 control de vigencia en las dos; sin prueba: hace falta una respuesta tardía |
+| Cobrar se cierra mientras cobra | 🟡 no cierra (Esc, X ni afuera) mientras "Cobrando…"; sin prueba automática |
+| "Abrir caja" en Vender pierde el carrito | 🟡 abre el turno en el mismo carrito (`AbrirTurnoCobrar`); sin prueba: depende de una caja cerrada |
+| Cambiar un rol de un toque | ✅ `panel-equipo.mjs` (confirmación con lo que gana o pierde) |
+| Exportar ignora los filtros | 🟡 el botón dice "Exportar todos los socios" si hay un filtro; el filtro real necesita migración (ver `PREGUNTAS.md`) |
+| "Salir" del socio cae en el login del equipo | ✅ pulido-roto |
+| Con la sesión abierta, /ingresar y /socio piden la contraseña | ✅ pulido-roto (en la página; `proxy.ts` lo sigue otro ayudante) |
+| `linkAyudaBrik` borra la letra D | ✅ `destino.test.ts` (vitest) |
+| "Tu celular o tu mail" con `type=tel` | ✅ pulido-roto |
+| El tema por usuario solo lee la cookie | ✅ pulido-roto (dispositivo nuevo sin cookie) |
+| La hora del cierre por WhatsApp sale en la zona de la compu | 🟡 usa la zona del gimnasio; sin prueba automática (depende de la zona de la compu que corre la prueba) |
+| Soporte reconocido por el nombre "Soporte BRIK" | 🟡 permisos: no se arregló, queda en `PREGUNTAS.md` con la opción más segura |

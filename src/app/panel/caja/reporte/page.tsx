@@ -71,7 +71,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
                 <p className="font-semibold mb-1">Entradas y salidas de plata</p>
                 {r.movimientos.length === 0 ? <p className="texto-tenue">No hubo.</p> : (
                   <ul className="space-y-1 text-sm">
-                    {r.movimientos.map((m, i) => <li key={i}>{m.tipo === "retiro" ? "" : ""} {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>)}
+                    {r.movimientos.map((m, i) => <li key={i}><Icono nombre={m.tipo === "retiro" ? "menos" : "mas"} titulo={m.tipo === "retiro" ? "Salió de la caja" : "Entró a la caja"} /> {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>)}
                   </ul>
                 )}
               </div>

@@ -2,7 +2,7 @@
 import { headers } from "next/headers";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
-import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
+import { armarLinkAyuda, TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
 import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
@@ -15,8 +15,7 @@ async function linkAyudaBrik(email: string): Promise<string | undefined> {
   try {
     const { clienteServicio } = await import("@/lib/supabase/servicio");
     const { data } = await clienteServicio().rpc("contacto_plataforma_publico");
-    const w = String((data as { whatsapp?: string | null } | null)?.whatsapp ?? "").replace(/D/g, "");
-    return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a Base con ${email}`)}` : undefined;
+    return armarLinkAyuda((data as { whatsapp?: string | null } | null)?.whatsapp, email);
   } catch { return undefined; }
 }
 

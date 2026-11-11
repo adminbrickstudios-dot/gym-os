@@ -13,6 +13,12 @@ export function destinoSeguro(siguiente: string | null, porDefecto: string) {
   return porDefecto;
 }
 
+/** El link de WhatsApp a BRIK con el mail de quien no puede entrar. Del número se sacan las letras y símbolos (`\D`, no la letra D). */
+export function armarLinkAyuda(whatsapp: unknown, email: string): string | undefined {
+  const w = String(whatsapp ?? "").replace(/\D/g, "");
+  return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a Base con ${email}`)}` : undefined;
+}
+
 /** Recuerda en qué gimnasio trabaja la persona cuando entra desde la dirección de la plataforma. */
 export async function elegirGimnasio(slug: string) {
   (await cookies()).set(COOKIE_GIMNASIO, slug, OPCIONES_COOKIE_GIMNASIO);
@@ -76,4 +82,26 @@ export async function destinoTrasEntrar(supabase: Cliente, siguiente: string | n
   if (yo.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
   await supabase.auth.signOut();
   return { error: "Tu usuario no es de este gimnasio. Revisá la dirección o pedile acceso al dueño." };
+}
+
+/**
+ * Entrar a /ingresar o a /socio con la sesión ya abierta no muestra el login otra vez: lleva a donde iba la persona.
+ * Nunca cierra la sesión ni adivina: si no corresponde a este gimnasio, devuelve null y se muestra el ingreso de siempre.
+ */
+export async function destinoSiYaHaySesion(supabase: Cliente, siguiente: string | null, comoSocio: boolean): Promise<string | null> {
+  if (!(await cookies()).getAll().some((c) => c.name.startsWith("sb-"))) return null;
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return null;
+  const h = await headers();
+  const gimnasioId = h.get("x-gimnasio-id");
+  if (!gimnasioId || h.get("x-gymos-contexto") === "plataforma") return null;
+  const { data: sesion, error } = await supabase.rpc("mi_sesion");
+  if (error || !sesion) return null;
+  const yo = sesion as MiSesion;
+  const esSocio = yo.socios.some((s) => s.gimnasio_id === gimnasioId);
+  const esEquipo = yo.equipo.some((e) => e.gimnasio_id === gimnasioId);
+  if (comoSocio && esSocio) return "/app";
+  if (esEquipo) return destinoSeguro(siguiente, "/panel");
+  if (esSocio) return "/app";
+  return null;
 }

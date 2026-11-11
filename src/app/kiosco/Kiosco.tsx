@@ -8,6 +8,7 @@ import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
 import QRCode from "qrcode";
 import { Icono } from "@/components/ui/Icono";
+import { SIN_CONEXION, valorDelCampo } from "./campo";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "entrar"];
 
@@ -82,14 +83,16 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
 
   const mandar = useCallback((codigo: string) => empezar(async () => {
     setCamara(false);
-    const x = await entrarEnKiosco(codigo);
+    let x: Resultado;
+    try { x = await entrarEnKiosco(codigo); } catch { x = { error: SIN_CONEXION }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   }), []);
   // VD-48 · "Me voy": con el DNI (o el QR que escribió el lector) en el campo.
   const irme = (codigo: string) => empezar(async () => {
     setCamara(false);
-    const x = await salirEnKiosco(codigo);
+    let x: Resultado;
+    try { x = await salirEnKiosco(codigo); } catch { x = { error: SIN_CONEXION, salida: true }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && !!x.registrada);
   });
@@ -102,7 +105,8 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
   }, [r]);
 
   const conHabitual = (fin: string) => empezar(async () => {
-    const x = await entrarHabitual(elegido!.socio_id, fin);
+    let x: Resultado;
+    try { x = await entrarHabitual(elegido!.socio_id, fin); } catch { x = { error: SIN_CONEXION }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   });
@@ -162,7 +166,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       )}
       {elegido && <button type="button" className="boton-texto texto-suave" onClick={() => { setElegido(null); setDni(""); }}>← No soy {elegido.nombre}</button>}
       <form onSubmit={(e) => { e.preventDefault(); if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6 || /^GYMOS1\./.test(dni)) mandar(dni); }}>
-        <input ref={campo} value={dni} onChange={(e) => setDni(!elegido && e.target.value.startsWith("GYMOS1.") ? e.target.value : e.target.value.replace(/\D/g, "").slice(0, largo))}
+        <input ref={campo} value={dni} onChange={(e) => setDni(valorDelCampo(e.target.value, !!elegido, largo))}
           inputMode="numeric" autoComplete="off" aria-label={elegido ? "Últimos 3 números de tu DNI" : "Tu DNI"} placeholder={elegido ? "···" : "Tu DNI"}
           className="campo !min-h-20 !text-4xl text-center tracking-widest numero" />
       </form>

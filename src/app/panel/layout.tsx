@@ -22,6 +22,7 @@ import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
 import { contextoCompleto, contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
 import { Icono } from "@/components/ui/Icono";
+import { SincronizarTema } from "./cuenta/SincronizarTema";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -89,10 +90,12 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   const estadoG = soporte?.activo ? null : await rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
   if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
+  const temaCookie = (await cookies()).get("tema")?.value ?? null;
   return (
     <>
       <RegistrarSesion />
-      <Marco panel={panel} tema={(await cookies()).get("tema")?.value ?? null} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+      {!temaCookie && <SincronizarTema />}
+      <Marco panel={panel} tema={temaCookie} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
         <FranjaMantenimiento />
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
