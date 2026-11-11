@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Icono } from "@/components/ui/Icono";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -28,7 +29,7 @@ export default async function PaginaKiosco({ searchParams }: { searchParams: Pro
     <main className="min-h-dvh grid place-items-center p-6">
       {estado ? <Kiosco {...estado} /> : (
         <div className="max-w-lg text-center space-y-4" data-kiosco="sin-autorizar">
-          <p className="text-6xl" aria-hidden>🔒</p>
+          <p className="text-6xl" aria-hidden><Icono nombre="candado" /></p>
           <h1 className="titular text-4xl">Tablet sin autorizar</h1>
           <p className="texto-suave text-lg">{problema}</p>
         </div>

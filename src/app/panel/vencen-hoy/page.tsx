@@ -23,6 +23,7 @@ const PESTANAS = [
   { clave: "vencidos", emoji: "punto-rojo", titulo: "Vencidos" },
   { clave: "por_vencer", emoji: "calendario", titulo: "Por vencer" },
   { clave: "prometieron", emoji: "usuarios", titulo: "Prometieron pagar" },
+  { clave: "cobrar", emoji: "plata", titulo: "Tengo que cobrar" },
 ] as const;
 
 export default async function VencenHoy({ searchParams }: { searchParams: Promise<{ pestana?: string }> }) {
@@ -49,7 +50,10 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
     const tanda = filas.flatMap((f) => { const b = avisos.get(f.socio_id); return b ? [{ ...b, nombre: f.nombre, mensaje: f.mensaje ?? b.mensaje }] : []; });
     const zona = panel.gimnasio.zona_horaria;
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas) && panel.cobra.membresia;
-    const cuantos = (c: string) => c === "prometieron" ? prometieron.length : pest[c as "hoy" | "vencidos" | "por_vencer"].cantidad;
+    // F7.1 · "Tengo que cobrar" (el día 1): los que vencen hoy y los vencidos en una sola cola, primero los de más plata, para ir cobrando de arriba hacia abajo.
+    const colaCobro = [...pest.hoy.filas, ...pest.vencidos.filas.filter((v) => !pest.hoy.filas.some((h) => h.socio_id === v.socio_id))]
+      .sort((a, b) => (b.debe ?? b.monto_mensual ?? 0) - (a.debe ?? a.monto_mensual ?? 0) || a.nombre.localeCompare(b.nombre, "es"));
+    const cuantos = (c: string) => c === "prometieron" ? prometieron.length : c === "cobrar" ? colaCobro.length : pest[c as "hoy" | "vencidos" | "por_vencer"].cantidad;
     // La plata de la cuota mensual es de dueño y encargado; la recepción ve cantidades y lo que debe cada vencido.
     const gestion = panel.yo.rol !== "recepcion";
     const lista = (grupo: Fila[], clave: "hoy" | "vencidos" | "por_vencer") => (
@@ -92,7 +96,7 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
           {gestion && pest.por_vencer.plata != null && <> · <b className="numero" data-total="por_vencer">{formatearPesos(pest.por_vencer.plata)}</b> por vencer</>}
         </p>
         <nav className="pestanas mb-6" aria-label="Pestañas de cobro" data-pestanas>
-          {PESTANAS.map((p) => (
+          {PESTANAS.filter((p) => p.clave !== "cobrar" || puedeCobrar).map((p) => (
             <Link key={p.clave} href={ir(p.clave)} data-transicion className="pestana" data-pestana={p.clave} aria-current={p.clave === activa ? "page" : undefined}>
               <Icono nombre={p.emoji} /> {p.titulo} <span className="texto-tenue" data-cuenta>{cuantos(p.clave)}</span>
             </Link>
@@ -123,6 +127,20 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
         {activa === "por_vencer" && (pest.por_vencer.cantidad === 0
           ? <Vacio icono="calendario" titulo="Nadie vence en los próximos días">Se vuelve a calcular cada vez que abrís.</Vacio>
           : lista(pest.por_vencer.filas, "por_vencer"))}
+        {activa === "cobrar" && puedeCobrar && (colaCobro.length === 0
+          ? <Vacio icono="estrella" titulo="No hay nadie para cobrar">Los que vencen hoy y los que deben la cuota aparecen acá, los de más plata primero.</Vacio>
+          : (
+            <div className="space-y-3" data-cola-cobro={colaCobro.length}>
+              <p className="texto-suave">{colaCobro.length === 1 ? "1 socio para cobrar" : `${colaCobro.length} socios para cobrar`}, los de más plata primero. Cobrá de arriba hacia abajo: al cobrar, sale de la lista.</p>
+              <ul className="space-y-2" data-lista-vencen="cobrar">
+                {colaCobro.map((f, i) => (
+                  <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={`${i + 1}. ${f.nombre}`} texto={f.texto} lista={pest.hoy.filas.some((h) => h.socio_id === f.socio_id) ? "por_vencer" : "vencido"}
+                    detalle={f.debe != null && f.debe > 0 ? `Debe ${formatearPesos(f.debe)}` : f.monto_mensual != null && gestion ? `Cuota ${formatearPesos(f.monto_mensual)}` : "Vence hoy"}
+                    whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)} ultimo={null} puedeAnotar={false} cobrar />
+                ))}
+              </ul>
+            </div>
+          ))}
         {activa === "prometieron" && (prometieron.length === 0
           ? <Vacio icono="usuarios" titulo="Nadie prometió pagar">Si dejás pasar a alguien que paga después, aparece acá hasta que pague.</Vacio>
           : bloquePrometieron)}

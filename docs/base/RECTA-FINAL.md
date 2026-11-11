@@ -107,19 +107,19 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | ❌ |
+| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | 🟡 carril/b-super: lo de mi zona está (FA-20 `/estado` escrito, FA-24 hecho); FA-12 y FA-23 son de la app del socio; el resto de A, C y D |
 
 ## Fase 6 · Lo chico de antes
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F6.1 | Los grupos 2 a 9 de `docs/v2/DETALLES.md` (VD-*) que no quedaron hechos en las fases anteriores | `docs/v2/DETALLES.md` | ❌ |
+| F6.1 | Los grupos 2 a 9 de `docs/v2/DETALLES.md` (VD-*) que no quedaron hechos en las fases anteriores | `docs/v2/DETALLES.md` | 🟡 carril/b-super: lo de super admin, plataforma, kiosco, TV y avisos (VD-26B, 33F, 40B); lo que queda es de otros carriles o de Mateo (ver PREGUNTAS.md) |
 
 ## Fase 7 · Propuestas (P2)
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F7.1 | TV de entradas, pase de invitado, ocupación en vivo para el socio, congelar solo, modo "tengo que cobrar" el día 1, tablet kiosco pulida | `PROGRESO.md` P2 | ❌ |
+| F7.1 | TV de entradas, pase de invitado, ocupación en vivo para el socio, congelar solo, modo "tengo que cobrar" el día 1, tablet kiosco pulida | `PROGRESO.md` P2 | 🟡 carril/b-super: TV de entradas con ocupación, ocupación en vivo en la app (apagada), congelar solo (apagado, con tope), pestaña "Tengo que cobrar", kiosco sin emojis; pase de invitado ya estaba; falta el e2e `super-f11.mjs` en Actions; ver PREGUNTAS.md |
 
 ## Fase 9 · Edición en capas, escala y seguridad (`AJUSTES-0911-NOCHE.md`)
 
