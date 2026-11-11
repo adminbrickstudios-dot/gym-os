@@ -27,7 +27,9 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   const prospecto = socioId ? "" : String(form.get("prospecto") ?? "");
   // Alta en un paso (SOC-13): el plan y, si se eligió, ir directo a cobrar.
   const plan = socioId ? "" : String(form.get("plan_id") ?? "");
-  const cobrar = !!plan && form.get("despues") === "cobrar";
+  // C10: alta en el pasado (fecha de alta y/o pagos anteriores). Lo hace la base en una sola transacción: dueño o encargado.
+  const pasado = !socioId && form.get("pasado") === "1";
+  const cobrar = !pasado && !!plan && form.get("despues") === "cobrar";
   // U2: quien lo da de alta puede escribirle la contraseña (no se manda ningún mail). Se valida antes de guardar nada.
   const contrasena = socioId ? "" : String(form.get("contrasena_elegida") ?? "").trim();
   if (contrasena && !datos.email) return { error: "Para ponerle contraseña hace falta su mail.", valores: datos };
@@ -38,8 +40,23 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
     const c = await conflictoDe(panel.gimnasio.id, "socios", socioId, String(form.get("version") ?? ""));
     if (c) return { error: c.error, version: c.version, valores: datos };
   }
+  let pagosPasados: unknown[] = [];
+  if (pasado) {
+    if (!plan) return { error: "Para cargar un alta en el pasado elegí el plan.", valores: datos };
+    try { pagosPasados = JSON.parse(String(form.get("pagos_pasados") || "[]")); if (!Array.isArray(pagosPasados)) throw new Error("x"); }
+    catch { return { error: "Los pagos anteriores no se entendieron: volvé a cargarlos.", valores: datos }; }
+  }
   try {
-    id = await rpc<string>("guardar_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: socioId, p_datos: datos });
+    if (pasado) {
+      // Socio, membresía y pagos pasados en una sola transacción (la plata no entra en la caja de hoy).
+      const r = await rpc<{ socio_id: string }>("alta_socio_pasado", {
+        p_gimnasio_id: panel.gimnasio.id, p_sede_id: sedeActiva(panel).sede.id, p_datos: datos, p_plan_id: plan,
+        p_fecha_alta: String(form.get("fecha_alta") ?? "").trim() || null, p_pagos: pagosPasados,
+      });
+      id = r.socio_id;
+    } else {
+      id = await rpc<string>("guardar_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: socioId, p_datos: datos });
+    }
     if (prospecto) {
       await rpc("prospecto_es_socio", { p_gimnasio_id: panel.gimnasio.id, p_prospecto_id: prospecto, p_socio_id: id });
       revalidatePath("/panel/prospectos");
@@ -51,8 +68,8 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   // Desde un Interesado ya no se redirige desde el servidor (esa vuelta perdía la sesión en Actions): el cliente sigue solo,
   // y la página del alta tolera que el Interesado ya sea socio mientras se vuelve a dibujar.
   // El socio ya quedó dado de alta: si el plan no se pudo asignar, se sigue en la ficha (ahí se asigna).
-  let conPlan = false;
-  if (plan) {
+  let conPlan = pasado;   // el alta en el pasado ya dejó la membresía
+  if (plan && !pasado) {
     try { await rpc("asignar_plan", { p_socio_id: id, p_plan_id: plan }); conPlan = true; revalidatePath(`/panel/socios/${id}`); }
     catch { conPlan = false; }
   }

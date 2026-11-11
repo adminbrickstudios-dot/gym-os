@@ -4,13 +4,14 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { fechaCorta } from "@/lib/formato";
+import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { CAMPOS, adivinarColumnas, armarFilas, celda, leerCsv, type Campo } from "@/lib/importar";
 import { deshacer, importar, revisar } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 
 export type Importacion = { id: string; archivo: string | null; filas: number; importados: number; creado_en: string; deshecha_en: string | null; puede_deshacer: boolean };
-type Revision = { validas: number; ya_existian?: number; repetidas_en_archivo?: number; filas: { fila: number; errores: string[]; datos: Record<string, string | null> }[] };
+type PagoRevisado = { fecha: string; monto: number | string; medio: string; cuotas: number };
+type Revision = { validas: number; ya_existian?: number; repetidas_en_archivo?: number; pagos?: number; monto_pagos?: number | string; filas: { fila: number; errores: string[]; datos: Record<string, string | null> & { pagos?: PagoRevisado[] } }[] };
 
 export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zona: string }) {
   const [archivo, setArchivo] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
   const [datos, setDatos] = useState<unknown[][]>([]);
   const [mapa, setMapa] = useState<(Campo | null)[]>([]);
   const [revision, setRevision] = useState<Revision | null>(null);
-  const [resultado, setResultado] = useState<{ importados: number; salteados: number; ya_existian?: number; repetidas_en_archivo?: number; con_cobertura?: number } | null>(null);
+  const [resultado, setResultado] = useState<{ importados: number; salteados: number; ya_existian?: number; repetidas_en_archivo?: number; con_cobertura?: number; pagos_cargados?: number; monto_pagos?: number | string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   const [lista, setLista] = useState(anteriores);
@@ -67,6 +68,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
       <section className="tarjeta p-5 sm:p-6 space-y-3">
         <p className="titulo text-2xl">1. Tu archivo</p>
         <p className="texto-suave">Excel (.xlsx) o CSV, con los títulos en la primera fila. Sirve el que exportás de otro sistema o una planilla tuya.</p>
+        <p className="text-sm texto-tenue">También podés cargar pagos de antes (hasta 3 por socio): una columna de fecha, monto y medio de pago por cada uno. Tienen que ser de días que ya pasaron.</p>
         <label className="boton boton-principal cursor-pointer w-fit">
           <Icono nombre="documento" /> Elegir archivo
           <input type="file" accept=".xlsx,.csv,.txt" className="sr-only" aria-label="Elegir archivo"
@@ -94,7 +96,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
       )}
 
       {revision && (
-        <section className="tarjeta p-5 sm:p-6 space-y-4" data-revision data-validas={revision.validas} data-con-error={conError.length} data-ya-existian={revision.ya_existian ?? 0} data-repetidas-archivo={revision.repetidas_en_archivo ?? 0}>
+        <section className="tarjeta p-5 sm:p-6 space-y-4" data-revision data-validas={revision.validas} data-con-error={conError.length} data-ya-existian={revision.ya_existian ?? 0} data-repetidas-archivo={revision.repetidas_en_archivo ?? 0} data-pagos={revision.pagos ?? 0}>
           <p className="titulo text-2xl">3. Revisión</p>
           <p className="text-lg"><strong>{revision.validas}</strong> listos para entrar{conError.length > 0 && <> · <strong>{conError.length}</strong> con algo para corregir (no entran)</>}.</p>
           {conError.length > 0 && (
@@ -113,7 +115,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
               <ul className="space-y-1 text-sm">
                 {revision.filas.filter((f) => !f.errores.some((e) => !e.startsWith("Celular repetido"))).slice(0, 5).map((f) => (
                   <li key={f.fila} className="texto-suave">
-                    <strong>{f.datos.nombre} {f.datos.apellido ?? ""}</strong>{f.datos.dni ? ` · DNI ${f.datos.dni}` : ""}{f.datos.telefono ? ` · ${f.datos.telefono}` : ""}{f.datos.vence ? ` · pagó hasta ${f.datos.vence.split("-").reverse().join("/")}` : ""}
+                    <strong>{f.datos.nombre} {f.datos.apellido ?? ""}</strong>{f.datos.dni ? ` · DNI ${f.datos.dni}` : ""}{f.datos.telefono ? ` · ${f.datos.telefono}` : ""}{f.datos.vence ? ` · pagó hasta ${f.datos.vence.split("-").reverse().join("/")}` : ""}{f.datos.pagos?.length ? ` · ${f.datos.pagos.length} ${f.datos.pagos.length === 1 ? "pago" : "pagos"} de ${formatearPesos(f.datos.pagos.reduce((t, p) => t + Number(p.monto), 0))}` : ""}
                   </li>
                 ))}
               </ul>
@@ -125,6 +127,12 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
               {(revision.repetidas_en_archivo ?? 0) > 0 && <>{revision.repetidas_en_archivo} aparecen más de una vez en el archivo (entra la primera).</>}
             </p>
           )}
+          {(revision.pagos ?? 0) > 0 && (
+            <div data-aviso-pagos-pasados className="space-y-1">
+              <p className="text-lg"><Icono nombre="plata" /> Se cargan <strong>{revision.pagos}</strong> pagos anteriores por <strong>{formatearPesos(revision.monto_pagos ?? 0)}</strong>.</p>
+              <p className="text-sm texto-tenue">Cada pago cuenta en el Resultado del mes de su fecha y arma la cobertura como si se hubiera cobrado ese día. No entran en la caja de hoy y quedan marcados en Control como cargados por vos, con la fecha de hoy. La plata no se deshace con “Deshacer”: si un pago está mal se anula desde la ficha del socio.</p>
+            </div>
+          )}
           <p className="text-sm texto-tenue">“Pagó hasta” se carga como lo que ya pagó, también si ya venció: el primer día la puerta ya muestra quién debe. Quien no tiene esa fecha queda con el plan y sin pagar.</p>
           <button type="button" className="boton boton-principal" disabled={ocupado || revision.validas === 0} onClick={hacerImportacion}>
             {ocupado ? "Importando…" : `Importar ${revision.validas} socios`}
@@ -135,7 +143,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       {resultado && (
         <Mensaje tipo="exito" accion={<Link href="/panel/socios" className="boton"><Icono nombre="usuarios" /> Ver socios</Link>}>
-          <span data-importados={resultado.importados}>Entraron {resultado.importados} socios{resultado.salteados ? ` (${resultado.salteados} quedaron afuera: errores o ya cargados)` : ""}. Si algo salió mal, deshacelo abajo durante 24 horas.</span>
+          <span data-importados={resultado.importados} data-pagos-cargados={resultado.pagos_cargados ?? 0}>Entraron {resultado.importados} socios{resultado.salteados ? ` (${resultado.salteados} quedaron afuera: errores o ya cargados)` : ""}.{(resultado.pagos_cargados ?? 0) > 0 ? ` Se cargaron ${resultado.pagos_cargados} pagos anteriores por ${formatearPesos(resultado.monto_pagos ?? 0)}; no entraron en la caja de hoy.` : " Si algo salió mal, deshacelo abajo durante 24 horas."}</span>
         </Mensaje>
       )}
 

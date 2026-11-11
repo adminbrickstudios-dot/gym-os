@@ -35,10 +35,13 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     // Las membresías con su primer pago (cuota + matrícula), calculado por la base.
     const planes = await rpc<PlanAlta[]>("planes_para_alta", { p_sede_id: sedeActiva(panel).sede.id });
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
+    // C10: cargar un alta en el pasado (fecha de alta y pagos de antes) es de dueño y encargado; la base también lo exige.
+    const puedePasado = ["dueno", "encargado"].includes(panel.yo.rol);
+    const hoy = new Intl.DateTimeFormat("sv-SE", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());
     return (
       <>
         <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen icono="mas" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
-        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : undefined} />
+        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} puedePasado={puedePasado} hoy={hoy} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : undefined} />
       </>
     );
   });
