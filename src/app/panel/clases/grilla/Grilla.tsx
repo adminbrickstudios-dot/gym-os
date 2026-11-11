@@ -118,7 +118,7 @@ export function Grilla({ actividades, horarios, sedes, profes, hoy, soloLectura 
           }}>
             <p className="titulo text-xl sm:col-span-2 lg:col-span-3"><Icono nombre="mas" /> Agregar a la grilla</p>
             <label className="space-y-1"><span className="etiqueta">Actividad</span>
-              <select className="campo" value={h.actividad} onChange={(e) => setH({ ...h, actividad: e.target.value })}>{activas.map((a) => <option key={a.actividad_id} value={a.actividad_id}><Icono nombre={a.emoji} /> {a.nombre}</option>)}</select></label>
+              <select className="campo" value={h.actividad} onChange={(e) => setH({ ...h, actividad: e.target.value })}>{activas.map((a) => <option key={a.actividad_id} value={a.actividad_id}>{a.nombre}</option>)}</select></label>
             <label className="space-y-1"><span className="etiqueta">Día</span>
               <select className="campo" value={h.dia} onChange={(e) => setH({ ...h, dia: Number(e.target.value) })}>{DIAS.map((d, i) => <option key={d} value={i + 1}>{d}</option>)}</select></label>
             <label className="space-y-1"><span className="etiqueta">Hora</span>

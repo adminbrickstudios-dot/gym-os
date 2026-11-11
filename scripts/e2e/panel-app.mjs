@@ -33,9 +33,11 @@ try {
     await s.locator("main h1").waitFor({ timeout: 60000 });
     await sinDesborde(s, que);
     await s.getByRole("link", { name: /Volver/ }).click();
-    await s.waitForURL(/\/app(\?.*)?$/, { timeout: 30000 });
-    ok(`${que} abre y “← Volver” vuelve al inicio`);
+    // Historial y Mi membresía se abren desde Yo: "Volver" lleva a Yo. Novedades se abre desde el inicio.
+    await s.waitForURL(sel.startsWith("[data-yo-fila") ? /\/app\/yo(\?.*)?$/ : /\/app(\?.*)?$/, { timeout: 30000 });
+    ok(`${que} abre y “← Volver” vuelve a donde estaba`);
   }
+  await s.goto(`${G}/app`);
 
   await s.getByRole("link", { name: /Reservar|Ver horarios/ }).click();
   await s.waitForURL(/\/app\/clases/, { timeout: 30000 });
