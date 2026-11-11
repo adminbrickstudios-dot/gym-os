@@ -114,6 +114,7 @@ como "decidido por defecto" y se sigue.
 | `AJUSTES-0911-NOCHE.md` | El pedido de Mateo del 09/11 a la noche, textual, y dónde quedó cada ID | Armado el 09/11 |
 | `RECOMENDACIONES.md` | Cómo trabajar ahora que hay un gimnasio real, y las funciones nuevas propuestas (fase N) | Armado el 11/11 |
 | `SOCIO-FLUJO.md` | El camino del socio: landing, registro con DNI, pago, entrar, su app y su perfil | Armado el 11/11 |
+| `PULIDO.md` | Auditoría del código del 11/11: todo lo que hay que pulir, pantalla por pantalla, con archivo y línea (fase Z) | Armado el 11/11 |
 | `REPARTO.md` | Los 4 carriles: el agente principal y sus 3 ayudantes sin pisarse | Armado el 09/11 |
 | `FLUIDEZ.md` | La pasada botón por botón: las 14 reglas | Armado el 09/11 |
 | `FALTANTES.md` | Lo que Mateo pidió y no estaba en ninguna lista (FA-1 a FA-24) | Armado el 09/11 |
