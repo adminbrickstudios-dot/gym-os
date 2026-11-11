@@ -12,6 +12,8 @@ const r = async (f: () => Promise<unknown>) => {
 };
 /** VD-46D: el socio dice "entendido" a un aviso (queda la constancia de que lo vio). */
 export const marcarAvisoLeido = async (avisoId: string) => r(() => rpc("marcar_aviso_leido", { p_aviso_id: avisoId }));
+/** C1b: "Entendido" al aviso de clave nueva; queda guardado en la base y no vuelve hasta una entrega más nueva. */
+export const cerrarAvisoClave = async (socioId: string) => r(async () => { await rpc("marcar_aviso_clave_visto", { p_socio_id: socioId }); revalidatePath("/app/cuenta"); });
 export const reservarClase =async (claseId: string, socioId: string) => r(() => rpc("reservar", { p_clase_id: claseId, p_socio_id: socioId }));
 /** VD-24: si al cancelar subió alguien de la lista de espera, la base devuelve su reserva y se le manda el push. */
 export const cancelarReserva = async (reservaId: string) => r(async () => {

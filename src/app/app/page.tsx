@@ -25,6 +25,7 @@ import { Encuesta } from "./Encuesta";
 import { Bienvenida } from "./Bienvenida";
 import { OcupacionEnVivo } from "./OcupacionEnVivo";
 import { AvisosInicio } from "./AvisosInicio";
+import { AvisoClaveSocio } from "./AvisoClaveSocio";
 import { Entraste } from "./Entraste";
 import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
@@ -116,6 +117,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           )}
         </header>
 
+        <Suspense fallback={null}><AvisoClaveSocio socioId={s.socio_id} zona={zona} /></Suspense>
         <AvisosInicio socioId={s.socio_id} />
         <Suspense fallback={null}><OcupacionEnVivo gimnasioId={g.id} /></Suspense>
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}

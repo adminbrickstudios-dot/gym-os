@@ -86,6 +86,8 @@ const EJECUTABLES = {
     "public.avisos_app_socio", "public.guardar_aviso_clase", "public.aviso_clase_socio",
     // C1: nueva clave sin mails (la valida la base; el servidor toca la cuenta recién después)
     "public.cuenta_para_clave_socio", "public.registrar_clave_entregada",
+    // C1b: el socio se entera de la clave nueva (lee solo su ficha; permiso denegado = error)
+    "public.aviso_clave_socio", "public.marcar_aviso_clave_visto",
   ]),
 };
 
