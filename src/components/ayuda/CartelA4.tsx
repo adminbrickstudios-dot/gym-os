@@ -23,6 +23,7 @@ const ESTILO = `
 .cartel-qr svg { display: block; width: 100%; height: 100%; }
 .cartel-url { font-size: 3.6cqw; text-align: center; overflow-wrap: anywhere; color: #5b616b; }
 @media print {
+  html, body { height: 295mm !important; max-height: 295mm !important; overflow: hidden !important; }
   .cartel-hoja { max-width: none; width: 210mm; height: 295mm; margin: 0 !important; border: 0 !important; break-inside: avoid; break-after: avoid; }
 }`;
 

@@ -7,7 +7,7 @@
 // ESCRITO, NO EJECUTADO por quien lo escribió. Deja todo como estaba.
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { GIMNASIO, PLATAFORMA as B, aparece, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { GIMNASIO, PLATAFORMA as B, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, CELU, resultado } from "./comun.mjs";
 
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
 await db.connect();
@@ -61,17 +61,16 @@ try {
   const pestana = p.locator('[data-pestana="cobrar"]');
   chequear(await aparece(pestana, 20000), "Vencen hoy tiene la pestaña 'Tengo que cobrar'", "falta la pestaña 'Tengo que cobrar'");
   await pestana.click();
-  await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await p.locator("[data-cola-cobro], [data-lista-vencen=cobrar], :text('No hay nadie para cobrar')").first().waitFor({ timeout: 30000 }).catch(() => {});
   chequear(await p.locator("[data-cola-cobro], [data-lista-vencen=cobrar]").count() > 0 || /No hay nadie para cobrar/.test(await p.locator("main").innerText()), "la cola de cobro muestra la lista (o dice que no hay nadie)", "la pestaña no muestra la cola");
 
   // ── App del socio: ocupación en vivo ──
-  const [socio] = await q(`select telefono from public.socios where gimnasio_id = $1 and telefono is not null and usuario_id is not null limit 1`, [gim.id]);
-  if (socio?.telefono) {
-    const s = await (await b.newContext()).newPage();
-    await entrarSocio(s, socio.telefono, G);
+  {
+    const s = await pagina(b, CELU);
+    await entrar(s, "socio@ejemplo.invalid", undefined, G);
     chequear(await aparece(s.locator("[data-ocupacion-en-vivo]"), 20000), "la app del socio muestra 'Ahora hay N personas' cuando el dueño lo prendió", "la app del socio no muestra la ocupación");
     await s.context().close();
-  } else ok("sin socio con celular y cuenta para probar la app: se salta ese paso");
+  }
 
   // ── Super admin: plan en la web ──
   await entrar(p, "admin@ejemplo.invalid", undefined, B);

@@ -28,14 +28,9 @@ const config = (min) => db.query(`insert into public.configuracion_entrada (gimn
   on conflict (gimnasio_id) do update set resultado_entrada = 'aviso', cerrar_por_inactividad_min = $2`, [gim, min]);
 await config(0);
 // Socios para leer: se usa el teléfono como DNI, igual que base-ingresos.
-// El demo de CI puede no tener teléfonos de 8 a 10 dígitos: se crean tres socios ficticios (teléfono 000…) para leer.
-for (let i = 0; i < 3; i++) {
-  const tel = `000${String(Date.now() % 10000000).padStart(7, "0").slice(0, 6)}${i}`;
-  await db.query(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) select $1, $2, $3, $4 where not exists (select 1 from public.socios where gimnasio_id = $1 and telefono = $4)`, [gim, `Lector${i}`, "De Prueba", tel]);
-}
 const { rows: socios } = await db.query(`select id, telefono as dni, nombre || ' ' || apellido as nombre from public.socios
-  where gimnasio_id = $1 and telefono ~ '^[0-9]{8,10}$' and dado_de_baja_en is null order by (nombre = 'Testigo') desc, numero limit 6`, [gim]);
-if (socios.length < 3) { console.error(`faltan socios con DNI de 8 a 10 dígitos: hay ${socios.length}`); process.exit(1); }
+  where gimnasio_id = $1 and telefono is not null and dado_de_baja_en is null order by (nombre = 'Testigo') desc, numero limit 6`, [gim]);
+if (socios.length < 3) { console.error(`faltan socios con teléfono para leer: hay ${socios.length}`); process.exit(1); }
 
 const b = await navegador();
 try {

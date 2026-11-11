@@ -33,10 +33,17 @@ const paginasDe = (buf) => (buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g)
 const sinDesborde = (p) => p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 const rgb = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim()); if (!m) return null; const n = parseInt(m[1], 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
 
+/** Una pantalla que la base niega: no hay título, se espera a que termine de cargar y diga algo. */
+async function abrirDenegada(p, ruta) {
+  await p.goto(`${BASE}${ruta}`);
+  await p.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+  await p.locator("body").filter({ hasText: /S/ }).waitFor({ timeout: 30000 });
+}
+
 /** Abre una pantalla y espera a que cargue; false si dice que no hay acceso o se rompió. */
 async function abrir(p, ruta) {
   await p.goto(`${BASE}${ruta}`);
-  await p.locator("h1, main, [role=alert]").first().waitFor({ timeout: 60000 });
+  await p.locator("h1").first().waitFor({ timeout: 60000 });
   return !PANTALLA_ROTA.test(await p.locator("body").innerText());
 }
 
@@ -159,9 +166,9 @@ try {
   await abrir(r, "/panel/ayuda/guias");
   const mias = await r.locator("[data-guia-link]").evaluateAll((l) => l.map((x) => x.getAttribute("data-guia-link")));
   chequear(mias.join() === "recepcion,socio", `recepción ve su guía y la del socio (${mias.join(", ")})`, `recepción ve: ${mias.join(", ")}`);
-  await abrir(r, "/panel/ayuda/guias/dueno");
+  await abrirDenegada(r, "/panel/ayuda/guias/dueno");
   chequear(/no tiene acceso|No tenés acceso/i.test(await r.locator("main").innerText()), "recepción no abre la guía del dueño: dice que no tiene acceso", "recepción abrió la guía del dueño o ve una pantalla vacía");
-  await abrir(r, "/panel/ayuda/carteles");
+  await abrirDenegada(r, "/panel/ayuda/carteles");
   chequear(/no tiene acceso|No tenés acceso/i.test(await r.locator("main").innerText()), "recepción no abre los carteles: dice que no tiene acceso", "recepción abrió los carteles");
   await r.context().close();
 
