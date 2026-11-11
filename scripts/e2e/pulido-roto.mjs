@@ -96,11 +96,11 @@ try {
   // ── 4. El campo "celular o mail" ──
   const nuevo = await pagina(b, CELU);
   await nuevo.goto(`${G}/ingresar?modo=socio`);
-  if (!(await nuevo.locator("input[name=telefono]").count())) await nuevo.getByRole("button", { name: /Celular/ }).click();
-  const tel = nuevo.locator("input[name=telefono]");
-  await tel.waitFor({ timeout: 30000 });
-  chequear(await tel.getAttribute("type") === "text" && await tel.getAttribute("inputmode") === "email",
-    "“Tu celular o tu mail”: type=text con teclado de mail (se puede escribir la arroba)", `type=${await tel.getAttribute("type")} inputmode=${await tel.getAttribute("inputmode")}`);
+  // D43 + H3b: la primera vista es mail y contraseña; el campo de mail es de texto con teclado de mail (se escribe la arroba).
+  const mailCampo = nuevo.locator("input[name=email]").first();
+  await mailCampo.waitFor({ timeout: 30000 });
+  chequear(await mailCampo.getAttribute("type") === "text" && await mailCampo.getAttribute("inputmode") === "email",
+    "el campo de mail: type=text con teclado de mail (se puede escribir la arroba)", `type=${await mailCampo.getAttribute("type")} inputmode=${await mailCampo.getAttribute("inputmode")}`);
 
   // ── 5 y 6. Avisos y botón de la Entrada, y la letra suelta en el veredicto ──
   const r = await pagina(b, COMPU);
