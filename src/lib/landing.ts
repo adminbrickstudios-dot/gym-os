@@ -12,6 +12,8 @@ export type Marca = {
   favicon_path: string | null;
   color_acento: string;
   color_fondo: string;
+  /** La letra de los títulos (P8b). Sin dato, la condensada de siempre. */
+  tipografia?: "condensada" | "ancha" | "clasica";
 };
 
 export type PlanPublico = {
@@ -66,18 +68,24 @@ export type LandingPublicada = {
 export type LandingSinPublicar = { publicada: false; marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } };
 export type Landing = LandingPublicada | LandingSinPublicar;
 
-/** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
 // VD-47: la marca, los planes, las secciones y los horarios casi no cambian: se guardan 60 s por direccion y se
-// invalidan al guardar (etiqueta "landing", ver rpc() en lib/panel/servidor.ts). Es informacion publica, igual
-// para todos: nunca permisos, plata ni socios.
-const landingEnCache = unstable_cache(async (host: string): Promise<Landing | null> => {
-  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
-  const { data, error } = await supabase.rpc("landing_publica", { p_host: host });
-  if (error) throw new Error(`No se pudo leer la página del gimnasio: ${error.message}`);
-  return (data as Landing | null) ?? null;
-}, ["landing_publica"], { tags: ["landing"], revalidate: 60 });
+// invalidan al guardar. Es informacion publica, igual para todos: nunca permisos, plata ni socios.
+// P8: cada direccion (cada gimnasio) lleva ademas su propia etiqueta (etiquetaLanding): invalidarla no vacia
+// la cache de los demas gimnasios. La general "landing" la invalida rpc() (lib/panel/servidor.ts) con cualquier
+// escritura de la pagina, asi que nunca falta invalidar.
+export const etiquetaLanding = (host: string) => `landing:${host.toLowerCase()}`;
 
-export const traerLanding = (host: string): Promise<Landing | null> => landingEnCache(host);
+const opciones = (host: string) => ({ tags: ["landing", etiquetaLanding(host)], revalidate: 60 });
+
+/** Trae la landing del host. null = el host no es de ningún gimnasio. Error = no se pudo preguntar. */
+export const traerLanding = (host: string): Promise<Landing | null> => {
+  return unstable_cache(async (): Promise<Landing | null> => {
+    const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+    const { data, error } = await supabase.rpc("landing_publica", { p_host: host });
+    if (error) throw new Error(`No se pudo leer la página del gimnasio: ${error.message}`);
+    return (data as Landing | null) ?? null;
+  }, ["landing_publica", host.toLowerCase()], opciones(host))();
+};
 
 /** Horarios, "abierto ahora" y próximos cierres del gimnasio del host (agenda_publica, sin sesión). */
 export async function traerAgenda(host: string): Promise<Agenda | null> {
@@ -105,11 +113,24 @@ export async function traerEventos(host: string): Promise<EventoPublico[]> {
 /** COM-11: los IDs de medición que cargó el dueño (solo con la página publicada; la base los valida). */
 export type Medicion = { pixel_meta?: string | null; google_analytics?: string | null };
 
-const medicionEnCache = unstable_cache(async (host: string): Promise<Medicion> => {
-  const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
-  const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
-  if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
-  return (data as Medicion) ?? {};
-}, ["medicion_publica"], { tags: ["landing"], revalidate: 60 });
+export const traerMedicion = (host: string): Promise<Medicion> => {
+  return unstable_cache(async (): Promise<Medicion> => {
+    const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+    const { data, error } = await supabase.rpc("medicion_publica", { p_host: host });
+    if (error) throw new Error(`No se pudo leer la medición de la página: ${error.message}`);
+    return (data as Medicion) ?? {};
+  }, ["medicion_publica", host.toLowerCase()], opciones(host))();
+};
 
-export const traerMedicion = (host: string): Promise<Medicion> => medicionEnCache(host);
+/** P8: una clase de los próximos 7 días, con el día y la hora ya en la zona del gimnasio. */
+export type ClaseSemana = { inicio: string; actividad: string; sede: string; zona: string; dia: string; hora: string };
+
+/** Las clases de la semana que muestra la página (vacío si la página no está publicada o Horarios está oculto). */
+export const traerClasesSemana = (host: string): Promise<ClaseSemana[]> => {
+  return unstable_cache(async (): Promise<ClaseSemana[]> => {
+    const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
+    const { data, error } = await supabase.rpc("clases_semana_publica", { p_host: host });
+    if (error) throw new Error(`No se pudieron leer las clases de la semana: ${error.message}`);
+    return (data as ClaseSemana[]) ?? [];
+  }, ["clases_semana_publica", host.toLowerCase()], opciones(host))();
+};
