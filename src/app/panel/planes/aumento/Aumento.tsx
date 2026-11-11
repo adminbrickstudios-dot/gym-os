@@ -26,15 +26,17 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
   // Vista previa a medida que se escribe (la cuenta es de la base, la misma que guarda).
   useEffect(() => {
     if (!datos.valor.trim() || !datos.planes.length) { setVista(null); setError(null); return; }
-    const t = setTimeout(async () => { const r = await vistaAumento(datos); setError(r.error ?? null); setVista(r.vista ?? null); }, 300);
-    return () => clearTimeout(t);
+    let vivo = true;   // si se sale de la pantalla con el pedido a medias, no se actualiza nada ni queda un error en la consola
+    const t = setTimeout(async () => { try { const r = await vistaAumento(datos); if (vivo) { setError(r.error ?? null); setVista(r.vista ?? null); } } catch { /* navegó: el pedido se cortó */ } }, 300);
+    return () => { vivo = false; clearTimeout(t); };
   }, [datos]);
 
   // VD-46D: cuántos días de aviso lleva y a cuántos socios les llega (lo cuenta la base).
   useEffect(() => {
     if (!datos.planes.length) { setPrevio(null); return; }
-    const t = setTimeout(async () => { const r = await avisoPrevioAumento(datos.planes, datos.desde); setPrevio(r.aviso ?? null); }, 200);
-    return () => clearTimeout(t);
+    let vivo = true;
+    const t = setTimeout(async () => { try { const r = await avisoPrevioAumento(datos.planes, datos.desde); if (vivo) setPrevio(r.aviso ?? null); } catch { /* navegó: el pedido se cortó */ } }, 200);
+    return () => { vivo = false; clearTimeout(t); };
   }, [datos.planes, datos.desde, avisoDias]);
 
   const tildar = (id: string) => setDatos({ ...datos, planes: datos.planes.includes(id) ? datos.planes.filter((x) => x !== id) : [...datos.planes, id] });
