@@ -47,6 +47,19 @@ Dónde quedó (09/11, mediodía):
 | P8b | **Editor de la landing como el de yadeportes** (Mateo, 11/11; adelanta EDIT-D03 de F9.2): en Configuración → Página el dueño ve su página al lado y la cambia en vivo (logo, colores, letra, fotos, textos, qué secciones se ven y en qué orden, arrastrando), con guardado, deshacer y "Restaurar por defecto" | ❌ |
 | P9 | PLAT-05: dominios desde el super admin por la API de Vercel (⛔ hasta el dominio y `VERCEL_TOKEN`) | ⛔ carril/b-super: escrito y probado con un Vercel simulado; bloqueado en producción hasta VERCEL_TOKEN, VERCEL_PROJECT_ID y el dominio (pasos arriba de PROGRESO.md) |
 
+## Fase C · Lo que hace falta para el primer cliente real (11/11, lo que se suele olvidar)
+
+| # | Qué | LISTO SI | Estado |
+|---|---|---|---|
+| C1 | **Olvidé mi contraseña sin mails** (Mateo no quiere mandar mails). Sin SMTP: el socio y el equipo ven "Pedile una clave nueva a la recepción / al dueño". En el panel, "Nueva clave" a un toque, con el mensaje armado por wa.me. Si algún día hay SMTP (VD-45), vuelve el link por mail | e2e: un socio sin SMTP pide clave nueva, la recepción se la da y él entra | ❌ |
+| C2 | **Importar los socios del gimnasio real** desde Excel o CSV: nombre, DNI, teléfono, mail, plan, fecha de alta y "pagó hasta". Vista previa, filas con error marcadas, sin duplicar por DNI, y la cobertura ("cubierto hasta") cargada como hecho, para que el primer día la puerta ya diga quién debe | e2e con un archivo de 300 filas, 5 malas y 3 repetidas | ❌ |
+| C3 | **Guía de uso por rol** (recepción, dueño, profe, socio): una página por rol, con capturas reales y en 10 pasos como máximo, en la ayuda del panel y para imprimir (PDF). Lo primero que necesita la recepción el primer día | Las 4 guías abiertas e impresas en PDF, mirándolas | ❌ |
+| C4 | **El QR de la pared y el cartel de la puerta** para imprimir desde el panel, en A4 y con la marca del gimnasio, más el cartel "Descargá la app" con el QR de la página | PDF generado y mirado | ❌ |
+| C5 | **Lectores en la recepción**: lector de QR o de tarjeta USB (actúa como teclado) en el mismo campo de la Entrada, con Enter al final; probado con un lector simulado (tipeo rápido de 20 caracteres + Enter) | e2e con tipeo a 5 ms por tecla | ❌ |
+| C6 | **La compu compartida de la recepción**: cambiar de persona sin cerrar la sesión del gimnasio ("Atiende: Ana"), cierre por inactividad configurable, y que el navegador no guarde la contraseña del dueño en esa compu | e2e de cambio de persona y de inactividad | ❌ |
+| C7 | **Primer día del gimnasio real** (`PRIMER-DIA.md`): qué carga el dueño, qué imprime, qué prueba la recepción antes de abrir, y qué hacer si algo falla (sin internet, lector que no lee, alguien que no aparece). Escrito para el dueño, en palabras simples | Escrito y revisado contra la app publicada | ❌ |
+| C8 | **Copias de los datos del cliente aunque no haya Supabase Pro**: exportación diaria de cada gimnasio real a un archivo privado (Actions, cifrado, que nunca va al repo público), con restaurar probado en una base de prueba. Si Mateo contrata Pro, se suma la copia de Supabase | Corrida de Actions que exporta y restaura en una base de prueba | ❌ |
+
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 
 | # | Qué | Detalle | Estado |
