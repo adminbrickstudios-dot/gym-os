@@ -2,6 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { traducirErrorSupabase } from "@/lib/admin/errores-supabase";
+import { urlDeHost } from "@/lib/urls";
 import { contrasenaProvisoria, nuevaContrasena } from "@/lib/cuentas";
 
 // C1 · Nueva clave sin mails. Quien llama YA pasó por la base (cuenta_para_clave_socio / cuenta_para_nueva_clave):
@@ -11,8 +12,7 @@ import { contrasenaProvisoria, nuevaContrasena } from "@/lib/cuentas";
 export async function origenDePeticion(): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-  const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127\.|[^.]+\.localhost)/.test(host) ? "http" : "https");
-  return `${proto}://${host}`;
+  return urlDeHost(host);
 }
 
 export type CuentaSocio = { socio_id: string; gimnasio_id: string; gimnasio: string; nombre: string; email: string; usuario_id: string | null; crear: boolean };
