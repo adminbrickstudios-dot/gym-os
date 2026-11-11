@@ -11,7 +11,7 @@ export function Favorito({ gimnasioId, favorito }: { gimnasioId: string; favorit
   return (
     <span>
       <button type="button" disabled={pend} aria-pressed={favorito} aria-label={favorito ? "Sacar de favoritos" : "Fijar arriba"} title={favorito ? "Sacar de favoritos" : "Fijar arriba"}
-        className={`boton ${favorito ? "!border-[var(--acento,#16a34a)]" : "texto-suave"}`} data-favorito={favorito ? "si" : "no"}
+        className={`boton ${favorito ? "!border-[var(--acento)]" : "texto-suave"}`} data-favorito={favorito ? "si" : "no"}
         onClick={async () => { setPend(true); const r = await marcarFavorito(gimnasioId, !favorito); setPend(false); if (r.error) { setError(r.error); return; } setError(""); router.refresh(); }}>
         {favorito ? "Fijado" : "Fijar"}
       </button>

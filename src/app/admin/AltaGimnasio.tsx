@@ -1,5 +1,7 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import { rutaGimnasio } from "@/lib/urls";
+import { ACENTO_POR_DEFECTO, FONDO_CLARO, textoSobre } from "@/lib/marca";
 import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import Link from "next/link";
 import { useRef, useState, useActionState } from "react";
@@ -10,9 +12,9 @@ import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 
 // ADM-1: el tipo de gimnasio prende lo que corresponde y crea planes de ejemplo (sin precio).
 const TIPOS: [string, string][] = [
-  ["", "Sin plantilla (todo apagado)"], ["musculacion", "🏋️ Musculación de barrio"], ["grande", "🏢 Gimnasio grande o cadena"],
-  ["box", "🔥 Box de crossfit o funcional"], ["yoga", "🧘 Yoga o pilates"], ["artes", "🥋 Artes marciales o escuela deportiva"],
-  ["natacion", "🏊 Natación"], ["personal", "💪 Entrenador personal o estudio chico"], ["24h", "🌙 24 horas o sin recepción"],
+  ["", "Sin plantilla (todo apagado)"], ["musculacion", "Musculación de barrio"], ["grande", "Gimnasio grande o cadena"],
+  ["box", "Box de crossfit o funcional"], ["yoga", "Yoga o pilates"], ["artes", "Artes marciales o escuela deportiva"],
+  ["natacion", "Natación"], ["personal", "Entrenador personal o estudio chico"], ["24h", "24 horas o sin recepción"],
 ];
 const aSlug = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 42);
 const PASOS = ["Tipo", "Datos y marca", "Dueño"];
@@ -25,8 +27,8 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
   const [nombre, setNombre] = useState("");
   const [slug, setSlug] = useState("");
   const [tocado, setTocado] = useState(false);
-  const [acento, setAcento] = useState("#16a34a");
-  const [fondo, setFondo] = useState("#F4F5F6");
+  const [acento, setAcento] = useState(ACENTO_POR_DEFECTO);
+  const [fondo, setFondo] = useState(FONDO_CLARO);
   const [falta, setFalta] = useState("");
   const [copiado, setCopiado] = useState(false);
   const formulario = useRef<HTMLFormElement>(null);
@@ -42,16 +44,16 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
 
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-alta-gimnasio>
-      <p className="titulo text-2xl">➕ Nuevo gimnasio</p>
+      <p className="titulo text-2xl"><Icono nombre="mas" /> Nuevo gimnasio</p>
       {ok ? (
         <div role="status" className="space-y-4">
           {ok.pendiente ? (
             <div className="space-y-2" data-alta-a-medias>
-              <p className="text-lg" role="alert">⚠️ <strong>{ok.nombre}</strong>: {ok.aviso}</p>
+              <p className="text-lg" role="alert"><Icono nombre="alerta" /> <strong>{ok.nombre}</strong>: {ok.aviso}</p>
               <Link href={`/admin/${ok.gimnasio_id}`} className="boton boton-principal" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>
             </div>
           ) : (
-            <p className="text-lg">✅ <strong>{ok.nombre}</strong> está creado. {ok.aviso}</p>
+            <p className="text-lg"><Icono nombre="ok" /> <strong>{ok.nombre}</strong> está creado. {ok.aviso}</p>
           )}
           {ok.contrasenaNoAplicada && ok.equipoId && (
             <div className="tarjeta p-4 space-y-2" role="alert" data-contrasena-no-aplicada>
@@ -89,15 +91,15 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               <p className="etiqueta">Mensaje de bienvenida para el dueño</p>
               <textarea readOnly rows={5} className="campo select-all" value={ok.bienvenida.texto} />
               {ok.bienvenida.wa
-                ? <a href={ok.bienvenida.wa} target="_blank" rel="noopener noreferrer" className="boton" data-whatsapp>💬 Mandar por WhatsApp</a>
+                ? <a href={ok.bienvenida.wa} target="_blank" rel="noopener noreferrer" className="boton" data-whatsapp><Icono nombre="mensaje" /> Mandar por WhatsApp</a>
                 : <p className="texto-tenue text-sm">Copiá el mensaje y mandáselo. Si cargás su celular en el paso 3, te lo deja listo para WhatsApp.</p>}
             </div>
           )}
           <div className="flex flex-wrap gap-2 items-start">
-            <BotonEntrar gimnasioId={ok.gimnasio_id} texto="🚪 Entrar al panel a terminar de configurarlo" motivoInicial="Alta del gimnasio: terminar de configurarlo" />
-            <Link href={`/admin/${ok.gimnasio_id}`} className="boton" data-alta-equipo>⚙️ Equipo, claves y direcciones</Link>
-            <a href={rutaGimnasio(ok.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
-            <button type="button" className="boton texto-suave" onClick={() => window.location.reload()}>➕ Crear otro</button>
+            <BotonEntrar gimnasioId={ok.gimnasio_id} texto="Entrar al panel a terminar de configurarlo" motivoInicial="Alta del gimnasio: terminar de configurarlo" />
+            <Link href={`/admin/${ok.gimnasio_id}`} className="boton" data-alta-equipo><Icono nombre="ajustes" /> Equipo, claves y direcciones</Link>
+            <a href={rutaGimnasio(ok.slug)} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver su página</a>
+            <button type="button" className="boton texto-suave" onClick={() => window.location.reload()}><Icono nombre="mas" /> Crear otro</button>
           </div>
         </div>
       ) : (
@@ -138,13 +140,13 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               )}
               <p className="sm:col-span-2 texto-tenue text-sm">El logo lo sube el dueño (o vos, entrando a terminar de configurarlo) desde Configuración.</p>
             </div>
-            <div className="rounded-2xl p-5 space-y-3 border border-[var(--borde,#0002)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
-              <p className="text-xs uppercase tracking-wide opacity-60" style={{ color: "#111" }}>Vista previa · {tipoNombre.replace(/^\S+\s/, "") || "sin plantilla"}</p>
+            <div className="rounded-2xl p-5 space-y-3 border border-[var(--borde)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
+              <p className="text-xs uppercase tracking-wide opacity-60" style={{ color: textoSobre(fondo) }}>Vista previa · {tipoNombre || "sin plantilla"}</p>
               <p className="flex items-center gap-3">
                 <span className="grid place-items-center size-12 rounded-xl text-xl font-bold text-white" style={{ background: acento }} aria-hidden>{(nombre.trim()[0] ?? "G").toUpperCase()}</span>
-                <span className="text-2xl font-bold" style={{ color: "#111" }}>{nombre.trim() || "Tu gimnasio"}</span>
+                <span className="text-2xl font-bold" style={{ color: textoSobre(fondo) }}>{nombre.trim() || "Tu gimnasio"}</span>
               </p>
-              <p className="text-sm break-all" style={{ color: "#444" }}>{direccion}</p>
+              <p className="text-sm break-all" style={{ color: textoSobre(fondo) }}>{direccion}</p>
               <span className="inline-block rounded-xl px-5 py-3 font-semibold text-white" style={{ background: acento }}>Soy socio</span>
             </div>
           </div>
@@ -160,12 +162,12 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               <span className="block text-sm texto-tenue">Para dejarte listo el WhatsApp de bienvenida. No se guarda.</span></label>
           </div>
 
-          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {falta || estado.error}</p>}
+          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {falta || estado.error}</p>}
           <div className="flex flex-wrap gap-2">
             {paso > 1 && <button type="button" className="boton" onClick={() => { setFalta(""); setPaso((p) => p - 1); }}>← Atrás</button>}
             {paso < 3
               ? <button key="siguiente" type="button" className="boton boton-principal" onClick={siguiente}>Siguiente →</button>
-              : <button key="crear" type="submit" disabled={creando} className="boton boton-principal">{creando ? "Creando…" : "🏋️ Crear gimnasio"}</button>}
+              : <button key="crear" type="submit" disabled={creando} className="boton boton-principal">{creando ? "Creando…" : "Crear gimnasio"}</button>}
           </div>
         </form>
       )}

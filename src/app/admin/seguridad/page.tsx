@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DosPasos } from "@/app/panel/cuenta/DosPasos";
+import { Sesiones } from "@/components/cuenta/Sesiones";
+import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
 import { rpc } from "@/lib/panel/servidor";
 import { EquipoBrik, type EstadoSeguridad } from "./EquipoBrik";
 
@@ -13,6 +15,7 @@ export default async function Seguridad() {
   if ((await headers()).get("x-gymos-contexto") !== "plataforma") redirect("/");
   // Con el segundo factor exigido y sin confirmar, la base no deja ver el estado: la pantalla igual muestra cómo confirmarlo.
   const estado = await rpc<EstadoSeguridad>("admin_estado_seguridad").catch(() => null);
+  const mia = await rpc<MiSeguridad>("mi_seguridad").catch(() => null);   // F2.8: dónde está abierta mi cuenta, y cerrar las demás
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-8 py-10 space-y-8">
       <header className="space-y-2">
@@ -24,6 +27,7 @@ export default async function Seguridad() {
         {!estado && <p className="texto-suave" data-pide-codigo>Si ya la tenés activa, confirmá el código de ahora para volver a entrar al super admin.</p>}
         <DosPasos recomendada />
       </section>
+      {mia && <Sesiones sesiones={mia.sesiones} zona="America/Argentina/Buenos_Aires" />}
       {estado && <EquipoBrik estado={estado} />}
       {estado && <p><Link href="/admin/registro" className="boton">Ver el registro de BRIK</Link></p>}
     </main>

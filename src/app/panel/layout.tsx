@@ -9,6 +9,8 @@ import { AyudaBrik } from "@/components/panel/AyudaBrik";
 import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
 import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
 import { BannerSoporte } from "@/components/panel/BannerSoporte";
+import { FranjaMantenimiento } from "@/components/panel/FranjaMantenimiento";
+import { PantallaEstadoGimnasio, type EstadoGimnasioAviso } from "@/components/panel/PantallaEstadoGimnasio";
 
 type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?: string };
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
@@ -83,11 +85,15 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     soporte = await rpc<EstadoSoporte>("estado_soporte", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
     if (soporte && !soporte.activo) redirect(`/admin?error=${encodeURIComponent("Terminó tu entrada de soporte (dura 60 minutos). Para volver a entrar, escribí el motivo otra vez.")}`);
   }
+  // F2.6: pausado, dado de baja o demo vencida: una pantalla clara con el WhatsApp de BRIK. El Soporte BRIK adentro sí ve el panel (a eso entra).
+  const estadoG = soporte?.activo ? null : await rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+  if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
   return (
     <>
       <RegistrarSesion />
       <Marco panel={panel} tema={(await cookies()).get("tema")?.value ?? null} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+        <FranjaMantenimiento />
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}
