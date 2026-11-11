@@ -10,6 +10,7 @@ import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { altaOnline, type ResultadoAlta } from "./acciones";
 import type { DatosAlta } from "./page";
 import { Icono } from "@/components/ui/Icono";
+import { CampoAntiRobot } from "@/components/cuentas/CampoAntiRobot";
 
 function Copiar({ texto, etiqueta }: { texto: string; etiqueta: string }) {
   const [ok, setOk] = useState(false);
@@ -110,7 +111,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         <div className="tarjeta p-5 max-h-64 overflow-auto whitespace-pre-line texto-suave" data-reglamento>{datos.reglamento!.texto}</div>
         <input type="hidden" name="version" value={datos.reglamento!.version} />
         <label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" name="acepto" value="si" required defaultChecked={v("acepto") === "si"} className="mt-1 size-5" />
-          <span>Leí y acepto el reglamento de {datos.marca.nombre}.</span></label>
+          <span>Leí y acepto el reglamento de {datos.marca.nombre}, y que use mis datos para anotarme y cobrarme (<a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica-acepto>política de privacidad</a>).</span></label>
       </fieldset>
 
       <fieldset id="paso-pago" className="space-y-3 scroll-mt-4">
@@ -131,8 +132,8 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
         </div>
       </fieldset>
 
-      <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      <p className="texto-suave text-sm">Usamos tus datos para anotarte y cobrarte. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
+      <CampoAntiRobot />
+      <p className="texto-suave text-sm">Ley 25.326: tus datos los guarda {datos.marca.nombre}, solo para anotarte y cobrarte. Podés pedir verlos, corregirlos o borrarlos desde “Yo” en tu app, o en recepción. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
       {r.error && <Mensaje tipo="error">{r.error}</Mensaje>}
       <button type="submit" disabled={enviando || !plan} className="boton boton-principal text-lg w-full sm:w-auto px-10">
         {enviando ? "Anotándote…" : plan ? <><Icono nombre="pesa" /> Hacerme socio</> : "Elegí un plan"}

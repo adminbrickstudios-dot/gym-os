@@ -6,6 +6,7 @@
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 
@@ -113,6 +114,32 @@ chequeo("Migraciones con nombre AAAAMMDDHHMMSS_nombre.sql", malNombre);
   const porVersion = new Map();
   for (const f of readdirSync(carpetaMig).filter((n) => n.endsWith(".sql"))) { const v = f.slice(0, 14); porVersion.set(v, [...(porVersion.get(v) ?? []), f]); }
   chequeo("Cada migración tiene su propia versión (los 14 dígitos no se repiten)", [...porVersion.values()].filter((l) => l.length > 1).map((l) => l.join(" y ")));
+}
+
+{
+  // BASE-8 / F1.7: ninguna contraseña demo débil o conocida fuera de la compu local. Se prueba ejecutando: contra un Supabase "real"
+  // (no localhost) usuarios-demo se niega, antes de conectarse a nada, con la de siempre, con una corta y con una repetida;
+  // y ningún workflow que usa los secretos de Supabase lleva "demo-gymos" ni una contraseña escrita a mano.
+  const problemas = [];
+  const remoto = "https://proyecto-de-prueba.supabase.co";
+  const casos = [["(la de siempre, sin --contrasena)", null], ["demo-gymos", "demo-gymos"], ["Demo-Gymos-2026", "Demo-Gymos-2026"], ["una corta", "corta123"], ["repetida", "aaaaaaaaaaaa"], ["password123456", "password123456"]];
+  for (const [nombre, c] of casos) {
+    const args = ["scripts/datos/usuarios-demo.mjs", "--url", "postgres://nadie@127.0.0.1:1/nada", "--supabase", remoto, "--servicio", "x", ...(c ? ["--contrasena", c] : [])];
+    const r = spawnSync(process.execPath, args, { cwd: raiz, encoding: "utf8", timeout: 20000 });
+    if (r.status !== 1 || !/débil/.test(r.stderr ?? "")) problemas.push(`usuarios-demo acepta la contraseña ${nombre} contra un Supabase real`);
+  }
+  const carpetaWf = join(raiz, ".github", "workflows");
+  for (const f of existsSync(carpetaWf) ? readdirSync(carpetaWf) : []) {
+    const t = readFileSync(join(carpetaWf, f), "utf8");
+    if (!/secrets\.SUPABASE_/.test(t)) continue;
+    if (/demo-?gymos/i.test(t)) problemas.push(`.github/workflows/${f}: usa los secretos de Supabase y nombra la contraseña de siempre`);
+    for (const m of t.matchAll(/usuarios-demo\.mjs[^\n]*--contrasena\s+(\S+)/g)) {
+      if (!/^["']?\$/.test(m[1])) problemas.push(`.github/workflows/${f}: --contrasena con un valor escrito a mano (${m[1].slice(0, 12)}…)`);
+    }
+  }
+  const wfBase = join(carpetaWf, "base-de-datos.yml");
+  if (existsSync(wfBase) && !/\$\{#CONTRASENA\}\s*-lt\s*10/.test(readFileSync(wfBase, "utf8"))) problemas.push("base-de-datos.yml: falta exigir 10 letras o más a la contraseña de usuarios-demo");
+  chequeo("Ninguna contraseña demo débil o conocida fuera de la compu local", problemas);
 }
 
 const telefonosReales = [];

@@ -5,7 +5,7 @@
 // la recepción lo encuentra en Entrada sin poder pasar hasta pagar, con su
 // motivo, y lo ve en Prospectos → al apagar las altas la página manda a WhatsApp.
 //   npm run e2e:reg-1            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -60,11 +60,13 @@ try {
     await f.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
   };
   await llenar(form, DNI1, TEL1);
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   // Sin aceptar el reglamento, el navegador no deja mandar (required).
   chequear(await form.locator('input[name="acepto"]').evaluate((x) => !x.checkValidity()), "sin aceptar el reglamento no se manda", "se pudo mandar sin aceptar");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   const listo = v.locator('[data-alta-lista="transferencia"]');
   await listo.waitFor({ timeout: 30000 });
@@ -81,6 +83,7 @@ try {
   await f2.locator("[data-plan]").first().click();
   await llenar(f2, DNI1, TEL2);
   await f2.locator('input[name="acepto"]').check();
+  await esperarAntiRobot(f2);
   await f2.locator('button[type="submit"]').click();
   await v2.locator("[data-alta-ya-socio]").waitFor({ timeout: 30000 });
   ok("el mismo DNI no se anota dos veces: “¡Ya sos socio!”");
@@ -93,6 +96,7 @@ try {
   await f3.locator('input[name="nombre"]').fill("Bruno");
   await f3.locator('input[name="acepto"]').check();
   await f3.locator('label:has(input[value="mostrador"])').click();
+  await esperarAntiRobot(f3);
   await f3.locator('button[type="submit"]').click();
   await v2.locator('[data-alta-lista="mostrador"]').waitFor({ timeout: 30000 });
   chequear(/Pasá por recepción/.test(await v2.locator('[data-alta-lista="mostrador"]').innerText()), "en el mostrador: “Pasá por recepción y pagá tu plan”", "no dice que pague en recepción");

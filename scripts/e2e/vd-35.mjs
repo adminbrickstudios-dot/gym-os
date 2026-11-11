@@ -6,7 +6,7 @@
 //   node scripts/e2e/vd-35.mjs     (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -76,6 +76,7 @@ try {
   await llenar(`${anio - 15}-05-10`);
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   const alerta = v.locator('form[data-form-alta] [role="alert"]');
   await alerta.waitFor({ timeout: 30000 });
@@ -84,6 +85,7 @@ try {
   await llenar(`${anio - 30}-05-10`);
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   await v.locator('[data-alta-lista="transferencia"]').waitFor({ timeout: 30000 });
   const [{ id: socio, origen }] = (await db.query(`select s.id, s.origen from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo' and s.dni = $1`, [DNI])).rows;
