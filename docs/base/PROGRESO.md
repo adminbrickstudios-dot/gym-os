@@ -1,5 +1,16 @@
 # PROGRESO de Base
 
+## PUBLICACIÓN LISTA, ESPERANDO TU COPIA (11/11, noche): rama `publicar/base-hoy`
+Prevuelo en verde (Actions 43123213163): 11 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
+Como Temple Gym ya cobra, **no aplico sin copia cifrada**. Pasos para vos, en orden:
+1. GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret: `COPIA_CLAVE` = una frase de 16+ caracteres al azar (guardala también en tu gestor de contraseñas: sin ella la copia no se abre).
+2. Actions → **Copias** → Run workflow (prueba la copia y que restaura en una base de prueba). Tiene que dar verde.
+3. Actions → **Base de datos** → Run workflow, rama `publicar/base-hoy`, acción `aplicar` (hace la copia, el prevuelo, aplica y corre los chequeos). Si no hay COPIA_CLAVE se frena solo.
+4. Abrí el PR de `publicar/base-hoy` a `main`, mergealo y esperá el deploy de Vercel en verde.
+5. Mirá (sin crear nada) `https://gym-os-pied.vercel.app/g/templegym1/hacete-socio`: tiene que abrir el formulario de Temple Gym.
+6. Actions → **Humo producción** (necesita `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`).
+Si cargás `COPIA_CLAVE`, el loop hace los pasos 2 a 6 solo.
+
 ## RESUMEN PARA MATEO (11/11, tarde)
 - Publicado en producción: fase P y C1, C2, aviso al socio (PR #15). **Desde que Temple Gym cobra con Base, no aplico más migraciones sin copia cifrada previa**: el botón `aplicar` de Actions ahora hace la copia y se frena solo si falta `COPIA_CLAVE`.
 - Listo para publicar apenas haya copia: recepción (inactividad), velocidad (130100-130400, filtros en lote), C9 (QR), C10 (cargar pasado), F1.2/F1.7, F1.4/F1.5, C3-C7 (guías y carteles). Esperando a los ayudantes de H1 (caja), H3/H3b (camino del socio y QR directo) y H7 (lo roto de PULIDO) para sumarlos.
