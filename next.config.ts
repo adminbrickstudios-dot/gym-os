@@ -4,16 +4,21 @@ import type { NextConfig } from "next";
 // (tamaño y formato para cada celular). Solo desde el host de Supabase de este despliegue.
 const supabaseHost = (() => { try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname; } catch { return null; } })();
 
+// En la base local (e2e) Supabase corre en http://127.0.0.1: la CSP lo deja pasar SOLO si es la dirección de este despliegue y no es https
+// (en producción es https y ya está permitido). Sin esto, el navegador bloquea las llamadas de Mi cuenta y las imágenes del almacenamiento local.
+const supabaseHttp = (() => { try { const u = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""); return u.protocol === "http:" ? u.origin : ""; } catch { return ""; } })();
+const conLocal = (origenes: string) => (supabaseHttp ? `${origenes} ${supabaseHttp}` : origenes);
+
 // BASE-8 · Encabezados de seguridad en todas las rutas. La CSP deja correr lo inline que Next necesita y limita de dónde puede
 // venir el resto; la cámara queda permitida solo para este sitio (lector de QR).
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://sdk.mercadopago.com https://http2.mlstatic.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  `img-src ${conLocal("'self' data: blob: https:")}`,
   "font-src 'self' data:",
-  "media-src 'self' blob: https:",
-  "connect-src 'self' https: wss:",
+  `media-src ${conLocal("'self' blob: https:")}`,
+  `connect-src ${conLocal("'self' https: wss:")}`,
   "frame-src 'self' https:",
   "worker-src 'self' blob:",
   "manifest-src 'self'",

@@ -17,7 +17,7 @@ export async function altaGimnasio(p, { nombre, dueno, email, celular, tipo, ace
 
 /** Entra como Soporte BRIK: abre el pedido de motivo dentro de `donde` (página o fila), lo escribe y entra. */
 export async function entrarSoporte(donde, motivo = "e2e: revisar el gimnasio") {
-  await donde.locator('button:has-text("Entrar al panel")').first().click();
+  await donde.locator("[data-entrar-soporte]").first().click();
   await donde.locator("input[name=motivo]").fill(motivo);
   await donde.locator('button:has-text("Entrar como soporte")').click();
 }

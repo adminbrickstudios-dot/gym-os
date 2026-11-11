@@ -56,14 +56,16 @@ try {
   chequear(color_acento === "#ff0000", "el color elegido quedó guardado en la marca del gimnasio", `color guardado: ${color_acento}`);
 
   // ── 2. Entrar como soporte: el motivo es obligatorio ──
-  const miFila = p.locator("li", { hasText: NOMBRE }).first();
+  // La lista de gimnasios vive en /admin/gimnasios (con buscador): se busca el nuevo por su nombre.
+  await p.goto(`${B}/admin/gimnasios?q=${encodeURIComponent(NOMBRE)}`);
+  const miFila = p.locator("[data-gimnasio-fila]", { hasText: NOMBRE }).first();
   await miFila.waitFor({ timeout: 60000 });
-  await miFila.locator('button:has-text("Entrar al panel")').click();
+  await miFila.locator("[data-entrar-soporte]").click();
   await miFila.locator("input[name=motivo]").fill("ab");
   await miFila.locator('button:has-text("Entrar como soporte")').click();
   await p.waitForTimeout(1500);
   chequear(!/\/panel/.test(p.url()), "motivo muy corto: no deja entrar", "entró sin un motivo válido");
-  if (!(await miFila.locator("input[name=motivo]").count())) await miFila.locator('button:has-text("Entrar al panel")').click();
+  if (!(await miFila.locator("input[name=motivo]").count())) await miFila.locator("[data-entrar-soporte]").click();
   await miFila.locator("input[name=motivo]").fill(MOTIVO);
   await miFila.locator('button:has-text("Entrar como soporte")').click();
   await p.waitForURL(/\/panel/, { timeout: 60000 });

@@ -43,10 +43,15 @@ try {
   await capturar(v, "com11-celu-pagina");
 
   await db.query(`update public.landing_gimnasio set publicada = false where gimnasio_id = $1`, [gim]);
-  await v.goto(`${G}/`);
-  await v.locator("h1").first().waitFor({ timeout: 60000 });
-  await v.waitForTimeout(1500);
-  const quedan = await v.evaluate(() => !!document.getElementById("pixel-meta") || !!document.querySelector('script[src*="googletagmanager"]'));
+  // La página de un gimnasio se guarda 60 s en el servidor (VD-47) y el cambio hecho por SQL no la invalida: se espera a que venza.
+  let quedan = true;
+  for (let i = 0; i < 16 && quedan; i++) {
+    await v.goto(`${G}/`);
+    await v.locator("h1").first().waitFor({ timeout: 60000 });
+    await v.waitForTimeout(1500);
+    quedan = await v.evaluate(() => !!document.getElementById("pixel-meta") || !!document.querySelector('script[src*="googletagmanager"]'));
+    if (quedan) await v.waitForTimeout(5000);
+  }
   chequear(!quedan, "sin publicar no carga nada", "la página sin publicar carga la medición");
   if (d.errores.length) falla(d.errores.join(" | "));
 } catch (e) {

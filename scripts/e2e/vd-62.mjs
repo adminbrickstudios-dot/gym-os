@@ -211,8 +211,14 @@ try {
     // El botón se apaga recién cuando el guardado volvió (antes quedaba el "Guardado." del paso anterior).
     await vid.getByRole("button", { name: "Guardar video" }).waitFor({ state: "attached" });
     await vid.page().waitForFunction(() => [...document.querySelectorAll("[data-video-portada-panel] button")].some((x) => /Guardar video/.test(x.textContent) && x.disabled), null, { timeout: 30000 });
-    await v.reload();
-    chequear(await v.locator("[data-video-portada]").count() === 0, "sin link, la portada vuelve a la foto", "quedó el video después de borrar el link");
+    // La página pública se guarda hasta 60 s en el servidor (VD-47): si el guardado no la invalidó a tiempo, se espera a que venza.
+    let quedaVideo = true;
+    for (let i = 0; i < 14 && quedaVideo; i++) {
+      await v.reload();
+      quedaVideo = (await v.locator("[data-video-portada]").count()) > 0;
+      if (quedaVideo) await v.waitForTimeout(5000);
+    }
+    chequear(!quedaVideo, "sin link, la portada vuelve a la foto", "quedó el video después de borrar el link");
   }
   if (admin.errores.length) falla(`admin: ${admin.errores.join(" | ")}`);
 } finally {

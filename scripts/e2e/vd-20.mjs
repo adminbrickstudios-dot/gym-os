@@ -45,7 +45,9 @@ try {
   await p.waitForURL((u) => u.searchParams.get("id") && u.searchParams.get("id") !== rut, { timeout: 60000 });
   copia = new URL(p.url()).searchParams.get("id");
   await p.locator("[data-editor-rutina]").waitFor({ timeout: 60000 });
-  chequear(/copia/.test(await p.locator("[data-editor-rutina] input").first().inputValue()), "“Usar esta plantilla” abre una copia propia", "la copia no se abrió");
+  // Al navegar a la copia el editor viejo sigue en pantalla un instante: se espera a que traiga el nombre de la copia.
+  const abrioCopia = await p.waitForFunction(() => /copia/.test(document.querySelector("[data-editor-rutina] input")?.value ?? ""), null, { timeout: 30000 }).then(() => true, () => false);
+  chequear(abrioCopia, "“Usar esta plantilla” abre una copia propia", "la copia no se abrió");
 
   // Asignar a 3 de una vez, con fecha de cambio.
   const asig = p.locator("[data-asignar-rutina]");

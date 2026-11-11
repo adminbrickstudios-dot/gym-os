@@ -78,7 +78,9 @@ try {
   // La dueña ve quién fue y cierra el evento: queda el resumen.
   await d.goto(`${G}/panel/eventos`);
   const f2 = d.locator("[data-evento]", { hasText: NOMBRE });
-  await f2.locator("summary", { hasText: "Anotados" }).click();
+  // El día del evento la lista ya viene abierta: tocar el resumen la CERRARÍA. Solo se abre si está cerrada.
+  const lista = f2.locator("details", { has: d.locator("summary", { hasText: "Anotados" }) }).first();
+  if (!(await lista.evaluate((x) => x.open))) await lista.locator("summary").click();
   chequear(await aparece(f2.locator('[data-presente="si"]'), 30000), "la lista del evento muestra al presente", "la lista no muestra presentes");
   chequear(/Pagó|Falta pagar/.test(await f2.locator("[data-lista-anotados]").innerText()), "y si pagó o falta pagar", "la lista no dice si pagó");
   await f2.locator("[data-cerrar-evento]").click();

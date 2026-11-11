@@ -56,7 +56,9 @@ try {
   await p.goto(`${G}/panel/grados`);
   const fila = p.locator(`[data-listo-rendir="${nombre}"]`, { hasText: clase.actividad });
   await fila.locator("button", { hasText: `Rindió: ${BLANCO}` }).click();
-  chequear(await aparece(fila.getByText(`${BLANCO}`), 30000), `el profe, en el celular, toca “Rindió: ${BLANCO}”`, await fila.innerText());
+  // Tras rendir, la fila muestra el grado nuevo o sale de la lista de los listos (los dos están bien): lo que cuenta es que el grado quedó (lo mira la app del socio, abajo).
+  const quedoGrado = await Promise.race([aparece(fila.getByText(`${BLANCO}`), 30000), fila.waitFor({ state: "detached", timeout: 30000 }).then(() => true, () => false)]);
+  chequear(quedoGrado, `el profe, en el celular, toca “Rindió: ${BLANCO}”`, "después de tocar “Rindió” la fila no cambió ni salió de la lista");
   await capturar(p, "com13-celu-profe");
 
   const so = await pagina(b, CELU);

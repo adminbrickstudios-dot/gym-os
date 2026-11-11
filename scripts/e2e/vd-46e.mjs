@@ -31,7 +31,7 @@ try {
   const d = await pagina(b, COMPU);
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/campana`);
-  await d.getByRole("link", { name: /pidió la baja/ }).first().click();
+  await d.getByRole("link", { name: /pidió la baja/ }).filter({ hasText: /Testigo/ }).first().click();
   const banner = d.locator("[data-pedido-baja]");
   await banner.waitFor({ timeout: 60000 });
   chequear((await banner.locator("[data-codigo-baja]").innerText()).trim() === codigo, "la ficha muestra la misma constancia", "el código de la ficha es otro");

@@ -15,7 +15,7 @@ const G = GIMNASIO();
 const sinDesborde = (p) => p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 const dialogo = (p) => p.locator("[role=dialog][aria-label=Buscar]");
 const abrirBuscador = async (p, celu) => {
-  if (celu) await p.locator('button[aria-label="Buscar"]').first().click(); else await p.keyboard.press("Control+k");
+  if (celu) await p.locator('button[aria-label="Buscar"]:visible').first().click(); else await p.keyboard.press("Control+k");
   await dialogo(p).waitFor({ timeout: 15000 });
 };
 const REGLAMENTO = "VD-63 prueba: 1. Traé toalla. 2. Dejá los discos en su lugar. 3. Respetá los horarios.";
