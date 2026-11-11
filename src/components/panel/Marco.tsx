@@ -40,6 +40,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         logo={urlMarca(panel.marca.logo_path)}
         persona={panel.yo.nombre}
         rol={NOMBRE_ROL[rol]}
+        rolClave={rol}
         secciones={secciones}
         grupos={GRUPOS}
         principales={principalesCelular(rol, panel.secciones_apagadas)}

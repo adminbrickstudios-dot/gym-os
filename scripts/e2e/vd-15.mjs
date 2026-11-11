@@ -13,6 +13,7 @@ import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, nave
 import { elegirPlan } from "./alta.mjs";
 // F1.9: un error que nadie atrapó deja de colgar el recorrido sin ✗: se escribe qué esperaba y cuándo, y se corta con código 1.
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
+process.on("uncaughtException", (e) => { console.log(`✗ se cortó: ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -85,7 +86,9 @@ try {
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
   await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 }).catch(async (e) => {
     const alertas = await d.locator('[role=alert], [data-error], .pildora-rojo').allInnerTexts().catch(() => []);
-    throw new Error(`${e.message.split("\n")[0]} | URL ${d.url()} | alertas: ${alertas.join(" / ") || "(ninguna)"} | pantalla: ${(await d.locator("main").innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 500)}`);
+    const url0 = d.url();
+    const hoja = await d.evaluate(() => `hoja montada=${document.documentElement.dataset.cobrarHoja ?? "no"}`).catch(() => "sin página");
+    throw new Error(`${e.message.split("\n")[0]} | URL ${url0} | ${hoja} | alertas: ${alertas.join(" / ") || "(ninguna)"} | pantalla: ${(await d.locator("main").innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 500)}`);
   });
   await d.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
   await d.locator("[data-cobrar-confirmar]").click();
