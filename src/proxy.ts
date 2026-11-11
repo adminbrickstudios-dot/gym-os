@@ -28,6 +28,8 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   const ruta = req.nextUrl.pathname;
   let respuesta = NextResponse.next({ request: { headers: cabeceras } });
   if (!esProtegida(ruta) && ruta !== "/ingresar") return respuesta;
+  // ESC-02: la landing y el ingreso de alguien sin sesión no verifican nada (ahorra un getClaims por cada visita anónima).
+  if (!esProtegida(ruta) && !req.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return respuesta;
 
   const supabase = createServerClient(supabaseUrl, anon, {
     cookies: {
