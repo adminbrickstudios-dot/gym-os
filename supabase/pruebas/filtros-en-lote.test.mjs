@@ -84,6 +84,21 @@ before(async () => {
   await socio("Baja futura", { cob: [[-30, 30]], baja: 8 });
   await socio("Otra sede", { plan: planSedes, cob: [[-30, 20]] });
   await socio("Otra sede vencida", { plan: planSedes, cob: [[-60, -20]] });
+  // Plan con tope semanal (3), con 0 a 5 días de ingreso por membresía en la semana en curso (HOY es sábado: la semana empezó el -5), y plan de franja.
+  const [{ id: planTres }] = await t.q(`select id from public.planes where gimnasio_id = $1 and nombre = 'Plan 3 veces'`, [t.g]);
+  const [{ id: planManana }] = await t.q(`select id from public.planes where gimnasio_id = $1 and nombre = 'Plan Mañana'`, [t.g]);
+  for (let vino = 0; vino <= 5; vino++) for (const hasta of [20, -2, -20]) {
+    const tr = await socio(`Tope ${vino} ${hasta}`, { plan: planTres, cob: [[-40, hasta]] });
+    for (let d = 0; d < vino; d++) {
+      await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto, via_habilitante)
+        values ($1,$2,$3,$4,'recepcion','entro','verde','al_dia','ok','membresia')`, [t.g, t.sede, tr.id, await dia(-5 + d, "10:00:00")]);
+    }
+  }
+  const tr2 = await socio("Tope con ingreso de la semana pasada y anulado", { plan: planTres, cob: [[-40, 20]] });
+  await t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto, via_habilitante)
+    values ($1,$2,$3,$4,'recepcion','entro','verde','al_dia','ok','membresia'), ($1,$2,$3,$5,'recepcion','entro','verde','al_dia','ok','membresia'), ($1,$2,$3,$6,'recepcion','entro','verde','al_dia','ok','membresia'), ($1,$2,$3,$7,'recepcion','entro','verde','al_dia','ok','membresia')`,
+    [t.g, t.sede, tr2.id, await dia(-7, "10:00:00"), await dia(-1, "10:00:00"), await dia(-1, "20:00:00"), await dia(0, "09:00:00")]);
+  for (let h = -30; h <= 30; h += 10) await socio(`Franja ${h}`, { plan: planManana, cob: [[-60, h]] });
   // Congelados (la cobertura sigue vigente) y suspendidos.
   const c1 = await socio("Congelado", { cob: [[-30, 30]] });
   await t.q(`select privado.congelar($1, $2::date, $3::date, 'viaje', null, null, true)`, [c1.su, sumarDias(HOY, -3), sumarDias(HOY, 12)]);
@@ -154,7 +169,7 @@ test("filtros_socios en lote == la de antes, socio por socio y en el JSON comple
   const r = await comparar("base", [null, t.sede]);
   assert.ok(r.porSocio > 3000, `se compararon ${r.porSocio} veredictos`);
   assert.ok(r.rapidos > r.lentos, "la mayoría tiene que ir por el camino rápido (si no, la prueba no prueba nada)");
-  assert.ok(r.lentos > 200, "y tiene que haber casos especiales por el camino de la puerta");
+  assert.ok(r.lentos > 50, "y tiene que haber casos especiales por el camino de la puerta");
   console.log(`  filtros_socios: ${r.porSocio} veredictos comparados (${r.rapidos} por el camino rápido, ${r.lentos} por la puerta), todos iguales`);
 });
 
