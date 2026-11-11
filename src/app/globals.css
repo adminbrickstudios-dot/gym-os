@@ -56,8 +56,8 @@
   --tarjeta-alta: color-mix(in oklab, var(--fondo), white 10%);
   --borde: color-mix(in oklab, var(--fondo), white 11%);
   --texto: #f3f4f6;
-  --texto-suave: color-mix(in oklab, #f3f4f6, var(--fondo) 40%);
-  --texto-tenue: color-mix(in oklab, #f3f4f6, var(--fondo) 62%);
+  --texto-suave: #c9ced6;       /* texto secundario: 8:1 o más sobre fondo, tarjeta y tarjeta-alta */
+  --texto-tenue: #a8aeb8;       /* texto apagado: 5,9:1 o más (WCAG AA normal: 4,5) */
   --superficie: var(--tarjeta);
   --texto-2: var(--texto-suave);
   --sobre-acento: var(--acento-texto);
@@ -69,8 +69,8 @@
   --tarjeta-alta: color-mix(in oklab, var(--fondo), black 4%);
   --borde: color-mix(in oklab, var(--fondo), black 8%);
   --texto: #15171a;
-  --texto-suave: #5b616b;
-  --texto-tenue: color-mix(in oklab, #5b616b, var(--fondo) 28%);
+  --texto-suave: #4b5159;       /* texto secundario: 6,4:1 o más */
+  --texto-tenue: #5a606a;       /* texto apagado: 5:1 o más (WCAG AA normal: 4,5) */
   --superficie: var(--tarjeta);
   --texto-2: var(--texto-suave);
   --sobre-acento: var(--acento-texto);

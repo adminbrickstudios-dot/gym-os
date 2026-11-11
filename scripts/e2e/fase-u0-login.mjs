@@ -78,24 +78,30 @@ try {
   chequear(/\/ingresar/.test(p2.url()) && !/\/gimnasio-no-encontrado/.test(p2.url()), "puerta 2: /g/<slug>/ingresar muestra el ingreso", `puerta 2: terminó en ${p2.url()}`);
   chequear((await p2.locator("body").innerText()).includes(NOMBRE), "puerta 2: muestra la marca del gimnasio", "puerta 2: no muestra el nombre del gimnasio");
   await capturar(p2, "u0-puerta2-ingreso");
-  // Errores con el motivo real, sin perder el gimnasio.
-  await p2.fill("input[type=email]", MAIL);
-  await p2.fill("input[type=password]", "contraseña-equivocada");
-  await p2.click("button[type=submit]");
-  await p2.locator('[role="alert"]', { hasText: /S/ }).first().waitFor({ timeout: 30000 });
-  const malaClave = (await p2.locator('[role="alert"]', { hasText: /S/ }).first().innerText()).replace(/\s+/g, " ");
+  // Errores con el motivo real, sin perder el gimnasio. Cada intento espera SU respuesta (la acción termina y el botón vuelve a "Entrar"):
+  // si no, se lee el aviso del intento anterior y el formulario se vacía en medio de lo que se escribe.
+  const intentar = async (pagina, mail, clave) => {
+    await pagina.fill("input[type=email]", mail);
+    await pagina.fill("input[type=password]", clave);
+    await pagina.click("button[type=submit]");
+    await pagina.locator("button[type=submit]:not([disabled])").waitFor({ timeout: 30000 });
+    await pagina.waitForTimeout(400);
+    return (await pagina.locator("[role=alert]").first().innerText({ timeout: 30000 }).catch(() => "")).replace(/\s+/g, " ");
+  };
+  const malaClave = await intentar(p2, MAIL, "contraseña-equivocada");
   chequear(/no son correctos/.test(malaClave), `contraseña mala de una cuenta que existe: “${malaClave.slice(0, 90)}…”`, `contraseña mala: “${malaClave}”`);
   chequear(p2.url().includes(`gimnasio=${SLUG}`) || (await p2.locator("body").innerText()).includes(NOMBRE), "y el error no hizo perder el gimnasio", `el error terminó en ${p2.url()}`);
-  await p2.fill("input[type=email]", `no-existe-${s}@ejemplo.invalid`);
-  await p2.fill("input[type=password]", "cualquiera-123");
-  await p2.click("button[type=submit]");
-  await p2.locator("[role=alert]", { hasText: /no tiene cuenta|no son correctos/ }).first().waitFor({ timeout: 30000 });
-  ok("un mail sin cuenta: error claro y la pantalla sigue siendo la del gimnasio");
+  const sinCuenta = await intentar(p2, `no-existe-${s}@ejemplo.invalid`, "cualquiera-123");
+  chequear(/no tiene cuenta|no son correctos/.test(sinCuenta), "un mail sin cuenta: error claro y la pantalla sigue siendo la del gimnasio", `mail sin cuenta: “${sinCuenta}”`);
   chequear(p2.url().includes(`gimnasio=${SLUG}`) || (await p2.locator("body").innerText()).includes(NOMBRE), "y sigue mostrando el gimnasio (no cae al ingreso genérico)", "el error del mail sin cuenta hizo perder el gimnasio");
-  await p2.fill("input[type=email]", `  ${MAIL.toUpperCase()}  `.trim());
-  await p2.fill("input[type=password]", CLAVE);
-  await p2.click("button[type=submit]");
-  await aterrizaComoDueno(p2, "puerta 2 (/g/<slug>/ingresar)");
+  // El ingreso correcto va en una página nueva de la misma puerta (sin el estado del formulario de los intentos fallidos).
+  const p2b = await pagina(b, COMPU);
+  p2b.setDefaultNavigationTimeout(120000);
+  await p2b.goto(`${B}/g/${SLUG}/ingresar`);
+  await p2b.fill("input[type=email]", MAIL.toUpperCase());
+  await p2b.fill("input[type=password]", CLAVE);
+  await p2b.click("button[type=submit]");
+  await aterrizaComoDueno(p2b, "puerta 2 (/g/<slug>/ingresar)");
 
   // ── Puerta 3: /dueno en la dirección del gimnasio ──
   const p3 = await pagina(b, COMPU);
@@ -147,7 +153,7 @@ try {
   await p5.waitForURL((u) => !u.pathname.startsWith("/ingresar"), { timeout: 60000 });
   ok("con su contraseña de siempre entra (ahora es dueño de dos gimnasios y elige o cae en uno)");
 
-  for (const [n, x] of [["puerta 1", p1], ["puerta 2", p2], ["puerta 3", p3], ["otro gimnasio", p4]]) {
+  for (const [n, x] of [["puerta 1", p1], ["puerta 2", p2], ["puerta 2 (ingreso correcto)", p2b], ["puerta 3", p3], ["otro gimnasio", p4]]) {
     const reales = x.errores.filter((e) => !/HTTP 40[13] /.test(e));
     if (reales.length) falla(`${n}: errores de página: ${reales.join(" | ")}`);
   }
