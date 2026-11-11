@@ -51,9 +51,15 @@ try {
   // F2.9: mantenimiento
   await q(`insert into public.avisos_mantenimiento (desde, hasta, texto, creado_por) values (now() + interval '1 hour', now() + interval '2 hours', 'Prueba e2e de mantenimiento', (select usuario_id from public.administradores_plataforma limit 1))`).catch(async () =>
     q(`insert into public.avisos_mantenimiento (desde, hasta, texto) values (now() + interval '1 hour', now() + interval '2 hours', 'Prueba e2e de mantenimiento')`));
-  await abrir(`${GIMNASIO(SLUG)}/panel`);
+  // El aviso se cargó directo en la base (no por la acción del super admin, que invalida la caché al instante): la franja puede tardar hasta 60 s.
   const franja = p.locator("[data-mantenimiento]");
-  chequear(await aparece(franja, 90000), "la franja de mantenimiento aparece arriba del panel", "no apareció la franja de mantenimiento (la caché tarda hasta 60 s)");
+  let aparecio = false;
+  for (let i = 0; i < 8 && !aparecio; i++) {
+    await abrir(`${GIMNASIO(SLUG)}/panel`);
+    aparecio = await aparece(franja, 5000);
+    if (!aparecio) await new Promise((r) => setTimeout(r, 10000));
+  }
+  chequear(aparecio, "la franja de mantenimiento aparece arriba del panel", "no apareció la franja de mantenimiento ni recargando durante 80 s");
   await q(`delete from public.avisos_mantenimiento where texto = 'Prueba e2e de mantenimiento'`);
 
   // F2.7 y F2.8: super admin

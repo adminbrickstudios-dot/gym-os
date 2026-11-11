@@ -1,5 +1,5 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
 import { dominioBase } from "@/lib/dominios";
 import { urlGimnasio, urlPanel } from "@/lib/urls";
@@ -273,8 +273,8 @@ export async function publicarNovedadPara(titulo: string, texto: string, link: s
   } catch (e) { return { error: (e as Error).message }; }
 }
 export const programarMantenimiento = async (desde: string, hasta: string, texto: string) =>
-  hechoAdmin(() => rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }), ["/admin"]);
-export const cancelarMantenimiento = async (id: string) => hechoAdmin(() => rpc("admin_cancelar_mantenimiento", { p_id: id }), ["/admin"]);
+  hechoAdmin(async () => { await rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }); revalidateTag("mantenimiento", { expire: 0 }); }, ["/admin"]);
+export const cancelarMantenimiento = async (id: string) => hechoAdmin(async () => { await rpc("admin_cancelar_mantenimiento", { p_id: id }); revalidateTag("mantenimiento", { expire: 0 }); }, ["/admin"]);
 export const guardarPrueba = async (gimnasioId: string, dias: number) =>
   hechoAdmin(() => rpc("admin_guardar_prueba", { p_gimnasio_id: gimnasioId, p_dias: dias }), [`/admin/${gimnasioId}`, "/admin"]);
 export const guardarDescuento = async (gimnasioId: string, porcentaje: number, motivo: string, hasta: string) =>
