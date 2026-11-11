@@ -45,6 +45,31 @@ export async function guardarVideoPortada(url: string): Promise<{ error?: string
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** P8b: colores y letra de la página. Solo el dueño; la base valida los colores y la letra y devuelve la página como quedó. */
+export async function guardarEstilo(acento: string, fondo: string, tipografia: string): Promise<{ error?: string; pagina?: unknown }> {
+  const panel = await contextoPanel();
+  try {
+    const pagina = await rpc("guardar_estilo_pagina", { p_gimnasio_id: panel.gimnasio.id, p_color_acento: acento, p_color_fondo: fondo, p_tipografia: tipografia });
+    // Los colores también son los del panel y la app del socio.
+    revalidatePath("/", "layout");
+    return { pagina };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export type PaginaPorDefecto = {
+  portada: { titulo: string; bajada: string | null; boton_texto: string; foto_portada_path: string | null; mensaje_whatsapp: string; mostrar_precios: boolean };
+  secciones: { tipo: string; titulo: string; visible: boolean; contenido: Record<string, never> }[];
+  estilo: { color_acento: string; color_fondo: string; tipografia: "condensada" | "ancha" | "clasica" };
+};
+
+/** P8b: lo que vale "Restaurar por defecto". Solo lee: el editor lo carga como borrador y se guarda con Guardar. */
+export async function leerPaginaPorDefecto(): Promise<{ error?: string; defecto?: PaginaPorDefecto }> {
+  const panel = await contextoPanel();
+  try {
+    return { defecto: await rpc<PaginaPorDefecto>("pagina_por_defecto", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** COM-11: IDs del píxel de Meta y de Google Analytics (la base los valida). */
 export async function guardarMedicion(pixel: string, ga: string): Promise<{ error?: string; medicion?: import("./MedicionPagina").MedicionPanel }> {
   const panel = await contextoPanel();

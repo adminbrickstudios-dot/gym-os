@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 320 funciones piden un rol del equipo con `privado.exigir_equipo`; 400 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 322 funciones piden un rol del equipo con `privado.exigir_equipo`; 401 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -156,6 +156,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_equipo` | ✓ | — | — | — |
 | `guardar_equipo_ajuste` | ✓ | — | — | — |
 | `guardar_espera_plazo` | ✓ | — | — | — |
+| `guardar_estilo_pagina` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
 | `guardar_foto_socio_permitida` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
@@ -233,6 +234,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `otorgar_grado` | ✓ | ✓ | — | ✓ |
 | `pagar_profe` | ✓ | — | — | — |
 | `pagina_panel` | ✓ | ✓ | — | — |
+| `pagina_por_defecto` | ✓ | ✓ | — | — |
 | `pasos_asistente` | ✓ | — | — | — |
 | `pedido_baja_socio` | ✓ | ✓ | ✓ | — |
 | `pedidos_anulacion_pendientes` | ✓ | ✓ | — | — |
@@ -482,6 +484,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `clase_detalle`
 - `clases_del_dia`
 - `clases_para_probar (también anónimo)`
+- `clases_semana_publica (también anónimo)`
 - `comprobante_gasto`
 - `config_cierres`
 - `config_fichaje`

@@ -3,9 +3,9 @@ import { headers } from "next/headers";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
-import { traerAgenda } from "@/lib/landing";
+import { traerAgenda, traerClasesSemana } from "@/lib/landing";
 import { direccionPagina } from "@/lib/panel/direccion-pagina";
-import { Editor, type PaginaPanel } from "./Editor";
+import { Editor, type PaginaPanel, type ReglasImagenes } from "./Editor";
 import { Altas, type AltasPanel } from "./Altas";
 import { PruebaSocial, type PruebaSocialPanel } from "./PruebaSocial";
 import { VideoPortada } from "./VideoPortada";
@@ -18,17 +18,20 @@ export default async function Pagina() {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const host = (await headers()).get("x-gimnasio-host");
-    const [pagina, altas, agenda, medicion, prueba] = await Promise.all([
+    const [pagina, altas, agenda, clases, medicion, prueba, datos] = await Promise.all([
       rpc<PaginaPanel>("pagina_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<AltasPanel>("altas_panel", { p_gimnasio_id: panel.gimnasio.id }),
       host ? traerAgenda(host) : Promise.resolve(null),
+      host ? traerClasesSemana(host) : Promise.resolve([]),
       rpc<MedicionPanel>("medicion_panel", { p_gimnasio_id: panel.gimnasio.id }),
       rpc<PruebaSocialPanel>("prueba_social_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      // Las reglas de las imágenes (tipos y tamaño) las decide la base; el editor las usa para subir el logo y las fotos.
+      rpc<{ reglas_imagenes: ReglasImagenes }>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     return (
       <>
-        <Encabezado icono="web" titulo="Tu página" bajada="Lo que ve la gente antes de hacerse socio. Cambiá los textos, mostrá u ocultá secciones, ordenalas y mirá cómo queda antes de guardar." />
-        <Editor inicial={pagina} agenda={agenda} puedeEditar={panel.yo.rol === "dueno"} direccion={await direccionPagina(pagina.vista.marca.slug)}
+        <Encabezado icono="web" titulo="Tu página" bajada="Lo que ve la gente antes de hacerse socio. Cambiá logo, colores, letra, fotos y textos, mostrá u ocultá secciones, ordenalas arrastrando y mirá cómo queda al lado antes de guardar." />
+        <Editor inicial={pagina} agenda={agenda} clases={clases} reglas={datos.reglas_imagenes} puedeEditar={panel.yo.rol === "dueno"} direccion={await direccionPagina(pagina.vista.marca.slug)}
           altas={<Altas inicial={altas} puedeEditar={panel.yo.rol === "dueno"} />} />
         <VideoPortada inicial={pagina.vista.portada?.video_url ?? null} puedeEditar={panel.yo.rol === "dueno"} />
         <PruebaSocial inicial={prueba} puedeEditar={panel.yo.rol === "dueno"} />
