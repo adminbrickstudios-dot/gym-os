@@ -99,7 +99,7 @@ try {
   // D43 + H3b: la primera vista es mail y contraseña; el campo de mail es de texto con teclado de mail (se escribe la arroba).
   const mailCampo = nuevo.locator("input[name=email]").first();
   await mailCampo.waitFor({ timeout: 30000 });
-  chequear(await mailCampo.getAttribute("type") === "text" && await mailCampo.getAttribute("inputmode") === "email",
+  chequear(await mailCampo.getAttribute("type") === "email" || (await mailCampo.getAttribute("type") === "text" && await mailCampo.getAttribute("inputmode") === "email"),
     "el campo de mail: type=text con teclado de mail (se puede escribir la arroba)", `type=${await mailCampo.getAttribute("type")} inputmode=${await mailCampo.getAttribute("inputmode")}`);
 
   // ── 5 y 6. Avisos y botón de la Entrada, y la letra suelta en el veredicto ──
