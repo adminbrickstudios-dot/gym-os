@@ -113,7 +113,7 @@ try {
   const colores = await p.locator("li[data-gimnasio-color]").evaluateAll((l) => l.map((e) => e.getAttribute("data-gimnasio-color")));
   const rango = { rojo: 0, amarillo: 1, verde: 2, demo: 3 };
   chequear(colores.length >= 2 && colores.every((c, i) => i === 0 || rango[colores[i - 1]] <= rango[c]), `la lista va de los que necesitan atención a los que no (${colores.join(" > ")})`, `orden roto: ${colores.join(",")}`);
-  const mia = p.locator("li", { hasText: NOMBRE }).first();
+  const mia = p.locator("li[data-gimnasio-color]", { hasText: NOMBRE }).first();
   const colorMia = await mia.getAttribute("data-gimnasio-color");
   const motivosMia = (await mia.locator("[data-motivos]").count()) ? await mia.locator("[data-motivos]").innerText() : "(sin motivos)";
   const gimMia = (await db.query(`select es_demo, plataforma_plan_id is not null as con_plan, plataforma_desde, prueba_dias from public.gimnasios where id = $1`, [gid])).rows[0];
