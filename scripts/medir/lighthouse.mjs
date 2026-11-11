@@ -48,6 +48,25 @@ function lcpElemento(r) {
     return `LCP element: \`${nodo?.selector ?? "?"}\`${url ? ` ${url}` : " (texto, sin recurso)"}${desglose ? ` — ${desglose}` : ""}`.replace(/\|/g, "\\|");
   } catch { return "LCP element: no se pudo leer"; }
 }
+/** Qué bloquea el primer pintado: recursos que bloquean el render, cadena de pedidos críticos y el JavaScript que más trabaja (evidencia para el LCP de texto). */
+function quePinta(r) {
+  const partes = [];
+  try {
+    const bloq = r.audits["render-blocking-resources"]?.details?.items ?? [];
+    if (bloq.length) partes.push(`bloquean el render: ${bloq.slice(0, 6).map((i) => `${String(i.url).split("/").slice(-1)[0].slice(0, 40)} (${Math.round(i.wastedMs ?? 0)} ms, ${Math.round((i.totalBytes ?? 0) / 1024)} KB)`).join(", ")}`);
+    const cad = r.audits["critical-request-chains"]?.details;
+    if (cad?.longestChain) partes.push(`cadena crítica más larga: ${cad.longestChain.count} pedidos, ${Math.round(cad.longestChain.duration)} ms`);
+    const js = (r.audits["bootup-time"]?.details?.items ?? []).slice(0, 4).map((i) => `${String(i.url).split("/").slice(-1)[0].slice(0, 34)} (${Math.round(i.total)} ms)`);
+    if (js.length) partes.push(`JavaScript que más trabaja: ${js.join(", ")}`);
+    const fuentes = r.audits["font-display"]?.details?.items ?? [];
+    if (fuentes.length) partes.push(`fuentes sin font-display: ${fuentes.length}`);
+    const css = (r.audits["network-requests"]?.details?.items ?? []).filter((i) => /\.css(\?|$)/.test(i.url)).map((i) => `${String(i.url).split("/").slice(-1)[0].slice(0, 30)} ${Math.round((i.transferSize ?? 0) / 1024)} KB`);
+    if (css.length) partes.push(`CSS: ${css.join(", ")}`);
+    const html = (r.audits["network-requests"]?.details?.items ?? [])[0];
+    if (html) partes.push(`HTML: ${Math.round((html.transferSize ?? 0) / 1024)} KB`);
+  } catch { /* sin detalle */ }
+  return partes.length ? partes.join(" · ").replace(/\|/g, "\\|") : "sin detalle";
+}
 const pct = (r, k) => Math.round((r.categories[k]?.score ?? 0) * 100);
 const num = (r, k) => r.audits[k]?.numericValue;
 
@@ -66,6 +85,7 @@ for (const [nombre, ruta, principal] of PAGINAS) {
   const perf = pct(r, "performance");
   filas.push(`| ${nombre} | \`${ruta}\` | **${perf}** | ${pct(r, "accessibility")} | ${pct(r, "best-practices")} | ${pct(r, "seo")} | ${(num(r, "largest-contentful-paint") / 1000).toFixed(2)} s | ${num(r, "cumulative-layout-shift").toFixed(3)} | ${Math.round(num(r, "total-blocking-time"))} ms |`);
   filas.push(`| ↳ ${nombre}: elemento LCP | | ${lcpElemento(r)} | | | | | | |`);
+  filas.push(`| ↳ ${nombre}: qué bloquea el pintado | | ${quePinta(r)} | | | | | | |`);
   if (principal && perf < UMBRAL) { avisos++; console.log(`::warning::Lighthouse móvil: la landing saca ${perf} de performance (objetivo ${UMBRAL}).`); }
   const malas = Object.values(r.audits).filter((a) => a.score !== null && a.score < 0.9 && a.details?.type !== "debugdata" && (a.scoreDisplayMode === "numeric" || a.scoreDisplayMode === "binary" || a.scoreDisplayMode === "metricSavings"))
     .sort((a, b) => a.score - b.score).slice(0, 8).map((a) => `${a.title} (${Math.round(a.score * 100)})`);
