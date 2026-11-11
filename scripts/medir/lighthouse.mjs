@@ -35,6 +35,19 @@ function correr(url, archivo) {
   }
   return JSON.parse(readFileSync(archivo, "utf8"));
 }
+/** "LCP element: <selector> <url del recurso si es una imagen>" y de dónde sale el tiempo (si Lighthouse lo informa). */
+function lcpElemento(r) {
+  try {
+    const nodo = r.audits["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node;
+    const snippet = String(nodo?.snippet ?? "");
+    const url = snippet.match(/\bsrc="([^"]+)"/)?.[1]
+      ?? r.audits["lcp-discovery-insight"]?.details?.items?.find?.((i) => i.url)?.url
+      ?? r.audits["lcp-breakdown-insight"]?.details?.items?.find?.((i) => i.url)?.url ?? "";
+    const partes = r.audits["lcp-breakdown-insight"]?.details?.items ?? r.audits["largest-contentful-paint-element"]?.details?.items?.[1]?.items ?? [];
+    const desglose = (Array.isArray(partes) ? partes : []).filter((p) => p.subpart || p.phase).map((p) => `${p.subpart ?? p.phase}: ${Math.round(p.duration ?? p.timing ?? 0)} ms`).join(", ");
+    return `LCP element: \`${nodo?.selector ?? "?"}\`${url ? ` ${url}` : " (texto, sin recurso)"}${desglose ? ` — ${desglose}` : ""}`.replace(/\|/g, "\\|");
+  } catch { return "LCP element: no se pudo leer"; }
+}
 const pct = (r, k) => Math.round((r.categories[k]?.score ?? 0) * 100);
 const num = (r, k) => r.audits[k]?.numericValue;
 
@@ -52,6 +65,7 @@ for (const [nombre, ruta, principal] of PAGINAS) {
   const r = corridas[Math.floor(corridas.length / 2)];
   const perf = pct(r, "performance");
   filas.push(`| ${nombre} | \`${ruta}\` | **${perf}** | ${pct(r, "accessibility")} | ${pct(r, "best-practices")} | ${pct(r, "seo")} | ${(num(r, "largest-contentful-paint") / 1000).toFixed(2)} s | ${num(r, "cumulative-layout-shift").toFixed(3)} | ${Math.round(num(r, "total-blocking-time"))} ms |`);
+  filas.push(`| ↳ ${nombre}: elemento LCP | | ${lcpElemento(r)} | | | | | | |`);
   if (principal && perf < UMBRAL) { avisos++; console.log(`::warning::Lighthouse móvil: la landing saca ${perf} de performance (objetivo ${UMBRAL}).`); }
   const malas = Object.values(r.audits).filter((a) => a.score !== null && a.score < 0.9 && a.details?.type !== "debugdata" && (a.scoreDisplayMode === "numeric" || a.scoreDisplayMode === "binary" || a.scoreDisplayMode === "metricSavings"))
     .sort((a, b) => a.score - b.score).slice(0, 8).map((a) => `${a.title} (${Math.round(a.score * 100)})`);

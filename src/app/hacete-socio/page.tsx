@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { propsMarca } from "@/lib/marca";
 import { linkWhatsapp } from "@/lib/landing-textos";
-import type { Marca, PlanPublico } from "@/lib/landing";
+import { traerLanding, type Marca, type PlanPublico } from "@/lib/landing";
 import { FormAlta } from "./FormAlta";
 import type { Transferencia } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
@@ -26,12 +26,20 @@ async function datos(): Promise<DatosAlta | null> {
   return data as DatosAlta | null;
 }
 
+/**
+ * El nombre del gimnasio para el título y la descripción sale de la MISMA landing que ya está en caché (rápido): si el generateMetadata
+ * esperara la consulta del alta (lenta), Next manda las etiquetas DESPUÉS del <head> (streaming) y Lighthouse y Google no las ven
+ * ("Document does not have a meta description").
+ */
 export async function generateMetadata(): Promise<Metadata> {
-  const d = await datos();
+  const h = await headers();
+  const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
+  const landing = host ? await traerLanding(host).catch(() => null) : null;
+  const nombre = landing?.marca.nombre ?? null;
   return {
-    title: { absolute: d ? `Quiero ser socio · ${d.marca.nombre}` : "Quiero ser socio" },
-    // SEO: toda página pública lleva su descripción (Lighthouse la pide).
-    description: d ? `Hacete socio de ${d.marca.nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.",
+    title: { absolute: nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio" },
+    // SEO: toda página pública lleva su descripción.
+    description: nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.",
   };
 }
 
