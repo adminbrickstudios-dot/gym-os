@@ -38,7 +38,7 @@ try {
   await p.goto(`${GIMNASIO()}/panel`);
   const numeros = p.locator('section[aria-label="Números de hoy"] a[data-numero]');
   const cuantos = await numeros.count();
-  chequear(cuantos === 4, `Inicio: los 4 números se pueden tocar`, `Inicio: ${cuantos} números con link (esperaba 4)`);
+  chequear(cuantos >= 4, `Inicio: los ${cuantos} números se pueden tocar (BASE-4: más de 4 por defecto)`, `Inicio: ${cuantos} números con link (esperaba 4 o más)`);
   await capturar(p, "dis0-compu-inicio");
   const destinos = [];
   for (let i = 0; i < cuantos; i++) destinos.push(await numeros.nth(i).getAttribute("href"));
