@@ -83,7 +83,10 @@ try {
   chequear((await d.locator('input[name="telefono"]').inputValue()).replace(/\D/g, "").endsWith(cel(1).replace(/\D/g, "").slice(-7)), "el alta arranca con su celular", "no trajo el celular");
   await elegirPlan(d, 0);
   await d.locator('button:has-text("Dar de alta y cobrar")').click();
-  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 });
+  await d.locator('[data-cobrar] [data-cobrar-confirmar]').waitFor({ timeout: 30000 }).catch(async (e) => {
+    const alertas = await d.locator('[role=alert], [data-error], .pildora-rojo').allInnerTexts().catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | URL ${d.url()} | alertas: ${alertas.join(" / ") || "(ninguna)"} | pantalla: ${(await d.locator("main").innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 500)}`);
+  });
   await d.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
   await d.locator("[data-cobrar-confirmar]").click();
   await d.locator("[data-alta-paso=listo]").waitFor({ timeout: 30000 });

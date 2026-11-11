@@ -92,7 +92,12 @@ try {
     if (filas) ok(`${quien}: ${filas} avisos en ${grupos} día${grupos === 1 ? "" : "s"} (Hoy / Ayer / fecha)`);
     if (!probadoMarcar && await p.locator("[data-marcar-todo]").count()) {
       await p.locator("[data-marcar-todo]").click();
-      await p.waitForFunction(() => document.querySelectorAll('[data-novedad="nueva"]').length === 0, null, { timeout: 30000 });
+      await p.waitForFunction(() => document.querySelectorAll('[data-novedad="nueva"]').length === 0, null, { timeout: 30000 }).catch(async (e) => {
+        const quedan = await p.locator('[data-novedad="nueva"]').evaluateAll((l) => l.slice(0, 5).map((x) => `${x.getAttribute("data-tipo")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 80)}`));
+        const nQuedan = await p.locator('[data-novedad="nueva"]').count();
+        const alerta = await p.locator("[role=alert]").allInnerTexts().catch(() => []);
+        throw new Error(`${e.message.split("\n")[0]} | ${quien}: quedan ${nQuedan} sin leer (${quedan.join(" ; ")}) | alerta: ${alerta.join(" / ") || "ninguna"}`);
+      });
       await p.waitForFunction(() => document.querySelector("a[data-campana]")?.getAttribute("data-campana") === "0" || !document.querySelector("a[data-campana]")?.getAttribute("data-campana"), null, { timeout: 30000 });
       ok(`${quien}: “Marcar todo como leído” deja la campana en cero`);
       probadoMarcar = true;

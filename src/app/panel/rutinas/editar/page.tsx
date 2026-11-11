@@ -30,7 +30,7 @@ export default async function EditarRutina({ searchParams }: { searchParams: Pro
         <div className="space-y-10">
           {id && r && <AccionesRutina rutinaId={id} nombre={r.nombre} plantilla={meta?.plantilla ?? false} asignados={meta?.asignados ?? 0} />}
           {id && r && <AsignarRutina rutinaId={id} />}
-          <Editor id={id ?? null} ejercicios={ejercicios} inicial={{ nombre: r?.nombre ?? "", descripcion: r?.descripcion ?? "", items: r?.items ?? [] }} />
+          <Editor key={id ?? "nueva"} id={id ?? null} ejercicios={ejercicios} inicial={{ nombre: r?.nombre ?? "", descripcion: r?.descripcion ?? "", items: r?.items ?? [] }} />
         </div>
       </>
     );

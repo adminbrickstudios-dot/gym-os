@@ -16,6 +16,7 @@ const [{ id: gim }] = (await db.query(`select id from public.gimnasios where slu
 // Punto de partida: la recepción no los ve (el valor por defecto).
 await db.query(`delete from public.config_mensajes where gimnasio_id = $1`, [gim]);
 const s5 = Date.now().toString().slice(-6);
+let rapidaCreada = false;
 const TEXTO = `Perdí una botella azul ${s5}`;
 // Un PNG de 1x1 (la foto de mentira).
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
@@ -91,6 +92,14 @@ try {
   await fotoR.waitFor({ timeout: 30000 });
   chequear(await fotoR.evaluate((i) => i.complete && i.naturalWidth > 0), "la recepción ve la foto del socio", "la recepción no ve la foto");
   // Una respuesta rápida + un toque propio.
+  // Las tres de ejemplo solo las siembra la migración en los gimnasios que ya existían: en una base nueva el demo no las tiene.
+  const [{ n: hayRapida }] = (await db.query(`select count(*)::int n from public.respuestas_rapidas_mensajes where gimnasio_id = $1 and titulo = 'Objeto encontrado'`, [gim])).rows;
+  if (!hayRapida) {
+    await db.query(`insert into public.respuestas_rapidas_mensajes (gimnasio_id, titulo, texto, orden) values ($1, 'Objeto encontrado', 'Encontramos lo que perdiste. Pasá por la recepción y te lo damos.', 2)`, [gim]);
+    rapidaCreada = true;
+    await r.reload();
+    await r.locator("[data-responder]").waitFor({ timeout: 30000 });
+  }
   const rapida = r.locator("[data-rapidas] button", { hasText: "Objeto encontrado" });
   await rapida.waitFor({ timeout: 15000 });
   await rapida.click();
@@ -137,6 +146,7 @@ try {
   await capturar(c, "vd38-celu-bandeja");
 } finally {
   await db.query(`delete from public.config_mensajes where gimnasio_id = $1`, [gim]).catch(() => {});
+  if (rapidaCreada) await db.query(`delete from public.respuestas_rapidas_mensajes where gimnasio_id = $1 and titulo = 'Objeto encontrado'`, [gim]).catch(() => {});
   await db.end();
   await b.close();
 }
