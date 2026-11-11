@@ -70,18 +70,16 @@ try {
     await form.locator('input[name="dni"]').fill(DNI);
     await form.locator('input[name="telefono"]').fill(TEL);
     await form.locator('input[name="fecha_nacimiento"]').fill(nac);
+    await form.locator('input[name="email"]').fill(`reg${s}@ejemplo.invalid`);
+    await form.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   };
   chequear(await form.locator('input[name="fecha_nacimiento"]').evaluate((x) => x.required), "la fecha de nacimiento es obligatoria", "la fecha de nacimiento no es obligatoria");
   const anio = new Date().getFullYear();
   await llenar(`${anio - 15}-05-10`);
+  // H3b: un menor se anota con un adulto responsable (el formulario se lo pide); sin él no se manda.
+  chequear(await aparece(form.locator("[data-adulto-responsable]"), 10000) && await form.locator('input[name="responsable_nombre"]').evaluate((x) => x.required), "un menor: el formulario pide el nombre y el celular de un adulto responsable", "con un menor no pide al adulto responsable");
+  chequear((await db.query(`select count(*)::int n from public.socios where dni = $1`, [DNI])).rows[0].n === 0, "y no queda anotado sin él", "el menor quedó anotado");
   await form.locator('input[name="acepto"]').check();
-  await form.locator('label:has-text("Transferencia")').click();
-  await esperarAntiRobot(form);
-  await form.locator('button[type="submit"]').click();
-  const alerta = v.locator('form[data-form-alta] [role="alert"]');
-  await alerta.waitFor({ timeout: 30000 });
-  chequear(/menos de 18/.test(await alerta.innerText()), "un menor no se anota solo: “el alta la hace un adulto responsable”", `con un menor dijo: ${await alerta.innerText()}`);
-  chequear((await db.query(`select count(*)::int n from public.socios where dni = $1`, [DNI])).rows[0].n === 0, "y no queda anotado", "el menor quedó anotado");
   await llenar(`${anio - 30}-05-10`);
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();

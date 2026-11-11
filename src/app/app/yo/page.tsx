@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { fechaCorta } from "@/lib/formato";
+import { fechaCorta, formatearDni } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
@@ -38,6 +38,8 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
       yo.modo_clases !== "ninguno" ? rpc<boolean>("aviso_clase_socio", { p_socio_id: s.socio_id }).catch(() => null) : Promise.resolve(null),
     ]);
     const ayudasEstado = await ayudasDeUsuario();
+    // El DNI es con lo que entra: se ve, y cambiarlo lo hace la recepción. Si la base no lo da, no se muestra.
+    const dni = await rpc<string>("mi_dni", { p_socio_id: s.socio_id }).catch(() => null);
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
         <Link href={href} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila={marca ?? titulo}>
@@ -52,6 +54,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         <div>
           <h1 className="titular text-5xl">{s.nombre} {s.apellido}</h1>
           <p className="texto-tenue mt-1">Socio #{s.numero}</p>
+          {dni && <p className="texto-suave mt-1" data-yo-dni>DNI {formatearDni(dni)} · si hay que cambiarlo, lo hace la recepción</p>}
           {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue underline">Cambiar de socio</Link>}
         </div>
 
@@ -100,7 +103,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
         {/* VD-31B: apagar las ayudas (o volver a verlas) desde la app, igual que en el panel. */}
         {ayudasEstado && <AjustesAyuda apagadas={ayudasEstado.apagadas} />}
 
-        <form action="/salir?a=socio" method="post"><button className="boton w-full !min-h-14">Cerrar sesión</button></form>
+        <form action="/salir" method="post"><input type="hidden" name="a" value="socio" /><button className="boton w-full !min-h-14" data-cerrar-sesion>Cerrar sesión</button></form>
       </div>
     );
   });

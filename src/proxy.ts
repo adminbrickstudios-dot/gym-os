@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO as OPCIONES_COOKIE } from "@/lib/cookie-gimnasio";
 import { clasificarHost, normalizarHost } from "@/lib/host";
 import { memoriaCorta } from "@/lib/rapidez/memoria";
+import { accionDeGimnasio, direccionPropia, esDelGimnasioConSesion, leerRutaGimnasio, usaGimnasioElegido } from "@/lib/proxy-rutas";
+import { urlDeHost } from "@/lib/urls";
 
 // VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
 // RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
@@ -113,32 +115,36 @@ async function proxyInterno(req: NextRequest) {
 
     // /g/<slug>: la página de un gimnasio que todavía no tiene dirección
     // propia. Queda elegido (cookie) para que "Soy socio" y /app sigan en él.
-    const g = /^\/g\/([a-z0-9-]{1,42})(\/.*)?$/.exec(ruta);
-    if (g) {
+    const g = leerRutaGimnasio(ruta);
+    if (g.tipo === "gimnasio") {
       let elegido: Elegido | undefined;
       try {
-        elegido = await porSlug(g[1]);
+        elegido = await porSlug(g.slug);
       } catch (e) {
-        return new NextResponse(`No se pudo resolver el gimnasio ${g[1]}: ${(e as Error).message}`, { status: 503 });
+        return new NextResponse(`No se pudo resolver el gimnasio ${g.slug}: ${(e as Error).message}`, { status: 503 });
       }
       if (!elegido) {
         const destino = req.nextUrl.clone();
         destino.pathname = "/gimnasio-no-encontrado";
-        destino.search = `?host=${encodeURIComponent(`${host}/g/${g[1]}`)}`;
+        destino.search = `?host=${encodeURIComponent(`${host}/g/${g.slug}`)}`;
         return NextResponse.rewrite(destino, { status: 404 });
       }
-      const resto = g[2] && g[2] !== "/" ? g[2] : null;
+      // H3: con dominio propio (o subdominio que ya anda) la dirección vieja /g/<slug>/… redirige a la nueva, con la misma ruta.
+      // Sin dominio, /g/<slug>/… es la dirección buena y siempre anda (la del QR impreso).
+      const propio = direccionPropia(elegido.host, { base, plataforma });
+      if (propio) return NextResponse.redirect(urlDeHost(propio, (g.resto ?? "/") + req.nextUrl.search), 308);
+      const que = accionDeGimnasio(g.resto);
       let r: NextResponse;
-      if (resto === "/ingresar") {
-        // U0.1/PLAT-02: /g/<slug>/ingresar se queda en esa dirección (no rebota al /ingresar de la plataforma):
-        // muestra la marca de ESE gimnasio y comprueba que la cuenta sea de él. El gimnasio queda también en la cookie.
+      if (que.accion === "publica") {
+        // U0.1/PLAT-02 + H3: /g/<slug>/ingresar, /hacete-socio y /privacidad se quedan en esa dirección (no rebotan a la raíz de la
+        // plataforma, donde se perdía el gimnasio): muestran ESE gimnasio. El gimnasio queda también en la cookie.
         marcarGimnasio(elegido);
         const destino = req.nextUrl.clone();
-        destino.pathname = "/ingresar";
+        destino.pathname = que.ruta;
         r = NextResponse.rewrite(destino, { request: { headers: cabeceras } });
-      } else if (resto) {
+      } else if (que.accion === "redirigir") {
         const destino = req.nextUrl.clone();
-        destino.pathname = resto;
+        destino.pathname = que.ruta;
         r = NextResponse.redirect(destino);
       } else {
         marcarGimnasio(elegido);
@@ -153,9 +159,10 @@ async function proxyInterno(req: NextRequest) {
     // El panel, la app del socio y su ingreso también se usan desde la
     // dirección de la plataforma: el gimnasio sale de la cookie que se puso
     // al entrar. La cookie no da permisos.
-    const socioIngresando = ruta === "/ingresar" && req.nextUrl.searchParams.get("modo") === "socio";
+    // H3: el alta, la privacidad y el ingreso del socio también salen con el gimnasio elegido (los links relativos de su página).
+    const socioIngresando = usaGimnasioElegido(ruta, req.nextUrl.searchParams.get("modo"));
     // VD-22: /auth/* (Google: ir, volver y vincular) también son del gimnasio elegido.
-    const delGimnasio = ruta === "/panel" || ruta.startsWith("/panel/") || ruta === "/app" || ruta.startsWith("/app/") || ruta.startsWith("/auth/");
+    const delGimnasio = esDelGimnasioConSesion(ruta);
     const slug = req.cookies.get(COOKIE_GIMNASIO)?.value;
     if (delGimnasio || (socioIngresando && slug)) {
       let elegido: Elegido | undefined;
@@ -167,6 +174,11 @@ async function proxyInterno(req: NextRequest) {
         }
       }
       if (!elegido) {
+        if (!delGimnasio && ruta !== "/ingresar") {
+          // /hacete-socio o /privacidad con una cookie que ya no apunta a nadie: la página dice que no hay gimnasio (nunca el de otro).
+          cabeceras.set("x-gymos-contexto", "plataforma");
+          return conSesion(req, cabeceras, supabaseUrl, anon);
+        }
         const destino = req.nextUrl.clone();
         destino.pathname = "/ingresar";
         destino.search = `?siguiente=${encodeURIComponent(ruta)}`;

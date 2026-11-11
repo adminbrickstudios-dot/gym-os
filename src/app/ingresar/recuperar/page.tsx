@@ -12,8 +12,8 @@ function mailDelLink(m?: string) {
 
 export const metadata: Metadata = { title: "Olvidé mi contraseña", robots: { index: false, follow: true } };
 
-export default async function PaginaRecuperar({ searchParams }: { searchParams: Promise<{ siguiente?: string; email?: string; nueva?: string }> }) {
-  const { siguiente, email, nueva } = await searchParams;
+export default async function PaginaRecuperar({ searchParams }: { searchParams: Promise<{ siguiente?: string; email?: string; nueva?: string; modo?: string }> }) {
+  const { siguiente, email, nueva, modo } = await searchParams;
   const primera = nueva === "1";
   const marca = await traerMarca();
   const conMail = smtpActivo();
@@ -35,7 +35,7 @@ export default async function PaginaRecuperar({ searchParams }: { searchParams: 
         </div>
       )}
       <div className="mt-6"><Recuperar siguiente={siguiente ?? null} emailInicial={mailDelLink(email)} /></div>
-      <p className="text-sm text-center mt-6"><Link href="/ingresar" className="underline underline-offset-4 texto-suave inline-flex items-center min-h-11">← Volver a ingresar</Link></p>
+      <p className="text-sm text-center mt-6"><Link href={modo === "socio" || siguiente === "/app" ? "/ingresar?modo=socio" : "/ingresar"} className="underline underline-offset-4 texto-suave inline-flex items-center min-h-11">← Volver a ingresar</Link></p>
     </CascaraIngreso>
   );
 }

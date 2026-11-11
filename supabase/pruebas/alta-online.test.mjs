@@ -55,7 +55,15 @@ test("el visitante se anota: socio con plan, sin cobertura, reglamento aceptado 
   await t.falla(() => anon(() => alta(DATOS, "mostrador", 0)), /El reglamento cambió/);
   await t.falla(() => anon(() => alta({ ...DATOS, dni: "12" })), /DNI/);
   await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: "" })), /fecha de nacimiento/);
-  await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: "2015-05-01" })), /menos de 18/);
+  await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: "2015-05-01" })), /menor de 18.*adulto responsable/);
+  // H3b: el menor se anota con un adulto responsable; el DNI sigue sin repetirse.
+  const menorOk = await anon(() => alta({ ...DATOS, dni: "50111222", telefono: "387 555 8888", fecha_nacimiento: "2015-05-01", responsable_nombre: "Mamá Prueba", responsable_telefono: "387 555 9999" }));
+  assert.equal(menorOk.ya_socio, false);
+  assert.equal(menorOk.menor, true);
+  const [{ rt }] = await t.q(`select responsable_telefono rt from public.socios where id = $1`, [menorOk.socio_id]);
+  assert.equal(rt, "+5493875559999");
+  const repetido = await anon(() => alta({ ...DATOS, dni: "50111222", telefono: "387 555 1010" }));
+  assert.deepEqual({ ya: repetido.ya_socio, por: repetido.por }, { ya: true, por: "dni" });
   await t.falla(() => anon(() => alta(DATOS, "mostrador", 1, "00000000-0000-0000-0000-000000000000")), /Elegí uno de los planes/);
 
   const r = await anon(() => alta(DATOS));

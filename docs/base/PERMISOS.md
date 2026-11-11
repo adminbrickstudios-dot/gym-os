@@ -1,6 +1,7 @@
 # Permisos por rol (sacado de la base real)
 
 Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 327 funciones piden un rol del equipo con `privado.exigir_equipo`; 406 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 327 funciones piden un rol del equipo con `privado.exigir_equipo`; 404 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -622,6 +623,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `marcar_transferencia_vista`
 - `medicion_publica (también anónimo)`
 - `mensajes_estado_socio`
+- `mi_dni`
 - `mi_fichaje`
 - `mi_hilo`
 - `mi_link_referido`
@@ -762,9 +764,11 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `registrar_pedido_codigo`
 - `revertir_pago_mp`
 - `revisar_pagos_mp`
+- `socio_para_reclamar`
 - `socio_para_vincular_google`
 - `telefono_para_ingresar`
 - `usuario_por_mail`
+- `vincular_cuenta_socio`
 - `vincular_google`
 - `vincular_socios_por_email`
 - `vincular_socios_por_telefono`

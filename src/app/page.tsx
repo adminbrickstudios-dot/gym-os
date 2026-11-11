@@ -7,6 +7,7 @@ import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedici
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 import { PlataformaLanding } from "@/components/landing/Plataforma";
+import { sesionEnEsteGimnasio } from "@/lib/app/sesion-gimnasio";
 import { contactoPlataforma, planesBrikPublicos } from "@/lib/plataforma-venta";
 import { linkWhatsapp } from "@/lib/landing-textos";
 import capturasGymos from "@/lib/capturas-gymos.json";
@@ -66,7 +67,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Inicio() {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
-    if (!r.landing.publicada) return <LandingOculta marca={r.landing.marca} contacto={r.landing.contacto} />;
+    // H3b: con la sesión abierta, la landing saluda por el nombre y ofrece "Ir a mi perfil" y "Cerrar sesión".
+    const sesion = await sesionEnEsteGimnasio();
+    if (!r.landing.publicada) return <LandingOculta marca={r.landing.marca} contacto={r.landing.contacto} altas={false} sesion={sesion} />;   // el alta online pide la página publicada: oculta no hay "Quiero ser socio"
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
     const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
@@ -75,7 +78,7 @@ export default async function Inicio() {
       <>
         {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
-        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} />
+        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} sesion={sesion} />
         <Medicion medicion={r.medicion} />
       </>
     );

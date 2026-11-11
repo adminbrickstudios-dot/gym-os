@@ -61,6 +61,11 @@ export function saludo(momento: Date = new Date(), zona = ZONA_POR_DEFECTO): str
   return "Buenas noches";
 }
 
+/** "12345678" → "12.345.678" (solo para mostrar; en la base el DNI va sin puntos). */
+export function formatearDni(dni: string | number | null | undefined): string {
+  return String(dni ?? "").replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 /** Lunes 26/10 */
 export function fechaLarga(momento: Date = new Date(), zona = ZONA_POR_DEFECTO): string {
   const dia = new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long" }).format(momento);

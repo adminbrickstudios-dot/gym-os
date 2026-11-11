@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useState, type CSSProperties } from "react";
 import { ingresar, type EstadoIngreso } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 import { guardarCompuCompartida, leerCompuCompartida } from "@/app/panel/entrada/compartida";
 
 export function FormularioIngreso({ siguiente, emailInicial }: { siguiente: string | null; emailInicial?: string }) {
@@ -17,7 +18,9 @@ export function FormularioIngreso({ siguiente, emailInicial }: { siguiente: stri
     setCompartida(leerCompuCompartida());
     setPorInactividad(new URLSearchParams(window.location.search).get("inactividad") === "1");
   }, []);
-  const recuperar = siguiente ? `/ingresar/recuperar?siguiente=${encodeURIComponent(siguiente)}` : "/ingresar/recuperar";
+  // El socio (siguiente=/app) no es del equipo: no ve lo de la compu compartida y los links conservan modo=socio.
+  const esSocio = siguiente === "/app";
+  const recuperar = siguiente ? `/ingresar/recuperar?siguiente=${encodeURIComponent(siguiente)}${esSocio ? "&modo=socio" : ""}` : "/ingresar/recuperar";
   return (
     <form action={accion} className="space-y-4">
       {siguiente && <input type="hidden" name="siguiente" value={siguiente} />}
@@ -37,12 +40,12 @@ export function FormularioIngreso({ siguiente, emailInicial }: { siguiente: stri
         <Mensaje tipo="error">{estado.error}{estado.ayuda && <> <a href={estado.ayuda} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 font-semibold" data-ayuda-brik>Escribinos por WhatsApp</a></>}</Mensaje>
       )}
       <button type="submit" disabled={yendo} className="boton boton-principal text-lg w-full !mt-6">
-        {yendo ? "Entrando…" : "🔑 Entrar"}
+        {yendo ? "Entrando…" : <><Icono nombre="llave" /> Entrar</>}
       </button>
-      <label className="flex items-center gap-2 text-sm" data-compu-compartida>
+      {!esSocio && <label className="flex items-center gap-2 text-sm" data-compu-compartida>
         <input type="checkbox" checked={compartida} onChange={(e) => { setCompartida(e.target.checked); guardarCompuCompartida(e.target.checked); }} />
         <span>Esta compu la usa todo el equipo: que el navegador no guarde la contraseña</span>
-      </label>
+      </label>}
       <p className="text-sm text-center">
         <Link href={recuperar} className="underline underline-offset-4" data-olvide>¿Te olvidaste la contraseña?</Link>
       </p>

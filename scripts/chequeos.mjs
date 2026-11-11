@@ -89,6 +89,8 @@ const EJECUTABLES = {
     "public.cuenta_para_clave_socio", "public.registrar_clave_entregada",
     // C1b: el socio se entera de la clave nueva (lee solo su ficha; permiso denegado = error)
     "public.aviso_clave_socio", "public.marcar_aviso_clave_visto",
+    // H3b: el socio lee su propio DNI (permiso denegado = error); vincular_cuenta_socio y socio_para_reclamar son solo del servidor
+    "public.mi_dni",
   ]),
 };
 

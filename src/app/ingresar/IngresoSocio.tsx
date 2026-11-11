@@ -5,10 +5,11 @@ import { FormularioIngreso } from "./FormularioIngreso";
 import { PasoCodigo } from "@/components/cuentas/PasoCodigo";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
+import { Icono } from "@/components/ui/Icono";
 
 type Via = "celular" | "mail" | "clave";
 type Estado = { error?: string; enviado?: boolean; telefono?: string; email?: string; destino?: string };
-const VIAS: [Via, string][] = [["clave", "🔑 Contraseña"], ["celular", "📱 Celular"], ["mail", "✉️ Mail"]];
+const VIAS: [Via, string, string][] = [["clave", "Contraseña", "llave"], ["celular", "Celular", "telefono"], ["mail", "Mail", "mail"]];
 
 /**
  * El socio entra con un solo campo, "celular o mail" (VD-33, primero quién): lo que escribe elige el método
@@ -64,9 +65,9 @@ function Vias({ via, cambiar }: { via: Via; cambiar: (v: Via) => void }) {
     <div>
       <p className="etiqueta mb-2">Otras formas de entrar</p>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Cómo entrar">
-        {VIAS.map(([v, t]) => (
+        {VIAS.map(([v, t, ic]) => (
           <button key={v} type="button" aria-pressed={via === v} onClick={() => cambiar(v)}
-            className={`pildora cursor-pointer !min-h-11 ${via === v ? "pildora-azul" : ""}`}>{t}</button>
+            className={`pildora cursor-pointer !min-h-11 ${via === v ? "pildora-azul" : ""}`}><Icono nombre={ic} /> {t}</button>
         ))}
       </div>
     </div>
@@ -118,7 +119,7 @@ function PorCodigo({ via, setVia, valor, setValor, vias, otraVez }: {
       <label className="block space-y-2">
         <span className="etiqueta">Tu celular o tu mail</span>
         <input
-          className="campo !text-xl" name={mail ? "email" : "telefono"} type="text" inputMode="email" autoCapitalize="none" autoCorrect="off" autoComplete={mail ? "email" : "tel"}
+          className="campo !text-xl" name={mail ? "email" : "telefono"} type="text" inputMode={mail ? "email" : "tel"} autoComplete={mail ? "email" : "tel"} autoCapitalize="off" spellCheck={false}
           required placeholder="387 555-1234 o vos@ejemplo.com" value={valor}
           onChange={(e) => {
             const v = e.target.value;
@@ -132,7 +133,7 @@ function PorCodigo({ via, setVia, valor, setValor, vias, otraVez }: {
       <DesafioTurnstile />
       {pedido.error && <Mensaje tipo="error">{pedido.error}</Mensaje>}
       <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">
-        {pidiendo ? "Mandando…" : mail ? "✉️ Mandame el código" : "📲 Mandame el código"}
+        {pidiendo ? "Mandando…" : <><Icono nombre={mail ? "mail" : "telefono"} /> Mandame el código</>}
       </button>
     </form>
   );
