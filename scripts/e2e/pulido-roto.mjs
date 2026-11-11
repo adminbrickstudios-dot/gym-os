@@ -88,9 +88,10 @@ try {
   await s.waitForURL((u) => u.pathname === "/app", { timeout: 30000 });
   ok("con la sesión abierta, /socio lleva a la app del socio");
   await s.goto(`${G}/app`);
-  await s.locator('form[action="/salir?a=socio"] button').first().click();
-  await s.waitForURL((u) => u.pathname === "/ingresar" && u.searchParams.get("modo") === "socio", { timeout: 30000 });
-  ok("“Salir” del socio vuelve al ingreso del socio (no al del equipo)");
+  await s.locator('form[action="/salir"]:has(input[name=a][value=socio]) button').first().click();
+  // H3b: el socio vuelve a la página de su gimnasio (no al login del equipo); sin gimnasio conocido, a su ingreso.
+  await s.waitForURL((u) => (u.pathname === "/" || u.pathname.startsWith("/g/")) || (u.pathname === "/ingresar" && u.searchParams.get("modo") === "socio"), { timeout: 30000 });
+  ok("“Salir” del socio vuelve a la página de su gimnasio (no al login del equipo)");
 
   // ── 4. El campo "celular o mail" ──
   const nuevo = await pagina(b, CELU);
