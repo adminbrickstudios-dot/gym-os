@@ -7,6 +7,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { traerCampana, traerPreferencias, type ItemCampana } from "./datos";
 import { MarcarTodo, PreferenciasAvisos } from "./Controles";
 import { MarcarLeidos } from "./Leidos";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Novedades" };
 
@@ -38,7 +39,7 @@ export default async function Novedades() {
     const fila = (i: ItemCampana) => (
       <li key={i.clave} data-novedad={i.leido ? "vista" : "nueva"} data-tipo={i.tipo ?? ""}>
         <Link href={i.href} className={`tarjeta fila flex items-center gap-4 px-4 py-3 min-h-[68px] hover:bg-[var(--tarjeta-alta)] transition-colors ${i.leido ? "opacity-70" : ""}`}>
-          <span className="icono" aria-hidden>{i.emoji}</span>
+          <span className="icono" aria-hidden><Icono nombre={i.emoji} sistema /></span>
           <span className="min-w-0 flex-1">
             <span className="block font-semibold text-lg leading-tight">{i.titulo}</span>
             {i.detalle && <span className="block texto-suave text-[15px] truncate">{i.detalle}</span>}
@@ -53,10 +54,10 @@ export default async function Novedades() {
     const hayParaPush = items.some((i) => !i.leido && JUSTIFICAN_PUSH.has(i.tipo ?? "")) && panel.yo.rol !== "profe";
     return (
       <>
-        <Encabezado emoji="🔔" titulo="Novedades" bajada={sinLeer ? `${sinLeer === 1 ? "1 cosa nueva" : `${sinLeer} cosas nuevas`} desde la última vez. Tocá cada una para ir a resolverla.` : "Lo que pasó en el gimnasio y te toca ver."} />
+        <Encabezado icono="campana" titulo="Novedades" bajada={sinLeer ? `${sinLeer === 1 ? "1 cosa nueva" : `${sinLeer} cosas nuevas`} desde la última vez. Tocá cada una para ir a resolverla.` : "Lo que pasó en el gimnasio y te toca ver."} />
         <MarcarLeidos claves={items.filter((i) => !i.leido).map((i) => i.clave)} />
         <MarcarTodo sinLeer={sinLeer} />
-        {items.length === 0 ? <Vacio emoji="✨" titulo="Nada nuevo">Cuando llegue un comprobante, alguien pida algo o pase algo con la plata, aparece acá.</Vacio> : (
+        {items.length === 0 ? <Vacio icono="estrella" titulo="Nada nuevo">Cuando llegue un comprobante, alguien pida algo o pase algo con la plata, aparece acá.</Vacio> : (
           <div className="space-y-10" data-grupos-dia>
             {grupos.map((g) => (
               <section key={g.clave} data-dia={g.clave}>
@@ -70,7 +71,7 @@ export default async function Novedades() {
         {/* Pedir permiso para el push SOLO después de algo que lo justifique: acá ya vio algo que se pierde si no lo mira a tiempo. */}
         {hayParaPush && (
           <section className="tarjeta p-5 sm:p-6 max-w-xl mt-10" data-push-oferta aria-labelledby="oferta-push">
-            <h2 id="oferta-push" className="titulo text-2xl mb-1">📲 ¿Te avisamos al celular?</h2>
+            <h2 id="oferta-push" className="titulo text-2xl mb-1"><Icono nombre="celular" /> ¿Te avisamos al celular?</h2>
             <p className="texto-suave mb-4">Así no te enterás tarde la próxima vez que llegue un comprobante o se pida algo. Lo activás en este dispositivo y lo apagás cuando quieras.</p>
             <ActivarPush />
           </section>
@@ -78,7 +79,7 @@ export default async function Novedades() {
 
         {prefs.length > 0 && (
           <details className="mt-10 max-w-2xl" data-preferencias-avisos>
-            <summary className="boton cursor-pointer inline-flex">⚙️ Qué avisos querés ver</summary>
+            <summary className="boton cursor-pointer inline-flex"><Icono nombre="ajustes" /> Qué avisos querés ver</summary>
             <div className="mt-4">
               <p className="texto-suave mb-3">Apagar un tipo lo saca de esta lista y del número de la campana. Lo que pasó queda registrado igual. Los avisos al celular se eligen por dispositivo en <Link href="/panel/cuenta" className="underline">Mi cuenta</Link>.</p>
               <PreferenciasAvisos inicial={prefs} />

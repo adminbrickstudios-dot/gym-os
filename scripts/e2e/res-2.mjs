@@ -14,7 +14,7 @@ try {
   await d.goto(`${G}/panel/resultado`);
   await d.locator("[data-exportar]").waitFor({ timeout: 60000 });
   const [descarga] = await Promise.all([d.waitForEvent("download"), d.locator("[data-exportar] a", { hasText: "Ventas" }).click()]);
-  chequear(/^ventas-.+-\d{4}-\d{2}\.csv$/.test(descarga.suggestedFilename()), `“🧾 Ventas” baja ${descarga.suggestedFilename()}`, descarga.suggestedFilename());
+  chequear(/^ventas-.+-\d{4}-\d{2}\.csv$/.test(descarga.suggestedFilename()), `“Ventas” baja ${descarga.suggestedFilename()}`, descarga.suggestedFilename());
   for (const [que, titulo] of [["ventas", "Fecha;Venta;Socio;Detalle;Bruto"], ["pagos", "Fecha;Venta;Socio;Medio;Monto"], ["caja", "Fecha;Caja;Movimiento;Monto"]]) {
     const href = await d.locator("[data-exportar] a").nth(["ventas", "pagos", "caja"].indexOf(que)).getAttribute("href");
     const r = await bajar(d, `${G}${href}`);

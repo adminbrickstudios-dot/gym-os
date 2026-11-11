@@ -3,6 +3,7 @@
 // Si el gimnasio no lo pide, no aparece.
 import { useState, useTransition } from "react";
 import { anularApto, cargarApto } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type DatosApto = { pide: false } | { pide: true; hoy: string; apto: { id: string; vence: string; vigente: boolean } | null };
 const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(2, 4)}`;
@@ -15,7 +16,7 @@ export function AptoFisico({ socioId, datos }: { socioId: string; datos: DatosAp
   const [ocupado, empezar] = useTransition();
   if (!datos.pide) return null;
   const a = datos.apto;
-  const pild = !a ? ["pildora-amarillo", "🩺 Sin apto físico"] : a.vigente ? ["pildora-verde", `🩺 Apto hasta el ${dia(a.vence)}`] : ["pildora-rojo", `🩺 Apto vencido el ${dia(a.vence)}`];
+  const pild = !a ? ["pildora-amarillo", "Sin apto físico"] : a.vigente ? ["pildora-verde", `Apto hasta el ${dia(a.vence)}`] : ["pildora-rojo", `Apto vencido el ${dia(a.vence)}`];
   const correr = (fn: () => Promise<{ error?: string }>) => empezar(async () => {
     const r = await fn(); if (r.error) { setError(r.error); return; } setError(null); setAbierto(false);
   });
@@ -35,7 +36,7 @@ export function AptoFisico({ socioId, datos }: { socioId: string; datos: DatosAp
           <p className="basis-full text-sm texto-tenue">Solo se guarda que lo presentó y la fecha. El papel no se sube.</p>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

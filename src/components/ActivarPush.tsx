@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
 import { borrarPush, estadoPush, guardarPush, probarPush } from "@/app/push-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const NOMBRE: Record<string, string> = {
   comprobantes: "Comprobantes para revisar",
@@ -46,7 +47,7 @@ export function ActivarPush() {
   }, []);
 
   if (soporte === null) return null;
-  if (soporte === "iphone") return <p className="texto-suave" data-push="iphone">📱 En iPhone, las notificaciones llegan a la app instalada: tocá <b>Compartir</b> → <b>Agregar a inicio</b>, abrila desde ahí y activalas.</p>;
+  if (soporte === "iphone") return <p className="texto-suave" data-push="iphone"><Icono nombre="celular" /> En iPhone, las notificaciones llegan a la app instalada: tocá <b>Compartir</b> → <b>Agregar a inicio</b>, abrila desde ahí y activalas.</p>;
   if (soporte === "no") return <p className="texto-suave" data-push="sin-soporte">Este navegador no recibe notificaciones. Probá desde Chrome, Edge o Safari actualizado.</p>;
   if (!CLAVE) return <p className="texto-suave" data-push="sin-claves">Las notificaciones todavía no están configuradas en este sistema.</p>;
 
@@ -82,7 +83,7 @@ export function ActivarPush() {
   return (
     <div className="space-y-3" data-push={tipos ? "activo" : "apagado"}>
       {!tipos ? (
-        <button type="button" className="boton !min-h-12" disabled={ocupado} onClick={activar}>🔔 Activar en este dispositivo</button>
+        <button type="button" className="boton !min-h-12" disabled={ocupado} onClick={activar}><Icono nombre="campana" /> Activar en este dispositivo</button>
       ) : (
         <>
           <ul className="space-y-1">
@@ -102,7 +103,7 @@ export function ActivarPush() {
         </>
       )}
       {aviso.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}>✓ {aviso.ok}</p>}
-      {aviso.error && <p role="alert" className="pildora pildora-rojo">⚠️ {aviso.error}</p>}
+      {aviso.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {aviso.error}</p>}
     </div>
   );
 }

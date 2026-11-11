@@ -55,7 +55,8 @@ try {
   };
   const conCuenta = await textoError("duena@ejemplo.invalid");
   const sinCuenta = await textoError(`nadie-${Date.now() % 100000}@ejemplo.invalid`);
-  chequear(conCuenta === sinCuenta && /no son correctos/.test(conCuenta), "contraseña mala: el mismo mensaje con cuenta y sin cuenta", `“${conCuenta}” ≠ “${sinCuenta}”`);
+  // BASE-2: con contraseña mala, si el mail no tiene cuenta se dice con nombre (decisión en PREGUNTAS.md); con cuenta, “no son correctos”.
+  chequear(/no son correctos/.test(conCuenta) && /no tiene cuenta/i.test(sinCuenta), "contraseña mala: con cuenta, “no son correctos”; sin cuenta, lo dice con nombre", `“${conCuenta}” / “${sinCuenta}”`);
 
   // 2 · Código por mail: se escribe el mail en el mismo campo y el código se verifica solo (sin apretar Entrar).
   const s = await pagina(b, CELU);

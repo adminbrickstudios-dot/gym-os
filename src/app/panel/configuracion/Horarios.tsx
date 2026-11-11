@@ -7,6 +7,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { DIAS, textoCierre, type Agenda, type Franja } from "@/lib/horarios";
 import { anularCierre, crearCierre, guardarHorarios, previsualizarCierre, type PrevioCierre } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type CierrePanel = {
   cierre_id: string; desde: string; hasta: string; motivo: string; compensa: boolean; sede: string | null;
@@ -113,7 +114,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
     <div className="space-y-4">
       <section className="tarjeta p-5 sm:p-6 space-y-4" data-horarios data-listo={listo}>
         <div>
-          <p className="titulo text-2xl">⏰ Cuándo abre</p>
+          <p className="titulo text-2xl"><Icono nombre="reloj" /> Cuándo abre</p>
           <p className="texto-suave">Sale en tu página y en la app, con “abierto ahora”. Hora del gimnasio.</p>
         </div>
         {sedes.length > 1 && (
@@ -124,7 +125,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
             {sucio && <span className="block text-sm texto-tenue">Guardá esta sede antes de pasar a otra.</span>}
           </label>
         )}
-        {sede?.texto && <p className="pildora" data-ahora>{sede.abierto ? "🟢" : "⚪"} Ahora: {sede.texto}</p>}
+        {sede?.texto && <p className="pildora" data-ahora>{sede.abierto ? "" : ""} Ahora: {sede.texto}</p>}
         <fieldset disabled={!esDueno || ocupado} className="divide-y divide-[var(--borde)]">
           {DIAS.map((nombre, i) => {
             const dia = i + 1;
@@ -144,7 +145,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
                   </div>
                 ))}
                 {filas.length > 0 && filas.length < 3 && (
-                  <button type="button" className="boton-texto" onClick={() => setDia(dia, [...filas, { abre: "16:00", cierra: "20:00" }])}>➕ Otra franja (turno partido)</button>
+                  <button type="button" className="boton-texto" onClick={() => setDia(dia, [...filas, { abre: "16:00", cierra: "20:00" }])}><Icono nombre="mas" /> Otra franja (turno partido)</button>
                 )}
               </div>
             );
@@ -156,8 +157,8 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
             {msjH.error && <Mensaje tipo="error">{msjH.error}</Mensaje>}
             {msjH.ok && !sucio && <Mensaje tipo="exito">{msjH.ok}</Mensaje>}
             <div className="flex flex-wrap items-center gap-3">
-              <button type="button" className="boton boton-principal" disabled={ocupado || !sucio} onClick={guardar}>{ocupado ? "Guardando…" : "✅ Guardar"}</button>
-              <button type="button" className="boton" disabled={ocupado || semana[1].length === 0} onClick={copiarLunes}>📋 Lunes a viernes igual que el lunes</button>
+              <button type="button" className="boton boton-principal" disabled={ocupado || !sucio} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
+              <button type="button" className="boton" disabled={ocupado || semana[1].length === 0} onClick={copiarLunes}><Icono nombre="lista" /> Lunes a viernes igual que el lunes</button>
               {sucio && <span className="pildora" data-sin-guardar>• Cambios sin guardar</span>}
             </div>
           </div>
@@ -166,7 +167,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
 
       <section className="tarjeta p-5 sm:p-6 space-y-4" data-cierres data-respuestas={msjC.n} data-listo={listo}>
         <div>
-          <p className="titulo text-2xl">🚫 Días que cierra</p>
+          <p className="titulo text-2xl"><Icono nombre="prohibido" /> Días que cierra</p>
           <p className="texto-suave">Feriados, vacaciones, una mudanza. Se cancelan las clases de esos días, se avisa en la página y en la app, y si querés se les devuelven los días a los socios.</p>
         </div>
         <fieldset disabled={ocupado} className="grid sm:grid-cols-2 gap-3">
@@ -189,13 +190,13 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
               ? "Con una sola sede cerrada no se suman días al vencimiento (los socios pueden ir a otra)."
               : "Si los días cerrados se suman al vencimiento de los socios lo decide la regla del gimnasio (Configuración → Reglas → Días cerrados). Antes de cargar te decimos a cuántos socios les corre el vencimiento."}
           </p>
-          <div className="sm:col-span-2"><button type="button" className="boton" onClick={revisar} data-revisar-cierre>{ocupado && !previo ? "Revisando…" : "🚫 Cargar cierre"}</button></div>
+          <div className="sm:col-span-2"><button type="button" className="boton" onClick={revisar} data-revisar-cierre>{ocupado && !previo ? "Revisando…" : "Cargar cierre"}</button></div>
         </fieldset>
         {previo && (
           <div className="tarjeta p-4 space-y-3 border-2 border-[var(--acento)]" role="group" aria-label="Confirmar el cierre" data-previo-cierre={previo.suma_dias ? "suma" : "no-suma"}>
             <p className="font-semibold" data-previo-texto>
               {previo.suma_dias
-                ? `🎁 Esto corre el vencimiento de ${previo.socios} ${previo.socios === 1 ? "socio" : "socios"} ${previo.dias} ${previo.dias === 1 ? "día" : "días"}.`
+                ? `Esto corre el vencimiento de ${previo.socios} ${previo.socios === 1 ? "socio" : "socios"} ${previo.dias} ${previo.dias === 1 ? "día" : "días"}.`
                 : "Esto no corre ningún vencimiento: el gimnasio no suma los días cerrados."}
             </p>
             <p className="text-sm texto-suave">
@@ -205,7 +206,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
               {" "}Se cancelan las clases de esos días y se avisa en la página y en la app.
             </p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" className="boton boton-principal" disabled={ocupado} onClick={cargar} data-confirmar-cierre>{ocupado ? "Cargando…" : "✅ Confirmar y cargar el cierre"}</button>
+              <button type="button" className="boton boton-principal" disabled={ocupado} onClick={cargar} data-confirmar-cierre>{ocupado ? "Cargando…" : "Confirmar y cargar el cierre"}</button>
               <button type="button" className="boton-texto" disabled={ocupado} onClick={() => setPrevio(null)}>Cambiar algo</button>
             </div>
           </div>)}
@@ -225,7 +226,7 @@ export function HorariosYCierres({ agendaInicial, cierresIniciales, esDueno, alC
                     )}
                   </div>
                   <p className="text-sm texto-tenue">
-                    {c.compensa ? "🎁 Devuelve los días" : "No devuelve días"}
+                    {c.compensa ? "Devuelve los días" : "No devuelve días"}
                     {c.clases_canceladas > 0 && ` · canceló ${c.clases_canceladas} ${c.clases_canceladas === 1 ? "clase" : "clases"}`}
                     {c.pasado && " · ya pasó"}
                   </p>

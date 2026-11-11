@@ -37,7 +37,7 @@ try {
   await irAVender(d, await hojaDeAlta(d));
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok(`una persona nueva al día con el DNI ${dni}`);
 

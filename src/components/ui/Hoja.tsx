@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, type ReactNode } from "react";
+import { Icono } from "@/components/ui/Icono";
 
 const ENFOCABLES = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * La hoja flotante de todo el sistema (Ctrl+K, menús, Cobrar): fondo atenuado, panel de vidrio
+ * La hoja flotante de todo el sistema (Ctrl+K, menús, Cobrar): fondo atenuado, panel liso
  * con `.hoja` (escala al entrar; en el celular sube desde abajo). Esc la cierra, tocar afuera
  * también, el foco queda atrapado adentro y vuelve a donde estaba al cerrar.
  */
@@ -37,9 +38,14 @@ export function Hoja({ abierta, alCerrar, etiqueta, children, className = "", al
 
   if (!abierta) return null;
   return (
-    <div className={`aparecer fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex justify-center px-3 ${alineacion === "arriba" ? "items-start pt-[10vh]" : "items-end sm:items-center pb-3 sm:pb-0"}`} onClick={alCerrar}>
+    <div className={`aparecer fixed inset-0 z-[60] bg-black/50 flex justify-center px-3 ${alineacion === "arriba" ? "items-start pt-[10vh]" : "items-end sm:items-center pb-3 sm:pb-0"}`} onClick={alCerrar}>
       <div ref={panel} role="dialog" aria-modal="true" aria-label={etiqueta} tabIndex={-1} onClick={(e) => e.stopPropagation()}
-        className={`hoja vidrio w-full max-w-xl overflow-hidden rounded-[var(--radio-grande)] outline-none ${className}`}>
+        className={`hoja vidrio relative w-full max-w-xl overflow-hidden rounded-[var(--radio-grande)] outline-none ${className}`}>
+        {/* La X siempre visible (BASE-6): además de Esc y de tocar afuera. */}
+        <button type="button" onClick={() => cerrar.current()} aria-label="Cerrar" data-cerrar-hoja
+          className="absolute top-2 right-2 z-10 grid place-items-center size-9 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)] hover:text-[var(--texto)]">
+          <Icono nombre="cerrar" />
+        </button>
         {children}
       </div>
     </div>

@@ -74,7 +74,7 @@ try {
   // Al rechazar, la fila dice "✕ Rechazada" y la lista se vuelve a pedir: puede irse antes de verla. Vale que ya no esté pendiente.
   await d.locator("li", { hasText: `Sofía Rev${s}` }).filter({ has: d.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
   await a.goto(`${G}/app/historial`);
-  chequear(await aparece(a.getByText(/rechazado: El monto no coincide/), 60000), "le rechazan la transferencia: en la app ve “❌ rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
+  chequear(await aparece(a.getByText(/rechazado: El monto no coincide/), 60000), "le rechazan la transferencia: en la app ve “rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
   await a.goto(`${G}/app`);
   const otra = a.locator("section", { hasText: "Pagar por transferencia" });
   chequear(await aparece(otra, 60000), "y la app le vuelve a ofrecer subir otro comprobante", "no puede subir otro");
@@ -100,7 +100,7 @@ try {
   if (await aparece(reservar, 15000)) {
     await reservar.click();
     const r = await Promise.race([
-      a.getByText("✅ Reservada").first().waitFor({ timeout: 30000 }).then(() => "ok"),
+      a.getByText("Reservada").first().waitFor({ timeout: 30000 }).then(() => "ok"),
       a.locator('main [role="alert"]').first().waitFor({ timeout: 30000 }).then(async () => await a.locator('main [role="alert"]').first().innerText()),
     ]);
     chequear(r === "ok" || /no cubre|tu plan/i.test(r), r === "ok" ? "reserva una clase de mañana desde la app" : `reservar: la base dice por qué no (“${r}”)`, `al reservar: ${r}`);
@@ -112,7 +112,7 @@ try {
   await r.goto(`${G}/panel/vender?socio=${socio}&cuota=1`);
   await r.getByText(/^Cuota /).first().waitFor({ timeout: 60000 });
   await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   await r.goto(`${G}/panel/entrada?socio=${socio}`);
   const ver2 = r.locator('[data-veredicto="verde"]');

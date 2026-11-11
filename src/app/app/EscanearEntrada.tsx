@@ -4,6 +4,7 @@ import { useCallback, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { escanearEntrada, escanearSalida } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** principal: el verde de la pantalla solo si es lo que tiene que hacer ahora (si debe pagar, el verde es pagar). conSalida (VD-48): el gimnasio registra la salida y se ofrece "Me voy". */
 export function EscanearEntrada({ gimnasioId, socioId, principal = true, conSalida = false }: { gimnasioId: string; socioId: string; principal?: boolean; conSalida?: boolean }) {
@@ -20,24 +21,25 @@ export function EscanearEntrada({ gimnasioId, socioId, principal = true, conSali
   return (
     <section className="space-y-3" data-escanear-entrada>
       <button type="button" className={`boton ${principal ? "boton-principal" : ""} w-full !min-h-16 text-lg`} disabled={ocupado} onClick={() => { setR(null); setSalio(null); setAbierta("entrar"); }}>
-        {ocupado ? "Un momento…" : "📷 Escanear el QR de la entrada"}
+        {ocupado ? "Un momento…" : <><Icono nombre="camara" /> Escanear el QR de la entrada</>}
       </button>
       {conSalida && (
         <button type="button" className="boton w-full !min-h-14 text-lg" disabled={ocupado} data-me-voy onClick={() => { setR(null); setSalio(null); setAbierta("salir"); }}>
-          👋 Me voy
+          
+          <Icono nombre="salir" /> Me voy
         </button>
       )}
       {salio && (
         <div role="status" className="rounded-[var(--radio-grande)] p-5 border" data-resultado-salida={salio.error ? "error" : salio.registrada ? "salio" : "sin-entrada"}
           style={{ background: `color-mix(in oklab, ${colorVar(salio.error ? "gris" : salio.registrada ? "verde" : "amarillo")}, var(--fondo) 80%)` }}>
-          <p className="titulo text-2xl">{salio.error ? "🤔 No se pudo" : salio.registrada ? "👋 ¡Hasta pronto!" : "ℹ️ Listo"}</p>
+          <p className="titulo text-2xl">{salio.error ? "No se pudo" : salio.registrada ? <><Icono nombre="salir" /> ¡Hasta pronto!</> : <><Icono nombre="info" /> Listo</>}</p>
           <p className="mt-1">{salio.error ?? salio.texto}</p>
         </div>
       )}
       {r && (
         <div role="status" className="rounded-[var(--radio-grande)] p-5 border" data-resultado-escaneo={r.error ? "error" : entro ? "entro" : "no"}
           style={{ background: `color-mix(in oklab, ${colorVar(r.error ? "gris" : entro ? (r.color ?? "verde") : "rojo")}, var(--fondo) 80%)` }}>
-          <p className="titulo text-2xl">{r.error ? "🤔 No se pudo" : entro ? "✅ ¡Adentro! Buen entrenamiento" : "⛔ Hoy no podés pasar"}</p>
+          <p className="titulo text-2xl">{r.error ? "No se pudo" : entro ? <><Icono nombre="ok" /> ¡Adentro! Buen entrenamiento</> : <><Icono nombre="prohibido" /> Hoy no podés pasar</>}</p>
           <p className="mt-1">{r.error ?? r.texto}</p>
         </div>
       )}

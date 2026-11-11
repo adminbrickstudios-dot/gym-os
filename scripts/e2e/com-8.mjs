@@ -34,7 +34,7 @@ try {
   await r.goto(`${G}/panel/vender`);
   await r.locator("main button", { hasText: NOMBRE }).first().click();
   await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   ok("la recepción vende un lugar en Vender (es un producto más)");
   await d.reload();
@@ -51,7 +51,7 @@ try {
   so.setDefaultNavigationTimeout(120000);
   await entrar(so, "socio@ejemplo.invalid");
   await so.goto(`${G}/app`);
-  chequear(await aparece(so.locator("[data-eventos-app] li", { hasText: NOMBRE }), 60000), "y la app: “🎟️ Próximos eventos”", "la app no muestra el evento");
+  chequear(await aparece(so.locator("[data-eventos-app] li", { hasText: NOMBRE }), 60000), "y la app: “Próximos eventos”", "la app no muestra el evento");
   await capturar(so, "com8-celu-app");
 
   await d.locator("[data-evento]", { hasText: NOMBRE }).locator("button", { hasText: "Cancelarlo" }).click();

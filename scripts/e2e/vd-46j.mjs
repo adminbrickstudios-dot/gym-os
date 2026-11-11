@@ -24,13 +24,13 @@ try {
   const mas = d.locator('button:has-text("+")').first();
   await mas.click(); await mas.click();
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok("cobradas 3 cuotas juntas");
 
   // Antes de confirmar la baja: el aviso con el monto.
   await d.goto(`${G}/panel/socios/${id}`);
-  await d.locator('button:has-text("👋 Dar de baja")').click();
+  await d.locator('button:has-text("Dar de baja")').click();
   const aviso = d.locator("[data-baja-devolucion]");
   await aviso.waitFor({ timeout: 30000 });
   chequear(/corresponden \$/.test(await aviso.innerText()), "antes de la baja: “corresponden $… de devolución”", `el aviso dice: ${await aviso.innerText()}`);
@@ -43,7 +43,7 @@ try {
   // La dueña la registra: transferencia, con motivo.
   await d.locator("[data-devolucion-abrir]").click();
   await d.locator('select[aria-label="Medio de la devolución"]').selectOption("transferencia");
-  const boton = d.locator('button:has-text("↩️ Registrar la devolución")');
+  const boton = d.locator('button:has-text("Registrar la devolución")');
   chequear(await boton.isDisabled(), "sin motivo no se registra", "se puede registrar sin motivo");
   await d.locator('input[aria-label="Motivo de la devolución"]').fill("Se mudó de ciudad");
   await boton.click();

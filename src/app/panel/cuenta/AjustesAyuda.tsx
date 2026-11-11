@@ -4,6 +4,7 @@ import { apagarAyudas, reiniciarAyudas } from "@/app/ayuda-acciones";
 import { EVENTO_AYUDAS } from "@/components/ui/AyudaPantalla";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 const avisar = (detalle: { apagadas?: boolean; reiniciar?: boolean }) => window.dispatchEvent(new CustomEvent(EVENTO_AYUDAS, { detail: detalle }));
 
@@ -14,7 +15,7 @@ export function AjustesAyuda({ apagadas: inicial }: { apagadas: boolean }) {
   const [ocupado, empezar] = useTransition();
   return (
     <section className="tarjeta p-5 sm:p-6 max-w-xl mt-6" aria-labelledby="ayudas" data-ajustes-ayuda>
-      <h2 id="ayudas" className="titulo text-2xl mb-1">💡 Ayuda en cada pantalla</h2>
+      <h2 id="ayudas" className="titulo text-2xl mb-1"><Icono nombre="info" /> Ayuda en cada pantalla</h2>
       <p className="texto-suave mb-3">La primera vez que abrís una pantalla, un globo corto cuenta para qué sirve. El “?” siempre está por si querés verlo de nuevo.</p>
       <Interruptor etiqueta="Mostrarme las ayudas" ayuda="Si lo apagás, no sale ningún globo solo. Vale en todos tus dispositivos."
         checked={!apagadas} disabled={ocupado}
@@ -37,7 +38,7 @@ export function AjustesAyuda({ apagadas: inicial }: { apagadas: boolean }) {
             avisar({ reiniciar: true });
             setMsj({ tipo: "exito", texto: "Listo: vas a ver de nuevo la ayuda de cada pantalla." });
           });
-        }}>🔄 Volver a ver todas las ayudas</button>
+        }}><Icono nombre="repetir" /> Volver a ver todas las ayudas</button>
       {msj && <Mensaje tipo={msj.tipo} className="mt-3">{msj.texto}</Mensaje>}
     </section>
   );

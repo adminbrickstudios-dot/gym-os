@@ -4,6 +4,7 @@ import { LinkPanel } from "@/components/panel/LinkPanel";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { textoRequisitos, type GradoPanel, type GradosPanel } from "@/lib/clases/grados";
 import { archivarGrado, guardarGrado, otorgarGrado } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** Un socio listo para rendir: lo que lleva y el botón para otorgarle el grado. */
 export function FilaListo({ l, puedeOtorgar }: { l: GradosPanel["listos"][number]; puedeOtorgar: boolean }) {
@@ -16,10 +17,10 @@ export function FilaListo({ l, puedeOtorgar }: { l: GradosPanel["listos"][number
         <LinkPanel href={`/panel/socios/${l.socio_id}`} siNoEsta="texto" className="font-semibold">{l.nombre}</LinkPanel>
         <span className="block text-sm texto-suave">{l.actividad} · {l.actual?.nombre ?? "Sin grado"} → {l.proximo?.nombre} · {textoRequisitos(l)}</span>
       </span>
-      {hecho ? <span className="pildora pildora-verde">✅ {l.proximo?.nombre}</span> : puedeOtorgar && l.proximo && (
+      {hecho ? <span className="pildora pildora-verde"><Icono nombre="ok" /> {l.proximo?.nombre}</span> : puedeOtorgar && l.proximo && (
         <button type="button" className="boton" disabled={ocupado}
           onClick={() => empezar(async () => { const r = await otorgarGrado(l.socio_id, l.proximo!.grado_id, null); if (r.error) setError(r.error); else setHecho(true); })}>
-          🥋 Rindió: {l.proximo.nombre}
+          <Icono nombre="pesa" /> Rindió: {l.proximo.nombre}
         </button>
       )}
       {error && <Mensaje tipo="error" className="w-full">{error}</Mensaje>}
@@ -34,12 +35,12 @@ export function GradosActividad({ a, puedeEditar }: { a: GradosPanel["actividade
   const siguiente = (a.grados.at(-1)?.orden ?? 0) + 1;
   return (
     <section className="mb-8" data-grados-actividad={a.nombre}>
-      <h3 className="titulo text-xl mb-2">{a.emoji ?? "🥋"} {a.nombre}</h3>
+      <h3 className="titulo text-xl mb-2"><Icono nombre={a.emoji ?? "pesa"} /> {a.nombre}</h3>
       {a.grados.length === 0 && <p className="texto-suave mb-2">Sin grados.</p>}
       <ol className="space-y-2">{a.grados.map((g) => <FilaGrado key={g.grado_id} actividadId={a.actividad_id} g={g} puedeEditar={puedeEditar} />)}</ol>
       {puedeEditar && (nuevo
         ? <EditorGrado actividadId={a.actividad_id} inicial={{ orden: siguiente }} alTerminar={() => setNuevo(false)} />
-        : <button type="button" className="boton mt-2" onClick={() => setNuevo(true)}>➕ {a.grados.length ? "Otro grado" : "Armar los grados"}</button>)}
+        : <button type="button" className="boton mt-2" onClick={() => setNuevo(true)}><Icono nombre="mas" /> {a.grados.length ? "Otro grado" : "Armar los grados"}</button>)}
     </section>
   );
 }

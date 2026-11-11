@@ -8,6 +8,7 @@ import { formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Turnos de caja" };
 
@@ -17,7 +18,7 @@ type Turno = {
   otros_medios: Record<string, number>; nota: string | null; ventas: number; anuladas: number; estado?: string;
   movimientos: { tipo: "ingreso" | "retiro"; monto: number; motivo: string; en: string; por: string | null }[];
 };
-const MEDIO: Record<string, string> = { transferencia: "🏦 Transferencia", debito: "💳 Débito", credito: "💳 Crédito", mercadopago: "📲 MercadoPago", cuenta_corriente: "📒 A cuenta" };
+const MEDIO: Record<string, string> = { transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
 
 /** CAJ-1: cada turno con quién abrió y cerró, lo esperado contra lo contado y los retiros. */
 export default async function HistorialCaja({ searchParams }: { searchParams: Promise<{ sede?: string }> }) {
@@ -28,15 +29,32 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
     exigirRol(panel, ["dueno", "encargado"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const turnos = await rpc<Turno[]>("historial_caja", { p_sede_id: sede.id, p_limite: 60 });
+    // FA-21: lo que faltó o sobró, acumulado por cajero (quien cerró el turno), últimos 90 días.
+    const cajeros = await rpc<{ equipo_id: string; cajero: string; turnos: number; diferencia: number | string; sobrante: number | string; faltante: number | string; con_diferencia: number }[]>("diferencia_caja_por_cajero", { p_gimnasio_id: panel.gimnasio.id, p_dias: 90 });
     const zona = panel.gimnasio.zona_horaria;
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
-        <Encabezado emoji="🗂️" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
+        <Encabezado icono="grilla" titulo="Turnos de caja" volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
           bajada="Quién abrió y cerró, cuánto tenía que haber, cuánto se contó y qué entró o salió del cajón." />
+        {cajeros.length > 0 && (
+          <section className="mb-6" aria-labelledby="por-cajero" data-diferencia-cajeros>
+            <h2 id="por-cajero" className="titulo text-2xl mb-2">Diferencia por cajero (90 días)</h2>
+            <ul className="tarjeta divide-y divide-[var(--borde)]">{cajeros.map((c) => {
+              const d = Number(c.diferencia);
+              return (
+                <li key={c.equipo_id} className="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3" data-cajero={c.cajero}>
+                  <span className="font-semibold">{c.cajero} <span className="texto-tenue text-sm font-normal">· {c.turnos} {c.turnos === 1 ? "turno" : "turnos"}, {c.con_diferencia} con diferencia</span></span>
+                  <span className={`pildora ${d === 0 ? "pildora-verde" : d > 0 ? "pildora-amarillo" : "pildora-rojo"}`}>{d === 0 ? "Justo" : d > 0 ? `Sobraron ${formatearPesos(d)}` : `Faltaron ${formatearPesos(-d)}`}</span>
+                </li>
+              );
+            })}</ul>
+            <p className="text-sm texto-tenue mt-1">Suma lo que faltó y lo que sobró en cada cierre; el turno lo cuenta quien lo cierra. Solo avisa: no cambia ninguna caja.</p>
+          </section>
+        )}
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/historial" />}
-        {turnos.length === 0 ? <Vacio emoji="🗂️" titulo="Todavía no hubo turnos">Cuando se abra y se cierre la caja, cada turno queda acá.</Vacio> : (
+        {turnos.length === 0 ? <Vacio icono="grilla" titulo="Todavía no hubo turnos">Cuando se abra y se cierre la caja, cada turno queda acá.</Vacio> : (
           <ul className="space-y-3" data-turnos>
             {turnos.map((t) => {
               const dif = t.diferencia ?? 0;
@@ -46,15 +64,15 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <p className="font-semibold text-lg flex-1 min-w-0">{t.caja} · {cuando(t.abierto_en)}{t.cerrado_en ? ` a ${hora(t.cerrado_en)}` : ""}</p>
                     {t.estado === "sin_contar" || t.estado === "sin_contar_dejada"
-                      ? <span className="pildora pildora-amarillo" data-sin-contar>🧾 Sin contar</span>
+                      ? <span className="pildora pildora-amarillo" data-sin-contar><Icono nombre="recibo" /> Sin contar</span>
                       : t.cerrado_en
-                      ? <span className={`pildora ${dif === 0 ? "pildora-verde" : dif > 0 ? "pildora-amarillo" : "pildora-rojo"}`}>{dif === 0 ? "✅ Justa" : dif > 0 ? `Sobraron ${formatearPesos(dif)}` : `Faltaron ${formatearPesos(-dif)}`}</span>
-                      : <span className="pildora pildora-azul">🔓 Abierta</span>}
+                      ? <span className={`pildora ${dif === 0 ? "pildora-verde" : dif > 0 ? "pildora-amarillo" : "pildora-rojo"}`}>{dif === 0 ? "Justa" : dif > 0 ? `Sobraron ${formatearPesos(dif)}` : `Faltaron ${formatearPesos(-dif)}`}</span>
+                      : <span className="pildora pildora-azul"><Icono nombre="candado-abierto" /> Abierta</span>}
                   </div>
                   <p className="texto-suave text-sm">Abrió {t.abierto_por ?? "—"}{t.cerrado_por ? ` · cerró ${t.cerrado_por}` : ""} · {t.ventas} {t.ventas === 1 ? "venta" : "ventas"}{t.anuladas ? ` (${t.anuladas} anulada${t.anuladas === 1 ? "" : "s"})` : ""}</p>
                   <dl className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-3">
                     <div><dt className="texto-tenue text-xs">Inicial</dt><dd className="numero text-lg">{formatearPesos(t.monto_inicial)}</dd></div>
-                    <div><dt className="texto-tenue text-xs">💵 Efectivo cobrado</dt><dd className="numero text-lg">{formatearPesos(t.efectivo)}</dd></div>
+                    <div><dt className="texto-tenue text-xs"><Icono nombre="plata" /> Efectivo cobrado</dt><dd className="numero text-lg">{formatearPesos(t.efectivo)}</dd></div>
                     <div><dt className="texto-tenue text-xs">Ingresos − retiros</dt><dd className="numero text-lg">{formatearPesos(t.ingresos - t.retiros)}</dd></div>
                     <div><dt className="texto-tenue text-xs">Tenía que haber</dt><dd className="numero text-lg">{formatearPesos(t.esperado)}</dd></div>
                     <div><dt className="texto-tenue text-xs">Contado</dt><dd className="numero text-lg">{t.contado == null ? "—" : formatearPesos(t.contado)}</dd></div>
@@ -63,15 +81,15 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
                   {t.movimientos.length > 0 && (
                     <ul className="mt-3 space-y-1 text-sm">
                       {t.movimientos.map((m, i) => (
-                        <li key={i}>{m.tipo === "retiro" ? "➖" : "➕"} {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>
+                        <li key={i}>{m.tipo === "retiro" ? "" : ""} {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>
                       ))}
                     </ul>
                   )}
-                  {t.nota && <p className="text-sm mt-2">📝 {t.nota}</p>}
-                  <Link className="boton boton-chico mt-3 mr-2" href={`/panel/caja/reporte?turno=${t.turno_id}`}>📋 Reporte</Link>
+                  {t.nota && <p className="text-sm mt-2"><Icono nombre="lista" /> {t.nota}</p>}
+                  <Link className="boton boton-chico mt-3 mr-2" href={`/panel/caja/reporte?turno=${t.turno_id}`}><Icono nombre="lista" /> Reporte</Link>
                   {t.cerrado_en && (
                     <a className="boton boton-chico mt-3" target="_blank" rel="noopener noreferrer" data-compartir-cierre
-                      href={linkCompartir(textoCierre({ ...t, abrio: t.abierto_por, cerro: t.cerrado_por, cuando: `${cuando(t.abierto_en)} a ${hora(t.cerrado_en)}` }))}>📲 Compartir</a>
+                      href={linkCompartir(textoCierre({ ...t, abrio: t.abierto_por, cerro: t.cerrado_por, cuando: `${cuando(t.abierto_en)} a ${hora(t.cerrado_en)}` }))}><Icono nombre="celular" /> Compartir</a>
                   )}
                 </li>
               );

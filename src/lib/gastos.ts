@@ -2,8 +2,8 @@
 // ganancia, desvío) lo hace la base en ganancia_mes; acá solo nombres y formas.
 
 export const CATEGORIAS_GASTO: [string, string][] = [
-  ["alquiler", "🏠 Alquiler"], ["sueldos", "🧑‍🤝‍🧑 Sueldos"], ["servicios", "💡 Servicios"],
-  ["mantenimiento", "🔧 Mantenimiento"], ["proveedores", "🚚 Proveedores"], ["otros", "📦 Otros"],
+  ["alquiler", "Alquiler"], ["sueldos", "Sueldos"], ["servicios", "Servicios"],
+  ["mantenimiento", "Mantenimiento"], ["proveedores", "Proveedores"], ["otros", "Otros"],
 ];
 export const NOMBRE_CATEGORIA: Record<string, string> = Object.fromEntries(CATEGORIAS_GASTO);
 

@@ -38,7 +38,7 @@ try {
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(`Cuota Franja${s5}`).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   await d.goto(`${G}/panel/entrada?socio=${id}`);
   const rojo = d.locator('[data-veredicto="rojo"]');

@@ -62,6 +62,10 @@ http.createServer(async (req, res) => {
   try {
     const u = new URL(req.url, BASE);
     const autorizado = /^Bearer (APP_USR|TEST)-/.test(req.headers.authorization ?? "");
+    if (req.method === "GET" && u.pathname === "/users/me") {   // "Probar conexión" del asistente
+      if (!autorizado) return json(res, 401, { message: "invalid access token" });
+      return json(res, 200, { id: 123456789, nickname: "CUENTA-SIMULADA", site_id: "MLA" });
+    }
     if (req.method === "POST" && u.pathname === "/checkout/preferences") {
       if (!autorizado) return json(res, 401, { message: "invalid access token" });
       const p = JSON.parse(await leer(req));

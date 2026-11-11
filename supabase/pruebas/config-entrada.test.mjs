@@ -28,15 +28,15 @@ const guardar = (usuario, datos, g = () => t.g) => como(usuario, async () => (aw
 
 test("sin fila valen los valores por defecto del doc v2/01", async () => {
   for (const rol of ["dueno", "encargado", "recepcion", "profe"]) {
-    assert.deepEqual(await leer(u[rol]), { abrir_al_tipear: true, barra_fija: false, anotar_solo_en_verde: false, cerrar_sola_seg: 4 }, rol);
+    assert.deepEqual(await leer(u[rol]), { abrir_al_tipear: true, barra_fija: false, anotar_solo_en_verde: false, cerrar_sola_seg: 4, resultado_entrada: "aviso" }, rol);
   }
 });
 
 test("el dueño y el encargado cambian lo que mandan; el resto queda como estaba", async () => {
   const a = await guardar(u.dueno, { barra_fija: true, cerrar_sola_seg: 6 });
-  assert.deepEqual(a, { abrir_al_tipear: true, barra_fija: true, anotar_solo_en_verde: false, cerrar_sola_seg: 6 });
+  assert.deepEqual(a, { abrir_al_tipear: true, barra_fija: true, anotar_solo_en_verde: false, cerrar_sola_seg: 6, resultado_entrada: "aviso" });
   const b = await guardar(u.encargado, { anotar_solo_en_verde: true, abrir_al_tipear: false, cerrar_sola_seg: 0 });
-  assert.deepEqual(b, { abrir_al_tipear: false, barra_fija: true, anotar_solo_en_verde: true, cerrar_sola_seg: 0 });
+  assert.deepEqual(b, { abrir_al_tipear: false, barra_fija: true, anotar_solo_en_verde: true, cerrar_sola_seg: 0, resultado_entrada: "aviso" });
   assert.deepEqual(await leer(u.recepcion), b, "la recepción ve lo guardado");
   assert.equal((await t.q(`select count(*)::int n from public.configuracion_entrada where gimnasio_id = $1`, [t.g]))[0].n, 1, "una sola fila por gimnasio");
 });
@@ -48,8 +48,16 @@ test("la recepción y la profe no guardan (error, no un éxito vacío)", async (
   assert.equal((await leer(u.dueno)).barra_fija, true, "nada cambió");
 });
 
+test("BASE-3: el dueño elige aviso en la esquina o ventana grande", async () => {
+  const x = await guardar(u.dueno, { resultado_entrada: "ventana" });
+  assert.equal(x.resultado_entrada, "ventana");
+  assert.equal((await leer(u.recepcion)).resultado_entrada, "ventana", "la recepción ve lo elegido");
+  await guardar(u.dueno, { resultado_entrada: "aviso" });
+});
+
 test("cada campo se valida", async () => {
   await como(u.dueno, async () => {
+    await t.falla(() => t.q(`select public.guardar_config_entrada($1, '{"resultado_entrada": "otra"}'::jsonb)`, [t.g]), /Mostrar el resultado/);
     await t.falla(() => t.q(`select public.guardar_config_entrada($1, '{"cerrar_sola_seg": 5}'::jsonb)`, [t.g]), /Cerrar sola/);
     await t.falla(() => t.q(`select public.guardar_config_entrada($1, '{"cerrar_sola_seg": "4"}'::jsonb)`, [t.g]), /Cerrar sola/);
     await t.falla(() => t.q(`select public.guardar_config_entrada($1, '{"barra_fija": "si"}'::jsonb)`, [t.g]), /Barra fija/);

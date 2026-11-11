@@ -5,7 +5,9 @@ import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Anotar } from "./Anotar";
 import { MarcarDia } from "./MarcarDia";
+import { Series } from "./Series";
 import { MarcasProgreso, type Progreso } from "@/components/rutinas/Progreso";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Mi rutina" };
 export type MiRutina = { nombre: string; descripcion: string | null; cambiar_en?: string | null;
@@ -21,9 +23,10 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     if (yo.elegir || !yo.socio) return <p className="texto-suave">Elegí primero <Link href="/app" className="underline">qué socio sos</Link>.</p>;
     const s = yo.socio;
     const q = (extra = "") => { const p = new URLSearchParams(); if (yo.socios.length > 1) p.set("socio", s.socio_id); if (extra) p.set("dia", extra); const x = p.toString(); return x ? `?${x}` : ""; };
-    const [r, progreso] = await Promise.all([
+    const [r, progreso, seriesHoy] = await Promise.all([
       rpc<MiRutina | null>("rutina_de_socio", { p_socio_id: s.socio_id }),
       rpc<Progreso>("progreso_socio", { p_socio_id: s.socio_id }),
+      rpc<{ dia: number; ejercicio_id: string; serie: number }[]>("series_hechas_hoy", { p_socio_id: s.socio_id }),   // FA-15
     ]);
     if (!r) return (<><Link href={`/app${q()}`} className="texto-suave">← Volver</Link><h1 className="titular text-5xl mt-4">Mi rutina</h1>
       <p className="texto-suave text-lg mt-4">Todavía no tenés una rutina. Pedísela a tu profe.</p></>);
@@ -38,8 +41,8 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     return (
       <div className="space-y-6">
         <Link href={`/app${q()}`} className="texto-suave">← Volver</Link>
-        <div><h1 className="titular text-5xl">💪 {r.nombre}</h1>{r.descripcion && <p className="texto-suave text-lg mt-2">{r.descripcion}</p>}</div>
-        {cambiarEn && <p className="texto-suave" data-cambiar-en>🔄 Tu profe te la cambia el {cambiarEn}.</p>}
+        <div><h1 className="titular text-5xl"><Icono nombre="pesa" /> {r.nombre}</h1>{r.descripcion && <p className="texto-suave text-lg mt-2">{r.descripcion}</p>}</div>
+        {cambiarEn && <p className="texto-suave" data-cambiar-en><Icono nombre="repetir" /> Tu profe te la cambia el {cambiarEn}.</p>}
         <div className="tarjeta p-4 space-y-3" data-rutina-hoy={diaHoy}>
           <p className="titulo text-2xl">{esHoy ? `Hoy te toca el Día ${diaHoy}` : `Hoy te toca el Día ${diaHoy} (estás viendo el Día ${dia})`}</p>
           {!esHoy && <Link href={`/app/rutina${q()}`} className="boton">Ver el de hoy</Link>}
@@ -57,11 +60,13 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
               <span className="block texto-suave">{x.series} × {x.repeticiones}{x.nota ? ` · ${x.nota}` : ""}</span>
               {x.ultimo && <span className="block text-sm texto-tenue" data-ultimo>Última: {x.ultimo.peso != null ? `${String(x.ultimo.peso).replace(".", ",")} kg` : ""}{x.ultimo.peso != null && x.ultimo.repeticiones ? " × " : ""}{x.ultimo.repeticiones ?? ""}{x.ultimo.repeticiones && x.ultimo.peso == null ? " reps" : ""} · {fecha(x.ultimo.momento)}</span>}
             </span>
-            {x.video_url && <a href={x.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico">▶️</a>}
+            {x.video_url && <a href={x.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico"><Icono nombre="derecha" /></a>}
             <Anotar socioId={s.socio_id} ejercicioId={x.ejercicio_id} nombre={x.ejercicio} />
+            <Series socioId={s.socio_id} dia={x.dia} ejercicioId={x.ejercicio_id} series={x.series}
+              hechas={(seriesHoy ?? []).filter((h) => h.dia === x.dia && h.ejercicio_id === x.ejercicio_id).map((h) => h.serie)} />
           </li>
         ))}</ul>
-        <section className="space-y-3 pt-4"><h2 className="titulo text-3xl">🏆 Mis marcas</h2><MarcasProgreso datos={progreso} zona={yo.zona!} /></section>
+        <section className="space-y-3 pt-4"><h2 className="titulo text-3xl"><Icono nombre="trofeo" /> Mis marcas</h2><MarcasProgreso datos={progreso} zona={yo.zona!} /></section>
       </div>
     );
   });

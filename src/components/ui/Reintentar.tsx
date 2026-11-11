@@ -8,7 +8,7 @@ export function Reintentar() {
   const [pendiente, empezar] = useTransition();
   return (
     <button type="button" className="boton boton-principal mt-6" disabled={pendiente} onClick={() => empezar(() => router.refresh())}>
-      {pendiente ? "Reintentando…" : "🔄 Reintentar"}
+      {pendiente ? "Reintentando…" : "Reintentar"}
     </button>
   );
 }

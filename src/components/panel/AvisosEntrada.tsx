@@ -1,6 +1,6 @@
 "use client";
 // VD-4 · Los avisos de vidrio de la puerta, en cualquier pantalla del panel (docs/v2/01 §5).
-// "✅ Juan Pérez entró por QR · al día hasta 30/11" se va solo; "⛔ Ana Gómez intentó entrar: vencida" se queda
+// "Juan Pérez entró por QR · al día hasta 30/11" se va solo; "Ana Gómez intentó entrar: vencida" se queda
 // hasta que se toca la ✕, con el botón Cobrar. Tocar el aviso abre el veredicto en la ventana de Entrada.
 // Los datos vienen del "oído" compartido (entradas-vivo.ts): un solo pedido cada 4 s para todo el panel.
 import { usePathname, useRouter } from "next/navigation";
@@ -11,18 +11,24 @@ import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
 import { escucharEntradas } from "./entradas-vivo";
 import { EVENTO_ABRIR_PANEL_SOCIO } from "./PanelSocioLateral";
+import { Icono } from "@/components/ui/Icono";
 
 /** La ventana de Entrada escucha este evento para abrir el veredicto de un socio (detail: ResultadoSocio). */
 export const EVENTO_ABRIR_SOCIO = "gymos:abrir-entrada-socio";
 
+/** La ventana de Entrada manda este evento con lo que acaba de anotar la recepción (BASE-3, modo aviso): sale como aviso abajo a la derecha. */
+export const EVENTO_AVISO_LOCAL = "gymos:aviso-local";
+export type AvisoLocal = { id: string; color: string; texto: string; socioId: string; nombre: string; numero: number | null; cobrar: boolean; puede: boolean; textoSocio: string };
+
 const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con QR", qr_pared: "por QR", kiosco: "en la tablet", nfc: "con el llavero", molinete: "por el molinete" };
 const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
-const MAX_VISIBLES = 4;
+const MAX_VISIBLES = 3;
+let memoriaAvisos: Aviso[] = [];
 const VERDE_MS = 6000;
 const AMARILLO_MS = 12000;
 
 type Aviso = {
-  id: string; color: "verde" | "amarillo" | "rojo"; emoji: string; texto: string;
+  id: string; color: "verde" | "amarillo" | "rojo" | "azul"; emoji: string; texto: string;
   socioId: string; nombre: string; numero: number | null; cobrar: boolean; puede: boolean; textoSocio: string; colorSocio: string;
 };
 
@@ -35,13 +41,13 @@ function deEntrada(x: EntradaViva): Aviso {
     : x.resultado === "forzado" ? `${quien} entró ${via} (lo dejaron pasar): ${minuscula(x.texto)}`
     : `${quien} entró ${via}${x.texto ? ` · ${x.texto}` : ""}`;
   return {
-    id: x.ingreso_id, color, emoji: color === "rojo" ? "⛔" : color === "amarillo" ? "⚠️" : "✅", texto,
+    id: x.ingreso_id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : "✓", texto,
     socioId: x.socio_id, nombre: x.socio, numero: x.numero, cobrar: x.cobrar, puede: !rechazado && x.resultado !== "forzado", textoSocio: x.texto, colorSocio: x.color,
   };
 }
 function deAlerta(a: AlertaViva): Aviso {
   return {
-    id: a.alerta_id, color: "amarillo", emoji: "⚠️",
+    id: a.alerta_id, color: "amarillo", emoji: "alerta",
     texto: `${a.socio} volvió a entrar por ${VIA_PRESTAMO[a.via_nueva] ?? a.via_nueva} ${a.minutos < 1 ? "hace menos de 1 min" : `a los ${a.minutos} min`} de haber entrado por ${VIA_PRESTAMO[a.via_anterior] ?? a.via_anterior}: ¿es la misma persona?`,
     socioId: a.socio_id, nombre: a.socio, numero: null, cobrar: false, puede: true, textoSocio: "", colorSocio: "amarillo",
   };
@@ -49,7 +55,12 @@ function deAlerta(a: AlertaViva): Aviso {
 const minuscula = (t: string) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 
 export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: { gimnasioId: string; sedeId: string; puedeCobrar: boolean; conVentana: boolean }) {
-  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  // Los avisos viven también fuera del componente: si la pantalla se vuelve a montar (p. ej. después de anotar una entrada y refrescar
+  // el panel) no se pierden. Al volver a montar se les rearma el tiempo.
+  const [avisos, setAvisosRaw] = useState<Aviso[]>(() => memoriaAvisos);
+  const setAvisos = useCallback((f: Aviso[] | ((p: Aviso[]) => Aviso[])) => {
+    setAvisosRaw((p) => { const n = typeof f === "function" ? f(p) : f; memoriaAvisos = n; return n; });
+  }, []);
   const ruta = usePathname();
   const router = useRouter();
   const temporizadores = useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -91,6 +102,39 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   const pausar = (id: string) => { const t = temporizadores.current.get(id); if (t) clearTimeout(t); temporizadores.current.delete(id); };
   const reanudar = (a: Aviso) => { if (a.color === "rojo") return; temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS)); };
+  useEffect(() => {
+    const mapa = temporizadores.current;
+    for (const a of memoriaAvisos) if (a.color !== "rojo" && !mapa.has(a.id)) mapa.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // BASE-3: lo que anota la propia recepción (modo aviso) llega por acá.
+  useEffect(() => {
+    const mapa = temporizadores.current;
+    const local = (e: Event) => {
+      const x = (e as CustomEvent<AvisoLocal>).detail;
+      const color = x.color as Aviso["color"];
+      const n: Aviso = { id: x.id, color, emoji: color === "rojo" ? "" : color === "amarillo" ? "!" : color === "azul" ? "" : "✓", texto: x.texto,
+        socioId: x.socioId, nombre: x.nombre, numero: x.numero, cobrar: x.cobrar, puede: x.puede, textoSocio: x.textoSocio, colorSocio: color === "rojo" ? "rojo" : color === "amarillo" ? "amarillo" : "verde" };
+      setAvisos((previos) => {
+        let todos = [...previos.filter((p) => p.id !== n.id), n];
+        while (todos.length > MAX_VISIBLES) {
+          // Se apilan los últimos 3: se va el más viejo (primero un verde o azul, después un amarillo, y si no queda otro, el rojo más viejo). El nuevo nunca.
+          const viejos = todos.slice(0, -1);
+          const i = viejos.findIndex((q) => q.color === "verde" || q.color === "azul");
+          const j = i >= 0 ? i : viejos.findIndex((q) => q.color === "amarillo") >= 0 ? viejos.findIndex((q) => q.color === "amarillo") : 0;
+          const [fuera] = todos.splice(j, 1);
+          const t = mapa.get(fuera.id); if (t) clearTimeout(t); mapa.delete(fuera.id);
+          todos = [...todos];
+        }
+        return todos;
+      });
+      if (color !== "rojo") mapa.set(n.id, setTimeout(() => cerrar(n.id), color === "verde" ? VERDE_MS : AMARILLO_MS));
+    };
+    window.addEventListener(EVENTO_AVISO_LOCAL, local);
+    return () => window.removeEventListener(EVENTO_AVISO_LOCAL, local);
+  }, [cerrar]);
+
   const abrirVeredicto = (a: Aviso) => {
     cerrar(a.id);
     // BASE-3: tocar el aviso abre el panel lateral con la ficha rápida (la ventana de Entrada sigue en F2).
@@ -112,16 +156,16 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
   return (
     <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 bottom-4 flex flex-col-reverse gap-2 pointer-events-none" data-avisos-entrada={avisos.length} role="region" aria-label="Avisos de la puerta" aria-live="polite">
       {avisos.map((a) => (
-        <div key={a.id} data-aviso-entrada={a.color} data-aviso-socio={a.socioId}
+        <div key={a.id} data-aviso-id={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
-          className="vidrio aparecer pointer-events-auto rounded-2xl p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
+          className="vidrio aparecer pointer-events-auto rounded-[var(--radio)] p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
-            <span className="text-xl leading-6" aria-hidden>{a.emoji}</span>
+            <span className="text-xl leading-6" aria-hidden><Icono nombre={a.emoji} /></span>
             <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
           </button>
           <div className="flex flex-col items-end gap-1 flex-none">
             <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-8 rounded-lg texto-tenue active:opacity-60">✕</button>
-            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm">💵 Cobrar</button>}
+            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm"><Icono nombre="plata" /> Cobrar</button>}
           </div>
         </div>
       ))}

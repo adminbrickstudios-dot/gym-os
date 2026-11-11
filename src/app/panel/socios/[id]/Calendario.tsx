@@ -1,6 +1,7 @@
 // El mes del socio: los días que vino marcados, cuántas veces (y el mes
 // anterior) y la racha de semanas seguidas. Se cambia de mes con flechas.
 import Link from "next/link";
+import { Icono } from "@/components/ui/Icono";
 
 export type Asistencia = { mes: string; hoy: string; dias: string[]; veces: number; racha_semanas: number; veces_mes_anterior: number };
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -24,9 +25,9 @@ export function Calendario({ a, socioId }: { a: Asistencia; socioId: string }) {
       </div>
       <div className="tarjeta p-4 sm:p-6 space-y-4 max-w-lg">
         <div className="flex items-center justify-between gap-2">
-          <Link href={href(anterior)} className="boton px-4" aria-label="Mes anterior">◀</Link>
+          <Link href={href(anterior)} className="boton px-4" aria-label="Mes anterior"><Icono nombre="izquierda" /></Link>
           <p className="titulo text-2xl capitalize">{MESES[m - 1]} {anio}</p>
-          {esFuturo ? <span className="w-[52px]" /> : <Link href={href(siguiente)} className="boton px-4" aria-label="Mes siguiente">▶</Link>}
+          {esFuturo ? <span className="w-[52px]" /> : <Link href={href(siguiente)} className="boton px-4" aria-label="Mes siguiente"><Icono nombre="derecha" /></Link>}
         </div>
         <div className="grid grid-cols-7 gap-1 text-center" role="grid" aria-label={`Asistencia de ${MESES[m - 1]}`}>
           {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => <span key={i} className="text-sm texto-tenue py-1">{d}</span>)}

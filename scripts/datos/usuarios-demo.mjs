@@ -35,6 +35,16 @@ export const USUARIOS_DEMO = [
   { email: "socio-vencido@ejemplo.invalid", nombre: null, gimnasio: "demo", socio: "Testigo Vencida" },
 ];
 
+// BASE-8: fuera de la compu local, ninguna contraseña débil ni la de siempre ("demo-gymos"): el demo de producción es público en la práctica.
+export function contrasenaDebil(c) {
+  return c.length < 10 || /demo-?gymos/i.test(c) || /^(password|contrasena|12345)/i.test(c) || /^(.)\1+$/.test(c);
+}
+const esLocal = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:|\/|$)/.test(supabaseUrl);
+if (!esLocal && contrasenaDebil(contrasena)) {
+  console.error("Contraseña demo débil para un Supabase real: elegí una de 10 letras o más que no sea la de siempre (--contrasena).");
+  process.exit(1);
+}
+
 const db = new pg.Client({ connectionString: url });
 await db.connect();
 const q = async (s, p) => (await db.query(s, p)).rows;

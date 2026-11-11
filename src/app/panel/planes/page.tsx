@@ -7,6 +7,7 @@ import { Editor, type Actividad, type Matricula, type Plan, type Producto } from
 import type { ListaPrecios } from "./Precios";
 import type { AjustesPlanes, Convenio, Servicio, Stock } from "./acciones";
 import { Convenios } from "./Convenios";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Planes y precios" };
 
@@ -34,10 +35,10 @@ export default async function Planes() {
     ]) : [[], {}];
     return (
       <>
-        <Encabezado emoji="🏷️" titulo="Planes y precios"
+        <Encabezado icono="etiqueta" titulo="Planes y precios"
           accion={<span className="flex flex-wrap gap-2">
-            {planes.some((p) => p.activo && p.precio != null) && <Link href="/panel/planes/aumento" className="boton">📈 Aumento de precios</Link>}
-            <Link href="/panel/cupones" className="boton" data-ir-cupones>🏷️ Cupones</Link>
+            {planes.some((p) => p.activo && p.precio != null) && <Link href="/panel/planes/aumento" className="boton"><Icono nombre="tendencia" /> Aumento de precios</Link>}
+            <Link href="/panel/cupones" className="boton" data-ir-cupones><Icono nombre="etiqueta" /> Cupones</Link>
           </span>} bajada="Lo que vendés y cuánto cuesta. Un aumento se programa con fecha y no toca lo ya cobrado." />
         <Editor planes={planes} listas={listas} actividades={actividades} incluyen={incluyen} matriculas={matriculas} stock={stock} productos={productos} ajustes={ajustes} servicios={servicios} zona={panel.gimnasio.zona_horaria} />
         <div className="mt-12"><Convenios convenios={convenios} /></div>

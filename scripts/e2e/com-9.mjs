@@ -43,7 +43,7 @@ try {
   await d.locator("[data-cupon]").getByText(/20% en 1 línea/).waitFor({ timeout: 30000 });
   const carrito = (await d.locator("[data-carrito]").innerText()).replace(/\s+/g, " ");
   chequear(carrito.includes(`Cupón ${CODIGO}`) || await d.locator(`input[value="Cupón ${CODIGO}"]`).count() > 0, "el cupón carga el descuento en la cuota (motivo “Cupón …”), no en el agua", carrito.slice(0, 200));
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   chequear(await aparece(d.locator("[data-uso-cupon]", { hasText: "anotado" }), 15000), "cobra y el uso queda anotado", await d.locator("[data-uso-cupon]").innerText().catch(() => "sin mensaje"));
   await capturar(d, "com9-compu-vender");

@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import type { MapaLugares } from "@/lib/clases/lugares";
 import { elegirLugar } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** COM-12: con la reserva confirmada, el socio elige su lugar en la sala (la bici, el reformer). */
 export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
@@ -16,12 +17,12 @@ export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
     <div className="basis-full" data-elegir-lugar data-mio={mio ?? ""}>
       {!abierto && mio != null ? (
         <p className="flex items-center gap-2">
-          <span className="pildora">📍 {mapa.etiqueta} {mio}</span>
+          <span className="pildora"><Icono nombre="ubicacion" /> {mapa.etiqueta} {mio}</span>
           <button type="button" className="underline text-sm" onClick={() => setAbierto(true)}>Cambiar</button>
         </p>
       ) : (
         <>
-          <p className="text-sm font-semibold mb-2">📍 Elegí tu lugar ({mapa.etiqueta.toLowerCase()})</p>
+          <p className="text-sm font-semibold mb-2"><Icono nombre="ubicacion" /> Elegí tu lugar ({mapa.etiqueta.toLowerCase()})</p>
           <div className="grid grid-cols-6 sm:grid-cols-10 gap-1.5">
             {Array.from({ length: mapa.cantidad }, (_, i) => i + 1).map((n) => {
               const roto = fuera.has(n), tomado = tomados.has(n), esMio = n === mio;
@@ -37,7 +38,7 @@ export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
               );
             })}
           </div>
-          {error && <p role="alert" className="pildora pildora-rojo w-full mt-2">⚠️ {error}</p>}
+          {error && <p role="alert" className="pildora pildora-rojo w-full mt-2"><Icono nombre="alerta" /> {error}</p>}
         </>
       )}
     </div>

@@ -12,21 +12,24 @@ import { DosPasos } from "./DosPasos";
 import { ActivarPush } from "@/components/ActivarPush";
 import { Sesiones } from "@/components/cuenta/Sesiones";
 import { MiLiquidacion } from "./MiLiquidacion";
+import { Tema } from "./Tema";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
 import { rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Mi cuenta" };
 
 export default async function Cuenta() {
   const panel = await contextoPanel();
-  const [{ data }, seguridad, ayudas] = await Promise.all([
+  const [{ data }, seguridad, ayudas, miTema] = await Promise.all([
     crearClienteServidor().then((c) => c.auth.getUser()),
     rpc<MiSeguridad>("mi_seguridad"),
     rpc<{ apagadas: boolean }>("ayudas_vistas", undefined, { lectura: true }).catch(() => null),   // VD-31
+    rpc<string | null>("mi_tema", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true }).catch(() => null),   // BASE-6
   ]);
   return (
     <>
-      <Encabezado emoji="👤" titulo={panel.yo.nombre} bajada={`${NOMBRE_ROL[panel.yo.rol]} · ${data.user?.email ?? ""}`} />
+      <Encabezado icono="persona" titulo={panel.yo.nombre} bajada={`${NOMBRE_ROL[panel.yo.rol]} · ${data.user?.email ?? ""}`} />
       <CambiarContrasena tieneContrasena={seguridad.tiene_contrasena} />
       {/* VD-52: el profe (y quien tenga clases o regla) ve su mes. */}
       <MiLiquidacion />
@@ -36,18 +39,19 @@ export default async function Cuenta() {
       {panel.yo.rol !== "profe" && <DosPasos recomendada={panel.yo.rol === "dueno"} />}
       {/* Con un PIN puesto en esta compu, el PIN que se guarda es el de la sesión: se pide sin PIN puesto. */}
       {(await cookies()).get("gymos_operador")
-        ? <p className="texto-suave mt-6">🔢 Para cambiar tu PIN, primero <Link href="/panel/pin" className="underline">salí del PIN</Link> de esta compu.</p>
+        ? <p className="texto-suave mt-6"><Icono nombre="calculadora" /> Para cambiar tu PIN, primero <Link href="/panel/pin" className="underline">salí del PIN</Link> de esta compu.</p>
         : <MiPin />}
       {/* PUSH-1: el profe todavía no tiene avisos propios. */}
       {panel.yo.rol !== "profe" && (
         <section className="tarjeta p-5 sm:p-6 max-w-xl mt-6" aria-labelledby="push">
-          <h2 id="push" className="titulo text-2xl mb-1">🔔 Notificaciones</h2>
+          <h2 id="push" className="titulo text-2xl mb-1"><Icono nombre="campana" /> Notificaciones</h2>
           <p className="texto-suave mb-4">Que te lleguen al celular o a la compu, aunque no tengas el panel abierto. Se activan en cada dispositivo.</p>
           <ActivarPush />
         </section>
       )}
+      <Tema inicial={miTema === "claro" || miTema === "oscuro" ? miTema : "gimnasio"} />
       {ayudas && <AjustesAyuda apagadas={ayudas.apagadas} />}
-      <form action="/salir" method="post" className="mt-8"><button className="boton">🚪 Cerrar sesión</button></form>
+      <form action="/salir" method="post" className="mt-8"><button className="boton"><Icono nombre="puerta" /> Cerrar sesión</button></form>
     </>
   );
 }

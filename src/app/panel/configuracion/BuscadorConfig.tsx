@@ -4,7 +4,7 @@ import { useState } from "react";
 import { buscarOpciones, type Opcion } from "./indice";
 import { PESTANAS } from "./pestanas";
 
-const NOMBRE_PESTANA = Object.fromEntries(PESTANAS.map((p) => [p.clave, `${p.emoji} ${p.texto}`]));
+const NOMBRE_PESTANA = Object.fromEntries(PESTANAS.map((p) => [p.clave, p.texto]));
 
 export function BuscadorConfig({ visible, alElegir }: { visible: (o: Opcion) => boolean; alElegir: (o: Opcion) => void }) {
   const [texto, setTexto] = useState("");
@@ -14,7 +14,7 @@ export function BuscadorConfig({ visible, alElegir }: { visible: (o: Opcion) => 
     <div className="space-y-2" data-buscador-config>
       <label className="block">
         <span className="sr-only">Buscar una opción</span>
-        <input type="search" className="campo" placeholder="🔍 Buscar una opción: reingreso, caja, fiado, meta…" autoComplete="off" enterKeyHint="search"
+        <input type="search" className="campo" placeholder="Buscar una opción: reingreso, caja, fiado, meta…" autoComplete="off" enterKeyHint="search"
           value={texto} onChange={(e) => setTexto(e.target.value)} aria-label="Buscar una opción" data-buscar-opcion />
       </label>
       {buscando && (

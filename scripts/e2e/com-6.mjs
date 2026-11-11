@@ -58,7 +58,7 @@ try {
   await r.goto(`${G}/panel/entrada?socio=${otro.id}`);
   const aviso = r.locator("[data-aviso-firmar]");
   chequear(await aparece(aviso, 30000) && /Falta firmar: Reglamento/.test(await aviso.innerText()) && await r.locator('[data-veredicto="verde"]').count() === 1,
-    "en la Entrada: “✍️ Falta firmar: Reglamento”, y sigue en verde (no lo frena)", `Entrada: ${await aviso.innerText().catch(() => "sin aviso")}`);
+    "en la Entrada: “Falta firmar: Reglamento”, y sigue en verde (no lo frena)", `Entrada: ${await aviso.innerText().catch(() => "sin aviso")}`);
   await r.locator('a:has-text("Ver ficha")').first().click();
   await r.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}/, { timeout: 60000 });
   const enFicha = r.locator('[data-documentos-ficha] [data-firmar="reglamento"]');

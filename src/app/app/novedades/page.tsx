@@ -5,6 +5,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MarcarLeidas } from "./Leidos";
 import { ActivarPush } from "@/components/ActivarPush";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Novedades" };
 type Item = { clave: string; emoji: string; titulo: string; detalle: string | null; href: string; en: string | null; leido: boolean };
@@ -27,16 +28,16 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
     return (
       <div className="space-y-6">
         <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">🔔 Novedades</h1>
+        <h1 className="titular text-5xl"><Icono nombre="campana" /> Novedades</h1>
         {mensajes && mensajes.sin_leer > 0 && (
           <Link href={`/app/mensajes${q}`} className="tarjeta flex items-center gap-3 p-4" data-novedad-mensajes>
-            <span className="text-2xl" aria-hidden>💬</span>
+            <span className="text-2xl" aria-hidden><Icono nombre="mensaje" /></span>
             <span className="flex-1 font-semibold">{mensajes.sin_leer === 1 ? "El gimnasio te respondió" : `El gimnasio te respondió ${mensajes.sin_leer} mensajes`}</span>
             <span aria-hidden className="texto-tenue">›</span>
           </Link>
         )}
         <MarcarLeidas claves={c.items.filter((i) => !i.leido).map((i) => i.clave)} />
-        {c.items.length === 0 ? <p className="texto-suave text-lg">Nada nuevo por ahora. Cuando aprueben tu pago o cambie una clase, aparece acá. ✨</p> : (
+        {c.items.length === 0 ? <p className="texto-suave text-lg">Nada nuevo por ahora. Cuando aprueben tu pago o cambie una clase, aparece acá. <Icono nombre="estrella" /></p> : (
           <ul className="space-y-2">
             {c.items.map((i) => (
               <li key={i.clave} data-novedad={i.leido ? "vista" : "nueva"}>
@@ -53,7 +54,7 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
           </ul>
         )}
         <section className="tarjeta p-5 space-y-3" aria-labelledby="push">
-          <h2 id="push" className="titulo text-xl">🔔 Que me lleguen al celular</h2>
+          <h2 id="push" className="titulo text-xl"><Icono nombre="campana" /> Que me lleguen al celular</h2>
           <p className="texto-suave">Cuando aprueben tu pago o se cancele una clase tuya, te llega un aviso aunque no tengas la app abierta.</p>
           <ActivarPush />
         </section>

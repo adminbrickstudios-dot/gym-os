@@ -23,13 +23,17 @@ async function usuario(rol) {
   return u;
 }
 
-test("un gimnasio nuevo nace con su landing sin publicar y sus 9 secciones (con “Probá una clase”)", async () => {
+test("un gimnasio nuevo nace con su landing PUBLICADA (U4) y sus 9 secciones (con “Probá una clase”); oculta, queda solo la marca", async () => {
   const [{ n }] = await t.q(`select count(*)::int n from public.landing_secciones where gimnasio_id = $1`, [t.g]);
   assert.equal(n, 9);
   const l = await landing();
-  assert.equal(l.publicada, false);
+  assert.equal(l.publicada, true);
+  assert.equal(l.portada.titulo.length > 0, true);
+  await t.q(`update public.landing_gimnasio set publicada = false where gimnasio_id = $1`, [t.g]);
+  const oculta = await landing();
+  assert.equal(oculta.publicada, false);
   assert.equal(l.marca.nombre, "Gimnasio de Prueba");
-  assert.equal(l.planes, undefined, "sin publicar no muestra nada más que la marca");
+  assert.equal(oculta.planes, undefined, "oculta no muestra nada más que la marca");
 });
 
 test("un host desconocido devuelve null, no otro gimnasio", async () => {

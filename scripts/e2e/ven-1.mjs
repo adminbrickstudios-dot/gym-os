@@ -15,12 +15,12 @@ try {
   await r.goto(`${G}/panel/vender?socio=${id}`);
   await r.locator("main button", { hasText: "Agua 500 ml" }).click();
   await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   const a = r.locator("a[data-comprobante]");
   await a.waitFor({ timeout: 30000 });
   const href = decodeURIComponent(await a.getAttribute("href"));
-  chequear(/^https:\/\/wa\.me\/549000\d+\?text=Hola Testigo! Recibimos tu pago de \$1\.500 en .+ \(Agua 500 ml, \d\d\/\d\d\)\./.test(href), "“🧾 Mandar comprobante” abre su WhatsApp con el texto armado", href);
+  chequear(/^https:\/\/wa\.me\/549000\d+\?text=Hola Testigo! Recibimos tu pago de \$1\.500 en .+ \(Agua 500 ml, \d\d\/\d\d\)\./.test(href), "“Mandar comprobante” abre su WhatsApp con el texto armado", href);
   await capturar(r, "ven1-celu-comprobante");
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 } catch (e) {

@@ -6,8 +6,9 @@ import { Vacio } from "@/components/ui/Vacio";
 import { formatearPesos } from "@/lib/formato";
 import { CATEGORIAS_GASTO, NOMBRE_CATEGORIA, diaCorto, type GananciaMes } from "@/lib/gastos";
 import { agregarFijo, anularGasto, cargarGasto, guardarPresupuesto, permitirEncargado, terminarFijo, verComprobante } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
-const Falla = ({ texto }: { texto: string | null }) => texto ? <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {texto}</p> : null;
+const Falla = ({ texto }: { texto: string | null }) => texto ? <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {texto}</p> : null;
 
 /** Cargar un gasto del día, con la foto del comprobante si la tiene a mano. */
 export function CargarGasto({ mes, hoy, ultimoDia }: { mes: string; hoy: string; ultimoDia: string }) {
@@ -31,10 +32,10 @@ export function CargarGasto({ mes, hoy, ultimoDia }: { mes: string; hoy: string;
       <label className="grid gap-1 text-sm">Monto
         <input name="monto" className="campo" inputMode="decimal" placeholder="250.000" required />
       </label>
-      <label className="grid gap-1 text-sm sm:col-span-2 lg:col-span-3">📷 Foto del comprobante (opcional)
+      <label className="grid gap-1 text-sm sm:col-span-2 lg:col-span-3"><Icono nombre="camara" /> Foto del comprobante (opcional)
         <input name="comprobante" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="text-sm" aria-label="Foto del comprobante" />
       </label>
-      <BotonAccion type="submit" ocupadoTexto="Guardando…">➕ Cargar gasto</BotonAccion>
+      <BotonAccion type="submit" ocupadoTexto="Guardando…"><Icono nombre="mas" /> Cargar gasto</BotonAccion>
       <div className="sm:col-span-2 lg:col-span-4"><Falla texto={error} /></div>
     </form>
   );
@@ -54,27 +55,27 @@ export function ListaGastos({ g, puedeVerFijos }: { g: GananciaMes; puedeVerFijo
   };
   const fila = "flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 min-h-14";
   if (!g.gastos.length && !g.fijos.length && !(Number(g.total_fijos) > 0)) {
-    return <Vacio emoji="🧮" titulo="Todavía no cargaste gastos de este mes">Cargá el primero arriba. Lo que se repite todos los meses (alquiler, sueldos) se carga una vez como fijo y aparece solo cada mes.</Vacio>;
+    return <Vacio icono="calculadora" titulo="Todavía no cargaste gastos de este mes">Cargá el primero arriba. Lo que se repite todos los meses (alquiler, sueldos) se carga una vez como fijo y aparece solo cada mes.</Vacio>;
   }
   return (
     <div>
       <ul className="tarjeta divide-y divide-[var(--borde)]" data-lista-gastos>
         {puedeVerFijos && g.fijos.map((x) => (
           <li key={x.fijo_id} className={fila} data-fijo>
-            <span className="flex-1 min-w-0">{NOMBRE_CATEGORIA[x.categoria] ?? x.categoria}{x.detalle && <span className="texto-suave"> · {x.detalle}</span>} <span className="pildora">🔁 fijo</span></span>
+            <span className="flex-1 min-w-0">{NOMBRE_CATEGORIA[x.categoria] ?? x.categoria}{x.detalle && <span className="texto-suave"> · {x.detalle}</span>} <span className="pildora"><Icono nombre="repetir" /> fijo</span></span>
             <span className="numero">{formatearPesos(x.monto)}</span>
             {g.es_dueno && <BotonAccion className="boton-texto texto-suave" ocupadoTexto="…" aria-label={`Dejar de repetir ${x.detalle ?? x.categoria} desde este mes`}
               onClick={async () => { const r = await terminarFijo(x.fijo_id, g.mes); setError(r.error ?? null); }}>Dejar de repetir</BotonAccion>}
           </li>
         ))}
         {!puedeVerFijos && Number(g.total_fijos) > 0 && (
-          <li className={fila}><span className="flex-1">🔁 Gastos fijos del mes</span><span className="numero">{formatearPesos(g.total_fijos)}</span></li>
+          <li className={fila}><span className="flex-1"><Icono nombre="repetir" /> Gastos fijos del mes</span><span className="numero">{formatearPesos(g.total_fijos)}</span></li>
         )}
         {g.gastos.map((x) => (
           <li key={x.gasto_id} className={fila} data-gasto>
             <span className="texto-tenue text-sm w-12">{diaCorto(x.fecha)}</span>
             <span className="flex-1 min-w-0">{NOMBRE_CATEGORIA[x.categoria] ?? x.categoria}{x.detalle && <span className="texto-suave"> · {x.detalle}</span>}</span>
-            {x.comprobante && <button type="button" className="boton-texto" aria-label={`Ver el comprobante de ${x.detalle ?? x.categoria}`} onClick={() => abrir(x.gasto_id)}>📎 Ver</button>}
+            {x.comprobante && <button type="button" className="boton-texto" aria-label={`Ver el comprobante de ${x.detalle ?? x.categoria}`} onClick={() => abrir(x.gasto_id)}><Icono nombre="documento" /> Ver</button>}
             <span className="numero">{formatearPesos(x.monto)}</span>
             <BotonAccion className="boton-texto texto-suave" ocupadoTexto="…" aria-label={`Quitar ${x.detalle ?? x.categoria}`}
               onClick={async () => { const r = await anularGasto(x.gasto_id); setError(r.error ?? null); }}>Quitar</BotonAccion>
@@ -106,7 +107,7 @@ export function Fijos({ mes }: { mes: string }) {
       <label className="grid gap-1 text-sm">Monto por mes
         <input className="campo" inputMode="decimal" value={monto} onChange={(e) => setMonto(e.target.value)} placeholder="500.000" required />
       </label>
-      <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Guardando…" : "🔁 Agregar fijo"}</button>
+      <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Guardando…" : "Agregar fijo"}</button>
       <div className="sm:col-span-4"><Falla texto={error} /></div>
     </form>
   );
@@ -139,7 +140,7 @@ export function Presupuesto({ g }: { g: GananciaMes }) {
                 action={async (datos) => { setError(null); setGuardado(null); const r = await guardarPresupuesto(c.categoria, String(datos.get("monto") ?? "")); if (r.error) setError(r.error); else setGuardado(c.categoria); }}>
                 <input key={String(c.presupuesto)} name="monto" className="campo w-36" inputMode="decimal" defaultValue={c.presupuesto == null ? "" : String(Number(c.presupuesto)).replace(".", ",")}
                   placeholder="Sin presupuesto" aria-label={`Presupuesto mensual de ${NOMBRE_CATEGORIA[c.categoria] ?? c.categoria}`} />
-                <BotonAccion className="boton" ocupadoTexto="…">{guardado === c.categoria ? "✅" : "Guardar"}</BotonAccion>
+                <BotonAccion className="boton" ocupadoTexto="…">{guardado === c.categoria ? "✓" : "Guardar"}</BotonAccion>
               </form>
             </li>
           );
@@ -157,7 +158,7 @@ export function PermisoEncargado({ prendido }: { prendido: boolean }) {
   const [ocupado, empezar] = useTransition();
   return (
     <div className="tarjeta p-4" data-permiso-gastos>
-      <Interruptor etiqueta="🧭 El encargado ve y carga los gastos" ayuda="Apagado: solo vos ves los gastos y los sueldos. Los fijos y el presupuesto los manejás siempre vos."
+      <Interruptor etiqueta="El encargado ve y carga los gastos" ayuda="Apagado: solo vos ves los gastos y los sueldos. Los fijos y el presupuesto los manejás siempre vos."
         checked={valor} disabled={ocupado}
         onChange={(e) => { const nuevo = e.target.checked; setValor(nuevo); empezar(async () => { const r = await permitirEncargado(nuevo); if (r.error) { setValor(!nuevo); setError(r.error); } else setError(null); }); }} />
       <Falla texto={error} />

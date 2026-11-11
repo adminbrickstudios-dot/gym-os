@@ -50,7 +50,7 @@ try {
       const faltan = nombres.filter((n) => !enPantalla.includes(n));
       // Le pone precio al primero.
       const primero = d.locator(`li[data-plan="${nombres[0]}"]`);
-      await primero.locator('button:has-text("💲 Precios")').click();
+      await primero.locator('button:has-text("Precios")').click();
       await primero.locator('input[aria-label="Precio general"]').fill("20.000");
       await primero.locator('button:has-text("Guardar precios")').click();
       const conPrecio = await primero.getByText("$20.000").first().waitFor({ timeout: 30000 }).then(() => true, () => false);

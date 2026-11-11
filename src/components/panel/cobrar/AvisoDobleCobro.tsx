@@ -3,6 +3,7 @@
 // y un motivo escrito (que la base guarda en la venta). Lo usan la hoja Cobrar y Vender; el texto lo escribe la base
 // (o, al abrir la hoja, sale de lo que contexto_cobro devolvió).
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 export type EstadoDobleCobro = { texto: string; abierto: boolean; motivo: string };
 
@@ -20,7 +21,7 @@ export function AvisoDobleCobro({ estado, alCambiar, alCancelar }: {
 }) {
   return (
     <div className="space-y-3" data-cobrar-doble role="alert">
-      <Mensaje tipo="aviso"><span data-cobrar-doble-texto>⚠️ {estado.texto}</span></Mensaje>
+      <Mensaje tipo="aviso"><span data-cobrar-doble-texto><Icono nombre="alerta" /> {estado.texto}</span></Mensaje>
       {!estado.abierto ? (
         <div className="flex flex-wrap gap-2">
           <button type="button" className="boton !min-h-11" data-cobrar-doble-igual onClick={() => alCambiar({ ...estado, abierto: true })}>Cobrar igual (con motivo)</button>

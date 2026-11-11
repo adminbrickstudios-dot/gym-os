@@ -15,9 +15,9 @@ export default async function Duplicados() {
     const pares = await rpc<Par[]>("posibles_duplicados", { p_gimnasio_id: panel.gimnasio.id });
     return (
       <>
-        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen emoji="🔎" titulo="Posibles duplicados" bajada="Socios cargados dos veces (mismo celular o nombre casi igual). Al unirlos, todo lo del que se va pasa al que queda." />
+        <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen icono="buscar" titulo="Posibles duplicados" bajada="Socios cargados dos veces (mismo celular o nombre casi igual). Al unirlos, todo lo del que se va pasa al que queda." />
         {pares.length === 0
-          ? <Vacio emoji="✨" titulo="No hay duplicados">Cuando aparezcan dos fichas con el mismo celular o un nombre casi igual, las vas a ver acá.</Vacio>
+          ? <Vacio icono="estrella" titulo="No hay duplicados">Cuando aparezcan dos fichas con el mismo celular o un nombre casi igual, las vas a ver acá.</Vacio>
           : <Pares pares={pares} zona={panel.gimnasio.zona_horaria} puedeUnir={panel.yo.rol === "dueno"} />}
       </>
     );

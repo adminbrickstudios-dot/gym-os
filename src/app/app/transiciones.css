@@ -1,0 +1,15 @@
+/* FA-18 · Transiciones entre pestañas de la app del socio (View Transitions). Solo se usan cuando NavSocio las pide, y nunca si el
+   socio activó "reducir movimiento": ahí no se anima nada. La barra de abajo queda quieta (tiene su propio nombre de transición). */
+.nav-socio { view-transition-name: nav-socio; }
+
+@keyframes app-sale { to { opacity: 0; } }
+@keyframes app-entra { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: 120ms ease-out both app-sale; }
+  ::view-transition-new(root) { animation: 180ms ease-out 60ms both app-entra; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

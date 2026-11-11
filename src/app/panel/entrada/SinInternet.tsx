@@ -4,6 +4,7 @@ import { colorVar } from "@/components/panel/Estado";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { buscarEnCopia, copiaVigente } from "@/lib/entrada/sin-internet";
 import { copiaEntrada, sincronizarSinInternet, type CopiaEntrada, type EntradaSinInternet, type Sincronizada } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const CADA_COPIA_MS = 15 * 60e3;
 const CADA_PRUEBA_MS = 20e3;
@@ -102,7 +103,7 @@ export function SinInternet({ sedeId, zona }: { sedeId: string; zona: string }) 
     <div className="contents" data-sin-internet={offline ? "sin" : prendido ? "prendido" : "apagado"}>
       {offline && (
         <section className="tarjeta p-5 space-y-3 !border-[var(--amarillo)]" data-sin-internet-panel>
-          <p className="titulo text-2xl">📴 Sin internet</p>
+          <p className="titulo text-2xl"><Icono nombre="prohibido" /> Sin internet</p>
           {!vigente ? (
             <p className="texto-suave">No hay una copia de hoy en esta compu. Anotá en un papel nombre y hora de cada uno, y cargalos cuando vuelva internet.</p>
           ) : (
@@ -115,18 +116,18 @@ export function SinInternet({ sedeId, zona }: { sedeId: string; zona: string }) 
                   <span className="w-3 h-3 rounded-full" style={{ background: colorVar(s.c) }} aria-hidden />
                   <span className="grow min-w-0"><span className="font-semibold">{s.n}</span> <span className="texto-suave">#{s.num}</span>
                     <span className="block text-sm">{s.t}</span></span>
-                  {s.p ? <button type="button" className="boton boton-principal" onClick={() => anotar(s)}>✅ Entró</button>
-                    : <span className="text-sm texto-suave basis-full">⛔ Sin internet no se deja pasar a quien no puede: cuando vuelva, cobrale o dejalo pasar desde la Entrada.</span>}
+                  {s.p ? <button type="button" className="boton boton-principal" onClick={() => anotar(s)}><Icono nombre="ok" /> Entró</button>
+                    : <span className="text-sm texto-suave basis-full"><Icono nombre="prohibido" /> Sin internet no se deja pasar a quien no puede: cuando vuelva, cobrale o dejalo pasar desde la Entrada.</span>}
                 </li>
               ))}</ul>
               {anotado && <Mensaje tipo="exito">{anotado}: anotado. Se registra cuando vuelva internet.</Mensaje>}
             </>
           )}
-          {cola.length > 0 && <p className="text-sm" data-cola={cola.length}>🕐 {cola.length} {cola.length === 1 ? "entrada espera" : "entradas esperan"} a que vuelva internet (quedan guardadas en esta compu).</p>}
+          {cola.length > 0 && <p className="text-sm" data-cola={cola.length}><Icono nombre="reloj" /> {cola.length} {cola.length === 1 ? "entrada espera" : "entradas esperan"} a que vuelva internet (quedan guardadas en esta compu).</p>}
           {manual && !sinRed && <button type="button" className="boton" onClick={() => setManual(false)}>Ya volvió internet</button>}
         </section>
       )}
-      {!offline && cola.length > 0 && <p className="pildora" data-cola={cola.length}>🔄 Registrando {cola.length} {cola.length === 1 ? "entrada" : "entradas"} anotadas sin internet…</p>}
+      {!offline && cola.length > 0 && <p className="pildora" data-cola={cola.length}><Icono nombre="repetir" /> Registrando {cola.length} {cola.length === 1 ? "entrada" : "entradas"} anotadas sin internet…</p>}
       {sync?.error && !offline && <Mensaje tipo="aviso">{sync.error}</Mensaje>}
       {sync?.r && sync.r.length > 0 && (
         <div data-sincronizado={sync.r.length}>
@@ -139,11 +140,11 @@ export function SinInternet({ sedeId, zona }: { sedeId: string; zona: string }) 
       {!offline && (
         <p className="order-last text-sm texto-suave flex flex-wrap items-center gap-x-3 gap-y-1">
           {prendido ? <>
-            <span data-copia={copia?.socios.length ?? 0}>📴 Copia para cuando se corte internet: {copia ? `${hora(copia.generada_en)} · ${copia.socios.length} socios` : "bajando…"}</span>
+            <span data-copia={copia?.socios.length ?? 0}><Icono nombre="prohibido" /> Copia para cuando se corte internet: {copia ? `${hora(copia.generada_en)} · ${copia.socios.length} socios` : "bajando…"}</span>
             <button type="button" className="underline min-h-11 inline-flex items-center" onClick={() => setManual(true)}>Usarla ahora</button>
             <button type="button" className="underline min-h-11 inline-flex items-center" onClick={() => prender(false)}>Apagar en esta compu</button>
           </> : <>
-            <span>📴 ¿Se te corta internet?</span>
+            <span><Icono nombre="prohibido" /> ¿Se te corta internet?</span>
             <button type="button" className="underline min-h-11 inline-flex items-center" data-prender-copia onClick={() => prender(true)}>Guardar una copia en esta compu</button>
           </>}
         </p>

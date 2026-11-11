@@ -7,9 +7,10 @@ import { agregarPersona, editarPersona, type Resultado } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { darDeBajaPersona } from "../seguridad-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type Miembro = { equipo_id: string; nombre: string; rol: Rol; sede_id: string | null; sede: string | null; activo: boolean; tiene_acceso: boolean; soy_yo: boolean };
-const EMOJI: Record<Rol, string> = { dueno: "👑", encargado: "🧭", recepcion: "🛎️", profe: "💪" };
+const EMOJI: Record<Rol, string> = { dueno: "", encargado: "", recepcion: "", profe: "" };
 const QUE_HACE: Record<Rol, string> = {
   dueno: "Todo, incluida la plata y la configuración",
   encargado: "Todo menos configuración y equipo",
@@ -36,7 +37,7 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
       <ul className="space-y-2">
         {miembros.map((m) => (
           <li key={m.equipo_id} className={`tarjeta flex flex-wrap items-center gap-4 px-4 py-4 ${m.activo ? "" : "opacity-50"}`}>
-            <span className="icono" aria-hidden>{EMOJI[m.rol]}</span>
+            <span className="icono" aria-hidden><Icono nombre={EMOJI[m.rol]} /></span>
             <span className="min-w-0 flex-1">
               <span className="block font-semibold text-lg">{m.nombre}{m.soy_yo && <span className="texto-tenue font-normal"> · vos</span>}</span>
               <span className="block texto-suave text-sm">{NOMBRE_ROL[m.rol]}{m.sede ? ` · ${m.sede}` : ""}{m.tiene_acceso ? "" : " · sin acceso al sistema"}</span>
@@ -89,27 +90,27 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
           </li>
         ))}
       </ul>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       {avisoBaja && <Mensaje tipo="exito"><span data-baja-hecha>{avisoBaja}</span></Mensaje>}
 
       {puedeEditar && (
         <form action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
-          <p className="titulo text-2xl sm:col-span-2">➕ Sumar a alguien</p>
+          <p className="titulo text-2xl sm:col-span-2"><Icono nombre="mas" /> Sumar a alguien</p>
           <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
           <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" placeholder="Vacío: solo figura en la grilla" /></label>
           <label className="space-y-1"><span className="etiqueta">Contraseña</span><CampoContrasena /></label>
           <label className="space-y-1"><span className="etiqueta">Rol</span>
-            <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{EMOJI[r]} {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
+            <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}><Icono nombre={EMOJI[r]} /> {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
           {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>
             <select name="sede" className="campo"><option value="">Todas</option>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
-          {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-2xl !px-4 !py-3">⚠️ {estado.error}</p>}
+          {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {estado.error}</p>}
           {estado.aviso && (
             <Mensaje tipo="exito" className="sm:col-span-2">
               <p>{estado.aviso}</p>
-              {estado.contrasena && <p className="mt-2 text-[var(--texto)]">📧 <strong className="break-all">{estado.email}</strong> · 🔑 <strong className="numero text-2xl select-all">{estado.contrasena}</strong></p>}
+              {estado.contrasena && <p className="mt-2 text-[var(--texto)]"><Icono nombre="mail" /> <strong className="break-all">{estado.email}</strong> · <Icono nombre="llave" /> <strong className="numero text-2xl select-all">{estado.contrasena}</strong></p>}
             </Mensaje>
           )}
-          <div className="sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal">{guardando ? "Sumando…" : "➕ Sumar al equipo"}</button></div>
+          <div className="sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal">{guardando ? "Sumando…" : "Sumar al equipo"}</button></div>
         </form>
       )}
     </div>

@@ -9,7 +9,7 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 (pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
-**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`, la lista es `docs/base/PROGRESO.md`. Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
+**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`; la lista que manda es `docs/base/RECTA-FINAL.md` (el detalle de cada BASE-* está en `docs/base/PROGRESO.md`). Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
 **Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
 Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
 **Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche
@@ -25,12 +25,13 @@ Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
   `estado`, `vencido` ni parecida. Se guardan **hechos** (pagos,
   coberturas, congelamientos, suspensiones, consumos) y el estado sale
   de `privado.calcular_acceso(socio, momento, sede)`.
-  **Única excepción (D36): `socios.cubierto_hasta`**, el final de la
-  cobertura derivado de los hechos, mantenido por trigger en la misma
-  transacción y verificado por `npm run chequeos` (guardado = recalculado).
-  No depende de la hora, así que no se pudre. El color y la deuda se siguen
-  calculando contra el momento.
-- **Única excepción (D36, BASE-5): `socios.cubierto_hasta`.** Se guarda el *fin de la cobertura* (el último `hasta` de las coberturas no anuladas), por trigger, en la misma transacción que el hecho que lo mueve. Es un hecho derivado, no un estado: el color y el "al día" siguen saliendo de comparar esa fecha con el momento (`estado_acceso`), nunca se guardan, y la puerta sigue haciendo la cuenta completa. Lo usan las listas de muchos socios. `npm run chequeos` verifica que lo guardado sea lo recalculado.
+  **Única excepción (D36, BASE-5): `socios.cubierto_hasta`**, el fin de la
+  cobertura (el último `hasta` de las coberturas no anuladas), mantenido por
+  trigger en la misma transacción que el hecho que lo mueve y verificado por
+  `npm run chequeos` (guardado = recalculado). No depende de la hora, así que
+  no se pudre. El color, el "al día" y la deuda se siguen calculando contra
+  el momento; la puerta sigue haciendo la cuenta completa. Lo usan las listas
+  de muchos socios.
 - **Una sola fuente de verdad.** Recepción, kiosco, QR, app del socio,
   listas de retención y "Vencen hoy" usan la misma función SQL.
   Prohibido reimplementar el cálculo en TypeScript.

@@ -7,6 +7,7 @@ import { CrearContrasena, PedirBaja, PedirPausa } from "./Pedidos";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { Sesiones } from "@/components/cuenta/Sesiones";
 import type { MiSeguridad } from "@/lib/cuenta/dispositivo";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Mi membresía" };
 
@@ -28,15 +29,15 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
       <div className="space-y-6">
         <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
         <h1 className="titular text-5xl">Mi membresía</h1>
-        {yo.plan && <p className="texto-suave text-lg">🏷️ {yo.plan.nombre}</p>}
+        {yo.plan && <p className="texto-suave text-lg"><Icono nombre="etiqueta" /> {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}
         <CrearContrasena email={usuario.data.user?.email || null} tieneContrasena={seguridad.tiene_contrasena} />
         {/* VD-33b: dónde está abierta mi cuenta y cerrar las demás. */}
         <Sesiones sesiones={seguridad.sesiones} zona={yo.zona!} />
         {/* SEG-6: lo que el gimnasio guarda de él. */}
-        <p><a href={`/app/mis-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" download data-mis-datos>⬇️ Descargar mis datos</a></p>
+        <p><a href={`/app/mis-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" download data-mis-datos><Icono nombre="descargar" /> Descargar mis datos</a></p>
         {baja
-          ? <p className="mensaje mensaje-info" data-baja-pendiente>👋 Pediste la baja: el gimnasio te va a contactar.{baja.codigo && <> Tu código de baja: <strong data-codigo-baja>{baja.codigo}</strong>. Guardalo: es tu constancia.</>}</p>
+          ? <p className="mensaje mensaje-info" data-baja-pendiente><Icono nombre="salir" /> Pediste la baja: el gimnasio te va a contactar.{baja.codigo && <> Tu código de baja: <strong data-codigo-baja>{baja.codigo}</strong>. Guardalo: es tu constancia.</>}</p>
           : <PedirBaja socioId={s.socio_id} ofrecePausa={!!yo.plan} />}
       </div>
     );

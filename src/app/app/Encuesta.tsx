@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { responderEncuesta } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** COM-10: una sola pregunta, del 0 al 10. Los que recomiendan (9 y 10) ven la reseña y la invitación a traer a un amigo. */
 export function Encuesta({ socioId }: { socioId: string }) {
@@ -11,13 +12,13 @@ export function Encuesta({ socioId }: { socioId: string }) {
   if (r) {
     return (
       <section className="tarjeta p-5 space-y-3" data-encuesta="respondida">
-        <p className="titulo text-xl">🙏 ¡Gracias!</p>
+        <p className="titulo text-xl">¡Gracias!</p>
         {r.promotor ? (
           <>
             <p className="texto-suave">Nos alegra un montón. ¿Nos ayudás a que más gente nos conozca?</p>
             <div className="flex flex-wrap gap-2">
-              {r.link_resena && <a href={r.link_resena} target="_blank" rel="noopener noreferrer" className="boton boton-principal">⭐ Dejar una reseña en Google</a>}
-              <a href="#referir" className="boton">🤝 Invitar a un amigo</a>
+              {r.link_resena && <a href={r.link_resena} target="_blank" rel="noopener noreferrer" className="boton boton-principal"><Icono nombre="estrella" /> Dejar una reseña en Google</a>}
+              <a href="#referir" className="boton"><Icono nombre="usuarios" /> Invitar a un amigo</a>
             </div>
           </>
         ) : <p className="texto-suave">Lo vamos a tener en cuenta. Si querés contarnos más, escribile a recepción.</p>}
@@ -26,7 +27,7 @@ export function Encuesta({ socioId }: { socioId: string }) {
   }
   return (
     <section className="tarjeta p-5 space-y-3" data-encuesta="pendiente">
-      <p className="titulo text-xl">⭐ Una sola pregunta</p>
+      <p className="titulo text-xl"><Icono nombre="estrella" /> Una sola pregunta</p>
       <p className="texto-suave">Del 0 al 10, ¿cuánto nos recomendarías a un amigo?</p>
       <div className="grid grid-cols-6 sm:grid-cols-11 gap-1.5">
         {Array.from({ length: 11 }, (_, n) => (

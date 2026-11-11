@@ -3,13 +3,14 @@
 // y le aparece a BRIK en el super admin.
 import { useActionState } from "react";
 import { pedirDemo, type EstadoDemo } from "./acciones-plataforma";
+import { Icono } from "@/components/ui/Icono";
 
 export function FormDemo() {
   const [estado, accion, enviando] = useActionState<EstadoDemo, FormData>(pedirDemo, {});
   if (estado.ok) {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-demo-listo>
-        <p className="titulo text-2xl">🙌 ¡Listo, {estado.nombre}!</p>
+        <p className="titulo text-2xl"><Icono nombre="persona" /> ¡Listo, {estado.nombre}!</p>
         <p className="texto-suave text-lg">Recibimos tu pedido. Te escribimos para mostrarte Base con los datos de tu gimnasio.</p>
       </div>
     );
@@ -26,8 +27,8 @@ export function FormDemo() {
         <textarea name="mensaje" rows={3} maxLength={500} className="campo" defaultValue={estado.datos?.mensaje} /></label>
       {/* Para robots: una persona no ve este campo y no lo llena. */}
       <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-      {estado.error && <p role="alert" className="mensaje mensaje-error">⚠️ {estado.error}</p>}
-      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "🙋 Quiero una demo"}</button>
+      {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
+      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "Quiero una demo"}</button>
       <p className="text-sm texto-tenue">Usamos estos datos solo para contestarte sobre la demo.</p>
     </form>
   );

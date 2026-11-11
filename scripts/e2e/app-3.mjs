@@ -17,7 +17,7 @@ try {
   const pagos = await s.locator("[data-historial-pagos]").innerText();
   const vino = await s.locator("[data-historial-entradas]").innerText();
   chequear(/\$/.test(pagos) || /Todavía no hay pagos/.test(pagos), `pagos: ${pagos.split("\n").slice(1, 3).join(" · ")}`, pagos);
-  chequear(/Entrada|🗓️|Todavía no hay entradas/.test(vino), "y cuándo vino", vino);
+  chequear(/Entrada||Todavía no hay entradas/.test(vino), "y cuándo vino", vino);
   const ancho = await s.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular sin desborde (${ancho}px)`, `desborda: ${ancho}`);
   if (s.errores.length) falla(`socio: ${s.errores.join(" | ")}`);

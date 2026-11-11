@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { archivarRutina, guardarRutina, type ItemRutina } from "../acciones";
 import { nombreGrupo, type Ejercicio } from "../tipos";
+import { Icono } from "@/components/ui/Icono";
 
 type Item = ItemRutina & { clave: number };
 let siguiente = 1;
@@ -51,19 +52,19 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
             })}</ul>
             <label className="block"><span className="sr-only">Sumar ejercicio al día {dia}</span>
               <select className="campo" value="" onChange={(ev) => { if (ev.target.value) sumar(dia, ev.target.value); }} aria-label={`Sumar ejercicio al día ${dia}`}>
-                <option value="">➕ Sumar ejercicio…</option>
+                <option value=""><Icono nombre="mas" /> Sumar ejercicio…</option>
                 {activos.map((e) => <option key={e.id} value={e.id}>{e.nombre} · {nombreGrupo(e.grupo)}</option>)}
               </select></label>
           </section>
         );
       })}
-      {dias < 7 && <button type="button" className="boton" onClick={() => setDias(dias + 1)}>➕ Sumar día {dias + 1}</button>}
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {dias < 7 && <button type="button" className="boton" onClick={() => setDias(dias + 1)}><Icono nombre="mas" /> Sumar día {dias + 1}</button>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
       <div className="flex flex-wrap gap-2">
         <button type="button" className="boton boton-principal" disabled={ocupado || items.length === 0 || nombre.trim().length < 2} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar rutina"}</button>
         <Link href="/panel/rutinas" className="boton">Cancelar</Link>
         {id && <button type="button" className="boton texto-suave ml-auto" disabled={ocupado}
-          onClick={() => empezar(async () => { const r = await archivarRutina(id); if (r.error) setError(r.error); else router.push("/panel/rutinas"); })}>🗄️ Archivar</button>}
+          onClick={() => empezar(async () => { const r = await archivarRutina(id); if (r.error) setError(r.error); else router.push("/panel/rutinas"); })}>Archivar</button>}
       </div>
     </div>
   );

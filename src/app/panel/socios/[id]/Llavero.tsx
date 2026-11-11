@@ -2,6 +2,7 @@
 // Llavero o tarjeta del socio (ENT-7): se pasa por el lector (escribe el código y Enter) o se tipea.
 import { useState, useTransition } from "react";
 import { asignarLlavero, quitarLlavero } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type DatosLlavero = { usa: boolean; llavero: string | null };
 
@@ -15,7 +16,7 @@ export function Llavero({ socioId, datos }: { socioId: string; datos: DatosLlave
   return (
     <div className="space-y-2" data-llavero={datos.llavero ?? ""}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="pildora">{datos.llavero ? `🔑 Llavero ${datos.llavero}` : "🔑 Sin llavero"}</span>
+        <span className="pildora">{datos.llavero ? `Llavero ${datos.llavero}` : "Sin llavero"}</span>
         {!abierto && <button type="button" className="text-sm texto-suave underline" onClick={() => setAbierto(true)}>{datos.llavero ? "Cambiar" : "Asignar llavero"}</button>}
         {!abierto && datos.llavero && <button type="button" className="text-sm texto-tenue underline" disabled={ocupado} onClick={() => correr(() => quitarLlavero(socioId))}>Quitar</button>}
       </div>
@@ -26,7 +27,7 @@ export function Llavero({ socioId, datos }: { socioId: string; datos: DatosLlave
           <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

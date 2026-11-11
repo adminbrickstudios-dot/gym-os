@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Icono } from "@/components/ui/Icono";
 
 type EventoInstalar = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
@@ -25,7 +26,7 @@ export function Instalar({ gimnasio = "tu gimnasio" }: { gimnasio?: string }) {
   const cerrar = () => { try { localStorage.setItem("gymos_instalar_cerrado", "1"); } catch { /* nada */ } setModo("no"); };
   return (
     <section className="tarjeta p-4 flex flex-wrap items-center gap-3" data-instalar={modo}>
-      <span className="text-2xl" aria-hidden>📲</span>
+      <span className="text-2xl" aria-hidden><Icono nombre="celular" /></span>
       <p className="flex-1 min-w-48">
         {modo === "iphone"
           ? <>Tené a {gimnasio} en tu pantalla de inicio: tocá <b>Compartir</b> y después <b>Agregar a inicio</b>.</>

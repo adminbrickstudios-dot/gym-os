@@ -12,18 +12,18 @@ export function datosEstructurados(l: LandingPublicada, agenda: Agenda | null, o
     const tel = s.telefono ?? l.contacto.whatsapp;
     return Object.fromEntries(Object.entries({
       "@context": "https://schema.org",
-      "@type": "HealthClub",
+      "@type": ["ExerciseGym", "HealthClub"],   // WEB-05: ExerciseGym (subtipo de lugar de actividad física) y el HealthClub del pedido
       "@id": `${origen}/#sede-${i + 1}`,
       name: sedes.length > 1 ? `${l.marca.nombre} · ${s.nombre}` : l.marca.nombre,
       description: l.portada.bajada ?? l.portada.titulo,
       url: `${origen}/`,
       logo: logo ?? undefined,
-      image: logo ?? undefined,
+      image: logo ?? `${origen}/og`,   // Google pide imagen en los negocios locales: sin logo, la de la página (la misma de las redes)
       telephone: tel ?? undefined,
       email: l.contacto.email ?? undefined,
       address: s.direccion ? { "@type": "PostalAddress", streetAddress: s.direccion, addressCountry: "AR" } : undefined,
       hasMap: s.mapa_url ?? undefined,
-      sameAs: l.contacto.instagram ? [`https://instagram.com/${l.contacto.instagram}`] : undefined,
+      sameAs: l.contacto.instagram ? [`https://instagram.com/${l.contacto.instagram.replace(/^@/, "")}`] : undefined,
       openingHoursSpecification: franjas.length
         ? franjas.map((f) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: DIA_SCHEMA[f.dia], opens: f.abre.slice(0, 5), closes: f.cierra.slice(0, 5) }))
         : undefined,

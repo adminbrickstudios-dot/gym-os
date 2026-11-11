@@ -3,6 +3,7 @@
 // cuando lo encuentra, lo pasa una sola vez. La validación la hace la base.
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
+import { Icono } from "@/components/ui/Icono";
 
 /** `frente`: la cámara de adelante (la tablet mira al socio); si no, la de atrás (la recepción apunta al celular). */
 export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: string) => void; alCerrar: () => void; frente?: boolean }) {
@@ -44,7 +45,7 @@ export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4" role="dialog" aria-label="Leer QR con la cámara" data-camara={estado}>
       <div className="tarjeta p-5 w-full max-w-md space-y-4">
-        <p className="titulo text-2xl">📷 Leer QR</p>
+        <p className="titulo text-2xl"><Icono nombre="camara" /> Leer QR</p>
         {estado === "sin"
           ? <p className="texto-suave">No hay cámara disponible (o no diste permiso). Buscalo por nombre o DNI.</p>
           : <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" />}

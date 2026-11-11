@@ -26,3 +26,17 @@
 **Entorno de Windows**
 - La compu se queda sin memoria con el demo de 5.000 socios y con cadenas largas de e2e: tandas de 20 con base nueva, y la medición grande en Actions (`medir-escala.yml`).
 - El cliente de pedidos de Playwright no resuelve `demo.localhost`: helper `api()` en `scripts/e2e/comun.mjs`.
+
+**Login del dueño recién creado (U0.1, 09/11)**
+- Un alta con el mail de una cuenta que YA existe no pisa su contraseña: la que escribe quien crea no se aplica, y el ingreso dice "incorrectos". Se avisa en el alta y se arregla con "Contraseña nueva". Causa más probable de "mail o contraseña incorrectos" junto con la clave de servicio mal puesta en Vercel (la cuenta nunca se creó; `Invalid API key`).
+- `/g/<slug>/ingresar` no debe rebotar al `/ingresar` genérico: se reescribe conservando el gimnasio (marca y comprobación de pertenencia). Nunca caer a un gimnasio por defecto ni al demo.
+- Un error de ingreso no se esconde bajo "incorrectos": sin confirmar, desactivada, sin gimnasio y demasiados intentos tienen su texto; el código real va al registro del servidor.
+- **Las 7 causas de URG-02, revisadas contra el código y la base local** (`supabase/pruebas/login-dueno-nuevo.test.mjs`, `scripts/e2e/fase-u0-login.mjs`):
+  a) `createUser` ya lleva `email_confirm: true` en todos los caminos (descartada).
+  b) La fila usuario ↔ gimnasio ↔ rol: el alta deja el `equipo` del dueño (activo, sin cuenta) y `vincular_usuario_equipo` lo une a la cuenta; una cuenta sin fila, o con fila de otro gimnasio, no ve este (probado en la base).
+  c) El redirect perdía el gimnasio: se resuelve en el proxy (arreglado por B); el slug que no existe no cae a otro (probado: `gimnasio_por_slug`).
+  d) Otro proyecto de Supabase (vista previa contra producción): no se ve en el código; lo cubre el chequeo de entorno (PLAT-06).
+  e) Mail con mayúsculas o espacios: la búsqueda de la cuenta es insensible (`usuario_por_mail` usa `lower(trim())`, probado con tres escrituras) y el ingreso normaliza. Otra variante: la contraseña que se escribe al crear NO se aplica si el mail ya tenía cuenta (lo de arriba).
+  f) El tope de intentos fallidos avisa "muchos intentos", no "incorrectos".
+  g) La cookie de sesión no cambia con el redirect (mismo host).
+- Regla: una función que crea o busca cuentas normaliza el mail ADENTRO, no en cada pantalla que la llama.

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { formatearPesos } from "@/lib/formato";
 import { guardarModoDevolucion, guardarMotivoBeneficio, guardarTopesBeneficios } from "@/app/panel/socios/moderacion-acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type TopesBeneficios = { max_dias_recepcion: number; max_dias_encargado: number; dias_mes_recepcion: number; dias_mes_encargado: number; alerta_repetidas: number; descuento_max_recepcion: number };
 export type MotivosBeneficio = { id: string; nombre: string; activo: boolean }[];
@@ -59,7 +60,7 @@ export function TopesYMotivos({ gimnasioId, topes, motivos, puedeEditar, devoluc
           </div>
         )}
       </div>
-      {msj && <p role={msj.tipo === "error" ? "alert" : "status"} className={`pildora whitespace-normal ${msj.tipo === "error" ? "pildora-rojo" : ""}`}>{msj.tipo === "error" ? "⚠️" : "✅"} {msj.texto}</p>}
+      {msj && <p role={msj.tipo === "error" ? "alert" : "status"} className={`pildora whitespace-normal ${msj.tipo === "error" ? "pildora-rojo" : ""}`}>{msj.tipo === "error" ? "!" : "✓"} {msj.texto}</p>}
     </div>
   );
 }
@@ -67,7 +68,7 @@ export function TopesYMotivos({ gimnasioId, topes, motivos, puedeEditar, devoluc
 export function Beneficios({ gimnasioId, datos: d, devolucionModo }: { gimnasioId: string; datos: BeneficiosMes; devolucionModo: string }) {
   return (
     <section className="space-y-3" data-beneficios aria-label="Cortesías y descuentos del mes">
-      <h2 className="titulo-grupo">🎁 Cortesías y descuentos de {d.mes}</h2>
+      <h2 className="titulo-grupo"><Icono nombre="regalo" /> Cortesías y descuentos de {d.mes}</h2>
       <div className="grid sm:grid-cols-2 gap-2">
         <div className="tarjeta px-4 py-3"><p className="texto-suave text-sm">Descuentos del mes</p><p className="numero text-2xl" data-descuentos-mes>{formatearPesos(Number(d.descuentos_total))}</p><p className="texto-tenue text-sm">{d.descuentos_cantidad} {d.descuentos_cantidad === 1 ? "línea con descuento" : "líneas con descuento"}</p></div>
         <div className="tarjeta px-4 py-3"><p className="texto-suave text-sm">Cortesías del mes</p><p className="numero text-2xl" data-cortesias-mes>{d.cortesias_dias} {d.cortesias_dias === 1 ? "día" : "días"}</p><p className="texto-tenue text-sm">{d.cortesias_cantidad} {d.cortesias_cantidad === 1 ? "cortesía" : "cortesías"}</p></div>

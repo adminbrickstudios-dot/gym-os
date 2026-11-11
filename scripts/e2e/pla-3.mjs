@@ -35,7 +35,7 @@ try {
   await capturar(d, "pla3-compu-carrito");
   const id = new URL(d.url()).searchParams.get("socio");
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
-  await d.locator('button:has-text("✅ Cobrar")').click();
+  await d.locator('button:has-text("Cobrar")').click();
   await esperarCobro(d);
   ok("cobrada");
   await d.goto(`${G}/panel/vender?socio=${id}`);
@@ -50,7 +50,7 @@ try {
   await fila.locator('button:has-text("Editar")').waitFor({ timeout: 30000 });
   await d.waitForFunction((n) => !document.querySelector(`li[data-plan="${n}"]`)?.textContent?.includes("matrícula"), `Mat${s5}`, { timeout: 15000 }).catch(() => {});
   const tf = await fila.innerText();
-  chequear(!/matrícula/.test(tf), "✏️ Editar con la matrícula vacía: el plan queda sin matrícula", tf.replace(/\n/g, " | "));
+  chequear(!/matrícula/.test(tf), "Editar con la matrícula vacía: el plan queda sin matrícula", tf.replace(/\n/g, " | "));
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

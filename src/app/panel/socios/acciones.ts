@@ -1,6 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { prepararLinkContrasenaSocio } from "@/lib/app/acceso-socio-servidor";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { errorSiHaySalud } from "@/lib/salud";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -10,6 +12,8 @@ export type EstadoForm = {
   error?: string; destino?: string; valores?: Record<string, string>; version?: string;
   /** VD-6: el alta salió bien: el socio, si hay que cobrar ahora y si el plan no se pudo asignar. */
   socioId?: string; cobrar?: boolean; sinPlan?: boolean; nombre?: string;
+  /** F1.2: el alta con mail deja el link para que el socio cree su contraseña (se copia o se manda por WhatsApp). */
+  linkContrasena?: { link: string; texto: string; wa: string | null; conContrasena?: boolean } | null; avisoLink?: string;
 };
 
 const CAMPOS = ["nombre", "apellido", "dni", "telefono", "email", "fecha_nacimiento", "contacto_emergencia_nombre", "contacto_emergencia_telefono", "notas", "responsable_nombre", "responsable_telefono"] as const;
@@ -25,6 +29,10 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   // Alta en un paso (SOC-13): el plan y, si se eligió, ir directo a cobrar.
   const plan = socioId ? "" : String(form.get("plan_id") ?? "");
   const cobrar = !!plan && form.get("despues") === "cobrar";
+  // U2: quien lo da de alta puede escribirle la contraseña (no se manda ningún mail). Se valida antes de guardar nada.
+  const contrasena = socioId ? "" : String(form.get("contrasena_elegida") ?? "").trim();
+  if (contrasena && !datos.email) return { error: "Para ponerle contraseña hace falta su mail.", valores: datos };
+  if (contrasena && contrasena.length < 8) return { error: "La contraseña tiene que tener 8 letras o más.", valores: datos };
   let id: string;
   // VD-34: si otra persona tocó la ficha desde que se abrió, se avisa en vez de pisarla.
   if (socioId) {
@@ -51,9 +59,21 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   }
   // VD-5b/VD-6: con cobro, la pantalla abre la hoja Cobrar en el lugar (el destino a Vender queda de respaldo,
   // si la hoja no está montada). Desde un prospecto se vuelve al alta con el socio ya creado ("listo").
+  // F1.2 (D43): con mail, el socio recibe el link para crear su contraseña. Si falla, el alta ya quedó: se avisa y se sigue.
+  let linkContrasena: EstadoForm["linkContrasena"] = null; let avisoLink: string | undefined;
+  if (!socioId && datos.email) {
+    try {
+      const h = await headers();
+      const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+      const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127.|[^.]+.localhost)/.test(host) ? "http" : "https");
+      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}`, contrasena: contrasena || undefined, gimnasioId: panel.gimnasio.id });
+      const tel = (datos.telefono ?? "").replace(/D/g, "");
+      linkContrasena = { ...r, wa: tel.length >= 8 ? `https://wa.me/${tel}?text=${encodeURIComponent(r.texto)}` : null };
+    } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }
+  }
   const destino = cobrar && conPlan ? `/panel/vender?socio=${id}&cuota=1` : `/panel/socios/${id}${plan && !conPlan ? "?sin_plan=1" : ""}`;
   if (prospecto) redirect(cobrar && conPlan ? `/panel/socios/nuevo?listo=${id}&cobrar=1` : destino);
-  return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim() };
+  return { destino, socioId: id, cobrar: cobrar && conPlan, sinPlan: !!plan && !conPlan, nombre: `${datos.nombre} ${datos.apellido}`.trim(), linkContrasena, avisoLink };
 }
 
 export type PlanParaAlta = {
@@ -183,6 +203,12 @@ export async function guardarFoto(socioId: string, form: FormData): Promise<{ er
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** FA-16: la recepción confirma la foto que subió el socio (deja de estar marcada "foto nueva"). */
+export async function confirmarFotoSubida(socioId: string): Promise<{ error?: string }> {
+  try { await rpc("confirmar_foto_subida", { p_socio_id: socioId }); revalidatePath(`/panel/socios/${socioId}`); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function quitarFoto(socioId: string): Promise<{ error?: string }> {
   try {
     const anterior = await rpc<string | null>("confirmar_foto_socio", { p_socio_id: socioId, p_ruta: null });
@@ -253,4 +279,28 @@ export async function anonimizarSocio(socioId: string, confirmo: string): Promis
     revalidatePath(`/panel/socios/${socioId}`);
     return {};
   } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── FA-9: varios socios a la vez ──
+/** Los de la lista elegida a los que NO se les escribe (marca "no escribirle"): se sacan del envío por WhatsApp. */
+export async function sociosSinMensajes(ids: string[]): Promise<{ ids: string[]; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { ids: await rpc<string[]>("no_escribirles_de", { p_gimnasio_id: panel.gimnasio.id, p_socio_ids: ids }) };
+  } catch (e) { return { ids: [], error: (e as Error).message }; }
+}
+/** Poner una etiqueta (existente o nueva) a todos los elegidos. Si alguno falla, lo dice y no finge que salió todo bien. */
+export async function etiquetarVarios(ids: string[], nombre: string): Promise<{ hechos: number; error?: string }> {
+  const limpio = nombre.trim();
+  if (!limpio) return { hechos: 0, error: "Escribí la etiqueta." };
+  if (ids.length === 0 || ids.length > 600) return { hechos: 0, error: "Elegí entre 1 y 600 socios." };
+  let hechos = 0;
+  try {
+    for (const id of ids) { await rpc("poner_etiqueta", { p_socio_id: id, p_nombre: limpio }); hechos++; }
+  } catch (e) {
+    revalidatePath("/panel/socios");
+    return { hechos, error: `Se la puse a ${hechos} de ${ids.length} y se cortó: ${(e as Error).message}` };
+  }
+  revalidatePath("/panel/socios");
+  return { hechos };
 }

@@ -6,6 +6,7 @@ import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
 import { Equipo, type Miembro } from "./Equipo";
 import { Perfiles, type PerfilesDatos } from "./Perfiles";
 import { PermisosEquipo, type Permisos } from "./Permisos";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Equipo" };
 
@@ -20,11 +21,11 @@ export default async function PaginaEquipo() {
     ]);
     return (
       <>
-        <Encabezado emoji="🧑‍🤝‍🧑" titulo="Equipo" bajada="Quién trabaja en el gimnasio y qué puede hacer cada uno."
+        <Encabezado icono="usuarios" titulo="Equipo" bajada="Quién trabaja en el gimnasio y qué puede hacer cada uno."
           accion={(panel.yo.rol === "dueno" || panel.permisos.encargado_ve_resultado) ? (
             <div className="flex flex-wrap gap-2">
-              <Link href="/panel/equipo/actividad" className="boton" data-link-actividad>📋 Qué hizo cada uno</Link>
-              {!panel.secciones_apagadas.includes("control") && <Link href="/panel/control" className="boton" data-link-control>🛡️ Control</Link>}
+              <Link href="/panel/equipo/actividad" className="boton" data-link-actividad><Icono nombre="lista" /> Qué hizo cada uno</Link>
+              {!panel.secciones_apagadas.includes("control") && <Link href="/panel/control" className="boton" data-link-control><Icono nombre="escudo" /> Control</Link>}
             </div>
           ) : undefined} />
         <div className="space-y-10">

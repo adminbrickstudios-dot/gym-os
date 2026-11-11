@@ -3,11 +3,17 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Aviso } from "@/components/panel/Marco";
+import { rutaGimnasio } from "@/lib/urls";
 import { dominioBase } from "@/lib/dominios";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
 import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
+import { Tablero } from "./Tablero";
+import { Demos, type DemoVencida } from "./Demos";
+import { ErroresPlataforma } from "./ErroresPlataforma";
+import { PlataformaDatos } from "./PlataformaDatos";
+import { DominiosVercelDatos } from "./DominiosVercelDatos";
 import { BotonEntrar } from "./BotonEntrar";
 import { EstadoPlataforma } from "./EstadoPlataforma";
 import { NovedadesDuenos, type NovedadPlataforma } from "./NovedadesDuenos";
@@ -45,6 +51,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let metricas: MetricasPlataforma;
   let ayudas: PedidoAyuda[];
   let pedidosDemo: PedidoDemo[] = [];
+  let demosVencidas: DemoVencida[] = [];
   let contactoPlataforma: ContactoPlataforma = { whatsapp: null, mensaje_demo: "" };
   let novedades: NovedadPlataforma[] = [];
   let abonos: Record<string, EstadoAbono> = {};
@@ -57,9 +64,10 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik"),
       rpc<Record<string, SaludV2>>("admin_salud_v2"), rpc<MetricasPlataforma>("admin_metricas"), rpc<PedidoAyuda[]>("admin_ayudas", { p_pendientes: true })]);
     pedidosDemo = await rpc<PedidoDemo[]>("admin_pedidos_demo", { p_pendientes: true });
+    demosVencidas = await rpc<DemoVencida[]>("admin_demos_vencidas").catch(() => []);
     contactoPlataforma = await rpc<ContactoPlataforma>("contacto_plataforma_publico");
   } catch (e) {
-    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}</Aviso></main>;
+    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}<span className="block mt-2"><Link href="/admin/seguridad" className="underline">Confirmar mi código de dos pasos</Link></span></Aviso></main>;
     throw e;
   }
   const reales = gimnasios.filter((g) => !g.es_demo);
@@ -86,11 +94,22 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       </header>
 
       {error && <Mensaje tipo="error">{error}</Mensaje>}
-      <Ayudas pedidos={ayudas} />
+      <nav className="flex flex-wrap gap-2" aria-label="Super admin">
+        <Link href="/admin/gimnasios" className="boton">Lista de gimnasios</Link>
+        <Link href="/admin/buscar" className="boton">Buscar a una persona</Link>
+        <Link href="/admin/seguridad" className="boton">Seguridad</Link>
+        <Link href="/admin/registro" className="boton">Registro</Link>
+      </nav>
+      <Tablero />
+      <div id="ayudas"><Ayudas pedidos={ayudas} /></div>
       <PedidosDemo pedidos={pedidosDemo} />
       <Metricas m={metricas} />
       <EstadoPlataforma />
-      <AltaGimnasio dominio={dominioBase()} />
+      <div id="alta"><AltaGimnasio dominio={dominioBase()} planes={planesBrik.filter((x) => x.activo).map((x) => ({ id: x.id, nombre: x.nombre }))} /></div>
+      <Demos vencidas={demosVencidas} />
+      <ErroresPlataforma />
+      <PlataformaDatos />
+      <DominiosVercelDatos />
       <NovedadesDuenos novedades={novedades} />
       <PlanesBrik planes={planesBrik} />
       <ContactoPlataformaForm inicial={contactoPlataforma} />
@@ -129,6 +148,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <p className="texto-suave text-sm mt-1">
                     👑 {g.duenos.join(", ") || "Sin dueño"}
                     {g.duenos_sin_cuenta > 0 && <span className="pildora pildora-amarillo ml-2">{g.duenos_sin_cuenta === 1 ? "el dueño no tiene acceso" : `${g.duenos_sin_cuenta} dueños sin acceso`}</span>}
+                    {g.duenos_sin_cuenta > 0 && <Link href={`/admin/${g.gimnasio_id}`} className="pildora pildora-amarillo ml-2" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>}
                   </p>
                   {!g.es_demo && sv(g).motivos.length > 0 && <p className="texto-suave text-sm mt-1" data-motivos>⚑ {sv(g).motivos.join(" · ")}</p>}
                   <p className="texto-tenue text-sm mt-1 break-all">🌐 {g.hosts.join(" · ")}</p>
@@ -148,7 +168,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <div className="flex flex-wrap gap-2">
                 <BotonEntrar gimnasioId={g.gimnasio_id} principal={false} />
                 <Link href={`/admin/${g.gimnasio_id}`} className="boton">⚙️ Equipo, claves y direcciones</Link>
-                <a href={`/g/${g.slug}`} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+                <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
               </div>
             </li>
           ))}

@@ -31,7 +31,7 @@ try {
   const d = await pagina(b, COMPU);
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel/campana`);
-  await d.getByRole("link", { name: /pidió la baja/ }).first().click();
+  await d.getByRole("link", { name: /pidió la baja/ }).filter({ hasText: /Testigo/ }).first().click();
   const banner = d.locator("[data-pedido-baja]");
   await banner.waitFor({ timeout: 60000 });
   chequear((await banner.locator("[data-codigo-baja]").innerText()).trim() === codigo, "la ficha muestra la misma constancia", "el código de la ficha es otro");
@@ -46,7 +46,7 @@ try {
   await elegirPlan(d, 0);
   await d.locator('button:has-text("Solo dar de alta")').click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}/, { timeout: 30000 });
-  await d.locator('button:has-text("👋 Dar de baja")').click();
+  await d.locator('button:has-text("Dar de baja")').click();
   await d.locator('button:has-text("Se mudó")').click();
   const c = d.locator("[data-constancia-baja]");
   await c.waitFor({ timeout: 30000 });

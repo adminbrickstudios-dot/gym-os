@@ -85,11 +85,140 @@ Función de base sola (`explain analyze`, con el rol correcto). Presupuesto: 300
 | Qué | Antes | Después | Cómo |
 |---|---|---|---|
 | `numeros_inicio` (regresión de BASE-4: 4 recorridos de Retención) | 1796 ms | **465 ms** (corrida 42496822825, misma base de 5.000 socios) | migración `20261108050200_numeros_inicio_una_pasada` |
+| **Retención con `cubierto_hasta` (F1.6 / F0.3, carril C, 10/11).** Escala: **5.019 socios, 134.500 ingresos y 200 gimnasios chicos** en Actions (mismo runner, misma base). Los "antes" son la copia de la cuenta vieja (`privado.retencion_referencia`) corrida en esa misma base; migraciones `20261109010100` a `010300` | | | |
+| · Pendientes: `retencion_liviana` filtrada a 3 listas → `retencion_pendientes` (consulta por socio con índices) | 295 ms | **49 ms** | arranca de los socios con `cubierto_hasta > ahora`; sin uniones entre listas grandes |
+| · 3 listas livianas (`numeros_inicio`) → `retencion_listas` | 295 ms | **185 ms** | los socios vencidos no se recorren |
+| · solo `por_vencer` (`vencen_hoy`, `panel_inicio`) → `retencion_listas` | 431 ms | **166 ms** | pide solo esa lista |
+| · Retención completa (`retencion`, `retencion_resumen`, `vencen_pestanas`) | 434 ms | 433 ms | **igual**: lo caro es `via_membresia` por cada vencido (deuda y texto); no se tocó para no mover ningún veredicto |
 | Región de las funciones de Vercel | iad1 (Washington) con Supabase en São Paulo | gru1 | `vercel.json` `{"regions":["gru1"]}` (Mateo confirmó São Paulo) |
 | Vigencia guardada `socios.cubierto_hasta` + índice `(gimnasio_id, cubierto_hasta)` | — | disponible para las listas | BASE-5, migración `20261108050100` |
 
+**Cómo se garantiza que ningún veredicto cambió.** `privado.retencion_referencia` es una copia de la función de antes (solo la usa la prueba). `supabase/pruebas/retencion-cubierto.test.mjs` compara, con 18 momentos fijos (de 45 días antes a 45 días después de HOY, a las 00:00 y a las 19:00), los casos testigo más 16 socios armados a propósito (huecos, coberturas futuras, encimadas, anuladas, bajas, sin pagos, nuevos, que dejaron de venir): `retencion_con` completa y liviana, `retencion_listas` en 8 combinaciones de listas, y `retencion_pendientes` (columnas, filas y orden) contra la de antes. Falla si difiere una sola fila. Además `pendientes_panel` se compara con la cuenta vieja de "vencen hoy". Pasa 7/7.
+
+
+**Las pantallas, medidas con `medir-escala.yml` (corrida 42732049862, 5.019 socios, 134.500 ingresos, 200 gimnasios; el runner varió hasta 1,5×: la misma `retencion` dio 434 ms en otra corrida y 665 ms en esta).** Contra la medición del 08/11 (corrida 42495312345, antes de estas migraciones):
+
+| Función (dueño) | 08/11 | Ahora | Presupuesto |
+|---|---:|---:|---:|
+| `pendientes_panel` | 385,5 ms | **89,6 ms** | 50 (todavía no) |
+| `para_hacer_hoy` | 308,2 ms | **78,0 ms** | 300 ok |
+| `panel_inicio` | 446,3 ms | **238,9 ms** | 300 ok |
+| `vencen_hoy` | 438,9 ms | **233,8 ms** | 300 ok |
+| `numeros_inicio` | 465 ms | 389,0 ms | 300 (todavía no; en runner más lento) |
+| `vencen_pestanas` / `retencion` / `retencion_resumen` | 452,6 / 441,4 / 441,5 ms | 538,3 / 665,2 / 650,8 ms | 300 (sin cambio de código: es el runner y `via_membresia`) |
+| `filtros_socios` | 882 ms | 1.323,9 ms | 300 (no se tocó; ver abajo) |
+
+Ninguna función que se tocó empeoró respecto de producción; las que no se tocaron (`retencion` completa, `filtros_socios`) se ven más lentas solo por el runner. **Quedan sin cumplir:** `pendientes_panel` (90 ms: 49 son la consulta; el resto son las demás cuentas del menú) y `numeros_inicio` (389 ms; usa tres listas más `via` de `numeros` y sus propias cuentas). Siguiente paso posible para `pendientes_panel`: contar `vencen_hoy`/`vencen_pronto` desde las coberturas que terminan hoy, sin recorrer a nadie (no se hizo).
+
+**F0.3, segunda pasada (corrida 42739155563, misma escala: 5.000 socios, 200 gimnasios).** `retencion_pendientes` ya no busca por socio quién tiene una cuota adelantada ni quién vino hace poco (una pasada cada una) y mira congelado/suspendido solo para quien cayó en una lista. Misma prueba viejo-vs-nuevo (7/7).
+
+| Función | 08/11 | 1.ª pasada | 2.ª pasada | Presupuesto |
+|---|---:|---:|---:|---:|
+| `pendientes_panel` (dueño) | 385,5 ms | 89,6 ms | **52,9 ms** | 50 (por 3 ms) |
+| `pendientes_panel` (recepción) | 306,6 ms | 75,6 ms | **45,3 ms** | 50 ok |
+| `numeros_inicio` | 465 ms | 389,0 ms | **208,6 ms** | 300 ok |
+| `panel_inicio` | 446,3 ms | 238,9 ms | **135,3 ms** | 300 ok |
+| `vencen_hoy` | 438,9 ms | 233,8 ms | **134,6 ms** | 300 ok |
+| `para_hacer_hoy` | 308,2 ms | 78,0 ms | **44,7 ms** | 300 ok |
+| `retencion` (completa, sin tocar) | 441,4 ms | 665,2 ms | 316,8 ms | 300 (varía con el runner) |
+
 ## Pendiente de BASE-1 (anotado)
-- Usar `cubierto_hasta` dentro de `privado.retencion` (y de ahí `vencen_hoy`, `retencion`, `panel_inicio`, `pendientes_panel`, `para_hacer_hoy`) para no calcular el veredicto completo de los vencidos: bajar de ~440 a menos de 300 ms.
-- `filtros_socios` (880 ms): contar con el índice en vez de recorrer.
+- `retencion`, `retencion_resumen` y `vencen_pestanas` (completas): el costo es `via_membresia` por cada vencido; bajarlo exige cambiar cómo se calcula la deuda, y no se tocó en esta pasada para no arriesgar ningún veredicto.
+- `filtros_socios` (880 ms con 5.000; ~2 s en la compu local con 1.500): el grupo de cada socio sale del veredicto completo (`calcular_acceso`: membresía, pases, packs, pausas); `cubierto_hasta` solo no alcanza para probar el resultado. Queda para una pasada propia con su prueba viejo-vs-nuevo.
 - Medir las pantallas con la app compilada y 5.000 socios.
 - No hace falta tocar: RLS con `(select auth.uid())`, índices de búsqueda y paginación (la búsqueda ya tarda menos de 40 ms).
+
+## Hallazgo 2 (09/11): por qué se siente lento en producción, aunque la base sea rápida
+
+En la base, cada función tarda poco: la puerta, menos de 40 ms con 5.000
+socios. Lo lento está **alrededor**: cada pantalla del panel hace **6 a 8 viajes
+a Supabase, uno detrás del otro**, antes de mostrar nada (leído en el código):
+
+1. `proxy.ts`: `getClaims()`. Si el proyecto de Supabase todavía firma con la
+   clave vieja (simétrica, HS256), la librería cae a `getUser()`: es un viaje a
+   Auth en **cada pedido**. Más `gimnasio_por_host`, que está en caché solo
+   dentro de la misma función de Vercel.
+2. `contextoPanel()`: `getClaims()` otra vez, después `panel_gimnasio`, después
+   `ver_mensajes_equipo` (recepción) y después `config_fichaje`. Son **tres
+   viajes en fila**.
+3. `panel/layout.tsx`: `estado_abono_panel` y las ayudas (en paralelo), y
+   después `config_entrada` y `formas_de_entrada` (otro viaje).
+4. La pantalla: sus propias funciones.
+5. El menú: `pendientes_panel`, que tarda **300 a 385 ms** con 5.000 socios
+   (presupuesto: 50 ms), en cada pantalla.
+
+Además, Supabase Free corre en la máquina más chica y compartida, y Vercel
+Hobby arranca en frío las funciones que no se usaron hace un rato.
+
+Viajes de 40 a 80 ms, por 7 en fila, más los arranques en frío y el menú: uno
+a dos segundos por toque.
+
+## Plan de la fase 0 (`RECTA-FINAL.md` F0): que tocar y ver sea instantáneo
+
+Objetivos (Mateo, 09/11: "rapidísimo, toco y al toque ya está, por debajo del
+promedio"), **medidos en producción**, en celular con 4G:
+- Primer cambio en pantalla al tocar: **menos de 50 ms**, siempre (estado
+  apretado, esqueleto o cambio optimista).
+- Datos de una pantalla del panel: **menos de 500 ms p75** y menos de 800 ms
+  p95.
+- Registrar un ingreso, de Enter al aviso: **menos de 300 ms p75**.
+- Buscar un socio mientras se tipea: **menos de 150 ms** por tecla.
+- Volver a una pantalla ya vista: **instantáneo**, sin viajes.
+- Página del gimnasio y app del socio: LCP **menos de 1,5 s** en 4G y
+  Lighthouse celular **95 o más**.
+- Nada salta al cargar: CLS menor a 0,05.
+
+1. **Medir de verdad, primero.**
+   - `Server-Timing` en cada respuesta (proxy, auth y cada RPC con su nombre),
+     y un log por pedido en Vercel.
+   - Un workflow de Actions `medir-produccion.yml`: Playwright contra
+     producción, con los usuarios del demo. Toca cada pantalla clave 10 veces y
+     deja la tabla en el resumen de la corrida. Los runners de GitHub sí llegan
+     a vercel.app.
+   - Los usuarios del demo en producción se crean con el workflow
+     `usuarios-demo`, con la contraseña como secreto `DEMO_CONTRASENA`, que
+     nunca se imprime. Si el secreto no está, ⛔ con el paso para Mateo.
+2. **Un solo viaje para el contexto.**
+   - Una función `contexto_pantalla(p_gimnasio_id)` que devuelve de una vez:
+     - lo que hoy da `panel_gimnasio`,
+     - mensajes y fichaje,
+     - abono,
+     - config de entrada y formas,
+     - las ayudas vistas.
+   - Lo que no cambia (marca, secciones, config) va en caché por gimnasio, con
+     etiqueta, y se invalida al guardar la configuración.
+   - El proxy deja de llamar a Auth si no hace falta.
+3. **El menú no frena la pantalla.**
+   - `pendientes_panel` llega después de pintar (Suspense o pedido del lado del
+     cliente) y baja a menos de 50 ms con `cubierto_hasta` y conteos con
+     índice.
+4. **Navegación del cliente.**
+   - `staleTimes` (dinámico 30 s) para que volver sea instantáneo.
+   - `prefetch` en los links del menú y de Inicio.
+   - `useOptimistic` en las acciones de todos los días: ingreso, cobrar,
+     asistencia, tareas, reservas.
+5. **Claves de Supabase.**
+   - Si el proyecto firma con la clave vieja: pasar a claves asimétricas
+     (Supabase → Settings → JWT Keys → migrar).
+   - Así `getClaims()` verifica sin viajar a Auth.
+   - Lo hace **Mateo**, desde el panel de Supabase; el agente deja los pasos
+     exactos. Puede cerrar las sesiones abiertas una vez.
+6. **Lo demás que suma**, cada cosa medida antes y después:
+   - Imágenes con `next/image`, tamaño justo y AVIF/WebP.
+   - Fuentes con `next/font` y sin bloquear.
+   - JS por ruta lo más chico posible: lo pesado con carga diferida y
+     componentes de servidor.
+   - Búsqueda con `pg_trgm` y debounce corto.
+   - Realtime solo donde hace falta.
+   - Ningún re-render que se note.
+   - Índices que falten según `EXPLAIN`.
+7. **Planes** (D51, los paga Mateo):
+   - Supabase Pro trae una máquina más grande que la de Free.
+   - En Vercel, revisar que esté prendido Fluid Compute, que reduce los
+     arranques en frío.
+   - El agente mide con y sin, si Mateo los activa, y anota la diferencia.
+
+**LISTO SI:** la tabla de `medir-produccion.yml` muestra, antes y después, cada
+objetivo de arriba cumplido en producción.
+Volver a una pantalla vista no hace ningún viaje. Con la red lenta simulada,
+siempre hay respuesta en menos de 100 ms.

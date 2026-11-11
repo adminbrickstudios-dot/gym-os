@@ -4,6 +4,7 @@ import { Vacio } from "@/components/ui/Vacio";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { AltaMaquina, TarjetaMaquina, type DatosMaquinas } from "./Maquinas";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Máquinas" };
 
@@ -19,17 +20,17 @@ export default async function Maquinas() {
     const variasSedes = r.sedes.length > 1;
     return (
       <div data-maquinas>
-        <Encabezado emoji="🛠️" titulo="Máquinas"
+        <Encabezado icono="ajustes" titulo="Máquinas"
           bajada={r.puede_gestionar ? "Marcá lo que está fuera de servicio, asigná quién la arregla y cerrá la falla cuando vuelve. Todo queda en el historial." : "Si una máquina está rota, marcala: el encargado ve el aviso y la arregla."} />
         <div className="space-y-6 max-w-3xl">
           {fuera.length > 0 && (
             <p className="mensaje mensaje-aviso" data-fuera-de-servicio={fuera.length}>
-              <span aria-hidden>🟡</span> <span>Fuera de servicio hoy: {fuera.map((m) => m.nombre).join(", ")}</span>
+              <span aria-hidden><Icono nombre="punto-amarillo" /></span> <span>Fuera de servicio hoy: {fuera.map((m) => m.nombre).join(", ")}</span>
             </p>
           )}
           {r.puede_gestionar && <AltaMaquina sedes={r.sedes} />}
           {activas.length === 0 ? (
-            <Vacio emoji="🏋️" titulo="Todavía no hay máquinas cargadas">
+            <Vacio icono="pesa" titulo="Todavía no hay máquinas cargadas">
               {r.puede_gestionar ? "Cargá las máquinas del gimnasio (la prensa, la cinta, el remo…) y desde acá se marca cuál está rota." : "El dueño o el encargado tienen que cargar las máquinas."}
             </Vacio>
           ) : (

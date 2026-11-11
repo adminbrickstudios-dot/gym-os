@@ -26,7 +26,7 @@ export default async function PaginaAumento() {
     const primeroDelMes = sig.toISOString().slice(0, 10);
     return (
       <>
-        <Encabezado emoji="📈" titulo="Aumento de precios" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
+        <Encabezado icono="tendencia" titulo="Aumento de precios" volver={{ href: "/panel/planes", texto: "Planes y precios" }} volverAlOrigen
           bajada="Varios planes a la vez, desde un día con aviso previo. Lo ya cobrado no cambia; hasta ese día se cobra el precio de hoy." />
         <Aumento planes={planes} hoy={hoy} sugerido={primeroDelMes} zona={zona} gimnasio={panel.gimnasio.nombre}
           avisoDias={config.aviso_dias} esDueno={panel.yo.rol === "dueno"} hechos={hechos} />

@@ -6,6 +6,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Vacio } from "@/components/ui/Vacio";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Clases" };
 type Clase = { clase_id: string; actividad: string; emoji: string | null; color: string | null; inicio: string; fin: string; profe: string | null;
@@ -33,11 +34,11 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
     const ahora = Date.now();
     return (
       <>
-        <Encabezado emoji="🗓️" titulo="Clases" bajada={panel.modo_clases === "reserva" ? "Cupos, reservas y lista de espera. Tocá una clase para tomar presente." : "Tocá una clase para tomar presente."}
+        <Encabezado icono="calendario" titulo="Clases" bajada={panel.modo_clases === "reserva" ? "Cupos, reservas y lista de espera. Tocá una clase para tomar presente." : "Tocá una clase para tomar presente."}
           accion={<span className="flex flex-wrap gap-2">
-            <Link href="/panel/clases/grilla" className="boton">{["dueno", "encargado"].includes(panel.yo.rol) ? "🧩 Armar la grilla" : "🧩 Ver la grilla"}</Link>
-            <Link href="/panel/clases/tv" className="boton" data-ir-tv>📺 TV de la sala</Link>
-            <Link href="/panel/grados" className="boton" data-ir-grados>🥋 Grados</Link>
+            <Link href="/panel/clases/grilla" className="boton">{["dueno", "encargado"].includes(panel.yo.rol) ? "Armar la grilla" : "Ver la grilla"}</Link>
+            <Link href="/panel/clases/tv" className="boton" data-ir-tv><Icono nombre="pantalla" /> TV de la sala</Link>
+            <Link href="/panel/grados" className="boton" data-ir-grados><Icono nombre="pesa" /> Grados</Link>
           </span>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/clases" />}
         <nav aria-label="Día" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
@@ -46,7 +47,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               className={`boton !min-h-12 whitespace-nowrap first-letter:uppercase ${d === dia ? "!border-[var(--acento)]" : "opacity-75"}`}>{nombreDia(d, i)}</Link>
           ))}
         </nav>
-        {clases.length === 0 ? <Vacio emoji="🗓️" titulo="No hay clases este día">Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
+        {clases.length === 0 ? <Vacio icono="calendario" titulo="No hay clases este día">Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
           <ul className="space-y-2">
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
@@ -57,7 +58,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               const contenido = (
                 <>
                     <span className="numero text-3xl w-20">{hora(c.inicio)}</span>
-                    <span className="icono" aria-hidden>{c.emoji ?? "🗓️"}</span>
+                    <span className="icono" aria-hidden><Icono nombre={c.emoji ?? "calendario"} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg truncate">{c.actividad}</span>
                       <span className="block texto-suave truncate">{c.cancelada ? `Cancelada · ${c.cancelada_motivo ?? ""}` : c.profe ?? "Sin profe asignado"}</span>

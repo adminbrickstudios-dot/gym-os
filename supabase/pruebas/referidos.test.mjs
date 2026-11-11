@@ -22,6 +22,7 @@ after(async () => t && t.cerrar());
 const link = (u) => t.comoUsuario(u, async () => (await t.q(`select public.mi_link_referido($1) l`, [socio]))[0].l);
 
 test("sin la página recibiendo pedidos no hay link; publicada, el código es fijo", async () => {
+  await t.q(`update public.landing_gimnasio set publicada = false where gimnasio_id = $1`, [t.g]);   // U4: nace publicada; acá se prueba oculta
   assert.equal(await link(uSocio), null);
   await t.q(`update public.landing_gimnasio set publicada = true where gimnasio_id = $1`, [t.g]);
   // comoUsuario vuelve atrás lo que hizo: el código se guarda desde el servidor en esta prueba.

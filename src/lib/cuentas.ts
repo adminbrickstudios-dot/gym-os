@@ -1,6 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { clienteServicio } from "@/lib/supabase/servicio";
+import { traducirErrorSupabase } from "@/lib/admin/errores-supabase";
 
 // Cuentas del equipo con la clave de servicio. Quien llama YA validó el
 // permiso en la base (persona_para_dar_acceso / cuenta_para_nueva_clave /
@@ -27,7 +28,16 @@ export const mailValido = (m: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);
  * Vincula una persona del equipo a la cuenta de ese mail; si no existe, la
  * crea con una contraseña provisoria y la devuelve para mostrarla UNA vez.
  */
-export async function darAcceso(equipoId: string, email: string, nombre: string, elegida?: string): Promise<{ contrasena?: string }> {
+/** yaExistia: ese mail ya tenía cuenta (no se toca su contraseña). contrasenaNoAplicada: se había escrito una contraseña y NO se aplicó por eso. */
+export type ResultadoAcceso = { contrasena?: string; yaExistia: boolean; contrasenaNoAplicada: boolean };
+
+export async function darAcceso(equipoId: string, email: string, nombre: string, elegida?: string): Promise<ResultadoAcceso> {
+  // U1: un error de la clave de servicio nunca sale como "Invalid API key": sale en palabras y con qué hacer.
+  try { return await darAccesoSinTraducir(equipoId, email, nombre, elegida); }
+  catch (e) { throw new Error(traducirErrorSupabase((e as Error).message)); }
+}
+
+async function darAccesoSinTraducir(equipoId: string, email: string, nombre: string, elegida?: string): Promise<ResultadoAcceso> {
   const servicio = clienteServicio();
   const { data: existente, error: errBusca } = await servicio.rpc("usuario_por_mail", { p_email: email });
   if (errBusca) throw new Error(`No se pudo buscar la cuenta: ${errBusca.message}`);
@@ -41,13 +51,15 @@ export async function darAcceso(equipoId: string, email: string, nombre: string,
   }
   const { error: errVincula } = await servicio.rpc("vincular_usuario_equipo", { p_equipo_id: equipoId, p_usuario_id: usuarioId });
   if (errVincula) throw new Error(`No se pudo vincular la cuenta: ${errVincula.message}`);
-  return { contrasena };
+  return { contrasena, yaExistia: !!existente, contrasenaNoAplicada: !!existente && !!elegida };
 }
 
 /** Pone una contraseña provisoria nueva y la devuelve para mostrarla una vez. */
 export async function nuevaContrasena(usuarioId: string, elegida?: string): Promise<string> {
   const contrasena = elegida ?? contrasenaProvisoria();
-  const { data, error } = await clienteServicio().auth.admin.updateUserById(usuarioId, { password: contrasena });
-  if (error || !data.user) throw new Error(`No se pudo cambiar la contraseña: ${error?.message ?? "la cuenta no existe"}`);
+  try {
+    const { data, error } = await clienteServicio().auth.admin.updateUserById(usuarioId, { password: contrasena });
+    if (error || !data.user) throw new Error(`No se pudo cambiar la contraseña: ${error?.message ?? "la cuenta no existe"}`);
+  } catch (e) { throw new Error(traducirErrorSupabase((e as Error).message)); }
   return contrasena;
 }

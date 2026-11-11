@@ -1,0 +1,43 @@
+# F0.1 · Medir la velocidad en PRODUCCIÓN (demo publicado). A mano: Actions → Medir producción → Run workflow.
+# Playwright desde un runner de GitHub contra vercel.app, con los usuarios del demo (secreto DEMO_CONTRASENA,
+# nunca se imprime). La tabla va al resumen de la corrida y se sube como artefacto: es el antes / después.
+name: Medir producción
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Dirección de producción"
+        default: "https://gym-os-pied.vercel.app"
+      repeticiones:
+        description: "Repeticiones por pantalla"
+        default: "10"
+      etiqueta:
+        description: "Nombre de la medición (antes / despues / con-pro)"
+        default: "medicion"
+
+jobs:
+  medir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Medir
+        env:
+          BASE_URL: ${{ inputs.url }}
+          DEMO_CONTRASENA: ${{ secrets.DEMO_CONTRASENA }}
+        run: |
+          if [ -z "$DEMO_CONTRASENA" ]; then echo "::error::Falta el secreto DEMO_CONTRASENA (Settings, Secrets and variables, Actions). Es la contraseña con la que se corrió usuarios-demo."; exit 1; fi
+          echo "::add-mask::$DEMO_CONTRASENA"
+          node scripts/medir/produccion.mjs --reps "${{ inputs.repeticiones }}" --md medicion.md
+          { echo "## ${{ inputs.etiqueta }}"; cat medicion.md; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: medicion-${{ inputs.etiqueta }}
+          path: medicion.md

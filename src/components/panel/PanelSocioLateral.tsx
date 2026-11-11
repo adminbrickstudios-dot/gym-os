@@ -8,6 +8,8 @@ import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { formatearPesos } from "@/lib/formato";
 import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
+import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
+import { Icono } from "@/components/ui/Icono";
 
 /** Quien quiera abrir el panel lateral de un socio manda este evento (detail: { socioId }). */
 export const EVENTO_ABRIR_PANEL_SOCIO = "gymos:abrir-panel-socio";
@@ -60,7 +62,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
           <h2 className="titular text-2xl flex-1 min-w-0 break-words">{ficha ? `${ficha.socio.nombre} ${ficha.socio.apellido}` : "Cargando…"}</h2>
           <button ref={cerrarBtn} type="button" onClick={() => setSocioId(null)} aria-label="Cerrar" className="size-11 rounded-lg texto-suave active:opacity-60">✕</button>
         </div>
-        {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
         {ficha && a && (
           <>
             <p className="texto-suave" data-panel-socio-dato>#{ficha.socio.numero}{ficha.socio.dni ? ` · DNI ${ficha.socio.dni}` : ""}</p>
@@ -78,8 +80,11 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
             )}
             {puedeCobrar && !vigente && (
               <button type="button" onClick={cobrar} data-panel-socio-cobrar className="boton boton-principal w-full !min-h-14 text-xl">
-                💵 COBRAR AHORA{debe ? ` ${formatearPesos(debe)}` : ""}
+                <Icono nombre="plata" /> COBRAR AHORA{debe ? ` ${formatearPesos(debe)}` : ""}
               </button>
+            )}
+            {puedeCobrar && !vigente && (
+              <button type="button" data-panel-socio-dejar-pasar className="boton w-full" onClick={() => { const id = socioId; setSocioId(null); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_SOCIO, { detail: { socio_id: id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`, color: a.color, texto: a.texto, puede: a.puede, dado_de_baja: false } })); }}>Dejar pasar igual…</button>
             )}
             <section aria-label="Último pago">
               <h3 className="titulo text-lg">Último pago</h3>

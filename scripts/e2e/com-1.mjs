@@ -15,7 +15,7 @@ try {
   await d.locator("main h1").waitFor({ timeout: 60000 });
   const lista = d.locator("[data-riesgo]");
   if (!(await aparece(lista, 15000))) {
-    chequear(await aparece(d.getByText("Nadie en riesgo"), 5000), "nadie en riesgo en el demo: “🎉 Nadie en riesgo”", "la lista En riesgo no aparece");
+    chequear(await aparece(d.getByText("Nadie en riesgo"), 5000), "nadie en riesgo en el demo: “Nadie en riesgo”", "la lista En riesgo no aparece");
   } else {
     const n = Number(await lista.getAttribute("data-riesgo"));
     const fila = lista.locator("li").first();

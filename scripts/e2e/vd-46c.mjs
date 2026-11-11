@@ -27,7 +27,7 @@ try {
   await r.locator("[data-cortesia-abrir]").click();
   const opciones = await r.locator('select[aria-label="Días de cortesía"] option').count();
   chequear(opciones === 1, "la recepción solo puede dar 1 día (tope bajo)", `ve ${opciones} opciones de días`);
-  const boton = r.locator('button:has-text("🎁 Dar la cortesía")');
+  const boton = r.locator('button:has-text("Dar la cortesía")');
   chequear(await boton.isDisabled(), "sin motivo no se puede dar", "se puede dar sin motivo");
   await r.locator('select[aria-label="Motivo de la cortesía"]').selectOption({ index: 1 });
   await boton.click();
@@ -38,7 +38,7 @@ try {
   // Vender: el motivo del descuento es una lista.
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-  await d.locator('button:has-text("🏷️ Descuento")').first().click();
+  await d.locator('button:has-text("Descuento")').first().click();
   const sel = d.locator("select[data-motivo-descuento]");
   await sel.waitFor({ timeout: 30000 });
   await d.waitForFunction(() => document.querySelectorAll("select[data-motivo-descuento] option").length > 2, null, { timeout: 30000 });

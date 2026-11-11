@@ -5,9 +5,11 @@ export type ConfigEntrada = {
   anotar_solo_en_verde: boolean;
   /** Segundos hasta que la ventana se cierra sola después de anotar; 0 = no se cierra sola. */
   cerrar_sola_seg: 0 | 3 | 4 | 6;
+  /** BASE-3 (D40): cómo se muestra lo que anota la recepción: aviso en la esquina (con panel lateral) o la ventana grande de siempre. */
+  resultado_entrada: "aviso" | "ventana";
 };
 
-export const CONFIG_ENTRADA_POR_DEFECTO: ConfigEntrada = { abrir_al_tipear: true, barra_fija: false, anotar_solo_en_verde: false, cerrar_sola_seg: 4 };
+export const CONFIG_ENTRADA_POR_DEFECTO: ConfigEntrada = { abrir_al_tipear: true, barra_fija: false, anotar_solo_en_verde: false, cerrar_sola_seg: 4, resultado_entrada: "aviso" };
 
 /** Lo que una compu puntual le pisa al gimnasio (solo estos dos; el resto es del gimnasio). */
 export type PisadoEnEstaCompu = { abrir_al_tipear?: boolean; barra_fija?: boolean };

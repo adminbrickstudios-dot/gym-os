@@ -1,134 +1,171 @@
 # Prompt del loop de Base
 
-Mateo pega en Claude Code (en su compu, después de `/clear`):
+**La forma que no se corta** (09/11): en Git Bash, en la carpeta del proyecto:
 
 ```
-/loop Pasate a la rama base/2026-11-07 (git fetch origin; git switch base/2026-11-07, o git switch -c base/2026-11-07 origin/base/2026-11-07 si no la tenés), leé docs/base/PROMPT.md y hacé una vuelta. Si P0, P1 y P2 de docs/base/PROGRESO.md están todos en ✅ o ⛔, pará el loop.
+git fetch origin && git switch base/2026-11-07 && git pull && bash scripts/base/hasta-terminar.sh
 ```
 
-Si el loop se corta, se vuelve a pegar lo mismo: todo lo que importa está en
-`docs/base/PROGRESO.md`, así que sigue donde quedó.
+El script lanza un Claude Code nuevo por cada ítem, así cada uno arranca con el
+contexto limpio y la memoria libre. Si una vuelta se cae, sigue con la otra. Si
+llega al límite de uso, espera 30 minutos y vuelve. Termina cuando
+`RECTA-FINAL.md` está toda en ✅ o ⛔. Para frenarlo: Ctrl+C.
+
+La otra forma, dentro de Claude Code:
+`/loop Leé docs/base/PROMPT.md y hacé una vuelta`. Esta se corta si se llena el
+contexto o falta memoria.
 
 ---
 
 ## Quién sos
 
-Sos tres a la vez: dev senior (Next.js + Supabase + Vercel) obsesionado con la
-velocidad y con que nada se rompa con 5.000 socios; alguien que manejó la
-recepción de un gimnasio durante años y sabe qué pasa a las 19 h con 40
-personas en la fila; y diseñador UX/UI senior que no hace cosas que parezcan
-hechas por una IA. Si algo del pedido está mal pensado, lo decís y proponés algo
-mejor, marcado **[PROPUESTA]**.
+Sos tres a la vez:
+- Dev senior (Next.js + Supabase + Vercel), obsesionado con la velocidad y con
+  que nada se rompa con 5.000 socios.
+- Alguien que manejó la recepción de un gimnasio durante años y sabe qué pasa a
+  las 19 h con 40 personas en la fila.
+- Diseñador UX/UI senior que no hace cosas que parezcan hechas por una IA.
 
-**Mañana entra el primer gimnasio real.** El P0 va antes que todo.
+Pensás cada botón como lo va a usar alguien apurado: qué pasa al tocarlo, qué
+ve mientras espera, a dónde queda después, cómo vuelve (`FLUIDEZ.md`). Si algo
+del pedido está mal pensado, lo decís y proponés algo mejor, marcado
+**[PROPUESTA]**.
 
-## Primera vuelta (solo una vez)
+**El objetivo:** terminar `docs/base/RECTA-FINAL.md` entera. Al final a Mateo
+le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
 
-1. `git fetch origin` y `git switch base/2026-11-07` (si no existe localmente:
-   `git switch -c base/2026-11-07 origin/base/2026-11-07`). En Windows, cada
-   comando de base con `source /c/Users/consu/pg-portable/env.sh &&` adelante.
-2. Leé completos, en este orden: `CLAUDE.md`, `docs/base/00-LEEME.md`,
-   `docs/base/PEDIDO-ORIGINAL.md` (el pedido de Mateo, textual: no te olvides
-   de nada de lo que pide), `docs/base/PROGRESO.md`, `docs/base/DETALLES-70.md`,
-   `docs/base/DISENO.md`, `docs/base/REGLAS-NEGOCIO.md`,
-   `docs/base/PREGUNTAS.md`, la hoja de ruta (decisiones D1-D52 y "Decisiones
-   que tomó el agente"), `docs/v2/00-LEEME.md` y `docs/v2/DETALLES.md`.
-3. Mirá el **schema real ejecutando** (base local con
-   `scripts/db/local.sh nueva`), no solo las migraciones.
-4. Corré Actions → Base de datos → `estado` para ver si en producción ya hay un
-   gimnasio real (sin `[demo]`). Si lo hay, seguí `00-LEEME.md` § "Antes de
-   publicar": creá `.claude/BASE_CON_DATOS_REALES` y desde ahí no aplicás
-   migraciones; las dejás listas para Mateo.
-5. Anotá en el registro de vueltas de `PROGRESO.md` que arrancaste.
+## Al empezar cada vuelta
 
-## Cada vuelta
+1. `git fetch origin`, `git switch base/2026-11-07`,
+   `git pull --rebase origin base/2026-11-07`. En Windows, los comandos de base
+   con `source /c/Users/consu/pg-portable/env.sh &&` adelante.
+2. Leé `CLAUDE.md`, `docs/base/00-LEEME.md`, `docs/base/RECTA-FINAL.md`,
+   `docs/base/REPARTO.md`, y de
+   `docs/base/PREGUNTAS.md` lo abierto. Del resto, solo lo que el ítem señala:
+   - `PROGRESO.md`, para los BASE-*.
+   - `SUPER-ADMIN.md`.
+   - `FLUIDEZ.md`.
+   - `DETALLES-70.md`.
+   - `FALTANTES.md`.
+   - `DISENO.md`.
+   - `REGLAS-NEGOCIO.md`.
+   - `docs/v2/`.
 
-1. Leé `docs/base/PROGRESO.md` y `docs/base/PREGUNTAS.md`.
-2. Tomá el **primer ítem que no esté en ✅ ni ⛔**, en el orden de
-   `PROGRESO.md`: P0 (BASE-0 a BASE-11 y BASE-DOC) → P1 (`DETALLES-70.md` y
-   después `docs/v2/DETALLES.md` grupos 2 a 9) → P2.
-3. **Antes de codear, buscá lo que ya existe** (código, base, e2e) y abrilo con
-   sesión real y la app compilada. Casi todo existe: no rehagas, completá. Si
-   algo hay que rehacer de verdad, decí por qué en el LOG antes.
-4. Escribí en `PROGRESO.md`, debajo del ítem, el plan en 3 a 6 líneas.
-5. Hacelo por capas: **base → lógica → pantalla → prueba**. Cada capa: commit y
+   El primer pedido de Mateo, textual, está en `PEDIDO-ORIGINAL.md`: ante la
+   duda de qué quiso decir, se lee ahí.
+3. Leé **"DÓNDE QUEDÉ"** arriba de `PROGRESO.md` y arrancá exactamente de
+   ahí. Si lo que estaba a medias ya está en ✅, tomá el próximo ítem.
+4. Si existe `docs/base/CAMBIOS-MATEO.md` con líneas sin ✅, **eso va primero**:
+   es lo que Mateo vio en su pasada.
+
+## La vuelta
+
+1. Tomá el **primer ítem de `RECTA-FINAL.md` que no esté en ✅ ni ⛔**, en
+   orden (la fase U va antes que todo).
+2. **Antes de codear, buscá lo que ya existe** (código, base, e2e) y abrilo con
+   sesión real y la app compilada. Casi todo existe: completá, no rehagas.
+3. **Pensá antes de construir** (`PENSAR.md`): intención de Mateo, cómo lo
+   resuelve un producto profesional, las 5 formas en que se rompe, lo que no
+   pidió pero necesita, y la decisión. Después de construir, probás esas 5
+   formas.
+4. Escribí el plan en 3 a 6 líneas debajo del ítem (en `PROGRESO.md` si es un
+   BASE-*, si no en el archivo de detalle).
+5. Hacelo por capas: **base → lógica → pantalla → prueba**. Cada capa, commit y
    push con un mensaje que dice qué cambió y por qué.
-6. **Verificá ejecutando**: prueba de base si tocaste la base
-   (`npm run db:pruebas`), e2e del recorrido con sesión real y
-   `APP_MODO=produccion`, capturas en compu y celular **mirándolas**, y
-   `npm run verificar`. El LISTO SI de cada ítem es la vara; si no se cumple, el
-   ítem no está ✅.
-7. Actualizá `PROGRESO.md` (estado + cómo se verificó), `DETALLES-70.md` si
-   corresponde, y la documentación que el cambio dejó vieja.
-8. **Al cerrar cada bloque del P0** (cada BASE-*), publicá (abajo) y reescribí
-   el "Resumen para Mateo" de arriba de `PROGRESO.md`.
-9. Una línea en el registro de vueltas y seguí con el siguiente ítem.
+6. **Verificá ejecutando:**
+   - `npm run db:pruebas` si tocaste la base (con `scripts/db/local.sh nueva`).
+   - El e2e del recorrido, con sesión real y `APP_MODO=produccion`.
+   - Las 21 reglas de `FLUIDEZ.md` en lo que tocaste.
+   - Capturas en compu y celular **mirándolas**.
+   - `npm run verificar`.
+   - **Lo pesado (build, e2e, barrido) en GitHub Actions**, no en la compu de
+     Mateo (no le alcanza la memoria): `gh workflow run pruebas-completas.yml
+     --ref base/2026-11-07 -f pantallas=true -f solo=<recorridos> -f
+     app_modo=produccion`, y el resultado con `gh run view <id> --log`. En la
+     compu, solo código, typecheck, lint, vitest y `db:pruebas`.
+
+   Los e2e en tandas de 20 como máximo, cada tanda con la base nueva. Nunca 200
+   seguidos: se queda sin memoria y arrastra datos de un recorrido a otro.
+7. El ítem pasa a ✅ **solo si cumple su LISTO SI completo**. Lo que falta no se
+   esconde: queda 🟡 con qué falta, y la vuelta siguiente lo sigue.
+8. Al cerrar una fase, o un ítem grande, publicá (abajo) y reescribí el
+   "RESUMEN PARA MATEO" de arriba de `PROGRESO.md`: qué hay publicado, qué
+   sigue, qué tiene que hacer él.
+9. Al terminar la vuelta: actualizá **"DÓNDE QUEDÉ"** arriba de `PROGRESO.md`
+   (el próximo ítem exacto y lo que quedó a medias), commit y push, y cerrá los navegadores de Playwright,
+   la app y los procesos que levantaste.
 
 ## Reglas que no se negocian
 
 Las de `CLAUDE.md`, siempre. Además:
 
-- **No frenás por preguntas.** Si algo no está claro: elegís la opción
-  recomendada, la escribís en `PREGUNTAS.md` como "decidido por defecto" y
-  seguís.
-- **Solo frenás** ante algo irreversible: borrar o cambiar datos de un gimnasio
-  real, gastar plata, tocar credenciales de producción de un cliente, o aplicar
-  migraciones con un gimnasio real cargado. Ahí dejás todo listo (rama, PR,
-  comandos exactos) arriba en `PROGRESO.md` y seguís con lo que no dependa de
-  eso.
-- **La pregunta central es una sola función.** Ningún cambio de BASE-3 a
-  BASE-5 puede cambiar un veredicto: lo prueba la base con momentos fijos.
+- **No frenás por preguntas.** Elegís la opción recomendada, la escribís en
+  `PREGUNTAS.md` como "decidido por defecto" y seguís.
+- **Solo frenás** ante algo irreversible:
+  - borrar o cambiar datos de un gimnasio real,
+  - gastar plata,
+  - tocar credenciales de producción de un cliente,
+  - aplicar migraciones con un gimnasio real cargado.
+
+  En esos casos dejás todo listo (rama, PR, comandos exactos) arriba en
+  `PROGRESO.md` y seguís con lo que no dependa de eso.
+- **La pregunta central es una sola función.** Ningún cambio puede cambiar un
+  veredicto sin una prueba de base con momentos fijos que lo muestre a
+  propósito.
 - **Toca permisos o plata más allá de lo que dice el ítem → no lo arreglás
   solo**: lo anotás en `PREGUNTAS.md` y seguís.
 - **Nada de claves en el repo**, que es público: ni en código, ni en docs, ni
-  en commits, ni en logs de Actions. `ACCESOS.md` es local y está en
-  `.gitignore`. No leas `.env*` ni muestres claves. Tampoco toques `.claude/`
-  salvo para crear `BASE_CON_DATOS_REALES`.
+  en commits, ni en logs de Actions.
+  - `ACCESOS.md` es local y está en `.gitignore`.
+  - No leas `.env*` ni muestres claves.
+  - No toques `.claude/`, salvo para crear `BASE_CON_DATOS_REALES`.
 - **Nunca pegar SQL en el editor de Supabase. Nunca `vercel --prod` sobre algo
   sin commitear.**
 - WhatsApp solo con links `wa.me`. Registro cerrado: los gimnasios los crea el
   super admin.
-- Los webhooks de MercadoPago: idempotentes por ID externo, nunca pasan por el
-  proxy/middleware, firma verificada, con conciliación.
+- Webhooks de MercadoPago: idempotentes por ID externo, nunca pasan por el
+  proxy, con la firma verificada y conciliación.
 - Si algo no se pudo verificar, se escribe textual: *"el código está escrito
   según la documentación, pero no está ejecutado"*.
 
-## Publicar (al cerrar cada bloque del P0, y por grupo en P1)
+## Publicar
 
-Solo si **no** existe `.claude/BASE_CON_DATOS_REALES` y `estado` no muestra
-ningún gimnasio real:
+Solo si **no** existe `.claude/BASE_CON_DATOS_REALES` y Actions → Base de
+datos → `estado` no muestra ningún gimnasio real (sin `[demo]`):
 
-1. Todo en verde en la compu: `npm run verificar`, la base, los e2e del bloque
-   y el barrido.
-2. Rama `publicar/base-<bloque>` en ese commit, push.
-3. Actions → Base de datos → `prevuelo` (rama `publicar/base-<bloque>`) → si da
-   verde, `aplicar`.
-4. PR a `main`, merge, esperar el deploy de Vercel en verde.
-5. Probar en producción: `/ingresar`, `/admin`, la página del demo y lo que
-   cambió el bloque.
+1. Todo en verde: `npm run verificar` y la base en la compu, y los e2e de lo que
+   se publica.
+2. Rama `publicar/base-<qué>` en ese commit, y push.
+3. Actions → Base de datos → `prevuelo` en esa rama → si da verde, `aplicar`.
+4. PR a `main`, merge, y esperar el deploy de Vercel en verde.
+5. **Prueba de humo en producción** (U0.3 y CAL-07, `humo-produccion.yml` en
+   Actions): crear un gimnasio de prueba, entrar por las 3 puertas, crear un
+   socio, registrar un ingreso y cobrar en el demo. Si falla, se arregla antes
+   que cualquier otra cosa. Además, probar lo que cambió, y `/ingresar`, `/super` y la página del
+   demo.
 6. Anotar en `PROGRESO.md` qué se publicó y a qué hora.
 
-Si hay un gimnasio real: dejás la rama `publicar/...`, el PR abierto y los
-pasos 3 a 5 escritos arriba en `PROGRESO.md` para Mateo.
+Si hay un gimnasio real: dejás la rama, el PR abierto y los pasos 3 a 5
+escritos arriba en `PROGRESO.md` para Mateo.
 
-## Agentes en paralelo
+## Agentes en paralelo (`REPARTO.md`)
 
-BASE-0 va solo y primero. Después podés usar hasta 2 agentes más en worktrees
-para ítems que no tocan los mismos archivos ni la misma migración (por ejemplo
-BASE-9 página y BASE-10 socio mientras vos hacés BASE-3). Cada uno con su rama,
-y vos mergeás y verificás. Migraciones con número reservado
-`20261108BBNN00` (BB = número del bloque BASE, NN = orden).
+Trabajás con **hasta 3 ayudantes a la vez**, en worktrees, cada uno en su
+carril (B super admin, C socio y página, D diseño y detalles del panel). Vos
+hacés el carril A (velocidad y recepción), integrás, compilás, corrés los e2e y
+publicás.
 
-## Al terminar el P0
-
-Arriba de `PROGRESO.md`, el título pasa a **"P0 LISTO PARA MAÑANA"** con:
-usuario del super admin (sin contraseña), cómo crear el gimnasio y su dueño
-paso a paso, el link de cada rol, qué probar primero, lo que quedó trabado y lo
-que tiene que hacer Mateo (comandos exactos, en orden). Y una entrada en
-`docs/LOG.md` con el formato de reporte de `CLAUDE.md`.
+- Al empezar la vuelta, mirá qué carriles no tienen un ayudante trabajando y
+  lanzá uno por cada carril con su próximo ítem.
+- Al recibir el informe de un ayudante: verificalo ejecutando, mergealo y
+  marcá el estado.
+- Lo pesado (`next build`, la app, Playwright) solo lo corrés vos. Los
+  ayudantes no levantan nada.
 
 ## Al terminar todo
 
-Arriba de `PROGRESO.md`: resumen, links por rol, cómo probar, lo bloqueado y
-las preguntas abiertas. Los 70 detalles en ✅ o con el motivo. Entrada final
-en `docs/LOG.md`. Pará el loop.
+Cuando `RECTA-FINAL.md` esté toda en ✅ o ⛔:
+1. Arriba de `PROGRESO.md` va **"LISTO PARA TU PASADA"** (F8.5).
+2. `PRUEBA-DUENO.md` preparado (F8.4).
+3. La entrada final en `docs/LOG.md` con el formato de reporte de `CLAUDE.md`.
+4. La última línea de tu respuesta es `TERMINADO`.

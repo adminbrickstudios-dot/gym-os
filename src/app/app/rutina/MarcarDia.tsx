@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { marcarDiaHecho } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-20: el botón grande de "Hice el Día N" (y deshacer si fue sin querer). */
 export function MarcarDia({ socioId, dia, hecho }: { socioId: string; dia: number; hecho: boolean }) {
@@ -11,13 +12,13 @@ export function MarcarDia({ socioId, dia, hecho }: { socioId: string; dia: numbe
     <div className="space-y-2" data-marcar-dia={hecho ? "hecho" : "pendiente"}>
       {hecho ? (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="pildora pildora-verde text-base" role="status" data-dia-hecho>✅ Día {dia} hecho hoy. ¡Buen laburo!</p>
+          <p className="pildora pildora-verde text-base" role="status" data-dia-hecho><Icono nombre="ok" /> Día {dia} hecho hoy. ¡Buen laburo!</p>
           <button type="button" className="boton-texto texto-suave" disabled={ocupado} onClick={() => tocar(true)}>Deshacer</button>
         </div>
       ) : (
-        <button type="button" className="boton boton-principal w-full sm:w-auto text-lg" disabled={ocupado} data-hice-dia onClick={() => tocar(false)}>{ocupado ? "Guardando…" : `✅ Hice el Día ${dia}`}</button>
+        <button type="button" className="boton boton-principal w-full sm:w-auto text-lg" disabled={ocupado} data-hice-dia onClick={() => tocar(false)}>{ocupado ? "Guardando…" : `Hice el Día ${dia}`}</button>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

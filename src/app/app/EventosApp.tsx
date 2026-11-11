@@ -4,6 +4,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { formatearPesos } from "@/lib/formato";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { anotarmeEvento, bajarmeDeEvento } from "./eventos";
+import { Icono } from "@/components/ui/Icono";
 
 export type EventoApp = {
   evento_id: string; nombre: string; inicio: string; fechas: string[]; precio: number; precio_socio: number | null; mi_precio: number; descripcion: string | null;
@@ -17,7 +18,7 @@ const cuando = (iso: string, zona: string) => new Intl.DateTimeFormat("es-AR", {
 export function EventosApp({ socioId, eventos }: { socioId: string; eventos: EventoApp[] }) {
   return (
     <section className="space-y-2" data-eventos-app={eventos.length}>
-      <p className="titulo text-2xl">🎟️ Próximos eventos</p>
+      <p className="titulo text-2xl"><Icono nombre="ticket" /> Próximos eventos</p>
       <ul className="space-y-2">{eventos.map((e) => <Tarjeta key={e.evento_id} socioId={socioId} e={e} />)}</ul>
     </section>
   );
@@ -36,15 +37,15 @@ function Tarjeta({ socioId, e }: { socioId: string; e: EventoApp }) {
       )}
       <p className="font-semibold break-words">{e.nombre}{e.cuando_cerca && <span className="pildora pildora-amarillo ml-2" data-evento-cerca={e.cuando_cerca}>{e.cuando_cerca === "hoy" ? "Es hoy" : "Es mañana"}</span>}</p>
       <p className="texto-suave text-sm first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>
-      {(e.lugar || e.responsable) && <p className="texto-suave text-sm">{[e.lugar && `📍 ${e.lugar}`, e.responsable && `👤 ${e.responsable}`].filter(Boolean).join(" · ")}</p>}
+      {(e.lugar || e.responsable) && <p className="texto-suave text-sm">{[e.lugar && `${e.lugar}`, e.responsable && `${e.responsable}`].filter(Boolean).join(" · ")}</p>}
       {e.descripcion && <p className="text-sm">{e.descripcion}</p>}
       {e.cancelado ? (
         <Mensaje tipo="error">Este evento se canceló. Si pagaste, hablá con recepción.</Mensaje>
       ) : (
         <>
           <p className="text-sm" data-evento-estado={e.anotado ? "anotado" : e.en_espera_pos ? "espera" : "libre"}>
-            {e.anotado ? "✅ Estás anotado"
-              : e.en_espera_pos ? `⏳ Estás en la lista de espera: el lugar ${e.en_espera_pos}`
+            {e.anotado ? <><Icono nombre="ok" /> Estás anotado</>
+              : e.en_espera_pos ? `Estás en la lista de espera: el lugar ${e.en_espera_pos}`
               : e.quedan === 0 ? (e.lista_espera ? "Está lleno: podés anotarte en la lista de espera" : "Sin lugares")
               : `${gratis ? "Gratis" : formatearPesos(e.mi_precio)}${e.precio_socio !== null && Number(e.precio) > Number(e.precio_socio) ? ` (precio de socio; el general es ${formatearPesos(e.precio)})` : ""} · quedan ${e.quedan}`}
           </p>
@@ -54,7 +55,7 @@ function Tarjeta({ socioId, e }: { socioId: string; e: EventoApp }) {
             {!e.anotado && !e.en_espera_pos && (e.quedan > 0 || e.lista_espera) && (
               <button type="button" className="boton" disabled={ocupado} data-anotarme
                 onClick={() => empezar(async () => { const r = await anotarmeEvento(socioId, e.evento_id); setError(r.error ?? null); })}>
-                {ocupado ? "Anotando…" : e.quedan > 0 ? "🎟️ Anotarme" : "⏳ Ponerme en la lista de espera"}
+                {ocupado ? "Anotando…" : e.quedan > 0 ? <><Icono nombre="ticket" /> Anotarme</> : <><Icono nombre="reloj-arena" /> Ponerme en la lista de espera</>}
               </button>
             )}
             {(e.anotado || e.en_espera_pos) && e.puede_cancelar && (

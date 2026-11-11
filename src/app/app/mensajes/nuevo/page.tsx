@@ -5,6 +5,7 @@ import { MOTIVOS } from "@/lib/mensajes";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { FormMensaje } from "../FormMensaje";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Nuevo mensaje" };
 
@@ -19,7 +20,7 @@ export default async function NuevoMensaje({ searchParams }: { searchParams: Pro
     return (
       <div className="space-y-6">
         <Link href={`/app/mensajes${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">✉️ Nuevo mensaje</h1>
+        <h1 className="titular text-5xl"><Icono nombre="mail" /> Nuevo mensaje</h1>
         {estado.activo
           ? <FormMensaje socioId={s.socio_id} q={q} motivoInicial={MOTIVOS.find((m) => m.clave === sp.motivo)?.clave} />
           : <p className="tarjeta p-5 texto-suave">Por ahora este gimnasio no recibe mensajes por la app. Hablá con la recepción.</p>}

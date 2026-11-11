@@ -14,7 +14,7 @@ try {
   await d.waitForURL(/\/panel\/resumen$/, { timeout: 30000 });
   await d.locator("[data-resumen-numeros]").waitFor({ timeout: 60000 });
   const texto = await d.locator("main").innerText();
-  chequear(/Cobrado/.test(texto) && /Entradas/.test(texto) && /Altas/.test(texto) && /Bajas/.test(texto), "Inicio → “📊 Resumen de hoy”: cobrado, entradas, altas y bajas", texto.slice(0, 200));
+  chequear(/Cobrado/.test(texto) && /Entradas/.test(texto) && /Altas/.test(texto) && /Bajas/.test(texto), "Inicio → “Resumen de hoy”: cobrado, entradas, altas y bajas", texto.slice(0, 200));
   await d.getByRole("link", { name: "Semana pasada" }).click();
   await d.waitForURL(/semana=\d{4}-\d{2}-\d{2}/, { timeout: 30000 });
   await d.getByText(/Semana del \d{2}\/\d{2} al \d{2}\/\d{2}/).first().waitFor({ timeout: 30000 });

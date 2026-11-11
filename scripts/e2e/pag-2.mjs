@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// PAG-2 · Publicar, pasar a borrador y compartir: desde Tu página la dueña
-// pasa a borrador (la gente ve "Próximamente") y la vuelve a publicar; copia
+// PAG-2 · Mostrar, ocultar y compartir: desde Tu página la dueña
+// pasa a borrador (la gente ve solo la portada) y la vuelve a publicar; copia
 // el link; el link de WhatsApp lleva la dirección; al compartir, la página
 // tiene título, descripción e imagen (la de portada o /og con sus colores).
 //   npm run e2e:pag-2            (con scripts/local/levantar.sh corriendo)
@@ -42,16 +42,16 @@ try {
   }
 
   // ── Borrador y de vuelta ──
-  await estado.locator('button:has-text("Pasar a borrador")').click();
+  await estado.locator('button:has-text("Ocultar mi página")').click();
   await p.locator('[data-estado-pagina="borrador"]').waitFor({ timeout: 30000 });
   await v.reload(); await v.locator("h1").first().waitFor();
-  chequear(/Estamos armando nuestra página/.test(await v.locator("body").innerText()), "pasar a borrador → la gente ve “Estamos armando nuestra página”", "en borrador se sigue viendo la página");
-  chequear(/Estamos armando/.test(await meta(v, "og:description") ?? ""), "en borrador, al compartir dice que se está armando", "en borrador, la descripción para compartir no cambió");
+  chequear(await v.locator("[data-pagina-oculta]").count() > 0 && !/armando/i.test(await v.locator("body").innerText()), "ocultar → la gente ve solo la portada con los botones, sin “armando”", "al ocultar no queda la portada");
+  chequear(!/armando/i.test(await meta(v, "og:description") ?? ""), "oculta, al compartir no dice que se está armando", "la descripción para compartir dice armando");
   await capturar(p, "pag2-compu-borrador");
-  await estado.locator('button:has-text("Publicar mi página")').click();
+  await estado.locator('button:has-text("Mostrar mi página")').click();
   await p.locator('[data-estado-pagina="publicada"]').waitFor({ timeout: 30000 });
   await v.reload(); await v.locator("h1").first().waitFor();
-  chequear(!/Estamos armando nuestra página/.test(await v.locator("body").innerText()), "“Publicar mi página” la vuelve a mostrar", "sigue en borrador");
+  chequear(await v.locator("[data-pagina-oculta]").count() === 0 && !/armando/i.test(await v.locator("body").innerText()), "“Mostrar mi página” la vuelve a mostrar completa", "sigue oculta");
   await v.context().close();
   if (p.errores.length) falla(`dueña: ${p.errores.join(" | ")}`);
   await p.context().close();
@@ -61,7 +61,7 @@ try {
   await entrar(e, "encargado@ejemplo.invalid");
   await e.goto(`${G}/panel/pagina`);
   await e.locator("[data-estado-pagina]").waitFor({ timeout: 60000 });
-  chequear(await e.locator('[data-estado-pagina] button:has-text("borrador"), [data-estado-pagina] button:has-text("Publicar")').count() === 0
+  chequear(await e.locator('[data-estado-pagina] button:has-text("Ocultar"), [data-estado-pagina] button:has-text("Mostrar")').count() === 0
     && await e.locator('[data-estado-pagina] button:has-text("Copiar link")').count() === 1, "encargado: copia y comparte, no publica", "encargado puede publicar o no puede compartir");
   const ancho = await e.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular: sin desborde (${ancho}px)`, `celular: mide ${ancho}px`);

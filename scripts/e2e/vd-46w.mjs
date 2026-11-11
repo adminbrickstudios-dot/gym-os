@@ -16,7 +16,7 @@ try {
   await elegirPlan(d, 0);
   await d.locator('button:has-text("Solo dar de alta")').click();
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}/, { timeout: 30000 });
-  await d.locator('button:has-text("👋 Dar de baja")').click();
+  await d.locator('button:has-text("Dar de baja")').click();
   await d.locator('button:has-text("Se mudó")').click();
   await d.locator("[data-constancia-baja]").waitFor({ timeout: 30000 });
   ok("la baja se da y deja su constancia");

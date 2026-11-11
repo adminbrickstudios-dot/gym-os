@@ -14,8 +14,9 @@ import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmerge
 import type { EmergenciaActiva } from "./emergencia-tipos";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
+import { Icono } from "@/components/ui/Icono";
 
-const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
+const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
 
 /** Un sonido por color, para no tener que mirar: agudo y corto si entra, grave y doble si no. */
 function sonar(color: string) {
@@ -222,31 +223,31 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           if (e.key === "Enter" && socios[0] && !elegido) elegir(socios[0]);
           if (e.key === "Escape") reiniciar();
         }}
-        placeholder="🔍 Nombre, DNI o número de socio" className="campo !min-h-16 !text-xl" aria-label="Buscar socio" autoComplete="off"
+        placeholder="Nombre, DNI o número de socio" className="campo !min-h-16 !text-xl" aria-label="Buscar socio" autoComplete="off"
       />
       <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
-        {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto">📷 Leer QR</button>}
+        {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto"><Icono nombre="camara" /> Leer QR</button>}
         <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-xl text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
-          {sonido ? "🔊 Con sonido" : "🔇 Sin sonido"}
+          {sonido ? "Con sonido" : "Sin sonido"}
         </button>
       </div>
 
       {hecho && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : hecho.alerta_prestamo ? "amarillo" : "verde") }}>
-          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : hecho.alerta_prestamo ? "⚠️" : <Tilde tamano={32} />}</span>
+          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={32} />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">
             {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
-          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
+          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
           {hecho.repetido && hecho.puede_salir && hecho.socioId && (
             <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} data-ventana-salida-boton
-              onClick={() => marcarSalida(hecho.socioId!, hecho.nombre)}>👋 Marcar salida</button>
+              onClick={() => marcarSalida(hecho.socioId!, hecho.nombre)}><Icono nombre="salir" /> Marcar salida</button>
           )}
         </div>
       )}
       {salio && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"}>
-          <span className="text-3xl" aria-hidden>{salio.registrada ? "👋" : "ℹ️"}</span>
+          <span className="text-3xl" aria-hidden>{salio.registrada ? "" : ""}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">{salio.registrada ? salio.texto : `${salio.nombre}: ${salio.texto}`}</p>
         </div>
       )}
@@ -271,14 +272,14 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
         <div className="space-y-3">
           <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
           {pruebaModo !== "no" && /^\d{6,9}$/.test(dniEscrito) && !prueba && (
-            <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}>🎁 Dar prueba gratis</button>
+            <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}><Icono nombre="regalo" /> Dar prueba gratis</button>
           )}
         </div>
       )}
       {prueba && (
         <form data-ventana-prueba-form className="tarjeta p-5 space-y-3" onSubmit={(e) => { e.preventDefault(); if (!ocupado && prueba.nombre.trim()) darPrueba(); }}>
-          <p className="titulo text-xl">🎁 Prueba gratis · {dniEscrito}</p>
-          {prueba.reservada && <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada>🙋 Reservó desde la página. Confirmá y lo dejás entrar.</p>}
+          <p className="titulo text-xl"><Icono nombre="regalo" /> Prueba gratis · {dniEscrito}</p>
+          {prueba.reservada && <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full" data-prueba-reservada><Icono nombre="persona" /> Reservó desde la página. Confirmá y lo dejás entrar.</p>}
           <label className="block space-y-1"><span className="etiqueta">Nombre</span>
             <input data-prueba-nombre className="campo" value={prueba.nombre} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, nombre: e.target.value, error: null })} /></label>
           {!prueba.reservada && (
@@ -291,7 +292,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           )}
           {prueba.error && <Mensaje tipo="error">{prueba.error}</Mensaje>}
           <div className="flex flex-wrap gap-2">
-            <button type="submit" className="boton boton-principal" disabled={ocupado || !prueba.nombre.trim()} data-prueba-dar>🎁 Dejarlo entrar con la prueba</button>
+            <button type="submit" className="boton boton-principal" disabled={ocupado || !prueba.nombre.trim()} data-prueba-dar><Icono nombre="regalo" /> Dejarlo entrar con la prueba</button>
             <button type="button" className="boton-texto px-3" onClick={() => setPrueba(null)}>Volver</button>
           </div>
         </form>
@@ -304,17 +305,17 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 62%)` }}>
           <div className="pulso m-auto w-full max-w-3xl">
           <div className="flex items-center gap-4">
-            <p className="text-7xl" aria-hidden>{EMOJI[v.color] ?? "❔"}</p>
+            <p className="text-7xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
             {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-entrada
-              className="size-28 sm:size-36 rounded-3xl object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              className="size-28 sm:size-36 rounded-[var(--radio)] object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
           </div>
           <p className="titular text-6xl sm:text-8xl mt-4 break-words">{elegido.nombre}</p>
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
-          {guia?.decile && <p className="mt-2 text-2xl" data-decile>💬 {guia.decile}</p>}
-          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.href ? <LinkPanel href={c.href} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
+          {guia?.decile && <p className="mt-2 text-2xl" data-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <LinkPanel href={c.href} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
@@ -322,23 +323,23 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
 
           <div className="flex flex-wrap gap-2 mt-7">
             {v.puede ? (
-              <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8">✅ Anotar entrada</button>
+              <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8"><Icono nombre="ok" /> Anotar entrada</button>
             ) : (
               <>
                 {/* VD-46M: puerta en emergencia: a quien no podía entrar se lo anota igual (queda marcado). Es un clic a propósito: Enter no lo hace. */}
-                {guia?.emergencia && <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8" data-anotar-emergencia>🚨 Anotar entrada (emergencia)</button>}
+                {guia?.emergencia && <button type="button" disabled={ocupado} onClick={() => anotar()} className="boton boton-principal text-lg px-8" data-anotar-emergencia><Icono nombre="alerta-circulo" /> Anotar entrada (emergencia)</button>}
                 {/* En pausa no se cobra: si volvió antes, se termina la pausa y entra. */}
                 {v.motivo === "congelada"
-                  ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8">🏃 Volvió antes: terminar la pausa</button>
-                  : <BotonCobrar socioId={elegido.socio_id} origen="entrada" cuota={!!v.para_regularizar} className="boton boton-principal text-lg px-8">💵 Cobrar</BotonCobrar>}
+                  ? <button type="button" disabled={ocupado} onClick={volvioAntes} className="boton boton-principal text-lg px-8"><Icono nombre="pesa" /> Volvió antes: terminar la pausa</button>
+                  : <BotonCobrar socioId={elegido.socio_id} origen="entrada" cuota={!!v.para_regularizar} className="boton boton-principal text-lg px-8"><Icono nombre="plata" /> Cobrar</BotonCobrar>}
                 {/* D1: a un suspendido o dado de baja lo deja pasar el dueño o el encargado (la base lo frena igual). */}
                 {!forzando && (esRecepcion && (v.motivo === "suspendido" || v.motivo === "se_fue")
-                  ? <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>
-                  : <button type="button" onClick={() => { setForzando(true); void cupoDejarPasar().then(setCupo); }} className="boton">🚪 Dejar pasar igual</button>)}
+                  ? <p className="basis-full texto-suave"><Icono nombre="candado" /> A este socio lo deja pasar el dueño o el encargado.</p>
+                  : <button type="button" onClick={() => { setForzando(true); void cupoDejarPasar().then(setCupo); }} className="boton"><Icono nombre="puerta" /> Dejar pasar igual</button>)}
               </>
             )}
-            <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton">👤 Ver ficha</LinkPanel>
-            {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton>👋 Salida</button>}
+            <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</LinkPanel>
+            {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida</button>}
             <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
           </div>
 

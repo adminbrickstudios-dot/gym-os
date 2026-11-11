@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarMedicion } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type MedicionPanel = { pixel_meta: string | null; google_analytics: string | null; publicada: boolean };
 
@@ -15,7 +16,7 @@ export function MedicionPagina({ inicial, puedeEditar }: { inicial: MedicionPane
   const sucio = px.trim() !== (m.pixel_meta ?? "") || ga.trim().toUpperCase() !== (m.google_analytics ?? "");
   return (
     <section className="tarjeta p-5 space-y-3 mt-6" data-medicion>
-      <p className="titulo text-xl">📊 Medir las visitas</p>
+      <p className="titulo text-xl"><Icono nombre="grafico" /> Medir las visitas</p>
       <p className="texto-suave">Si hacés publicidad en Instagram o Facebook, o usás Google Analytics, pegá acá los IDs y la página los carga sola. Solo el número del píxel y el código G-…, nunca código entero.</p>
       <label className="block">
         <span className="text-sm">ID del píxel de Meta</span>

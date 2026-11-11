@@ -6,6 +6,7 @@ import { conFotos } from "@/lib/mensajes-servidor";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { FormMensaje } from "../FormMensaje";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Mi mensaje" };
 
@@ -37,7 +38,7 @@ export default async function MiHilo({ params, searchParams }: { params: Promise
                 {x.con_foto && (x.foto_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <a href={x.foto_url} target="_blank" rel="noreferrer"><img src={x.foto_url} alt="Foto que mandaste" className="mt-2 rounded-[var(--radio)] max-h-64 w-auto max-w-full" data-foto-hilo /></a>
-                  : <p className="texto-tenue text-sm mt-2">📷 La foto no se pudo abrir ahora.</p>)}
+                  : <p className="texto-tenue text-sm mt-2"><Icono nombre="camara" /> La foto no se pudo abrir ahora.</p>)}
               </div>
             </li>
           ))}

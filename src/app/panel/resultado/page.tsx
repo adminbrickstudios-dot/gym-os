@@ -5,11 +5,13 @@ import { MEDIO } from "@/lib/caja";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { TasaCobro, type TasaDeCobro } from "./TasaCobro";
 import { Gastos, type GastosMes } from "./Gastos";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { DeudaSocios, type DeudaConSocios } from "./DeudaSocios";
 import { PorSede, type ResultadoPorSede } from "./PorSede";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -19,7 +21,7 @@ type Resultado = {
   por_dia: { dia: string; total: number }[]; activos: number; altas: number; bajas: number; recurrente: number; horas: number[];
 };
 
-const MOTIVO_BAJA: Record<string, string> = { precio: "💸 Precio", horario: "⏰ Horario", mudanza: "📦 Se mudó", otro_gimnasio: "🏋️ Otro gimnasio", sin_tiempo: "⌛ Sin tiempo", insatisfecho: "😕 No le gustó", otro: "Otro" };
+const MOTIVO_BAJA: Record<string, string> = { precio: "Precio", horario: "Horario", mudanza: "Se mudó", otro_gimnasio: "Otro gimnasio", sin_tiempo: "Sin tiempo", insatisfecho: "No le gustó", otro: "Otro" };
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const nombreMes = (d: string) => `${MESES[Number(d.slice(5, 7)) - 1]} ${d.slice(0, 4)}`;
 const moverMes = (d: string, n: number) => { const x = new Date(Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1 + n, 1)); return x.toISOString().slice(0, 10); };
@@ -48,6 +50,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       // VD-46P: por sede, dónde se cobró y dónde se usó (solo se muestra si el gimnasio tiene más de una).
       rpc<ResultadoPorSede>("resultado_por_sede", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
     ]);
+    const tasa = await rpc<TasaDeCobro>("tasa_de_cobro", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });   // FA-10
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -58,7 +61,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const totalConcepto = r.por_concepto.reduce((a, c) => a + Number(c.total), 0) || 1;
     return (
       <div className="space-y-10">
-        <Encabezado emoji="📈" titulo="Resultado" bajada={`La plata de ${nombreMes(r.mes)}${r.en_curso ? " hasta hoy" : ""}: cuánto entró, de dónde y contra el mes anterior.`} />
+        <Encabezado icono="tendencia" titulo="Resultado" bajada={`La plata de ${nombreMes(r.mes)}${r.en_curso ? " hasta hoy" : ""}: cuánto entró, de dónde y contra el mes anterior.`} />
         <nav className="flex flex-wrap items-center gap-2" aria-label="Mes">
           <Link href={`/panel/resultado?mes=${anterior.slice(0, 7)}`} className="pestana">← {MESES[Number(anterior.slice(5, 7)) - 1]}</Link>
           <span className="pestana" aria-current="page">{nombreMes(r.mes)}</span>
@@ -75,18 +78,20 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
 
         <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
           {[
-            { e: "👥", t: "Socios al día", v: formatearNumero(r.activos) },
-            { e: "🌱", t: "Altas", v: formatearNumero(r.altas) },
-            { e: "👋", t: "Bajas", v: formatearNumero(r.bajas) },
-            { e: "🔁", t: "Recurrente por mes", v: formatearPesos(r.recurrente) },
+            { e: "usuarios", t: "Socios al día", v: formatearNumero(r.activos) },
+            { e: "hoja", t: "Altas", v: formatearNumero(r.altas) },
+            { e: "salir", t: "Bajas", v: formatearNumero(r.bajas) },
+            { e: "repetir", t: "Recurrente por mes", v: formatearPesos(r.recurrente) },
           ].map((n) => (
             <div key={n.t} className="flex flex-col-reverse">
-              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden>{n.e}</span> {n.t}</dt>
+              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.e} sistema /></span> {n.t}</dt>
               <dd className="numero text-4xl sm:text-5xl">{n.v}</dd>
             </div>
           ))}
         </dl>
         <p className="text-sm texto-tenue -mt-6">Recurrente: lo que entra por mes si todos los que hoy tienen la membresía al día la renuevan, al precio de hoy.</p>
+
+        <TasaCobro t={tasa} />
 
         <section aria-labelledby="dias">
           <h2 id="dias" className="titulo text-2xl mb-3">Día por día</h2>
@@ -137,17 +142,17 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
 
         {encuestas.respuestas > 0 && (
           <section aria-labelledby="encuesta" data-encuesta-resultado>
-            <h2 id="encuesta" className="titulo text-2xl mb-1">⭐ ¿Nos recomiendan?</h2>
+            <h2 id="encuesta" className="titulo text-2xl mb-1"><Icono nombre="estrella" /> ¿Nos recomiendan?</h2>
             <p className="texto-suave mb-3">{encuestas.respuestas} {encuestas.respuestas === 1 ? "respuesta" : "respuestas"} en 90 días · puntaje {encuestas.nps ?? "—"} (los que dan 9 o 10, menos los que dan 6 o menos).</p>
             {encuestas.promotores.length > 0 && (
-              <details className="tarjeta p-4"><summary className="cursor-pointer">💚 {encuestas.promotores.length} te recomiendan: invitalos a traer a un amigo</summary>
+              <details className="tarjeta p-4"><summary className="cursor-pointer"><Icono nombre="corazon" /> {encuestas.promotores.length} te recomiendan: invitalos a traer a un amigo</summary>
                 <ul className="mt-2 space-y-1">{encuestas.promotores.map((p) => (
                   <li key={p.socio_id} className="text-sm"><LinkPanel href={`/panel/socios/${p.socio_id}`} siNoEsta="texto" className="underline">{p.nombre}</LinkPanel> · {p.puntaje}</li>
                 ))}</ul>
               </details>
             )}
             {encuestas.detractores.length > 0 && (
-              <details className="tarjeta p-4 mt-2"><summary className="cursor-pointer">🟠 {encuestas.detractores.length} dieron 6 o menos</summary>
+              <details className="tarjeta p-4 mt-2"><summary className="cursor-pointer"><Icono nombre="punto-naranja" /> {encuestas.detractores.length} dieron 6 o menos</summary>
                 <ul className="mt-2 space-y-1">{encuestas.detractores.map((p) => (
                   <li key={p.socio_id} className="text-sm"><LinkPanel href={`/panel/socios/${p.socio_id}`} siNoEsta="texto" className="underline">{p.nombre}</LinkPanel> · {p.puntaje}</li>
                 ))}</ul>
@@ -158,7 +163,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
 
         {cupones.some((c) => c.usos > 0) && (
           <section aria-labelledby="cupones" data-cupones-resultado>
-            <h2 id="cupones" className="titulo text-2xl mb-3">🏷️ Cupones</h2>
+            <h2 id="cupones" className="titulo text-2xl mb-3"><Icono nombre="etiqueta" /> Cupones</h2>
             <ul className="tarjeta divide-y divide-[var(--borde)]">{cupones.filter((c) => c.usos > 0).map((c) => (
               <li key={c.codigo} className="flex justify-between gap-3 px-4 py-3"><span className="numero">{c.codigo}</span><span className="texto-suave">{c.usos} {c.usos === 1 ? "uso" : "usos"} · trajo {c.socios} {c.socios === 1 ? "socio" : "socios"}</span></li>
             ))}</ul>
@@ -180,7 +185,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           <h2 id="contador" className="titulo text-2xl mb-1">Para el contador</h2>
           <p className="texto-suave mb-3">El mes fila por fila, en planillas que se abren con Excel.</p>
           <div className="flex flex-wrap gap-2" data-exportar>
-            {[["ventas", "🧾 Ventas"], ["pagos", "💳 Pagos"], ["caja", "💵 Caja"]].map(([q, t]) => (
+            {[["ventas", "Ventas"], ["pagos", "Pagos"], ["caja", "Caja"]].map(([q, t]) => (
               <a key={q} href={`/panel/resultado/exportar?que=${q}&mes=${r.mes.slice(0, 7)}`} className="boton" download>{t}</a>
             ))}
           </div>

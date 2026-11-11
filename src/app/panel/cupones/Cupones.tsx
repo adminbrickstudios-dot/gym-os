@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { formatearPesos } from "@/lib/formato";
 import { desactivarCupon, guardarCupon } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export type CuponPanel = { cupon_id: string; codigo: string; tipo: "porcentaje" | "monto"; valor: number; tope_usos: number | null; vence_en: string | null;
   activo: boolean; planes: string[]; usos: number; socios: number };
@@ -14,7 +15,7 @@ export function NuevoCupon({ planes }: { planes: { plan_id: string; nombre: stri
   const [estado, setEstado] = useState<{ ok?: boolean; error?: string }>({});
   const [guardando, empezar] = useTransition();
   const set = (k: keyof typeof d, v: string) => setD((x) => ({ ...x, [k]: v }));
-  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}>➕ Nuevo cupón</button>;
+  if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nuevo cupón</button>;
   return (
     <form className="tarjeta p-5 grid gap-3 sm:grid-cols-2" data-nuevo-cupon
       onSubmit={(e) => { e.preventDefault(); empezar(async () => {
@@ -39,7 +40,7 @@ export function NuevoCupon({ planes }: { planes: { plan_id: string; nombre: stri
         ))}</div></fieldset>
       {estado.error && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
       <div className="flex gap-2 sm:col-span-2">
-        <button type="submit" className="boton boton-principal" disabled={guardando || d.codigo.length < 3}>{guardando ? "Guardando…" : "✅ Crear cupón"}</button>
+        <button type="submit" className="boton boton-principal" disabled={guardando || d.codigo.length < 3}>{guardando ? "Guardando…" : "Crear cupón"}</button>
         <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { aprobar, rechazar, verComprobante } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: string; socio: string; monto: number; descripcion: string | null }; cuando: string }) {
   const [rechazando, setRechazando] = useState(false);
@@ -33,8 +34,8 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
           <p className="texto-suave">{p.descripcion ?? "Transferencia"} · {cuando}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="boton" onClick={abrir} disabled={ocupado}>🧾 Ver comprobante</button>
-          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => aprobar(p.pago_id), "✅ Aprobada")}>✅ Aprobar</button>
+          <button type="button" className="boton" onClick={abrir} disabled={ocupado}><Icono nombre="recibo" /> Ver comprobante</button>
+          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => aprobar(p.pago_id), "Aprobada")}><Icono nombre="ok" /> Aprobar</button>
           {!rechazando && <button type="button" className="boton" onClick={() => setRechazando(true)}>✕ Rechazar</button>}
         </div>
       </div>
@@ -44,7 +45,7 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
           <button type="submit" disabled={!motivo.trim() || ocupado} className="boton boton-peligro">Rechazar</button>
         </form>
       )}
-      {error && <p role="alert" className="pildora pildora-rojo mt-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}
     </li>
   );
 }

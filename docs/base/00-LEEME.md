@@ -28,7 +28,7 @@ Entonces esta vuelta **no rehace nada**. Por cada punto del pedido:
 
 | # | Tema | Decisión |
 |---|---|---|
-| D36 | Vigencia guardada | **Se guarda `cubierto_hasta` en el socio** (y su saldo de hechos), por trigger, cada vez que cambia un hecho: pago, anulación, pausa, cambio de plan, regla de vencimiento, plan familiar. El color se saca comparando esa fecha con el momento: nunca queda viejo y no hay cron. Detalle en `REGLAS-NEGOCIO.md` § Vigencia. |
+| D36 | Vigencia guardada | **Se guarda solo `cubierto_hasta` en el socio** (ni estado ni deuda: la deuda crece sola con los días), por trigger, cada vez que cambia un hecho: pago, anulación, pausa, cambio de plan, regla de vencimiento, plan familiar. El color se saca comparando esa fecha con el momento: nunca queda viejo y no hay cron. Detalle en `REGLAS-NEGOCIO.md` § Vigencia. |
 | D37 | Fondo | **Claro por defecto, oscuro elegible**: el gimnasio elige el suyo en Configuración y cada usuario puede cambiarlo en Mi cuenta. Reemplaza el "modo gym oscuro" del 05/11. |
 | D38 | Íconos | **Íconos de línea propios** (set tipo Lucide, en el color del gimnasio) en lugar de emojis, en todos lados: menú, botones, app, página. |
 | D39 | Nombre | **El producto se llama Base.** Cambia todo lo que ve la gente (ingreso, página de venta, mails, super admin, títulos, manifest). El repo, el código, las tablas y las variables siguen como están. |
@@ -106,7 +106,17 @@ como "decidido por defecto" y se sigue.
 |---|---|---|
 | `00-LEEME.md` | Esto | Armado el 07/11 |
 | `PEDIDO-ORIGINAL.md` | El pedido de Mateo textual | Armado el 07/11 |
-| `PROGRESO.md` | La lista de trabajo P0 → P1 → P2 con su estado, y arriba el resumen para Mateo | El agente lo mantiene |
+| `RECTA-FINAL.md` | **Desde el 09/11, la única lista que sigue el loop**: 8 fases hasta "LISTO PARA TU PASADA" | Armado el 09/11, el agente marca el estado |
+| `PROGRESO.md` | El detalle de cada BASE-* del P0, y arriba el resumen para Mateo | El agente lo mantiene |
+| `SUPER-ADMIN.md` | El super admin mejorado (SA-1 a SA-12) | Armado el 08/11 |
+| `PLATAFORMA.md` | Direcciones, login universal, cómo se encuentra el gimnasio, dominios (PLAT-01 a 08) | Armado el 09/11 |
+| `PENSAR.md` | Las 5 preguntas antes de cada bloque, y lo que pensó el agente | El agente escribe |
+| `AJUSTES-0911-NOCHE.md` | El pedido de Mateo del 09/11 a la noche, textual, y dónde quedó cada ID | Armado el 09/11 |
+| `REPARTO.md` | Los 4 carriles: el agente principal y sus 3 ayudantes sin pisarse | Armado el 09/11 |
+| `FLUIDEZ.md` | La pasada botón por botón: las 14 reglas | Armado el 09/11 |
+| `FALTANTES.md` | Lo que Mateo pidió y no estaba en ninguna lista (FA-1 a FA-24) | Armado el 09/11 |
+| `PRUEBA-DUENO.md` | La pasada visual y la prueba del dueño que hace Mateo al final | Armado el 09/11, el agente lo prepara |
+| `CAMBIOS-MATEO.md` | Lo que Mateo anota en su pasada; va primero en el loop | Mateo |
 | `PREGUNTAS.md` | Preguntas abiertas con la opción recomendada aplicada | El agente agrega |
 | `DETALLES-70.md` | Los 70 detalles: qué existe, qué falta, con qué ítem | Armado el 07/11, el agente actualiza el estado |
 | `DISENO.md` | El diseño de Base: claro, íconos de línea, tipografía, recepción como mostrador | Armado el 07/11 |

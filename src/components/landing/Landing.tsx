@@ -10,6 +10,7 @@ import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
 import { conTextosPorDefecto } from "@/lib/landing-defaults";
 import { FormProbar } from "./FormProbar";
 import { Foto } from "./Foto";
+import { Icono } from "@/components/ui/Icono";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -17,15 +18,15 @@ import { Foto } from "./Foto";
 // solo el emoji de cada tipo de sección.
 
 const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
-  sobre_nosotros: "🏋️",
-  actividades: "💪",
-  planes: "🔥",
-  horarios: "⏰",
-  galeria: "📸",
-  equipo: "👥",
-  preguntas: "💬",
-  ubicacion: "📍",
-  probar: "🙋",
+  sobre_nosotros: "",
+  actividades: "",
+  planes: "",
+  horarios: "",
+  galeria: "",
+  equipo: "",
+  preguntas: "",
+  ubicacion: "",
+  probar: "",
 };
 
 function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
@@ -58,7 +59,7 @@ function Bloque({ id, tipo, titulo, children }: { id: string; tipo: Seccion["tip
     <section aria-labelledby={id} className="px-4 py-12 sm:py-20">
       <div className="mx-auto max-w-5xl">
         <h2 id={id} className="flex items-center gap-4 mb-8 sm:mb-10 scroll-mt-24">
-          <span className="icono" aria-hidden>{EMOJI_SECCION[tipo]}</span>
+          <span className="icono" aria-hidden><Icono nombre={EMOJI_SECCION[tipo]} /></span>
           <span className="titulo text-4xl sm:text-5xl">{titulo}</span>
         </h2>
         {children}
@@ -86,7 +87,7 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
       <ul className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {items.map((a, i) => (
           <li key={`${i}-${a.nombre}`} className="tarjeta p-5 sm:p-6">
-            <p className="text-4xl sm:text-5xl mb-5" aria-hidden>{a.emoji || "💪"}</p>
+            <p className="text-4xl sm:text-5xl mb-5" aria-hidden><Icono nombre={a.emoji || "pesa"} /></p>
             <p className="titulo text-2xl">{a.nombre}</p>
             {a.descripcion && <p className="texto-suave mt-1.5 text-[15px] leading-snug">{a.descripcion}</p>}
           </li>
@@ -111,7 +112,7 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; wh
         </p>
       )}
       {variantes.map((v) => (
-        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "var(--acento)" }}>💸 {v}</p>
+        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "var(--acento)" }}><Icono nombre="plata" /> {v}</p>
       ))}
       {condiciones.length > 0 && (
         <ul className="mt-5 flex flex-wrap gap-2">
@@ -120,7 +121,7 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; wh
       )}
       {altas && p.id
         ? <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a href={`/hacete-socio?plan=${p.id}`} className="boton">💪 Elegir este</a>
+            <a href={`/hacete-socio?plan=${p.id}`} className="boton"><Icono nombre="pesa" /> Elegir este</a>
             {link && <a href={link} target="_blank" rel="noopener noreferrer" className="texto-suave underline underline-offset-4">Consultar</a>}
           </div>
         : link && <a href={link} target="_blank" rel="noopener noreferrer" className="boton mt-8">Lo quiero</a>}
@@ -141,7 +142,7 @@ function Planes({ s, landing }: { s: Extract<Seccion, { tipo: "planes" }>; landi
   );
 }
 
-/** "🟢 Abierto · cierra 22:00": la misma cuenta que la app y el panel (privado.agenda). */
+/** "Abierto · cierra 22:00": la misma cuenta que la app y el panel (privado.agenda). */
 function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolean }) {
   if (!texto) return null;
   return (
@@ -165,7 +166,7 @@ function Horarios({ s, agenda }: { s: Extract<Seccion, { tipo: "horarios" }>; ag
             <div key={x.sede_id} className="tarjeta" data-horarios-sede={x.sede}>
               {(sedes.length > 1 || x.texto) && (
                 <div className="flex flex-wrap items-center justify-between gap-2 px-6 pt-5">
-                  {sedes.length > 1 && <p className="titulo text-2xl">📍 {x.sede}</p>}
+                  {sedes.length > 1 && <p className="titulo text-2xl"><Icono nombre="ubicacion" /> {x.sede}</p>}
                   <EstadoAhora texto={x.texto} abierto={x.abierto} />
                 </div>
               )}
@@ -203,7 +204,7 @@ function AvisoCierres({ agenda }: { agenda: Agenda | null }) {
       <ul className="mx-auto max-w-5xl space-y-2" aria-label="Días que cierra el gimnasio">
         {cierres.slice(0, 3).map((c) => (
           <li key={`${c.desde}-${c.sede ?? ""}`} className="mensaje mensaje-aviso" data-cierre>
-            🚫 Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}
+            <Icono nombre="prohibido" /> Cerrado {textoCierre(c)}{c.sede ? ` (${c.sede})` : ""}: {c.motivo}
           </li>
         ))}
       </ul>
@@ -291,8 +292,8 @@ function Ubicacion({ s, sedes }: { s: Extract<Seccion, { tipo: "ubicacion" }>; s
             {conDireccion.length > 1 && <p className="titulo text-xl mb-1">{x.nombre}</p>}
             <p className="text-xl">{x.direccion}</p>
             <div className="flex flex-wrap gap-2 mt-6">
-              {x.mapa_url && <a href={x.mapa_url} target="_blank" rel="noopener noreferrer" className="boton">🗺️ Cómo llegar</a>}
-              {x.telefono && <a href={`tel:${x.telefono}`} className="boton">📞 Llamar</a>}
+              {x.mapa_url && <a href={x.mapa_url} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="ubicacion" /> Cómo llegar</a>}
+              {x.telefono && <a href={`tel:${x.telefono}`} className="boton"><Icono nombre="telefono" /> Llamar</a>}
             </div>
           </li>
         ))}
@@ -331,7 +332,7 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
     <section aria-labelledby="eventos" className="px-4 py-12 sm:py-20" data-eventos-landing={eventos.length}>
       <div className="mx-auto max-w-5xl">
         <h2 id="eventos" className="flex items-center gap-4 mb-8 sm:mb-10 scroll-mt-24">
-          <span className="icono" aria-hidden>🎟️</span>
+          <span className="icono" aria-hidden><Icono nombre="ticket" /></span>
           <span className="titulo text-4xl sm:text-5xl">Próximos eventos</span>
         </h2>
         <ul className="grid sm:grid-cols-2 gap-4">
@@ -343,7 +344,7 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
               )}
               <p className="titulo text-2xl">{e.nombre}</p>
               <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas && e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>
-              {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `📍 ${e.lugar}`, e.responsable && `👤 ${e.responsable}`].filter(Boolean).join(" · ")}</p>}
+              {(e.lugar || e.responsable) && <p className="texto-suave">{[e.lugar && `${e.lugar}`, e.responsable && `${e.responsable}`].filter(Boolean).join(" · ")}</p>}
               {e.descripcion && <p>{e.descripcion}</p>}
               <p className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="numero text-3xl">{Number(e.precio) > 0 ? formatearPesos(e.precio) : "Gratis"}</span>
@@ -354,7 +355,7 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
               {e.para === "todos"
                 ? <AnotarseEvento eventoId={e.evento_id} lleno={e.quedan === 0} conEspera={e.lista_espera !== false} />
                 : <p className="texto-suave">Anotate desde la app del gimnasio.</p>}
-              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2">💬 Consultar por WhatsApp</a>}
+              {e.quedan > 0 && whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton mt-2"><Icono nombre="mensaje" /> Consultar por WhatsApp</a>}
             </li>
           ))}
         </ul>
@@ -373,7 +374,7 @@ function Senales({ landing, ahora }: { landing: LandingPublicada; ahora: Agenda[
   const puntaje = resena ? Number(resena.puntaje).toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : "";
   const contenidoResena = resena && (
     <>
-      <span aria-hidden className="text-[#f5b50a]">★</span>
+      <span aria-hidden className="text-[var(--amarillo)]"><Icono nombre="estrella" /></span>
       <span className="numero">{puntaje}</span>
       <span>· {resena.cantidad.toLocaleString("es-AR")} {resena.cantidad === 1 ? "reseña" : "reseñas"} en Google</span>
     </>
@@ -388,7 +389,7 @@ function Senales({ landing, ahora }: { landing: LandingPublicada; ahora: Agenda[
             : <span className="pildora" data-resenas>{contenidoResena}</span>}
         </li>
       )}
-      {socios && <li><span className="pildora" data-socios>👥 +{socios.toLocaleString("es-AR")} socios</span></li>}
+      {socios && <li><span className="pildora" data-socios><Icono nombre="usuarios" /> +{socios.toLocaleString("es-AR")} socios</span></li>}
     </ul>
   );
 }
@@ -398,13 +399,13 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   const pasos = [
     probar && { href: "#probar", titulo: "Probá una clase", texto: "Dejás tu WhatsApp y te escribimos para arreglar día y hora." },
     planes && { href: "#planes", titulo: "Elegí tu plan", texto: "Mirá los precios y quedate con el que te cierra." },
-    altas && { href: "/hacete-socio", titulo: "Hacete socio", texto: "Te anotás desde el celular y empezás." },
+    altas && { href: "/hacete-socio", titulo: "Quiero ser socio", texto: "Te anotás desde el celular y empezás." },
   ].filter(Boolean) as { href: string; titulo: string; texto: string }[];
   if (pasos.length < 2) return null;
   return (
     <section aria-labelledby="empezar" className="px-4 pt-4 pb-2" data-como-empezar>
       <div className="mx-auto max-w-5xl">
-        <h2 id="empezar" className="titulo text-2xl sm:text-3xl mb-4">🚀 ¿Primera vez? Empezá acá</h2>
+        <h2 id="empezar" className="titulo text-2xl sm:text-3xl mb-4"><Icono nombre="estrella" /> ¿Primera vez? Empezá acá</h2>
         <ol className="grid gap-3 sm:grid-cols-3">
           {pasos.map((p, i) => (
             <li key={p.titulo}>
@@ -442,9 +443,9 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <span className="titulo text-xl truncate">{marca.nombre}</span>
           </a>
           <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            {landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton">💪 Hacete socio</a>}
-            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton">🔥 Ver planes</a>}
-            <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
+            <a href="/hacete-socio" className="hidden sm:inline-flex boton"><Icono nombre="pesa" /> Quiero ser socio</a>
+            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton"><Icono nombre="fuego" /> Ver planes</a>}
+            <a href="/ingresar?modo=socio" className="boton"><Icono nombre="pesa" /> Soy socio</a>
           </nav>
         </div>
       </header>
@@ -465,9 +466,9 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
               <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
-                {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis>🎁 Probá gratis</a>}
-                {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-                {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30">💪 Hacete socio</a>}
+                {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
+                {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
+                <a href="/hacete-socio" className="boton text-lg px-8 bg-white/15 text-white border-white/30"><Icono nombre="pesa" /> Quiero ser socio</a>
               </div>
             </div>
           </div>
@@ -480,10 +481,10 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <Senales landing={landing} ahora={ahora} />
             <div className="mt-10 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
-              {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis>🎁 Probá gratis</a>}
-              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "💬 " : ""}{portada.boton_texto}</BotonPrincipal>}
-              {landing.altas_online && <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto">💪 Hacete socio</a>}
-              {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto">🔥 Ver planes</a>}
+              {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
+              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
+              <a href="/hacete-socio" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="pesa" /> Quiero ser socio</a>
+              {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="fuego" /> Ver planes</a>}
             </div>
           </div>
         </section>
@@ -506,47 +507,52 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             <span className="titulo text-xl">{marca.nombre}</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton">💬 WhatsApp</a>}
+            {whatsapp && <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
             {contacto.instagram && (
-              <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton">📷 Instagram</a>
+              <a href={`https://instagram.com/${contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="camara" /> Instagram</a>
             )}
-            {contacto.email && <a href={`mailto:${contacto.email}`} className="boton">✉️ Mail</a>}
-            {landing.prueba_social?.resena?.link && <a href={landing.prueba_social.resena.link} target="_blank" rel="noopener noreferrer" className="boton">⭐ Dejanos tu reseña</a>}
+            {contacto.email && <a href={`mailto:${contacto.email}`} className="boton"><Icono nombre="mail" /> Mail</a>}
+            <a href="/privacidad" className="boton" data-privacidad-link><Icono nombre="candado" /> Privacidad</a>
+            {landing.prueba_social?.resena?.link && <a href={landing.prueba_social.resena.link} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="estrella" /> Dejanos tu reseña</a>}
           </div>
         </div>
         <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm texto-tenue">Página hecha con Base</p>
-          <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4">🛎️ Soy del equipo</a>
+          <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4"><Icono nombre="campana" /> Soy del equipo</a>
         </div>
       </footer>
 
       {whatsapp && (
         <a href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Escribinos por WhatsApp" data-whatsapp-flotante
           className="hidden sm:grid fixed right-6 bottom-6 z-30 size-14 place-items-center rounded-full text-2xl shadow-lg"
-          style={{ background: "var(--acento)", color: "var(--acento-texto)" }}>💬</a>
+          style={{ background: "var(--acento)", color: "var(--acento-texto)" }}><Icono nombre="mensaje" /></a>
       )}
       {whatsapp && (
         <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-[color-mix(in_oklab,var(--fondo)_88%,transparent)] backdrop-blur-md">
-          <BotonPrincipal href={whatsapp} className="w-full">💬 {portada.boton_texto}</BotonPrincipal>
+          <BotonPrincipal href={whatsapp} className="w-full"><Icono nombre="mensaje" /> {portada.boton_texto}</BotonPrincipal>
         </div>
       )}
     </div>
   );
 }
 
-export function LandingProximamente({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
+/**
+ * U4 · "Ocultar mi página": solo la portada con la marca y los dos botones. Nunca un cartel de "en construcción": la página
+ * de un gimnasio es siempre su landing, y esto es lo que queda cuando el dueño decide no mostrarla.
+ */
+export function LandingOculta({ marca, contacto }: { marca: Marca; contacto?: { whatsapp: string | null; mensaje_whatsapp: string | null } }) {
   const whatsapp = linkWhatsapp(contacto?.whatsapp ?? null, contacto?.mensaje_whatsapp || "Hola! Vi su página.");
   return (
-    <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4">
+    <div {...propsMarca(marca)} className="min-h-dvh grid place-items-center px-4" data-pagina-oculta>
       <div className="text-center">
         <div className="flex justify-center"><Logo marca={marca} grande /></div>
         <h1 className="titular text-5xl sm:text-6xl mt-8">{marca.nombre}</h1>
-        <p className="texto-suave mt-4 text-lg">🚧 Estamos armando nuestra página. Volvé pronto.</p>
-        {whatsapp && <div className="mt-8 flex justify-center"><BotonPrincipal href={whatsapp} className="px-8">💬 Escribinos por WhatsApp</BotonPrincipal></div>}
-        <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <a href="/ingresar?modo=socio" className="boton">💪 Soy socio</a>
-          <a href="/ingresar" className="boton">🛎️ Soy del equipo</a>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="/hacete-socio" className="boton boton-principal text-lg px-8"><Icono nombre="pesa" /> Quiero ser socio</a>
+          <a href="/ingresar?modo=socio" className="boton text-lg px-8"><Icono nombre="pesa" /> Soy socio</a>
         </div>
+        {whatsapp && <div className="mt-6 flex justify-center"><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a></div>}
+        <p className="mt-10"><a href="/ingresar" className="text-sm texto-suave underline underline-offset-4"><Icono nombre="campana" /> Soy del equipo</a></p>
       </div>
     </div>
   );

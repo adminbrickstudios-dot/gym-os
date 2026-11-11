@@ -56,7 +56,7 @@ try {
   await d.goto(`${G}/panel/planes`);
   const plan = d.locator('li[data-plan="Libre mensual"]');
   await plan.waitFor({ timeout: 60000 });
-  await plan.locator('button:has-text("💲 Precios")').click();
+  await plan.locator('button:has-text("Precios")').click();
   await plan.locator('input[aria-label="Precio general"]').fill("30.000");
   await plan.locator('button:has-text("Guardar precios")').click();
   await plan.getByText("$30.000").first().waitFor({ timeout: 30000 });
@@ -105,8 +105,8 @@ try {
   await estado.waitFor({ timeout: 60000 });
   // Un clic antes de que la página termine de cargar no hace nada: se espera y, si no cambió, se vuelve a tocar.
   await d.waitForLoadState("networkidle").catch(() => {});
-  for (let i = 0; i < 3 && await estado.locator('button:has-text("Publicar mi página")').count(); i++) {
-    await estado.locator('button:has-text("Publicar mi página")').click();
+  for (let i = 0; i < 3 && await estado.locator('button:has-text("Mostrar mi página")').count(); i++) {
+    await estado.locator('button:has-text("Mostrar mi página")').click();
     await d.locator('[data-estado-pagina="publicada"], [data-estado-pagina] [role="alert"]').first().waitFor({ timeout: 15000 }).catch(() => {});
   }
   if (await estado.locator('[role="alert"]').count()) throw new Error(`al publicar: ${await estado.locator('[role="alert"]').innerText()}`);
@@ -158,7 +158,7 @@ try {
   await r.getByText("Cuota Libre mensual").first().waitFor({ timeout: 60000 });
   chequear(/\$30\.000/.test(await r.locator("main").innerText()), "la recepción abre la caja y la cuota sale $30.000", "la cuota no sale $30.000");
   await r.locator('button[aria-pressed]:has-text("Efectivo")').click();
-  await r.locator('button:has-text("✅ Cobrar")').click();
+  await r.locator('button:has-text("Cobrar")').click();
   await esperarCobro(r);
   await r.goto(`${G}/panel/entrada?socio=${uno}`);
   await r.locator('[data-veredicto="verde"]').waitFor({ timeout: 60000 });
@@ -179,7 +179,7 @@ try {
   const reservar = s1.getByRole("button", { name: /^Reservar$/ }).first();
   await reservar.waitFor({ timeout: 60000 });
   await reservar.click();
-  await s1.getByText("✅ Reservada").first().waitFor({ timeout: 30000 });
+  await s1.getByText("Reservada").first().waitFor({ timeout: 30000 });
   ok("el socio que pagó entra a la app con su celular y reserva CrossFit de mañana");
 
   const s2 = await nueva(CELU);
@@ -194,7 +194,7 @@ try {
 
   // ── 6. El dueño aprueba y ve la plata ──
   await d.goto(`${G}/panel/transferencias`);
-  await d.locator('button:has-text("✅ Aprobar")').first().click();
+  await d.locator('button:has-text("Aprobar")').first().click();
   await d.getByText("Aprobada").first().waitFor({ timeout: 30000 });
   await d.goto(`${G}/panel/entrada?socio=${dos}`);
   await d.locator('[data-veredicto="verde"]').waitFor({ timeout: 60000 });

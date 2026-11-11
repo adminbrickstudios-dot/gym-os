@@ -5,6 +5,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import type { PtSocio } from "@/app/panel/pt/acciones";
 import { cancelarMiSesion, reservarMiSesion } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const hora = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
 const dia = (m: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", day: "numeric", month: "long" }).format(new Date(m));
@@ -33,7 +34,7 @@ export function MisSesiones({ socioId, datos, zona }: { socioId: string; datos: 
           <div className="tarjeta p-5" data-sin-pack><p className="titulo text-2xl">Todavía no tenés un pack</p><p className="texto-suave">Pedíselo en la recepción y después reservás tus horarios acá.</p></div>
         ) : (datos.packs ?? []).map((p) => (
           <div key={p.venta_item_id} className="tarjeta p-5" data-pack-socio>
-            <p className="titulo text-2xl">🎟️ {p.nombre}</p>
+            <p className="titulo text-2xl"><Icono nombre="ticket" /> {p.nombre}</p>
             <p className="texto-suave" data-pack-restantes={p.restantes}>
               {p.vigente ? `Te quedan ${p.restantes} de ${p.total} ${p.total === 1 ? "sesión" : "sesiones"}` : p.restantes <= 0 ? `Usaste las ${p.total} sesiones` : "Este pack venció"}
               {p.vence_en && p.vigente ? ` · hasta el ${diaCorto(p.vence_en, zona)}` : ""}
@@ -44,7 +45,7 @@ export function MisSesiones({ socioId, datos, zona }: { socioId: string; datos: 
       </section>
 
       {gimCancelo.map((s) => (
-        <p key={s.sesion_id} className="mensaje mensaje-aviso" data-sesion-cancelada-gym><span aria-hidden>🟡</span><span>Se canceló tu turno del {corto(s.inicio, zona)} con {s.entrenador}{s.cancelada_motivo ? ` (${s.cancelada_motivo})` : ""}. La sesión se te devolvió.</span></p>
+        <p key={s.sesion_id} className="mensaje mensaje-aviso" data-sesion-cancelada-gym><span aria-hidden><Icono nombre="punto-amarillo" /></span><span>Se canceló tu turno del {corto(s.inicio, zona)} con {s.entrenador}{s.cancelada_motivo ? ` (${s.cancelada_motivo})` : ""}. La sesión se te devolvió.</span></p>
       ))}
 
       <section className="space-y-2" aria-labelledby="mis-turnos">
@@ -63,7 +64,7 @@ export function MisSesiones({ socioId, datos, zona }: { socioId: string; datos: 
         </ul>
         {pasadas.length > 0 && (
           <details className="texto-suave text-sm"><summary className="cursor-pointer">Anteriores</summary>
-            <ul className="mt-2 space-y-1">{pasadas.map((s) => <li key={s.sesion_id}>{corto(s.inicio, zona)} · {s.entrenador} · {s.estado === "dictada" ? "✅ la diste" : s.estado === "ausente" ? "🚫 no viniste" : "a confirmar"}</li>)}</ul></details>
+            <ul className="mt-2 space-y-1">{pasadas.map((s) => <li key={s.sesion_id}>{corto(s.inicio, zona)} · {s.entrenador} · {s.estado === "dictada" ? <><Icono nombre="ok" /> la diste</> : s.estado === "ausente" ? <><Icono nombre="prohibido" /> no viniste</> : "a confirmar"}</li>)}</ul></details>
         )}
       </section>
 

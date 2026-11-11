@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarReglaCierres, leerReglaCierres } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 const OPCIONES: [boolean, string, string][] = [
   [false, "No suma días", "Un feriado o unas vacaciones no mueven el vencimiento de nadie. Es lo normal y lo que queda si no elegís."],
@@ -20,7 +21,7 @@ export function ReglaCierres({ puedeEditar }: { puedeEditar: boolean }) {
   }, []);
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-3" data-regla-cierres={suma === null ? "cargando" : suma ? "suma" : "no-suma"}>
-      <p className="titulo text-2xl">🚫 Días cerrados</p>
+      <p className="titulo text-2xl"><Icono nombre="prohibido" /> Días cerrados</p>
       <p className="texto-suave">Cuando cargás un cierre (feriado, vacaciones, mantenimiento), ¿esos días se suman al vencimiento de los socios? Lo decide esta regla, igual para todos: ya no depende de quién cargue el cierre.</p>
       {suma === null && !estado.error ? <div className="esqueleto h-16" aria-hidden /> : suma !== null && (
         <>

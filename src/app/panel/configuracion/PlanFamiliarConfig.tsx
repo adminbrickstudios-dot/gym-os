@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { guardarPlanFamiliar } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-46G: el interruptor del plan familiar/corporativo. Arranca apagado; lo prende solo el dueño (guarda al tocarlo). */
 export function PlanFamiliarConfig({ inicial, puedeEditar }: { inicial: boolean; puedeEditar: boolean }) {
@@ -11,7 +12,7 @@ export function PlanFamiliarConfig({ inicial, puedeEditar }: { inicial: boolean;
   const [ocupado, empezar] = useTransition();
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-2" data-plan-familiar-config={activo ? "prendido" : "apagado"}>
-      <p className="titulo text-2xl">👨‍👩‍👧 Plan familiar y corporativo</p>
+      <p className="titulo text-2xl"><Icono nombre="usuarios" /> Plan familiar y corporativo</p>
       <Interruptor etiqueta="Un titular paga por los demás" data-opcion="plan-familiar" checked={activo} disabled={!puedeEditar || ocupado}
         ayuda={activo
           ? "Prendido: en la ficha de un grupo familiar elegís quién paga; los demás entran con su plan. Si el titular vence o se da de baja, a cada uno se le explica. Los cobros van al titular."

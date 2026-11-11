@@ -12,7 +12,7 @@ const reloj = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
  * `intento` es el último resultado de verificar (cambia con cada respuesta); `envio`, el último pedido
  * de código (cambia con cada reenvío y reinicia la cuenta).
  */
-export function PasoCodigo({ accion, ocultos, intro, error, intento, envio, entrando, reenviar, reenviando, cambiar, textoBoton = "✅ Entrar" }: {
+export function PasoCodigo({ accion, ocultos, intro, error, intento, envio, entrando, reenviar, reenviando, cambiar, textoBoton = "Entrar" }: {
   accion: (datos: FormData) => void;
   ocultos: Record<string, string>;
   intro: ReactNode;

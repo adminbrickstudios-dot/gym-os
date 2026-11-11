@@ -22,6 +22,7 @@ import { FilaTarea, type Tarea } from "./tareas/Tareas";
 import { UltimasEntradas, type EntradaVivo } from "@/components/panel/UltimasEntradas";
 import { FueraDeServicio, type MaquinaFuera } from "@/components/panel/FueraDeServicio";
 import { LockersVencen, type LockerVence } from "@/components/panel/LockersVencen";
+import { Icono } from "@/components/ui/Icono";
 
 // VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
 type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
@@ -53,12 +54,12 @@ export default async function Inicio() {
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
-          <h1 className="titular text-5xl sm:text-7xl pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} 👋</h1>
+          <h1 className="titular text-5xl sm:text-7xl pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
-          <BotonEntrada className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
+          <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
@@ -146,7 +147,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           const turno = datos.ahora.find((a) => a.tipo === "caja");
           return turno && rutaDisponible("/panel/caja", rol, panel.secciones_apagadas) ? (
             <p data-turno className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
-              <span className="min-w-0 flex-1"><span aria-hidden>{turno.emoji}</span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
+              <span className="min-w-0 flex-1"><span aria-hidden><Icono nombre={turno.emoji} /></span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
               <Link href="/panel/caja" className="boton">{turno.tono ? "Abrir mi turno" : "Cerrar mi turno"}</Link>
             </p>
           ) : null;
@@ -168,21 +169,21 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
           {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
           {(rol === "dueno" || rol === "encargado") && (
-            <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline">📊 Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
+            <p className="mt-6"><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>
           )}
         </section>
 
         {rol !== "profe" && (
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8 [&>*]:min-w-0">
             <section aria-labelledby="para-hacer" data-para-hacer={hacerHoy.length}>
-              <h2 id="para-hacer" className="titulo text-3xl mb-4">✅ Para hacer hoy{hacerHoy.length > 0 ? ` (${hacerHoy.length})` : ""}</h2>
+              <h2 id="para-hacer" className="titulo text-3xl mb-4"><Icono nombre="ok" /> Para hacer hoy{hacerHoy.length > 0 ? ` (${hacerHoy.length})` : ""}</h2>
               {hacerHoy.length === 0 ? (
-                <p className="texto-suave text-lg">Nada para hacer por ahora: todo al día. ✨</p>
+                <p className="texto-suave text-lg">Nada para hacer por ahora: todo al día. <Icono nombre="estrella" /></p>
               ) : (
                 <ul className="space-y-2">
                   {hacerHoy.map((x) => (
                     <li key={x.clave} data-hacer={x.clave} className="tarjeta flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                      <span className="icono" aria-hidden>{x.emoji}</span>
+                      <span className="icono" aria-hidden><Icono nombre={x.emoji} /></span>
                       <span className="min-w-0 flex-1 font-semibold text-lg leading-tight">{x.texto}</span>
                       <Link href={`/panel${x.href}`} className="boton !min-h-11" aria-label={`Ver: ${x.texto}`}>Ver</Link>
                     </li>
@@ -192,7 +193,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
             </section>
             {verEntradas && (
               <section aria-labelledby="ultimas-entradas">
-                <h2 id="ultimas-entradas" className="titulo text-3xl mb-4">🚪 Últimas entradas <span className="texto-tenue text-base font-normal">en vivo</span></h2>
+                <h2 id="ultimas-entradas" className="titulo text-3xl mb-4"><Icono nombre="puerta" /> Últimas entradas <span className="texto-tenue text-base font-normal">en vivo</span></h2>
                 <UltimasEntradas iniciales={entradasVivo} zona={zona} />
               </section>
             )}
@@ -202,13 +203,13 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
         <section aria-labelledby="ahora">
           <h2 id="ahora" className="titulo text-3xl mb-4">Ahora y lo que sigue</h2>
           {ahora.length === 0 ? (
-            <p className="texto-suave text-lg">Nada pendiente por ahora. ✨</p>
+            <p className="texto-suave text-lg">Nada pendiente por ahora. <Icono nombre="estrella" /></p>
           ) : (
             <ul className="space-y-2">
               {ahora.map((a, i) => {
                 const contenido = (
                   <>
-                    <span className="icono" aria-hidden>{a.emoji}</span>
+                    <span className="icono" aria-hidden><Icono nombre={a.emoji} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg leading-tight">{a.titulo}</span>
                       {a.detalle && <span className="block texto-suave text-[15px] truncate">{a.detalle}</span>}
@@ -233,7 +234,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           const mias = tareas.tareas.filter((t) => t.mia && !t.hecha_en && t.dia <= tareas.hoy);
           return mias.length > 0 && (
             <section aria-labelledby="tareas-hoy" data-tareas-inicio={mias.length}>
-              <h2 id="tareas-hoy" className="titulo text-3xl mb-1">📌 Tus tareas de hoy</h2>
+              <h2 id="tareas-hoy" className="titulo text-3xl mb-1"><Icono nombre="chincheta" /> Tus tareas de hoy</h2>
               <p className="texto-suave mb-4">Las de hoy y las que quedaron atrasadas. <LinkPanel href="/panel/tareas" siNoEsta="texto" className="underline">Ver todas</LinkPanel></p>
               <ul className="space-y-2">{mias.map((t) => <FilaTarea key={t.id} t={t} hoy={tareas.hoy} />)}</ul>
             </section>
@@ -242,7 +243,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {dejados.length > 0 && (
           <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>
-            <h2 id="dejados" className="titulo text-3xl mb-1">🚪 Dejados pasar hoy</h2>
+            <h2 id="dejados" className="titulo text-3xl mb-1"><Icono nombre="puerta" /> Dejados pasar hoy</h2>
             <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué. <LinkPanel href="/panel/entrada/control" siNoEsta="texto" className="underline">Ver la semana</LinkPanel></p>
             <ul className="space-y-2">
               {dejados.map((x) => (
@@ -262,16 +263,16 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {invitados.length > 0 && (
           <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
-            <h2 id="invitados-hoy" className="titulo text-3xl mb-4">👥 Invitados hoy</h2>
+            <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
             <ul className="space-y-1">
-              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✅" : "⏳"} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✓" : ""} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
           </section>
         )}
 
         {olvidadas.length > 0 && (
           <section aria-labelledby="cajas-olvidadas" data-cajas-olvidadas={olvidadas.length}>
-            <h2 id="cajas-olvidadas" className="titulo text-3xl mb-4">⏰ Caja abierta</h2>
+            <h2 id="cajas-olvidadas" className="titulo text-3xl mb-4"><Icono nombre="reloj" /> Caja abierta</h2>
             <ul className="space-y-2">
               {olvidadas.map((o) => (
                 <li key={o.turno_id}>
@@ -292,7 +293,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {reponer.length > 0 && rutaDisponible("/panel/planes", rol, panel.secciones_apagadas) && (
           <section aria-labelledby="reponer" data-reponer={reponer.length}>
-            <h2 id="reponer" className="titulo text-3xl mb-4">📦 Por reponer</h2>
+            <h2 id="reponer" className="titulo text-3xl mb-4"><Icono nombre="caja" /> Por reponer</h2>
             <ul className="flex flex-wrap gap-2">
               {reponer.map((p) => (
                 <li key={p.producto_id}>
@@ -305,14 +306,14 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {anular.length > 0 && (
           <section aria-labelledby="pedidos-anulacion" data-pedidos-anulacion={anular.length}>
-            <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4">↩️ Ventas para anular</h2>
+            <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4"><Icono nombre="deshacer" /> Ventas para anular</h2>
             <ul className="space-y-2">{anular.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} conSocio />)}</ul>
           </section>
         )}
 
         {pedidosBaja.length > 0 && (
           <section aria-labelledby="pedidos-baja" data-pedidos-baja-inicio={pedidosBaja.length}>
-            <h2 id="pedidos-baja" className="titulo text-3xl mb-1">👋 Pidieron la baja</h2>
+            <h2 id="pedidos-baja" className="titulo text-3xl mb-1"><Icono nombre="salir" /> Pidieron la baja</h2>
             <p className="texto-suave mb-4">Desde la app. Hablales antes: a veces una pausa o un cambio de plan alcanza.</p>
             <ul className="space-y-2">
               {pedidosBaja.map((x) => (
@@ -321,7 +322,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg truncate">{x.nombre}</span>
                       <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}{x.codigo ? ` · ${x.codigo}` : ""}</span>
-                      {x.tarde && <span className="block font-semibold text-sm" data-baja-tarde>⏳ Hace más de 24 h que espera respuesta</span>}
+                      {x.tarde && <span className="block font-semibold text-sm" data-baja-tarde><Icono nombre="reloj-arena" /> Hace más de 24 h que espera respuesta</span>}
                     </span>
                     <span className="texto-suave">Resolver</span>
                   </LinkPanel>
@@ -333,7 +334,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {pedidosPausa.length > 0 && (
           <section aria-labelledby="pedidos-pausa" data-pedidos-pausa={pedidosPausa.length}>
-            <h2 id="pedidos-pausa" className="titulo text-3xl mb-4">⏸️ Pausas para aprobar</h2>
+            <h2 id="pedidos-pausa" className="titulo text-3xl mb-4"><Icono nombre="pausa" /> Pausas para aprobar</h2>
             <ul className="space-y-2">
               {pedidosPausa.map((x) => (
                 <li key={x.id}>
@@ -352,18 +353,18 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
 
         {cumples.length > 0 && (
           <section aria-labelledby="cumples" data-cumplen-hoy={cumples.length}>
-            <h2 id="cumples" className="titulo text-3xl mb-4">🎂 Cumplen hoy</h2>
+            <h2 id="cumples" className="titulo text-3xl mb-4"><Icono nombre="calendario" /> Cumplen hoy</h2>
             <ul className="space-y-2">
               {cumples.map((c) => {
                 const wa = linkWhatsappSocio(c.telefono, c.mensaje);
                 return (
                   <li key={c.socio_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="text-2xl" aria-hidden>🎉</span>
+                    <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
                     <span className="min-w-0 flex-1">
                       <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
                       <span className="block texto-suave">Cumple {c.cumple}</span>
                     </span>
-                    {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton">💬 Saludar</a>}
+                    {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
                   </li>
                 );
               })}

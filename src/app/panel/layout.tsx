@@ -3,22 +3,23 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
-import { Marco, type Abono, type DatosEntrada } from "@/components/panel/Marco";
+import { Marco, type DatosEntrada } from "@/components/panel/Marco";
 import { redirect } from "next/navigation";
 import { AyudaBrik } from "@/components/panel/AyudaBrik";
 import { AyudaPantalla } from "@/components/ui/AyudaPantalla";
 import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
 import { BannerSoporte } from "@/components/panel/BannerSoporte";
 
-type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number };
+type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?: string };
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
-import { CONFIG_ENTRADA_POR_DEFECTO, type ConfigEntrada } from "./entrada/config";
+import { CONFIG_ENTRADA_POR_DEFECTO } from "./entrada/config";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 import { urlMarca } from "@/lib/landing";
-import { contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
+import { contextoCompleto, contextoPanel, ErrorDatos, rpc } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -33,6 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LayoutPanel({ children }: { children: ReactNode }) {
   // En la dirección de la plataforma (sin subdominio) se puede volver a elegir gimnasio.
   const enPlataforma = normalizarHost((await headers()).get("host")) === dominioPlataforma();
+  const ayudasP = ayudasDeUsuario();   // VD-31: sale a la vez que el contexto (si falla, no hay globos: nunca bloquea)
   let panel;
   try {
     panel = await contextoPanel();
@@ -41,11 +43,11 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       return (
         <main className="min-h-dvh flex items-center px-4">
           <div className="mx-auto w-full max-w-xl">
-            <Aviso emoji="🔒" titulo="No tenés acceso a este gimnasio">
+            <Aviso icono="candado" titulo="No tenés acceso a este gimnasio">
               Tu usuario no es parte del equipo acá. Si debería serlo, pedile al dueño que te agregue.
               <div className="mt-6 flex flex-wrap gap-2">
-                {enPlataforma && <Link href="/elegir" className="boton boton-principal">🔁 Elegir otro gimnasio</Link>}
-                <form action="/salir" method="post"><button className="boton">🚪 Cerrar sesión</button></form>
+                {enPlataforma && <Link href="/elegir" className="boton boton-principal"><Icono nombre="repetir" /> Elegir otro gimnasio</Link>}
+                <form action="/salir" method="post"><button className="boton"><Icono nombre="puerta" /> Cerrar sesión</button></form>
               </div>
             </Aviso>
           </div>
@@ -55,20 +57,18 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     throw e;
   }
   const atiende = (await cookies()).get("gymos_operador_nombre")?.value;
-  // ADM-2/ADM-3: el abono de Gym OS (si falla la consulta, no se inventa un estado).
-  const [abono, ayudas] = await Promise.all([
-    rpc<Abono>("estado_abono_panel", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
-    ayudasDeUsuario(),   // VD-31: qué globos de ayuda ya vio esta persona (si falla, no hay globos: nunca bloquea)
-  ]);
+  // ADM-2/ADM-3 + VD-1: el abono, la config de Entrada y las formas ya vinieron con el contexto (un solo viaje); solo las ayudas piden aparte.
+  const completo = await contextoCompleto();
+  const conEntrada = panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas);
+  const abono = completo.abono ?? null;
+  const config = conEntrada ? (completo.config_entrada ?? CONFIG_ENTRADA_POR_DEFECTO) : null;
+  const formas = conEntrada ? (completo.formas_entrada ?? []) : null;
+  const ayudas = await ayudasP;
   // VD-1: la ventana de Entrada vive en todas las pantallas (recepción, encargado y dueño; la profe no entra a la puerta).
   let entrada: DatosEntrada | null = null;
-  if (panel.yo.rol !== "profe" && rutaDisponible("/panel/entrada", panel.yo.rol, panel.secciones_apagadas)) {
+  if (conEntrada && config && formas) {
     try {
       const { sede, puedeCambiar } = sedeActiva(panel);
-      const [config, formas] = await Promise.all([
-        rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => CONFIG_ENTRADA_POR_DEFECTO),
-        rpc<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }).catch(() => [] as string[]),
-      ]);
       entrada = {
         sedeId: sede.id, config, conQr: formas.includes("qr_socio"), conLlavero: formas.includes("nfc"),
         // VD-1b: el dueño con varias sedes elige en cuál anota; VD-6: el alta rápida cobra solo si Vender está disponible.
@@ -87,8 +87,8 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   return (
     <>
       <RegistrarSesion />
-      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
-        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
+      <Marco panel={panel} tema={(await cookies()).get("tema")?.value ?? null} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+        {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}
         {pideAyuda && <AyudaBrik />}

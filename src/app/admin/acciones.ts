@@ -1,8 +1,14 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib/cuentas";
-import { dominioBase, dominioPlataforma, subdominiosFuncionan } from "@/lib/dominios";
+import { dominioBase } from "@/lib/dominios";
+import { urlGimnasio, urlPanel } from "@/lib/urls";
 import { rpc } from "@/lib/panel/servidor";
+import { normalizarSlug, errorDeSlug } from "@/lib/admin/slug";
+import { agregarDominio as agregarDominioVercel, configuracionVercel, verificarDominio as verificarDominioVercel, type EstadoDominio, type Fetch as VercelFetch } from "@/lib/admin/vercel-dominios";
+import { leerPago } from "@/lib/mercadopago";
+import { procesarPagoMP } from "@/lib/mp-procesar";
+import { clienteServicio } from "@/lib/supabase/servicio";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
 // valida con la sesión de quien pide (admin_* / *_para_*), recién después el
@@ -11,38 +17,64 @@ import { rpc } from "@/lib/panel/servidor";
 
 export type EstadoAlta = {
   error?: string;
-  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; bienvenida?: { texto: string; wa: string | null } };
+  ok?: { gimnasio_id: string; slug: string; nombre: string; email?: string; contrasena?: string; aviso: string; pendiente?: boolean;
+         equipoId?: string; yaExistia?: boolean; contrasenaNoAplicada?: boolean; bienvenida?: { texto: string; wa: string | null };
+         accesos?: Accesos; prueba?: PruebaGimnasio };
 };
+
+/** P5 (EDIT-S02): lo que se le pasa al dueño, listo para copiar o mandar por wa.me. La contraseña solo se ve al crearla. */
+export type Accesos = { panel: string; web: string; email: string; contrasena?: string; texto: string; wa: string | null };
+/** Cuando el mail ya tenía cuenta, la contraseña que escribió quien crea no se aplica: se dice en palabras y se ofrece “Contraseña nueva”. */
+const AVISO_NO_APLICADA = "Ese mail ya tenía cuenta: la contraseña que escribiste NO se aplicó. Entra con la que ya tiene, o poné una nueva con “Contraseña nueva”.";
+export type PasoPrueba = { clave: string; titulo: string; estado: "ok" | "falta" | "aviso"; detalle?: string; arreglo?: string | null };
+export type PruebaPersona = { equipo_id: string; nombre: string; rol: string; email: string | null; gimnasio: string; ok: boolean; pasos: PasoPrueba[] };
+export type PruebaGimnasio = { gimnasio_id: string; nombre: string; ok: boolean; pasos: PasoPrueba[]; duenos: PruebaPersona[] };
 
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 
-/** VD-40: el mensaje de bienvenida para pasarle al dueño por WhatsApp, con el link y la contraseña provisoria. */
-function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string, celular: string) {
-  const base = dominioBase();
-  const host = subdominiosFuncionan(base) ? `${slug}.${base}` : (dominioPlataforma() || base);
-  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base. Entrá en https://${host} con “Entrá a tu gimnasio”.\nMail: ${email}\nContraseña provisoria: ${contrasena}\nCambiala apenas entres (Mi cuenta).`;
+/** Las direcciones del gimnasio: la web (su raíz) y la puerta del dueño. Sin subdominios propios, se abre desde la plataforma (/g/<slug>). */
+function direccionesDe(slug: string) {
+  return { web: urlGimnasio(slug), panel: urlPanel(slug, "dueno") };
+}
+
+/** VD-40 / P5: el mensaje de bienvenida y la tarjeta "Accesos" (link del panel, mail, contraseña y link de la web). */
+function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string | undefined, celular: string) {
+  const { web, panel } = direccionesDe(slug);
+  const lineaClave = contrasena ? `Contraseña: ${contrasena}\n` : "Entrá con la contraseña que ya tenés.\n";
+  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base.\nTu panel: ${panel}\nMail: ${email}\n${lineaClave}Tu web: ${web}${contrasena ? "\nCambiá la contraseña apenas entres (Mi cuenta)." : ""}`;
   const digitos = celular.replace(/\D/g, "");
-  return { texto, wa: digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : null };
+  const wa = digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  return { bienvenida: { texto, wa: digitos.length >= 8 ? wa : null }, accesos: { panel, web, email, contrasena, texto, wa } satisfies Accesos };
 }
 
 export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoAlta> {
-  const slug = String(f.get("slug") ?? "").trim().toLowerCase();
+  // P4: la dirección se normaliza siempre acá (sin tildes ni espacios) y se valida antes de tocar nada.
   const nombre = String(f.get("nombre") ?? "").trim();
+  const slug = normalizarSlug(String(f.get("slug") ?? "")) || normalizarSlug(nombre);
+  const errSlug = errorDeSlug(slug);
+  if (errSlug) return { error: errSlug };
   const dueno = String(f.get("dueno") ?? "").trim();
   const email = String(f.get("email") ?? "").trim().toLowerCase();
   if (email && !mailValido(email)) return { error: "El mail del dueño no es válido" };
   const base = dominioBase();
   if (!base) return { error: "Falta NEXT_PUBLIC_DOMINIO_BASE en Vercel (Settings → Environment Variables) y redeployar." };
 
+  // U1: si un alta anterior se cortó a la mitad (el gimnasio quedó sin acceso para el dueño), el reintento con la misma
+  // dirección termina ESE gimnasio: no crea otro ni dice "ya existe".
+  const pendiente = await altaPendiente(slug);
   let r: { gimnasio_id: string; equipo_id: string; host: string };
-  try {
-    r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
-  } catch (e) {
-    return { error: (e as Error).message };
+  if (pendiente) {
+    r = { ...pendiente, host: "" };
+  } else {
+    try {
+      r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
+    } catch (e) {
+      return { error: (e as Error).message };
+    }
   }
   revalidatePath("/admin");
   // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde).
-  const tipo = String(f.get("tipo") ?? "");
+  const tipo = pendiente ? "" : String(f.get("tipo") ?? "");
   let avisoPlantilla = "";
   if (tipo) {
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
@@ -50,22 +82,47 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   }
   // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
   const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
-  if (COLOR.test(acento) && COLOR.test(fondo)) {
+  if (!pendiente && COLOR.test(acento) && COLOR.test(fondo)) {
     try { await rpc("admin_guardar_marca", { p_gimnasio_id: r.gimnasio_id, p_acento: acento, p_fondo: fondo }); }
     catch (e) { avisoPlantilla += ` No se pudieron guardar los colores: ${(e as Error).message}.`; }
+  }
+  // P4: el plan de Base elegido en el alta (si falla, el gimnasio ya está creado y se dice).
+  const planBrik = String(f.get("plan_brik") ?? "");
+  if (!pendiente && /^[0-9a-f-]{36}$/i.test(planBrik)) {
+    try { await rpc("admin_asignar_plan_brik", { p_gimnasio_id: r.gimnasio_id, p_plan_id: planBrik }); }
+    catch (e) { avisoPlantilla += ` No se pudo asignar el plan de Base: ${(e as Error).message}.`; }
   }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
   if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };
   try {
-    const { contrasena } = await darAcceso(r.equipo_id, email, dueno, contrasenaElegida(f));
-    return { ok: { ...creado, email, contrasena, aviso: (contrasena ? "Pasale al dueño su mail y esta contraseña provisoria." : "El dueño ya tenía cuenta: entra con la suya.") + avisoPlantilla,
-      bienvenida: contrasena ? bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? "")) : undefined } };
+    const { contrasena, yaExistia, contrasenaNoAplicada } = await darAcceso(r.equipo_id, email, dueno, contrasenaElegida(f));
+    // P4: al terminar se corre "Probar acceso" solo (filas del gimnasio y del dueño); si no se puede correr, el alta igual quedó hecha.
+    let prueba: PruebaGimnasio | undefined;
+    try { prueba = await rpc<PruebaGimnasio>("admin_probar_acceso_gimnasio", { p_gimnasio_id: r.gimnasio_id }); } catch { prueba = undefined; }
+    // P5: la tarjeta Accesos nunca ofrece una contraseña que no se aplicó (si el mail ya tenía cuenta, se manda sin contraseña).
+    const b = bienvenida(nombre, dueno, slug, email, contrasena, String(f.get("celular") ?? ""));
+    const aviso = contrasenaNoAplicada ? AVISO_NO_APLICADA : contrasena ? "Pasale al dueño su mail y esta contraseña." : "El dueño ya tenía cuenta: entra con la suya.";
+    return { ok: { ...creado, email, contrasena, aviso: aviso + avisoPlantilla, equipoId: r.equipo_id, yaExistia, contrasenaNoAplicada,
+      bienvenida: contrasena ? b.bienvenida : undefined, accesos: b.accesos, prueba } };
   } catch (e) {
-    return { ok: { ...creado, aviso: `${nombre} está creado, pero el dueño todavía no tiene acceso: ${(e as Error).message}` } };
+    // U1: el gimnasio queda creado y se dice qué falta y qué hacer; "Terminar alta" está en su ficha y en la lista.
+    return { ok: { ...creado, pendiente: true, aviso: `El alta quedó a medias: ${nombre} está creado, pero el dueño todavía no tiene acceso. ${(e as Error).message} Cuando lo arregles, entrá a la ficha y usá “Terminar alta: dar acceso al dueño” (o repetí este alta con la misma dirección: no crea otro gimnasio).` } };
   }
 }
 
-export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string };
+/** Un alta cortada: el gimnasio de esa dirección existe y su dueño todavía no tiene cuenta. Devuelve el gimnasio y la persona del equipo a la que falta darle acceso. */
+async function altaPendiente(slug: string): Promise<{ gimnasio_id: string; equipo_id: string } | null> {
+  try {
+    const lista = await rpc<{ gimnasio_id: string; slug: string; duenos_sin_cuenta: number }[]>("admin_gimnasios");
+    const g = lista.find((x) => x.slug === slug && x.duenos_sin_cuenta > 0);
+    if (!g) return null;
+    const d = await rpc<{ equipo: { equipo_id: string; rol: string; activo: boolean; es_soporte: boolean; tiene_cuenta: boolean }[] }>("admin_gimnasio", { p_gimnasio_id: g.gimnasio_id });
+    const e = d.equipo.find((p) => p.rol === "dueno" && p.activo && !p.es_soporte && !p.tiene_cuenta);
+    return e ? { gimnasio_id: g.gimnasio_id, equipo_id: e.equipo_id } : null;
+  } catch { return null; }
+}
+
+export type Resultado = { error?: string; aviso?: string; email?: string; contrasena?: string; contrasenaNoAplicada?: boolean };
 
 /** Alta de una persona en el equipo de un gimnasio, con acceso si se carga el mail. */
 export async function agregarPersona(_: Resultado, f: FormData): Promise<Resultado> {
@@ -83,10 +140,10 @@ export async function agregarPersona(_: Resultado, f: FormData): Promise<Resulta
   revalidatePath(`/admin/${gimnasioId}`);
   if (!email) return { aviso: `${nombre} quedó en el equipo, sin acceso al sistema.` };
   try {
-    const { contrasena } = await darAcceso(equipoId, email, nombre, contrasenaElegida(f));
+    const { contrasena, contrasenaNoAplicada } = await darAcceso(equipoId, email, nombre, contrasenaElegida(f));
     return contrasena
       ? { email, contrasena, aviso: `Pasale a ${nombre} su mail y esta contraseña provisoria.` }
-      : { email, aviso: `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
+      : { email, contrasenaNoAplicada, aviso: contrasenaNoAplicada ? AVISO_NO_APLICADA : `${email} ya tenía cuenta: entra con su contraseña de siempre.` };
   } catch (e) {
     return { error: `${nombre} quedó en el equipo, pero sin acceso: ${(e as Error).message}` };
   }
@@ -99,12 +156,12 @@ export async function darAccesoPersona(_: Resultado, f: FormData): Promise<Resul
   if (!mailValido(email)) return { error: "Escribí un mail válido" };
   try {
     const p = await rpc<{ nombre: string }>("persona_para_dar_acceso", { p_equipo_id: equipoId });
-    const { contrasena } = await darAcceso(equipoId, email, p.nombre, contrasenaElegida(f));
+    const { contrasena, contrasenaNoAplicada } = await darAcceso(equipoId, email, p.nombre, contrasenaElegida(f));
     revalidatePath("/admin", "layout");
     revalidatePath("/panel/equipo");
     return contrasena
       ? { email, contrasena, aviso: `Pasale a ${p.nombre} su mail y esta contraseña provisoria.` }
-      : { email, aviso: `${email} ya tenía cuenta: ${p.nombre} entra con su contraseña de siempre.` };
+      : { email, contrasenaNoAplicada, aviso: contrasenaNoAplicada ? AVISO_NO_APLICADA : `${email} ya tenía cuenta: ${p.nombre} entra con su contraseña de siempre.` };
   } catch (e) {
     return { error: (e as Error).message };
   }
@@ -171,6 +228,150 @@ export const anularPagoBrik = async (gimnasioId: string, pagoId: string) =>
 export const resolverAyuda = async (id: string) => hechoAdmin(() => rpc("admin_resolver_ayuda", { p_id: id }), ["/admin"]);
 export const agregarNotaBrik = async (gimnasioId: string, texto: string) =>
   hechoAdmin(() => rpc("admin_agregar_nota", { p_gimnasio_id: gimnasioId, p_texto: texto }), [`/admin/${gimnasioId}`]);
+
+// ── Carril B (F2): ficha, favoritos y búsqueda. Todo pasa por funciones admin_* (la base valida y deja registro). ──
+export const cambiarDueno = async (gimnasioId: string, equipoId: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_dueno", { p_gimnasio_id: gimnasioId, p_equipo_id: equipoId }), [`/admin/${gimnasioId}`, "/admin/gimnasios"]);
+export const guardarModulos = async (gimnasioId: string, apagadas: string[]) =>
+  hechoAdmin(() => rpc("admin_guardar_modulos", { p_gimnasio_id: gimnasioId, p_apagadas: apagadas }), [`/admin/${gimnasioId}`]);
+export const cambiarSlug = async (gimnasioId: string, slug: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_slug", { p_gimnasio_id: gimnasioId, p_slug: slug }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
+export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>
+  hechoAdmin(() => rpc("admin_marcar_favorito", { p_gimnasio_id: gimnasioId, p_favorito: favorito }), ["/admin/gimnasios"]);
+
+export const guardarCiudad = async (gimnasioId: string, ciudad: string) =>
+  hechoAdmin(() => rpc("admin_guardar_ciudad", { p_gimnasio_id: gimnasioId, p_ciudad: ciudad }), [`/admin/${gimnasioId}`, "/admin/gimnasios"]);
+export const pausarGimnasio = async (gimnasioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_pausar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const reanudarGimnasio = async (gimnasioId: string) =>
+  hechoAdmin(() => rpc("admin_reanudar_gimnasio", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const darDeBajaGimnasio = async (gimnasioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_dar_de_baja", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const restaurarBaja = async (gimnasioId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_baja", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
+export const borrarSocio = async (gimnasioId: string, socioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_borrar_socio", { p_gimnasio_id: gimnasioId, p_socio_id: socioId, p_motivo: motivo }), []);
+export const exigir2fa = async (exigir: boolean) => hechoAdmin(() => rpc("admin_exigir_2fa", { p_exigir: exigir }), ["/admin/seguridad"]);
+export const darRolBrik = async (email: string, rol: string) => hechoAdmin(() => rpc("admin_dar_rol_brik", { p_email: email, p_rol: rol }), ["/admin/seguridad"]);
+export const quitarRolBrik = async (usuarioId: string) => hechoAdmin(() => rpc("admin_quitar_rol_brik", { p_usuario_id: usuarioId }), ["/admin/seguridad"]);
+export async function crearDemo(interesado: string, tipo: string): Promise<{ error?: string; aviso?: string; gimnasioId?: string }> {
+  try {
+    const r = await rpc<{ gimnasio_id: string; host: string }>("admin_crear_demo", { p_interesado: interesado, p_tipo: tipo || null, p_dominio_base: dominioBase() });
+    revalidatePath("/admin");
+    return { aviso: `Demo lista en ${r.host}. Vence en 7 días.`, gimnasioId: r.gimnasio_id };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const borrarDemosVencidas = async () => hechoAdmin(() => rpc("admin_borrar_demos_vencidas"), ["/admin"]);
+
+// ── Carril B (F2, tercera tanda): comunicación, abonos, plataforma, papelera, clonar y borrado ──
+export async function publicarNovedadPara(titulo: string, texto: string, link: string, plan: string, ciudad: string, modulo: string): Promise<{ error?: string }> {
+  try {
+    await rpc("admin_publicar_novedad", { p_titulo: titulo, p_texto: texto, p_link: link || null, p_plan: plan || null, p_ciudad: ciudad || null, p_modulo: modulo || null });
+    revalidatePath("/admin"); return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const programarMantenimiento = async (desde: string, hasta: string, texto: string) =>
+  hechoAdmin(() => rpc("admin_programar_mantenimiento", { p_desde: desde, p_hasta: hasta, p_texto: texto }), ["/admin"]);
+export const cancelarMantenimiento = async (id: string) => hechoAdmin(() => rpc("admin_cancelar_mantenimiento", { p_id: id }), ["/admin"]);
+export const guardarPrueba = async (gimnasioId: string, dias: number) =>
+  hechoAdmin(() => rpc("admin_guardar_prueba", { p_gimnasio_id: gimnasioId, p_dias: dias }), [`/admin/${gimnasioId}`, "/admin"]);
+export const guardarDescuento = async (gimnasioId: string, porcentaje: number, motivo: string, hasta: string) =>
+  hechoAdmin(() => rpc("admin_guardar_descuento", { p_gimnasio_id: gimnasioId, p_porcentaje: porcentaje, p_motivo: motivo, p_hasta: hasta }), [`/admin/${gimnasioId}`]);
+export const quitarDescuento = async (gimnasioId: string) => hechoAdmin(() => rpc("admin_quitar_descuento", { p_gimnasio_id: gimnasioId }), [`/admin/${gimnasioId}`]);
+export const guardarLinkPago = async (link: string) => hechoAdmin(() => rpc("admin_guardar_link_pago", { p_link: link }), ["/admin"]);
+export const prenderFuncion = async (gimnasioId: string, clave: string, prendida: boolean) =>
+  hechoAdmin(() => rpc("admin_prender_funcion", { p_gimnasio_id: gimnasioId, p_clave: clave, p_prendida: prendida }), ["/admin"]);
+export const restaurarSocio = async (gimnasioId: string, socioId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_socio", { p_gimnasio_id: gimnasioId, p_socio_id: socioId }), [`/admin/${gimnasioId}`]);
+export const restaurarPlan = async (gimnasioId: string, planId: string) =>
+  hechoAdmin(() => rpc("admin_restaurar_plan", { p_gimnasio_id: gimnasioId, p_plan_id: planId }), [`/admin/${gimnasioId}`]);
+export async function clonarConfiguracion(origen: string, destino: string): Promise<{ error?: string; aviso?: string }> {
+  try {
+    const r = await rpc<{ planes: number; actividades: number }>("admin_clonar_configuracion", { p_origen: origen, p_destino: destino });
+    revalidatePath(`/admin/${destino}`); return { aviso: `Copiados ${r.planes} planes y ${r.actividades} actividades (sin socios).` };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const borrarDefinitivo = async (gimnasioId: string, nombre: string) =>
+  hechoAdmin(() => rpc("admin_borrar_definitivo", { p_gimnasio_id: gimnasioId, p_nombre: nombre }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
+
+/**
+ * Reprocesar un aviso de MercadoPago que falló, a pedido y con la misma lógica idempotente del webhook (por pago y estado).
+ * La base valida quién es (admin_evento_webhook); la ruta del webhook no se toca. Si el pago ya estaba procesado, no se duplica.
+ */
+export async function reprocesarWebhook(eventoId: string, gimnasioId: string): Promise<{ error?: string; aviso?: string }> {
+  try {
+    const ev = await rpc<{ evento_id: string; gimnasio_id: string; id_externo: string; payload: unknown }>("admin_evento_webhook", { p_id: eventoId });
+    const pagoId = ev.id_externo.split(":")[0];
+    const db = clienteServicio();
+    const { data: cred, error } = await db.rpc("credenciales_mp", { p_gimnasio_id: ev.gimnasio_id });
+    const c = cred as { token: string } | null;
+    if (error || !c?.token) return { error: error?.message ?? "Ese gimnasio ya no tiene MercadoPago conectado" };
+    const pago = await leerPago(c.token, pagoId);
+    const r = await procesarPagoMP(db, ev.gimnasio_id, pago, { reprocesado: true, evento: ev.evento_id });
+    await db.rpc("cerrar_evento_webhook", { p_evento_id: ev.evento_id, p_error: null });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return { aviso: r.ya ? "Ese pago ya estaba acreditado: no se duplicó." : `Reprocesado: ${r.resultado}.` };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── Fase P (P6 y P7): probar el acceso de cada persona y gestionarla ──
+export async function probarAccesoPersona(equipoId: string): Promise<{ error?: string; prueba?: PruebaPersona }> {
+  try { return { prueba: await rpc<PruebaPersona>("admin_probar_acceso", { p_equipo_id: equipoId }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+/** El botón "Arreglar" de cada paso rojo: confirmar la cuenta, activar a la persona o reanudar el gimnasio. Dar acceso se hace desde su fila. */
+export async function arreglarAcceso(equipoId: string, gimnasioId: string, arreglo: string): Promise<{ error?: string }> {
+  const rutas = [`/admin/${gimnasioId}`, "/admin/gimnasios"];
+  if (arreglo === "confirmar") return hechoAdmin(() => rpc("admin_confirmar_cuenta", { p_equipo_id: equipoId }), rutas);
+  if (arreglo === "activar") return hechoAdmin(() => rpc("admin_estado_persona", { p_equipo_id: equipoId, p_activo: true }), rutas);
+  if (arreglo === "reanudar") {
+    return hechoAdmin(async () => {
+      try { await rpc("admin_reanudar_gimnasio", { p_gimnasio_id: gimnasioId }); }
+      catch { await rpc("admin_restaurar_baja", { p_gimnasio_id: gimnasioId }); }
+    }, rutas);
+  }
+  return { error: "Eso se arregla dándole acceso: usá “Dar acceso” en su fila." };
+}
+export const estadoPersona = async (equipoId: string, gimnasioId: string, activo: boolean) =>
+  hechoAdmin(() => rpc("admin_estado_persona", { p_equipo_id: equipoId, p_activo: activo }), [`/admin/${gimnasioId}`]);
+export const cambiarRolPersona = async (equipoId: string, gimnasioId: string, rol: string) =>
+  hechoAdmin(() => rpc("admin_cambiar_rol_persona", { p_equipo_id: equipoId, p_rol: rol }), [`/admin/${gimnasioId}`]);
+export const moverPersona = async (equipoId: string, gimnasioId: string, destino: string, rol: string) =>
+  hechoAdmin(() => rpc("admin_mover_persona", { p_equipo_id: equipoId, p_gimnasio_destino: destino, p_rol: rol || null }), [`/admin/${gimnasioId}`, `/admin/${destino}`, "/admin/gimnasios"]);
+
+// ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
+// ⛔ en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
+const hablarConVercel: VercelFetch = async (url, init) => {
+  const r = await fetch(url, { ...init, cache: "no-store" });
+  return { status: r.status, json: () => r.json() };
+};
+async function soloPrincipal() {
+  const s = await rpc<{ mi_rol: string }>("admin_estado_seguridad");
+  if (s.mi_rol !== "principal") throw new Error("Solo el usuario principal de BRIK conecta dominios.");
+}
+export async function vercelListo(): Promise<{ lista: boolean; faltan?: string[] }> {
+  const c = configuracionVercel(process.env);
+  return c.lista ? { lista: true } : { lista: false, faltan: c.faltan };
+}
+async function operarDominio(accion: "agregar" | "verificar", dominio: string): Promise<{ error?: string; estado?: EstadoDominio }> {
+  try {
+    await soloPrincipal();
+    const c = configuracionVercel(process.env);
+    if (!c.lista) return { error: `Todavía no se puede: falta cargar ${c.faltan.join(" y ")} en Vercel (Settings → Environment Variables) y redeployar. Los pasos están arriba de docs/base/PROGRESO.md.` };
+    const estado = accion === "agregar" ? await agregarDominioVercel(hablarConVercel, c.config, dominio) : await verificarDominioVercel(hablarConVercel, c.config, dominio);
+    await rpc("admin_anotar_registro", { p_accion: accion === "agregar" ? "agregar_dominio_vercel" : "verificar_dominio_vercel", p_gimnasio_id: null, p_detalle: { dominio: estado.dominio, estado: estado.estado } });
+    return { estado };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export const conectarDominioVercel = async (dominio: string) => operarDominio("agregar", dominio);
+export const verificarDominioEnVercel = async (dominio: string) => operarDominio("verificar", dominio);
+
+export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre: string; gimnasio_id: string; gimnasio: string; slug: string; baja: boolean; persona_id?: string };
+/** SA-5: busca por mail, DNI o teléfono en todos los gimnasios. Pide motivo y queda registrado; devuelve nombre, gimnasio y rol. */
+export async function buscarPersona(q: string, motivo: string): Promise<{ error?: string; personas?: PersonaEncontrada[] }> {
+  try { return { personas: await rpc<PersonaEncontrada[]>("admin_buscar_persona", { p_q: q, p_motivo: motivo }) }; }
+  catch (e) { return { error: (e as Error).message }; }
+}
 
 // ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──
 export const atenderDemo = async (id: string) => hechoAdmin(() => rpc("admin_atender_demo", { p_id: id }), ["/admin"]);

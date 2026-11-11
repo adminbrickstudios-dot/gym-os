@@ -30,6 +30,7 @@ const comoAnonimo = async (fn) => {
 const probar = (nombre, tel, interes = null) => t.q(`select public.quiero_probar($1, $2, $3, $4) as r`, [HOST, nombre, tel, interes]).then((x) => x[0].r);
 
 test("sin publicar no recibe; publicada sí, sin duplicar el celular", async () => {
+  await t.q(`update public.landing_gimnasio set publicada = false where gimnasio_id = $1`, [t.g]);   // U4: nace publicada; acá se prueba oculta
   await t.falla(() => comoAnonimo(() => probar("Ana", "387 555 1234")), /no está recibiendo pedidos/);
   await t.q(`update public.landing_gimnasio set publicada = true where gimnasio_id = $1`, [t.g]);
   const r1 = await comoAnonimo(() => probar("Ana Pérez", "387 555-1234", "Funcional a la tarde"));

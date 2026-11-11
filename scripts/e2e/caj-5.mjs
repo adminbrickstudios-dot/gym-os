@@ -27,6 +27,10 @@ try {
   await r.locator('button:has-text("Cerrar caja")').waitFor({ timeout: 30000 });
   // Pasa la noche: la apertura queda en ayer (el único hecho que cambia la prueba).
   const db = new pg.Client({ connectionString: url }); await db.connect();
+  // La caja que pasó la hora de corte se cierra SOLA "sin contar" al primer acceso (VD-9): para que siga abierta y "olvidada" mientras la miran la
+  // recepción y la dueña, el corte del gimnasio demo se corre a las 23:59 y el máximo a 48 h durante la prueba (al final vuelve a lo de siempre).
+  await db.query(`insert into public.configuracion_caja (gimnasio_id, hora_corte, horas_max) select id, '23:59', 48 from public.gimnasios where slug = 'demo'
+                   on conflict (gimnasio_id) do update set hora_corte = '23:59', horas_max = 48`);
   await db.query(`update public.turnos_caja t set abierto_en = abierto_en - interval '1 day'
                    from public.equipo e where e.id = t.abierto_por and t.cerrado_en is null and e.nombre like 'Ana%'`);
   await db.end();
@@ -34,7 +38,7 @@ try {
   await r.goto(`${G}/panel`);
   const aviso = r.locator("[data-cajas-olvidadas] li").first();
   await aviso.waitFor({ timeout: 30000 });
-  chequear(/quedó abierta/.test(await aviso.innerText()) && /la abriste vos/.test(await aviso.innerText()), "Inicio de la recepción: “⏰ Caja principal quedó abierta · la abriste vos”", await aviso.innerText());
+  chequear(/quedó abierta/.test(await aviso.innerText()) && /la abriste vos/.test(await aviso.innerText()), "Inicio de la recepción: “Caja principal quedó abierta · la abriste vos”", await aviso.innerText());
   await aviso.locator("a").click();
   await r.waitForURL(/\/panel\/caja/);
   await r.locator("[data-olvidada]").waitFor({ timeout: 30000 });
@@ -56,6 +60,12 @@ try {
   chequear(await r.locator("[data-cajas-olvidadas]").count() === 0, "cerrada, el aviso desaparece", "sigue el aviso");
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
+}
+{
+  // Vuelve el corte de siempre (00:00, 14 h) para las pruebas que siguen.
+  const db2 = new pg.Client({ connectionString: url }); await db2.connect();
+  await db2.query(`update public.configuracion_caja set hora_corte = '00:00', horas_max = 14 where gimnasio_id = (select id from public.gimnasios where slug = 'demo')`);
+  await db2.end();
 }
 await b.close();
 resultado();

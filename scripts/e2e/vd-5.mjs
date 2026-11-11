@@ -3,7 +3,7 @@
 // la ficha y Ctrl+K; la recepción no ve "cobré otro día" y la dueña sí; el total de la hoja es el
 // que guarda la base; frena el doble cobro (VD-50: lo prueba vd-50); el celular no desborda.
 //   node scripts/e2e/vd-5.mjs     (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
 
 const G = GIMNASIO();
@@ -51,7 +51,7 @@ try {
   await r.keyboard.press("Enter");                                   // cobra
   await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 });
   chequear(await r.locator("[data-ventana-cobrado]").count() === 1, "vuelve a la Entrada con “Cobrado $…” y el veredicto en verde", "no volvió con el cobro");
-  chequear(await r.locator("[data-comprobante]").count() >= 1, "y el recibo por WhatsApp a mano", "sin recibo");
+  chequear(await aparece(r.locator("[data-comprobante]"), 20000), "y el recibo por WhatsApp a mano", "sin recibo");   // el comprobante se arma al terminar de cobrar: se espera
   await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-anotar"), null, { timeout: 10000 });
   await r.keyboard.press("Enter");                                   // anota
   await r.locator('[data-ventana-hecho="entro"]').waitFor({ timeout: 30000 });
@@ -92,7 +92,7 @@ try {
   const error = d.locator('[data-cobrar] [role="alert"]');
   await Promise.race([hecho.waitFor({ timeout: 30000 }), error.waitFor({ timeout: 30000 }).then(async () => { throw new Error(`al cobrar: ${await error.innerText()}`); })]);
   chequear(await hecho.getAttribute("data-total") === total, "lo cobrado es el total que mostraba la hoja", `mostraba ${total} y cobró ${await hecho.getAttribute("data-total")}`);
-  chequear(await d.locator("[data-comprobante]").count() >= 1, "recibo por WhatsApp", "sin recibo");
+  chequear(await aparece(d.locator("[data-comprobante]"), 20000), "recibo por WhatsApp", "sin recibo");
   await capturar(d, "vd5-compu-cobrado");
   await d.locator("[data-cobrar-volver]").click();
   await d.goto(`${G}/panel/socios/${id2}?pestana=pagos`);

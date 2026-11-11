@@ -7,9 +7,9 @@
 // acá no se calcula nada.
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition, startTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, entradaRapida, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
@@ -21,20 +21,21 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { colorVar, PuntoEstado } from "./Estado";
-import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
+import { EVENTO_ABRIR_SOCIO, EVENTO_AVISO_LOCAL, type AvisoLocal } from "./AvisosEntrada";
 import { EventosHoyEntrada } from "./EventosHoyEntrada";
 import { CartelEmergencia, useEmergencia } from "./CartelEmergencia";
 import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
+import { Icono } from "@/components/ui/Icono";
 
 export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
 /** VD-29: abrir la ventana con un DNI, número o nombre ya escrito (detail = el texto). */
 export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 
 const ES_QR = /^GYMOS1\./;
-const EMOJI: Record<string, string> = { verde: "✅", amarillo: "⚠️", naranja: "⚠️", rojo: "⛔", gris: "❔" };
+const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
 
 type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio" | "prueba";
 /** VD-51: lo que se escribe para darle la prueba gratis a un DNI nuevo (o a quien reservó desde la página). */
@@ -141,7 +142,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const pruebaModoRef = useRef<"no" | "dia" | "clase" | null>(null);
   const salirRef = useRef<() => void>(() => {});
   const salirConDniRef = useRef<(dni: string) => void>(() => {});
+  const router = useRouter();
+  const refrescoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ocupado, empezar] = useTransition();
+  const enterPendiente = useRef(false);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
   const [camara, setCamara] = useState(false);
@@ -225,13 +229,38 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
-  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion") => empezar(async () => {
+  // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
+  // Va fuera de la transición a propósito: si no, la ventana queda "ocupada" mientras el panel se refresca y el próximo Enter se pierde.
+  const elegirAviso = useCallback(async (s: ResultadoSocio) => {
+    const r = await entradaRapida(s.socio_id, sedeId, !!cfgRef.current.anotar_solo_en_verde);
+    if (r.error || !r.v) { setError(r.error ?? "No se pudo ver el estado"); return; }
+    const vv = r.v;
+    const aviso = (id: string, color: AvisoLocal["color"], texto: string, cobrar: boolean, puede: boolean): AvisoLocal => ({ id, color, texto, socioId: s.socio_id, nombre: s.nombre, numero: s.numero, cobrar, puede, textoSocio: vv.texto });
+    let a: AvisoLocal;
+    if (r.r) {
+      const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
+      a = aviso(`${r.r.ingreso_id}-${Date.now()}`, color, r.r.repetido ? `${s.nombre} ya había entrado: ${r.r.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
+      // El aviso sale ya; los números de la pantalla se actualizan después, sin frenar el próximo Enter.
+      // Un solo refresco, 2 s después del último ingreso: con varios seguidos no se encolan re-renders de toda la pantalla.
+      if (refrescoRef.current) clearTimeout(refrescoRef.current);
+      refrescoRef.current = setTimeout(() => startTransition(() => router.refresh()), 2000);
+    } else {
+      a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
+    }
+    if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
+    window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
+    cerrar();
+  }, [sedeId, sonido, cerrar, router]);
+
+  const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => {
+    if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande) { void elegirAviso(s); return; }
+    empezar(async () => {
     setElegido(s); setHecho(null); setError(null); setForzando(false); setVia(forma); setPaso("veredicto"); setV(null);
     const r = await veredicto(s.socio_id, sedeId);
     if (r.error) { setError(r.error); setPaso("escribir"); setElegido(null); return; }
     setV(r.v!); setGuia(r.guia ?? null); setApto(r.apto ?? null); setFirmar(r.firmar ?? null); setEventosHoy(r.eventosHoy ?? []);
     if (sonido) sonar(r.v!.color);
-  }), [sedeId, sonido]);
+  }); }, [sedeId, sonido, elegirAviso]);
 
   const anotado = useCallback((r: ResultadoIngreso, s: ResultadoSocio) => {
     setHecho({ ...r, nombre: s.nombre, hora: hora(new Date()), socioId: s.socio_id });
@@ -358,6 +387,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     elegir(lista[0]);
   }), [conLlavero, directo, elegir]);
 
+  // BASE-3: el Enter que llegó mientras se terminaba de buscar corre ahora (con lo que haya en pantalla).
+  useEffect(() => {
+    if (ocupado || !enterPendiente.current) return;
+    enterPendiente.current = false;
+    if (paso !== "escribir") return;
+    if (socios.length > 0) elegir(socios[Math.min(marcado, socios.length - 1)]); else if (texto.trim()) resolver(texto);
+  }, [ocupado, paso, socios, marcado, texto, elegir, resolver]);
+
   // VD-6 · DNI que no existe → alta en la misma ventana. Los planes y su primer pago los trae la base.
   const iniciarAlta = useCallback((dniEscrito: string) => {
     setAlta({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", plan: "", paso: "datos", planes: null, ofrecido: null, vinculado: null, error: null });
@@ -450,6 +487,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         return;
       }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // BASE-3: "/" (fuera de campos de texto) abre la Entrada, como F2.
+      if (e.key === "/" && !editable && !abiertaRef.current) { e.preventDefault(); if (conBarraRef.current) barra.current?.focus(); else abrir(); return; }
       const imprimible = e.key.length === 1;
       const digito = /^[0-9]$/.test(e.key);
 
@@ -544,7 +583,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const abrirSocio = (e: Event) => {
       const s = (e as CustomEvent<ResultadoSocio>).detail;
       abrir();
-      setTimeout(() => elegir(s), 0);
+      setTimeout(() => elegir(s, "recepcion", true), 0);   // desde un aviso o el panel lateral: la ventana grande, con todos sus botones
     };
     window.addEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
     return () => window.removeEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
@@ -615,19 +654,19 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     switch (clave) {
       case "anotar":
         // VD-46M: con la puerta en emergencia, al que no podía entrar se lo anota igual (queda marcado); un clic a propósito, sin Enter.
-        if (!v.puede && guia?.emergencia) return <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar data-anotar-emergencia>🚨 Anotar entrada (emergencia)</button>;
-        return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar>✅ Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
+        if (!v.puede && guia?.emergencia) return <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar data-anotar-emergencia><Icono nombre="alerta-circulo" /> Anotar entrada (emergencia)</button>;
+        return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar><Icono nombre="ok" /> Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
       case "cobrar":
       case "cobrar_pack":
         return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar
-          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "💵 Cobrar un pack" : "💵 Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
+          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "Cobrar un pack" : "Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
       case "dejar_pasar":
         if (v.puede || forzando) return null;
-        return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={() => dejarRef.current()} className={clase} data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
+        return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={() => dejarRef.current()} className={clase} data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
       case "volver_antes":
-        return v.puede ? null : <button key={clave} type="button" disabled={ocupado} onClick={volvioAntes} className={clase} data-ventana-volvio>🏃 Volvió antes: terminar la pausa</button>;
+        return v.puede ? null : <button key={clave} type="button" disabled={ocupado} onClick={volvioAntes} className={clase} data-ventana-volvio><Icono nombre="pesa" /> Volvió antes: terminar la pausa</button>;
       case "volver_alta":
-        return <button key={clave} type="button" disabled={ocupado} onClick={volverAlta} className={clase} data-ventana-volver-alta>↩️ Volver a dar de alta</button>;
+        return <button key={clave} type="button" disabled={ocupado} onClick={volverAlta} className={clase} data-ventana-volver-alta><Icono nombre="deshacer" /> Volver a dar de alta</button>;
       default:
         return null;
     }
@@ -645,14 +684,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           className="fixed z-40 left-1/2 -translate-x-1/2 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:left-auto lg:translate-x-0 lg:right-6 lg:bottom-6
             size-16 rounded-full bg-[var(--verde)] text-white text-3xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
           style={{ boxShadow: "0 10px 28px -10px rgb(0 0 0 / 0.6)" }}>
-          <span aria-hidden>{abierta ? "✕" : "🚪"}</span>
+          <span aria-hidden>{abierta ? "✕" : ""}</span>
         </button>
       )}
 
       {/* C · La barra fija (compu ≥ 1280 px): el DNI siempre a mano y las últimas 5 entradas. */}
       {conBarra && (
         <aside data-barra-entrada aria-label="Entrada" className="hidden xl:flex fixed right-0 top-0 bottom-0 w-72 z-20 flex-col gap-4 border-l border-[var(--borde)] bg-[var(--fondo)] p-4 pt-20">
-          <p className="titulo text-xl">🚪 Entrada</p>
+          <p className="titulo text-xl"><Icono nombre="puerta" /> Entrada</p>
           <input ref={barra} data-barra-dni value={conPuntos(textoBarra)} inputMode="numeric" autoComplete="off" aria-label="DNI, número de socio o nombre"
             onChange={(e) => setTextoBarra(sinPuntos(e.target.value))}
             onKeyDown={(e) => {
@@ -681,13 +720,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           {emergencia && <div className="p-4 pb-0"><CartelEmergencia e={emergencia} /></div>}
           {paso === "escribir" && (
             <div className="p-6 sm:p-8 space-y-4">
-              <p className="titulo text-2xl text-center">🚪 Entrada</p>
+              <p className="titulo text-2xl text-center"><Icono nombre="puerta" /> Entrada</p>
               {/* VD-1b: el dueño con varias sedes elige en cuál anota (queda en esta compu). */}
               {sedes.length > 1 && (
                 <div role="group" aria-label="Sede" className="flex flex-wrap justify-center gap-2" data-ventana-sedes>
                   {sedes.map((s) => (
                     <button key={s.id} type="button" aria-pressed={s.id === sedeId} data-sede={s.id} onClick={() => { elegirSede(s.id); setTimeout(() => campo.current?.focus(), 0); }}
-                      className={`pestana ${s.id === sedeId ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}>📍 {s.nombre}</button>
+                      className={`pestana ${s.id === sedeId ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}><Icono nombre="ubicacion" /> {s.nombre}</button>
                   ))}
                 </div>
               )}
@@ -704,13 +743,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   else if (e.key === "ArrowUp" && hayLista) { e.preventDefault(); setMarcado((m) => Math.max(m - 1, 0)); }
                   else if (e.key === "Enter") {
                     e.preventDefault();
-                    if (ocupado) return;
+                    // Si todavía está terminando una búsqueda, el Enter no se pierde: queda anotado y corre apenas termina.
+                    if (ocupado) { enterPendiente.current = true; return; }
                     if (hayLista) elegir(socios[Math.min(marcado, socios.length - 1)]); else resolver(texto);
                   }
                 }}
                 placeholder="30.123.456" className="campo !min-h-24 !text-5xl sm:!text-6xl text-center font-bold tracking-wide numero" />
               <p className="texto-tenue text-center text-sm">Enter para buscar · Esc para cerrar · también por nombre</p>
-              {conQr && <div className="flex justify-center"><button type="button" className="boton" onClick={() => setCamara(true)}>📷 Leer QR</button></div>}
+              {conQr && <div className="flex justify-center"><button type="button" className="boton" onClick={() => setCamara(true)}><Icono nombre="camara" /> Leer QR</button></div>}
 
               {error && <Mensaje tipo="error">{error}</Mensaje>}
               {ocupado && !hayLista && <div className="h-16 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden />}
@@ -736,10 +776,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   <p className="text-lg font-semibold">{dni ? `No hay nadie con ${dni}` : `No encontramos a “${nadie}”`}</p>
                   <div className="flex flex-wrap gap-2">
                     {dni
-                      ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}>➕ Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
-                      : <Link href="/panel/socios/nuevo" className="boton boton-principal">➕ Darlo de alta</Link>}
+                      ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}><Icono nombre="mas" /> Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
+                      : <Link href="/panel/socios/nuevo" className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
                     {dni && pruebaModo && pruebaModo !== "no" && (
-                      <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}>🎁 Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
+                      <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}><Icono nombre="regalo" /> Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
                     )}
                     {dni && <Link href="/panel/socios/nuevo" className="boton" data-ventana-alta-completa>Alta completa</Link>}
                   </div>
@@ -750,10 +790,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "prueba" && prueba && (
             <form data-ventana-prueba-form className="p-6 sm:p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); if (!ocupado && !(prueba.info?.existe && prueba.info.usada)) guardarPrueba(); }}>
-              <p className="titulo text-2xl text-center">🎁 Prueba gratis · {conPuntos(prueba.dni)}</p>
+              <p className="titulo text-2xl text-center"><Icono nombre="regalo" /> Prueba gratis · {conPuntos(prueba.dni)}</p>
               {prueba.info?.existe && !prueba.info.usada && (
-                <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full" data-prueba-reservada>
-                  🙋 Reservó desde la página{prueba.info.clase ? `: ${prueba.info.clase}` : ""}. Confirmá y lo dejás entrar.
+                <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full" data-prueba-reservada>
+                  <Icono nombre="persona" /> Reservó desde la página{prueba.info.clase ? `: ${prueba.info.clase}` : ""}. Confirmá y lo dejás entrar.
                 </p>
               )}
               <label className="block space-y-1"><span className="etiqueta">Nombre</span>
@@ -768,7 +808,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               )}
               {prueba.error && <Mensaje tipo="error">{prueba.error}</Mensaje>}
               <div className="flex flex-wrap gap-2">
-                <button type="submit" className="boton boton-principal" disabled={ocupado || !!(prueba.info?.existe && prueba.info.usada) || !prueba.nombre.trim()} data-prueba-dar>🎁 Dejarlo entrar con la prueba</button>
+                <button type="submit" className="boton boton-principal" disabled={ocupado || !!(prueba.info?.existe && prueba.info.usada) || !prueba.nombre.trim()} data-prueba-dar><Icono nombre="regalo" /> Dejarlo entrar con la prueba</button>
                 <button type="button" className="boton-texto px-3" onClick={alCerrarHoja}>Volver</button>
               </div>
               <p className="text-sm texto-tenue">Es una vez por DNI. No es socio ni gasta ningún plan; queda registrado quién la dio.</p>
@@ -778,7 +818,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           {paso === "alta" && alta && (
             <form data-ventana-alta-form data-alta-paso={alta.paso} className="p-6 sm:p-8 space-y-4"
               onSubmit={(e) => { e.preventDefault(); if (ocupado) return; if (alta.paso === "datos") { if (alta.nombre.trim()) setAlta({ ...alta, paso: "plan" }); } else guardarAlta(!!alta.plan && puedeCobrar); }}>
-              <p className="titulo text-2xl text-center">➕ Alta rápida</p>
+              <p className="titulo text-2xl text-center"><Icono nombre="mas" /> Alta rápida</p>
               <p className="text-center texto-suave">DNI <strong className="text-[var(--texto)] numero">{conPuntos(alta.dni)}</strong></p>
               <ol className="flex gap-2 text-sm" aria-label="Pasos del alta rápida">
                 {["Datos", "Plan", "Cobro", "Entra"].map((n, i) => {
@@ -820,8 +860,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {alta.plan && puedeCobrar
-                    ? <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-cobrar>{ocupado ? "Guardando…" : "💵 Guardar y cobrar"}</button>
-                    : <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-guardar>{ocupado ? "Guardando…" : "✅ Guardar"}</button>}
+                    ? <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-cobrar>{ocupado ? "Guardando…" : "Guardar y cobrar"}</button>
+                    : <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-guardar>{ocupado ? "Guardando…" : "Guardar"}</button>}
                   {alta.plan && puedeCobrar && <button type="button" className="boton" disabled={ocupado} onClick={() => guardarAlta(false)} data-alta-solo>Solo guardar</button>}
                   <button type="button" className="boton-texto px-3" onClick={() => setAlta({ ...alta, paso: "datos" })}>← Datos</button>
                 </div>
@@ -834,11 +874,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
             <div data-ventana-veredicto={v?.color ?? "cargando"} aria-live="polite">
               {!v ? <div className="p-8"><div className="h-64 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden /></div> : (<>
                 <div className="px-6 sm:px-8 py-5" style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-                  <p className="text-2xl sm:text-3xl font-bold leading-tight"><span aria-hidden>{EMOJI[v.color] ?? "❔"}</span> {v.texto}</p>
+                  <p className="text-2xl sm:text-3xl font-bold leading-tight"><span aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></span> {v.texto}</p>
                 </div>
                 <div className="p-6 sm:p-8 space-y-5">
                   <div className="flex items-center gap-4">
-                    <span className="relative size-24 sm:size-32 flex-none rounded-3xl bg-[var(--tarjeta-alta)] flex items-center justify-center text-4xl font-bold overflow-hidden">
+                    <span className="relative size-24 sm:size-32 flex-none rounded-[var(--radio)] bg-[var(--tarjeta-alta)] flex items-center justify-center text-4xl font-bold overflow-hidden">
                       <Iniciales nombre={elegido.nombre} />
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-ventana
@@ -852,10 +892,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
                   {/* VD-2: lo que hay que decirle, cuánto le falta y los avisos (todo lo calcula la base). */}
                   {guia?.falta && <p className="text-xl font-semibold" data-ventana-falta>{guia.falta}</p>}
-                  {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile>💬 {guia.decile}</p>}
+                  {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
                   {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
                     <ul className="flex flex-wrap gap-2" data-ventana-chips>
-                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden>{c.emoji}</span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
+                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
                       {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
                       {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
                       {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
@@ -871,16 +911,16 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   <div className="flex flex-wrap gap-2">
                     {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0))}
                     {!v.puede && !forzando && principal !== "dejar_pasar" && !bloqueadoParaRecepcion && (
-                      <button type="button" onClick={() => dejarRef.current()} className="boton" data-ventana-dejar>🤝 Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
+                      <button type="button" onClick={() => dejarRef.current()} className="boton" data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
                     )}
-                    {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave">🔒 A este socio lo deja pasar el dueño o el encargado.</p>}
+                    {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave"><Icono nombre="candado" /> A este socio lo deja pasar el dueño o el encargado.</p>}
                     <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}?desde=entrada`} className="boton" data-ventana-ficha
-                      onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}>👤 Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
+                      onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}><Icono nombre="persona" /> Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
                     {pruebaModo && pruebaModo !== "no" && v.motivo === "sin_plan" && (
-                      <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton" data-ventana-prueba>🎁 Dar prueba gratis</button>
+                      <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton" data-ventana-prueba><Icono nombre="regalo" /> Dar prueba gratis</button>
                     )}
                     {salidaModo && salidaModo !== "no" && (
-                      <button type="button" onClick={() => marcarSalida(elegido)} disabled={ocupado} className="boton" data-ventana-salida-boton>👋 Salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                      <button type="button" onClick={() => marcarSalida(elegido)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
                     )}
                     <button type="button" onClick={() => reiniciar()} className="boton-texto px-3">Otro socio</button>
                   </div>
@@ -896,7 +936,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "anotado" && hecho && (
             <div className="p-8 text-center space-y-4" data-ventana-hecho={hecho.resultado} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "⛔" : hecho.alerta_prestamo ? "⚠️" : <Tilde tamano={72} />}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={72} />}</div>
               <p className="titular text-4xl break-words">{hecho.nombre}</p>
               <p className="text-xl font-semibold">
                 {hecho.repetido ? (hecho.texto ?? "Ya estaba anotado hace un momento")
@@ -907,9 +947,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               <div className="flex justify-center"><EventosHoyEntrada key={hecho.socioId} socioId={hecho.socioId} eventos={eventosHoy} /></div>
               {error && <Mensaje tipo="error">{error}</Mensaje>}
               <div className="flex flex-wrap justify-center gap-2">
-                {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}>↩️ Deshacer</button>}
+                {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
                 {hecho.repetido && hecho.puede_salir && elegido && (
-                  <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} onClick={() => marcarSalida(elegido)} data-ventana-salida-boton>👋 Marcar salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
+                  <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} onClick={() => marcarSalida(elegido)} data-ventana-salida-boton><Icono nombre="salir" /> Marcar salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
                 )}
                 <button type="button" className={`boton ${hecho.avisar_salida ? "" : "boton-principal"}`} onClick={() => reiniciar()}>Siguiente</button>
               </div>
@@ -919,7 +959,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "salio" && salio && (
             <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "👋" : "ℹ️"}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "" : ""}</div>
               {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
                 <>
                   <p className="titular text-4xl break-words">{salio.nombre}</p>

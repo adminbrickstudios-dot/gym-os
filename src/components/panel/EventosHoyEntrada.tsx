@@ -3,6 +3,7 @@
 // la presencia con un toque. Es un aviso: no cambia si el socio puede entrar al gimnasio.
 import { useState, useTransition } from "react";
 import { presenteEnEvento, type EventoHoy } from "@/app/panel/entrada/acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function EventosHoyEntrada({ socioId, eventos }: { socioId: string; eventos: EventoHoy[] }) {
   const [presentes, setPresentes] = useState<Record<string, boolean>>(() => Object.fromEntries(eventos.map((e) => [e.evento_id, e.presente])));
@@ -15,7 +16,7 @@ export function EventosHoyEntrada({ socioId, eventos }: { socioId: string; event
         const esta = presentes[e.evento_id] ?? e.presente;
         return (
           <li key={e.evento_id} className="flex flex-wrap items-center gap-2" data-ventana-evento={e.nombre}>
-            <span className="pildora pildora-azul whitespace-normal"><span aria-hidden>🎟️</span> Hoy: {e.nombre}{e.espera ? " (en lista de espera)" : ""}</span>
+            <span className="pildora pildora-azul whitespace-normal"><span aria-hidden><Icono nombre="ticket" /></span> Hoy: {e.nombre}{e.espera ? " (en lista de espera)" : ""}</span>
             {e.espera ? null : esta
               ? <span className="pildora pildora-verde" data-evento-presente>✓ Presente</span>
               : <button type="button" className="boton" disabled={ocupado} data-evento-marcar

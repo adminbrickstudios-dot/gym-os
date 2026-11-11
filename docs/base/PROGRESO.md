@@ -1,5 +1,32 @@
 # PROGRESO de Base
 
+## PASOS PARA MATEO (velocidad y accesos; F0.6)
+1. **Clave de servicio (urgente, destraba el alta de dueños):** Supabase → tu proyecto de Gym OS → Project Settings → API → copiá la clave **service_role** → Vercel → el proyecto → Settings → Environment Variables → `SUPABASE_SERVICE_ROLE_KEY` (Production) → pegala → Redeploy. Tiene que ser de ESTE proyecto (el mismo de `NEXT_PUBLIC_SUPABASE_URL`), no la anon ni la de otro proyecto. En /admin, "Estado de la plataforma" la prueba creando y borrando un usuario.
+2. **Claves asimétricas (hace que el proxy no viaje a Auth en cada pedido):** Supabase → Project Settings → JWT Keys → "Migrate" a claves asimétricas (ECC/RSA). Puede cerrar las sesiones abiertas una vez. Después `getClaims()` verifica sin ir a Auth.
+3. **Secretos de GitHub** (Settings → Secrets and variables → Actions): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` (10+ letras; para el demo y para medir) y, para la prueba de humo, `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (tu cuenta de super admin de producción).
+4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
+5. **Dominio:** `DOMINIO.md` (pasos exactos).
+
+## DÓNDE QUEDÉ (11/11, mañana)
+- **Verde en Actions** (corrida 42976537928, build y chequeos incluidos): panel-inicio, base-ingresos (20 ingresos, mediana 199 ms, tope 1 s), panel-socios, panel-entrada, base-8, fase-u1-u2 (U1, U2), fase-u3 (U3), fase-u4 (U4), super-p, super-plat, panel-d, super-f2. `contexto_pantalla` (un solo viaje) anda: 3 a 18 ms en el log. `pendientes_panel` a 5.000 socios: 53 ms dueño / 45 ms recepción (era 385).
+- **En curso:** U0.1/U0.2 — falta que pase `fase-u0-login` (login correcto por `/g/<slug>/ingresar`; D lo corrigió como carrera del test, corrida 42978781658) y el contraste del tema (`barrido-tema`, D subió los tokens). Después: U0.3 (humo en producción: espera los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`), P8 (C), F1.9 (D: vd-6, vd-9, vd-46r, vd-3, vd-15, vd-37, vd-38, vd-46f, vd-49 plata), F1.4 resto (D).
+- **PUBLICAR la fase U (lo hacés vos, hay 3 gimnasios reales sin socios en producción):** cuando U0.1 esté en verde dejo la rama `publicar/base-fase-u` y el PR. Pasos: (1) GitHub → Actions → "Base de datos" → Run workflow en esa rama → acción `prevuelo` → si da verde, `aplicar`; (2) mergear el PR a main y esperar el deploy de Vercel en verde; (3) Actions → "Humo producción" (necesita los secretos); (4) Vercel: `SUPABASE_SERVICE_ROLE_KEY` correcta y redeploy (ver PASOS PARA MATEO).
+
+## ⛔ PASOS PARA MATEO: conectar el dominio desde el super admin (PLAT-05)
+
+Todo el código está escrito y probado con un Vercel simulado. En producción queda bloqueado hasta que hagas esto, **una sola vez**, cuando compres el dominio (`<dominio>`):
+
+1. **Token de Vercel.** Vercel → tu avatar → Account Settings → Tokens → Create Token (nombre "Base dominios", alcance: tu equipo). Copialo.
+2. **Cargar tres variables** en Vercel → proyecto de Base → Settings → Environment Variables (Production y Preview):
+   - `VERCEL_TOKEN` = el token del paso 1.
+   - `VERCEL_PROJECT_ID` = Project Settings → General → Project ID (empieza con `prj_`).
+   - `VERCEL_TEAM_ID` = Team Settings → General → Team ID (empieza con `team_`); solo si el proyecto es de un equipo.
+3. **Redeploy** (Deployments → los tres puntos → Redeploy).
+4. En `/super` → "Dominios (Vercel)": escribí el dominio (`<dominio>`), "Agregar a Vercel". Te muestra los **registros DNS exactos** (una A para la raíz, un CNAME para `app` y uno `*` para los gimnasios, y un TXT si Vercel pide verificar).
+5. Cargalos en el panel de donde compraste el dominio (DNS). Volvé y apretá **Verificar**: pasa de amarillo (Pendiente) a verde (Verificado). El SSL lo pone Vercel solo. Repetí con `app.<dominio>` y `*.<dominio>`.
+6. Cargá en Vercel `NEXT_PUBLIC_DOMINIO_BASE=<dominio>` y `NEXT_PUBLIC_DOMINIO_PLATAFORMA=app.<dominio>` (sin `https://` ni barra), y en cada entorno `SUPABASE_REF_ESPERADO` (el ref de tu proyecto de Supabase: la parte de la URL antes de `.supabase.co`) para que "Estado de la plataforma" avise si algún entorno apunta a otro Supabase. Redeploy.
+7. En `/super` → "Estado de la plataforma" tiene que quedar todo en verde. Más detalle en `DOMINIO.md`.
+
 Estados: ✅ hecho y verificado ejecutando · 🟡 a medias (dice qué falta) ·
 ❌ no empezado · ⛔ trabado (dice por qué y qué hace falta).
 
@@ -8,7 +35,29 @@ usuario, qué número medido. "Lo leí y cumple" no es un ✅.
 
 ---
 
-## P0 LISTO PARA MAÑANA
+## EN CURSO: la recta final (09/11)
+
+**⛔ Para que crear un gimnasio funcione en producción (lo hace Mateo, 2 minutos):**
+1. En Supabase: tu proyecto → Project Settings → API Keys → copiá la clave
+   `service_role` (la secreta, empieza con `eyJ…`; si usás las claves nuevas,
+   la `secret`).
+2. En Vercel: proyecto gym-os → Settings → Environment Variables →
+   `SUPABASE_SERVICE_ROLE_KEY` → pegala (Production) → Save.
+3. Vercel → Deployments → el último → ⋯ → Redeploy.
+4. Entrá a `/super` → "Estado de la plataforma" tiene que decir que la clave anda.
+   Probá crear el gimnasio otra vez.
+
+**Fase 0 (velocidad), 09/11 tarde:** en curso, nada publicado todavía. Hecho en la rama: los viajes a Supabase del panel salen en paralelo (contexto, mensajes, fichaje, abono, ayudas, config de Entrada), cada RPC deja su tiempo en el log de Vercel, el proxy manda `Server-Timing`, `staleTimes` de 30 s, y el workflow **Medir producción**. Medido hoy desde afuera (sin sesión): `/ingresar` 1,5 a 3,0 s y `/g/demo` 0,8 a 3,5 s de TTFB; las funciones ya están en gru1.
+**⛔ Lo que necesito de vos para medir en producción (credenciales, no las toco yo):** en GitHub → Settings → Secrets and variables → Actions, cargar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `DEMO_CONTRASENA` (10 o más letras, la que quieras). Después correr Actions → Base de datos → `usuarios-demo` con esa contraseña y Actions → Medir producción. Hoy los usuarios demo no existen en producción.
+**09/11 tarde-noche:** integrados los 3 carriles en la rama (verificar: todo verde salvo el test de tiempo de importar-socios, que en Actions pasa). **Alerta de velocidad:** medido en Actions con 5.000 socios, `privado.retencion_pendientes` (carril C, F1.6) tardaba 9 s; el carril C lo está corrigiendo y **no se publica ninguna migración de F1.6 hasta que a 5.000 socios sea más rápida que lo de producción**.
+**Ayudantes:** carril B (super admin), C (socio y página) y D (diseño y panel) trabajando en `carril/b-super`, `carril/c-socio`, `carril/d-panel`.
+
+**Desde el 09/11 el loop sigue `RECTA-FINAL.md`** (fases 1 a 8). El P0 de abajo
+está publicado, pero BASE-1, 3, 6, 8, 9 y 10 siguen en 🟡: se cierran en la
+fase 1. Cuando toda la recta esté en ✅ o ⛔, este título pasa a
+**"LISTO PARA TU PASADA"** y queda armada `PRUEBA-DUENO.md`.
+
+Lo que sigue es el resumen del 08/11 a la noche, como lo dejó el agente.
 
 **Estado (08/11, noche):** el P0 (BASE-0 a BASE-11 y BASE-DOC) está **publicado en producción**, bloque por bloque, con PR mergeado y chequeos en verde. La simulación de "terminado" (`scripts/e2e/base-simulacion.mjs`) pasa entera. Cada bloque dice qué quedó pendiente (cosas chicas, nada que impida entregar el primer gimnasio).
 
@@ -322,6 +371,27 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 
 ## P1: los 70 detalles y lo chico
 
+**0. Super admin (08/11, primero del P1):** `SUPER-ADMIN.md`, en su orden
+(SA-3 ficha con links, equipo y módulos → SA-4 soporte con rol y motivo → SA-5
+buscar a cualquiera → SA-2 lista → SA-1 tablero → el resto). Cada SA-* con su
+estado acá abajo y publicado al cerrarlo.
+
+| SA | Qué | Estado |
+|---|---|---|
+| SA-3 | Ficha del gimnasio (todo de un local) | ❌ |
+| SA-4 | Entrar como soporte con rol, motivo y aviso al dueño | ❌ |
+| SA-5 | Buscar a cualquiera en todos los gimnasios | ❌ |
+| SA-2 | Lista de gimnasios con filtros | ❌ |
+| SA-1 | Tablero con "necesitan atención" | ❌ |
+| SA-6 | Alta, lanzamiento, pausa, baja y papelera | ❌ |
+| SA-11 | Datos personales (Ley 25.326) | ❌ |
+| SA-10 | Segundo factor, roles de BRIK y registro | ❌ |
+| SA-7 | Abonos, ventas y demos | ❌ |
+| SA-8 | Comunicación | ❌ |
+| SA-9 | Plataforma | ❌ |
+| SA-12 | Detalles chicos | ❌ |
+
+
 1. **Los 70 detalles** de `DETALLES-70.md`, en su orden. Muchos ya existen
    (marcados ✅ verificar): se verifican con sesión real y se pasan a ✅ con la
    prueba que los cubre. Los 🟡 y ❌ se hacen.
@@ -331,9 +401,11 @@ con Base (fondo oscuro, emojis, ventana grande como único resultado) se marca
 ## P2: propuestas
 
 [PROPUESTA] del pedido, después de P1:
-- Pantalla para la TV de la sala con quién entra y la ocupación (la TV de clases
-  ya existe, VD-60: sumar el modo entradas).
-- Pase de invitado (un socio trae a alguien una vez por mes).
+- TV de la sala: las clases de hoy, los cupos y el profe, como pidió Mateo (ya
+  existe, VD-60: pulirla), más la ocupación como número. Nunca nombres de socios
+  en una pantalla pública (D52).
+- Pase de invitado: ya existe (INV-1). Lo que falta, que el invitado quede como
+  interesado, está en `FALTANTES.md` FA-24.
 - Ocupación en vivo para el socio ("ahora hay 23 personas").
 - El socio congela su plan solo, dentro del tope.
 - Modo "tengo que cobrar" el día 1: la recepción ve una lista de cobro rápida.

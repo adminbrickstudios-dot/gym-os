@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { cerrarOtrasSesiones } from "@/lib/cuenta/acciones";
 import { nombreDispositivo, type SesionAbierta } from "@/lib/cuenta/dispositivo";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 const cuando = (iso: string, zona?: string) =>
   new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
@@ -16,7 +17,7 @@ export function Sesiones({ sesiones, zona }: { sesiones: SesionAbierta[]; zona?:
   const otras = sesiones.filter((s) => !s.actual).length;
   return (
     <section className="tarjeta p-5 sm:p-6 max-w-xl mt-6 space-y-3" aria-labelledby="mis-sesiones" data-sesiones={sesiones.length}>
-      <h2 id="mis-sesiones" className="titulo text-2xl">📱 Dónde tenés abierta tu cuenta</h2>
+      <h2 id="mis-sesiones" className="titulo text-2xl"><Icono nombre="celular" /> Dónde tenés abierta tu cuenta</h2>
       <ul className="space-y-2">
         {sesiones.map((s) => (
           <li key={s.id} data-sesion={s.actual ? "actual" : "otra"} className="flex items-center gap-3 min-h-12">
@@ -29,7 +30,7 @@ export function Sesiones({ sesiones, zona }: { sesiones: SesionAbierta[]; zona?:
         ))}
       </ul>
       {otras === 0 ? (
-        <p className="texto-suave" data-sin-otras>Solo está abierta en este dispositivo. ✨</p>
+        <p className="texto-suave" data-sin-otras>Solo está abierta en este dispositivo. <Icono nombre="estrella" /></p>
       ) : (
         <button type="button" className="boton" disabled={ocupado} data-cerrar-otras
           onClick={() => empezar(async () => {

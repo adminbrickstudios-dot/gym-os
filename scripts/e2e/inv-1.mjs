@@ -28,7 +28,7 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/entrada`);
   const form = r.locator("[data-form-invitado]");
-  await r.locator('button:has-text("➕ Invitado")').click();
+  await r.locator('button:has-text("Invitado")').click();
   await form.locator('input[aria-label="Nombre del invitado"]').fill(`Pedro Amigo${s5}`);
   await form.locator('input[aria-label="Socio que invita"]').fill("Testigo Al Día");
   await form.locator("button.fila", { hasText: "Testigo Al Día" }).first().click();

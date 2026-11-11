@@ -9,6 +9,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { CartelEmergencia } from "@/components/panel/CartelEmergencia";
 import { activarEmergencia, cerrarEmergencia, entradasDeEmergencia, estadoEmergencia, habilitarEmergencia } from "./emergencia-acciones";
 import type { EmergenciaHistorial, EntradaEmergencia, EstadoEmergencia } from "./emergencia-tipos";
+import { Icono } from "@/components/ui/Icono";
 
 const DURACIONES = [1, 2, 3, 4, 6, 8, 12];
 const cuando = (m: string, zona: string) =>
@@ -75,7 +76,7 @@ export function PanelEmergencia({ sedeId, zona, inicial, historial }: { sedeId: 
   return (
     <section data-panel-emergencia={est.activa ? "activa" : est.habilitada ? "lista" : "apagada"} className="tarjeta p-5 space-y-4">
       <div className="flex items-start gap-3">
-        <span className="text-2xl" aria-hidden>🚨</span>
+        <span className="text-2xl" aria-hidden><Icono nombre="alerta-circulo" /></span>
         <div className="min-w-0 flex-1">
           <h2 className="titulo text-xl">Modo emergencia de la puerta</h2>
           <p className="texto-suave">Si el molinete se rompe o se corta la luz: la puerta deja pasar a todos, cada entrada queda marcada y, al cerrar, ves quiénes pasaron. Se corta solo al terminar el tiempo.</p>
@@ -95,7 +96,7 @@ export function PanelEmergencia({ sedeId, zona, inicial, historial }: { sedeId: 
         <div className="space-y-3">
           <CartelEmergencia e={est.activa} />
           <p className="texto-suave" data-emergencia-datos>Activada por {est.activa.por ?? "el equipo"} a las {hora(est.activa.desde, zona)} · entraron {est.activa.entradas} hasta ahora.</p>
-          {est.puede_activar && <BotonAccion className="boton boton-peligro" ocupadoTexto="Cerrando…" onClick={cerrar} data-emergencia-cerrar>✅ Cerrar la emergencia</BotonAccion>}
+          {est.puede_activar && <BotonAccion className="boton boton-peligro" ocupadoTexto="Cerrando…" onClick={cerrar} data-emergencia-cerrar><Icono nombre="ok" /> Cerrar la emergencia</BotonAccion>}
         </div>
       )}
 
@@ -113,13 +114,13 @@ export function PanelEmergencia({ sedeId, zona, inicial, historial }: { sedeId: 
               </select>
             </label>
             <div className="flex flex-wrap gap-2">
-              <BotonAccion className="boton boton-peligro" ocupadoTexto="Activando…" disabled={motivo.trim().length < 5} onClick={activar} data-emergencia-activar>🚨 Activar emergencia</BotonAccion>
+              <BotonAccion className="boton boton-peligro" ocupadoTexto="Activando…" disabled={motivo.trim().length < 5} onClick={activar} data-emergencia-activar><Icono nombre="alerta-circulo" /> Activar emergencia</BotonAccion>
               <button type="button" className="boton-texto px-3" onClick={() => setAbierto(false)}>Cancelar</button>
             </div>
           </form>
         ) : (
           <div className="flex flex-wrap gap-2">
-            <button type="button" className="boton boton-peligro" onClick={() => setAbierto(true)} data-emergencia-abrir>🚨 Activar emergencia</button>
+            <button type="button" className="boton boton-peligro" onClick={() => setAbierto(true)} data-emergencia-abrir><Icono nombre="alerta-circulo" /> Activar emergencia</button>
             {est.puede_habilitar && <BotonAccion className="boton-texto px-3" ocupadoTexto="Apagando…" onClick={() => prender(false)} data-emergencia-apagar>Apagar el modo emergencia</BotonAccion>}
           </div>
         )

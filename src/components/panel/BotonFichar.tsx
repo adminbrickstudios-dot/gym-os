@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { ficharAhora, type ResFichaje } from "@/app/panel/fichar/acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { horaLocal, textoMinutos } from "@/lib/fichaje";
+import { Icono } from "@/components/ui/Icono";
 
 export function textoResultado(r: ResFichaje, zona: string): string {
   if (r.accion === "entrada") return `Entrada fichada a las ${horaLocal(r.momento!, zona)}${r.nombre ? `, ${r.nombre}` : ""}.`;
@@ -24,7 +25,7 @@ export function BotonFichar({ nombre, enTurno, entradaEn, sinSalidaDesde, zona }
     <section className="tarjeta p-4 space-y-3" aria-label="Fichaje" data-fichaje>
       <div className="flex flex-wrap items-center gap-3">
         <p className="min-w-0 flex-1">
-          <span aria-hidden>⏱️</span> {enTurno ? <>En turno desde las <strong>{horaLocal(entradaEn!, zona)}</strong></> : <>Fichás como <strong data-fichaje-nombre>{nombre}</strong></>}
+          <span aria-hidden><Icono nombre="reloj" /></span> {enTurno ? <>En turno desde las <strong>{horaLocal(entradaEn!, zona)}</strong></> : <>Fichás como <strong data-fichaje-nombre>{nombre}</strong></>}
           {sinSalidaDesde && <span className="texto-suave text-sm block">Tu entrada de las {horaLocal(sinSalidaDesde, zona)} quedó sin salida: no suma horas hasta que el dueño la corrija.</span>}
         </p>
         <button type="button" className="boton boton-principal" disabled={ocupado} data-fichar={accion}

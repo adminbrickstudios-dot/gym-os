@@ -53,6 +53,14 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
 }
 
 export async function proxy(req: NextRequest) {
+  // F0.1: cuánto tarda el proxy (resolver gimnasio + sesión), a la vista en la cabecera Server-Timing.
+  const t0 = performance.now();
+  const r = await proxyInterno(req);
+  r.headers.append("Server-Timing", `proxy;dur=${Math.round(performance.now() - t0)}`);
+  return r;
+}
+
+async function proxyInterno(req: NextRequest) {
   const base = process.env.NEXT_PUBLIC_DOMINIO_BASE;
   const plataforma = process.env.NEXT_PUBLIC_DOMINIO_PLATAFORMA;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -113,7 +121,14 @@ export async function proxy(req: NextRequest) {
       }
       const resto = g[2] && g[2] !== "/" ? g[2] : null;
       let r: NextResponse;
-      if (resto) {
+      if (resto === "/ingresar") {
+        // U0.1/PLAT-02: /g/<slug>/ingresar se queda en esa dirección (no rebota al /ingresar de la plataforma):
+        // muestra la marca de ESE gimnasio y comprueba que la cuenta sea de él. El gimnasio queda también en la cookie.
+        marcarGimnasio(elegido);
+        const destino = req.nextUrl.clone();
+        destino.pathname = "/ingresar";
+        r = NextResponse.rewrite(destino, { request: { headers: cabeceras } });
+      } else if (resto) {
         const destino = req.nextUrl.clone();
         destino.pathname = resto;
         r = NextResponse.redirect(destino);

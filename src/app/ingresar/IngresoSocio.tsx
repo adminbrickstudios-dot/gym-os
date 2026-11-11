@@ -8,7 +8,7 @@ import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
 
 type Via = "celular" | "mail" | "clave";
 type Estado = { error?: string; enviado?: boolean; telefono?: string; email?: string; destino?: string };
-const VIAS: [Via, string][] = [["celular", "📱 Celular"], ["mail", "✉️ Mail"], ["clave", "🔑 Contraseña"]];
+const VIAS: [Via, string][] = [["clave", "🔑 Contraseña"], ["celular", "📱 Celular"], ["mail", "✉️ Mail"]];
 
 /**
  * El socio entra con un solo campo, "celular o mail" (VD-33, primero quién): lo que escribe elige el método
@@ -16,7 +16,8 @@ const VIAS: [Via, string][] = [["celular", "📱 Celular"], ["mail", "✉️ Mai
  * por mail y mail con contraseña (APP-9). Nada de acá revela si la cuenta existe.
  */
 export function IngresoSocio({ google = false }: { google?: boolean }) {
-  const [via, setVia] = useState<Via>("celular");
+  // D43: mail y contraseña es la forma principal; el código por celular o mail queda abajo, en "Otras formas de entrar".
+  const [via, setVia] = useState<Via>("clave");
   const [valor, setValor] = useState("");
   const [intento, setIntento] = useState(0);
   const vias = <Vias via={via} cambiar={setVia} />;
@@ -61,7 +62,7 @@ function BotonGoogle() {
 function Vias({ via, cambiar }: { via: Via; cambiar: (v: Via) => void }) {
   return (
     <div>
-      <p className="etiqueta mb-2">Cómo querés entrar</p>
+      <p className="etiqueta mb-2">Otras formas de entrar</p>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Cómo entrar">
         {VIAS.map(([v, t]) => (
           <button key={v} type="button" aria-pressed={via === v} onClick={() => cambiar(v)}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { estadoEmergencia } from "@/app/panel/entrada/emergencia-acciones";
 import type { EmergenciaActiva } from "@/app/panel/entrada/emergencia-tipos";
 import { colorVar } from "./Estado";
+import { Icono } from "@/components/ui/Icono";
 
 /** La emergencia activa de la sede (o null). `inicial` evita el parpadeo cuando la página ya la trae. */
 export function useEmergencia(sedeId: string, activo = true, inicial: EmergenciaActiva | null = null) {
@@ -27,7 +28,7 @@ export function CartelEmergencia({ e }: { e: EmergenciaActiva | null }) {
   return (
     <div role="alert" data-emergencia-activa className="aparecer rounded-[var(--radio-grande)] p-4 flex items-start gap-3 border-2"
       style={{ background: `color-mix(in oklab, ${colorVar("rojo")}, var(--fondo) 80%)`, borderColor: colorVar("rojo") }}>
-      <span className="text-3xl" aria-hidden>🚨</span>
+      <span className="text-3xl" aria-hidden><Icono nombre="alerta-circulo" /></span>
       <div className="min-w-0">
         <p className="titulo text-xl">EMERGENCIA activa en la puerta</p>
         <p className="break-words">{e.motivo} · hasta las {hora(e.vence_en)}. Entran todos; cada entrada queda marcada.</p>

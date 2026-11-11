@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { reservarClase } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 export function Reservar({ claseId, socioId, lleno }: { claseId: string; socioId: string; lleno: boolean }) {
   const [msj, setMsj] = useState<{ ok?: boolean; texto?: string }>({});
@@ -9,9 +10,9 @@ export function Reservar({ claseId, socioId, lleno }: { claseId: string; socioId
     <>
       <button type="button" disabled={ocupado || msj.ok} className={`boton !min-h-11 ${lleno ? "texto-suave" : ""}`}
         onClick={() => empezar(async () => { const r = await reservarClase(claseId, socioId); setMsj(r.error ? { texto: r.error } : { ok: true }); })}>
-        {msj.ok ? "✅" : lleno ? "Anotarme en espera" : "Reservar"}
+        {msj.ok ? <><Icono nombre="ok" /></> : lleno ? "Anotarme en espera" : "Reservar"}
       </button>
-      {msj.texto && <p role="alert" className="pildora pildora-rojo w-full">⚠️ {msj.texto}</p>}
+      {msj.texto && <p role="alert" className="pildora pildora-rojo w-full"><Icono nombre="alerta" /> {msj.texto}</p>}
     </>
   );
 }

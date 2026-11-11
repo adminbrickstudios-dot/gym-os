@@ -48,7 +48,7 @@ try {
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/entrada`);
-  chequear(await r.locator('button:has-text("Leer QR")').count() === 1, "en Entrada aparece “📷 Leer QR”", "no está Leer QR");
+  chequear(await r.locator('button:has-text("Leer QR")').count() === 1, "en Entrada aparece “Leer QR”", "no está Leer QR");
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   const hecho = r.locator("[data-hecho]");
   for (let intento = 0; ; intento++) {
@@ -58,7 +58,7 @@ try {
     if (intento) throw new Error("el QR nuevo también figura usado");
     c1 = await codigoNuevo(s, c1);                                            // una corrida anterior usó el de esta ventana
   }
-  chequear(/Testigo Al Día/.test(await hecho.innerText()), `con el lector entra solo: “${(await hecho.innerText()).replace(/\s+/g, " ").replace(/↩️.*/, "").trim()}”`, `dice: ${await hecho.innerText()}`);
+  chequear(/Testigo Al Día/.test(await hecho.innerText()), `con el lector entra solo: “${(await hecho.innerText()).replace(/\s+/g, " ").replace(/.*/, "").trim()}”`, `dice: ${await hecho.innerText()}`);
   await hecho.locator('button:has-text("Deshacer")').click().catch(() => {});
   await buscar.fill(c1); await buscar.press("Enter");
   await r.getByText("ya se usó").waitFor({ timeout: 30000 });

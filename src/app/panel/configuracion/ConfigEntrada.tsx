@@ -7,6 +7,7 @@ import { guardarConfigEntrada, guardarConfigVisita, leerConfigVisita, type Confi
 import { CONFIG_ENTRADA_POR_DEFECTO, guardarPisado, leerPisado, type ConfigEntrada as Config, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 const SEGUNDOS: { valor: Config["cerrar_sola_seg"]; texto: string }[] = [
   { valor: 3, texto: "3 segundos" }, { valor: 4, texto: "4 segundos" }, { valor: 6, texto: "6 segundos" }, { valor: 0, texto: "No se cierra sola" },
@@ -45,8 +46,19 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
   return (
     <div className="space-y-5" data-config-entrada>
       <section className="tarjeta p-5 space-y-2">
-        <h2 className="titulo text-2xl">🚪 La Entrada en todo el panel</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="puerta" /> La Entrada en todo el panel</h2>
         <p className="texto-suave">La ventana de Entrada se abre desde cualquier pantalla: con el botón verde, con F2 o Ctrl+E, tipeando un DNI o pasando el lector.</p>
+        <div className="py-2" data-opcion="entrada-resultado">
+          <p className="font-semibold">Mostrar el resultado de la entrada</p>
+          <p className="texto-suave text-sm">Con el aviso, Enter anota y el resultado sale abajo a la derecha (con la franja de color); tocarlo abre la ficha rápida. Con la ventana grande, el veredicto ocupa la pantalla como siempre.</p>
+          <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Mostrar el resultado de la entrada">
+            {([["aviso", "Aviso en la esquina"], ["ventana", "Ventana grande"]] as const).map(([valor, texto]) => (
+              <button key={valor} type="button" aria-pressed={c.resultado_entrada === valor} data-resultado={valor}
+                className={`pestana ${c.resultado_entrada === valor ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}
+                onClick={() => setC({ ...c, resultado_entrada: valor })}>{texto}</button>
+            ))}
+          </div>
+        </div>
         <Interruptor etiqueta="Abrir al tipear un número" data-opcion="entrada-abrir-al-tipear" ayuda="Si no estás escribiendo en un campo, tocar un número abre la Entrada con ese número. Un lector de QR o llavero la abre siempre."
           checked={c.abrir_al_tipear} onChange={(e) => setC({ ...c, abrir_al_tipear: e.target.checked })} />
         <Interruptor etiqueta="Barra fija a la derecha" data-opcion="entrada-barra-fija" ayuda="Solo en compus de pantalla ancha: el campo DNI siempre a la vista y las últimas 5 entradas. Pensada para la compu del mostrador."
@@ -64,7 +76,7 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
+          <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
         {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
@@ -81,7 +93,7 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
       <ConfigVisitaSeccion puedeEditar={puedeEditar} />
 
       <section className="tarjeta p-5 space-y-3" data-entrada-en-esta-compu data-opcion="entrada-esta-compu">
-        <h2 className="titulo text-2xl">🖥️ En esta compu</h2>
+        <h2 className="titulo text-2xl"><Icono nombre="pantalla" /> En esta compu</h2>
         <p className="texto-suave">Para pisar lo del gimnasio solo en esta compu o tablet (queda guardado en este navegador). Por ejemplo, prender la barra fija solo en el mostrador.</p>
         <Elegir etiqueta="Abrir al tipear un número" valor={aEleccion(pisado.abrir_al_tipear)} alCambiar={(e) => pisar("abrir_al_tipear", e)} />
         <Elegir etiqueta="Barra fija a la derecha" valor={aEleccion(pisado.barra_fija)} alCambiar={(e) => pisar("barra_fija", e)} />
@@ -116,7 +128,7 @@ function ConfigVisitaSeccion({ puedeEditar }: { puedeEditar: boolean }) {
   const entero = (t: string) => (t === "" ? 0 : Math.max(0, Math.trunc(Number(t)) || 0));
   return (
     <section className="tarjeta p-5 space-y-3" data-config-visita data-opcion="visita-horas antiprestamo registrar-salida avisar-en-vivo">
-      <h2 className="titulo text-2xl">🔁 Volver a entrar y avisos de la puerta</h2>
+      <h2 className="titulo text-2xl"><Icono nombre="repetir" /> Volver a entrar y avisos de la puerta</h2>
       <p className="texto-suave">Una visita dura unas horas: si el mismo socio pasa de nuevo por cualquier vía (DNI, QR, tablet) dentro de ese tiempo, se le dice a qué hora entró y no se cuenta otra entrada ni se gasta otra clase.</p>
       {!c ? <div className="esqueleto h-24" aria-hidden /> : (
         <>
@@ -146,7 +158,7 @@ function ConfigVisitaSeccion({ puedeEditar }: { puedeEditar: boolean }) {
           <Interruptor etiqueta="Avisar las entradas por QR o tablet en todas las pantallas" ayuda="Un aviso chiquito arriba a la derecha cuando alguien entra por el QR o la tablet, o intenta entrar y no puede (ese queda hasta que lo cierres, con el botón Cobrar)."
             checked={c.avisar_en_vivo} onChange={(e) => setC({ ...c, avisar_en_vivo: e.target.checked })} />
           <div className="flex flex-wrap items-center gap-3 pt-1">
-            <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "💾 Guardar"}</button>
+            <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
             {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
           </div>
           {puedeEditar && (

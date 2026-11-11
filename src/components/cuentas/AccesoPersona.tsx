@@ -3,6 +3,7 @@ import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState } from "react";
 import { darAccesoPersona, nuevaClavePersona, type Resultado } from "@/app/admin/acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 /** La contraseña provisoria se muestra una sola vez, grande y fácil de copiar. */
 export function ContrasenaNueva({ r }: { r: Resultado }) {
@@ -13,12 +14,12 @@ export function ContrasenaNueva({ r }: { r: Resultado }) {
       <p>{r.aviso}</p>
       {r.contrasena && (
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[var(--texto)]">
-          {r.email && <span>📧 <strong className="break-all">{r.email}</strong></span>}
-          <span>🔑 <strong className="numero text-2xl select-all">{r.contrasena}</strong></span>
+          {r.email && <span><Icono nombre="mail" /> <strong className="break-all">{r.email}</strong></span>}
+          <span><Icono nombre="llave" /> <strong className="numero text-2xl select-all">{r.contrasena}</strong></span>
           {/* Se arma en el navegador recién acá; el texto sale hacia WhatsApp solo si se toca (contraseña provisoria por WhatsApp, 10-DIA-A-DIA). */}
           <a className="boton boton-chico" target="_blank" rel="noopener noreferrer" data-compartir-clave
              href={`https://wa.me/?text=${encodeURIComponent(`Tu acceso a Base: entrá en ${window.location.origin}/ingresar${r.email ? ` con ${r.email}` : ""} y la contraseña ${r.contrasena}. Después cambiala en “Mi cuenta”.`)}`}>
-            📲 Mandar por WhatsApp
+            <Icono nombre="celular" /> Mandar por WhatsApp
           </a>
         </p>
       )}
@@ -37,15 +38,17 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
   const [abierto, setAbierto] = useState(false);
   // Primero el resultado: al dar acceso la página se refresca y la persona
   // ya figura con cuenta; la contraseña recién creada no se puede perder.
-  if (acceso.aviso) return <ContrasenaNueva r={acceso} />;
+  // Si el mail ya tenía cuenta y la contraseña escrita NO se aplicó, el aviso queda y el botón “Nueva contraseña” sigue a la vista.
+  if (acceso.aviso && !acceso.contrasenaNoAplicada) return <ContrasenaNueva r={acceso} />;
   if (tieneCuenta) {
     if (!puedeNuevaClave) return null;
     return (
       <>
+        {acceso.contrasenaNoAplicada && <ContrasenaNueva r={acceso} />}
         <form action={pedirClave} onSubmit={(e) => { if (!confirm(`¿Darle a ${nombre} una contraseña nueva? La que tiene deja de servir.`)) e.preventDefault(); }}>
           <input type="hidden" name="equipo_id" value={equipoId} />
           <CampoContrasena className="campo !w-48" />
-          <button className="boton boton-chico" disabled={cambiando}>{cambiando ? "Generando…" : "🔑 Nueva contraseña"}</button>
+          <button className="boton boton-chico" disabled={cambiando}>{cambiando ? "Generando…" : "Nueva contraseña"}</button>
         </form>
         <ContrasenaNueva r={clave} />
       </>
@@ -61,7 +64,7 @@ export function AccesoPersona({ equipoId, nombre, tieneCuenta, puedeNuevaClave =
           <button className="boton boton-principal boton-chico" disabled={dando}>{dando ? "Dando acceso…" : "Dar acceso"}</button>
         </form>
       ) : (
-        <button type="button" className="boton boton-chico" onClick={() => setAbierto(true)}>✉️ Dar acceso</button>
+        <button type="button" className="boton boton-chico" onClick={() => setAbierto(true)}><Icono nombre="mail" /> Dar acceso</button>
       )}
       {acceso.error && <ContrasenaNueva r={acceso} />}
     </>

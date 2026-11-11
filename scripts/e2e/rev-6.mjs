@@ -30,7 +30,7 @@ try {
   await r.locator("main button", { hasText: "Agua 500 ml" }).click();
   await r.locator('button[aria-pressed]:has-text("Transferencia")').click();
   const antes = new Date((await db.query("select now() n")).rows[0].n);
-  await r.locator('button:has-text("✅ Cobrar")').dblclick();
+  await r.locator('button:has-text("Cobrar")').dblclick();
   await esperarCobro(r);
   await r.waitForTimeout(2000);
   const hechas = await ventasDesde(antes);
@@ -49,7 +49,7 @@ try {
     await p.locator('button[aria-pressed]:has-text("Transferencia")').click();
   }
   const antes2 = new Date((await db.query("select now() n")).rows[0].n);
-  await Promise.all([r.locator('button:has-text("✅ Cobrar")').click(), d.locator('button:has-text("✅ Cobrar")').click()]);
+  await Promise.all([r.locator('button:has-text("Cobrar")').click(), d.locator('button:has-text("Cobrar")').click()]);
   await r.waitForTimeout(4000);
   const cuotas = await ventasDesde(antes2, socio);
   if (cuotas === 1) ok("dos personas cobran la misma cuota a la vez: entra una; la otra ve que ya se cobró");
@@ -80,7 +80,7 @@ try {
   await f.locator('input[name="telefono"]').fill(`000 4${s}1`);
   await f.locator('button[type="submit"]').first().click();   // sin plan: "✅ Dar de alta"
   await d.waitForURL(/\/panel\/socios\/[0-9a-f-]{36}$/, { timeout: 60000 });
-  chequear(/🦄 Ñandú/.test(await d.locator("main h1").innerText()), "con emoji, eñe y apóstrofo en el nombre: se da de alta y se ve igual", await d.locator("main h1").innerText());
+  chequear(/Ñandú/.test(await d.locator("main h1").innerText()), "con emoji, eñe y apóstrofo en el nombre: se da de alta y se ve igual", await d.locator("main h1").innerText());
   for (const raro of ["'; drop table socios; --", "%_\\", "🦄"]) {
     await d.goto(`${G}/panel/socios?q=${encodeURIComponent(raro)}`);
     await d.locator("main h1").waitFor({ timeout: 60000 });

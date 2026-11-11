@@ -3,6 +3,7 @@ import { FilaContacto } from "@/components/panel/FilaContacto";
 import { Vacio } from "@/components/ui/Vacio";
 import { fechaCorta } from "@/lib/formato";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
+import { Icono } from "@/components/ui/Icono";
 
 // VD-46O · Reactivar ex socios: la lista “Se fueron” con filtro por motivo de baja y antigüedad, y cuántos de los
 // contactados volvieron a pagar. Todo lo calcula la base (ex_socios); acá solo se muestra.
@@ -16,8 +17,8 @@ export type DatosExSocios = {
 };
 
 export const MOTIVOS_EX: Record<string, string> = {
-  precio: "💸 Precio", horario: "⏰ Horario", mudanza: "📦 Se mudó", otro_gimnasio: "🏋️ Otro gimnasio",
-  sin_tiempo: "⌛ Sin tiempo", insatisfecho: "😕 No le gustó", otro: "Otro", sin_baja: "👋 Dejó de pagar",
+  precio: "Precio", horario: "Horario", mudanza: "Se mudó", otro_gimnasio: "Otro gimnasio",
+  sin_tiempo: "Sin tiempo", insatisfecho: "No le gustó", otro: "Otro", sin_baja: "Dejó de pagar",
 };
 export const ANTIGUEDADES = [
   { clave: "menos_3", titulo: "Menos de 3 meses" }, { clave: "de_3_a_12", titulo: "De 3 a 12 meses" }, { clave: "mas_12", titulo: "Más de un año" },
@@ -40,7 +41,7 @@ export function ExSocios({ datos: d, motivo, antiguedad, url, zona, mostrar }: {
   return (
     <div data-ex-socios>
       <p className="mensaje mensaje-info mb-4" data-seguimiento-ex>
-        🔁 <span>{s.contactados === 0
+        <Icono nombre="repetir" /> <span>{s.contactados === 0
           ? `Todavía no le escribiste a ningún ex socio en los últimos ${s.dias} días. Cuando lo hagas, acá ves cuántos volvieron a pagar.`
           : <><strong>{s.volvieron} de {s.contactados}</strong> de los ex socios a los que se les escribió (últimos {s.dias} días) volvieron a pagar.</>}</span>
       </p>
@@ -61,7 +62,7 @@ export function ExSocios({ datos: d, motivo, antiguedad, url, zona, mostrar }: {
         ))}
       </nav>
       {d.filas.length === 0 ? (
-        <Vacio emoji={filtrado ? "🔎" : "🎉"} titulo={filtrado ? "Nadie con ese filtro" : "Nadie se fue"}>
+        <Vacio icono={filtrado ? "buscar" : "estrella"} titulo={filtrado ? "Nadie con ese filtro" : "Nadie se fue"}>
           {filtrado ? <>Probá con <Link href={url(null, null)} className="underline">todos los ex socios</Link>.</> : "Cuando alguien deje de pagar o se dé de baja, aparece acá para que le escribas."}
         </Vacio>
       ) : (

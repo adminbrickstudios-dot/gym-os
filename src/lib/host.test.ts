@@ -30,3 +30,14 @@ test("las variables de dominio aceptan protocolo y barra final (como se suelen p
   expect(normalizarHost("https://gym-os-pied.vercel.app/")).toBe("gym-os-pied.vercel.app");
   expect(clasificarHost("gym-os-pied.vercel.app", "https://gym-os-pied.vercel.app/", " gym-os-pied.vercel.app ")).toEqual({ tipo: "plataforma" });
 });
+
+test("U5: con el dominio nuevo, la raíz es la plataforma, gimnasio.dominio es el gimnasio y un dominio propio sigue andando", () => {
+  // En desarrollo: base.localhost (plataforma), gim.base.localhost (gimnasio) y un dominio propio.
+  expect(clasificarHost("base.localhost:3123", "base.localhost", "base.localhost")).toEqual({ tipo: "plataforma" });
+  expect(clasificarHost("www.base.localhost:3123", "base.localhost", "base.localhost")).toEqual({ tipo: "plataforma" });
+  expect(clasificarHost("gim.base.localhost:3123", "base.localhost", "base.localhost")).toEqual({ tipo: "gimnasio", host: "gim.base.localhost" });
+  expect(clasificarHost("migimnasio.com.ar", "base.localhost", "base.localhost")).toEqual({ tipo: "gimnasio", host: "migimnasio.com.ar" });
+  // En producción con dominio propio de Base (sin vercel.app por ningún lado).
+  expect(clasificarHost("midominio.com", "midominio.com", "midominio.com")).toEqual({ tipo: "plataforma" });
+  expect(clasificarHost("gim.midominio.com", "midominio.com", "midominio.com")).toEqual({ tipo: "gimnasio", host: "gim.midominio.com" });
+});

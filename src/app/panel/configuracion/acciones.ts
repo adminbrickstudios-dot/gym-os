@@ -232,6 +232,27 @@ export async function conectarMercadoPago(token: string, secreto: string, modo: 
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
+/** BASE-7: "Probar conexión": usa el token ya guardado (nunca vuelve al navegador) y le pregunta a MercadoPago a qué cuenta pertenece. */
+export async function probarMercadoPago(): Promise<{ error?: string; cuenta?: string }> {
+  try {
+    const panel = await contextoPanel();
+    // Solo el dueño y el encargado: la base decide con el mismo permiso que usa para ver el estado de los pagos online.
+    await rpc("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id });
+    const { data, error } = await clienteServicio().rpc("credenciales_mp", { p_gimnasio_id: panel.gimnasio.id });
+    if (error) return { error: error.message };
+    const c = data as { token: string; modo: string } | null;
+    if (!c?.token) return { error: "Todavía no conectaste MercadoPago: guardá tus credenciales y probá de nuevo." };
+    const { cuentaDelToken } = await import("@/lib/mercadopago");
+    try {
+      const u = await cuentaDelToken(c.token);
+      return { cuenta: u.nickname ?? u.email ?? String(u.id) };
+    } catch (e) {
+      const m = (e as Error).message;
+      if (/ 40[13] /.test(m)) return { error: "MercadoPago no aceptó el Access Token: copialo de nuevo desde Credenciales (el de producción, o el de prueba si elegiste Prueba)." };
+      return { error: "No pudimos hablar con MercadoPago. Probá de nuevo en un rato." };
+    }
+  } catch (e) { return { error: (e as Error).message }; }
+}
 export async function desconectarMercadoPago(): Promise<{ error?: string }> {
   try {
     const panel = await contextoPanel();
@@ -304,6 +325,55 @@ export async function guardarPlanFamiliar(activo: boolean): Promise<{ error?: st
     await rpc("guardar_plan_familiar", { p_gimnasio_id: panel.gimnasio.id, p_activo: activo });
     revalidatePath("/panel/configuracion");
     revalidatePath("/panel/socios");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── FA-16 (D57): que el socio suba su foto desde la app. Apagado por defecto; lo prende solo el dueño. ──
+export async function leerFotoSocioPermitida(): Promise<{ permitida?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return { permitida: await rpc<boolean>("foto_socio_permitida_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarFotoSocioPermitida(si: boolean): Promise<{ permitida?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_foto_socio_permitida", { p_gimnasio_id: panel.gimnasio.id, p_si: si });
+    revalidatePath("/panel/configuracion");
+    return { permitida: si };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── FA-7: los primeros días, la entrada avisa pero no frena ──
+export async function leerAvisarSinBloquear(): Promise<{ hasta?: string | null; activo?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    return await rpc<{ hasta: string | null; activo: boolean }>("avisar_sin_bloquear_estado", { p_gimnasio_id: panel.gimnasio.id });
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarAvisarSinBloquear(dias: number): Promise<{ hasta?: string | null; activo?: boolean; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ hasta: string | null; activo: boolean }>("guardar_avisar_sin_bloquear", { p_gimnasio_id: panel.gimnasio.id, p_dias: dias });
+    revalidatePath("/panel", "layout");
+    return r;
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── FA-23: plazo para aceptar el lugar de la lista de espera ──
+export async function leerEsperaPlazo(): Promise<{ minutos?: number | null; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ minutos: number | null }>("espera_plazo_gimnasio", { p_gimnasio_id: panel.gimnasio.id });
+    return { minutos: r.minutos };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+export async function guardarEsperaPlazo(minutos: number | null): Promise<{ error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    await rpc("guardar_espera_plazo", { p_gimnasio_id: panel.gimnasio.id, p_minutos: minutos });
+    revalidatePath("/panel/configuracion");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }

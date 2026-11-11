@@ -76,7 +76,7 @@ try {
     await capturar(c, `vd27${ruta.replaceAll("/", "-")}-celu`);
   }
   await c.goto(`${G}/panel`);
-  await c.locator('button[aria-label="Buscar"], button:has-text("Buscar")').first().click();
+  await c.locator('button[aria-label="Buscar"]:visible, button:has-text("Buscar"):visible').first().click();
   const hc = c.locator('[role=dialog][aria-label=Buscar]');
   await hc.waitFor({ timeout: 15000 });
   const dc = await hc.evaluate((e) => getComputedStyle(e).animationName);

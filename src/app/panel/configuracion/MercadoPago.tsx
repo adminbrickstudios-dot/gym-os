@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
-import { conectarMercadoPago, desconectarMercadoPago, type EstadoMP } from "./acciones";
+import { conectarMercadoPago, desconectarMercadoPago, probarMercadoPago, type EstadoMP } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * PAY-1: conectar MercadoPago para que los socios paguen desde la app. El
@@ -21,11 +22,16 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
     const r = await desconectarMercadoPago();
     setMsj(r.error ? { error: r.error } : { ok: "Desconectado: la app ya no ofrece pagar con MercadoPago." });
   });
+  const probar = () => empezar(async () => {
+    const r = await probarMercadoPago();
+    setMsj(r.error ? { error: r.error } : { ok: `La conexión funciona: es la cuenta de ${r.cuenta}.` });
+  });
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-mercadopago={estado.conectado ? "conectado" : "no"}>
       <div>
-        <p className="titulo text-2xl">💳 Pagos online con MercadoPago</p>
+        <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Pagos online con MercadoPago</p>
         <p className="texto-suave">Que los socios paguen la cuota desde la app. Queda al día apenas MercadoPago avisa; la plata va a tu cuenta de MercadoPago.</p>
+        <p className="font-semibold" data-mp-plata-directa>La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK.</p>
       </div>
       {estado.conectado ? (
         <p className="pildora pildora-verde !text-base">✓ Conectado{estado.modo === "prueba" ? " en modo prueba" : ""}{estado.por ? ` por ${estado.por}` : ""}</p>
@@ -33,6 +39,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
       {puedeEditar && !abierto && (
         <div className="flex flex-wrap gap-2">
           <button type="button" className="boton" onClick={() => setAbierto(true)}>{estado.conectado ? "Cambiar credenciales" : "Conectar MercadoPago"}</button>
+          {estado.conectado && <button type="button" className="boton" disabled={ocupado} onClick={probar} data-probar-mp>{ocupado ? "Probando…" : "Probar conexión"}</button>}
           {estado.conectado && <button type="button" className="boton texto-suave" disabled={ocupado} onClick={desconectar}>Desconectar</button>}
         </div>
       )}
@@ -62,7 +69,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
         </form>
       )}
       {msj.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}>✓ {msj.ok}</p>}
-      {msj.error && <p role="alert" className="pildora pildora-rojo">⚠️ {msj.error}</p>}
+      {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </section>
   );
 }

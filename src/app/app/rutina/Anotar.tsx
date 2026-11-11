@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { anotarEjercicio } from "../acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** RUT-2: anotar lo que levantó (kg) y las repeticiones; queda como "última". */
 export function Anotar({ socioId, ejercicioId, nombre }: { socioId: string; ejercicioId: string; nombre: string }) {
@@ -9,7 +10,7 @@ export function Anotar({ socioId, ejercicioId, nombre }: { socioId: string; ejer
   const [reps, setReps] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  if (!abierto) return <button type="button" className="boton boton-chico" onClick={() => setAbierto(true)} aria-label={`Anotar ${nombre}`}>✍️ Anotar</button>;
+  if (!abierto) return <button type="button" className="boton boton-chico" onClick={() => setAbierto(true)} aria-label={`Anotar ${nombre}`}><Icono nombre="lapiz" /> Anotar</button>;
   const num = (s: string) => (s.trim() === "" ? null : Number(s.replace(",", ".")));
   return (
     <form className="basis-full flex flex-wrap items-end gap-2" data-anotar
@@ -18,7 +19,7 @@ export function Anotar({ socioId, ejercicioId, nombre }: { socioId: string; ejer
       <label className="space-y-1"><span className="text-xs texto-suave">Reps</span><input className="campo !min-h-11 w-20" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} aria-label="Repeticiones" placeholder="10" /></label>
       <button type="submit" className="boton !min-h-11" disabled={ocupado || (!peso && !reps)}>{ocupado ? "…" : "Guardar"}</button>
       <button type="button" className="boton-texto texto-suave" onClick={() => setAbierto(false)}>Cancelar</button>
-      {error && <p role="alert" className="pildora pildora-rojo w-full">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo w-full"><Icono nombre="alerta" /> {error}</p>}
     </form>
   );
 }
