@@ -12,7 +12,7 @@ const traer = unstable_cache(async (): Promise<Mantenimiento> => {
   const { data, error } = await supabase.rpc("mantenimiento_vigente");
   if (error) return null;
   return (data as Mantenimiento) ?? null;
-}, ["mantenimiento_vigente"], { revalidate: 60 });
+}, ["mantenimiento_vigente"], { tags: ["mantenimiento"], revalidate: 60 });
 
 const cuando = (iso: string) => new Intl.DateTimeFormat("es-AR", { timeZone: "America/Argentina/Buenos_Aires", weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 
