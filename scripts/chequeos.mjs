@@ -108,6 +108,12 @@ for (const f of migraciones) {
 chequeo("Ningún TODO en migraciones", conTodo);
 chequeo("Ninguna migración abre su propia transacción", conTransaccion);
 chequeo("Migraciones con nombre AAAAMMDDHHMMSS_nombre.sql", malNombre);
+{
+  // schema_migrations guarda solo la versión (los 14 dígitos): dos archivos con la misma versión chocan al aplicar.
+  const porVersion = new Map();
+  for (const f of readdirSync(carpetaMig).filter((n) => n.endsWith(".sql"))) { const v = f.slice(0, 14); porVersion.set(v, [...(porVersion.get(v) ?? []), f]); }
+  chequeo("Cada migración tiene su propia versión (los 14 dígitos no se repiten)", [...porVersion.values()].filter((l) => l.length > 1).map((l) => l.join(" y ")));
+}
 
 const telefonosReales = [];
 const carpetaDatos = join(raiz, "scripts", "datos");
