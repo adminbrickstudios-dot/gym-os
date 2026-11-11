@@ -55,7 +55,9 @@ try {
       await abrirBuscador(d, celu);
       await dialogo(d).locator("[data-buscador-campo]").fill(escribo);
       const fila = dialogo(d).locator(`[data-buscador-ayuda="${id}"]`);
-      await fila.waitFor({ timeout: 15000 });
+      await fila.waitFor({ timeout: 15000 }).catch(async (e) => {
+        throw new Error(`${tam} · el diálogo abrió pero no ofrece “${id}” | escrito: ${await dialogo(d).locator("[data-buscador-campo]").inputValue()} | diálogo: ${(await dialogo(d).innerText()).replace(/\s+/g, " ").slice(0, 500)}`);
+      });
       chequear(true, `${tam} · Ctrl+K “${escribo}” ofrece la pregunta`, "");
       if (celu && id === "anular-cobro") await capturar(d, "vd63-celu-ctrlk");
       await fila.click();
