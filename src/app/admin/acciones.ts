@@ -363,7 +363,7 @@ export async function restaurarTextoGimnasio(gimnasioId: string, clave: string):
 }
 
 // ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
-// ⛔ en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
+// (pendiente) en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
 const hablarConVercel: VercelFetch = async (url, init) => {
   const r = await fetch(url, { ...init, cache: "no-store" });
   return { status: r.status, json: () => r.json() };
@@ -394,6 +394,13 @@ export type PersonaEncontrada = { tipo: "socio" | "equipo"; rol: string; nombre:
 export async function buscarPersona(q: string, motivo: string): Promise<{ error?: string; personas?: PersonaEncontrada[] }> {
   try { return { personas: await rpc<PersonaEncontrada[]>("admin_buscar_persona", { p_q: q, p_motivo: motivo }) }; }
   catch (e) { return { error: (e as Error).message }; }
+}
+
+// ── F2.8: equipos desde los que entran los usuarios de BRIK ──
+/** Anota el equipo (por su navegador) y dice si es uno nuevo para esta cuenta. Nunca frena: si falla, no hay aviso. */
+export async function registrarEquipoBrik(): Promise<{ nuevo: boolean }> {
+  try { const r = await rpc<{ nuevo: boolean }>("admin_registrar_equipo"); return { nuevo: !!r.nuevo }; }
+  catch (e) { console.error("admin_registrar_equipo:", (e as Error).message); return { nuevo: false }; }
 }
 
 // ── VD-26: pedidos de demo que llegan desde la página de Gym OS ──

@@ -1,4 +1,5 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import { useState, useTransition } from "react";
 import { publicarNovedadPara, retirarNovedadPlataforma } from "./acciones";
 
@@ -17,7 +18,7 @@ export function NovedadesDuenos({ novedades }: { novedades: NovedadPlataforma[] 
   const [ocupado, empezar] = useTransition();
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-novedades-admin>
-      <p className="titulo text-2xl">📣 Novedades para los dueños</p>
+      <p className="titulo text-2xl"><Icono nombre="campana" /> Novedades para los dueños</p>
       <p className="texto-suave">Aparecen en el Inicio de cada dueño hasta que la cierra.</p>
       {novedades.length > 0 && <ul className="space-y-2">{novedades.map((n) => (
         <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--borde)] px-4 py-3">
@@ -34,9 +35,9 @@ export function NovedadesDuenos({ novedades }: { novedades: NovedadPlataforma[] 
         <label className="space-y-1"><span className="etiqueta">Solo al plan (opcional)</span><input className="campo" value={plan} onChange={(e) => setPlan(e.target.value)} placeholder="Básico" /></label>
         <label className="space-y-1"><span className="etiqueta">Solo a la ciudad (opcional)</span><input className="campo" value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder="Rosario" /></label>
         <label className="space-y-1"><span className="etiqueta">Solo a quienes tienen prendido</span><select className="campo" value={modulo} onChange={(e) => setModulo(e.target.value)}>{MODULOS.map(([k, t]) => <option key={k} value={k}>{t}</option>)}</select></label>
-        <div className="sm:col-span-2"><button type="submit" className="boton" disabled={ocupado || titulo.trim().length < 3 || texto.trim().length < 3}>📣 Publicar</button></div>
+        <div className="sm:col-span-2"><button type="submit" className="boton" disabled={ocupado || titulo.trim().length < 3 || texto.trim().length < 3}><Icono nombre="campana" /> Publicar</button></div>
       </form>
-      {error && <p role="alert" className="pildora pildora-rojo">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
     </section>
   );
 }

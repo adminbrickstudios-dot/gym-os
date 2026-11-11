@@ -80,10 +80,10 @@ Dónde quedó (09/11, mediodía):
 | F2.3 | SA-5 Buscar a cualquiera en todos los gimnasios | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
 | F2.4 | SA-2 Lista de gimnasios con filtros | `SUPER-ADMIN.md` | 🟡 carril/b-super: hecho y probado en la base y con vitest; falta el e2e con sesión real (lo corre el principal) |
 | F2.5 | SA-1 Tablero con "necesitan atención" | `SUPER-ADMIN.md` | 🟡 carril/b-super: tablero con errores; medido con 200 gimnasios: tablero 429 ms y lista 758 ms (prueba de base) |
-| F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | 🟡 carril/b-super: lanzamiento, pausa, baja, restaurar, papelera, clonar y borrado definitivo (anonimizar); falta la pantalla de "pausado" y los botones "abrir como soporte en esta pantalla" |
-| F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | 🟡 carril/b-super: exportar y borrar a un socio, exportar el gimnasio; falta estado de copias |
-| F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | 🟡 carril/b-super: 2FA exigible, roles y registro; roles solo en lo nuevo, faltan aviso de equipo nuevo y cerrar sesiones |
-| F2.9 | SA-7, SA-8, SA-9 y SA-12 | `SUPER-ADMIN.md` | 🟡 carril/b-super: demo, errores, novedades por destino, mantenimiento (falta la franja en los paneles), prueba, descuento, recordatorio, estado, uso y funciones a prueba |
+| F2.6 | SA-6 Alta, lista de lanzamiento, pausa, baja y papelera | `SUPER-ADMIN.md` | 🟡 carril/b-super: lanzamiento, pausa, baja, restaurar, papelera, clonar y borrado definitivo (anonimizar); pantalla de pausado, baja y demo vencida con "Hablar con BRIK", y portada neutral de la landing (migración 020900); falta confirmarlo con el e2e `super-f10.mjs` en Actions |
+| F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | 🟡 carril/b-super: exportar y borrar a un socio, exportar el gimnasio; estado de copias (última exportación y quién; las copias automáticas son de Supabase y no se ven desde acá) |
+| F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | 🟡 carril/b-super: 2FA exigible, roles y registro; roles solo en lo nuevo; aviso de "equipo nuevo" y "Dónde tenés abierta tu cuenta" con cerrar las demás en `/admin/seguridad`; aviso por mail ⛔ (no hay mail) |
+| F2.9 | SA-7, SA-8, SA-9 y SA-12 | `SUPER-ADMIN.md` | 🟡 carril/b-super: demo, errores, novedades por destino, mantenimiento (franja en el panel y en la app del socio), prueba, descuento, recordatorio, estado, uso y funciones a prueba |
 
 ## Fase 3 · Fluidez: la pasada botón por botón
 

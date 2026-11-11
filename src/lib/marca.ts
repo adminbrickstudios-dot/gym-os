@@ -53,6 +53,8 @@ export type ColoresMarca = { color_acento: string; color_fondo: string };
 
 /** Variables CSS y atributo de tono para el wrapper de una pantalla del gimnasio. */
 export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
+/** El acento con el que arranca un gimnasio nuevo en el alta (el super admin lo cambia en el formulario). */
+export const ACENTO_POR_DEFECTO = "#16a34a";
 /** `tema`: lo que eligió la persona en Mi cuenta (cookie `tema`, D37). Si elige claro u oscuro manda sobre el fondo del gimnasio (el acento sigue siendo el del gimnasio). */
 export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSProperties; "data-tono": "oscuro" | "claro" } {
   const fondo = tema === "oscuro" ? FONDO_OSCURO : tema === "claro" ? FONDO_CLARO : m.color_fondo;

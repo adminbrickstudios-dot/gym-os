@@ -1,3 +1,4 @@
+import { Icono } from "@/components/ui/Icono";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
 import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
+import { EstadoCopias } from "../EstadoCopias";
 import { Ciudad, CicloDeVida, QrGimnasio, RestaurarTextos } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
@@ -30,7 +32,7 @@ const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como sopor
 type PasoLanzamiento = { clave: string; titulo: string; falta: string; hecho: boolean };
 type ErrorPantalla = { pantalla: string; cantidad: number; ultimo: string; mensaje: string };
 type Soporte = { id: string; quien: string; motivo: string; rol?: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
-const COLOR = { rojo: ["🔴 Urgente", "pildora-rojo"], amarillo: ["🟡 Atención", "pildora-amarillo"], verde: ["🟢 Todo bien", "pildora-verde"] } as const;
+const COLOR = { rojo: ["Urgente", "pildora-rojo"], amarillo: ["Atención", "pildora-amarillo"], verde: ["Todo bien", "pildora-verde"] } as const;
 const diaCorto = (d: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
 export const metadata: Metadata = { title: "BRIK · Gimnasio" };
@@ -41,7 +43,7 @@ type Detalle = {
   equipo: { equipo_id: string; nombre: string; rol: Rol; activo: boolean; es_soporte: boolean; tiene_cuenta: boolean;
             email: string | null; ultimo_ingreso: string | null; soy_yo: boolean }[];
 };
-const EMOJI: Record<Rol, string> = { dueno: "👑", encargado: "🧭", recepcion: "🛎️", profe: "💪" };
+const ICONO_ROL: Record<Rol, string> = { dueno: "corona", encargado: "objetivo", recepcion: "campana", profe: "pesa" };
 const fecha = (iso: string | null) => iso
   ? new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(iso))
   : "nunca";
@@ -69,7 +71,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       rpc<{ gimnasio_id: string; nombre: string }[]>("admin_gimnasios"),
     ]);
   } catch (e) {
-    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="No se pudo abrir">{e.message}</Aviso></main>;
+    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="No se pudo abrir">{e.message}</Aviso></main>;
     throw e;
   }
   const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
@@ -83,11 +85,11 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <h1 className="titular text-6xl">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
         <div className="flex flex-wrap gap-2">
           <BotonEntrar gimnasioId={g.gimnasio_id} />
-          <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+          <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver su página</a>
           {yoSoporte && (
             <form action="/admin/salir-gimnasio" method="post">
               <input type="hidden" name="gimnasio_id" value={g.gimnasio_id} />
-              <button className="boton texto-suave">🚶 Dejar de ser parte de su equipo</button>
+              <button className="boton texto-suave"><Icono nombre="salir" /> Dejar de ser parte de su equipo</button>
             </form>
           )}
         </div>
@@ -107,7 +109,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
           <div className="tarjeta p-5 space-y-3">
             <p><span className={`pildora ${COLOR[saludTodos[g.gimnasio_id].color][1]}`} data-color={saludTodos[g.gimnasio_id].color}>{COLOR[saludTodos[g.gimnasio_id].color][0]}</span></p>
             {saludTodos[g.gimnasio_id].motivos.length > 0
-              ? <div className="space-y-1">{saludTodos[g.gimnasio_id].motivos.map((m) => <p key={m} className="texto-suave">⚑ {m}</p>)}</div>
+              ? <div className="space-y-1">{saludTodos[g.gimnasio_id].motivos.map((m) => <p key={m} className="texto-suave"><Icono nombre="alerta" /> {m}</p>)}</div>
               : <p className="texto-suave">Usa el panel, entra gente y el abono está al día.</p>}
             <p className="texto-tenue text-sm">Último ingreso del equipo: {fecha(saludTodos[g.gimnasio_id].ultimo_acceso_equipo)}</p>
           </div>
@@ -129,7 +131,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <ul className="space-y-2">
           {g.equipo.map((p) => (
             <li key={p.equipo_id} className={`tarjeta p-4 flex flex-wrap items-center gap-4 ${p.activo ? "" : "opacity-50"}`}>
-              <span className="icono" aria-hidden>{p.es_soporte ? "🧱" : EMOJI[p.rol]}</span>
+              <span className="icono" aria-hidden><Icono nombre={p.es_soporte ? "escudo" : ICONO_ROL[p.rol]} /></span>
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-lg">{p.nombre}{p.soy_yo && <span className="texto-tenue font-normal"> · vos</span>}</span>
                 <span className="block texto-suave text-sm break-all">
@@ -197,6 +199,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3" data-ficha-ciclo>
         <p className="titulo-grupo">Pausar o dar de baja</p>
         <CicloDeVida gimnasioId={g.gimnasio_id} nombre={g.nombre} pausado={!!fila?.suspendido} paraBorrar={!!fila?.para_borrar} />
+        <EstadoCopias gimnasioId={g.gimnasio_id} />
         {fila?.para_borrar && <BorrarDefinitivo gimnasioId={g.gimnasio_id} nombre={g.nombre} />}
       </section>
 

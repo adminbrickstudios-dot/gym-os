@@ -1,3 +1,4 @@
+import { Icono } from "@/components/ui/Icono";
 import { randomUUID } from "node:crypto";
 import { traducirErrorSupabase } from "@/lib/admin/errores-supabase";
 import { chequearEntorno } from "@/lib/admin/entorno";
@@ -66,12 +67,12 @@ export async function EstadoPlataforma() {
   return (
     <details className="tarjeta p-5" open={problemas > 0}>
       <summary className="cursor-pointer titulo text-xl">
-        {problemas ? `⚠️ ${problemas === 1 ? "Hay 1 cosa" : `Hay ${problemas} cosas`} para configurar` : "✅ Plataforma bien configurada"}
+        <Icono nombre={problemas ? "alerta" : "ok"} /> {problemas ? `${problemas === 1 ? "Hay 1 cosa" : `Hay ${problemas} cosas`} para configurar` : "Plataforma bien configurada"}
       </summary>
       <ul className="mt-4 space-y-3">
         {lista.map((c) => (
           <li key={c.titulo} className="flex gap-3">
-            <span aria-hidden>{c.ok && !c.aviso ? "✅" : "⚠️"}</span>
+            <span aria-hidden><Icono nombre={c.ok && !c.aviso ? "ok" : "alerta"} /></span>
             <span><span className="font-semibold">{c.titulo}</span>{c.detalle && <span className="block texto-suave text-sm">{c.detalle}</span>}</span>
           </li>
         ))}

@@ -5,7 +5,7 @@ import { useState } from "react";
  * Entrar al panel de un gimnasio como Soporte BRIK (POST: la base valida y lo suma al equipo).
  * VD-40: pide el MOTIVO; queda escrito (quién, por qué, cuándo) y el dueño lo ve en su Control.
  */
-export function BotonEntrar({ gimnasioId, principal = true, texto = "🚪 Entrar al panel", motivoInicial = "", destino = "" }: {
+export function BotonEntrar({ gimnasioId, principal = true, texto = "Entrar al panel", motivoInicial = "", destino = "" }: {
   gimnasioId: string; principal?: boolean; texto?: string; motivoInicial?: string; destino?: string;
 }) {
   const [abierto, setAbierto] = useState(false);

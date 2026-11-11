@@ -36,7 +36,7 @@ export function Metricas({ m }: { m: MetricasPlataforma }) {
           <p className="texto-suave text-sm">Entradas por día en toda la plataforma (14 días)</p>
           <div className="flex items-end gap-1 h-24" role="img" aria-label="Entradas por día">
             {m.entradas_por_dia.map((d) => (
-              <div key={d.dia} className="flex-1 rounded-t bg-[var(--acento,#16a34a)]" style={{ height: `${Math.max(4, (d.entradas / max) * 100)}%` }} title={`${dia(d.dia)}: ${d.entradas}`} />
+              <div key={d.dia} className="flex-1 rounded-t bg-[var(--acento)]" style={{ height: `${Math.max(4, (d.entradas / max) * 100)}%` }} title={`${dia(d.dia)}: ${d.entradas}`} />
             ))}
           </div>
           <p className="texto-tenue text-xs flex justify-between"><span>{dia(m.entradas_por_dia[0]?.dia ?? "1970-01-01")}</span><span>{dia(m.entradas_por_dia.at(-1)?.dia ?? "1970-01-01")}</span></p>
@@ -46,7 +46,7 @@ export function Metricas({ m }: { m: MetricasPlataforma }) {
           <div className="flex items-end gap-2 h-24" role="img" aria-label="Ingreso por abonos">
             {m.abonos_por_mes.map((d) => (
               <div key={d.mes} className="flex-1 flex flex-col justify-end h-full text-center">
-                <div className="rounded-t bg-[var(--acento,#16a34a)]" style={{ height: `${Math.max(4, (Number(d.monto) / maxAbono) * 100)}%` }} title={formatearPesos(Number(d.monto))} />
+                <div className="rounded-t bg-[var(--acento)]" style={{ height: `${Math.max(4, (Number(d.monto) / maxAbono) * 100)}%` }} title={formatearPesos(Number(d.monto))} />
               </div>
             ))}
           </div>

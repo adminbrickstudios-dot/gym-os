@@ -1,4 +1,5 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
@@ -28,9 +29,9 @@ export function Notas({ gimnasioId, notas }: { gimnasioId: string; notas: NotaBr
           const r = await agregarNotaBrik(gimnasioId, texto);
           if (r.error) { setError(r.error); return; }
           setError(""); setTexto(""); router.refresh();
-        }}>➕ Agregar nota</BotonAccion>
+        }}><Icono nombre="mas" /> Agregar nota</BotonAccion>
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">⚠️ {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

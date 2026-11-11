@@ -1,4 +1,5 @@
 "use client";
+import { Icono } from "@/components/ui/Icono";
 import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState, useTransition } from "react";
 import { ContrasenaNueva } from "@/components/cuentas/AccesoPersona";
@@ -10,7 +11,7 @@ export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
   const [estado, accion, guardando] = useActionState<Resultado, FormData>(agregarPersona, {});
   return (
     <form action={accion} className="tarjeta p-5 grid sm:grid-cols-3 gap-3">
-      <p className="titulo text-xl sm:col-span-3">➕ Sumar a alguien</p>
+      <p className="titulo text-xl sm:col-span-3"><Icono nombre="mas" /> Sumar a alguien</p>
       <input type="hidden" name="gimnasio_id" value={gimnasioId} />
       <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
       <label className="space-y-1"><span className="etiqueta">Mail</span><input name="email" type="email" className="campo" placeholder="Para que entre al sistema" /></label>
@@ -18,7 +19,7 @@ export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
       <label className="space-y-1"><span className="etiqueta">Rol</span>
         <select name="rol" className="campo" defaultValue="dueno">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]}</option>)}</select></label>
       <div className="sm:col-span-3"><ContrasenaNueva r={estado} /></div>
-      <div className="sm:col-span-3"><button className="boton" disabled={guardando}>{guardando ? "Sumando…" : "➕ Sumar"}</button></div>
+      <div className="sm:col-span-3"><button className="boton" disabled={guardando}>{guardando ? "Sumando…" : <><Icono nombre="mas" /> Sumar</>}</button></div>
     </form>
   );
 }
@@ -46,7 +47,7 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
       </ul>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <form action={accion} className="tarjeta p-5 space-y-3">
-        <p className="titulo text-xl">➕ Sumar una dirección</p>
+        <p className="titulo text-xl"><Icono nombre="mas" /> Sumar una dirección</p>
         <p className="texto-suave text-sm">
           Un dominio del gimnasio (www.olympogym.com) o, mientras no haya dominio, una dirección gratis de Vercel
           (por ejemplo olympogym.com.ar). Después agregala igual en Vercel → tu proyecto → Settings → Domains.

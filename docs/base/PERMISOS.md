@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 395 no (las decide la propia función con la sesión, el socio o RLS); 26 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 318 funciones piden un rol del equipo con `privado.exigir_equipo`; 398 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -359,6 +359,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_demos_vencidas`
 - `admin_entrar_gimnasio`
 - `admin_errores`
+- `admin_estado_copias`
 - `admin_estado_persona`
 - `admin_estado_seguridad`
 - `admin_evento_webhook`
@@ -406,6 +407,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_quitar_dominio`
 - `admin_quitar_rol_brik`
 - `admin_reanudar_gimnasio`
+- `admin_registrar_equipo`
 - `admin_registrar_pago_brik`
 - `admin_registro_brik`
 - `admin_resolver_ayuda`
@@ -517,6 +519,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `escribir_al_gimnasio`
 - `estado_abono_panel`
 - `estado_acceso`
+- `estado_gimnasio_aviso`
 - `estado_soporte`
 - `eventos_publicos (también anónimo)`
 - `eventos_socio`
@@ -733,6 +736,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `destinos_push_mensajes`
 - `entrar_con_google`
 - `ingreso_permitido`
+- `landing_publica_base`
 - `mail_para_ingresar`
 - `precio_cuota`
 - `registrar_envio_publico`

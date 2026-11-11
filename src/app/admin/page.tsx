@@ -1,3 +1,4 @@
+import { Icono } from "@/components/ui/Icono";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -35,7 +36,7 @@ type Gimnasio = {
 type Salud = { ultimo_acceso_equipo: string | null; ventas_7_dias: number; cobrado_7_dias: number; entradas_7_dias: number; sin_uso: boolean };
 // VD-40: el color de cada gimnasio y por qué (se calcula en la base, nunca se guarda).
 type SaludV2 = { color: "rojo" | "amarillo" | "verde"; orden: number; puntaje: number; motivos: string[]; ayudas_pendientes: number };
-const COLOR: Record<SaludV2["color"], [string, string]> = { rojo: ["🔴 Urgente", "pildora-rojo"], amarillo: ["🟡 Atención", "pildora-amarillo"], verde: ["🟢 Todo bien", "pildora-verde"] };
+const COLOR: Record<SaludV2["color"], [string, string]> = { rojo: ["Urgente", "pildora-rojo"], amarillo: ["Atención", "pildora-amarillo"], verde: ["Todo bien", "pildora-verde"] };
 const FILTROS: [string, string][] = [["todos", "Todos"], ["atencion", "Necesitan atención"], ["rojo", "Urgentes"], ["amarillo", "Atención"], ["verde", "Todo bien"]];
 const sinTildes = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 const hace = (m: string | null) => { if (!m) return "nunca"; const d = Math.floor((Date.now() - new Date(m).getTime()) / 86400000); return d <= 0 ? "hoy" : d === 1 ? "ayer" : `hace ${d} días`; };
@@ -68,7 +69,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     demosVencidas = await rpc<DemoVencida[]>("admin_demos_vencidas").catch(() => []);
     contactoPlataforma = await rpc<ContactoPlataforma>("contacto_plataforma_publico");
   } catch (e) {
-    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso emoji="🔒" titulo="Sin acceso">{e.message}<span className="block mt-2"><Link href="/admin/seguridad" className="underline">Confirmar mi código de dos pasos</Link></span></Aviso></main>;
+    if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="Sin acceso">{e.message}<span className="block mt-2"><Link href="/admin/seguridad" className="underline">Confirmar mi código de dos pasos</Link></span></Aviso></main>;
     throw e;
   }
   const reales = gimnasios.filter((g) => !g.es_demo);
@@ -85,12 +86,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     <main className="mx-auto max-w-5xl px-4 sm:px-8 py-10 space-y-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-4xl mb-3" aria-hidden>🧱</p>
+          <p className="text-4xl mb-3" aria-hidden><Icono nombre="escudo" /></p>
           <h1 className="titular text-6xl">Gimnasios</h1>
           <p className="texto-suave text-lg mt-2">{reales.length} {reales.length === 1 ? "gimnasio" : "gimnasios"} · {formatearNumero(reales.reduce((s, g) => s + g.socios_al_dia, 0))} socios al día</p>
         </div>
         <div className="flex gap-2">
-          <form action="/salir" method="post"><button className="boton">🚪 Salir</button></form>
+          <form action="/salir" method="post"><button className="boton"><Icono nombre="puerta" /> Salir</button></form>
         </div>
       </header>
 
@@ -122,14 +123,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <div className="flex flex-wrap items-center gap-2" data-filtros>
           {FILTROS.map(([k, t]) => (
             <Link key={k} href={enlaceFiltro(k)} aria-current={filtro === k ? "true" : undefined} data-filtro={k}
-              className={`boton ${filtro === k ? "!border-[var(--acento,#16a34a)]" : "texto-suave"}`}>
+              className={`boton ${filtro === k ? "!border-[var(--acento)]" : "texto-suave"}`}>
               {t}{k === "atencion" || k === "rojo" || k === "amarillo" || k === "verde" ? ` (${cuentas[k]})` : ""}
             </Link>
           ))}
           <form action="/admin" className="flex gap-2 flex-1 min-w-[14rem]">
             <input type="hidden" name="filtro" value={filtro} />
             <input name="q" defaultValue={busqueda ?? ""} className="campo flex-1" placeholder="Buscar por nombre…" aria-label="Buscar gimnasio" />
-            <button className="boton">🔎</button>
+            <button className="boton" aria-label="Buscar"><Icono nombre="buscar" /></button>
           </form>
         </div>
         {gimnasios.length === 0 && <p className="texto-suave">Todavía no hay gimnasios. Creá el primero acá arriba.</p>}
@@ -149,15 +150,15 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                     <PildoraAbono a={abonos[g.gimnasio_id]} />
                   </p>
                   <p className="texto-suave text-sm mt-1">
-                    👑 {g.duenos.join(", ") || "Sin dueño"}
+                    <Icono nombre="corona" /> {g.duenos.join(", ") || "Sin dueño"}
                     {g.duenos_sin_cuenta > 0 && <span className="pildora pildora-amarillo ml-2">{g.duenos_sin_cuenta === 1 ? "el dueño no tiene acceso" : `${g.duenos_sin_cuenta} dueños sin acceso`}</span>}
                     {g.duenos_sin_cuenta > 0 && <Link href={`/admin/${g.gimnasio_id}`} className="pildora pildora-amarillo ml-2" data-terminar-alta>Terminar alta: dar acceso al dueño</Link>}
                   </p>
-                  {!g.es_demo && sv(g).motivos.length > 0 && <p className="texto-suave text-sm mt-1" data-motivos>⚑ {sv(g).motivos.join(" · ")}</p>}
-                  <p className="texto-tenue text-sm mt-1 break-all">🌐 {g.hosts.join(" · ")}</p>
+                  {!g.es_demo && sv(g).motivos.length > 0 && <p className="texto-suave text-sm mt-1" data-motivos><Icono nombre="alerta" /> {sv(g).motivos.join(" · ")}</p>}
+                  <p className="texto-tenue text-sm mt-1 break-all"><Icono nombre="web" /> {g.hosts.join(" · ")}</p>
                   {salud[g.gimnasio_id] && (
                     <p className="texto-suave text-sm mt-1" data-salud>
-                      🩺 El equipo entró {hace(salud[g.gimnasio_id].ultimo_acceso_equipo)} · {salud[g.gimnasio_id].ventas_7_dias} ventas en 7 días ({formatearPesos(salud[g.gimnasio_id].cobrado_7_dias)})
+                      <Icono nombre="tendencia" /> El equipo entró {hace(salud[g.gimnasio_id].ultimo_acceso_equipo)} · {salud[g.gimnasio_id].ventas_7_dias} ventas en 7 días ({formatearPesos(salud[g.gimnasio_id].cobrado_7_dias)})
                       {salud[g.gimnasio_id].sin_uso && !g.es_demo && <span className="pildora pildora-rojo ml-2">Dejó de usarse</span>}
                     </p>
                   )}
@@ -170,8 +171,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               </div>
               <div className="flex flex-wrap gap-2">
                 <BotonEntrar gimnasioId={g.gimnasio_id} principal={false} />
-                <Link href={`/admin/${g.gimnasio_id}`} className="boton">⚙️ Equipo, claves y direcciones</Link>
-                <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton">🌐 Ver su página</a>
+                <Link href={`/admin/${g.gimnasio_id}`} className="boton"><Icono nombre="ajustes" /> Equipo, claves y direcciones</Link>
+                <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver su página</a>
               </div>
             </li>
           ))}
