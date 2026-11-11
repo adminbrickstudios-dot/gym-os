@@ -8,7 +8,7 @@
 5. **Dominio:** `DOMINIO.md` (pasos exactos).
 
 ## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
-- U5, P1 y P4 a P7 en ✅ (corrida 43015505501, 0 fallas). Ayudante lanzado en `carril/c-landing` para P8 y P8b (landing profesional y editor en vivo); cuando termine: integrar, correr su e2e `web-p8b` en Actions. Mientras, yo sigo con la fase C (C1 olvidé sin mails, C2 importar socios). Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel).
+- U5, P1, P4 a P7, P8 y P8b en ✅ (Actions 43015505501 y 43020787407). Chequeos de la base relanzados en 43022741600 (lista blanca y paletas del editor ya arreglados). Ayudantes en la fase C: `carril/c-clave` (C1) y `carril/c-importar` (C2); al terminar: integrar, correr su e2e (`clave-nueva`, `importar-300`) en Actions. Yo sigo con C3 a C8. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel). Hay migraciones nuevas sin aplicar (20261111090000 y las que traigan los carriles): se aplican en la próxima publicación.
 
 ## (anterior) DÓNDE QUEDÉ (11/11, mediodía)
 - **(11/11, 08:40) Fase U publicada:** prevuelo y aplicar de `publicar/base-fase-u` en verde (corridas 43012383810 y 43013698089), PR #14 mergeado (37fa0a0), deploy de Vercel en verde. El humo en producción (corrida 43014189983) no corrió: faltan los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`.
