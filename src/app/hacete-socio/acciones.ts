@@ -2,6 +2,7 @@
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
+import { frenarEnvioPublico } from "@/lib/seguridad/envio-publico";
 
 export type Transferencia = { alias: string | null; cbu: string | null; titular: string | null; banco: string | null };
 export type ResultadoAlta = {
@@ -21,13 +22,10 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
-  // BASE-8: tope de envíos (10 por hora por conexión, 3 por hora por persona). El campo trampa ya se resolvió arriba.
-  {
-    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
-    const { clienteServicio } = await import("@/lib/supabase/servicio");
-    const { error: errTope } = await clienteServicio().rpc("registrar_envio_publico", { p_formulario: "alta_online", p_ip: ip, p_clave: datos.dni || datos.email || null });
-    if (errTope) return { error: errTope.message, datos };
-  }
+  // BASE-8 · D49: campo trampa, tiempo mínimo y tope de envíos (10 por hora por conexión, 3 por hora por persona).
+  const freno = await frenarEnvioPublico(form, "alta_online", datos.dni || datos.email || null);
+  if (freno.robot) return { listo: true, nombre: datos.nombre };
+  if (freno.error) return { error: freno.error, datos };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("alta_online", {
     p_host: host, p_plan_id: datos.plan, p_version: Number(datos.version), p_medio: datos.medio,

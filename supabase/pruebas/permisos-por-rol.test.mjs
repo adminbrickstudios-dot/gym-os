@@ -145,3 +145,49 @@ test("PERMISOS.md coincide con la base y cada rol recibe lo que dice la matriz",
   console.log(`permisos-por-rol: ${matriz.size} funciones, ${llamadas} llamadas, ${concluyentes} concluyentes, ${noConcluyentes} no concluyentes, ${salteadas} salteadas`);
   assert.deepEqual(errores, [], `Contradicciones con PERMISOS.md:\n${errores.join("\n")}`);
 });
+
+// "Solo el servidor": lo que PERMISOS.md dice que es de service_role no lo puede ejecutar nadie con sesión ni anónimo
+// (ni siquiera el dueño), y llamarlo es un error de permiso, nunca una respuesta. Y el documento lista TODAS las que son así.
+test("las funciones «solo el servidor» de PERMISOS.md no las ejecuta ningún rol, y están todas", async () => {
+  const md = readFileSync(new URL("../../docs/base/PERMISOS.md", import.meta.url), "utf8");
+  const seccion = md.split("## Solo el servidor")[1] ?? "";
+  const listadas = [...seccion.matchAll(/^- `([a-z0-9_]+)`/gm)].map((m) => m[1]);
+  assert.ok(listadas.length >= 20, `no se pudo leer la sección «Solo el servidor» (${listadas.length})`);
+
+  const fns = await t.q(`
+    select p.proname as nombre,
+           has_function_privilege('anon', p.oid, 'execute') as anon,
+           has_function_privilege('authenticated', p.oid, 'execute') as auth,
+           has_function_privilege('service_role', p.oid, 'execute') as servicio,
+           (select array_agg(format_type(x, null) order by o) from unnest(p.proargtypes::oid[]) with ordinality as a(x, o)) as tipos
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' and p.prokind = 'f'`);
+  const errores = [];
+  const reales = new Set(fns.filter((f) => f.servicio && !f.anon && !f.auth).map((f) => f.nombre));
+  for (const n of listadas) if (!reales.has(n)) errores.push(`${n}: PERMISOS.md dice que es solo del servidor y la base no coincide`);
+  for (const n of reales) if (!listadas.includes(n)) errores.push(`${n}: es solo del servidor y PERMISOS.md no lo lista (regenerarlo)`);
+
+  for (const f of fns.filter((x) => listadas.includes(x.nombre))) {
+    const tipos = f.tipos ?? [];
+    if (tipos.some((tp) => valor(tp, "x") === null)) continue;
+    const params = tipos.map((tp) => valor(tp, "x"));
+    const marcas = tipos.map((tp, i) => `$${i + 1}::${tp}`).join(", ");
+    for (const rol of ["dueno", "encargado", "recepcion", "profe", "socio", "otro", "anon"]) {
+      await t.db.query("savepoint servidor");
+      try {
+        if (rol === "anon") await t.db.query("set local role anon");
+        else {
+          await t.db.query("set local role authenticated");
+          await t.db.query(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: usuario[rol], role: "authenticated" })]);
+        }
+        await t.db.query(`select * from public.${f.nombre}(${marcas})`, params);
+        errores.push(`${f.nombre}: ${rol} la ejecutó (es solo del servidor)`);
+      } catch (e) {
+        if (e.code !== "42501") errores.push(`${f.nombre}: ${rol} recibió «${e.message}» (código ${e.code}) y tendría que ser un error de permiso (42501)`);
+      } finally {
+        await t.db.query("rollback to savepoint servidor");
+      }
+    }
+  }
+  assert.deepEqual(errores, [], `Funciones «solo el servidor» mal cerradas:\n${errores.join("\n")}`);
+});
