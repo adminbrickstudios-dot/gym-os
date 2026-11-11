@@ -1,5 +1,11 @@
 # PROGRESO de Base
 
+## LO QUE NECESITO DE MATEO (secretos de GitHub: hoy solo existe `SUPABASE_DB_URL`)
+- `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` → destraba el humo en producción (U0.3).
+- `COPIAS_CLAVE` (una frase larga, 16+ letras; guardala vos también, sin ella las copias no se abren) → destraba C8, corré Actions → Copias.
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` → destraban medir producción (F0.1) y los usuarios demo.
+- `SUPABASE_SERVICE_ROLE_KEY` en Vercel (U1/U0.1).
+
 ## PASOS PARA MATEO (velocidad y accesos; F0.6)
 1. **Clave de servicio (urgente, destraba el alta de dueños):** Supabase → tu proyecto de Gym OS → Project Settings → API → copiá la clave **service_role** → Vercel → el proyecto → Settings → Environment Variables → `SUPABASE_SERVICE_ROLE_KEY` (Production) → pegala → Redeploy. Tiene que ser de ESTE proyecto (el mismo de `NEXT_PUBLIC_SUPABASE_URL`), no la anon ni la de otro proyecto. En /admin, "Estado de la plataforma" la prueba creando y borrando un usuario.
 2. **Claves asimétricas (hace que el proxy no viaje a Auth en cada pedido):** Supabase → Project Settings → JWT Keys → "Migrate" a claves asimétricas (ECC/RSA). Puede cerrar las sesiones abiertas una vez. Después `getClaims()` verifica sin ir a Auth.
