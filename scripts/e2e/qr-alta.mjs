@@ -8,9 +8,17 @@
 //   4. Con el registro apagado, el mismo link dice que hoy no se puede y da el WhatsApp del gimnasio.
 //   5. La recepción no abre el cartel (solo dueño y encargado).
 //   node scripts/e2e/qr-alta.mjs      (con scripts/local/levantar.sh corriendo; sin correr todavía: escrito según la documentación)
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
+// El registro no se prende sin reglamento: el demo de CI puede no tenerlo, se deja uno.
+{
+  const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() }); await db.connect();
+  await db.query(`insert into public.reglamentos (gimnasio_id, version, texto) select g.id, 1, 'Reglamento de prueba del gimnasio demo para el e2e del registro por QR.' from public.gimnasios g where g.slug = 'demo' and not exists (select 1 from public.reglamentos r where r.gimnasio_id = g.id)`);
+  await db.end();
+}
 const b = await navegador();
 const s = Date.now().toString().slice(-6);
 const DNI = `42${s}`;
