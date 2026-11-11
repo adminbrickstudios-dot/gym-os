@@ -95,6 +95,22 @@ pantalla de inicio".
 | Cómo se entra: DNI, QR o los dos | Los dos |
 | Plan sugerido en el alta | El primero de la lista |
 
+## 6. Lo que no se pidió pero hace falta
+
+- **El socio que ya estaba cargado** (importado con C2 o dado de alta por la
+  recepción) **se reclama, no se duplica.** En "Ya soy socio → Es mi primera
+  vez", pone su DNI y su celular. Si coinciden con su ficha, crea su contraseña
+  y queda vinculado a esa ficha, con su plan y sus pagos. Si no coinciden: "Pedile
+  a la recepción que revise tus datos". Nunca se crea un socio nuevo con un DNI
+  que ya existe.
+- **Menores de 18**: el alta pide además el nombre y el celular de un adulto
+  responsable, y queda marcado (los documentos que firma el adulto ya existen,
+  VD-46R).
+- **El primer ingreso a la app** muestra una guía de tres pasos: este es tu QR,
+  acá ves cuántos días te quedan, acá pagás.
+- **Avisos en la app** (push, si lo acepta): "Te quedan 3 días", "Ya está tu
+  pago", "Mañana tenés Funcional 19:00" (FA-12).
+
 ## LISTO SI
 
 e2e en celular (390 px), contra producción en un gimnasio `[demo]` y contra
@@ -109,3 +125,4 @@ local:
 5. Con "Quiero ser socio" apagado: el botón no aparece y el link directo dice
    que hoy no se puede, con el WhatsApp.
 6. Con "solo DNI": la app no muestra QR. Con "solo QR": el DNI no deja entrar.
+7. Un socio importado reclama su cuenta con DNI y celular, y ve su plan y sus pagos. Con un DNI que ya existe nunca se crea otro socio.
