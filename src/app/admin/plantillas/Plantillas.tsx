@@ -41,13 +41,13 @@ export function Plantillas({ tipos, textos }: { tipos: string[]; textos: TextoPl
             <p className="font-semibold">{t.etiqueta} <span className="pildora align-middle">{t.grupo}</span></p>
             <p className="texto-tenue text-sm">De fábrica: {t.fabrica}</p>
           </div>
-          <div className="space-y-1"><p className="etiqueta">Plantilla de la plataforma (todos los tipos)</p><Editor key={`${t.clave}-p-${t.plataforma ?? ""}`} texto={t} tipo={null} valor={t.plataforma} /></div>
+          <div className="space-y-1"><p className="etiqueta">Plantilla de la plataforma (todos los tipos)</p><Editor key={`${t.clave}-p`} texto={t} tipo={null} valor={t.plataforma} /></div>
           <details className="space-y-3">
             <summary className="cursor-pointer texto-suave">Por tipo de gimnasio ({Object.keys(t.por_tipo).length} con plantilla propia)</summary>
             <div className="space-y-3 pt-2">
               {tipos.map((tipo) => (
                 <div key={tipo} className="space-y-1"><p className="etiqueta">{NOMBRE_TIPO[tipo] ?? tipo} <span className="texto-tenue normal-case">({t.gimnasios_por_tipo[tipo] ?? 0} gimnasios)</span></p>
-                  <Editor key={`${t.clave}-${tipo}-${t.por_tipo[tipo] ?? ""}`} texto={t} tipo={tipo} valor={t.por_tipo[tipo] ?? null} /></div>
+                  <Editor key={`${t.clave}-${tipo}`} texto={t} tipo={tipo} valor={t.por_tipo[tipo] ?? null} /></div>
               ))}
             </div>
           </details>
