@@ -426,7 +426,15 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const iniciarAlta = useCallback((dniEscrito: string) => {
     setAlta({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", plan: "", paso: "datos", planes: null, ofrecido: null, vinculado: null, error: null });
     setPaso("alta"); setError(null);
-    void planesParaAlta(sedeId).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)));
+    // Si el pedido de planes se corta (la red, o una acción que Next aborta) no se queda esperando para siempre: reintenta y, si no puede, lo dice.
+    const cargarPlanes = (intento: number): void => {
+      void planesParaAlta(sedeId).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
+        .catch(() => {
+          if (intento < 2) setTimeout(() => cargarPlanes(intento + 1), 700);
+          else setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a));
+        });
+    };
+    cargarPlanes(0);
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-alta-nombre]")?.focus(), 0);
   }, [sedeId]);
   const guardarAlta = (cobrarYa: boolean) => {
