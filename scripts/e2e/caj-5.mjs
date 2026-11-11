@@ -31,8 +31,10 @@ try {
   // recepción y la dueña, el corte del gimnasio demo se corre a las 23:59 y el máximo a 48 h durante la prueba (al final vuelve a lo de siempre).
   await db.query(`insert into public.configuracion_caja (gimnasio_id, hora_corte, horas_max) select id, '23:59', 48 from public.gimnasios where slug = 'demo'
                    on conflict (gimnasio_id) do update set hora_corte = '23:59', horas_max = 48`);
-  await db.query(`update public.turnos_caja t set abierto_en = abierto_en - interval '1 day'
-                   from public.equipo e where e.id = t.abierto_por and t.cerrado_en is null and e.nombre like 'Ana%'`);
+  // La apertura queda a las 23:59:30 de AYER (hora del gimnasio): es de otro día (olvidada) pero, con el corte a las 23:59 y 48 h, todavía no venció
+  // a ninguna hora del día en que corra la prueba (con "abierto - 1 día" a las 5 de la mañana ya estaba vencida).
+  await db.query(`update public.turnos_caja t set abierto_en = ((date_trunc('day', now() at time zone g.zona_horaria) - interval '1 day' + interval '23 hours 59 minutes 30 seconds') at time zone g.zona_horaria)
+                   from public.equipo e, public.gimnasios g where e.id = t.abierto_por and g.id = t.gimnasio_id and t.cerrado_en is null and e.nombre like 'Ana%'`);
   await db.end();
 
   await r.goto(`${G}/panel`);
