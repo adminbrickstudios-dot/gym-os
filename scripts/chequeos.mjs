@@ -84,6 +84,8 @@ const EJECUTABLES = {
     // FA-23 (lista de espera con plazo) y FA-12 (avisos en la app del socio)
     "public.ofertas_socio", "public.aceptar_oferta", "public.rechazar_oferta", "public.guardar_espera_plazo",
     "public.avisos_app_socio", "public.guardar_aviso_clase", "public.aviso_clase_socio",
+    // C1: nueva clave sin mails (la valida la base; el servidor toca la cuenta recién después)
+    "public.cuenta_para_clave_socio", "public.registrar_clave_entregada",
   ]),
 };
 

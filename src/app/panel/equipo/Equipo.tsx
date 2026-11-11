@@ -3,7 +3,7 @@ import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import { useActionState, useState, useTransition } from "react";
 import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
-import { agregarPersona, editarPersona, type Resultado } from "./acciones";
+import { agregarPersona, editarPersona, nuevaClaveEquipo, type Resultado } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { darDeBajaPersona } from "../seguridad-acciones";
@@ -85,7 +85,7 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
             )}
             {puedeEditar && !m.soy_yo && m.activo && (
               // A otro dueño no se le cambia la contraseña (eso lo hace BRIK); acceso sí se le puede dar.
-              <AccesoPersona equipoId={m.equipo_id} nombre={m.nombre} tieneCuenta={m.tiene_acceso} puedeNuevaClave={m.rol !== "dueno"} />
+              <AccesoPersona equipoId={m.equipo_id} nombre={m.nombre} tieneCuenta={m.tiene_acceso} puedeNuevaClave={m.rol !== "dueno"} accionClave={nuevaClaveEquipo} />
             )}
           </li>
         ))}

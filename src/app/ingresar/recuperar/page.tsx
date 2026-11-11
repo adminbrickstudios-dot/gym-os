@@ -28,11 +28,9 @@ export default async function PaginaRecuperar({ searchParams }: { searchParams: 
       {!conMail && (
         <div className="mt-4" data-sin-smtp>
           <Mensaje tipo="aviso">
-            <p>Por ahora los mails de código pueden demorar o no llegar. Si no te llega, tenés dos caminos:</p>
-            <ul className="list-disc pl-5 mt-1 space-y-1">
-              {marca && <li><Link href="/ingresar?modo=socio" className="underline font-semibold">Entrá con un código por celular</Link> (si sos socio).</li>}
-              <li>{marca ? "Pedile a la recepción o al dueño de tu gimnasio una contraseña nueva." : "Pedile al dueño de tu gimnasio una contraseña nueva (si sos el dueño, a BRIK)."}</li>
-            </ul>
+            <p className="font-semibold">{marca ? "Pedile una clave nueva a la recepción (si sos del equipo, al dueño)." : "Pedile una clave nueva al dueño de tu gimnasio (si sos el dueño, a BRIK)."}</p>
+            <p className="mt-1">Te la dan en un toque y entrás enseguida con tu mail. Los mails de código pueden demorar o no llegar.</p>
+            {marca && <p className="mt-1">Si sos socio, también podés <Link href="/ingresar?modo=socio" className="underline font-semibold">entrar con un código por celular</Link>.</p>}
           </Mensaje>
         </div>
       )}
