@@ -53,3 +53,6 @@ capturas/
 
 # Accesos locales de Base (D48): nunca al repo, que es público
 ACCESOS.md
+
+# copias de C8 (cifradas, igual no van al repo)
+/copias-salida/
