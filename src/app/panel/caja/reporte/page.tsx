@@ -74,7 +74,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
                 <p className="font-semibold mb-1">Entradas y salidas de plata</p>
                 {r.movimientos.length === 0 ? <p className="texto-tenue">No hubo.</p> : (
                   <ul className="space-y-1 text-sm">
-                    {r.movimientos.map((m, i) => <li key={i}>{m.tipo === "retiro" ? "" : ""} {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>)}
+                    {r.movimientos.map((m, i) => <li key={i}><span className="inline-flex items-center gap-1 font-semibold" data-movimiento={m.tipo}><Icono nombre={m.tipo === "retiro" ? "menos" : "mas"} /><span className="sr-only">{m.tipo === "retiro" ? "Salió" : "Entró"}</span></span> {formatearPesos(m.monto)} · {m.motivo} <span className="texto-tenue">({hora(m.en)}{m.por ? `, ${m.por}` : ""})</span></li>)}
                   </ul>
                 )}
               </div>
@@ -99,6 +99,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
     const v = veredictoCaja(contados > 0 ? z.diferencia : null);
     const sedeQ = sp.sede ? `&sede=${sp.sede}` : "";
     const ayer = mover(z.dia, -1), manana = mover(z.dia, 1);
+    const hoyLocal = new Intl.DateTimeFormat("sv-SE", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());
     const fechaLarga = new Intl.DateTimeFormat("es-AR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" }).format(new Date(`${z.dia}T12:00:00Z`));
     return (
       <>
@@ -106,7 +107,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja/reporte" />}
         <nav className="flex flex-wrap gap-2" aria-label="Cambiar de día">
           <Link className="boton boton-chico" href={`/panel/caja/reporte?dia=${ayer}${sedeQ}`}>← Día anterior</Link>
-          <Link className="boton boton-chico" href={`/panel/caja/reporte?dia=${manana}${sedeQ}`}>Día siguiente →</Link>
+          {manana <= hoyLocal && <Link className="boton boton-chico" href={`/panel/caja/reporte?dia=${manana}${sedeQ}`}>Día siguiente →</Link>}
         </nav>
         {z.turnos.length === 0 ? <Vacio icono="lista" titulo="Ese día no se abrió ninguna caja">Cuando se abra un turno, el cierre del día aparece acá.</Vacio> : (
           <section className="tarjeta p-6 sm:p-8 space-y-6" data-reporte-dia={z.turnos.length} data-veredicto={v.clave}>

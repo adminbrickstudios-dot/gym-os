@@ -18,7 +18,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { Icono } from "@/components/ui/Icono";
 
-const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 /** Un sonido por color, para no tener que mirar: agudo y corto si entra, grave y doble si no. */
 function sonar(color: string) {
@@ -81,11 +81,19 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     if (socioInicial && !abrioInicial.current) { abrioInicial.current = true; elegir(socioInicial); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Una búsqueda vieja no pisa a la nueva: cada respuesta se descarta si lo escrito ya cambió. `listaPara` dice para qué texto es la lista que se ve.
+  const [listaPara, setListaPara] = useState("");
+  const textoVivo = useRef(texto);
+  textoVivo.current = texto;
   useEffect(() => {
-    if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
+    const q = texto.trim();
+    if (q.length < 2 || ES_QR.test(q)) { setSocios([]); setListaPara(""); return; }
     const t = setTimeout(async () => {
-      const r = await leerConReintento(() => buscarSociosRapido(texto.trim()));
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(q)); } catch { if (textoVivo.current.trim() === q) { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); setListaPara(q); } return; }
+      if (textoVivo.current.trim() !== q) return;
       setSocios(r.socios ?? []);
+      setListaPara(q);
       setError(r.error ?? null);
     }, 150);
     return () => clearTimeout(t);
@@ -189,7 +197,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const abrirPrueba = () => empezar(async () => {
     const r = await pruebaPorDni(dniEscrito);
     if (r.error || !r.p) { setError(r.error ?? "No se pudo mirar la prueba"); return; }
-    if (r.p.existe && r.p.usada) { setError(`Ya usó su prueba gratis el ${r.p.dia} · Hacete socio.`); return; }
+    if (r.p.existe && r.p.usada) { setError(`Ya usó la prueba gratis el ${r.p.dia}: ofrecele un plan o un pase.`); return; }
     setError(null);
     setPrueba({ nombre: r.p.existe ? r.p.nombre ?? "" : "", apellido: "", telefono: r.p.existe ? r.p.telefono ?? "" : "", reservada: !!r.p.existe, error: null });
   });
@@ -242,7 +250,6 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       if (forzando || ((e.target as HTMLElement)?.tagName === "INPUT" && e.target !== campo.current)) return;
       if (e.key === "Escape") { e.preventDefault(); reiniciar(); }
       else if (e.key === "Enter" && v.puede && !ocupado && (e.target as HTMLElement)?.tagName !== "BUTTON" && (e.target as HTMLElement)?.tagName !== "A") { e.preventDefault(); anotar(); }
-      else if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !ocupado && e.target !== campo.current && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); marcarSalida(elegido.socio_id, elegido.nombre); }
       // Una letra con el foco en otro lado: va al buscador, reemplazando lo que había (el onChange cierra el veredicto).
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== campo.current) { campo.current?.focus(); campo.current?.select(); }
     };
@@ -314,9 +321,12 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           ))}
         </ul>
       )}
-      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara !== texto.trim() && !ES_QR.test(texto.trim()) && (
+        <p className="texto-suave text-lg" data-buscando>Buscando…</p>
+      )}
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara === texto.trim() && (
         <div className="space-y-3">
-          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
+          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href={`/panel/socios/nuevo${/^\d{6,9}$/.test(dniEscrito) ? `?dni=${dniEscrito}` : /^[\p{L} '.-]{2,60}$/u.test(texto.trim()) ? `?nombre=${encodeURIComponent(texto.trim())}` : ""}`} className="underline">Darlo de alta</LinkPanel></p>
           {pruebaModo !== "no" && /^\d{6,9}$/.test(dniEscrito) && !prueba && (
             <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}><Icono nombre="regalo" /> Dar prueba gratis</button>
           )}
@@ -386,9 +396,10 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             )}
             <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</LinkPanel>
             {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida</button>}
-            <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
+            <button type="button" onClick={reiniciar} className="boton"><Icono nombre="cerrar" /> Otro socio</button>
           </div>
 
+          {error && <div className="mt-4"><Mensaje tipo="error">{error}</Mensaje></div>}
           {forzando && (
             <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
           )}
