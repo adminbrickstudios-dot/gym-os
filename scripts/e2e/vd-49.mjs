@@ -114,6 +114,11 @@ try {
   await r.locator('input[aria-label="Fondo del turno"]').fill("500");
   await r.locator("[data-abrir-turno]").click();
   await panelTurno(r).waitFor({ state: "detached", timeout: 30000 });
+  // Si Cobrar no se habilita se dice qué hay en la hoja (en vez de esperar 30 s a ciegas).
+  await r.waitForFunction(() => { const b = document.querySelector("[data-cobrar-confirmar]"); return !!b && !b.disabled; }, null, { timeout: 10000 }).catch(async () => {
+    const hoja = await r.locator("[data-cobrar]").first().innerText().catch(() => "(sin hoja)");
+    throw new Error(`Cobrar sigue apagado tras abrir el turno nuevo. Hoja: ${hoja.replace(/\s+/g, " ").slice(0, 700)}`);
+  });
   await r.locator("[data-cobrar-confirmar]").click();
   await r.locator("[data-cobrar-hecho]").waitFor({ timeout: 30000 });
   const total2 = Number(await r.locator("[data-cobrar-hecho]").getAttribute("data-total"));

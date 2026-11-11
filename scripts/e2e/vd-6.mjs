@@ -48,7 +48,10 @@ try {
   chequear(await r.locator("[data-cobrar-linea=cuota]").count() === 1, "Guardar y cobrar abre la hoja Cobrar con la cuota del plan", "la hoja no trae la cuota");
   await r.locator("[data-cobrar-medio]", { hasText: "Transferencia" }).click();
   await r.locator("[data-cobrar-confirmar]").click();
-  await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 });
+  await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 }).catch(async (e) => {
+    const hojas = await r.locator("dialog[open], [role=dialog], [data-cobrar], [data-ventana-veredicto], [data-cobrar-hecho]").evaluateAll((l) => l.map((x) => `${x.tagName}${[...x.attributes].filter((a) => a.name.startsWith("data-")).map((a) => ` ${a.name}=${a.value}`).join("")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 300)}`));
+    throw new Error(`${e.message.split("\n")[0]} | en pantalla: ${hojas.join(" || ") || "(sin hoja ni ventana)"}`);
+  });
   chequear(await r.locator("[data-ventana-cobrado]").count() === 1, "cobrado: vuelve a la ventana con el veredicto en verde", "no volvió con el cobro");
   await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-anotar"), null, { timeout: 10000 });
   await r.keyboard.press("Enter");
