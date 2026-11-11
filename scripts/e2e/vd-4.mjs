@@ -104,7 +104,12 @@ try {
   await t.locator('input[aria-label="Tu DNI"]').fill(DNI_ROJO);
   await t.locator('input[aria-label="Tu DNI"]').press("Enter");
   const rojo = r.locator('[data-aviso-entrada="rojo"]', { hasText: "Vencida" });
-  await rojo.first().waitFor({ timeout: 12000 });
+  await rojo.first().waitFor({ timeout: 12000 }).catch(async (e) => {
+    // Para saber de qué lado se cortó: qué dijo la tablet y qué avisos tiene la recepción.
+    const tab = await t.locator("main, body").first().innerText().then((x) => x.replace(/\s+/g, " ").slice(0, 300)).catch(() => "(sin tablet)");
+    const rec = await r.locator("[data-avisos-entrada]").evaluateAll((l) => l.map((x) => x.innerText.replace(/\s+/g, " ").slice(0, 200))).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | tablet: ${tab} | avisos de la recepción: ${rec.join(" || ") || "(ninguno)"}`);
+  });
   ok(`un rechazo en la tablet aparece en la recepción: “${(await rojo.first().innerText()).replace(/\s+/g, " ").slice(0, 80)}”`);
   await r.waitForTimeout(14000);
   chequear(await rojo.count() > 0, "el aviso rojo se queda (no se va solo)", "el aviso rojo desapareció");

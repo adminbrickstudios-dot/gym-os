@@ -162,7 +162,9 @@ try {
     await c.locator("main").waitFor({ timeout: 30000 });
     await c.waitForTimeout(800);
     const ancho = await c.evaluate(() => ({ s: document.documentElement.scrollWidth, v: window.innerWidth }));
-    chequear(ancho.s <= ancho.v + 1, `celular ${ruta}: sin scroll horizontal`, `se desborda: ${ancho.s} > ${ancho.v}`);
+    // Si desborda, dice qué elementos se pasan del borde (para arreglar el elemento y no tapar el síntoma).
+    const pasan = ancho.s <= ancho.v + 1 ? [] : await c.evaluate((v) => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > v + 1).slice(0, 6).map((e) => `<${e.tagName.toLowerCase()} class="${String(e.className).slice(0, 60)}"> ${(e.textContent ?? "").trim().slice(0, 40)} (hasta ${Math.round(e.getBoundingClientRect().right)})`), ancho.v);
+    chequear(ancho.s <= ancho.v + 1, `celular ${ruta}: sin scroll horizontal`, `se desborda: ${ancho.s} > ${ancho.v}; se pasan: ${pasan.join(" || ")}`);
   }
   await c.goto(`${G}/panel/socios?vista=interesados`);
   await capturar(c, "vd15-celu-interesados");
