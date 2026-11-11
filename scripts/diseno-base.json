@@ -71,6 +71,10 @@
   "hex": 0,
   "emoji": 1
  },
+ "src/app/icono/route.tsx": {
+  "hex": 1,
+  "emoji": 0
+ },
  "src/app/ingresar/Encabezado.tsx": {
   "hex": 0,
   "emoji": 1

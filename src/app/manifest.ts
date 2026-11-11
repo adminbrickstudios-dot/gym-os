@@ -13,6 +13,6 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: nombre, short_name: nombre.slice(0, 12), start_url: "/app", scope: "/", display: "standalone",
     // Los colores del gimnasio (sin gimnasio, el manifest no fija colores).
     ...(landing ? { background_color: landing.marca.color_fondo, theme_color: landing.marca.color_fondo } : {}), lang: "es-AR",
-    icons: icono ? [{ src: icono, sizes: "any" }] : [{ src: "/favicon.ico", sizes: "any" }],
+    icons: icono ? [{ src: icono, sizes: "any" }] : landing ? [{ src: "/icono", sizes: "192x192", type: "image/png" }] : [{ src: "/favicon.ico", sizes: "any" }],
   };
 }

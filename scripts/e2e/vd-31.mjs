@@ -85,7 +85,7 @@ try {
   await r.goto(`${G}/panel/entrada`);
   chequear(await sale(r, "entrada"), "la recepción ve la ayuda de Entrada", "la recepción no vio la ayuda de Entrada");
   const textoR = await globo(r, "entrada").innerText();
-  chequear(/llega alguien/i.test(textoR), `y es la suya: “${textoR.replace(/\s+/g, " ").slice(0, 70)}…”`, `texto de recepción mal: ${textoR}`);
+  chequear(/de quien llega|llega alguien/i.test(textoR), `y es la suya: “${textoR.replace(/\s+/g, " ").slice(0, 70)}…”`, `texto de recepción mal: ${textoR}`);
   await r.locator("[data-ayuda-entendido]").click();
 
   // ── Dueña en el celular, 390 px ──

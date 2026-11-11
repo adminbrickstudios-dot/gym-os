@@ -5,6 +5,8 @@ import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MiFoto } from "./MiFoto";
+import { AjustesAyuda } from "@/app/panel/cuenta/AjustesAyuda";
+import { ayudasDeUsuario } from "@/lib/ayuda-servidor";
 import { AvisoClase } from "./AvisoClase";
 import { Icono } from "@/components/ui/Icono";
 
@@ -35,6 +37,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
       // FA-12: "Avisarme antes de mi clase" (solo si el gimnasio usa clases).
       yo.modo_clases !== "ninguno" ? rpc<boolean>("aviso_clase_socio", { p_socio_id: s.socio_id }).catch(() => null) : Promise.resolve(null),
     ]);
+    const ayudasEstado = await ayudasDeUsuario();
     const fila = (href: string, emoji: string, titulo: string, detalle?: string, marca?: string) => (
       <li key={titulo}>
         <Link href={href} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-yo-fila={marca ?? titulo}>
@@ -93,6 +96,9 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
               <span className="text-2xl" aria-hidden><Icono nombre="descargar" /></span><span className="flex-1 font-semibold">Descargar mis datos</span></a></li>
           </ul>
         </section>
+
+        {/* VD-31B: apagar las ayudas (o volver a verlas) desde la app, igual que en el panel. */}
+        {ayudasEstado && <AjustesAyuda apagadas={ayudasEstado.apagadas} />}
 
         <form action="/salir" method="post"><button className="boton w-full !min-h-14">Cerrar sesión</button></form>
       </div>

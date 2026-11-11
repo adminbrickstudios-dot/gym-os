@@ -895,7 +895,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
                   {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
                     <ul className="flex flex-wrap gap-2" data-ventana-chips>
-                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <Link href={c.href} className="underline">{c.texto}</Link> : c.texto}</li>)}
+                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <Link href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} className="underline">{c.texto}</Link> : c.texto}</li>)}
                       {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
                       {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
                       {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}

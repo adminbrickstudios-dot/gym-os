@@ -108,7 +108,7 @@ try {
 
   // ── 5. Salud con colores y orden ──
   await db.query(`insert into public.plataforma_planes (nombre, precio_mensual) values ($1, 1000)`, [`Plan vd40 ${s}`]);
-  await db.query(`update public.gimnasios set plataforma_plan_id = (select id from public.plataforma_planes where nombre = $1), plataforma_desde = current_date - 40 where id = $2`, [`Plan vd40 ${s}`, gid]);
+  await db.query(`update public.gimnasios set plataforma_plan_id = (select id from public.plataforma_planes where nombre = $1), plataforma_desde = current_date - 400 where id = $2`, [`Plan vd40 ${s}`, gid]);
   await p.goto(`${B}/admin`);
   const colores = await p.locator("li[data-gimnasio-color]").evaluateAll((l) => l.map((e) => e.getAttribute("data-gimnasio-color")));
   const rango = { rojo: 0, amarillo: 1, verde: 2, demo: 3 };

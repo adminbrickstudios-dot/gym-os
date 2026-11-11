@@ -137,7 +137,7 @@ export function PedidoBaja({ socioId, pedido }: { socioId: string; pedido: { ped
   return (
     <div className="mensaje mensaje-aviso mt-4 space-y-3" data-pedido-baja>
       <p><span className="font-semibold"><Icono nombre="salir" /> Pidió la baja desde la app</span> · {motivo}{pedido.nota ? `: “${pedido.nota}”` : ""}</p>
-      {pedido.codigo && <p className="text-sm" data-codigo-baja><Icono nombre="recibo" /> Constancia <strong>{pedido.codigo}</strong>: es el código que ya tiene el socio en su app.</p>}
+      {pedido.codigo && <p className="text-sm"><Icono nombre="recibo" /> Constancia <strong data-codigo-baja>{pedido.codigo}</strong>: es el código que ya tiene el socio en su app.</p>}
       <p className="texto-suave text-sm">Hablale antes: a veces una pausa o un cambio de plan alcanza. Dar la baja anula sus pagos por aprobar, sus turnos fijos y sus reservas de clases que vienen; lo que ya pagó no se toca.</p>
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ocupado} className="boton" onClick={() => resolver(false)}><Icono nombre="pesa" /> Se queda</button>

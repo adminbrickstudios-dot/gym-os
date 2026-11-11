@@ -112,7 +112,7 @@ function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; wh
         </p>
       )}
       {variantes.map((v) => (
-        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "var(--acento)" }}><Icono nombre="plata" /> {v}</p>
+        <p key={v} className="mt-2 text-sm font-semibold" style={{ color: "color-mix(in oklab, var(--acento), var(--texto) 45%)" }}><Icono nombre="plata" /> {v}</p>
       ))}
       {condiciones.length > 0 && (
         <ul className="mt-5 flex flex-wrap gap-2">
