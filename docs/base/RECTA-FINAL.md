@@ -19,6 +19,22 @@ Dónde quedó (09/11, mediodía):
 
 ---
 
+## Fase H · HOY: Temple Gym ya está usando Base (11/11, antes que todo)
+
+Temple Gym (`templegym1`) es el gimnasio real y desde el 11/11 cobra con Base
+(Benjamín, caja abierta a las 16:22). Desde ahora **hay datos reales en
+producción**: antes de cada `aplicar`, copia cifrada de la base (H5), y lo que
+toque plata se prueba con números fijos antes de publicar.
+
+| # | Qué | LISTO SI | Estado |
+|---|---|---|---|
+| H1 | **Transferencias en la Caja** (reclamo de Temple Gym): los cobros por transferencia hechos en el mostrador "no salen en Caja". Hoy el turno muestra "Tiene que haber" solo con el efectivo (está bien: es lo que hay en el cajón), y las transferencias quedan en una línea chica ("Además, en este turno: Transferencia $76.000") que nadie ve. Arreglo: (a) en el turno, un **resumen por medio** grande y claro (efectivo, transferencia, tarjeta, MercadoPago), cada uno con su total, cantidad de cobros y la lista desplegable (hora, socio, monto, quién cobró), y "Tiene que haber en el cajón" explicado al lado del efectivo; (b) en el cierre y en los reportes X y Z, lo mismo; (c) en **Transferencias**, dos pestañas: "Comprobantes de socios" (lo que suben, para aprobar) y "Cobradas en el mostrador" (para chequear contra el banco, con una tilde "ya la vi en el banco"), así no se mezclan (VD-5C); (d) la diferencia de caja solo cuenta el efectivo. **No cambia ningún monto ni cómo se cobra**: solo cómo se ve | Prueba con números fijos: 2 en efectivo, 3 por transferencia y 1 con tarjeta en un turno; el resumen, el cierre, el reporte Z y Transferencias dicen lo mismo, y "tiene que haber" es solo el efectivo. e2e en compu y celular con capturas | ❌ |
+| H2 | **Cargar socios, inscripciones y pagos en el pasado** (C10, sube a hoy): alta de a uno y carga masiva con fecha de alta pasada y pagos pasados que no tocan la caja de hoy. Ver C10 | El de C10 | ❌ |
+| H3 | **El QR de registro directo** (C9, sube a hoy). Error encontrado el 11/11: `/g/<slug>/hacete-socio` redirige a `/hacete-socio` en la dirección de la plataforma, que pierde el gimnasio y no abre el alta (el proxy solo lleva el gimnasio en `/panel`, `/app`, `/auth` e `/ingresar?modo=socio`). Arreglarlo para `/hacete-socio`, para cualquier ruta pública del gimnasio y para el `/ingresar` del socio. Mateo ya tiene impreso o por imprimir el QR a `https://gym-os-pied.vercel.app/g/templegym1/hacete-socio`: **esa dirección tiene que andar siempre**, también después del dominio (redirige al nuevo). Después, C9 completo (QR generado en el panel) | e2e en celular: abrir esa dirección exacta → formulario de Temple Gym → alta → aparece en el panel. Y con el dominio nuevo, la vieja redirige | ❌ |
+| H4 | **Prueba de todos los botones en producción, en Temple Gym, en modo mirar** (sin crear ni cobrar nada): el robot de `FLUIDEZ.md` (F3.1), con un usuario de solo lectura o el dueño de prueba en un gimnasio `[demo]` clonado de la configuración de Temple Gym, para encontrar lo que se rompe con su configuración real (planes, reglas, sedes) | Corrida en Actions con la lista de lo que falla, y cada falla en un ítem | ❌ |
+| H5 | **Copia de la base antes de cada publicación**, ahora que hay datos reales: en el workflow "Base de datos", antes de `aplicar`, un `pg_dump` cifrado con una clave que está solo en los secretos de GitHub (`COPIA_CLAVE`). **Nunca como archivo abierto** (el repo es público y los archivos de Actions se pueden bajar). Más restaurar la copia en una base de prueba para probar que sirve. Es C8 adelantado | La corrida de aplicar muestra la copia hecha y la restauración de prueba en verde; ⛔ si falta `COPIA_CLAVE`, con los pasos para Mateo | ❌ |
+| H6 | **Canal de errores de Temple Gym**: lo que reporten (como el de las transferencias) va a `docs/base/CAMBIOS-MATEO.md` con la captura descripta, y es lo primero de cada vuelta. En el panel, el botón "¿Necesitás ayuda?" del dueño y de la recepción manda la pantalla, el usuario y el último error a BRIK por wa.me | Un reporte de prueba desde el panel llega con su contexto | ❌ |
+
 ## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche): **se publica apenas está en verde, esta misma noche**
 
 | # | Qué | LISTO SI | Estado |
@@ -149,6 +165,20 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 | F9.6 | ESC-05, 06 y 08: tablas que crecen (ingresos, registro) listas para partirse por mes y listas siempre paginadas; monitoreo propio (errores, chequeo de que responde, alertas; Sentry ⛔); límites por plan en datos | 🟡 carril/b-super: registro paginado, tamaño de tablas, `/api/salud`, alertas y límites por plan; Sentry ⛔ |
 | F9.7 | ESC-07: procedimiento para restaurar una copia de seguridad (⛔ hasta Supabase Pro, D51) | ❌ |
 | F9.8 | SEG-01 a 07 que no hayan quedado cubiertos por U3, BASE-8 y SA-10/11 | 🟡 carril/b-super: guardas SEG-02/07 en vitest; restricción de plata del soporte y ver como socio hechos |
+
+## Fase N · Funciones nuevas propuestas (`RECOMENDACIONES.md`, 11/11)
+
+| # | Qué | Estado |
+|---|---|---|
+| N0 | Ensayo antes de producción: workflow para aplicar migraciones primero en un Supabase de ensayo, con la vista previa de Vercel apuntando ahí (⛔ hasta que Mateo cree el proyecto de ensayo) | ❌ |
+| N1 | Débito automático con MercadoPago (suscripciones), idempotente por el webhook (🔌 credenciales del gimnasio) | ❌ |
+| N2 | Apto físico como fecha de vencimiento (sin guardar el certificado ni datos de salud), con aviso y la opción de que la entrada avise o frene | ❌ |
+| N3 | Resumen de la noche para el dueño (campana y push), calculado al abrirlo | ❌ |
+| N4 | Origen de cada alta ("Quiero ser socio" con su origen: Instagram, QR, WhatsApp, referido) y conversión | ❌ |
+| N5 | Interruptor por gimnasio para cada función nueva (prenderla primero en el demo y después en Temple Gym) | ❌ |
+| N6 | "Qué hay de nuevo" para el dueño en el panel, armado con cada publicación | ❌ |
+| N7 | Factura electrónica ARCA, opcional (🔌) | ❌ |
+| N8 | Molinete o cerradura por API (🔌 hardware) | ❌ |
 
 ## Fase 8 · El cierre
 
