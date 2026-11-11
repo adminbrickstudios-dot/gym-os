@@ -7,6 +7,12 @@
 4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
 5. **Dominio:** `DOMINIO.md` (pasos exactos).
 
+## PUBLICADO 11/11 10:45 — fase P y lo hecho de la fase C (PR #15)
+- 11 migraciones aplicadas desde Actions (prevuelo 43030658511, aplicar 43030901243, chequeos en verde); PR #15 mergeado y deploy de Vercel en verde. Incluye: plataforma y alta (P1 a P7), landing y editor (P8, P8b), clave nueva sin mails (C1), importar socios (C2), aviso de clave al socio, plantillas, escala y papelera del super admin.
+- Antes de aplicar, el estado dijo 3 gimnasios reales con 2 socios en total; se aplicó igual por orden de Mateo (migraciones aditivas).
+- Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
+- Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
+
 ## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
 - U5, P1, P4 a P7, P8 y P8b en ✅ (Actions 43015505501 y 43020787407). Chequeos de la base relanzados en 43022741600 (lista blanca y paletas del editor ya arreglados). Ayudantes en la fase C: `carril/c-clave` (C1) y `carril/c-importar` (C2); al terminar: integrar, correr su e2e (`clave-nueva`, `importar-300`) en Actions. Yo sigo con C3 a C8. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel). Hay migraciones nuevas sin aplicar (20261111090000 y las que traigan los carriles): se aplican en la próxima publicación.
 
