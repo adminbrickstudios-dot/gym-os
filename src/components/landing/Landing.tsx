@@ -461,8 +461,8 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
                 autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="relative p-6 sm:p-12 text-white aparecer">
-              <h1 className="titular text-[clamp(3.25rem,13vw,7.5rem)] max-w-[12ch]">{portada.titulo}</h1>
+            <div className="relative p-6 sm:p-10 text-white aparecer">
+              <h1 className="titular text-[clamp(3rem,11vw,5.75rem)] max-w-[14ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
               <Senales landing={landing} ahora={ahora} />
               <div className="mt-8 flex flex-wrap gap-3">
@@ -474,12 +474,12 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
           </div>
         </section>
       ) : (
-        <section className="px-4 pt-14 pb-10 sm:pt-28 sm:pb-20">
+        <section className="px-4 pt-12 pb-10 sm:pt-16 sm:pb-16">
           <div className="mx-auto max-w-5xl">
-            <h1 className="titular text-[clamp(3.5rem,15vw,8.5rem)] max-w-[11ch]">{portada.titulo}</h1>
+            <h1 className="titular text-[clamp(3.25rem,13vw,6.5rem)] max-w-[14ch]">{portada.titulo}</h1>
             {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
             <Senales landing={landing} ahora={ahora} />
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
               {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
               {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{whatsapp ? "" : ""}{portada.boton_texto}</BotonPrincipal>}
