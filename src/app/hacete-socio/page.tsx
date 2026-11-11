@@ -28,7 +28,11 @@ async function datos(): Promise<DatosAlta | null> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const d = await datos();
-  return { title: { absolute: d ? `Quiero ser socio · ${d.marca.nombre}` : "Quiero ser socio" } };
+  return {
+    title: { absolute: d ? `Quiero ser socio · ${d.marca.nombre}` : "Quiero ser socio" },
+    // SEO: toda página pública lleva su descripción (Lighthouse la pide).
+    description: d ? `Hacete socio de ${d.marca.nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.",
+  };
 }
 
 export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {

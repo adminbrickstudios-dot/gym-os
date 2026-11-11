@@ -122,6 +122,17 @@ Ninguna función que se tocó empeoró respecto de producción; las que no se to
 | `para_hacer_hoy` | 308,2 ms | 78,0 ms | **44,7 ms** | 300 ok |
 | `retencion` (completa, sin tocar) | 441,4 ms | 665,2 ms | 316,8 ms | 300 (varía con el runner) |
 
+## Lighthouse móvil de la página pública (F1.8 / F0; corrida 42991229889, app compilada, Lighthouse 12.6.1, mediana de 3)
+
+| Pantalla | Performance | Accesibilidad | Buenas prácticas | SEO | LCP | CLS | TBT |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Landing `/` — **antes** | 91 | 100 | 100 | 100 | 3,37 s | 0 | 139 ms |
+| `/hacete-socio` — **antes** | 93 | 100 | 100 | 91 (sin meta description) | 3,19 s | — | — |
+| `/ingresar` (equipo y socio) — **antes** | no midió: falló las 3 corridas ("Command failed"); el script ahora imprime las últimas 15 líneas del error | | | | | | |
+
+Lo que más bajaba: el elemento LCP, JavaScript sin usar, JavaScript "legacy" para navegadores modernos y bfcache bloqueado.
+**Cambios de esta pasada (carril C):** meta description en `/hacete-socio` (SEO); se quitó la animación de entrada del contenido de la portada (un elemento que arranca en opacidad 0 retrasa el LCP); íconos de sección con `Icono`. **Pedidos al principal (archivos compartidos):** (1) `browserslist` moderno en `package.json` (o `experimental.browsersListForSwc`) para sacar el JavaScript "legacy"; (2) bfcache: las páginas dinámicas salen con `Cache-Control: no-store`, que bloquea el bfcache; probar en `next.config` `headers()` para `/`, `/hacete-socio` e `/ingresar` un `Cache-Control: private, no-cache` (si Next lo respeta) o en `src/proxy.ts`; (3) revisar qué elemento es el LCP en el informe JSON del artefacto (`.local/lighthouse/*.json`, auditoría `largest-contentful-paint-element`). **Después:** a completar con la próxima corrida de `lighthouse.yml`.
+
 ## Pendiente de BASE-1 (anotado)
 - `retencion`, `retencion_resumen` y `vencen_pestanas` (completas): el costo es `via_membresia` por cada vencido; bajarlo exige cambiar cómo se calcula la deuda, y no se tocó en esta pasada para no arriesgar ningún veredicto.
 - `filtros_socios` (880 ms con 5.000; ~2 s en la compu local con 1.500): el grupo de cada socio sale del veredicto completo (`calcular_acceso`: membresía, pases, packs, pausas); `cubierto_hasta` solo no alcanza para probar el resultado. Queda para una pasada propia con su prueba viejo-vs-nuevo.

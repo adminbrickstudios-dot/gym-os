@@ -18,15 +18,15 @@ import { Icono } from "@/components/ui/Icono";
 // solo el emoji de cada tipo de sección.
 
 const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
-  sobre_nosotros: "",
-  actividades: "",
-  planes: "",
-  horarios: "",
-  galeria: "",
-  equipo: "",
-  preguntas: "",
-  ubicacion: "",
-  probar: "",
+  sobre_nosotros: "info",
+  actividades: "pesa",
+  planes: "tarjeta",
+  horarios: "reloj",
+  galeria: "imagen",
+  equipo: "usuarios",
+  preguntas: "ayuda",
+  ubicacion: "ubicacion",
+  probar: "regalo",
 };
 
 function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
@@ -461,7 +461,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
                 autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-            <div className="relative p-6 sm:p-10 text-white aparecer">
+            <div className="relative p-6 sm:p-10 text-white">
               <h1 className="titular text-[clamp(3rem,11vw,5.75rem)] max-w-[14ch]">{portada.titulo}</h1>
               {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
               <Senales landing={landing} ahora={ahora} />

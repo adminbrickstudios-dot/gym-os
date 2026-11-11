@@ -5,7 +5,7 @@
 // mucho). Escribe la tabla en markdown (puntajes, LCP, CLS, TBT, FCP) en `salida/tabla.md`, en $GITHUB_STEP_SUMMARY si existe, y deja los
 // JSON de Lighthouse. Si el performance de la landing queda por debajo del umbral lo dice (::warning::) pero NO corta: la tabla es lo que se compara.
 // Requiere Chrome (CHROME_PATH) y la app corriendo. Versión de Lighthouse fija (LIGHTHOUSE_VERSION).
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -23,10 +23,16 @@ const PAGINAS = [
 ];
 mkdirSync(SALIDA, { recursive: true });
 
+const errores = [];   // las últimas líneas de lo que dijo Lighthouse cuando falló, para el resumen
 function correr(url, archivo) {
-  execFileSync("npx", ["--yes", `lighthouse@${VERSION}`, url, "--quiet", "--output=json", `--output-path=${archivo}`,
+  const r = spawnSync("npx", ["--yes", `lighthouse@${VERSION}`, url, "--quiet", "--output=json", `--output-path=${archivo}`,
     "--only-categories=performance,accessibility,best-practices,seo", "--form-factor=mobile", "--screenEmulation.mobile=true",
-    "--chrome-flags=--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage"], { stdio: ["ignore", "inherit", "inherit"], timeout: 240000 });
+    "--chrome-flags=--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage"], { encoding: "utf8", timeout: 240000, maxBuffer: 64 * 1024 * 1024 });
+  if (r.status !== 0) {
+    const cola = `${r.stderr ?? ""}\n${r.stdout ?? ""}`.split("\n").map((l) => l.trimEnd()).filter(Boolean).slice(-15).join("\n");
+    errores.push(`### ${url}\n\`\`\`\n${cola || (r.error ? String(r.error.message) : "sin salida")}\n\`\`\``);
+    throw new Error(`código ${r.status ?? "?"}`);
+  }
   return JSON.parse(readFileSync(archivo, "utf8"));
 }
 const pct = (r, k) => Math.round((r.categories[k]?.score ?? 0) * 100);
@@ -54,6 +60,7 @@ for (const [nombre, ruta, principal] of PAGINAS) {
 const tabla = [
   `## Lighthouse móvil · ${BASE} · Lighthouse ${VERSION} · mediana de ${VECES} corridas`, "",
   "| Pantalla | Ruta | Performance | Accesibilidad | Buenas prácticas | SEO | LCP | CLS | TBT |", "|---|---|---:|---:|---:|---:|---:|---:|---:|", ...filas, "",
+  ...(errores.length ? ["## Lo que dijo Lighthouse cuando falló (últimas 15 líneas)", "", ...errores, ""] : []),
   `Objetivo F1.8: performance ≥ ${UMBRAL} en celular; objetivo de la fase 0: 95 y LCP < 1,5 s.${avisos ? ` **La landing quedó por debajo de ${UMBRAL}.**` : ""}`, "",
 ].join("\n");
 writeFileSync(join(SALIDA, "tabla.md"), tabla);
