@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { PASOS_DESCARGAR_APP, cartelPuerta } from "./carteles";
+import { PASOS_ANOTATE, PASOS_DESCARGAR_APP, PIE_ANOTATE, cartelPuerta, linkCompartirWhatsapp, mensajeAnotate } from "./carteles";
 
 const EMOJI = /\p{Extended_Pictographic}/u;
 
@@ -36,4 +36,14 @@ test("los textos de los carteles no llevan emojis", () => {
     for (const t of [c.titulo, c.pie, c.aviso ?? "", ...c.pasos]) expect(EMOJI.test(t), t).toBe(false);
   }
   for (const t of PASOS_DESCARGAR_APP) expect(EMOJI.test(t), t).toBe(false);
+});
+
+test("C9: el cartel Anotate acá no promete acceso y no lleva emojis; el mensaje de WhatsApp lleva el link", () => {
+  for (const t of [...PASOS_ANOTATE, PIE_ANOTATE]) expect(EMOJI.test(t), t).toBe(false);
+  expect(PIE_ANOTATE).toMatch(/cuando pagás/);
+  const m = mensajeAnotate("Gimnasio Demo", "https://demo.ejemplo.invalid/hacete-socio");
+  expect(m).toContain("https://demo.ejemplo.invalid/hacete-socio");
+  const wa = linkCompartirWhatsapp(m);
+  expect(wa.startsWith("https://wa.me/?text=")).toBe(true);
+  expect(decodeURIComponent(wa.split("text=")[1])).toBe(m);
 });

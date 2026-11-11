@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 324 funciones piden un rol del equipo con `privado.exigir_equipo`; 403 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 326 funciones piden un rol del equipo con `privado.exigir_equipo`; 403 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -134,6 +134,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_actividad` | ✓ | ✓ | — | — |
 | `guardar_actividades_plan` | ✓ | ✓ | — | — |
 | `guardar_ajustes_plan` | ✓ | ✓ | — | — |
+| `guardar_alta_plan_sugerido` | ✓ | — | — | — |
 | `guardar_altas` | ✓ | — | — | — |
 | `guardar_autonomia_socios` | ✓ | — | — | — |
 | `guardar_avisar_sin_bloquear` | ✓ | — | — | — |
@@ -276,6 +277,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `pt_socio` | ✓ | ✓ | ✓ | — |
 | `publicar_evento` | ✓ | ✓ | — | — |
 | `publicar_pagina` | ✓ | — | — | — |
+| `qr_alta_panel` | ✓ | ✓ | — | — |
 | `quitar_foto_producto` | ✓ | ✓ | — | — |
 | `quitar_imagen_marca` | ✓ | — | — | — |
 | `quitar_respuesta_rapida` | ✓ | ✓ | — | — |
