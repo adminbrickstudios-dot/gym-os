@@ -4,6 +4,7 @@ import { Aviso } from "@/components/panel/Marco";
 import { traerLanding } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
 import { Icono } from "@/components/ui/Icono";
+import { estiloTipografia } from "@/lib/landing-estilo";
 
 /** WEB-05 · La 404 de la dirección de un gimnasio lleva su nombre y su color, y vuelve a SU página (no a la de la plataforma). */
 export default async function NoEncontrada() {
@@ -12,7 +13,7 @@ export default async function NoEncontrada() {
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   if (landing) {
     return (
-      <main {...propsMarca(landing.marca)} className="min-h-dvh grid place-items-center px-4" data-404-gimnasio>
+      <main {...propsMarca(landing.marca)} style={{ ...propsMarca(landing.marca).style, ...estiloTipografia(landing.marca.tipografia) }} className="min-h-dvh grid place-items-center px-4" data-404-gimnasio>
         <div className="text-center max-w-md">
           <p className="titulo text-xl texto-suave">{landing.marca.nombre}</p>
           <h1 className="titular text-5xl sm:text-6xl mt-4">No encontramos esta página</h1>

@@ -23,6 +23,10 @@ export function estiloTipografia(t: string | null | undefined): CSSProperties {
 /** Lo que vale "Restaurar por defecto" para el estilo: el mismo que usa la base (pagina_por_defecto). */
 export const ESTILO_POR_DEFECTO = { color_acento: "#16a34a", color_fondo: FONDO_CLARO.toLowerCase(), tipografia: "condensada" as Tipografia };
 
+/** Colores para elegir de un toque (el dueño puede poner cualquiera). Nada de violetas ni degradados: DISENO.md. */
+export const ACENTOS = ["#16a34a", "#0f766e", "#2563eb", "#0369a1", "#c2410c", "#dc2626", "#b45309", "#be185d"];
+export const FONDOS = ["#f4f5f6", "#ffffff", "#faf7f0", "#111315"];
+
 // ── Mover y deshacer (el editor) ────────────────────────────────────
 
 /** La lista con el elemento de `desde` puesto en `hasta` (arrastrar). Fuera de rango o igual: la misma lista. */
