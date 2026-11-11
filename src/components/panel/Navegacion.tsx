@@ -97,6 +97,20 @@ export function Navegacion(props: Props) {
   const actual = usePathname();
   const [abierto, setAbierto] = useState(false);
   useEffect(() => { document.body.style.overflow = abierto ? "hidden" : ""; }, [abierto]);
+  // Regla 5 (FLUIDEZ): la hoja del menú se cierra con Esc y con el "atrás" del teléfono (que cierra el menú y no saca de la pantalla).
+  useEffect(() => {
+    if (!abierto) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setAbierto(false); };
+    const atras = () => setAbierto(false);
+    history.pushState({ menu: 1 }, "");
+    window.addEventListener("keydown", esc);
+    window.addEventListener("popstate", atras);
+    return () => {
+      window.removeEventListener("keydown", esc);
+      window.removeEventListener("popstate", atras);
+      if (history.state?.menu === 1) history.back();   // se cerró con la X o con un enlace: se saca la entrada que sumó
+    };
+  }, [abierto]);
 
   // VD-37: los números salen de la base en un solo pedido. Se piden al cargar, al cambiar de pantalla,
   // al cobrar o resolver algo, y cada 60 s con la pestaña visible. Si falla se conserva el último número.

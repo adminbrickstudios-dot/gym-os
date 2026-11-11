@@ -16,6 +16,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { CELU, COMPU, GIMNASIO, PLATAFORMA, entrar, navegador, pagina } from "./comun.mjs";
 // La pantalla de error de Next o la propia (PantallaError). No sirve el "algo salió mal" suelto: lo dicen textos normales ("si algo salió mal, lo deshacés").
 const ROTA = /Application error|Unhandled Runtime Error|Something went wrong|No se pudo cargar esta pantalla/i;
+const ESPERADO = /Falta elegir el socio|Falta el pago en la dirección/;   // direcciones sin su parámetro: el error con motivo es lo correcto
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
@@ -74,7 +75,7 @@ async function candidatos(p) {
     const salida = [];
     todos.forEach((e, i) => {
       e.setAttribute("data-bt", String(i));
-      const texto = (e.innerText || e.textContent || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
+      const texto = (e.innerText || e.textContent || e.labels?.[0]?.textContent || e.closest("label")?.textContent || e.getAttribute("placeholder") || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
       const enForm = !!e.closest("form") && e.tagName === "BUTTON" && (e.getAttribute("type") ?? "submit") === "submit";
       salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
     });
@@ -117,7 +118,7 @@ async function tocar(p, rol, vista, ruta, c, errores) {
   else if (ms !== null && ms > LIMITE_RESPUESTA && despues.href === antes.href) nota(informe.lentos, rol, vista, ruta, `«${c.texto || c.aria || c.tag}» tardó ${ms} ms en mostrar algo (regla: menos de ${LIMITE_RESPUESTA} ms)`);
   if (errores.length) nota(informe.consola, rol, vista, ruta, `«${c.texto || c.tag}» dejó: ${errores.slice(0, 2).join(" | ").slice(0, 200)}`);
   const cuerpo = await p.locator("body").innerText().catch(() => "");
-  if (ROTA.test(cuerpo)) nota(informe.rotas, rol, vista, ruta, `«${c.texto || c.tag}» dejó una pantalla rota`);
+  if ((ROTA.test(cuerpo) && !ESPERADO.test(cuerpo))) nota(informe.rotas, rol, vista, ruta, `«${c.texto || c.tag}» dejó una pantalla rota`);
 
   // Y vuelve: lo que se abrió se cierra con Esc; lo que navegó vuelve con "atrás".
   if (despues.href !== antes.href && despues.origin === antes.origin) {
@@ -149,7 +150,7 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
   await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
   if (!r || r.status() >= 500) { nota(informe.rotas, rol, vista, ruta, `la pantalla dio ${r?.status() ?? "sin respuesta"}`); return []; }
   const cuerpo = await p.locator("body").innerText().catch(() => "");
-  if (ROTA.test(cuerpo)) { nota(informe.rotas, rol, vista, ruta, "pantalla rota (error de la app)"); return []; }
+  if ((ROTA.test(cuerpo) && !ESPERADO.test(cuerpo))) { nota(informe.rotas, rol, vista, ruta, "pantalla rota (error de la app)"); return []; }
   if (/No tenés acceso a esta pantalla/i.test(cuerpo)) return [];   // por la dirección directa da error con motivo: es lo correcto (regla 11)
   // Regla 17: nada salta al cargar (CLS) · regla 5: siempre hay salida (menú, "Volver" o un enlace al inicio).
   const cls = await p.evaluate(() => window.__cls ?? 0).catch(() => 0);
