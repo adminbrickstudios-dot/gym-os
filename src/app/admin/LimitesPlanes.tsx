@@ -31,5 +31,5 @@ function Fila({ plan }: { plan: PlanConLimites }) {
 
 export function LimitesPlanes({ planes }: { planes: PlanConLimites[] }) {
   if (planes.length === 0) return <p className="texto-tenue">Todavía no hay planes de BRIK: creá uno en “Planes de Base”.</p>;
-  return <ul className="space-y-2" data-limites-planes>{planes.map((p) => <Fila key={`${p.id}-${p.max_socios}-${p.max_sedes}`} plan={p} />)}</ul>;
+  return <ul className="space-y-2" data-limites-planes>{planes.map((p) => <Fila key={p.id} plan={p} />)}</ul>;
 }
