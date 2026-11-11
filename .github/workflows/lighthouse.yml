@@ -7,6 +7,9 @@
 name: Lighthouse
 
 on:
+  # Hasta que este archivo esté en main, GitHub no deja dispararlo a mano: un push a dia/** con [lighthouse] en el mensaje lo corre.
+  push:
+    branches: ["dia/**"]
   workflow_dispatch:
     inputs:
       veces:
@@ -30,6 +33,7 @@ env:
 jobs:
   medir:
     name: Lighthouse móvil
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[lighthouse]')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     services:
