@@ -28,7 +28,7 @@ test("por defecto (BASE-4): el dueño ve la plata y los que vencen; la recepció
   assert.equal(d.numeros.find((n) => n.clave === "entraron").serie.length, 7);
   assert.equal(d.numeros.find((n) => n.clave === "cobrado").formato, "pesos");
   const r = await numeros(uRec);
-  assert.deepEqual(r.numeros.map((n) => n.clave), ["adentro", "entraron", "a_cobrar", "por_vencer", "deben"]);
+  assert.deepEqual(r.numeros.map((n) => n.clave), ["adentro", "entraron", "a_cobrar", "por_vencer", "deben", "caja_turno"]);
   assert.ok(!r.disponibles.some((x) => x.clave === "cobrado"));
 });
 

@@ -162,10 +162,22 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   });
   const anotar = (forzar?: string, promesa?: PromesaPago) => empezar(async () => {
     if (!elegido) return;
+    // F0.4 · Si el veredicto ya dice que puede entrar, el aviso "Entró Fulana" sale en el mismo instante (provisorio, sin Deshacer)
+    // y la base confirma por detrás. Si la base lo rechaza, vuelve atrás: el mismo veredicto en pantalla y el error con el porqué.
+    const optimista = !forzar && !promesa && !!v?.puede;
+    const antes = { elegido, v, guia, apto, firmar, texto, socios };
+    if (optimista) {
+      setHecho({ ingreso_id: "", repetido: false, resultado: "entro", nombre: elegido.nombre, socioId: elegido.socio_id });
+      reiniciar();
+    }
     const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
-    if (r.error) { setError(r.error); return; }
+    if (r.error) {
+      setError(r.error);
+      if (optimista) { setHecho(null); setElegido(antes.elegido); setV(antes.v); setGuia(antes.guia); setApto(antes.apto); setFirmar(antes.firmar); setTexto(antes.texto); setSocios(antes.socios); }
+      return;
+    }
     setHecho({ ...r.r!, nombre: elegido.nombre, socioId: elegido.socio_id });
-    reiniciar();
+    if (!optimista) reiniciar();
   });
   const dniEscrito = texto.replace(/\./g, "").trim();
   const abrirPrueba = () => empezar(async () => {
@@ -266,7 +278,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-lg font-semibold min-w-0 flex-1">
             {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
-          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
+          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado || !hecho.ingreso_id} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
           {hecho.repetido && hecho.puede_salir && hecho.socioId && (
             <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} data-ventana-salida-boton
               onClick={() => marcarSalida(hecho.socioId!, hecho.nombre)}><Icono nombre="salir" /> Marcar salida</button>

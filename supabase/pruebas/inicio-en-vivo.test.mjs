@@ -28,7 +28,7 @@ test("VD-12c: la recepción no ve lo cobrado salvo que el dueño lo prenda; el e
   assert.ok(claves(await numeros(uEnc)).includes("cobrado"));
   await t.q(`update public.configuracion_gimnasio set recepcion_ve_cobrado = true where gimnasio_id = $1`, [t.g]);
   const r = await numeros(uRec);
-  assert.deepEqual(claves(r), ["adentro", "entraron", "cobrado", "a_cobrar", "por_vencer", "deben"]);
+  assert.deepEqual(claves(r), ["adentro", "entraron", "cobrado", "a_cobrar", "por_vencer", "deben", "caja_turno"]);
   assert.equal(r.numeros.find((n) => n.clave === "cobrado").formato, "pesos");
   assert.ok(r.disponibles.some((x) => x.clave === "cobrado"));
   await t.q(`update public.configuracion_gimnasio set recepcion_ve_cobrado = false where gimnasio_id = $1`, [t.g]);
