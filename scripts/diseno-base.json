@@ -1,16 +1,4 @@
 {
- "src/app/auth/vincular/VincularGoogle.tsx": {
-  "hex": 0,
-  "emoji": 2
- },
- "src/app/elegir/page.tsx": {
-  "hex": 0,
-  "emoji": 3
- },
- "src/app/gimnasio-no-encontrado/page.tsx": {
-  "hex": 0,
-  "emoji": 1
- },
  "src/app/icono/route.tsx": {
   "hex": 1,
   "emoji": 0
