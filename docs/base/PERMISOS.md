@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 324 funciones piden un rol del equipo con `privado.exigir_equipo`; 403 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 325 funciones piden un rol del equipo con `privado.exigir_equipo`; 403 no (las decide la propia función con la sesión, el socio o RLS); 27 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -12,6 +12,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `alertas_caja` | ✓ | ✓ | — | — |
 | `alertas_patron_entradas` | ✓ | ✓ | — | — |
 | `alertas_prestamo` | ✓ | ✓ | — | — |
+| `alta_socio_pasado` | ✓ | ✓ | — | — |
 | `altas_panel` | ✓ | ✓ | — | — |
 | `anular_apto` | ✓ | ✓ | ✓ | — |
 | `anular_fichaje` | ✓ | — | — | — |
