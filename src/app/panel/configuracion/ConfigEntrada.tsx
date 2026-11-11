@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Restablecer } from "./Restablecer";
 import { guardarConfigEntrada, guardarConfigVisita, leerConfigVisita, type ConfigVisita } from "@/app/panel/entrada/ventana-acciones";
 import { CONFIG_ENTRADA_POR_DEFECTO, guardarPisado, leerPisado, type ConfigEntrada as Config, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
+import { guardarCompuCompartida, leerCompuCompartida } from "@/app/panel/entrada/compartida";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Icono } from "@/components/ui/Icono";
@@ -12,6 +13,7 @@ import { Icono } from "@/components/ui/Icono";
 const SEGUNDOS: { valor: Config["cerrar_sola_seg"]; texto: string }[] = [
   { valor: 3, texto: "3 segundos" }, { valor: 4, texto: "4 segundos" }, { valor: 6, texto: "6 segundos" }, { valor: 0, texto: "No se cierra sola" },
 ];
+const INACTIVIDAD = [0, 15, 30, 60, 120];
 type Eleccion = "gimnasio" | "si" | "no";
 const aEleccion = (x: boolean | undefined): Eleccion => (x === undefined ? "gimnasio" : x ? "si" : "no");
 
@@ -28,7 +30,8 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
   const [msj, setMsj] = useState<{ tipo: "exito" | "error"; texto: string } | null>(null);
   const [ocupado, empezar] = useTransition();
   const [pisado, setPisado] = useState<PisadoEnEstaCompu>({});
-  useEffect(() => { setPisado(leerPisado()); }, []);
+  const [compartida, setCompartida] = useState(false);
+  useEffect(() => { setPisado(leerPisado()); setCompartida(leerCompuCompartida()); }, []);
 
   const sucio = JSON.stringify(c) !== JSON.stringify(guardado);
   const guardar = () => empezar(async () => {
@@ -75,13 +78,24 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
             ))}
           </div>
         </div>
+        <div className="py-2" data-opcion="entrada-inactividad">
+          <p className="font-semibold">Cerrar por falta de uso (compu compartida)</p>
+          <p className="texto-suave text-sm">Si nadie toca la compu ese tiempo, primero suelta a quien atiende (vuelve a pedir el PIN) y, pasado el mismo tiempo sin que nadie lo ponga, cierra la sesión del gimnasio. Por defecto no se cierra.</p>
+          <div className="flex flex-wrap gap-2 mt-2" role="group" aria-label="Cerrar por falta de uso">
+            {INACTIVIDAD.map((m) => (
+              <button key={m} type="button" aria-pressed={(c.cerrar_por_inactividad_min ?? 0) === m} data-inactividad={m}
+                className={`pestana ${(c.cerrar_por_inactividad_min ?? 0) === m ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}
+                onClick={() => setC({ ...c, cerrar_por_inactividad_min: m })}>{m === 0 ? "No se cierra" : `${m} minutos`}</button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <button type="button" className="boton boton-principal" disabled={!sucio || ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
           {sucio && <span className="texto-tenue text-sm">Hay cambios sin guardar</span>}
         </div>
         {msj && <Mensaje tipo={msj.tipo}>{msj.texto}</Mensaje>}
         {puedeEditar && (
-          <Restablecer id="entrada" recomendado="abrir al tipear prendido, barra fija apagada, anotar con Enter siempre, y cerrar sola a los 4 segundos."
+          <Restablecer id="entrada" recomendado="abrir al tipear prendido, barra fija apagada, anotar con Enter siempre, cerrar sola a los 4 segundos y sin cierre por falta de uso."
             alConfirmar={async () => {
               const r = await guardarConfigEntrada(CONFIG_ENTRADA_POR_DEFECTO);
               if (r.error || !r.config) return r.error ?? "No se pudo restablecer.";
@@ -97,6 +111,9 @@ export function ConfigEntrada({ inicial, puedeEditar = true }: { inicial: Config
         <p className="texto-suave">Para pisar lo del gimnasio solo en esta compu o tablet (queda guardado en este navegador). Por ejemplo, prender la barra fija solo en el mostrador.</p>
         <Elegir etiqueta="Abrir al tipear un número" valor={aEleccion(pisado.abrir_al_tipear)} alCambiar={(e) => pisar("abrir_al_tipear", e)} />
         <Elegir etiqueta="Barra fija a la derecha" valor={aEleccion(pisado.barra_fija)} alCambiar={(e) => pisar("barra_fija", e)} />
+        <Interruptor etiqueta="Esta compu la usa todo el equipo" data-opcion="entrada-compu-compartida"
+          ayuda="El formulario de ingreso no deja que el navegador guarde ni rellene la contraseña acá. Prendelo en la compu de la recepción."
+          checked={compartida} onChange={(e) => { setCompartida(e.target.checked); guardarCompuCompartida(e.target.checked); }} />
         <p className="texto-tenue text-sm">El sonido de la puerta también se prende o apaga por compu, desde la pantalla de Entrada.</p>
       </section>
     </div>

@@ -10,6 +10,7 @@ import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type ResultadoSalida, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
+import { crearDetectorLector, esLecturaRepetida } from "./lector";
 import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmergencia";
 import type { EmergenciaActiva } from "./emergencia-tipos";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -97,7 +98,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   });
   // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
   // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
-  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
+  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "recepcion" | "qr_socio" | "nfc") => {
     if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
     const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
     const r = await veredicto(s.socio_id, sedeId);
@@ -124,6 +125,31 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     setTexto(""); setHecho(null); setForzando(false);
     await directo(l, "nfc");
   });
+  // C5 · Lector USB: el código llegó de corrido y terminó en Enter. Busca por QR, credencial (llavero) o DNI; el veredicto lo da la base.
+  // Si no encuentra a nadie suena el error, el campo queda vacío y con el foco (la próxima lectura no se pega a esta). El mismo código dos veces seguidas es un solo ingreso.
+  const detector = useRef(crearDetectorLector());
+  const ultimaLectura = useRef<{ codigo: string; en: number } | null>(null);
+  const porLectura = (crudo: string) => {
+    const t = crudo.replace(/\./g, "").trim() || crudo.trim();
+    if (!t) return;
+    const ahora = Date.now();
+    if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+    ultimaLectura.current = { codigo: t, en: ahora };
+    setTexto(""); setSocios([]); setHecho(null); setForzando(false);
+    const noEsta = () => { setError("No encontramos a nadie con ese código."); if (sonido) sonar("rojo"); setTimeout(() => campo.current?.focus(), 0); };
+    empezar(async () => {
+      if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); return; }
+      if (conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(t) && !/^\d{7,9}$/.test(t)) {
+        const l = await leerLlavero(t);
+        if (l.socio || l.error) { await directo(l, "nfc"); return; }
+      }
+      const r = await buscarSociosRapido(t);
+      if (r.error) { setError(r.error); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
+      const primero = r.socios?.[0];
+      if (!primero) { noEsta(); return; }
+      await directo({ socio: { socio_id: primero.socio_id, nombre: primero.nombre, numero: primero.numero ?? 0 } }, "recepcion");
+    });
+  };
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
     const r = await terminarPausa(elegido.socio_id, sedeId);
@@ -212,6 +238,8 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       <input
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); setSalio(null); setPrueba(null); }}
         onKeyDown={(e) => {
+          detector.current.tecla(e.key, e.timeStamp);
+          if (e.key === "Enter" && detector.current.enter(e.timeStamp)) { e.preventDefault(); porLectura(e.currentTarget.value); return; }
           // VD-48: DNI + S marca la salida (solo si el gimnasio la registra).
           if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !e.ctrlKey && !e.metaKey && !e.altKey && /^\d{6,9}$/.test(texto.replace(/\./g, "").trim())) {
             e.preventDefault(); if (!ocupado) salirConDni(texto.replace(/\./g, "").trim()); return;
