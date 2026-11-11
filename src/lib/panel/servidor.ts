@@ -89,11 +89,21 @@ export const contextoCompleto = cache(async (): Promise<ContextoCompleto> => {
   const g = await gimnasioActual();
   const supabase = await crearClienteServidor();
   // getClaims: sin viaje a Auth cuando hay claves asimétricas; la base valida con auth.uid() igual.
-  const [claims, res] = await Promise.all([
+  const [claims0, res] = await Promise.all([
     supabase.auth.getClaims(),
     rpcLectura<ContextoCompleto>("contexto_pantalla", { p_gimnasio_id: g.id }).then((v) => ({ v }), (e: unknown) => ({ e })),
   ]);
-  if (!claims.data?.claims?.sub) redirect("/ingresar?siguiente=/panel");
+  // Sesión: solo "no hay sesión" manda al ingreso. Si la verificación FALLÓ (error de red o del servicio de cuentas) se reintenta una vez;
+  // si sigue fallando se dice (nunca se echa a alguien con sesión por un tropiezo del servicio de cuentas).
+  let claims = claims0;
+  if (!claims.data?.claims?.sub && claims.error) { await new Promise((r) => setTimeout(r, 200)); claims = await supabase.auth.getClaims(); }
+  if (!claims.data?.claims?.sub) {
+    if (claims.error && !/session.*missing|no.*session|not.*authenticated|jwt/i.test(claims.error.message ?? "")) {
+      console.error(`[sesion] getClaims fallo: ${claims.error.message}`);
+      throw new ErrorDatos("No pudimos verificar tu sesión ahora. Probá de nuevo en un momento.", "sesion", 503);
+    }
+    redirect("/ingresar?siguiente=/panel");
+  }
   if ("e" in res) throw res.e;
   return res.v;
 });
