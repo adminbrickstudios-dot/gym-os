@@ -395,7 +395,7 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 | Kiosco: el lector USB borra la G de `GYMOS1.` | ✅ `src/app/kiosco/campo.test.ts` (vitest) y pulido-roto paso 1 |
 | Kiosco sin internet termina en la pantalla de error | ✅ pulido-roto (modo sin conexión: "Sin conexión: pasá por recepción") |
 | Mi QR vencido sin señal; al volver de la pantalla bloqueada | ✅ pulido-roto (sin señal y al volver); 🟡 el `visibilitychange` está escrito pero la prueba solo corta y devuelve la red |
-| Avisos que tapan el botón flotante y la barra | ✅ pulido-roto (posición contra el botón y la barra) |
+| Avisos que tapan el botón flotante y la barra | ✅ contra el botón (pulido-roto); 🟡 contra la barra fija: a 1440 px la prueba no la mostró, el `xl:right-[19rem]` queda sin medir |
 | Botón flotante de la Entrada vacío | ✅ pulido-roto (tiene su ícono) |
 | Íconos vacíos en el rojo, la salida y la caja (Puerta, Ventana, Turno, entradas y salidas de plata) | 🟡 reemplazados por `<Icono>`; sin prueba de pantalla propia (tsc y lint limpios) |
 | Emojis crudos de la base en Inicio y en los chips de la guía | 🟡 `sistema` en `<Icono>` (la migración entregada no se toca); sin prueba de pantalla propia |
