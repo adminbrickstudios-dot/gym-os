@@ -54,7 +54,7 @@ try {
   const mp = p.locator("[data-mercadopago]");
   await mp.waitFor({ timeout: 30000 });
   await mp.locator("button", { hasText: /Conectar MercadoPago|Cambiar credenciales/ }).click();
-  await mp.locator('input[placeholder="APP_USR-…"]').fill("TEST-token-de-prueba-e2e");
+  await mp.locator('input[placeholder="APP_USR-…"]').fill("TEST-token-de-prueba-e2e-0001");
   await mp.locator("label", { hasText: "Clave secreta" }).locator("input").fill("clave-secreta-e2e");
   await mp.locator("label", { hasText: /Prueba/ }).click();
   await mp.locator("button", { hasText: "Guardar y conectar" }).click();
