@@ -46,9 +46,11 @@ export function PreferenciasAvisos({ inicial }: { inicial: { tipo: string; app: 
   const [ocupado, empezar] = useTransition();
   const cambiar = (tipo: string, app: boolean) => empezar(async () => {
     setError(null); setOk(null);
+    // La casilla cambia en el mismo instante; si la base no lo guarda, vuelve atrás y dice por qué.
+    const poner = (valor: boolean) => setPrefs((p) => p.map((x) => (x.tipo === tipo ? { ...x, app: valor } : x)));
+    poner(app);
     const r = await guardarPreferenciaAviso(tipo, app);
-    if (r.error) { setError(r.error); return; }
-    setPrefs((p) => p.map((x) => (x.tipo === tipo ? { ...x, app } : x)));
+    if (r.error) { poner(!app); setError(r.error); return; }
     setOk("Guardado.");
     refrescarPendientes();
     router.refresh();
