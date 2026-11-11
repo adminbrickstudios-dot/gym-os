@@ -57,7 +57,7 @@ try {
 
   // 3. Ingreso optimista.
   const { rows: [s] } = await db.query(`
-    select s.id, s.nombre || ' ' || s.apellido as nombre, s.numero from public.socios s
+    select s.id, s.nombre || ' ' || s.apellido as nombre, s.numero, s.dni from public.socios s
      where s.gimnasio_id = $1 and s.dado_de_baja_en is null and s.cubierto_hasta > now() + interval '10 days'
      order by s.numero limit 1`, [gim]);
   if (!s) throw new Error("no hay un socio al día en el demo");
@@ -74,7 +74,7 @@ try {
     }
     return ruta.continue();
   });
-  await campo.fill(String(s.numero));
+  await campo.fill(s.dni);   // por DNI: un número corto (menos de 2 cifras) no dispara la búsqueda
   await r.waitForTimeout(400);
   await campo.press("Enter");
   await r.locator("[data-veredicto], [data-color]").first().waitFor({ timeout: 30000 }).catch(() => {});
@@ -96,7 +96,7 @@ try {
   await r.reload();
   await campo.waitFor({ timeout: 30000 });
   frenar = false; cortar = false;
-  await campo.fill(String(s.numero)); await r.waitForTimeout(400); await campo.press("Enter");
+  await campo.fill(s.dni); await r.waitForTimeout(400); await campo.press("Enter");
   await r.waitForTimeout(1500);
   frenar = true; cortar = true;
   await r.keyboard.press("Enter");
