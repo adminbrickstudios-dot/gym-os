@@ -19,7 +19,13 @@
 - Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
 - Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
 
-## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
+## DÓNDE QUEDÉ (11/11, 12:00)
+- ✅ cerrados hoy: U5, P1, P4-P8b, C1-C7, F1.2, F2.1-F2.9, F7.1, F9.1. Publicado: fase P y C1/C2/aviso (PR #15). Sin publicar: migraciones 20261111120000 (recepción) y 130100-130400 (velocidad) y lo que sigan los ayudantes.
+- En curso (ayudantes en worktrees): `carril/a-filtros` (filtros_socios a menos de 300 ms), `carril/c-qr-alta` (C9), `carril/c-pasado` (C10, plata: dueño y encargado), `carril/d-f19` (F1.9: vd-6, base-7b, velocidad-a y los 15 viejos, con Actions), `carril/d-f3` (F3).
+- Rojos conocidos en Actions: `base-7b` (paso 4b), `velocidad-a` (ingreso optimista), `vd-6` (paso 6). Los trabaja `carril/d-f19`.
+- Pendientes tras eso: F4, F5, F6, F9.2-F9.8, F0.1 (⛔ secretos), F1.6 (filtros), F8 y publicar cada fase.
+
+## (anterior) DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
 - U5, P1, P4 a P7, P8 y P8b en ✅ (Actions 43015505501 y 43020787407). Chequeos de la base relanzados en 43022741600 (lista blanca y paletas del editor ya arreglados). Ayudantes en la fase C: `carril/c-clave` (C1) y `carril/c-importar` (C2); al terminar: integrar, correr su e2e (`clave-nueva`, `importar-300`) en Actions. Yo sigo con C3 a C8. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel). Hay migraciones nuevas sin aplicar (20261111090000 y las que traigan los carriles): se aplican en la próxima publicación.
 
 ## (anterior) DÓNDE QUEDÉ (11/11, mediodía)
