@@ -499,7 +499,7 @@ begin
   if i.deshecha_en is not null then raise exception 'Esa importación ya se deshizo.'; end if;
   if i.creado_en <= now() - interval '24 hours' then raise exception 'Pasaron más de 24 horas: ya no se puede deshacer entera. Corregí los socios uno por uno.'; end if;
   if exists (select 1 from public.ventas v where v.gimnasio_id = p_gimnasio_id and v.importacion_id = i.id) then
-    raise exception 'Esa importación cargó pagos: la plata no se borra. Si un pago está mal, anulalo desde Control; el resto de los socios queda como está.';
+    raise exception 'Esa importación cargó pagos: la plata no se borra. Si un pago está mal, anulá esa venta desde la ficha del socio; el resto de los socios queda como está.';
   end if;
   perform set_config('gymos.deshacer_importacion', i.id::text, true);
   begin

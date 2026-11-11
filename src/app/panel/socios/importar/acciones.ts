@@ -8,10 +8,10 @@ export async function revisar(filas: unknown[]): Promise<{ error?: string; revis
   catch (e) { return { error: (e as Error).message }; }
 }
 
-export async function importar(filas: unknown[], archivo: string): Promise<{ error?: string; resultado?: { importacion_id: string; importados: number; salteados: number } }> {
+export async function importar(filas: unknown[], archivo: string): Promise<{ error?: string; resultado?: { importacion_id: string; importados: number; salteados: number; ya_existian?: number; repetidas_en_archivo?: number; con_cobertura?: number; pagos_cargados?: number; monto_pagos?: number | string } }> {
   const panel = await contextoPanel();
   try {
-    const resultado = await rpc<{ importacion_id: string; importados: number; salteados: number }>("importar_socios", { p_gimnasio_id: panel.gimnasio.id, p_filas: filas, p_archivo: archivo });
+    const resultado = await rpc<NonNullable<Awaited<ReturnType<typeof importar>>["resultado"]>>("importar_socios", { p_gimnasio_id: panel.gimnasio.id, p_filas: filas, p_archivo: archivo });
     revalidatePath("/panel/socios", "layout");
     return { resultado };
   } catch (e) { return { error: (e as Error).message }; }
