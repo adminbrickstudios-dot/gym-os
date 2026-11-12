@@ -24,6 +24,14 @@ on:
         description: "Cómo corre la app: dev (next dev) o produccion (next build + next start)"
         type: string
         default: "produccion"
+      socios:
+        description: "Socios del gimnasio demo (vacío = 300). F8.1 mide con 5000"
+        type: string
+        default: ""
+      tanda:
+        description: "Nombre de la tanda (t1, t2...): tandas con nombre distinto corren a la vez, cada una con su base y su app"
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -66,7 +74,7 @@ jobs:
     name: Pantallas (e2e y barrido)
     # Las pantallas no se cancelan con un push normal: hacen cola.
     concurrency:
-      group: pantallas-${{ github.ref }}
+      group: pantallas-${{ github.ref }}-${{ inputs.tanda }}
       cancel-in-progress: false
     if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
     runs-on: ubuntu-latest
@@ -99,6 +107,7 @@ jobs:
       - name: Levantar la app con la imitación de Supabase
         env:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          SOCIOS_DEMO: ${{ inputs.socios || '300' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
