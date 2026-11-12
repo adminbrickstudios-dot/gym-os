@@ -14,11 +14,14 @@ const paso = (ok, texto) => { console.log(`${ok ? "✓" : "✗"} ${texto}`); if 
 
 try {
   await db.query("begin");
-  const [g] = await q(`select g.id, g.zona_horaria from public.gimnasios g
-                         join public.equipo e on e.gimnasio_id = g.id and e.rol = 'dueno' and e.activo and e.usuario_id is not null
-                        where g.es_demo and g.baja_en is null order by g.creado_en limit 1`);
-  if (!g) { console.log("No hay un gimnasio demo con dueño: nada que probar"); process.exitCode = 1; throw new Error("sin demo"); }
-  const [dueno] = await q(`select e.id, e.usuario_id from public.equipo e where e.gimnasio_id = $1 and e.rol = 'dueno' and e.activo and e.usuario_id is not null limit 1`, [g.id]);
+  const [g] = await q(`select g.id, g.zona_horaria from public.gimnasios g where g.es_demo and g.baja_en is null order by g.creado_en limit 1`);
+  if (!g) { console.log("✗ No hay un gimnasio demo: nada que probar"); fallas++; throw new Error("sin demo"); }
+  // El dueño del demo si ya tiene cuenta; si no, uno temporal dentro de la transacción (se revierte con todo lo demás).
+  let [dueno] = await q(`select e.id, e.usuario_id from public.equipo e where e.gimnasio_id = $1 and e.rol = 'dueno' and e.activo and e.usuario_id is not null limit 1`, [g.id]);
+  if (!dueno) {
+    const [u] = await q(`insert into auth.users (id, email) values (gen_random_uuid(), 'humo-pasado@ejemplo.invalid') returning id`);
+    [dueno] = await q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Humo','dueno') returning id, usuario_id`, [g.id, u.id]);
+  }
   const [sede] = await q(`select id from public.sedes where gimnasio_id = $1 order by creado_en limit 1`, [g.id]);
   const [plan] = await q(`select id, precio from public.planes where gimnasio_id = $1 and activo order by orden, nombre limit 1`, [g.id]);
   paso(!!(dueno && sede && plan), "el demo tiene dueño, sede y un plan activo");
