@@ -105,6 +105,8 @@ const SECCIONES: [string, string, string, string][] = [
     "No hay pantalla de Personal trainer y el socio no ve los turnos en la app. Las sesiones ya reservadas se conservan."],
   ["rutinas", "Rutinas", "Armar ejercicios y rutinas y asignarlas a los socios.",
     "No hay pantalla de Rutinas en el panel ni en Ctrl+K. Las rutinas ya asignadas se conservan y el socio las sigue viendo en su app."],
+  ["eventos", "Eventos", "Seminarios y clases especiales con cupo y precio, en el panel, en tu página y en la app.",
+    "No hay pantalla de Eventos ni se ven en tu página, en la app ni en la ventana de la Entrada. Los eventos y sus anotados se conservan."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */

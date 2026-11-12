@@ -10,9 +10,9 @@ const sql = readFileSync(`${carpeta}/${ultimaDelCatalogo}`, "utf8");
 const catalogo = [...sql.matchAll(/jsonb_build_object\('clave', '([a-z_]+)'/g)].map((m) => m[1]);
 
 describe("funciones nuevas: un solo interruptor", () => {
-  it("el catálogo tiene las siete claves, sin repetir", () => {
+  it("el catálogo tiene las ocho claves, sin repetir", () => {
     expect(new Set(catalogo).size).toBe(catalogo.length);
-    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "origen_altas", "panel_pago", "resumen_noche"]);
+    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "origen_altas", "panel_pago", "resumen_noche", "vuelto_efectivo"]);
   });
   it("cada una trae título, explicación y la frase de “Qué hay de nuevo”", () => {
     for (const c of catalogo) {

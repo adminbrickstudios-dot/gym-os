@@ -12,6 +12,7 @@ import { Hoja } from "@/components/ui/Hoja";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { MotivoDescuento } from "@/components/panel/cobrar/MotivoDescuento";
+import { VueltoEfectivo } from "@/components/panel/cobrar/VueltoEfectivo";
 import { AbrirTurnoCobrar } from "@/components/panel/cobrar/AbrirTurnoCobrar";
 import { AvisoDobleCobro, motivoDobleValido, textoDobleCobro, type EstadoDobleCobro } from "@/components/panel/cobrar/AvisoDobleCobro";
 import { formatearPesos, leerMonto } from "@/lib/formato";
@@ -392,6 +393,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
             <p className="text-sm texto-suave mt-2" data-fiado>Se le puede fiar hasta {formatearPesos(precios.fiado.disponible)} más (tope {formatearPesos(precios.fiado.tope)}).</p>
           )}
 
+          {d.vueltoEfectivo && !mixto && medioOk === "efectivo" && !otroDia && (total ?? 0) > 0 && <VueltoEfectivo key={total} total={total ?? 0} />}
           {usaEfectivo && turnoId && !otroDia && <p className="text-sm texto-tenue mt-2" data-cobrar-caja><Icono nombre="plata" /> El efectivo queda en tu caja{caja.caja ? ` (${caja.caja})` : ""}.</p>}
           {/* VD-49: efectivo sin turno → abrirlo acá, con el fondo, y seguir con este cobro */}
           {faltaCaja && <div className="mt-3"><AbrirTurnoCobrar caja={caja} alAbrir={(id, nombre) => { setCaja({ ...caja, turno_id: id, caja: nombre, vencido: false, libres: [] }); setError(null); }} /></div>}

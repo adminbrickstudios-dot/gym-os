@@ -24,6 +24,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { Ayudas, type PedidoAyuda } from "./Ayudas";
 import { Metricas, type MetricasPlataforma } from "./Metricas";
 import { PedidosDemo, type PedidoDemo } from "./PedidosDemo";
+import { MenuSecciones } from "./MenuSecciones";
 import { ContactoPlataformaForm, type ContactoPlataforma } from "./ContactoPlataforma";
 
 export const metadata: Metadata = { title: "BRIK · Gimnasios" };
@@ -38,7 +39,8 @@ type Salud = { ultimo_acceso_equipo: string | null; ventas_7_dias: number; cobra
 type SaludV2 = { color: "rojo" | "amarillo" | "verde"; orden: number; puntaje: number; motivos: string[]; ayudas_pendientes: number };
 const COLOR: Record<SaludV2["color"], [string, string]> = { rojo: ["Urgente", "pildora-rojo"], amarillo: ["Atención", "pildora-amarillo"], verde: ["Todo bien", "pildora-verde"] };
 const FILTROS: [string, string][] = [["todos", "Todos"], ["atencion", "Necesitan atención"], ["rojo", "Urgentes"], ["amarillo", "Atención"], ["verde", "Todo bien"]];
-const sinTildes = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const SECCIONES = [{ id: "hoy", titulo: "Hoy" }, { id: "plataforma", titulo: "Plataforma" }, { id: "gimnasios", titulo: "Gimnasios" }, { id: "brik", titulo: "BRIK" }];
+const sinTildes =(s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 const hace = (m: string | null) => { if (!m) return "nunca"; const d = Math.floor((Date.now() - new Date(m).getTime()) / 86400000); return d <= 0 ? "hoy" : d === 1 ? "ayer" : `hace ${d} días`; };
 
 // El super admin de BRIK: vive en el dominio de la plataforma, no en el de un gimnasio.
@@ -103,20 +105,29 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <Link href="/admin/registro" className="boton">Registro</Link>
         <Link href="/admin/plantillas" className="boton">Plantillas de textos</Link>
       </nav>
-      <Tablero />
-      <div id="ayudas"><Ayudas pedidos={ayudas} /></div>
-      <PedidosDemo pedidos={pedidosDemo} />
-      <Metricas m={metricas} />
-      <EstadoPlataforma />
-      <div id="alta"><AltaGimnasio dominio={dominioBase()} planes={planesBrik.filter((x) => x.activo).map((x) => ({ id: x.id, nombre: x.nombre }))} /></div>
-      <Demos vencidas={demosVencidas} />
-      <ErroresPlataforma />
-      <PlataformaDatos />
-      <EscalaDatos />
-      <DominiosVercelDatos />
-      <NovedadesDuenos novedades={novedades} />
-      <PlanesBrik planes={planesBrik} />
-      <ContactoPlataformaForm inicial={contactoPlataforma} />
+      <MenuSecciones secciones={SECCIONES} />
+
+      <section id="hoy" className="space-y-10 scroll-mt-16" aria-labelledby="t-hoy">
+        <h2 id="t-hoy" className="titular text-[22px]">Hoy</h2>
+        <Tablero />
+        <div id="ayudas"><Ayudas pedidos={ayudas} /></div>
+        <PedidosDemo pedidos={pedidosDemo} />
+        <Metricas m={metricas} />
+      </section>
+
+      <section id="plataforma" className="space-y-10 scroll-mt-16" aria-labelledby="t-plataforma">
+        <h2 id="t-plataforma" className="titular text-[22px]">Plataforma</h2>
+        <EstadoPlataforma />
+        <ErroresPlataforma />
+        <PlataformaDatos />
+        <EscalaDatos />
+        <DominiosVercelDatos />
+      </section>
+
+      <section id="gimnasios" className="space-y-10 scroll-mt-16" aria-labelledby="t-gimnasios">
+        <h2 id="t-gimnasios" className="titular text-[22px]">Gimnasios</h2>
+        <div id="alta"><AltaGimnasio dominio={dominioBase()} planes={planesBrik.filter((x) => x.activo).map((x) => ({ id: x.id, nombre: x.nombre }))} /></div>
+        <Demos vencidas={demosVencidas} />
 
       <section className="space-y-3">
         <p className="titulo-grupo">Todos los gimnasios</p>
@@ -179,9 +190,17 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </ul>
       </section>
 
-      <section className="space-y-3">
-        <p className="titulo-grupo">Mi cuenta</p>
-        <CambiarContrasena />
+      </section>
+
+      <section id="brik" className="space-y-10 scroll-mt-16" aria-labelledby="t-brik">
+        <h2 id="t-brik" className="titular text-[22px]">BRIK</h2>
+        <NovedadesDuenos novedades={novedades} />
+        <PlanesBrik planes={planesBrik} />
+        <ContactoPlataformaForm inicial={contactoPlataforma} />
+        <section className="space-y-3">
+          <p className="titulo-grupo">Mi cuenta</p>
+          <CambiarContrasena />
+        </section>
       </section>
     </main>
   );

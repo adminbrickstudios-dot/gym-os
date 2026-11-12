@@ -3,6 +3,7 @@ import Link from "next/link";
 import { miSocio } from "@/lib/app/socio";
 import { estadoDe, motivoDe, type HiloSocio } from "@/lib/mensajes";
 import { conFotos } from "@/lib/mensajes-servidor";
+import { fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { FormMensaje } from "../FormMensaje";
@@ -21,7 +22,7 @@ export default async function MiHilo({ params, searchParams }: { params: Promise
     const hilo = await rpc<HiloSocio>("mi_hilo", { p_hilo_id: id });
     const mensajes = await conFotos(hilo.mensajes);
     const m = motivoDe(hilo.motivo), e = estadoDe(hilo.estado);
-    const cuando = (x: string) => new Intl.DateTimeFormat("es-AR", { timeZone: yo.zona!, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x));
+    const cuando = (x: string) => fechaHoraHumana(x, yo.zona!);
     return (
       <div className="space-y-6" data-mi-hilo>
         <Link href={`/app/mensajes${q}`} className="texto-suave">← Mis mensajes</Link>

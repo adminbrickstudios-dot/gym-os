@@ -50,7 +50,7 @@ export const SECCIONES: Seccion[] = [
   // "mensajes": para la recepción lo saca contextoPanel si el dueño no se lo prendió (VD-38); el contador de pendientes lo suma VD-37.
   { clave: "mensajes", ruta: DESTINO.mensajes, emoji: "mensaje", titulo: "Mensajes", descripcion: "Consultas y quejas de los socios, para contestar", grupo: "Socios", roles: MOSTRADOR, apagable: "mensajes", tambien: "consultas quejas objetos perdidos" },
   { clave: "retencion", ruta: DESTINO.retencion, emoji: "tendencia-baja", titulo: "Retención y números", descripcion: "Los que se están yendo, con el mensaje armado", grupo: "Socios", roles: MOSTRADOR, apagable: "retencion", tambien: "retencion" },
-  { clave: "eventos", ruta: DESTINO.eventos, emoji: "ticket", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", secundaria: true, roles: MOSTRADOR },
+  { clave: "eventos", ruta: DESTINO.eventos, emoji: "ticket", titulo: "Eventos", descripcion: "Seminarios y clases especiales con cupo y precio", grupo: "Socios", secundaria: true, roles: MOSTRADOR, apagable: "eventos" },
   // VD-58: turnos 1 a 1 con un personal trainer (cada uno ve su agenda; el dueño y el encargado, todas).
   { clave: "pt", ruta: DESTINO.pt, emoji: "objetivo", titulo: "Personal trainer", corto: "PT", descripcion: "Agenda del PT, packs de sesiones y turnos reservados", grupo: "Socios", roles: ["dueno", "encargado", "recepcion", "profe"], apagable: "pt", tambien: "pt entrenador sesiones turnos personal" },
   // VD-55: alquiler de lockers con vencimiento (se cobra con Vender; el estado se calcula).

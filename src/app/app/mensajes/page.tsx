@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Vacio } from "@/components/ui/Vacio";
 import { miSocio } from "@/lib/app/socio";
 import { estadoDe, motivoDe, type FilaSocio } from "@/lib/mensajes";
+import { fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Icono } from "@/components/ui/Icono";
@@ -21,7 +22,7 @@ export default async function MisMensajes({ searchParams }: { searchParams: Prom
       rpc<FilaSocio[]>("mis_mensajes", { p_socio_id: s.socio_id }),
       rpc<{ activo: boolean }>("mensajes_estado_socio", { p_socio_id: s.socio_id }),
     ]);
-    const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: yo.zona!, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+    const cuando = (m: string) => fechaHoraHumana(m, yo.zona!);
     return (
       <div className="space-y-6" data-mis-mensajes>
         <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>

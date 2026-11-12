@@ -2,7 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { formatearPesos } from "@/lib/formato";
+import { formatearCelular, formatearPesos } from "@/lib/formato";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { cerrarEvento, crearEvento, marcarPresente, publicarEvento, subirFlyerEvento } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
@@ -190,7 +190,7 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
       {e.espera.length > 0 && (
         <details><summary className="cursor-pointer texto-suave">Lista de espera ({e.espera.length})</summary>
           <ol className="mt-2 space-y-1 text-sm" data-lista-espera>
-            {e.espera.map((w) => <li key={w.clave}>#{w.posicion} · {w.nombre}{w.telefono ? ` · ${w.telefono}` : ""}</li>)}
+            {e.espera.map((w) => <li key={w.clave}>#{w.posicion} · {w.nombre}{w.telefono ? ` · ${formatearCelular(w.telefono)}` : ""}</li>)}
           </ol>
         </details>
       )}
