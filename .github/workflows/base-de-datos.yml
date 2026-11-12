@@ -6,6 +6,7 @@
 #   chequeos   solo los chequeos (RLS, permisos, search_path…)
 #   hacer-admin  da super admin a la cuenta del mail indicado
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
+#   humo-pasado  prueba en el demo de producción (transacción que revierte): alta con fecha y pago pasados + caja por medio
 #   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
 #   usuarios-demo crea los logins del demo (dueña, encargado, recepción, profe, socio) con la
 #                 contraseña que pongas; NO crea un super admin demo. Necesita los secretos
@@ -21,7 +22,7 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, sembrar-demo, usuarios-demo]
+        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
@@ -109,6 +110,9 @@ jobs:
       - name: Estado de la base
         if: inputs.accion == 'estado'
         run: node scripts/datos/estado-base.mjs
+      - name: Humo de cargar en el pasado y caja por medio (demo, transacción que revierte)
+        if: inputs.accion == 'humo-pasado'
+        run: node scripts/datos/humo-pasado-produccion.mjs
       - name: Sembrar el gimnasio demo
         if: inputs.accion == 'sembrar-demo'
         env:
