@@ -65,10 +65,12 @@ export async function guardarConfigEntrada(datos: Partial<ConfigEntrada>): Promi
 }
 
 /** BASE-3: la ficha rápida del panel lateral. Todo sale de `ficha_socio` (el veredicto lo calcula la base; acá no se recalcula nada). */
-export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/app/panel/socios/[id]/tipos").Ficha; puedeCobrar?: boolean; error?: string }> {
+export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/app/panel/socios/[id]/tipos").Ficha; puedeCobrar?: boolean; datosDePago?: boolean; error?: string }> {
   try {
     const panel = await contextoPanel();
     const ficha = await rpc<import("@/app/panel/socios/[id]/tipos").Ficha>("ficha_socio", { p_socio_id: socioId });
-    return { ficha, puedeCobrar: panel.yo.rol !== "profe" };
+    // FA-1: "cuándo le toca pagar" es una función nueva, apagada por defecto (interruptor del gimnasio).
+    const datosDePago = (await rpc<string[]>("funciones_nuevas_gimnasio", { p_gimnasio_id: panel.gimnasio.id })).includes("panel_pago");
+    return { ficha, puedeCobrar: panel.yo.rol !== "profe", datosDePago };
   } catch (e) { return { error: (e as Error).message }; }
 }

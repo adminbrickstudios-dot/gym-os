@@ -24,6 +24,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   const [socioId, setSocioId] = useState<string | null>(null);
   const [ficha, setFicha] = useState<Ficha | null>(null);
   const [puedeCobrar, setPuedeCobrar] = useState(false);
+  const [datosDePago, setDatosDePago] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cerrarBtn = useRef<HTMLButtonElement>(null);
 
@@ -36,7 +37,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   useEffect(() => {
     if (!socioId) return;
     let vivo = true;
-    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); } });
+    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); setDatosDePago(!!r.datosDePago); } });
     cerrarBtn.current?.focus();
     const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") setSocioId(null); };
     window.addEventListener("keydown", tecla);
@@ -79,6 +80,15 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
               </p>
               {ficha.membresia && <p className="texto-tenue text-sm mt-1">Desde el {dia(ficha.membresia.inicio)}</p>}
             </div>
+            {datosDePago && (
+              <div className="tarjeta p-4 space-y-1" data-panel-socio-pago>
+                {vigente && a.vence_en && <p data-panel-pago-toca>Le toca pagar el {dia(a.vence_en)}{ficha.membresia?.precio != null ? ` · ${formatearPesos(ficha.membresia.precio)}` : ""}</p>}
+                {!vigente && a.vence_en && new Date(a.vence_en).getTime() <= Date.now() && <p data-panel-pago-desde>Debe desde el {dia(a.vence_en)}{debe ? ` · ${formatearPesos(debe)}` : ""}</p>}
+                {ficha.membresia
+                  ? <p className="texto-suave" data-panel-pago-plan>Pagaría {ficha.membresia.plan}{ficha.membresia.precio != null ? `: ${formatearPesos(ficha.membresia.precio)}` : ""}</p>
+                  : <p className="texto-suave" data-panel-pago-plan>Sin plan: se elige al cobrar.</p>}
+              </div>
+            )}
             {!vigente && debe != null && debe > 0 && (
               <p className="font-semibold" data-panel-socio-debe>Debe {formatearPesos(debe)}</p>
             )}
