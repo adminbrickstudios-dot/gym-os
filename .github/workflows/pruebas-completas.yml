@@ -175,5 +175,6 @@ jobs:
             .local/caidas.txt
             .local/tiempos.md
             .local/capturas/
+            .local/humo/
           if-no-files-found: ignore
           retention-days: 7

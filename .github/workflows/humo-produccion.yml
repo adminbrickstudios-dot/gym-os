@@ -36,3 +36,38 @@ jobs:
           if [ -z "$BRIK_ADMIN_MAIL" ] || [ -z "$BRIK_ADMIN_CLAVE" ]; then echo "::error::Faltan los secretos BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE (la cuenta de super admin de producción)"; exit 1; fi
           echo "::add-mask::$BRIK_ADMIN_CLAVE"
           node scripts/medir/humo-produccion.mjs
+
+  # F8.3 · Las puertas /super, /dueno, /recepcion, /profe, /socio y la página del gimnasio de prueba, en compu y celular, con capturas.
+  # Solo mira (no crea ni cambia nada). Lo que no tiene su secreto queda ⛔ "sin probar" y se dice; nunca se inventa un verde.
+  # Secretos: BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE (super admin) y CLAVE_PRUEBA_MATEO (contraseña de los usuarios del Gimnasio Prueba Mateo).
+  puertas:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Humo de las puertas
+        env:
+          BASE_URL: ${{ inputs.url || vars.PRODUCCION_URL || 'https://gym-os-pied.vercel.app' }}
+          GIMNASIO_SLUG: demo-mateo
+          BRIK_ADMIN_MAIL: ${{ secrets.BRIK_ADMIN_MAIL }}
+          BRIK_ADMIN_CLAVE: ${{ secrets.BRIK_ADMIN_CLAVE }}
+          CLAVE_PRUEBA: ${{ secrets.CLAVE_PRUEBA_MATEO }}
+        run: |
+          [ -n "$BRIK_ADMIN_CLAVE" ] && echo "::add-mask::$BRIK_ADMIN_CLAVE"
+          [ -n "$CLAVE_PRUEBA" ] && echo "::add-mask::$CLAVE_PRUEBA"
+          node scripts/medir/humo-puertas.mjs
+      - name: Guardar capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: humo-puertas
+          path: .local/humo/
+          if-no-files-found: ignore
+          retention-days: 14
