@@ -9,7 +9,7 @@
 //   npm run e2e:cliente           (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, PLATAFORMA, GIMNASIO, capturar, chequear, entrar, entrarSocio, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, PLATAFORMA, GIMNASIO, capturar, chequear, entrar, entrarSocio, esperarAntiRobot, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { altaGimnasio } from "./alta-gimnasio.mjs";
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -141,6 +141,7 @@ try {
   await probar.waitFor({ timeout: 60000 });
   await probar.locator("input[name=nombre]").fill(`Prospecto ${s}`);
   await probar.locator("input[name=telefono]").fill(`000 9${s}9`);
+  await esperarAntiRobot(v);
   await probar.getByRole("button", { name: /Quiero probar/ }).click();
   await v.locator("[data-probar-listo]").waitFor({ timeout: 30000 });
   await d.goto(`${G}/panel/prospectos`);

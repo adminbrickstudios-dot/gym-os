@@ -60,8 +60,15 @@ jobs:
       - name: App levantada (solo con web pública)
         if: inputs.con_web
         run: scripts/local/levantar.sh
-      - name: Carga
+      - name: Carga realista (cada usuario mira cada pantalla de 3 a 10 segundos)
         run: |
+          mkdir -p .local
+          node scripts/medir/carga.mjs --url "$(scripts/db/local.sh url)" --sin-estricto \
+            --usuarios "${{ inputs.usuarios || '500' }}" --conexiones "${{ inputs.conexiones || '50' }}" --segundos "${{ inputs.segundos || '60' }}" \
+            --pausa-min 3000 --pausa-max 10000 --md .local/carga-realista.md --json .local/carga-realista.json | tee .local/carga-realista.log
+      - name: Carga de estrés (una pantalla nueva cada 0,2 a 0,8 s por usuario)
+        run: |
+          mkdir -p .local
           APP=""
           if [ "${{ inputs.con_web }}" = "true" ]; then APP="--app http://localhost:3123"; fi
           node scripts/medir/carga.mjs --url "$(scripts/db/local.sh url)" \
@@ -71,7 +78,7 @@ jobs:
         if: always()
         run: |
           mkdir -p .local
-          { echo "## Prueba de carga"; echo; cat .local/carga.md 2>/dev/null || echo "No se generó la tabla: mirá el log."; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Prueba de carga"; echo; cat .local/carga-realista.md 2>/dev/null; echo; cat .local/carga.md 2>/dev/null || echo "No se generó la tabla: mirá el log."; } >> "$GITHUB_STEP_SUMMARY"
       - name: Explain de las funciones con la base grande
         if: always()
         run: node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/explain-carga.md || true
@@ -81,6 +88,9 @@ jobs:
           name: carga
           path: |
             .local/carga.md
+            .local/carga-realista.md
+            .local/carga-realista.json
+            .local/carga-realista.log
             .local/carga.json
             .local/carga.log
             .local/explain-carga.md

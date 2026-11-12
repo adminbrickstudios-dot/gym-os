@@ -13,7 +13,8 @@
 //  4. Muestra p50 / p95 / p99 / máximo por pantalla, errores y pedidos por segundo. Con --estricto (por defecto) sale con 1 si algún p95 pasa
 //     el presupuesto (300 ms) o hay errores.
 // Se niega contra Supabase y contra cualquier base que no sea de la compu o de Actions.
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import http from "node:http";
 import pg from "pg";
 
@@ -25,6 +26,8 @@ const segundos = Number(arg("segundos", "60"));
 const app = arg("app", "");
 const estricto = !process.argv.includes("--sin-estricto");
 const PRESUPUESTO_P95 = Number(arg("presupuesto", "300"));
+// Pausa entre pantallas de cada usuario (ms). Por defecto 200 a 800: una prueba de estrés. Un dueño real mira cada pantalla varios segundos: --pausa-min 3000 --pausa-max 10000.
+const PAUSA_MIN = Number(arg("pausa-min", "200")), PAUSA_MAX = Number(arg("pausa-max", "800"));
 if (!url) { console.error("Falta --url o DB_PRUEBAS_URL"); process.exit(1); }
 {
   // Solo una base de esta compu o del runner de Actions (localhost / 127.0.0.1 / socket): cualquier otro host, incluido Supabase, se rechaza.
@@ -96,7 +99,7 @@ async function usuarioVirtual(v) {
       errores[nombre]++; mensajes.set(e.message.slice(0, 120), (mensajes.get(e.message.slice(0, 120)) ?? 0) + 1);
       try { await c?.query("rollback"); } catch { /* la conexión ya estaba rota */ }
     } finally { c?.release(); pedidos++; }
-    await pausa(azar(200, 800));
+    await pausa(azar(PAUSA_MIN, PAUSA_MAX));
   }
 }
 
@@ -140,6 +143,7 @@ const md = [
   ...(mensajes.size ? ["", "Errores distintos:", ...[...mensajes].map(([m, n]) => `- ${n} × ${m}`)] : []),
 ].join("\n");
 console.log(md);
+for (const o of [arg("md"), arg("json")]) if (o) mkdirSync(dirname(o), { recursive: true });
 if (arg("md")) writeFileSync(arg("md"), md + "\n");
 if (arg("json")) writeFileSync(arg("json"), JSON.stringify({ usuarios, gimnasios: totalGim, conexiones, segundos, filas }, null, 2));
 const pasan = filas.filter((r) => r.errores > 0 || r.p95 > PRESUPUESTO_P95);
