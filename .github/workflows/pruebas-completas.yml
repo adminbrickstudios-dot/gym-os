@@ -69,6 +69,13 @@ jobs:
         run: DB_PRUEBAS_URL="$(scripts/db/local.sh url)" npm run chequeos
       - name: El demo se siembra
         run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost
+      - name: El Gimnasio Prueba Mateo [demo] se siembra (F8.4), con 30 socios, y sembrarlo de nuevo no lo rehace
+        run: |
+          URL="$(scripts/db/local.sh url)"
+          node scripts/datos/sembrar-prueba-mateo.mjs --url "$URL" --dominio localhost | tee .prueba-mateo.txt
+          grep -q "30 socios" .prueba-mateo.txt
+          node scripts/datos/sembrar-prueba-mateo.mjs --url "$URL" --dominio localhost | grep -q "ya existe"
+          test "$(psql -Atc "select count(*) from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo-mateo'" "$URL" | tr -d '\015')" = "30"
 
   pantallas:
     name: Pantallas (e2e y barrido)
