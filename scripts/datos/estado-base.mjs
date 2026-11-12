@@ -8,7 +8,7 @@ const url = process.env.SUPABASE_DB_URL;
 if (!url) { console.error("Falta SUPABASE_DB_URL"); process.exit(1); }
 const db = new pg.Client({ connectionString: url });
 await db.connect();
-const q = async (sql) => (await db.query(sql)).rows;
+const q = async (sql, args) => (await db.query(sql, args)).rows;
 
 const [m] = await q(`select count(*)::int as n from supabase_migrations.schema_migrations`).catch(() => [{ n: "?" }]);
 const [a] = await q(`select count(*)::int as n from public.administradores_plataforma`);
@@ -34,5 +34,12 @@ const col = await q(`select 1 from information_schema.columns where table_schema
 if (col.length) {
   const fn = await q(`select g.slug = 'templegym1' as es_temple, c.funciones_nuevas as f from public.gimnasios g join public.configuracion_gimnasio c on c.gimnasio_id = g.id where not g.es_demo`);
   console.log(`Funciones nuevas prendidas en reales: ${fn.filter((x) => x.f.length).length} gimnasio(s); Temple Gym: ${JSON.stringify(fn.find((x) => x.es_temple)?.f ?? "sin fila")}`);
+  // Diagnóstico de /g/templegym1/hacete-socio: solo booleanos (nada de direcciones) de lo que ve la página con el host que le pasa el proxy.
+  const [t] = await q(`select g.id, (select d.host from public.dominios_gimnasio d where d.gimnasio_id = g.id order by (d.tipo = 'propio') desc, d.creado_en limit 1) as host from public.gimnasios g where g.slug = 'templegym1'`);
+  if (t) {
+    const h = t.host ?? "gym-os-pied.vercel.app";
+    const [r] = await q(`select public.alta_publica($1) as alta, public.landing_publica($1) as landing`, [h]);
+    console.log(`Temple Gym alta: tiene_host=${!!t.host} alta_publica_null=${r.alta === null} abierta=${r.alta?.abierta ?? "?"} landing_null=${r.landing === null} publicada=${r.landing?.publicada ?? "?"}`);
+  }
 } else console.log("Funciones nuevas: la columna todavía no existe en producción");
 await db.end();
