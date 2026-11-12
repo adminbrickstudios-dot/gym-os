@@ -64,8 +64,9 @@ begin
   if p_forzar_desde is not null or p_forzar_hasta is not null then
     if p_forzar_desde is null or p_forzar_hasta is null then raise exception 'Poné las dos fechas: desde y hasta.' using errcode = '22023'; end if;
     if p_forzar_desde < date '2000-01-01' then raise exception 'La fecha “desde” es imposible.' using errcode = '22023'; end if;
-    if p_forzar_desde > hoy then
-      raise exception 'La cobertura no puede empezar en el futuro: hoy es el %.', to_char(hoy, 'DD/MM/YYYY') using errcode = '22023';
+    -- "Hoy" es el de verdad (no el del momento del cobro): en una carga en el pasado el pago es de otro día y la cobertura puede empezar después de él.
+    if p_forzar_desde > privado.dia_local(now(), zona) then
+      raise exception 'La cobertura no puede empezar en el futuro: hoy es el %.', to_char(privado.dia_local(now(), zona), 'DD/MM/YYYY') using errcode = '22023';
     end if;
     if p_forzar_hasta < p_forzar_desde then raise exception 'El “hasta” no puede ser antes del “desde”.' using errcode = '22023'; end if;
     if p_forzar_hasta + 1 > (p_forzar_desde + interval '12 months')::date then
