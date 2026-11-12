@@ -43,6 +43,7 @@ const EJECUTABLES = {
     "public.lista_clase", "public.anular_asistencia",
     "public.estado_emergencia_puerta", "public.habilitar_emergencia_puerta", "public.activar_emergencia_puerta", "public.entradas_de_emergencia", "public.cerrar_emergencia_puerta", "public.historial_emergencias_puerta",
     "public.mi_sesion", "public.mi_seguridad", "public.ayudas_vistas", "public.marcar_ayuda", "public.apagar_ayudas", "public.reiniciar_ayudas", "public.panel_gimnasio", "public.guardar_accesos_rapidos", "public.panel_inicio",
+    "public.vuelto_efectivo_activo", "public.guardar_vuelto_efectivo",
     "public.buscar_socios", "public.ficha_socio", "public.guardar_socio", "public.planes_gimnasio", "public.guardar_plan",
     "public.programar_precio", "public.productos_gimnasio", "public.guardar_producto", "public.ingresos_del_dia",
     "public.configuracion_panel", "public.guardar_configuracion", "public.equipo_gimnasio", "public.guardar_equipo",

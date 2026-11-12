@@ -4,7 +4,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
 import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaCorta, formatearCelular, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { BorrarDatos, CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
@@ -219,7 +219,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <p className="titulo text-2xl mb-4"><Icono nombre="celular" /> Contacto</p>
             <dl className="space-y-3">
               {s.responsable_nombre && <Dato etiqueta={s.es_menor ? "Responsable (es menor)" : "Responsable"} valor={`${s.responsable_nombre} · ${s.responsable_telefono ?? ""}`} />}
-              <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono} />
+              <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono ? formatearCelular(s.telefono) : s.telefono} />
               <Dato etiqueta="Mail" valor={s.email} />
               <Dato etiqueta="DNI" valor={s.dni} />
               <Dato etiqueta="Emergencia" valor={s.contacto_emergencia_nombre ? `${s.contacto_emergencia_nombre} · ${s.contacto_emergencia_telefono ?? ""}` : null} />

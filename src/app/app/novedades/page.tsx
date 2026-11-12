@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { miSocio } from "@/lib/app/socio";
+import { fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MarcarLeidas } from "./Leidos";
@@ -24,7 +25,7 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     const zona = yo.zona!;
-    const cuando = (m: string | null) => (m ? new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m)) : null);
+    const cuando = (m: string | null) => (m ? fechaHoraHumana(m, zona) : null);
     return (
       <div className="space-y-6">
         <Link href={`/app${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>

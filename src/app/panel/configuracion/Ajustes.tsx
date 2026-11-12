@@ -12,6 +12,7 @@ import { PruebaGratisConfig } from "./PruebaGratisConfig";
 import { FotoSocioConfig } from "./FotoSocioConfig";
 import { AvisarSinBloquear } from "./AvisarSinBloquear";
 import { AutonomiaSocios } from "./AutonomiaSocios";
+import { VueltoConfig } from "./VueltoConfig";
 import { EsperaPlazo } from "./EsperaPlazo";
 import { ReglaCierres } from "./ReglaCierres";
 import { ReglasBeneficios, type ReglasBeneficiosDatos } from "./ReglasBeneficios";
@@ -103,6 +104,8 @@ const SECCIONES: [string, string, string, string][] = [
     "No hay pantalla de Personal trainer y el socio no ve los turnos en la app. Las sesiones ya reservadas se conservan."],
   ["rutinas", "Rutinas", "Armar ejercicios y rutinas y asignarlas a los socios.",
     "No hay pantalla de Rutinas en el panel ni en Ctrl+K. Las rutinas ya asignadas se conservan y el socio las sigue viendo en su app."],
+  ["eventos", "Eventos", "Seminarios y clases especiales con cupo y precio, en el panel, en tu página y en la app.",
+    "No hay pantalla de Eventos ni se ven en tu página, en la app ni en la ventana de la Entrada. Los eventos y sus anotados se conservan."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */
@@ -520,6 +523,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               <Interruptor etiqueta="Mercado Pago" ayuda="Cobrar con link o QR de Mercado Pago, que se acredita solo. Todavía no está disponible: lo vas a poder prender cuando conectemos tu cuenta." checked={false} disabled readOnly />
             </div>
           </Tarjeta>
+          <div data-opcion="vuelto-efectivo"><VueltoConfig puedeEditar={puedeEditar} /></div>
           <Tarjeta icono="banco" titulo="Transferencias" ancla="transferencias" ayuda="Lo que ve el socio para pagarte por transferencia.">
             {!c.medios_aceptados.includes("transferencia")
               ? <Mensaje tipo="info">Apagaste las transferencias: estos datos no se le muestran a nadie.</Mensaje>

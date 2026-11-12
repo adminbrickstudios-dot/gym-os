@@ -92,7 +92,7 @@ export type CajaCobro = {
 export type DatosCobro = {
   sedeId: string; zona: string; caja: CajaCobro;
   socio: { socio_id: string; nombre: string; numero: number | null; color: string; texto: string };
-  precios: PreciosVenta; ctx: ContextoCobro; puedeAnular: boolean; sinProductos: boolean;
+  precios: PreciosVenta; ctx: ContextoCobro; vueltoEfectivo: boolean; puedeAnular: boolean; sinProductos: boolean;
 };
 
 /** Mi caja de esta sede, de nuevo (después de un error de caja, o para refrescar lo que ofrece la hoja). */
@@ -112,16 +112,18 @@ export async function datosCobro(sedeId: string | null, socioId: string): Promis
     exigirSeccion(panel, "vender");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede } = sedeActiva(panel, sedeId ?? undefined);
-    const [precios, caja, ficha, ctx] = await Promise.all([
+    // Vuelto en efectivo: interruptor del dueño, apagado por defecto. Si no se puede leer, queda apagado (es solo una ayuda de pantalla).
+    const [precios, caja, ficha, ctx, vueltoEfectivo] = await Promise.all([
       rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
       rpc<CajaCobro>("caja_para_cobrar", { p_sede_id: sede.id }, { lectura: true }),
       rpc<Ficha>("ficha_socio", { p_socio_id: socioId }, { lectura: true }),
       rpc<ContextoCobro>("contexto_cobro", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
+      rpc<boolean>("vuelto_efectivo_activo", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true }).catch(() => false),
     ]);
     return { datos: {
       sedeId: sede.id, zona: panel.gimnasio.zona_horaria, caja,
       socio: { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), numero: ficha.socio.numero ?? null, color: ficha.acceso.color, texto: ficha.acceso.texto },
-      precios, ctx, puedeAnular: panel.yo.rol === "dueno" || panel.yo.rol === "encargado",
+      precios, ctx, vueltoEfectivo, puedeAnular: panel.yo.rol === "dueno" || panel.yo.rol === "encargado",
       sinProductos: panel.yo.rol === "recepcion" && !panel.permisos.recepcion_vende_productos,
     } };
   } catch (e) { return { error: (e as Error).message }; }
