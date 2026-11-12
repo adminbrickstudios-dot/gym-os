@@ -42,6 +42,7 @@ try {
   await campo.waitFor({ timeout: 30000 });
   await campo.fill(`${await campo.inputValue()}1`);
   await d.locator("[data-sin-guardar]").first().waitFor({ timeout: 10000 });
+  d.removeAllListeners("dialog");   // pagina() acepta todo solo: acá se mira el aviso y se contesta a mano
   let mensaje = "";
   d.once("dialog", async (x) => { mensaje = x.message(); await x.dismiss(); });
   await d.locator('aside a[href="/panel/socios"], nav a[href="/panel/socios"]').first().click();
