@@ -36,10 +36,11 @@ try {
   chequear(new URL(d.url()).pathname === "/panel", "cerrada con Esc no deja una entrada de más: el atrás vuelve a Inicio", `el atrás quedó en ${d.url()}`);
 
   // ── 2. Cambios sin guardar ──
-  await d.goto(`${G}/panel/configuracion`);
-  const campo = d.locator('fieldset[data-pestana-activa] input[type="text"]').first();
-  await campo.waitFor({ timeout: 60000 });
-  await campo.fill(`${await campo.inputValue()} z`);
+  await d.goto(`${G}/panel/configuracion?pestana=reglas`);
+  await d.locator('fieldset[data-pestana-activa="reglas"]').waitFor({ timeout: 60000 }); await d.waitForTimeout(800);
+  const campo = d.locator('fieldset[data-pestana-activa="reglas"] input[type="number"], fieldset[data-pestana-activa="reglas"] input[type="text"]').first();
+  await campo.waitFor({ timeout: 30000 });
+  await campo.fill(`${await campo.inputValue()}1`);
   await d.locator("[data-sin-guardar]").first().waitFor({ timeout: 10000 });
   let mensaje = "";
   d.once("dialog", async (x) => { mensaje = x.message(); await x.dismiss(); });
