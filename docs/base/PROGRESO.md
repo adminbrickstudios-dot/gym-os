@@ -1,5 +1,11 @@
 # PROGRESO de Base
 
+## DÓNDE QUEDÉ (12/11, 17:30 hora del gimnasio)
+- **Verificado en producción tras el PR #16:** (1) Temple Gym tiene **0 funciones nuevas prendidas** (Actions → Base de datos → estado, corrida 43297648610): lo de la fase N está apagado. (2) `https://gym-os-pied.vercel.app/g/templegym1/hacete-socio` abre la página de alta de Temple Gym con su marca (200, se queda en esa dirección). **Hoy dice "Hoy no te podés anotar desde acá"** porque el registro por QR de Temple Gym está apagado (`altas_online`): Mateo lo prende en Configuración → Registro de socios cuando quiera que el QR impreso ande. No lo toqué (es un dato real). (3) Cargar un socio con alta y pago de hace 20 días y la caja por medio de pago, en el demo de producción y dentro de una transacción que revierte (acción `humo-pasado`, corrida 43300000883): 1 pago, 1 cobertura, la caja del turno no se mueve, efectivo y transferencia salen separados, no quedó nada.
+- Ramas `carril/*`: ninguna tiene trabajo sin integrar.
+- No hay un dueño con cuenta en los demos de producción: el humo con sesión real (`humo-produccion.yml`) sigue ⛔ por `BRIK_ADMIN_MAIL` / `BRIK_ADMIN_CLAVE`.
+- En curso: fase D (D3, D4) y fase R (ESTADO-GENERAL.md) con 2 ayudantes.
+
 ## PUBLICACIÓN LISTA, ESPERANDO TU COPIA (11/11, noche): rama `publicar/base-hoy`
 Prevuelo en verde (Actions 43143923167): 22 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo, términos y restaurar cambios, lista del super admin rápida, exportar con filtros, funciones nuevas apagadas). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
 Como Temple Gym ya cobra, **no aplico sin copia cifrada**. Pasos para vos, en orden:
