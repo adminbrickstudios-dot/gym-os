@@ -55,10 +55,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+// N4: el link puede llevar de dónde viene la persona (?o=instagram | qr | whatsapp | recomendado). Solo esos cuatro; cualquier otro texto no cuenta.
+const ORIGENES = ["instagram", "qr", "whatsapp", "recomendado"];
+
+export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string; o?: string }> }) {
   const d = await datos();
   if (!d) notFound();
-  const { plan } = await searchParams;
+  const { plan, o } = await searchParams;
+  const origen = ORIGENES.includes(String(o ?? "").toLowerCase()) ? String(o).toLowerCase() : "";
   const raiz = await raizDelGimnasio();
   const wa = linkWhatsapp(d.contacto.whatsapp, "Hola! Quiero hacerme socio.");
   return (
@@ -73,7 +77,7 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
           <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y creá tu cuenta. Con tu mail y tu contraseña entrás a tu perfil.</p>
         </div>
         {d.abierta && d.planes?.length
-          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} />
+          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} origen={origen} />
           : (
             // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.
             <div className="tarjeta p-6 space-y-4" data-alta-cerrada>

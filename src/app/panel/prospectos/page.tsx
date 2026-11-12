@@ -5,6 +5,8 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol } from "@/lib/panel/servidor";
 import { cargarInteresados } from "./Interesados";
 import { Prospectos } from "./Prospectos";
+import { OrigenAltas } from "./OrigenAltas";
+import { cargarOrigenAltas } from "./origen-altas";
 
 export const metadata: Metadata = { title: "Interesados" };
 
@@ -17,10 +19,12 @@ export default async function PaginaProspectos() {
     const sociosPrendido = !panel.secciones_apagadas.includes("socios");
     if (sociosPrendido) redirect("/panel/socios?vista=interesados");
     const { lista, pagina } = await cargarInteresados(panel);
+    const origenAltas = await cargarOrigenAltas(panel);
     return (
       <>
         <Encabezado icono="hoja" titulo="Interesados" bajada="Los que quieren probar: de la página, del mostrador o recomendados. Escribiles rápido; el que prueba en la semana se queda." />
         <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas={false} />
+        {origenAltas && <OrigenAltas datos={origenAltas} zona={panel.gimnasio.zona_horaria} />}
       </>
     );
   });

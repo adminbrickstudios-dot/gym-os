@@ -12,6 +12,7 @@ export const PESTANAS = [
   { clave: "clases", texto: "Clases", emoji: "calendario" },
   { clave: "secciones", texto: "Secciones", emoji: "grilla" },
   { clave: "direccion", texto: "Dirección", emoji: "enlace" },
+  { clave: "funciones", texto: "Funciones nuevas", emoji: "estrella" },
   { clave: "cambios", texto: "Cambios", emoji: "reloj" },
 ] as const;
 export type ClavePestana = (typeof PESTANAS)[number]["clave"];

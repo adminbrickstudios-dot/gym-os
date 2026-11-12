@@ -91,6 +91,13 @@ const EJECUTABLES = {
     "public.aviso_clave_socio", "public.marcar_aviso_clave_visto",
     // H3b: el socio lee su propio DNI (permiso denegado = error); vincular_cuenta_socio y socio_para_reclamar son solo del servidor
     "public.mi_dni",
+    // Fase N (11/11): funciones nuevas apagadas por gimnasio (N5) y las que cuelgan de ellas. Cada una pide el rol del equipo que corresponde
+    // y falla con un texto claro si la función no está prendida. acreditar_cobro_debito y actualizar_adhesion_debito son solo del servidor.
+    "public.funciones_nuevas_panel", "public.cambiar_funcion_nueva", "public.funciones_nuevas_activas", "public.que_hay_de_nuevo",   // N5, N6
+    "public.anotar_origen_alta", "public.origen_altas_reporte", "public.origen_alta_socio",   // N4 (anotar_origen_alta: el propio socio)
+    "public.resumen_noche",   // N3
+    "public.apto_config", "public.guardar_apto_config", "public.aptos_por_vencer",   // N2
+    "public.debito_estado", "public.registrar_adhesion_debito", "public.cancelar_adhesion_debito",   // N1
   ]),
 };
 

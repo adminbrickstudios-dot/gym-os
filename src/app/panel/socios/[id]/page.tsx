@@ -67,6 +67,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
     // VD-46G: si el plan familiar está prendido, quién es el titular de su grupo (la tarjeta Familia lo muestra).
     const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
+    // N4: el canal por el que se anotó (solo si el gimnasio prendió la función; si no, la base devuelve null).
+    const pCanal: Promise<string | null> = panel.yo.rol !== "profe" ? rpc<string | null>("origen_alta_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
     const [f, planes, asistencia, ne, foto, fotoEstado, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -225,7 +227,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               <Dato etiqueta="Emergencia" valor={s.contacto_emergencia_nombre ? `${s.contacto_emergencia_nombre} · ${s.contacto_emergencia_telefono ?? ""}` : null} />
             </dl>
             {!s.telefono && !s.email && !s.dni && !s.responsable_nombre && <p className="texto-suave">Sin datos de contacto.</p>}
-            <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} /></div>
+            <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} canal={await pCanal} /></div>
           </div>
           {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
           <Familia socioId={s.id} familia={familia} plan={planFamiliar} puedeArmar={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} />
