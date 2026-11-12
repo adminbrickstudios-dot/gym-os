@@ -77,7 +77,7 @@ export default async function ResumenDueno({ searchParams }: { searchParams: Pro
         <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8" data-resumen-numeros>
           {numeros.map((n) => (
             <div key={n.etiqueta} className="flex flex-col-reverse">
-              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} /></span> {n.etiqueta}{n.comp && <span className="block text-sm texto-tenue">{n.comp}</span>}</dt>
+              <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} sistema /></span> {n.etiqueta}{n.comp && <span className="block text-sm texto-tenue">{n.comp}</span>}</dt>
               <dd className="numero text-4xl sm:text-5xl">{n.valor}</dd>
             </div>
           ))}

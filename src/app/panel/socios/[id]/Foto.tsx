@@ -84,12 +84,12 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
       )}
       {abierta && (
         <div className="fixed inset-0 z-50 bg-black/60 grid place-items-center p-4" role="dialog" aria-modal="true" aria-label="Foto del socio" onClick={cerrar}>
-          <div className="tarjeta p-5 w-full max-w-md space-y-4 relative" onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={cerrar} aria-label="Cerrar" className="absolute top-2 right-2 grid place-items-center size-9 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)]"><Icono nombre="cerrar" /></button>
+          <div className="tarjeta p-5 w-full max-w-md max-h-[92dvh] overflow-y-auto space-y-4 relative" onClick={(e) => e.stopPropagation()}>
+            <button type="button" autoFocus onClick={cerrar} aria-label="Cerrar" className="absolute top-2 right-2 grid place-items-center size-9 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)]"><Icono nombre="cerrar" /></button>
             <p className="titulo text-2xl"><Icono nombre="camara" /> Foto del socio</p>
             <p className="text-sm texto-tenue">Para reconocerlo en la puerta. Se guarda privada: solo la ve el equipo.</p>
             {camara === "lista" || camara === "pidiendo"
-              ? <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" data-video />
+              ? <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-[var(--radio)] bg-black" data-video />
               : <p className="texto-suave">No hay cámara disponible (o no diste permiso). Elegí una foto.</p>}
             {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
             <div className="flex flex-wrap gap-2">

@@ -44,11 +44,15 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
       rpc<Omit<ReglasBeneficiosDatos, "gimnasio_id">>("reglas_beneficios", { p_gimnasio_id: panel.gimnasio.id }),   // VD-46U
       searchParams,
     ]);
+    // F9.2 (EDIT-D04): "Restaurar este valor" en Cambios. Solo el dueño y solo si la función está prendida (la base devuelve lista vacía si no).
+    const restaurables = panel.yo.rol === "dueno" ? await rpc<{ id: string; campo: string; cuando: string }[]>("cambios_restaurables", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }) : [];
+    const idDe = new Map(restaurables.map((r) => [`${r.campo}|${r.cuando}`, r.id]));
+    const cambiosConId: Cambio[] = cambios.map((c) => ({ ...c, restaurar_id: idDe.get(`${c.campo}|${c.cuando}`) }));
     const inicial: ClavePestana = PESTANAS.find((p) => p.clave === pestana)?.clave ?? "gimnasio";
     return (
       <>
         <Encabezado icono="ajustes" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
-        <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambios} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
+        <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambiosConId} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
           direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos}
           linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} />
       </>

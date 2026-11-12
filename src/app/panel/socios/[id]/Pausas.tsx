@@ -13,7 +13,7 @@ export type DatosPausas = { maximo: number; usados: number; anio: number; hoy: s
 
 const MOTIVOS: [string, string][] = [["viaje", "Viaje"], ["trabajo", "Trabajo"], ["estudio", "Estudio"], ["otro", "Otro"]];
 const MOTIVO: Record<string, string> = { ...Object.fromEntries(MOTIVOS), personal: "Personal", economico: "Económico" };
-const ESTADO: Record<Pausa["estado"], string> = { programada: "Programada", en_curso: "En pausa", terminada: "✓ Terminó", anulada: "Anulada" };
+const ESTADO: Record<Pausa["estado"], string> = { programada: "Programada", en_curso: "En pausa", terminada: "Terminó", anulada: "Anulada" };
 const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(2, 4)}`;
 const sumar = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
 const dias = (desde: string, vuelve: string) => Math.round((Date.parse(vuelve) - Date.parse(desde)) / 864e5);
@@ -57,7 +57,7 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
               <p className="texto-suave">Del {dia(x.desde)}, vuelve el {dia(x.vuelve)} ({dias(x.desde, x.vuelve)} días) · {MOTIVO[x.categoria] ?? x.categoria}{x.nota ? ` · ${x.nota}` : ""}</p>
               {p.puede_dar
                 ? <div className="flex flex-wrap gap-2">
-                    <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => resolverPedidoPausa(socioId, x.id, true), "Pausa aprobada.")}>✓ Aprobar</button>
+                    <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => resolverPedidoPausa(socioId, x.id, true), "Pausa aprobada.")}><Icono nombre="ok" /> Aprobar</button>
                     <button type="button" className="boton" disabled={ocupado} onClick={() => correr(() => resolverPedidoPausa(socioId, x.id, false), "Pedido rechazado.")}>Rechazar</button>
                   </div>
                 : <p className="text-sm texto-tenue">Esperando que la apruebe el dueño o el encargado.</p>}
@@ -119,7 +119,7 @@ export function Pausas({ socioId, datos: p }: { socioId: string; datos: DatosPau
         <button type="button" className="boton" onClick={() => { setAbierto(true); setAviso(null); }}>{p.puede_dar ? "Pausar la membresía" : "Pedir una pausa"}</button>
       ))}
       {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
-      {aviso && <p role="status" className="pildora pildora-verde whitespace-normal">✓ {aviso}</p>}
+      {aviso && <p role="status" className="pildora pildora-verde whitespace-normal"><Icono nombre="ok" /> {aviso}</p>}
     </div>
   );
 }

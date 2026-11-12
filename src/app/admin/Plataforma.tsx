@@ -14,7 +14,7 @@ export type DatosPlataforma = {
   linkPago: string | null;
 };
 const cuando = (iso: string) => new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(iso));
-const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{m}</p> : null);
+const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
 /** SA-7, SA-8 y SA-9: estado de la plataforma, uso por gimnasio, aviso de mantenimiento, link de pago y funciones a prueba. */
 export function Plataforma({ d }: { d: DatosPlataforma }) {

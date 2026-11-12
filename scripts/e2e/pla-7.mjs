@@ -24,7 +24,8 @@ async function guardar() {
 }
 async function vencida() {
   await d.goto(`${G}/panel/socios?q=${encodeURIComponent("Testigo Vencida")}`);
-  const id = (await d.locator('main ul a[href^="/panel/socios/"]').first().getAttribute("href")).split("/").pop();
+  // La búsqueda trae también a "Testigo Pack Vencido": se elige a la persona por su nombre entero.
+  const id = (await d.locator('main ul a[href^="/panel/socios/"]', { hasText: /Testigo Vencida/ }).first().getAttribute("href")).split("/").pop();
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
 }

@@ -65,7 +65,7 @@ try {
   }
   ok("➕ Agregar actividad: “🧪 Prueba e2e”");
   const form = d.locator("form", { hasText: "Agregar a la grilla" });
-  await form.locator("select").first().selectOption({ label: "🧪 Prueba e2e" });
+  await form.locator("select").first().selectOption({ label: "Prueba e2e" });
   await form.locator("select").nth(1).selectOption("7");
   await form.locator('input[type="time"]').fill("23:15");
   await form.getByRole("button", { name: /Agregar/ }).click();

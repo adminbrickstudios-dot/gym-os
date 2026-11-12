@@ -21,7 +21,7 @@ export function NovedadesDuenos({ novedades }: { novedades: NovedadPlataforma[] 
       <p className="titulo text-2xl"><Icono nombre="campana" /> Novedades para los dueños</p>
       <p className="texto-suave">Aparecen en el Inicio de cada dueño hasta que la cierra.</p>
       {novedades.length > 0 && <ul className="space-y-2">{novedades.map((n) => (
-        <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--borde)] px-4 py-3">
+        <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-[var(--radio)] border border-[var(--borde)] px-4 py-3">
           <span className="flex-1 min-w-0"><span className="block font-semibold">{n.titulo}</span><span className="block text-sm texto-suave">{n.texto} · le llega a {n.alcanza ?? "todos"} · la cerraron {n.cerraron}{n.para_plan || n.para_ciudad || n.para_modulo ? ` · solo ${[n.para_plan && `plan ${n.para_plan}`, n.para_ciudad, n.para_modulo && `con ${n.para_modulo}`].filter(Boolean).join(", ")}` : ""}</span></span>
           <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
             onClick={() => empezar(async () => { const r = await retirarNovedadPlataforma(n.id); setError(r.error ?? null); })}>Retirar</button>

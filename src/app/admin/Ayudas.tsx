@@ -20,7 +20,7 @@ export function Ayudas({ pedidos }: { pedidos: PedidoAyuda[] }) {
   return (
     <section className="space-y-3" data-ayudas>
       <p className="titulo-grupo"><Icono nombre="ayuda" /> Pedidos de ayuda <span className="pildora pildora-amarillo align-middle" data-ayudas-cantidad>{pedidos.length}</span></p>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
       <div className="space-y-2">
         {pedidos.map((p) => (
           <div key={p.id} className="tarjeta p-4 space-y-2" data-ayuda>

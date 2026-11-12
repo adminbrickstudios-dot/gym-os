@@ -1,5 +1,28 @@
 # PROGRESO de Base
 
+## PUBLICACIÓN LISTA, ESPERANDO TU COPIA (11/11, noche): rama `publicar/base-hoy`
+Prevuelo en verde (Actions 43143923167): 22 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo, términos y restaurar cambios, lista del super admin rápida, exportar con filtros, funciones nuevas apagadas). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
+Como Temple Gym ya cobra, **no aplico sin copia cifrada**. Pasos para vos, en orden:
+1. GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret: `COPIA_CLAVE` = una frase de 16+ caracteres al azar (guardala también en tu gestor de contraseñas: sin ella la copia no se abre).
+2. Actions → **Copias** → Run workflow (prueba la copia y que restaura en una base de prueba). Tiene que dar verde.
+3. Actions → **Base de datos** → Run workflow, rama `publicar/base-hoy`, acción `aplicar` (hace la copia, el prevuelo, aplica y corre los chequeos). Si no hay COPIA_CLAVE se frena solo.
+4. Abrí el PR de `publicar/base-hoy` a `main`, mergealo y esperá el deploy de Vercel en verde.
+5. Mirá (sin crear nada) `https://gym-os-pied.vercel.app/g/templegym1/hacete-socio`: tiene que abrir el formulario de Temple Gym.
+6. Actions → **Humo producción** (necesita `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`).
+Si cargás `COPIA_CLAVE`, el loop hace los pasos 2 a 6 solo.
+
+## RESUMEN PARA MATEO (11/11, tarde)
+- Publicado en producción: fase P y C1, C2, aviso al socio (PR #15). **Desde que Temple Gym cobra con Base, no aplico más migraciones sin copia cifrada previa**: el botón `aplicar` de Actions ahora hace la copia y se frena solo si falta `COPIA_CLAVE`.
+- Listo para publicar apenas haya copia: recepción (inactividad), velocidad (130100-130400, filtros en lote), C9 (QR), C10 (cargar pasado), F1.2/F1.7, F1.4/F1.5, C3-C7 (guías y carteles). Esperando a los ayudantes de H1 (caja), H3/H3b (camino del socio y QR directo) y H7 (lo roto de PULIDO) para sumarlos.
+- Ensayo antes de producción (N0): un segundo proyecto de Supabase llamado "ensayo": ⛔ lo crea Mateo (5 minutos); hasta entonces se prueba en el demo y en la base local.
+
+## LO QUE NECESITO DE MATEO (secretos de GitHub: hoy solo existe `SUPABASE_DB_URL`)
+- **`COPIA_CLAVE` (urgente, destraba todo lo que toca la base):** Settings → Secrets and variables → Actions → Secrets → New repository secret, nombre `COPIA_CLAVE`, valor una frase de 16+ caracteres al azar; guardala también en tu gestor de contraseñas. Sin ella no puedo aplicar nada. Después corré Actions → Copias para probar copia y restauración.
+- `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` → destraba el humo en producción (U0.3).
+- `COPIA_CLAVE` (una frase larga, 16+ letras; guardala vos también, sin ella las copias no se abren) → destraba C8, corré Actions → Copias.
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` → destraban medir producción (F0.1) y los usuarios demo.
+- `SUPABASE_SERVICE_ROLE_KEY` en Vercel (U1/U0.1).
+
 ## PASOS PARA MATEO (velocidad y accesos; F0.6)
 1. **Clave de servicio (urgente, destraba el alta de dueños):** Supabase → tu proyecto de Gym OS → Project Settings → API → copiá la clave **service_role** → Vercel → el proyecto → Settings → Environment Variables → `SUPABASE_SERVICE_ROLE_KEY` (Production) → pegala → Redeploy. Tiene que ser de ESTE proyecto (el mismo de `NEXT_PUBLIC_SUPABASE_URL`), no la anon ni la de otro proyecto. En /admin, "Estado de la plataforma" la prueba creando y borrando un usuario.
 2. **Claves asimétricas (hace que el proxy no viaje a Auth en cada pedido):** Supabase → Project Settings → JWT Keys → "Migrate" a claves asimétricas (ECC/RSA). Puede cerrar las sesiones abiertas una vez. Después `getClaims()` verifica sin ir a Auth.
@@ -7,7 +30,25 @@
 4. **Planes (los pagás vos):** Supabase Pro (máquina más grande que Free) y, en Vercel, revisar que Fluid Compute esté prendido (Settings → Functions). Con y sin, el agente mide y anota la diferencia en `VELOCIDAD.md`.
 5. **Dominio:** `DOMINIO.md` (pasos exactos).
 
-## DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
+## PUBLICADO 11/11 10:45 — fase P y lo hecho de la fase C (PR #15)
+- 11 migraciones aplicadas desde Actions (prevuelo 43030658511, aplicar 43030901243, chequeos en verde); PR #15 mergeado y deploy de Vercel en verde. Incluye: plataforma y alta (P1 a P7), landing y editor (P8, P8b), clave nueva sin mails (C1), importar socios (C2), aviso de clave al socio, plantillas, escala y papelera del super admin.
+- Antes de aplicar, el estado dijo 3 gimnasios reales con 2 socios en total; se aplicó igual por orden de Mateo (migraciones aditivas).
+- Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
+- Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
+
+## DÓNDE QUEDÉ (11/11, noche)
+- ✅ hoy: H1, H2/C10, H3, H6, F1.9, F1.5, F1.6, F2.x, F3.1, F7.1, F9.1, C1-C10, U5, P1-P8b. 🟡: H3b, H4, H5, H7, F3.2. ⛔: C8/H5 (COPIA_CLAVE), N0 (proyecto ensayo), F0.1 (secretos).
+- Publicación lista en `publicar/base-hoy` (prevuelo 43123213163, 11 migraciones); **no se aplica sin COPIA_CLAVE** (pasos arriba).
+- En curso (5 ayudantes con Actions en su rama): `carril/z-iconos-textos` (Z2-Z4), `carril/z-diseno-falta` (Z5-Z7), `carril/f4-f5` (DETALLES-70 y FALTANTES), `carril/h7-pruebas` (exportar con filtros, pruebas de H7/H3b, CLS en celular), `carril/f9` (F9.2-F9.8). Al terminar: mergear a base, e2e con `solo`, cerrar filas.
+- Falta después: F0.3/F0.5, F3.2, N1-N8 (apagado para Temple Gym), F8 (cierre: botones + barrido, simulación completa, humo, PRUEBA-DUENO.md).
+
+## (anterior) DÓNDE QUEDÉ (11/11, 12:00)
+- ✅ cerrados hoy: U5, P1, P4-P8b, C1-C7, F1.2, F2.1-F2.9, F7.1, F9.1. Publicado: fase P y C1/C2/aviso (PR #15). Sin publicar: migraciones 20261111120000 (recepción) y 130100-130400 (velocidad) y lo que sigan los ayudantes.
+- En curso (ayudantes en worktrees): `carril/a-filtros` (filtros_socios a menos de 300 ms), `carril/c-qr-alta` (C9), `carril/c-pasado` (C10, plata: dueño y encargado), `carril/d-f19` (F1.9: vd-6, base-7b, velocidad-a y los 15 viejos, con Actions), `carril/d-f3` (F3).
+- Rojos conocidos en Actions: `base-7b` (paso 4b), `velocidad-a` (ingreso optimista), `vd-6` (paso 6). Los trabaja `carril/d-f19`.
+- Pendientes tras eso: F4, F5, F6, F9.2-F9.8, F0.1 (⛔ secretos), F1.6 (filtros), F8 y publicar cada fase.
+
+## (anterior) DÓNDE QUEDÉ (11/11, 09:00 — vuelta nueva)
 - U5, P1, P4 a P7, P8 y P8b en ✅ (Actions 43015505501 y 43020787407). Chequeos de la base relanzados en 43022741600 (lista blanca y paletas del editor ya arreglados). Ayudantes en la fase C: `carril/c-clave` (C1) y `carril/c-importar` (C2); al terminar: integrar, correr su e2e (`clave-nueva`, `importar-300`) en Actions. Yo sigo con C3 a C8. Bloqueados por Mateo: U0.1/U0.3/U1 en producción (secretos `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE` y clave de servicio en Vercel). Hay migraciones nuevas sin aplicar (20261111090000 y las que traigan los carriles): se aplican en la próxima publicación.
 
 ## (anterior) DÓNDE QUEDÉ (11/11, mediodía)

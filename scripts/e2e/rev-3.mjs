@@ -8,7 +8,7 @@
 //   npm run e2e:rev-3            (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, entrarSocio, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, entrarSocio, esperarCobro, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -48,8 +48,11 @@ try {
   await form.locator('input[name="dni"]').fill(DNI);
   await form.locator('input[name="telefono"]').fill(TEL);
   await form.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
+  await form.locator('input[name="email"]').fill(`rev${s}@ejemplo.invalid`);
+  await form.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   await v.locator('[data-alta-lista="transferencia"]').waitFor({ timeout: 30000 });
   const [{ id: socio }] = (await db.query(`select s.id from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo' and s.dni = $1`, [DNI])).rows;

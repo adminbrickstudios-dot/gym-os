@@ -34,7 +34,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
         <p className="font-semibold" data-mp-plata-directa>La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK.</p>
       </div>
       {estado.conectado ? (
-        <p className="pildora pildora-verde !text-base">✓ Conectado{estado.modo === "prueba" ? " en modo prueba" : ""}{estado.por ? ` por ${estado.por}` : ""}</p>
+        <p className="pildora pildora-verde !text-base"><Icono nombre="ok" /> Conectado{estado.modo === "prueba" ? " en modo prueba" : ""}{estado.por ? ` por ${estado.por}` : ""}</p>
       ) : <p className="texto-suave">No conectado.</p>}
       {puedeEditar && !abierto && (
         <div className="flex flex-wrap gap-2">
@@ -68,7 +68,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
           <p className="text-sm texto-tenue">Se guardan cifrados y no se vuelven a mostrar.</p>
         </form>
       )}
-      {msj.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}>✓ {msj.ok}</p>}
+      {msj.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {msj.ok}</p>}
       {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </section>
   );

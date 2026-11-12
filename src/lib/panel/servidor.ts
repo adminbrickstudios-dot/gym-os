@@ -2,6 +2,7 @@ import "server-only";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { guardaLoPublico } from "@/lib/panel/lo-publico";
 import { crearClienteServidor, gimnasioActual } from "@/lib/supabase/servidor";
 import type { Rol } from "@/lib/panel/secciones";
 import type { Abono } from "@/components/panel/Marco";
@@ -30,7 +31,7 @@ export async function rpc<T>(nombre: string, args?: Record<string, unknown>, opc
     // F0.1: cada viaje a la base queda en el log de Vercel con su nombre y sus ms (sin datos ni argumentos).
     console.log(`[rpc] ${nombre} ${Math.round(performance.now() - t0)}ms${error ? " error" : ""}`);
     if (!error) {
-      if (!opciones.lectura && GUARDA_LO_PUBLICO.test(nombre)) invalidarLoPublico();
+      if (!opciones.lectura && guardaLoPublico(nombre)) invalidarLoPublico();
       return data as T;
     }
     if (esDemora(error)) {
@@ -46,7 +47,6 @@ export const TIEMPO_MAXIMO_MS = 10_000;
 // VD-47: la landing, la marca, los planes y los horarios públicos se guardan en caché (lib/landing.ts,
 // etiqueta "landing"). Cualquier escritura que cambie eso la invalida al instante. Sobra invalidar de más
 // (cuesta una consulta); falta invalidar nunca.
-const GUARDA_LO_PUBLICO = /^(guardar|publicar|programar|aplicar|anular_precio|anular_cierre|crear_cierre|confirmar_imagen|quitar_imagen|ordenar_fotos|sumar_sede|configurar|archivar|reordenar|activar|desactivar|apagar|prender|editar)_/;
 function invalidarLoPublico() {
   try { revalidateTag("landing", { expire: 0 }); } catch { /* llamado durante el render: no se puede, vence solo en 60 s */ }
 }
@@ -132,16 +132,16 @@ export const contextoPanel = cache(async (): Promise<PanelGimnasio> => {
 
 /** Corta si el rol no puede ver la pantalla: error claro, no una lista vacía. */
 export function exigirRol(panel: PanelGimnasio, roles: Rol[]) {
-  if (!roles.includes(panel.yo.rol)) throw new ErrorDatos("Tu rol no tiene acceso a esta pantalla", "42501", 403);
+  if (!roles.includes(panel.yo.rol)) throw new ErrorDatos(`Tu rol (${panel.yo.rol}) no tiene acceso a esta pantalla. Si lo necesitás, pedíselo al dueño.`, "42501", 403);
 }
 
 /** Una sección que el gimnasio apagó no se ve en ningún panel, ni entrando por la dirección. */
 export function exigirSeccion(panel: PanelGimnasio, clave: string) {
   if (panel.secciones_apagadas.includes(clave)) {
     // Gastos se apaga solo para quien no tiene el permiso (VD-41b): se dice que es un permiso, no que el gimnasio la apagó.
-    if (clave === "gastos" && panel.yo.rol !== "dueno") throw new ErrorDatos("No tenés permiso para ver los gastos. Lo da el dueño desde Configuración.", "42501", 403);
+    if (clave === "gastos" && panel.yo.rol !== "dueno") throw new ErrorDatos("No tenés permiso para ver los gastos. Pedíselo al dueño.", "42501", 403);
     // Igual con Mensajes para la recepción (VD-38): la saca del menú el permiso que da el dueño, no que el gimnasio la haya apagado.
-    if (clave === "mensajes" && panel.yo.rol === "recepcion") throw new ErrorDatos("No tenés permiso para ver los mensajes de los socios. Lo da el dueño desde Configuración.", "42501", 403);
+    if (clave === "mensajes" && panel.yo.rol === "recepcion") throw new ErrorDatos("No tenés permiso para ver los mensajes de los socios. Pedíselo al dueño.", "42501", 403);
     throw new ErrorDatos("Esta sección está apagada en este gimnasio. La prende el dueño desde Configuración.", "apagada", 404);
   }
 }

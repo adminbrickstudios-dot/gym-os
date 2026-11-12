@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // F1.2 · El socio entra con mail y contraseña (es lo primero que se ve), "Olvidé mi contraseña" funciona de punta a punta
-// y los errores tienen nombre. ESCRITO, NO EJECUTADO por quien lo escribió (los ayudantes no levantan la app).
+// y los errores tienen nombre. Falló en Actions en el botón Salir (CSP form-action frenaba la redirección de /salir, ver LECCIONES);
+// los pasos del código por mail y de la contraseña andaban.
 //   node scripts/e2e/olvide-socio.mjs     (con scripts/local/levantar.sh corriendo)
 //
 //  1. Mail y contraseña es la forma que se ve primero en /ingresar?modo=socio.
@@ -69,6 +70,12 @@ try {
   await s.goto(`${G}/ingresar?modo=socio`);
   await s.locator("[data-olvide]").click();
   await s.waitForURL(/\/ingresar\/recuperar/, { timeout: 30000 });
+  // Sin SMTP (CI y local) la pantalla promete lo que sí hay: pedirle una clave nueva a la recepción (C1, ver clave-nueva.mjs);
+  // el formulario del código sigue andando contra supabase-local, que deja los códigos en .local/codigos.json.
+  if (process.env.SMTP_CONFIGURADO !== "1") {
+    await s.locator("[data-sin-smtp]").waitFor({ timeout: 30000 });
+    chequear(/Pedile una clave nueva a la recepción/.test(await s.locator("[data-sin-smtp]").innerText()), "sin SMTP, “Olvidé mi contraseña” manda a pedir una clave nueva a la recepción", "sin SMTP no aparece el aviso de la clave nueva");
+  }
   await s.fill("[data-paso-mail] input[name=email]", MAIL);
   await s.getByRole("button", { name: /Mandame el código/ }).click();
   await ponerCodigo(s, MAIL);

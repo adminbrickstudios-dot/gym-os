@@ -8,6 +8,7 @@ import { traerCampana, traerPreferencias, type ItemCampana } from "./datos";
 import { MarcarTodo, PreferenciasAvisos } from "./Controles";
 import { MarcarLeidos } from "./Leidos";
 import { Icono } from "@/components/ui/Icono";
+import { cargarNuevas, Nuevas } from "./nuevas";
 
 export const metadata: Metadata = { title: "Novedades" };
 
@@ -19,6 +20,7 @@ export default async function Novedades() {
   return intentar(async () => {
     const { panel, items, sinLeer } = await traerCampana();
     const prefs = await traerPreferencias();
+    const nuevas = await cargarNuevas(panel);   // N3 / N2 / N6: solo lo que este gimnasio prendió
     const zona = panel.gimnasio.zona_horaria;
     const dia = (m: string) => new Intl.DateTimeFormat("en-CA", { timeZone: zona, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(m));
     const hoy = dia(new Date().toISOString());
@@ -55,6 +57,7 @@ export default async function Novedades() {
     return (
       <>
         <Encabezado icono="campana" titulo="Novedades" bajada={sinLeer ? `${sinLeer === 1 ? "1 cosa nueva" : `${sinLeer} cosas nuevas`} desde la última vez. Tocá cada una para ir a resolverla.` : "Lo que pasó en el gimnasio y te toca ver."} />
+        <Nuevas datos={nuevas} />
         <MarcarLeidos claves={items.filter((i) => !i.leido).map((i) => i.clave)} />
         <MarcarTodo sinLeer={sinLeer} />
         {items.length === 0 ? <Vacio icono="estrella" titulo="Nada nuevo">Cuando llegue un comprobante, alguien pida algo o pase algo con la plata, aparece acá.</Vacio> : (

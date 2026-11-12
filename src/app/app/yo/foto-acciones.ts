@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { sinDetalle } from "@/lib/errores-humanos";
 import { rpc } from "@/lib/panel/servidor";
 import { clienteServicio } from "@/lib/supabase/servicio";
 
@@ -16,10 +17,10 @@ export async function subirMiFoto(socioId: string, form: FormData): Promise<{ er
     const ruta = await rpc<string>("preparar_foto_propia", { p_socio_id: socioId });
     const sb = clienteServicio().storage.from("fotos_socios");
     const { error } = await sb.upload(ruta, Buffer.from(await archivo.arrayBuffer()), { contentType: "image/jpeg", upsert: false });
-    if (error) return { error: `No se pudo subir la foto: ${error.message}` };
+    if (error) return { error: sinDetalle("No se pudo subir la foto. Probá de nuevo.", error) };
     const anterior = await rpc<string | null>("confirmar_foto_propia", { p_socio_id: socioId, p_ruta: ruta });
     if (anterior) await sb.remove([anterior]);
     revalidatePath("/app/yo");
     return {};
-  } catch (e) { return { error: (e as Error).message }; }
+  } catch (e) { return { error: sinDetalle("No se pudo guardar la foto. Probá de nuevo.", e) }; }
 }

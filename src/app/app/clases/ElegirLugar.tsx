@@ -18,7 +18,7 @@ export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
       {!abierto && mio != null ? (
         <p className="flex items-center gap-2">
           <span className="pildora"><Icono nombre="ubicacion" /> {mapa.etiqueta} {mio}</span>
-          <button type="button" className="underline text-sm" onClick={() => setAbierto(true)}>Cambiar</button>
+          <button type="button" className="underline text-sm min-h-11 px-2" onClick={() => setAbierto(true)}>Cambiar</button>
         </p>
       ) : (
         <>
@@ -34,7 +34,7 @@ export function ElegirLugar({ mapa }: { mapa: MapaLugares }) {
                     setError(null);
                     const r = await elegirLugar(mapa.reserva_id!, n);
                     if (r.error) setError(r.error); else { setMio(n); setAbierto(false); }
-                  })}>{roto ? "✕" : n}</button>
+                  })}>{roto ? <Icono nombre="cerrar" /> : n}</button>
               );
             })}
           </div>

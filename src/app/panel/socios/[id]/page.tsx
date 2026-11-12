@@ -4,7 +4,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
 import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaCorta, formatearCelular, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { BorrarDatos, CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
@@ -67,6 +67,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       ? rpc<FilaHistorial[]>("historial_mensajes_socio", { p_socio_id: id }, { lectura: true }).catch(() => null) : Promise.resolve(null);
     // VD-46G: si el plan familiar está prendido, quién es el titular de su grupo (la tarjeta Familia lo muestra).
     const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
+    // N4: el canal por el que se anotó (solo si el gimnasio prendió la función; si no, la base devuelve null).
+    const pCanal: Promise<string | null> = panel.yo.rol !== "profe" ? rpc<string | null>("origen_alta_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
     const [f, planes, asistencia, ne, foto, fotoEstado, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -121,7 +123,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
               version={foto ? foto.slice(-36, -4) : null} subidaPorSocio={!!fotoEstado?.subida_por_el_socio} puedeConfirmar={panel.yo.rol !== "profe"} />
             <div className="min-w-0">
-              <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
+              <h1 className="titular text-[28px]">{s.nombre} {s.apellido}</h1>
               <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · el responsable usa la app" : " · usa la app") : ""}</p>
             </div>
           </div>
@@ -130,6 +132,23 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
           </div>
+          {/* DISENO: las acciones (Cobrar, Vender, Editar…) van arriba, abajo del estado; no después de diez bloques. */}
+          {!s.dado_de_baja_en && (
+            <div className="flex flex-wrap gap-2 mt-4" data-ficha-acciones>
+              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
+              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
+              {!v.puede || v.color === "amarillo"
+                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal"><Icono nombre="plata" /> Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
+                : <>
+                    <BotonCobrar socioId={s.id} origen="ficha" className="boton"><Icono nombre="plata" /> Cobrar</BotonCobrar>
+                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton"><Icono nombre="carrito" /> Vender</LinkPanel>
+                  </>}
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
+              <Link href={`/panel/socios/${s.id}/editar`} className="boton"><Icono nombre="lapiz" /> Editar</Link>
+              <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
+              <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
+            </div>
+          )}
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (
             <section className="mt-6 space-y-3" data-documentos-ficha={documentos.pendientes.length}>
@@ -169,29 +188,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           )}
           {primerMes && !s.dado_de_baja_en && (
             <p className="pildora mt-6 !text-base" data-primer-mes={primerMes.dia}>
-              <Icono nombre="hoja" /> Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? "✓" : ""}
+              <Icono nombre="hoja" /> Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? <> <Icono nombre="ok" /></> : ""}
             </p>
           )}
           {riesgo[0] && (
             <p className={`mensaje ${riesgo[0].nivel === "alto" ? "mensaje-error" : "mensaje-aviso"} mt-6`} data-riesgo-ficha={riesgo[0].nivel}>
               <Icono nombre="objetivo" /> <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>
             </p>
-          )}
-          {!s.dado_de_baja_en && (
-            <div className="flex flex-wrap gap-2 mt-6" data-ficha-acciones>
-              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
-              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
-              {!v.puede || v.color === "amarillo"
-                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal"><Icono nombre="plata" /> Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
-                : <>
-                    <BotonCobrar socioId={s.id} origen="ficha" className="boton"><Icono nombre="plata" /> Cobrar</BotonCobrar>
-                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton"><Icono nombre="carrito" /> Vender</LinkPanel>
-                  </>}
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
-              <Link href={`/panel/socios/${s.id}/editar`} className="boton"><Icono nombre="lapiz" /> Editar</Link>
-              <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
-              <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
-            </div>
           )}
         </header>
 
@@ -218,13 +221,13 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <p className="titulo text-2xl mb-4"><Icono nombre="celular" /> Contacto</p>
             <dl className="space-y-3">
               {s.responsable_nombre && <Dato etiqueta={s.es_menor ? "Responsable (es menor)" : "Responsable"} valor={`${s.responsable_nombre} · ${s.responsable_telefono ?? ""}`} />}
-              <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono} />
+              <Dato etiqueta={s.es_menor ? "WhatsApp del menor" : "WhatsApp"} valor={s.telefono ? formatearCelular(s.telefono) : s.telefono} />
               <Dato etiqueta="Mail" valor={s.email} />
               <Dato etiqueta="DNI" valor={s.dni} />
               <Dato etiqueta="Emergencia" valor={s.contacto_emergencia_nombre ? `${s.contacto_emergencia_nombre} · ${s.contacto_emergencia_telefono ?? ""}` : null} />
             </dl>
             {!s.telefono && !s.email && !s.dni && !s.responsable_nombre && <p className="texto-suave">Sin datos de contacto.</p>}
-            <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} /></div>
+            <div className="mt-5 pt-4 border-t border-[var(--borde)]"><Origen socioId={s.id} datos={origen} zona={zona} canal={await pCanal} /></div>
           </div>
           {!s.dado_de_baja_en && <Pausas socioId={s.id} datos={pausas} />}
           <Familia socioId={s.id} familia={familia} plan={planFamiliar} puedeArmar={panel.yo.rol === "dueno" || panel.yo.rol === "encargado"} />

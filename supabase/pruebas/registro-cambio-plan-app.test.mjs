@@ -93,7 +93,7 @@ test("registro: sin fecha de nacimiento o siendo menor no se anota; el que se an
   const sinFecha = { ...DATOS }; delete sinFecha.fecha_nacimiento;
   await t.falla(() => anon(() => alta(sinFecha, viejo)), /fecha de nacimiento/);
   const menor = new Date(); menor.setFullYear(menor.getFullYear() - 15);
-  await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: menor.toISOString().slice(0, 10) }, viejo)), /menos de 18/);
+  await t.falla(() => anon(() => alta({ ...DATOS, fecha_nacimiento: menor.toISOString().slice(0, 10) }, viejo)), /menor de 18/);
   assert.equal((await t.q(`select count(*)::int n from public.socios where gimnasio_id = $1 and dni = '33444555'`, [t.g]))[0].n, 0, "ni el menor ni el que no puso fecha quedaron anotados");
   const r = await anon(() => alta(DATOS, viejo));
   assert.equal(r.ya_socio, false);

@@ -18,6 +18,16 @@ export async function guardarConfiguracion(datos: Record<string, unknown>, versi
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** F9.2 (EDIT-D04): vuelve un dato de Configuración al valor que tenía antes. Solo el dueño; la base decide qué datos se pueden restaurar. */
+export async function restaurarCambio(cambioId: string): Promise<{ error?: string; aviso?: string }> {
+  const panel = await contextoPanel();
+  try {
+    const r = await rpc<{ etiqueta: string; valor: string }>("restaurar_cambio_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_cambio_id: cambioId });
+    revalidatePath("/panel", "layout");
+    return { aviso: `Listo: ${r.etiqueta} volvió a “${r.valor}”.` };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /**
  * Pestaña Gimnasio: nombre, contacto y sedes, todo junto o nada. Devuelve lo
  * guardado tal como quedó en la base (teléfonos e Instagram normalizados).

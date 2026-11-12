@@ -66,7 +66,7 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
       const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase();
       const path = `${gimnasioId}/${socioId}/${crypto.randomUUID()}.${ext}`;
       const { error: e } = await crearClienteNavegador().storage.from("comprobantes").upload(path, f, { contentType: f.type });
-      if (e) { setError(`No se pudo subir: ${e.message}`); return; }
+      if (e) { setError("No se pudo subir el comprobante. Revisá tu conexión y probá de nuevo."); return; }
       const r = await informarCompraApp(socioId, vista.plan_id, path, claveDe(vista.plan_id, "transferencia"));
       if (r.error) { setError(r.error); return; }
       setListo(vista.cambia_plan ? "Listo: el gimnasio revisa tu comprobante y, apenas lo aprueba, tu plan cambia." : "Listo: el gimnasio revisa tu comprobante y te habilita.");
@@ -147,7 +147,7 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
                         <p><span className="numero text-3xl">{formatearPesos(vista.precio_transferencia)}</span> <span className="texto-suave">por transferencia</span></p>
                         {[["Alias", o.transferencia.alias], ["CBU / CVU", o.transferencia.cbu]].filter(([, v]) => v).map(([k, v]) => (
                           <button key={k} type="button" onClick={() => copiar(v!)} className="boton w-full !justify-between">
-                            <span className="text-left"><span className="block text-xs texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
+                            <span className="text-left"><span className="block text-[13px] texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
                             <span className="text-sm texto-suave">{copiado === v ? <><Icono nombre="ok" /> Copiado</> : <><Icono nombre="lista" /> Copiar</>}</span>
                           </button>
                         ))}

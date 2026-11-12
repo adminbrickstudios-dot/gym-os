@@ -37,7 +37,7 @@ function Pasos({ siguiente, emailInicial, otraVez }: { siguiente: string | null;
         </label>
         {nueva.error && <Mensaje tipo="error">{nueva.error}</Mensaje>}
         <button type="submit" disabled={guardando || !!nueva.destino} className="boton boton-principal text-lg w-full">
-          {guardando || nueva.destino ? "Guardando…" : "✅ Guardar y entrar"}
+          {guardando || nueva.destino ? "Guardando…" : "Guardar y entrar"}
         </button>
         <button type="button" onClick={otraVez} className="underline underline-offset-4 texto-suave cursor-pointer min-h-11 w-full text-sm">Empezar de nuevo</button>
       </form>
@@ -49,7 +49,7 @@ function Pasos({ siguiente, emailInicial, otraVez }: { siguiente: string | null;
         accion={verificar} ocultos={{ email }}
         intro={<>Si <strong className="text-[var(--texto)]">{email}</strong> tiene una cuenta, te llegó un código. Mirá también en spam.</>}
         error={verif.error ?? nueva.error ?? pedido.error} intento={verif} envio={pedido}
-        entrando={verificando} textoBoton="✅ Seguir"
+        entrando={verificando} textoBoton="Seguir"
         reenviar={() => startTransition(() => { const f = new FormData(); f.set("email", email); pedir(f); })}
         reenviando={pidiendo} cambiar={otraVez}
       />
@@ -63,7 +63,7 @@ function Pasos({ siguiente, emailInicial, otraVez }: { siguiente: string | null;
       </label>
       <DesafioTurnstile />
       {pedido.error && <Mensaje tipo="error">{pedido.error}</Mensaje>}
-      <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">{pidiendo ? "Mandando…" : "✉️ Mandame el código"}</button>
+      <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">{pidiendo ? "Mandando…" : "Mandame el código"}</button>
     </form>
   );
 }

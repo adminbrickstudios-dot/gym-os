@@ -13,7 +13,7 @@ import { AgregarPersona, Direcciones } from "./Formularios";
 import { AbonoGimnasio, type EstadoAbono, type PlanBrik } from "../Abono";
 import { Historial, type Cambio } from "@/app/panel/configuracion/Historial";
 import { Notas, type NotaBrik } from "./Notas";
-import { CambiarDueno, CambiarSlug, LinksPorRol, Modulos } from "./FichaExtra";
+import { CambiarDueno, CambiarSlug, FuncionesNuevas, LinksPorRol, Modulos } from "./FichaExtra";
 import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
@@ -74,6 +74,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="No se pudo abrir">{e.message}</Aviso></main>;
     throw e;
   }
+  const funciones = await rpc<{ restaurar_cambios: boolean }>("funciones_del_gimnasio", { p_gimnasio_id: id });
   const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
   const wa = fila ? whatsappDueno(fila.dueno_telefono, `Hola ${fila.dueno ?? ""}, te escribo de BRIK por ${g.nombre}.`) : null;
   const yoSoporte = g.equipo.find((p) => p.soy_yo && p.es_soporte && p.activo);
@@ -81,8 +82,8 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   return (
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-10">
       <header className="space-y-4" id="entrar">
-        <Link href="/admin" className="texto-suave">← Gimnasios</Link>
-        <h1 className="titular text-6xl">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
+        <Link href="/admin/gimnasios" className="texto-suave inline-flex min-h-11 items-center">← Gimnasios</Link>
+        <h1 className="titular text-[28px]">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
         <div className="flex flex-wrap gap-2">
           <BotonEntrar gimnasioId={g.gimnasio_id} />
           <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver su página</a>
@@ -225,6 +226,11 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       <section className="space-y-3" data-ficha-modulos>
         <p className="titulo-grupo">Módulos</p>
         <Modulos key={extra.secciones_apagadas.join(",")} gimnasioId={g.gimnasio_id} validas={extra.secciones_validas} apagadas={extra.secciones_apagadas} />
+      </section>
+
+      <section className="space-y-3" data-ficha-funciones>
+        <p className="titulo-grupo">Funciones nuevas</p>
+        <FuncionesNuevas key={String(funciones.restaurar_cambios)} gimnasioId={g.gimnasio_id} restaurarCambios={funciones.restaurar_cambios} />
       </section>
 
       <section className="space-y-3" data-ficha-integraciones>

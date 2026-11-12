@@ -71,7 +71,7 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
     // REV-1a: a los que dejaron pasar sin poder entrar, se les recuerda hoy y mañana (sale solo cuando pagan).
     const bloquePrometieron = prometieron.length > 0 && (
       <section className="mb-8 space-y-3" aria-labelledby="prometieron" data-prometieron={prometieron.length}>
-        <h2 id="prometieron" className="titulo text-2xl"><Icono nombre="usuarios" /> Le prometieron pagar</h2>
+        <h2 id="prometieron" className="titulo text-2xl"><Icono nombre="usuarios" /> Prometieron pagar</h2>
         <ul className="space-y-2">
           {prometieron.map((p) => (
             <FilaContacto key={p.socio_id} socioId={p.socio_id} nombre={p.socio} texto={p.texto ?? ""} lista="vencido"
@@ -86,7 +86,7 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
       <>
         <Encabezado icono="reloj" titulo="Vencen hoy" bajada={filas.length
           ? `${filas.length === 1 ? "A 1 socio se le termina" : `A ${filas.length} socios se les termina`} la cuota hoy. Un mensaje ahora evita que se vayan; si vienen, cobrales desde acá.`
-          : "Hoy es su último día cubierto. Un mensaje ahora evita que se vayan."} />
+          : "Hoy no se le termina la cuota a nadie. Mirá Por vencer para adelantarte."} />
         <p className="texto-suave -mt-2 mb-3" data-modo-cobro={pest.modo.renovacion}>{pest.modo.texto}</p>
         <p className="mb-4 text-lg" data-totales>
           {gestion && pest.hoy.plata != null
@@ -98,7 +98,7 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
         <nav className="pestanas mb-6" aria-label="Pestañas de cobro" data-pestanas>
           {PESTANAS.filter((p) => p.clave !== "cobrar" || puedeCobrar).map((p) => (
             <Link key={p.clave} href={ir(p.clave)} data-transicion className="pestana" data-pestana={p.clave} aria-current={p.clave === activa ? "page" : undefined}>
-              <Icono nombre={p.emoji} /> {p.titulo} <span className="texto-tenue" data-cuenta>{cuantos(p.clave)}</span>
+              <Icono nombre={p.emoji} sistema /> {p.titulo} <span className="texto-tenue" data-cuenta>{cuantos(p.clave)}</span>
             </Link>
           ))}
         </nav>

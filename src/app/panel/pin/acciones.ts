@@ -1,7 +1,8 @@
 "use server";
 import { cookies } from "next/headers";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
-import { COOKIE_OPERADOR } from "@/lib/supabase/servidor";
+import { COOKIE_OPERADOR, crearClienteServidor } from "@/lib/supabase/servidor";
+import { COOKIE_GIMNASIO } from "@/lib/cookie-gimnasio";
 
 const COOKIE_NOMBRE = "gymos_operador_nombre";
 const DURA = 12 * 3600 - 300;   // un poco menos que el token: nunca se manda uno vencido
@@ -29,6 +30,23 @@ export async function salirDelPin(): Promise<{ ir: string }> {
   almacen.delete(COOKIE_OPERADOR);
   almacen.delete(COOKIE_NOMBRE);
   return { ir: "/panel/pin" };
+}
+
+/**
+ * C6: la compu de la recepción estuvo sin uso el tiempo que puso el gimnasio. Primero suelta a quien atiende (vuelve a pedir el PIN, la sesión
+ * del gimnasio sigue); si ya no había nadie atendiendo, cierra la sesión del gimnasio. Nunca da permisos: solo los quita.
+ */
+export async function cerrarPorInactividad(): Promise<{ ir: string; cerroSesion: boolean }> {
+  const almacen = await cookies();
+  if (almacen.get(COOKIE_OPERADOR)) {
+    almacen.delete(COOKIE_OPERADOR);
+    almacen.delete(COOKIE_NOMBRE);
+    return { ir: "/panel/pin", cerroSesion: false };
+  }
+  const supabase = await crearClienteServidor();
+  await supabase.auth.signOut();
+  almacen.delete(COOKIE_GIMNASIO);
+  return { ir: "/ingresar?siguiente=/panel&inactividad=1", cerroSesion: true };
 }
 
 export async function guardarMiPin(pin: string): Promise<{ error?: string }> {

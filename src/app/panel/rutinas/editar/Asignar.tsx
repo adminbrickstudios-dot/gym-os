@@ -28,7 +28,7 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
     if (r.error) { setError(r.error); return; }
     setHechos((h) => [...h, ...lista]);
     setElegidos((e) => Object.fromEntries(Object.entries(e).filter(([id]) => !lista.includes(id))));
-    setAviso(`✓ Asignada a ${r.asignados} ${r.asignados === 1 ? "socio" : "socios"}${r.omitidos ? ` (${r.omitidos} no se pudo)` : ""}.`);
+    setAviso(`Asignada a ${r.asignados} ${r.asignados === 1 ? "socio" : "socios"}${r.omitidos ? ` (${r.omitidos} no se pudo)` : ""}.`);
   });
   return (
     <section className="tarjeta p-4 sm:p-5 space-y-3" data-asignar-rutina>
@@ -49,7 +49,7 @@ export function AsignarRutina({ rutinaId }: { rutinaId: string }) {
             <PuntoEstado color={s.color} />
             <span className="flex-1 min-w-0 truncate font-semibold">{s.nombre}</span>
             <Link href={`/panel/rutinas/socio?id=${s.socio_id}`} className="boton-texto texto-suave text-sm" aria-label={`Progreso de ${s.nombre}`}><Icono nombre="trofeo" /> Progreso</Link>
-            {hechos.includes(s.socio_id) ? <span className="pildora pildora-verde">✓ Asignada</span> : (
+            {hechos.includes(s.socio_id) ? <span className="pildora pildora-verde"><Icono nombre="ok" /> Asignada</span> : (
               <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => asignar([s.socio_id])}>Asignar</button>
             )}
           </li>

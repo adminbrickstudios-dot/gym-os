@@ -24,7 +24,7 @@ export default async function Registro({ searchParams }: { searchParams: Promise
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-6">
       <header className="space-y-2">
         <Link href="/admin/seguridad" className="texto-suave">← Seguridad</Link>
-        <h1 className="titular text-5xl">Registro de BRIK</h1>
+        <h1 className="titular text-[28px]">Registro de BRIK</h1>
         <p className="texto-suave">Lo que hizo cada usuario de BRIK. Solo se agregan entradas: nadie las edita ni las borra.</p>
       </header>
       {filas.length === 0 && <p className="texto-suave">Todavía no hay nada registrado.</p>}

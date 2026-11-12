@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MEDIO } from "@/lib/caja";
-import { formatearPesos } from "@/lib/formato";
+import { fechaHoraHumana, fechaHumana, formatearPesos } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
@@ -12,7 +12,7 @@ type Historial = {
   pagos: { fecha: string; monto: number; medio: string; estado: string; detalle: string | null; motivo: string | null; venta_id?: string; recibo?: boolean }[];
   entradas: { momento: string; tipo: "entrada" | "clase"; actividad: string | null }[];
 };
-const ESTADO: Record<string, string> = { aprobado: "ok", pendiente: "revisando", rechazado: "rechazado" };
+const ESTADO: Record<string, string> = { aprobado: "Aprobado", pendiente: "En revisión", rechazado: "Rechazado", devuelto: "Devuelto" };
 
 /** APP-3: lo que pagó y cuándo vino. */
 export default async function HistorialSocio({ searchParams }: { searchParams: Promise<{ socio?: string }> }) {
@@ -23,11 +23,11 @@ export default async function HistorialSocio({ searchParams }: { searchParams: P
     const h = await rpc<Historial>("mi_historial", { p_socio_id: yo.socio.socio_id });
     const zona = yo.zona!;
     const q = yo.socios.length > 1 ? `?socio=${yo.socio.socio_id}` : "";
-    const dia = (m: string, conHora = false) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", month: "numeric", ...(conHora ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" as const } : {}) }).format(new Date(m));
+    const dia = (m: string, conHora = false) => (conHora ? fechaHoraHumana(m, zona) : fechaHumana(m, zona));
     return (
       <div className="space-y-8">
-        <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl"><Icono nombre="recibo" /> Mi historial</h1>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]"><Icono nombre="recibo" /> Mi historial</h1>
         <section aria-labelledby="pagos" data-historial-pagos>
           <h2 id="pagos" className="titulo text-2xl mb-3">Pagos</h2>
           {h.pagos.length === 0 ? <p className="texto-suave">Todavía no hay pagos.</p> : (

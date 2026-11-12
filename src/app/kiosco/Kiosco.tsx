@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
-import QRCode from "qrcode";
 import { Icono } from "@/components/ui/Icono";
+import { SIN_CONEXION, valorDelCampo } from "./campo";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "entrar"];
 
@@ -32,7 +32,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
     const traer = async () => {
       const r = await qrDeLaTablet();
       if (!vivo) return;
-      if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await QRCode.toString(r.codigo, { type: "svg", margin: 1 })); }
+      if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await (await import("qrcode")).default.toString(r.codigo, { type: "svg", margin: 1 })); }
       t = setTimeout(traer, r.vence_en ? Math.max(1000, Date.parse(r.vence_en) - Date.now() - 1500) : 5000);
     };
     void traer();
@@ -49,7 +49,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   return (
     <div className="tarjeta p-5 space-y-3" data-qr-pared={qr?.codigo ?? ""}>
       <p className="text-xl font-semibold"><Icono nombre="celular" /> O escaneá este QR con tu app</p>
-      <div className="mx-auto w-56 aspect-square bg-white rounded-2xl p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
+      <div className="mx-auto w-56 aspect-square bg-white rounded-[var(--radio)] p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
     </div>
   );
 }
@@ -82,14 +82,16 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
 
   const mandar = useCallback((codigo: string) => empezar(async () => {
     setCamara(false);
-    const x = await entrarEnKiosco(codigo);
+    let x: Resultado;
+    try { x = await entrarEnKiosco(codigo); } catch { x = { error: SIN_CONEXION }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   }), []);
   // VD-48 · "Me voy": con el DNI (o el QR que escribió el lector) en el campo.
   const irme = (codigo: string) => empezar(async () => {
     setCamara(false);
-    const x = await salirEnKiosco(codigo);
+    let x: Resultado;
+    try { x = await salirEnKiosco(codigo); } catch { x = { error: SIN_CONEXION, salida: true }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && !!x.registrada);
   });
@@ -102,7 +104,8 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
   }, [r]);
 
   const conHabitual = (fin: string) => empezar(async () => {
-    const x = await entrarHabitual(elegido!.socio_id, fin);
+    let x: Resultado;
+    try { x = await entrarHabitual(elegido!.socio_id, fin); } catch { x = { error: SIN_CONEXION }; }
     setR(x); setDni(""); setElegido(null);
     sonar(!x.error && (x.resultado === "entro" || x.resultado === "entro_modo_aviso"));
   });
@@ -145,7 +148,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       {emergencia && (
         <div role="alert" data-kiosco-emergencia className="rounded-[var(--radio-grande)] p-4 border-2 text-2xl font-bold"
           style={{ background: `color-mix(in oklab, ${colorVar("rojo")}, var(--fondo) 75%)`, borderColor: colorVar("rojo") }}>
-          <Icono nombre="alerta" /> EMERGENCIA activa: pasá por la puerta
+          <Icono nombre="alerta" /> Emergencia: pasá por la puerta, la recepción te abre
         </div>
       )}
       <div>
@@ -162,10 +165,11 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       )}
       {elegido && <button type="button" className="boton-texto texto-suave" onClick={() => { setElegido(null); setDni(""); }}>← No soy {elegido.nombre}</button>}
       <form onSubmit={(e) => { e.preventDefault(); if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6 || /^GYMOS1\./.test(dni)) mandar(dni); }}>
-        <input ref={campo} value={dni} onChange={(e) => setDni(!elegido && e.target.value.startsWith("GYMOS1.") ? e.target.value : e.target.value.replace(/\D/g, "").slice(0, largo))}
+        <input ref={campo} value={dni} onChange={(e) => setDni(valorDelCampo(e.target.value, !!elegido, largo))}
           inputMode="numeric" autoComplete="off" aria-label={elegido ? "Últimos 3 números de tu DNI" : "Tu DNI"} placeholder={elegido ? "···" : "Tu DNI"}
           className="campo !min-h-20 !text-4xl text-center tracking-widest numero" />
       </form>
+      {ocupado && <p className="texto-suave text-xl" role="status" data-kiosco-buscando>Buscando…</p>}
       <div className="grid grid-cols-3 gap-3" aria-label="Teclado">
         {TECLAS.map((k) => (
           <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "entrar" && (elegido ? dni.length !== 3 : dni.length < 6))}

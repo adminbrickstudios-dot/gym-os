@@ -6,14 +6,16 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { propsMarca } from "@/lib/marca";
 import { linkWhatsapp } from "@/lib/landing-textos";
-import { traerLanding, type Marca, type PlanPublico } from "@/lib/landing";
+import { traerLanding, urlMarca, type Marca, type PlanPublico } from "@/lib/landing";
 import { FormAlta } from "./FormAlta";
 import type { Transferencia } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
+import { urlDeHost } from "@/lib/urls";
 
 export type DatosAlta = {
   abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
-  mostrar_precios?: boolean; planes?: PlanPublico[]; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
+  mostrar_precios?: boolean; planes?: PlanPublico[]; plan_sugerido?: string | null; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
 };
 
 async function datos(): Promise<DatosAlta | null> {
@@ -36,35 +38,52 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const nombre = landing?.marca.nombre ?? null;
+  const titulo = nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio";
+  // SEO: toda página pública lleva su descripción.
+  const descripcion = nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.";
+  // Al compartir el link por WhatsApp: la misma imagen y el mismo ícono que la página del gimnasio (la foto de portada, o /og con su nombre y sus colores).
+  const origen = host ? urlDeHost(host, "/og") : "/og";
+  const foto = landing?.publicada && landing.portada.foto_path ? urlMarca(landing.portada.foto_path) : null;
+  const imagen = foto ?? origen;
+  const icono = landing ? urlMarca(landing.marca.favicon_path ?? landing.marca.logo_path) : null;
   return {
-    title: { absolute: nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio" },
-    // SEO: toda página pública lleva su descripción.
-    description: nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.",
+    title: { absolute: titulo },
+    description: descripcion,
+    icons: icono ? { icon: icono, apple: icono } : { icon: "/icono", apple: "/icono" },
+    openGraph: { type: "website", title: titulo, description: descripcion, siteName: nombre ?? "Base", locale: "es_AR", images: [{ url: imagen, alt: nombre ?? "Base" }] },
+    twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
   };
 }
 
-export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+// N4: el link puede llevar de dónde viene la persona (?o=instagram | qr | whatsapp | recomendado). Solo esos cuatro; cualquier otro texto no cuenta.
+const ORIGENES = ["instagram", "qr", "whatsapp", "recomendado"];
+
+export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string; o?: string }> }) {
   const d = await datos();
   if (!d) notFound();
-  const { plan } = await searchParams;
+  const { plan, o } = await searchParams;
+  const origen = ORIGENES.includes(String(o ?? "").toLowerCase()) ? String(o).toLowerCase() : "";
+  const raiz = await raizDelGimnasio();
   const wa = linkWhatsapp(d.contacto.whatsapp, "Hola! Quiero hacerme socio.");
   return (
     <div {...propsMarca(d.marca)} className="min-h-dvh">
       <header className="mx-auto max-w-3xl px-4 h-16 flex items-center justify-between gap-3">
-        <Link href="/" className="titulo text-xl truncate">← {d.marca.nombre}</Link>
-        <a href="/ingresar?modo=socio" className="boton"><Icono nombre="pesa" /> Soy socio</a>
+        <Link href={raiz} className="titulo text-xl truncate">← {d.marca.nombre}</Link>
+        <a href="/ingresar?modo=socio" className="boton"><Icono nombre="llave" /> Ya soy socio, entrar</a>
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 space-y-8">
         <div>
-          <h1 className="titular text-5xl sm:text-6xl"><Icono nombre="pesa" /> Quiero ser socio</h1>
-          <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y empezá a entrenar.</p>
+          <h1 className="titular text-5xl sm:text-6xl">Quiero ser socio</h1>
+          <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y creá tu cuenta. Con tu mail y tu contraseña entrás a tu perfil.</p>
         </div>
-        {d.abierta && d.planes?.length && d.reglamento
-          ? <FormAlta datos={d} planInicial={plan ?? null} />
+        {d.abierta && d.planes?.length
+          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} origen={origen} />
           : (
+            // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.
             <div className="tarjeta p-6 space-y-4" data-alta-cerrada>
-              <p className="text-lg">Por ahora el alta se hace en el gimnasio o por WhatsApp.</p>
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal"><Icono nombre="mensaje" /> Consultanos por WhatsApp</a>}
+              <p className="text-lg">Hoy no te podés anotar desde acá.</p>
+              <p className="texto-suave">{wa ? "Escribinos por WhatsApp o pasá por el gimnasio y te anotamos." : "Pasá por el gimnasio y te anotamos."}</p>
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal" data-whatsapp-gimnasio><Icono nombre="mensaje" /> Consultanos por WhatsApp</a>}
             </div>
           )}
       </main>

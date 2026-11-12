@@ -4,19 +4,21 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { colorVar, PuntoEstado } from "@/components/panel/Estado";
 import { formatearPesos } from "@/lib/formato";
 import { leerConfigVisita, type RegistrarSalida } from "./ventana-acciones";
 import { anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, registrarEntrada, registrarSalida, terminarPausa, veredicto, type ResultadoSalida, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type Veredicto } from "./acciones";
 import { FormDejarPasar } from "@/components/panel/FormDejarPasar";
 import { Camara } from "./CamaraDinamica";
+import { crearDetectorLector, esLecturaRepetida } from "./lector";
 import { CartelEmergencia, useEmergencia } from "@/components/panel/CartelEmergencia";
 import type { EmergenciaActiva } from "./emergencia-tipos";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { Icono } from "@/components/ui/Icono";
 
-const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 /** Un sonido por color, para no tener que mirar: agudo y corto si entra, grave y doble si no. */
 function sonar(color: string) {
@@ -38,15 +40,17 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null }: {
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null, textoInicial = "" }: {
   sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null; emergenciaInicial?: EmergenciaActiva | null;
+  /** VD-29B: lo que llegó en ?q= (por ejemplo "entrada 12345678" desde Ctrl+K): el campo arranca con eso y busca. */
+  textoInicial?: string;
 }) {
   // VD-46M: el cartel rojo mientras la puerta está en emergencia (lo pregunta a la base cada 30 s).
   const emergencia = useEmergencia(sedeId, true, emergenciaInicial);
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
-  const [texto, setTexto] = useState("");
+  const [texto, setTexto] = useState(textoInicial);
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);
@@ -79,11 +83,19 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     if (socioInicial && !abrioInicial.current) { abrioInicial.current = true; elegir(socioInicial); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Una búsqueda vieja no pisa a la nueva: cada respuesta se descarta si lo escrito ya cambió. `listaPara` dice para qué texto es la lista que se ve.
+  const [listaPara, setListaPara] = useState("");
+  const textoVivo = useRef(texto);
+  useEffect(() => { textoVivo.current = texto; }, [texto]);
   useEffect(() => {
-    if (texto.trim().length < 2 || ES_QR.test(texto.trim())) { setSocios([]); return; }
+    const q = texto.trim();
+    if (q.length < 2 || ES_QR.test(q)) { setSocios([]); setListaPara(""); return; }
     const t = setTimeout(async () => {
-      const r = await buscarSociosRapido(texto.trim());
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(q)); } catch { if (textoVivo.current.trim() === q) { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); setListaPara(q); } return; }
+      if (textoVivo.current.trim() !== q) return;
       setSocios(r.socios ?? []);
+      setListaPara(q);
       setError(r.error ?? null);
     }, 150);
     return () => clearTimeout(t);
@@ -97,7 +109,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   });
   // QR (cámara o lector USB): si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
   // QR (cámara o lector) o llavero: si puede entrar, se anota solo; si no, queda el veredicto con el porqué.
-  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "qr_socio" | "nfc") => {
+  const directo = useCallback(async (q: { socio?: { socio_id: string; nombre: string; numero: number } | null; error?: string }, forma: "recepcion" | "qr_socio" | "nfc") => {
     if (q.error || !q.socio) { setError(q.error ?? "No se pudo leer"); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
     const s: ResultadoSocio = { ...q.socio, color: "gris", texto: "", puede: false, dado_de_baja: false };
     const r = await veredicto(s.socio_id, sedeId);
@@ -124,6 +136,31 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     setTexto(""); setHecho(null); setForzando(false);
     await directo(l, "nfc");
   });
+  // C5 · Lector USB: el código llegó de corrido y terminó en Enter. Busca por QR, credencial (llavero) o DNI; el veredicto lo da la base.
+  // Si no encuentra a nadie suena el error, el campo queda vacío y con el foco (la próxima lectura no se pega a esta). El mismo código dos veces seguidas es un solo ingreso.
+  const detector = useRef(crearDetectorLector());
+  const ultimaLectura = useRef<{ codigo: string; en: number } | null>(null);
+  const porLectura = (crudo: string) => {
+    const t = crudo.replace(/\./g, "").trim() || crudo.trim();
+    if (!t) return;
+    const ahora = Date.now();
+    if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+    ultimaLectura.current = { codigo: t, en: ahora };
+    setTexto(""); setSocios([]); setHecho(null); setForzando(false);
+    const noEsta = () => { setError("No encontramos a nadie con ese código."); if (sonido) sonar("rojo"); setTimeout(() => campo.current?.focus(), 0); };
+    empezar(async () => {
+      if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); return; }
+      if (conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(t) && !/^\d{7,9}$/.test(t)) {
+        const l = await leerLlavero(t);
+        if (l.socio || l.error) { await directo(l, "nfc"); return; }
+      }
+      const r = await leerConReintento(() => buscarSociosRapido(t));
+      if (r.error) { setError(r.error); if (sonido) sonar("rojo"); campo.current?.focus(); return; }
+      const primero = r.socios?.[0];
+      if (!primero) { noEsta(); return; }
+      await directo({ socio: { socio_id: primero.socio_id, nombre: primero.nombre, numero: primero.numero ?? 0 } }, "recepcion");
+    });
+  };
   const volvioAntes = () => empezar(async () => {
     if (!elegido) return;
     const r = await terminarPausa(elegido.socio_id, sedeId);
@@ -134,18 +171,35 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
     if (r.error) setError(r.error); else setHecho(null);
   });
-  const anotar = (forzar?: string, promesa?: PromesaPago) => empezar(async () => {
+  const anotar = (forzar?: string, promesa?: PromesaPago) => {
     if (!elegido) return;
-    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa);
-    if (r.error) { setError(r.error); return; }
+    // F0.4 · Si el veredicto ya dice que puede entrar, el aviso "Entró Fulana" sale en el mismo instante (provisorio, sin Deshacer)
+    // y la base confirma por detrás. Si la base lo rechaza, vuelve atrás: el mismo veredicto en pantalla y el error con el porqué.
+    // El aviso provisorio se pone ACÁ, fuera de la transición: dentro de ella, React lo guarda hasta que la acción del servidor termina.
+    const optimista = !forzar && !promesa && !!v?.puede;
+    const antes = { elegido, v, guia, apto, firmar, texto, socios };
+    if (optimista) {
+      setHecho({ ingreso_id: "", repetido: false, resultado: "entro", nombre: elegido.nombre, socioId: elegido.socio_id });
+      reiniciar();
+    }
+    confirmarEntrada(elegido, antes, optimista, forzar, promesa);
+  };
+  const confirmarEntrada = (elegido: ResultadoSocio, antes: { elegido: ResultadoSocio; v: Veredicto | null; guia: Guia | null; apto: string | null; firmar: string | null; texto: string; socios: ResultadoSocio[] }, optimista: boolean, forzar?: string, promesa?: PromesaPago) => empezar(async () => {
+    // Si la red se corta a mitad del pedido el servidor ni contesta (la acción lanza): se trata como un error más, con la vuelta atrás.
+    const r = await registrarEntrada(elegido.socio_id, sedeId, forzar, via, promesa).catch(() => ({ error: "No se pudo anotar la entrada: se cortó la conexión. Revisá internet y probá de nuevo." } as Awaited<ReturnType<typeof registrarEntrada>>));
+    if (r.error) {
+      setError(r.error);
+      if (optimista) { setHecho(null); setElegido(antes.elegido); setV(antes.v); setGuia(antes.guia); setApto(antes.apto); setFirmar(antes.firmar); setTexto(antes.texto); setSocios(antes.socios); }
+      return;
+    }
     setHecho({ ...r.r!, nombre: elegido.nombre, socioId: elegido.socio_id });
-    reiniciar();
+    if (!optimista) reiniciar();
   });
   const dniEscrito = texto.replace(/\./g, "").trim();
   const abrirPrueba = () => empezar(async () => {
     const r = await pruebaPorDni(dniEscrito);
     if (r.error || !r.p) { setError(r.error ?? "No se pudo mirar la prueba"); return; }
-    if (r.p.existe && r.p.usada) { setError(`Ya usó su prueba gratis el ${r.p.dia} · Hacete socio.`); return; }
+    if (r.p.existe && r.p.usada) { setError(`Ya usó la prueba gratis el ${r.p.dia}: ofrecele un plan o un pase.`); return; }
     setError(null);
     setPrueba({ nombre: r.p.existe ? r.p.nombre ?? "" : "", apellido: "", telefono: r.p.existe ? r.p.telefono ?? "" : "", reservada: !!r.p.existe, error: null });
   });
@@ -164,7 +218,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
     reiniciar();
   });
   const salirConDni = (dni: string) => empezar(async () => {
-    const r = await buscarSociosRapido(dni);
+    const r = await leerConReintento(() => buscarSociosRapido(dni));
     if (r.error) { setError(r.error); return; }
     const s = (r.socios ?? [])[0];
     if (!s) { setError(`No hay nadie con el DNI ${dni}.`); return; }
@@ -198,7 +252,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       if (forzando || ((e.target as HTMLElement)?.tagName === "INPUT" && e.target !== campo.current)) return;
       if (e.key === "Escape") { e.preventDefault(); reiniciar(); }
       else if (e.key === "Enter" && v.puede && !ocupado && (e.target as HTMLElement)?.tagName !== "BUTTON" && (e.target as HTMLElement)?.tagName !== "A") { e.preventDefault(); anotar(); }
-      else if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !ocupado && e.target !== campo.current && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); marcarSalida(elegido.socio_id, elegido.nombre); }
+      // (Sin atajo "S" acá: con el foco fuera del campo, una "S" es la primera letra de un nombre. La salida es el botón "Salida" o DNI + S en el campo.)
       // Una letra con el foco en otro lado: va al buscador, reemplazando lo que había (el onChange cierra el veredicto).
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.target !== campo.current) { campo.current?.focus(); campo.current?.select(); }
     };
@@ -212,6 +266,8 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       <input
         ref={campo} value={texto} onChange={(e) => { setTexto(e.target.value); setElegido(null); setV(null); setHecho(null); setSalio(null); setPrueba(null); }}
         onKeyDown={(e) => {
+          detector.current.tecla(e.key, e.timeStamp);
+          if (e.key === "Enter" && detector.current.enter(e.timeStamp)) { e.preventDefault(); porLectura(e.currentTarget.value); return; }
           // VD-48: DNI + S marca la salida (solo si el gimnasio la registra).
           if (e.key.toLowerCase() === "s" && salidaModo !== "no" && !e.ctrlKey && !e.metaKey && !e.altKey && /^\d{6,9}$/.test(texto.replace(/\./g, "").trim())) {
             e.preventDefault(); if (!ocupado) salirConDni(texto.replace(/\./g, "").trim()); return;
@@ -227,18 +283,18 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       />
       <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
         {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto"><Icono nombre="camara" /> Leer QR</button>}
-        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-xl text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
+        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
           {sonido ? "Con sonido" : "Sin sonido"}
         </button>
       </div>
 
       {hecho && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-hecho={hecho.resultado} style={{ borderColor: colorVar(hecho.resultado === "rechazado" ? "rojo" : hecho.alerta_prestamo ? "amarillo" : "verde") }}>
-          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={32} />}</span>
+          <span className="text-3xl" aria-hidden>{hecho.resultado === "rechazado" ? <Icono nombre="prohibido" /> : hecho.alerta_prestamo ? <Icono nombre="alerta" /> : <Tilde tamano={32} />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">
             {hecho.repetido ? `${hecho.nombre}: ${hecho.texto ?? "ya estaba anotado hace un momento"}` : hecho.resultado === "forzado" ? `${hecho.nombre}: entrada anotada (lo dejaste pasar)` : hecho.resultado === "rechazado" ? `${hecho.nombre}: anotado que no pudo entrar` : hecho.emergencia ? `Entró ${hecho.nombre} por la emergencia (queda marcado)` : `Entró ${hecho.nombre}`}
           </p>
-          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
+          {!hecho.repetido && <button type="button" className="boton" disabled={ocupado || !hecho.ingreso_id} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
           {hecho.repetido && hecho.puede_salir && hecho.socioId && (
             <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} data-ventana-salida-boton
               onClick={() => marcarSalida(hecho.socioId!, hecho.nombre)}><Icono nombre="salir" /> Marcar salida</button>
@@ -247,11 +303,11 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       )}
       {salio && (
         <div role="status" className="tarjeta p-5 flex flex-wrap items-center gap-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"}>
-          <span className="text-3xl" aria-hidden>{salio.registrada ? "" : ""}</span>
+          <span className="text-3xl" aria-hidden>{salio.registrada ? <Icono nombre="ok" /> : <Icono nombre="info" />}</span>
           <p className="text-lg font-semibold min-w-0 flex-1">{salio.registrada ? salio.texto : `${salio.nombre}: ${salio.texto}`}</p>
         </div>
       )}
-      {error && <Mensaje tipo="error">{error}</Mensaje>}
+      {error && !(elegido && v) && <Mensaje tipo="error">{error}</Mensaje>}
 
       {!elegido && socios.length > 0 && (
         <ul className="space-y-2">
@@ -268,9 +324,12 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           ))}
         </ul>
       )}
-      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && (
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara !== texto.trim() && !ES_QR.test(texto.trim()) && (
+        <p className="texto-suave text-lg" data-buscando>Buscando…</p>
+      )}
+      {!elegido && texto.trim().length >= 2 && socios.length === 0 && !error && listaPara === texto.trim() && (
         <div className="space-y-3">
-          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href="/panel/socios/nuevo" className="underline">Darlo de alta</LinkPanel></p>
+          <p className="texto-suave text-lg">No encontramos a “{texto.trim()}”. <LinkPanel href={`/panel/socios/nuevo${/^\d{6,9}$/.test(dniEscrito) ? `?dni=${dniEscrito}` : /^[\p{L} '.-]{2,60}$/u.test(texto.trim()) ? `?nombre=${encodeURIComponent(texto.trim())}` : ""}`} className="underline">Darlo de alta</LinkPanel></p>
           {pruebaModo !== "no" && /^\d{6,9}$/.test(dniEscrito) && !prueba && (
             <button type="button" className="boton" data-ventana-prueba disabled={ocupado} onClick={abrirPrueba}><Icono nombre="regalo" /> Dar prueba gratis</button>
           )}
@@ -304,6 +363,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           className="fixed inset-0 z-50 overflow-y-auto p-6 sm:p-12 flex"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 62%)` }}>
           <div className="pulso m-auto w-full max-w-3xl">
+          {error && <div className="mb-4" data-veredicto-error><Mensaje tipo="error">{error}</Mensaje></div>}
           <div className="flex items-center gap-4">
             <p className="text-7xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
             {/* La foto, si tiene (sin foto la dirección responde vacía y no se muestra nada). */}
@@ -315,7 +375,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
           <p className="text-3xl sm:text-4xl mt-4 font-semibold">{v.texto}</p>
           {guia?.falta && <p className="mt-2 text-2xl font-semibold" data-falta>{guia.falta}</p>}
           {guia?.decile && <p className="mt-2 text-2xl" data-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
-          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} /></span> {c.href ? <LinkPanel href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
+          {guia?.chips.length ? <ul className="mt-3 flex flex-wrap gap-2" data-chips>{guia.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <LinkPanel href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} siNoEsta="texto" className="underline">{c.texto}</LinkPanel> : c.texto}</li>)}</ul> : null}
           {v.avisos?.length ? <ul className="mt-3 space-y-1 texto-suave">{v.avisos.map((a) => <li key={a}>• {a}</li>)}</ul> : null}
           {apto && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</p>}
           {firmar && <p className="mt-3 pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</p>}
@@ -340,7 +400,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             )}
             <LinkPanel href={`/panel/socios/${elegido.socio_id}`} className="boton"><Icono nombre="persona" /> Ver ficha</LinkPanel>
             {salidaModo !== "no" && <button type="button" onClick={() => marcarSalida(elegido.socio_id, elegido.nombre)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida</button>}
-            <button type="button" onClick={reiniciar} className="boton">✕ Otro socio</button>
+            <button type="button" onClick={reiniciar} className="boton"><Icono nombre="cerrar" /> Otro socio</button>
           </div>
 
           {forzando && (

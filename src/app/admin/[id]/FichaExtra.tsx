@@ -2,13 +2,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
-import { cambiarDueno, cambiarSlug, guardarModulos } from "../acciones";
+import { cambiarDueno, cambiarSlug, guardarFuncion, guardarModulos } from "../acciones";
 
 const NOMBRE_SECCION: Record<string, string> = {
   entrada: "Entrada", clases: "Clases", vencen_hoy: "Vencen hoy", socios: "Socios", retencion: "Retención", rutinas: "Rutinas",
   caja: "Caja", vender: "Vender", resultado: "Resultado", transferencias: "Transferencias", pt: "Turnos de entrenador",
 };
-const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{m}</p> : null);
+const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
 /** Links por rol con botón de copiar (SA-3, pestaña Links). */
 export function LinksPorRol({ links }: { links: { rol: string; nombre: string; url: string }[] }) {
@@ -44,6 +44,22 @@ export function CambiarSlug({ gimnasioId, slug }: { gimnasioId: string; slug: st
         if (r.error) { setError(r.error); return; }
         setError(""); router.refresh();
       }}>Cambiar el slug</BotonAccion>
+      <Alerta m={error} />
+    </div>
+  );
+}
+
+/** Funciones nuevas: arrancan apagadas en los gimnasios con datos reales; los demos las tienen prendidas (F9.2). */
+export function FuncionesNuevas({ gimnasioId, restaurarCambios }: { gimnasioId: string; restaurarCambios: boolean }) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  return (
+    <div className="space-y-3" data-funciones-nuevas>
+      <label className="tarjeta p-3 flex items-center gap-2">
+        <input type="checkbox" defaultChecked={restaurarCambios} data-funcion="restaurar_cambios"
+          onChange={async (e) => { const r = await guardarFuncion(gimnasioId, "restaurar_cambios", e.target.checked); setError(r.error ?? ""); router.refresh(); }} />
+        <span>Restaurar cambios de Configuración (el dueño vuelve un dato al valor anterior)</span>
+      </label>
       <Alerta m={error} />
     </div>
   );

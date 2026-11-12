@@ -5,7 +5,7 @@
 // la recepción lo encuentra en Entrada sin poder pasar hasta pagar, con su
 // motivo, y lo ve en Prospectos → al apagar las altas la página manda a WhatsApp.
 //   npm run e2e:reg-1            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -58,18 +58,22 @@ try {
     await f.locator('input[name="dni"]').fill(dni);
     await f.locator('input[name="telefono"]').fill(tel);
     await f.locator('input[name="fecha_nacimiento"]').fill("1990-05-01");
+    await f.locator('input[name="email"]').fill(`alta${dni}@ejemplo.invalid`);
+    await f.locator('input[name="contrasena"]').fill("clave-de-prueba-1");
   };
   await llenar(form, DNI1, TEL1);
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   // Sin aceptar el reglamento, el navegador no deja mandar (required).
   chequear(await form.locator('input[name="acepto"]').evaluate((x) => !x.checkValidity()), "sin aceptar el reglamento no se manda", "se pudo mandar sin aceptar");
   await form.locator('input[name="acepto"]').check();
   await form.locator('label:has-text("Transferencia")').click();
+  await esperarAntiRobot(form);
   await form.locator('button[type="submit"]').click();
   const listo = v.locator('[data-alta-lista="transferencia"]');
   await listo.waitFor({ timeout: 30000 });
   const tl = (await listo.innerText()).replace(/\s+/g, " ");
-  chequear(/Bienvenido\/a a .+, Martina/.test(tl) && /Alias/.test(tl) && /comprobante desde la app/.test(tl), `transferencia: “${tl.slice(0, 110)}…”`, `la pantalla final dice: ${tl}`);
+  chequear(/¡Listo, Martina! Ya tenés tu cuenta en/.test(tl) && /Alias/.test(tl) && /comprobante desde la app/.test(tl), `transferencia: “${tl.slice(0, 110)}…”`, `la pantalla final dice: ${tl}`);
   await capturar(v, "reg1-celu-transferencia", true);
   await v.context().close();
 
@@ -81,6 +85,7 @@ try {
   await f2.locator("[data-plan]").first().click();
   await llenar(f2, DNI1, TEL2);
   await f2.locator('input[name="acepto"]').check();
+  await esperarAntiRobot(f2);
   await f2.locator('button[type="submit"]').click();
   await v2.locator("[data-alta-ya-socio]").waitFor({ timeout: 30000 });
   ok("el mismo DNI no se anota dos veces: “¡Ya sos socio!”");
@@ -93,6 +98,7 @@ try {
   await f3.locator('input[name="nombre"]').fill("Bruno");
   await f3.locator('input[name="acepto"]').check();
   await f3.locator('label:has(input[value="mostrador"])').click();
+  await esperarAntiRobot(f3);
   await f3.locator('button[type="submit"]').click();
   await v2.locator('[data-alta-lista="mostrador"]').waitFor({ timeout: 30000 });
   chequear(/Pasá por recepción/.test(await v2.locator('[data-alta-lista="mostrador"]').innerText()), "en el mostrador: “Pasá por recepción y pagá tu plan”", "no dice que pague en recepción");
@@ -130,7 +136,8 @@ try {
   chequear(await aparece(c.locator("[data-alta-cerrada]"), 15000) && await c.locator('a:has-text("WhatsApp")').count() > 0, "apagadas: “Consultanos por WhatsApp”", "con las altas apagadas el formulario sigue");
   await c.goto(`${G}/`);
   await c.locator("h1").first().waitFor();
-  chequear(await c.locator('a[href="/hacete-socio"]').count() > 0, "apagadas: “Quiero ser socio” se ve igual (lleva al aviso de WhatsApp)", "apagadas: falta “Quiero ser socio”");
+  // H3b (SOCIO-FLUJO §1, LISTO SI 5): con las altas apagadas el botón no aparece; el link directo ya dice que hoy no se puede.
+  chequear(await c.locator('a[href="/hacete-socio"]').count() === 0 && await c.locator("[data-ya-soy-socio]").count() > 0, "apagadas: “Quiero ser socio” no aparece y queda “Ya soy socio, entrar”", "apagadas: “Quiero ser socio” sigue en la página");
   await c.context().close();
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();

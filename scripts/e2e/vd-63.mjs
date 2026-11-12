@@ -60,7 +60,11 @@ try {
       });
       chequear(true, `${tam} · Ctrl+K “${escribo}” ofrece la pregunta`, "");
       if (celu && id === "anular-cobro") await capturar(d, "vd63-celu-ctrlk");
-      await fila.click();
+      await fila.click({ timeout: 15000 }).catch(async (e) => {
+        const cajas = [];
+        for (let k = 0; k < 6; k++) { cajas.push(JSON.stringify(await fila.boundingBox().catch(() => null))); await d.waitForTimeout(250); }
+        throw new Error(`${e.message.split("\n").slice(0, 30).join(" | ")} | cajas de la fila: ${cajas.join(" ; ")} | filas: ${await dialogo(d).locator("[data-buscador-ayuda]").count()}`);
+      });
       await d.waitForURL(new RegExp(`/panel/ayuda\\?p=${id}`), { timeout: 30000 });
       const li = d.locator(`[data-pregunta="${id}"]`);
       await li.waitFor({ timeout: 30000 });
@@ -150,7 +154,7 @@ try {
     if (s.errores.length) falla(`${tam} socio: ${s.errores.join(" | ")}`);
     await s.context().close();
   }
-} catch (e) { falla(`se cortó: ${e.message.split("\n")[0]}`); }
+} catch (e) { falla(`se cortó: ${e.message.split("\n").slice(0, 40).join(" | ")}`); }
 finally {
   if (creado) await db.query(`delete from public.documentos where id = $1`, [creado]).catch(() => {});
   await db.end(); await b.close(); resultado();

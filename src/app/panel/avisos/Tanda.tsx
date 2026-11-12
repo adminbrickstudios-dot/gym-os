@@ -52,7 +52,7 @@ export function TandaAvisos({ avisos, etiqueta = "Avisar a todos", principal = f
         </>
       ) : (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="font-semibold flex-1" data-tanda-fin>✓ Listo: {avisados === 1 ? "avisaste a 1" : `avisaste a ${avisados}`}{cola.length - avisados ? `, salteaste ${cola.length - avisados}` : ""}.</p>
+          <p className="font-semibold flex-1" data-tanda-fin><Icono nombre="ok" /> Listo: {avisados === 1 ? "avisaste a 1" : `avisaste a ${avisados}`}{cola.length - avisados ? `, salteaste ${cola.length - avisados}` : ""}.</p>
           <button type="button" className="boton !min-h-11" onClick={cerrar}>Cerrar</button>
         </div>
       )}

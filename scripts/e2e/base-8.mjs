@@ -21,7 +21,11 @@ try {
   const intentar = async (clave) => {
     await p.fill("input[type=email]", `nadie-${s}@ejemplo.invalid`);
     await p.fill("input[type=password]", clave);
+    // Se espera la respuesta de ESTE intento: sin eso se lee el aviso del anterior (en la corrida lenta de Actions se leía con un intento de atraso).
+    const respondio = p.waitForResponse((r) => r.request().method() === "POST" && /\/ingresar/.test(r.url()), { timeout: 60000 }).catch(() => null);
     await p.click("button[type=submit]");
+    await respondio;
+    await p.waitForTimeout(300);
     await p.locator('[role="alert"]', { hasText: /\S/ }).first().waitFor({ timeout: 30000 });
     return (await p.locator('[role="alert"]', { hasText: /\S/ }).first().innerText()).trim();
   };

@@ -5,7 +5,7 @@
 //   npm run e2e:ref-1            (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -34,6 +34,7 @@ try {
   await form.locator("[data-referido]").waitFor({ timeout: 10000 });
   await form.locator("input[name=nombre]").fill(AMIGO);
   await form.locator("input[name=telefono]").fill(TEL);
+  await esperarAntiRobot(a);
   await form.getByRole("button", { name: /Quiero probar/ }).click();
   await a.locator("[data-probar-listo]").waitFor({ timeout: 30000 });
   ok("el amigo abre el link: “Te invitó un amigo” y deja sus datos");

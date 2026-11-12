@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { formatearPesos } from "@/lib/formato";
+import { fechaHumana, formatearPesos } from "@/lib/formato";
 import { anularHoras, anularPago, cargarHoras, guardarConfigLiquidacion, guardarRegla, pagarProfe, verDetalle, type Detalle } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 
@@ -189,7 +189,7 @@ function ListaPagos({ detalle, turnoId, correr, soloVer }: { detalle: Detalle | 
     <div><p className="etiqueta mb-1">Pagos</p>
       <ul className="space-y-1 text-sm">{detalle.pagos.map((x) => (
         <li key={x.id} className="flex flex-wrap items-center gap-2" data-pago={x.anulado_en ? "anulado" : "vigente"}>
-          <span className={x.anulado_en ? "line-through texto-tenue" : ""}>{new Date(x.pagado_en).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })} · {formatearPesos(x.monto)} · {MEDIO[x.medio]} · {x.pagado_por}{x.nota ? ` · ${x.nota}` : ""}</span>
+          <span className={x.anulado_en ? "line-through texto-tenue" : ""}>{fechaHumana(x.pagado_en)} · {formatearPesos(x.monto)} · {MEDIO[x.medio]} · {x.pagado_por}{x.nota ? ` · ${x.nota}` : ""}</span>
           {x.anulado_en ? <span className="texto-tenue">anulado: {x.anulado_motivo}</span> : !soloVer && (
             <AnularConMotivo pregunta="¿Por qué anulás este pago?" onAnular={(m) => correr(() => anularPago(x.id, m, turnoId), "Pago anulado.")} />)}
         </li>

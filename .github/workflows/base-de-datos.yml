@@ -32,6 +32,10 @@ on:
       contrasena:
         description: "Contraseña de los usuarios demo (solo para usuarios-demo, 10 o más letras)"
         required: false
+      sin_copia:
+        description: "Solo con permiso de Mateo: escribí SIN COPIA para aplicar sin la copia cifrada previa (si algo sale mal, no hay copia para volver)"
+        required: false
+        default: ""
 
 concurrency:
   group: base-de-datos
@@ -60,6 +64,34 @@ jobs:
             echo "::error::GitHub no le pasa SUPABASE_DB_URL a este workflow. Tiene que estar en Settings → Secrets and variables → Actions → pestaña Secrets → 'Repository secrets' (no en Environments, Codespaces ni Dependabot), con ese nombre exacto."
           fi
           exit 1
+      - name: Sin copia previa (Mateo lo autorizó para esta publicación)
+        if: inputs.accion == 'aplicar' && inputs.sin_copia == 'SIN COPIA'
+        run: echo "::warning::Se aplica SIN copia cifrada previa, con permiso de Mateo. Si algo sale mal en la base, no hay copia para volver."
+      - name: Copia cifrada ANTES de aplicar (H5; sin COPIA_CLAVE no se aplica)
+        if: inputs.accion == 'aplicar' && inputs.sin_copia != 'SIN COPIA'
+        env:
+          COPIA_CLAVE: ${{ secrets.COPIA_CLAVE }}
+        run: |
+          if [ -z "$COPIA_CLAVE" ] || [ ${#COPIA_CLAVE} -lt 16 ]; then
+            echo "::error::Falta el secreto COPIA_CLAVE (16 o más caracteres). Hay datos reales de un cliente en producción: sin copia cifrada previa NO se aplica ninguna migración. Pasos en docs/base/COPIAS.md."
+            exit 1
+          fi
+          echo "::add-mask::$COPIA_CLAVE"
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          export PATH="/usr/lib/postgresql/17/bin:$PATH"
+          node scripts/db/copia.mjs exportar --salida copias-salida
+      - name: Guardar la copia cifrada (artefacto privado, 30 días)
+        if: inputs.accion == 'aplicar' && inputs.sin_copia != 'SIN COPIA'
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-copia-previa-${{ github.run_id }}
+          path: copias-salida/*.tar.gz.enc
+          retention-days: 30
+          if-no-files-found: error
       - name: Pre-vuelo (transacción que se revierte)
         if: inputs.accion == 'prevuelo' || inputs.accion == 'aplicar'
         run: node scripts/db/aplicar.mjs --prevuelo

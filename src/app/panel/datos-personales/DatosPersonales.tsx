@@ -2,7 +2,8 @@
 import { useState, useTransition } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { guardarPolitica, resolverPedido } from "./acciones";
+import { TERMINOS_MODELO } from "@/lib/terminos-modelo";
+import { guardarPolitica, guardarTerminos, resolverPedido } from "./acciones";
 
 export type PedidoDatos = { id: string; socio_id: string; socio: string; tipo: "ver" | "corregir" | "borrar"; detalle: string | null; creado_en: string; resuelto_en: string | null; nota: string | null };
 const TIPO: Record<PedidoDatos["tipo"], string> = { ver: "Quiere ver sus datos", corregir: "Quiere corregir un dato", borrar: "Quiere que borremos sus datos" };
@@ -15,10 +16,15 @@ Con quién los compartimos: con nadie, salvo que una ley o un juez lo pida. Usam
 Tus derechos (Ley 25.326): podés pedir ver, corregir o borrar tus datos desde tu app o en la recepción. Lo respondemos en 10 días corridos.
 La Agencia de Acceso a la Información Pública (AAIP) es el organismo que atiende denuncias por incumplimiento de esta ley.`;
 
-export function DatosPersonales({ politica, pedidos, puedeEditar }: { politica: string | null; pedidos: PedidoDatos[]; puedeEditar: boolean }) {
+export type TerminosPropios = { texto: string | null; publicado: boolean; actualizado_en: string | null };
+
+export function DatosPersonales({ politica, pedidos, puedeEditar, terminos }: { politica: string | null; pedidos: PedidoDatos[]; puedeEditar: boolean; terminos: TerminosPropios }) {
   const [texto, setTexto] = useState(politica ?? "");
   const [msj, setMsj] = useState<{ ok?: string; error?: string }>({});
   const [, empezar] = useTransition();
+  const [textoT, setTextoT] = useState(terminos.texto ?? "");
+  const [publicadoT, setPublicadoT] = useState(terminos.publicado);
+  const [msjT, setMsjT] = useState<{ ok?: string; error?: string }>({});
   const abiertos = pedidos.filter((p) => !p.resuelto_en);
   const cerrados = pedidos.filter((p) => p.resuelto_en);
   return (
@@ -39,6 +45,25 @@ export function DatosPersonales({ politica, pedidos, puedeEditar }: { politica: 
           </>
         ) : <p className="whitespace-pre-wrap text-sm">{politica ?? POLITICA_MODELO}</p>}
         <p className="text-sm texto-tenue">Inscribir la base de datos en la AAIP (Registro Nacional de Bases de Datos) lo hace el gimnasio como responsable: no lo hace Base por vos. El texto modelo es un borrador: revisalo con un abogado.</p>
+      </section>
+
+      <section className="tarjeta p-5 space-y-3" data-terminos-panel>
+        <h2 className="titulo text-2xl">Términos y condiciones</h2>
+        <p className="texto-suave">Las reglas de tu gimnasio: cuota, pausas, bajas, uso de las instalaciones. {publicadoT ? "Están publicados en tu página, en /terminos." : "No están publicados: nadie los ve hasta que los publiques."}</p>
+        {msjT.ok && <Mensaje tipo="exito">{msjT.ok}</Mensaje>}
+        {msjT.error && <Mensaje tipo="error">{msjT.error}</Mensaje>}
+        {puedeEditar ? (
+          <>
+            <textarea className="campo min-h-56" maxLength={20000} value={textoT} onChange={(e) => setTextoT(e.target.value)} placeholder={TERMINOS_MODELO} aria-label="Texto de los términos y condiciones" />
+            <label className="flex items-center gap-2"><input type="checkbox" checked={publicadoT} onChange={(e) => setPublicadoT(e.target.checked)} /> Publicar en mi página</label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="boton" onClick={() => setTextoT(TERMINOS_MODELO)}>Empezar desde el texto modelo</button>
+              <BotonAccion className="boton boton-principal" ocupadoTexto="Guardando…"
+                onClick={async () => { const r = await guardarTerminos(textoT, publicadoT); setMsjT(r.error ? { error: r.error } : { ok: publicadoT ? "Términos publicados." : "Términos guardados, sin publicar." }); }}>Guardar</BotonAccion>
+            </div>
+          </>
+        ) : <p className="whitespace-pre-wrap text-sm">{terminos.texto ?? "Todavía no hay términos cargados."}</p>}
+        <p className="text-sm texto-tenue">El texto modelo es un borrador para que lo adaptes: no es asesoramiento legal. Revisalo con un abogado antes de publicarlo.</p>
       </section>
 
       <section className="space-y-3" data-pedidos-datos>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CancelarReserva } from "../CancelarReserva";
 import { miSocio } from "@/lib/app/socio";
 import { intentar } from "@/lib/panel/intentar";
-import { rpc } from "@/lib/panel/servidor";
+import { ErrorDatos, rpc } from "@/lib/panel/servidor";
 import { Reservar } from "./Reservar";
 import { ElegirLugar } from "./ElegirLugar";
 import type { MapaLugares } from "@/lib/clases/lugares";
@@ -28,7 +28,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const dias = Array.from({ length: 7 }, (_, i) => { const d = new Date(`${hoy}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + i); return d.toISOString().slice(0, 10); });
     const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
     const sede = yo.sedes?.[0];
-    if (!sede) throw new Error("El gimnasio no tiene sedes activas");
+    if (!sede) throw new ErrorDatos("El gimnasio no tiene sedes activas todavía, así que no hay clases para mostrar.");
     const [todas, politica, turnos, horarios, wods, avisos] = await Promise.all([
       rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.sede_id, p_dia: dia, p_socio_id: yo.socio.socio_id }),
       // CLA-1: las reglas (cancelar, faltas) y si hoy no puede reservar por una falta.
@@ -59,8 +59,8 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
     const q = (d: string) => `/app/clases?dia=${d}${yo.socios.length > 1 ? `&socio=${yo.socio!.socio_id}` : ""}`;
     return (
       <>
-        <Link href={`/app${yo.socios.length > 1 ? `?socio=${yo.socio.socio_id}` : ""}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl mt-4">{reserva ? "Reservar" : "Clases"}</h1>
+        <Link href={`/app${yo.socios.length > 1 ? `?socio=${yo.socio.socio_id}` : ""}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px] mt-4">{reserva ? "Reservar" : "Clases"}</h1>
         {!reserva && <p className="texto-suave text-lg mt-2" data-sin-reserva>No hace falta reservar: vení directo.</p>}
         <nav className="flex gap-2 overflow-x-auto -mx-4 px-4 py-4">
           {dias.map((d, i) => (
@@ -69,7 +69,7 @@ export default async function ClasesSocio({ searchParams }: { searchParams: Prom
             </Link>
           ))}
         </nav>
-        {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 w-full mb-4" data-bloqueo-reservas><Icono nombre="prohibido" /> {politica.bloqueo.texto}</p>}
+        {reserva && politica.bloqueo && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3 w-full mb-4" data-bloqueo-reservas><Icono nombre="prohibido" /> {politica.bloqueo.texto}</p>}
         {reserva && avisos.length > 0 && <div className="space-y-2 mb-4" data-avisos-lugar>{avisos.map((a) => <Mensaje key={a.clase_id + a.tipo} tipo={a.tipo === "lugar_liberado" ? "exito" : "aviso"}>{a.texto}</Mensaje>)}</div>}
         {clases.length === 0 ? <p className="texto-suave">No quedan clases este día.{dias.indexOf(dia) < dias.length - 1 && <> <Link href={q(dias[dias.indexOf(dia) + 1])} className="underline">Ver el día siguiente</Link></>}</p> : (
           <ul className="space-y-2">{clases.map((c) => (

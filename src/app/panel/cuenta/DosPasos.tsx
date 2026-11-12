@@ -85,7 +85,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
         <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
           <p className="texto-suave">1. Abrí tu app autenticadora y escaneá este código (o escribí la clave a mano).</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={estado.qr} alt="Código QR para tu app autenticadora" width={176} height={176} className="rounded-xl bg-white p-2" />
+          <img src={estado.qr} alt="Código QR para tu app autenticadora" width={176} height={176} className="rounded-[var(--radio)] bg-white p-2" />
           <p className="texto-suave text-sm">Clave: <code className="break-all select-all" data-clave-totp>{estado.secreto}</code></p>
           <p className="texto-suave">2. Escribí el código de 6 números que muestra la app.</p>
           <input className="campo numero text-2xl tracking-widest !w-44" inputMode="numeric" autoComplete="one-time-code" maxLength={6} aria-label="Código de 6 números"

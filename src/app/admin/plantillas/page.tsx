@@ -16,7 +16,7 @@ export default async function PaginaPlantillas() {
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-6">
       <header className="space-y-2">
         <Link href="/admin" className="texto-suave">← Tablero</Link>
-        <h1 className="titular text-5xl">Plantillas de textos</h1>
+        <h1 className="titular text-[28px]">Plantillas de textos</h1>
         <p className="texto-suave">Cada texto se resuelve en capas: lo que escribió el gimnasio, después la plantilla de su tipo, después la de la plataforma y, al final, la de fábrica. Al cambiar una plantilla se actualizan los gimnasios que no editaron ese texto; el que escribió el suyo lo conserva.</p>
       </header>
       <Plantillas tipos={datos.tipos} textos={datos.textos} />

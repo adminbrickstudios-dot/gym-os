@@ -1,5 +1,6 @@
 "use server";
 import { headers } from "next/headers";
+import { sinDetalle } from "@/lib/errores-humanos";
 import { createClient } from "@supabase/supabase-js";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { requerir, supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -42,7 +43,7 @@ async function contexto() {
 async function contactoDelDni(gimnasioId: string, dni: string): Promise<Contacto | null> {
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { data, error } = await clienteServicio().rpc("socio_para_vincular_google", { p_gimnasio_id: gimnasioId, p_dni: dni });
-  if (error) throw new Error(`No pudimos buscar el DNI: ${error.message}`);
+  if (error) throw new Error(sinDetalle("No pudimos buscar el DNI. Probá de nuevo en un minuto.", error));
   return data as Contacto | null;
 }
 
@@ -71,7 +72,7 @@ export async function pedirCodigoGoogle(_: EstadoVinculo, form: FormData): Promi
     const { error } = contacto?.telefono
       ? await auth.signInWithOtp({ phone: contacto.telefono })
       : await auth.signInWithOtp({ email: destino, options: { shouldCreateUser: true } });
-    if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : `No pudimos mandarte el código: ${error.message}`, dni };
+    if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : sinDetalle("No pudimos mandarte el código. Probá de nuevo en un minuto.", error), dni };
   }
   return { enviado: true, dni };
 }
@@ -114,7 +115,7 @@ async function guardarVinculo(gimnasioId: string, usuarioId: string, dni: string
   const { data, error } = await clienteServicio().rpc("vincular_google", {
     p_gimnasio_id: gimnasioId, p_usuario_id: usuarioId, p_dni: dni, p_verificado_id: verificadoId, p_confirmar: confirmar,
   });
-  if (error) return { error: error.code === "P0001" ? MENSAJE_GENERICO : `No pudimos vincular tu cuenta: ${error.message}`, enviado: true, dni };
+  if (error) return { error: error.code === "P0001" ? MENSAJE_GENERICO : sinDetalle("No pudimos vincular tu cuenta. Probá de nuevo y, si sigue, pasá por la recepción.", error), enviado: true, dni };
   const r = data as { estado: "vinculado" | "confirmar"; socio?: string; otros?: string[]; otra_cuenta?: boolean };
   if (r.estado === "confirmar") {
     return {

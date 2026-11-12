@@ -5,7 +5,7 @@
 // WhatsApp armado → recepción le escribe, vino, "Hacerlo socio" → alta con sus
 // datos → queda en "Se hicieron socios" con su ficha.
 //   npm run e2e:pag-3            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -44,12 +44,14 @@ try {
   chequear(await formV.isVisible() && (await v.locator("body").innerText()).includes(texto), "el botón “Probá una clase” lleva al formulario con el texto del dueño", "no llega al formulario");
   await formV.locator('input[name="nombre"]').fill(NOMBRE);
   await formV.locator('input[name="telefono"]').fill("123");
+  await esperarAntiRobot(v);
   await formV.locator('button[type="submit"]').click();
   await formV.locator('[role="alert"]').waitFor({ timeout: 30000 });
   chequear(/WhatsApp/.test(await formV.locator('[role="alert"]').innerText()), `WhatsApp mal escrito → “${(await formV.locator('[role="alert"]').innerText()).trim()}”`, "no avisa el WhatsApp mal escrito");
   chequear(await formV.locator('input[name="nombre"]').inputValue() === NOMBRE, "el error no borra lo que escribió", "se borró el nombre");
   await formV.locator('input[name="telefono"]').fill(TEL);
   await formV.locator('input[name="interes"]').fill("Funcional a la tarde");
+  await esperarAntiRobot(v);
   await formV.locator('button[type="submit"]').click();
   await v.locator("[data-probar-listo]").waitFor({ timeout: 30000 });
   ok(`visitante: “${(await v.locator("[data-probar-listo]").innerText()).replace(/\s+/g, " ").trim()}”`);
@@ -58,6 +60,7 @@ try {
   await v.reload(); await v.locator("[data-form-probar]").waitFor();
   await v.locator('[data-form-probar] input[name="nombre"]').fill(NOMBRE);
   await v.locator('[data-form-probar] input[name="telefono"]').fill(`+54 9 ${TEL}`);
+  await esperarAntiRobot(v);
   await v.locator('[data-form-probar] button[type="submit"]').click();
   await v.locator("[data-probar-listo]").waitFor({ timeout: 30000 });
   if (v.errores.length) falla(`visitante: ${v.errores.join(" | ")}`);

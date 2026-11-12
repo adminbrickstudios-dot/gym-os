@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Vacio } from "@/components/ui/Vacio";
 import { miSocio } from "@/lib/app/socio";
 import { estadoDe, motivoDe, type FilaSocio } from "@/lib/mensajes";
+import { fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { Icono } from "@/components/ui/Icono";
@@ -21,11 +22,11 @@ export default async function MisMensajes({ searchParams }: { searchParams: Prom
       rpc<FilaSocio[]>("mis_mensajes", { p_socio_id: s.socio_id }),
       rpc<{ activo: boolean }>("mensajes_estado_socio", { p_socio_id: s.socio_id }),
     ]);
-    const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: yo.zona!, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+    const cuando = (m: string) => fechaHoraHumana(m, yo.zona!);
     return (
       <div className="space-y-6" data-mis-mensajes>
-        <Link href={`/app/yo${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl"><Icono nombre="mensaje" /> Escribile al gimnasio</h1>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]"><Icono nombre="mensaje" /> Escribile al gimnasio</h1>
         {estado.activo
           ? <Link href={`/app/mensajes/nuevo${q}`} className="boton boton-principal w-full !min-h-14" data-nuevo-mensaje><Icono nombre="mail" /> Escribir un mensaje</Link>
           : <p className="tarjeta p-5 texto-suave">Por ahora este gimnasio no recibe mensajes por la app. Hablá con la recepción.</p>}
@@ -38,9 +39,9 @@ export default async function MisMensajes({ searchParams }: { searchParams: Prom
               return (
                 <li key={h.hilo_id}>
                   <Link href={`/app/mensajes/${h.hilo_id}${q}`} className="tarjeta flex items-start gap-3 p-4" data-hilo={h.sin_leer ? "sin-leer" : "leido"}>
-                    <span className="text-2xl" aria-hidden>{m.emoji}</span>
+                    <span className="text-2xl" aria-hidden><Icono nombre={m.emoji} /></span>
                     <span className="min-w-0 flex-1">
-                      <span className="block font-semibold leading-tight">{m.titulo}{h.sin_leer && <span className="pildora pildora-rojo ml-2 !text-xs align-middle">Te respondieron</span>}</span>
+                      <span className="block font-semibold leading-tight">{m.titulo}{h.sin_leer && <span className="pildora pildora-rojo ml-2 !text-[13px] align-middle">Te respondieron</span>}</span>
                       {h.extracto && <span className="block texto-suave text-[15px] truncate">{h.extracto}</span>}
                       <span className="block text-sm texto-tenue mt-1">{estadoDe(h.estado).titulo} · {cuando(h.ultimo_en)}</span>
                     </span>

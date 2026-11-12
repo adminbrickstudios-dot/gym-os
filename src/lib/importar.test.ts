@@ -30,3 +30,24 @@ test("armarFilas respeta el orden de las columnas del archivo", () => {
   expect(armarFilas([[new Date(Date.UTC(2026, 11, 31)), "05/01/2025", 20111222, "Ana Gómez"]], mapa))
     .toEqual([{ vence: "2026-12-31", alta: "05/01/2025", dni: "20111222", nombre: "Ana Gómez" }]);
 });
+
+test("C10: columnas de pagos pasados por nombre, sin pisar alta ni pagó hasta", () => {
+  expect(adivinarColumnas(["Nombre", "Fecha de alta", "Fecha de pago 1", "Monto 1", "Medio de pago 1", "Fecha de pago 2", "Monto 2", "Medio de pago 2", "Plan"]))
+    .toEqual(["nombre", "alta", "pago1_fecha", "pago1_monto", "pago1_medio", "pago2_fecha", "pago2_monto", "pago2_medio", "plan"]);
+  // Un solo pago, sin número: es el pago 1.
+  expect(adivinarColumnas(["Nombre", "Plan", "Fecha de pago", "Importe", "Forma de pago"])).toEqual(["nombre", "plan", "pago1_fecha", "pago1_monto", "pago1_medio"]);
+});
+
+test("C10: armarFilas junta cada grupo de pago en una lista y no deja las columnas sueltas", () => {
+  const mapa = adivinarColumnas(["Nombre", "Plan", "Fecha de pago 1", "Monto 1", "Medio 1", "Fecha de pago 2", "Monto 2", "Medio 2"]);
+  const filas = armarFilas([
+    ["Ana", "Plan Full", new Date(Date.UTC(2026, 9, 1)), 25000, "Efectivo", "", "", ""],
+    ["Beto", "Plan Full", "", "", "", "", "", ""],
+    ["Cami", "Plan Full", "05/10/2026", "", "", "", 25000, "Transferencia"],
+  ], mapa);
+  expect(filas).toEqual([
+    { nombre: "Ana", plan: "Plan Full", pagos: [{ fecha: "2026-10-01", monto: "25000", medio: "Efectivo" }] },
+    { nombre: "Beto", plan: "Plan Full" },
+    { nombre: "Cami", plan: "Plan Full", pagos: [{ fecha: "05/10/2026", monto: "", medio: "" }, { fecha: "", monto: "25000", medio: "Transferencia" }] },
+  ]);
+});

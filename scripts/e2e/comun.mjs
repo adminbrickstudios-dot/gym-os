@@ -181,3 +181,9 @@ export async function api(ctx, metodo, ruta, opciones = {}, slug = "demo") {
     method: metodo, ...opciones, headers: { host: `${slug}.localhost:${PUERTO}`, cookie, ...(opciones.headers ?? {}) },
   });
 }
+
+/** D49: los formularios públicos ("Quiero ser socio", "Quiero una demo") no aceptan un envío con menos de 3 segundos abierto. Esperar a que el contador de la página llegue. */
+export async function esperarAntiRobot(pagina) {
+  const p = typeof pagina.page === "function" ? pagina.page() : pagina;
+  await p.waitForFunction(() => Number(document.querySelector("input[name=segundos]")?.value) >= 3, null, { timeout: 30000 });
+}

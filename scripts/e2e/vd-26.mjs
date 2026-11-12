@@ -2,7 +2,7 @@
 // VD-26 · Página de Gym OS para vender: la dirección de la plataforma muestra la landing; "Ingresar" sigue
 // andando; el formulario de la demo crea el pedido y le aparece al super admin en /admin; en 390 px no desborda.
 //   node scripts/e2e/vd-26.mjs     (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, PLATAFORMA as B, capturar, chequear, entrar, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, PLATAFORMA as B, capturar, chequear, entrar, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const b = await navegador();
 const s5 = Date.now().toString().slice(-5);
@@ -24,6 +24,7 @@ try {
   await p.locator('input[name="nombre"]').fill(trampa);
   await p.locator('input[name="contacto"]').fill(`robot${s5}@ejemplo.invalid`);
   await p.locator('input[name="sitio"]').evaluate((e) => { e.value = "http://spam.invalid"; });
+  await esperarAntiRobot(p);
   await p.locator("[data-form-demo] button[type=submit]").click();
   await p.locator("[data-demo-listo]").waitFor({ timeout: 30000 });
 
@@ -33,11 +34,13 @@ try {
   await p.locator('input[name="nombre"]').fill(nombre);
   await p.locator('input[name="gimnasio"]').fill(`Gimnasio Prueba ${s5}`);
   await p.locator('input[name="contacto"]').fill("hola");
+  await esperarAntiRobot(p);
   await p.locator("[data-form-demo] button[type=submit]").click();
   await p.locator('[data-form-demo] [role="alert"]').waitFor({ timeout: 30000 });
   ok(`un contacto inválido se avisa: “${(await p.locator('[data-form-demo] [role="alert"]').innerText()).trim().slice(0, 70)}”`);
   chequear((await p.locator('input[name="nombre"]').inputValue()) === nombre, "el error no borra lo escrito", "se perdió lo escrito");
   await p.locator('input[name="contacto"]').fill(`387 000 ${s5}`);
+  await esperarAntiRobot(p);
   await p.locator("[data-form-demo] button[type=submit]").click();
   await p.locator("[data-demo-listo]").waitFor({ timeout: 30000 });
   ok("el pedido de demo se envía");

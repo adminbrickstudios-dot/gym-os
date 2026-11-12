@@ -4,6 +4,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { clasesParaProbar, quieroProbar, reservarPrueba, type ClaseParaProbar, type EstadoProbar, type EstadoReservaPrueba } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { CampoAntiRobot } from "@/components/cuentas/CampoAntiRobot";
 
 /** VD-51: si el gimnasio da prueba gratis y hay clases, se reserva una (nombre, DNI, celular); si no, queda el pedido de siempre. */
 export function FormProbar() {
@@ -37,7 +38,7 @@ function FormReservaPrueba({ clases }: { clases: ClaseParaProbar[] }) {
         <input name="dni" required inputMode="numeric" autoComplete="off" placeholder="Sin puntos" maxLength={12} className="campo" defaultValue={estado.datos?.dni} /></label>
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
         <input name="telefono" required type="tel" inputMode="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={estado.datos?.telefono} /></label>
-      <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+      <CampoAntiRobot />
       {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
       <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "Reservar mi clase gratis"}</button>
       <p className="text-sm texto-tenue">Es una prueba por persona. Usamos tu DNI y tu WhatsApp solo para esta clase.</p>
@@ -68,7 +69,7 @@ function FormPedido() {
       <label className="block space-y-1"><span className="etiqueta">¿Qué te gustaría hacer? <span className="texto-tenue font-normal">(opcional)</span></span>
         <input name="interes" maxLength={200} placeholder="Musculación, funcional, a la tarde…" className="campo" defaultValue={estado.datos?.interes} /></label>
       {/* Para robots: una persona no ve este campo y no lo llena. */}
-      <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+      <CampoAntiRobot />
       {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
       <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-8">{enviando ? "Enviando…" : "Quiero probar"}</button>
       <p className="text-sm texto-tenue">Solo usamos tu WhatsApp para escribirte por la clase de prueba.</p>

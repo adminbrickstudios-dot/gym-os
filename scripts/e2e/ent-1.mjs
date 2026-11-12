@@ -12,7 +12,12 @@ async function primero(p, estado) {
   await p.goto(`${G}/panel/socios?estado=${estado}`);
   const a = p.locator('main ul a[href^="/panel/socios/"]').first();
   await a.waitFor({ timeout: 30000 });
-  return (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  const t = (await a.locator(".font-semibold").first().innerText()).trim();
+  // El demo tiene homónimos (varias "Agustina Ejemplo", unas al día y otras vencidas) y no tiene DNI: el nombre no alcanza.
+  // Se identifica por el número de socio, que la búsqueda de la Entrada entiende y es único.
+  const numero = t.match(/#(\d+)/)?.[1];
+  if (!numero) throw new Error(`la lista no muestra el número de ${t}`);
+  return { nombre: t.replace(/#\d+/, "").trim(), numero };
 }
 try {
   const r = await pagina(b, COMPU);
@@ -23,16 +28,25 @@ try {
     window.AudioContext = class extends Orig { createOscillator() { const o = super.createOscillator(); const st = o.start.bind(o); o.start = (t) => { window.__sonidos.push(o.frequency.value); return st(t); }; return o; } };
   });
   await entrar(r, "recepcion@ejemplo.invalid");
-  const verde = await primero(r, "al_dia"), rojo = await primero(r, "vencidos");
+  const V = await primero(r, "al_dia"), R = await primero(r, "vencidos");
+  // La fila exacta de ese socio (nombre y #número), aunque haya homónimos.
+  const filaDe = (pg, x) => pg.locator("button.fila").filter({ hasText: new RegExp(`#${x.numero}(?!\\d)`) }).first();
+  // Escribe el número y elige al socio con Enter si es el primero de la lista, o con un clic si no (con homónimos el orden es por nombre).
+  const elegir = async (pg, campo, x, conEnter = false) => {
+    await campo.fill(x.numero);
+    const f = filaDe(pg, x);
+    await f.waitFor({ timeout: 15000 });
+    if (conEnter && await pg.locator("button.fila").first().evaluate((e, n) => new RegExp(`#${n}(?!\\d)`).test(e.textContent ?? ""), x.numero)) await campo.press("Enter");
+    else await f.click();
+  };
+  const verde = V.nombre, rojo = R.nombre;
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 30000 });
   if ((await r.locator("[data-sonido]").getAttribute("data-sonido")) === "no") await r.locator("[data-sonido]").click();
 
   // Rojo: pantalla completa, Enter no anota, Esc vuelve.
-  await buscar.fill(rojo);
-  await r.locator("button.fila", { hasText: rojo }).first().waitFor({ timeout: 15000 });
-  await buscar.press("Enter");
+  await elegir(r, buscar, R, true);
   const ver = r.locator("[data-veredicto]");
   await ver.waitFor({ timeout: 30000 });
   const caja = await ver.boundingBox();
@@ -49,9 +63,7 @@ try {
   chequear(await buscar.evaluate((e) => e === document.activeElement && e.value === ""), "Esc vuelve a buscar, con foco", "Esc no volvió al buscador");
 
   // Verde: Enter anota.
-  await buscar.fill(verde);
-  await r.locator("button.fila", { hasText: verde }).first().waitFor({ timeout: 15000 });
-  await buscar.press("Enter");
+  await elegir(r, buscar, V, true);
   await r.locator('[data-veredicto="verde"]').waitFor({ timeout: 30000 });
   await r.waitForTimeout(400);
   const sonVerde = (await r.evaluate(() => window.__sonidos.slice())).slice(sonRojo.length);
@@ -62,8 +74,7 @@ try {
   await r.locator('[data-hecho] button:has-text("Deshacer")').click();     // no dejar la prueba anotada
 
   // Escribir con el veredicto abierto arranca otra búsqueda.
-  await buscar.fill(rojo);
-  await r.locator("button.fila", { hasText: rojo }).first().click();
+  await elegir(r, buscar, R);
   await ver.waitFor({ timeout: 30000 });
   await r.locator('[data-veredicto] button:has-text("Dejar pasar igual")').focus();   // el foco en otro lado, como después de un clic
   await r.keyboard.type(verde.slice(0, 4));
@@ -75,8 +86,7 @@ try {
   await r.reload();
   await r.locator('[data-sonido="no"]').waitFor({ timeout: 30000 });
   const antes = await r.evaluate(() => window.__sonidos.length);
-  await buscar.fill(rojo);
-  await r.locator("button.fila", { hasText: rojo }).first().click();
+  await elegir(r, buscar, R);
   await ver.waitFor({ timeout: 30000 });
   await r.waitForTimeout(400);
   chequear(await r.evaluate(() => window.__sonidos.length) === antes, "🔇 se apaga y queda apagado en esta compu", "sonó igual");
@@ -88,8 +98,7 @@ try {
   const c = await pagina(b, CELU);
   await entrar(c, "recepcion@ejemplo.invalid");
   await c.goto(`${G}/panel/entrada`);
-  await c.locator('input[aria-label="Buscar socio"]').fill(rojo);
-  await c.locator("button.fila", { hasText: rojo }).first().click();
+  await elegir(c, c.locator('input[aria-label="Buscar socio"]'), R);
   await c.locator("[data-veredicto]").waitFor({ timeout: 30000 });
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
   const botones = await c.locator('[data-veredicto] a:has-text("Cobrar")').isVisible();

@@ -7,12 +7,22 @@ import { conflictoDe } from "@/lib/panel/version";
 const listo = () => { revalidatePath("/panel/planes"); return {}; };
 const MAL_MONTO = "No entiendo el precio: escribilo como 84.500 o 84500,50";
 
-export async function crearPlan(_: { error?: string }, f: FormData): Promise<{ error?: string; ok?: number }> {
+export type EstadoNuevoPlan = { error?: string; ok?: number; campo?: string; valores?: Record<string, string> };
+
+/** Regla 7 y 8 de FLUIDEZ: si falla, vuelven los campos escritos (React 19 vacía el formulario al terminar) y el error dice en qué campo. */
+export async function crearPlan(_: EstadoNuevoPlan, f: FormData): Promise<EstadoNuevoPlan> {
+  const valores = Object.fromEntries([...f.entries()].filter(([, v]) => typeof v === "string")) as Record<string, string>;
+  const r = await crearPlanInterno(f);
+  // Si el plan ya se creó (falló solo la matrícula) no se devuelven los campos: volver a enviar lo duplicaría.
+  return r.error && !r.error.startsWith("El plan se creó") ? { ...r, valores } : r;
+}
+
+async function crearPlanInterno(f: FormData): Promise<EstadoNuevoPlan> {
   const panel = await contextoPanel();
   const tipo = String(f.get("tipo"));
   const precio = leerMonto(String(f.get("precio") ?? ""));
-  if (Number.isNaN(precio)) return { error: MAL_MONTO };
-  if (!(precio > 0)) return { error: "Poné el precio" };
+  if (Number.isNaN(precio)) return { error: MAL_MONTO, campo: "precio" };
+  if (!(precio > 0)) return { error: "Poné el precio", campo: "precio" };
   try {
     const id = await rpc<string>("guardar_plan", { p_gimnasio_id: panel.gimnasio.id, p_plan_id: null, p_datos: {
       tipo, nombre: f.get("nombre"), descripcion: f.get("descripcion"),
@@ -26,7 +36,7 @@ export async function crearPlan(_: { error?: string }, f: FormData): Promise<{ e
     const mat = String(f.get("matricula") ?? "").trim();
     if (tipo === "membresia" && mat) {
       const m = leerMonto(mat);
-      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde ✏️ Editar.` };
+      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde Editar.` };
       await rpc("guardar_matricula_plan", { p_plan_id: id, p_monto: m, p_anual: f.get("matricula_anual") === "on" });
     }
     listo();

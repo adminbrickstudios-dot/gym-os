@@ -53,6 +53,7 @@ try {
   ok("dirección propia sumada, limpia");
   await capturar(p, "admin-detalle", true);
   await fila(`olympo-${s}.vercel.app`).locator('button:has-text("Quitar")').click();
+  await p.locator("[data-confirmar-ok]").click();   // la confirmación es la hoja del sistema, no el confirm del navegador
   await fila(`olympo-${s}.vercel.app`).waitFor({ state: "detached", timeout: 30000 });
   ok("dirección propia quitada");
 

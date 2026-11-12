@@ -5,6 +5,7 @@
 // opcionalmente hay una barra fija a la derecha. Todo lo que dice y hace sale de
 // las funciones de la base de siempre (estado_acceso, registrar_ingreso, leer_qr…):
 // acá no se calcula nada.
+import { urlDarDeAlta } from "@/lib/panel/alta-url";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition, startTransition } from "react";
@@ -13,8 +14,11 @@ import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, mod
 import { FormDejarPasar } from "./FormDejarPasar";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
+import { CierreInactividad } from "@/app/panel/pin/CierreInactividad";
+import { crearDetectorLector, esLecturaRepetida, LECTOR_MIN_CARACTERES, LECTOR_PAUSA_MAX_MS } from "@/app/panel/entrada/lector";
 import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
 import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
+import { leerConReintento } from "@/lib/panel/lectura";
 import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { Hoja } from "@/components/ui/Hoja";
@@ -35,7 +39,7 @@ export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
 export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
 
 const ES_QR = /^GYMOS1\./;
-const EMOJI: Record<string, string> = { verde: "✓", amarillo: "!", naranja: "!", rojo: "", gris: "" };
+const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
 type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio" | "prueba";
 /** VD-51: lo que se escribe para darle la prueba gratis a un DNI nuevo (o a quien reservó desde la página). */
@@ -81,7 +85,7 @@ const esEditable = (t: EventTarget | null) => {
 function conPuntos(t: string): string {
   if (!/^[\d.]*$/.test(t)) return t;
   const d = t.replace(/\./g, "");
-  return d.length >= 7 ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : d;
+  return d.length >= 7 && d.length <= 8 ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : d;
 }
 const sinPuntos = (t: string) => (/^[\d.]*$/.test(t) ? t.replace(/\./g, "") : t);
 
@@ -126,6 +130,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [eventosHoy, setEventosHoy] = useState<EventoHoy[]>([]);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [hecho, setHecho] = useState<Hecho | null>(null);
+  const [anulada, setAnulada] = useState<string | null>(null);   // "Entrada de Juan anulada": el Deshacer no vuelve a la búsqueda en silencio
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -146,6 +151,9 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const refrescoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ocupado, empezar] = useTransition();
   const enterPendiente = useRef(false);
+  // C5: lector USB. El detector mide la velocidad entre teclas; la última lectura sirve para ignorar el doble Enter del lector.
+  const detector = useRef(crearDetectorLector());
+  const ultimaLectura = useRef<{ codigo: string; en: number } | null>(null);
   const [ultimas, setUltimas] = useState<UltimaEntrada[]>([]);
   const [textoBarra, setTextoBarra] = useState("");
   const [camara, setCamara] = useState(false);
@@ -160,6 +168,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const pasoRef = useRef<Paso>("escribir");
   const trabajando = useRef(false);
   const buffer = useRef({ t: "", cuando: 0 });
+  const rafaga = useRef("");
+  const ultimaTecla = useRef(0);  // C5: cuándo fue la tecla anterior; una tecla a menos de 50 ms de otra es del lector, nunca un atajo
   const cobrarRef = useRef<HTMLAnchorElement>(null);
   const fichaRef = useRef<HTMLAnchorElement>(null);
   // Los oyentes de teclado viven mucho: leen estas copias para no quedarse con valores viejos.
@@ -225,7 +235,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     trabajando.current = false;
     if (enfocar) setTimeout(() => campo.current?.focus(), 0);
   }, []);
-  const cerrar = useCallback(() => { setAbierta(false); setTimeout(() => reiniciar(), 0); }, [reiniciar]);
+  // C5: después de cada ingreso el foco vuelve a donde se escribe (con la barra fija, a la barra) para que el lector siga andando.
+  const cerrar = useCallback(() => {
+    setAbierta(false);
+    setTimeout(() => { reiniciar(); if (conBarraRef.current) setTimeout(() => barra.current?.focus(), 60); }, 0);
+  }, [reiniciar]);
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
@@ -298,7 +312,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (!p) return p;
       if (r.error) return { ...p, error: r.error };
       const info = r.p ?? null;
-      if (info?.existe && info.usada) return { ...p, info, error: `Ya usó su prueba gratis el ${info.dia} · Hacete socio.` };
+      if (info?.existe && info.usada) return { ...p, info, error: `Ya usó la prueba gratis el ${info.dia}: ofrecele un plan o un pase.` };
       return { ...p, info, nombre: info?.existe ? info.nombre ?? "" : p.nombre, telefono: info?.existe ? info.telefono ?? "" : p.telefono };
     }));
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-prueba-nombre]")?.focus(), 0);
@@ -343,7 +357,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const salirConDni = useCallback((dniEscrito: string) => {
     if (trabajando.current) return;
     empezar(async () => {
-      const r = await buscarSociosRapido(dniEscrito);
+      const r = await leerConReintento(() => buscarSociosRapido(dniEscrito));
       if (r.error) { setError(r.error); return; }
       const lista = r.socios ?? [];
       if (lista.length === 0) { setNadie(dniEscrito); return; }
@@ -370,22 +384,38 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   }, [sedeId, sonido, anotado]);
 
   // Enter sobre lo escrito: QR del lector, llavero, o buscar y elegir (la base busca por DNI, número o nombre).
-  const resolver = useCallback((crudo: string) => empezar(async () => {
+  // `lector`: lo que entró fue una lectura (ver lector.ts). Si no se encuentra a nadie suena el error y el campo queda vacío y con el foco,
+  // así la próxima lectura no se pega a este código. Quién es y si entra lo sigue diciendo solo la base.
+  const resolver = useCallback((crudo: string, lector = false) => empezar(async () => {
     const t = sinPuntos(crudo).trim();
     if (!t) return;
+    const volverAlCampo = () => { if (lector) { setTexto(""); setTimeout(() => campo.current?.focus(), 0); } };
     setError(null); setNadie(null);
-    if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); return; }
+    if (ES_QR.test(t)) { await directo(await leerQR(t), "qr_socio"); volverAlCampo(); return; }
     if (conLlavero && /^[A-Za-z0-9-]{4,30}$/.test(t) && !/^\d{7,9}$/.test(t)) {
       const l = await leerLlavero(t);
-      if (l.socio || l.error) { await directo(l, "nfc"); return; }
+      if (l.socio || l.error) { await directo(l, "nfc"); volverAlCampo(); return; }
     }
-    const r = await buscarSociosRapido(t);
-    if (r.error) { setError(r.error); return; }
+    const r = await leerConReintento(() => buscarSociosRapido(t));
+    if (r.error) { setError(r.error); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     const lista = r.socios ?? [];
     setSocios(lista); setListaPara(t);
-    if (lista.length === 0) { setNadie(t); return; }
+    if (lista.length === 0) { setNadie(t); if (sonido) sonar("rojo"); volverAlCampo(); return; }
     elegir(lista[0]);
-  }), [conLlavero, directo, elegir]);
+  }), [conLlavero, directo, elegir, sonido]);
+
+  // C5: una lectura del lector USB. El mismo código dos veces seguidas (doble Enter) es un solo ingreso; y de todos modos
+  // la base no anota dos veces la misma visita (registrar_ingreso es idempotente: el segundo dice "ya había entrado").
+  const leer = useCallback((crudo: string) => {
+    const t = sinPuntos(crudo).trim();
+    if (!t) return;
+    const ahora = Date.now();
+    if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+    ultimaLectura.current = { codigo: t, en: ahora };
+    enterPendiente.current = false;
+    setTexto("");
+    resolver(t, true);
+  }, [resolver]);
 
   // BASE-3: el Enter que llegó mientras se terminaba de buscar corre ahora (con lo que haya en pantalla).
   useEffect(() => {
@@ -399,7 +429,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const iniciarAlta = useCallback((dniEscrito: string) => {
     setAlta({ dni: dniEscrito, nombre: "", apellido: "", telefono: "", plan: "", paso: "datos", planes: null, ofrecido: null, vinculado: null, error: null });
     setPaso("alta"); setError(null);
-    void planesParaAlta(sedeId).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)));
+    // Causa raíz del Plan sin tarjetas: Next aborta el pedido en vuelo si justo se refresca la pantalla (entrada en vivo, cierre de la hoja de cobro).
+    // Es una lectura: se repite; si no hay caso, se dice en vez de dejar el esqueleto para siempre.
+    leerConReintento(() => planesParaAlta(sedeId)).then((r) => setAlta((a) => (a ? { ...a, planes: r.planes ?? [], error: r.error ?? a.error } : a)))
+      .catch(() => setAlta((a) => (a ? { ...a, planes: [], error: "No se pudieron cargar los planes: revisá la conexión y volvé a abrir el alta." } : a)));
     setTimeout(() => document.querySelector<HTMLInputElement>("[data-alta-nombre]")?.focus(), 0);
   }, [sedeId]);
   const guardarAlta = (cobrarYa: boolean) => {
@@ -422,10 +455,16 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const r = await prospectoPorTelefono(celular);
     setAlta((a) => (a ? { ...a, ofrecido: r.prospecto ?? null, vinculado: r.prospecto ? a.vinculado : null } : a));
   };
-  const enviar = useCallback((crudo: string) => {
+  const enviar = useCallback((crudo: string, lector = false) => {
+    if (lector) {
+      const t = sinPuntos(crudo).trim();
+      const ahora = Date.now();
+      if (esLecturaRepetida(ultimaLectura.current, t, ahora)) return;
+      ultimaLectura.current = { codigo: t, en: ahora };
+    }
     setAbierta(true);
     setTexto(crudo);
-    resolver(crudo);
+    resolver(crudo, lector);
   }, [resolver]);
 
   // Coincidencias mientras escribe (hasta 3).
@@ -434,7 +473,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     const t = sinPuntos(texto).trim();
     if (t.length < 2 || ES_QR.test(t)) { setSocios([]); setListaPara(""); setNadie(null); return; }
     const id = setTimeout(async () => {
-      const r = await buscarSociosRapido(t);
+      let r: Awaited<ReturnType<typeof buscarSociosRapido>>;
+      try { r = await leerConReintento(() => buscarSociosRapido(t)); } catch { setError("No se pudo buscar: revisá la conexión y probá de nuevo."); return; }
       if (sinPuntos(textoRef.current).trim() !== t) return;
       if (r.error) { setError(r.error); return; }
       setError(null);
@@ -491,11 +531,23 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (e.key === "/" && !editable && !abiertaRef.current) { e.preventDefault(); if (conBarraRef.current) barra.current?.focus(); else abrir(); return; }
       const imprimible = e.key.length === 1;
       const digito = /^[0-9]$/.test(e.key);
+      const delLector = imprimible && e.timeStamp - ultimaTecla.current < LECTOR_PAUSA_MAX_MS;
+      if (imprimible) ultimaTecla.current = e.timeStamp;
 
       if (abiertaRef.current) {
         if (editable) return;
         const p = pasoRef.current;
         if (p === "alta") return;   // el alta tiene sus propios campos
+        // C5: con un resultado en pantalla, las teclas que llegan de corrido (un lector leyendo el código siguiente) no son atajos:
+        // una "c" o una "s" dentro del código no puede cobrar ni marcar una salida.
+        // Y si lo que llegó de corrido termina en Enter, era una lectura: se empieza de nuevo con ese código (nunca anota al de antes).
+        if (p !== "escribir") {
+          if (imprimible) rafaga.current = delLector ? rafaga.current + e.key : e.key;
+          else if (e.key === "Enter" && rafaga.current.length >= LECTOR_MIN_CARACTERES && e.timeStamp - ultimaTecla.current < LECTOR_PAUSA_MAX_MS * 2) {
+            e.preventDefault(); const c = rafaga.current; rafaga.current = ""; reiniciar(); leer(c); return;
+          }
+          if (delLector && !digito) return;
+        }
         if (p === "escribir") {
           if (e.key.toLowerCase() === "a" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarAltaRef.current(nadieRef.current!); return; }
           if (e.key.toLowerCase() === "p" && pruebaModoRef.current && pruebaModoRef.current !== "no" && /^\d{6,9}$/.test(nadieRef.current ?? "")) { e.preventDefault(); iniciarPruebaRef.current(nadieRef.current!); return; }
@@ -530,7 +582,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       if (document.querySelector('[aria-modal="true"]')) return;
       if (e.key === "Enter") {
         const b = buffer.current; buffer.current = { t: "", cuando: 0 };
-        if (b.t.length >= 4 && e.timeStamp - b.cuando < 60) { e.preventDefault(); enviar(b.t); }
+        if (b.t.length >= 4 && e.timeStamp - b.cuando < 60) { e.preventDefault(); enviar(b.t, true); }
         return;
       }
       if (!imprimible) return;
@@ -546,7 +598,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     };
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
-  }, [propia, abrir, cerrar, reiniciar, resolver, enviar]);
+  }, [propia, abrir, cerrar, reiniciar, resolver, enviar, leer]);
 
   useEffect(() => {
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
@@ -607,7 +659,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const deshacer = () => empezar(async () => {
     if (!hecho) return;
     const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
-    if (r.error) setError(r.error); else reiniciar();
+    if (r.error) setError(r.error); else { const n = hecho.nombre; reiniciar(); setAnulada(`Entrada de ${n} anulada`); }
   });
   // Esc en el alta vuelve a la búsqueda (no tira lo escrito de golpe); otra vez, cierra.
   const alCerrarHoja = () => {
@@ -677,14 +729,16 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   return (
     <>
+      {/* C6 · Compu compartida: sin uso el tiempo que puso el gimnasio, suelta a quien atiende y después cierra la sesión (0 = apagado). */}
+      {(cfg.cerrar_por_inactividad_min ?? 0) > 0 && <CierreInactividad minutos={cfg.cerrar_por_inactividad_min} />}
       {/* B · El botón: redondo y flotante (en el celular, centrado sobre la barra de abajo). En Inicio está el grande. */}
       {ruta !== "/panel" && (
         <button type="button" data-boton-ventana onClick={() => (abierta ? cerrar() : conBarra ? barra.current?.focus() : abrir())}
           aria-label={abierta ? "Cerrar la Entrada" : "Abrir la Entrada"} aria-pressed={abierta} title="Entrada (F2)"
           className="fixed z-40 left-1/2 -translate-x-1/2 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:left-auto lg:translate-x-0 lg:right-6 lg:bottom-6
-            size-16 rounded-full bg-[var(--verde)] text-white text-3xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          style={{ boxShadow: "0 10px 28px -10px rgb(0 0 0 / 0.6)" }}>
-          <span aria-hidden>{abierta ? "✕" : ""}</span>
+            size-16 rounded-full bg-[var(--acento)] text-[var(--sobre-acento)] text-3xl flex items-center justify-center active:scale-95 transition-transform"
+          style={{ boxShadow: "var(--sombra-flota)" }}>
+          <span aria-hidden><Icono nombre={abierta ? "cerrar" : "puerta"} /></span>
         </button>
       )}
 
@@ -695,6 +749,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
           <input ref={barra} data-barra-dni value={conPuntos(textoBarra)} inputMode="numeric" autoComplete="off" aria-label="DNI, número de socio o nombre"
             onChange={(e) => setTextoBarra(sinPuntos(e.target.value))}
             onKeyDown={(e) => {
+              detector.current.tecla(e.key, e.timeStamp);
+              // C5: lectura del lector USB en la barra fija: se toma del campo, se vacía y el foco se queda para la próxima.
+              if (e.key === "Enter" && detector.current.enter(e.timeStamp) && e.currentTarget.value.trim()) {
+                e.preventDefault(); const t = sinPuntos(e.currentTarget.value); setTextoBarra(""); enviar(t, true); return;
+              }
               if (e.key === "Enter" && textoBarra.trim()) { e.preventDefault(); const t = textoBarra; setTextoBarra(""); enviar(t); }
               if (e.key === "Escape") { setTextoBarra(""); barra.current?.blur(); }
             }}
@@ -715,12 +774,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         </aside>
       )}
 
-      <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl">
+      <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl" atras={false}>
         <div data-ventana-entrada data-paso={paso} className="max-h-[88dvh] overflow-y-auto">
           {emergencia && <div className="p-4 pb-0"><CartelEmergencia e={emergencia} /></div>}
           {paso === "escribir" && (
             <div className="p-6 sm:p-8 space-y-4">
               <p className="titulo text-2xl text-center"><Icono nombre="puerta" /> Entrada</p>
+              {anulada && <p role="status" className="pildora pildora-verde whitespace-normal justify-center" data-ventana-anulada><Icono nombre="ok" /> {anulada}</p>}
               {/* VD-1b: el dueño con varias sedes elige en cuál anota (queda en esta compu). */}
               {sedes.length > 1 && (
                 <div role="group" aria-label="Sede" className="flex flex-wrap justify-center gap-2" data-ventana-sedes>
@@ -731,8 +791,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 </div>
               )}
               <input ref={campo} data-ventana-campo value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
-                onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); }}
+                onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); setAnulada(null); }}
                 onKeyDown={(e) => {
+                  detector.current.tecla(e.key, e.timeStamp);
+                  // C5: tipeo de corrido terminado en Enter = lectura del lector. Se toma lo que hay en el campo (no el estado, que puede ir un render atrás).
+                  if (e.key === "Enter" && detector.current.enter(e.timeStamp)) { e.preventDefault(); leer(e.currentTarget.value); return; }
                   if (e.code === "NumpadDecimal") { e.preventDefault(); return; }   // el punto del teclado numérico no va en un DNI
                   if (e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey && !e.altKey && dni) { e.preventDefault(); iniciarAlta(nadie!); }
                   else if (e.key.toLowerCase() === "p" && !e.ctrlKey && !e.metaKey && !e.altKey && dni && pruebaModo && pruebaModo !== "no") { e.preventDefault(); iniciarPrueba(nadie!); }
@@ -777,11 +840,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   <div className="flex flex-wrap gap-2">
                     {dni
                       ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}><Icono nombre="mas" /> Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
-                      : <Link href="/panel/socios/nuevo" className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
+                      : <Link href={urlDarDeAlta(nadie)} className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
                     {dni && pruebaModo && pruebaModo !== "no" && (
                       <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}><Icono nombre="regalo" /> Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
                     )}
-                    {dni && <Link href="/panel/socios/nuevo" className="boton" data-ventana-alta-completa>Alta completa</Link>}
+                    {dni && <Link href={urlDarDeAlta(nadie)} className="boton" data-ventana-alta-completa>Alta completa</Link>}
                   </div>
                 </div>
               )}
@@ -823,7 +886,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               <ol className="flex gap-2 text-sm" aria-label="Pasos del alta rápida">
                 {["Datos", "Plan", "Cobro", "Entra"].map((n, i) => {
                   const actual = alta.paso === "datos" ? 0 : 1;
-                  return <li key={n} className={`flex-1 min-w-0 rounded-full px-2 py-1 text-center truncate border ${i === actual ? "border-[var(--acento)] font-semibold" : "border-[var(--borde)] texto-tenue"}`}>{i < actual ? "✓ " : `${i + 1} · `}{n}</li>;
+                  return <li key={n} className={`flex-1 min-w-0 rounded-full px-2 py-1 text-center truncate border ${i === actual ? "border-[var(--acento)] font-semibold" : "border-[var(--borde)] texto-tenue"}`}>{i < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}</li>;
                 })}
               </ol>
 
@@ -936,7 +999,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "anotado" && hecho && (
             <div className="p-8 text-center space-y-4" data-ventana-hecho={hecho.resultado} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? "" : hecho.alerta_prestamo ? "!" : <Tilde tamano={72} />}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? <Icono nombre="prohibido" /> : hecho.alerta_prestamo ? <Icono nombre="alerta" /> : <Tilde tamano={72} />}</div>
               <p className="titular text-4xl break-words">{hecho.nombre}</p>
               <p className="text-xl font-semibold">
                 {hecho.repetido ? (hecho.texto ?? "Ya estaba anotado hace un momento")
@@ -959,7 +1022,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
           {paso === "salio" && salio && (
             <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? "" : ""}</div>
+              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? <Icono nombre="ok" /> : <Icono nombre="info" />}</div>
               {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
                 <>
                   <p className="titular text-4xl break-words">{salio.nombre}</p>

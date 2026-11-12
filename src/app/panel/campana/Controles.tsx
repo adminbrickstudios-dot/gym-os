@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { guardarPreferenciaAviso, marcarTodoLeido } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-37: "Marcar todo como leído". */
 export function MarcarTodo({ sinLeer }: { sinLeer: number }) {
@@ -20,7 +21,7 @@ export function MarcarTodo({ sinLeer }: { sinLeer: number }) {
           refrescarPendientes();
           router.refresh();
         })}>
-        {ocupado ? "Marcando…" : "✓ Marcar todo como leído"}
+        {ocupado ? "Marcando…" : <><Icono nombre="ok" /> Marcar todo como leído</>}
       </button>
       {error && <p role="alert" className="mensaje mensaje-error">{error}</p>}
     </div>
@@ -44,11 +45,16 @@ export function PreferenciasAvisos({ inicial }: { inicial: { tipo: string; app: 
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const cambiar = (tipo: string, app: boolean) => empezar(async () => {
+  const cambiar = (tipo: string, app: boolean) => {
+    // La casilla cambia en el mismo instante (fuera de la transición, que la dejaría para después); si la base no lo guarda, vuelve atrás y dice por qué.
+    const poner = (valor: boolean) => setPrefs((p) => p.map((x) => (x.tipo === tipo ? { ...x, app: valor } : x)));
+    poner(app);
+    guardar(tipo, app, poner);
+  };
+  const guardar = (tipo: string, app: boolean, poner: (valor: boolean) => void) => empezar(async () => {
     setError(null); setOk(null);
     const r = await guardarPreferenciaAviso(tipo, app);
-    if (r.error) { setError(r.error); return; }
-    setPrefs((p) => p.map((x) => (x.tipo === tipo ? { ...x, app } : x)));
+    if (r.error) { poner(!app); setError(r.error); return; }
     setOk("Guardado.");
     refrescarPendientes();
     router.refresh();

@@ -31,7 +31,7 @@ try {
   await r.locator('button:has-text("Cerrar con este monto")').click();
   await r.getByText("Faltan $100").waitFor({ timeout: 30000 });
   const link = decodeURIComponent(await r.locator("a[data-compartir-cierre]").getAttribute("href"));
-  chequear(/^https:\/\/wa\.me\/\?text=Cierre de caja/.test(link) && /Faltaron \$100/.test(link), "CAJ-2: “Mandar el cierre por WhatsApp” con el cierre escrito", link);
+  chequear(/^https:\/\/wa\.me\/\?text=(?:\p{Extended_Pictographic}️?\s*)?Cierre de caja/u.test(link) && /Faltaron \$100/.test(link), "CAJ-2: “Mandar el cierre por WhatsApp” con el cierre escrito", link);
   await r.locator('button:has-text("Listo")').click();
   chequear(await r.locator('main a:has-text("Turnos anteriores")').count() === 0, "la recepción no ve “Turnos anteriores”", "la recepción lo ve");
   await r.goto(`${G}/panel/caja/historial`);

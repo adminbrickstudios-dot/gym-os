@@ -137,7 +137,7 @@ function Ficha({ persona, perfil, actividades }: { persona: Persona; perfil: Per
 
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" className="boton boton-principal" disabled={ocupado} onClick={guardar}>{ocupado ? "Guardando…" : "Guardar"}</button>
-            {mensaje && <p role={mensaje.tipo === "error" ? "alert" : "status"} className={`pildora ${mensaje.tipo === "error" ? "pildora-rojo" : "pildora-verde"}`}>{mensaje.tipo === "error" ? "!" : "✓"}{mensaje.texto}</p>}
+            {mensaje && <p role={mensaje.tipo === "error" ? "alert" : "status"} className={`pildora ${mensaje.tipo === "error" ? "pildora-rojo" : "pildora-verde"}`}><Icono nombre={mensaje.tipo === "error" ? "alerta-circulo" : "ok"} /> {mensaje.texto}</p>}
           </div>
         </div>
       )}

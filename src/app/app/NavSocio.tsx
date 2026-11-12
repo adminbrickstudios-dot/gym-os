@@ -38,12 +38,12 @@ export function NavSocio({ clases, rutina }: { clases: boolean; rutina: boolean 
     { clave: "inicio", ruta: "/app", emoji: "inicio", titulo: "Inicio", activa: (p) => p === "/app" },
     clases && { clave: "clases", ruta: "/app/clases", emoji: "calendario", titulo: "Clases", activa: (p) => p.startsWith("/app/clases") },
     rutina && { clave: "rutina", ruta: "/app/rutina", emoji: "pesa", titulo: "Rutina", activa: (p) => p.startsWith("/app/rutina") },
-    { clave: "yo", ruta: "/app/yo", emoji: "persona", titulo: "Yo", activa: (p) => /^\/app\/(yo|historial|cuenta|novedades|pago|mensajes|info|ayuda|resumen|pedir-datos)/.test(p) },
+    { clave: "yo", ruta: "/app/yo", emoji: "persona", titulo: "Yo", activa: (p) => /^\/app\/(yo|historial|cuenta|novedades|pago|mensajes|info|ayuda|resumen|pedir-datos|plan|recibo|locker|pt)/.test(p) },
   ];
   const pestanas = todas.filter((x): x is Pestana => !!x);
   return (
     <nav aria-label="Secciones de la app" data-nav-socio={pestanas.map((x) => x.clave).join(",")}
-      className="nav-socio fixed bottom-0 inset-x-0 z-30 border-t border-[var(--borde)] backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_90%,transparent)] pb-[env(safe-area-inset-bottom)]">
+      className="nav-socio fixed bottom-0 inset-x-0 z-30 border-t border-[var(--borde)] bg-[var(--fondo)] pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto max-w-lg px-2 h-16 flex">
         {pestanas.map((x) => {
           const activa = x.activa(ruta);
@@ -51,9 +51,9 @@ export function NavSocio({ clases, rutina }: { clases: boolean; rutina: boolean 
           return (
             <li key={x.clave} className="flex-1 min-w-0">
               <Link href={destino} onClick={(e) => alTocar(e, destino)} aria-current={activa ? "page" : undefined} data-pestana={x.clave}
-                className={`h-full flex flex-col items-center justify-center gap-0.5 rounded-xl transition active:scale-95 ${activa ? "text-[var(--acento)] font-semibold" : "texto-suave"}`}>
+                className={`h-full flex flex-col items-center justify-center gap-0.5 rounded-[var(--radio)] transition active:scale-95 ${activa ? "text-[var(--acento)] font-semibold" : "texto-suave"}`}>
                 <span className="text-2xl leading-none" aria-hidden><Icono nombre={x.emoji} /></span>
-                <span className="text-xs">{x.titulo}</span>
+                <span className="text-[13px]">{x.titulo}</span>
               </Link>
             </li>
           );

@@ -12,7 +12,9 @@ import { TarjetasPlan, PrimerPago } from "@/components/panel/TarjetasPlan";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
+import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { Icono } from "@/components/ui/Icono";
+import { TEXTO_CAMBIOS_SIN_GUARDAR, useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type PlanAlta = PlanParaAlta;
 
@@ -35,8 +37,70 @@ function esMenor(nacimiento: string) {
   return cumple18 > hoy;
 }
 
+type PagoPasado = { fecha: string; monto: string; medio: string };
+const MEDIOS_PASADO = [["efectivo", "Efectivo"], ["transferencia", "Transferencia"], ["debito", "Débito"], ["credito", "Crédito"]] as const;
+const diaAnterior = (iso: string) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - 1); return d.toISOString().slice(0, 10); };
+
+/** C10 · Cargar en el pasado: fecha de alta y pagos de antes. Solo dueño y encargado (la base lo exige). Los pagos no entran en la caja de hoy. */
+function CargaPasada({ hoy, plan, abierto, alAbrir }: { hoy: string; plan: string; abierto: boolean; alAbrir: (v: boolean) => void }) {
+  const [fechaAlta, setFechaAlta] = useState("");
+  const [pagos, setPagos] = useState<PagoPasado[]>([{ fecha: "", monto: "", medio: "efectivo" }]);
+  const ayer = diaAnterior(hoy);
+  const cambiar = (i: number, campo: keyof PagoPasado, valor: string) => setPagos((p) => p.map((x, j) => (j === i ? { ...x, [campo]: valor } : x)));
+  // Solo se mandan los pagos con algo escrito: la base dice en palabras qué le falta a uno incompleto.
+  const enviados = pagos.filter((p) => p.fecha || p.monto);
+  return (
+    <fieldset className="space-y-3" data-carga-pasada>
+      <legend className="titulo text-2xl mb-2"><Icono nombre="calendario" /> Alta en el pasado</legend>
+      {!abierto ? (
+        <>
+          <p className="texto-suave text-sm">¿Se anotó y pagó hace días o meses? Cargá su fecha de alta y sus pagos de antes: la cobertura y la deuda salen como si los hubieras cobrado ese día.</p>
+          <button type="button" className="boton" data-pasado-abrir onClick={() => alAbrir(true)}><Icono nombre="mas" /> Cargar fecha de alta y pagos de antes</button>
+        </>
+      ) : (
+        <div className="space-y-4">
+          <input type="hidden" name="pasado" value="1" />
+          <input type="hidden" name="fecha_alta" value={fechaAlta} />
+          <input type="hidden" name="pagos_pasados" value={JSON.stringify(enviados)} />
+          {!plan && <Mensaje tipo="aviso">Elegí el plan arriba: los pagos son de su membresía.</Mensaje>}
+          <label className="block space-y-2 sm:max-w-xs">
+            <span className="etiqueta">Fecha de alta</span>
+            <input type="date" className="campo" max={hoy} value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} data-pasado-alta />
+            <span className="block text-sm texto-tenue">Vacía: queda la fecha de su primer pago.</span>
+          </label>
+          <p className="etiqueta">Pagos de antes</p>
+          <ul className="space-y-3">
+            {pagos.map((p, i) => (
+              <li key={i} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] items-end" data-pasado-pago={i}>
+                <label className="block space-y-1"><span className="etiqueta">Fecha</span>
+                  <input type="date" className="campo" max={ayer} value={p.fecha} onChange={(e) => cambiar(i, "fecha", e.target.value)} data-pasado-fecha /></label>
+                <label className="block space-y-1"><span className="etiqueta">Monto</span>
+                  <input className="campo" inputMode="decimal" placeholder="25000" value={p.monto} onChange={(e) => cambiar(i, "monto", e.target.value)} data-pasado-monto /></label>
+                <label className="block space-y-1"><span className="etiqueta">Medio</span>
+                  <select className="campo" value={p.medio} onChange={(e) => cambiar(i, "medio", e.target.value)} data-pasado-medio>
+                    {MEDIOS_PASADO.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+                  </select></label>
+                {pagos.length > 1 && <button type="button" className="boton" aria-label="Sacar este pago" onClick={() => setPagos((x) => x.filter((_, j) => j !== i))}><Icono nombre="cerrar" /></button>}
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-wrap gap-2">
+            {pagos.length < 24 && <button type="button" className="boton" data-pasado-otro onClick={() => setPagos((x) => [...x, { fecha: "", monto: "", medio: "efectivo" }])}><Icono nombre="mas" /> Otro pago</button>}
+            <button type="button" className="boton" onClick={() => alAbrir(false)}>Sacar la carga en el pasado</button>
+          </div>
+          <p className="text-sm texto-tenue">Las fechas tienen que ser de días que ya pasaron (un pago de hoy se cobra desde Cobrar). Estos pagos no entran en la caja de hoy: cuentan en el mes de su fecha y quedan marcados en Control como cargados por vos, con la fecha de hoy.</p>
+        </div>
+      )}
+    </fieldset>
+  );
+}
+
 type Props = {
   socioId: string | null; socio?: Socio; prospectoId?: string; planes?: PlanAlta[]; puedeCobrar?: boolean;
+  /** C10: dueño o encargado pueden cargar un alta en el pasado; `hoy` es el día de hoy del gimnasio (AAAA-MM-DD). */
+  puedePasado?: boolean; hoy?: string;
+  /** FA-17: borrador automático del alta (función nueva, apagada por defecto). */
+  conBorrador?: boolean;
   /** VD-6: el alta ya está hecha (vuelve de un Interesado): arranca en el cobro. */
   creado?: { socioId: string; nombre: string; cobrar: boolean };
 };
@@ -49,7 +113,7 @@ function Pasos({ actual }: { actual: number }) {
       {nombres.map((n, i) => (
         <li key={n} aria-current={i + 1 === actual ? "step" : undefined}
           className={`flex-1 min-w-0 rounded-full px-3 py-1.5 text-center truncate border ${i + 1 === actual ? "border-[var(--acento)] font-semibold" : i + 1 < actual ? "texto-suave border-[var(--borde)]" : "texto-tenue border-[var(--borde)]"}`}>
-          {i + 1 < actual ? "✓ " : `${i + 1} · `}{n}
+          {i + 1 < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}
         </li>
       ))}
     </ol>
@@ -62,8 +126,9 @@ export function FormSocio(props: Props) {
   return <FormInterno key={vuelta} {...props} otro={() => setVuelta((n) => n + 1)} />;
 }
 
-function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = false, creado: creadoInicial, otro }: Props & { otro: () => void }) {
+function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = false, puedePasado = false, hoy = "", conBorrador = false, creado: creadoInicial, otro }: Props & { otro: () => void }) {
   const [plan, setPlan] = useState("");
+  const [pasadoAbierto, setPasadoAbierto] = useState(false);
   const router = useRouter();
   const [estado, accion, guardando] = useActionState<EstadoForm, FormData>(guardarSocio.bind(null, socioId), {});
   const [versionAbierta] = useVersion("socios", socioId);
@@ -76,6 +141,9 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   const [despues, setDespues] = useState(false);
   const [ofrecido, setOfrecido] = useState<ProspectoOfrecido | null>(null);
   const [vinculado, setVinculado] = useState<string | null>(null);
+  // FLUIDEZ regla 7: lo escrito no se pierde sin avisar (cerrar, recargar, tocar el menú o Cancelar).
+  const [tocado, setTocado] = useState(false);
+  useCambiosSinGuardar(tocado && !guardando && !estado.destino && !creado);
   const planElegido = planes.find((p) => p.plan_id === plan) ?? null;
   useEffect(() => {
     if (!estado.destino) return;
@@ -132,6 +200,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
     const nombreSocio = creado.nombre || "el socio";
     return (
       <div className="max-w-2xl space-y-6" data-alta-creado={creado.socioId}>
+        {conBorrador && <BorradorAutomatico clave="alta-completa" borrar />}
         <Pasos actual={paso} />
         {paso === 3 ? (
           <div className="tarjeta p-6 space-y-4" data-alta-paso="cobro">
@@ -174,8 +243,9 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   }
 
   return (
-    <form action={accion} className="max-w-2xl space-y-8">
+    <form action={accion} onInput={() => setTocado(true)} className="max-w-2xl space-y-8">
       {!socioId && <Pasos actual={paso} />}
+      {conBorrador && !socioId && <BorradorAutomatico clave="alta-completa" />}
       {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
       {(prospectoId || vinculado) && <input type="hidden" name="prospecto" value={prospectoId ?? vinculado ?? ""} />}
       {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
@@ -226,15 +296,16 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
           {planElegido ? <PrimerPago plan={planElegido} /> : <p className="texto-tenue text-sm">Sin plan por ahora (viene con pase o pack). Tocá un plan para elegirlo; tocalo de nuevo para sacarlo.</p>}
         </fieldset>
       )}
+      {!socioId && puedePasado && hoy && planes.length > 0 && <CargaPasada hoy={hoy} plan={plan} abierto={pasadoAbierto} alAbrir={setPasadoAbierto} />}
       {estado.error && <Mensaje tipo="error">{estado.error}</Mensaje>}
       <div className="flex flex-wrap gap-2">
-        {!socioId && plan && puedeCobrar
+        {!socioId && plan && puedeCobrar && !pasadoAbierto
           ? <>
               <BotonAccion name="despues" value="cobrar" disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : "Dar de alta y cobrar"}</BotonAccion>
               <BotonAccion disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</BotonAccion>
             </>
           : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "Guardar cambios" : "Dar de alta"}</BotonAccion>}
-        <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
+        <button type="button" onClick={() => { if (!tocado || creado || window.confirm(TEXTO_CAMBIOS_SIN_GUARDAR)) router.back(); }} className="boton">Cancelar</button>
       </div>
     </form>
   );

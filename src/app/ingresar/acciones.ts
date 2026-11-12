@@ -1,8 +1,9 @@
 "use server";
 import { headers } from "next/headers";
+import { sinDetalle } from "@/lib/errores-humanos";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
-import { TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
+import { armarLinkAyuda, TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";
 import { exigirDesafio } from "./desafio";
 
 // La acción devuelve a dónde ir y el navegador navega. Redirigiendo dentro de
@@ -15,8 +16,7 @@ async function linkAyudaBrik(email: string): Promise<string | undefined> {
   try {
     const { clienteServicio } = await import("@/lib/supabase/servicio");
     const { data } = await clienteServicio().rpc("contacto_plataforma_publico");
-    const w = String((data as { whatsapp?: string | null } | null)?.whatsapp ?? "").replace(/D/g, "");
-    return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a Base con ${email}`)}` : undefined;
+    return armarLinkAyuda((data as { whatsapp?: string | null } | null)?.whatsapp, email);
   } catch { return undefined; }
 }
 
@@ -76,7 +76,7 @@ async function normalizarCelular(t: string): Promise<string | null> {
   const { data, error } = await clienteServicio().rpc("telefono_para_ingresar", { p_texto: t });
   if (error) {
     if (error.code === "22023") return null;
-    throw new Error(`No pudimos leer el celular: ${error.message}`);
+    throw new Error(sinDetalle("No pudimos leer el celular. Probá de nuevo en un minuto.", error));
   }
   return data as string | null;
 }
@@ -102,7 +102,7 @@ export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<Esta
   if (limite) return { error: limite, telefono };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ phone: telefono });
-  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : `No pudimos mandarte el código: ${error.message}`, telefono };
+  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : sinDetalle("No pudimos mandarte el código. Probá de nuevo en un minuto.", error), telefono };
   return { enviado: true, telefono };
 }
 
@@ -122,7 +122,7 @@ export async function verificarCodigo(_: EstadoCodigo, form: FormData): Promise<
   if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", telefono };
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { error: errVincula } = await clienteServicio().rpc("vincular_socios_por_telefono", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
-  if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, telefono };
+  if (errVincula) return { error: sinDetalle("No pudimos vincular tu cuenta. Probá de nuevo y, si sigue, pasá por la recepción.", errVincula), telefono };
 
   const { data: sesion } = await supabase.rpc("mi_sesion");
   if ((sesion as MiSesion | null)?.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
@@ -142,7 +142,7 @@ export async function pedirCodigoMail(_: EstadoCodigoMail, form: FormData): Prom
   if (limite) return { error: limite, email };
   const supabase = await crearClienteServidor();
   const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : `No pudimos mandarte el código: ${error.message}`, email };
+  if (error) return { error: sinConexion(error) ? TEXTO_SIN_CONEXION : demasiadosIntentos(error) ? TEXTO_DEMASIADOS_INTENTOS : sinDetalle("No pudimos mandarte el código. Probá de nuevo en un minuto.", error), email };
   return { enviado: true, email };
 }
 
@@ -159,7 +159,7 @@ export async function verificarCodigoMail(_: EstadoCodigoMail, form: FormData): 
   if (!gimnasioId) return { error: "Entrá desde la dirección de tu gimnasio", email };
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { data: v, error: errVincula } = await clienteServicio().rpc("vincular_socios_por_email", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
-  if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, email };
+  if (errVincula) return { error: sinDetalle("No pudimos vincular tu cuenta. Probá de nuevo y, si sigue, pasá por la recepción.", errVincula), email };
 
   const { data: sesion } = await supabase.rpc("mi_sesion");
   if ((sesion as MiSesion | null)?.socios.some((s) => s.gimnasio_id === gimnasioId)) return { destino: "/app" };
@@ -203,7 +203,7 @@ export async function verificarRecuperacion(_: EstadoRecuperar, form: FormData):
   if (gimnasioId) {
     const { clienteServicio } = await import("@/lib/supabase/servicio");
     const { error: errVincula } = await clienteServicio().rpc("vincular_socios_por_email", { p_gimnasio_id: gimnasioId, p_usuario_id: data.user.id });
-    if (errVincula) return { error: `No pudimos vincular tu cuenta: ${errVincula.message}`, email, enviado: true };
+    if (errVincula) return { error: sinDetalle("No pudimos vincular tu cuenta. Probá de nuevo y, si sigue, pasá por la recepción.", errVincula), email, enviado: true };
   }
   return { email, enviado: true, verificado: true };
 }
@@ -218,7 +218,7 @@ export async function guardarContrasenaNueva(_: EstadoRecuperar, form: FormData)
   const { data: usuario } = await supabase.auth.getUser();
   if (!usuario.user) return { error: "Se venció el código. Empezá de nuevo desde “Olvidé mi contraseña”." };
   const { error } = await supabase.auth.updateUser({ password: nueva });
-  if (error) return { ...aviso, error: sinConexion(error) ? TEXTO_SIN_CONEXION : `No se pudo cambiar: ${error.message}` };
+  if (error) return { ...aviso, error: sinConexion(error) ? TEXTO_SIN_CONEXION : sinDetalle("No se pudo cambiar la contraseña. Probá de nuevo.", error) };
   const r = await destinoTrasEntrar(supabase, String(form.get("siguiente") ?? "") || null);
   return r.error ? { ...aviso, verificado: false, enviado: false, error: `Tu contraseña quedó cambiada. ${r.error}` } : r;
 }

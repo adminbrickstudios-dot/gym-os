@@ -1,0 +1,131 @@
+# Copias de los datos de los clientes (C8), sin necesitar Supabase Pro.
+# Todos los días exporta la base, la CIFRA y la deja como artefacto de Actions (30 días).
+# Después la restaura en una base de prueba y verifica que lo restaurado coincide.
+# Pasos para Mateo, cómo descargar y restaurar: docs/base/COPIAS.md
+#
+# Secretos (Settings → Secrets and variables → Actions → pestaña Secrets):
+#   SUPABASE_DB_URL  la misma que usa "Base de datos"; este workflow solo LEE.
+#   COPIA_CLAVE     la clave con la que se cifra (16+ caracteres al azar). Sin ella, no hay copia.
+#
+# El repo y sus logs son PÚBLICOS: acá no se imprime ningún dato ni secreto, solo números.
+# Los artefactos de un repo público los puede bajar cualquier cuenta de GitHub, por eso
+# el archivo sale cifrado: sin COPIA_CLAVE no sirve de nada. La copia nunca se sube al repo.
+name: Copias
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # 03:17 de Argentina, a la hora de menos uso
+  workflow_dispatch:
+
+concurrency:
+  group: copias
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  exportar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      COPIA_CLAVE: ${{ secrets.COPIA_CLAVE }}
+    steps:
+      - name: Faltan secretos
+        run: |
+          faltan=0
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Falta el secreto SUPABASE_DB_URL. Cargalo en Settings → Secrets and variables → Actions → pestaña Secrets (no en Variables)."
+            faltan=1
+          fi
+          if [ -z "$COPIA_CLAVE" ]; then
+            echo "::error::Falta el secreto COPIA_CLAVE, la clave con la que se cifra la copia. Sin ella no se hace ninguna copia. Cargalo en Settings → Secrets and variables → Actions → pestaña Secrets, con 16 o más caracteres al azar, y guardala también en tu gestor de contraseñas: sin esa clave la copia no se puede abrir. Pasos en docs/base/COPIAS.md."
+            faltan=1
+          elif [ ${#COPIA_CLAVE} -lt 16 ]; then
+            echo "::error::COPIA_CLAVE es demasiado corta. Usá 16 o más caracteres al azar (docs/base/COPIAS.md)."
+            faltan=1
+          fi
+          exit $faltan
+      - name: Esconder los secretos del log
+        run: |
+          echo "::add-mask::$SUPABASE_DB_URL"
+          echo "::add-mask::$COPIA_CLAVE"
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Instalar pg_dump 17 (tiene que ser igual o más nuevo que la base)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Exportar y cifrar (solo lee la base)
+        run: node scripts/db/copia.mjs exportar --salida copias-salida
+      - name: Guardar la copia cifrada como artefacto privado (30 días)
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-copia-${{ github.run_id }}
+          path: copias-salida/*.tar.gz.enc
+          retention-days: 30
+          if-no-files-found: error
+
+  restaurar-prueba:
+    needs: exportar
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          # Base descartable del runner, no es un secreto: vive lo que dura el job.
+          POSTGRES_PASSWORD: prueba-descartable
+          POSTGRES_DB: gymos_restaurada
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      COPIA_CLAVE: ${{ secrets.COPIA_CLAVE }}
+    steps:
+      - name: Esconder los secretos del log
+        run: |
+          echo "::add-mask::$SUPABASE_DB_URL"
+          echo "::add-mask::$COPIA_CLAVE"
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Bajar la copia de esta corrida
+        uses: actions/download-artifact@v5
+        with:
+          name: base-copia-${{ github.run_id }}
+          path: copia-bajada
+      - name: Restaurar en la base de prueba y verificar conteos
+        env:
+          ORIGEN_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          archivo="$(ls copia-bajada/*.tar.gz.enc | head -n 1)"
+          scripts/db/restaurar-copia.sh "$archivo" "postgres://postgres:prueba-descartable@localhost:5432/gymos_restaurada"
+      - name: Chequeos del proyecto sobre lo restaurado
+        run: |
+          # El chequeo "Diseño" mira archivos del repo, no la base: no dice nada de la copia.
+          set +e
+          node scripts/chequeos.mjs --url "postgres://postgres:prueba-descartable@localhost:5432/gymos_restaurada" | tee chequeos.txt
+          set -e
+          rojos="$(grep '^✗' chequeos.txt | grep -v '^✗ Diseño' || true)"
+          if [ -n "$rojos" ]; then
+            echo "::error::Lo restaurado no pasa los chequeos de la base: $rojos"
+            exit 1
+          fi
+          echo "Chequeos de la base: ok sobre lo restaurado."

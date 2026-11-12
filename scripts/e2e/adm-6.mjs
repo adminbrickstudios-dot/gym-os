@@ -15,7 +15,7 @@ try {
   await caja.waitFor({ timeout: 60000 });
   await caja.getByPlaceholder("Ya podés cobrar con MercadoPago").fill(TITULO);
   await caja.locator("textarea").fill("Texto de prueba para todos los dueños");
-  await caja.getByRole("button", { name: /Publicar para todos/ }).click();
+  await caja.getByRole("button", { name: /Publicar/ }).click();
   await caja.locator("li", { hasText: TITULO }).waitFor({ timeout: 30000 });
   ok("el admin publica la novedad");
 

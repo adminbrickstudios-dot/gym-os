@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { miSocio } from "@/lib/app/socio";
+import { fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { rpc } from "@/lib/panel/servidor";
 import { MarcarLeidas } from "./Leidos";
@@ -24,11 +25,11 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
     ]);
     const q = yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     const zona = yo.zona!;
-    const cuando = (m: string | null) => (m ? new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m)) : null);
+    const cuando = (m: string | null) => (m ? fechaHoraHumana(m, zona) : null);
     return (
       <div className="space-y-6">
-        <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl"><Icono nombre="campana" /> Novedades</h1>
+        <Link href={`/app${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]"><Icono nombre="campana" /> Novedades</h1>
         {mensajes && mensajes.sin_leer > 0 && (
           <Link href={`/app/mensajes${q}`} className="tarjeta flex items-center gap-3 p-4" data-novedad-mensajes>
             <span className="text-2xl" aria-hidden><Icono nombre="mensaje" /></span>
@@ -44,7 +45,7 @@ export default async function NovedadesSocio({ searchParams }: { searchParams: P
                 <Link href={`${i.href}${q}`} className={`tarjeta flex items-start gap-3 p-4 ${i.leido ? "opacity-70" : ""}`}>
                   <span className="text-2xl" aria-hidden>{i.emoji}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold leading-tight">{i.titulo}{!i.leido && <span className="pildora ml-2 !text-xs align-middle">Nuevo</span>}</span>
+                    <span className="block font-semibold leading-tight">{i.titulo}{!i.leido && <span className="pildora ml-2 !text-[13px] align-middle">Nuevo</span>}</span>
                     {i.detalle && <span className="block texto-suave text-[15px]">{i.detalle}</span>}
                     {cuando(i.en) && <span className="block text-sm texto-tenue mt-1 first-letter:uppercase">{cuando(i.en)}</span>}
                   </span>

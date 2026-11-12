@@ -17,6 +17,7 @@ import { CobrarHost } from "./cobrar/CobrarHost";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
 import { Icono } from "@/components/ui/Icono";
+import { ATAJOS_PANEL, AtajosAyuda } from "@/components/ui/AtajosAyuda";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
 /** ADM-2/ADM-3: el abono del gimnasio con BRIK (los montos, solo para el dueño). */
@@ -52,8 +53,9 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
       {/* VD-28: el origen (de qué lista venís) y la memoria de scroll de las listas. */}
       <Suspense fallback={null}><OrigenPanel /></Suspense>
       {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
+      <AtajosAyuda atajos={ATAJOS_PANEL} />
       {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana />}
-      {entrada && <PanelSocioLateral sedeId={entrada.sedeId} />}
+      {entrada && <PanelSocioLateral sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} />}
       {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
@@ -82,14 +84,17 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
 /** `volver`: el link para subir un nivel (“← Socios”), arriba de todo. `volverAlOrigen` (VD-28): si se llegó desde una lista, ese link pasa a “← Volver a <esa lista>” con su búsqueda y scroll. */
 export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volverAlOrigen = false }: { icono?: string; /** Antes: un emoji. Lo siguen pasando pantallas de otros carriles; se muestra igual. */ emoji?: string; titulo: string; bajada?: ReactNode; accion?: ReactNode; volver?: { href: string; texto: string }; volverAlOrigen?: boolean }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
-      <div className="min-w-0">
+    <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+      <div className="min-w-0 pr-14 lg:pr-0">
         {volver && (volverAlOrigen
           ? <VolverAlOrigen href={volver.href} texto={volver.texto} />
           : <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>)}
-        {(icono ?? emoji) && <p className="text-4xl mb-3" aria-hidden><Icono nombre={icono ?? emoji} /></p>}
-        <h1 className="titular text-5xl sm:text-6xl">{titulo}</h1>
-        {bajada && <p className="texto-suave text-lg mt-2">{bajada}</p>}
+        {/* DISENO: título de pantalla de 28 px; el ícono va al lado, del tamaño del título y en el acento (no 36 px arriba). */}
+        <h1 className="titular text-[28px] flex items-center gap-2.5">
+          {(icono ?? emoji) && <span className="text-[var(--acento)] flex-none" aria-hidden><Icono nombre={icono ?? emoji} sistema /></span>}
+          <span className="min-w-0">{titulo}</span>
+        </h1>
+        {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
       </div>
       {accion}
     </div>
@@ -100,7 +105,7 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
 export function Aviso({ icono, emoji, titulo, children }: { icono?: string; emoji?: string; titulo: string; children?: ReactNode }) {
   return (
     <div className="tarjeta p-6 sm:p-8 max-w-xl">
-      <p className="text-4xl mb-4" aria-hidden><Icono nombre={icono ?? emoji ?? "alerta"} /></p>
+      <p className="text-4xl mb-4" aria-hidden><Icono nombre={icono ?? emoji ?? "alerta"} sistema /></p>
       <p className="titulo text-3xl">{titulo}</p>
       {children && <div className="texto-suave text-lg mt-2">{children}</div>}
     </div>

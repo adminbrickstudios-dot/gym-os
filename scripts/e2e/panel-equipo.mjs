@@ -27,6 +27,8 @@ try {
   chequear(/sin acceso al sistema/.test(await fila.innerText()), "suma a alguien sin mail: queda “sin acceso al sistema”", await fila.innerText());
 
   await fila.getByLabel(`Rol de ${NOMBRE}`).selectOption("recepcion");
+  // Cualquier cambio de rol se confirma antes de tocar nada (H7).
+  await fila.locator("[data-confirmar-rol=recepcion]").getByRole("button", { name: /Sí, pasarlo a Recepción/ }).click();
   await fila.getByText(/Recepción/).first().waitFor({ timeout: 30000 });
   ok("cambia el rol a Recepción");
   await fila.getByLabel(`Rol de ${NOMBRE}`).selectOption("dueno");

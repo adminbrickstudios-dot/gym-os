@@ -29,6 +29,7 @@ try {
   await r.keyboard.press("Enter");
   await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 });
   chequear(/No hay nadie con el DNI/.test(await r.locator("[data-ventana-nadie]").innerText()), "DNI que no existe: “No hay nadie con el DNI …”", "no dice que no hay nadie");
+  const t0 = Date.now();   // detalle 14: del "No hay nadie" a "Entró" en menos de 30 s (con las capturas y la compu lenta de Actions de por medio)
   await r.locator("[data-ventana-alta]").click();
   const form = r.locator("[data-ventana-alta-form]");
   await form.waitFor({ timeout: 30000 });
@@ -39,7 +40,10 @@ try {
   await r.locator("[data-alta-celular]").fill(cel(1));
   await capturar(r, "vd6-compu-alta-datos");
   await r.locator("[data-alta-siguiente]").click();
-  await r.locator("[data-plan-tarjeta]").first().waitFor({ timeout: 30000 });
+  await r.locator("[data-plan-tarjeta]").first().waitFor({ timeout: 30000 }).catch(async (e) => {
+    const f = await r.locator("[data-ventana-alta-form]").evaluateAll((l) => l.map((x) => `paso=${x.getAttribute("data-alta-paso")}: ${x.innerText.replace(/\s+/g, " ").slice(0, 400)}`)).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | alta: ${f.join(" || ") || "(sin formulario)"}`);
+  });
   await elegirPlan(r, 0);
   chequear(await r.locator("[data-primer-pago]").count() === 1, "el plan con tarjetas muestra su primer pago (lo calcula la base)", "no hay primer pago");
   await capturar(r, "vd6-compu-alta-plan");
@@ -63,15 +67,21 @@ try {
   await r.keyboard.press("Enter");
   await r.locator('[data-ventana-hecho="entro"]').waitFor({ timeout: 30000 });
   chequear(new URL(r.url()).pathname === "/panel/socios", "DNI nuevo → alta → cobro → entró, sin salir de la pantalla de origen", `terminó en ${r.url()}`);
+  chequear(Date.now() - t0 < 30000, `detalle 14: alta + cobro + entrada en ${Math.round((Date.now() - t0) / 1000)} s (menos de 30)`, `el alta tardó ${Math.round((Date.now() - t0) / 1000)} s (tope: 30)`);
   await capturar(r, "vd6-compu-entro");
   await r.keyboard.press("Escape");
+  await r.locator("[data-ventana-campo]").waitFor({ state: "hidden", timeout: 10000 });   // F2 abre y cierra: se espera a que la ventana esté cerrada
 
   // ── 2 · Lo escrito no se pierde: sin nombre no se guarda, un celular roto no rompe y Esc vuelve con el DNI ──
   await r.keyboard.press("F2");
   const otroDni = `37${s5}2`.padEnd(8, "5").slice(0, 8);
+  await r.waitForFunction(() => document.activeElement?.hasAttribute("data-ventana-campo"), null, { timeout: 10000 });   // abierta y con el foco en el campo antes de escribir
   await r.locator("[data-ventana-campo]").fill(otroDni);
   await r.keyboard.press("Enter");
-  await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 });
+  await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 }).catch(async (e) => {
+    const v = await r.locator("[data-ventana-campo], [data-ventana-hecho], [data-ventana-veredicto], [role=alert]").evaluateAll((l) => l.map((x) => `${x.tagName}: ${(x.value ?? x.innerText ?? "").toString().replace(/\s+/g, " ").slice(0, 200)}`)).catch(() => []);
+    throw new Error(`${e.message.split("\n")[0]} | ventana: ${v.join(" || ") || "(cerrada)"}`);
+  });
   await r.keyboard.press("a");
   await r.locator("[data-ventana-alta-form]").waitFor({ timeout: 30000 });
   await r.locator("[data-alta-nombre]").fill("");

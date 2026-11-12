@@ -37,7 +37,7 @@ export function Calendario({ a, socioId }: { a: Asistencia; socioId: string }) {
             const si = vino.has(fecha), hoy = fecha === a.hoy;
             return (
               <span key={fecha} role="gridcell" aria-label={`${i + 1}${si ? ": vino" : ""}`} data-vino={si || undefined}
-                className={`aspect-square grid place-items-center rounded-xl text-lg ${si ? "font-bold" : "texto-tenue"} ${hoy ? "ring-2 ring-[var(--borde)]" : ""}`}
+                className={`aspect-square grid place-items-center rounded-[var(--radio)] text-lg ${si ? "font-bold" : "texto-tenue"} ${hoy ? "ring-2 ring-[var(--borde)]" : ""}`}
                 style={si ? { background: "color-mix(in oklab, var(--acento), transparent 70%)" } : undefined}>{i + 1}</span>
             );
           })}

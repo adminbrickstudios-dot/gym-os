@@ -54,20 +54,28 @@ export default async function Inicio() {
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
-          <h1 className="titular text-5xl sm:text-7xl pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
+          <h1 className="titular text-[28px] pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
-          <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
+          <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--acento)] text-[var(--sobre-acento)] font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
-        {rol === "recepcion" && (
-          <nav className="flex flex-wrap gap-2 -mt-6 sm:-mt-8" aria-label="Acciones del mostrador" data-acciones-mostrador>
-            {rutaDisponible("/panel/vender", rol, panel.secciones_apagadas) && <Link href="/panel/vender" className="boton boton-principal"><Icono nombre="plata" /> Cobrar</Link>}
-            <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Alta</Link>
-            <Link href="/panel/entrada" className="boton"><Icono nombre="ticket" /> Pase diario</Link>
-          </nav>
-        )}
+        {/* F1.3: Cobrar, Alta y Pase diario a un toque, para todo el mostrador (recepción, encargado y dueño). Cada botón aparece solo si esa
+            pantalla está disponible para este rol y este gimnasio (nunca un botón que lleva a "no tenés permiso"). El Pase diario es una venta:
+            va a Vender y solo se ofrece si el gimnasio cobra pases. */}
+        {rol !== "profe" && (() => {
+          const puedeCobrar = rutaDisponible("/panel/vender", rol, panel.secciones_apagadas);
+          const puedeAlta = rutaDisponible("/panel/socios/nuevo", rol, panel.secciones_apagadas);
+          if (!puedeCobrar && !puedeAlta) return null;
+          return (
+            <nav className="flex flex-wrap gap-2 -mt-6 sm:-mt-8" aria-label="Acciones del mostrador" data-acciones-mostrador>
+              {puedeCobrar && <Link href="/panel/vender" className="boton boton-principal" data-accion-rapida="cobrar"><Icono nombre="plata" /> Cobrar</Link>}
+              {puedeAlta && <Link href="/panel/socios/nuevo" className="boton" data-accion-rapida="alta"><Icono nombre="mas" /> Alta</Link>}
+              {puedeCobrar && panel.cobra.pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" /> Pase diario</Link>}
+            </nav>
+          );
+        })()}
 
         <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
 
@@ -166,7 +174,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           const turno = datos.ahora.find((a) => a.tipo === "caja");
           return turno && rutaDisponible("/panel/caja", rol, panel.secciones_apagadas) ? (
             <p data-turno className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3">
-              <span className="min-w-0 flex-1"><span aria-hidden><Icono nombre={turno.emoji} /></span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
+              <span className="min-w-0 flex-1"><span aria-hidden><Icono nombre={turno.emoji} sistema /></span> {turno.titulo}{turno.detalle ? ` · ${turno.detalle}` : ""}</span>
               <Link href="/panel/caja" className="boton">{turno.tono ? "Abrir mi turno" : "Cerrar mi turno"}</Link>
             </p>
           ) : null;
@@ -195,7 +203,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                 <ul className="space-y-2">
                   {hacerHoy.map((x) => (
                     <li key={x.clave} data-hacer={x.clave} className="tarjeta flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                      <span className="icono" aria-hidden><Icono nombre={x.emoji} /></span>
+                      <span className="icono" aria-hidden><Icono nombre={x.emoji} sistema /></span>
                       <span className="min-w-0 flex-1 font-semibold text-lg leading-tight">{x.texto}</span>
                       <Link href={`/panel${x.href}`} className="boton !min-h-11" aria-label={`Ver: ${x.texto}`}>Ver</Link>
                     </li>
@@ -221,7 +229,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
               {ahora.map((a, i) => {
                 const contenido = (
                   <>
-                    <span className="icono" aria-hidden><Icono nombre={a.emoji} /></span>
+                    <span className="icono" aria-hidden><Icono nombre={a.emoji} sistema /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-lg leading-tight">{a.titulo}</span>
                       {a.detalle && <span className="block texto-suave text-[15px] truncate">{a.detalle}</span>}
@@ -277,7 +285,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
             <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
             <ul className="space-y-1">
-              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✓" : ""} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? <Icono nombre="ok" /> : null} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
           </section>
         )}
@@ -374,7 +382,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                     <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
                     <span className="min-w-0 flex-1">
                       <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
-                      <span className="block texto-suave">Cumple {c.cumple}</span>
+                      <span className="block texto-suave">Cumple {c.cumple} años</span>
                     </span>
                     {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
                   </li>

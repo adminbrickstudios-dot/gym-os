@@ -17,7 +17,7 @@ export async function AvisosDelDia({ socioId, zona }: { socioId: string; zona: s
     <div className="space-y-3">
       <OfertasLugar ofertas={ofertas} zona={zona} />
       {avisos.map((a) => (
-        <p key={`${a.tipo}-${a.texto}`} className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full whitespace-normal" role="status" data-aviso-app={a.tipo}>{a.texto}</p>
+        <p key={`${a.tipo}-${a.texto}`} className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full whitespace-normal" role="status" data-aviso-app={a.tipo}>{a.texto}</p>
       ))}
     </div>
   );

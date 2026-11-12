@@ -4,6 +4,7 @@ import { confirmarVinculoGoogle, pedirCodigoGoogle, verificarCodigoGoogle, type 
 import { PasoCodigo } from "@/components/cuentas/PasoCodigo";
 import { DesafioTurnstile } from "@/components/cuentas/DesafioTurnstile";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * Primera vez con Google: la persona prueba quién es con su DNI y un código al celular (o mail) que dejó en el
@@ -53,7 +54,7 @@ export function VincularGoogle({ cuenta }: { cuenta: string | null }) {
         reenviar={() => startTransition(() => { const f = new FormData(); f.set("dni", dni); pedir(f); })}
         reenviando={pidiendo}
         cambiar={() => setEnCodigo(false)}
-        textoBoton="✅ Vincular y entrar"
+        textoBoton="Vincular y entrar"
       />
     );
   }
@@ -69,7 +70,7 @@ export function VincularGoogle({ cuenta }: { cuenta: string | null }) {
       </label>
       <DesafioTurnstile />
       {pedido.error && <Mensaje tipo="error">{pedido.error}</Mensaje>}
-      <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">{pidiendo ? "Mandando…" : "📲 Mandame el código"}</button>
+      <button type="submit" disabled={pidiendo} className="boton boton-principal text-lg w-full">{pidiendo ? "Mandando…" : <><Icono nombre="celular" /> Mandame el código</>}</button>
       <p className="texto-suave text-sm">
         {cuenta ? <>Entraste con Google como <strong className="break-all">{cuenta}</strong>. </> : null}
         Es la primera vez: para cuidar tu ficha, el gimnasio te manda un código al celular o al mail que tiene cargado.

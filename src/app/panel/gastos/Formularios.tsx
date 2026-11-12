@@ -140,7 +140,7 @@ export function Presupuesto({ g }: { g: GananciaMes }) {
                 action={async (datos) => { setError(null); setGuardado(null); const r = await guardarPresupuesto(c.categoria, String(datos.get("monto") ?? "")); if (r.error) setError(r.error); else setGuardado(c.categoria); }}>
                 <input key={String(c.presupuesto)} name="monto" className="campo w-36" inputMode="decimal" defaultValue={c.presupuesto == null ? "" : String(Number(c.presupuesto)).replace(".", ",")}
                   placeholder="Sin presupuesto" aria-label={`Presupuesto mensual de ${NOMBRE_CATEGORIA[c.categoria] ?? c.categoria}`} />
-                <BotonAccion className="boton" ocupadoTexto="…">{guardado === c.categoria ? "✓" : "Guardar"}</BotonAccion>
+                <BotonAccion className="boton" ocupadoTexto="Guardando…">{guardado === c.categoria ? <><Icono nombre="ok" /> Guardado</> : "Guardar"}</BotonAccion>
               </form>
             </li>
           );

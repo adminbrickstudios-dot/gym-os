@@ -13,14 +13,18 @@ export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }:
   const [subiendo, empezar] = useTransition();
   const archivo = useRef<HTMLInputElement>(null);
   const clave = useRef(crypto.randomUUID());   // VD-34: el mismo intento (doble toque) es un solo pago
-  const copiar = async (t: string) => { await navigator.clipboard.writeText(t); setCopiado(t); setTimeout(() => setCopiado(null), 1500); };
+  // Sin permiso de portapapeles (o sin HTTPS) no se rompe: avisa y el texto queda a la vista para copiarlo a mano.
+  const copiar = async (t: string) => {
+    try { await navigator.clipboard.writeText(t); setCopiado(t); setTimeout(() => setCopiado(null), 1500); }
+    catch { setEstado({ texto: "No se pudo copiar solo. Mantené apretado el texto y copialo." }); }
+  };
 
   const subir = (f: File) => empezar(async () => {
     if (f.size > 5 * 1024 * 1024) { setEstado({ texto: "El archivo pesa más de 5 MB" }); return; }
     const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase();
     const path = `${gimnasioId}/${socioId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await crearClienteNavegador().storage.from("comprobantes").upload(path, f, { contentType: f.type });
-    if (error) { setEstado({ texto: `No se pudo subir: ${error.message}` }); return; }
+    if (error) { console.error("comprobante: no se pudo subir", error); setEstado({ texto: "No se pudo subir el comprobante. Revisá tu conexión y probá de nuevo; si sigue igual, mostralo en la recepción." }); return; }
     const r = await informarPago(socioId, path, clave.current);
     setEstado(r.error ? { texto: r.error } : { ok: true, texto: "Listo: el gimnasio lo revisa y te habilita." });
   });
@@ -31,7 +35,7 @@ export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }:
       {monto != null && <p><span className="numero text-4xl">{formatearPesos(monto)}</span> <span className="texto-suave">por transferencia</span></p>}
       {[["Alias", datos.alias], ["CBU / CVU", datos.cbu]].filter(([, v]) => v).map(([k, v]) => (
         <button key={k} type="button" onClick={() => copiar(v!)} className="boton w-full !justify-between">
-          <span className="text-left"><span className="block text-xs texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
+          <span className="text-left"><span className="block text-[13px] texto-tenue">{k}</span><span className="block font-semibold break-all">{v}</span></span>
           <span className="text-sm texto-suave">{copiado === v ? <><Icono nombre="ok" /> Copiado</> : <><Icono nombre="lista" /> Copiar</>}</span>
         </button>
       ))}

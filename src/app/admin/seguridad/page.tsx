@@ -20,7 +20,7 @@ export default async function Seguridad() {
     <main className="mx-auto max-w-3xl px-4 sm:px-8 py-10 space-y-8">
       <header className="space-y-2">
         <Link href="/admin" className="texto-suave">← Tablero</Link>
-        <h1 className="titular text-5xl">Seguridad</h1>
+        <h1 className="titular text-[28px]">Seguridad</h1>
       </header>
       <section className="space-y-3">
         <p className="titulo-grupo">Tu verificación en dos pasos</p>

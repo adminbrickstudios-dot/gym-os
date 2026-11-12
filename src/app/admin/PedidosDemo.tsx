@@ -17,7 +17,7 @@ export function PedidosDemo({ pedidos }: { pedidos: PedidoDemo[] }) {
   return (
     <section className="space-y-3" data-pedidos-demo>
       <p className="titulo-grupo"><Icono nombre="persona" /> Pedidos de demo <span className="pildora pildora-azul align-middle" data-pedidos-demo-cantidad>{pedidos.length}</span></p>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
       <div className="space-y-2">
         {pedidos.map((p) => (
           <div key={p.id} className="tarjeta p-4 space-y-2" data-pedido-demo>

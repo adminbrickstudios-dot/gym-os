@@ -10,7 +10,18 @@ import { darDeBajaPersona } from "../seguridad-acciones";
 import { Icono } from "@/components/ui/Icono";
 
 export type Miembro = { equipo_id: string; nombre: string; rol: Rol; sede_id: string | null; sede: string | null; activo: boolean; tiene_acceso: boolean; soy_yo: boolean };
-const EMOJI: Record<Rol, string> = { dueno: "", encargado: "", recepcion: "", profe: "" };
+const EMOJI: Record<Rol, string> = { dueno: "llave", encargado: "estrella", recepcion: "persona", profe: "pesa" };
+/** Qué cambia al pasar de un rol a otro, en palabras (la confirmación lo dice antes de tocar nada). */
+const VE_PLATA: Record<Rol, boolean> = { dueno: true, encargado: true, recepcion: false, profe: false };
+function queCambia(de: Rol, a: Rol): string {
+  const partes: string[] = [];
+  if (!VE_PLATA[de] && VE_PLATA[a]) partes.push("va a ver la plata");
+  if (VE_PLATA[de] && !VE_PLATA[a]) partes.push("deja de ver la plata");
+  if (a === "dueno") partes.push("va a poder cambiar la configuración y el equipo");
+  if (de === "dueno" && a !== "dueno") partes.push("pierde la configuración y el equipo");
+  if (a === "recepcion" || a === "profe") partes.push(`pasa a: ${QUE_HACE[a].toLowerCase()}`);
+  return partes.length ? `${partes.join("; ")}.` : "Cambia lo que ve y lo que puede hacer.";
+}
 const QUE_HACE: Record<Rol, string> = {
   dueno: "Todo, incluida la plata y la configuración",
   encargado: "Todo menos configuración y equipo",
@@ -23,15 +34,13 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
   // AUD-12: hacer dueño a alguien le da la plata y la configuración: se confirma en pantalla.
-  const [hacerDueno, setHacerDueno] = useState<Miembro | null>(null);
+  // Cualquier cambio de rol se confirma (un toque en el menú no alcanza para darle la plata a la recepción).
+  const [cambioRol, setCambioRol] = useState<{ m: Miembro; rol: Rol } | null>(null);
   // VD-42: "Dar de baja" corta todo de una vez; se confirma en pantalla diciendo qué pasa.
   const [baja, setBaja] = useState<Miembro | null>(null);
   const [motivoBaja, setMotivoBaja] = useState("");
   const [avisoBaja, setAvisoBaja] = useState<string | null>(null);
-  const cambiarRol = (m: Miembro, rol: string) => {
-    if (rol === "dueno") { setHacerDueno(m); return; }
-    empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, rol, m.sede_id, m.activo); setError(r.error ?? null); });
-  };
+  const cambiarRol = (m: Miembro, rol: string) => { if (rol !== m.rol) setCambioRol({ m, rol: rol as Rol }); };
   return (
     <div className="space-y-10">
       <ul className="space-y-2">
@@ -75,12 +84,14 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
                 </div>
               </div>
             )}
-            {hacerDueno?.equipo_id === m.equipo_id && (
-              <div className="basis-full flex flex-wrap items-center gap-2" role="group" aria-label="Confirmar" data-confirmar-dueno>
-                <span className="texto-suave">¿Hacer dueño a {m.nombre}? Va a ver la plata y poder cambiar la configuración y el equipo.</span>
-                <button type="button" className="boton boton-chico boton-peligro" disabled={ocupado}
-                  onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, "dueno", m.sede_id, m.activo); setError(r.error ?? null); setHacerDueno(null); })}>Sí, hacerlo dueño</button>
-                <button type="button" className="boton-texto texto-suave" onClick={() => setHacerDueno(null)}>Cancelar</button>
+            {cambioRol?.m.equipo_id === m.equipo_id && (
+              <div className="basis-full flex flex-wrap items-center gap-2" role="group" aria-label="Confirmar el cambio de rol" data-confirmar-rol={cambioRol.rol} {...(cambioRol.rol === "dueno" ? { "data-confirmar-dueno": "" } : {})}>
+                <span className="texto-suave">¿Pasar a {m.nombre} de {NOMBRE_ROL[m.rol]} a {NOMBRE_ROL[cambioRol.rol]}? {queCambia(m.rol, cambioRol.rol)}</span>
+                <button type="button" className={`boton boton-chico ${cambioRol.rol === "dueno" || (VE_PLATA[cambioRol.rol] && !VE_PLATA[m.rol]) ? "boton-peligro" : ""}`} disabled={ocupado} data-confirmar-rol-si
+                  onClick={() => empezar(async () => { const r = await editarPersona(m.equipo_id, m.nombre, cambioRol.rol, m.sede_id, m.activo); setError(r.error ?? null); setCambioRol(null); })}>
+                  {cambioRol.rol === "dueno" ? "Sí, hacerlo dueño" : `Sí, pasarlo a ${NOMBRE_ROL[cambioRol.rol]}`}
+                </button>
+                <button type="button" className="boton-texto texto-suave" onClick={() => setCambioRol(null)}>Cancelar</button>
               </div>
             )}
             {puedeEditar && !m.soy_yo && m.activo && (
@@ -96,11 +107,11 @@ export function Equipo({ miembros, sedes, puedeEditar }: { miembros: Miembro[]; 
       {puedeEditar && (
         <form action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
           <p className="titulo text-2xl sm:col-span-2"><Icono nombre="mas" /> Sumar a alguien</p>
-          <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" /></label>
-          <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" placeholder="Vacío: solo figura en la grilla" /></label>
+          <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" defaultValue={estado.valores?.nombre} /></label>
+          <label className="space-y-1"><span className="etiqueta">Mail (para que entre al sistema)</span><input name="email" type="email" className="campo" defaultValue={estado.valores?.email} placeholder="Vacío: solo figura en la grilla" /></label>
           <label className="space-y-1"><span className="etiqueta">Contraseña</span><CampoContrasena /></label>
           <label className="space-y-1"><span className="etiqueta">Rol</span>
-            <select name="rol" className="campo" defaultValue="recepcion">{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}><Icono nombre={EMOJI[r]} /> {NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
+            <select name="rol" className="campo" defaultValue={estado.valores?.rol ?? "recepcion"}>{(Object.keys(NOMBRE_ROL) as Rol[]).map((r) => <option key={r} value={r}>{NOMBRE_ROL[r]} — {QUE_HACE[r]}</option>)}</select></label>
           {sedes.length > 1 && <label className="space-y-1"><span className="etiqueta">Sede</span>
             <select name="sede" className="campo"><option value="">Todas</option>{sedes.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>}
           {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2 !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {estado.error}</p>}

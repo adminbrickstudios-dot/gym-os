@@ -10,10 +10,18 @@
 //   · y que vuelva: el "atrás" del navegador a donde estaba, y Esc cierra lo que se abrió.
 // Los que no hacen nada, se cuelgan o no vuelven quedan en .local/botones-informe.md (no corta: el informe es lo que se lee).
 //   node scripts/e2e/botones.mjs [--rol dueno,recepcion] [--solo-compu|--solo-celu] [--max-pantallas 60] [--max-botones 40] [--estricto]
+//        [--slug demo-temple-clon] [--mirar]
+// H4 · --slug: en vez del gimnasio demo, recorre un [demo] clonado de la configuración de un gimnasio real (scripts/datos/clonar-config-temple.mjs
+//   + usuarios-demo.mjs --clon): los logins son clon-<rol>@ejemplo.invalid y solo hay roles del panel (no super ni socio: el clon no tiene socios).
+// H4 · --mirar: modo mirar. Además de lo que ya no se toca, salta todo lo que escribe o prende/apaga algo (envíos de formularios, interruptores,
+//   casillas): abre, mira y vuelve. El workflow botones-temple.yml cuenta las filas de plata y socios antes y después: tienen que quedar iguales.
 // Roles: super (admin), dueno, encargado, recepcion, profe, socio. Se reparte en Actions con --rol (una tanda por rol).
 //   (con scripts/local/levantar.sh corriendo). Mira, no escribe: no aprieta nada que cambie datos.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, PLATAFORMA, entrar, navegador, pagina } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, PLATAFORMA, entrar, navegador, pagina } from "./comun.mjs";
+// La pantalla de error de Next o la propia (PantallaError). No sirve el "algo salió mal" suelto: lo dicen textos normales ("si algo salió mal, lo deshacés").
+const ROTA = /Application error|Unhandled Runtime Error|Something went wrong|No se pudo cargar esta pantalla/i;
+const ESPERADO = /Falta elegir el socio|Falta el pago en la dirección/;   // direcciones sin su parámetro: el error con motivo es lo correcto
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
@@ -26,6 +34,16 @@ const ROLES = {
   profe:      { mail: "profe@ejemplo.invalid",      base: GIMNASIO("demo"),   inicio: "/panel", area: "/panel" },
   socio:      { mail: "socio@ejemplo.invalid",      base: GIMNASIO("demo"),   inicio: "/app",   area: "/app" },
 };
+const SLUG = arg("slug", null);
+const MIRAR = tiene("mirar");
+if (SLUG) {
+  if (!/^demo/.test(SLUG)) { console.error("--slug: tiene que empezar con demo (nunca un gimnasio real)."); process.exit(1); }
+  for (const k of Object.keys(ROLES)) {
+    if (k === "super" || k === "socio") { delete ROLES[k]; continue; }
+    ROLES[k].base = GIMNASIO(SLUG);
+    ROLES[k].mail = `clon-${k === "dueno" ? "duena" : k}@ejemplo.invalid`;
+  }
+}
 const roles = (arg("rol", Object.keys(ROLES).join(",")) ?? "").split(",").map((x) => x.trim()).filter((x) => ROLES[x]);
 const VISTAS = [...(tiene("solo-celu") ? [] : [["compu", COMPU]]), ...(tiene("solo-compu") ? [] : [["celu", CELU]])];
 const MAX_PANTALLAS = Number(arg("max-pantallas", "60"));
@@ -45,7 +63,8 @@ function rutasDelMapa(area) {
   } catch { return []; }
 }
 
-const informe = { sinEfecto: [], lentos: [], consola: [], rotas: [], noVuelve: [], colgados: [], sinNombre: [], noTocados: new Map(), pantallas: 0, botones: 0, tocados: 0 };
+const inicioDe = (rol) => ROLES[rol].inicio;
+const informe = { saltos: [], sinSalida: [], existen: new Map(), sinEfecto: [], lentos: [], consola: [], rotas: [], noVuelve: [], colgados: [], sinNombre: [], noTocados: new Map(), pantallas: 0, botones: 0, tocados: 0 };
 const nota = (lista, rol, vista, ruta, que) => lista.push(`- **${rol} · ${vista}** \`${ruta}\` — ${que}`);
 
 /** Instala en la página el medidor: cuándo fue el toque y cuándo cambió algo (DOM, atributos o URL). */
@@ -58,6 +77,12 @@ const medidor = () => {
   addEventListener("popstate", marcar); addEventListener("hashchange", marcar);
 };
 
+/** Regla 17: suma de los saltos de diseño (CLS) desde que se abre la pantalla. Se instala antes de cargar. */
+const medidorCLS = () => {
+  window.__cls = 0;
+  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true }); } catch {}
+};
+
 async function candidatos(p) {
   return p.evaluate((max) => {
     const visible = (e) => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return r.width > 4 && r.height > 4 && s.visibility !== "hidden" && s.display !== "none" && r.bottom > 0 && r.top < innerHeight * 6; };
@@ -65,9 +90,9 @@ async function candidatos(p) {
     const salida = [];
     todos.forEach((e, i) => {
       e.setAttribute("data-bt", String(i));
-      const texto = (e.innerText || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
+      const texto = (e.innerText || e.textContent || e.labels?.[0]?.textContent || e.closest("label")?.textContent || e.getAttribute("placeholder") || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
       const enForm = !!e.closest("form") && e.tagName === "BUTTON" && (e.getAttribute("type") ?? "submit") === "submit";
-      salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
+      salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), papel: e.getAttribute("role") ?? "", enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
     });
     return salida.slice(0, max * 3);
   }, MAX_BOTONES);
@@ -75,6 +100,8 @@ async function candidatos(p) {
 
 async function tocar(p, rol, vista, ruta, c, errores) {
   const antes = new URL(p.url());
+  // Un enlace a la misma pantalla en la que ya estás (la pestaña activa del menú) no tiene nada que mostrar: no es un hallazgo.
+  if (c.href && c.href.split("#")[0].split("?")[0].replace(/\/$/, "") === antes.pathname.replace(/\/$/, "") && !c.href.includes("?")) return;
   const sel = p.locator(`[data-bt="${c.i}"]`).first();
   if (!(await sel.count())) return;
   await p.evaluate(medidor);
@@ -106,7 +133,7 @@ async function tocar(p, rol, vista, ruta, c, errores) {
   else if (ms !== null && ms > LIMITE_RESPUESTA && despues.href === antes.href) nota(informe.lentos, rol, vista, ruta, `«${c.texto || c.aria || c.tag}» tardó ${ms} ms en mostrar algo (regla: menos de ${LIMITE_RESPUESTA} ms)`);
   if (errores.length) nota(informe.consola, rol, vista, ruta, `«${c.texto || c.tag}» dejó: ${errores.slice(0, 2).join(" | ").slice(0, 200)}`);
   const cuerpo = await p.locator("body").innerText().catch(() => "");
-  if (PANTALLA_ROTA.test(cuerpo)) nota(informe.rotas, rol, vista, ruta, `«${c.texto || c.tag}» dejó una pantalla rota`);
+  if ((ROTA.test(cuerpo) && !ESPERADO.test(cuerpo))) nota(informe.rotas, rol, vista, ruta, `«${c.texto || c.tag}» dejó una pantalla rota`);
 
   // Y vuelve: lo que se abrió se cierra con Esc; lo que navegó vuelve con "atrás".
   if (despues.href !== antes.href && despues.origin === antes.origin) {
@@ -124,7 +151,10 @@ async function tocar(p, rol, vista, ruta, c, errores) {
       await p.keyboard.press("Escape");
       await p.waitForTimeout(250);
       const sigue = await p.evaluate(() => document.querySelectorAll("[role=dialog], dialog[open], .hoja, [data-hoja]").length).catch(() => 0);
-      if (sigue > estado.dialogos) nota(informe.noVuelve, rol, vista, ruta, `«${c.texto || c.tag}» abrió algo que no se cierra con Esc`);
+      if (sigue > estado.dialogos) {
+        nota(informe.noVuelve, rol, vista, ruta, `«${c.texto || c.tag}» abrió algo que no se cierra con Esc`);
+        await p.goto(antes.href, { waitUntil: "domcontentloaded" }).catch(() => {});   // para que lo que quedó abierto no tape los botones que siguen
+      }
     }
   }
 }
@@ -135,16 +165,25 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
   await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
   if (!r || r.status() >= 500) { nota(informe.rotas, rol, vista, ruta, `la pantalla dio ${r?.status() ?? "sin respuesta"}`); return []; }
   const cuerpo = await p.locator("body").innerText().catch(() => "");
-  if (PANTALLA_ROTA.test(cuerpo)) { nota(informe.rotas, rol, vista, ruta, "pantalla rota (error de la app)"); return []; }
+  if ((ROTA.test(cuerpo) && !ESPERADO.test(cuerpo))) { nota(informe.rotas, rol, vista, ruta, "pantalla rota (error de la app)"); return []; }
   if (/No tenés acceso a esta pantalla/i.test(cuerpo)) return [];   // por la dirección directa da error con motivo: es lo correcto (regla 11)
+  // Regla 17: nada salta al cargar (CLS) · regla 5: siempre hay salida (menú, "Volver" o un enlace al inicio).
+  const cls = await p.evaluate(() => window.__cls ?? 0).catch(() => 0);
+  if (cls > 0.1) nota(informe.saltos, rol, vista, ruta, `salta al cargar: CLS ${cls.toFixed(3)} (límite 0,1)`);
+  if (ruta !== inicioDe(rol)) {
+    const zona = ruta.startsWith("/admin") ? "/admin" : ruta.startsWith("/app") ? "/app" : "/panel";
+    const salida = await p.evaluate((ini) => !!document.querySelector(`a[href="${ini}"], a[href^="${ini}/"], nav a, [role=navigation] a, header button, button[aria-label*="enú"], button[aria-label*="olver"], a[aria-label*="olver"]`) || /volver|atrás|inicio/i.test(document.body.innerText), zona).catch(() => true);
+    if (!salida) nota(informe.sinSalida, rol, vista, ruta, "no se ve ninguna salida (ni menú, ni Volver, ni enlace al inicio)");
+  }
   const cs = await candidatos(p);
-  const enlaces = new Set(cs.filter((c) => c.tag === "a" && c.href.startsWith("/") && !c.href.startsWith("//")).map((c) => c.href.split("#")[0].split("?")[0]));
+  const enlaces = new Set(cs.filter((c) => c.tag === "a" && !c.descarga && !/mis-datos|\/api\/|\/salir|\/exportar/.test(c.href) && c.href.startsWith("/") && !c.href.startsWith("//")).map((c) => c.href.split("#")[0].split("?")[0]));
   let hechos = 0;
   for (const c of cs) {
     if (hechos >= MAX_BOTONES) break;
     informe.botones++;
     if (!c.texto && !c.aria) { nota(informe.sinNombre, rol, vista, ruta, `un ${c.tag}${c.href ? ` (→ ${c.href})` : ""} sin texto ni aria-label`); }
-    const peligroso = c.peligro || PELIGRO.test(`${c.texto} ${c.aria}`) || EXTERNO.test(c.href) || c.descarga || c.blank || c.enForm || c.deshabilitado || /\/salir|\/api\//.test(c.href);
+    const peligroso = c.peligro || PELIGRO.test(`${c.texto} ${c.aria}`) || EXTERNO.test(c.href) || c.descarga || c.blank || c.enForm || c.deshabilitado || (MIRAR && (c.papel === "switch" || c.papel === "checkbox")) || /\/salir|\/api\//.test(c.href);
+    if (peligroso && c.texto && !c.deshabilitado && c.tag !== "a") { const k2 = `${rol} · ${vista} \`${ruta}\``; (informe.existen.get(k2) ?? informe.existen.set(k2, new Set()).get(k2)).add(c.texto); }
     if (peligroso) { const k = `${rol}/${vista}`; informe.noTocados.set(k, (informe.noTocados.get(k) ?? 0) + 1); continue; }
     hechos++;
     await tocar(p, rol, vista, ruta, c, errores);
@@ -159,6 +198,7 @@ try {
     const R = ROLES[rol];
     for (const [vista, tam] of VISTAS) {
       const p = await pagina(b, tam);
+      await p.addInitScript(medidorCLS);
       p.setDefaultNavigationTimeout(60000);
       const errores = [];
       p.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|ERR_ABORTED|favicon/i.test(m.text())) errores.push(m.text().slice(0, 160)); });
@@ -185,14 +225,16 @@ try {
 const seccion = (titulo, lista) => `## ${titulo} (${lista.length})\n\n${lista.length ? lista.join("\n") : "Ninguno."}\n`;
 const md = [
   `# Informe de botones (F3.1) · ${new Date().toISOString().slice(0, 16).replace("T", " ")}`, "",
-  `Roles: ${roles.join(", ")} · vistas: ${VISTAS.map((v) => v[0]).join(", ")} · ${informe.pantallas} pantallas · ${informe.botones} botones y enlaces vistos · ${informe.tocados} tocados.`, "",
+  `Roles: ${roles.join(", ")}${SLUG ? ` · gimnasio ${SLUG}` : ""}${MIRAR ? " · modo mirar" : ""} · vistas: ${VISTAS.map((v) => v[0]).join(", ")} · ${informe.pantallas} pantallas · ${informe.botones} botones y enlaces vistos · ${informe.tocados} tocados.`, "",
   `No se tocan (cambian o mandan algo, salen de la app o están deshabilitados), por rol y vista: ${[...informe.noTocados].map(([k, n]) => `${k}: ${n}`).join(" · ") || "ninguno"}.`, "",
   seccion("No hacen nada en 1 s", informe.sinEfecto), seccion(`Tardan más de ${LIMITE_RESPUESTA} ms en mostrar algo`, informe.lentos), seccion("Se cuelgan o no se pueden tocar", informe.colgados),
   seccion("Dejan un error en la consola", informe.consola), seccion("Pantallas rotas", informe.rotas), seccion("No vuelven (atrás / Esc)", informe.noVuelve), seccion("Sin nombre accesible", informe.sinNombre),
+  seccion("Saltan al cargar (CLS > 0,1)", informe.saltos), seccion("Sin salida visible", informe.sinSalida),
+  `## Botones que cambian o mandan algo: existen, NO se tocaron (${[...informe.existen.values()].reduce((a, v) => a + v.size, 0)})\n\n${[...informe.existen].map(([k, v]) => `- ${k}: ${[...v].slice(0, 12).join(" · ")}`).join("\n") || "Ninguno."}\n`,
 ].join("\n");
 writeFileSync(arg("informe", ".local/botones-informe.md"), md);
 if (process.env.GITHUB_STEP_SUMMARY) writeFileSync(process.env.GITHUB_STEP_SUMMARY, md, { flag: "a" });
 console.log(md);
-const graves = informe.sinEfecto.length + informe.colgados.length + informe.consola.length + informe.rotas.length + informe.noVuelve.length;
+const graves = informe.saltos.length + informe.sinSalida.length + informe.sinEfecto.length + informe.colgados.length + informe.consola.length + informe.rotas.length + informe.noVuelve.length;
 console.log(`${graves} hallazgo(s) graves (sin efecto, colgados, consola, rotas, no vuelven) y ${informe.lentos.length} lentos.`);
 process.exit(tiene("estricto") && graves ? 1 : 0);

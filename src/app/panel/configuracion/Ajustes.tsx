@@ -34,12 +34,14 @@ import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/co
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
+import { FuncionesNuevas } from "./FuncionesNuevas";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 import { BuscadorConfig } from "./BuscadorConfig";
 import { Restablecer } from "./Restablecer";
 import type { Opcion } from "./indice";
 import { Icono } from "@/components/ui/Icono";
+import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -69,7 +71,7 @@ const MEDIOS: [string, string, string][] = [
   ["credito", "Crédito", "Con tu posnet o lector."],
 ];
 // D37: claro por defecto; los oscuros siguen elegibles.
-const FONDOS = ["#F4F5F6", "#faf7f0", "#14161b", "#101418", "#16121f", "#1a1512", "#0f1a14"];
+const FONDOS = ["#F4F5F6", "#faf7f0", "#14161b", "#111315"];   // DISENO: claros y el oscuro del sistema, no siete colores sueltos
 const ACENTOS = ["#2fbf5b", "#f5c518", "#3b82f6", "#a78bfa", "#ef4444", "#f97316", "#14b8a6"];
 /** [clave, nombre, qué es, qué cambia si se apaga] — el aviso se ve apenas se apaga, antes de guardar. */
 const SECCIONES: [string, string, string, string][] = [
@@ -101,6 +103,10 @@ const SECCIONES: [string, string, string, string][] = [
     "No hay pantalla de Lockers ni aviso de vencimientos, y el socio no ve su locker en la app. Los alquileres ya hechos se conservan."],
   ["pt", "Personal trainer", "Turnos 1 a 1 con un PT: packs de sesiones, agenda y reservas desde la app.",
     "No hay pantalla de Personal trainer y el socio no ve los turnos en la app. Las sesiones ya reservadas se conservan."],
+  ["rutinas", "Rutinas", "Armar ejercicios y rutinas y asignarlas a los socios.",
+    "No hay pantalla de Rutinas en el panel ni en Ctrl+K. Las rutinas ya asignadas se conservan y el socio las sigue viendo en su app."],
+  ["eventos", "Eventos", "Seminarios y clases especiales con cupo y precio, en el panel, en tu página y en la app.",
+    "No hay pantalla de Eventos ni se ven en tu página, en la app ni en la ventana de la Entrada. Los eventos y sus anotados se conservan."],
 ];
 
 /** Los números de cada campo, igual que la base: si no cierra, ni se manda. */
@@ -277,13 +283,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   };
   const algoSucio = PESTANAS.some((p) => sucio(p.clave));
 
-  // Irse con cambios sin guardar: el navegador pregunta antes.
-  useEffect(() => {
-    if (!algoSucio) return;
-    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
-    window.addEventListener("beforeunload", avisar);
-    return () => window.removeEventListener("beforeunload", avisar);
-  }, [algoSucio]);
+  // Irse con cambios sin guardar (cerrar, recargar o tocar el menú): pregunta antes.
+  useCambiosSinGuardar(algoSucio);
 
   // La pestaña queda en la dirección: se puede recargar o mandar el link ("Configuración → Cobros").
   const cambiarPestana = (p: string) => {
@@ -423,10 +424,10 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             <UnaImagen tipo="logo" ruta={d.logo_path} reglas={d.reglas_imagenes.logo} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => url
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-xl p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
+                ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-[var(--radio)] p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
                 : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
           </Tarjeta>
-          <Tarjeta icono="" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
+          <Tarjeta icono="imagen" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
             <UnaImagen tipo="favicon" ruta={d.favicon_path} reglas={d.reglas_imagenes.favicon} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => (
                 <div className="inline-flex items-center gap-2 rounded-t-xl border border-b-0 border-[var(--borde)] bg-[var(--tarjeta-alta)] px-3 py-2 max-w-full">
@@ -438,12 +439,12 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           </Tarjeta>
           <Tarjeta icono="imagen" titulo="Colores" ancla="colores" ayuda="Se ven en tu página, en el panel y en la app del socio.">
             <div><p className="etiqueta mb-2">Fondo</p><div className="flex flex-wrap gap-2">
-              {FONDOS.map((f) => <button key={f} type="button" aria-label={f} aria-pressed={c.color_fondo === f} onClick={() => set("color_fondo", f)} className="size-11 rounded-xl border-2" style={{ background: f, borderColor: c.color_fondo === f ? "var(--acento)" : "var(--borde)" }} />)}
-              <input type="color" aria-label="Otro fondo" value={c.color_fondo} onChange={(e) => set("color_fondo", e.target.value)} className="size-11 rounded-xl bg-transparent" />
+              {FONDOS.map((f) => <button key={f} type="button" aria-label={f} aria-pressed={c.color_fondo === f} onClick={() => set("color_fondo", f)} className="size-12 rounded-[var(--radio-campo)] border-2" style={{ background: f, borderColor: c.color_fondo === f ? "var(--acento)" : "var(--borde)" }} />)}
+              <input type="color" aria-label="Otro fondo" value={c.color_fondo} onChange={(e) => set("color_fondo", e.target.value)} className="size-11 rounded-[var(--radio)] bg-transparent" />
             </div><p className="text-sm texto-tenue mt-1">Oscuro o claro: los textos se acomodan solos para que se lean.</p></div>
             <div><p className="etiqueta mb-2">Color principal (botones)</p><div className="flex flex-wrap gap-2">
-              {ACENTOS.map((a) => <button key={a} type="button" aria-label={a} aria-pressed={c.color_acento === a} onClick={() => set("color_acento", a)} className="size-11 rounded-xl border-2" style={{ background: a, borderColor: c.color_acento === a ? "var(--texto)" : "transparent" }} />)}
-              <input type="color" aria-label="Otro color" value={c.color_acento} onChange={(e) => set("color_acento", e.target.value)} className="size-11 rounded-xl bg-transparent" />
+              {ACENTOS.map((a) => <button key={a} type="button" aria-label={a} aria-pressed={c.color_acento === a} onClick={() => set("color_acento", a)} className="size-12 rounded-[var(--radio-campo)] border-2" style={{ background: a, borderColor: c.color_acento === a ? "var(--texto)" : "transparent" }} />)}
+              <input type="color" aria-label="Otro color" value={c.color_acento} onChange={(e) => set("color_acento", e.target.value)} className="size-11 rounded-[var(--radio)] bg-transparent" />
             </div><p className="text-sm texto-tenue mt-1">El de la acción principal de cada pantalla. Usá el de tu logo.</p></div>
             {seLeePoco(c.color_acento, c.color_fondo) && (
               <p role="status" className="pildora pildora-amarillo whitespace-normal" data-aviso-contraste>
@@ -555,7 +556,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               </div>
             )}
           </Tarjeta>
-          <Tarjeta icono="" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
+          <Tarjeta icono="lista" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
             <Interruptor etiqueta="Se puede cobrar a cuenta" ayuda={c.fiado_activo ? "Prendido: hasta el tope de abajo por socio." : "Apagado: nadie queda debiendo."}
               checked={c.fiado_activo} onChange={(e) => set("fiado_activo", e.target.checked)} />
             {c.fiado_activo && (
@@ -739,6 +740,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       )}
       {pestana === "entrada" && <ConfigEntrada inicial={entrada} puedeEditar={puedeEditar} />}
       {pestana === "mensajes" && <><div data-opcion="link-resena"><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /></div><div data-opcion="mensajes"><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></div></>}
+      {pestana === "funciones" && <FuncionesNuevas puedeEditar={puedeEditar} zona={d.zona_horaria} />}
       {pestana === "cambios" && <div data-opcion="historial"><Historial cambios={cambios} /></div>}
       {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
       {pestana === "gimnasio" && puedeEditar && (

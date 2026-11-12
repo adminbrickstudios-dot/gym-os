@@ -25,7 +25,7 @@ export default async function Estado() {
   const ahora = new Date().toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", dateStyle: "short", timeStyle: "medium" });
   return (
     <main className="mx-auto max-w-xl px-4 py-12 space-y-6" data-estado={base.ok ? "ok" : "falla"}>
-      <h1 className="titular text-5xl">Estado de Base</h1>
+      <h1 className="titular text-[28px]">Estado de Base</h1>
       <p className={`pildora ${base.ok ? "pildora-verde" : "pildora-rojo"} !text-lg`} role="status">{base.ok ? "Todo funciona" : "Hay un problema: estamos viendo qué pasa"}</p>
       <dl className="tarjeta divide-y divide-[var(--borde)]">
         <div className="flex justify-between gap-4 px-4 py-3"><dt>La base de datos</dt><dd data-base>{base.ok ? `responde (${base.ms} ms)` : "no responde"}</dd></div>

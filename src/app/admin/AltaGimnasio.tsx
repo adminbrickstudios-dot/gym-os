@@ -4,7 +4,7 @@ import { rutaGimnasio } from "@/lib/urls";
 import { ACENTO_POR_DEFECTO, FONDO_CLARO, textoSobre } from "@/lib/marca";
 import { CampoContrasena } from "@/components/cuentas/CampoContrasena";
 import Link from "next/link";
-import { useRef, useState, useActionState } from "react";
+import { useRef, useState, useActionState, useEffect, startTransition, type FormEvent } from "react";
 import { crearGimnasio, type EstadoAlta } from "./acciones";
 import { BotonEntrar } from "./BotonEntrar";
 import { ListaPrueba } from "./ListaPrueba";
@@ -39,6 +39,15 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
     setFalta("");
     setPaso((p) => Math.min(3, p + 1));
   };
+  const enviar = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const datos = new FormData(e.currentTarget);
+    startTransition(() => {
+      accion(datos);
+    });
+  };
+  // Un error de la dirección o del nombre se ve en el paso donde se corrige, no en el último.
+  useEffect(() => { if (estado.error && /direcci[oó]n|slug|nombre del gimnasio/i.test(estado.error)) setPaso(2); }, [estado]);
   const tipoNombre = TIPOS.find(([v]) => v === tipo)?.[1] ?? "";
   const direccion = `${slug || "nombre"}.${dominio || "(falta el dominio)"}`;
 
@@ -103,7 +112,8 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
           </div>
         </div>
       ) : (
-        <form ref={formulario} action={accion} className="space-y-4"
+        // Con onSubmit (y no action) React no vacía los campos del dueño si el alta da error: se corrige y se reenvía.
+        <form ref={formulario} className="space-y-4" onSubmit={enviar}
           onKeyDown={(e) => { if (e.key === "Enter" && paso < 3 && (e.target as HTMLElement).tagName === "INPUT") { e.preventDefault(); siguiente(); } }}>
           <ol className="flex flex-wrap gap-2 text-sm" aria-label="Pasos del alta">
             {PASOS.map((n, i) => (
@@ -140,14 +150,14 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               )}
               <p className="sm:col-span-2 texto-tenue text-sm">El logo lo sube el dueño (o vos, entrando a terminar de configurarlo) desde Configuración.</p>
             </div>
-            <div className="rounded-2xl p-5 space-y-3 border border-[var(--borde)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
+            <div className="rounded-[var(--radio)] p-5 space-y-3 border border-[var(--borde)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
               <p className="text-xs uppercase tracking-wide opacity-60" style={{ color: textoSobre(fondo) }}>Vista previa · {tipoNombre || "sin plantilla"}</p>
               <p className="flex items-center gap-3">
-                <span className="grid place-items-center size-12 rounded-xl text-xl font-bold text-white" style={{ background: acento }} aria-hidden>{(nombre.trim()[0] ?? "G").toUpperCase()}</span>
+                <span className="grid place-items-center size-12 rounded-[var(--radio)] text-xl font-bold text-white" style={{ background: acento }} aria-hidden>{(nombre.trim()[0] ?? "G").toUpperCase()}</span>
                 <span className="text-2xl font-bold" style={{ color: textoSobre(fondo) }}>{nombre.trim() || "Tu gimnasio"}</span>
               </p>
               <p className="text-sm break-all" style={{ color: textoSobre(fondo) }}>{direccion}</p>
-              <span className="inline-block rounded-xl px-5 py-3 font-semibold text-white" style={{ background: acento }}>Soy socio</span>
+              <span className="inline-block rounded-[var(--radio)] px-5 py-3 font-semibold text-white" style={{ background: acento }}>Soy socio</span>
             </div>
           </div>
 
@@ -162,7 +172,7 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               <span className="block text-sm texto-tenue">Para dejarte listo el WhatsApp de bienvenida. No se guarda.</span></label>
           </div>
 
-          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {falta || estado.error}</p>}
+          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {falta || estado.error}</p>}
           <div className="flex flex-wrap gap-2">
             {paso > 1 && <button type="button" className="boton" onClick={() => { setFalta(""); setPaso((p) => p - 1); }}>← Atrás</button>}
             {paso < 3

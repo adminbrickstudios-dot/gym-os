@@ -2,10 +2,11 @@
 import { useRef, useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { formatearPesos } from "@/lib/formato";
+import { formatearCelular, formatearPesos } from "@/lib/formato";
 import { urlFotoProducto } from "@/lib/url-producto";
 import { cerrarEvento, crearEvento, marcarPresente, publicarEvento, subirFlyerEvento } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { BorradorDeEstado, borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
 
 export type Anotado = {
   clave: string; nombre: string; cantidad: number; socio_id: string | null; inscripcion_id: string | null; pago: boolean;
@@ -31,6 +32,8 @@ const diaLocal = (iso: string | number | Date, zona: string) => new Intl.DateTim
 const cuandoLargo = (iso: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 const cuandoCorto = (iso: string, zona: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 
+const ERROR_INICIO = "Elegí el día y la hora.";   // regla 8: sale junto al campo
+const CLAVE_BORRADOR = "evento-nuevo";   // regla 7: lo escrito queda como borrador en el dispositivo hasta que se crea
 const VACIO = { nombre: "", inicio: "", fin: "", cupo: "20", precio: "", precioSocio: "", descripcion: "", para: "todos", lugar: "", responsable: "", espera: true };
 
 export function NuevoEvento({ zona }: { zona: string }) {
@@ -44,7 +47,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
   if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nuevo evento</button>;
 
   const guardar = (borrador: boolean) => empezar(async () => {
-    if (!d.inicio) { setEstado({ error: "Elegí el día y la hora." }); return; }
+    if (!d.inicio) { setEstado({ error: ERROR_INICIO }); return; }
     const precio = numero(d.precio);
     const precioSocio = d.precioSocio.trim() ? numero(d.precioSocio) : null;
     if (Number.isNaN(precio) || (precioSocio !== null && Number.isNaN(precioSocio))) { setEstado({ error: "No entiendo el precio: escribilo como 15.000 (0 si es gratis)." }); return; }
@@ -60,13 +63,16 @@ export function NuevoEvento({ zona }: { zona: string }) {
       const s = await subirFlyerEvento(r.id, fd);
       if (s.error) { setEstado({ error: `El evento se creó, pero el flyer no: ${s.error}` }); }
     }
+    borrarBorradorDe(CLAVE_BORRADOR);
     setEstado({}); setAbierto(false); setD(VACIO); setExtras([]);
   });
 
   return (
     <form className="tarjeta p-5 grid gap-3 sm:grid-cols-2" data-nuevo-evento onSubmit={(e) => { e.preventDefault(); guardar(false); }}>
+      <BorradorDeEstado clave={CLAVE_BORRADOR} valor={{ d, extras }} aplicar={(b) => { setD({ ...VACIO, ...b.d }); setExtras(b.extras ?? []); }} />
       <label className="block space-y-1 sm:col-span-2"><span className="etiqueta">Nombre</span><input className="campo" maxLength={60} autoFocus value={d.nombre} onChange={(e) => set("nombre", e.target.value)} placeholder="Ej: Workshop de movilidad" /></label>
-      <label className="block space-y-1"><span className="etiqueta">Día y hora</span><input className="campo" type="datetime-local" value={d.inicio} onChange={(e) => set("inicio", e.target.value)} /></label>
+      <label className="block space-y-1"><span className="etiqueta">Día y hora</span><input className="campo" type="datetime-local" value={d.inicio} aria-invalid={estado.error === ERROR_INICIO || undefined} onChange={(e) => set("inicio", e.target.value)} />
+        {estado.error === ERROR_INICIO && <span role="alert" className="block text-sm" style={{ color: "var(--rojo)" }}>{ERROR_INICIO}</span>}</label>
       <label className="block space-y-1"><span className="etiqueta">Cupo</span><input className="campo" inputMode="numeric" value={d.cupo} onChange={(e) => set("cupo", e.target.value.replace(/\D/g, ""))} /></label>
       <label className="block space-y-1"><span className="etiqueta">Precio general (no socio)</span><input className="campo" inputMode="decimal" value={d.precio} onChange={(e) => set("precio", e.target.value)} placeholder="0 si es gratis" /></label>
       <label className="block space-y-1"><span className="etiqueta">Precio de socio (opcional)</span><input className="campo" inputMode="decimal" data-precio-socio value={d.precioSocio} onChange={(e) => set("precioSocio", e.target.value)} placeholder="igual al general" /></label>
@@ -82,7 +88,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
         {extras.map((x, i) => (
           <div key={i} className="flex gap-2">
             <input className="campo" type="datetime-local" aria-label={`Fecha ${i + 2}`} value={x} onChange={(e) => setExtras((l) => l.map((y, j) => (j === i ? e.target.value : y)))} />
-            <button type="button" className="boton" aria-label="Sacar esta fecha" onClick={() => setExtras((l) => l.filter((_, j) => j !== i))}>✕</button>
+            <button type="button" className="boton" aria-label="Sacar esta fecha" onClick={() => setExtras((l) => l.filter((_, j) => j !== i))}><Icono nombre="cerrar" /></button>
           </div>
         ))}
         {extras.length < 20 && <button type="button" className="boton" data-otra-fecha onClick={() => setExtras((l) => [...l, ""])}><Icono nombre="mas" /> Otra fecha</button>}
@@ -92,7 +98,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
         <input ref={archivo} className="campo" type="file" accept="image/jpeg,image/png,image/webp" data-flyer /></label>
       <label className="flex items-center gap-2 sm:col-span-2"><input type="checkbox" checked={d.espera} onChange={(e) => set("espera", e.target.checked)} /> <span>Si se llena, anotar en una lista de espera</span></label>
 
-      {estado.error && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
+      {estado.error && estado.error !== ERROR_INICIO && <Mensaje tipo="error" className="sm:col-span-2">{estado.error}</Mensaje>}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <button type="submit" className="boton boton-principal" disabled={guardando || d.nombre.trim().length < 3}>{guardando ? "Creando…" : "Crear evento"}</button>
         <button type="button" className="boton" disabled={guardando || d.nombre.trim().length < 3} onClick={() => guardar(true)}><Icono nombre="lista" /> Guardar como borrador</button>
@@ -171,7 +177,7 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
                   {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton-texto px-2" aria-label={`WhatsApp a ${a.nombre}`}><Icono nombre="mensaje" /></a>}
                   {hoyEsDia && (a.socio_id || a.inscripcion_id) && (
                     a.presente
-                      ? <button type="button" className="boton" disabled={ocupado} data-presente="si" onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }, true))}>✓ Presente (deshacer)</button>
+                      ? <button type="button" className="boton" disabled={ocupado} data-presente="si" onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }, true))}><Icono nombre="ok" /> Presente (deshacer)</button>
                       : <button type="button" className="boton" disabled={ocupado} data-marcar-presente onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }))}>Marcar presente</button>
                   )}
                   {!hoyEsDia && a.presente && <span className="pildora pildora-verde">Estuvo</span>}
@@ -184,7 +190,7 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
       {e.espera.length > 0 && (
         <details><summary className="cursor-pointer texto-suave">Lista de espera ({e.espera.length})</summary>
           <ol className="mt-2 space-y-1 text-sm" data-lista-espera>
-            {e.espera.map((w) => <li key={w.clave}>#{w.posicion} · {w.nombre}{w.telefono ? ` · ${w.telefono}` : ""}</li>)}
+            {e.espera.map((w) => <li key={w.clave}>#{w.posicion} · {w.nombre}{w.telefono ? ` · ${formatearCelular(w.telefono)}` : ""}</li>)}
           </ol>
         </details>
       )}

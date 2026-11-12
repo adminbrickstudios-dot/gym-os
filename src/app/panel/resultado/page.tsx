@@ -12,6 +12,8 @@ import { LinkPanel } from "@/components/panel/LinkPanel";
 import { DeudaSocios, type DeudaConSocios } from "./DeudaSocios";
 import { PorSede, type ResultadoPorSede } from "./PorSede";
 import { Icono } from "@/components/ui/Icono";
+import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
+import { HorariosPico, type IngresosPorHoraYDia } from "./HorariosPico";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -51,6 +53,9 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       rpc<ResultadoPorSede>("resultado_por_sede", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
     ]);
     const tasa = await rpc<TasaDeCobro>("tasa_de_cobro", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });   // FA-10
+    // Detalle 68: horarios pico por día (función nueva, apagada por defecto).
+    const pico7 = (await funcionesNuevasDe(panel.gimnasio.id)).includes("horarios_pico")
+      ? await rpc<IngresosPorHoraYDia>("ingresos_por_hora_y_dia", { p_gimnasio_id: panel.gimnasio.id, p_semanas: 8 }) : null;
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -58,6 +63,10 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     const maxDia = Math.max(1, ...r.por_dia.map((d) => Number(d.total)));
     const maxHora = Math.max(1, ...r.horas);
     const pico = r.horas.indexOf(Math.max(...r.horas));
+    // Las horas que se muestran: de 6 a 22 por defecto, pero si el gimnasio abre antes (5 h) o cierra después (24 h), se amplían: no se pierden entradas.
+    const conEntradas = r.horas.map((n, h) => (n > 0 ? h : -1)).filter((h) => h >= 0);
+    const horaDesde = Math.min(6, conEntradas[0] ?? 6);
+    const horaHasta = Math.max(22, conEntradas[conEntradas.length - 1] ?? 22);
     const totalConcepto = r.por_concepto.reduce((a, c) => a + Number(c.total), 0) || 1;
     return (
       <div className="space-y-10">
@@ -102,7 +111,15 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
                   style={{ height: `${Math.max(2, (Number(d.total) / maxDia) * 100)}%`, background: Number(d.total) ? "var(--acento)" : "var(--borde)" }} />
               ))}
             </div>
-            <div className="flex justify-between text-xs texto-tenue mt-2"><span>1</span><span>{r.por_dia.length}</span></div>
+            <div className="flex justify-between text-[13px] texto-tenue mt-2"><span>1</span><span>{r.por_dia.length}</span></div>
+            {/* En el celular no hay "title" al pasar el mouse: el mejor día y todos los montos se ven escritos. */}
+            {Number(maxDia) > 1 && (() => { const mejor = r.por_dia.find((d) => Number(d.total) === maxDia); return mejor ? <p className="text-[15px] mt-2" data-mejor-dia>Mejor día: el {Number(mejor.dia.slice(8, 10))}, {formatearPesos(mejor.total)}.</p> : null; })()}
+            <details className="mt-2" data-montos-por-dia>
+              <summary className="cursor-pointer texto-suave min-h-11 flex items-center">Ver los montos de cada día</summary>
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 text-[15px]">
+                {r.por_dia.map((d) => <li key={d.dia} className="flex justify-between border-b border-[var(--borde)] py-1.5"><span className="texto-suave">{Number(d.dia.slice(8, 10))}</span><span className="numero">{formatearPesos(d.total)}</span></li>)}
+              </ul>
+            </details>
           </div>
         </section>
 
@@ -196,14 +213,15 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           <p className="texto-suave mb-3">{Math.max(...r.horas) ? `La hora con más gente: de ${pico} a ${pico + 1} h.` : "Sin entradas registradas este mes."}</p>
           <div className="tarjeta p-4">
             <div className="flex items-end gap-[3px] h-24" role="img" aria-label="Entradas por hora del día">
-              {r.horas.slice(6).map((n, i) => (
-                <div key={i} className="flex-1 rounded-t-sm" title={`${i + 6} h: ${n}`}
-                  style={{ height: `${Math.max(2, (n / maxHora) * 100)}%`, background: n ? "var(--acento)" : "var(--borde)", opacity: i + 6 === pico ? 1 : 0.6 }} />
+              {r.horas.slice(horaDesde, horaHasta + 1).map((n, i) => (
+                <div key={i} className="flex-1 rounded-t-sm" title={`${i + horaDesde} h: ${n}`}
+                  style={{ height: `${Math.max(2, (n / maxHora) * 100)}%`, background: n ? "var(--acento)" : "var(--borde)", opacity: i + horaDesde === pico ? 1 : 0.6 }} />
               ))}
             </div>
-            <div className="flex justify-between text-xs texto-tenue mt-2"><span>6 h</span><span>15 h</span><span>23 h</span></div>
+            <div className="flex justify-between text-[13px] texto-tenue mt-2"><span>{horaDesde} h</span><span>{Math.round((horaDesde + horaHasta) / 2)} h</span><span>{horaHasta} h</span></div>
           </div>
         </section>
+        {pico7 && <HorariosPico datos={pico7} />}
       </div>
     );
   });

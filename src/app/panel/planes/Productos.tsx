@@ -22,8 +22,8 @@ function Miniatura({ p }: { p: Producto }) {
   const url = urlFotoProducto(p.foto_path);
   return url
     // eslint-disable-next-line @next/next/no-img-element
-    ? <img src={url} alt={`Foto de ${p.nombre}`} className="size-12 rounded-xl object-cover flex-none" data-foto />
-    : <span aria-hidden className="size-12 rounded-xl flex-none grid place-items-center text-2xl bg-[var(--tarjeta)] border border-[var(--borde)]"></span>;
+    ? <img src={url} alt={`Foto de ${p.nombre}`} className="size-12 rounded-[var(--radio)] object-cover flex-none" data-foto />
+    : <span aria-hidden className="size-12 rounded-[var(--radio)] flex-none grid place-items-center text-2xl bg-[var(--tarjeta)] border border-[var(--borde)]"></span>;
 }
 
 function FilaProducto({ p, stock }: { p: Producto; stock?: Stock }) {

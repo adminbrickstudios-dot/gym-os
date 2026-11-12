@@ -28,8 +28,8 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
     const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: yo.zona! }).format(new Date());
     return (
       <div className="space-y-6">
-        <Link href={`/app${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">Mi membresía</h1>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]">Mi membresía</h1>
         <AvisoClaveSocio socioId={s.socio_id} zona={yo.zona!} />
         {yo.plan && <p className="texto-suave text-lg"><Icono nombre="etiqueta" /> {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}
@@ -38,6 +38,11 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
         <Sesiones sesiones={seguridad.sesiones} zona={yo.zona!} />
         {/* SEG-6: lo que el gimnasio guarda de él. */}
         <p><a href={`/app/mis-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="texto-suave underline" download data-mis-datos><Icono nombre="descargar" /> Descargar mis datos</a></p>
+        {/* Ley 25.326 (D52): derecho de acceso, rectificación y supresión (pedir-datos), y la política del gimnasio. */}
+        <p className="texto-suave text-sm" data-derechos-datos>
+          <Link href={`/app/pedir-datos${yo.socios.length > 1 ? `?socio=${s.socio_id}` : ""}`} className="underline">Pedir que corrijan o borren mis datos</Link>
+          {" · "}<a href="/privacidad" className="underline">Política de privacidad</a>
+        </p>
         {baja
           ? <p className="mensaje mensaje-info" data-baja-pendiente><Icono nombre="salir" /> Pediste la baja: el gimnasio te va a contactar.{baja.codigo && <> Tu código de baja: <strong data-codigo-baja>{baja.codigo}</strong>. Guardalo: es tu constancia.</>}</p>
           : <PedirBaja socioId={s.socio_id} ofrecePausa={!!yo.plan} />}

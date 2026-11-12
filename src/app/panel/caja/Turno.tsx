@@ -6,7 +6,8 @@ import { CalculadoraBilletes } from "@/components/panel/CalculadoraBilletes";
 import { linkCompartir, textoCierre } from "@/lib/caja";
 import { formatearPesos } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
-import type { Billetes } from "./tipos";
+import { PorMedio } from "./PorMedio";
+import type { Billetes, CobrosMedio } from "./tipos";
 import { Icono } from "@/components/ui/Icono";
 
 const MEDIO: Record<string, string> = { transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
@@ -29,19 +30,24 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
         </button>
       )}
       {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-      <button type="submit" disabled={ocupado} className="boton boton-principal w-full text-lg"><Icono nombre="candado-abierto" /> Abrir caja</button>
+      <button type="submit" disabled={ocupado} className="boton boton-principal w-full text-lg">{ocupado ? "Abriendo la caja…" : <><Icono nombre="candado-abierto" /> Abrir caja</>}</button>
     </form>
   );
 }
 
-export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada = false, vencida = false, pedirBilletes = false }: {
-  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, abrirCierre = false, zona }: {
+  turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+  /** VD-29C: llegó con ?accion=cerrar (Ctrl+K "cerrar turno"): el formulario del cierre ya está abierto y enfocado. */
+  abrirCierre?: boolean;
+  /** La zona horaria del gimnasio: la hora del cierre que se manda por WhatsApp sale en ella, no en la de la compu. */
+  zona: string;
 }) {
-  const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">("nada");
+  const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">(abrirCierre ? "cerrar" : "nada");
   const [monto, setMonto] = useState("");
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cierre, setCierre] = useState<Resumen | null>(null);
+  const [cobrosCierre, setCobrosCierre] = useState<CobrosMedio[] | null>(null);
   const [conBilletes, setConBilletes] = useState(false);
   const [billetes, setBilletes] = useState<Billetes | null>(null);
   const [ocupado, empezar] = useTransition();
@@ -53,20 +59,23 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
     const dif = cierre.diferencia ?? 0;
     return (
       <section className="tarjeta p-6 sm:p-8 max-w-xl" aria-live="polite">
-        <p className="text-5xl" aria-hidden>{dif === 0 ? "✓" : dif > 0 ? "" : "!"}</p>
+        <p className="text-5xl" aria-hidden><Icono nombre={dif === 0 ? "ok" : dif > 0 ? "info" : "alerta"} /></p>
         <p className="titular text-5xl mt-4">{dif === 0 ? "Caja justa" : dif > 0 ? `Sobran ${formatearPesos(dif)}` : `Faltan ${formatearPesos(-dif)}`}</p>
         <dl className="grid grid-cols-2 gap-4 mt-6">
           <div><dt className="texto-tenue text-sm">Contaste</dt><dd className="numero text-3xl">{formatearPesos(cierre.contado)}</dd></div>
           <div><dt className="texto-tenue text-sm">Tenía que haber</dt><dd className="numero text-3xl">{formatearPesos(cierre.esperado)}</dd></div>
         </dl>
-        <OtrosMedios r={cierre} />
+        <p className="texto-suave text-sm mt-3" data-dif-efectivo>La diferencia cuenta solo el efectivo: lo que contaste menos lo que tenía que haber en el cajón. La transferencia y la tarjeta no entran.</p>
+        {cobrosCierre
+          ? <div className="mt-6"><PorMedio medios={cobrosCierre} zona={zona} titulo="Lo cobrado en el turno, por medio" /></div>
+          : <OtrosMedios r={cierre} />}
         <div className="flex flex-wrap gap-2 mt-8">
-          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}><Icono nombre="persona" /> Listo</button>
+          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}><Icono nombre="ok" /> Listo</button>
           {/* VD-9: el reporte del turno, con SOBRA / FALTA, para ver o mandar. */}
           <Link className="boton" data-ver-reporte href={`/panel/caja/reporte?turno=${cierre.turno_id}`}><Icono nombre="documento" /> Ver el reporte</Link>
           {/* CAJ-2: el cierre, escrito, para mandárselo al dueño. */}
           <a className="boton" data-compartir-cierre target="_blank" rel="noopener noreferrer"
-            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
+            href={linkCompartir(textoCierre({ ...cierre, caja: nombre, cuando: `${desde.replace(/^Desde las /, "de ").replace(/ · la abrió .*/, "")} a ${new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date())}` }))}>
             <Icono nombre="celular" /> Mandar el cierre por WhatsApp</a>
         </div>
       </section>
@@ -93,10 +102,12 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
           <p className="font-semibold">La caja de antes queda anotada como sin contar. ¿Con cuánta plata arrancás tu turno?</p>
           <input autoFocus className="campo !text-xl" inputMode="decimal" placeholder="$ 0" aria-label="Fondo del turno nuevo" value={monto} onChange={(e) => setMonto(e.target.value)} />
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Abrir mi turno</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">{ocupado ? "Abriendo…" : "Abrir mi turno"}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
-      {resumen ? (
+      {resumen && cobros ? (
+        <PorMedio medios={cobros} zona={zona} cajon={{ esperado: resumen.esperado, inicial: resumen.monto_inicial, efectivo: resumen.efectivo, ingresos: resumen.ingresos, retiros: resumen.retiros }} />
+      ) : resumen ? (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div><dt className="texto-tenue text-sm">Inicial</dt><dd className="numero text-2xl">{formatearPesos(resumen.monto_inicial)}</dd></div>
           <div><dt className="texto-tenue text-sm"><Icono nombre="plata" /> Cobrado en efectivo</dt><dd className="numero text-2xl">{formatearPesos(resumen.efectivo)}</dd></div>
@@ -106,7 +117,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
       ) : (
         <p className="texto-suave"><Icono nombre="persona" /> Al cerrar contás la plata y recién ahí ves cuánto tenía que haber.</p>
       )}
-      {resumen && <OtrosMedios r={resumen} />}
+      {resumen && !cobros && <OtrosMedios r={resumen} />}
 
       {modo === "nada" && (
         <div className="flex flex-wrap gap-2">
@@ -129,11 +140,11 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
             </label>
           )}
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Anotar</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">{ocupado ? "Anotando…" : "Anotar"}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
       {modo === "cerrar" && (
-        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await cerrarCaja(turnoId, monto, motivo, usaCalculadora ? billetes : null); if (r.error) setError(r.error); else setCierre(r.resumen!); }); }}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await cerrarCaja(turnoId, monto, motivo, usaCalculadora ? billetes : null); if (r.error) setError(r.error); else { setCobrosCierre(r.cobros ?? null); setCierre(r.resumen!); } }); }}>
           <p className="font-semibold">Contá la plata del cajón y escribí cuánto hay.</p>
           <input autoFocus className="campo !text-2xl !min-h-16" inputMode="decimal" placeholder="$ contado" value={monto} onChange={(e) => setMonto(e.target.value)} readOnly={usaCalculadora} />
           {/* VD-9: la calculadora es opcional (el gimnasio puede exigirla); el total sale solo y la base lo vuelve a sumar. */}
@@ -141,7 +152,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, olvidada
           {usaCalculadora && <CalculadoraBilletes alCambiar={(total, detalle) => { setMonto(String(total).replace(".", ",")); setBilletes(detalle); }} />}
           <input className="campo" placeholder="Nota (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado || !monto} className="boton boton-principal"><Icono nombre="candado" /> Cerrar con este monto</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado || !monto} className="boton boton-principal">{ocupado ? "Cerrando la caja…" : <><Icono nombre="candado" /> Cerrar con este monto</>}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
     </section>

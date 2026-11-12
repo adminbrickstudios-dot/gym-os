@@ -60,7 +60,7 @@ export function TopesYMotivos({ gimnasioId, topes, motivos, puedeEditar, devoluc
           </div>
         )}
       </div>
-      {msj && <p role={msj.tipo === "error" ? "alert" : "status"} className={`pildora whitespace-normal ${msj.tipo === "error" ? "pildora-rojo" : ""}`}>{msj.tipo === "error" ? "!" : "✓"} {msj.texto}</p>}
+      {msj && <p role={msj.tipo === "error" ? "alert" : "status"} className={`pildora whitespace-normal ${msj.tipo === "error" ? "pildora-rojo" : ""}`}><Icono nombre={msj.tipo === "error" ? "alerta-circulo" : "ok"} /> {msj.texto}</p>}
     </div>
   );
 }

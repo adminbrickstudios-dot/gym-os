@@ -5,7 +5,7 @@ import { Recomendacion } from "./Recomendacion";
 import { AvisosDelDia } from "./AvisosDelDia";
 import { colorVar } from "@/components/panel/Estado";
 import { Aviso } from "@/components/panel/Marco";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaCorta, formatearDni, formatearPesos } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
 import { traerAgenda } from "@/lib/landing";
 import { textoCierre } from "@/lib/horarios";
@@ -54,7 +54,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados] = await Promise.all([
+    const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados, dni] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
       rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
       rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -79,6 +79,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       rpc<{ pendiente: boolean }>("encuesta_socio", { p_socio_id: s.socio_id }),
       // COM-13: su grado (cinturón) en las actividades que los usan.
       rpc<GradosSocio>("grados_socio", { p_socio_id: s.socio_id }),
+      // SOCIO-FLUJO §4: "Tu DNI para entrar" cuando el gimnasio no usa el QR (si la base no lo da, no se muestra).
+      rpc<string>("mi_dni", { p_socio_id: s.socio_id }).catch(() => null),
     ]);
     // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
     const registraSalida = qrPared ? (await rpc<string>("registra_salida", { p_gimnasio_id: g.id }).catch(() => "no")) !== "no" : false;
@@ -87,7 +89,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const bloquePago = (
       <>
         {yo.pendiente && (
-          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="recibo" /> Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
+          <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full"><Icono nombre="recibo" /> Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
         )}
         {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
         {!yo.pendiente && debePagar && yo.transferencia && (
@@ -100,7 +102,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {progreso?.bienvenida_pendiente && <Bienvenida socioId={s.socio_id} nombre={s.nombre} qr={!!qr || qrPared} clases={(yo.modo_clases ?? "ninguno") as "reserva" | "sin_reserva" | "ninguno"} pagos={!!yo.transferencia || !!online?.disponible} />}
         <header className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <p className="texto-suave text-lg">Hola, {s.nombre}  <Icono nombre="salir" /></p>
+            <p className="texto-suave text-lg" data-hola>Hola, {s.nombre}</p>
             {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue">Cambiar de socio</Link>}
           </div>
           {campana && (
@@ -127,18 +129,36 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <p className="text-5xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
           <p className="titular text-5xl mt-4">{v.puede ? "Podés entrar" : "No podés entrar"}</p>
           <p className="text-xl mt-2 font-semibold">{v.texto}</p>
-          {v.vence_en && v.puede && <p className="texto-suave mt-1" data-cubierto-hasta>Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}{(() => { const n = Math.ceil((new Date(v.vence_en).getTime() - Date.now()) / 86400000); return n >= 0 ? ` · te ${n === 1 ? "queda 1 día" : `quedan ${n} días`}` : ""; })()}</p>}
+          {v.vence_en && v.puede && <p className="texto-suave mt-1" data-cubierto-hasta>Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}{(() => { const n = Math.ceil((new Date(v.vence_en).getTime() - Date.now()) / 86400000); return n === 0 ? " · vence hoy" : n > 0 ? ` · te ${n === 1 ? "queda 1 día" : `quedan ${n} días`}` : ""; })()}</p>}
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
+
+        {/* SOCIO-FLUJO §4: lo primero después del estado es cómo entra: el QR (que cambia) o, si el gimnasio no lo usa, su DNI. */}
+        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
+        {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
+        {!qr && !qrPared && dni && (
+          <section className="tarjeta p-6" data-tu-dni-inicio>
+            <p className="texto-suave">Tu DNI para entrar</p>
+            <p className="numero text-5xl mt-1">{formatearDni(dni)}</p>
+          </section>
+        )}
+
+        <nav className="grid grid-cols-2 gap-3" aria-label="Lo de todos los días" data-botones-inicio>
+          <Link href={`/app/yo${q}`} className="tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition" data-boton-mi-plan>
+            <span className="text-3xl" aria-hidden><Icono nombre="tarjeta" /></span><span className="titulo text-xl">Mi plan</span>
+          </Link>
+          {yo.modo_clases === "reserva" && (
+            <Link href={`/app/clases${q}`} className="tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition" data-boton-reservar>
+              <span className="text-3xl" aria-hidden><Icono nombre="calendario" /></span><span className="titulo text-xl">Reservar una clase</span>
+            </Link>
+          )}
+        </nav>
 
         {debePagar && bloquePago}
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
         {progreso && <ProgresoInicio p={progreso} />}
         <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>
         <Suspense fallback={null}><Recomendacion socioId={s.socio_id} q={q} /></Suspense>
-
-        {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
-        {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (
           <section className="space-y-2" aria-label="Horarios del gimnasio" data-agenda-app>

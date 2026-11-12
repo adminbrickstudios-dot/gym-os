@@ -20,7 +20,7 @@ export function MiPin() {
           value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
         <button type="submit" className="boton" disabled={ocupado || pin.length !== 4}>Guardar PIN</button>
       </div>
-      {msj && <p role={msj.ok ? "status" : "alert"} className={`pildora ${msj.ok ? "pildora-verde" : "pildora-rojo"} whitespace-normal`}>{msj.ok ? "✓" : "!"} {msj.texto}</p>}
+      {msj && <p role={msj.ok ? "status" : "alert"} className={`pildora ${msj.ok ? "pildora-verde" : "pildora-rojo"} whitespace-normal`}><Icono nombre={msj.ok ? "ok" : "alerta-circulo"} /> {msj.texto}</p>}
     </form>
   );
 }

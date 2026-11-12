@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NOMBRE_ROL } from "@/lib/panel/secciones";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
+import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Elegí el gimnasio" };
 
@@ -18,7 +19,7 @@ export default async function Elegir() {
   return (
     <main className="min-h-dvh flex items-center px-4 py-12">
       <div className="mx-auto w-full max-w-md">
-        <p className="text-5xl" aria-hidden>🏋️</p>
+        <p className="text-5xl" aria-hidden><Icono nombre="pesa" /></p>
         <h1 className="titular text-5xl mt-6">¿A qué gimnasio entrás?</h1>
         <ul className="mt-8 space-y-2">
           {yo.equipo.map((e) => (
@@ -28,14 +29,14 @@ export default async function Elegir() {
               </a>
             </li>
           ))}
-          {yo.es_admin && <li><Link href="/admin" className="boton w-full text-lg">🧱 Super admin de BRIK</Link></li>}
+          {yo.es_admin && <li><Link href="/admin" className="boton w-full text-lg"><Icono nombre="escudo" /> Super admin de BRIK</Link></li>}
         </ul>
         {/* AUD-15: el socio no tiene panel: va a la app de su gimnasio. */}
         {yo.socios.length > 0 && (
           <div className="mt-8 space-y-2" data-elegir-socio>
             <p className="texto-suave">Como socio:</p>
             {[...new Map(yo.socios.map((s) => [s.slug, s])).values()].map((s) => (
-              <a key={s.slug} href={`/g/${s.slug}/app`} className="boton w-full !justify-between text-lg"><span>💪 {s.gimnasio}</span><span className="texto-tenue text-sm">Mi app</span></a>
+              <a key={s.slug} href={`/g/${s.slug}/app`} className="boton w-full !justify-between text-lg"><span><Icono nombre="pesa" /> {s.gimnasio}</span><span className="texto-tenue text-sm">Mi app</span></a>
             ))}
           </div>
         )}

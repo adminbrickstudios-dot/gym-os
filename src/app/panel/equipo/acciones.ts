@@ -5,7 +5,9 @@ import { contrasenaElegida, darAcceso, mailValido, nuevaContrasena } from "@/lib
 import { origenDePeticion } from "@/lib/cuentas-clave-servidor";
 import { textoClave, type ResultadoClave } from "@/lib/cuentas-clave";
 
-export type Resultado = { error?: string; aviso?: string; contrasena?: string; email?: string };
+export type Resultado = { error?: string; aviso?: string; contrasena?: string; email?: string;
+  /** Si el alta no se hizo, lo que se escribió vuelve a los campos (la contraseña no). */
+  valores?: { nombre: string; email: string; rol: string; sede: string } };
 
 /**
  * Agrega a alguien al equipo. Primero la base valida que quien lo pide es el
@@ -18,11 +20,12 @@ export async function agregarPersona(_: Resultado, f: FormData): Promise<Resulta
   const rol = String(f.get("rol") ?? "");
   const email = String(f.get("email") ?? "").trim().toLowerCase();
   const sede = String(f.get("sede") ?? "") || null;
-  if (email && !mailValido(email)) return { error: "El mail no es válido" };
+  const valores = { nombre, email, rol, sede: sede ?? "" };
+  if (email && !mailValido(email)) return { error: "El mail no es válido", valores };
   let equipoId: string;
   try {
     equipoId = await rpc<string>("guardar_equipo", { p_gimnasio_id: panel.gimnasio.id, p_equipo_id: null, p_nombre: nombre, p_rol: rol, p_sede_id: sede });
-  } catch (e) { return { error: (e as Error).message }; }
+  } catch (e) { return { error: (e as Error).message, valores }; }
   revalidatePath("/panel/equipo");
   if (!email) return { aviso: `${nombre} quedó en el equipo sin acceso al sistema (aparece en la grilla de clases).` };
 
