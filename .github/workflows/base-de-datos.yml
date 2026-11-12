@@ -33,6 +33,10 @@ on:
       contrasena:
         description: "Contraseña de los usuarios demo (solo para usuarios-demo, 10 o más letras)"
         required: false
+      urgente:
+        description: "Solo para aplicar entre las 16 y las 22 h (hora de Argentina, hora pico): escribí URGENTE si es un arreglo de algo roto. Si no, no corre"
+        required: false
+        default: ""
       sin_copia:
         description: "Solo con permiso de Mateo: escribí SIN COPIA para aplicar sin la copia cifrada previa (si algo sale mal, no hay copia para volver)"
         required: false
@@ -54,6 +58,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: No aplicar en hora pico (16 a 22 h de Argentina, salvo urgente)
+        if: inputs.accion == 'aplicar'
+        env:
+          URGENTE: ${{ inputs.urgente }}
+        run: bash scripts/base/hora-pico.sh
       - name: Falta el secreto
         if: env.SUPABASE_DB_URL == ''
         env:
