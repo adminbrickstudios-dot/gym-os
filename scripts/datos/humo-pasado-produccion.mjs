@@ -23,7 +23,7 @@ try {
     [dueno] = await q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Humo','dueno') returning id, usuario_id`, [g.id, u.id]);
   }
   const [sede] = await q(`select id from public.sedes where gimnasio_id = $1 order by creado_en limit 1`, [g.id]);
-  const [plan] = await q(`select id, precio from public.planes where gimnasio_id = $1 and activo order by orden, nombre limit 1`, [g.id]);
+  const [plan] = await q(`select id from public.planes where gimnasio_id = $1 and activo and tipo = 'membresia' order by orden, nombre limit 1`, [g.id]);
   paso(!!(dueno && sede && plan), "el demo tiene dueño, sede y un plan activo");
   if (!(dueno && sede && plan)) throw new Error("faltan datos del demo");
 
@@ -41,7 +41,7 @@ try {
   };
   const dni = String(90000000 + Math.floor(Math.random() * 9999999));
   const r = await como(async () => (await q(`select public.alta_socio_pasado($1, $2, $3::jsonb, $4, $5::date, $6::jsonb) as r`,
-    [g.id, sede.id, JSON.stringify({ nombre: "Humo", apellido: "Pasado", dni }), plan.id, d20, JSON.stringify([{ fecha: d20, monto: String(plan.precio ?? 10000), medio: "transferencia" }])]))[0].r);
+    [g.id, sede.id, JSON.stringify({ nombre: "Humo", apellido: "Pasado", dni }), plan.id, d20, JSON.stringify([{ fecha: d20, monto: "25000", medio: "transferencia" }])]))[0].r);
   paso(r && Number(r.pagos) === 1 && Number(r.coberturas) >= 1, `alta con fecha y pago de hace 20 días: ${r?.pagos} pago, ${r?.coberturas} cobertura`);
   const [s] = await q(`select s.id, s.creado_en::date as alta, s.cubierto_hasta from public.socios s where s.gimnasio_id = $1 and s.dni = $2`, [g.id, dni]);
   paso(!!s, "el socio quedó cargado");
