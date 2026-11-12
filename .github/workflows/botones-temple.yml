@@ -1,0 +1,163 @@
+# H4 · La pasada de todos los botones, en modo MIRAR, con la configuración de Temple Gym y sin tocar nunca sus datos.
+# A mano: Actions → "Botones Temple" → Run workflow. Nada corre solo.
+#
+# Cómo funciona (todo en la base local del runner; Temple Gym solo se LEE, y solo su configuración):
+#   1. Base nueva + app compilada con la imitación de Supabase (como "Botones").
+#   2. Se crea el gimnasio "[demo] Temple clon" (slug demo-temple-clon) copiando la CONFIGURACIÓN del origen:
+#      planes, precios, reglas, sedes, actividades, horarios. Nunca socios, pagos, ventas, ingresos, caja, equipo
+#      ni cuentas, y ningún teléfono, mail, dirección, alias ni clave (scripts/datos/clonar-config-temple.mjs).
+#        origen = ensayo-local : el origen es un gimnasio demo sembrado en el mismo runner (para probar el armado).
+#        origen = produccion   : el origen es la base de producción (secreto SUPABASE_DB_URL), abierta en una
+#                                transacción de solo lectura. El clon se escribe SIEMPRE en la base local del runner.
+#   3. scripts/e2e/botones.mjs --slug demo-temple-clon --mirar: abre cada pantalla de cada rol del panel y mira cada
+#      botón sin escribir (salta formularios, interruptores y todo lo que cambia o manda algo).
+#   4. Prueba de que no se escribió nada: se cuentan las filas de plata y socios del clon antes y después; tienen que
+#      quedar iguales (y los socios, en cero).
+# El informe de cada rol va al resumen de la corrida y como artefacto (botones-temple-<rol>). Los hallazgos graves
+# no cortan la corrida salvo que pongas estricto=true: el informe es lo que se lee, y cada falla va a un ítem.
+name: Botones Temple
+
+on:
+  workflow_dispatch:
+    inputs:
+      origen:
+        description: "De dónde sale la configuración a clonar"
+        type: choice
+        options: [ensayo-local, produccion]
+        default: ensayo-local
+      slug_origen:
+        description: "Slug del gimnasio de origen (vacío: en produccion, el único gimnasio real; en ensayo-local, demo)"
+        type: string
+        default: ""
+      roles:
+        description: "Roles del panel, separados por coma"
+        type: string
+        default: "dueno,encargado,recepcion,profe"
+      estricto:
+        description: "Que falle si hay hallazgos graves"
+        type: boolean
+        default: false
+
+concurrency:
+  group: botones-temple
+  cancel-in-progress: false
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+  SLUG_CLON: demo-temple-clon
+
+jobs:
+  armar:
+    runs-on: ubuntu-latest
+    outputs:
+      roles: ${{ steps.r.outputs.roles }}
+    steps:
+      - id: r
+        env:
+          ROLES: ${{ inputs.roles }}
+        run: echo "roles=$(echo "$ROLES" | tr -d ' ' | jq -R -c 'split(",") | map(select(. == "dueno" or . == "encargado" or . == "recepcion" or . == "profe"))')" >> "$GITHUB_OUTPUT"
+
+  botones:
+    name: Botones Temple · ${{ matrix.rol }}
+    needs: armar
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        rol: ${{ fromJSON(needs.armar.outputs.roles) }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Falta el secreto (solo origen = produccion)
+        if: inputs.origen == 'produccion'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Falta el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions → Secrets). Sin él no se puede leer la configuración de Temple Gym. Probá con origen = ensayo-local."
+            exit 1
+          fi
+      - name: Base nueva
+        run: scripts/db/local.sh nueva
+      - name: Origen de ensayo (solo origen = ensayo-local)
+        if: inputs.origen == 'ensayo-local'
+        run: |
+          createdb -T gymos_pruebas gymos_origen
+          node scripts/datos/sembrar-demo.mjs --url "postgres://postgres@localhost:5432/gymos_origen" --dominio localhost --socios 30
+      - name: Levantar la app compilada con la imitación de Supabase
+        env:
+          APP_MODO: produccion
+          NODE_OPTIONS: --max-old-space-size=4096
+          SOCIOS_DEMO: "30"
+        run: scripts/local/levantar.sh
+      - name: Clonar la configuración a "[demo] Temple clon" (el origen solo se lee)
+        env:
+          ORIGEN: ${{ inputs.origen }}
+          SLUG_ORIGEN: ${{ inputs.slug_origen }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          DESTINO="$(scripts/db/local.sh url)"
+          if [ "$ORIGEN" = "produccion" ]; then
+            URL_ORIGEN="$SUPABASE_DB_URL"; SLUG="${SLUG_ORIGEN}"
+          else
+            URL_ORIGEN="postgres://postgres@localhost:5432/gymos_origen"; SLUG="${SLUG_ORIGEN:-demo}"
+          fi
+          echo "::add-mask::$URL_ORIGEN"
+          if [ -n "$SLUG" ]; then
+            node scripts/datos/clonar-config-temple.mjs --origen "$URL_ORIGEN" --destino "$DESTINO" --slug-origen "$SLUG" --slug-destino "$SLUG_CLON" --nombre "[demo] Temple clon"
+          else
+            node scripts/datos/clonar-config-temple.mjs --origen "$URL_ORIGEN" --destino "$DESTINO" --slug-destino "$SLUG_CLON" --nombre "[demo] Temple clon"
+          fi
+      - name: Logins del equipo del clon
+        run: |
+          eval "$(node scripts/local/supabase-local.mjs claves | sed 's/^/export /')"
+          node scripts/datos/usuarios-demo.mjs --url "$(scripts/db/local.sh url)" --supabase "http://127.0.0.1:${PUERTO_SUPABASE:-54321}" --servicio "$SUPABASE_SERVICE_ROLE_KEY" --clon "$SLUG_CLON"
+      - name: Contar plata y socios del clon (antes)
+        run: |
+          for t in socios pagos ventas coberturas movimientos_caja ingresos gastos cajas turnos_caja recibos; do
+            echo "$t $(psql -Atc "select count(*) from public.$t where gimnasio_id = (select id from public.gimnasios where slug = '$SLUG_CLON')" "$(scripts/db/local.sh url)" | tr -d '\015')"
+          done | tee .local/conteo-antes.txt
+          if [ "$(grep '^socios ' .local/conteo-antes.txt | cut -d' ' -f2)" != "0" ]; then echo "::error::El clon tiene socios: la configuración se clona sin socios, nunca con ellos."; exit 1; fi
+      - name: Recorrer los botones en modo mirar
+        env:
+          E2E_DEPURAR: "1"
+        run: node scripts/e2e/botones.mjs --slug "$SLUG_CLON" --mirar --rol "${{ matrix.rol }}" --informe ".local/botones-temple-informe-${{ matrix.rol }}.md" ${{ inputs.estricto && '--estricto' || '' }}
+      - name: Probar que no se escribió nada
+        if: always()
+        run: |
+          for t in socios pagos ventas coberturas movimientos_caja ingresos gastos cajas turnos_caja recibos; do
+            echo "$t $(psql -Atc "select count(*) from public.$t where gimnasio_id = (select id from public.gimnasios where slug = '$SLUG_CLON')" "$(scripts/db/local.sh url)" | tr -d '\015')"
+          done > .local/conteo-despues.txt
+          if ! diff .local/conteo-antes.txt .local/conteo-despues.txt; then
+            echo "::error::El modo mirar escribió filas de plata o de socios. Eso es un error del recorrido (algún botón escribe sin pedir confirmación)."
+            exit 1
+          fi
+          echo "Sin escrituras de plata ni de socios: los conteos quedaron iguales."
+          cat .local/conteo-despues.txt
+      - name: Guardar el informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: botones-temple-${{ matrix.rol }}
+          path: |
+            .local/botones-temple-informe-*.md
+            .local/conteo-*.txt
+            .local/capturas/
+            .local/app.log
+          if-no-files-found: ignore
+          retention-days: 30
