@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { fechaHoraHumana } from "@/lib/formato";
 import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -27,7 +28,7 @@ export default async function Transferencias({ searchParams }: { searchParams: P
     // VD-46A: el dueño y el encargado pueden revisar con MercadoPago si el gimnasio lo tiene conectado.
     const puedeRevisar = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
     const mp = !enMostrador && puedeRevisar ? await rpc<{ conectado: boolean }>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }) : null;
-    const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+    const cuando = (m: string) => fechaHoraHumana(m, panel.gimnasio.zona_horaria);
     return (
       <>
         <ActualizarSola />

@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { Icono } from "@/components/ui/Icono";
-import { formatearPesos } from "@/lib/formato";
+import { formatearPesos, fechaHoraHumana } from "@/lib/formato";
 import { marcarVista } from "./acciones";
 
 export type CobradaMostrador = {
@@ -20,7 +20,7 @@ export function Mostrador({ lista, zona }: { lista: ListaMostrador; zona: string
   const [soloFaltan, setSoloFaltan] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+  const cuando = (m: string) => fechaHoraHumana(m, zona);
   const estado = (f: CobradaMostrador) => vistas[f.pago_id] ?? { visto_en: f.visto_en, visto_por: f.visto_por };
   const filas = lista.filas.map((f) => ({ ...f, ...estado(f) }));
   const sinVer = filas.filter((f) => !f.visto_en);

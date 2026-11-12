@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { fechaHoraHumana } from "@/lib/formato";
 import Link from "next/link";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { ActualizarSola } from "@/components/ui/ActualizarSola";
@@ -38,7 +39,7 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
     ]);
     const mensajes = hilo ? await conFotos(hilo.mensajes) : [];
     const zona = panel.gimnasio.zona_horaria;
-    const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+    const cuando = (m: string) => fechaHoraHumana(m, zona);
     const c = bandeja.conteos;
     const ruta = (estado: string, h?: string) => `/panel/mensajes?estado=${estado}${h ? `&hilo=${h}` : ""}`;
     const pestanas = [

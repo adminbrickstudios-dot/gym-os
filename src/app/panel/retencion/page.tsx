@@ -5,7 +5,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
 import { rutaDisponible } from "@/lib/panel/secciones";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaConEl, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
@@ -153,7 +153,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={f.lista}
                 detalle={venia(f.visitas_por_semana)}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
-                ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : null}
+                ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} ${fechaConEl(f.ultimo_contacto_en, zona)}` : null}
                 puedeAnotar cobrar={puedeCobrar} tarea />
             ))}
           </ul>
