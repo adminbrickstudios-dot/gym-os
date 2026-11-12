@@ -126,6 +126,7 @@ test("N3: el resumen sale de los hechos del día, solo para el dueño y solo pre
   await comoDueno(() => t.falla(() => t.q(`select public.resumen_noche($1)`, [t.g]), /no está prendida/));
   await comoDueno(() => prender("resumen_noche"));
   const antes = await comoDueno(async () => (await t.q(`select public.resumen_noche($1) r`, [t.g]))[0].r);
+  const ayerAntes = await comoDueno(async () => (await t.q(`select public.resumen_noche($1, (now() at time zone $2)::date - 3) r`, [t.g, t.ctx.zona]))[0].r);
   // Un cobro de $1.500 por transferencia, una entrada, un alta y una baja, todo "ahora".
   const [{ id: venta }] = await t.q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, estado, origen, confirmada_en) values ($1,$2,$3,'confirmada','recepcion', now()) returning id`, [t.g, t.sede, socio]);
   await t.q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, aprobado_en) values ($1,$2,'transferencia',1500,'aprobado', now())`, [t.g, venta]);
@@ -142,7 +143,7 @@ test("N3: el resumen sale de los hechos del día, solo para el dueño y solo pre
   assert.equal(despues.es_hoy, true);
   // Otro día: sin hechos de hoy.
   const ayer = await comoDueno(async () => (await t.q(`select public.resumen_noche($1, (now() at time zone $2)::date - 3) r`, [t.g, t.ctx.zona]))[0].r);
-  assert.equal(ayer.es_hoy, false); assert.equal(Number(ayer.cobrado), 0);
+  assert.equal(ayer.es_hoy, false); assert.equal(Number(ayer.cobrado), Number(ayerAntes.cobrado), "los hechos de hoy no entran en otro día (la base de prueba puede traer cobros de días anteriores)");
   await comoDueno(() => t.falla(() => t.q(`select public.resumen_noche($1, (now() at time zone $2)::date + 2)`, [t.g, t.ctx.zona]), /últimos 60/));
   for (const rol of ["encargado", "recepcion", "profe"]) await como(u[rol], () => t.falla(() => t.q(`select public.resumen_noche($1)`, [t.g]), /Sin permiso/));
   await como(uOtro, () => t.falla(() => t.q(`select public.resumen_noche($1)`, [t.g]), /Sin permiso/));
