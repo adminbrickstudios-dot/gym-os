@@ -85,12 +85,12 @@ toque plata se prueba con números fijos antes de publicar.
 | # | Qué | Estado |
 |---|---|---|
 | Z1 | Todos los [ROTO] de `PULIDO.md` (lo que no entró en H7) | ❌ |
-| Z2 | Íconos de una vez: ningún ícono vacío, ningún emoji crudo (tampoco los que vienen de la base) y ningún glifo de texto; chequeo que falla si aparece uno | ❌ |
-| Z3 | Todos los [FLUIDEZ] | ❌ |
-| Z4 | Todos los [TEXTO] | ❌ |
-| Z5 | Todos los [DISEÑO] (menú en 4 secciones, títulos de 28 px, tokens, esquinas, tamaños) | 🟡 hecho menos la portada del super admin en 4 secciones y los íconos/emojis (Z2); detalle y corridas en `PULIDO.md` |
-| Z6 | Todos los [FALTA] y los detalles premium de los tres bloques | 🟡 lo chico hecho; lo grande con estimación en `PULIDO.md` |
-| Z7 | Lo transversal de `PULIDO.md` (formatos, avisos, listas, vacíos, accesibilidad, atajos, sin conexión) | 🟡 fechas, atajos «?» y vacíos hechos; falta aplicar los formatos pantalla por pantalla y «hay una versión nueva» |
+| Z2 | Íconos de una vez: ningún ícono vacío, ningún emoji crudo (tampoco los que vienen de la base) y ningún glifo de texto; chequeo que falla si aparece uno | ✅ `iconos-en-pantallas.test.ts` lee todo `src/` y falla si un ícono apunta a un nombre inexistente, está vacío o queda un emoji o glifo de texto (probado con un caso malo); `z-iconos-textos` 10 pasos y `botones` sin fallas en Actions (43133690159, 43128193952, y la regresión 43134339400); ~70 lugares corregidos |
+| Z3 | Todos los [FLUIDEZ] | 🟡 hecho: atrás y Esc con Ctrl+K, cambios sin guardar frenan el menú, aviso a los 10 s, polling de caja/transferencias/mensajes; falta: borrador real en formularios largos, errores junto al campo, paginación en base, reglas 16-18 (detalle en PULIDO.md) |
+| Z4 | Todos los [TEXTO] | 🟡 hecho: textos de errores humanos, Sobran/Cobrado/Aprobada, traducción de errores crudos al socio; falta: un solo nombre por pantalla, textos por defecto de la landing, error.message crudos restantes (detalle en PULIDO.md) |
+| Z5 | Todos los [DISEÑO] (menú en 4 secciones, títulos de 28 px, tokens, esquinas, tamaños) | 🟡 `z-diseno` 17, `vd-11` 43, `dis-3` 10 en verde (43132044748, 43134339400): menú en 4 secciones con Más, títulos de 28 px, hoja de confirmación en el super admin; falta la portada del super admin en 4 secciones (carril/z-resto en curso) |
+| Z6 | Todos los [FALTA] y los detalles premium de los tres bloques | 🟡 hecho: Darlo de alta con DNI, búsqueda visible en celular del super admin, listas, avisos, vacíos; falta: vuelto en efectivo conectado y apagado (carril/z-resto), Eventos apagable, y lo grande (transferencias con miniatura, pase diario sin socio, metas, PDF, paginar Retención y /admin/gimnasios) con estimaciones en PULIDO.md |
+| Z7 | Lo transversal de `PULIDO.md` (formatos, avisos, listas, vacíos, accesibilidad, atajos, sin conexión) | 🟡 hecho: fechaHumana/fechaHoraHumana/formatearCelular con vitest, tecla ? con atajos; falta aplicarlos pantalla por pantalla (carril/z-resto en curso) y el aviso de versión nueva |
 
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 
