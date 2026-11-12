@@ -37,7 +37,7 @@ test("el mismo socio en dos sedes con pocos minutos de diferencia; en la misma s
 
 test("muchas entradas en un día, muy por encima de su promedio; la recepción no lo ve", async () => {
   const [{ id: otro }] = await t.q(`insert into public.socios (gimnasio_id, nombre, apellido, telefono) values ($1,'Muchas','Veces','+5490000444002') returning id`, [t.g]);
-  const ent = (min) => t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto) values ($1,$2,$3, now() - ($4 * interval '1 second'), 'recepcion', 'entro', 'verde', 'vigente', 'ok')`, [t.g, t.sede, otro, `${min} minutes`]);
+  const ent = (min) => t.q(`insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto) values ($1,$2,$3, now() - ($4 * interval '1 second'), 'recepcion', 'entro', 'verde', 'vigente', 'ok')`, [t.g, t.sede, otro, min]);
   for (const m of [10, 40, 70, 100]) await ent(m);
   await t.comoUsuario(dueno, async () => {
     const [{ r }] = await t.q(`select public.alertas_patron_entradas($1) r`, [t.g]);
