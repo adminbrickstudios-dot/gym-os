@@ -10,7 +10,6 @@ import { MetaVisitas } from "./MetaVisitas";
 import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
 import { FotoSocioConfig } from "./FotoSocioConfig";
-import { FuncionesNuevasConfig } from "./FuncionesNuevasConfig";
 import { AvisarSinBloquear } from "./AvisarSinBloquear";
 import { AutonomiaSocios } from "./AutonomiaSocios";
 import { EsperaPlazo } from "./EsperaPlazo";
@@ -656,7 +655,6 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <div data-opcion="prueba-gratis"><PruebaGratisConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="avisar-sin-bloquear"><AvisarSinBloquear puedeEditar={puedeEditar} /></div>
           <div data-opcion="foto-socio"><FotoSocioConfig puedeEditar={puedeEditar} /></div>
-          <div data-opcion="funciones-nuevas"><FuncionesNuevasConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="autonomia-socios"><AutonomiaSocios puedeEditar={puedeEditar} /></div>
           <div data-opcion="cierres-suma-dias"><ReglaCierres puedeEditar={puedeEditar} /></div>
           {beneficios && <div data-opcion="beneficios"><ReglasBeneficios datos={beneficios} /></div>}

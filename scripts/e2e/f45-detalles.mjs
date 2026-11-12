@@ -11,12 +11,12 @@ const b = await navegador();
 const nota = `Prefiere el turno mañana ${Date.now().toString().slice(-5)}`;
 
 async function funcion(d, clave, si) {
-  await d.goto(`${G}/panel/configuracion?pestana=reglas`);
+  await d.goto(`${G}/panel/configuracion?pestana=funciones`);
   await d.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
-  const caja = d.locator(`[data-funcion-nueva="${clave}"]`);
-  if ((await caja.getAttribute("data-prendida")) === (si ? "si" : "no")) return;
-  await caja.locator("input[type=checkbox]").click();
-  await d.waitForFunction(([c, v]) => document.querySelector(`[data-funcion-nueva="${c}"]`)?.getAttribute("data-prendida") === v, [clave, si ? "si" : "no"], { timeout: 30000 });
+  const caja = d.locator(`[data-funcion="${clave}"]`);
+  if ((await caja.getAttribute("data-activa")) === (si ? "si" : "no")) return;
+  await caja.locator('input[role="switch"]').click();
+  await d.waitForFunction(([c, v]) => document.querySelector(`[data-funcion="${c}"]`)?.getAttribute("data-activa") === v, [clave, si ? "si" : "no"], { timeout: 30000 });
 }
 async function primero(p, filtro) {
   await p.goto(`${G}/panel/socios?estado=${filtro}`);

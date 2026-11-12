@@ -1,9 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 327 funciones piden un rol del equipo con `privado.exigir_equipo`; 407 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 330 funciones piden un rol del equipo con `privado.exigir_equipo`; 407 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 332 funciones piden un rol del equipo con `privado.exigir_equipo`; 409 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 335 funciones piden un rol del equipo con `privado.exigir_equipo`; 413 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 341 funciones piden un rol del equipo con `privado.exigir_equipo`; 415 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -136,7 +133,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `foto_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio_permitida_gimnasio` | ✓ | ✓ | — | — |
 | `fotos_de_clase` | ✓ | ✓ | ✓ | ✓ |
-| `funciones_nuevas_gimnasio` | ✓ | ✓ | ✓ | ✓ |
 | `funciones_del_gimnasio` | ✓ | ✓ | — | — |
 | `funciones_nuevas_activas` | ✓ | ✓ | ✓ | ✓ |
 | `funciones_nuevas_panel` | ✓ | ✓ | — | — |
@@ -173,7 +169,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_estilo_pagina` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
 | `guardar_foto_socio_permitida` | ✓ | — | — | — |
-| `guardar_funcion_nueva` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
 | `guardar_horarios_apertura` | ✓ | — | — | — |
 | `guardar_link_resena` | ✓ | — | — | — |

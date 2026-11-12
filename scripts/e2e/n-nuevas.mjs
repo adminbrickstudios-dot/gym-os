@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Fase N · Las funciones nuevas apagadas por gimnasio (N5) y las que cuelgan de ellas, en el gimnasio DEMO (nunca Temple Gym):
-//   APAGADAS: la dueña ve las 4 funciones apagadas; no aparece NADA de ellas en Novedades, en Interesados ni en la ficha; el alta con
+//   APAGADAS: la dueña ve las 7 funciones apagadas en una sola pantalla (4 de N + 3 de F4/F5); no aparece NADA de ellas en Novedades, en Interesados ni en la ficha; el alta con
 //   ?o=instagram no deja origen; el aviso del débito automático no acredita. El encargado no puede prender.
 //   PRENDIDAS: "Qué hay de nuevo" las cuenta; el alta con ?o=qr queda con su origen y el reporte de Interesados la cuenta; el resumen del
 //   día coincide con la base; los aptos por vencer se listan; la entrada frena sin apto (lo dice la puerta); el débito automático acredita
@@ -73,7 +73,7 @@ try {
   // ═══ APAGADAS ═══
   await d.goto(`${G}/panel/configuracion?pestana=funciones`);
   await d.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
-  chequear(await d.locator("[data-funcion]").count() === 4, "Configuración → Funciones nuevas: las 4 funciones", `hay ${await d.locator("[data-funcion]").count()} funciones`);
+  chequear(await d.locator("[data-funcion]").count() === 7, "Configuración → Funciones nuevas: las 7 funciones, en una sola pantalla", `hay ${await d.locator("[data-funcion]").count()} funciones`);
   chequear(await d.locator('[data-funcion][data-activa="si"]').count() === 0, "todas vienen apagadas", "alguna viene prendida");
   chequear(await d.locator("[data-sin-novedades]").count() === 1, "“Qué hay de nuevo” está vacío sin funciones prendidas", "“Qué hay de nuevo” muestra algo sin funciones prendidas");
   chequear(await d.locator("[data-apto-config], [data-debito]").count() === 0, "apagadas, no muestran su configuración", "una función apagada muestra su configuración");

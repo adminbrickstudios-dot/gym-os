@@ -100,7 +100,7 @@ export const OPCIONES: Opcion[] = [
   // ── Dirección y Cambios
   { id: "direccion", titulo: "Dirección y dominio propio", pestana: "direccion", claves: "direccion dominio propio url host link tugimnasio", explicacion: "Dónde se abren tu página, tu panel y la app de tus socios." },
   // ── Funciones nuevas (N5)
-  { id: "funciones-nuevas", titulo: "Funciones nuevas (prender y apagar)", pestana: "funciones", claves: "funciones nuevas prender apagar novedades que hay de nuevo origen altas resumen noche apto debito automatico", explicacion: "Cada función nueva viene apagada: la prendés vos cuando la querés usar, y apagada no se ve en ningún panel."},
+  { id: "funciones-nuevas", titulo: "Funciones nuevas (prender y apagar)", pestana: "funciones", claves: "funciones nuevas prender apagar novedades que hay de nuevo origen altas resumen noche apto debito automatico borrador alta panel socio horarios pico", explicacion: "Cada función nueva viene apagada: la prendés vos cuando la querés usar, y apagada no se ve en ningún panel."},
   { id: "historial", titulo: "Historial de cambios", pestana: "cambios", claves: "historial cambios quien cambio auditoria registro", explicacion: "Quién cambió cada opción y cuándo." },
 ];
 

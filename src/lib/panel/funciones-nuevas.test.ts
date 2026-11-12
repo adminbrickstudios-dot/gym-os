@@ -1,20 +1,38 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { FUNCIONES_NUEVAS } from "./funciones-nuevas-lista";
 
-// Las claves que ofrece Configuración tienen que ser las mismas que acepta la base: si una sobra o falta, el interruptor da error.
-describe("funciones nuevas con interruptor", () => {
-  const sql = readFileSync("supabase/migrations/20261112010000_funciones_nuevas_f45.sql", "utf8");
-  const enLaBase = [...(sql.match(/p_clave not in \(([^)]*)\)/)?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
+// Un solo interruptor por gimnasio: el catálogo vive en la base (la última versión de privado.funciones_nuevas_catalogo).
+// Las claves que el código pregunta tienen que estar en ese catálogo, y el sistema viejo no puede volver.
+const carpeta = "supabase/migrations";
+const ultimaDelCatalogo = readdirSync(carpeta).filter((f) => f.endsWith(".sql")).sort().reverse()
+  .find((f) => readFileSync(`${carpeta}/${f}`, "utf8").includes("create or replace function privado.funciones_nuevas_catalogo"))!;
+const sql = readFileSync(`${carpeta}/${ultimaDelCatalogo}`, "utf8");
+const catalogo = [...sql.matchAll(/jsonb_build_object\('clave', '([a-z_]+)'/g)].map((m) => m[1]);
 
-  it("las claves del panel son las de la lista blanca de la base", () => {
-    expect(FUNCIONES_NUEVAS.map((f) => f.clave).sort()).toEqual(enLaBase);
-    expect(enLaBase.length).toBeGreaterThan(0);
+describe("funciones nuevas: un solo interruptor", () => {
+  it("el catálogo tiene las siete claves, sin repetir", () => {
+    expect(new Set(catalogo).size).toBe(catalogo.length);
+    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "origen_altas", "panel_pago", "resumen_noche"]);
   });
-  it("cada una tiene título y ayuda para el dueño", () => {
-    for (const f of FUNCIONES_NUEVAS) { expect(f.titulo.length).toBeGreaterThan(5); expect(f.ayuda.length).toBeGreaterThan(20); }
+  it("cada una trae título, explicación y la frase de “Qué hay de nuevo”", () => {
+    for (const c of catalogo) {
+      const bloque = sql.slice(sql.indexOf(`'clave', '${c}'`)).split("jsonb_build_object('clave'")[0];
+      expect(bloque).toMatch(/'titulo', '[^']{6,}'/);
+      expect(bloque).toMatch(/'explicacion', '[^']{20,}'/);
+      expect(bloque).toMatch(/'novedad', '[^']{20,}'/);
+    }
   });
-  it("arrancan apagadas: la columna se crea con lista vacía", () => {
-    expect(sql).toMatch(/funciones_nuevas text\[\] not null default '\{\}'/);
+  it("el código solo pregunta por claves que existen en el catálogo", () => {
+    const usos = [["src/app/panel/socios/nuevo/page.tsx", "borrador_alta"], ["src/app/panel/entrada/ventana-acciones.ts", "panel_pago"], ["src/app/panel/resultado/page.tsx", "horarios_pico"]];
+    for (const [archivo, clave] of usos) {
+      expect(readFileSync(archivo, "utf8")).toContain(`"${clave}"`);
+      expect(catalogo).toContain(clave);
+    }
+  });
+  it("el código ya no usa el sistema viejo", () => {
+    for (const archivo of ["src/lib/panel/funciones-nuevas.ts", "src/app/panel/entrada/ventana-acciones.ts", "src/app/panel/configuracion/acciones.ts"]) {
+      const t = readFileSync(archivo, "utf8");
+      expect(t).not.toMatch(/"funciones_nuevas_gimnasio"|"guardar_funcion_nueva"/);
+    }
   });
 });
