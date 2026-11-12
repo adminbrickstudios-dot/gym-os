@@ -109,6 +109,11 @@ try {
   await p.fill("[data-pasado-fecha]", hoy);          // un pago de hoy no entra por acá
   await p.fill("[data-pasado-monto]", "25000");
   await p.selectOption("[data-pasado-medio]", "efectivo");
+  // El navegador ya no deja mandar un pago de hoy (el campo tiene como máximo ayer)...
+  const frenado = await p.locator("[data-pasado-fecha]").evaluate((x) => x.validity.rangeOverflow);
+  chequear(frenado, "el campo de fecha del pago no acepta hoy (máximo ayer)", "el campo de fecha acepta hoy");
+  // ...y aunque se saltee esa guarda, la base lo rechaza: se saca el máximo para llegar al servidor.
+  await p.locator("[data-pasado-fecha]").evaluate((x) => x.removeAttribute("max"));
   await p.locator('button:has-text("Dar de alta")').first().click();
   const err = p.locator('[role=alert]').filter({ hasText: /es hoy/ });
   await err.waitFor({ timeout: 30000 });
