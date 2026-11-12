@@ -49,7 +49,7 @@ try {
   await v.locator("h1").first().waitFor({ timeout: 30000 });
   const ls = await revisarLinks(v, "compu");
   const textos = ls.map((l) => l.texto).join(" · ");
-  chequear(/Soy socio/.test(textos) && /Soy del equipo/.test(textos), "tiene “Soy socio” y “Soy del equipo”", `faltan accesos: ${textos}`);
+  chequear(/Ya soy socio/.test(textos) && /Soy del equipo/.test(textos), "tiene “Ya soy socio, entrar” y “Soy del equipo”", `faltan accesos: ${textos}`);
   const planes = await v.locator("section[aria-labelledby=\"planes\"] li.tarjeta").count();
   const loQuiero = await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero")').count();
   chequear(planes > 0 && loQuiero === planes, `${planes} planes, cada uno con “Lo quiero” a WhatsApp con su nombre`, `${planes} planes y ${loQuiero} “Lo quiero”`);
@@ -96,7 +96,7 @@ try {
   chequear(!/armando/i.test(txt) && await v2.locator("[data-pagina-oculta]").count() > 0, "oculta: solo la portada, sin “armando”", "oculta: no queda la portada o dice “armando”");
   const ls2 = await revisarLinks(v2, "próximamente");
   const t2 = ls2.map((l) => l.texto).join(" · ");
-  chequear(/WhatsApp/.test(t2) && /Quiero ser socio/.test(t2) && /Soy socio/.test(t2) && /Soy del equipo/.test(t2), `oculta: ${t2}`, `la página oculta le falta algo: ${t2}`);
+  chequear(/WhatsApp/.test(t2) && /Ya soy socio/.test(t2) && /Soy del equipo/.test(t2), `oculta: ${t2}`, `la página oculta le falta algo: ${t2}`);
   chequear(!/Lo quiero|Ver planes/.test(t2), "oculta no muestra planes", "oculta muestra planes");
   await capturar(v2, "aud2-celu-proximamente");
   await v2.context().close();

@@ -25,6 +25,8 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   const [ficha, setFicha] = useState<Ficha | null>(null);
   const [puedeCobrar, setPuedeCobrar] = useState(false);
   const [datosDePago, setDatosDePago] = useState(false);
+  const [notas, setNotas] = useState<string[]>([]);
+  const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const cerrarBtn = useRef<HTMLButtonElement>(null);
 
@@ -37,7 +39,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   useEffect(() => {
     if (!socioId) return;
     let vivo = true;
-    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); setDatosDePago(!!r.datosDePago); } });
+    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); setDatosDePago(!!r.datosDePago); setNotas(r.notas ?? []); setEtiquetas(r.etiquetas ?? []); } });
     cerrarBtn.current?.focus();
     const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") setSocioId(null); };
     window.addEventListener("keydown", tecla);
@@ -88,6 +90,12 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
                   ? <p className="texto-suave" data-panel-pago-plan>Pagaría {ficha.membresia.plan}{ficha.membresia.precio != null ? `: ${formatearPesos(ficha.membresia.precio)}` : ""}</p>
                   : <p className="texto-suave" data-panel-pago-plan>Sin plan: se elige al cobrar.</p>}
               </div>
+            )}
+            {datosDePago && (notas.length > 0 || etiquetas.length > 0) && (
+              <section aria-label="Notas" className="space-y-1" data-panel-socio-notas>
+                {etiquetas.length > 0 && <p className="flex flex-wrap gap-1">{etiquetas.map((e) => <span key={e} className="pildora">{e}</span>)}</p>}
+                {notas.map((n, i) => <p key={i} className="text-sm texto-suave whitespace-pre-line">{n}</p>)}
+              </section>
             )}
             {!vigente && debe != null && debe > 0 && (
               <p className="font-semibold" data-panel-socio-debe>Debe {formatearPesos(debe)}</p>
