@@ -5,6 +5,7 @@ import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/
 import { FormSocio, type PlanAlta } from "../FormSocio";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { sedeActiva } from "@/lib/panel/sede";
+import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
 
 export const metadata: Metadata = { title: "Nuevo socio" };
 
@@ -23,7 +24,7 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
       return (
         <>
           <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen icono="mas" titulo="Nuevo socio" bajada="El alta ya está hecha." />
-          <FormSocio socioId={null} creado={{ socioId: listo, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), cobrar: cobrar === "1" }} />
+          <FormSocio socioId={null} conBorrador={false} creado={{ socioId: listo, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), cobrar: cobrar === "1" }} />
         </>
       );
     }
@@ -40,11 +41,12 @@ export default async function NuevoSocio({ searchParams }: { searchParams: Promi
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas);
     // C10: cargar un alta en el pasado (fecha de alta y pagos de antes) es de dueño y encargado; la base también lo exige.
     const puedePasado = ["dueno", "encargado"].includes(panel.yo.rol);
+    const conBorrador = (await funcionesNuevasDe(panel.gimnasio.id)).includes("borrador_alta");   // FA-17, apagado por defecto
     const hoy = new Intl.DateTimeFormat("sv-SE", { timeZone: panel.gimnasio.zona_horaria }).format(new Date());
     return (
       <>
         <Encabezado volver={{ href: "/panel/socios", texto: "Socios" }} volverAlOrigen icono="mas" titulo="Nuevo socio" bajada="Con el nombre alcanza. El resto lo podés completar después." />
-        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} puedePasado={puedePasado} hoy={hoy} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : (dniDelBuscador || nombreDelBuscador) ? { nombre: nombreDelBuscador, dni: dniDelBuscador } : undefined} />
+        <FormSocio socioId={null} prospectoId={prospecto?.id} planes={planes} puedeCobrar={puedeCobrar} puedePasado={puedePasado} hoy={hoy} conBorrador={conBorrador} socio={prospecto ? { nombre, apellido: resto.join(" ") || null, telefono: prospecto.telefono, dni: prospecto.dni ?? null } : (dniDelBuscador || nombreDelBuscador) ? { nombre: nombreDelBuscador, dni: dniDelBuscador } : undefined} />
       </>
     );
   });

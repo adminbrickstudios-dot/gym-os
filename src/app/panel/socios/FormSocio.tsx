@@ -12,6 +12,7 @@ import { TarjetasPlan, PrimerPago } from "@/components/panel/TarjetasPlan";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRO_HECHO, type CobroHecho } from "@/components/panel/cobrar/evento";
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
+import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { Icono } from "@/components/ui/Icono";
 
 export type PlanAlta = PlanParaAlta;
@@ -97,6 +98,8 @@ type Props = {
   socioId: string | null; socio?: Socio; prospectoId?: string; planes?: PlanAlta[]; puedeCobrar?: boolean;
   /** C10: dueño o encargado pueden cargar un alta en el pasado; `hoy` es el día de hoy del gimnasio (AAAA-MM-DD). */
   puedePasado?: boolean; hoy?: string;
+  /** FA-17: borrador automático del alta (función nueva, apagada por defecto). */
+  conBorrador?: boolean;
   /** VD-6: el alta ya está hecha (vuelve de un Interesado): arranca en el cobro. */
   creado?: { socioId: string; nombre: string; cobrar: boolean };
 };
@@ -122,7 +125,7 @@ export function FormSocio(props: Props) {
   return <FormInterno key={vuelta} {...props} otro={() => setVuelta((n) => n + 1)} />;
 }
 
-function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = false, puedePasado = false, hoy = "", creado: creadoInicial, otro }: Props & { otro: () => void }) {
+function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = false, puedePasado = false, hoy = "", conBorrador = false, creado: creadoInicial, otro }: Props & { otro: () => void }) {
   const [plan, setPlan] = useState("");
   const [pasadoAbierto, setPasadoAbierto] = useState(false);
   const router = useRouter();
@@ -193,6 +196,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
     const nombreSocio = creado.nombre || "el socio";
     return (
       <div className="max-w-2xl space-y-6" data-alta-creado={creado.socioId}>
+        {conBorrador && <BorradorAutomatico clave="alta-completa" borrar />}
         <Pasos actual={paso} />
         {paso === 3 ? (
           <div className="tarjeta p-6 space-y-4" data-alta-paso="cobro">
@@ -237,6 +241,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   return (
     <form action={accion} className="max-w-2xl space-y-8">
       {!socioId && <Pasos actual={paso} />}
+      {conBorrador && !socioId && <BorradorAutomatico clave="alta-completa" />}
       {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
       {(prospectoId || vinculado) && <input type="hidden" name="prospecto" value={prospectoId ?? vinculado ?? ""} />}
       {prospectoId && <Mensaje tipo="info">Viene de Prospectos: al darlo de alta queda marcado como “se hizo socio”.</Mensaje>}
