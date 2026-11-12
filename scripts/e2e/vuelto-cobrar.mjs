@@ -47,10 +47,11 @@ try {
 
   await interruptor(d, true);
   await abrirCobrar(d, id);
-  const total = Number(await d.locator("[data-cobrar-total]").getAttribute("data-cobrar-total"));
-  chequear(total > 0, `la hoja trae un total (${total})`, "total vacío");
   chequear(await d.locator("[data-cobrar-vuelto]").count() === 0, "con otro medio elegido no aparece el vuelto", "aparece el vuelto sin efectivo");
   await d.locator('[data-cobrar-medio="efectivo"]').click();
+  // El total depende del medio (descuento o recargo por efectivo): se lee ya con efectivo elegido.
+  const total = Number(await d.locator("[data-cobrar-total]").getAttribute("data-cobrar-total"));
+  chequear(total > 0, `la hoja trae un total en efectivo (${total})`, "total vacío");
   chequear(await aparece(d.locator("[data-cobrar-vuelto]"), 10000), "prendido y en efectivo: aparece “Paga con”", "no aparece el vuelto");
   await d.locator("[data-cobrar-paga-con]").fill(String(total + 500));
   chequear(await aparece(d.locator("[data-cobrar-vuelto-monto]"), 10000) && /Vuelto/.test(await d.locator("[data-cobrar-vuelto-monto]").innerText()), "paga con $500 de más: muestra el vuelto", "no calcula el vuelto");
