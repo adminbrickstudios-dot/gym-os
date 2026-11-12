@@ -6,13 +6,46 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import type { NumerosDelPeriodo } from "@/components/panel/NumerosPeriodo";
 
 const PERIODOS = ["mes", "mes_pasado", "3", "6", "12"];
-const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const LISTAS = ["riesgo", "vencido", "por_vencer", "nuevo", "no_viene", "se_fue"];
+const DIAS =["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const num = (n: number | string | null | undefined) => (n == null ? "" : String(n).replace(".", ","));
 const texto = (m: string, status: number) => new Response(m, { status, headers: { "content-type": "text/plain; charset=utf-8" } });
 
 export async function GET(req: Request) {
   const panel = await contextoPanel();
-  const p = new URL(req.url).searchParams.get("periodo") ?? "mes";
+  const params = new URL(req.url).searchParams;
+  // Q2: ?lista=… exporta esa lista de Retención (la misma que se ve; solo dueño y encargado, lo decide la base).
+  const lista = params.get("lista");
+  if (lista) {
+    if (!LISTAS.includes(lista)) return texto(`Pedí ?lista=${LISTAS.join("|")}`, 400);
+    const etiqueta = /^[0-9a-f-]{36}$/.test(params.get("etiqueta") ?? "") ? params.get("etiqueta")! : null;
+    try {
+      const g = panel.gimnasio.id;
+      const ids = etiqueta ? new Set(await rpc<string[]>("socios_con_etiqueta", { p_gimnasio_id: g, p_etiqueta_id: etiqueta })) : null;
+      let filas: (string | number | null)[][];
+      if (lista === "riesgo") {
+        const r = (await rpc<{ socio_id: string; nombre: string; telefono: string | null; nivel: string; porque: string[] }[]>("riesgo_baja", { p_gimnasio_id: g })).filter((x) => !ids || ids.has(x.socio_id));
+        filas = r.map((x) => [x.nombre, x.telefono, x.nivel === "alto" ? "Riesgo alto" : "Riesgo medio", x.porque.join(" · "), "", ""]);
+      } else if (lista === "se_fue") {
+        const r = (await rpc<{ filas: { socio_id: string; nombre: string; telefono: string | null; [k: string]: unknown }[] }>("ex_socios", { p_gimnasio_id: g, p_motivo: null, p_antiguedad: null })).filas.filter((x) => !ids || ids.has(x.socio_id));
+        filas = r.map((x) => [x.nombre, x.telefono, "Se fue", "", "", ""]);
+      } else {
+        const r = (await rpc<{ socio_id: string; nombre: string; telefono: string | null; lista: string; texto: string; ultimo_contacto_en: string | null; ultimo_contacto_resultado: string | null }[]>("retencion", { p_gimnasio_id: g }))
+          .filter((x) => x.lista === lista && (!ids || ids.has(x.socio_id)));
+        filas = r.map((x) => [x.nombre, x.telefono, x.texto, "", x.ultimo_contacto_en ? x.ultimo_contacto_en.slice(0, 10) : "", x.ultimo_contacto_resultado ?? ""]);
+      }
+      return new Response(aCsv(["Nombre", "Teléfono", "Situación", "Señales", "Último contacto", "Resultado"], filas), {
+        headers: {
+          "content-type": "text/csv; charset=utf-8",
+          "content-disposition": `attachment; filename="retencion-${panel.gimnasio.slug}-${lista}.csv"`,
+          "cache-control": "no-store",
+        },
+      });
+    } catch (e) {
+      return texto(`No se pudo exportar: ${(e as Error).message}`, 403);
+    }
+  }
+  const p = params.get("periodo") ?? "mes";
   if (!PERIODOS.includes(p)) return texto("Pedí ?periodo=mes|mes_pasado|3|6|12", 400);
   let n: NumerosDelPeriodo;
   try {

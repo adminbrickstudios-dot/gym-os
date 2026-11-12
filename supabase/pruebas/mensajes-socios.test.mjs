@@ -208,3 +208,14 @@ test("otro gimnasio no ve ni cuenta nada de este", async () => {
   assert.equal((await como(uExtra, () => t.q(`select id from public.hilos_socio`))).length, 0);
   assert.equal((await rpc(uExtra, `public.bandeja_mensajes($1)`, [g2])).items.length, 0);
 });
+
+// Q2: "ver más" — la bandeja pagina con "desde" y dice el total.
+test("la bandeja pagina con desde y dice cuántos hay en total", async () => {
+  const b = await rpc(u.dueno, `public.bandeja_mensajes($1, null, 1, 0)`, [t.g]);
+  assert.ok(b.total >= 1 && b.items.length === 1, "trae el total y una fila");
+  const c = await rpc(u.dueno, `public.bandeja_mensajes($1, null, 100, $2)`, [t.g, b.total]);
+  assert.equal(c.items.length, 0, "pasado el último no hay más");
+  assert.equal(c.total, b.total);
+  await como(u.dueno, () => t.falla(() => t.q(`select public.bandeja_mensajes($1, null, 100, -1)`, [t.g]), /negativo/));
+  await como(u.dueno, () => t.falla(() => t.q(`select public.bandeja_mensajes($1, null, 201, 0)`, [t.g]), /1 a 200/));
+});

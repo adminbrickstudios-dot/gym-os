@@ -64,13 +64,13 @@ export default async function PaginaTareas({ searchParams }: { searchParams: Pro
           <Vacio icono="estrella" titulo="No hay tareas pendientes">Anotá una con “<Icono nombre="mas" /> Nueva tarea”, o desde la ficha de un socio.</Vacio>
         ) : (
           <ul className="lista-entra space-y-2" data-tareas-pendientes={pendientes.length}>
-            {pendientes.map((t) => <FilaTarea key={t.id} t={t} hoy={datos.hoy} mostrarPara={todas || !t.mia} />)}
+            {pendientes.map((t) => <FilaTarea key={t.id} t={t} hoy={datos.hoy} mostrarPara={todas || !t.mia} equipo={datos.equipo} />)}
           </ul>
         )}
         {hechas.length > 0 && (
           <section className="mt-10 space-y-2">
             <h2 className="titulo-grupo">Hechas esta semana</h2>
-            <ul className="lista-entra space-y-2">{hechas.map((t) => <FilaTarea key={t.id} t={t} hoy={datos.hoy} mostrarPara={todas || !t.mia} />)}</ul>
+            <ul className="lista-entra space-y-2">{hechas.map((t) => <FilaTarea key={t.id} t={t} hoy={datos.hoy} mostrarPara={todas || !t.mia} equipo={datos.equipo} />)}</ul>
           </section>
         )}
 

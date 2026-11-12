@@ -9,6 +9,7 @@ import { fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
+import { TandaContactos, type ParaAvisar } from "./TandaContactos";
 import { ExSocios, MOTIVOS_EX, ANTIGUEDADES, type DatosExSocios } from "./ExSocios";
 import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/NumerosRetencion";
 import { NumerosDelPeriodo, PERIODOS, type NumerosDelPeriodo as DatosPeriodo } from "@/components/panel/NumerosPeriodo";
@@ -70,6 +71,8 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
       // VD-16: los números del período elegido (cada uno lo calcula la base).
       gestion ? rpc<DatosPeriodo>("retencion_periodo", { p_gimnasio_id: panel.gimnasio.id, p_periodo: periodo }) : Promise.resolve(null),
     ]);
+    // Q2: Al día, Altas y Bajas llevan a su lista de Socios (Altas: "Nuevos", los de los últimos 30 días; Bajas: "Dados de baja").
+    const enSocios = (estado: string) => rutaDisponible("/panel/socios", panel.yo.rol, panel.secciones_apagadas) ? `/panel/socios?estado=${estado}` : "/panel/retencion";
     const hoyAlDia = tablero?.semanas.at(-1)?.al_dia ?? 0;
     const hace4 = tablero?.semanas.at(-5)?.al_dia ?? hoyAlDia;
     const maxSemana = Math.max(1, ...(tablero?.semanas ?? []).map((x) => x.al_dia));
@@ -89,6 +92,11 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const urlEx = (m: string | null, a: string | null) => `${url("se_fue", etiqueta)}${m ? `&motivo=${m}` : ""}${a ? `&antig=${a}` : ""}`;
     // AUD-10: a los que deben, cobrarles desde la fila (si Vender está y el gimnasio cobra membresía).
     const puedeCobrar = rutaDisponible("/panel/vender", panel.yo.rol, panel.secciones_apagadas) && panel.cobra.membresia && ["vencido", "por_vencer"].includes(lista.clave);
+    // Q2: la tanda "Avisar a todos" (solo quien puede anotar el contacto: dueño y encargado). "En riesgo" no trae contacto previo.
+    const paraAvisar: ParaAvisar[] = !gestion || ex ? [] : lista.clave === "riesgo"
+      ? riesgo.map((r) => ({ socio_id: r.socio_id, nombre: r.nombre, telefono: r.telefono, mensaje: r.mensaje, lista: "no_viene", contactado: false }))
+      : visibles.map((f) => ({ socio_id: f.socio_id, nombre: f.nombre, telefono: f.telefono, mensaje: f.mensaje, lista: f.lista, contactado: !!f.ultimo_contacto_en }));
+    const exportarLista = `/panel/retencion/exportar?lista=${lista.clave}${etiqueta ? `&etiqueta=${etiqueta}` : ""}`;
     const otra = LISTAS.find((l) => l.clave !== lista.clave && cuantos(l.clave) > 0);
     return (
       <>
@@ -97,15 +105,15 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           <div className="flex flex-col-reverse">
             <dt className="texto-suave mt-2 text-[15px]"><Icono nombre="usuarios" /> Al día <span className="block text-sm texto-tenue">{hoyAlDia === hace4 ? "igual que hace 4 semanas" : `${hoyAlDia > hace4 ? "↑" : "↓"} ${Math.abs(hoyAlDia - hace4)} contra hace 4 semanas`}</span></dt>
             <dd>
-              <span className="numero text-5xl">{hoyAlDia}</span>
+              <Link href={enSocios("al_dia")} className="numero text-5xl hover:underline" data-tablero-link="al_dia">{hoyAlDia}</Link>
               <span className="flex items-end gap-[2px] h-8 mt-2" role="img" aria-label="Socios al día, últimas 12 semanas">
                 {tablero.semanas.map((x) => <span key={x.dia} className="flex-1 rounded-t-sm" style={{ height: `${Math.max(8, (x.al_dia / maxSemana) * 100)}%`, background: "var(--acento)", opacity: 0.35 + 0.65 * (x.al_dia / maxSemana) }} title={`${x.dia.slice(8, 10)}/${x.dia.slice(5, 7)}: ${x.al_dia}`} />)}
               </span>
             </dd>
           </div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="hoja" /> Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.altas_mes}</dd></div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="salir" /> Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd className="numero text-5xl">{tablero.bajas_mes}</dd></div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="plata" /> Por mes en riesgo</dt><dd className="numero text-4xl sm:text-5xl">{formatearPesos(resumen.plata_en_riesgo)}</dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="hoja" /> Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd><Link href={enSocios("nuevos")} className="numero text-5xl hover:underline" data-tablero-link="altas">{tablero.altas_mes}</Link></dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="salir" /> Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd><Link href={enSocios("bajas")} className="numero text-5xl hover:underline" data-tablero-link="bajas">{tablero.bajas_mes}</Link></dd></div>
+          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="plata" /> Por mes en riesgo</dt><dd><Link href={url("riesgo", etiqueta)} className="numero text-4xl sm:text-5xl hover:underline" data-tablero-link="riesgo">{formatearPesos(resumen.plata_en_riesgo)}</Link></dd></div>
         </dl>}
         {numeros && <NumerosDeRetencion n={numeros} />}
         {delPeriodo && <NumerosDelPeriodo n={delPeriodo}
@@ -129,6 +137,12 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
         )}
         <div data-lista>
         <p className="texto-suave mb-4">{lista.ayuda}.</p>
+        {gestion && !ex && cantidadLista > 0 && (
+          <div className="flex flex-wrap items-center gap-3">
+            <TandaContactos items={paraAvisar} />
+            <a href={exportarLista} download className="boton !min-h-11 mb-4" data-exportar-lista><Icono nombre="descargar" /> Exportar esta lista</a>
+          </div>
+        )}
         {ex ? <ExSocios datos={ex} motivo={motivoEx} antiguedad={antigEx} url={urlEx} zona={zona} mostrar={mostrar} />
         : lista.clave === "riesgo" ? (riesgo.length === 0 ? (
           <Vacio icono="estrella" titulo="Nadie en riesgo">

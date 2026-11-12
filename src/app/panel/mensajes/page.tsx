@@ -18,8 +18,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FILTROS = ["abiertos", "nuevo", "en_curso", "resuelto", "todos"] as const;
 
 /** VD-38 (D27): la bandeja de lo que los socios le escriben al gimnasio. Dueño y encargado; la recepción si el dueño lo prendió. */
-export default async function Mensajes({ searchParams }: { searchParams: Promise<{ estado?: string; hilo?: string }> }) {
+const POR_PAGINA = 100, TOPE = 1000;
+
+export default async function Mensajes({ searchParams }: { searchParams: Promise<{ estado?: string; hilo?: string; n?: string }> }) {
   const sp = await searchParams;
+  // Q2: "Ver 100 más" suma otra página de la base (que da hasta 200 por vez; acá se piden de a 100).
+  const mostrar = Math.min(TOPE, Math.max(POR_PAGINA, Math.round(Number(sp.n) / POR_PAGINA) * POR_PAGINA || POR_PAGINA));
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
@@ -30,17 +34,19 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
     const gestiona = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
 
     // La base exige el permiso en cada una: sin permiso, error (no una bandeja vacía).
-    const [bandeja, rapidas, permisos, hilo] = await Promise.all([
-      rpc<Bandeja>("bandeja_mensajes", { p_gimnasio_id: g, p_estado: filtro === "todos" ? null : filtro, p_limite: 100 }),
+    const [paginas, rapidas, permisos, hilo] = await Promise.all([
+      Promise.all(Array.from({ length: mostrar / POR_PAGINA }, (_, i) =>
+        rpc<Bandeja>("bandeja_mensajes", { p_gimnasio_id: g, p_estado: filtro === "todos" ? null : filtro, p_limite: POR_PAGINA, p_desde: i * POR_PAGINA }))),
       rpc<RespuestaRapida[]>("respuestas_rapidas", { p_gimnasio_id: g }),
       gestiona ? rpc<{ recepcion_ve: boolean }>("permisos_mensajes", { p_gimnasio_id: g }) : Promise.resolve(null),
       hiloId ? rpc<HiloPanel>("hilo_mensajes", { p_hilo_id: hiloId }) : Promise.resolve(null),
     ]);
+    const bandeja: Bandeja = { ...paginas[0], items: paginas.flatMap((p) => p.items) };
     const mensajes = hilo ? await conFotos(hilo.mensajes) : [];
     const zona = panel.gimnasio.zona_horaria;
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const c = bandeja.conteos;
-    const ruta = (estado: string, h?: string) => `/panel/mensajes?estado=${estado}${h ? `&hilo=${h}` : ""}`;
+    const ruta = (estado: string, h?: string) => `/panel/mensajes?estado=${estado}${h ? `&hilo=${h}` : ""}${mostrar > POR_PAGINA ? `&n=${mostrar}` : ""}`;
     const pestanas = [
       { clave: "abiertos", texto: `Abiertos (${c.nuevo + c.en_curso})`, href: ruta("abiertos") },
       { clave: "nuevo", texto: `Nuevos (${c.nuevo})`, href: ruta("nuevo") },
@@ -87,7 +93,12 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
                 })}
               </ul>
             )}
-            {bandeja.items.length >= 100 && <p className="texto-tenue text-[13px] mt-2" data-bandeja-recortada>Se ven los 100 más recientes de esta lista.</p>}
+            {bandeja.total > bandeja.items.length && (
+              <div className="mt-3 flex flex-wrap items-center gap-3" data-bandeja-recortada>
+                <p className="texto-tenue text-[13px]">Se ven {bandeja.items.length} de {bandeja.total}.</p>
+                {mostrar < TOPE && <Link href={`/panel/mensajes?estado=${filtro}${hiloId ? `&hilo=${hiloId}` : ""}&n=${mostrar + POR_PAGINA}`} data-transicion className="boton !min-h-11" data-ver-mas-mensajes>Ver {POR_PAGINA} más</Link>}
+              </div>
+            )}
           </section>
 
           {hilo && (
