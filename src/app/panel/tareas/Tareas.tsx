@@ -31,7 +31,7 @@ export function FilaTarea({ t, hoy, mostrarPara = false }: { t: Tarea; hoy: stri
   return (
     <li className={`tarjeta p-4 flex flex-wrap items-center gap-3 ${hecha ? "opacity-60" : ""}`} data-tarea={hecha ? "hecha" : t.atrasada ? "atrasada" : "pendiente"}>
       <button type="button" className="boton !min-h-11 !px-3" disabled={ocupado} onClick={cambiar} aria-label={hecha ? `Reabrir: ${t.que}` : `Marcar hecha: ${t.que}`}>
-        {hecha ? "" : "✓"}
+        {hecha ? <Icono nombre="deshacer" /> : <Icono nombre="ok" />}
       </button>
       <span className="min-w-0 flex-1">
         <span className={`block font-semibold ${hecha ? "line-through" : ""}`}>{t.que}</span>

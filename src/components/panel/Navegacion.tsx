@@ -163,7 +163,7 @@ export function Navegacion(props: Props) {
               <li key={a.clave}>
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
-                  <span className={`relative text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>
+                  <span className={`relative text-2xl ${on ? "" : "opacity-80"}`} aria-hidden>
                     <Icono nombre={a.emoji} sistema />
                     {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
                   </span>
@@ -187,7 +187,7 @@ export function Navegacion(props: Props) {
         <div className="hoja lg:hidden fixed inset-0 z-40 bg-[var(--fondo)] overflow-y-auto px-4 pt-4 pb-24" role="dialog" aria-modal="true" aria-label="Menú">
           <div className="flex items-center justify-between mb-6">
             <p className="titulo text-2xl">Menú</p>
-            <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú">✕</button>
+            <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú"><Icono nombre="cerrar" /></button>
           </div>
           <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} pendientes={pendientes} />
           <div className="mt-8 space-y-3">

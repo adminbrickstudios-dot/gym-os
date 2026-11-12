@@ -41,7 +41,7 @@ export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
                 </LinkPanel>
                 {anulando !== i.ingreso_id && (
                   <button type="button" className="flex-none size-11 rounded-xl texto-tenue hover:bg-[var(--tarjeta)]" aria-label={`Anular la entrada de ${i.socio}`}
-                    onClick={() => { setAnulando(i.ingreso_id); setMotivo(""); setError(null); }}>⋯</button>
+                    onClick={() => { setAnulando(i.ingreso_id); setMotivo(""); setError(null); }}><Icono nombre="papelera" /></button>
                 )}
               </div>
               {anulando === i.ingreso_id && (

@@ -129,7 +129,7 @@ export default async function InfoGimnasio({ searchParams }: { searchParams: Pro
             <details className="tarjeta group">
               <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 min-h-14 font-semibold">
                 {info.reglamento.titulo}
-                <span aria-hidden className="texto-suave transition-transform group-open:rotate-45">+</span>
+                <span aria-hidden className="texto-suave transition-transform group-open:rotate-45"><Icono nombre="mas" /></span>
               </summary>
               <p className="px-5 pb-5 texto-suave whitespace-pre-line">{info.reglamento.texto}</p>
             </details>
@@ -144,7 +144,7 @@ export default async function InfoGimnasio({ searchParams }: { searchParams: Pro
                 <details key={`${i}-${q.pregunta}`} className="tarjeta group">
                   <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 min-h-14 font-semibold">
                     {q.pregunta}
-                    <span aria-hidden className="texto-suave transition-transform group-open:rotate-45">+</span>
+                    <span aria-hidden className="texto-suave transition-transform group-open:rotate-45"><Icono nombre="mas" /></span>
                   </summary>
                   <p className="px-5 pb-5 texto-suave">{q.respuesta}</p>
                 </details>

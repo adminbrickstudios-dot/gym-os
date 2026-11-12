@@ -153,7 +153,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
             />
             <div className="max-h-[60vh] overflow-y-auto p-2" data-buscador-lista>
               {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-xl w-full"><Icono nombre="alerta" /> {error}</p>}
-              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-xl w-full" role="status" data-buscador-tarea-ok>✓ {aviso}</p>}
+              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-xl w-full" role="status" data-buscador-tarea-ok><Icono nombre="ok" /> {aviso}</p>}
               {pista && <p className="px-3 py-2 text-sm texto-suave" data-buscador-pista>Falta {pista.verbo === "tarea" ? "qué hay que hacer" : pista.verbo === "entrada" ? "el DNI o el nombre" : "a quién"}: escribí algo más después de “{texto.trim()}”.</p>}
               {!texto.trim() && ejemplos.length > 0 && (
                 <div className="px-3 pt-2 pb-1" data-buscador-ejemplos>

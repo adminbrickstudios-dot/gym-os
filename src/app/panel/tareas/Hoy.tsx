@@ -19,7 +19,7 @@ export function AutomaticasHoy({ items }: { items: Automatica[] }) {
       {items.map((x) => (
         <li key={x.clave} data-automatica={x.clave} data-cantidad={x.cantidad} className="tarjeta p-4 space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="icono" aria-hidden><Icono nombre={x.emoji} /></span>
+            <span className="icono" aria-hidden><Icono nombre={x.emoji} sistema /></span>
             <span className="min-w-0 flex-1 font-semibold text-lg leading-tight">{x.texto}</span>
             <LinkPanel href={`/panel${x.href}`} className="boton !min-h-11">Ver</LinkPanel>
           </div>
@@ -125,7 +125,7 @@ function FilaConfig({ a, equipo }: { a: ConfigAuto; equipo: PersonaConfig[] }) {
       <div className="space-y-2 min-w-0">
         <label className="flex items-center gap-3 font-semibold text-lg">
           <input type="checkbox" className="size-5" checked={activa} onChange={(e) => setActiva(e.target.checked)} data-config-activa />
-          <span aria-hidden><Icono nombre={a.emoji} /></span> {a.titulo}
+          <span aria-hidden><Icono nombre={a.emoji} sistema /></span> {a.titulo}
         </label>
         <div className="flex flex-wrap gap-3 items-end">
           <label className="block space-y-1"><span className="etiqueta">Para quién</span>

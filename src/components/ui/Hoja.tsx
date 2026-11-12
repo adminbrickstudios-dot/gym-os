@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Icono } from "@/components/ui/Icono";
+import { useAtrasCierra } from "@/components/ui/useAtrasCierra";
 
 const ENFOCABLES = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -17,6 +18,7 @@ export function Hoja({ abierta, alCerrar, etiqueta, children, className = "", al
   const panel = useRef<HTMLDivElement>(null);
   const cerrar = useRef(alCerrar);
   useEffect(() => { cerrar.current = alCerrar; });
+  useAtrasCierra(abierta, () => cerrar.current());
 
   useEffect(() => {
     if (!abierta) return;

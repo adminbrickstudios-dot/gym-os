@@ -26,7 +26,7 @@ export async function crearPlan(_: { error?: string }, f: FormData): Promise<{ e
     const mat = String(f.get("matricula") ?? "").trim();
     if (tipo === "membresia" && mat) {
       const m = leerMonto(mat);
-      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde ✏️ Editar.` };
+      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde Editar.` };
       await rpc("guardar_matricula_plan", { p_plan_id: id, p_monto: m, p_anual: f.get("matricula_anual") === "on" });
     }
     listo();

@@ -20,7 +20,7 @@ export function Etiquetas({ socioId, etiquetas, todas }: { socioId: string; etiq
         <span key={e.id} className="pildora pildora-azul gap-1" data-etiqueta={e.nombre}>
           <Icono nombre="etiqueta" /> {e.nombre}
           <button type="button" aria-label={`Sacar la etiqueta ${e.nombre}`} disabled={ocupado} className="ml-1 opacity-70 hover:opacity-100"
-            onClick={() => empezar(async () => { const r = await sacarEtiqueta(socioId, e.id); setError(r.error ?? null); })}>✕</button>
+            onClick={() => empezar(async () => { const r = await sacarEtiqueta(socioId, e.id); setError(r.error ?? null); })}><Icono nombre="cerrar" /></button>
         </span>
       ))}
       <form className="flex items-center gap-1" onSubmit={(ev) => { ev.preventDefault(); if (texto.trim()) poner(); }}>

@@ -45,7 +45,7 @@ export function ElegirNumeros({ disponibles, elegidos }: { disponibles: Opcion[]
         {error && <p role="alert" className="text-[var(--rojo)]">{error}</p>}
         <div className="flex items-center gap-3">
           <BotonAccion onClick={guardar} ocupadoTexto="Guardando…">Guardar</BotonAccion>
-          {guardado && <span className="texto-suave" role="status">✓ Guardado</span>}
+          {guardado && <span className="texto-suave" role="status"><Icono nombre="ok" /> Guardado</span>}
         </div>
       </div>
     </details>

@@ -109,7 +109,7 @@ function Pasos({ actual }: { actual: number }) {
       {nombres.map((n, i) => (
         <li key={n} aria-current={i + 1 === actual ? "step" : undefined}
           className={`flex-1 min-w-0 rounded-full px-3 py-1.5 text-center truncate border ${i + 1 === actual ? "border-[var(--acento)] font-semibold" : i + 1 < actual ? "texto-suave border-[var(--borde)]" : "texto-tenue border-[var(--borde)]"}`}>
-          {i + 1 < actual ? "✓ " : `${i + 1} · `}{n}
+          {i + 1 < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}
         </li>
       ))}
     </ol>

@@ -40,7 +40,7 @@ export function FilaContacto({ socioId, nombre, texto, detalle, whatsapp, lista,
           <LinkPanel href={`/panel/socios/${socioId}`} siNoEsta="texto" className="font-semibold text-lg hover:underline" textoClassName="font-semibold text-lg">{nombre}</LinkPanel>
           <p className="texto-suave">{texto}</p>
           {detalle && <p className="text-sm texto-tenue mt-0.5">{detalle}</p>}
-          {(anotado || ultimo) && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}>✓ {anotado ? "Anotado recién" : ultimo}</p>}
+          {(anotado || ultimo) && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {anotado ? "Anotado recién" : ultimo}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
           {whatsapp

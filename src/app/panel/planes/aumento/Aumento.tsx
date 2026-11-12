@@ -60,7 +60,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
           <h2 className="titulo text-2xl"><Icono nombre="campana" /> Avisales a tus socios</h2>
           <p className="texto-suave">Para mandar por WhatsApp a tu lista de difusión o pegar en el grupo:</p>
           <pre className="tarjeta p-4 whitespace-pre-wrap text-sm" data-aviso>{texto}</pre>
-          <button type="button" className="boton" onClick={async () => { try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? "✓ Copiado" : "Copiar el aviso"}</button>
+          <button type="button" className="boton" onClick={async () => { try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { setCopiado(false); } }}>{copiado ? <><Icono nombre="ok" /> Copiado</> : "Copiar el aviso"}</button>
         </section>
         <Link href="/panel/planes" className="boton boton-principal">← Volver a Planes</Link>
       </div>
@@ -155,7 +155,7 @@ export function Aumento({ planes, hoy, sugerido, zona, gimnasio, avisoDias, esDu
           <div className="flex flex-wrap items-end gap-2">
             <label className="space-y-2 block"><span className="etiqueta">Días de aviso antes de un aumento (7 a 90)</span>
               <input className="campo !w-28" inputMode="numeric" aria-label="Días de aviso" value={dias} onChange={(e) => setDias(e.target.value)} /></label>
-            <button type="button" className="boton" disabled={ocupado} onClick={() => empezar(async () => { const r = await guardarAvisoDias(dias); setDiasMsg(r.error ?? `✓ Desde ahora, ${r.dias} días`); })}>Guardar</button>
+            <button type="button" className="boton" disabled={ocupado} onClick={() => empezar(async () => { const r = await guardarAvisoDias(dias); setDiasMsg(r.error ?? `Desde ahora, ${r.dias} días`); })}>Guardar</button>
             {diasMsg && <p role="status" className="texto-suave text-sm">{diasMsg}</p>}
           </div>
         ) : <p className="texto-suave">El gimnasio avisa con {avisoDias} días de anticipación. Lo cambia el dueño.</p>}

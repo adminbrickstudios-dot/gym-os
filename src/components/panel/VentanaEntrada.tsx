@@ -883,7 +883,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
               <ol className="flex gap-2 text-sm" aria-label="Pasos del alta rápida">
                 {["Datos", "Plan", "Cobro", "Entra"].map((n, i) => {
                   const actual = alta.paso === "datos" ? 0 : 1;
-                  return <li key={n} className={`flex-1 min-w-0 rounded-full px-2 py-1 text-center truncate border ${i === actual ? "border-[var(--acento)] font-semibold" : "border-[var(--borde)] texto-tenue"}`}>{i < actual ? "✓ " : `${i + 1} · `}{n}</li>;
+                  return <li key={n} className={`flex-1 min-w-0 rounded-full px-2 py-1 text-center truncate border ${i === actual ? "border-[var(--acento)] font-semibold" : "border-[var(--borde)] texto-tenue"}`}>{i < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}</li>;
                 })}
               </ol>
 

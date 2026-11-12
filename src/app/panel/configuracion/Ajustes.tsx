@@ -426,7 +426,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-xl p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
                 : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
           </Tarjeta>
-          <Tarjeta icono="" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
+          <Tarjeta icono="imagen" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
             <UnaImagen tipo="favicon" ruta={d.favicon_path} reglas={d.reglas_imagenes.favicon} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => (
                 <div className="inline-flex items-center gap-2 rounded-t-xl border border-b-0 border-[var(--borde)] bg-[var(--tarjeta-alta)] px-3 py-2 max-w-full">
@@ -555,7 +555,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               </div>
             )}
           </Tarjeta>
-          <Tarjeta icono="" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
+          <Tarjeta icono="lista" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
             <Interruptor etiqueta="Se puede cobrar a cuenta" ayuda={c.fiado_activo ? "Prendido: hasta el tope de abajo por socio." : "Apagado: nadie queda debiendo."}
               checked={c.fiado_activo} onChange={(e) => set("fiado_activo", e.target.checked)} />
             {c.fiado_activo && (

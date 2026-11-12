@@ -21,7 +21,7 @@ export function Wod({ claseId, inicial, por, puedeEditar }: { claseId: string; i
           {ocupado ? "Guardando…" : "Guardar WOD"}
         </button>
         {por && !sucio && !msj.ok && <span className="text-sm texto-tenue">Lo escribió {por}</span>}
-        {msj.ok && !sucio && <span role="status" className="text-sm" style={{ color: "var(--acento)" }}>✓ {msj.ok}</span>}
+        {msj.ok && !sucio && <span role="status" className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {msj.ok}</span>}
       </div>
       {msj.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {msj.error}</p>}
     </section>

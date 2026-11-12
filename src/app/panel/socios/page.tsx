@@ -95,7 +95,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {/* En el celular lo que se usa poco va en "Más", así la búsqueda queda arriba. */}
                 {extra && (
                   <details className="sm:hidden" data-mas>
-                    <summary className="boton list-none cursor-pointer">⋯ Más</summary>
+                    <summary className="boton list-none cursor-pointer"><Icono nombre="menu" /> Más</summary>
                     <div className="flex flex-wrap gap-2 mt-2">{extra}</div>
                   </details>
                 )}

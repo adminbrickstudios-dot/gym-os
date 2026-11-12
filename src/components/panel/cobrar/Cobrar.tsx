@@ -244,7 +244,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
             <p className="titulo text-2xl truncate" data-cobrar-socio>{socio.nombre} {socio.numero != null && <span className="texto-tenue font-normal text-base">#{socio.numero}</span>}</p>
             <p className="texto-suave truncate">{socio.texto}</p>
           </div>
-          <button type="button" className="boton-texto" onClick={alCerrar} aria-label="Cerrar">✕</button>
+          <button type="button" className="boton-texto" onClick={alCerrar} aria-label="Cerrar"><Icono nombre="cerrar" /></button>
         </div>
 
         {/* Doble cobro (VD-50, D29): frena y pregunta; solo sigue con "Cobrar igual (con motivo)" */}
@@ -255,7 +255,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
           {lineas.length === 0 ? (
             <div className="tarjeta p-4 texto-suave">
               {precios.cuota ? "No hay nada para cobrar todavía." : "Sin membresía activa: asignale un plan desde su ficha para cobrarle la cuota."}
-              {" "}Sumá algo con “＋ Agregar”.
+              {" "}Sumá algo con “Agregar”.
             </div>
           ) : (
             <ul className="divide-y divide-[var(--borde)]">
@@ -292,11 +292,11 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
                     )}
                     <div className="flex items-center gap-2 mt-2">
                       <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined}
-                        onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                        onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}><Icono nombre="menos" /></button>
                       <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
                       <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.tipo === "otro" || (l.tipo === "cuota" && !!parcial)}
                         title={l.tipo === "cuota" && parcial ? "La primera cuota es parcial: se cobra sola" : undefined}
-                        onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                        onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}><Icono nombre="mas" /></button>
                       {l.descuento == null
                         ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
                         : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
@@ -316,7 +316,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
           {precios.tope_descuento != null && lineas.some((l) => l.descuento != null) && <p className="text-sm texto-tenue mt-2">Tu descuento máximo es {precios.tope_descuento}%.</p>}
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
-            <button type="button" className="boton !min-h-11" aria-expanded={agregando} data-cobrar-agregar onClick={() => setAgregando(!agregando)}>{agregando ? "Cerrar" : "＋ Agregar"}</button>
+            <button type="button" className="boton !min-h-11" aria-expanded={agregando} data-cobrar-agregar onClick={() => setAgregando(!agregando)}>{agregando ? "Cerrar" : <><Icono nombre="mas" /> Agregar</>}</button>
             {lineas.length > 0 && (
               <span className="flex flex-wrap items-center gap-2" data-cupon>
                 <input className="campo !w-32 !min-h-11 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
@@ -324,7 +324,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
               </span>
             )}
           </div>
-          {msjCupon.ok && <p className="text-sm mt-2" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</p>}
+          {msjCupon.ok && <p className="text-sm mt-2" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {msjCupon.ok}</p>}
           {msjCupon.error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal mt-2"><Icono nombre="alerta" /> {msjCupon.error}</p>}
 
           {agregando && (
@@ -332,10 +332,10 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
               <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto">
                 {precios.cuota && <Chip icono="etiqueta" texto={`Cuota ${precios.cuota.plan}`} onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />}
                 {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && <Chip icono="lista" texto={`Matrícula ${precios.matricula.plan}`} onClick={() => agregar({ tipo: "matricula", nombre: `Matrícula ${precios.matricula!.plan}`, precio_fijo: Number(precios.matricula!.monto) })} />}
-                {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && <Chip icono="" texto={`Lo que debe: ${formatearPesos(precios.deuda)}`} onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />}
+                {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && <Chip icono="tarjeta" texto={`Lo que debe: ${formatearPesos(precios.deuda)}`} onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />}
                 {precios.pases.map((p) => <Chip key={p.plan_id} icono="ticket" texto={p.nombre} onClick={() => agregar({ tipo: "pase", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
                 {precios.packs.map((p) => <Chip key={p.plan_id} icono="ticket" texto={p.nombre} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />)}
-                {!d.sinProductos && precios.productos.map((p) => <Chip key={p.producto_id} icono="" texto={`${p.nombre} · ${formatearPesos(p.precio)}`} onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />)}
+                {!d.sinProductos && precios.productos.map((p) => <Chip key={p.producto_id} icono="caja" texto={`${p.nombre} · ${formatearPesos(p.precio)}`} onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />)}
                 <Chip icono="lapiz" texto="Otra cosa" onClick={() => setOtro({ descripcion: "", monto: "" })} />
               </div>
               {otro && (

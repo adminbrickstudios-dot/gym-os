@@ -257,7 +257,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                 onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />
             )}
             {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && (
-              <Boton icono="" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
+              <Boton icono="tarjeta" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
                 onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />
             )}
             {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && (
@@ -273,7 +273,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {!sinProductos && precios.productos.map((p) => (
-              <Boton key={p.producto_id} icono="" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
+              <Boton key={p.producto_id} icono="caja" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}
             <button type="button" className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px]" onClick={() => setOtro({ descripcion: "", monto: "" })}>
@@ -324,10 +324,10 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-2">
-                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}><Icono nombre="menos" /></button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
                     <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
-                      title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                      title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}><Icono nombre="mas" /></button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
@@ -348,7 +348,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
           <div className="mt-3 flex flex-wrap items-center gap-2" data-cupon>
             <input className="campo !w-40 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
             <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}><Icono nombre="etiqueta" /> Aplicar</button>
-            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</span>}
+            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {msjCupon.ok}</span>}
             {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {msjCupon.error}</span>}
           </div>
         )}

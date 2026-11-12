@@ -82,7 +82,7 @@ export function NuevoEvento({ zona }: { zona: string }) {
         {extras.map((x, i) => (
           <div key={i} className="flex gap-2">
             <input className="campo" type="datetime-local" aria-label={`Fecha ${i + 2}`} value={x} onChange={(e) => setExtras((l) => l.map((y, j) => (j === i ? e.target.value : y)))} />
-            <button type="button" className="boton" aria-label="Sacar esta fecha" onClick={() => setExtras((l) => l.filter((_, j) => j !== i))}>✕</button>
+            <button type="button" className="boton" aria-label="Sacar esta fecha" onClick={() => setExtras((l) => l.filter((_, j) => j !== i))}><Icono nombre="cerrar" /></button>
           </div>
         ))}
         {extras.length < 20 && <button type="button" className="boton" data-otra-fecha onClick={() => setExtras((l) => [...l, ""])}><Icono nombre="mas" /> Otra fecha</button>}
@@ -171,7 +171,7 @@ export function FilaEvento({ e, puedeCerrar }: { e: Evento; puedeCerrar: boolean
                   {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton-texto px-2" aria-label={`WhatsApp a ${a.nombre}`}><Icono nombre="mensaje" /></a>}
                   {hoyEsDia && (a.socio_id || a.inscripcion_id) && (
                     a.presente
-                      ? <button type="button" className="boton" disabled={ocupado} data-presente="si" onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }, true))}>✓ Presente (deshacer)</button>
+                      ? <button type="button" className="boton" disabled={ocupado} data-presente="si" onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }, true))}><Icono nombre="ok" /> Presente (deshacer)</button>
                       : <button type="button" className="boton" disabled={ocupado} data-marcar-presente onClick={() => accion(() => marcarPresente(e.evento_id, { socioId: a.socio_id, inscripcionId: a.inscripcion_id }))}>Marcar presente</button>
                   )}
                   {!hoyEsDia && a.presente && <span className="pildora pildora-verde">Estuvo</span>}

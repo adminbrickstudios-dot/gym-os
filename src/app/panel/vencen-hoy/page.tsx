@@ -98,7 +98,7 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
         <nav className="pestanas mb-6" aria-label="Pestañas de cobro" data-pestanas>
           {PESTANAS.filter((p) => p.clave !== "cobrar" || puedeCobrar).map((p) => (
             <Link key={p.clave} href={ir(p.clave)} data-transicion className="pestana" data-pestana={p.clave} aria-current={p.clave === activa ? "page" : undefined}>
-              <Icono nombre={p.emoji} /> {p.titulo} <span className="texto-tenue" data-cuenta>{cuantos(p.clave)}</span>
+              <Icono nombre={p.emoji} sistema /> {p.titulo} <span className="texto-tenue" data-cuenta>{cuantos(p.clave)}</span>
             </Link>
           ))}
         </nav>

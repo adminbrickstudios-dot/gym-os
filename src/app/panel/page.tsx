@@ -285,7 +285,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
             <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
             <ul className="space-y-1">
-              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✓" : ""} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? <Icono nombre="ok" /> : null} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
           </section>
         )}

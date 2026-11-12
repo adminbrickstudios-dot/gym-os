@@ -7,7 +7,7 @@ export function Entraste({ momento, zona, delMes, racha, hito }: { momento: stri
   const hora = new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(momento));
   return (
     <section className="tarjeta p-4 aparecer relative overflow-hidden" data-entraste={hora} role="status">
-      <p className="titulo text-xl"><span className="entraste-tilde" aria-hidden>✓</span> Entraste {hora}</p>
+      <p className="titulo text-xl"><span className="entraste-tilde" aria-hidden><Icono nombre="ok" /></span> Entraste {hora}</p>
       <p className="texto-suave">Llevás {delMes} {delMes === 1 ? "vez" : "veces"} este mes{racha >= 2 ? ` · ${racha} semanas seguidas` : ""}</p>
       {hito != null && (
         <>

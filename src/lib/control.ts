@@ -16,7 +16,7 @@ export const META_TIPO: Record<TipoControl, { emoji: string; etiqueta: string }>
   configuracion: { emoji: "ajustes", etiqueta: "Configuración" },
   entrada_anulada: { emoji: "prohibido", etiqueta: "Entradas anuladas" },
   invitado: { emoji: "ticket", etiqueta: "Invitados" },
-  prestamo: { emoji: "", etiqueta: "Anti-préstamo" },
+  prestamo: { emoji: "prohibido", etiqueta: "Anti-préstamo" },
 };
 
 export type ItemControl = {

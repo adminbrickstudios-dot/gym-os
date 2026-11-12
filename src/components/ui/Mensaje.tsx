@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Icono } from "@/components/ui/Icono";
 
-const EMOJI = { error: "!", exito: "✓", aviso: "", info: "" } as const;
+const EMOJI = { error: "alerta-circulo", exito: "ok", aviso: "alerta", info: "info" } as const;
 export type TipoMensaje = keyof typeof EMOJI;
 
 /**

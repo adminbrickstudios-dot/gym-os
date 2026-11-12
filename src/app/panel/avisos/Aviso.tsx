@@ -24,14 +24,14 @@ export function FilaAviso({ a, hora }: { a: Aviso; hora: string | null }) {
           <LinkPanel href={`/panel/socios/${a.socio_id}`} siNoEsta="texto" className="font-semibold text-lg hover:underline" textoClassName="font-semibold text-lg">{a.nombre}</LinkPanel>
           <p className="texto-suave">{a.motivo}</p>
           <p className="text-sm texto-tenue mt-1 line-clamp-2">“{a.mensaje}”</p>
-          {hecho && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}>✓ {hecho}</p>}
+          {hecho && <p className="text-sm mt-1" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {hecho}</p>}
         </div>
         {!hecho && (
           <div className="flex flex-wrap gap-2">
             {wa
               ? <a href={wa} target="_blank" rel="noopener noreferrer" className="boton !min-h-11" onClick={marcar}><Icono nombre="mensaje" /> WhatsApp</a>
               : <span className="pildora"><Icono nombre="prohibido" /> Sin teléfono</span>}
-            <button type="button" className="boton !min-h-11 texto-suave" disabled={ocupado} onClick={marcar}>✓ Ya le avisé</button>
+            <button type="button" className="boton !min-h-11 texto-suave" disabled={ocupado} onClick={marcar}><Icono nombre="ok" /> Ya le avisé</button>
           </div>
         )}
       </div>

@@ -74,7 +74,7 @@ export function AjustesDelPlan({ planId, tipo, a, r, cerrar }: {
           <div className="flex flex-wrap gap-2">
             {[["ingreso", "Al entrar"], ["asistencia", "Al tomar asistencia"]].map(([k, t]) => (
               <label key={k} className={`boton !min-h-11 cursor-pointer ${consume === k ? "!border-[var(--acento)]" : ""}`}>
-                <input type="radio" name={`consume-${planId}`} className="sr-only" checked={consume === k} onChange={() => setConsume(k)} />{consume === k ? "✓ " : ""}{t}
+                <input type="radio" name={`consume-${planId}`} className="sr-only" checked={consume === k} onChange={() => setConsume(k)} />{consume === k ? <><Icono nombre="ok" /> </> : null}{t}
               </label>
             ))}
           </div>
@@ -92,7 +92,7 @@ export function AjustesDelPlan({ planId, tipo, a, r, cerrar }: {
                   const si = sedes.includes(s.sede_id);
                   return (
                     <label key={s.sede_id} className={`boton !min-h-11 cursor-pointer ${si ? "!border-[var(--acento)]" : ""}`}>
-                      <input type="checkbox" className="sr-only" checked={si} aria-label={s.nombre} onChange={() => setSedes(si ? sedes.filter((x) => x !== s.sede_id) : [...sedes, s.sede_id])} />{si ? "✓ " : ""}{s.nombre}
+                      <input type="checkbox" className="sr-only" checked={si} aria-label={s.nombre} onChange={() => setSedes(si ? sedes.filter((x) => x !== s.sede_id) : [...sedes, s.sede_id])} />{si ? <><Icono nombre="ok" /> </> : null}{s.nombre}
                     </label>
                   );
                 })}
@@ -116,7 +116,7 @@ export function VistaPrevia({ nombre, descripcion, precio, detalle, cerrar }: { 
         <p className="font-semibold text-xl">{nombre}</p>
         <p className="numero text-4xl mt-1">{precio != null ? formatearPesos(precio) : "Consultar"}</p>
         {descripcion && <p className="texto-suave mt-2">{descripcion}</p>}
-        {detalle.length > 0 && <ul className="mt-3 space-y-1 text-sm">{detalle.map((d) => <li key={d}>✓ {d}</li>)}</ul>}
+        {detalle.length > 0 && <ul className="mt-3 space-y-1 text-sm">{detalle.map((d) => <li key={d}><Icono nombre="ok" /> {d}</li>)}</ul>}
       </div>
       <button type="button" className="boton mt-3" onClick={cerrar}>Cerrar</button>
     </div>
