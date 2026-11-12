@@ -813,6 +813,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 }}
                 placeholder="30.123.456" className="campo !min-h-24 !text-5xl sm:!text-6xl text-center font-bold tracking-wide numero" />
               <p className="texto-tenue text-center text-sm">Enter para buscar · Esc para cerrar · también por nombre</p>
+              {/* D50: el sonido se prende o apaga por compu (es del mostrador, no del gimnasio). */}
+              <div className="flex justify-center">
+                <button type="button" aria-pressed={sonido} data-sonido-ventana={sonido ? "si" : "no"} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60"
+                  onClick={() => { setSonido((x) => { try { localStorage.setItem(CLAVE_SONIDO, x ? "no" : "si"); } catch { /* sin almacenamiento */ } return !x; }); campo.current?.focus(); }}>
+                  <Icono nombre="campana" /> {sonido ? "Con sonido" : "Sin sonido"}
+                </button>
+              </div>
               {conQr && <div className="flex justify-center"><button type="button" className="boton" onClick={() => setCamara(true)}><Icono nombre="camara" /> Leer QR</button></div>}
 
               {error && <Mensaje tipo="error">{error}</Mensaje>}
