@@ -5,6 +5,7 @@ import { clasificarHost, normalizarHost } from "@/lib/host";
 import { memoriaCorta } from "@/lib/rapidez/memoria";
 import { accionDeGimnasio, direccionPropia, esDelGimnasioConSesion, leerRutaGimnasio, usaGimnasioElegido } from "@/lib/proxy-rutas";
 import { urlDeHost } from "@/lib/urls";
+import { dominiosViejos } from "@/lib/dominios";
 
 // VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
 // RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
@@ -98,6 +99,12 @@ async function proxyInterno(req: NextRequest) {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return ((await r.json()) as NonNullable<Resuelto>[])[0];
   };
+
+  // D1: una dirección vieja de la lista explícita (NEXT_PUBLIC_DOMINIOS_VIEJOS) va, con 308 permanente, a la plataforma nueva: misma ruta y mismos parámetros.
+  const destinoPlataforma = normalizarHost(plataforma);
+  if (destinoPlataforma && host !== destinoPlataforma && dominiosViejos().includes(host)) {
+    return NextResponse.redirect(urlDeHost(destinoPlataforma, req.nextUrl.pathname + req.nextUrl.search), 308);
+  }
 
   const clase = clasificarHost(host, base, plataforma);
   if (clase.tipo === "plataforma") {
@@ -203,6 +210,17 @@ async function proxyInterno(req: NextRequest) {
   } catch (e) {
     // No es "no existe": es que no pudimos preguntar. Se dice así.
     return new NextResponse(`No se pudo resolver el gimnasio de ${host}: ${(e as Error).message}`, { status: 503 });
+  }
+
+  // D1: www.<dominio propio> va al dominio sin www (308), solo si ESE dominio es de un gimnasio. Si no, sigue dando "no encontrado".
+  if (!gimnasio && host.startsWith("www.")) {
+    const sinWww = host.slice(4);
+    try {
+      const g = await resolver("gimnasio_por_host", { p_host: sinWww });
+      if (g) return NextResponse.redirect(urlDeHost(sinWww, req.nextUrl.pathname + req.nextUrl.search), 308);
+    } catch (e) {
+      return new NextResponse(`No se pudo resolver el gimnasio de ${host}: ${(e as Error).message}`, { status: 503 });
+    }
   }
 
   if (!gimnasio) {
