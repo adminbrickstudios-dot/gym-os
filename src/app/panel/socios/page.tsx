@@ -84,8 +84,8 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
               <Link href="/panel/socios/duplicados" className="boton"><Icono nombre="buscar" /> Duplicados</Link>
               {filas.length > 0 && (
                 // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
-                // La base todavía filtra el archivo solo por texto y etiqueta: con otro filtro puesto se dice que baja a todos (no a los que se ven).
-                <a href={`/panel/socios/exportar${con({ estado: null, plan: null, web: false }).replace("/panel/socios", "")}`} className="boton" download data-exportar={estado || plan || web ? "todos" : "filtrado"}><Icono nombre="subir" /> {estado || plan || web ? "Exportar todos los socios" : "Exportar"}</a>
+                // Texto, etiqueta, estado, plan y origen: el archivo trae lo mismo que la lista, sin su tope de filas. Sin filtro, todos.
+                <a href={`/panel/socios/exportar${con({}).replace("/panel/socios", "")}`} className="boton" download data-exportar={filtrado || q ? "filtrado" : "todos"}><Icono nombre="subir" /> {filtrado || q ? "Exportar lo filtrado" : "Exportar"}</a>
               )}
             </>;
             return (
