@@ -17,6 +17,28 @@ import { Icono } from "@/components/ui/Icono";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
+// Declarado afuera del componente: adentro, cada toque lo volvía a montar y la grilla perdía el foco.
+const Boton = ({ onClick, icono, titulo, precio, deshabilitado, nota, foto }: {
+  onClick: () => void; icono: string; titulo: string; precio: number | null; deshabilitado?: string;
+  nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
+}) => (
+  <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
+    className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
+    <span className="flex items-center gap-2">
+      {foto
+        // eslint-disable-next-line @next/next/no-img-element
+        ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
+        : <span aria-hidden className="text-xl"><Icono nombre={icono} /></span>}
+      <span>{titulo}</span>
+    </span>
+    <span className="flex flex-wrap items-baseline gap-x-2">
+      <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
+      {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
+      {nota?.poco && <span className="pildora pildora-amarillo text-xs" data-queda-poco>Queda poco</span>}
+    </span>
+  </button>
+);
+
 export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {}, sinProductos = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
   /** Dueño y encargado anulan; la recepción pide (VEN-6). */
@@ -157,7 +179,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
     return (
       <section className="tarjeta p-6 sm:p-10 max-w-xl" aria-live="polite">
         <p className="text-5xl flex justify-center" aria-hidden><Tilde tamano={64} /></p>
-        <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
+        <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}{socio ? ` a ${socio.nombre.split(" ")[0]}` : ""}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         {usoCupon && <p className="mt-3 texto-suave" data-uso-cupon>{usoCupon}</p>}
         {socio ? <MandarComprobante ventaId={venta.venta_id} /> : <VerRecibo ventaId={venta.venta_id} />}
@@ -173,26 +195,6 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
     );
   }
 
-  const Boton = ({ onClick, icono, titulo, precio, deshabilitado, nota, foto }: {
-    onClick: () => void; icono: string; titulo: string; precio: number | null; deshabilitado?: string;
-    nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
-  }) => (
-    <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
-      className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
-      <span className="flex items-center gap-2">
-        {foto
-          // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
-          : <span aria-hidden className="text-xl"><Icono nombre={icono} /></span>}
-        <span>{titulo}</span>
-      </span>
-      <span className="flex flex-wrap items-baseline gap-x-2">
-        <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
-        {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
-        {nota?.poco && <span className="pildora pildora-amarillo text-xs" data-queda-poco>Queda poco</span>}
-      </span>
-    </button>
-  );
   // VD-18: lo más que se puede llevar de un producto con stock (la base lo exige igual).
   const topeStock = (l: Linea) => { const s = l.tipo === "producto" && l.producto_id ? stock[l.producto_id] : undefined; return s && !s.negativo ? s.stock : Infinity; };
   // VEN-4 + VD-18: cuántos quedan, "queda poco" desde el mínimo, y sin stock no se vende (salvo que el producto lo permita).
@@ -375,7 +377,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                   <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                 </div>
               ))}
-              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
+              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">{total - sumaMixto > 0 ? `Faltan ${formatearPesos(total - sumaMixto)}` : `Sobran ${formatearPesos(sumaMixto - total)}`}</p>}
             </div>
           )}
           {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "Paga con dos medios"}</button>}

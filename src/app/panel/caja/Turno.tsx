@@ -30,7 +30,7 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
         </button>
       )}
       {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-      <button type="submit" disabled={ocupado} className="boton boton-principal w-full text-lg"><Icono nombre="candado-abierto" /> Abrir caja</button>
+      <button type="submit" disabled={ocupado} className="boton boton-principal w-full text-lg">{ocupado ? "Abriendo la caja…" : <><Icono nombre="candado-abierto" /> Abrir caja</>}</button>
     </form>
   );
 }
@@ -68,7 +68,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           ? <div className="mt-6"><PorMedio medios={cobrosCierre} zona={zona} titulo="Lo cobrado en el turno, por medio" /></div>
           : <OtrosMedios r={cierre} />}
         <div className="flex flex-wrap gap-2 mt-8">
-          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}><Icono nombre="persona" /> Listo</button>
+          <button type="button" className="boton boton-principal" onClick={() => router.refresh()}><Icono nombre="ok" /> Listo</button>
           {/* VD-9: el reporte del turno, con SOBRA / FALTA, para ver o mandar. */}
           <Link className="boton" data-ver-reporte href={`/panel/caja/reporte?turno=${cierre.turno_id}`}><Icono nombre="documento" /> Ver el reporte</Link>
           {/* CAJ-2: el cierre, escrito, para mandárselo al dueño. */}
@@ -100,7 +100,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           <p className="font-semibold">La caja de antes queda anotada como sin contar. ¿Con cuánta plata arrancás tu turno?</p>
           <input autoFocus className="campo !text-xl" inputMode="decimal" placeholder="$ 0" aria-label="Fondo del turno nuevo" value={monto} onChange={(e) => setMonto(e.target.value)} />
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Abrir mi turno</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">{ocupado ? "Abriendo…" : "Abrir mi turno"}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
       {resumen && cobros ? (
@@ -138,7 +138,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
             </label>
           )}
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">Anotar</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">{ocupado ? "Anotando…" : "Anotar"}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
       {modo === "cerrar" && (
@@ -150,7 +150,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           {usaCalculadora && <CalculadoraBilletes alCambiar={(total, detalle) => { setMonto(String(total).replace(".", ",")); setBilletes(detalle); }} />}
           <input className="campo" placeholder="Nota (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
-          <div className="flex gap-2"><button type="submit" disabled={ocupado || !monto} className="boton boton-principal"><Icono nombre="candado" /> Cerrar con este monto</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
+          <div className="flex gap-2"><button type="submit" disabled={ocupado || !monto} className="boton boton-principal">{ocupado ? "Cerrando la caja…" : <><Icono nombre="candado" /> Cerrar con este monto</>}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
     </section>

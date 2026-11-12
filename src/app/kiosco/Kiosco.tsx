@@ -149,7 +149,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
       {emergencia && (
         <div role="alert" data-kiosco-emergencia className="rounded-[var(--radio-grande)] p-4 border-2 text-2xl font-bold"
           style={{ background: `color-mix(in oklab, ${colorVar("rojo")}, var(--fondo) 75%)`, borderColor: colorVar("rojo") }}>
-          <Icono nombre="alerta" /> EMERGENCIA activa: pasá por la puerta
+          <Icono nombre="alerta" /> Emergencia: pasá por la puerta, la recepción te abre
         </div>
       )}
       <div>
@@ -170,6 +170,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
           inputMode="numeric" autoComplete="off" aria-label={elegido ? "Últimos 3 números de tu DNI" : "Tu DNI"} placeholder={elegido ? "···" : "Tu DNI"}
           className="campo !min-h-20 !text-4xl text-center tracking-widest numero" />
       </form>
+      {ocupado && <p className="texto-suave text-xl" role="status" data-kiosco-buscando>Buscando…</p>}
       <div className="grid grid-cols-3 gap-3" aria-label="Teclado">
         {TECLAS.map((k) => (
           <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "entrar" && (elegido ? dni.length !== 3 : dni.length < 6))}

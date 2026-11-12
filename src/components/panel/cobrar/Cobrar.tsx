@@ -53,7 +53,7 @@ export function Cobrar({ sedeId, socioId, origen, alCerrar, alCobrado }: {
   }, [sedeId, socioId, intento]);
 
   return (
-    <Hoja abierta alCerrar={cerrar} etiqueta="Cobrar" className="!max-w-xl">
+    <Hoja abierta alCerrar={cerrar} etiqueta="Cobrar" className="!max-w-xl" atras={false}>
       <div data-cobrar data-origen={origen} data-estado={error ? "error" : d ? "listo" : "cargando"} className="max-h-[92dvh] overflow-y-auto">
         {error ? (
           <div className="p-6 sm:p-8 space-y-4">
@@ -215,7 +215,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
     return (
       <div className="p-6 sm:p-8 space-y-4" data-cobrar-hecho data-total={venta.total} aria-live="polite">
         <p className="flex justify-center" aria-hidden><Tilde tamano={64} /></p>
-        <p className="titular text-4xl sm:text-5xl text-center">Cobrado {formatearPesos(venta.total)}</p>
+        <p className="titular text-4xl sm:text-5xl text-center">Cobrado {formatearPesos(venta.total)}{socio.nombre ? ` a ${socio.nombre.split(" ")[0]}` : ""}</p>
         {venta.veredicto && <div className="flex justify-center"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         {cubre && <p className="texto-suave text-center text-sm">{socio.nombre.split(" ")[0]}{cubre}</p>}
         {usoCupon && <p className="texto-suave text-center" data-uso-cupon>{usoCupon}</p>}
@@ -377,7 +377,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
                   <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                 </div>
               ))}
-              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
+              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">{total - sumaMixto > 0 ? `Faltan ${formatearPesos(total - sumaMixto)}` : `Sobran ${formatearPesos(sumaMixto - total)}`}</p>}
               <p className="text-sm texto-tenue">Con dos medios rige el precio de lista.</p>
             </div>
           )}

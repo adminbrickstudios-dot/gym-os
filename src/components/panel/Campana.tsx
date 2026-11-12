@@ -16,7 +16,11 @@ export function Campana() {
     pedir();
     // Cuando algo se resuelve sin cambiar de pantalla (“Marcar todo como leído”), el número se vuelve a pedir.
     window.addEventListener(EVENTO_PENDIENTES, pedir);
-    return () => { vivo = false; window.removeEventListener(EVENTO_PENDIENTES, pedir); };
+    // FLUIDEZ regla 14: con la pantalla quieta, se vuelve a pedir cada 60 s (solo con la pestaña a la vista) y al volver a ella.
+    const cada = setInterval(() => { if (document.visibilityState === "visible") pedir(); }, 60_000);
+    const alVolver = () => { if (document.visibilityState === "visible") pedir(); };
+    document.addEventListener("visibilitychange", alVolver);
+    return () => { vivo = false; clearInterval(cada); document.removeEventListener("visibilitychange", alVolver); window.removeEventListener(EVENTO_PENDIENTES, pedir); };
   }, [ruta]);
   const activa = ruta === "/panel/campana";
   return (
@@ -24,7 +28,7 @@ export function Campana() {
       className={`relative grid place-items-center size-11 rounded-full border border-[var(--borde)] bg-[var(--tarjeta)] text-xl active:scale-95 transition ${activa ? "ring-2 ring-[var(--acento)]" : ""}`}>
       <span aria-hidden><Icono nombre="campana" /></span>
       {!!n && (
-        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center text-white" style={{ background: "var(--acento)" }} aria-hidden>
+        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full text-xs font-bold grid place-items-center" style={{ background: "var(--acento)", color: "var(--sobre-acento)" }} aria-hidden>
           {n > 99 ? "99+" : n}
         </span>
       )}

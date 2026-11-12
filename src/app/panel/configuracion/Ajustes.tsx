@@ -40,6 +40,7 @@ import { BuscadorConfig } from "./BuscadorConfig";
 import { Restablecer } from "./Restablecer";
 import type { Opcion } from "./indice";
 import { Icono } from "@/components/ui/Icono";
+import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -277,13 +278,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   };
   const algoSucio = PESTANAS.some((p) => sucio(p.clave));
 
-  // Irse con cambios sin guardar: el navegador pregunta antes.
-  useEffect(() => {
-    if (!algoSucio) return;
-    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
-    window.addEventListener("beforeunload", avisar);
-    return () => window.removeEventListener("beforeunload", avisar);
-  }, [algoSucio]);
+  // Irse con cambios sin guardar (cerrar, recargar o tocar el menú): pregunta antes.
+  useCambiosSinGuardar(algoSucio);
 
   // La pestaña queda en la dirección: se puede recargar o mandar el link ("Configuración → Cobros").
   const cambiarPestana = (p: string) => {

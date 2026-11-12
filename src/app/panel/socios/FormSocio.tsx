@@ -13,6 +13,7 @@ import { abrirCobrar, hayHojaCobrar, EVENTO_COBRO_HECHO, type CobroHecho } from 
 import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 import { Icono } from "@/components/ui/Icono";
+import { TEXTO_CAMBIOS_SIN_GUARDAR, useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type PlanAlta = PlanParaAlta;
 
@@ -137,6 +138,9 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   const [despues, setDespues] = useState(false);
   const [ofrecido, setOfrecido] = useState<ProspectoOfrecido | null>(null);
   const [vinculado, setVinculado] = useState<string | null>(null);
+  // FLUIDEZ regla 7: lo escrito no se pierde sin avisar (cerrar, recargar, tocar el menú o Cancelar).
+  const [tocado, setTocado] = useState(false);
+  useCambiosSinGuardar(tocado && !guardando && !estado.destino && !creado);
   const planElegido = planes.find((p) => p.plan_id === plan) ?? null;
   useEffect(() => {
     if (!estado.destino) return;
@@ -235,7 +239,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   }
 
   return (
-    <form action={accion} className="max-w-2xl space-y-8">
+    <form action={accion} onInput={() => setTocado(true)} className="max-w-2xl space-y-8">
       {!socioId && <Pasos actual={paso} />}
       {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
       {(prospectoId || vinculado) && <input type="hidden" name="prospecto" value={prospectoId ?? vinculado ?? ""} />}
@@ -296,7 +300,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
               <BotonAccion disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</BotonAccion>
             </>
           : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "Guardar cambios" : "Dar de alta"}</BotonAccion>}
-        <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
+        <button type="button" onClick={() => { if (!tocado || creado || window.confirm(TEXTO_CAMBIOS_SIN_GUARDAR)) router.back(); }} className="boton">Cancelar</button>
       </div>
     </form>
   );

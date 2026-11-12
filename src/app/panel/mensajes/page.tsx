@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LinkPanel } from "@/components/panel/LinkPanel";
+import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { Vacio } from "@/components/ui/Vacio";
@@ -50,6 +51,7 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
 
     return (
       <div data-bandeja-mensajes>
+        <ActualizarSola />
         <Encabezado icono="mensaje" titulo="Mensajes"
           bajada={c.sin_responder > 0 ? `${c.sin_responder === 1 ? "1 mensaje espera" : `${c.sin_responder} mensajes esperan`} tu respuesta.` : "Consultas, quejas y objetos perdidos que los socios te escriben desde la app."} />
         <div className="space-y-4 mb-6">

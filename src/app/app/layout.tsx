@@ -48,7 +48,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className={`mx-auto max-w-lg px-4 pt-6 ${pestanas ? "pb-28" : "pb-16"}`}><SinConexion /><FranjaMantenimiento />{ayudas && <AyudaPantalla ambito="app" inicial={ayudas} />}{children}</main>
+      <main className={`mx-auto max-w-lg px-4 pt-6 ${pestanas ? "pb-28" : "pb-16"}`}><SinConexion quien="socio" /><FranjaMantenimiento />{ayudas && <AyudaPantalla ambito="app" inicial={ayudas} />}{children}</main>
       {pestanas && <Suspense fallback={null}><NavSocio clases={pestanas.clases} rutina={pestanas.rutina} /></Suspense>}
     </div>
   );

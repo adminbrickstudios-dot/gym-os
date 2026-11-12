@@ -382,7 +382,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                     <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
                     <span className="min-w-0 flex-1">
                       <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
-                      <span className="block texto-suave">Cumple {c.cumple}</span>
+                      <span className="block texto-suave">Cumple {c.cumple} años</span>
                     </span>
                     {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
                   </li>

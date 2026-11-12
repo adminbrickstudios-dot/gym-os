@@ -31,7 +31,8 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
   const cerrarBtn = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const [intento, setIntento] = useState(0);
-  useAtrasCierra(!!socioId, () => setSocioId(null));
+  const soltar = useAtrasCierra(!!socioId, () => setSocioId(null));
+  const cerrarPanel = () => { setSocioId(null); setTimeout(soltar, 80); };   // X, Esc o tocar afuera: saca la entrada del historial que dejó al abrirse
 
   useEffect(() => {
     const abrir = (e: Event) => { const id = (e as CustomEvent<{ socioId: string }>).detail?.socioId; if (id) { setSocioId(id); setFicha(null); setError(null); } };
@@ -44,10 +45,10 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
     let vivo = true;
     fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); } });
     cerrarBtn.current?.focus();
-    const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") setSocioId(null); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") { setSocioId(null); setTimeout(soltar, 80); } };
     window.addEventListener("keydown", tecla);
     return () => { vivo = false; window.removeEventListener("keydown", tecla); };
-  }, [socioId, intento]);
+  }, [socioId, intento, soltar]);
 
   if (!socioId) return null;
   const a = ficha?.acceso;
@@ -65,12 +66,12 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
 
   return (
     <div className="fixed inset-0 z-[60]" data-panel-socio-lateral>
-      <button type="button" aria-label="Cerrar el panel" className="absolute inset-0 bg-black/30" onClick={() => setSocioId(null)} tabIndex={-1} />
+      <button type="button" aria-label="Cerrar el panel" className="absolute inset-0 bg-black/30" onClick={cerrarPanel} tabIndex={-1} />
       <aside role="dialog" aria-modal="true" aria-label="Ficha rápida del socio"
         className="absolute right-0 top-0 h-full w-full sm:w-[26rem] overflow-y-auto vidrio aparecer p-5 space-y-4 border-l-4" style={{ borderLeftColor: a ? colorVar(a.color) : "transparent" }}>
         <div className="flex items-start gap-2">
           <h2 className="titular text-2xl flex-1 min-w-0 break-words">{ficha ? `${ficha.socio.nombre} ${ficha.socio.apellido}` : "Cargando…"}</h2>
-          <button ref={cerrarBtn} type="button" onClick={() => setSocioId(null)} aria-label="Cerrar" className="size-11 rounded-lg texto-suave active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
+          <button ref={cerrarBtn} type="button" onClick={cerrarPanel} aria-label="Cerrar" className="size-11 rounded-lg texto-suave active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
         </div>
         {error && <div role="alert" className="space-y-2"><p className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p><button type="button" className="boton" onClick={() => { setError(null); setFicha(null); setIntento((n) => n + 1); }}><Icono nombre="repetir" /> Reintentar</button></div>}
         {!ficha && !error && <p className="texto-suave" role="status" aria-busy="true">Cargando la ficha…</p>}

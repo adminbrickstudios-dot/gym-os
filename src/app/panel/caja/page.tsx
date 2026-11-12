@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BotonPin } from "@/components/panel/BotonPin";
+import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
@@ -40,6 +41,7 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
+        <ActualizarSola />
         <Encabezado icono="plata" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
           accion={<div className="flex flex-wrap gap-2"><BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/caja" />
             {ve && <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton"><Icono nombre="grilla" /> Turnos anteriores</Link>}

@@ -3,6 +3,7 @@
 // Va adentro del inicio y no tapa nada: ver o saltear la bienvenida queda anotado en la base.
 import { useState, useTransition } from "react";
 import { marcarBienvenida } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 type Paso = { clave: string; emoji: string; titulo: string; texto: string };
 
@@ -25,7 +26,7 @@ export function Bienvenida({ socioId, nombre, qr, clases, pagos }: { socioId: st
   });
   return (
     <section className="tarjeta p-5 space-y-3 aparecer" data-bienvenida={p.clave} aria-label="Bienvenida">
-      <p className="text-4xl" aria-hidden>{p.emoji}</p>
+      <p className="text-4xl" aria-hidden><Icono nombre={p.emoji} /></p>
       <h2 className="titulo text-2xl">{p.titulo}</h2>
       <p className="texto-suave">{p.texto}</p>
       <div className="flex items-center gap-1" aria-hidden>{pasos.map((x, i) => <span key={x.clave} className="h-1.5 flex-1 rounded-full" style={{ background: i <= paso ? "var(--acento)" : "var(--borde)" }} />)}</div>

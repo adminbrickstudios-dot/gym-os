@@ -129,6 +129,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const [eventosHoy, setEventosHoy] = useState<EventoHoy[]>([]);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
   const [hecho, setHecho] = useState<Hecho | null>(null);
+  const [anulada, setAnulada] = useState<string | null>(null);   // "Entrada de Juan anulada": el Deshacer no vuelve a la búsqueda en silencio
   const [error, setError] = useState<string | null>(null);
   const [forzando, setForzando] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -657,7 +658,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   const deshacer = () => empezar(async () => {
     if (!hecho) return;
     const r = await anularEntrada(hecho.ingreso_id, "Anotada por error");
-    if (r.error) setError(r.error); else reiniciar();
+    if (r.error) setError(r.error); else { const n = hecho.nombre; reiniciar(); setAnulada(`Entrada de ${n} anulada`); }
   });
   // Esc en el alta vuelve a la búsqueda (no tira lo escrito de golpe); otra vez, cierra.
   const alCerrarHoja = () => {
@@ -772,12 +773,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         </aside>
       )}
 
-      <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl">
+      <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl" atras={false}>
         <div data-ventana-entrada data-paso={paso} className="max-h-[88dvh] overflow-y-auto">
           {emergencia && <div className="p-4 pb-0"><CartelEmergencia e={emergencia} /></div>}
           {paso === "escribir" && (
             <div className="p-6 sm:p-8 space-y-4">
               <p className="titulo text-2xl text-center"><Icono nombre="puerta" /> Entrada</p>
+              {anulada && <p role="status" className="pildora pildora-verde whitespace-normal justify-center" data-ventana-anulada><Icono nombre="ok" /> {anulada}</p>}
               {/* VD-1b: el dueño con varias sedes elige en cuál anota (queda en esta compu). */}
               {sedes.length > 1 && (
                 <div role="group" aria-label="Sede" className="flex flex-wrap justify-center gap-2" data-ventana-sedes>
@@ -788,7 +790,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                 </div>
               )}
               <input ref={campo} data-ventana-campo value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
-                onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); }}
+                onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); setAnulada(null); }}
                 onKeyDown={(e) => {
                   detector.current.tecla(e.key, e.timeStamp);
                   // C5: tipeo de corrido terminado en Enter = lectura del lector. Se toma lo que hay en el campo (no el estado, que puede ir un render atrás).

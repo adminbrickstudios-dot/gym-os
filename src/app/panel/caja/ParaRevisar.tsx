@@ -42,7 +42,7 @@ function Fila({ c, cuando, pedirBilletes }: { c: Caja; cuando: (m: string) => st
       <li className="tarjeta p-5 space-y-2" data-revisada aria-live="polite">
         <p className="font-semibold text-lg">{c.caja} · {cuando(c.abierto_en)}</p>
         <p className="titular text-3xl">{dif === 0 ? "Caja justa" : dif > 0 ? `Sobraban ${formatearPesos(dif)}` : `Faltaban ${formatearPesos(-dif)}`}</p>
-        <button type="button" className="boton" onClick={() => router.refresh()}><Icono nombre="persona" /> Listo</button>
+        <button type="button" className="boton" onClick={() => router.refresh()}><Icono nombre="ok" /> Listo</button>
       </li>
     );
   }
@@ -66,7 +66,7 @@ function Fila({ c, cuando, pedirBilletes }: { c: Caja; cuando: (m: string) => st
         </div>
       )}
       {modo === "contar" && (
-        <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); e.currentTarget.querySelector<HTMLButtonElement>("button.boton-principal")?.click(); }}>
           <p className="font-semibold">¿Cuánta plata había en esa caja?</p>
           <input autoFocus className="campo !text-2xl !min-h-16" inputMode="decimal" placeholder="$ contado" aria-label="Plata contada" value={monto} onChange={(e) => setMonto(e.target.value)} readOnly={usaCalculadora} />
           {!pedirBilletes && <button type="button" className="boton boton-chico" aria-pressed={conBilletes} onClick={() => { setConBilletes(!conBilletes); setBilletes(null); setMonto(""); }}>{conBilletes ? "Escribir el total yo" : "Contar billetes"}</button>}
@@ -83,7 +83,7 @@ function Fila({ c, cuando, pedirBilletes }: { c: Caja; cuando: (m: string) => st
         </form>
       )}
       {modo === "dejar" && (
-        <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); e.currentTarget.querySelector<HTMLButtonElement>("button.boton-principal")?.click(); }}>
           <p className="font-semibold">¿Por qué se deja sin contar? (queda escrito, con tu nombre)</p>
           <input autoFocus className="campo" placeholder="Motivo" aria-label="Motivo de dejarla sin contar" value={nota} onChange={(e) => setNota(e.target.value)} />
           {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
