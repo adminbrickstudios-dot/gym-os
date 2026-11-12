@@ -84,7 +84,7 @@ try {
     [{ id: act[nombre] }] = await q(`insert into public.actividades (gimnasio_id, nombre, emoji, descripcion) values ($1,$2,$3,$4) returning id`, [g, nombre, emoji, descripcion]);
   }
   // Equipo: una recepcionista y un profe (usuarios-demo --prueba les vincula el login).
-  await q(`insert into public.equipo (gimnasio_id, nombre, rol) values ($1, 'Ana Prueba', 'recepcion')`, [g]);
+  const [{ id: ana }] = await q(`insert into public.equipo (gimnasio_id, nombre, rol) values ($1, 'Ana Prueba', 'recepcion') returning id`, [g]);
   const [{ id: profe }] = await q(`insert into public.equipo (gimnasio_id, nombre, rol) values ($1, 'Diego Prueba', 'profe') returning id`, [g]);
   const grilla = [["Spinning", "08:00", 45, 15], ["Funcional", "09:00", 60, 20], ["Yoga", "10:30", 60, 12], ["Crossfit", "18:00", 60, 16], ["Spinning", "19:00", 45, 15], ["Funcional", "20:00", 60, 20]];
   for (let dia = 1; dia <= 6; dia++) for (const [a, hora, dur, cupo] of grilla) {
@@ -130,9 +130,9 @@ try {
 
   // Un socio en prueba gratis hoy (el que nunca pagó): "en prueba" en la puerta.
   if (enPrueba) {
-    await q(`insert into public.pruebas_gratis (gimnasio_id, dni, nombre, modo, sede_id, desde, hasta, origen, socio_id)
-             select $1, s.dni, s.nombre || ' ' || s.apellido, 'dia', $2, $3, $4, 'entrada', s.id from public.socios s where s.id = $5`,
-      [g, sede, await medianoche(hoy), await medianoche(sumarDias(hoy, 1)), enPrueba]);
+    await q(`insert into public.pruebas_gratis (gimnasio_id, dni, nombre, modo, sede_id, desde, hasta, origen, socio_id, dada_por)
+             select $1, s.dni, s.nombre || ' ' || s.apellido, 'dia', $2, $3, $4, 'entrada', s.id, $6 from public.socios s where s.id = $5`,
+      [g, sede, await medianoche(hoy), await medianoche(sumarDias(hoy, 1)), enPrueba, ana]);
   }
 
   // Interesados, para que Socios → Interesados no esté vacío.
