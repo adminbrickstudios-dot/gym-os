@@ -35,12 +35,14 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
   );
 }
 
-export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, zona }: {
+export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, abrirCierre = false, zona }: {
   turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+  /** VD-29C: llegó con ?accion=cerrar (Ctrl+K "cerrar turno"): el formulario del cierre ya está abierto y enfocado. */
+  abrirCierre?: boolean;
   /** La zona horaria del gimnasio: la hora del cierre que se manda por WhatsApp sale en ella, no en la de la compu. */
   zona: string;
 }) {
-  const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">("nada");
+  const [modo, setModo] = useState<"nada" | "ingreso" | "retiro" | "cerrar" | "nuevo">(abrirCierre ? "cerrar" : "nada");
   const [monto, setMonto] = useState("");
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);

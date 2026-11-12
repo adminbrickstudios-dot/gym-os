@@ -118,11 +118,13 @@ export function accionesPara(texto: string, c: Comando | null, permitidos: Set<V
       for (const s of porSocio) salida.push({ id: `vender:${s.socio_id}`, verbo, tipo: "ir", emoji: "carrito", titulo: `Vender a ${s.nombre}`, ruta: `/panel/vender?socio=${s.socio_id}` });
       salida.push({ id: "vender", verbo, tipo: "ir", emoji: "carrito", titulo: "Vender", detalle: arg ? `Productos, pases y packs (${arg})` : "Productos, pases y packs", ruta: "/panel/vender" });
     } else if (verbo === "nuevo_socio") {
-      salida.push({ id: "nuevo_socio", verbo, tipo: "ir", emoji: "mas", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" });
+      // VD-29D: "nuevo socio María" abre el alta con el nombre ya cargado (el alta valida el texto).
+      const nombre = /^[\p{L} '.-]{2,60}$/u.test(arg) ? arg : "";
+      salida.push({ id: "nuevo_socio", verbo, tipo: "ir", emoji: "mas", titulo: nombre ? `Nuevo socio: ${nombre}` : "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: nombre ? `/panel/socios/nuevo?nombre=${encodeURIComponent(nombre)}` : "/panel/socios/nuevo" });
     } else if (verbo === "abrir_turno") {
       salida.push({ id: "abrir_turno", verbo, tipo: "ir", emoji: "candado-abierto", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" });
     } else if (verbo === "cerrar_turno") {
-      salida.push({ id: "cerrar_turno", verbo, tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" });
+      salida.push({ id: "cerrar_turno", verbo, tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja?accion=cerrar" });
     } else if (verbo === "gasto") {
       salida.push({ id: "gasto", verbo, tipo: "ir", emoji: "calculadora", titulo: "Cargar un gasto", detalle: "Gastos del mes", ruta: "/panel/gastos" });
     } else if (verbo === "tarea" && arg) {
@@ -136,7 +138,7 @@ export function accionesPara(texto: string, c: Comando | null, permitidos: Set<V
     const sinArg: [Verbo, Accion][] = [
       ["nuevo_socio", { id: "nuevo_socio", verbo: "nuevo_socio", tipo: "ir", emoji: "mas", titulo: "Nuevo socio", detalle: "Dar de alta, con plan y cobro", ruta: "/panel/socios/nuevo" }],
       ["abrir_turno", { id: "abrir_turno", verbo: "abrir_turno", tipo: "ir", emoji: "candado-abierto", titulo: "Abrir turno", detalle: "Caja: contar lo que hay y arrancar", ruta: "/panel/caja" }],
-      ["cerrar_turno", { id: "cerrar_turno", verbo: "cerrar_turno", tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja" }],
+      ["cerrar_turno", { id: "cerrar_turno", verbo: "cerrar_turno", tipo: "ir", emoji: "candado", titulo: "Cerrar turno", detalle: "Caja: contar y cerrar", ruta: "/panel/caja?accion=cerrar" }],
     ];
     for (const [verbo, a] of sinArg) {
       if (permitidos.has(verbo) && FRASES[verbo].some((f) => f.startsWith(q))) salida.push(a);
