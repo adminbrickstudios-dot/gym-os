@@ -2,7 +2,7 @@
 // Función pura (sin base): la comparten la pantalla, el CSV y las pruebas.
 import { formatearPesos } from "@/lib/formato";
 
-export const TIPOS_CONTROL = ["cobro", "anulacion", "descuento", "otro_dia", "dejado_pasar", "caja", "precio", "configuracion", "entrada_anulada", "invitado", "prestamo"] as const;
+export const TIPOS_CONTROL = ["cobro", "anulacion", "descuento", "otro_dia", "dejado_pasar", "caja", "precio", "configuracion", "entrada_anulada", "invitado", "prestamo", "cobertura"] as const;
 export type TipoControl = (typeof TIPOS_CONTROL)[number];
 
 export const META_TIPO: Record<TipoControl, { emoji: string; etiqueta: string }> = {
@@ -17,6 +17,7 @@ export const META_TIPO: Record<TipoControl, { emoji: string; etiqueta: string }>
   entrada_anulada: { emoji: "prohibido", etiqueta: "Entradas anuladas" },
   invitado: { emoji: "ticket", etiqueta: "Invitados" },
   prestamo: { emoji: "prohibido", etiqueta: "Anti-préstamo" },
+  cobertura: { emoji: "calendario", etiqueta: "Fechas cambiadas" },
 };
 
 export type ItemControl = {
@@ -57,6 +58,7 @@ export function tituloControl(i: ItemControl, zona: string): string {
     case "entrada_anulada": return `${quien} anuló la entrada de ${i.socio ?? "un socio"}`;
     case "invitado": return `${i.socio ?? "Un socio"} invitó a ${i.detalle ?? "alguien"}${i.quien ? ` (lo cargó ${i.quien})` : x.desde_la_app ? " (desde la app)" : ""}`;
     case "prestamo": return `${i.socio ?? "Un socio"} volvió a entrar por otra vía`;
+    case "cobertura": return `${quien} cambió las fechas de lo que cubre la cuota${i.socio ? ` de ${i.socio}` : ""}${x.anulada ? " (después se anuló)" : ""}`;
   }
 }
 
@@ -66,7 +68,7 @@ export function detalleControl(i: ItemControl): string | null {
   switch (i.tipo) {
     case "cobro": return [i.detalle, typeof x.medios === "string" ? x.medios.split(", ").map((m) => MEDIO[m] ?? m).join(" + ") : null].filter(Boolean).join(" · ") || null;
     case "anulacion": return [i.detalle ? `Motivo: ${i.detalle}` : null, x.pidio ? `pidió ${x.pidio}` : null, x.aprobo ? `aprobó ${x.aprobo}` : null].filter(Boolean).join(" · ") || null;
-    case "descuento": case "dejado_pasar": case "entrada_anulada": return i.detalle;
+    case "descuento": case "dejado_pasar": case "entrada_anulada": case "cobertura": return i.detalle;
     case "otro_dia": return i.detalle ? `Motivo: ${i.detalle}` : null;
     case "caja": return i.extra.evento === "cerro" && i.detalle?.includes(": ") ? i.detalle.split(": ").slice(1).join(": ") : null;
     case "precio": return x.antes != null ? `Antes ${pesos(x.antes)}` : null;
@@ -84,7 +86,7 @@ function valor(v: unknown): string {
 
 /** A dónde lleva tocar el movimiento (la ficha del socio o la pantalla del tema). */
 export function enlaceControl(i: ItemControl): string | null {
-  if (i.socio_id && ["cobro", "anulacion", "descuento", "otro_dia", "dejado_pasar", "entrada_anulada", "prestamo", "invitado"].includes(i.tipo)) return `/panel/socios/${i.socio_id}`;
+  if (i.socio_id && ["cobro", "anulacion", "descuento", "otro_dia", "dejado_pasar", "entrada_anulada", "prestamo", "invitado", "cobertura"].includes(i.tipo)) return `/panel/socios/${i.socio_id}`;
   if (i.tipo === "caja") return "/panel/caja/historial";
   if (i.tipo === "precio") return "/panel/planes";
   if (i.tipo === "configuracion") return "/panel/configuracion";

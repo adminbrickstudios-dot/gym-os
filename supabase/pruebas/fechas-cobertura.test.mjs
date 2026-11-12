@@ -123,7 +123,7 @@ test("alta en el pasado: la propuesta que ve el formulario es la de la misma fun
   const despues = (await t.q(`select ultimo_numero_socio as n from public.configuracion_gimnasio where gimnasio_id = $1`, [t.g]))[0]?.n;
   assert.equal(despues, antes, "el contador de socios no avanzó");
   // Recepción no lo usa.
-  await hasta(() => como(u.recepcion, () => t.q(`select public.periodo_alta_propuesto($1, $2, $3::date, $3::date)`, [t.g, t.ctx.planes.full, d])), /permiso/);
+  await como(u.recepcion, () => hasta(() => t.q(`select public.periodo_alta_propuesto($1, $2, $3::date, $3::date)`, [t.g, t.ctx.planes.full, d]), /permiso/));
 });
 
 test("alta en el pasado con un pago y fechas elegidas: cubre esas fechas", async () => {
