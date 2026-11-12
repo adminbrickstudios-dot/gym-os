@@ -77,5 +77,5 @@ test("un Interesado con el DNI de un socio vigente se avisa; uno ya convertido e
 
 test("solo el equipo de BRIK las ve: una cuenta común recibe error, no una lista vacía", async () => {
   for (const f of ["admin_almacenamiento()", "admin_dnis_repetidos()", "admin_alertas()"]) {
-    await como(uComun, () => t.falla(() => t.q(`select public.${f}`), /no puede hacer esto|Sin permiso|permission denied/i));
+    await como(uComun, () => t.falla(() => t.q(`select public.${f}`), /administradores de la plataforma|no puede hacer esto|Sin permiso|permission denied/i));
   }});
