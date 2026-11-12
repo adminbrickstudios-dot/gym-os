@@ -18,6 +18,9 @@
 name: Botones Temple
 
 on:
+  # Mientras este archivo no esté en main no se puede lanzar a mano: un push a carril/** o dia/** con [botones-temple] en el mensaje lo corre (origen ensayo-local, los 4 roles).
+  push:
+    branches: ["carril/**", "dia/**"]
   workflow_dispatch:
     inputs:
       origen:
@@ -50,13 +53,14 @@ env:
 
 jobs:
   armar:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[botones-temple]')
     runs-on: ubuntu-latest
     outputs:
       roles: ${{ steps.r.outputs.roles }}
     steps:
       - id: r
         env:
-          ROLES: ${{ inputs.roles }}
+          ROLES: ${{ inputs.roles || 'dueno,encargado,recepcion,profe' }}
         run: echo "roles=$(echo "$ROLES" | tr -d ' ' | jq -R -c 'split(",") | map(select(. == "dueno" or . == "encargado" or . == "recepcion" or . == "profe"))')" >> "$GITHUB_OUTPUT"
 
   botones:
@@ -95,7 +99,7 @@ jobs:
       - name: Base nueva
         run: scripts/db/local.sh nueva
       - name: Origen de ensayo (solo origen = ensayo-local)
-        if: inputs.origen == 'ensayo-local'
+        if: inputs.origen != 'produccion'
         run: |
           createdb -T gymos_pruebas gymos_origen
           node scripts/datos/sembrar-demo.mjs --url "postgres://postgres@localhost:5432/gymos_origen" --dominio localhost --socios 30
@@ -107,7 +111,7 @@ jobs:
         run: scripts/local/levantar.sh
       - name: Clonar la configuración a "[demo] Temple clon" (el origen solo se lee)
         env:
-          ORIGEN: ${{ inputs.origen }}
+          ORIGEN: ${{ inputs.origen || 'ensayo-local' }}
           SLUG_ORIGEN: ${{ inputs.slug_origen }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |

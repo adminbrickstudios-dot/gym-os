@@ -33,7 +33,9 @@ describe("workflow botones Temple (H4)", () => {
   const codigo = sinComentarios(yml);
   it("es manual y el recorrido va en modo mirar sobre el clon", () => {
     expect(yml).toContain("workflow_dispatch:");
-    expect(codigo).not.toMatch(/\n\s*(push|schedule|pull_request):/);
+    expect(codigo).not.toMatch(/\n\s*(schedule|pull_request):/);
+    // El push (mientras el archivo no esté en main) solo corre con la marca en el mensaje del commit.
+    expect(codigo).toContain("contains(github.event.head_commit.message, '[botones-temple]')");
     expect(codigo).toMatch(/botones\.mjs --slug "\$SLUG_CLON" --mirar/);
   });
   it("la base de producción solo entra como origen del clon, nunca como destino", () => {
