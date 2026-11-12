@@ -109,7 +109,7 @@ try {
   chequear(n === 0, "cubierto_hasta guardado = recalculado", "cubierto_hasta guardado no coincide con el recalculado");
   await p.goto(`${G}/panel/socios/${socioId}`);
   const ficha = await p.locator("main").innerText();
-  chequear(new RegExp(`Cubierto hasta\\s*${dm2(cambioHasta)}`, "i").test(ficha), `la ficha dice “cubierto hasta ${dm2(cambioHasta)}”`, `la ficha no dice el nuevo cubierto hasta; muestra: ${(ficha.match(/[\s\S]{0,40}ubierto[\s\S]{0,50}/gi) ?? ["nada"]).join(" | ").replace(/\s+/g, " ")}`);
+  chequear(new RegExp(`Cubierto hasta\\s*0?${dm(cambioHasta).replace("/", "/0?")}\\b`, "i").test(ficha), `la ficha dice “cubierto hasta ${dm(cambioHasta)}”`, `la ficha no dice el nuevo cubierto hasta; muestra: ${(ficha.match(/[\s\S]{0,40}ubierto[\s\S]{0,50}/gi) ?? ["nada"]).join(" | ").replace(/\s+/g, " ")}`);
 
   // Control: quién lo cambió y cuál era la propuesta.
   await p.goto(`${G}/panel/control?tipos=cobertura`);
