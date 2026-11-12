@@ -84,8 +84,8 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
             </div>
             {datosDePago && (
               <div className="tarjeta p-4 space-y-1" data-panel-socio-pago>
-                {vigente && a.vence_en && <p data-panel-pago-toca>Le toca pagar el {dia(a.vence_en)}{ficha.membresia?.precio != null ? ` · ${formatearPesos(ficha.membresia.precio)}` : ""}</p>}
-                {!vigente && a.vence_en && new Date(a.vence_en).getTime() <= Date.now() && <p data-panel-pago-desde>Debe desde el {dia(a.vence_en)}{debe ? ` · ${formatearPesos(debe)}` : ""}</p>}
+                {a.vence_en && new Date(a.vence_en).getTime() > Date.now() && <p data-panel-pago-toca>Le toca pagar el {dia(a.vence_en)}{ficha.membresia?.precio != null ? ` · ${formatearPesos(ficha.membresia.precio)}` : ""}</p>}
+                {a.vence_en && new Date(a.vence_en).getTime() <= Date.now() && <p data-panel-pago-desde>Debe desde el {dia(a.vence_en)}{debe ? ` · ${formatearPesos(debe)}` : ""}</p>}
                 {ficha.membresia
                   ? <p className="texto-suave" data-panel-pago-plan>Pagaría {ficha.membresia.plan}{ficha.membresia.precio != null ? `: ${formatearPesos(ficha.membresia.precio)}` : ""}</p>
                   : <p className="texto-suave" data-panel-pago-plan>Sin plan: se elige al cobrar.</p>}

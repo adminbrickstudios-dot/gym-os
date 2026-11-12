@@ -89,7 +89,7 @@ try {
   chequear(/Pagaría/.test(await d.locator("[data-panel-pago-plan]").innerText()), "dice qué plan pagaría", "no dice qué plan pagaría");
   await cerrarPanel(d);
   await abrirPanel(d, vencido);
-  const desde = await d.locator("[data-panel-pago-desde]").innerText().catch(() => "");
+  const desde = await d.locator("[data-panel-pago-desde]").innerText({ timeout: 5000 }).catch(async () => `(sin línea; el panel dice: ${(await d.locator("[data-panel-socio-lateral]").innerText().catch(() => "")).replace(/s+/g, " ").slice(0, 300)})`);
   chequear(/Debe desde el/.test(desde), `socio vencido: “${desde}”`, `socio vencido sin “Debe desde el” (dice: ${desde})`);
   await cerrarPanel(d);
 
