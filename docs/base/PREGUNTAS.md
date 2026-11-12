@@ -418,3 +418,17 @@ Todo lo nuevo de esta rama arranca **apagado** para cada gimnasio (Configuració
 - (decidido por defecto) **P-N6 · Resumen de la noche: campana sí, push no.** Se calcula al abrir Novedades (sin cron) y lo ve solo el dueño. El aviso al celular "a las 22 h" necesita algo que se ejecute solo a esa hora (un cron), y la regla es que nada que importe dependa de un cron: queda ⛔ hasta decidir si se acepta uno para avisos (no para plata ni accesos). Opción segura: sin push.
 - (decidido por defecto) **P-N7 · El origen de las altas cuenta solo las altas desde "Quiero ser socio".** Los interesados que dejan sus datos en "Probá una clase" ya tenían su origen (página, mostrador, recomendado) y no cambian. El origen no guarda nada del visitante: solo el canal y el socio. "Pagaron" = socios con cobertura (`cubierto_hasta` no nulo). Un link con `?o=` que no es uno de los cuatro no cuenta y no da error.
 - **Decidido por defecto (11/11, avisos de la puerta):** el aviso ROJO (no puede entrar) no se esconde solo a los 12 s como decía DISENO.md: se queda hasta que la recepción lo cierre o lo atienda (tope de 10 min), como pedía BASE-3 y prueba `vd-4`. Verde 5 s, amarillo y azul 8 s. Es lo más seguro para el mostrador: un rojo que desaparece puede hacer que nadie cobre. Si Mateo prefiere 12 s, cambia `ROJO_MS` y la prueba.
+
+## P-F32a · Borrador del alta de socio en la recepción (12/11)
+El borrador del alta de socio (FA-17) sigue apagado por defecto (interruptor "Borrador del alta de socio" en Funciones nuevas). Guarda DNI, teléfono y nombre en esa computadora por 7 días. ¿Se prende?
+- A) Seguir apagado (recomendada: la recepción es una computadora compartida y el borrador deja datos personales de un socio en el navegador; cada gimnasio lo prende si lo quiere).
+- B) Prendido para todos (se vuelve a ofrecer "¿Seguimos donde dejaste?" al abrir el alta).
+Decidido por defecto: A. Dónde se nota: `/panel/socios/nuevo`. Plan nuevo, rutina y evento guardan borrador siempre (no llevan datos personales de socios).
+Respuesta de Mateo: (vacío)
+
+## P-F32b · Realtime entre compus (regla 14 y 20 de FLUIDEZ, 12/11)
+Hoy lo que se hace en una compu aparece en las otras en menos de un minuto (sondeo de 20 a 60 s), no al instante. Hacerlo instantáneo es publicar tablas por Supabase Realtime y decidir quién las escucha (permisos).
+- A) Dejar el sondeo (recomendada: no abre ninguna tabla nueva al navegador; la plata y los permisos no cambian).
+- B) Realtime solo para pendientes, entradas y caja, escuchando un canal por gimnasio con una política que solo deje pasar al equipo de ese gimnasio (hay que escribirla y probarla con dos gimnasios).
+Decidido por defecto: A. Dónde se nota: campana, pendientes del menú, últimas entradas.
+Respuesta de Mateo: (vacío)
