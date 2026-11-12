@@ -2,12 +2,14 @@
 import { useActionState, useState, useTransition } from "react";
 import { formatearNumero, formatearPesos } from "@/lib/formato";
 import { useVersion } from "@/components/panel/useVersion";
-import { activarPlan, crearPlan, editarPlan, ordenarPlanes, type AjustesPlanes, type Servicio, type Stock } from "./acciones";
+import { activarPlan, crearPlan, editarPlan, ordenarPlanes, type AjustesPlanes, type EstadoNuevoPlan, type Servicio, type Stock } from "./acciones";
 import { Precios, resumenVariantes, type ListaPrecios } from "./Precios";
 import { AjustesDelPlan, resumenAjustes, VistaPrevia } from "./Ajustes";
 import { Servicios } from "./Servicios";
 import { Productos, type Producto } from "./Productos";
 import { Icono } from "@/components/ui/Icono";
+import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
+import { borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
 
 export type Plan = { plan_id: string; tipo: string; nombre: string; descripcion: string | null; activo: boolean; duracion_meses: number | null;
   cantidad_clases: number | null; validez_dias: number | null; max_ingresos_semana: number | null; hora_desde: string | null; hora_hasta: string | null;
@@ -137,54 +139,61 @@ function NuevoPlan() {
   const [meses, setMeses] = useState("1");
   const [abierto, setAbierto] = useState(false);
   // Creado: se cierra el formulario y el plan aparece en su lista.
-  const [estado, accion, guardando] = useActionState(async (prev: { error?: string; ok?: number }, f: FormData) => {
+  const [estado, accion, guardando] = useActionState(async (prev: EstadoNuevoPlan, f: FormData) => {
     const r = await crearPlan(prev, f);
-    if (r.ok) { setAbierto(false); setTipo("membresia"); setMeses("1"); }
+    if (r.ok) { borrarBorradorDe("plan-nuevo"); setAbierto(false); setTipo("membresia"); setMeses("1"); }
     return r;
   }, {});
+  // Regla 7: React 19 vacía el formulario después de cada envío; si falló, vuelve lo que se escribió (y lo elegido).
+  const v = (c: string) => estado.valores?.[c];
+  const errorEn = (c: string) => (estado.error && estado.campo === c ? estado.error : null);
   if (!abierto) return <button type="button" className="boton boton-principal" onClick={() => setAbierto(true)}><Icono nombre="mas" /> Nuevo plan</button>;
   return (
     <form key={estado.ok} action={accion} className="tarjeta p-5 grid sm:grid-cols-2 gap-3">
+      <BorradorAutomatico clave="plan-nuevo" />
       <p className="titulo text-2xl sm:col-span-2"><Icono nombre="mas" /> Nuevo plan</p>
+      <input type="hidden" name="tipo" value={tipo} />
+      {tipo === "membresia" && <input type="hidden" name="duracion_meses" value={meses} />}
       <div className="sm:col-span-2 flex flex-wrap gap-2">
         {Object.entries(TIPO).map(([k, v]) => (
           <label key={k} className={`boton !min-h-11 cursor-pointer ${tipo === k ? "!border-[var(--acento)]" : ""}`}>
-            <input type="radio" name="tipo" value={k} checked={tipo === k} onChange={() => setTipo(k)} className="sr-only" /><Icono nombre={v.emoji} /> {v.titulo.replace(/s$/, "").replace("Packs", "Pack")}
+            <input type="radio" value={k} checked={tipo === k} onChange={() => setTipo(k)} className="sr-only" /><Icono nombre={v.emoji} /> {v.titulo.replace(/s$/, "").replace("Packs", "Pack")}
           </label>
         ))}
       </div>
-      <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required className="campo" placeholder={tipo === "pack" ? "Pack 8 clases" : tipo === "pase_diario" ? "Pase diario" : "Pase libre"} /></label>
-      <label className="space-y-1"><span className="etiqueta">Precio</span><input name="precio" required inputMode="decimal" className="campo" placeholder="$" /></label>
+      <label className="space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required autoFocus className="campo" defaultValue={v("nombre")} placeholder={tipo === "pack" ? "Pack 8 clases" : tipo === "pase_diario" ? "Pase diario" : "Pase libre"} /></label>
+      <label className="space-y-1"><span className="etiqueta">Precio</span><input name="precio" required inputMode="decimal" className="campo" placeholder="$" defaultValue={v("precio")} aria-invalid={errorEn("precio") ? true : undefined} aria-describedby={errorEn("precio") ? "error-precio" : undefined} />
+        {errorEn("precio") && <span id="error-precio" role="alert" className="block text-sm" style={{ color: "var(--rojo)" }}>{errorEn("precio")}</span>}</label>
       {tipo === "membresia" && (
         <fieldset className="space-y-1 sm:col-span-2"><legend className="etiqueta mb-1">Cada cuánto paga</legend>
           <div className="flex flex-wrap gap-2">
             {Object.entries(DURACION).map(([m, nombre]) => (
               <label key={m} className={`boton !min-h-11 cursor-pointer ${meses === m ? "!border-[var(--acento)]" : ""}`}>
-                <input type="radio" name="duracion_meses" value={m} checked={meses === m} onChange={() => setMeses(m)} className="sr-only" />{nombre}
+                <input type="radio" value={m} checked={meses === m} onChange={() => setMeses(m)} className="sr-only" />{nombre}
               </label>
             ))}
           </div>
           {meses !== "1" && <p className="text-sm texto-tenue">El precio es el total de los {meses} meses; una cuota cubre los {meses}.</p>}
         </fieldset>
       )}
-      {tipo === "membresia" && <label className="space-y-1"><span className="etiqueta">Veces por semana (vacío = libre)</span><input name="max_ingresos_semana" type="number" min={1} max={7} className="campo" /></label>}
+      {tipo === "membresia" && <label className="space-y-1"><span className="etiqueta">Veces por semana (vacío = libre)</span><input name="max_ingresos_semana" type="number" min={1} max={7} className="campo" defaultValue={v("max_ingresos_semana")} /></label>}
       {tipo === "membresia" && (
         <fieldset className="space-y-1"><legend className="etiqueta mb-1">Horario (vacío = todo el día)</legend>
-          <div className="flex items-center gap-2"><input name="hora_desde" type="time" aria-label="Horario desde" className="campo" /><span>a</span><input name="hora_hasta" type="time" aria-label="Horario hasta" className="campo" /></div>
+          <div className="flex items-center gap-2"><input name="hora_desde" type="time" aria-label="Horario desde" className="campo" defaultValue={v("hora_desde")} /><span>a</span><input name="hora_hasta" type="time" aria-label="Horario hasta" className="campo" defaultValue={v("hora_hasta")} /></div>
         </fieldset>
       )}
       {tipo === "membresia" && (
         <fieldset className="space-y-1"><legend className="etiqueta mb-1">Matrícula (vacío = sin matrícula)</legend>
           <div className="flex flex-wrap items-center gap-3">
-            <input name="matricula" inputMode="decimal" placeholder="$" aria-label="Matrícula" className="campo !w-40" />
-            <label className="flex items-center gap-2 min-h-11"><input type="checkbox" name="matricula_anual" className="w-5 h-5" />Cada año</label>
+            <input name="matricula" inputMode="decimal" placeholder="$" aria-label="Matrícula" className="campo !w-40" defaultValue={v("matricula")} />
+            <label className="flex items-center gap-2 min-h-11"><input type="checkbox" name="matricula_anual" className="w-5 h-5" defaultChecked={v("matricula_anual") === "on"} />Cada año</label>
           </div>
         </fieldset>
       )}
-      {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Cantidad de clases</span><input name="cantidad_clases" type="number" min={1} required className="campo" /></label>}
-      {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Vence a los (días)</span><input name="validez_dias" type="number" min={1} defaultValue={60} className="campo" /></label>}
-      <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Descripción (se ve en la página)</span><input name="descripcion" className="campo" /></label>
-      {estado.error && <p role="alert" className="pildora pildora-rojo sm:col-span-2"><Icono nombre="alerta" /> {estado.error}</p>}
+      {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Cantidad de clases</span><input name="cantidad_clases" type="number" min={1} required className="campo" defaultValue={v("cantidad_clases")} /></label>}
+      {tipo === "pack" && <label className="space-y-1"><span className="etiqueta">Vence a los (días)</span><input name="validez_dias" type="number" min={1} defaultValue={v("validez_dias") ?? 60} className="campo" /></label>}
+      <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Descripción (se ve en la página)</span><input name="descripcion" className="campo" defaultValue={v("descripcion")} /></label>
+      {estado.error && !estado.campo && <p role="alert" className="pildora pildora-rojo sm:col-span-2"><Icono nombre="alerta" /> {estado.error}</p>}
       <div className="flex gap-2 sm:col-span-2"><button type="submit" disabled={guardando} className="boton boton-principal"><Icono nombre="ok" /> Crear</button><button type="button" className="boton" onClick={() => setAbierto(false)}>Cerrar</button></div>
     </form>
   );

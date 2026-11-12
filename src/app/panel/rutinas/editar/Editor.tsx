@@ -6,6 +6,7 @@ import { archivarRutina, guardarRutina, type ItemRutina } from "../acciones";
 import { nombreGrupo, type Ejercicio } from "../tipos";
 import { Icono } from "@/components/ui/Icono";
 import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
+import { BorradorDeEstado, borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
 
 type Item = ItemRutina & { clave: number };
 let siguiente = 1;
@@ -26,17 +27,25 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
   const [original] = useState(huella);
   const sinGuardar = huella !== original && guardada !== huella;
   useCambiosSinGuardar(sinGuardar);
+  // Regla 7: lo escrito queda como borrador en el dispositivo (7 días) hasta que se guarda.
+  const claveBorrador = `rutina-${id ?? "nueva"}`;
+  const estadoBorrador = { nombre, descripcion, dias, items: items.map(({ dia, ejercicio_id, series, repeticiones, nota }) => ({ dia, ejercicio_id, series, repeticiones, nota })) };
+  const traerBorrador = (b: typeof estadoBorrador) => {
+    setNombre(b.nombre); setDescripcion(b.descripcion); setDias(Math.max(1, b.dias));
+    setItems(b.items.map((x) => ({ ...x, clave: siguiente++ })));
+  };
   const cambiar = (clave: number, cambio: Partial<Item>) => setItems((xs) => xs.map((x) => (x.clave === clave ? { ...x, ...cambio } : x)));
   const sumar = (dia: number, ejercicio_id: string) => setItems((xs) => [...xs, { clave: siguiente++, dia, ejercicio_id, series: 3, repeticiones: "12" }]);
   const guardar = () => empezar(async () => {
     const orden = [...items].sort((a, b) => a.dia - b.dia || a.clave - b.clave).map((x) => ({ dia: x.dia, ejercicio_id: x.ejercicio_id, series: x.series, repeticiones: x.repeticiones, nota: x.nota ?? null }));
     const r = await guardarRutina(id, nombre, descripcion, orden);
-    if (r.error) setError(r.error); else { setGuardada(huella); router.push("/panel/rutinas"); }
+    if (r.error) setError(r.error); else { setGuardada(huella); borrarBorradorDe(claveBorrador); router.push("/panel/rutinas"); }
   });
   return (
     <div className="space-y-8" data-editor-rutina>
+      <BorradorDeEstado clave={claveBorrador} valor={estadoBorrador} aplicar={traerBorrador} />
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="space-y-1"><span className="etiqueta">Nombre</span><input className="campo" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={80} placeholder="Fuerza 3 días" /></label>
+        <label className="space-y-1"><span className="etiqueta">Nombre</span><input className="campo" autoFocus={!id} value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={80} placeholder="Fuerza 3 días" /></label>
         <label className="space-y-1"><span className="etiqueta">Para quién o para qué (opcional)</span><input className="campo" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} maxLength={300} placeholder="Principiantes, hipertrofia…" /></label>
       </div>
       {Array.from({ length: dias }, (_, i) => i + 1).map((dia) => {

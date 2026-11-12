@@ -8,6 +8,7 @@ import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type
 import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
 import { Buscador } from "./Buscador";
 import { Icono } from "@/components/ui/Icono";
+import { LogoImagen } from "@/components/ui/LogoImagen";
 
 type Props = {
   gimnasio: string;
@@ -104,8 +105,7 @@ function Salir() {
 
 function Logo({ url, tam }: { url?: string | null; tam: string }) {
   if (!url) return null;
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt="" className={`${tam} w-auto flex-none rounded-lg object-contain`} />;
+  return <LogoImagen src={url} className={`${tam} w-auto flex-none rounded-lg object-contain`} />;
 }
 
 export function Navegacion(props: Props) {

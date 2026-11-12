@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Regla 18 de FLUIDEZ: con el teclado abierto la página se achica (no se tapa con él): el botón de guardar y la barra de abajo quedan a la vista.
+  interactiveWidget: "resizes-content",
   themeColor: "#F4F5F6",
 };
 

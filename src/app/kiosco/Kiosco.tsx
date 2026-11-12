@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { colorVar } from "@/components/panel/Estado";
 import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
-import QRCode from "qrcode";
 import { Icono } from "@/components/ui/Icono";
 import { SIN_CONEXION, valorDelCampo } from "./campo";
 
@@ -33,7 +32,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
     const traer = async () => {
       const r = await qrDeLaTablet();
       if (!vivo) return;
-      if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await QRCode.toString(r.codigo, { type: "svg", margin: 1 })); }
+      if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await (await import("qrcode")).default.toString(r.codigo, { type: "svg", margin: 1 })); }
       t = setTimeout(traer, r.vence_en ? Math.max(1000, Date.parse(r.vence_en) - Date.now() - 1500) : 5000);
     };
     void traer();

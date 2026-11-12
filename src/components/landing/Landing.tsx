@@ -10,6 +10,7 @@ import { resumirHorarios, textoCierre, type Agenda } from "@/lib/horarios";
 import { conTextosPorDefecto } from "@/lib/landing-defaults";
 import { FormProbar } from "./FormProbar";
 import { Foto } from "./Foto";
+import { LogoImagen } from "@/components/ui/LogoImagen";
 import { Icono } from "@/components/ui/Icono";
 import { agruparClases, estiloTipografia } from "@/lib/landing-estilo";
 
@@ -34,8 +35,7 @@ function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
   const url = urlMarca(marca.logo_path);
   const tam = grande ? "size-20 text-3xl rounded-[var(--radio)]" : "size-10 text-base rounded-[var(--radio-campo)]";
   if (url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={`Logo de ${marca.nombre}`} className={`${tam} !w-auto max-w-40 object-contain`} />;
+    return <LogoImagen src={url} alt={`Logo de ${marca.nombre}`} className={`${tam} !w-auto max-w-40 object-contain`} ancho={160} alto={grande ? 80 : 40} prioridad />;
   }
   return (
     <span aria-hidden className={`${tam} grid place-items-center titulo`}
@@ -367,8 +367,7 @@ function Eventos({ eventos, whatsapp }: { eventos: EventoPublico[]; whatsapp: st
           {eventos.map((e) => (
             <li key={e.evento_id} className="tarjeta p-6 space-y-2" data-evento-pagina={e.nombre}>
               {e.flyer && urlFotoProducto(e.flyer) && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} className="w-full aspect-[4/3] rounded-[var(--radio)] object-cover" loading="lazy" decoding="async" />
+                <div className="relative w-full aspect-[4/3] rounded-[var(--radio)] overflow-hidden"><Foto src={urlFotoProducto(e.flyer)!} alt={`Flyer de ${e.nombre}`} sizes="(min-width: 640px) 50vw, 100vw" /></div>
               )}
               <p className="titulo text-2xl">{e.nombre}</p>
               <p className="texto-suave first-letter:uppercase">{cuando(e.inicio, e.zona)}{e.fechas && e.fechas.length > 1 ? ` · y ${e.fechas.length - 1} fecha${e.fechas.length > 2 ? "s" : ""} más` : ""}</p>

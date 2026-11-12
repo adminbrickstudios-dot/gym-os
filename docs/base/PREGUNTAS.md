@@ -420,3 +420,17 @@ Todo lo nuevo de esta rama arranca **apagado** para cada gimnasio (Configuració
 - **Decidido por defecto (11/11, avisos de la puerta):** el aviso ROJO (no puede entrar) no se esconde solo a los 12 s como decía DISENO.md: se queda hasta que la recepción lo cierre o lo atienda (tope de 10 min), como pedía BASE-3 y prueba `vd-4`. Verde 5 s, amarillo y azul 8 s. Es lo más seguro para el mostrador: un rojo que desaparece puede hacer que nadie cobre. Si Mateo prefiere 12 s, cambia `ROJO_MS` y la prueba.
 - (decidido por defecto) **P-U1 · Un solo interruptor para las funciones nuevas (migración `20261112030000`).** Había dos: la tabla de N5 y una lista en `configuracion_gimnasio` (borrador del alta, datos del panel, horarios pico). Ahora vale solo `funciones_nuevas_gimnasio`, con una sola pantalla: Configuración → Funciones nuevas (las 7 funciones; Reglas ya no tiene la suya). Lo que algún gimnasio tuviera prendido en la lista vieja se pasó tal cual (hoy: nada, todo apagado) y la lista quedó vacía y sin uso. Se borraron `funciones_nuevas_gimnasio(uuid)` y `guardar_funcion_nueva(...)`: se lee con `funciones_nuevas_activas` y se cambia con `cambiar_funcion_nueva`, solo el dueño (como P-N1). Cada cambio queda en el historial de Configuración. **Punto de extensión:** el vuelto en efectivo (rama `carril/z-resto`, `configuracion_gimnasio.mostrar_vuelto_efectivo`) sigue con su interruptor propio; para pasarlo al único basta sumar su objeto a `privado.funciones_nuevas_catalogo()` (migración nueva) y que Cobrar pregunte por la clave. No se tocó.
 - **Decidido por defecto (11/11, F9.4 proxy):** el cambio del proxy para servir las páginas públicas desde caché sin auth (`src/lib/sitio-publico.ts`, probado en vitest) NO se aplica todavía. Temple Gym ya cobra y su dirección de alta (`/g/templegym1/hacete-socio`) depende del proxy; tocarlo sin el ensayo (N0, que espera el proyecto "ensayo" de Mateo) es apostar el alta del cliente. Se aplica después de probarlo en el ensayo. Mientras tanto la landing tiene su caché por gimnasio (`revalidateTag`) y mide 91 a 93 en Lighthouse móvil.
+
+## P-F32a · Borrador del alta de socio en la recepción (12/11)
+El borrador del alta de socio (FA-17) sigue apagado por defecto (interruptor "Borrador del alta de socio" en Funciones nuevas). Guarda DNI, teléfono y nombre en esa computadora por 7 días. ¿Se prende?
+- A) Seguir apagado (recomendada: la recepción es una computadora compartida y el borrador deja datos personales de un socio en el navegador; cada gimnasio lo prende si lo quiere).
+- B) Prendido para todos (se vuelve a ofrecer "¿Seguimos donde dejaste?" al abrir el alta).
+Decidido por defecto: A. Dónde se nota: `/panel/socios/nuevo`. Plan nuevo, rutina y evento guardan borrador siempre (no llevan datos personales de socios).
+Respuesta de Mateo: (vacío)
+
+## P-F32b · Realtime entre compus (regla 14 y 20 de FLUIDEZ, 12/11)
+Hoy lo que se hace en una compu aparece en las otras en menos de un minuto (sondeo de 20 a 60 s), no al instante. Hacerlo instantáneo es publicar tablas por Supabase Realtime y decidir quién las escucha (permisos).
+- A) Dejar el sondeo (recomendada: no abre ninguna tabla nueva al navegador; la plata y los permisos no cambian).
+- B) Realtime solo para pendientes, entradas y caja, escuchando un canal por gimnasio con una política que solo deje pasar al equipo de ese gimnasio (hay que escribirla y probarla con dos gimnasios).
+Decidido por defecto: A. Dónde se nota: campana, pendientes del menú, últimas entradas.
+Respuesta de Mateo: (vacío)
