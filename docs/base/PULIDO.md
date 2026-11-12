@@ -413,3 +413,57 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 | El tema por usuario solo lee la cookie | ✅ pulido-roto (dispositivo nuevo sin cookie) |
 | La hora del cierre por WhatsApp sale en la zona de la compu | 🟡 usa la zona del gimnasio; sin prueba automática (depende de la zona de la compu que corre la prueba) |
 | Soporte reconocido por el nombre "Soporte BRIK" | 🟡 permisos: no se arregló, queda en `PREGUNTAS.md` con la opción más segura |
+
+## Estado de Z2, Z3 y Z4 (11/11, rama `carril/z-iconos-textos`)
+
+Pruebas: `src/components/ui/iconos-en-pantallas.test.ts` (vitest, lee todo `src/`) y `scripts/e2e/z-iconos-textos.mjs`. Corridas en Actions: `z-iconos-textos` en verde en 43133690159 (10 pasos); `pulido-roto` y `vd-28` (memoria al volver tras cobrar) en verde en 43127384846; `botones` sin fallas en 43128193952. ✅ = arreglado y con prueba; 🟡 = arreglado sin prueba automática, o no hecho, con el motivo.
+
+### Z2 · Íconos
+| Punto | Estado |
+|---|---|
+| Ningún ícono vacío (`icono=""`, `emoji: ""`, `Mensaje` aviso/info, Tarjeta, Chip, Boton, Vacio, retención, control, comandos) | ✅ vitest (nombres inexistentes y vacíos fallan) |
+| Ningún emoji crudo en `.tsx` ni en datos `.ts` (mensajes del socio, ingreso, intentar, Recuperar, error, Encabezado) | ✅ vitest + e2e pasos 5 a 10 (6 pantallas del panel) |
+| Ningún "✓ ✕ ＋ ⋯ ! •" de texto como ícono (unos 70 lugares) | ✅ vitest + e2e |
+| `sistema` donde la base manda emoji (Tareas, Resumen, avisos de la puerta, últimas entradas, Vacio, Aviso/Marco, Vencen hoy) | 🟡 puesto; sin prueba que fuerce un emoji de la base |
+| La Bienvenida del socio mostraba el nombre del ícono como texto | 🟡 corregido; sin prueba de pantalla |
+| Textos de WhatsApp y push (`caja.ts`, `recibo.ts`, `push-acciones.ts`) siguen con emoji | 🟡 es texto plano que no puede llevar SVG; lista de excepciones en el test |
+| Íconos de `<option>` (svg dentro de option) | 🟡 no revisado |
+
+### Z3 · [FLUIDEZ]
+| Punto | Estado |
+|---|---|
+| "Está tardando más de lo normal…" a los 10 s en `BotonAccion` | 🟡 hecho; sin prueba (10 s) y **sin Reintentar** a propósito: ver `PREGUNTAS.md` |
+| El atrás del celular cierra Ctrl+K y el panel lateral, sin dejar una entrada de más | ✅ e2e pasos 1 y 2 (Ctrl+K). Panel lateral 🟡 sin prueba |
+| El atrás no cierra Cobrar ni la Entrada | 🟡 apagado a propósito (`Hoja atras={false}`): `PREGUNTAS.md` |
+| Menú del celular con Esc y atrás | ✅ ya estaba hecho (Navegacion.tsx); el documento estaba viejo |
+| Esc, X y afuera no cierran Cobrar mientras cobra | ✅ ya estaba (H7); sin prueba automática |
+| Cambios sin guardar frenan también los links del menú (Configuración, Tu página, rutinas, alta de socio con Cancelar) | ✅ e2e pasos 3 y 4 en Configuración; las otras 🟡 sin prueba |
+| Borrador de formularios largos (alta de socio, rutinas) | 🟡 no hecho: solo avisa antes de perder; guardar el borrador en el navegador falta |
+| Panel lateral: `<Link>` en vez de recargar, "Cargando…" y Reintentar | 🟡 hecho; sin prueba |
+| "Aprobando…" / "Rechazando…" en Transferencias; Abrir / Anotar / Cerrar caja con su texto | 🟡 hecho; sin prueba |
+| Enter envía en "Para revisar" | 🟡 hecho; sin prueba |
+| "Entrada de Juan anulada" al deshacer en la Ventana | 🟡 hecho; sin prueba (hace falta anotar una entrada) |
+| Kiosco dice "Buscando…" | 🟡 hecho; sin prueba |
+| Vender: `Boton` declarado afuera del componente (no pierde el foco) | 🟡 hecho; sin prueba |
+| En vivo: caja, transferencias y mensajes (cada 30 s con la pestaña a la vista) y campana (cada 60 s) | 🟡 hecho con polling, no con Realtime; sin prueba |
+| Esperas "Buscando…" en la Entrada y loading.tsx de Configuración y Asistente | ✅ ya estaban; el documento estaba viejo |
+| Errores al lado del campo, memoria de navegación en Control/Resultado/Mensajes/Avisos/Gastos/Interesados, paginar Retención y Super admin, consultas en fila, 22 consultas de la ficha, una consulta por plan, Deshacer de 5 s en Quitar gasto y Dejar de repetir, regla 16 (red y CPU lentas), 17, 18 | 🟡 no hechos: cambios grandes (origen.ts es de otro carril, la ficha y la paginación piden tocar la base) |
+
+### Z4 · [TEXTO]
+| Punto | Estado |
+|---|---|
+| "Faltan -$500" cuando sobra → "Sobran $500" (Cobrar y Vender) | 🟡 hecho; sin prueba |
+| "Cobrado $25.000" ahora dice "a Lucía" (nombre de pila) | 🟡 hecho; los e2e que buscan "Cobrado $…" siguen valiendo (coincide por texto parcial); sin prueba nueva |
+| "Aprobada · Juan" / "Rechazada" ahora con el monto | 🟡 hecho; sin prueba |
+| "Cumple 34" → "Cumple 34 años" | 🟡 hecho; sin prueba |
+| Códigos internos en el panel lateral, "Prometieron pagar", "Día siguiente" solo si no es hoy, estados del historial del socio, "¡Bienvenido/a", título de la pestaña del socio, ícono y título del push | ✅ ya estaban arreglados; el documento estaba viejo |
+| `error.message` crudo de Supabase al socio (ingreso, vincular, mandar código, subir comprobante y foto) → texto humano y el detalle al log (`src/lib/errores-humanos.ts`) | 🟡 hecho; sin prueba. Quedan `error.message` en la landing, la página, el kiosco, super admin y varias acciones del panel: muchos son mensajes en español de la base, hay que revisarlos uno por uno |
+| "Tu rol no tiene acceso" ahora dice el rol y a quién pedirlo; se sacó "lo da el dueño desde Configuración" (era falso) | 🟡 solo texto, no cambia permisos; las e2e de permisos buscan "no tiene acceso", que sigue en el texto |
+| El aviso sin conexión le habla al socio distinto que a la recepción | 🟡 hecho; sin prueba |
+| Kiosco: "EMERGENCIA activa" en mayúsculas | 🟡 hecho ("Emergencia: pasá por la puerta, la recepción te abre"); sin prueba |
+| Un solo nombre por pantalla (Planes y servicios/precios, Retención, Clases, Tareas, Novedades) | 🟡 no hecho: `origen.ts` y el menú son de otro carril y `vd-11` fija "Planes y servicios" |
+| Textos por defecto de la landing que suenan a plantilla | 🟡 no hecho: `super-f9` y `web-p8b` buscan esas frases; hay que cambiar texto y prueba juntos |
+| "Pase de prueba gratis" le habla al socio en la pantalla de la recepción, "Elegir los N del filtro", resto de los [TEXTO] de Retención, Equipo (encargado ve "todo menos configuración"), Super admin (suspendido/pausado) | 🟡 no revisados en esta tanda |
+
+### Sin tocar a propósito
+Nada de plata ni de permisos: los motivos y la opción más segura están en `PREGUNTAS.md` (sección "Íconos, fluidez y textos"). No se agregaron migraciones ni íconos nuevos en `Icono.tsx`.
