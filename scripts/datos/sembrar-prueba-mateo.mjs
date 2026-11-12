@@ -116,7 +116,7 @@ try {
       const desde = await medianoche(sumarDias(hoy, dDesde)), hasta = await medianoche(sumarDias(hoy, dHasta));
       const [{ id: v }] = await q(`insert into public.ventas (gimnasio_id, sede_id, socio_id, estado, origen, confirmada_en, creado_en) values ($1,$2,$3,'confirmada','recepcion',$4,$4) returning id`, [g, sede, s, desde]);
       const [{ id: it }] = await q(`insert into public.venta_items (gimnasio_id, venta_id, tipo, plan_id, suscripcion_id, descripcion, precio_unitario) values ($1,$2,'cuota',$3,$4,'Cuota mensual',$5) returning id`, [g, v, planes.full, su, precioFull]);
-      await q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, aprobado_en, creado_en) values ($1,$2,$3,$4,'aprobado',$5,$5)`, [g, v, ["efectivo", "transferencia", "debito"][m % 3], precioFull, desde]);
+      await q(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, aprobado_en, creado_en) values ($1,$2,$3,$4,'aprobado',$5,$5)`, [g, v, ["transferencia", "debito", "transferencia"][m % 3], precioFull, desde]);
       await q(`insert into public.coberturas (gimnasio_id, suscripcion_id, socio_id, desde, hasta, origen, venta_item_id) values ($1,$2,$3,$4,$5,'pago',$6)`, [g, su, s, desde, hasta, it]);
     }
     // Ingresos de los últimos días mientras estuvo cubierto.
