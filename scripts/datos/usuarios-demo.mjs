@@ -50,7 +50,14 @@ await db.connect();
 const q = async (s, p) => (await db.query(s, p)).rows;
 const supabase = createClient(supabaseUrl, servicio, { auth: { persistSession: false, autoRefreshToken: false } });
 
-for (const u of USUARIOS_DEMO) {
+// H4: con --clon <slug> se suman los logins del equipo de un `[demo]` clonado de la configuración de un gimnasio real
+// (scripts/datos/clonar-config-temple.mjs): clon-<rol>@ejemplo.invalid. Sin socios: el clon no tiene los del original.
+const slugClon = arg("clon", null);
+const USUARIOS_CLON = slugClon ? [["duena", "Dueña clon", "dueno"], ["encargado", "Encargado clon", "encargado"], ["recepcion", "Recepción clon", "recepcion"], ["profe", "Profe clon", "profe"]]
+  .map(([m, nombre, rol]) => ({ email: `clon-${m}@ejemplo.invalid`, nombre, gimnasio: slugClon, rol })) : [];
+if (slugClon && !/^demo/.test(slugClon)) { console.error("--clon: el slug tiene que empezar con 'demo' (nunca un gimnasio real)."); process.exit(1); }
+
+for (const u of slugClon ? USUARIOS_CLON : USUARIOS_DEMO) {
   if (u.admin && sinAdmin) continue;
   let [existente] = await q(`select id from auth.users where lower(email) = lower($1)`, [u.email]).catch(() => []);
   let usuarioId = existente?.id;
@@ -83,4 +90,4 @@ for (const u of USUARIOS_DEMO) {
 await db.end();
 // BASE-8a: el log de Actions es público: en el servidor de integración nunca se imprime la contraseña.
 console.log(`Usuarios demo listos (${process.env.GITHUB_ACTIONS ? "contraseña: la que escribiste al correr el workflow" : `contraseña: ${contrasena}`}):`);
-for (const u of USUARIOS_DEMO.filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);
+for (const u of (slugClon ? USUARIOS_CLON : USUARIOS_DEMO).filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);

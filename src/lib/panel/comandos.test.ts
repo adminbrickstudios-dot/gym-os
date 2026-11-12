@@ -107,7 +107,10 @@ describe("accionesPara", () => {
   it("nuevo socio, turnos, ficha y vender van a su pantalla", () => {
     expect(accionesPara("nuevo socio", interpretar("nuevo socio"), todos, [])[0]).toMatchObject({ tipo: "ir", ruta: "/panel/socios/nuevo" });
     expect(accionesPara("abrir turno", interpretar("abrir turno"), todos, [])[0]).toMatchObject({ ruta: "/panel/caja", titulo: "Abrir turno" });
-    expect(accionesPara("cerrar turno", interpretar("cerrar turno"), todos, [])[0]).toMatchObject({ ruta: "/panel/caja", titulo: "Cerrar turno" });
+    expect(accionesPara("cerrar turno", interpretar("cerrar turno"), todos, [])[0]).toMatchObject({ ruta: "/panel/caja?accion=cerrar", titulo: "Cerrar turno" });
+    // VD-29D: "nuevo socio María" lleva el nombre al alta; algo que no parece un nombre no se manda.
+    expect(accionesPara("nuevo socio María", interpretar("nuevo socio María"), todos, [])[0]).toMatchObject({ ruta: "/panel/socios/nuevo?nombre=Mar%C3%ADa" });
+    expect(accionesPara("nuevo socio 123<x>", interpretar("nuevo socio 123<x>"), todos, [])[0]).toMatchObject({ ruta: "/panel/socios/nuevo" });
     expect(accionesPara("ficha juan", interpretar("ficha juan"), todos, [juan])[0]).toMatchObject({ ruta: "/panel/socios/s1" });
     const v = accionesPara("vender juan", interpretar("vender juan"), todos, [juan]);
     expect(v.map((x) => (x as { ruta: string }).ruta)).toEqual(["/panel/vender?socio=s1", "/panel/vender"]);

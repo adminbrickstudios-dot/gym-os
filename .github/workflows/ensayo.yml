@@ -1,0 +1,62 @@
+# N0 · El ENSAYO: las migraciones se aplican primero en una base de ensayo (un segundo proyecto de Supabase llamado
+# "ensayo"), se prueban ahí con la vista previa de Vercel, y recién después van a producción (workflow "Base de datos").
+# A mano: Actions → "Ensayo" → Run workflow. Nunca corre solo.
+#
+#   prevuelo   corre las migraciones pendientes en una transacción que se revierte
+#   aplicar    prevuelo + aplica + chequeos del proyecto contra la base de ensayo
+#   chequeos   solo los chequeos (RLS, permisos, search_path…)
+#
+# Necesita el secreto SUPABASE_ENSAYO_DB_URL (Settings → Secrets and variables → Actions → Secrets). Si falta, el
+# workflow falla con los pasos para crearlo. Este workflow NUNCA usa SUPABASE_DB_URL (producción): y se frena si el
+# secreto de ensayo apunta al mismo servidor que producción. Ver docs/base/ENSAYO.md.
+name: Ensayo
+
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: "Qué hacer en la base de ENSAYO"
+        type: choice
+        options: [prevuelo, aplicar, chequeos]
+        default: prevuelo
+
+concurrency:
+  group: ensayo
+  cancel-in-progress: false
+
+jobs:
+  ensayo:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ENSAYO_DB_URL: ${{ secrets.SUPABASE_ENSAYO_DB_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Falta el secreto del ensayo
+        if: env.SUPABASE_ENSAYO_DB_URL == ''
+        run: |
+          echo "::error::Falta el secreto SUPABASE_ENSAYO_DB_URL: todavía no hay base de ENSAYO. Pasos para Mateo: (1) en supabase.com crear un segundo proyecto, gratis, llamado 'ensayo' (misma región que el de producción); (2) Project Settings → Database → Connection string (la de sesión, puerto 5432) y poner la contraseña de ese proyecto; (3) GitHub → Settings → Secrets and variables → Actions → pestaña Secrets → New repository secret: nombre SUPABASE_ENSAYO_DB_URL, valor esa dirección; (4) volver a correr este workflow con accion = prevuelo. Detalle en docs/base/ENSAYO.md."
+          exit 1
+      - name: El ensayo no puede ser producción
+        env:
+          PRODUCCION: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          host() { echo "$1" | sed -E 's#^[a-z]+://[^@]*@##; s#[:/?].*$##'; }
+          if [ -n "$PRODUCCION" ] && { [ "$SUPABASE_ENSAYO_DB_URL" = "$PRODUCCION" ] || [ "$(host "$SUPABASE_ENSAYO_DB_URL")" = "$(host "$PRODUCCION")" ]; }; then
+            echo "::error::SUPABASE_ENSAYO_DB_URL apunta al mismo servidor que SUPABASE_DB_URL (producción). El ensayo tiene que ser OTRO proyecto de Supabase. No se hace nada."
+            exit 1
+          fi
+          echo "El ensayo es otra base que producción."
+      - name: Pre-vuelo (transacción que se revierte)
+        if: inputs.accion == 'prevuelo' || inputs.accion == 'aplicar'
+        run: node scripts/db/aplicar.mjs --prevuelo --url "$SUPABASE_ENSAYO_DB_URL"
+      - name: Aplicar migraciones en el ensayo
+        if: inputs.accion == 'aplicar'
+        run: node scripts/db/aplicar.mjs --url "$SUPABASE_ENSAYO_DB_URL"
+      - name: Chequeos del proyecto contra el ensayo
+        if: inputs.accion == 'aplicar' || inputs.accion == 'chequeos'
+        run: node scripts/chequeos.mjs --url "$SUPABASE_ENSAYO_DB_URL"

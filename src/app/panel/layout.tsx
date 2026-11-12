@@ -90,6 +90,9 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   const estadoG = soporte?.activo ? null : await rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
   if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
+  // H6: el botón de ayuda por WhatsApp también para la recepción; el número sale de los datos (lo carga el super admin).
+  const conWhatsappAyuda = pideAyuda || (!soporte?.activo && panel.yo.rol === "recepcion");
+  const contactoAyuda = conWhatsappAyuda ? await rpc<{ whatsapp: string | null }>("contacto_plataforma_publico").catch(() => null) : null;
   const temaCookie = (await cookies()).get("tema")?.value ?? null;
   return (
     <>
@@ -100,7 +103,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
         {children}
-        {pideAyuda && <AyudaBrik />}
+        {conWhatsappAyuda && <AyudaBrik whatsapp={contactoAyuda?.whatsapp ?? null} gimnasio={panel.gimnasio.nombre} nombre={panel.yo.nombre} rol={panel.yo.rol} conFormulario={pideAyuda} />}
       </Marco>
     </>
   );

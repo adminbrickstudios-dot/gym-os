@@ -22,7 +22,7 @@ import { Icono } from "@/components/ui/Icono";
 export const metadata: Metadata = { title: "Entrada" };
 
 
-export default async function Entrada({ searchParams }: { searchParams: Promise<{ sede?: string; socio?: string }> }) {
+export default async function Entrada({ searchParams }: { searchParams: Promise<{ sede?: string; socio?: string; q?: string }> }) {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirSeccion(panel, "entrada");
@@ -57,7 +57,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
             {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
             {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
-            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} emergenciaInicial={emergencia?.activa ?? null} />
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} textoInicial={/^[\p{L}0-9 .'-]{2,60}$/u.test(sp.q ?? "") ? (sp.q ?? "").trim() : ""} emergenciaInicial={emergencia?.activa ?? null} />
             {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias} />}
           </div>
           <div>

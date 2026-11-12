@@ -40,15 +40,17 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null }: {
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null, textoInicial = "" }: {
   sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null; emergenciaInicial?: EmergenciaActiva | null;
+  /** VD-29B: lo que llegó en ?q= (por ejemplo "entrada 12345678" desde Ctrl+K): el campo arranca con eso y busca. */
+  textoInicial?: string;
 }) {
   // VD-46M: el cartel rojo mientras la puerta está en emergencia (lo pregunta a la base cada 30 s).
   const emergencia = useEmergencia(sedeId, true, emergenciaInicial);
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
-  const [texto, setTexto] = useState("");
+  const [texto, setTexto] = useState(textoInicial);
   const [socios, setSocios] = useState<ResultadoSocio[]>([]);
   const [elegido, setElegido] = useState<ResultadoSocio | null>(null);
   const [v, setV] = useState<Veredicto | null>(null);

@@ -10,6 +10,11 @@
 //   · y que vuelva: el "atrás" del navegador a donde estaba, y Esc cierra lo que se abrió.
 // Los que no hacen nada, se cuelgan o no vuelven quedan en .local/botones-informe.md (no corta: el informe es lo que se lee).
 //   node scripts/e2e/botones.mjs [--rol dueno,recepcion] [--solo-compu|--solo-celu] [--max-pantallas 60] [--max-botones 40] [--estricto]
+//        [--slug demo-temple-clon] [--mirar]
+// H4 · --slug: en vez del gimnasio demo, recorre un [demo] clonado de la configuración de un gimnasio real (scripts/datos/clonar-config-temple.mjs
+//   + usuarios-demo.mjs --clon): los logins son clon-<rol>@ejemplo.invalid y solo hay roles del panel (no super ni socio: el clon no tiene socios).
+// H4 · --mirar: modo mirar. Además de lo que ya no se toca, salta todo lo que escribe o prende/apaga algo (envíos de formularios, interruptores,
+//   casillas): abre, mira y vuelve. El workflow botones-temple.yml cuenta las filas de plata y socios antes y después: tienen que quedar iguales.
 // Roles: super (admin), dueno, encargado, recepcion, profe, socio. Se reparte en Actions con --rol (una tanda por rol).
 //   (con scripts/local/levantar.sh corriendo). Mira, no escribe: no aprieta nada que cambie datos.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -29,6 +34,16 @@ const ROLES = {
   profe:      { mail: "profe@ejemplo.invalid",      base: GIMNASIO("demo"),   inicio: "/panel", area: "/panel" },
   socio:      { mail: "socio@ejemplo.invalid",      base: GIMNASIO("demo"),   inicio: "/app",   area: "/app" },
 };
+const SLUG = arg("slug", null);
+const MIRAR = tiene("mirar");
+if (SLUG) {
+  if (!/^demo/.test(SLUG)) { console.error("--slug: tiene que empezar con demo (nunca un gimnasio real)."); process.exit(1); }
+  for (const k of Object.keys(ROLES)) {
+    if (k === "super" || k === "socio") { delete ROLES[k]; continue; }
+    ROLES[k].base = GIMNASIO(SLUG);
+    ROLES[k].mail = `clon-${k === "dueno" ? "duena" : k}@ejemplo.invalid`;
+  }
+}
 const roles = (arg("rol", Object.keys(ROLES).join(",")) ?? "").split(",").map((x) => x.trim()).filter((x) => ROLES[x]);
 const VISTAS = [...(tiene("solo-celu") ? [] : [["compu", COMPU]]), ...(tiene("solo-compu") ? [] : [["celu", CELU]])];
 const MAX_PANTALLAS = Number(arg("max-pantallas", "60"));
@@ -77,7 +92,7 @@ async function candidatos(p) {
       e.setAttribute("data-bt", String(i));
       const texto = (e.innerText || e.textContent || e.labels?.[0]?.textContent || e.closest("label")?.textContent || e.getAttribute("placeholder") || e.getAttribute("aria-label") || e.getAttribute("title") || "").trim().replace(/\s+/g, " ").slice(0, 60);
       const enForm = !!e.closest("form") && e.tagName === "BUTTON" && (e.getAttribute("type") ?? "submit") === "submit";
-      salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
+      salida.push({ i, tag: e.tagName.toLowerCase(), texto, href: e.getAttribute("href") ?? "", aria: e.getAttribute("aria-label") ?? "", deshabilitado: e.disabled || e.getAttribute("aria-disabled") === "true", peligro: e.hasAttribute("data-peligro"), papel: e.getAttribute("role") ?? "", enForm, descarga: e.hasAttribute("download"), blank: e.getAttribute("target") === "_blank" });
     });
     return salida.slice(0, max * 3);
   }, MAX_BOTONES);
@@ -167,7 +182,7 @@ async function recorrerPantalla(p, rol, vista, ruta, base, errores) {
     if (hechos >= MAX_BOTONES) break;
     informe.botones++;
     if (!c.texto && !c.aria) { nota(informe.sinNombre, rol, vista, ruta, `un ${c.tag}${c.href ? ` (→ ${c.href})` : ""} sin texto ni aria-label`); }
-    const peligroso = c.peligro || PELIGRO.test(`${c.texto} ${c.aria}`) || EXTERNO.test(c.href) || c.descarga || c.blank || c.enForm || c.deshabilitado || /\/salir|\/api\//.test(c.href);
+    const peligroso = c.peligro || PELIGRO.test(`${c.texto} ${c.aria}`) || EXTERNO.test(c.href) || c.descarga || c.blank || c.enForm || c.deshabilitado || (MIRAR && (c.papel === "switch" || c.papel === "checkbox")) || /\/salir|\/api\//.test(c.href);
     if (peligroso && c.texto && !c.deshabilitado && c.tag !== "a") { const k2 = `${rol} · ${vista} \`${ruta}\``; (informe.existen.get(k2) ?? informe.existen.set(k2, new Set()).get(k2)).add(c.texto); }
     if (peligroso) { const k = `${rol}/${vista}`; informe.noTocados.set(k, (informe.noTocados.get(k) ?? 0) + 1); continue; }
     hechos++;
@@ -210,7 +225,7 @@ try {
 const seccion = (titulo, lista) => `## ${titulo} (${lista.length})\n\n${lista.length ? lista.join("\n") : "Ninguno."}\n`;
 const md = [
   `# Informe de botones (F3.1) · ${new Date().toISOString().slice(0, 16).replace("T", " ")}`, "",
-  `Roles: ${roles.join(", ")} · vistas: ${VISTAS.map((v) => v[0]).join(", ")} · ${informe.pantallas} pantallas · ${informe.botones} botones y enlaces vistos · ${informe.tocados} tocados.`, "",
+  `Roles: ${roles.join(", ")}${SLUG ? ` · gimnasio ${SLUG}` : ""}${MIRAR ? " · modo mirar" : ""} · vistas: ${VISTAS.map((v) => v[0]).join(", ")} · ${informe.pantallas} pantallas · ${informe.botones} botones y enlaces vistos · ${informe.tocados} tocados.`, "",
   `No se tocan (cambian o mandan algo, salen de la app o están deshabilitados), por rol y vista: ${[...informe.noTocados].map(([k, n]) => `${k}: ${n}`).join(" · ") || "ninguno"}.`, "",
   seccion("No hacen nada en 1 s", informe.sinEfecto), seccion(`Tardan más de ${LIMITE_RESPUESTA} ms en mostrar algo`, informe.lentos), seccion("Se cuelgan o no se pueden tocar", informe.colgados),
   seccion("Dejan un error en la consola", informe.consola), seccion("Pantallas rotas", informe.rotas), seccion("No vuelven (atrás / Esc)", informe.noVuelve), seccion("Sin nombre accesible", informe.sinNombre),
