@@ -155,7 +155,9 @@ try {
   chequear((await d.locator('[data-origen-canal="qr_cartel"] [data-altas]').innerText()).trim() === "1", "Interesados cuenta 1 alta del QR del cartel", "el reporte no cuenta el alta del QR");
   chequear((await d.locator('[data-origen-canal="qr_cartel"] [data-pagaron]').innerText()).trim() === "0", "y 0 pagaron (todavía no pagó)", "el reporte dice que pagó");
   chequear((await d.locator('[data-origen-canal="instagram"] [data-altas]').innerText()).trim() === "0", "la de Instagram hecha con la función apagada no cuenta", "cuenta una alta hecha con la función apagada");
-  chequear((await d.locator("[data-origen-links] [data-link-canal]").count()) === 4 && /hacete-socio\?o=qr/.test(await d.locator('[data-link-canal="qr_cartel"]').innerText()), "da los 4 links para copiar (el del QR lleva ?o=qr)", "faltan los links por canal");
+  // Los links están dentro de un <details> cerrado: se leen del DOM (textContent), no de lo que se ve.
+  const links = await d.locator("[data-origen-links] [data-link-canal]").evaluateAll((els) => els.map((x) => [x.getAttribute("data-link-canal"), x.textContent ?? ""]));
+  chequear(links.length === 4 && /hacete-socio\?o=qr$/.test(links.find(([c]) => c === "qr_cartel")?.[1] ?? ""), "da los 4 links para copiar (el del QR lleva ?o=qr)", `faltan los links por canal: ${JSON.stringify(links)}`);
   await capturar(d, "n-compu-origen");
   await d.goto(`${G}/panel/socios/${idQr}`);
   await d.locator("[data-origen]").waitFor({ timeout: 60000 });
