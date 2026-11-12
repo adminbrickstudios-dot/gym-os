@@ -8,7 +8,7 @@
 //   node scripts/e2e/velocidad-a.mjs     (con scripts/local/levantar.sh corriendo; TOPE_MS afloja el tope en una compu lenta)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { COMPU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { COMPU, GIMNASIO, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const TOPE = Number(process.env.TOPE_MS ?? 500);
@@ -104,6 +104,40 @@ try {
   const desaparecio = await r.locator("[data-hecho]").waitFor({ state: "detached", timeout: 10000 }).then(() => true, () => false);
   chequear(desaparecio, "si el servidor no contesta, el aviso provisorio se retira (vuelta atrás)", "el aviso provisorio quedó aunque el servidor no contestó");
   chequear((await r.getByLabel("Buscar socio").count()) === 1, "la pantalla sigue usable para reintentar", "la pantalla quedó rota");
+
+  // 5. Reservar una clase desde la app del socio: se ve hecha al toque (con el servidor frenado 1,5 s) y queda en la base.
+  const [{ id: socioApp, telefono: telApp }] = (await db.query(`select id, telefono from public.socios where gimnasio_id = $1 and nombre = 'Testigo' and apellido = 'Al Día'`, [gim])).rows;
+  const [{ id: act }] = (await db.query(`select id from public.actividades where gimnasio_id = $1 and activa limit 1`, [gim])).rows;
+  const [{ id: sede }] = (await db.query(`select id from public.sedes where gimnasio_id = $1 and es_principal`, [gim])).rows;
+  const [{ id: clase }] = (await db.query(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, cupo) values ($1,$2,$3, now() + interval '3 days', now() + interval '3 days 1 hour', 10) returning id`, [gim, sede, act])).rows;
+  try {
+    const a = await pagina(b, COMPU);
+    a.setDefaultNavigationTimeout(120000);
+    await entrarSocio(a, telApp);
+    await a.goto(`${G}/app/clases?reservar=1`);
+    const boton = a.locator('[data-reservar-boton][data-reservada="no"]').first();
+    await boton.waitFor({ timeout: 60000 });
+    await a.route("**/app/clases**", async (ruta) => {
+      const req = ruta.request();
+      if (req.method() === "POST" && req.headers()["next-action"]) await new Promise((f) => setTimeout(f, 1500));
+      return ruta.continue();
+    });
+    const t1 = Date.now();
+    await boton.click();
+    await a.locator('[data-reservar-boton][data-reservada="si"]').first().waitFor({ timeout: 10000 });
+    const ms2 = Date.now() - t1;
+    chequear(ms2 <= TOPE, `Reservar: el botón queda en “reservado” a los ${ms2} ms, con el servidor frenado 1,5 s (tope ${TOPE} ms)`, `Reservar tardó ${ms2} ms en mostrarse (tope ${TOPE})`);
+    let guardada = 0;
+    for (let i = 0; i < 20 && !guardada; i++) {
+      guardada = (await db.query(`select count(*)::int n from public.reservas where gimnasio_id = $1 and socio_id = $2 and estado in ('confirmada', 'espera')`, [gim, socioApp])).rows[0].n;
+      if (!guardada) await a.waitForTimeout(500);
+    }
+    chequear(guardada >= 1, "la reserva quedó guardada en la base", "la reserva no quedó en la base");
+    if (a.errores.length) falla(`app del socio: ${a.errores.join(" | ")}`);
+  } finally {
+    await db.query(`delete from public.reservas where clase_id = $1`, [clase]).catch(() => {});
+    await db.query(`delete from public.clases where id = $1`, [clase]).catch(() => {});
+  }
 } catch (e) {
   falla(`el recorrido se cortó: ${e.message}`);
 } finally {
