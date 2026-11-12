@@ -152,8 +152,8 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
               className="w-full bg-transparent px-5 h-16 text-lg outline-none border-b border-[var(--borde)]"
             />
             <div className="max-h-[60vh] overflow-y-auto p-2" data-buscador-lista>
-              {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-xl w-full"><Icono nombre="alerta" /> {error}</p>}
-              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-xl w-full" role="status" data-buscador-tarea-ok>✓ {aviso}</p>}
+              {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-[var(--radio)] w-full"><Icono nombre="alerta" /> {error}</p>}
+              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-[var(--radio)] w-full" role="status" data-buscador-tarea-ok>✓ {aviso}</p>}
               {pista && <p className="px-3 py-2 text-sm texto-suave" data-buscador-pista>Falta {pista.verbo === "tarea" ? "qué hay que hacer" : pista.verbo === "entrada" ? "el DNI o el nombre" : "a quién"}: escribí algo más después de “{texto.trim()}”.</p>}
               {!texto.trim() && ejemplos.length > 0 && (
                 <div className="px-3 pt-2 pb-1" data-buscador-ejemplos>
@@ -166,7 +166,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
               {soloVer && socios.length > 0 && <p className="titulo-grupo px-3 pt-2 pb-1">Socios</p>}
               {soloVer && socios.map((s) => (
                 // EQU-2: el profe ve nombre, foto y semáforo; no abre la ficha.
-                <div key={s.socio_id} className="flex items-center gap-3 rounded-xl px-3 min-h-[56px]" data-socio-profe>
+                <div key={s.socio_id} className="flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[56px]" data-socio-profe>
                   {s.tiene_foto
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={`/panel/socios/${s.socio_id}/foto`} alt="" width={40} height={40} loading="lazy" decoding="async" className="size-10 rounded-full object-cover flex-none" />
@@ -192,7 +192,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                       {marcado === i && <kbd className="text-xs texto-tenue font-sans flex-none hidden sm:block">Enter</kbd>}
                     </>
                   );
-                  const clases = `flex items-center gap-3 rounded-xl px-3 min-h-[56px] w-full text-left ${marca(i)}`;
+                  const clases = `flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[56px] w-full text-left ${marca(i)}`;
                   return (
                     <div key={`a-${f.clave}`}>
                       {cab}
@@ -207,7 +207,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                   return (
                     <div key={`s-${f.clave}`}>
                       {cab}
-                      <div className={`flex items-center gap-2 rounded-xl pr-2 ${marca(i)}`} {...marcaProps}>
+                      <div className={`flex items-center gap-2 rounded-[var(--radio)] pr-2 ${marca(i)}`} {...marcaProps}>
                         <Link href={`/panel/socios/${s.socio_id}`} onClick={() => setAbierto(false)} className="flex items-center gap-3 px-3 min-h-[56px] min-w-0 flex-1">
                           <PuntoEstado color={s.color} />
                           <span className="min-w-0 flex-1">
@@ -226,7 +226,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                     <div key={`h-${f.clave}`}>
                       {cab}
                       <Link href={`/panel/ayuda?p=${q.id}`} onClick={() => setAbierto(false)} {...marcaProps} data-buscador-ayuda={q.id}
-                        className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
+                        className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] ${marca(i)}`}>
                         <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre="ayuda" /></span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-semibold truncate">{q.pregunta}</span>
@@ -241,7 +241,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                   <div key={`p-${f.clave}`}>
                     {cab}
                     <Link href={s.ruta} onClick={() => setAbierto(false)} {...marcaProps}
-                      className={`flex items-center gap-3 rounded-xl px-3 min-h-[52px] ${marca(i)}`}>
+                      className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] ${marca(i)}`}>
                       <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={s.emoji} sistema /></span>
                       <span className="font-semibold flex-none">{s.titulo}</span>
                       <span className="texto-tenue text-sm truncate">{s.descripcion}</span>

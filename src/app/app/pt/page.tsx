@@ -18,8 +18,8 @@ export default async function MiPt({ searchParams }: { searchParams: Promise<{ s
     const r = await rpc<PtSocio>("pt_socio", { p_socio_id: yo.socio.socio_id });
     return (
       <div className="space-y-6" data-mi-pt>
-        <Link href={`/app/yo${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">Mi personal trainer</h1>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]">Mi personal trainer</h1>
         {!r.prendido || (!r.ofrece && (r.packs?.length ?? 0) === 0)
           ? <p className="texto-suave text-lg" data-sin-pt>Tu gimnasio todavía no ofrece sesiones con personal trainer.</p>
           : <MisSesiones socioId={yo.socio.socio_id} datos={r} zona={yo.zona!} />}

@@ -47,7 +47,7 @@ export default async function InfoGimnasio({ searchParams }: { searchParams: Pro
     return (
       <div className="space-y-8" data-info-gimnasio>
         <div>
-          <h1 className="titular text-5xl">Info del gimnasio</h1>
+          <h1 className="titular text-[28px]">Info del gimnasio</h1>
           <p className="texto-suave mt-2">Horarios, reglamento y cómo comunicarte, siempre a mano.</p>
         </div>
         {!hayAlgo && <Vacio emoji="inicio" titulo="Todavía no hay información cargada">El gimnasio aún no cargó sus horarios ni su contacto. Escribile desde Mensajes y te cuentan.</Vacio>}

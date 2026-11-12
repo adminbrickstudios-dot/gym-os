@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fichaRapida } from "@/app/panel/entrada/ventana-acciones";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
-import { formatearPesos } from "@/lib/formato";
+import { fechaHoraHumana, formatearPesos } from "@/lib/formato";
 import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
 import { EVENTO_ABRIR_SOCIO } from "./AvisosEntrada";
@@ -20,7 +20,7 @@ const ETIQUETA_INGRESO: Record<string, string> = { entro: "Entró", entro_modo_a
 const MEDIO_ETIQUETA: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
 const nombreMedio = (m: string) => MEDIO_ETIQUETA[m] ?? m;
 
-export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
+export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: string }) {
   const [socioId, setSocioId] = useState<string | null>(null);
   const [ficha, setFicha] = useState<Ficha | null>(null);
   const [puedeCobrar, setPuedeCobrar] = useState(false);
@@ -103,7 +103,7 @@ export function PanelSocioLateral({ sedeId }: { sedeId: string }) {
               <h3 className="titulo text-lg">Últimos ingresos</h3>
               {ficha.ingresos.length === 0 ? <p className="texto-tenue">Sin ingresos todavía.</p> : (
                 <ul className="space-y-1 text-sm texto-suave">
-                  {ficha.ingresos.slice(0, 5).map((i) => <li key={i.id}>{new Date(i.momento).toLocaleString("es-AR", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })} · {ETIQUETA_INGRESO[i.resultado] ?? i.resultado}</li>)}
+                  {ficha.ingresos.slice(0, 5).map((i) => <li key={i.id}>{fechaHoraHumana(i.momento, zona)} · {ETIQUETA_INGRESO[i.resultado] ?? i.resultado}</li>)}
                 </ul>
               )}
             </section>

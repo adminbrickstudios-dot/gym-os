@@ -54,12 +54,12 @@ export default async function Inicio() {
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
-          <h1 className="titular text-5xl sm:text-7xl pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
+          <h1 className="titular text-[28px] pr-14">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
           <p className="texto-suave text-lg mt-3 first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
         </header>
 
         {rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas) && (
-          <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--verde)] text-white font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
+          <BotonEntrada barra={rol === "recepcion"} className="flex items-center justify-center gap-3 rounded-[var(--radio)] min-h-24 px-6 py-5 bg-[var(--acento)] text-[var(--sobre-acento)] font-bold text-3xl sm:text-4xl active:scale-[0.99] transition" />
         )}
         {/* F1.3: Cobrar, Alta y Pase diario a un toque, para todo el mostrador (recepción, encargado y dueño). Cada botón aparece solo si esa
             pantalla está disponible para este rol y este gimnasio (nunca un botón que lleva a "no tenés permiso"). El Pase diario es una venta:

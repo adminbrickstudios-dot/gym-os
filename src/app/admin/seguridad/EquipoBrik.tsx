@@ -50,7 +50,7 @@ export function EquipoBrik({ estado }: { estado: EstadoSeguridad }) {
             <div className="sm:col-span-3"><BotonAccion className="boton boton-principal" disabled={!email.includes("@")} onClick={() => hecho(() => darRolBrik(email, rol))}>Dar o cambiar el rol</BotonAccion></div>
           </div>
         )}
-        {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{error}</p>}
+        {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{error}</p>}
       </section>
     </div>
   );

@@ -29,7 +29,7 @@ export default async function Cuenta({ searchParams }: { searchParams: Promise<{
     return (
       <div className="space-y-6">
         <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
-        <h1 className="titular text-5xl">Mi membresía</h1>
+        <h1 className="titular text-[28px]">Mi membresía</h1>
         <AvisoClaveSocio socioId={s.socio_id} zona={yo.zona!} />
         {yo.plan && <p className="texto-suave text-lg"><Icono nombre="etiqueta" /> {yo.plan.nombre}</p>}
         {yo.plan ? <PedirPausa socioId={s.socio_id} hoy={hoy} /> : <p className="texto-suave">No tenés una membresía mensual para pausar.</p>}

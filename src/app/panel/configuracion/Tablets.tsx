@@ -53,7 +53,7 @@ export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; 
       {link && (
         <div className="tarjeta p-4 space-y-3" data-link-tablet={link}>
           <p className="font-semibold">Abrí este link en la tablet (o escaneá el QR con ella). Se ve una sola vez.</p>
-          {qr && <div className="w-44 aspect-square bg-white rounded-xl p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />}
+          {qr && <div className="w-44 aspect-square bg-white rounded-[var(--radio)] p-2" aria-hidden dangerouslySetInnerHTML={{ __html: qr }} />}
           <p className="text-sm break-all texto-suave">{link}</p>
           <div className="flex flex-wrap gap-2">
             <button type="button" className="boton" onClick={() => void navigator.clipboard?.writeText(link)}><Icono nombre="lista" /> Copiar link</button>

@@ -5,6 +5,7 @@
 // opcionalmente hay una barra fija a la derecha. Todo lo que dice y hace sale de
 // las funciones de la base de siempre (estado_acceso, registrar_ingreso, leer_qr…):
 // acá no se calcula nada.
+import { urlDarDeAlta } from "@/lib/panel/alta-url";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition, startTransition } from "react";
@@ -84,7 +85,7 @@ const esEditable = (t: EventTarget | null) => {
 function conPuntos(t: string): string {
   if (!/^[\d.]*$/.test(t)) return t;
   const d = t.replace(/\./g, "");
-  return d.length >= 7 ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : d;
+  return d.length >= 7 && d.length <= 8 ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : d;
 }
 const sinPuntos = (t: string) => (/^[\d.]*$/.test(t) ? t.replace(/\./g, "") : t);
 
@@ -734,8 +735,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         <button type="button" data-boton-ventana onClick={() => (abierta ? cerrar() : conBarra ? barra.current?.focus() : abrir())}
           aria-label={abierta ? "Cerrar la Entrada" : "Abrir la Entrada"} aria-pressed={abierta} title="Entrada (F2)"
           className="fixed z-40 left-1/2 -translate-x-1/2 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:left-auto lg:translate-x-0 lg:right-6 lg:bottom-6
-            size-16 rounded-full bg-[var(--verde)] text-white text-3xl shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-          style={{ boxShadow: "0 10px 28px -10px rgb(0 0 0 / 0.6)" }}>
+            size-16 rounded-full bg-[var(--acento)] text-[var(--sobre-acento)] text-3xl flex items-center justify-center active:scale-95 transition-transform"
+          style={{ boxShadow: "var(--sombra-flota)" }}>
           <span aria-hidden><Icono nombre={abierta ? "cerrar" : "puerta"} /></span>
         </button>
       )}
@@ -837,11 +838,11 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
                   <div className="flex flex-wrap gap-2">
                     {dni
                       ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}><Icono nombre="mas" /> Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
-                      : <Link href="/panel/socios/nuevo" className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
+                      : <Link href={urlDarDeAlta(nadie)} className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
                     {dni && pruebaModo && pruebaModo !== "no" && (
                       <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}><Icono nombre="regalo" /> Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
                     )}
-                    {dni && <Link href="/panel/socios/nuevo" className="boton" data-ventana-alta-completa>Alta completa</Link>}
+                    {dni && <Link href={urlDarDeAlta(nadie)} className="boton" data-ventana-alta-completa>Alta completa</Link>}
                   </div>
                 </div>
               )}

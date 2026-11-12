@@ -126,6 +126,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
           {moderacion.items.length > 0 && (
             <section className="space-y-2" data-moderacion-control aria-label="Suspensiones, cortesías, bajas y devoluciones">
               <h2 className="titulo-grupo"><Icono nombre="prohibido" /> Suspensiones, cortesías, bajas y devoluciones</h2>
+              <p className="texto-tenue text-[13px]" data-moderacion-alcance>{moderacion.items.length >= 30 ? "Las 30 más recientes del período (no sigue los filtros de arriba)." : "Todo el período (no sigue los filtros de arriba)."}</p>
               <ul className="space-y-2">
                 {moderacion.items.map((i) => (
                   <li key={i.clave} data-moderacion-item={i.tipo}>

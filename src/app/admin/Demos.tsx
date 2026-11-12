@@ -29,7 +29,7 @@ export function Demos({ vencidas }: { vencidas: DemoVencida[] }) {
           }}>Crear demo</BotonAccion>
           <span className="texto-suave text-sm">Datos ficticios, aparte de los gimnasios reales. A los 7 días queda vencida.</span>
         </div>
-        {msj.texto && <p role={msj.ok ? "status" : "alert"} className={`sm:col-span-3 ${msj.ok ? "texto-suave" : "pildora pildora-rojo !rounded-2xl !px-4 !py-3"}`}>{msj.texto}</p>}
+        {msj.texto && <p role={msj.ok ? "status" : "alert"} className={`sm:col-span-3 ${msj.ok ? "texto-suave" : "pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"}`}>{msj.texto}</p>}
       </div>
       {vencidas.length > 0 && (
         <div className="tarjeta p-4 space-y-2" data-demos-vencidas>

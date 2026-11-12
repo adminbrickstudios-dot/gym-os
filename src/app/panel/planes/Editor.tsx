@@ -69,8 +69,8 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajust
           <button type="button" className="boton boton-chico" onClick={() => setAbierto("editar")}><Icono nombre="lapiz" /> Editar</button>
           {aj && ajustes && <button type="button" className="boton boton-chico" data-ajustes-abrir onClick={() => setAbierto("ajustes")}><Icono nombre="ajustes" /> Ajustes</button>}
           <button type="button" className="boton boton-chico" data-vista-abrir onClick={() => setAbierto("vista")}><Icono nombre="ojo" /> Cómo lo ve el socio</button>
-          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}><Icono nombre="subir" /></button>
-          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}><Icono nombre="descargar" /></button>
+          <button type="button" className="boton boton-chico" aria-label={`Subir ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, -1))}><Icono nombre="arriba" /></button>
+          <button type="button" className="boton boton-chico" aria-label={`Bajar ${p.nombre}`} disabled={ocupado} onClick={() => correr(() => mover(p.plan_id, 1))}><Icono nombre="abajo" /></button>
           <button type="button" className="boton boton-chico texto-suave" disabled={ocupado} onClick={() => correr(() => activarPlan(p.plan_id, !p.activo))}>{p.activo ? "Dejar de vender" : "Volver a vender"}</button>
         </div>
       )}

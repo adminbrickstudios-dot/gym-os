@@ -259,7 +259,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
   );
 
   const pie = (
-    <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-4 z-10 tarjeta p-4 flex flex-wrap items-center gap-3 shadow-lg"
+    <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-4 z-10 tarjeta p-4 flex flex-wrap items-center gap-3 [box-shadow:var(--sombra-flota)]"
       data-pie-pagina data-respuestas={respuesta.n}>
       <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "Guardar"}</button>
       <button type="button" className="boton" disabled={!puedeDeshacer(hist) && !sinConfirmar} onClick={deshacerPaso} data-deshacer><Icono nombre="deshacer" /> Deshacer</button>
@@ -290,7 +290,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
               <UnaImagen tipo="logo" ruta={media.logo_path} reglas={reglas.logo} puedeEditar={puedeEditar} alListo={imagenesListas}
                 vista={(url) => url
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={url} alt={`Logo de ${inicial.vista.marca.nombre}`} className="h-20 max-w-full object-contain rounded-xl p-2 border border-[var(--borde)]" style={{ background: estilo.color_fondo }} />
+                  ? <img src={url} alt={`Logo de ${inicial.vista.marca.nombre}`} className="h-20 max-w-full object-contain rounded-[var(--radio)] p-2 border border-[var(--borde)]" style={{ background: estilo.color_fondo }} />
                   : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
             </div>
             <div className="space-y-2">
@@ -307,16 +307,16 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
               <p className="etiqueta mb-2">Color principal</p>
               <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Color principal">
                 {ACENTOS.map((a) => <button key={a} type="button" aria-label={`Color ${a}`} aria-pressed={estilo.color_acento.toLowerCase() === a} onClick={() => setE("color_acento", a)} data-color-acento={a}
-                  className="size-11 rounded-xl border-2" style={{ background: a, borderColor: estilo.color_acento.toLowerCase() === a ? "var(--texto)" : "transparent" }} />)}
-                <input type="color" aria-label="Otro color principal" value={estilo.color_acento} onChange={(e) => setE("color_acento", e.target.value)} className="size-11 rounded-xl bg-transparent" data-color-acento-libre />
+                  className="size-11 rounded-[var(--radio)] border-2" style={{ background: a, borderColor: estilo.color_acento.toLowerCase() === a ? "var(--texto)" : "transparent" }} />)}
+                <input type="color" aria-label="Otro color principal" value={estilo.color_acento} onChange={(e) => setE("color_acento", e.target.value)} className="size-11 rounded-[var(--radio)] bg-transparent" data-color-acento-libre />
               </div>
             </div>
             <div>
               <p className="etiqueta mb-2">Fondo</p>
               <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Fondo">
                 {FONDOS.map((f) => <button key={f} type="button" aria-label={`Fondo ${f}`} aria-pressed={estilo.color_fondo.toLowerCase() === f} onClick={() => setE("color_fondo", f)}
-                  className="size-11 rounded-xl border-2" style={{ background: f, borderColor: estilo.color_fondo.toLowerCase() === f ? "var(--acento)" : "var(--borde)" }} />)}
-                <input type="color" aria-label="Otro fondo" value={estilo.color_fondo} onChange={(e) => setE("color_fondo", e.target.value)} className="size-11 rounded-xl bg-transparent" />
+                  className="size-11 rounded-[var(--radio)] border-2" style={{ background: f, borderColor: estilo.color_fondo.toLowerCase() === f ? "var(--acento)" : "var(--borde)" }} />)}
+                <input type="color" aria-label="Otro fondo" value={estilo.color_fondo} onChange={(e) => setE("color_fondo", e.target.value)} className="size-11 rounded-[var(--radio)] bg-transparent" />
               </div>
             </div>
             {poco && (
@@ -327,7 +327,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
               <div className="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Letra de los títulos">
                 {TIPOGRAFIAS.map((t) => (
                   <button key={t.id} type="button" role="radio" aria-checked={estilo.tipografia === t.id} onClick={() => setE("tipografia", t.id)} data-tipografia-opcion={t.id}
-                    className={`rounded-xl border-2 p-3 text-left ${estilo.tipografia === t.id ? "border-[var(--acento)]" : "border-[var(--borde)]"}`}>
+                    className={`rounded-[var(--radio)] border-2 p-3 text-left ${estilo.tipografia === t.id ? "border-[var(--acento)]" : "border-[var(--borde)]"}`}>
                     <span className="block text-2xl titulo" style={estiloTipografia(t.id)}>Entrená hoy</span>
                     <span className="block text-sm font-semibold mt-1">{t.nombre}</span>
                     <span className="block text-sm texto-tenue">{t.detalle}</span>
@@ -357,10 +357,10 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
                 ? <p className="texto-tenue">Todavía no subiste fotos. Subilas arriba, en Logo y fotos, y elegí una acá.</p>
                 : <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Foto de portada">
                     <button type="button" role="radio" aria-checked={!portada.foto_portada_path} onClick={() => setP("foto_portada_path", null, true)}
-                      className={`size-20 rounded-xl border-2 texto-suave text-sm ${!portada.foto_portada_path ? "border-[var(--acento)]" : "border-[var(--borde)]"}`}>Sin foto</button>
+                      className={`size-20 rounded-[var(--radio)] border-2 texto-suave text-sm ${!portada.foto_portada_path ? "border-[var(--acento)]" : "border-[var(--borde)]"}`}>Sin foto</button>
                     {media.fotos.map((f, i) => (
                       <button key={f} type="button" role="radio" aria-checked={portada.foto_portada_path === f} aria-label={`Foto ${i + 1}`} onClick={() => setP("foto_portada_path", f, true)}
-                        className={`size-20 rounded-xl border-2 overflow-hidden ${portada.foto_portada_path === f ? "border-[var(--acento)]" : "border-transparent"}`}>
+                        className={`size-20 rounded-[var(--radio)] border-2 overflow-hidden ${portada.foto_portada_path === f ? "border-[var(--acento)]" : "border-transparent"}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={urlMarca(f)!} alt="" className="w-full h-full object-cover" />
                       </button>
@@ -411,7 +411,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
                 {lista && (
                   <div className="space-y-3">
                     {items(s).map((it, k) => (
-                      <div key={k} className="rounded-xl border border-[var(--borde)] p-3 space-y-2" data-elemento={k}>
+                      <div key={k} className="rounded-[var(--radio)] border border-[var(--borde)] p-3 space-y-2" data-elemento={k}>
                         <div className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]">
                           {lista.campos.map(([c, et, max, , area]) => (
                             <label key={c} className={`block space-y-1 ${area ? "sm:col-span-full" : c === "emoji" ? "sm:max-w-24" : ""}`}>

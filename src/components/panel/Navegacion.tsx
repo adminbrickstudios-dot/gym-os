@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { Acceso, Grupo, Seccion } from "@/lib/panel/secciones";
+import { useEffect, useRef, useState } from "react";
+import { LINEA_GRUPO, type Acceso, type Grupo, type Seccion } from "@/lib/panel/secciones";
 import { traerPendientes } from "@/app/panel/pendientes-acciones";
 import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type Pendientes } from "@/lib/panel/pendientes";
 import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
@@ -48,8 +48,8 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
   const on = activa(actual, s.ruta);
   return (
     <Link href={s.ruta} onClick={alElegir} aria-current={on ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
-      <span className="text-xl w-7 text-center" aria-hidden><Icono nombre={s.emoji} sistema /></span>
+      className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-12 py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
+      <span className={`text-xl w-7 text-center ${on ? "text-[var(--acento)]" : "texto-suave"}`} aria-hidden><Icono nombre={s.emoji} sistema /></span>
       <span className="min-w-0">
         <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{s.titulo}</span>
         {s.descripcion && <span className="block text-[13px] texto-tenue leading-snug truncate">{s.descripcion}</span>}
@@ -66,10 +66,25 @@ function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: s
       {props.grupos.map((g) => {
         const items = props.secciones.filter((s) => s.grupo === g);
         if (!items.length) return null;
+        const principales = items.filter((s) => !s.secundaria);
+        const mas = items.filter((s) => s.secundaria);
+        // Lo de "Más" queda a un toque, y se abre solo si estás parado en una de esas pantallas o hay un número adentro.
+        const masAbierto = mas.some((s) => activa(actual, s.ruta) || numeroDe(pendientes, s.clave) > 0);
         return (
-          <div key={g}>
-            <p className="titulo-grupo px-3 mb-1.5">{g}</p>
-            <div className="space-y-0.5">{items.map((s) => <Item key={s.clave} s={s} actual={actual} alElegir={alElegir} n={numeroDe(pendientes, s.clave)} />)}</div>
+          <div key={g} data-grupo={g}>
+            <p className="titulo-grupo px-3">{g}</p>
+            <p className="px-3 mb-1.5 text-[13px] texto-tenue leading-snug">{LINEA_GRUPO[g]}</p>
+            <div className="space-y-0.5">{principales.map((s) => <Item key={s.clave} s={{ ...s, descripcion: undefined }} actual={actual} alElegir={alElegir} n={numeroDe(pendientes, s.clave)} />)}</div>
+            {mas.length > 0 && (
+              <details key={masAbierto ? "abierto" : "cerrado"} open={masAbierto} className="mt-0.5" data-mas-grupo={g}>
+                <summary className="flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-12 cursor-pointer texto-suave hover:bg-[var(--tarjeta)] list-none [&::-webkit-details-marker]:hidden">
+                  <span className="w-7 text-center" aria-hidden><Icono nombre="abajo" /></span>
+                  <span className="font-semibold">Más</span>
+                  <span className="texto-tenue text-[13px]">{mas.length}</span>
+                </summary>
+                <div className="space-y-0.5">{mas.map((s) => <Item key={s.clave} s={{ ...s, descripcion: undefined }} actual={actual} alElegir={alElegir} n={numeroDe(pendientes, s.clave)} />)}</div>
+              </details>
+            )}
           </div>
         );
       })}
@@ -96,19 +111,23 @@ function Logo({ url, tam }: { url?: string | null; tam: string }) {
 export function Navegacion(props: Props) {
   const actual = usePathname();
   const [abierto, setAbierto] = useState(false);
+  const porEnlace = useRef(false);
   useEffect(() => { document.body.style.overflow = abierto ? "hidden" : ""; }, [abierto]);
   // Regla 5 (FLUIDEZ): la hoja del menú se cierra con Esc y con el "atrás" del teléfono (que cierra el menú y no saca de la pantalla).
   useEffect(() => {
     if (!abierto) return;
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setAbierto(false); };
     const atras = () => setAbierto(false);
+    const previo = history.state;
     history.pushState({ menu: 1 }, "");
     window.addEventListener("keydown", esc);
     window.addEventListener("popstate", atras);
     return () => {
       window.removeEventListener("keydown", esc);
       window.removeEventListener("popstate", atras);
-      if (history.state?.menu === 1) history.back();   // se cerró con la X o con un enlace: se saca la entrada que sumó
+      // Con la X o Esc se saca la entrada que sumó el menú. Con un enlace NO: un back() acá pisaba la navegación que el enlace estaba empezando (el menú del celular no llevaba a ningún lado); se le devuelve su estado a la entrada y listo.
+      if (history.state?.menu === 1) { if (porEnlace.current) history.replaceState(previo, ""); else history.back(); }
+      porEnlace.current = false;
     };
   }, [abierto]);
 
@@ -163,7 +182,7 @@ export function Navegacion(props: Props) {
               <li key={a.clave}>
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
-                  <span className={`relative text-2xl ${on ? "" : "grayscale-[40%] opacity-80"}`} aria-hidden>
+                  <span className={`relative text-2xl ${on ? "" : "opacity-80"}`} aria-hidden>
                     <Icono nombre={a.emoji} sistema />
                     {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
                   </span>
@@ -189,9 +208,9 @@ export function Navegacion(props: Props) {
             <p className="titulo text-2xl">Menú</p>
             <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú">✕</button>
           </div>
-          <Menu props={props} actual={actual} alElegir={() => setAbierto(false)} pendientes={pendientes} />
+          <Menu props={props} actual={actual} alElegir={() => { porEnlace.current = true; setAbierto(false); }} pendientes={pendientes} />
           <div className="mt-8 space-y-3">
-            <Link href="/panel/cuenta" onClick={() => setAbierto(false)} className="block px-3 text-sm hover:underline"><Icono nombre="persona" /> <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
+            <Link href="/panel/cuenta" onClick={() => { porEnlace.current = true; setAbierto(false); }} className="block px-3 text-sm hover:underline"><Icono nombre="persona" /> <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
             {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]"><Icono nombre="repetir" /> Cambiar de gimnasio</Link>}
             <Salir />
           </div>

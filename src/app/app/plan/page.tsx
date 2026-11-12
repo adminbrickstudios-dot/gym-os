@@ -18,9 +18,9 @@ export default async function PlanSocio({ searchParams }: { searchParams: Promis
     const opciones = await rpc<OpcionesCompra>("opciones_compra_app", { p_socio_id: s.socio_id }, { lectura: true });
     return (
       <div className="space-y-6" data-plan-socio>
-        <Link href={`/app/yo${q}`} className="texto-suave">← Volver</Link>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
         <div>
-          <h1 className="titular text-5xl">Mi plan</h1>
+          <h1 className="titular text-[28px]">Mi plan</h1>
           <p className="texto-suave text-lg mt-1">{opciones.plan_actual ? <>Ahora estás en <b>{opciones.plan_actual.nombre}</b>.</> : "Todavía no tenés un plan mensual."} Elegí otro plan o un pase.</p>
         </div>
         <ComprarPlan socioId={s.socio_id} gimnasioId={g.id} opciones={opciones} />

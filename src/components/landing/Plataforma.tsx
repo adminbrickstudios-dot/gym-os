@@ -148,11 +148,12 @@ export function PlataformaLanding({ planes, linkDemo = null, capturas = [] }: { 
 
       <section className="mx-auto max-w-5xl px-4 sm:px-8 py-12 space-y-6">
         <p className="titulo-grupo">Pensado para cada gimnasio</p>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          {([["", "Tu marca", "Tu dirección, tu logo y tus colores. Tu página con tus planes y horarios."],
-             ["", "Sin instalar nada", "Tus socios entran con QR y miran su estado desde el celular."],
-             ["", "No se frena", "Si se corta internet, la puerta sigue andando y todo se registra al volver."]] as const).map(([e, t, d]) => (
-            <li key={t} className="tarjeta p-5 space-y-2"><p className="text-3xl" aria-hidden><Icono nombre={e} /></p><p className="titulo text-xl">{t}</p><p className="texto-suave">{d}</p></li>
+        {/* DISENO: lista con jerarquía, no una grilla de tarjetas iguales. */}
+        <ul className="border-t border-[var(--borde)]">
+          {([["web", "Tu marca", "Tu dirección, tu logo y tus colores. Tu página con tus planes y horarios."],
+             ["celular", "Sin instalar nada", "Tus socios entran con QR y miran su estado desde el celular."],
+             ["senal", "No se frena", "Si se corta internet, la puerta sigue andando y todo se registra al volver."]] as const).map(([e, t, d]) => (
+            <li key={t} className="border-b border-[var(--borde)] py-4 flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-8"><p className="titulo text-2xl sm:w-64 flex-none flex items-center gap-3"><span className="text-[var(--acento)]" aria-hidden><Icono nombre={e} /></span>{t}</p><p className="texto-suave">{d}</p></li>
           ))}
         </ul>
       </section>

@@ -49,7 +49,7 @@ export default async function DetalleClase({ params }: { params: Promise<{ id: s
         <VolverAlOrigen href="/panel/clases" texto="Clases" className="texto-suave hover:text-[var(--texto)]" />
         <header className="mt-4 mb-8">
           <p className="text-4xl" aria-hidden><Icono nombre={clase.emoji ?? "calendario"} /></p>
-          <h1 className="titular text-5xl sm:text-6xl mt-3">{clase.actividad ?? "Clase"}</h1>
+          <h1 className="titular text-[28px] mt-3">{clase.actividad ?? "Clase"}</h1>
           <p className="texto-suave text-lg mt-2 first-letter:uppercase">{hora(clase.inicio)}{clase.profe ? ` · ${clase.profe}` : ""}{clase.cupo != null ? ` · ${clase.confirmadas} de ${clase.cupo} lugares` : ""}</p>
           {clase.cancelada && <p className="pildora pildora-rojo mt-4"><Icono nombre="prohibido" /> Cancelada: {clase.cancelada_motivo}</p>}
         </header>

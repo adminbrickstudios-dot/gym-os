@@ -66,7 +66,7 @@ export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; soc
     <section className="tarjeta p-6 text-center space-y-3" data-mi-qr data-codigo={qr.codigo} data-vencido={vencido ? "si" : "no"} aria-label="Tu QR para entrar">
       <p className="titulo text-2xl"><Icono nombre="celular" /> Tu QR para entrar</p>
       {/* Fondo blanco siempre: un lector no lee un QR sobre fondo oscuro. */}
-      <div className="mx-auto w-64 max-w-full aspect-square rounded-2xl bg-white p-3" aria-hidden
+      <div className="mx-auto w-64 max-w-full aspect-square rounded-[var(--radio)] bg-white p-3" aria-hidden
         style={vencido ? { opacity: 0.08 } : undefined}
         dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
       {vencido

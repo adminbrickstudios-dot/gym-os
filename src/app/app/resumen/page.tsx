@@ -19,8 +19,8 @@ export default async function MiAnio({ searchParams }: { searchParams: Promise<{
     const logradas = r.insignias.filter((i) => i.lograda);
     return (
       <div className="space-y-6" data-mi-anio>
-        <Link href={`/app/yo${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl">Mi año {r.anio.anio}</h1>
+        <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]">Mi año {r.anio.anio}</h1>
         <section className="tarjeta p-5 space-y-2" aria-label="Resumen del año" data-resumen-anio>
           {frases.length ? frases.map((f) => <p key={f} className="text-lg">{f}</p>) : <p className="texto-suave text-lg">Todavía no hay entradas este año. Cuando vengas, acá vas a ver cómo te va.</p>}
         </section>

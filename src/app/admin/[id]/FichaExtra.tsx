@@ -8,7 +8,7 @@ const NOMBRE_SECCION: Record<string, string> = {
   entrada: "Entrada", clases: "Clases", vencen_hoy: "Vencen hoy", socios: "Socios", retencion: "Retención", rutinas: "Rutinas",
   caja: "Caja", vender: "Vender", resultado: "Resultado", transferencias: "Transferencias", pt: "Turnos de entrenador",
 };
-const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{m}</p> : null);
+const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
 /** Links por rol con botón de copiar (SA-3, pestaña Links). */
 export function LinksPorRol({ links }: { links: { rol: string; nombre: string; url: string }[] }) {

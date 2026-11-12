@@ -6,6 +6,7 @@ import { ContrasenaNueva } from "@/components/cuentas/AccesoPersona";
 import { NOMBRE_ROL, type Rol } from "@/lib/panel/secciones";
 import { agregarDominio, agregarPersona, quitarDominio, type Resultado } from "../acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 
 export function AgregarPersona({ gimnasioId }: { gimnasioId: string }) {
   const [estado, accion, guardando] = useActionState<Resultado, FormData>(agregarPersona, {});
@@ -30,15 +31,17 @@ export function Direcciones({ gimnasioId, dominios }: { gimnasioId: string; domi
   const [estado, accion, guardando] = useActionState<Resultado, FormData>(agregarDominio, {});
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
+  const [confirmar, dialogo] = useConfirmar();
   return (
     <div className="space-y-3">
+      {dialogo}
       <ul className="space-y-2">
         {dominios.map((d) => (
           <li key={d.dominio_id} className="tarjeta p-4 flex flex-wrap items-center gap-3">
             <span className="flex-1 min-w-0 break-all"><strong>{d.host}</strong> <span className="texto-tenue text-sm">· {d.tipo === "propio" ? "dirección propia" : "subdominio de Base"}</span></span>
             {d.tipo === "propio" && (
               <button type="button" className="boton boton-chico texto-suave" disabled={ocupado}
-                onClick={() => { if (confirm(`¿Quitar ${d.host}? El gimnasio deja de abrir en esa dirección.`)) empezar(async () => setError((await quitarDominio(gimnasioId, d.dominio_id)).error ?? null)); }}>
+                onClick={async () => { if (await confirmar(`Vas a quitar ${d.host}. El gimnasio deja de abrir en esa dirección.`, { boton: "Quitar", peligro: true })) empezar(async () => setError((await quitarDominio(gimnasioId, d.dominio_id)).error ?? null)); }}>
                 Quitar
               </button>
             )}

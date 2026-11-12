@@ -11,6 +11,7 @@ import { ParaRevisar } from "./ParaRevisar";
 import type { CobrosMedio, ConfigCaja, MiTurno, ParaRevisar as ParaRevisarT } from "./tipos";
 import { AbrirCaja, TurnoAbierto } from "./Turno";
 import { Icono } from "@/components/ui/Icono";
+import { Vacio } from "@/components/ui/Vacio";
 
 export const metadata: Metadata = { title: "Caja" };
 type Caja = { caja_id: string; nombre: string; activa: boolean; turno_id: string | null; abierta_en: string | null; abierta_por: string | null; vencida: boolean };
@@ -46,7 +47,7 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
             {ve && <Link href={`/panel/caja/reporte${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton" data-reporte-dia><Icono nombre="lista" /> Cierre del día</Link>}</div>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja" />}
         {revisar.length > 0 && <ParaRevisar cajas={revisar} zona={panel.gimnasio.zona_horaria} pedirBilletes={config.pedir_billetes} />}
-        {cajas.length === 0 && <p className="texto-suave text-lg">Esta sede no tiene cajas activas.</p>}
+        {cajas.length === 0 && <Vacio icono="caja" titulo="Esta sede no tiene cajas activas">{panel.yo.rol === "dueno" || panel.yo.rol === "encargado" ? "Sin una caja activa no se puede abrir un turno ni cobrar en efectivo." : "Pedile al dueño que active una caja en Configuración."}</Vacio>}
         <div className="space-y-4">
           {cajas.map((c, i) => c.turno_id
             ? <TurnoAbierto key={c.caja_id} turnoId={c.turno_id} cajaId={c.caja_id} nombre={c.nombre} desde={`Desde las ${hora(c.abierta_en!)}${c.abierta_por ? ` · la abrió ${c.abierta_por}` : ""}`} resumen={resumenes[i]} cobros={cobros[i]}

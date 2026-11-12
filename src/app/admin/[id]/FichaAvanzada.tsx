@@ -2,11 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 import { formatearPesos } from "@/lib/formato";
 import { whatsappDueno } from "@/lib/admin/lista";
 import { borrarDefinitivo, clonarConfiguracion, guardarDescuento, guardarPrueba, quitarDescuento, reprocesarWebhook, restaurarPlan, restaurarSocio } from "../acciones";
 
-const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{m}</p> : null);
+const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 const diaLargo = (d: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
 
 export type AbonoDetalle = {
@@ -97,7 +98,7 @@ export function Clonar({ destino, otros }: { destino: string; otros: { id: strin
           setMsj(r.error ? { texto: r.error } : { ok: true, texto: r.aviso }); if (!r.error) router.refresh();
         }}>Copiar la configuración</BotonAccion>
       </div>
-      {msj.texto && <p role={msj.ok ? "status" : "alert"} className={msj.ok ? "texto-suave" : "pildora pildora-rojo !rounded-2xl !px-4 !py-3"}>{msj.texto}</p>}
+      {msj.texto && <p role={msj.ok ? "status" : "alert"} className={msj.ok ? "texto-suave" : "pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"}>{msj.texto}</p>}
     </div>
   );
 }
@@ -107,12 +108,15 @@ export function BorrarDefinitivo({ gimnasioId, nombre }: { gimnasioId: string; n
   const router = useRouter();
   const [escrito, setEscrito] = useState("");
   const [error, setError] = useState("");
+  const [confirmar, dialogo] = useConfirmar();
   return (
     <div className="tarjeta p-4 space-y-2" data-borrar-definitivo>
+      {dialogo}
       <p className="font-semibold">Borrado definitivo</p>
       <p className="texto-suave text-sm">Pasados 30 días de la baja. Se borran los datos personales de los socios y del equipo, y el gimnasio queda como &ldquo;Gimnasio borrado&rdquo;. Los pagos y las entradas se conservan sin nombre, para que la plata cuadre. No se puede deshacer.</p>
       <label className="space-y-1 block"><span className="etiqueta">Escribí el nombre del gimnasio: {nombre}</span><input className="campo" value={escrito} onChange={(e) => setEscrito(e.target.value)} /></label>
-      <BotonAccion className="boton texto-suave" disabled={escrito.trim() !== nombre} onClick={async () => {
+      <BotonAccion className="boton boton-peligro" disabled={escrito.trim() !== nombre} onClick={async () => {
+        if (!(await confirmar(`Vas a borrar definitivamente los datos personales de ${nombre}. Esto no se puede deshacer.`, { boton: "Borrar definitivamente", peligro: true }))) return;
         const r = await borrarDefinitivo(gimnasioId, escrito);
         if (r.error) { setError(r.error); return; } router.refresh();
       }}>Borrar definitivamente</BotonAccion>

@@ -81,7 +81,7 @@ export function MisSesiones({ socioId, datos, zona }: { socioId: string; datos: 
                   <li key={l.franja_id}>
                     <BotonAccion className="boton w-full !min-h-14 flex-col" ocupadoTexto="Reservando…" data-reservar-franja={l.franja_id}
                       onClick={() => correr(() => reservarMiSesion(socioId, l.franja_id), `Listo: turno reservado el ${corto(l.inicio, zona)} con ${l.entrenador}.`)}>
-                      <span className="numero text-lg">{hora(l.inicio, zona)}</span><span className="text-xs texto-suave">{l.entrenador}</span>
+                      <span className="numero text-lg">{hora(l.inicio, zona)}</span><span className="text-[13px] texto-suave">{l.entrenador}</span>
                     </BotonAccion>
                   </li>
                 ))}

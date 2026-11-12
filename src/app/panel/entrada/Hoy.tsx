@@ -29,7 +29,7 @@ export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
           {ingresos.slice(0, 40).map((i) => (
             <li key={i.ingreso_id} data-ingreso={i.resultado}>
               <div className="flex items-center gap-1">
-                <LinkPanel href={`/panel/socios/${i.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1 flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[var(--tarjeta)]" textoClassName="min-w-0 flex-1 flex items-center gap-3 rounded-xl px-2 py-2">
+                <LinkPanel href={`/panel/socios/${i.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1 flex items-center gap-3 rounded-[var(--radio)] px-2 py-2 hover:bg-[var(--tarjeta)]" textoClassName="min-w-0 flex-1 flex items-center gap-3 rounded-[var(--radio)] px-2 py-2">
                   <span className="numero text-lg w-12 flex-none texto-suave">{hora(i.momento)}</span>
                   <PuntoEstado color={i.resultado === "rechazado" ? "rojo" : i.resultado === "forzado" ? "naranja" : i.color} />
                   <span className="min-w-0 flex-1">
@@ -40,7 +40,7 @@ export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
                   </span>
                 </LinkPanel>
                 {anulando !== i.ingreso_id && (
-                  <button type="button" className="flex-none size-11 rounded-xl texto-tenue hover:bg-[var(--tarjeta)]" aria-label={`Anular la entrada de ${i.socio}`}
+                  <button type="button" className="flex-none size-11 rounded-[var(--radio)] texto-tenue hover:bg-[var(--tarjeta)]" aria-label={`Anular la entrada de ${i.socio}`}
                     onClick={() => { setAnulando(i.ingreso_id); setMotivo(""); setError(null); }}>⋯</button>
                 )}
               </div>
@@ -58,6 +58,7 @@ export function Hoy({ ingresos, zona }: { ingresos: Ingreso[]; zona: string }) {
           ))}
         </ul>
       )}
+      {ingresos.length > 40 && <p className="texto-tenue text-[13px] mt-2" data-hoy-recortada>Se ven las 40 más recientes de {ingresos.length} de hoy.</p>}
     </section>
   );
 }

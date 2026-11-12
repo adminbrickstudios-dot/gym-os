@@ -291,10 +291,10 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
                       </div>
                     )}
                     <div className="flex items-center gap-2 mt-2">
-                      <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined}
+                      <button type="button" aria-label="Uno menos" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined}
                         onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                       <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                      <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.tipo === "otro" || (l.tipo === "cuota" && !!parcial)}
+                      <button type="button" aria-label="Uno más" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.tipo === "otro" || (l.tipo === "cuota" && !!parcial)}
                         title={l.tipo === "cuota" && parcial ? "La primera cuota es parcial: se cobra sola" : undefined}
                         onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                       {l.descuento == null
@@ -324,7 +324,7 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
               </span>
             )}
           </div>
-          {msjCupon.ok && <p className="text-sm mt-2" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</p>}
+          {msjCupon.ok && <p className="text-sm mt-2" style={{ color: "var(--ok)" }}>✓ {msjCupon.ok}</p>}
           {msjCupon.error && <p role="alert" className="text-sm pildora pildora-rojo whitespace-normal mt-2"><Icono nombre="alerta" /> {msjCupon.error}</p>}
 
           {agregando && (

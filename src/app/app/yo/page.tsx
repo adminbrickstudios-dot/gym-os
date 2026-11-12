@@ -52,7 +52,7 @@ export default async function Yo({ searchParams }: { searchParams: Promise<{ soc
     return (
       <div className="space-y-6" data-yo>
         <div>
-          <h1 className="titular text-5xl">{s.nombre} {s.apellido}</h1>
+          <h1 className="titular text-[28px]">{s.nombre} {s.apellido}</h1>
           <p className="texto-tenue mt-1">Socio #{s.numero}</p>
           {dni && <p className="texto-suave mt-1" data-yo-dni>DNI {formatearDni(dni)} · si hay que cambiarlo, lo hace la recepción</p>}
           {yo.socios.length > 1 && <Link href="/app" className="text-sm texto-tenue underline">Cambiar de socio</Link>}

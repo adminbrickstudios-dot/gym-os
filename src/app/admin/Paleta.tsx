@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { filtrarComandos, type Comando } from "@/lib/admin/paleta";
+import { Icono } from "@/components/ui/Icono";
 
 export type GimnasioPaleta = { id: string; nombre: string; slug: string };
 
@@ -35,7 +36,10 @@ export function Paleta({ gimnasios }: { gimnasios: GimnasioPaleta[] }) {
     return () => window.removeEventListener("keydown", tecla);
   }, []);
   useEffect(() => { if (abierta) entrada.current?.focus(); }, [abierta]);
-  if (!abierta) return null;
+  if (!abierta) return (
+    <button type="button" onClick={() => { setAbierta(true); setQ(""); setSel(0); }} data-abrir-paleta aria-label="Buscar o ir a (Ctrl K)" title="Buscar (Ctrl K)"
+      className="fixed z-40 right-4 bottom-4 size-12 rounded-full bg-[var(--acento)] text-[var(--sobre-acento)] grid place-items-center text-xl active:scale-95 transition-transform" style={{ boxShadow: "var(--sombra-flota)" }}><Icono nombre="buscar" /></button>
+  );
   const ir = (c: Comando | undefined) => { if (!c) return; setAbierta(false); router.push(c.destino); };
   return (
     <div className="fixed inset-0 z-50 grid place-items-start justify-center bg-black/40 p-4 pt-[15vh]" role="dialog" aria-modal="true" aria-label="Buscar o ir a" data-paleta onClick={() => setAbierta(false)}>

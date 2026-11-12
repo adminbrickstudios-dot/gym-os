@@ -102,7 +102,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
           {conError.length > 0 && (
             <ul className="space-y-2 max-h-80 overflow-auto">
               {conError.slice(0, 100).map((f) => (
-                <li key={f.fila} className="rounded-xl border border-[var(--borde)] p-3" data-fila-error={f.fila}>
+                <li key={f.fila} className="rounded-[var(--radio)] border border-[var(--borde)] p-3" data-fila-error={f.fila}>
                   <p className="font-semibold">Fila {f.fila + 1}{f.datos.nombre ? ` · ${f.datos.nombre} ${f.datos.apellido ?? ""}` : ""}</p>
                   <p className="text-sm texto-suave">{f.errores.join(" · ")}</p>
                 </li>

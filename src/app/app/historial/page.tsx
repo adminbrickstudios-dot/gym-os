@@ -27,7 +27,7 @@ export default async function HistorialSocio({ searchParams }: { searchParams: P
     return (
       <div className="space-y-8">
         <Link href={`/app/yo${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
-        <h1 className="titular text-5xl"><Icono nombre="recibo" /> Mi historial</h1>
+        <h1 className="titular text-[28px]"><Icono nombre="recibo" /> Mi historial</h1>
         <section aria-labelledby="pagos" data-historial-pagos>
           <h2 id="pagos" className="titulo text-2xl mb-3">Pagos</h2>
           {h.pagos.length === 0 ? <p className="texto-suave">Todavía no hay pagos.</p> : (

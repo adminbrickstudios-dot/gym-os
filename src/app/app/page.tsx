@@ -89,7 +89,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const bloquePago = (
       <>
         {yo.pendiente && (
-          <p className="pildora pildora-azul !rounded-2xl !px-4 !py-3 w-full"><Icono nombre="recibo" /> Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
+          <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full"><Icono nombre="recibo" /> Informaste {formatearPesos(yo.pendiente.monto)}: el gimnasio lo está revisando.</p>
         )}
         {!yo.pendiente && online?.disponible && <PagarOnline socioId={s.socio_id} monto={online.monto!} descripcion={online.descripcion!} adelantar={!debePagar} />}
         {!yo.pendiente && debePagar && yo.transferencia && (

@@ -18,7 +18,7 @@ export default async function AyudaSocio({ searchParams }: { searchParams: Promi
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="titular text-5xl">Ayuda</h1>
+          <h1 className="titular text-[28px]">Ayuda</h1>
           <p className="texto-suave mt-2">Buscá lo que no sepas hacer. ¿Buscás horarios o el reglamento? Están en <Link href="/app/info" className="underline">Info del gimnasio</Link>.</p>
         </div>
         <p><Link href="/app/ayuda/guia" className="boton" data-ayuda-guia>Guía del socio, paso a paso</Link></p>

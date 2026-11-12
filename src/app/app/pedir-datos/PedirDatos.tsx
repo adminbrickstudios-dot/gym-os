@@ -16,7 +16,7 @@ export function PedirDatos({ socioId }: { socioId: string }) {
   const [hecho, setHecho] = useState(false);
   const [enviando, empezar] = useTransition();
 
-  if (hecho) return <p className="pildora pildora-verde !rounded-2xl !px-4 !py-3 w-full" role="status" data-pedido-enviado><Icono nombre="ok" /> Listo: el gimnasio recibió tu pedido.</p>;
+  if (hecho) return <p className="pildora pildora-verde !rounded-[var(--radio)] !px-4 !py-3 w-full" role="status" data-pedido-enviado><Icono nombre="ok" /> Listo: el gimnasio recibió tu pedido.</p>;
   return (
     <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await pedirMisDatos(socioId, tipo, detalle); if (r.error) setError(r.error); else { setError(null); setHecho(true); } }); }}>
       <div className="space-y-2" role="radiogroup" aria-label="Qué querés pedir">
