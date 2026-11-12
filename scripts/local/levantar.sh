@@ -67,6 +67,9 @@ if [[ "$(psql -Atc "select count(*) from public.gimnasios where slug = 'demo'" "
   node scripts/datos/sembrar-demo.mjs --url "$URL" --dominio localhost --socios "${SOCIOS_DEMO:-300}"
 fi
 node scripts/datos/usuarios-demo.mjs --url "$URL" --supabase "http://127.0.0.1:$PUERTO_SUPABASE" --servicio "$SUPABASE_SERVICE_ROLE_KEY"
+# F8.1: con una base recién sembrada (5.000 socios) el planificador no tiene estadísticas hasta que autovacuum pasa (a los minutos): sin esto,
+# las primeras pantallas medidas tardan segundos por un plan viejo y no por la app. En producción lo hace autovacuum solo.
+psql -qc "analyze" "$URL" >/dev/null 2>&1 || true
 
 # Simulador de MercadoPago: el pago online de punta a punta sin cuenta real.
 parar mp
