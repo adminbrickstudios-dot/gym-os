@@ -40,6 +40,12 @@ if (col.length) {
     const h = t.host ?? "gym-os-pied.vercel.app";
     const [r] = await q(`select public.alta_publica($1) as alta, public.landing_publica($1) as landing`, [h]);
     console.log(`Temple Gym alta: tiene_host=${!!t.host} alta_publica_null=${r.alta === null} abierta=${r.alta?.abierta ?? "?"} landing_null=${r.landing === null} publicada=${r.landing?.publicada ?? "?"}`);
+    // Lo mismo, pero como el rol anónimo (el que usa la página pública).
+    try {
+      await db.query("begin"); await db.query("set local role anon");
+      const { rows: [an] } = await db.query(`select public.alta_publica($1) as alta, public.landing_publica($1) as landing`, [h]);
+      console.log(`Como anon: alta_null=${an.alta === null} abierta=${an.alta?.abierta ?? "?"} landing_null=${an.landing === null}`);
+    } catch (e) { console.log(`Como anon: ERROR ${e.message}`); } finally { await db.query("rollback").catch(() => {}); }
   }
 } else console.log("Funciones nuevas: la columna todavía no existe en producción");
 await db.end();
