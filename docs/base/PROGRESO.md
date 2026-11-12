@@ -1,7 +1,7 @@
 # PROGRESO de Base
 
 ## PUBLICACIÓN LISTA, ESPERANDO TU COPIA (11/11, noche): rama `publicar/base-hoy`
-Prevuelo en verde (Actions 43123213163): 11 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
+Prevuelo en verde (Actions 43135452461): 15 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo, términos y restaurar cambios, lista del super admin rápida, exportar con filtros, funciones nuevas apagadas). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
 Como Temple Gym ya cobra, **no aplico sin copia cifrada**. Pasos para vos, en orden:
 1. GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret: `COPIA_CLAVE` = una frase de 16+ caracteres al azar (guardala también en tu gestor de contraseñas: sin ella la copia no se abre).
 2. Actions → **Copias** → Run workflow (prueba la copia y que restaura en una base de prueba). Tiene que dar verde.
