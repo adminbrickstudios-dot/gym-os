@@ -12,6 +12,8 @@ try {
   let ultimo = "";
   for (let i = 0; i < 6; i++) {
     await p.goto(`${G}/ingresar?modo=socio`);
+    // D43: lo primero es mail y contraseña; el código por celular está en la vía "Celular".
+    if (!(await p.locator("input[name=telefono]").count())) await p.getByRole("button", { name: /Celular/ }).click();
     await p.fill("input[name=telefono]", TEL);
     await p.click('button:has-text("código")');
     // Ojo: Next pone su propio role=alert (el anunciador de rutas) fuera de <main>.

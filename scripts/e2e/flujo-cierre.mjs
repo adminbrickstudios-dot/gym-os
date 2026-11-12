@@ -31,9 +31,6 @@ try {
   const cobradoAntes = await cobrado(dueña);
   const cajaDueña = await pagina(b, COMPU);                     // otra compu de la dueña, con la caja abierta
   await entrar(cajaDueña, "duena@ejemplo.invalid");
-  await cajaDueña.goto(`${G}/panel/caja`);
-  await cajaDueña.locator("main h1").waitFor({ timeout: 60000 });
-  const cajaAntes = await totalCaja(cajaDueña);
   const socio = await pagina(b, CELU);                          // el celular del socio
   await entrar(socio, "socio-vencido@ejemplo.invalid");
   await socio.goto(`${G}/app`);
@@ -41,14 +38,28 @@ try {
   const bien = socio.locator("[data-bienvenida]");
   if (await bien.count()) { await bien.locator("[data-bienvenida-saltear], [data-bienvenida-listo]").first().click(); await bien.waitFor({ state: "detached", timeout: 30000 }); }
   chequear(await socio.locator("[data-cubierto-hasta]").count() === 0, "antes: el socio ve “No podés entrar” y no tiene cobertura", "el socio ya tenía cobertura");
-  ok(`antes: Resultado cobrado ${cobradoAntes}, caja ${cajaAntes}`);
+  ok(`antes: Resultado cobrado ${cobradoAntes}`);
 
   // ── La recepción cobra desde la ficha (Cobrar → Cobrar) ──
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
+  // La caja: la recepción abre su turno (sin turno no hay caja del día) y la dueña la mira desde otra compu.
+  await r.goto(`${G}/panel/caja`);
+  await r.locator("main h1").waitFor({ timeout: 60000 });
+  if (!(await r.locator('button:has-text("Cerrar caja")').count())) {
+    await r.locator('input[placeholder="$ 0"]').first().fill("1.000");
+    await r.locator('button:has-text("Abrir caja")').first().click();
+    await r.locator('button:has-text("Cerrar caja")').waitFor({ timeout: 30000 });
+  }
+  await cajaDueña.goto(`${G}/panel/caja`);
+  await cajaDueña.locator("main h1").waitFor({ timeout: 60000 });
+  await cajaDueña.locator("[data-medio], button:has-text('Cerrar caja')").first().waitFor({ timeout: 60000 });
+  const cajaAntes = await totalCaja(cajaDueña);
+  ok(`la recepción abrió su turno; la caja de la otra compu marca ${cajaAntes} cobrado`);
   await r.goto(`${G}/panel/socios/${vencida.id}`);
   await r.locator('main a:has-text("Cobrar")').first().click();
   await r.locator("[data-cobrar] [data-cobrar-confirmar]").waitFor({ timeout: 30000 });
+  await r.locator('[data-cobrar-medio="efectivo"]').click();      // efectivo: es lo que entra en la caja del turno
   const t0 = Date.now();
   await r.locator("[data-cobrar-confirmar]").click();
   const hecho = r.locator("[data-cobrar-hecho]");

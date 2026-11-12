@@ -32,9 +32,9 @@ try {
   await m.goto(`${PLATAFORMA}/g/demo`);
   await m.goto(`${PLATAFORMA}/ingresar?modo=socio`);
   chequear(((await m.locator("[data-marca-ingreso]").textContent())?.trim()) === nombreGim, "desde /g/demo también se ve la marca del demo", "desde /g/demo no se ve la marca del demo");
-  chequear(await m.getByText("Tu celular o tu mail", { exact: true }).isVisible() && await m.getByRole("button", { name: /Celular/ }).isVisible()
+  chequear(await m.locator("input[type=email]").isVisible() && await m.getByRole("button", { name: /Celular/ }).isVisible()
     && await m.getByRole("button", { name: /Mail/ }).isVisible() && await m.getByRole("button", { name: /Contraseña/ }).isVisible(),
-  "un campo “celular o mail” y los tres métodos a la vista", "faltan el campo o los métodos");
+  "D43: mail y contraseña a la vista y las tres vías (Contraseña, Celular, Mail)", "faltan el campo o los métodos");
   chequear(await sinDesborde(m), "celular 390: ingreso del socio sin desborde", "el ingreso del socio desborda en 390");
   await m.goto(`${G}/ingresar`);
   chequear(await sinDesborde(m), "celular 390: ingreso del equipo sin desborde", "el ingreso del equipo desborda en 390");
@@ -61,6 +61,8 @@ try {
   // 2 · Código por mail: se escribe el mail en el mismo campo y el código se verifica solo (sin apretar Entrar).
   const s = await pagina(b, CELU);
   await s.goto(`${G}/ingresar?modo=socio`);
+  // D43: lo primero es mail y contraseña; el código está en las vías "Celular" y "Mail".
+  if (!(await s.locator("input[name=telefono]").count())) await s.getByRole("button", { name: /Celular/ }).click();
   await s.fill("input[name=telefono]", MAIL);
   await s.locator("input[name=email]").waitFor({ timeout: 10000 });
   chequear(await s.getByRole("button", { name: /Mail/ }).getAttribute("aria-pressed") === "true", "con una @ el campo pasa solo a mail", "el campo no pasó a mail");
