@@ -43,23 +43,18 @@ try {
   chequear(await socio.locator("[data-cubierto-hasta]").count() === 0, "antes: el socio ve “No podés entrar” y no tiene cobertura", "el socio ya tenía cobertura");
   ok(`antes: Resultado cobrado ${cobradoAntes}, caja ${cajaAntes}`);
 
-  // ── La recepción cobra desde la Entrada (F2 → nombre → C → Enter) ──
+  // ── La recepción cobra desde la ficha (Cobrar → Cobrar) ──
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
-  await r.goto(`${G}/panel/socios`);
-  await r.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
-  await r.keyboard.press("F2");
-  await r.locator("[data-ventana-campo]").fill("Testigo Vencida");
-  await r.locator("button.fila", { hasText: "Vencida" }).first().click();
-  await r.locator("[data-ventana-cobrar]").waitFor({ timeout: 30000 });
-  await r.keyboard.press("c");
+  await r.goto(`${G}/panel/socios/${vencida.id}`);
+  await r.locator('main a:has-text("Cobrar")').first().click();
   await r.locator("[data-cobrar] [data-cobrar-confirmar]").waitFor({ timeout: 30000 });
-  await r.waitForFunction(() => document.activeElement?.hasAttribute("data-cobrar-confirmar"), null, { timeout: 10000 });
   const t0 = Date.now();
-  await r.keyboard.press("Enter");
-  await r.locator('[data-ventana-veredicto="verde"]').waitFor({ timeout: 30000 });
-  ok(`la recepción cobró y la Entrada quedó en verde (${Date.now() - t0} ms)`);
-  await r.keyboard.press("Escape");
+  await r.locator("[data-cobrar-confirmar]").click();
+  const hecho = r.locator("[data-cobrar-hecho]");
+  const error = r.locator('[data-cobrar] [role="alert"]');
+  await Promise.race([hecho.waitFor({ timeout: 30000 }), error.waitFor({ timeout: 30000 }).then(async () => { throw new Error(`al cobrar: ${await error.innerText()}`); })]);
+  ok(`la recepción cobró desde la ficha (${Date.now() - t0} ms)`);
   const [pago] = (await db.query(`select p.monto from public.pagos p join public.ventas v on v.id = p.venta_id where v.socio_id = $1 and p.estado = 'aprobado' order by p.creado_en desc limit 1`, [vencida.id])).rows;
   const monto = Number(pago.monto);
   ok(`en la base: pago aprobado de ${pesos(monto)}`);

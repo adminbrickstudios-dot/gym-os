@@ -55,7 +55,13 @@ const abrir = async (pantalla) => {
 };
 const sinDesborde = async (p) => (await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
 const foto = async (p, nombre) => { await p.screenshot({ path: join(CAPTURAS, `${nombre}.png`), fullPage: false }).catch(() => {}); };
-const esperarPantalla = async (p) => { await p.locator("h1").first().waitFor({ timeout: 60000 }); await p.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {}); };
+// La app del socio no tiene h1: saluda con "Hola, …" (data-hola). La bienvenida de la primera vez se saltea para ver la pantalla de verdad.
+const esperarPantalla = async (p) => {
+  await p.locator("h1, [data-hola]").first().waitFor({ timeout: 60000 });
+  const bien = p.locator("[data-bienvenida]");
+  if (await bien.count()) { await bien.locator("[data-bienvenida-saltear], [data-bienvenida-listo]").first().click().catch(() => {}); await bien.waitFor({ state: "detached", timeout: 15000 }).catch(() => {}); }
+  await p.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+};
 
 for (const pantalla of Object.keys(PANTALLAS)) {
   // Las puertas: cada una pide el ingreso, entra con su usuario y cae donde corresponde.
@@ -73,7 +79,7 @@ for (const pantalla of Object.keys(PANTALLAS)) {
       await p.click("button[type=submit]");
       await p.waitForURL((u) => puerta.aterriza.test(u.pathname), { timeout: 90000 });
       await esperarPantalla(p);
-      const titulo = (await p.locator("h1").first().innerText()).replace(/\s+/g, " ").slice(0, 80);
+      const titulo = (await p.locator("h1, [data-hola]").first().innerText()).replace(/\s+/g, " ").slice(0, 80);
       ok(`${etiqueta}: entra y cae en ${new URL(p.url()).pathname} (“${titulo}”)`);
       await foto(p, `${puerta.rol}-2-pantalla-${pantalla}`);
       chequear(await sinDesborde(p), `${etiqueta}: la pantalla entra en el ancho`, `${etiqueta}: la pantalla se desborda hacia el costado`);
