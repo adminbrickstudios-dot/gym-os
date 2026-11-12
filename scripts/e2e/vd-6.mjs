@@ -29,6 +29,7 @@ try {
   await r.keyboard.press("Enter");
   await r.locator("[data-ventana-nadie]").waitFor({ timeout: 30000 });
   chequear(/No hay nadie con el DNI/.test(await r.locator("[data-ventana-nadie]").innerText()), "DNI que no existe: “No hay nadie con el DNI …”", "no dice que no hay nadie");
+  const t0 = Date.now();   // detalle 14: del "No hay nadie" a "Entró" en menos de 30 s (con las capturas y la compu lenta de Actions de por medio)
   await r.locator("[data-ventana-alta]").click();
   const form = r.locator("[data-ventana-alta-form]");
   await form.waitFor({ timeout: 30000 });
@@ -66,6 +67,7 @@ try {
   await r.keyboard.press("Enter");
   await r.locator('[data-ventana-hecho="entro"]').waitFor({ timeout: 30000 });
   chequear(new URL(r.url()).pathname === "/panel/socios", "DNI nuevo → alta → cobro → entró, sin salir de la pantalla de origen", `terminó en ${r.url()}`);
+  chequear(Date.now() - t0 < 30000, `detalle 14: alta + cobro + entrada en ${Math.round((Date.now() - t0) / 1000)} s (menos de 30)`, `el alta tardó ${Math.round((Date.now() - t0) / 1000)} s (tope: 30)`);
   await capturar(r, "vd6-compu-entro");
   await r.keyboard.press("Escape");
   await r.locator("[data-ventana-campo]").waitFor({ state: "hidden", timeout: 10000 });   // F2 abre y cierra: se espera a que la ventana esté cerrada

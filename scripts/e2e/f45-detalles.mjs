@@ -40,6 +40,10 @@ try {
 
   // #20: una nota en la ficha aparece en el panel lateral
   await d.goto(`${G}/panel/socios/${verde}`);
+  // #22: la barra de vigencia de la ficha dice los días con palabras
+  await d.locator("[data-barra-vigencia]").waitFor({ timeout: 30000 });
+  const barra = (await d.locator("[data-barra-vigencia]").innerText()).replace(/\s+/g, " ");
+  chequear(/d[ií]a/i.test(barra), `#22: la ficha tiene la barra de vigencia (“${barra.slice(0, 60)}”)`, `la barra no dice los días: “${barra}”`);
   await d.locator('a.pestana:has-text("Notas")').click();
   await d.locator("[data-notas]").waitFor({ timeout: 30000 });
   await d.locator("[data-notas] textarea").fill(nota);

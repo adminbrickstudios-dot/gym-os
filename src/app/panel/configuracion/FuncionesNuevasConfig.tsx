@@ -2,7 +2,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { FUNCIONES_NUEVAS } from "@/lib/panel/funciones-nuevas";
+import { FUNCIONES_NUEVAS } from "@/lib/panel/funciones-nuevas-lista";
 import { guardarFuncionNueva, leerFuncionesNuevas } from "./acciones";
 
 /** F4/F5: funciones nuevas que arrancan apagadas. Cada gimnasio las prende cuando las quiere probar. */
