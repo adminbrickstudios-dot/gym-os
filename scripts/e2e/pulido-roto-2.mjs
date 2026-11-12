@@ -114,6 +114,7 @@ try {
   await ver.waitFor({ state: "detached", timeout: 10000 });
 
   // ── 4. Cobrar no se cierra mientras cobra ──
+  r.errores.length = 0;                            // los pedidos cortados a propósito arriba no cuentan
   const nombre = `H7Cobro${s5}`;
   await moroso(r, nombre);
   await r.goto(`${G}/panel/socios`);
@@ -204,7 +205,8 @@ try {
   await k.locator('button:has-text("Anotar")').click();
   await k.locator('button:has-text("Entra plata")').waitFor({ timeout: 30000 });
   const movs = await k.locator("main").innerText();
-  chequear(!EMOJI.test(movs) && /\+\s?\$\s?500|Entró|Cambio \(prueba\)/.test(movs) && /Limpieza \(prueba\)/.test(movs), "las entradas y salidas de plata se anotan sin emojis crudos", `texto: ${movs.slice(0, 200)}`);
+  // (la recepción no ve la lista de movimientos: arqueo ciego; se mira que la pantalla siga sin emojis tras anotar entrada y salida)
+  chequear(!EMOJI.test(movs) && await k.locator('button:has-text("Sale plata") svg').count() === 1, "tras anotar entrada y salida de plata, la caja sigue con íconos y sin emojis crudos", `texto: ${movs.slice(0, 200)}`);
 
   // 7. Cerrar y mandar el cierre por WhatsApp: la hora sale en la zona del gimnasio, no en la del navegador (Tokio).
   await k.locator('button:has-text("Cerrar caja")').first().click();
