@@ -12,7 +12,7 @@ export type ResultadoAlta = {
   dni?: string; menor?: boolean; pagoOnline?: boolean; sesion?: boolean;
 };
 
-const CAMPOS = ["plan", "nombre", "apellido", "dni", "telefono", "email", "contrasena", "fecha_nacimiento", "responsable_nombre", "responsable_telefono", "medio", "version", "acepto"] as const;
+const CAMPOS = ["origen", "plan", "nombre", "apellido", "dni", "telefono", "email", "contrasena", "fecha_nacimiento", "responsable_nombre", "responsable_telefono", "medio", "version", "acepto"] as const;
 
 /**
  * Hacerse socio (SOCIO-FLUJO §2): crea la cuenta con el mail y la contraseña que escribe (ya confirmada, sin mails), la ficha del socio
@@ -63,6 +63,10 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   let sesion = cuenta.sesionAbierta;
   if (!sesion) sesion = (await abrirSesion(datos.email, datos.contrasena)) === null;
   if (sesion) await recordarGimnasio();
+  // N4: de dónde llegó (si el gimnasio prendió la función; si no, la base no anota nada). Nunca frena el alta.
+  if (sesion && datos.origen) {
+    try { const { rpc } = await import("@/lib/panel/servidor"); await rpc("anotar_origen_alta", { p_socio_id: r.socio_id, p_canal: datos.origen }); } catch { /* el origen no es parte del alta */ }
+  }
   // "Pagar online" solo si el gimnasio conectó MercadoPago (lo dice la base; si falla, no se muestra).
   let pagoOnline = false;
   if (sesion) {

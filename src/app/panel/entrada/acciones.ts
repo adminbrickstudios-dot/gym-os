@@ -69,6 +69,9 @@ export async function registrarSalida(socioId: string, sedeId: string): Promise<
 
 type Apto = { pide: boolean; apto?: { vence: string; vigente: boolean } | null };
 
+/** N2: si la puerta ya dijo lo del apto (el gimnasio prendió que la entrada avise o frene), no se repite el aviso aparte. */
+const aptoYaDicho = (v: Veredicto) => /^Apto físico/.test(v.texto) || (v.avisos ?? []).some((a) => /^Apto físico/.test(a));
+
 /** El veredicto de la puerta, y aparte lo que el mostrador tiene que saber (no cambia si entra): el apto físico, si el gimnasio lo pide. */
 export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: Veredicto; guia?: Guia; apto?: string | null; firmar?: string | null; eventosHoy?: EventoHoy[]; error?: string }> {
   const panel = await contextoPanel();
@@ -86,7 +89,7 @@ export async function veredicto(socioId: string, sedeId: string): Promise<{ v?: 
     const dia = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
     const apto = !a.pide ? null : !a.apto ? "No presentó el apto físico" : !a.apto.vigente ? `El apto físico venció el ${dia(a.apto.vence)}` : null;
     const firmar = docs.pendientes.length ? `Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
-    return { v, guia, apto, firmar, eventosHoy };
+    return { v, guia, apto: aptoYaDicho(v) ? null : apto, firmar, eventosHoy };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
@@ -117,9 +120,10 @@ export async function entradaRapida(socioId: string, sedeId: string, soloEnVerde
     const apto = !a.pide ? null : !a.apto ? "No presentó el apto físico" : !a.apto.vigente ? `El apto físico venció el ${dia(a.apto.vence)}` : null;
     const firmar = docs.pendientes.length ? `Falta firmar: ${docs.pendientes.map((d) => d.titulo).join(", ")}` : null;
     const anotable = v.puede && guia.boton === "anotar" && (!soloEnVerde || v.color === "verde") && !apto && !firmar;
-    if (!anotable) return { v, guia, apto, firmar, eventosHoy };
+    const aptoMostrado = aptoYaDicho(v) ? null : apto;
+    if (!anotable) return { v, guia, apto: aptoMostrado, firmar, eventosHoy };
     const r = await rpc<ResultadoIngreso>("registrar_ingreso", { p_socio_id: socioId, p_sede_id: sede.id, p_via_acceso: "recepcion", p_forzar_motivo: null, p_promete_pagar_el: null });
-    return { v, guia, apto, firmar, eventosHoy, r };
+    return { v, guia, apto: aptoMostrado, firmar, eventosHoy, r };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

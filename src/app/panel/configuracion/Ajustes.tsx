@@ -35,6 +35,7 @@ import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/co
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
+import { FuncionesNuevas } from "./FuncionesNuevas";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 import { BuscadorConfig } from "./BuscadorConfig";
@@ -739,6 +740,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       )}
       {pestana === "entrada" && <ConfigEntrada inicial={entrada} puedeEditar={puedeEditar} />}
       {pestana === "mensajes" && <><div data-opcion="link-resena"><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /></div><div data-opcion="mensajes"><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></div></>}
+      {pestana === "funciones" && <FuncionesNuevas puedeEditar={puedeEditar} zona={d.zona_horaria} />}
       {pestana === "cambios" && <div data-opcion="historial"><Historial cambios={cambios} /></div>}
       {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
       {pestana === "gimnasio" && puedeEditar && (
