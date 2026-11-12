@@ -106,14 +106,14 @@ try {
   chequear((await r.getByLabel("Buscar socio").count()) === 1, "la pantalla sigue usable para reintentar", "la pantalla quedó rota");
 
   // 5. Reservar una clase desde la app del socio: se ve hecha al toque (con el servidor frenado 1,5 s) y queda en la base.
-  const [{ id: socioApp, telefono: telApp }] = (await db.query(`select id, telefono from public.socios where gimnasio_id = $1 and nombre = 'Testigo' and apellido = 'Al Día'`, [gim])).rows;
+  const [{ id: socioApp, telefono: telApp }] = (await db.query(`select id, telefono from public.socios where gimnasio_id = $1 and nombre = 'Testigo' and apellido = 'Por Vencer'`, [gim])).rows;
   const [{ id: act }] = (await db.query(`select id from public.actividades where gimnasio_id = $1 and activa limit 1`, [gim])).rows;
   const [{ id: sede }] = (await db.query(`select id from public.sedes where gimnasio_id = $1 and es_principal`, [gim])).rows;
   const [{ id: clase }] = (await db.query(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, cupo) values ($1,$2,$3, now() + interval '3 days', now() + interval '3 days 1 hour', 10) returning id`, [gim, sede, act])).rows;
   try {
     const a = await pagina(b, COMPU);
     a.setDefaultNavigationTimeout(120000);
-    await entrarSocio(a, telApp);
+    await entrarSocio(a, telApp).catch((e) => { throw new Error(`entrar como socio: ${String(e.message).slice(0, 120)} (en ${a.url()})`); });
     await a.goto(`${G}/app/clases?reservar=1`);
     const boton = a.locator('[data-reservar-boton][data-reservada="no"]').first();
     await boton.waitFor({ timeout: 60000 });
