@@ -1,6 +1,14 @@
 # PROGRESO de Base
 
-## PUBLICACIONES LISTAS (12/11, 18:30), esperan las 22 h
+## LISTO PARA CAMBIAR LOS DOMINIOS (12/11, publicado entre las 19:50 y las 20:15 hora de Argentina, con tu autorización, sin copia)
+Mateo: ya podés seguir `docs/base/DOMINIO.md`, en orden (la variable `NEXT_PUBLIC_DOMINIOS_VIEJOS=gym-os-pied.vercel.app` es la que salva el QR impreso; la dirección propia de Temple Gym se carga en el super admin recién DESPUÉS del Redeploy).
+Publicado hoy:
+1. **PR #18** (dominios, solo código): `gym-os-pied.vercel.app` y `www.` redirigen con 308; deploy en verde; Temple Gym `/g/templegym1`, `/g/templegym1/hacete-socio`, `/ingresar` en 200, `/super` pide sesión.
+2. **PR #19** (H2c fechas de cobertura + prevención de la fase D): migraciones `20261112050000` y `20261112200000` aplicadas **sin copia** (corrida 43324347571, chequeos en verde) y luego merge, deploy en verde. Humo en producción en el demo con rollback (corrida 43324855643): Cobrar propone "cubre del … al …", fechas cambiadas con la propuesta y quién las cambió, `cubierto_hasta` = recalculado, la recepción rechazada, Control lo muestra; no quedó nada guardado.
+3. **PR #20** (fase Q, pulido Z, resto): migración `20261112210000` aplicada sin copia (corrida 43325742385); validado antes en Actions (base 1117 pruebas sin fallas y 10 recorridos en verde); merge, deploy en verde, mismas páginas en 200.
+Temple Gym sigue con 0 funciones nuevas prendidas (estado, corrida 43326431319). No quedó nada sin publicar de lo que estaba en verde. Sin sesión real de demo no pude abrir las pantallas con el navegador: lo de pantalla se verificó con los recorridos e2e en Actions y lo de la base contra producción.
+
+## (anterior) PUBLICACIONES LISTAS (12/11, 18:30), esperan las 22 h
 1. **Dominios (D1/D2), solo código y documentación, sin migraciones: PR #18** (`publicar/base-dominios`). Se mergea **después de las 22 h** (hora de Argentina). Cuando esté mergeado y el deploy en verde, acá va a decir "LISTO PARA CAMBIAR LOS DOMINIOS" y Mateo sigue `docs/base/DOMINIO.md` (ojo: la variable nueva `NEXT_PUBLIC_DOMINIOS_VIEJOS` es la que salva el QR impreso).
 2. **H2c (fechas de cobertura) y la prevención de la fase D: PR #19** (`publicar/base-h2c`). Trae 2 migraciones (`20261112050000` y `20261112200000`, aditivas). Prevuelo contra la base real en verde (corrida 43309182849). **No hay `COPIA_CLAVE`, así que no las aplico solo.** Pasos de Mateo, después de las 22 h: (a) Actions → Base de datos → rama `publicar/base-h2c`, acción `aplicar`, y si no hay copia, en `sin_copia` escribir `SIN COPIA` (decisión tuya; son funciones nuevas y columnas vacías, no tocan filas); (b) mergear el PR #19 y esperar el deploy en verde; (c) abrir Cobrar de un socio y ver "Cubre del … al …" con "Cambiar fechas" (dueño). **No mergear el #19 antes de aplicar las migraciones: la pantalla de Cobrar las necesita.** Si decís "SIN COPIA, hacelo", el loop lo hace solo después de las 22 h.
 
