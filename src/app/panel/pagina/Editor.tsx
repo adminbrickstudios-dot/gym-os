@@ -468,7 +468,10 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
         <div className="lg:hidden fixed inset-0 z-50 bg-[var(--fondo)] flex flex-col" role="dialog" aria-label="Cómo queda la página">
           <div className="p-3 flex items-center justify-between gap-2 border-b border-[var(--borde)]">
             <p className="font-semibold"><Icono nombre="ojo" /> Así la ve la gente</p>
-            <button type="button" className="boton" onClick={() => setVerVista(false)}><Icono nombre="lapiz" /> Volver a editar</button>
+            <span className="flex items-center gap-2">
+              <button type="button" className="boton" onClick={() => setVerVista(false)}><Icono nombre="lapiz" /> Volver a editar</button>
+              <button type="button" onClick={() => setVerVista(false)} aria-label="Cerrar" data-cerrar-hoja className="grid place-items-center size-11 rounded-[var(--radio-campo)] texto-suave"><Icono nombre="cerrar" /></button>
+            </span>
           </div>
           <div className="flex-1 min-h-0 p-2">{VistaCelu}</div>
         </div>

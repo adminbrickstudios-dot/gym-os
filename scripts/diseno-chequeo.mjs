@@ -18,6 +18,8 @@ const ARCHIVOS_CON_COLOR = new Set([
   "src/app/layout.tsx",           // viewport.themeColor pide un color literal (el del tema claro por defecto)
   "src/app/panel/configuracion/Ajustes.tsx",   // las muestras de fondo y de acento que ofrece el selector: son datos, no estilos
   "src/app/panel/grados/Grados.tsx",           // el color inicial del cinturón nuevo: dato del gimnasio
+  "src/app/icono/route.tsx",      // imagen del ícono de la app (PNG generado, no hay CSS): el verde de Base solo si el gimnasio no tiene acento
+  "src/app/ingresar/IngresoSocio.tsx", // el logo de Google del botón "Entrar con Google": los cuatro colores de su marca son obligatorios
 ]);
 // La tabla emoji → ícono de Icono.tsx tiene que nombrar los emojis para traducirlos: es lo único que los puede nombrar.
 const ARCHIVOS_CON_EMOJI = new Set(["src/components/ui/Icono.tsx"]);
