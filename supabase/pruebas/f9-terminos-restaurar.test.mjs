@@ -14,7 +14,7 @@ async function como(usuario, fn) {
 }
 const fallaComo = (usuario, fn, patron) => como(usuario, () => t.falla(fn, patron));
 const rpc = (usuario, sql, params) => como(usuario, async () => (await t.q(sql, params))[0]);
-const ultimo = async (campo) => (await t.q(`select id, antes, despues from public.historial_configuracion where gimnasio_id = $1 and campo = $2 order by cambiado_en desc, id limit 1`, [t.g, campo]))[0];
+const ultimo = async (campo) => (await t.q(`select id, antes, despues from public.historial_configuracion where gimnasio_id = $1 and campo = $2 order by cambiado_en desc, (despues is not distinct from privado.valor_actual_campo(gimnasio_id, campo)) desc, id limit 1`, [t.g, campo]))[0];
 const restaurables = (usuario) => como(usuario, async () => (await t.q(`select public.cambios_restaurables($1) as r`, [t.g]))[0].r);
 
 before(async () => {
