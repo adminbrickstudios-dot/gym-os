@@ -30,8 +30,8 @@ export function ProgresoInicio({ p }: { p: ProgresoSocio }) {
         <ol className="grid grid-cols-7 gap-1 text-center" aria-label="Días de esta semana">
           {p.semana.map((d, i) => (
             <li key={d.dia} data-dia-vino={d.vino ? "si" : "no"} aria-label={`${LETRA[i]}: ${d.vino ? "viniste" : d.hoy ? "hoy" : "no viniste"}`}>
-              <span className={`mx-auto grid place-items-center size-8 rounded-full text-sm ${d.vino ? "text-[var(--sobre-acento)]" : "texto-tenue border border-[var(--borde)]"} ${d.hoy ? "ring-2 ring-[var(--acento)]" : ""}`}
-                style={d.vino ? { background: "var(--acento)" } : undefined}>{d.vino ? "✓" : ""}</span>
+              <span className={`mx-auto grid place-items-center size-8 rounded-full text-sm ${d.vino ? "text-white" : "texto-tenue border border-[var(--borde)]"} ${d.hoy ? "ring-2 ring-[var(--acento)]" : ""}`}
+                style={d.vino ? { background: "var(--acento)" } : undefined}>{d.vino ? <Icono nombre="ok" /> : null}</span>
               <span className="block text-[13px] texto-tenue mt-1">{LETRA[i]}</span>
             </li>
           ))}

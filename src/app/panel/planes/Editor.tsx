@@ -107,7 +107,7 @@ function FilaPlan({ p, lista, fecha, hoy, actividades, incluye, matricula, ajust
                     <label key={a.actividad_id} className={`boton !min-h-11 cursor-pointer ${si ? "!border-[var(--acento)]" : ""}`}>
                       <input type="checkbox" className="sr-only" checked={si} aria-label={a.nombre}
                         onChange={() => setDatos({ ...datos, actividades: si ? datos.actividades.filter((x) => x !== a.actividad_id) : [...datos.actividades, a.actividad_id] })} />
-                      {si ? "✓ " : ""}<Icono nombre={a.emoji ?? ""} /> {a.nombre}
+                      {si ? <><Icono nombre="ok" /> </> : null}<Icono nombre={a.emoji ?? ""} /> {a.nombre}
                     </label>
                   );
                 })}

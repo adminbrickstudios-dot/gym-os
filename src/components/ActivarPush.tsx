@@ -102,7 +102,7 @@ export function ActivarPush() {
           </div>
         </>
       )}
-      {aviso.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}>✓ {aviso.ok}</p>}
+      {aviso.ok && <p role="status" className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {aviso.ok}</p>}
       {aviso.error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {aviso.error}</p>}
     </div>
   );

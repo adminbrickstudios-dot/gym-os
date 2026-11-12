@@ -285,7 +285,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
             <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
             <ul className="space-y-1">
-              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? "✓" : ""} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? <Icono nombre="ok" /> : null} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
             </ul>
           </section>
         )}
@@ -382,7 +382,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
                     <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
                     <span className="min-w-0 flex-1">
                       <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
-                      <span className="block texto-suave">Cumple {c.cumple}</span>
+                      <span className="block texto-suave">Cumple {c.cumple} años</span>
                     </span>
                     {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
                   </li>

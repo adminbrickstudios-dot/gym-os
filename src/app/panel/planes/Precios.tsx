@@ -44,7 +44,7 @@ export function Precios({ lista, hoy, fecha, cerrar }: { lista: ListaPrecios; ho
       {lista.proxima && (
         <p className="tarjeta p-3 text-sm flex flex-wrap items-center gap-2" data-proxima>
           <span className="flex-1 min-w-0"><Icono nombre="calendario" /> Desde el {fecha(lista.proxima.desde)} rige {formatearPesos(lista.proxima.general)}{lista.proxima.variantes.length ? ` (${resumenVariantes(lista.proxima)})` : ""}. Lo de abajo la reemplaza.</span>
-          <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => correr(() => anularProgramado(lista.plan_id, lista.proxima!.desde), cerrar)}>✕ Anular ese aumento</button>
+          <button type="button" className="boton boton-chico" disabled={ocupado} onClick={() => correr(() => anularProgramado(lista.plan_id, lista.proxima!.desde), cerrar)}><Icono nombre="cerrar" /> Anular ese aumento</button>
         </p>
       )}
       <label className="block space-y-1 max-w-xs"><span className="etiqueta">Precio general</span>
@@ -70,7 +70,7 @@ export function Precios({ lista, hoy, fecha, cerrar }: { lista: ListaPrecios; ho
               <span>Hasta el día</span>
               <input type="number" min={1} max={28} className="campo !w-20" aria-label="Hasta el día" value={d.dia} onChange={(e) => setPorDia(porDia.map((x, j) => (j === i ? { ...x, dia: e.target.value } : x)))} />
               <input className="campo !w-36" inputMode="decimal" placeholder="$" aria-label="Precio hasta ese día" value={d.monto} onChange={(e) => setPorDia(porDia.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
-              <button type="button" className="boton boton-chico" aria-label="Quitar" onClick={() => setPorDia(porDia.filter((_, j) => j !== i))}>✕</button>
+              <button type="button" className="boton boton-chico" aria-label="Quitar" onClick={() => setPorDia(porDia.filter((_, j) => j !== i))}><Icono nombre="cerrar" /></button>
             </div>
           ))}
           <button type="button" className="boton boton-chico" onClick={() => setPorDia([...porDia, { dia: "10", monto: "" }])}><Icono nombre="mas" /> Precio por pagar antes</button>

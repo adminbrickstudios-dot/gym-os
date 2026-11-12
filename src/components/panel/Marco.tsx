@@ -91,7 +91,7 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
           : <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>)}
         {/* DISENO: título de pantalla de 28 px; el ícono va al lado, del tamaño del título y en el acento (no 36 px arriba). */}
         <h1 className="titular text-[28px] flex items-center gap-2.5">
-          {(icono ?? emoji) && <span className="text-[var(--acento)] flex-none" aria-hidden><Icono nombre={icono ?? emoji} /></span>}
+          {(icono ?? emoji) && <span className="text-[var(--acento)] flex-none" aria-hidden><Icono nombre={icono ?? emoji} sistema /></span>}
           <span className="min-w-0">{titulo}</span>
         </h1>
         {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
@@ -105,7 +105,7 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
 export function Aviso({ icono, emoji, titulo, children }: { icono?: string; emoji?: string; titulo: string; children?: ReactNode }) {
   return (
     <div className="tarjeta p-6 sm:p-8 max-w-xl">
-      <p className="text-4xl mb-4" aria-hidden><Icono nombre={icono ?? emoji ?? "alerta"} /></p>
+      <p className="text-4xl mb-4" aria-hidden><Icono nombre={icono ?? emoji ?? "alerta"} sistema /></p>
       <p className="titulo text-3xl">{titulo}</p>
       {children && <div className="texto-suave text-lg mt-2">{children}</div>}
     </div>

@@ -10,6 +10,7 @@ import { MetaVisitas } from "./MetaVisitas";
 import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
 import { FotoSocioConfig } from "./FotoSocioConfig";
+import { FuncionesNuevasConfig } from "./FuncionesNuevasConfig";
 import { AvisarSinBloquear } from "./AvisarSinBloquear";
 import { AutonomiaSocios } from "./AutonomiaSocios";
 import { VueltoConfig } from "./VueltoConfig";
@@ -41,6 +42,7 @@ import { BuscadorConfig } from "./BuscadorConfig";
 import { Restablecer } from "./Restablecer";
 import type { Opcion } from "./indice";
 import { Icono } from "@/components/ui/Icono";
+import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -282,13 +284,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   };
   const algoSucio = PESTANAS.some((p) => sucio(p.clave));
 
-  // Irse con cambios sin guardar: el navegador pregunta antes.
-  useEffect(() => {
-    if (!algoSucio) return;
-    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
-    window.addEventListener("beforeunload", avisar);
-    return () => window.removeEventListener("beforeunload", avisar);
-  }, [algoSucio]);
+  // Irse con cambios sin guardar (cerrar, recargar o tocar el menú): pregunta antes.
+  useCambiosSinGuardar(algoSucio);
 
   // La pestaña queda en la dirección: se puede recargar o mandar el link ("Configuración → Cobros").
   const cambiarPestana = (p: string) => {
@@ -431,7 +428,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 ? <img src={url} alt={`Logo de ${d.nombre}`} className="h-24 max-w-full object-contain rounded-[var(--radio)] p-2 border border-[var(--borde)]" style={{ background: c.color_fondo }} />
                 : <p className="texto-tenue">Sin logo: se muestra el nombre del gimnasio.</p>} />
           </Tarjeta>
-          <Tarjeta icono="" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
+          <Tarjeta icono="imagen" titulo="Ícono de la pestaña" ancla="favicon" ayuda="El dibujito chico que aparece en la pestaña del navegador y al guardar la app en el celular. Si no subís uno, se usa el logo.">
             <UnaImagen tipo="favicon" ruta={d.favicon_path} reglas={d.reglas_imagenes.favicon} puedeEditar={puedeEditar} alListo={imagenesListas}
               vista={(url) => (
                 <div className="inline-flex items-center gap-2 rounded-t-xl border border-b-0 border-[var(--borde)] bg-[var(--tarjeta-alta)] px-3 py-2 max-w-full">
@@ -561,7 +558,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               </div>
             )}
           </Tarjeta>
-          <Tarjeta icono="" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
+          <Tarjeta icono="lista" titulo="Fiar (cuenta corriente)" ancla="fiado" restablecer={volver("fiado")} ayuda="Apagado, todo se cobra en el momento. Prendido, en Vender aparece “A cuenta” hasta un tope por socio; el que debe entra en amarillo con “Debe $…” y lo paga en Vender.">
             <Interruptor etiqueta="Se puede cobrar a cuenta" ayuda={c.fiado_activo ? "Prendido: hasta el tope de abajo por socio." : "Apagado: nadie queda debiendo."}
               checked={c.fiado_activo} onChange={(e) => set("fiado_activo", e.target.checked)} />
             {c.fiado_activo && (
@@ -662,6 +659,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <div data-opcion="prueba-gratis"><PruebaGratisConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="avisar-sin-bloquear"><AvisarSinBloquear puedeEditar={puedeEditar} /></div>
           <div data-opcion="foto-socio"><FotoSocioConfig puedeEditar={puedeEditar} /></div>
+          <div data-opcion="funciones-nuevas"><FuncionesNuevasConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="autonomia-socios"><AutonomiaSocios puedeEditar={puedeEditar} /></div>
           <div data-opcion="cierres-suma-dias"><ReglaCierres puedeEditar={puedeEditar} /></div>
           {beneficios && <div data-opcion="beneficios"><ReglasBeneficios datos={beneficios} /></div>}

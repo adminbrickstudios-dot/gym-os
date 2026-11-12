@@ -39,7 +39,7 @@ export default async function MisMensajes({ searchParams }: { searchParams: Prom
               return (
                 <li key={h.hilo_id}>
                   <Link href={`/app/mensajes/${h.hilo_id}${q}`} className="tarjeta flex items-start gap-3 p-4" data-hilo={h.sin_leer ? "sin-leer" : "leido"}>
-                    <span className="text-2xl" aria-hidden>{m.emoji}</span>
+                    <span className="text-2xl" aria-hidden><Icono nombre={m.emoji} /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold leading-tight">{m.titulo}{h.sin_leer && <span className="pildora pildora-rojo ml-2 !text-[13px] align-middle">Te respondieron</span>}</span>
                       {h.extracto && <span className="block texto-suave text-[15px] truncate">{h.extracto}</span>}

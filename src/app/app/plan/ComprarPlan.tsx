@@ -66,7 +66,7 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
       const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase();
       const path = `${gimnasioId}/${socioId}/${crypto.randomUUID()}.${ext}`;
       const { error: e } = await crearClienteNavegador().storage.from("comprobantes").upload(path, f, { contentType: f.type });
-      if (e) { setError(`No se pudo subir: ${e.message}`); return; }
+      if (e) { setError("No se pudo subir el comprobante. Revisá tu conexión y probá de nuevo."); return; }
       const r = await informarCompraApp(socioId, vista.plan_id, path, claveDe(vista.plan_id, "transferencia"));
       if (r.error) { setError(r.error); return; }
       setListo(vista.cambia_plan ? "Listo: el gimnasio revisa tu comprobante y, apenas lo aprueba, tu plan cambia." : "Listo: el gimnasio revisa tu comprobante y te habilita.");

@@ -62,7 +62,7 @@ export function PorMedio({ medios, zona, cajon, pasado = false, titulo = "Lo cob
             {g.cantidad > 0 && (
               <details className="group">
                 <summary className="cursor-pointer list-none min-h-11 flex items-center gap-2 text-sm font-semibold" data-ver-cobros={g.clave}>
-                  <span aria-hidden className="texto-suave transition-transform group-open:rotate-45">+</span> Ver los cobros
+                  <span aria-hidden className="texto-suave transition-transform group-open:rotate-45"><Icono nombre="mas" /></span> Ver los cobros
                 </summary>
                 <ul className="space-y-1 text-sm pt-1">
                   {g.cobros.map((c) => (

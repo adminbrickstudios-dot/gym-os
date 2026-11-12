@@ -12,6 +12,8 @@ import { LinkPanel } from "@/components/panel/LinkPanel";
 import { DeudaSocios, type DeudaConSocios } from "./DeudaSocios";
 import { PorSede, type ResultadoPorSede } from "./PorSede";
 import { Icono } from "@/components/ui/Icono";
+import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
+import { HorariosPico, type IngresosPorHoraYDia } from "./HorariosPico";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -51,6 +53,9 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
       rpc<ResultadoPorSede>("resultado_por_sede", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido }),
     ]);
     const tasa = await rpc<TasaDeCobro>("tasa_de_cobro", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });   // FA-10
+    // Detalle 68: horarios pico por día (función nueva, apagada por defecto).
+    const pico7 = (await funcionesNuevasDe(panel.gimnasio.id)).includes("horarios_pico")
+      ? await rpc<IngresosPorHoraYDia>("ingresos_por_hora_y_dia", { p_gimnasio_id: panel.gimnasio.id, p_semanas: 8 }) : null;
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -216,6 +221,7 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
             <div className="flex justify-between text-[13px] texto-tenue mt-2"><span>{horaDesde} h</span><span>{Math.round((horaDesde + horaHasta) / 2)} h</span><span>{horaHasta} h</span></div>
           </div>
         </section>
+        {pico7 && <HorariosPico datos={pico7} />}
       </div>
     );
   });

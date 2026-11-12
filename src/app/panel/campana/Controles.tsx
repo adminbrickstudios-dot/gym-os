@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { refrescarPendientes } from "@/lib/panel/pendientes";
 import { guardarPreferenciaAviso, marcarTodoLeido } from "./acciones";
+import { Icono } from "@/components/ui/Icono";
 
 /** VD-37: "Marcar todo como leído". */
 export function MarcarTodo({ sinLeer }: { sinLeer: number }) {
@@ -20,7 +21,7 @@ export function MarcarTodo({ sinLeer }: { sinLeer: number }) {
           refrescarPendientes();
           router.refresh();
         })}>
-        {ocupado ? "Marcando…" : "✓ Marcar todo como leído"}
+        {ocupado ? "Marcando…" : <><Icono nombre="ok" /> Marcar todo como leído</>}
       </button>
       {error && <p role="alert" className="mensaje mensaje-error">{error}</p>}
     </div>

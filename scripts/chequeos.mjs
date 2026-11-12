@@ -83,6 +83,8 @@ const EJECUTABLES = {
     "public.marcar_serie_rutina", "public.series_hechas_hoy", "public.resumen_app_socio",
     "public.foto_propia_permitida", "public.preparar_foto_propia", "public.confirmar_foto_propia", "public.foto_propia",
     "public.foto_estado_socio", "public.confirmar_foto_subida", "public.guardar_foto_socio_permitida",
+    // F4/F5: interruptor por gimnasio de las funciones nuevas y horarios pico
+    "public.funciones_nuevas_gimnasio", "public.guardar_funcion_nueva", "public.ingresos_por_hora_y_dia",
     // FA-23 (lista de espera con plazo) y FA-12 (avisos en la app del socio)
     "public.ofertas_socio", "public.aceptar_oferta", "public.rechazar_oferta", "public.guardar_espera_plazo",
     "public.avisos_app_socio", "public.guardar_aviso_clase", "public.aviso_clase_socio",

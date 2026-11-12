@@ -53,7 +53,7 @@ export function FormMensaje({ socioId, hilo, q = "", motivoInicial }: { socioId:
             {MOTIVOS.map((m) => (
               <label key={m.clave} className={`fila flex items-center gap-2 px-3 min-h-[52px] cursor-pointer ${motivo === m.clave ? "ring-2 ring-[var(--acento)]" : ""}`}>
                 <input type="radio" name="motivo" value={m.clave} checked={motivo === m.clave} onChange={() => setMotivo(m.clave)} className="sr-only" data-motivo={m.clave} />
-                <span aria-hidden>{m.emoji}</span><span className="font-semibold">{m.titulo}</span>
+                <span aria-hidden><Icono nombre={m.emoji} /></span><span className="font-semibold">{m.titulo}</span>
               </label>
             ))}
           </div>

@@ -142,7 +142,7 @@ toque plata se prueba con números fijos antes de publicar.
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | ❌ |
+| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | 🟡 60 de 70 filas de DETALLES-70.md en ✅ con su prueba (corridas 43128173940, 43130787225, 43131873292, 43132608358); 10 en 🟡 con motivo (plata/permisos: 13, 24, 25, 26, 43; saldo: 21; MercadoPago: 33; celular real: 58; DNS: 64; reporte para compartir: 69) |
 
 ## Fase 5 · Lo que faltaba de todo lo que pidió Mateo
 
@@ -153,7 +153,7 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | 🟡 carril/b-super: lo de mi zona está (FA-20 `/estado` escrito, FA-24 hecho); FA-12 y FA-23 son de la app del socio; el resto de A, C y D |
+| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | 🟡 las 24 filas de FALTANTES.md confirmadas contra el código: hechos con prueba FA-1, 8, 9, 14, 15, 16, 17, 20; grandes con estimación FA-13, 19 (espera el texto legal), 6, 12, 23, 4; migración 20261112010000 (funciones nuevas apagadas por gimnasio) pendiente de aplicar |
 
 ## Fase 6 · Lo chico de antes
 
