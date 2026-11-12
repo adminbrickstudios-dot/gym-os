@@ -1,5 +1,11 @@
 # PROGRESO de Base
 
+## DÓNDE QUEDÉ (12/11, 17:30 hora del gimnasio)
+- **Verificado en producción tras el PR #16:** (1) Temple Gym tiene **0 funciones nuevas prendidas** (Actions → Base de datos → estado, corrida 43297648610): lo de la fase N está apagado. (2) `https://gym-os-pied.vercel.app/g/templegym1/hacete-socio` abre la página de alta de Temple Gym con su marca (200, se queda en esa dirección). **Hoy dice "Hoy no te podés anotar desde acá"** porque el registro por QR de Temple Gym está apagado (`altas_online`): Mateo lo prende en Configuración → Registro de socios cuando quiera que el QR impreso ande. No lo toqué (es un dato real). (3) Cargar un socio con alta y pago de hace 20 días y la caja por medio de pago, en el demo de producción y dentro de una transacción que revierte (acción `humo-pasado`, corrida 43300000883): 1 pago, 1 cobertura, la caja del turno no se mueve, efectivo y transferencia salen separados, no quedó nada.
+- Ramas `carril/*`: ninguna tiene trabajo sin integrar.
+- No hay un dueño con cuenta en los demos de producción: el humo con sesión real (`humo-produccion.yml`) sigue ⛔ por `BRIK_ADMIN_MAIL` / `BRIK_ADMIN_CLAVE`.
+- En curso: fase D (D3, D4) con un ayudante. **R1 y R2 hechos (12/11, `carril/r-estado`):** `ESTADO-GENERAL.md` con las tres listas al día y fase Q nueva en `RECTA-FINAL.md` (Q1 a Q5, lo que faltaba sin ítem); los MD viejos que chocaban quedaron marcados "Reemplazado por docs/base/…". Sigue R3.
+
 ## PUBLICACIÓN LISTA, ESPERANDO TU COPIA (11/11, noche): rama `publicar/base-hoy`
 Prevuelo en verde (Actions 43143923167): 22 migraciones pendientes (recepción, velocidad, filtros en lote, cargar pasado, QR, Caja por medio, alta con cuenta y reclamo, términos y restaurar cambios, lista del super admin rápida, exportar con filtros, funciones nuevas apagadas). Trae: Caja con resumen por medio y Transferencias en dos pestañas (H1), `/g/<slug>/hacete-socio` y el camino del socio (H3/H3b), lo roto de PULIDO que pega hoy (H7), cargar socios y pagos en el pasado (C10), QR para registrarse (C9), lector USB y cierre por inactividad (C5/C6), guías y carteles (C3/C4), y los arreglos de las revisiones del mostrador y del socio.
 Como Temple Gym ya cobra, **no aplico sin copia cifrada**. Pasos para vos, en orden:
@@ -35,6 +41,9 @@ Si cargás `COPIA_CLAVE`, el loop hace los pasos 2 a 6 solo.
 - Antes de aplicar, el estado dijo 3 gimnasios reales con 2 socios en total; se aplicó igual por orden de Mateo (migraciones aditivas).
 - Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
 - Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
+
+## PUBLICADO EL 12/11 (17:10, por Claude desde el chat)
+Migraciones de `publicar/base-hoy` aplicadas en producción (corrida 43295889879; **sin copia previa**, con permiso de Mateo; prevuelo y chequeos contra la base real en verde), PR #16 mergeado (164d21e) y deploy de Vercel en verde. Entró todo lo que había en `base/2026-11-07` al 12/11 01:12: H1, H2/C10, H3, H6, la fase C, el super admin, lo hecho del pulido. El e2e `n-nuevas` (fase N) no pasaba: lo de la fase N tiene que quedar apagado para Temple Gym hasta pasar. El workflow "Base de datos" tiene ahora `sin_copia` (solo con la frase "SIN COPIA"); por defecto sigue pidiendo la copia.
 
 ## DÓNDE QUEDÉ (11/11, noche)
 - ✅ hoy: H1, H2/C10, H3, H6, F1.9, F1.5, F1.6, F2.x, F3.1, F7.1, F9.1, C1-C10, U5, P1-P8b. 🟡: H3b, H4, H5, H7, F3.2. ⛔: C8/H5 (COPIA_CLAVE), N0 (proyecto ensayo), F0.1 (secretos).

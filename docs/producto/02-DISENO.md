@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/DISENO.md y docs/base/PULIDO.md en lo visual: ya no se usan emojis como íconos (salen de `Icono`), hay tema claro y oscuro elegible por usuario y las esquinas y sombras cambiaron. Donde este archivo diga otra cosa, manda docs/base/.
+
 # Diseño
 
 **Modo gym oscuro, minimalista, con emojis.** Inspiración: el esqueleto de

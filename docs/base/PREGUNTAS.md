@@ -440,3 +440,12 @@ Hoy lo que se hace en una compu aparece en las otras en menos de un minuto (sond
 - B) Realtime solo para pendientes, entradas y caja, escuchando un canal por gimnasio con una política que solo deje pasar al equipo de ese gimnasio (hay que escribirla y probarla con dos gimnasios).
 Decidido por defecto: A. Dónde se nota: campana, pendientes del menú, últimas entradas.
 Respuesta de Mateo: (vacío)
+
+## P-H2c · Fechas de cobertura elegidas al cobrar (12/11, toca plata)
+Decidido por defecto lo más seguro; Mateo lo cambia si quiere otra cosa.
+- **Quién cambia las fechas:** dueño y encargado. Recepción ve la propuesta ("Cubre del … al …") pero no tiene "Cambiar fechas" (la base lo rechaza aunque lo intenten). ¿Querés que recepción también pueda, con un motivo escrito?
+- **El monto no cambia al mover las fechas** (no hay prorrateo). Si el socio paga menos o más por menos o más días, se ajusta a mano con un descuento con motivo. ¿Querés un prorrateo automático? Es plata: habría que definir la regla con números.
+- **Una sola cuota por vez:** las fechas se cambian cuando se cobra 1 cuota (no 2 o más juntas). En el alta en el pasado, solo para el pago más antiguo (el que abre la cobertura); los siguientes encadenan solos.
+- **"Hoy" es el de verdad:** el "desde" no puede ser futuro (hoy del gimnasio); en una carga en el pasado la cobertura puede empezar después de la fecha del pago.
+- **Registro:** Control tiene un tipo nuevo "Fechas cambiadas" con quién las cambió, la propuesta que había y las fechas elegidas.
+Respuesta de Mateo: (vacío)

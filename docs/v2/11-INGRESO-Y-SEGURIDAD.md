@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/SOCIO-FLUJO.md, docs/base/PLATAFORMA.md (login universal) y docs/base/AJUSTES-0911-NOCHE.md (U2: sin mails, la cuenta se crea con la contraseña que pone quien la crea; C1: clave nueva dada por la recepción) en el ingreso del socio y del equipo. Lo de códigos por mail o SMS y el SMTP queda como opcional para más adelante.
+
 # 11 · Ingresar, registrarse y seguridad
 
 Hoy (`/ingresar`): código por SMS, código por mail, mail + contraseña; el

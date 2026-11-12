@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/RECTA-FINAL.md (lo que se hace y en qué orden) y docs/base/ESTADO-GENERAL.md (qué está hecho y publicado). Esto queda como la historia de lo construido de Gym OS.
+
 # Gym OS — Plan
 
 > **Propuesta del agente.** Se reconcilia con `7-PLAN.md` (las 17

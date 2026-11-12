@@ -38,6 +38,8 @@ export type Linea = {
   descuento?: number;
   descuento_texto?: string;  // lo que se escribió ("1.500"), para no perder el punto mientras se tipea
   descuento_motivo?: string;
+  /** H2c: fechas elegidas de lo que cubre la cuota (YYYY-MM-DD, hasta inclusive). Solo dueño y encargado; la base las valida. */
+  cubre?: { desde: string; hasta: string };
 };
 
 /** Precio unitario de una línea con el medio elegido. Con pago mixto (medio null) rige el de lista, como en la base. */
@@ -142,5 +144,6 @@ export function armarItems(lineas: Linea[]): Record<string, unknown>[] {
     tipo: l.tipo, cantidad: l.cantidad, plan_id: l.plan_id, producto_id: l.producto_id,
     descripcion: l.tipo === "otro" ? l.nombre : undefined, precio_unitario: l.tipo === "otro" || l.tipo === "deuda" ? l.precio_fijo : undefined,
     descuento: l.descuento || undefined, descuento_motivo: l.descuento_motivo || undefined,
+    cubre_desde: l.tipo === "cuota" && l.cantidad === 1 ? l.cubre?.desde : undefined, cubre_hasta: l.tipo === "cuota" && l.cantidad === 1 ? l.cubre?.hasta : undefined,
   }));
 }

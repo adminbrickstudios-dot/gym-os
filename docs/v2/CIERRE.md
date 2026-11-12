@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/PROMPT.md: las instrucciones del agente, el orden de trabajo y cómo se publica son las de ese archivo (el loop lee docs/base/RECTA-FINAL.md). Esto queda como historia del cierre de v2.
+
 # Cierre de Gym OS v2 (Claude Code en la nube)
 
 Sos el agente que termina Gym OS v2. Trabajás en **Claude Code en la nube**

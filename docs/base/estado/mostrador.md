@@ -1,5 +1,7 @@
 # Estado de la zona Mostrador (revisión del 11/11, rama `carril/rev-mostrador`)
 
+> **12/11:** las tres listas vigentes (publicado, sin publicar, falta) están en `docs/base/ESTADO-GENERAL.md`; este archivo es el detalle de la revisión del 11/11 y, donde difiera, manda `ESTADO-GENERAL.md` (se escribió antes del PR #16 y de los cierres de F4, F5 y Z).
+
 Zona: Entrada, Caja (turno, cierre, X/Z, ventas, transferencias), Vender, Socios (alta, ficha, pagos, pausas, bajas, importar, Interesados), clases en recepción, Retención, Vencen hoy y Mensajes. Roles: recepción, encargado y dueño en el mostrador.
 
 Cómo se leyó: cada función contra `FLUIDEZ.md` (21 reglas), `DISENO.md` y `PULIDO.md` (bloque mostrador), mirando el código y la prueba que la cubre. **Una prueba solo cuenta como verde si corrió en Actions sobre esta rama** (ids abajo); las demás dicen "e2e escrito" y valen lo que dijo su última corrida en `RECTA-FINAL.md`. Datos: solo el gimnasio demo (Temple Gym no se tocó).

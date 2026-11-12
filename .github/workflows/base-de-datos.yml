@@ -6,6 +6,7 @@
 #   chequeos   solo los chequeos (RLS, permisos, search_path…)
 #   hacer-admin  da super admin a la cuenta del mail indicado
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
+#   humo-pasado  prueba en el demo de producción (transacción que revierte): alta con fecha y pago pasados + caja por medio
 #   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
 #   usuarios-demo crea los logins del demo (dueña, encargado, recepción, profe, socio) con la
 #                 contraseña que pongas; NO crea un super admin demo. Necesita los secretos
@@ -21,7 +22,7 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, sembrar-demo, usuarios-demo]
+        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
@@ -32,6 +33,10 @@ on:
       contrasena:
         description: "Contraseña de los usuarios demo (solo para usuarios-demo, 10 o más letras)"
         required: false
+      urgente:
+        description: "Solo para aplicar entre las 16 y las 22 h (hora de Argentina, hora pico): escribí URGENTE si es un arreglo de algo roto. Si no, no corre"
+        required: false
+        default: ""
       sin_copia:
         description: "Solo con permiso de Mateo: escribí SIN COPIA para aplicar sin la copia cifrada previa (si algo sale mal, no hay copia para volver)"
         required: false
@@ -53,6 +58,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: No aplicar en hora pico (16 a 22 h de Argentina, salvo urgente)
+        if: inputs.accion == 'aplicar'
+        env:
+          URGENTE: ${{ inputs.urgente }}
+        run: bash scripts/base/hora-pico.sh
       - name: Falta el secreto
         if: env.SUPABASE_DB_URL == ''
         env:
@@ -109,6 +119,9 @@ jobs:
       - name: Estado de la base
         if: inputs.accion == 'estado'
         run: node scripts/datos/estado-base.mjs
+      - name: Humo de cargar en el pasado y caja por medio (demo, transacción que revierte)
+        if: inputs.accion == 'humo-pasado'
+        run: node scripts/datos/humo-pasado-produccion.mjs
       - name: Sembrar el gimnasio demo
         if: inputs.accion == 'sembrar-demo'
         env:

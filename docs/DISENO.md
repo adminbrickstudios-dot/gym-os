@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/DISENO.md en lo visual (íconos de línea con `Icono` en vez de emojis, esquinas de 10 y 8 px, sin vidrio ni sombras grandes, claro y oscuro, tipografía Barlow). Lo que describe de las clases y los componentes sigue valiendo solo si no choca con ese archivo.
+
 # Sistema visual — cómo se arma cada pantalla
 
 Las reglas de fondo están en `docs/producto/02-DISENO.md`. Acá está **con qué

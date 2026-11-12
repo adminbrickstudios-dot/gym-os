@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/00-LEEME.md en qué manda: donde esta especificación choque con docs/base/ (nombre del producto, diseño sin emojis, ingreso sin mails, app del socio), gana docs/base/. Lo que no choca sigue valiendo.
+
 # Gym OS — Especificación del producto
 
 Lo que Gym OS **tiene que ser**: cada panel, cada botón, cómo se conecta todo.

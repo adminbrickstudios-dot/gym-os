@@ -1,5 +1,7 @@
 # Estado: socio, profe, kiosco, TV y página pública (revisión del 11/11, carril rev-socio)
 
+> **12/11:** las tres listas vigentes (publicado, sin publicar, falta) están en `docs/base/ESTADO-GENERAL.md`; este archivo es el detalle de la revisión del 11/11 y, donde difiera, manda `ESTADO-GENERAL.md` (se escribió antes del PR #16 y de los cierres de F4, F5 y Z).
+
 Zona: app del socio, panel del profe, kiosco, TV de entradas y de la sala, landing, horarios, prueba gratis, privacidad, notificaciones y mensajes por wa.me. No incluye lo que rehace el carril `carril/h3-socio` (Quiero ser socio, DNI, `/hacete-socio`, `proxy.ts`, el alta online ni el inicio de la app del socio) ni lo que arregla `carril/h7-roto` (lector USB del kiosco, QR sin señal, Salir del socio, ingreso): ahí solo se anota lo que se vio.
 
 **Cómo se verificó.** Corridas de `Pruebas completas` en Actions sobre `carril/rev-socio` (modo producción, gimnasio demo; nada se tocó en Temple Gym):
