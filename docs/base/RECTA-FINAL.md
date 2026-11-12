@@ -88,9 +88,9 @@ toque plata se prueba con números fijos antes de publicar.
 | Z2 | Íconos de una vez: ningún ícono vacío, ningún emoji crudo (tampoco los que vienen de la base) y ningún glifo de texto; chequeo que falla si aparece uno | ❌ |
 | Z3 | Todos los [FLUIDEZ] | ❌ |
 | Z4 | Todos los [TEXTO] | ❌ |
-| Z5 | Todos los [DISEÑO] (menú en 4 secciones, títulos de 28 px, tokens, esquinas, tamaños) | ❌ |
-| Z6 | Todos los [FALTA] y los detalles premium de los tres bloques | ❌ |
-| Z7 | Lo transversal de `PULIDO.md` (formatos, avisos, listas, vacíos, accesibilidad, atajos, sin conexión) | ❌ |
+| Z5 | Todos los [DISEÑO] (menú en 4 secciones, títulos de 28 px, tokens, esquinas, tamaños) | 🟡 hecho menos la portada del super admin en 4 secciones y los íconos/emojis (Z2); detalle y corridas en `PULIDO.md` |
+| Z6 | Todos los [FALTA] y los detalles premium de los tres bloques | 🟡 lo chico hecho; lo grande con estimación en `PULIDO.md` |
+| Z7 | Lo transversal de `PULIDO.md` (formatos, avisos, listas, vacíos, accesibilidad, atajos, sin conexión) | 🟡 fechas, atajos «?» y vacíos hechos; falta aplicar los formatos pantalla por pantalla y «hay una versión nueva» |
 
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
 

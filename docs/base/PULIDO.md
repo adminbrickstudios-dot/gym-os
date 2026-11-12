@@ -416,7 +416,7 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 
 ## Estado de Z5, Z6 y Z7 (11/11, rama `carril/z-diseno-falta`)
 
-La prueba de pantallas es `scripts/e2e/z-diseno.mjs` (dueña, recepción, celular y super admin) y vitest para lo que es una cuenta (`formato.test.ts`, `menu-vd11.test.ts`, `alta-url.test.ts`, `vuelto.test.ts`). ✅ = hecho y con prueba; 🟡 = hecho sin prueba automática, a medias o sin hacer, con el motivo. Todo se confirmó primero en el código actual: lo que ya estaba hecho por H7, H3b y las revisiones se anota como "ya estaba".
+Corridas en Actions sobre la rama: **43132044748** (`z-diseno` 17 pasos, `vd-11` 43 pasos y `dis-3` 10 pasos en verde) y **43126909589** (`pulido-roto`, `vd-37`, `super-admin`, `super-f2`, `avi-1` y `base-3` en verde con el mismo código de pantallas; ahí fallaron `z-diseno`, `vd-11` y `dis-3`, y se arreglaron: el menú del celular pisaba la navegación de un enlace, y el «Más» nuevo chocaba con el `[data-mas]` de Socios). `botones` (todos los botones, todos los roles) **no se corrió**: tarda más de una hora y se canceló; queda para el principal. La prueba de pantallas es `scripts/e2e/z-diseno.mjs` (dueña, recepción, celular y super admin) y vitest para lo que es una cuenta (`formato.test.ts`, `menu-vd11.test.ts`, `alta-url.test.ts`, `vuelto.test.ts`). ✅ = hecho y con prueba; 🟡 = hecho sin prueba automática, a medias o sin hacer, con el motivo. Todo se confirmó primero en el código actual: lo que ya estaba hecho por H7, H3b y las revisiones se anota como "ya estaba".
 
 ### Z5 · [DISEÑO]
 | Punto | Estado |
