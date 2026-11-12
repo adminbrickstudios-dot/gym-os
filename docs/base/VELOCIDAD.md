@@ -233,3 +233,40 @@ promedio"), **medidos en producción**, en celular con 4G:
 objetivo de arriba cumplido en producción.
 Volver a una pantalla vista no hace ningún viaje. Con la red lenta simulada,
 siempre hay respuesta en menos de 100 ms.
+
+
+## F0.3 y F0.5 · pasada del 12/11 (carril f32-f05)
+
+### `pendientes_panel` del dueño bajo los 50 ms (F0.3)
+
+Migración `20261112031732_pendientes_menos_subconsultas.sql`. **Ningún resultado cambia**: `supabase/pruebas/pendientes-vieja-vs-nueva.test.mjs` arma en la transacción de la prueba una copia de las funciones de antes (leídas de las migraciones que las definieron) y las compara con las nuevas en 18 momentos fijos (mismas filas, mismas columnas, mismo orden), con más de 20 socios armados a propósito (huecos, cadenas, coberturas futuras, anuladas, bajas, nuevos, los que dejaron de venir, dos suscripciones, cortesías repetidas dadas por dos personas). Además `retencion-cubierto.test.mjs` (contra `retencion_referencia`) y las demás de retención siguen en verde (46 de 46 en la base local). Con 5.000 socios, `retencion_pendientes` vieja y nueva devuelven lo mismo en 4 momentos (588, 192, 3.514 y 0 filas, mismo orden).
+
+Qué se cambió, solo cómo se calcula:
+
+- `retencion_pendientes` (es el 85 % de lo que tarda `pendientes_panel`): "quién vino hace poco" y "quién tiene cuota adelantada" ahora se unen una vez (`left join`) en vez de preguntarse con una subconsulta por cada uso (eran unas 20 tablas hash de 4.500 filas armadas en cada llamada y un plan de 40 subplanes que también tardaba en planificarse); la membresía vigente de cada socio sale de una sola pasada por las suscripciones del gimnasio (antes, una búsqueda con orden por cada socio candidato); el primer inicio solo se busca para quien lo necesita (quien ya es "por vencer" no lo usa); desaparece la lista intermedia de candidatos.
+- `avisos_moderacion_base` (lo que `campana_control` suma al menú del dueño): el aviso de cortesías repetidas agrupa primero por socio y busca los nombres de quienes las dieron solo para los pocos que pasan el umbral (antes cruzaba con el equipo cada cobertura de los últimos 60 días: 4.500 cruces en la siembra de la prueba). `calcular_devolucion_baja` no se tocó: en la siembra no corre (sin bajas con períodos pagados por adelantado) y con 17 bajas de 30 días mide menos de 1 ms.
+
+Medido en Actions con la prueba `escala-5000` (5.000 socios, mediana de 5 vueltas; el runner varía hasta 1,6×, por eso van tres corridas):
+
+| Corrida | Rama | `pendientes_panel` dueño | recepción | `buscar_socios` (texto), de control |
+|---|---|---:|---:|---:|
+| 43147288581 (runner lento) | base 07/11 (antes) | **59,7 ms** | 44,9 ms | 28,5 ms |
+| 43146695444 (runner lento, el mismo tipo) | esta rama | **49,3 ms** | 35,0 ms | 29,0 ms |
+| 43145325761 (runner normal) | esta rama | **31,2 ms** | 22,0 ms | 23,2 ms |
+
+Con la misma carga de runner (control igual), el dueño pasa de 59,7 a 49,3 ms (−17 %) y la recepción de 44,9 a 35,0 ms (−22 %). En el runner normal queda en 31,2 ms. **Presupuesto de 50 ms cumplido en las dos corridas de esta rama, pero en el runner lento con apenas 0,7 ms de margen.** Lo que queda del dueño: `reciente` (la lista de quién vino en la última semana: 18.000 ingresos de la siembra, unos 20 ms en una compu cargada) y una búsqueda por socio candidato (`suscripciones` y `ingresos`). Un índice que cubra `ingresos (gimnasio_id, momento) include (socio_id)` solo ayuda con la tabla ya aspirada (no en la siembra de la prueba): no se agregó.
+
+### Imágenes y JS por ruta (F0.5)
+
+- `LogoImagen` (nuevo, `src/components/ui/`): el logo del panel (Navegación), el de la landing y los flyers de eventos de la landing (ahora con su lugar reservado, 4:3) pasan por `next/image` cuando salen del bucket público de Supabase del despliegue; en la base local (http) siguen siendo `<img>`. Las fotos de socios y del equipo salen de rutas con sesión (`/panel/socios/:id/foto`, `/foto-equipo/:id`): no pasan por el optimizador y no se tocaron. La foto de fondo de `/ingresar` queda como estaba (es de otro carril y esa pantalla tiene el problema de `NO_FCP`).
+- `qrcode` se baja aparte (`import()` dentro del efecto) en `MiQR` (Inicio del socio), el kiosco y la ficha de admin: sale del primer JS de esas rutas. `jsqr` (cámara de la Puerta) y `read-excel-file` (importar socios) ya eran dinámicos. No hay otras librerías pesadas del lado del cliente (`fflate` va en una ruta de servidor). Sin `next build` acá, **no se midió el JS por ruta**.
+
+Lighthouse móvil, app compilada, mediana de 3, contra el demo local (donde las imágenes son `<img>` comunes, así que lo de `next/image` no se ve en esta medición):
+
+| Pantalla | Antes (corrida 43148052355, base 07/11) | Después (corrida 43148807813, esta rama) |
+|---|---|---|
+| Landing `/` | 91 · LCP 3,44 s · TBT 75 ms | 93 · LCP 3,18 s · TBT 96 ms |
+| `/hacete-socio` | 96 · LCP 2,72 s · TBT 54 ms | 93 · LCP 3,18 s · TBT 100 ms |
+| `/ingresar` (equipo y socio) | sin medir (falla; ver F1.8) | sin medir |
+
+**No se llegó a 95 ni a LCP < 1,5 s, y la diferencia entre las dos corridas (±3 puntos, ±0,5 s) es ruido del runner**: nada de lo cambiado toca esas dos pantallas en la base local. El elemento LCP es **un texto** (el `h1` de la landing y un párrafo de `/hacete-socio`, "sin recurso"), con 2,3 a 3 s de "render delay" después de un TTFB de 0,46 s: no es una imagen. Lo que el informe señala es el JavaScript que corre antes del primer pintado (451 ms "unattributable" más dos chunks de 230 y 220 ms, con la CPU 4× más lenta) y el CSS de 15 KB que bloquea el render. Para bajar de ahí hace falta **medir el JS por ruta con un `next build` completo** (el análisis de paquetes de Turbopack) y probar sacar del primer render lo que no hace falta (`Hidratado`, los formularios de más abajo), y eso es del principal (build y `next.config`). Queda 🟡.
