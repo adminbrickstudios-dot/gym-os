@@ -19,6 +19,11 @@ async function poner(d, clave, si) {
   await d.locator(`[data-funcion-nueva="${clave}"] input[type=checkbox]`).click();
   await d.waitForFunction(([c, v]) => document.querySelector(`[data-funcion-nueva="${c}"]`)?.getAttribute("data-prendida") === v, [clave, si ? "si" : "no"], { timeout: 30000 });
 }
+async function candidatos(p, filtro, n = 10) {
+  await p.goto(`${G}/panel/socios?estado=${filtro}`);
+  await p.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
+  return (await p.locator('main ul a[href^="/panel/socios/"]').evaluateAll((xs, k) => xs.slice(0, k).map((x) => x.getAttribute("href").split("/").pop()), n));
+}
 async function primero(p, filtro) {
   await p.goto(`${G}/panel/socios?estado=${filtro}`);
   const a = p.locator('main ul a[href^="/panel/socios/"]').first();
@@ -42,7 +47,7 @@ try {
   for (const c of CLAVES) await poner(d, c, false);   // por si una corrida anterior dejó algo prendido
   chequear((await Promise.all(CLAVES.map((c) => estado(d, c)))).every((x) => x === "no"), "las tres funciones nuevas están apagadas", "alguna está prendida");
 
-  const alDia = await primero(d, "al_dia"), vencido = await primero(d, "vencidos");
+  const alDia = await primero(d, "al_dia"), vencidos = await candidatos(d, "vencidos");
   await d.goto(`${G}/panel/socios/nuevo`);
   await d.locator('input[name="nombre"]').fill("Borrador");
   await d.waitForTimeout(900);
@@ -88,10 +93,15 @@ try {
   chequear(/Le toca pagar el/.test(toca), `socio al día: “${toca}”`, `socio al día sin “Le toca pagar el” (dice: ${toca})`);
   chequear(/Pagaría/.test(await d.locator("[data-panel-pago-plan]").innerText()), "dice qué plan pagaría", "no dice qué plan pagaría");
   await cerrarPanel(d);
-  await abrirPanel(d, vencido);
-  const desde = await d.locator("[data-panel-pago-desde]").innerText({ timeout: 5000 }).catch(async () => `(sin línea; el panel dice: ${(await d.locator("[data-panel-socio-lateral]").innerText().catch(() => "")).replace(/s+/g, " ").slice(0, 300)})`);
-  chequear(/Debe desde el/.test(desde), `socio vencido: “${desde}”`, `socio vencido sin “Debe desde el” (dice: ${desde})`);
-  await cerrarPanel(d);
+  // Un socio de la lista de vencidos cuya cobertura ya terminó (el de justo hoy puede figurar ahí con "quedan 1 día"): el primero que tenga la línea.
+  let desde = "";
+  for (const id of vencidos) {
+    await abrirPanel(d, id);
+    desde = await d.locator("[data-panel-pago-desde]").innerText({ timeout: 4000 }).catch(() => "");
+    await cerrarPanel(d);
+    if (desde) break;
+  }
+  chequear(/Debe desde el/.test(desde), `socio vencido: “${desde}”`, `ninguno de los ${vencidos.length} primeros vencidos dice “Debe desde el”`);
 
   // Detalle 68: horarios pico
   await d.goto(`${G}/panel/resultado`);
