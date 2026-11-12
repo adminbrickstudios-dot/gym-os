@@ -29,4 +29,10 @@ const gs = await q(`
 const reales = gs.filter((g) => !g.es_demo);
 console.log(`Gimnasios: ${gs.length} (reales: ${reales.length}, demo: ${gs.length - reales.length}) · socios en los reales: ${reales.reduce((n, g) => n + g.socios, 0)} · equipo en los reales: ${reales.reduce((n, g) => n + g.equipo, 0)}`);
 console.log(reales.length ? "HAY GIMNASIOS REALES: las migraciones las aplica Mateo (crear .claude/BASE_CON_DATOS_REALES)." : "No hay gimnasios reales: el agente puede aplicar migraciones.");
+// Funciones nuevas prendidas en gimnasios reales (solo las claves, sin nombres): tienen que estar apagadas hasta pasar en el demo.
+const col = await q(`select 1 from information_schema.columns where table_schema = 'public' and table_name = 'configuracion_gimnasio' and column_name = 'funciones_nuevas'`);
+if (col.length) {
+  const fn = await q(`select g.slug = 'templegym1' as es_temple, c.funciones_nuevas as f from public.gimnasios g join public.configuracion_gimnasio c on c.gimnasio_id = g.id where not g.es_demo`);
+  console.log(`Funciones nuevas prendidas en reales: ${fn.filter((x) => x.f.length).length} gimnasio(s); Temple Gym: ${JSON.stringify(fn.find((x) => x.es_temple)?.f ?? "sin fila")}`);
+} else console.log("Funciones nuevas: la columna todavía no existe en producción");
 await db.end();
