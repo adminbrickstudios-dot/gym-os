@@ -37,7 +37,7 @@ export default async function Privacidad() {
         <Link href="/" className="titulo text-xl truncate">← {p.gimnasio}</Link>
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 space-y-6" data-privacidad={p.texto ? "propia" : "modelo"}>
-        <h1 className="titular text-5xl">Política de privacidad</h1>
+        <h1 className="titular text-[28px]">Política de privacidad</h1>
         <p className="texto-suave">{p.gimnasio}{fecha ? ` · actualizada el ${fecha}` : ""}</p>
         <div className="space-y-4 text-lg">{parrafos.map((t) => <p key={t} className="whitespace-pre-line">{t}</p>)}</div>
       </main>

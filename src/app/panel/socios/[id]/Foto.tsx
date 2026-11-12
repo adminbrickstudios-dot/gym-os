@@ -89,7 +89,7 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
             <p className="titulo text-2xl"><Icono nombre="camara" /> Foto del socio</p>
             <p className="text-sm texto-tenue">Para reconocerlo en la puerta. Se guarda privada: solo la ve el equipo.</p>
             {camara === "lista" || camara === "pidiendo"
-              ? <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" data-video />
+              ? <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-[var(--radio)] bg-black" data-video />
               : <p className="texto-suave">No hay cámara disponible (o no diste permiso). Elegí una foto.</p>}
             {error && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {error}</p>}
             <div className="flex flex-wrap gap-2">

@@ -30,7 +30,7 @@ export function Pares({ pares, zona, puedeUnir }: { pares: Par[]; zona: string; 
               {(["a", "b"] as const).map((x) => {
                 const s = lado(p, x);
                 return (
-                  <div key={x} className="rounded-xl border border-[var(--borde)] p-4 space-y-1">
+                  <div key={x} className="rounded-[var(--radio)] border border-[var(--borde)] p-4 space-y-1">
                     <Link href={`/panel/socios/${s.id}`} className="font-semibold text-lg underline-offset-4 hover:underline">{s.nombre} <span className="texto-tenue font-normal">#{s.numero}</span></Link>
                     <p className="text-sm texto-suave">DNI {s.dni ?? "—"} · {s.tel ?? "sin celular"} · alta {fechaCorta(s.alta, zona)}</p>
                     {puedeUnir && <button type="button" className="boton mt-2" disabled={ocupado} onClick={() => setEleccion({ par: i, queda: x })}><Icono nombre="ok" /> Quedarse con #{s.numero}</button>}
@@ -41,7 +41,7 @@ export function Pares({ pares, zona, puedeUnir }: { pares: Par[]; zona: string; 
             {eleccion?.par === i && (() => {
               const q = lado(p, eleccion.queda), v = lado(p, eleccion.queda === "a" ? "b" : "a");
               return (
-                <div className="rounded-xl border-2 border-[var(--acento)] p-4 space-y-3" data-confirmar>
+                <div className="rounded-[var(--radio)] border-2 border-[var(--acento)] p-4 space-y-3" data-confirmar>
                   <p>Todo lo de <strong>{v.nombre} #{v.numero}</strong> (pagos, cuotas, entradas, reservas, notas, etiquetas y la cuenta de la app) pasa a <strong>{q.nombre} #{q.numero}</strong>, y la ficha #{v.numero} se borra. <strong>No se puede deshacer.</strong></p>
                   <div className="flex flex-wrap gap-2">
                     <button type="button" className="boton boton-principal" disabled={ocupado}

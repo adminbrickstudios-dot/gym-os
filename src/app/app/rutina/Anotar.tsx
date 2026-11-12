@@ -15,8 +15,8 @@ export function Anotar({ socioId, ejercicioId, nombre }: { socioId: string; ejer
   return (
     <form className="basis-full flex flex-wrap items-end gap-2" data-anotar
       onSubmit={(e) => { e.preventDefault(); empezar(async () => { const r = await anotarEjercicio(socioId, ejercicioId, num(peso), num(reps)); if (r.error) setError(r.error); else { setAbierto(false); setPeso(""); setReps(""); setError(null); } }); }}>
-      <label className="space-y-1"><span className="text-xs texto-suave">Kg</span><input className="campo !min-h-11 w-24" inputMode="decimal" value={peso} onChange={(e) => setPeso(e.target.value)} aria-label="Kilos" placeholder="60" /></label>
-      <label className="space-y-1"><span className="text-xs texto-suave">Reps</span><input className="campo !min-h-11 w-20" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} aria-label="Repeticiones" placeholder="10" /></label>
+      <label className="space-y-1"><span className="text-[13px] texto-suave">Kg</span><input className="campo !min-h-11 w-24" inputMode="decimal" value={peso} onChange={(e) => setPeso(e.target.value)} aria-label="Kilos" placeholder="60" /></label>
+      <label className="space-y-1"><span className="text-[13px] texto-suave">Reps</span><input className="campo !min-h-11 w-20" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} aria-label="Repeticiones" placeholder="10" /></label>
       <button type="submit" className="boton !min-h-11" disabled={ocupado || (!peso && !reps)}>{ocupado ? "…" : "Guardar"}</button>
       <button type="button" className="boton-texto texto-suave" onClick={() => setAbierto(false)}>Cancelar</button>
       {error && <p role="alert" className="pildora pildora-rojo w-full"><Icono nombre="alerta" /> {error}</p>}

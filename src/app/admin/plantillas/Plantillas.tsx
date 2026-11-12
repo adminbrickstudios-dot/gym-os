@@ -27,7 +27,7 @@ function Editor({ texto, tipo, valor }: { texto: TextoPlantilla; tipo: string | 
           }}>Restaurar por defecto</BotonAccion>
         )}
       </div>
-      {msj.t && <p role={msj.ok ? "status" : "alert"} className={msj.ok ? "texto-suave text-sm" : "pildora pildora-rojo !rounded-2xl !px-4 !py-3"}>{msj.t}</p>}
+      {msj.t && <p role={msj.ok ? "status" : "alert"} className={msj.ok ? "texto-suave text-sm" : "pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"}>{msj.t}</p>}
     </div>
   );
 }

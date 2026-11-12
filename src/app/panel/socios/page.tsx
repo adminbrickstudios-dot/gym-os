@@ -80,12 +80,12 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
         <Encabezado icono="usuarios" titulo="Socios" bajada="Buscá por nombre, DNI, teléfono o número."
           accion={(() => {
             const extra = panel.yo.rol !== "recepcion" && <>
-              <Link href="/panel/socios/importar" className="boton"><Icono nombre="descargar" /> Importar</Link>
+              <Link href="/panel/socios/importar" className="boton"><Icono nombre="subir" /> Importar</Link>
               <Link href="/panel/socios/duplicados" className="boton"><Icono nombre="buscar" /> Duplicados</Link>
               {filas.length > 0 && (
                 // Descarga: un <a> común (no navegación del cliente), con el mismo filtro de la lista.
                 // La base todavía filtra el archivo solo por texto y etiqueta: con otro filtro puesto se dice que baja a todos (no a los que se ven).
-                <a href={`/panel/socios/exportar${con({ estado: null, plan: null, web: false }).replace("/panel/socios", "")}`} className="boton" download data-exportar={estado || plan || web ? "todos" : "filtrado"}><Icono nombre="subir" /> {estado || plan || web ? "Exportar todos los socios" : "Exportar"}</a>
+                <a href={`/panel/socios/exportar${con({ estado: null, plan: null, web: false }).replace("/panel/socios", "")}`} className="boton" download data-exportar={estado || plan || web ? "todos" : "filtrado"}><Icono nombre="descargar" /> {estado || plan || web ? "Exportar todos los socios" : "Exportar"}</a>
               )}
             </>;
             return (
@@ -95,7 +95,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {/* En el celular lo que se usa poco va en "Más", así la búsqueda queda arriba. */}
                 {extra && (
                   <details className="sm:hidden" data-mas>
-                    <summary className="boton list-none cursor-pointer">⋯ Más</summary>
+                    <summary className="boton list-none cursor-pointer"><Icono nombre="menu" /> Más</summary>
                     <div className="flex flex-wrap gap-2 mt-2">{extra}</div>
                   </details>
                 )}
@@ -148,7 +148,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
             ? <Vacio icono="buscar" titulo={`Nadie con “${q}”`} acciones={<Link href={`/panel/socios/nuevo${/^[\d.]{6,11}$/.test(q) ? `?dni=${q.replace(/\./g, "")}` : /^[\p{L} '.-]{2,60}$/u.test(q) ? `?nombre=${encodeURIComponent(q)}` : ""}`} className="boton"><Icono nombre="mas" /> Darlo de alta</Link>}>Probá con el DNI o solo el apellido.</Vacio>
             : <Vacio icono="usuarios" titulo="Todavía no hay socios" acciones={<>
                 <Link href="/panel/socios/nuevo" className="boton"><Icono nombre="mas" /> Cargar el primero</Link>
-                {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="descargar" /> Importar de un Excel</Link>}
+                {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="subir" /> Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
           <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} />

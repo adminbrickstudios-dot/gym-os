@@ -24,8 +24,10 @@ const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con
 const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
 const MAX_VISIBLES = 3;
 let memoriaAvisos: Aviso[] = [];
-const VERDE_MS = 6000;
-const AMARILLO_MS = 12000;
+const VERDE_MS = 5000;   // DISENO: verde 5 s, amarillo y azul 8 s, rojo 12 s (con el mouse o el dedo encima no se esconde)
+const AMARILLO_MS = 8000;
+const ROJO_MS = 12000;
+const msDe = (color: string) => (color === "verde" ? VERDE_MS : color === "rojo" ? ROJO_MS : AMARILLO_MS);
 
 type Aviso = {
   id: string; color: "verde" | "amarillo" | "rojo" | "azul"; emoji: string; texto: string;
@@ -81,7 +83,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
       if (nuevos.length === 0) return;
       setAvisos((previos) => {
         let todos = [...previos, ...nuevos.filter((n) => !previos.some((p) => p.id === n.id))];
-        // Si hay de más, se van primero los verdes más viejos; los rojos nunca se pierden solos.
+        // Si hay de más, se van primero los verdes más viejos; el rojo dura 12 s.
         while (todos.length > MAX_VISIBLES) {
           const i = todos.findIndex((x) => x.color === "verde");
           const j = i >= 0 ? i : todos.findIndex((x) => x.color === "amarillo");
@@ -93,18 +95,17 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
         return todos;
       });
       for (const n of nuevos) {
-        if (n.color === "rojo") continue;   // el rojo queda hasta que se toca
-        mapa.set(n.id, setTimeout(() => cerrar(n.id), n.color === "verde" ? VERDE_MS : AMARILLO_MS));
+        mapa.set(n.id, setTimeout(() => cerrar(n.id), msDe(n.color)));
       }
     });
     return () => { quitar(); mapa.forEach((t) => clearTimeout(t)); mapa.clear(); };
   }, [gimnasioId, cerrar]);
 
   const pausar = (id: string) => { const t = temporizadores.current.get(id); if (t) clearTimeout(t); temporizadores.current.delete(id); };
-  const reanudar = (a: Aviso) => { if (a.color === "rojo") return; temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS)); };
+  const reanudar = (a: Aviso) => { temporizadores.current.set(a.id, setTimeout(() => cerrar(a.id), msDe(a.color))); };
   useEffect(() => {
     const mapa = temporizadores.current;
-    for (const a of memoriaAvisos) if (a.color !== "rojo" && !mapa.has(a.id)) mapa.set(a.id, setTimeout(() => cerrar(a.id), a.color === "verde" ? VERDE_MS : AMARILLO_MS));
+    for (const a of memoriaAvisos) if (!mapa.has(a.id)) mapa.set(a.id, setTimeout(() => cerrar(a.id), msDe(a.color)));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -129,7 +130,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
         }
         return todos;
       });
-      if (color !== "rojo") mapa.set(n.id, setTimeout(() => cerrar(n.id), color === "verde" ? VERDE_MS : AMARILLO_MS));
+      mapa.set(n.id, setTimeout(() => cerrar(n.id), msDe(color)));
     };
     window.addEventListener(EVENTO_AVISO_LOCAL, local);
     return () => window.removeEventListener(EVENTO_AVISO_LOCAL, local);
@@ -160,13 +161,13 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
         <div key={a.id} data-aviso-id={a.id} data-aviso-entrada={a.color === "azul" ? "azul" : a.color} data-aviso-socio={a.socioId}
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
           className="vidrio aparecer pointer-events-auto rounded-[var(--radio)] p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
-          <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-11 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
+          <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-12 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
             <span className="text-xl leading-6" aria-hidden><Icono nombre={a.emoji} /></span>
             <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
           </button>
           <div className="flex flex-col items-end gap-1 flex-none">
-            <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-11 rounded-lg texto-tenue active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
-            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-9 !px-3 text-sm"><Icono nombre="plata" /> Cobrar</button>}
+            <button type="button" onClick={() => cerrar(a.id)} aria-label="Cerrar el aviso" className="size-12 rounded-[var(--radio-campo)] texto-tenue active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
+            {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-12 !px-4 text-[15px]"><Icono nombre="plata" /> Cobrar</button>}
           </div>
         </div>
       ))}

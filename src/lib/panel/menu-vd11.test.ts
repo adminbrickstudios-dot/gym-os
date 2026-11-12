@@ -34,7 +34,7 @@ describe("VD-11 · menú nuevo", () => {
 
   it("cada rol ve su menú y las apagadas no aparecen", () => {
     const claves = (rol: Parameters<typeof seccionesPara>[0], ap: string[] = []) => seccionesPara(rol, ap).map((s) => s.clave);
-    expect(claves("profe")).toEqual(["tareas", "fichar", "clases", "incidentes", "maquinas", "rutinas", "pt"]);
+    expect(claves("profe")).toEqual(["tareas", "fichar", "clases", "incidentes", "maquinas", "pt", "rutinas"]);
     expect(claves("recepcion")).not.toContain("gastos");
     expect(claves("recepcion")).not.toContain("control");
     expect(claves("recepcion")).toContain("prospectos");
@@ -43,5 +43,31 @@ describe("VD-11 · menú nuevo", () => {
     expect(claves("encargado", ["gastos", "control"])).not.toContain("control");
     expect(claves("dueno", ["vender"])).not.toContain("vender");
     expect(rutaDisponible("/panel/gastos", "encargado", ["gastos"])).toBe(false);
+  });
+});
+
+describe("Z5 · el menú en cuatro secciones (DISENO.md)", () => {
+  it("cada sección tiene su línea que explica qué es", async () => {
+    const { LINEA_GRUPO } = await import("./secciones");
+    for (const g of GRUPOS) expect(LINEA_GRUPO[g].length).toBeGreaterThan(10);
+  });
+
+  it("ningún ícono se repite en todo el menú (uno distinto por pantalla)", () => {
+    const iconos = SECCIONES.map((s) => s.emoji);
+    expect(iconos.filter((e, i) => iconos.indexOf(e) !== i)).toEqual([]);
+  });
+
+  it("lo de uso menos seguido va en «Más» y el dueño ve a lo sumo 7 sueltas por sección", () => {
+    const sec = (c: string) => SECCIONES.find((s) => s.clave === c)!;
+    for (const c of ["incidentes", "maquinas", "horas", "profes", "resumen", "eventos"]) expect(sec(c).secundaria).toBe(true);
+    for (const g of GRUPOS) {
+      const sueltas = seccionesPara("dueno", []).filter((s) => s.grupo === g && !s.secundaria);
+      expect(sueltas.length).toBeLessThanOrEqual(7);
+    }
+  });
+
+  it("Rutinas está en Gimnasio y no se repite ninguna sección", () => {
+    expect(SECCIONES.find((s) => s.clave === "rutinas")?.grupo).toBe("Gimnasio");
+    expect(new Set(SECCIONES.map((s) => s.clave)).size).toBe(SECCIONES.length);
   });
 });

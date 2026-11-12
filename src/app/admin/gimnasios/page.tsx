@@ -46,7 +46,7 @@ export default async function ListaGimnasios({ searchParams }: { searchParams: P
     <main className="mx-auto max-w-6xl px-4 sm:px-8 py-10 space-y-6">
       <header className="space-y-2">
         <Link href="/admin" className="texto-suave">← Tablero</Link>
-        <h1 className="titular text-5xl">Gimnasios</h1>
+        <h1 className="titular text-[28px]">Gimnasios</h1>
         <p className="texto-suave">{formatearNumero(filas.length)} {filas.length === 1 ? "gimnasio" : "gimnasios"}{hayFiltro ? " con estos filtros" : ""}</p>
       </header>
 

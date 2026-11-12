@@ -28,7 +28,7 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
       rpc<Progreso>("progreso_socio", { p_socio_id: s.socio_id }),
       rpc<{ dia: number; ejercicio_id: string; serie: number }[]>("series_hechas_hoy", { p_socio_id: s.socio_id }),   // FA-15
     ]);
-    if (!r) return (<><Link href={`/app${q()}`} className="texto-suave">← Volver</Link><h1 className="titular text-5xl mt-4">Mi rutina</h1>
+    if (!r) return (<><Link href={`/app${q()}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link><h1 className="titular text-[28px] mt-4">Mi rutina</h1>
       <p className="texto-suave text-lg mt-4">Todavía no tenés una rutina. Pedísela a tu profe.</p></>);
     const dias = [...new Set(r.items.map((x) => x.dia))].sort();
     // VD-20: la de hoy va primero (la calcula la base: el día que sigue al último que hizo).
@@ -40,8 +40,8 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
     const fecha = (m: string) => new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "numeric", timeZone: yo.zona! }).format(new Date(m));
     return (
       <div className="space-y-6">
-        <Link href={`/app${q()}`} className="texto-suave">← Volver</Link>
-        <div><h1 className="titular text-5xl"><Icono nombre="pesa" /> {r.nombre}</h1>{r.descripcion && <p className="texto-suave text-lg mt-2">{r.descripcion}</p>}</div>
+        <Link href={`/app${q()}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <div><h1 className="titular text-[28px]"><Icono nombre="pesa" /> {r.nombre}</h1>{r.descripcion && <p className="texto-suave text-lg mt-2">{r.descripcion}</p>}</div>
         {cambiarEn && <p className="texto-suave" data-cambiar-en><Icono nombre="repetir" /> Tu profe te la cambia el {cambiarEn}.</p>}
         <div className="tarjeta p-4 space-y-3" data-rutina-hoy={diaHoy}>
           <p className="titulo text-2xl">{esHoy ? `Hoy te toca el Día ${diaHoy}` : `Hoy te toca el Día ${diaHoy} (estás viendo el Día ${dia})`}</p>

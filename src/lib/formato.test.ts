@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fechaCorta, fechaLarga, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
+import { fechaCorta, fechaHoraHumana, fechaHumana, fechaLarga, formatearCelular, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
 
 describe("formatearPesos", () => {
   test.each([
@@ -60,5 +60,38 @@ describe("leerMonto", () => {
   });
   test("lo que no se entiende es NaN", () => {
     for (const x of ["", "abc", "1.50.0", "1,5,0", "12.34,5,6", "1.5000"]) expect(leerMonto(x)).toBeNaN();
+  });
+});
+
+// Z7 · fechas "hoy", "ayer", "lun 12/11" y celular "+54 9 …": siempre en la hora del gimnasio, con un "ahora" fijo.
+describe("fechaHumana y fechaHoraHumana", () => {
+  const ZONA = "America/Argentina/Buenos_Aires";
+  const ahora = new Date("2026-11-12T01:30:00Z");   // 11/11 22:30 en Buenos Aires, 12/11 en UTC: la hora de la compu no cuenta
+  test("hoy y ayer según el día del gimnasio, no el de la compu", () => {
+    expect(fechaHumana("2026-11-12T00:10:00Z", ZONA, ahora)).toBe("hoy");   // 11/11 21:10 allá
+    expect(fechaHumana("2026-11-11T02:00:00Z", ZONA, ahora)).toBe("ayer");  // 10/11 23:00 allá
+  });
+  test("más viejo: día de la semana y fecha", () => {
+    expect(fechaHumana("2026-11-09T15:00:00Z", ZONA, ahora)).toBe("lun 09/11");
+  });
+  test("de otro año lleva el año", () => {
+    expect(fechaHumana("2025-03-03T15:00:00Z", ZONA, ahora)).toBe("lun 03/03/25");
+  });
+  test("con la hora del gimnasio", () => {
+    expect(fechaHoraHumana("2026-11-12T00:10:00Z", ZONA, ahora)).toBe("hoy 21:10");
+  });
+});
+
+describe("formatearCelular", () => {
+  test.each([
+    ["+5491123456789", "+54 9 11 2345-6789"],
+    ["011 15 2345 6789", "+54 9 11 2345-6789"],
+    ["11 2345-6789", "+54 9 11 2345-6789"],
+    ["3515123456", "+54 9 351 512-3456"],
+    ["+54 9 000 111 2222", "+54 9 000 111-2222"],
+  ])("%s → %s", (entrada, salida) => expect(formatearCelular(entrada)).toBe(salida));
+  test("lo que no se reconoce queda tal cual y lo vacío es vacío", () => {
+    expect(formatearCelular("12345")).toBe("12345");
+    expect(formatearCelular(null)).toBe("");
   });
 });

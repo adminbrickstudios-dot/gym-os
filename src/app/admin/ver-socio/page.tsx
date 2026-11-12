@@ -28,7 +28,7 @@ export default async function VerSocio({ searchParams }: { searchParams: Promise
     <main className="mx-auto max-w-2xl px-4 sm:px-8 py-10 space-y-6" data-ver-socio>
       <header className="space-y-2">
         <Link href="/admin/buscar" className="texto-suave">← Buscar</Link>
-        <h1 className="titular text-5xl">{v.nombre || "Socio"}</h1>
+        <h1 className="titular text-[28px]">{v.nombre || "Socio"}</h1>
         <p className="texto-suave">Así lo ve su app, solo para mirar: no entrás a su cuenta ni cambiás nada. Queda anotado en el registro de BRIK.</p>
       </header>
       <section className="tarjeta p-5 space-y-2">

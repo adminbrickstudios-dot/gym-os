@@ -35,7 +35,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
   const ayudas = sesion ? await ayudasDeUsuario() : null;   // VD-31
   return (
     <div {...propsMarca(landing.marca)} className="min-h-dvh">
-      <header className="sticky top-0 z-20 backdrop-blur-md bg-[color-mix(in_oklab,var(--fondo)_85%,transparent)] border-b border-[var(--borde)]">
+      <header className="sticky top-0 z-20 bg-[var(--fondo)] border-b border-[var(--borde)]">
         <div className="mx-auto max-w-lg px-4 h-14 flex items-center justify-between">
           <Link href="/app" className="titulo text-xl flex items-center gap-2 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}

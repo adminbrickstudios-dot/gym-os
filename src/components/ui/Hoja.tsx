@@ -43,7 +43,7 @@ export function Hoja({ abierta, alCerrar, etiqueta, children, className = "", al
         className={`hoja vidrio relative w-full max-w-xl overflow-hidden rounded-[var(--radio-grande)] outline-none ${className}`}>
         {/* La X siempre visible (BASE-6): además de Esc y de tocar afuera. */}
         <button type="button" onClick={() => cerrar.current()} aria-label="Cerrar" data-cerrar-hoja
-          className="absolute top-2 right-2 z-10 grid place-items-center size-9 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)] hover:text-[var(--texto)]">
+          className="absolute top-2 right-2 z-10 grid place-items-center size-12 rounded-[var(--radio-campo)] texto-suave hover:bg-[var(--tarjeta-alta)] hover:text-[var(--texto)]">
           <Icono nombre="cerrar" />
         </button>
         {children}

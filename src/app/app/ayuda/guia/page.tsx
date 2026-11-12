@@ -25,7 +25,7 @@ export default async function GuiaSocio({ searchParams }: { searchParams: Promis
       <div className="space-y-5">
         <div>
           <Link href="/app/ayuda" className="inline-block texto-suave mb-3">← Ayuda</Link>
-          <h1 className="titular text-5xl">{guia.titulo}</h1>
+          <h1 className="titular text-[28px]">{guia.titulo}</h1>
           <p className="texto-suave mt-2">{guia.bajada}</p>
         </div>
         <GuiaHoja guia={guia} pasos={pasosVisibles(guia, visibles, false)} conLinks={false} gimnasio={landing?.marca.nombre ?? "Tu gimnasio"} logoPath={landing?.marca.logo_path} />

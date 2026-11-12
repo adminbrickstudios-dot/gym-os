@@ -87,7 +87,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-4xl mb-3" aria-hidden><Icono nombre="escudo" /></p>
-          <h1 className="titular text-6xl">Gimnasios</h1>
+          <h1 className="titular text-[28px]">Gimnasios</h1>
           <p className="texto-suave text-lg mt-2">{reales.length} {reales.length === 1 ? "gimnasio" : "gimnasios"} · {formatearNumero(reales.reduce((s, g) => s + g.socios_al_dia, 0))} socios al día</p>
         </div>
         <div className="flex gap-2">

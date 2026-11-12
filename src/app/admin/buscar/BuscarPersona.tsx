@@ -2,12 +2,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
+import { useConfirmar } from "@/components/ui/useConfirmar";
 import { borrarSocio, buscarPersona, type PersonaEncontrada } from "../acciones";
 
 const ROL: Record<string, string> = { socio: "Socio", dueno: "Dueño", encargado: "Encargado", recepcion: "Recepción", profe: "Profe" };
 
 /** SA-5 y SA-11: buscar a una persona; si es socio, exportar o borrar sus datos (solo el principal; la base lo valida). */
 export function BuscarPersona() {
+  const [confirmar, dialogo] = useConfirmar();
   const [q, setQ] = useState("");
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState("");
@@ -15,6 +17,7 @@ export function BuscarPersona() {
   const [personas, setPersonas] = useState<PersonaEncontrada[] | null>(null);
   return (
     <div className="space-y-4" data-buscar-persona>
+      {dialogo}
       <div className="tarjeta p-4 grid gap-3 sm:grid-cols-2">
         <label className="space-y-1"><span className="etiqueta">Mail, DNI o celular</span>
           <input className="campo" value={q} maxLength={120} onChange={(e) => setQ(e.target.value)} autoFocus /></label>
@@ -29,7 +32,7 @@ export function BuscarPersona() {
           }}>Buscar</BotonAccion>
         </div>
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{error}</p>}
       {aviso && <p className="texto-suave" role="status">{aviso}</p>}
       {personas && personas.length === 0 && <p className="texto-suave" data-sin-resultados>No hay nadie con ese dato en ningún gimnasio.</p>}
       <ul className="space-y-2">
@@ -48,7 +51,7 @@ export function BuscarPersona() {
                 <a className="boton" href={`/admin/buscar/exportar-socio?gimnasio=${p.gimnasio_id}&socio=${p.persona_id}`}>Exportar sus datos</a>
                 <BotonAccion className="boton texto-suave" ocupadoTexto="Borrando…" onClick={async () => {
                   const why = window.prompt(`Se borran los datos personales de ${p.nombre}. Los pagos se conservan con el nombre tachado. ¿Por qué? (por ejemplo, "lo pidió el socio")`);
-                  if (!why || !window.confirm("Esto no se puede deshacer. ¿Borrar los datos?")) return;
+                  if (!why || !(await confirmar(`Vas a borrar los datos personales de ${p.nombre}. Esto no se puede deshacer.`, { boton: "Borrar los datos", peligro: true }))) return;
                   const r = await borrarSocio(p.gimnasio_id, p.persona_id!, why);
                   if (r.error) { setError(r.error); return; }
                   setError(""); setAviso(`Datos de ${p.nombre} borrados.`);

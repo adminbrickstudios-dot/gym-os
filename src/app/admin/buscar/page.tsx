@@ -13,7 +13,7 @@ export default async function Buscar() {
     <main className="mx-auto max-w-3xl px-4 sm:px-8 py-10 space-y-6">
       <header className="space-y-2">
         <Link href="/admin" className="texto-suave">← Tablero</Link>
-        <h1 className="titular text-5xl">Buscar a una persona</h1>
+        <h1 className="titular text-[28px]">Buscar a una persona</h1>
         <p className="texto-suave">Sirve para &ldquo;me escribió alguien que no puede entrar y no sé de qué gimnasio es&rdquo;. Toca datos personales: pide el motivo y queda registrado. Muestra solo nombre, gimnasio y rol.</p>
       </header>
       <BuscarPersona />

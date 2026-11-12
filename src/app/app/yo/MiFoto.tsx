@@ -36,7 +36,7 @@ export function MiFoto({ socioId, iniciales, tieneFoto }: { socioId: string; ini
 
   return (
     <div className="tarjeta p-5 flex items-center gap-4" data-mi-foto={tieneFoto || vista ? "si" : "no"}>
-      <span className="size-20 rounded-3xl grid place-items-center titulo text-3xl overflow-hidden flex-none bg-[var(--tarjeta-2,var(--borde))]" aria-hidden>
+      <span className="size-20 rounded-[var(--radio)] grid place-items-center titulo text-3xl overflow-hidden flex-none bg-[var(--tarjeta-alta)]" aria-hidden>
         {vista || tieneFoto
           // eslint-disable-next-line @next/next/no-img-element
           ? <img src={vista ?? `/app/foto?socio=${socioId}`} alt="" className="size-full object-cover" />

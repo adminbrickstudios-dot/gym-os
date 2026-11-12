@@ -290,11 +290,13 @@ try {
   const bytes = await zip.body();
   chequear(zip.status() === 200 && bytes.subarray(0, 2).toString() === "PK" && bytes.includes(Buffer.from("socios.csv")), "el zip trae socios.csv (empieza con PK)", "el zip no es válido");
   await ciclo.locator("button:has-text('2. Dar de baja')").click();
+  await p.locator("[data-confirmar-ok]").click();
   chequear(await existe(ciclo.getByRole("button", { name: "Restaurar el gimnasio" }), 40000), "dar de baja: queda “para borrar” y se puede restaurar", "no quedó dado de baja");
   const borrar = p.locator("[data-borrar-definitivo]");
   chequear(await existe(borrar), "aparece el borrado definitivo (pide escribir el nombre)", "no aparece el borrado definitivo");
   await borrar.locator("input").fill(NOMBRE);
   await borrar.locator("button", { hasText: "Borrar definitivamente" }).click();
+  await p.locator("[data-confirmar-ok]").click();
   chequear(await existe(borrar.locator("[role=alert]")) && /30 días/.test(await borrar.locator("[role=alert]").innerText()), "el borrado definitivo se frena antes de los 30 días", "el borrado definitivo no se frenó");
   await abrir("/admin/gimnasios");
   await listaLista();

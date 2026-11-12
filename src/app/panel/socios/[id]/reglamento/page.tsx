@@ -21,7 +21,7 @@ export default async function ReglamentoAceptado({ params }: { params: Promise<{
         <Link href={`/panel/socios/${id}`} className="texto-suave hover:text-[var(--texto)]">← Ficha del socio</Link>
         {r ? <>
           <header>
-            <h1 className="titular text-4xl sm:text-5xl"><Icono nombre="documento" /> Reglamento aceptado</h1>
+            <h1 className="titular text-[28px]"><Icono nombre="documento" /> Reglamento aceptado</h1>
             <p className="texto-suave text-lg mt-2">Versión {r.version}, aceptada el {fechaCorta(r.aceptado_en, panel.gimnasio.zona_horaria)}.</p>
           </header>
           <article className="tarjeta p-6 whitespace-pre-wrap leading-relaxed" data-texto-reglamento>{r.texto}</article>

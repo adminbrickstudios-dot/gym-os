@@ -31,7 +31,7 @@ export function Notas({ gimnasioId, notas }: { gimnasioId: string; notas: NotaBr
           setError(""); setTexto(""); router.refresh();
         }}><Icono nombre="mas" /> Agregar nota</BotonAccion>
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {error}</p>}
     </div>
   );
 }

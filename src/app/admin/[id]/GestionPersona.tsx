@@ -6,7 +6,7 @@ import { ListaPrueba } from "../ListaPrueba";
 import { arreglarAcceso, cambiarRolPersona, estadoPersona, moverPersona, probarAccesoPersona, type PruebaPersona } from "../acciones";
 
 const ROLES: [string, string][] = [["dueno", "Dueño"], ["encargado", "Encargado"], ["recepcion", "Recepción"], ["profe", "Profe"]];
-const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3 basis-full">{m}</p> : null);
+const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3 basis-full">{m}</p> : null);
 
 /**
  * P6 y P7: "Probar acceso" de una persona (con sus "Arreglar"), desactivar o activar, cambiar el rol y mover a otro gimnasio.

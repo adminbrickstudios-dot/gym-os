@@ -50,7 +50,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   return (
     <div className="tarjeta p-5 space-y-3" data-qr-pared={qr?.codigo ?? ""}>
       <p className="text-xl font-semibold"><Icono nombre="celular" /> O escaneá este QR con tu app</p>
-      <div className="mx-auto w-56 aspect-square bg-white rounded-2xl p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
+      <div className="mx-auto w-56 aspect-square bg-white rounded-[var(--radio)] p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
     </div>
   );
 }

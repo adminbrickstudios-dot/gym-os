@@ -33,7 +33,7 @@ export function DominiosVercel({ lista, faltan }: { lista: boolean; faltan: stri
         <BotonAccion className="boton boton-principal" disabled={!lista || dominio.trim().length < 4} onClick={() => correr(conectarDominioVercel)}>Agregar a Vercel</BotonAccion>
         <BotonAccion className="boton" disabled={!lista || !estado} onClick={() => correr(verificarDominioEnVercel)}>Verificar</BotonAccion>
       </div>
-      {error && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3">{error}</p>}
+      {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{error}</p>}
       {estado && (
         <div className="tarjeta p-4 space-y-2" data-estado-dominio={estado.estado}>
           <p><span className={`pildora ${SEMAFORO[estado.estado][0]}`}>{SEMAFORO[estado.estado][1]}</span> <strong className="break-all">{estado.dominio}</strong></p>

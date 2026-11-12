@@ -121,7 +121,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <Foto socioId={s.id} iniciales={(s.nombre[0] ?? "") + (s.apellido[0] ?? "")} color={colorVar(v.color)}
               version={foto ? foto.slice(-36, -4) : null} subidaPorSocio={!!fotoEstado?.subida_por_el_socio} puedeConfirmar={panel.yo.rol !== "profe"} />
             <div className="min-w-0">
-              <h1 className="titular text-5xl sm:text-6xl">{s.nombre} {s.apellido}</h1>
+              <h1 className="titular text-[28px]">{s.nombre} {s.apellido}</h1>
               <p className="texto-suave text-lg mt-1">Socio #{s.numero}{s.es_menor ? " · menor de edad" : ""}{s.tiene_app ? (s.es_menor ? " · el responsable usa la app" : " · usa la app") : ""}</p>
             </div>
           </div>
@@ -130,6 +130,23 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
           </div>
+          {/* DISENO: las acciones (Cobrar, Vender, Editar…) van arriba, abajo del estado; no después de diez bloques. */}
+          {!s.dado_de_baja_en && (
+            <div className="flex flex-wrap gap-2 mt-4" data-ficha-acciones>
+              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
+              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
+              {!v.puede || v.color === "amarillo"
+                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal"><Icono nombre="plata" /> Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
+                : <>
+                    <BotonCobrar socioId={s.id} origen="ficha" className="boton"><Icono nombre="plata" /> Cobrar</BotonCobrar>
+                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton"><Icono nombre="carrito" /> Vender</LinkPanel>
+                  </>}
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
+              <Link href={`/panel/socios/${s.id}/editar`} className="boton"><Icono nombre="lapiz" /> Editar</Link>
+              <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
+              <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
+            </div>
+          )}
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (
             <section className="mt-6 space-y-3" data-documentos-ficha={documentos.pendientes.length}>
@@ -176,22 +193,6 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             <p className={`mensaje ${riesgo[0].nivel === "alto" ? "mensaje-error" : "mensaje-aviso"} mt-6`} data-riesgo-ficha={riesgo[0].nivel}>
               <Icono nombre="objetivo" /> <span><strong>Riesgo {riesgo[0].nivel} de irse:</strong> {riesgo[0].porque.join(" · ")}.</span>
             </p>
-          )}
-          {!s.dado_de_baja_en && (
-            <div className="flex flex-wrap gap-2 mt-6" data-ficha-acciones>
-              {/* VD-15: Entrada y Cobrar siempre a mano en el encabezado (Entrada abre la ventana de VD-1 con este socio). */}
-              {panel.yo.rol !== "profe" && <BotonEntradaFicha className="boton" socio={{ socio_id: s.id, numero: s.numero, nombre: `${s.nombre} ${s.apellido}`.trim(), color: v.color, texto: v.texto, puede: v.puede, dado_de_baja: false }} />}
-              {!v.puede || v.color === "amarillo"
-                ? <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal"><Icono nombre="plata" /> Cobrar{v.para_regularizar ? ` ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>
-                : <>
-                    <BotonCobrar socioId={s.id} origen="ficha" className="boton"><Icono nombre="plata" /> Cobrar</BotonCobrar>
-                    <LinkPanel href={`/panel/vender?socio=${s.id}`} className="boton"><Icono nombre="carrito" /> Vender</LinkPanel>
-                  </>}
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> WhatsApp</a>}
-              <Link href={`/panel/socios/${s.id}/editar`} className="boton"><Icono nombre="lapiz" /> Editar</Link>
-              <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
-              <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
-            </div>
           )}
         </header>
 

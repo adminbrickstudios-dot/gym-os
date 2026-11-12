@@ -281,7 +281,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       />
       <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
         {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto"><Icono nombre="camara" /> Leer QR</button>}
-        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-xl text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
+        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
           {sonido ? "Con sonido" : "Sin sonido"}
         </button>
       </div>

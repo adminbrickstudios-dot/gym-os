@@ -19,8 +19,8 @@ export default async function NuevoMensaje({ searchParams }: { searchParams: Pro
     const estado = await rpc<{ activo: boolean }>("mensajes_estado_socio", { p_socio_id: s.socio_id });
     return (
       <div className="space-y-6">
-        <Link href={`/app/mensajes${q}`} className="texto-suave">← Volver</Link>
-        <h1 className="titular text-5xl"><Icono nombre="mail" /> Nuevo mensaje</h1>
+        <Link href={`/app/mensajes${q}`} className="texto-suave inline-flex min-h-11 items-center">← Volver</Link>
+        <h1 className="titular text-[28px]"><Icono nombre="mail" /> Nuevo mensaje</h1>
         {estado.activo
           ? <FormMensaje socioId={s.socio_id} q={q} motivoInicial={MOTIVOS.find((m) => m.clave === sp.motivo)?.clave} />
           : <p className="tarjeta p-5 texto-suave">Por ahora este gimnasio no recibe mensajes por la app. Hablá con la recepción.</p>}

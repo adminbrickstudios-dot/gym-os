@@ -6,11 +6,12 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { propsMarca } from "@/lib/marca";
 import { linkWhatsapp } from "@/lib/landing-textos";
-import { traerLanding, type Marca, type PlanPublico } from "@/lib/landing";
+import { traerLanding, urlMarca, type Marca, type PlanPublico } from "@/lib/landing";
 import { FormAlta } from "./FormAlta";
 import type { Transferencia } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
+import { urlDeHost } from "@/lib/urls";
 
 export type DatosAlta = {
   abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
@@ -37,10 +38,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const nombre = landing?.marca.nombre ?? null;
+  const titulo = nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio";
+  // SEO: toda página pública lleva su descripción.
+  const descripcion = nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.";
+  // Al compartir el link por WhatsApp: la misma imagen y el mismo ícono que la página del gimnasio (la foto de portada, o /og con su nombre y sus colores).
+  const origen = host ? urlDeHost(host, "/og") : "/og";
+  const foto = landing?.publicada && landing.portada.foto_path ? urlMarca(landing.portada.foto_path) : null;
+  const imagen = foto ?? origen;
+  const icono = landing ? urlMarca(landing.marca.favicon_path ?? landing.marca.logo_path) : null;
   return {
-    title: { absolute: nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio" },
-    // SEO: toda página pública lleva su descripción.
-    description: nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.",
+    title: { absolute: titulo },
+    description: descripcion,
+    icons: icono ? { icon: icono, apple: icono } : { icon: "/icono", apple: "/icono" },
+    openGraph: { type: "website", title: titulo, description: descripcion, siteName: nombre ?? "Base", locale: "es_AR", images: [{ url: imagen, alt: nombre ?? "Base" }] },
+    twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
   };
 }
 

@@ -48,7 +48,7 @@ export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: 
         <p className="titulo text-2xl"><Icono nombre="camara" /> Leer QR</p>
         {estado === "sin"
           ? <p className="texto-suave">No hay cámara disponible (o no diste permiso). Buscalo por nombre o DNI.</p>
-          : <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-xl bg-black" />}
+          : <video ref={video} playsInline muted className="w-full aspect-square object-cover rounded-[var(--radio)] bg-black" />}
         <p className="text-sm texto-tenue">{frente ? "Mostrá el QR de tu app frente a la cámara." : "Que el socio muestre el QR de su app frente a la cámara."}</p>
         <button type="button" className="boton w-full" onClick={alCerrar}>Cancelar</button>
       </div>

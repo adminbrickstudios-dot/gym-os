@@ -82,7 +82,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
     <main className="mx-auto max-w-4xl px-4 sm:px-8 py-10 space-y-10">
       <header className="space-y-4" id="entrar">
         <Link href="/admin" className="texto-suave">← Gimnasios</Link>
-        <h1 className="titular text-6xl">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
+        <h1 className="titular text-[28px]">{g.nombre} {g.es_demo && <span className="pildora align-middle text-base">demo</span>}</h1>
         <div className="flex flex-wrap gap-2">
           <BotonEntrar gimnasioId={g.gimnasio_id} />
           <a href={rutaGimnasio(g.slug)} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver su página</a>

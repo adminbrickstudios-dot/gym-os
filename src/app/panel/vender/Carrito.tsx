@@ -1,4 +1,5 @@
 "use client";
+import { urlDarDeAlta } from "@/lib/panel/alta-url";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
@@ -235,7 +236,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
               {socio && <button type="button" className="boton" onClick={() => setBuscando(false)}>Seguir con {socio.nombre}</button>}
               {!socio && errorBusqueda && <p role="alert" className="pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {errorBusqueda}</p>}
               {!socio && !errorBusqueda && texto.trim().length >= 2 && encontrados.length === 0 && (
-                <p className="texto-suave">No está.<LinkPanel href="/panel/socios/nuevo" className="underline"> Darlo de alta y volver.</LinkPanel></p>
+                <p className="texto-suave">No está.<LinkPanel href={urlDarDeAlta(texto)} className="underline"> Darlo de alta y volver.</LinkPanel></p>
               )}
             </div>
           )}
@@ -300,7 +301,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
       {/* DIS-4: en el celular el carrito queda abajo de todo: una barra con el total lleva hasta él. */}
       {lineas.length > 0 && !carritoVisible && (
         <a href="#carrito" data-barra-carrito
-          className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(9.75rem+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] shadow-lg">
+          className="lg:hidden fixed inset-x-3 z-20 bottom-[calc(9.75rem+env(safe-area-inset-bottom))] boton !justify-between !border-[var(--acento)] [box-shadow:var(--sombra-flota)]">
           <span><Icono nombre="carrito" /> {lineas.reduce((n, l) => n + l.cantidad, 0)} · {total == null ? "—" : formatearPesos(total)}</span>
           <span>Cobrar ↓</span>
         </a>
@@ -324,9 +325,9 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-2">
-                    <button type="button" aria-label="Uno menos" className="boton !min-h-9 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                    <button type="button" aria-label="Uno menos" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
-                    <button type="button" aria-label="Uno más" className="boton !min-h-9 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
+                    <button type="button" aria-label="Uno más" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
                       title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
@@ -348,7 +349,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
           <div className="mt-3 flex flex-wrap items-center gap-2" data-cupon>
             <input className="campo !w-40 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
             <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}><Icono nombre="etiqueta" /> Aplicar</button>
-            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}>✓ {msjCupon.ok}</span>}
+            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--ok)" }}>✓ {msjCupon.ok}</span>}
             {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {msjCupon.error}</span>}
           </div>
         )}

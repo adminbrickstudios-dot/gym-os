@@ -38,7 +38,7 @@ export function PedirPausa({ socioId, hoy }: { socioId: string; hoy: string }) {
       </div>
       <fieldset className="flex flex-wrap gap-2"><legend className="text-sm texto-suave mb-1">¿Por qué?</legend>
         {CATEGORIAS.map(([v, t]) => (
-          <label key={v} className={`pildora cursor-pointer ${cat === v ? "pildora-azul" : ""}`}>
+          <label key={v} className={`pildora cursor-pointer !min-h-11 !px-4 ${cat === v ? "pildora-azul" : ""}`}>
             <input type="radio" name="cat" value={v} checked={cat === v} onChange={() => setCat(v)} className="sr-only" />{t}
           </label>
         ))}

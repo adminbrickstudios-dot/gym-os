@@ -18,6 +18,6 @@ export default async function ReciboSocio({ params, searchParams }: { params: Pr
     if (!/^[0-9a-f-]{36}$/i.test(venta)) throw new ErrorDatos("Ese recibo no existe.", "22023", 404);
     const r = await rpc<ReciboDatos>("recibo_venta", { p_venta_id: venta }, { lectura: true });
     const q = yo.socios.length > 1 ? `?socio=${yo.socio.socio_id}` : "";
-    return <Recibo r={r} volver={<Link href={`/app/historial${q}`} className="texto-suave">← Mi historial</Link>} />;
+    return <Recibo r={r} volver={<Link href={`/app/historial${q}`} className="texto-suave inline-flex min-h-11 items-center">← Mi historial</Link>} />;
   });
 }

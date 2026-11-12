@@ -27,7 +27,7 @@ export async function registroAbierto() {
 
 export type MarcaIngreso = Awaited<ReturnType<typeof traerMarca>>;
 
-/** Cáscara de las pantallas de ingreso: fondo con degradé, logo y nombre, y la tarjeta de vidrio con el contenido. */
+/** Cáscara de las pantallas de ingreso: fondo liso, logo y nombre, y la tarjeta con el contenido. */
 export function CascaraIngreso({ marca, children }: { marca: MarcaIngreso; children: React.ReactNode }) {
   const logo = urlMarca(marca?.logo_path);
   return (
@@ -42,9 +42,9 @@ export function CascaraIngreso({ marca, children }: { marca: MarcaIngreso; child
           {marca ? (
             logo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} alt="" className="size-12 rounded-2xl object-cover" />
+              <img src={logo} alt="" className="size-12 rounded-[var(--radio)] object-cover" />
             ) : (
-              <span className="size-12 rounded-2xl grid place-items-center titulo text-lg" style={{ background: "var(--acento)", color: "var(--acento-texto)" } as CSSProperties}>
+              <span className="size-12 rounded-[var(--radio)] grid place-items-center titulo text-lg" style={{ background: "var(--acento)", color: "var(--acento-texto)" } as CSSProperties}>
                 {iniciales(marca.nombre)}
               </span>
             )

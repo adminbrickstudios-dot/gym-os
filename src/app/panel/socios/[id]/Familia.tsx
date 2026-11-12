@@ -24,7 +24,7 @@ export function Familia({ socioId, familia, plan = null, puedeArmar = false }: {
       <p className="titulo text-2xl"><Icono nombre="usuarios" /> Familia</p>
       {familia.length === 0 && <p className="texto-suave">No está vinculado con nadie. Sumá a quien viene con él (hermana, hijo…) para verlos juntos.</p>}
       {plan?.activo && familia.length > 0 && (
-        <div className="rounded-xl border border-[var(--borde)] p-3 space-y-2 min-w-0" data-plan-familiar={plan.titular_id ? (plan.es_titular ? "titular" : "miembro") : "sin-titular"}>
+        <div className="rounded-[var(--radio)] border border-[var(--borde)] p-3 space-y-2 min-w-0" data-plan-familiar={plan.titular_id ? (plan.es_titular ? "titular" : "miembro") : "sin-titular"}>
           {plan.titular_id ? (
             <>
               <p className="font-semibold break-words"><Icono nombre="corona" /> {plan.es_titular ? `Paga por ${plan.vinculados ?? 0} ${plan.vinculados === 1 ? "persona" : "personas"}` : `Paga ${plan.titular_nombre}`} <span className="texto-tenue font-normal">· plan {plan.tipo === "corporativo" ? "corporativo" : "familiar"}</span></p>

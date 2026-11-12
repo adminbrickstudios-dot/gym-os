@@ -140,14 +140,14 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               )}
               <p className="sm:col-span-2 texto-tenue text-sm">El logo lo sube el dueño (o vos, entrando a terminar de configurarlo) desde Configuración.</p>
             </div>
-            <div className="rounded-2xl p-5 space-y-3 border border-[var(--borde)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
+            <div className="rounded-[var(--radio)] p-5 space-y-3 border border-[var(--borde)]" style={{ background: fondo }} data-vista-previa aria-label="Vista previa">
               <p className="text-xs uppercase tracking-wide opacity-60" style={{ color: textoSobre(fondo) }}>Vista previa · {tipoNombre || "sin plantilla"}</p>
               <p className="flex items-center gap-3">
-                <span className="grid place-items-center size-12 rounded-xl text-xl font-bold text-white" style={{ background: acento }} aria-hidden>{(nombre.trim()[0] ?? "G").toUpperCase()}</span>
+                <span className="grid place-items-center size-12 rounded-[var(--radio)] text-xl font-bold text-white" style={{ background: acento }} aria-hidden>{(nombre.trim()[0] ?? "G").toUpperCase()}</span>
                 <span className="text-2xl font-bold" style={{ color: textoSobre(fondo) }}>{nombre.trim() || "Tu gimnasio"}</span>
               </p>
               <p className="text-sm break-all" style={{ color: textoSobre(fondo) }}>{direccion}</p>
-              <span className="inline-block rounded-xl px-5 py-3 font-semibold text-white" style={{ background: acento }}>Soy socio</span>
+              <span className="inline-block rounded-[var(--radio)] px-5 py-3 font-semibold text-white" style={{ background: acento }}>Soy socio</span>
             </div>
           </div>
 
@@ -162,7 +162,7 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               <span className="block text-sm texto-tenue">Para dejarte listo el WhatsApp de bienvenida. No se guarda.</span></label>
           </div>
 
-          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-2xl !px-4 !py-3"><Icono nombre="alerta" /> {falta || estado.error}</p>}
+          {(falta || estado.error) && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3"><Icono nombre="alerta" /> {falta || estado.error}</p>}
           <div className="flex flex-wrap gap-2">
             {paso > 1 && <button type="button" className="boton" onClick={() => { setFalta(""); setPaso((p) => p - 1); }}>← Atrás</button>}
             {paso < 3
