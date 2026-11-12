@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     # Un push nuevo cancela la base del anterior (solo importa la última).
     concurrency:
-      group: base-${{ github.ref }}
+      group: base-${{ github.ref }}-${{ inputs.tanda }}
       cancel-in-progress: true
     timeout-minutes: 30
     services:
