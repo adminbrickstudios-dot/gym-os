@@ -18,13 +18,13 @@ const MOTIVO = "q3-recomendacion";
 const previas = (await db.query(`select id from public.ingresos where socio_id = $1 and anulado_en is null`, [socio.id])).rows.map((r) => r.id);
 let propia = null;
 const poner = async (diasAtras) => {
-  if (propia) await db.query(`delete from public.ingresos where id = $1`, [propia]);
+  if (propia) await db.query(`update public.ingresos set anulado_en = now(), anulado_motivo = $2 where id = $1`, [propia, "q3-propia"]);
   propia = (await db.query(
     `insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto)
      values ($1, $2, $3, now() - ($4 || ' days')::interval, 'recepcion', 'entro', 'verde', 'al_dia', 'Pasá') returning id`, [gim, sede, socio.id, String(diasAtras)])).rows[0].id;
 };
 const restaurar = async () => {
-  if (propia) await db.query(`delete from public.ingresos where id = $1`, [propia]);
+  if (propia) await db.query(`update public.ingresos set anulado_en = now(), anulado_motivo = $2 where id = $1`, [propia, "q3-propia"]);
   if (previas.length) await db.query(`update public.ingresos set anulado_en = null, anulado_por = null, anulado_motivo = null where id = any($1::uuid[]) and anulado_motivo = $2`, [previas, MOTIVO]);
 };
 const b = await navegador();
