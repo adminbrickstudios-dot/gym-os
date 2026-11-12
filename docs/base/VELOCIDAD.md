@@ -270,3 +270,29 @@ Lighthouse móvil, app compilada, mediana de 3, contra el demo local (donde las 
 | `/ingresar` (equipo y socio) | sin medir (falla; ver F1.8) | sin medir |
 
 **No se llegó a 95 ni a LCP < 1,5 s, y la diferencia entre las dos corridas (±3 puntos, ±0,5 s) es ruido del runner**: nada de lo cambiado toca esas dos pantallas en la base local. El elemento LCP es **un texto** (el `h1` de la landing y un párrafo de `/hacete-socio`, "sin recurso"), con 2,3 a 3 s de "render delay" después de un TTFB de 0,46 s: no es una imagen. Lo que el informe señala es el JavaScript que corre antes del primer pintado (451 ms "unattributable" más dos chunks de 230 y 220 ms, con la CPU 4× más lenta) y el CSS de 15 KB que bloquea el render. Para bajar de ahí hace falta **medir el JS por ruta con un `next build` completo** (el análisis de paquetes de Turbopack) y probar sacar del primer render lo que no hace falta (`Hidratado`, los formularios de más abajo), y eso es del principal (build y `next.config`). Queda 🟡.
+
+
+## F8.1 · La simulación de terminado con 5.000 socios y la app compilada (12/11, carril f8-cierre)
+
+`scripts/e2e/base-simulacion.mjs` entera, en Actions, con el demo sembrado con **5.019 socios** (30.094 cuotas y 134.490 ingresos) y la app
+compilada (`next build` + `next start`, `app_modo=produccion`): corrida **43331281446**, los 10 pasos en verde ("✓ La simulación de terminado pasó entera").
+La entrada ahora se prueba con 5.000 socios porque "Pruebas completas" acepta `socios` (y `tanda`, para correr varias tandas a la vez).
+
+**Lo que pasó el tope de 1 s** (`base-ingresos`, 20 ingresos con F2 → DNI → Enter, de Enter al aviso, corrida 43329594913): mediana **146 ms**,
+peor **296 ms** (tope 1.000 ms). Los 20: 130 132 133 141 143 143 145 145 146 146 146 149 149 151 155 161 167 210 294 296 ms.
+
+**Lo que se arregló (antes / después).** En la primera medición con 5.000 socios (corrida 43326880490) las pantallas de Inicio tardaban segundos:
+
+| RPC (Inicio, 5.019 socios, app compilada) | Antes (43326880490) | Después (43329594913 y 43331281446) |
+|---|---:|---:|
+| `panel_inicio` | 2.753 a 4.015 ms | **262 a 280 ms** |
+| `numeros_inicio` | 3.439 a 4.369 ms | **341 a 430 ms** |
+| `pendientes_panel` | n/d | 100 a 221 ms |
+
+La causa **no era la función ni la app**: la base se sembró y se usó sin `ANALYZE`, y sin estadísticas el planificador elige planes de tabla vacía (autovacuum
+tarda minutos en pasar; en producción lo hace solo). `scripts/local/levantar.sh` ahora corre `analyze` después de sembrar. No cambió ninguna función ni migración.
+Las pantallas siguen sin pasar el presupuesto de 300 ms en `numeros_inicio` (341 a 430 ms) en el runner de Actions con la app, el build y el navegador corriendo
+a la vez; en la base sola, con `explain analyze`, está por debajo (F0.3). Queda anotado, no bloquea el tope de 1 s.
+
+**Un recorrido viejo, no la app:** `base-ingresos` pedía los avisos "abajo a la derecha" (D40) y la app los tiene arriba a la derecha desde D56 / el pulido
+(a la izquierda del panel de últimas entradas, para no tapar el botón de Entrada). Se cambió la prueba a "a la derecha y dentro de la pantalla" y quedó en `PREGUNTAS.md`.
