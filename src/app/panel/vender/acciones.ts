@@ -90,8 +90,10 @@ export type CajaCobro = {
   turno_id: string | null; caja: string | null; vencido: boolean; otra_sede: string | null; modo: string;
   libres: { caja_id: string; nombre: string; fondo_sugerido: number; dejo_anterior: number | null; con_vencida: boolean }[];
 };
+/** H2c: la propuesta de lo que cubre la próxima cuota (días en la zona del gimnasio, hasta inclusive) y si esta persona puede cambiar las fechas. Lo decide la base (periodo_cuota_propuesto). */
+export type PeriodoCuota = { desde: string; hasta: string; cubierto_hasta: string; hoy: string; zona: string; puede_cambiar: boolean; parcial: boolean };
 export type DatosCobro = {
-  sedeId: string; zona: string; caja: CajaCobro;
+  sedeId: string; zona: string; caja: CajaCobro; periodo: PeriodoCuota | null;
   socio: { socio_id: string; nombre: string; numero: number | null; color: string; texto: string };
   precios: PreciosVenta; ctx: ContextoCobro; vueltoEfectivo: boolean; puedeAnular: boolean; sinProductos: boolean;
 };
@@ -114,15 +116,16 @@ export async function datosCobro(sedeId: string | null, socioId: string): Promis
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede } = sedeActiva(panel, sedeId ?? undefined);
     // Vuelto en efectivo: interruptor del dueño, apagado por defecto. Si no se puede leer, queda apagado (es solo una ayuda de pantalla).
-    const [precios, caja, ficha, ctx, vueltoEfectivo] = await Promise.all([
+    const [precios, caja, ficha, ctx, periodo, vueltoEfectivo] = await Promise.all([
       rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
       rpc<CajaCobro>("caja_para_cobrar", { p_sede_id: sede.id }, { lectura: true }),
       rpc<Ficha>("ficha_socio", { p_socio_id: socioId }, { lectura: true }),
       rpc<ContextoCobro>("contexto_cobro", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
+      rpc<PeriodoCuota | null>("periodo_cuota_propuesto", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
       funcionesNuevasDe(panel.gimnasio.id).then((c) => c.includes("vuelto_efectivo")).catch(() => false),
     ]);
     return { datos: {
-      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, caja,
+      sedeId: sede.id, zona: panel.gimnasio.zona_horaria, caja, periodo,
       socio: { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), numero: ficha.socio.numero ?? null, color: ficha.acceso.color, texto: ficha.acceso.texto },
       precios, ctx, vueltoEfectivo, puedeAnular: panel.yo.rol === "dueno" || panel.yo.rol === "encargado",
       sinProductos: panel.yo.rol === "recepcion" && !panel.permisos.recepcion_vende_productos,

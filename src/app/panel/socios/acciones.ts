@@ -109,6 +109,15 @@ export async function planesParaAlta(sedeId: string): Promise<{ planes?: PlanPar
 
 export type ProspectoOfrecido = { id: string; nombre: string; creado_en: string };
 
+/** H2c · Lo que cubriría la primera cuota de un alta en el pasado (la misma función de la base que decide la cobertura). Solo dueño y encargado. */
+export async function propuestaAltaPasada(plan: string, fechaAlta: string, fechaPago: string): Promise<{ propuesta?: { desde: string; hasta: string; hoy: string }; error?: string }> {
+  try {
+    const panel = await contextoPanel();
+    const r = await rpc<{ desde: string; hasta: string; hoy: string }>("periodo_alta_propuesto", { p_gimnasio_id: panel.gimnasio.id, p_plan_id: plan, p_fecha_alta: fechaAlta || fechaPago, p_fecha_pago: fechaPago });
+    return { propuesta: { desde: r.desde, hasta: r.hasta, hoy: r.hoy } };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** El Interesado con ese celular, para ofrecerlo en el alta. Un celular a medio escribir no coincide con nadie. */
 /** VD-6b · El Interesado con ese DNI. Un DNI a medio escribir no coincide con nadie. */
 export async function prospectoPorDni(dni: string): Promise<{ prospecto?: ProspectoOfrecido | null; error?: string }> {

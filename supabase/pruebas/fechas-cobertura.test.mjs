@@ -30,7 +30,7 @@ const coberturas = async (socio) => {
 const malos = async (socio) => (await t.q(`select count(*)::int as n from public.socios where id = $1 and cubierto_hasta is distinct from privado.calcular_cubierto_hasta(id)`, [socio]))[0].n;
 const socioNuevo = async (d) => (await alta(t.ctx.planes.full, d)).socio_id;
 const item = async (socio) => (await t.q(`select i.*, i.cubre_desde::text as cubre_desde_txt from public.venta_items i join public.ventas v on v.id = i.venta_id where v.socio_id = $1 and i.tipo = 'cuota' order by v.creado_en desc limit 1`, [socio]))[0];
-const hasta = (a, b) => assert.rejects(a, b);
+const hasta = (fn, patron) => t.falla(fn, patron);   // con savepoint: la prueba corre en una sola transacción
 
 before(async () => {
   t = await abrir("prueba-fechas-cobertura");

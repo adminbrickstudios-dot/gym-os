@@ -21,6 +21,7 @@ import { DeshacerVenta, MandarComprobante, MEDIOS } from "@/app/panel/vender/com
 import { aplicarCupon, armarItems, conRecargoLineas, descuentoConvenio, lineasIniciales, precioUnitario, totalCarrito, type Linea, type Medio } from "@/app/panel/vender/tipos";
 import type { OrigenCobro } from "./evento";
 import { Icono } from "@/components/ui/Icono";
+import { CubreFechas } from "@/components/panel/CubreFechas";
 
 const VUELTA: Record<OrigenCobro, string> = { entrada: "Volver a la entrada", ficha: "Volver a la ficha", vencen: "Volver a Vencen hoy", retencion: "Volver a Retención", buscador: "Listo", tarea: "Volver a Para hacer hoy", otro: "Listo" };
 
@@ -269,7 +270,11 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
                       <span className="flex-1 font-semibold">{l.cantidad > 1 ? `${l.cantidad} × ` : ""}{l.nombre}</span>
                       <span className="numero text-lg">{p == null ? "—" : formatearPesos(p * l.cantidad)}</span>
                     </div>
-                    {l.tipo === "cuota" && ctx.cubre && (
+                    {l.tipo === "cuota" && d.periodo && cuotas === 1 && (
+                      <CubreFechas propuesta={{ desde: d.periodo.desde, hasta: d.periodo.hasta }} hoy={d.periodo.hoy} puedeCambiar={d.periodo.puede_cambiar && !d.periodo.parcial}
+                        valor={l.cubre ?? null} alCambiar={(v) => cambiar(l.clave, { cubre: v ?? undefined })} />
+                    )}
+                    {l.tipo === "cuota" && ctx.cubre && !(d.periodo && cuotas === 1) && (
                       <p className="texto-suave text-sm" data-cobrar-cubre>
                         {cuotas > 1 ? `Cubre ${cuotas} períodos desde el ${diaCorto(ctx.cubre.desde, d.zona)}` : `Cubre del ${diaCorto(ctx.cubre.desde, d.zona)} al ${diaCorto(ctx.cubre.hasta, d.zona, 1)}`}
                       </p>

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { guardarSocio, prospectoPorDni, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
+import { guardarSocio, propuestaAltaPasada, prospectoPorDni, prospectoPorTelefono, type EstadoForm, type PlanParaAlta, type ProspectoOfrecido } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { AvisoSalud } from "@/components/ui/AvisoSalud";
 import { BotonAccion } from "@/components/ui/BotonAccion";
@@ -14,6 +14,7 @@ import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { Icono } from "@/components/ui/Icono";
+import { CubreFechas, type Fechas } from "@/components/panel/CubreFechas";
 import { TEXTO_CAMBIOS_SIN_GUARDAR, useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type PlanAlta = PlanParaAlta;
@@ -37,7 +38,7 @@ function esMenor(nacimiento: string) {
   return cumple18 > hoy;
 }
 
-type PagoPasado = { fecha: string; monto: string; medio: string };
+type PagoPasado = { fecha: string; monto: string; medio: string; cubre?: Fechas | null };
 const MEDIOS_PASADO = [["efectivo", "Efectivo"], ["transferencia", "Transferencia"], ["debito", "Débito"], ["credito", "Crédito"]] as const;
 const diaAnterior = (iso: string) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - 1); return d.toISOString().slice(0, 10); };
 
@@ -48,7 +49,18 @@ function CargaPasada({ hoy, plan, abierto, alAbrir }: { hoy: string; plan: strin
   const ayer = diaAnterior(hoy);
   const cambiar = (i: number, campo: keyof PagoPasado, valor: string) => setPagos((p) => p.map((x, j) => (j === i ? { ...x, [campo]: valor } : x)));
   // Solo se mandan los pagos con algo escrito: la base dice en palabras qué le falta a uno incompleto.
-  const enviados = pagos.filter((p) => p.fecha || p.monto);
+  // H2c: el pago más antiguo es el que abre la cobertura: es el que muestra "Cubre del … al …" y deja cambiar las fechas.
+  const primero = pagos.reduce<number>((m, p, i) => (p.fecha && (m < 0 || p.fecha < pagos[m].fecha) ? i : m), -1);
+  const enviados = pagos.filter((p) => p.fecha || p.monto).map(({ cubre, ...p }) => ({ ...p, ...(cubre && pagos[primero] && pagos[primero].cubre === cubre && p.fecha === pagos[primero].fecha ? { cubre_desde: cubre.desde, cubre_hasta: cubre.hasta } : {}) }));
+  const fechaPrimero = primero >= 0 ? pagos[primero].fecha : "";
+  const [propuesta, setPropuesta] = useState<{ desde: string; hasta: string; hoy: string } | null>(null);
+  const [errorPropuesta, setErrorPropuesta] = useState<string | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    if (!abierto || !plan || !fechaPrimero) { setPropuesta(null); setErrorPropuesta(null); return; }
+    propuestaAltaPasada(plan, fechaAlta, fechaPrimero).then((r) => { if (!vivo) return; setPropuesta(r.propuesta ?? null); setErrorPropuesta(r.error ?? null); });
+    return () => { vivo = false; };
+  }, [abierto, plan, fechaAlta, fechaPrimero]);
   return (
     <fieldset className="space-y-3" data-carga-pasada>
       <legend className="titulo text-2xl mb-2"><Icono nombre="calendario" /> Alta en el pasado</legend>
@@ -81,6 +93,13 @@ function CargaPasada({ hoy, plan, abierto, alAbrir }: { hoy: string; plan: strin
                     {MEDIOS_PASADO.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
                   </select></label>
                 {pagos.length > 1 && <button type="button" className="boton" aria-label="Sacar este pago" onClick={() => setPagos((x) => x.filter((_, j) => j !== i))}><Icono nombre="cerrar" /></button>}
+                {i === primero && propuesta && (
+                  <div className="sm:col-span-4" data-pasado-cubre>
+                    <CubreFechas propuesta={{ desde: propuesta.desde, hasta: propuesta.hasta }} hoy={propuesta.hoy} puedeCambiar valor={p.cubre ?? null}
+                      alCambiar={(v) => setPagos((x) => x.map((y, j) => (j === i ? { ...y, cubre: v } : y)))} atributoTexto={false} />
+                  </div>
+                )}
+                {i === primero && errorPropuesta && <p className="sm:col-span-4 text-sm texto-tenue" data-pasado-cubre-error>{errorPropuesta}</p>}
               </li>
             ))}
           </ul>
