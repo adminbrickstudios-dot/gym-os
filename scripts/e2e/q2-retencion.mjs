@@ -6,6 +6,7 @@ import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
+const TOPE = 30;
 const b = await navegador();
 try {
   const d = await pagina(b, COMPU);
@@ -39,6 +40,7 @@ try {
     const boton = d.locator("[data-tanda]").first();
     const n = Number(/\((\d+)\)/.exec(await boton.innerText())?.[1]);
     chequear(n >= 2 && n <= 30, `“Avisar a todos (${n})” en ${lista}, con tope de 30 por tanda`, `el botón dice ${n}`);
+    if (n === TOPE) chequear(/quedan \d+ para la próxima tanda/.test(await d.locator("[data-tanda-tope]").innerText().catch(() => "")), "con más de 30 avisa cuántos quedan para la próxima tanda", "no avisa que hay más de 30");
     await d.locator("[data-exportar-lista]").waitFor({ timeout: 30000 });
     await boton.click();
     const caja = d.locator("[data-tanda-abierta]");
@@ -54,9 +56,14 @@ try {
     const fila = d.locator("[data-lista-retencion] > li", { hasText: primero }).first();
     await fila.waitFor({ timeout: 60000 });
     chequear(/Le escribió|Dijo que vuelve|Anotado/.test(await fila.innerText()), `el contacto de ${primero} quedó anotado (quién y cuándo)`, `${primero} sigue sin contacto anotado: ${(await fila.innerText()).replace(/\n/g, " | ")}`);
-    const nuevo = d.locator("[data-tanda]");
-    const quedan = (await nuevo.count()) ? Number(/\((\d+)\)/.exec(await nuevo.first().innerText())?.[1]) : 0;
-    chequear(quedan < n, `la próxima tanda ya no incluye a quien se avisó (${n} → ${quedan})`, `siguen ${quedan} para avisar (eran ${n})`);
+    // La próxima tanda ya no incluye a quien se avisó (con tope, el número del botón puede seguir en 30: se mira quién abre primero).
+    await d.locator("[data-tanda]").first().click();
+    const caja2 = d.locator("[data-tanda-abierta]");
+    await caja2.waitFor({ timeout: 30000 });
+    const segundo = (await caja2.locator("p.font-semibold").first().innerText()).trim();
+    chequear(segundo !== primero, `la próxima tanda arranca con ${segundo}, no con ${primero} (ya avisado)`, `la tanda vuelve a empezar con ${primero}`);
+    await caja2.getByRole("button", { name: "Terminar" }).click();
+    await d.locator("[data-tanda]").first().waitFor({ timeout: 30000 });
 
     // 3) Exportar la lista: un CSV con encabezado, no un archivo vacío.
     const href = await d.locator("[data-exportar-lista]").getAttribute("href");
