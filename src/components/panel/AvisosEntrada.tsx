@@ -24,9 +24,9 @@ const VIA: Record<string, string> = { recepcion: "en recepción", qr_socio: "con
 const VIA_PRESTAMO: Record<string, string> = { recepcion: "recepción", qr_socio: "el QR", qr_pared: "el QR de la pared", kiosco: "la tablet", nfc: "el llavero", molinete: "el molinete" };
 const MAX_VISIBLES = 3;
 let memoriaAvisos: Aviso[] = [];
-const VERDE_MS = 5000;   // DISENO: verde 5 s, amarillo y azul 8 s, rojo 12 s (con el mouse o el dedo encima no se esconde)
+const VERDE_MS = 5000;   // DISENO: verde 5 s, amarillo y azul 8 s, rojo se queda (10 min como tope) (con el mouse o el dedo encima no se esconde)
 const AMARILLO_MS = 8000;
-const ROJO_MS = 12000;
+const ROJO_MS = 600000;   // El rojo (no puede entrar) se queda hasta que la recepción lo cierre o lo atienda (BASE-3, vd-4); DISENO decía 12 s: se eligió lo más seguro para el mostrador (PREGUNTAS.md).
 const msDe = (color: string) => (color === "verde" ? VERDE_MS : color === "rojo" ? ROJO_MS : AMARILLO_MS);
 
 type Aviso = {
