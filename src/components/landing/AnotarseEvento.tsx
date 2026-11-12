@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { anotarseEvento, type EstadoAnotarse } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { CampoAntiRobot } from "@/components/cuentas/CampoAntiRobot";
 
 export function AnotarseEvento({ eventoId, lleno, conEspera }: { eventoId: string; lleno: boolean; conEspera: boolean }) {
   const [abierto, setAbierto] = useState(false);
@@ -25,7 +26,7 @@ export function AnotarseEvento({ eventoId, lleno, conEspera }: { eventoId: strin
         <input name="dni" required inputMode="numeric" autoComplete="off" placeholder="Sin puntos" className="campo" defaultValue={estado.datos?.dni} /></label>
       <label className="block space-y-1"><span className="etiqueta">Tu WhatsApp</span>
         <input name="telefono" required type="tel" inputMode="tel" autoComplete="tel" placeholder="387 555 1234" className="campo" defaultValue={estado.datos?.telefono} /></label>
-      <input name="sitio" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+      <CampoAntiRobot />
       {estado.error && <p role="alert" className="mensaje mensaje-error"><Icono nombre="alerta" /> {estado.error}</p>}
       <button type="submit" disabled={enviando} className="boton boton-principal w-full sm:w-auto px-8">{enviando ? "Anotando…" : "Confirmar"}</button>
     </form>

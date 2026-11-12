@@ -2,13 +2,17 @@
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
+import { frenarEnvioPublico } from "@/lib/seguridad/envio-publico";
 
 export type EstadoAnotarse = { ok?: boolean; estado?: "anotado" | "espera"; posicion?: number; precio?: number; error?: string; datos?: { nombre: string; dni: string; telefono: string } };
 
 /** VD-19: anotarse a un evento desde la página (sin sesión). La base valida el gimnasio publicado, el cupo y la lista de espera; se paga en recepción. */
 export async function anotarseEvento(eventoId: string, _: EstadoAnotarse, form: FormData): Promise<EstadoAnotarse> {
   const datos = { nombre: String(form.get("nombre") ?? "").trim(), dni: String(form.get("dni") ?? "").trim(), telefono: String(form.get("telefono") ?? "").trim() };
-  if (String(form.get("sitio") ?? "")) return { ok: true, estado: "anotado" };
+  // SEG-04: campo trampa, tiempo mínimo y tope por conexión y por persona (el DNI), como el alta.
+  const freno = await frenarEnvioPublico(form, "otro", datos.dni || null);
+  if (freno.robot) return { ok: true, estado: "anotado" };
+  if (freno.error) return { error: freno.error, datos };
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
@@ -27,8 +31,10 @@ export type EstadoProbar ={ ok?: boolean; nombre?: string; error?: string; datos
 /** "Probá una clase": lo decide la base (gimnasio publicado, sección visible, tope contra spam). */
 export async function quieroProbar(_: EstadoProbar, form: FormData): Promise<EstadoProbar> {
   const datos = { nombre: String(form.get("nombre") ?? "").trim(), telefono: String(form.get("telefono") ?? "").trim(), interes: String(form.get("interes") ?? "").trim() };
-  // El campo escondido lo llenan los robots: se les contesta como si nada, sin guardar.
-  if (String(form.get("sitio") ?? "")) return { ok: true, nombre: datos.nombre.split(" ")[0] };
+  // SEG-04: el campo escondido lo llenan los robots (se les contesta como si nada); además tiempo mínimo y tope de envíos.
+  const freno = await frenarEnvioPublico(form, "consulta", datos.telefono || null);
+  if (freno.robot) return { ok: true, nombre: datos.nombre.split(" ")[0] };
+  if (freno.error) return { error: freno.error, datos };
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
@@ -54,7 +60,9 @@ export type EstadoReservaPrueba = { ok?: boolean; nombre?: string; clase?: strin
 /** VD-51 · "Probá una clase": elige la clase y deja nombre, DNI y celular. Queda como Interesado con la reserva; lo decide la base. */
 export async function reservarPrueba(_: EstadoReservaPrueba, form: FormData): Promise<EstadoReservaPrueba> {
   const datos = { nombre: String(form.get("nombre") ?? "").trim(), dni: String(form.get("dni") ?? "").trim(), telefono: String(form.get("telefono") ?? "").trim(), clase: String(form.get("clase") ?? "") };
-  if (String(form.get("sitio") ?? "")) return { ok: true, nombre: datos.nombre.split(" ")[0] };
+  const freno = await frenarEnvioPublico(form, "prueba", datos.dni || null);
+  if (freno.robot) return { ok: true, nombre: datos.nombre.split(" ")[0] };
+  if (freno.error) return { error: freno.error, datos };
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };

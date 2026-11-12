@@ -21,7 +21,7 @@ const UNIQUE_GLOBAL = new Set([
   "gimnasios_slug_key", "dominios_gimnasio_host_key", "dispositivos_tokens_token_hash_key", "eventos_webhook_origen_tipo_id_externo_key",
 ]);
 const EJECUTABLES = {
-  anon: new Set(["public.politica_privacidad_publica", "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.clases_semana_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_emergencia", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.kiosco_salida_activa", "public.kiosco_salir", "public.clases_para_probar", "public.reservar_prueba_publica", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.mantenimiento_vigente", "public.planes_brik_publicos", "public.contacto_plataforma_publico", "public.foto_equipo"]),
+  anon: new Set(["public.politica_privacidad_publica", "public.terminos_publicos", "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.agenda_publica", "public.clases_semana_publica", "public.quiero_probar", "public.alta_publica", "public.alta_online", "public.kiosco_estado", "public.kiosco_emergencia", "public.kiosco_entrar", "public.kiosco_qr", "public.kiosco_ultimo", "public.kiosco_habituales", "public.kiosco_entrar_habitual", "public.kiosco_salida_activa", "public.kiosco_salir", "public.clases_para_probar", "public.reservar_prueba_publica", "public.eventos_publicos", "public.medicion_publica", "public.tv_estado", "public.inscribirse_evento_publico", "public.pedir_demo_brik", "public.mantenimiento_vigente", "public.planes_brik_publicos", "public.contacto_plataforma_publico", "public.foto_equipo"]),
   authenticated: new Set([
     "public.gimnasio_por_host", "public.gimnasio_por_slug", "public.landing_publica", "public.estado_acceso", "public.registrar_ingreso", "public.anular_ingreso",
     "public.congelar", "public.descongelar", "public.anular_congelamiento", "public.crear_cierre", "public.anular_cierre",
@@ -37,6 +37,7 @@ const EJECUTABLES = {
     "public.config_liquidacion", "public.guardar_config_liquidacion", "public.liquidacion_profes", "public.liquidacion_profe_detalle", "public.mi_liquidacion",
     "public.guardar_regla_profe", "public.cargar_horas_profe", "public.anular_horas_profe", "public.pagar_profe", "public.anular_pago_profe",
     "public.recibo_venta",
+    "public.admin_funcion_gimnasio", "public.funciones_del_gimnasio", "public.cambios_restaurables", "public.restaurar_cambio_configuracion", "public.terminos_propios", "public.guardar_terminos", "public.terminos_publicos",
     "public.config_cierres", "public.guardar_config_cierres", "public.previsualizar_cierre",
     "public.fichar", "public.fichar_con_pin", "public.config_fichaje", "public.guardar_config_fichaje", "public.mi_fichaje", "public.mis_horas", "public.horas_equipo", "public.fichajes_persona", "public.corregir_fichaje", "public.anular_fichaje",
     "public.clases_del_dia", "public.reservar", "public.cancelar_reserva", "public.cancelar_clase", "public.tomar_asistencia",

@@ -14,6 +14,8 @@ test("lee /g/<slug> con y sin resto, con barra final", () => {
 test("el alta, la privacidad y el ingreso se quedan en la dirección del gimnasio", () => {
   expect(accionDeGimnasio("/hacete-socio")).toEqual({ accion: "publica", ruta: "/hacete-socio" });
   expect(accionDeGimnasio("/privacidad")).toEqual({ accion: "publica", ruta: "/privacidad" });
+  expect(accionDeGimnasio("/terminos")).toEqual({ accion: "publica", ruta: "/terminos" });
+  expect(usaGimnasioElegido("/terminos", null)).toBe(true);
   expect(accionDeGimnasio("/ingresar")).toEqual({ accion: "publica", ruta: "/ingresar" });
   expect(accionDeGimnasio(null)).toEqual({ accion: "raiz" });
   expect(accionDeGimnasio("/panel/socios")).toEqual({ accion: "redirigir", ruta: "/panel/socios" });
