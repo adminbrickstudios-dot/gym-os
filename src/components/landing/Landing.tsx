@@ -299,7 +299,7 @@ function Preguntas({ s }: { s: Extract<Seccion, { tipo: "preguntas" }> }) {
           <details key={`${i}-${q.pregunta}`} className="tarjeta group">
             <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-6 min-h-[64px] text-lg font-semibold">
               {q.pregunta}
-              <span aria-hidden className="text-2xl texto-suave transition-transform group-open:rotate-45">+</span>
+              <span aria-hidden className="text-2xl texto-suave transition-transform group-open:rotate-45"><Icono nombre="mas" /></span>
             </summary>
             <p className="px-6 pb-6 texto-suave text-lg leading-relaxed">{q.respuesta}</p>
           </details>

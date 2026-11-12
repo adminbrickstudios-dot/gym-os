@@ -84,7 +84,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
           </p>
           {patrones && <AlertasPatron datos={patrones} zona={zona} />}
           {pagina.items.length === 0 ? (
-            <Vacio icono={cursor ? "" : "hoja"} titulo={cursor ? "No hay más movimientos" : "Nada para mostrar con estos filtros"}
+            <Vacio icono={cursor ? "ok" : "hoja"} titulo={cursor ? "No hay más movimientos" : "Nada para mostrar con estos filtros"}
               acciones={<Link href={cursor ? `/panel/control?${base}` : "/panel/control"} className="boton">{cursor ? "Volver al principio" : "Ver los últimos 7 días"}</Link>}>
               {cursor ? "Ya viste todo lo que hay en estas fechas." : "Cuando alguien cobre, anule, dé un descuento o cierre la caja, queda escrito acá."}
             </Vacio>
@@ -131,7 +131,7 @@ export default async function Control({ searchParams }: { searchParams: Promise<
                 {moderacion.items.map((i) => (
                   <li key={i.clave} data-moderacion-item={i.tipo}>
                     <Link href={i.socio_id ? `/panel/socios/${i.socio_id}` : "/panel/control"} className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[60px] hover:bg-[var(--tarjeta-alta)] transition-colors">
-                      <span className="icono" aria-hidden><Icono nombre={META_MODERACION[i.tipo]?.emoji ?? "•"} /></span>
+                      <span className="icono" aria-hidden><Icono nombre={META_MODERACION[i.tipo]?.emoji ?? "alerta"} /></span>
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold leading-tight break-words">{META_MODERACION[i.tipo]?.titulo ?? i.tipo}{i.socio ? `: ${i.socio}` : ""}{i.monto != null ? ` · ${formatearPesos(Number(i.monto))}` : ""}</span>
                         <span className="block texto-suave text-[15px] break-words">{[i.quien, i.detalle].filter(Boolean).join(" · ")}</span>

@@ -109,7 +109,7 @@ export function accionesPara(texto: string, c: Comando | null, permitidos: Set<V
     if (verbo === "cobrar" && arg) {
       for (const s of porSocio) salida.push({ id: `cobrar:${s.socio_id}`, verbo, tipo: "cobrar", emoji: "plata", titulo: `Cobrar a ${s.nombre}`, socioId: s.socio_id });
     } else if (verbo === "ficha" && arg) {
-      for (const s of socios) salida.push({ id: `ficha:${s.socio_id}`, verbo, tipo: "ir", emoji: "", titulo: `Ficha de ${s.nombre}`, ruta: `/panel/socios/${s.socio_id}` });
+      for (const s of socios) salida.push({ id: `ficha:${s.socio_id}`, verbo, tipo: "ir", emoji: "persona", titulo: `Ficha de ${s.nombre}`, ruta: `/panel/socios/${s.socio_id}` });
     } else if (verbo === "entrada" && arg) {
       salida.push({ id: "entrada", verbo, tipo: "entrada", emoji: "puerta", titulo: pareceDni(arg) ? `Entrada del DNI ${arg}` : `Entrada de ${arg}`, detalle: "Abre la ventana de Entrada", texto: arg });
     } else if (verbo === "entrada") {

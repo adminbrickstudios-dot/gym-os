@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { archivarRutina, guardarRutina, type ItemRutina } from "../acciones";
 import { nombreGrupo, type Ejercicio } from "../tipos";
 import { Icono } from "@/components/ui/Icono";
+import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 type Item = ItemRutina & { clave: number };
 let siguiente = 1;
@@ -22,15 +23,9 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
   // Regla 7 de FLUIDEZ: si cerrás la pestaña con cambios sin guardar, el navegador pregunta antes de perderlos.
   const huella = JSON.stringify([nombre, descripcion, items.map((x) => [x.dia, x.ejercicio_id, x.series, x.repeticiones, x.nota ?? ""])]);
   const [guardada, setGuardada] = useState<string | null>(null);
-  const original = useRef<string | null>(null);
-  if (original.current === null) original.current = huella;
-  const sinGuardar = huella !== original.current && guardada !== huella;
-  useEffect(() => {
-    if (!sinGuardar) return;
-    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
-    window.addEventListener("beforeunload", avisar);
-    return () => window.removeEventListener("beforeunload", avisar);
-  }, [sinGuardar]);
+  const [original] = useState(huella);
+  const sinGuardar = huella !== original && guardada !== huella;
+  useCambiosSinGuardar(sinGuardar);
   const cambiar = (clave: number, cambio: Partial<Item>) => setItems((xs) => xs.map((x) => (x.clave === clave ? { ...x, ...cambio } : x)));
   const sumar = (dia: number, ejercicio_id: string) => setItems((xs) => [...xs, { clave: siguiente++, dia, ejercicio_id, series: 3, repeticiones: "12" }]);
   const guardar = () => empezar(async () => {

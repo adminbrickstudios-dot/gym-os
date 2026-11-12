@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type MouseEvent } from "react";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
 import { crearTareaRapida } from "@/app/panel/tareas/acciones";
 import type { Rol, Seccion } from "@/lib/panel/secciones";
@@ -90,7 +90,9 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
   useEffect(() => setMarcado(0), [texto, socios.length]);
   useEffect(() => { document.querySelector("[data-fila-marcada]")?.scrollIntoView({ block: "nearest" }); }, [marcado, tope]);
 
-  const ir = (ruta: string) => { setAbierto(false); router.push(ruta); };
+  // La hoja deja una entrada en el historial (para que el "atrás" la cierre): al ir a otra pantalla esa entrada se reemplaza, no se suma otra.
+  const ir = (ruta: string) => { const dentro = !!window.history.state?.__hoja; setAbierto(false); if (dentro) router.replace(ruta); else router.push(ruta); };
+  const alLink = (e: MouseEvent<HTMLAnchorElement>, ruta: string) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { setAbierto(false); return; } e.preventDefault(); ir(ruta); };
   const cobrarA = (socioId: string) => { setAbierto(false); abrirCobrar({ socioId, origen: "buscador" }); };
   const ejecutar = (a: Accion) => {
     if (a.tipo === "ir") return ir(a.ruta);
@@ -153,7 +155,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
             />
             <div className="max-h-[60vh] overflow-y-auto p-2" data-buscador-lista>
               {error && <p className="px-3 py-3 text-sm pildora pildora-rojo !rounded-[var(--radio)] w-full"><Icono nombre="alerta" /> {error}</p>}
-              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-[var(--radio)] w-full" role="status" data-buscador-tarea-ok>✓ {aviso}</p>}
+              {aviso && <p className="px-3 py-3 text-sm pildora pildora-verde !rounded-[var(--radio)] w-full" role="status" data-buscador-tarea-ok><Icono nombre="ok" /> {aviso}</p>}
               {pista && <p className="px-3 py-2 text-sm texto-suave" data-buscador-pista>Falta {pista.verbo === "tarea" ? "qué hay que hacer" : pista.verbo === "entrada" ? "el DNI o el nombre" : "a quién"}: escribí algo más después de “{texto.trim()}”.</p>}
               {!texto.trim() && ejemplos.length > 0 && (
                 <div className="px-3 pt-2 pb-1" data-buscador-ejemplos>
@@ -197,7 +199,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                     <div key={`a-${f.clave}`}>
                       {cab}
                       {a.tipo === "ir"
-                        ? <Link href={a.ruta} onClick={() => setAbierto(false)} className={clases} data-buscador-accion={a.verbo} {...marcaProps}>{cuerpo}</Link>
+                        ? <Link href={a.ruta} onClick={(e) => alLink(e, a.ruta)} className={clases} data-buscador-accion={a.verbo} {...marcaProps}>{cuerpo}</Link>
                         : <button type="button" onClick={() => ejecutar(a)} disabled={haciendo} className={clases} data-buscador-accion={a.verbo} {...(a.tipo === "cobrar" ? { "data-buscador-cobrar": "" } : {})} {...marcaProps}>{cuerpo}</button>}
                     </div>
                   );
@@ -208,7 +210,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                     <div key={`s-${f.clave}`}>
                       {cab}
                       <div className={`flex items-center gap-2 rounded-[var(--radio)] pr-2 ${marca(i)}`} {...marcaProps}>
-                        <Link href={`/panel/socios/${s.socio_id}`} onClick={() => setAbierto(false)} className="flex items-center gap-3 px-3 min-h-[56px] min-w-0 flex-1">
+                        <Link href={`/panel/socios/${s.socio_id}`} onClick={(e) => alLink(e, `/panel/socios/${s.socio_id}`)} className="flex items-center gap-3 px-3 min-h-[56px] min-w-0 flex-1">
                           <PuntoEstado color={s.color} />
                           <span className="min-w-0 flex-1">
                             <span className="block font-semibold truncate">{s.nombre} {s.numero != null && <span className="texto-tenue font-normal">#{s.numero}</span>}</span>
@@ -225,7 +227,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                   return (
                     <div key={`h-${f.clave}`}>
                       {cab}
-                      <Link href={`/panel/ayuda?p=${q.id}`} onClick={() => setAbierto(false)} {...marcaProps} data-buscador-ayuda={q.id}
+                      <Link href={`/panel/ayuda?p=${q.id}`} onClick={(e) => alLink(e, `/panel/ayuda?p=${q.id}`)} {...marcaProps} data-buscador-ayuda={q.id}
                         className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] ${marca(i)}`}>
                         <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre="ayuda" /></span>
                         <span className="min-w-0 flex-1">
@@ -240,7 +242,7 @@ export function Buscador({ secciones, buscaSocios, compacto = false, soloVer = f
                 return (
                   <div key={`p-${f.clave}`}>
                     {cab}
-                    <Link href={s.ruta} onClick={() => setAbierto(false)} {...marcaProps}
+                    <Link href={s.ruta} onClick={(e) => alLink(e, s.ruta)} {...marcaProps}
                       className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-[52px] ${marca(i)}`}>
                       <span className="text-xl w-7 text-center flex-none" aria-hidden><Icono nombre={s.emoji} sistema /></span>
                       <span className="font-semibold flex-none">{s.titulo}</span>

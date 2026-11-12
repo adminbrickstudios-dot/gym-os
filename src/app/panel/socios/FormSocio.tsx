@@ -14,6 +14,7 @@ import { MandarComprobante } from "@/app/panel/vender/compartido";
 import { formatearPesos } from "@/lib/formato";
 import { BorradorAutomatico } from "@/lib/app/BorradorAutomatico";
 import { Icono } from "@/components/ui/Icono";
+import { TEXTO_CAMBIOS_SIN_GUARDAR, useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 export type PlanAlta = PlanParaAlta;
 
@@ -112,7 +113,7 @@ function Pasos({ actual }: { actual: number }) {
       {nombres.map((n, i) => (
         <li key={n} aria-current={i + 1 === actual ? "step" : undefined}
           className={`flex-1 min-w-0 rounded-full px-3 py-1.5 text-center truncate border ${i + 1 === actual ? "border-[var(--acento)] font-semibold" : i + 1 < actual ? "texto-suave border-[var(--borde)]" : "texto-tenue border-[var(--borde)]"}`}>
-          {i + 1 < actual ? "✓ " : `${i + 1} · `}{n}
+          {i + 1 < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}
         </li>
       ))}
     </ol>
@@ -140,6 +141,9 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   const [despues, setDespues] = useState(false);
   const [ofrecido, setOfrecido] = useState<ProspectoOfrecido | null>(null);
   const [vinculado, setVinculado] = useState<string | null>(null);
+  // FLUIDEZ regla 7: lo escrito no se pierde sin avisar (cerrar, recargar, tocar el menú o Cancelar).
+  const [tocado, setTocado] = useState(false);
+  useCambiosSinGuardar(tocado && !guardando && !estado.destino && !creado);
   const planElegido = planes.find((p) => p.plan_id === plan) ?? null;
   useEffect(() => {
     if (!estado.destino) return;
@@ -239,7 +243,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
   }
 
   return (
-    <form action={accion} className="max-w-2xl space-y-8">
+    <form action={accion} onInput={() => setTocado(true)} className="max-w-2xl space-y-8">
       {!socioId && <Pasos actual={paso} />}
       {conBorrador && !socioId && <BorradorAutomatico clave="alta-completa" />}
       {socioId && <input type="hidden" name="version" value={estado.version ?? versionAbierta ?? ""} />}
@@ -301,7 +305,7 @@ function FormInterno({ socioId, socio, prospectoId, planes = [], puedeCobrar = f
               <BotonAccion disabled={guardando || !!estado.destino} className="boton">Solo dar de alta</BotonAccion>
             </>
           : <BotonAccion disabled={guardando || !!estado.destino} className="boton boton-principal text-lg px-8">{guardando ? "Guardando…" : socioId ? "Guardar cambios" : "Dar de alta"}</BotonAccion>}
-        <button type="button" onClick={() => router.back()} className="boton">Cancelar</button>
+        <button type="button" onClick={() => { if (!tocado || creado || window.confirm(TEXTO_CAMBIOS_SIN_GUARDAR)) router.back(); }} className="boton">Cancelar</button>
       </div>
     </form>
   );

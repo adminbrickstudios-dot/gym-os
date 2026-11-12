@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { intentar } from "@/lib/panel/intentar";
@@ -29,6 +30,7 @@ export default async function Transferencias({ searchParams }: { searchParams: P
     const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: panel.gimnasio.zona_horaria, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>
+        <ActualizarSola />
         <Encabezado icono="recibo" titulo="Transferencias"
           bajada={enMostrador ? "Lo que se cobró por transferencia en el mostrador. Mirá que haya llegado al banco y tildala." : "Socios que pagaron por transferencia y subieron el comprobante. Mirá que haya llegado y aprobala."} />
         <Pestanas etiqueta="Transferencias" activa={enMostrador ? "mostrador" : "comprobantes"} pestanas={[

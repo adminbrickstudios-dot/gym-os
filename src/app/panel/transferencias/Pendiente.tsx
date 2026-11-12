@@ -35,14 +35,14 @@ export function Pendiente({ p, cuando }: { p: { pago_id: string; socio_id: strin
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="boton" onClick={abrir} disabled={ocupado}><Icono nombre="recibo" /> Ver comprobante</button>
-          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => aprobar(p.pago_id), "Aprobada")}><Icono nombre="ok" /> Aprobar</button>
-          {!rechazando && <button type="button" className="boton" onClick={() => setRechazando(true)}>✕ Rechazar</button>}
+          <button type="button" className="boton boton-principal" disabled={ocupado} onClick={() => correr(() => aprobar(p.pago_id), `Aprobada ${formatearPesos(p.monto)}`)}>{ocupado ? "Aprobando…" : <><Icono nombre="ok" /> Aprobar</>}</button>
+          {!rechazando && <button type="button" className="boton" onClick={() => setRechazando(true)}><Icono nombre="cerrar" /> Rechazar</button>}
         </div>
       </div>
       {rechazando && (
-        <form className="mt-4 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) correr(() => rechazar(p.pago_id, motivo), "✕ Rechazada"); }}>
+        <form className="mt-4 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) correr(() => rechazar(p.pago_id, motivo), `Rechazada ${formatearPesos(p.monto)}`); }}>
           <input autoFocus className="campo" placeholder="Motivo (le llega al socio): ej. el monto no coincide" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-          <button type="submit" disabled={!motivo.trim() || ocupado} className="boton boton-peligro">Rechazar</button>
+          <button type="submit" disabled={!motivo.trim() || ocupado} className="boton boton-peligro">{ocupado ? "Rechazando…" : "Rechazar"}</button>
         </form>
       )}
       {error && <p role="alert" className="pildora pildora-rojo mt-3"><Icono nombre="alerta" /> {error}</p>}

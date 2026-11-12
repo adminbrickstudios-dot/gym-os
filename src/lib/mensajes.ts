@@ -1,9 +1,9 @@
 // VD-38 (D27): los mensajes de los socios al gimnasio. Textos y tipos compartidos por la app del socio y el panel.
 export const MOTIVOS = [
-  { clave: "consulta", emoji: "❓", titulo: "Consulta", ayuda: "Una duda sobre horarios, planes, clases…" },
-  { clave: "queja", emoji: "😕", titulo: "Queja", ayuda: "Algo que no estuvo bien y querés que sepamos." },
-  { clave: "objeto_perdido", emoji: "🎒", titulo: "Objeto perdido", ayuda: "Perdiste algo en el gimnasio. Podés sumar una foto." },
-  { clave: "otro", emoji: "💬", titulo: "Otro", ayuda: "Cualquier otra cosa." },
+  { clave: "consulta", emoji: "ayuda", titulo: "Consulta", ayuda: "Una duda sobre horarios, planes, clases…" },
+  { clave: "queja", emoji: "alerta", titulo: "Queja", ayuda: "Algo que no estuvo bien y querés que sepamos." },
+  { clave: "objeto_perdido", emoji: "caja", titulo: "Objeto perdido", ayuda: "Perdiste algo en el gimnasio. Podés sumar una foto." },
+  { clave: "otro", emoji: "mensaje", titulo: "Otro", ayuda: "Cualquier otra cosa." },
 ] as const;
 export type Motivo = (typeof MOTIVOS)[number]["clave"];
 export const motivoDe = (clave: string) => MOTIVOS.find((m) => m.clave === clave) ?? MOTIVOS[3];

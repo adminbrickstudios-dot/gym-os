@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, type ButtonHTMLAttributes, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type MouseEvent } from "react";
 import { useFormStatus } from "react-dom";
 
 type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
@@ -19,6 +19,13 @@ export function BotonAccion({ ocupadoTexto = "Guardando…", onClick, children, 
   const [propio, setPropio] = useState(false);
   const traba = useRef(false);
   const ocupado = pending || propio;
+  // FLUIDEZ regla 2: a los 10 s sin respuesta lo dice, en vez de quedar mudo. No reintenta solo: un segundo cobro lo decide quien tiene la clave de la operación.
+  const [lento, setLento] = useState(false);
+  useEffect(() => {
+    if (!ocupado) { setLento(false); return; }
+    const t = setTimeout(() => setLento(true), 10_000);
+    return () => clearTimeout(t);
+  }, [ocupado]);
   const tocar = async (e: MouseEvent<HTMLButtonElement>) => {
     if (!onClick) return;
     if (traba.current) { e.preventDefault(); return; }
@@ -26,8 +33,8 @@ export function BotonAccion({ ocupadoTexto = "Guardando…", onClick, children, 
     try { await onClick(e); } finally { traba.current = false; setPropio(false); }
   };
   return (
-    <button {...resto} type={onClick ? "button" : (type ?? "submit")} className={className} disabled={disabled || ocupado} aria-busy={ocupado || undefined} onClick={onClick ? tocar : undefined}>
-      {ocupado ? ocupadoTexto : children}
+    <button {...resto} type={onClick ? "button" : (type ?? "submit")} className={className} disabled={disabled || ocupado} aria-busy={ocupado || undefined} data-lento={lento || undefined} onClick={onClick ? tocar : undefined}>
+      {ocupado ? (lento ? "Está tardando más de lo normal…" : ocupadoTexto) : children}
     </button>
   );
 }

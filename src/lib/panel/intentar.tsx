@@ -17,10 +17,10 @@ export async function intentar(pantalla: () => Promise<ReactNode>): Promise<Reac
     return <>{await pantalla()}<PaginaHidratada /></>;
   } catch (e) {
     if (!(e instanceof ErrorDatos)) throw e;
-    if (e.codigo === "apagada") return <Aviso emoji="🧩" titulo="Esta sección está apagada"><p>{e.message}</p></Aviso>;
-    if (e.codigo === "demora") return <Aviso emoji="🐢" titulo="La base está tardando"><p>{e.message}</p><Reintentar /></Aviso>;
+    if (e.codigo === "apagada") return <Aviso icono="grilla" titulo="Esta sección está apagada"><p>{e.message}</p></Aviso>;
+    if (e.codigo === "demora") return <Aviso icono="reloj-arena" titulo="La base está tardando"><p>{e.message}</p><Reintentar /></Aviso>;
     return e.sinPermiso
-      ? <Aviso emoji="🔒" titulo="No tenés acceso a esta pantalla"><p>{e.message}</p></Aviso>
+      ? <Aviso icono="candado" titulo="No tenés acceso a esta pantalla"><p>{e.message}</p></Aviso>
       : <Aviso titulo="No se pudo cargar esta pantalla"><p>{e.message}</p></Aviso>;
   }
 }

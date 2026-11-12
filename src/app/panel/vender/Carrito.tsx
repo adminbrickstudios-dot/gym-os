@@ -18,6 +18,28 @@ import { Icono } from "@/components/ui/Icono";
 
 type Socio = { socio_id: string; nombre: string; color: string; texto: string };
 
+// Declarado afuera del componente: adentro, cada toque lo volvía a montar y la grilla perdía el foco.
+const Boton = ({ onClick, icono, titulo, precio, deshabilitado, nota, foto }: {
+  onClick: () => void; icono: string; titulo: string; precio: number | null; deshabilitado?: string;
+  nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
+}) => (
+  <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
+    className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
+    <span className="flex items-center gap-2">
+      {foto
+        // eslint-disable-next-line @next/next/no-img-element
+        ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
+        : <span aria-hidden className="text-xl"><Icono nombre={icono} /></span>}
+      <span>{titulo}</span>
+    </span>
+    <span className="flex flex-wrap items-baseline gap-x-2">
+      <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
+      {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
+      {nota?.poco && <span className="pildora pildora-amarillo text-xs" data-queda-poco>Queda poco</span>}
+    </span>
+  </button>
+);
+
 export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIniciales, conCuota = false, desdeEntrada = false, puedeAnular = false, stockInicial = {}, sinProductos = false }: {
   sedeId: string; turnoId: string | null; socioInicial: Socio | null; preciosIniciales: PreciosVenta; conCuota?: boolean; desdeEntrada?: boolean;
   /** Dueño y encargado anulan; la recepción pide (VEN-6). */
@@ -158,7 +180,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
     return (
       <section className="tarjeta p-6 sm:p-10 max-w-xl" aria-live="polite">
         <p className="text-5xl flex justify-center" aria-hidden><Tilde tamano={64} /></p>
-        <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}</p>
+        <p className="titular text-5xl mt-4">Cobrado {formatearPesos(venta.total)}{socio ? ` a ${socio.nombre.split(" ")[0]}` : ""}</p>
         {socio && venta.veredicto && <div className="mt-5"><PildoraEstado color={venta.veredicto.color}>{socio.nombre}: {venta.veredicto.texto}</PildoraEstado></div>}
         {usoCupon && <p className="mt-3 texto-suave" data-uso-cupon>{usoCupon}</p>}
         {socio ? <MandarComprobante ventaId={venta.venta_id} /> : <VerRecibo ventaId={venta.venta_id} />}
@@ -174,26 +196,6 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
     );
   }
 
-  const Boton = ({ onClick, icono, titulo, precio, deshabilitado, nota, foto }: {
-    onClick: () => void; icono: string; titulo: string; precio: number | null; deshabilitado?: string;
-    nota?: { texto: string; alerta: boolean; poco?: boolean; sinStock?: boolean }; foto?: string | null;
-  }) => (
-    <button type="button" onClick={onClick} disabled={!!deshabilitado || precio == null || !!nota?.sinStock} title={deshabilitado ?? (nota?.sinStock ? "Sin stock" : undefined)}
-      className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px] text-left">
-      <span className="flex items-center gap-2">
-        {foto
-          // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={foto} alt="" className="size-10 rounded-lg object-cover flex-none" data-foto />
-          : <span aria-hidden className="text-xl"><Icono nombre={icono} /></span>}
-        <span>{titulo}</span>
-      </span>
-      <span className="flex flex-wrap items-baseline gap-x-2">
-        <span className="numero text-xl texto-suave">{precio == null ? "Sin precio" : formatearPesos(precio)}</span>
-        {nota && <span className={`text-sm ${nota.alerta ? "text-[var(--rojo)]" : "texto-tenue"}`} data-quedan>{nota.texto}</span>}
-        {nota?.poco && <span className="pildora pildora-amarillo text-xs" data-queda-poco>Queda poco</span>}
-      </span>
-    </button>
-  );
   // VD-18: lo más que se puede llevar de un producto con stock (la base lo exige igual).
   const topeStock = (l: Linea) => { const s = l.tipo === "producto" && l.producto_id ? stock[l.producto_id] : undefined; return s && !s.negativo ? s.stock : Infinity; };
   // VEN-4 + VD-18: cuántos quedan, "queda poco" desde el mínimo, y sin stock no se vende (salvo que el producto lo permita).
@@ -258,7 +260,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                 onClick={() => agregar({ tipo: "cuota", nombre: `Cuota ${precios.cuota!.plan}`, precios: precios.cuota!.precios })} />
             )}
             {precios.deuda != null && Number(precios.deuda) > 0 && !lineas.some((l) => l.tipo === "deuda") && (
-              <Boton icono="" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
+              <Boton icono="tarjeta" titulo="Pagar lo que debe a cuenta" precio={Number(precios.deuda)}
                 onClick={() => agregar({ tipo: "deuda", nombre: "Pago de deuda a cuenta", precio_fijo: Number(precios.deuda) })} />
             )}
             {precios.matricula && !lineas.some((l) => l.tipo === "matricula") && (
@@ -274,7 +276,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                 deshabilitado={socio ? undefined : "Elegí un socio primero"} onClick={() => agregar({ tipo: "pack", nombre: p.nombre, plan_id: p.plan_id, precios: p.precios })} />
             ))}
             {!sinProductos && precios.productos.map((p) => (
-              <Boton key={p.producto_id} icono="" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
+              <Boton key={p.producto_id} icono="caja" titulo={p.nombre} precio={p.precio} nota={notaStock(p.producto_id)} foto={urlFotoProducto(p.foto_path)}
                 onClick={() => agregar({ tipo: "producto", nombre: p.nombre, producto_id: p.producto_id, precio_fijo: p.precio })} />
             ))}
             <button type="button" className="boton !flex-col !items-start !justify-between !p-4 min-h-[104px]" onClick={() => setOtro({ descripcion: "", monto: "" })}>
@@ -325,10 +327,10 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-2">
-                    <button type="button" aria-label="Uno menos" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}>−</button>
+                    <button type="button" aria-label="Uno menos" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "recargo" || l.tipo === "servicio"} title={l.tipo === "recargo" || l.tipo === "servicio" ? "Va con la cuota: si no lo cobrás, ponele un descuento" : undefined} onClick={() => (l.cantidad > 1 ? cambiar(l.clave, { cantidad: l.cantidad - 1 }) : quitar(l.clave))}><Icono nombre="menos" /></button>
                     <span className="numero text-lg w-6 text-center">{l.cantidad}</span>
                     <button type="button" aria-label="Uno más" className="boton !min-h-12 !min-w-12 !px-3" disabled={l.tipo === "matricula" || l.tipo === "recargo" || l.tipo === "servicio" || l.tipo === "deuda" || l.cantidad >= topeStock(l)}
-                      title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}>+</button>
+                      title={l.cantidad >= topeStock(l) ? "No queda más stock" : undefined} onClick={() => cambiar(l.clave, { cantidad: Math.min(l.cantidad + 1, l.tipo === "cuota" ? 12 : 50) })}><Icono nombre="mas" /></button>
                     {l.descuento == null
                       ? <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: 0 })}><Icono nombre="etiqueta" /> Descuento</button>
                       : <button type="button" className="boton-texto ml-auto" onClick={() => cambiar(l.clave, { descuento: undefined, descuento_texto: undefined, descuento_motivo: undefined })}>Sin descuento</button>}
@@ -349,7 +351,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
           <div className="mt-3 flex flex-wrap items-center gap-2" data-cupon>
             <input className="campo !w-40 uppercase" value={codigoCupon} onChange={(e) => setCodigoCupon(e.target.value.replace(/\s/g, ""))} placeholder="Cupón" aria-label="Código de cupón" maxLength={20} />
             <button type="button" className="boton" disabled={ocupado || codigoCupon.length < 3} onClick={aplicar}><Icono nombre="etiqueta" /> Aplicar</button>
-            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--ok)" }}>✓ {msjCupon.ok}</span>}
+            {msjCupon.ok && <span className="text-sm" style={{ color: "var(--acento)" }}><Icono nombre="ok" /> {msjCupon.ok}</span>}
             {msjCupon.error && <span role="alert" className="text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {msjCupon.error}</span>}
           </div>
         )}
@@ -376,7 +378,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
                   <input className="campo !min-h-12" inputMode="decimal" placeholder="$" value={p.monto} onChange={(e) => setPartes(partes.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                 </div>
               ))}
-              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">Faltan {formatearPesos(total - sumaMixto)}</p>}
+              {total != null && sumaMixto !== total && <p className="text-sm pildora pildora-amarillo">{total - sumaMixto > 0 ? `Faltan ${formatearPesos(total - sumaMixto)}` : `Sobran ${formatearPesos(sumaMixto - total)}`}</p>}
             </div>
           )}
           {medios.length >= 2 && <button type="button" className="boton-texto mt-2" onClick={() => setMixto(!mixto)}>{mixto ? "Un solo medio" : "Paga con dos medios"}</button>}

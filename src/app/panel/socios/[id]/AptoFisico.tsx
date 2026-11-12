@@ -31,7 +31,7 @@ export function AptoFisico({ socioId, datos }: { socioId: string; datos: DatosAp
         <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); correr(() => cargarApto(socioId, vence)); }}>
           <label className="space-y-1"><span className="block text-sm texto-suave">Presentó el apto. Vale hasta el</span>
             <input type="date" className="campo" value={vence} min={datos.hoy} onChange={(e) => setVence(e.target.value)} required aria-label="El apto vale hasta" /></label>
-          <button type="submit" className="boton boton-principal" disabled={ocupado}>{ocupado ? "Guardando…" : "✓ Guardar"}</button>
+          <button type="submit" className="boton boton-principal" disabled={ocupado}>{ocupado ? "Guardando…" : <><Icono nombre="ok" /> Guardar</>}</button>
           <button type="button" className="boton" onClick={() => setAbierto(false)}>Cancelar</button>
           <p className="basis-full text-sm texto-tenue">Solo se guarda que lo presentó y la fecha. El papel no se sube.</p>
         </form>

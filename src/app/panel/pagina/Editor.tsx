@@ -19,6 +19,7 @@ import {
 import { guardarEstilo, guardarPagina, leerPaginaPorDefecto } from "./acciones";
 import { publicarPagina } from "../configuracion/acciones";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "../configuracion/Imagenes";
+import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 
 type Portada = { titulo: string; bajada: string | null; boton_texto: string; foto_portada_path: string | null; mensaje_whatsapp: string; mostrar_precios: boolean };
 type SeccionPanel = Seccion & { visible: boolean };
@@ -146,12 +147,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
   }, [verVista]);
 
   const sucio = !igual(est, guardado);
-  useEffect(() => {
-    if (!sucio) return;
-    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
-    window.addEventListener("beforeunload", avisar);
-    return () => window.removeEventListener("beforeunload", avisar);
-  }, [sucio]);
+  useCambiosSinGuardar(sucio);
 
   // ── Cambios: los de un toque quedan como un paso del historial; lo que se escribe, al salir del campo ──
   const ahora = useCallback((fn: (e: Estado) => Estado) => { const n = fn(est); setEst(n); setHist((h) => registrar(h, n)); }, [est]);

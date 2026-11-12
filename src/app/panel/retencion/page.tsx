@@ -28,7 +28,7 @@ const LISTAS = [
   { clave: "vencido", emoji: "punto-rojo", titulo: "Vencidos", ayuda: "Les venció y no pagaron" },
   { clave: "por_vencer", emoji: "reloj", titulo: "Por vencer", ayuda: "Vencen en los próximos días" },
   { clave: "nuevo", emoji: "hoja", titulo: "Nuevos que no vienen", ayuda: "Se anotaron hace poco y aflojaron" },
-  { clave: "no_viene", emoji: "", titulo: "No vienen", ayuda: "Pagan pero dejaron de venir" },
+  { clave: "no_viene", emoji: "reloj", titulo: "No vienen", ayuda: "Pagan pero dejaron de venir" },
   { clave: "se_fue", emoji: "salir", titulo: "Se fueron", ayuda: "Hace rato que no pagan" },
 ];
 

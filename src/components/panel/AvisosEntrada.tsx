@@ -162,7 +162,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
           onMouseEnter={() => pausar(a.id)} onMouseLeave={() => reanudar(a)} onTouchStart={() => pausar(a.id)} onTouchEnd={() => reanudar(a)}
           className="vidrio aparecer pointer-events-auto rounded-[var(--radio)] p-3 pr-2 flex items-start gap-2 border-l-4" style={{ borderLeftColor: colorVar(a.color) }}>
           <button type="button" onClick={() => abrirVeredicto(a)} className="min-w-0 flex-1 text-left flex items-start gap-2 min-h-12 active:opacity-70" aria-label={`Abrir la entrada de ${a.nombre}`}>
-            <span className="text-xl leading-6" aria-hidden><Icono nombre={a.emoji} /></span>
+            <span className="text-xl leading-6" aria-hidden><Icono nombre={a.emoji} sistema /></span>
             <span className="min-w-0 text-sm font-semibold break-words">{a.texto}</span>
           </button>
           <div className="flex flex-col items-end gap-1 flex-none">

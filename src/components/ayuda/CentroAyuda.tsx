@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buscarPreguntas, type PreguntaAyuda } from "@/lib/ayuda-preguntas";
+import { Icono } from "@/components/ui/Icono";
 
 /**
  * VD-63 · El centro de ayuda (panel y app del socio): preguntas cortas, buscables, cada una con el botón que lleva a hacerlo.
@@ -43,12 +44,12 @@ export function CentroAyuda({ preguntas, abierta = null, version }: { preguntas:
                   <button type="button" onClick={() => alternar(p.id)} aria-expanded={on} aria-controls={`r-${p.id}`}
                     className="w-full flex items-center gap-3 px-5 py-4 min-h-14 text-left cursor-pointer">
                     <span className="flex-1 min-w-0 font-semibold">{p.pregunta}</span>
-                    <span aria-hidden className="texto-tenue flex-none">{on ? "−" : "+"}</span>
+                    <span aria-hidden className="texto-tenue flex-none">{on ? <Icono nombre="menos" /> : <Icono nombre="mas" />}</span>
                   </button>
                   {on && (
                     <div id={`r-${p.id}`} className="px-5 pb-5 -mt-1 space-y-4">
                       <p className="texto-suave" data-respuesta>{p.respuesta}</p>
-                      <Link href={p.destino.ruta} className="boton boton-principal" data-ayuda-boton-destino={p.id}>{p.destino.boton} →</Link>
+                      <Link href={p.destino.ruta} className="boton boton-principal" data-ayuda-boton-destino={p.id}>{p.destino.boton} <Icono nombre="derecha" /></Link>
                     </div>
                   )}
                 </li>

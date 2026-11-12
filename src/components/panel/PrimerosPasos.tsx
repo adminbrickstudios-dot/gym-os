@@ -53,7 +53,7 @@ export function PrimerosPasos({ datos }: { datos: PrimerosPasosDatos }) {
           {datos.pasos.map((p) => (
             <li key={p.clave} data-paso={p.clave} data-hecho={p.hecho}>
               <Link href={`/panel${p.href}`} className="flex items-center gap-3 py-3 hover:opacity-80">
-                <span aria-hidden className="text-xl">{p.hecho ? "✓" : <Icono nombre={p.emoji} sistema />}</span>
+                <span aria-hidden className="text-xl">{p.hecho ? <Icono nombre="ok" /> : <Icono nombre={p.emoji} sistema />}</span>
                 <span className="min-w-0 flex-1">
                   <span className={`block font-semibold ${p.hecho ? "texto-tenue line-through" : ""}`}>{p.titulo}</span>
                   {!p.hecho && <span className="block texto-tenue text-sm">{p.ayuda}</span>}

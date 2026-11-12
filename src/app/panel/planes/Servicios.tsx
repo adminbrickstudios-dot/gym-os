@@ -46,7 +46,7 @@ function FilaServicio({ s }: { s: Servicio }) {
           {s.socios.map((x) => (
             <li key={x.socio_id} className="pildora text-sm flex items-center gap-2" data-servicio-socio={x.nombre}>
               {x.nombre}
-              <button type="button" className="boton-texto !min-h-0" aria-label={`Quitarle ${s.nombre} a ${x.nombre}`} disabled={ocupado} onClick={() => correr(() => asignarServicio(x.socio_id, s.producto_id, false))}>✕</button>
+              <button type="button" className="boton-texto !min-h-0" aria-label={`Quitarle ${s.nombre} a ${x.nombre}`} disabled={ocupado} onClick={() => correr(() => asignarServicio(x.socio_id, s.producto_id, false))} ><Icono nombre="cerrar" /></button>
             </li>
           ))}
         </ul>

@@ -186,7 +186,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           )}
           {primerMes && !s.dado_de_baja_en && (
             <p className="pildora mt-6 !text-base" data-primer-mes={primerMes.dia}>
-              <Icono nombre="hoja" /> Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? "✓" : ""}
+              <Icono nombre="hoja" /> Día {primerMes.dia} de {primerMes.de} · {primerMes.entradas} {primerMes.entradas === 1 ? "entrada" : "entradas"} (meta {primerMes.meta}){primerMes.entradas >= primerMes.meta ? <> <Icono nombre="ok" /></> : ""}
             </p>
           )}
           {riesgo[0] && (

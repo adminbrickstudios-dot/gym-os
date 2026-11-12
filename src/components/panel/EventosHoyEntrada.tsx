@@ -18,7 +18,7 @@ export function EventosHoyEntrada({ socioId, eventos }: { socioId: string; event
           <li key={e.evento_id} className="flex flex-wrap items-center gap-2" data-ventana-evento={e.nombre}>
             <span className="pildora pildora-azul whitespace-normal"><span aria-hidden><Icono nombre="ticket" /></span> Hoy: {e.nombre}{e.espera ? " (en lista de espera)" : ""}</span>
             {e.espera ? null : esta
-              ? <span className="pildora pildora-verde" data-evento-presente>✓ Presente</span>
+              ? <span className="pildora pildora-verde" data-evento-presente><Icono nombre="ok" /> Presente</span>
               : <button type="button" className="boton" disabled={ocupado} data-evento-marcar
                   onClick={() => empezar(async () => {
                     const r = await presenteEnEvento(e.evento_id, socioId);

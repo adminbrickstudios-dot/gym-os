@@ -26,7 +26,7 @@ export default async function MiHilo({ params, searchParams }: { params: Promise
       <div className="space-y-6" data-mi-hilo>
         <Link href={`/app/mensajes${q}`} className="texto-suave">← Mis mensajes</Link>
         <div>
-          <h1 className="titular text-[28px]">{m.emoji} {m.titulo}</h1>
+          <h1 className="titular text-[28px]"><Icono nombre={m.emoji} /> {m.titulo}</h1>
           <p className="mt-2"><span className={`pildora pildora-${e.color}`}>{e.titulo}</span></p>
         </div>
         <ul className="space-y-3" aria-label="Conversación">

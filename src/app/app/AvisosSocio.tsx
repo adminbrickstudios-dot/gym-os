@@ -20,7 +20,7 @@ export function AvisosSocio({ avisos }: { avisos: AvisoApp[] }) {
           <p className="texto-suave">{a.texto}</p>
           <button type="button" className="boton" disabled={ocupado}
             onClick={() => empezar(async () => { const r = await marcarAvisoLeido(a.id); if (r.error) setError(r.error); else { setError(null); setVistos((v) => [...v, a.id]); } })}>
-            ✓ Entendido
+            <Icono nombre="ok" /> Entendido
           </button>
         </div>
       ))}

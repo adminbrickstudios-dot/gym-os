@@ -206,7 +206,7 @@ export function Navegacion(props: Props) {
         <div className="hoja lg:hidden fixed inset-0 z-40 bg-[var(--fondo)] overflow-y-auto px-4 pt-4 pb-24" role="dialog" aria-modal="true" aria-label="Menú">
           <div className="flex items-center justify-between mb-6">
             <p className="titulo text-2xl">Menú</p>
-            <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú">✕</button>
+            <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú"><Icono nombre="cerrar" /></button>
           </div>
           <Menu props={props} actual={actual} alElegir={() => { porEnlace.current = true; setAbierto(false); }} pendientes={pendientes} />
           <div className="mt-8 space-y-3">
