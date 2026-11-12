@@ -355,22 +355,6 @@ export async function guardarFotoSocioPermitida(si: boolean): Promise<{ permitid
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-// ── F4/F5: funciones nuevas con interruptor por gimnasio (apagadas por defecto; las prende solo el dueño) ──
-export async function leerFuncionesNuevas(): Promise<{ prendidas?: string[]; error?: string }> {
-  try {
-    const panel = await contextoPanel();
-    return { prendidas: await rpc<string[]>("funciones_nuevas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) };
-  } catch (e) { return { error: (e as Error).message }; }
-}
-export async function guardarFuncionNueva(clave: string, si: boolean): Promise<{ prendidas?: string[]; error?: string }> {
-  try {
-    const panel = await contextoPanel();
-    await rpc("guardar_funcion_nueva", { p_gimnasio_id: panel.gimnasio.id, p_clave: clave, p_si: si });
-    revalidatePath("/panel", "layout");
-    return { prendidas: await rpc<string[]>("funciones_nuevas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) };
-  } catch (e) { return { error: (e as Error).message }; }
-}
-
 // ── FA-7: los primeros días, la entrada avisa pero no frena ──
 export async function leerAvisarSinBloquear(): Promise<{ hasta?: string | null; activo?: boolean; error?: string }> {
   try {

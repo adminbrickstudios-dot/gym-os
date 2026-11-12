@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Z-resto · Vuelto en efectivo en la hoja Cobrar: apagado por defecto (la hoja no cambia); la dueña lo prende en
-// Configuración → Cobros; prendido, "Paga con" calcula el vuelto sin cambiar el total; se vuelve a apagar (deja todo como estaba).
+// Configuración → Funciones nuevas; prendido, "Paga con" calcula el vuelto sin cambiar el total; se vuelve a apagar (deja todo como estaba).
 //   node scripts/e2e/vuelto-cobrar.mjs     (con scripts/local/levantar.sh corriendo; solo el gimnasio demo)
 import { COMPU, GIMNASIO, aparece, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
@@ -12,16 +12,18 @@ const hoja = (p) => p.locator("[data-cobrar]");
 let d = null;
 
 async function interruptor(p, prendido) {
-  await p.goto(`${G}/panel/configuracion?pestana=cobros`);
-  const sw = p.locator("[data-vuelto-interruptor]");
-  await sw.waitFor({ timeout: 30000 });
-  if ((await sw.isChecked()) !== prendido) {
-    await sw.click({ force: true });
-    await p.locator("[data-vuelto-config]").getByText("Guardado.").waitFor({ timeout: 30000 });
+  await p.goto(`${G}/panel/configuracion?pestana=funciones`);
+  await p.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
+  const fila = p.locator('[data-funcion="vuelto_efectivo"]');
+  await fila.waitFor({ timeout: 30000 });
+  const quiere = prendido ? "si" : "no";
+  if ((await fila.getAttribute("data-activa")) !== quiere) {
+    await fila.locator('input[role="switch"]').click();
+    await p.waitForFunction((v) => document.querySelector('[data-funcion="vuelto_efectivo"]')?.getAttribute("data-activa") === v, quiere, { timeout: 30000 });
   }
   await p.reload();
-  await p.locator("[data-vuelto-interruptor]").waitFor({ timeout: 30000 });
-  chequear((await p.locator("[data-vuelto-interruptor]").isChecked()) === prendido, `el interruptor quedó ${prendido ? "prendido" : "apagado"} al volver a abrir`, "el interruptor no quedó guardado");
+  await p.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
+  chequear((await p.locator('[data-funcion="vuelto_efectivo"]').getAttribute("data-activa")) === quiere, `el interruptor quedó ${prendido ? "prendido" : "apagado"} al volver a abrir`, "el interruptor no quedó guardado");
 }
 async function abrirCobrar(p, id) {
   await p.goto(`${G}/panel/socios/${id}`);

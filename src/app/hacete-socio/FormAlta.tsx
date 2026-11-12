@@ -31,7 +31,7 @@ const esMenorDe18 = (nac: string) => {
   return new Date(y, m - 1, d) > new Date(t.getFullYear() - 18, t.getMonth(), t.getDate());
 };
 
-export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial: string | null }) {
+export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta; planInicial: string | null; origen?: string }) {
   const [r, accion, enviando] = useActionState<ResultadoAlta, FormData>(altaOnline, {});
   const planes = datos.planes ?? [];
   const [plan, setPlan] = useState(planes.some((p) => p.id === planInicial) ? planInicial : null);
@@ -106,6 +106,7 @@ export function FormAlta({ datos, planInicial }: { datos: DatosAlta; planInicial
       {/* React 19 vacía el formulario después de cada envío con error: los radios controlados se ven elegidos pero no viajan. Por eso el valor viaja en campos ocultos. */}
       <input type="hidden" name="plan" value={plan ?? ""} />
       <input type="hidden" name="medio" value={medio} />
+      <input type="hidden" name="origen" value={origen} />
       <fieldset id="paso-plan" className="space-y-3 scroll-mt-4">
         <legend className="titulo text-2xl mb-3">1. Tu plan</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">

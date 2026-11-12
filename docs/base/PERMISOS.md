@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 337 funciones piden un rol del equipo con `privado.exigir_equipo`; 409 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 341 funciones piden un rol del equipo con `privado.exigir_equipo`; 415 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -23,6 +23,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `anular_precio_programado` | ✓ | ✓ | — | — |
 | `anular_presente` | ✓ | ✓ | ✓ | ✓ |
 | `aplicar_aumento` | ✓ | ✓ | — | — |
+| `apto_config` | ✓ | ✓ | — | — |
+| `aptos_por_vencer` | ✓ | ✓ | ✓ | — |
 | `archivar_documento` | ✓ | — | — | — |
 | `archivar_grado` | ✓ | ✓ | — | — |
 | `archivar_rutina` | ✓ | ✓ | — | ✓ |
@@ -93,6 +95,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `dar_de_baja_equipo` | ✓ | — | — | — |
 | `datos_ejemplo` | ✓ | — | — | — |
 | `datos_gimnasio_panel` | ✓ | ✓ | — | — |
+| `debito_estado` | ✓ | ✓ | — | — |
 | `dejados_pasar` | ✓ | ✓ | — | — |
 | `desactivar_cupon` | ✓ | — | — | — |
 | `deshacer_importacion` | ✓ | ✓ | — | — |
@@ -131,7 +134,8 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `foto_socio_permitida_gimnasio` | ✓ | ✓ | — | — |
 | `fotos_de_clase` | ✓ | ✓ | ✓ | ✓ |
 | `funciones_del_gimnasio` | ✓ | ✓ | — | — |
-| `funciones_nuevas_gimnasio` | ✓ | ✓ | ✓ | ✓ |
+| `funciones_nuevas_activas` | ✓ | ✓ | ✓ | ✓ |
+| `funciones_nuevas_panel` | ✓ | ✓ | — | — |
 | `gastos_mes` | ✓ | — | — | — |
 | `grados_panel` | ✓ | ✓ | ✓ | ✓ |
 | `grados_socio` | ✓ | ✓ | ✓ | ✓ |
@@ -165,7 +169,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_estilo_pagina` | ✓ | — | — | — |
 | `guardar_ficha_producto` | ✓ | ✓ | — | — |
 | `guardar_foto_socio_permitida` | ✓ | — | — | — |
-| `guardar_funcion_nueva` | ✓ | — | — | — |
 | `guardar_grado` | ✓ | ✓ | — | — |
 | `guardar_horarios_apertura` | ✓ | — | — | — |
 | `guardar_link_resena` | ✓ | — | — | — |
@@ -195,7 +198,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_tema_usuario` | ✓ | ✓ | ✓ | ✓ |
 | `guardar_terminos` | ✓ | — | — | — |
 | `guardar_video_portada` | ✓ | — | — | — |
-| `guardar_vuelto_efectivo` | ✓ | — | — | — |
 | `habilitar_emergencia_puerta` | ✓ | — | — | — |
 | `historial_configuracion` | ✓ | ✓ | — | — |
 | `historial_emergencias_puerta` | ✓ | ✓ | — | — |
@@ -241,6 +243,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `ocupacion_horarios` | ✓ | ✓ | — | — |
 | `ordenar_fotos` | ✓ | — | — | — |
 | `ordenar_planes` | ✓ | ✓ | — | — |
+| `origen_altas_reporte` | ✓ | ✓ | ✓ | — |
 | `otorgar_grado` | ✓ | ✓ | — | ✓ |
 | `pagar_profe` | ✓ | — | — | — |
 | `pagina_panel` | ✓ | ✓ | — | — |
@@ -286,6 +289,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `publicar_evento` | ✓ | ✓ | — | — |
 | `publicar_pagina` | ✓ | — | — | — |
 | `qr_alta_panel` | ✓ | ✓ | — | — |
+| `que_hay_de_nuevo` | ✓ | ✓ | — | — |
 | `quitar_foto_producto` | ✓ | ✓ | — | — |
 | `quitar_imagen_marca` | ✓ | — | — | — |
 | `quitar_respuesta_rapida` | ✓ | ✓ | — | — |
@@ -303,6 +307,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `restaurar_cambio_configuracion` | ✓ | — | — | — |
 | `restaurar_mensaje` | ✓ | ✓ | — | — |
 | `resumen_dueno` | ✓ | ✓ | — | — |
+| `resumen_noche` | ✓ | — | — | — |
 | `retencion_numeros` | ✓ | ✓ | — | — |
 | `retencion_periodo` | ✓ | ✓ | — | — |
 | `revisar_importacion` | ✓ | ✓ | — | — |
@@ -341,7 +346,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `vincular_familia` | ✓ | ✓ | — | — |
 | `vista_aumento` | ✓ | ✓ | — | — |
 | `vista_previa_mensaje` | ✓ | ✓ | — | — |
-| `vuelto_efectivo_activo` | ✓ | ✓ | ✓ | — |
 
 ## Sin rol del equipo en la función (lo decide otra regla)
 - `abonar_turno`
@@ -455,6 +459,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `alta_publica (también anónimo)`
 - `anonimizar_socio`
 - `anotar_ejercicio`
+- `anotar_origen_alta`
 - `anular_asistencia`
 - `anular_cierre`
 - `anular_congelamiento`
@@ -488,8 +493,10 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `caja_para_cobrar`
 - `cajas_sede`
 - `cambiar_estado_hilo`
+- `cambiar_funcion_nueva`
 - `cambiar_plan`
 - `campana_socio`
+- `cancelar_adhesion_debito`
 - `cancelar_clase`
 - `cancelar_inscripcion_evento`
 - `cancelar_reserva`
@@ -565,6 +572,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `gimnasio_por_host (también anónimo)`
 - `gimnasio_por_slug (también anónimo)`
 - `guardar_accesos_rapidos`
+- `guardar_apto_config`
 - `guardar_aviso_clase`
 - `guardar_config_cierres`
 - `guardar_config_pt`
@@ -657,6 +665,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `ofertas_socio`
 - `opciones_compra_app`
 - `operador_actual`
+- `origen_alta_socio`
 - `origen_socio`
 - `pago_online`
 - `pago_online_disponible`
@@ -703,6 +712,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `reemplazar_profe`
 - `reemplazos_clase`
 - `registra_salida`
+- `registrar_adhesion_debito`
 - `registrar_contacto`
 - `registrar_devolucion`
 - `registrar_error_app`
@@ -755,7 +765,9 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `wods_socio`
 
 ## Solo el servidor (`service_role`)
+- `acreditar_cobro_debito`
 - `acreditar_pago_mp`
+- `actualizar_adhesion_debito`
 - `baja_push`
 - `caja_abierta`
 - `cerrar_evento_webhook`

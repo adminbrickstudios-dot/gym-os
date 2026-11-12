@@ -10,10 +10,8 @@ import { MetaVisitas } from "./MetaVisitas";
 import { PlanFamiliarConfig } from "./PlanFamiliarConfig";
 import { PruebaGratisConfig } from "./PruebaGratisConfig";
 import { FotoSocioConfig } from "./FotoSocioConfig";
-import { FuncionesNuevasConfig } from "./FuncionesNuevasConfig";
 import { AvisarSinBloquear } from "./AvisarSinBloquear";
 import { AutonomiaSocios } from "./AutonomiaSocios";
-import { VueltoConfig } from "./VueltoConfig";
 import { EsperaPlazo } from "./EsperaPlazo";
 import { ReglaCierres } from "./ReglaCierres";
 import { ReglasBeneficios, type ReglasBeneficiosDatos } from "./ReglasBeneficios";
@@ -36,6 +34,7 @@ import type { ConfigEntrada as DatosConfigEntrada } from "@/app/panel/entrada/co
 import type { Tablet } from "./acciones";
 import { Mensajes, type MensajePanel } from "./Mensajes";
 import { Historial, type Cambio } from "./Historial";
+import { FuncionesNuevas } from "./FuncionesNuevas";
 import type { Agenda } from "@/lib/horarios";
 import { urlMarca } from "@/lib/url-marca";
 import { BuscadorConfig } from "./BuscadorConfig";
@@ -520,7 +519,6 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               <Interruptor etiqueta="Mercado Pago" ayuda="Cobrar con link o QR de Mercado Pago, que se acredita solo. Todavía no está disponible: lo vas a poder prender cuando conectemos tu cuenta." checked={false} disabled readOnly />
             </div>
           </Tarjeta>
-          <div data-opcion="vuelto-efectivo"><VueltoConfig puedeEditar={puedeEditar} /></div>
           <Tarjeta icono="banco" titulo="Transferencias" ancla="transferencias" ayuda="Lo que ve el socio para pagarte por transferencia.">
             {!c.medios_aceptados.includes("transferencia")
               ? <Mensaje tipo="info">Apagaste las transferencias: estos datos no se le muestran a nadie.</Mensaje>
@@ -659,7 +657,6 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
           <div data-opcion="prueba-gratis"><PruebaGratisConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="avisar-sin-bloquear"><AvisarSinBloquear puedeEditar={puedeEditar} /></div>
           <div data-opcion="foto-socio"><FotoSocioConfig puedeEditar={puedeEditar} /></div>
-          <div data-opcion="funciones-nuevas"><FuncionesNuevasConfig puedeEditar={puedeEditar} /></div>
           <div data-opcion="autonomia-socios"><AutonomiaSocios puedeEditar={puedeEditar} /></div>
           <div data-opcion="cierres-suma-dias"><ReglaCierres puedeEditar={puedeEditar} /></div>
           {beneficios && <div data-opcion="beneficios"><ReglasBeneficios datos={beneficios} /></div>}
@@ -743,6 +740,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
       )}
       {pestana === "entrada" && <ConfigEntrada inicial={entrada} puedeEditar={puedeEditar} />}
       {pestana === "mensajes" && <><div data-opcion="link-resena"><LinkResena inicial={linkResena} puedeEditar={puedeEditar} /></div><div data-opcion="mensajes"><Mensajes iniciales={mensajes} alCambiarSucio={setMensajesSucio} /></div></>}
+      {pestana === "funciones" && <FuncionesNuevas puedeEditar={puedeEditar} zona={d.zona_horaria} />}
       {pestana === "cambios" && <div data-opcion="historial"><Historial cambios={cambios} /></div>}
       {/* SEG-2: todos los datos del gimnasio (solo el dueño; lo decide la base). */}
       {pestana === "gimnasio" && puedeEditar && (

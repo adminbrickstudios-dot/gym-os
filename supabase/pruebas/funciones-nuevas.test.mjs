@@ -22,25 +22,34 @@ before(async () => {
 });
 after(async () => t && t.cerrar());
 
-test("todo arranca apagado; el dueño prende y apaga; los demás roles leen pero no cambian", async () => {
-  const lee = (rol) => como(u[rol], async () => (await t.q(`select public.funciones_nuevas_gimnasio($1) as f`, [t.g]))[0].f);
+test("todo arranca apagado; el dueño prende y apaga con el interruptor único; los demás roles leen pero no cambian", async () => {
+  const lee = (rol) => como(u[rol], async () => (await t.q(`select public.funciones_nuevas_activas($1) as f`, [t.g]))[0].f);
+  const prende = (clave, si) => t.q(`select public.cambiar_funcion_nueva($1, $2, $3)`, [t.g, clave, si]);
   assert.deepEqual(await lee("recepcion"), []);
-  await como(u.dueno, () => t.q(`select public.guardar_funcion_nueva($1, 'panel_pago', true)`, [t.g]));
-  await como(u.dueno, () => t.q(`select public.guardar_funcion_nueva($1, 'panel_pago', true)`, [t.g]));   // idempotente
-  await como(u.dueno, () => t.q(`select public.guardar_funcion_nueva($1, 'borrador_alta', true)`, [t.g]));
+  await como(u.dueno, () => prende("panel_pago", true));
+  await como(u.dueno, () => prende("panel_pago", true));   // idempotente
+  await como(u.dueno, () => prende("borrador_alta", true));
   assert.deepEqual(await lee("recepcion"), ["borrador_alta", "panel_pago"]);
-  await como(u.dueno, () => t.q(`select public.guardar_funcion_nueva($1, 'panel_pago', false)`, [t.g]));
+  await como(u.dueno, () => prende("panel_pago", false));
   assert.deepEqual(await lee("profe"), ["borrador_alta"]);
   for (const rol of ["encargado", "recepcion", "profe"]) {
-    await como(u[rol], () => t.falla(() => t.q(`select public.guardar_funcion_nueva($1, 'panel_pago', true)`, [t.g]), /permiso|autorizad|acceso/i));
+    await como(u[rol], () => t.falla(() => prende("panel_pago", true), /permiso|autorizad|acceso/i));
   }
-  await como(u.dueno, () => t.falla(() => t.q(`select public.guardar_funcion_nueva($1, 'inventada', true)`, [t.g]), /no existe/i));
+  await como(u.dueno, () => t.falla(() => prende("inventada", true), /no existe/i));
+});
+
+test("el sistema viejo ya no existe: sin funciones sueltas y la lista de configuracion_gimnasio no manda", async () => {
+  const [{ n }] = await t.q(`select count(*)::int n from pg_proc p join pg_namespace s on s.oid = p.pronamespace
+                              where s.nspname = 'public' and p.proname in ('funciones_nuevas_gimnasio', 'guardar_funcion_nueva')`);
+  assert.equal(n, 0);
+  await t.q(`update public.configuracion_gimnasio set funciones_nuevas = array['horarios_pico'] where gimnasio_id = $1`, [t.g]);
+  assert.equal((await t.q(`select privado.funcion_activa($1, 'horarios_pico') a`, [t.g]))[0].a, false, "la columna vieja no prende nada");
 });
 
 test("otro gimnasio no puede leer ni cambiar las funciones", async () => {
   const [{ id: otro }] = await t.q(`insert into public.gimnasios (slug, nombre) values ('otro-funciones', 'Otro') returning id`);
-  await como(u.dueno, () => t.falla(() => t.q(`select public.funciones_nuevas_gimnasio($1)`, [otro])));
-  await como(u.dueno, () => t.falla(() => t.q(`select public.guardar_funcion_nueva($1, 'panel_pago', true)`, [otro])));
+  await como(u.dueno, () => t.falla(() => t.q(`select public.funciones_nuevas_activas($1)`, [otro])));
+  await como(u.dueno, () => t.falla(() => t.q(`select public.cambiar_funcion_nueva($1, 'panel_pago', true)`, [otro])));
 });
 
 test("horarios pico: cuenta por día y hora, sin rechazados; solo dueño y encargado", async () => {

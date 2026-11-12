@@ -44,7 +44,6 @@ const EJECUTABLES = {
     "public.lista_clase", "public.anular_asistencia",
     "public.estado_emergencia_puerta", "public.habilitar_emergencia_puerta", "public.activar_emergencia_puerta", "public.entradas_de_emergencia", "public.cerrar_emergencia_puerta", "public.historial_emergencias_puerta",
     "public.mi_sesion", "public.mi_seguridad", "public.ayudas_vistas", "public.marcar_ayuda", "public.apagar_ayudas", "public.reiniciar_ayudas", "public.panel_gimnasio", "public.guardar_accesos_rapidos", "public.panel_inicio",
-    "public.vuelto_efectivo_activo", "public.guardar_vuelto_efectivo",
     "public.buscar_socios", "public.ficha_socio", "public.guardar_socio", "public.planes_gimnasio", "public.guardar_plan",
     "public.programar_precio", "public.productos_gimnasio", "public.guardar_producto", "public.ingresos_del_dia",
     "public.configuracion_panel", "public.guardar_configuracion", "public.equipo_gimnasio", "public.guardar_equipo",
@@ -84,8 +83,8 @@ const EJECUTABLES = {
     "public.marcar_serie_rutina", "public.series_hechas_hoy", "public.resumen_app_socio",
     "public.foto_propia_permitida", "public.preparar_foto_propia", "public.confirmar_foto_propia", "public.foto_propia",
     "public.foto_estado_socio", "public.confirmar_foto_subida", "public.guardar_foto_socio_permitida",
-    // F4/F5: interruptor por gimnasio de las funciones nuevas y horarios pico
-    "public.funciones_nuevas_gimnasio", "public.guardar_funcion_nueva", "public.ingresos_por_hora_y_dia",
+    // F4/F5: horarios pico (el interruptor de las funciones nuevas es uno solo: N5, ver abajo)
+    "public.ingresos_por_hora_y_dia",
     // FA-23 (lista de espera con plazo) y FA-12 (avisos en la app del socio)
     "public.ofertas_socio", "public.aceptar_oferta", "public.rechazar_oferta", "public.guardar_espera_plazo",
     "public.avisos_app_socio", "public.guardar_aviso_clase", "public.aviso_clase_socio",
@@ -95,6 +94,13 @@ const EJECUTABLES = {
     "public.aviso_clave_socio", "public.marcar_aviso_clave_visto",
     // H3b: el socio lee su propio DNI (permiso denegado = error); vincular_cuenta_socio y socio_para_reclamar son solo del servidor
     "public.mi_dni",
+    // Fase N (11/11): funciones nuevas apagadas por gimnasio (N5) y las que cuelgan de ellas. Cada una pide el rol del equipo que corresponde
+    // y falla con un texto claro si la función no está prendida. acreditar_cobro_debito y actualizar_adhesion_debito son solo del servidor.
+    "public.funciones_nuevas_panel", "public.cambiar_funcion_nueva", "public.funciones_nuevas_activas", "public.que_hay_de_nuevo",   // N5, N6
+    "public.anotar_origen_alta", "public.origen_altas_reporte", "public.origen_alta_socio",   // N4 (anotar_origen_alta: el propio socio)
+    "public.resumen_noche",   // N3
+    "public.apto_config", "public.guardar_apto_config", "public.aptos_por_vencer",   // N2
+    "public.debito_estado", "public.registrar_adhesion_debito", "public.cancelar_adhesion_debito",   // N1
   ]),
 };
 

@@ -11,6 +11,8 @@ import { Prospectos } from "../prospectos/Prospectos";
 import { MemoriaSocios } from "./MemoriaSocios";
 import { ListaSocios } from "./ListaSocios";
 import { InvitadosPorSeguir, type InvitadoSinSeguir } from "../prospectos/InvitadosPorSeguir";
+import { OrigenAltas } from "../prospectos/OrigenAltas";
+import { cargarOrigenAltas } from "../prospectos/origen-altas";
 import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Socios" };
@@ -47,12 +49,14 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
       const { lista, pagina } = await cargarInteresados(panel);
       const nuevos = lista.filter((p) => p.estado === "nuevo").length;
       const invitados = await rpcLectura<InvitadoSinSeguir[]>("invitados_sin_seguimiento", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []);   // FA-24
+      const origenAltas = await cargarOrigenAltas(panel);   // N4: null si el gimnasio no prendió la función
       return (
         <>
           <Encabezado icono="usuarios" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />
           <PestanasSocios activa="interesados" nuevos={nuevos} />
           <InvitadosPorSeguir invitados={invitados} />
           <Prospectos lista={lista} pagina={pagina} zona={panel.gimnasio.zona_horaria} puedeAltas />
+          {origenAltas && <OrigenAltas datos={origenAltas} zona={panel.gimnasio.zona_horaria} />}
         </>
       );
     }

@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, ErrorDatos, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
 import { sedeActiva } from "@/lib/panel/sede";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import type { Veredicto } from "@/app/panel/entrada/acciones";
@@ -118,7 +119,7 @@ export async function datosCobro(sedeId: string | null, socioId: string): Promis
       rpc<CajaCobro>("caja_para_cobrar", { p_sede_id: sede.id }, { lectura: true }),
       rpc<Ficha>("ficha_socio", { p_socio_id: socioId }, { lectura: true }),
       rpc<ContextoCobro>("contexto_cobro", { p_sede_id: sede.id, p_socio_id: socioId }, { lectura: true }),
-      rpc<boolean>("vuelto_efectivo_activo", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true }).catch(() => false),
+      funcionesNuevasDe(panel.gimnasio.id).then((c) => c.includes("vuelto_efectivo")).catch(() => false),
     ]);
     return { datos: {
       sedeId: sede.id, zona: panel.gimnasio.zona_horaria, caja,

@@ -70,7 +70,7 @@ export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/
     const panel = await contextoPanel();
     const ficha = await rpc<import("@/app/panel/socios/[id]/tipos").Ficha>("ficha_socio", { p_socio_id: socioId });
     // FA-1: "cuándo le toca pagar" es una función nueva, apagada por defecto (interruptor del gimnasio).
-    const datosDePago = (await rpc<string[]>("funciones_nuevas_gimnasio", { p_gimnasio_id: panel.gimnasio.id })).includes("panel_pago");
+    const datosDePago = (await rpc<string[]>("funciones_nuevas_activas", { p_gimnasio_id: panel.gimnasio.id })).includes("panel_pago");
     // Detalle 20: con la función prendida, el panel también muestra las notas y etiquetas del socio (la profe no las ve: la base no se las da).
     let notas: string[] | undefined, etiquetas: string[] | undefined;
     if (datosDePago && panel.yo.rol !== "profe") {

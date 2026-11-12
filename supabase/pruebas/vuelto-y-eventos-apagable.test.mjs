@@ -33,23 +33,20 @@ before(async () => {
 });
 after(async () => { if (t) await t.cerrar(); if (otro) await otro.cerrar(); });
 
-test("el vuelto arranca apagado; solo el dueño lo prende y solo en su gimnasio", async () => {
-  const [{ v }] = await t.q(`select mostrar_vuelto_efectivo v from public.configuracion_gimnasio where gimnasio_id = $1`, [t.g]);
-  assert.equal(v, false, "apagado por defecto");
+const activas = (g) => t.q(`select public.funciones_nuevas_activas($1) r`, [g]).then((x) => x[0].r);
+const poner = (u, g, v) => como(u, () => t.q(`select public.cambiar_funcion_nueva($1, 'vuelto_efectivo', $2)`, [g, v]));
+
+test("el vuelto arranca apagado (función nueva vuelto_efectivo); solo el dueño la prende y solo en su gimnasio", async () => {
   await como(uRecep, async () => {
-    assert.equal((await t.q(`select public.vuelto_efectivo_activo($1) r`, [t.g]))[0].r, false, "la recepción lo lee");
-    await t.falla(() => t.q(`select public.guardar_vuelto_efectivo($1, true)`, [t.g]), /permiso|rol|acceso/i);
+    assert.equal((await activas(t.g)).includes("vuelto_efectivo"), false, "apagado por defecto, la recepción lo lee");
+    await t.falla(() => t.q(`select public.cambiar_funcion_nueva($1, 'vuelto_efectivo', true)`, [t.g]), /permiso|rol|acceso/i);
   });
-  await como(uDuenoOtro, () => t.falla(() => t.q(`select public.guardar_vuelto_efectivo($1, true)`, [t.g]), /permiso|rol|acceso/i));
-  await como(uDuenoOtro, () => t.falla(() => t.q(`select public.vuelto_efectivo_activo($1)`, [t.g]), /permiso|rol|acceso/i));
-  assert.equal((await t.q(`select mostrar_vuelto_efectivo v from public.configuracion_gimnasio where gimnasio_id = $1`, [t.g]))[0].v, false, "nadie de afuera lo cambió");
-  await como(uDueno, async () => {
-    assert.equal((await t.q(`select public.guardar_vuelto_efectivo($1, true) r`, [t.g]))[0].r, true);
-    await t.falla(() => t.q(`select public.guardar_vuelto_efectivo($1, null)`, [t.g]), /inválidos/i);
-  });
-  assert.equal((await t.q(`select mostrar_vuelto_efectivo v from public.configuracion_gimnasio where gimnasio_id = $1`, [t.g]))[0].v, true);
-  assert.equal((await t.q(`select count(*)::int n from public.configuracion_gimnasio where gimnasio_id = $1 and mostrar_vuelto_efectivo`, [otro.g]))[0].n, 0, "el otro gimnasio sigue apagado");
-  await como(uDueno, () => t.q(`select public.guardar_vuelto_efectivo($1, false)`, [t.g]));
+  await como(uDuenoOtro, () => t.falla(() => t.q(`select public.cambiar_funcion_nueva($1, 'vuelto_efectivo', true)`, [t.g]), /permiso|rol|acceso/i));
+  assert.equal((await t.q(`select count(*)::int n from public.funciones_nuevas_gimnasio where gimnasio_id = $1 and clave = 'vuelto_efectivo' and activa`, [t.g]))[0].n, 0, "nadie de afuera lo cambió");
+  await poner(uDueno, t.g, true);
+  assert.equal((await como(uDueno, () => activas(t.g))).includes("vuelto_efectivo"), true);
+  assert.equal((await t.q(`select count(*)::int n from public.funciones_nuevas_gimnasio where gimnasio_id = $1 and clave = 'vuelto_efectivo' and activa`, [otro.g]))[0].n, 0, "el otro gimnasio sigue apagado");
+  await poner(uDueno, t.g, false);
 });
 
 test("con el vuelto apagado o prendido el total cobrado y la caja son los mismos (números fijos)", async () => {
@@ -57,17 +54,17 @@ test("con el vuelto apagado o prendido el total cobrado y la caja son los mismos
   const items = JSON.stringify([{ tipo: "producto", producto_id: agua, cantidad: 2 }]);
   const pagos = JSON.stringify([{ medio: "efectivo", monto: 3000 }]);
   const vender = () => como(uDueno, async () => (await t.q(`select public.vender($1, $2::jsonb, $3::jsonb, null, $4) as r`, [t.sede, items, pagos, turno]))[0].r);
-  await como(uDueno, () => t.q(`select public.guardar_vuelto_efectivo($1, false)`, [t.g]));
+  await poner(uDueno, t.g, false);
   const a = await vender();
   const caja1 = (await t.q(`select privado.resumen_turno($1) as r`, [turno]))[0].r;
-  await como(uDueno, () => t.q(`select public.guardar_vuelto_efectivo($1, true)`, [t.g]));
+  await poner(uDueno, t.g, true);
   const b = await vender();
   const caja2 = (await t.q(`select privado.resumen_turno($1) as r`, [turno]))[0].r;
   assert.equal(Number(a.total), 3000);
   assert.equal(Number(b.total), 3000, "prendido, el total cobrado es el mismo");
   assert.equal(Number(caja1.esperado), 13000, "fondo 10.000 + 3.000 de efectivo");
   assert.equal(Number(caja2.esperado), 16000, "la segunda venta suma 3.000 y nada más (el vuelto no entra a la caja)");
-  await como(uDueno, () => t.q(`select public.guardar_vuelto_efectivo($1, false)`, [t.g]));
+  await poner(uDueno, t.g, false);
 });
 
 test("Eventos apagado: la página, la app, el panel y la Entrada no ven nada; al prender vuelven", async () => {

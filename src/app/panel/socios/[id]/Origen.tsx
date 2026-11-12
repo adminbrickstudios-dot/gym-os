@@ -11,14 +11,16 @@ export type DatosOrigen = {
 };
 const DE_PROSPECTO = { pagina: "pidió una clase de prueba desde la página", recepcion: "consultó en la recepción", referido: "vino recomendado" } as const;
 
-export function Origen({ socioId, datos: o, zona }: { socioId: string; datos: DatosOrigen; zona: string }) {
+const CANAL = { instagram: "Instagram", qr_cartel: "el QR del cartel", whatsapp: "un link de WhatsApp", recomendado: "una recomendación" } as const;
+
+export function Origen({ socioId, datos: o, zona, canal = null }: { socioId: string; datos: DatosOrigen; zona: string; canal?: string | null }) {
   const dia = (x: string) => fechaCorta(x, zona);
   const como = o.origen === "alta_web" ? `Se anotó solo desde la página el ${dia(o.alta)}`
     : o.origen === "importacion" ? `Vino en una importación${o.importacion?.archivo ? ` (${o.importacion.archivo})` : ""} el ${dia(o.importacion?.en ?? o.alta)}`
     : `Lo dio de alta ${o.por ?? "el equipo"} en el mostrador el ${dia(o.alta)}`;
   return (
     <div className="space-y-1 text-sm texto-suave" data-origen={o.origen}>
-      <p><Icono nombre="lista" /> {como}.{o.prospecto && ` Antes ${DE_PROSPECTO[o.prospecto.origen]} (${dia(o.prospecto.desde)}).`}</p>
+      <p><Icono nombre="lista" /> {como}.{canal && canal in CANAL && <span data-origen-canal={canal}> Llegó por {CANAL[canal as keyof typeof CANAL]}.</span>}{o.prospecto && ` Antes ${DE_PROSPECTO[o.prospecto.origen]} (${dia(o.prospecto.desde)}).`}</p>
       {o.reglamento && (
         <p data-reglamento={o.reglamento.version}><Icono nombre="documento" /> Aceptó el reglamento (versión {o.reglamento.version}) el {dia(o.reglamento.aceptado_en)} · <Link href={`/panel/socios/${socioId}/reglamento`} className="underline">Ver lo que aceptó</Link></p>
       )}

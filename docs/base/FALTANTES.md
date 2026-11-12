@@ -33,7 +33,7 @@ que ya se está haciendo.
 | FA-23 | Lista de espera: el lugar que se libera se ofrece con un plazo para aceptar (configurable). Si no acepta, pasa al siguiente. Se calcula al consultar, sin cron | `14-SITUACIONES` #51 | ⛔ no se hizo: cambia cómo se libera y se ofrece un lugar (reservas, app del socio). Decisión en `PREGUNTAS.md` |
 | FA-24 | El invitado de un socio (el pase ya existe, INV-1) queda como interesado, con quién lo trajo | Pedido §7 | 🟡 "Invitados para seguir" en Interesados (`invitado_a_interesado`, `invitado-interesado.test.mjs`). Sin e2e |
 
-**Cierre de F5.1 (12/11, rama `carril/f4-f5`).** Cada fila se cruzó con el código vigente y con las corridas de `pruebas-completas` (pantallas, app compilada, gimnasio demo). Lo nuevo (borrador del alta, más datos en el panel, horarios pico) quedó con un interruptor por gimnasio, apagado por defecto: Configuración → Reglas → "Funciones nuevas".
+**Cierre de F5.1 (12/11, rama `carril/f4-f5`).** Cada fila se cruzó con el código vigente y con las corridas de `pruebas-completas` (pantallas, app compilada, gimnasio demo). Lo nuevo (borrador del alta, más datos en el panel, horarios pico) quedó con un interruptor por gimnasio, apagado por defecto: Configuración → Funciones nuevas.
 
 **Grandes, con estimación:** FA-13 (1 día, migración sobre una función con 4 parches), FA-19 (esperando el texto legal; después medio día), FA-6 listas virtualizadas (1 a 2 días), FA-12 y FA-23 (necesitan cron o la app del socio: 2 días cada una). **Chicos que quedan en carriles ajenos:** FA-2 (Inicio, 1 h), FA-5 (Inicio, 2 h), FA-10 en Inicio, FA-7 paso del asistente (2 h), FA-17 en plan y página (2 h cada uno).
 

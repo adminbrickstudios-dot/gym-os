@@ -17,6 +17,12 @@
 //   POST /__estado/<id>?estado=charged_back|refunded|approved[&reembolsado=N][&avisar=0]
 //                                   cambia el pago como lo haría MercadoPago (devolución, contracargo, reembolso
 //                                   parcial) y manda el aviso firmado; con avisar=0 no avisa (prueba la reconsulta)
+//   N1 · débito automático (suscripciones):
+//   POST /preapproval                    crea la suscripción (pide Bearer); GET /preapproval/<id> la lee
+//   GET  /authorized_payments/<id>       un cobro mensual de esa suscripción, como lo lee el webhook
+//   POST /__debito/cobro?sub=<id>&monto=N&estado=approved|rejected|refunded[&aviso=<url>]   cobra y manda el aviso FIRMADO
+//   POST /__debito/adhesion?sub=<id>&estado=authorized|paused|cancelled[&aviso=<url>]       cambia la suscripción y avisa
+//   POST /__debito/reenviar/<id>  /  /__debito/firma-mala/<id>   el mismo aviso otra vez / con firma inválida
 //
 // La clave del webhook es la que se le carga al gimnasio de prueba:
 // MP_SIMULADO_SECRETO (por defecto la de abajo, solo para local).
@@ -31,6 +37,7 @@ const PUERTO = Number(arg("puerto", process.env.PUERTO_MP ?? 54331));
 const SECRETO = process.env.MP_SIMULADO_SECRETO ?? "secreto-del-simulador-de-mp-solo-local";
 const BASE = `http://127.0.0.1:${PUERTO}`;
 const prefs = new Map(); const pagos = new Map(); let siguiente = 90000001;
+const suscripciones = new Map(); const cobrosDebito = new Map(); let siguienteCobro = 70000001;
 
 const firmar = (dataId, requestId, secreto = SECRETO) => {
   const ts = String(Math.floor(Date.now() / 1000));
@@ -54,6 +61,23 @@ async function avisar(pago, secreto = SECRETO) {
   const r = { status: estado };
   console.log(`[mp-simulado] aviso ${pago.id} → ${r.status} ${cuerpo}`);
   return { status: r.status, cuerpo };
+}
+// N1: el aviso del débito automático. data.id es el ID del cobro (o de la suscripción); tipo, como lo manda MercadoPago.
+async function avisarDebito(urlAviso, tipo, dataId, secreto = SECRETO) {
+  const url = new URL(urlAviso);
+  url.searchParams.set('type', tipo); url.searchParams.set('data.id', String(dataId));
+  const requestId = crypto.randomUUID();
+  const cuerpoAviso = JSON.stringify({ action: tipo + '.updated', type: tipo, data: { id: String(dataId) } });
+  const { status, cuerpo } = await new Promise((ok, mal) => {
+    const pedido = http.request({ hostname: url.hostname.endsWith('localhost') ? '127.0.0.1' : url.hostname, port: url.port || 80, path: url.pathname + url.search, method: 'POST',
+      headers: { host: url.host, 'content-type': 'application/json', 'content-length': Buffer.byteLength(cuerpoAviso),
+        'x-signature': firmar(String(dataId), requestId, secreto), 'x-request-id': requestId } }, (r) => {
+      let b = ''; r.on('data', (c) => (b += c)); r.on('end', () => ok({ status: r.statusCode, cuerpo: b }));
+    });
+    pedido.on('error', mal); pedido.end(cuerpoAviso);
+  });
+  console.log(`[mp-simulado] aviso débito ${tipo} ${dataId} → ${status} ${cuerpo}`);
+  return { status, cuerpo };
 }
 const leer = (req) => new Promise((ok) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => ok(b)); });
 const json = (res, status, o) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(o)); };
@@ -130,7 +154,53 @@ http.createServer(async (req, res) => {
       if (!pago) return json(res, 404, { message: "payment not found" });
       return json(res, 200, await avisar(pago, m[1] === "firma-mala" ? "otra-clave-que-no-es" : SECRETO));
     }
-    if (u.pathname === "/") return json(res, 200, { ok: true, pagos: pagos.size });
+    // ── N1 · débito automático ──
+    if (req.method === 'POST' && u.pathname === '/preapproval') {
+      if (!autorizado) return json(res, 401, { message: 'invalid access token' });
+      const p = JSON.parse(await leer(req));
+      const sub = { id: 'sus-' + crypto.randomUUID().slice(0, 12), status: 'pending', reason: p.reason ?? null, external_reference: p.external_reference ?? null,
+        transaction_amount: Number(p.auto_recurring?.transaction_amount ?? 0), notification_url: p.notification_url ?? null };
+      suscripciones.set(sub.id, sub);
+      return json(res, 201, { id: sub.id, status: sub.status, init_point: BASE + '/preapproval/' + sub.id });
+    }
+    m = /^\/preapproval\/([\w-]+)$/.exec(u.pathname);
+    if (req.method === 'GET' && m) {
+      if (!autorizado) return json(res, 401, { message: 'invalid access token' });
+      const sub = suscripciones.get(m[1]);
+      return sub ? json(res, 200, { id: sub.id, status: sub.status, transaction_amount: sub.transaction_amount }) : json(res, 404, { message: 'preapproval not found' });
+    }
+    m = /^\/authorized_payments\/(\d+)$/.exec(u.pathname);
+    if (req.method === 'GET' && m) {
+      if (!autorizado) return json(res, 401, { message: 'invalid access token' });
+      const c = cobrosDebito.get(m[1]);
+      if (!c) return json(res, 404, { message: 'authorized payment not found' });
+      const aprobado = c.estado === 'approved';
+      return json(res, 200, { id: c.id, preapproval_id: c.sub, status: aprobado ? 'processed' : 'recycling', transaction_amount: c.monto, currency_id: 'ARS',
+        payment: { id: c.id, status: c.estado }, date_created: c.fecha });
+    }
+    if (req.method === 'POST' && u.pathname === '/__debito/cobro') {
+      const sub = suscripciones.get(u.searchParams.get('sub') ?? '');
+      if (!sub) return json(res, 404, { message: 'preapproval not found' });
+      const c = { id: siguienteCobro++, sub: sub.id, monto: Number(u.searchParams.get('monto') ?? sub.transaction_amount), estado: u.searchParams.get('estado') ?? 'approved', fecha: new Date().toISOString(),
+        aviso: u.searchParams.get('aviso') ?? sub.notification_url };
+      cobrosDebito.set(String(c.id), c);
+      if (!c.aviso) return json(res, 200, { id: c.id, status: 200, cuerpo: 'sin aviso' });
+      return json(res, 200, { id: c.id, ...(await avisarDebito(c.aviso, 'subscription_authorized_payment', c.id)) });
+    }
+    if (req.method === 'POST' && u.pathname === '/__debito/adhesion') {
+      const sub = suscripciones.get(u.searchParams.get('sub') ?? '');
+      if (!sub) return json(res, 404, { message: 'preapproval not found' });
+      sub.status = u.searchParams.get('estado') ?? 'authorized';
+      const aviso = u.searchParams.get('aviso') ?? sub.notification_url;
+      return json(res, 200, aviso ? await avisarDebito(aviso, 'subscription_preapproval', sub.id) : { status: 200, cuerpo: 'sin aviso' });
+    }
+    m = /^\/__debito\/(reenviar|firma-mala)\/(\d+)$/.exec(u.pathname);
+    if (req.method === 'POST' && m) {
+      const c = cobrosDebito.get(m[2]);
+      if (!c?.aviso) return json(res, 404, { message: 'cobro sin aviso' });
+      return json(res, 200, await avisarDebito(c.aviso, 'subscription_authorized_payment', c.id, m[1] === 'firma-mala' ? 'otra-clave-que-no-es' : SECRETO));
+    }
+    if (u.pathname === '/') return json(res, 200, { ok: true, pagos: pagos.size });
     json(res, 404, { message: "not found" });
   } catch (e) {
     console.error(e);

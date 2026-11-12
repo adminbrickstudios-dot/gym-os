@@ -10,14 +10,14 @@ const b = await navegador();
 const CLAVES = ["borrador_alta", "panel_pago", "horarios_pico"];
 
 async function abrirConfig(d) {
-  await d.goto(`${G}/panel/configuracion?pestana=reglas`);
+  await d.goto(`${G}/panel/configuracion?pestana=funciones`);
   await d.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
 }
-const estado = (d, clave) => d.locator(`[data-funcion-nueva="${clave}"]`).getAttribute("data-prendida");
+const estado = async (d, clave) => ((await d.locator(`[data-funcion="${clave}"]`).getAttribute("data-activa")) === "si" ? "si" : "no");
 async function poner(d, clave, si) {
   if ((await estado(d, clave)) === (si ? "si" : "no")) return;
-  await d.locator(`[data-funcion-nueva="${clave}"] input[type=checkbox]`).click();
-  await d.waitForFunction(([c, v]) => document.querySelector(`[data-funcion-nueva="${c}"]`)?.getAttribute("data-prendida") === v, [clave, si ? "si" : "no"], { timeout: 30000 });
+  await d.locator(`[data-funcion="${clave}"] input[role="switch"]`).click();
+  await d.waitForFunction(([c, v]) => document.querySelector(`[data-funcion="${c}"]`)?.getAttribute("data-activa") === v, [clave, si ? "si" : "no"], { timeout: 30000 });
 }
 async function candidatos(p, filtro, n = 10) {
   await p.goto(`${G}/panel/socios?estado=${filtro}`);
@@ -116,9 +116,15 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await abrirPanel(r, alDia);
   chequear(await r.locator("[data-panel-socio-pago]").count() === 1, "la recepción ve cuándo toca pagar en el panel lateral", "la recepción no lo ve");
-  await r.goto(`${G}/panel/configuracion`);
+  await r.goto(`${G}/panel/configuracion?pestana=funciones`);
   await r.waitForTimeout(1500);
   chequear(await r.locator("[data-funciones-nuevas]").count() === 0, "la recepción no tiene los interruptores", "la recepción ve los interruptores");
+
+  // Hay una sola pantalla: en Reglas ya no queda ninguna lista de funciones nuevas
+  await d.goto(`${G}/panel/configuracion?pestana=reglas`);
+  await d.locator("main").first().waitFor({ timeout: 60000 });
+  await d.waitForTimeout(1500);
+  chequear(await d.locator("[data-funciones-nuevas], [data-funcion-nueva]").count() === 0, "Configuración → Reglas ya no tiene su propia lista de funciones nuevas", "Reglas todavía muestra funciones nuevas");
 
   // ── Se apagan ──
   await abrirConfig(d);
