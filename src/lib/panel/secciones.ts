@@ -39,7 +39,7 @@ export const SECCIONES: Seccion[] = [
   { clave: "fichar", ruta: DESTINO.fichar, emoji: "lista", titulo: "Fichar y mis horas", corto: "Fichar", descripcion: "Marcar tu entrada y salida, y ver tus horas del mes", grupo: "Hoy", roles: ["encargado", "recepcion", "profe"], tambien: "fichaje entrada salida horas turno" },
   { clave: "avisos", ruta: DESTINO.avisos, emoji: "mail", titulo: "Avisos de hoy", descripcion: "A quién escribirle hoy, con el mensaje listo", grupo: "Hoy", roles: MOSTRADOR },
   { clave: "vencen_hoy", ruta: DESTINO.vencen_hoy, emoji: "reloj-arena", titulo: "Vencen y cobrar", descripcion: "A quién avisarle y cobrarle antes de que se vaya", grupo: "Hoy", roles: MOSTRADOR, apagable: "vencen_hoy", tambien: "vencen hoy vencimientos" },
-  { clave: "clases", ruta: DESTINO.clases, emoji: "calendario", titulo: "Clases de hoy", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
+  { clave: "clases", ruta: DESTINO.clases, emoji: "calendario", titulo: "Clases", descripcion: "Cupos, reservas y presentes", grupo: "Hoy", roles: TODOS, apagable: "clases" },
   // VD-46I: todo el equipo anota; el dueño y el encargado ven todos (lo exige la base).
   { clave: "incidentes", ruta: DESTINO.incidentes, emoji: "corazon", titulo: "Incidentes", descripcion: "Lo que pasó en la sala, sin diagnóstico", grupo: "Hoy", secundaria: true, roles: TODOS, apagable: "incidentes", tambien: "accidente caída mareo" },
   // VD-54: todo el equipo marca una máquina rota; el dueño y el encargado la cierran (lo exige la base).

@@ -4,7 +4,7 @@ import { FilaContacto } from "@/components/panel/FilaContacto";
 import { Vacio } from "@/components/ui/Vacio";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { Encabezado } from "@/components/panel/Marco";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaConEl, fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
@@ -60,9 +60,9 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
       <ul className="space-y-2" data-lista-vencen={clave}>
         {grupo.map((f) => (
           <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={clave === "vencidos" ? "vencido" : "por_vencer"}
-            detalle={f.ultimo_ingreso ? `Vino por última vez el ${fechaCorta(f.ultimo_ingreso, zona)}` : "Nunca vino"}
+            detalle={f.ultimo_ingreso ? `Vino por última vez ${fechaConEl(f.ultimo_ingreso, zona)}` : "Nunca vino"}
             whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
-            ultimo={f.ultimo_contacto_en ? `Le escribió ${f.ultimo_contacto_por ?? "alguien"} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : clave === "vencidos" ? null : marcado(f.socio_id)}
+            ultimo={f.ultimo_contacto_en ? `Le escribió ${f.ultimo_contacto_por ?? "alguien"} ${fechaConEl(f.ultimo_contacto_en, zona)}` : clave === "vencidos" ? null : marcado(f.socio_id)}
             puedeAnotar cobrar={puedeCobrar}
             aviso={clave !== "vencidos" && avisos.get(f.socio_id) ? { clave: "por_vencer", referencia: avisos.get(f.socio_id)!.referencia } : null} />
         ))}

@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -14,5 +15,5 @@ export async function estadoTv(): Promise<{ estado?: EstadoTv; error?: string }>
   if (!token) return { error: "Esta TV no está autorizada. El dueño la autoriza desde Clases → TV de la sala." };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("tv_estado", { p_token: token });
-  return error ? { error: error.message } : { estado: data as EstadoTv };
+  return error ? { error: textoDeBase(error) } : { estado: data as EstadoTv };
 }

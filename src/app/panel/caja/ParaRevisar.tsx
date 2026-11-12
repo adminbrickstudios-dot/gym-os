@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CalculadoraBilletes } from "@/components/panel/CalculadoraBilletes";
 import { BotonAccion } from "@/components/ui/BotonAccion";
-import { formatearPesos } from "@/lib/formato";
+import { formatearPesos, fechaHoraHumana } from "@/lib/formato";
 import { contarCajaSinContar, dejarCajaSinContar, type Resumen } from "./acciones";
 import type { Billetes, ParaRevisar as Caja } from "./tipos";
 import { Icono } from "@/components/ui/Icono";
 
 export function ParaRevisar({ cajas, zona, pedirBilletes }: { cajas: Caja[]; zona: string; pedirBilletes: boolean }) {
-  const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+  const cuando = (m: string) => fechaHoraHumana(m, zona);
   return (
     <section aria-labelledby="para-revisar" data-para-revisar={cajas.length} className="space-y-3">
       <div>

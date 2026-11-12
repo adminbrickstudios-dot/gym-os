@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fechaCorta, fechaHoraHumana, fechaHumana, fechaLarga, formatearCelular, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
+import { fechaConEl, fechaCorta, fechaHoraHumana, fechaHumana, fechaLarga, formatearCelular, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
 
 describe("formatearPesos", () => {
   test.each([
@@ -79,6 +79,11 @@ describe("fechaHumana y fechaHoraHumana", () => {
   });
   test("con la hora del gimnasio", () => {
     expect(fechaHoraHumana("2026-11-12T00:10:00Z", ZONA, ahora)).toBe("hoy 21:10");
+  });
+  test("en una frase: hoy y ayer solos, el resto con el", () => {
+    expect(fechaConEl("2026-11-12T00:10:00Z", ZONA, ahora)).toBe("hoy");
+    expect(fechaConEl("2026-11-11T02:00:00Z", ZONA, ahora)).toBe("ayer");
+    expect(fechaConEl("2026-11-09T15:00:00Z", ZONA, ahora)).toBe("el lun 09/11");
   });
 });
 

@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 343 funciones piden un rol del equipo con `privado.exigir_equipo`; 415 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 345 funciones piden un rol del equipo con `privado.exigir_equipo`; 415 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -42,6 +42,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `beneficios_mes` | ✓ | ✓ | — | — |
 | `borrar_nota` | ✓ | ✓ | ✓ | — |
 | `borrar_socios_ejemplo` | ✓ | — | — | — |
+| `borrar_tarea` | ✓ | ✓ | ✓ | ✓ |
 | `buscar_socios` | ✓ | ✓ | ✓ | — |
 | `buscar_socios_profe` | ✓ | ✓ | ✓ | ✓ |
 | `cajas_olvidadas` | ✓ | ✓ | ✓ | — |
@@ -104,6 +105,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `documentos_panel` | ✓ | ✓ | — | — |
 | `documentos_socio` | ✓ | ✓ | ✓ | — |
 | `editar_horario` | ✓ | ✓ | — | — |
+| `editar_tarea` | ✓ | ✓ | ✓ | ✓ |
 | `ejercicios_gimnasio` | ✓ | ✓ | — | ✓ |
 | `encuestas_panel` | ✓ | ✓ | — | — |
 | `entradas_de_emergencia` | ✓ | ✓ | — | — |

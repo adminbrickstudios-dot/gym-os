@@ -1,3 +1,4 @@
+import { textoDeBase } from "@/lib/errores-humanos";
 import "server-only";
 import { headers } from "next/headers";
 
@@ -21,5 +22,5 @@ export async function frenarEnvioPublico(form: FormData, formulario: "alta_onlin
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { error } = await clienteServicio().rpc("registrar_envio_publico", { p_formulario: formulario, p_ip: ip, p_clave: clave });
-  return error ? { error: error.message } : {};
+  return error ? { error: textoDeBase(error, "No pudimos enviar el formulario ahora. Probá de nuevo en un rato.") } : {};
 }

@@ -54,6 +54,34 @@ try {
   await q(`select privado.vender($1,$2,null,$3::jsonb,$4::jsonb,$5,$6,null, now())`, [g.id, sede.id, item, JSON.stringify([{ medio: "transferencia", monto: 1000 }]), turno.id, dueno.id]);
   const txt = JSON.stringify(await medios());
   paso(txt.includes("transferencia") && txt.includes("efectivo"), "la caja del turno muestra efectivo y transferencia por separado");
+
+  // H2c: "Cubre del … al …" antes de cobrar, fechas cambiadas con la propuesta registrada, y la recepción no puede cambiarlas.
+  // Un socio anotado hace 10 días, sin pagos: la primera cuota cubre desde el alta (H2b) y se puede cambiar (H2c).
+  const [{ d10 }] = await q(`select (privado.dia_local(now(), $1) - 10)::text as d10`, [g.zona_horaria]);
+  const dni2 = String(80000000 + Math.floor(Math.random() * 9999999));
+  const r2 = await como(async () => (await q(`select public.alta_socio_pasado($1, $2, $3::jsonb, $4, $5::date, '[]'::jsonb) as r`, [g.id, sede.id, JSON.stringify({ nombre: "Humo", apellido: "Pasada", dni: dni2 }), plan.id, d10]))[0].r);
+  const s2 = { id: r2.socio_id };
+  const prop = await como(async () => (await q(`select public.periodo_cuota_propuesto($1, $2) as r`, [sede.id, s2.id]))[0].r);
+  paso(!!(prop && prop.desde && prop.hasta && prop.cubierto_hasta === prop.hasta && prop.puede_cambiar === true), `Cobrar propone “cubre del ${prop?.desde} al ${prop?.hasta}” y el dueño puede cambiar las fechas`);
+  const [{ d: desdeElegido }] = await q(`select ($1::date + 3)::text as d`, [prop.desde]);
+  const [{ d: hastaElegido }] = await q(`select ($1::date + 3 + 27)::text as d`, [prop.desde]);
+  await q(`select privado.vender($1,$2,$3,$4::jsonb,$5::jsonb,$6,$7,null, now())`,
+    [g.id, sede.id, s2.id, JSON.stringify([{ tipo: "cuota", cantidad: 1, cubre_desde: desdeElegido, cubre_hasta: hastaElegido }]), JSON.stringify([{ medio: "transferencia", monto: 25000 }]), turno.id, dueno.id]);
+  const [{ n: cambios }] = await q(`select count(*)::int n from public.venta_items i where i.gimnasio_id = $1 and i.cubre_cambiada_por = $2 and i.cubre_propuesta_desde is not null`, [g.id, dueno.id]);
+  paso(cambios === 1, "cobrar con otras fechas guardó la propuesta y quién las cambió");
+  const [{ n: malos }] = await q(`select count(*)::int n from public.socios where id = $1 and cubierto_hasta is distinct from privado.calcular_cubierto_hasta(id)`, [s2.id]);
+  paso(malos === 0, "cubierto_hasta guardado = recalculado");
+  const [rec] = await q(`insert into auth.users (id, email) values (gen_random_uuid(), 'humo-recepcion@ejemplo.invalid') returning id`);
+  const [eqRec] = await q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Humo','recepcion') returning id`, [g.id, rec.id]);
+  let rechazada = false;
+  await db.query("savepoint rec");
+  try {
+    await q(`select privado.vender($1,$2,$3,$4::jsonb,$5::jsonb,$6,$7,null, now())`,
+      [g.id, sede.id, s2.id, JSON.stringify([{ tipo: "cuota", cantidad: 1, cubre_desde: desdeElegido, cubre_hasta: hastaElegido }]), JSON.stringify([{ medio: "transferencia", monto: 25000 }]), turno.id, eqRec.id]);
+  } catch (e) { rechazada = /Solo el dueño o el encargado/.test(e.message); await db.query("rollback to savepoint rec"); }
+  paso(rechazada, "la recepción no puede cambiar las fechas");
+  const ctl = await como(async () => (await q(`select public.linea_de_control($1, (now() - interval '2 days')::date, (now() + interval '2 days')::date, array['cobertura'], null, 50, null) as r`, [g.id]))[0].r);
+  paso(JSON.stringify(ctl).includes("la propuesta era del"), "Control muestra el cambio de fechas con la propuesta");
 } catch (e) {
   if (e.message !== "sin demo") { console.log(`✗ ERROR: ${e.message}`); fallas++; }
 } finally {

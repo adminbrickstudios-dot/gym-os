@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FilaContacto } from "@/components/panel/FilaContacto";
 import { Vacio } from "@/components/ui/Vacio";
-import { fechaCorta } from "@/lib/formato";
+import { fechaConEl } from "@/lib/formato";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { Icono } from "@/components/ui/Icono";
 
@@ -71,7 +71,7 @@ export function ExSocios({ datos: d, motivo, antiguedad, url, zona, mostrar }: {
             <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista="se_fue"
               detalle={`${MOTIVOS_EX[f.motivo] ?? f.motivo} · ${meses(f.meses)}`}
               whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
-              ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : null}
+              ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} ${fechaConEl(f.ultimo_contacto_en, zona)}` : null}
               puedeAnotar tarea />
           ))}
         </ul>

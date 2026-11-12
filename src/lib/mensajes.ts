@@ -30,7 +30,7 @@ export type FilaBandeja = {
   hilo_id: string; socio_id: string; socio: string; motivo: string; estado: string; creado_en: string; ultimo_en: string;
   ultimo_autor: string; sin_responder: boolean; con_foto: boolean; extracto: string | null;
 };
-export type Bandeja = { items: FilaBandeja[]; conteos: { nuevo: number; en_curso: number; resuelto: number; sin_responder: number } };
+export type Bandeja = { total: number; items: FilaBandeja[]; conteos: { nuevo: number; en_curso: number; resuelto: number; sin_responder: number } };
 export type HiloPanel = HiloSocio & { socio: string; resuelto_en: string | null };
 export type RespuestaRapida = { id: string; titulo: string; texto: string };
 export type FilaHistorial = { hilo_id: string; motivo: string; estado: string; creado_en: string; ultimo_en: string; sin_responder: boolean; extracto: string | null };

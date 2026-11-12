@@ -4,7 +4,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { Vacio } from "@/components/ui/Vacio";
 import { linkCompartir, textoCierre } from "@/lib/caja";
-import { formatearPesos } from "@/lib/formato";
+import { formatearPesos, fechaHoraHumana } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -32,7 +32,7 @@ export default async function HistorialCaja({ searchParams }: { searchParams: Pr
     // FA-21: lo que faltó o sobró, acumulado por cajero (quien cerró el turno), últimos 90 días.
     const cajeros = await rpc<{ equipo_id: string; cajero: string; turnos: number; diferencia: number | string; sobrante: number | string; faltante: number | string; con_diferencia: number }[]>("diferencia_caja_por_cajero", { p_gimnasio_id: panel.gimnasio.id, p_dias: 90 });
     const zona = panel.gimnasio.zona_horaria;
-    const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+    const cuando = (m: string) => fechaHoraHumana(m, zona);
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     return (
       <>

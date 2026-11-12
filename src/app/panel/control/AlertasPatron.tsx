@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { fechaHoraHumana } from "@/lib/formato";
 
 export type AlertasPatronDatos = {
   dos_sedes: { socio_id: string; nombre: string; sede_a: string; sede_b: string; minutos: number; momento: string }[];
@@ -9,7 +10,7 @@ export type AlertasPatronDatos = {
 export function AlertasPatron({ datos, zona }: { datos: AlertasPatronDatos; zona: string }) {
   const total = datos.dos_sedes.length + datos.muchas_entradas.length;
   if (total === 0) return null;
-  const cuando = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+  const cuando = (m: string) => fechaHoraHumana(m, zona);
   return (
     <section className="tarjeta p-4 space-y-3" aria-labelledby="patrones" data-alertas-patron={total}>
       <h2 id="patrones" className="titulo text-xl">Entradas para mirar ({total})</h2>

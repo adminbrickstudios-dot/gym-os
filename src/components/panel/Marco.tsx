@@ -8,6 +8,7 @@ import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
 import { ProveedorSecciones } from "./LinkPanel";
 import { SinConexion } from "@/components/ui/SinConexion";
+import { VersionNueva } from "@/components/ui/VersionNueva";
 import { VentanaEntrada } from "./VentanaEntrada";
 import { PanelSocioLateral } from "./PanelSocioLateral";
 import { AvisosEntrada } from "./AvisosEntrada";
@@ -62,6 +63,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}
           <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10"><Campana /></div>
           <SinConexion />
+          <VersionNueva />
           {abono?.estado === "vencido" && (
             <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura><Icono nombre="candado" /> El abono de Base está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
           )}

@@ -86,6 +86,7 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
   const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
   const [otro, setOtro] = useState<{ descripcion: string; monto: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorOtro, setErrorOtro] = useState<string | null>(null);   // el error del precio de "Otra cosa" sale junto al campo
   const [venta, setVenta] = useState<Venta | null>(null);
   // VD-50 (D29): la cuota ya cobrada hace poco frena (lo dice la base al cobrar) y sigue solo con "Cobrar igual" + motivo.
   const [doble, setDoble] = useState<EstadoDobleCobro | null>(null);
@@ -286,14 +287,17 @@ export function Carrito({ sedeId, turnoId: turnoInicial, socioInicial, preciosIn
           </div>
           {socio && !precios.cuota && <p className="texto-tenue mt-3">Sin membresía activa: asignale un plan desde su ficha para cobrarle la cuota.</p>}
           {otro && (
-            <form className="tarjeta p-4 mt-3 flex flex-col sm:flex-row gap-2" onSubmit={(e) => {
+            <form className="tarjeta p-4 mt-3 flex flex-col sm:flex-row sm:flex-wrap gap-2" onSubmit={(e) => {
               e.preventDefault();
-              if (!otro.descripcion.trim() || !(leerMonto(otro.monto) >= 0)) { setError("No entiendo el precio: escribilo como 84.500 o 84500,50"); return; }
+              if (!otro.descripcion.trim()) { setErrorOtro("Escribí qué es (por ejemplo: candado)"); return; }
+              if (!(leerMonto(otro.monto) >= 0)) { setErrorOtro("No entiendo el precio: escribilo como 84.500 o 84500,50"); return; }
+              setErrorOtro(null);
               agregar({ tipo: "otro", nombre: otro.descripcion.trim(), precio_fijo: leerMonto(otro.monto) }); setOtro(null);
             }}>
-              <input autoFocus className="campo" placeholder="Qué es (ej: candado)" value={otro.descripcion} onChange={(e) => setOtro({ ...otro, descripcion: e.target.value })} />
-              <input className="campo sm:max-w-40" inputMode="decimal" placeholder="Precio" value={otro.monto} onChange={(e) => setOtro({ ...otro, monto: e.target.value })} />
+              <input autoFocus className="campo" placeholder="Qué es (ej: candado)" aria-invalid={errorOtro && !otro.descripcion.trim() ? true : undefined} value={otro.descripcion} onChange={(e) => { setErrorOtro(null); setOtro({ ...otro, descripcion: e.target.value }); }} />
+              <input className="campo sm:max-w-40" inputMode="decimal" placeholder="Precio" aria-invalid={errorOtro && otro.descripcion.trim() ? true : undefined} value={otro.monto} onChange={(e) => { setErrorOtro(null); setOtro({ ...otro, monto: e.target.value }); }} />
               <button type="submit" className="boton">Agregar</button>
+              {errorOtro && <p role="alert" className="w-full text-sm pildora pildora-rojo whitespace-normal"><Icono nombre="alerta" /> {errorOtro}</p>}
             </form>
           )}
         </section>

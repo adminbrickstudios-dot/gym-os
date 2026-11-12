@@ -215,9 +215,9 @@ Todas están en `PREGUNTAS.md` con la opción más segura, y **no se cambiaron**
 
 | Función | Rol | Estado | Ítem |
 |---|---|---|---|
-| Retención: "Avisar a todos" con tope y registro de contacto, exportar, y que Altas, Bajas, En riesgo y Socios al día lleven a su lista | dueño | ❌ | Q2 |
-| Tareas: editar, borrar y cortar una tarea que se repite todos los días | dueño | ❌ (`tareas/acciones.ts` solo crea y tilda) | Q2 |
-| Mensajes: "ver más" después de los 100 | dueño | ❌ | Q2 |
+| Retención: "Avisar a todos" con tope y registro de contacto, exportar, y que Altas, Bajas, En riesgo y Socios al día lleven a su lista | dueño | `q2-retencion` | ✅ (Altas lleva a "Nuevos", últimos 30 días, no al mes calendario) |
+| Tareas: editar, borrar y cortar una tarea que se repite todos los días | dueño | `q2-tareas`, `tareas.test.mjs` | ✅ |
+| Mensajes: "ver más" después de los 100 | dueño | `q2-mensajes`, `mensajes-socios.test.mjs` | ✅ |
 | Reporte mensual para compartir (69), comparación con el año pasado, metas, vistas guardadas | dueño | ❌ | Z6 |
 | Super admin: ingreso mensual de BRIK y cohortes, notas por gimnasio en la lista, "ver como el dueño" de solo lectura | super admin | ❌ | Z6 |
 | Mostrador: lista Hoy que avisa que corta en 40 y Anular con confirmación, foto en "Entró" por QR o llavero, ticket en impresora térmica, alias y CBU al elegir Transferencia, cuenta regresiva de "se cierra sola", transferencias con miniatura | recepción | ❌ | Z6 |

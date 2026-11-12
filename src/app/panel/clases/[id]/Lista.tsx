@@ -8,6 +8,7 @@ import { detectarSalud } from "@/lib/salud";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Vacio } from "@/components/ui/Vacio";
 import { Icono } from "@/components/ui/Icono";
+import { formatearCelular } from "@/lib/formato";
 
 type Fila = { socio_id: string; nombre: string; estado: string; posicion: number | null; presente: boolean; telefono?: string | null };
 const ESTADO: Record<string, string> = { confirmada: "Reservó", espera: "En espera", sin_reserva: "Vino sin reservar" };
@@ -58,7 +59,7 @@ export function Lista({ claseId, filas, reserva, puedeCancelar, cancelada, busca
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-lg truncate">{f.nombre}</span>
-                {f.telefono && <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="block text-sm texto-suave underline" data-telefono-lista><Icono nombre="mensaje" /> {f.telefono}</a>}
+                {f.telefono && <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="block text-sm texto-suave underline" data-telefono-lista><Icono nombre="mensaje" /> {formatearCelular(f.telefono)}</a>}
                 <span className="block texto-suave text-sm">{f.estado === "espera" && f.posicion ? `${f.posicion}° en espera` : ESTADO[f.estado] ?? f.estado}</span>
               </span>
               {f.presente && deshaciendo === f.socio_id ? (

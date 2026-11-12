@@ -23,6 +23,25 @@ export async function crearTareaRapida(que: string): Promise<{ error?: string }>
   return crearTarea(que, panel.yo.equipo_id, hoy, null, null);
 }
 
+/** Q2: editar una tarea (qué, para quién, día y repetición; repite vacío la corta). La base valida quién puede. */
+export async function editarTarea(id: string, que: string, para: string, dia: string, repite: string | null): Promise<{ error?: string }> {
+  const sal = errorSiHaySalud(que); if (sal) return { error: sal };
+  try {
+    await rpc("editar_tarea", { p_tarea_id: id, p_que: que, p_para: para, p_dia: dia, p_repite: repite || null });
+    refrescar();
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/** Q2: borrar una tarea (si se repetía, la que ya nació queda; no nacen más desde esta). */
+export async function borrarTarea(id: string): Promise<{ error?: string }> {
+  try {
+    await rpc("borrar_tarea", { p_tarea_id: id });
+    refrescar();
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function marcarTarea(id: string, hecha: boolean): Promise<{ error?: string }> {
   try {
     await rpc("marcar_tarea", { p_tarea_id: id, p_hecha: hecha });

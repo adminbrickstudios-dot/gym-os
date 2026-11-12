@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { frenarEnvioPublico } from "@/lib/seguridad/envio-publico";
@@ -18,6 +19,6 @@ export async function pedirDemo(_: EstadoDemo, form: FormData): Promise<EstadoDe
   if (freno.error) return { error: freno.error, datos };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { error } = await supabase.rpc("pedir_demo_brik", { p_nombre: datos.nombre, p_gimnasio: datos.gimnasio, p_contacto: datos.contacto, p_mensaje: datos.mensaje });
-  if (error) return { error: error.message, datos };
+  if (error) return { error: textoDeBase(error), datos };
   return { ok: true, nombre: datos.nombre.split(" ")[0] };
 }
