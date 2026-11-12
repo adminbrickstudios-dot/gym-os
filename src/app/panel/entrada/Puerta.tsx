@@ -403,7 +403,6 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
             <button type="button" onClick={reiniciar} className="boton"><Icono nombre="cerrar" /> Otro socio</button>
           </div>
 
-          {error && <div className="mt-4"><Mensaje tipo="error">{error}</Mensaje></div>}
           {forzando && (
             <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
           )}

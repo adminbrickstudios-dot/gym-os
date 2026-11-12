@@ -7,15 +7,28 @@ type Fila = { numero: number; nombre: string; apellido: string; dni: string | nu
   plan: string | null; estado: string; cubierto_hasta: string | null; alta: string; dado_de_baja: string | null; etiquetas: string | null };
 
 const TOPE_CSV = 5000;
+const POR_PAGINA = 1000;
+const ESTADOS = ["al_dia", "por_vencer", "vencidos", "en_pausa", "sin_plan", "nuevos", "bajas"];
 const fecha =(d: string | null) => (d ? d.split("-").reverse().join("/") : "");
 
 export async function GET(req: Request) {
   const panel = await contextoPanel();
   const u = new URL(req.url);
   const etiqueta = /^[0-9a-f-]{36}$/.test(u.searchParams.get("etiqueta") ?? "") ? u.searchParams.get("etiqueta") : null;
-  let filas: Fila[];
+  const estado = ESTADOS.includes(u.searchParams.get("estado") ?? "") ? u.searchParams.get("estado") : null;
+  const plan = /^[0-9a-f-]{36}$/.test(u.searchParams.get("plan") ?? "") ? u.searchParams.get("plan") : null;
+  const origen = u.searchParams.get("web") === "1" ? "web" : null;
+  const filas: Fila[] = [];
   try {
-    filas = await rpc<Fila[]>("exportar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: u.searchParams.get("q") ?? "", p_etiqueta: etiqueta });
+    // La base devuelve de a 1.000 (PostgREST corta ahí): se juntan las páginas hasta el tope + 1 (para saber si hay más).
+    while (filas.length <= TOPE_CSV) {
+      const pagina = await rpc<Fila[]>("exportar_socios", {
+        p_gimnasio_id: panel.gimnasio.id, p_texto: u.searchParams.get("q") ?? "", p_etiqueta: etiqueta,
+        p_estado: estado, p_plan: plan, p_origen: origen, p_desde: filas.length, p_cantidad: POR_PAGINA,
+      });
+      filas.push(...pagina);
+      if (pagina.length < POR_PAGINA) break;
+    }
   } catch (e) {
     // Sin permiso (o cualquier error): se dice, nunca un archivo vacío.
     return new Response(`No se pudo exportar: ${(e as Error).message}`, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });

@@ -397,19 +397,19 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 | Mi QR vencido sin señal; al volver de la pantalla bloqueada | ✅ pulido-roto (sin señal y al volver); 🟡 el `visibilitychange` está escrito pero la prueba solo corta y devuelve la red |
 | Avisos que tapan el botón flotante y la barra | ✅ contra el botón (pulido-roto); 🟡 contra la barra fija: a 1440 px la prueba no la mostró, el `xl:right-[19rem]` queda sin medir |
 | Botón flotante de la Entrada vacío | ✅ pulido-roto (tiene su ícono) |
-| Íconos vacíos en el rojo, la salida y la caja (Puerta, Ventana, Turno, entradas y salidas de plata) | 🟡 reemplazados por `<Icono>`; sin prueba de pantalla propia (tsc y lint limpios) |
+| Íconos vacíos en el rojo, la salida y la caja (Puerta, Ventana, Turno, entradas y salidas de plata) | ✅ `<Icono>`; `pulido-roto-2` (corrida 43131092971): el rojo y la caja sin emojis ni botones vacíos. 🟡 la salida (`data-ventana-salida`) no se probó: marcar una salida escribe datos |
 | Emojis crudos de la base en Inicio y en los chips de la guía | 🟡 `sistema` en `<Icono>` (la migración entregada no se toca); sin prueba de pantalla propia |
-| Error de Anotar, Dejar pasar, Salida o Volvió antes debajo del veredicto | 🟡 el error se muestra dentro del veredicto (Puerta.tsx); sin prueba: hace falta forzar un fallo de la base |
+| Error de Anotar, Dejar pasar, Salida o Volvió antes debajo del veredicto | ✅ dentro del veredicto, una sola vez (se sacó un duplicado); `pulido-roto-2` corta la conexión al anotar (43131092971). 🟡 Dejar pasar, Salida y Volvió antes usan el mismo `setError`, sin prueba propia |
 | Atajo "S" marca la salida al tipear un nombre | ✅ pulido-roto (la S va al buscador) |
-| Búsqueda vieja pisa a la nueva (Entrada y Vender); Vender mostraba el error como "No está" | 🟡 control de vigencia en las dos; sin prueba: hace falta una respuesta tardía |
-| Cobrar se cierra mientras cobra | 🟡 no cierra (Esc, X ni afuera) mientras "Cobrando…"; sin prueba automática |
-| "Abrir caja" en Vender pierde el carrito | 🟡 abre el turno en el mismo carrito (`AbrirTurnoCobrar`); sin prueba: depende de una caja cerrada |
+| Búsqueda vieja pisa a la nueva (Entrada y Vender); Vender mostraba el error como "No está" | ✅ `pulido-roto-2` frena la respuesta vieja 4 s en Entrada y en Vender, y corta la búsqueda en Vender (43131092971) |
+| Cobrar se cierra mientras cobra | ✅ `pulido-roto-2` demora el cobro 6 s: Esc, X y afuera no cierran; después sí (43131092971) |
+| "Abrir caja" en Vender pierde el carrito | ✅ `pulido-roto-2` cierra la caja, arma el carrito, abre el turno y el Agua sigue ahí (43131092971) |
 | Cambiar un rol de un toque | ✅ `panel-equipo.mjs` (confirmación con lo que gana o pierde) |
-| Exportar ignora los filtros | 🟡 el botón dice "Exportar todos los socios" si hay un filtro; el filtro real necesita migración (ver `PREGUNTAS.md`) |
+| Exportar ignora los filtros | ✅ migración `20261111193700` (estado, plan, origen, sin tope de 100); `exportar-filtros.test.mjs` y e2e `exportar-filtros` |
 | "Salir" del socio cae en el login del equipo | ✅ pulido-roto |
 | Con la sesión abierta, /ingresar y /socio piden la contraseña | ✅ pulido-roto (en la página; `proxy.ts` lo sigue otro ayudante) |
 | `linkAyudaBrik` borra la letra D | ✅ `destino.test.ts` (vitest) |
 | "Tu celular o tu mail" con `type=tel` | ✅ pulido-roto |
 | El tema por usuario solo lee la cookie | ✅ pulido-roto (dispositivo nuevo sin cookie) |
-| La hora del cierre por WhatsApp sale en la zona de la compu | 🟡 usa la zona del gimnasio; sin prueba automática (depende de la zona de la compu que corre la prueba) |
+| La hora del cierre por WhatsApp sale en la zona de la compu | ✅ `pulido-roto-2` corre el navegador en Tokio y el cierre dice la hora de Buenos Aires (43131092971) |
 | Soporte reconocido por el nombre "Soporte BRIK" | 🟡 permisos: no se arregló, queda en `PREGUNTAS.md` con la opción más segura |
