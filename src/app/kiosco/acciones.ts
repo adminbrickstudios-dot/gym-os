@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -12,7 +13,7 @@ export async function salirEnKiosco(codigo: string): Promise<Resultado> {
   if (!token) return { error: "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas." };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("kiosco_salir", { p_token: token, p_codigo: codigo });
-  if (error) return { error: error.message };
+  if (error) return { error: textoDeBase(error) };
   return { ...(data as Resultado), salida: true };
 }
 
@@ -22,7 +23,7 @@ export async function entrarEnKiosco(codigo: string): Promise<Resultado> {
   if (!token) return { error: "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas." };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("kiosco_entrar", { p_token: token, p_codigo: codigo });
-  if (error) return { error: error.message };
+  if (error) return { error: textoDeBase(error) };
   return data as Resultado;
 }
 
@@ -32,7 +33,7 @@ const token = async () => (await cookies()).get(COOKIE_TABLET)?.value ?? "";
 /** El QR que muestra la tablet para que el socio lo escanee (ENT-6). Lo firma la base. */
 export async function qrDeLaTablet(): Promise<{ codigo?: string; vence_en?: string; error?: string }> {
   const { data, error } = await cliente().rpc("kiosco_qr", { p_token: await token() });
-  return error ? { error: error.message } : data;
+  return error ? { error: textoDeBase(error) } : data;
 }
 
 /** Quién entró por esta tablet escaneando su QR, desde un momento. */
@@ -58,5 +59,5 @@ export async function entrarHabitual(socioId: string, dniFin: string): Promise<R
   const t = await token();
   if (!t) return { error: "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas." };
   const { data, error } = await cliente().rpc("kiosco_entrar_habitual", { p_token: t, p_socio_id: socioId, p_dni_fin: dniFin });
-  return error ? { error: error.message } : (data as Resultado);
+  return error ? { error: textoDeBase(error) } : (data as Resultado);
 }

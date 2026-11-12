@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -21,7 +22,7 @@ export async function anotarseEvento(eventoId: string, _: EstadoAnotarse, form: 
   const telefono = datos.telefono.trim().startsWith("+") ? `+${digitos}` : `+${digitos.startsWith("54") ? digitos : `54${digitos}`}`;
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("inscribirse_evento_publico", { p_host: host, p_evento_id: eventoId, p_nombre: datos.nombre, p_dni: datos.dni, p_telefono: telefono });
-  if (error) return { error: error.message, datos };
+  if (error) return { error: textoDeBase(error), datos };
   const r = data as { estado: "anotado" | "espera"; posicion?: number; precio?: number };
   return { ok: true, estado: r.estado, posicion: r.posicion, precio: r.precio };
 }
@@ -40,7 +41,7 @@ export async function quieroProbar(_: EstadoProbar, form: FormData): Promise<Est
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { error } = await supabase.rpc("quiero_probar", { p_host: host, p_nombre: datos.nombre, p_telefono: datos.telefono, p_interes: datos.interes || null, p_ref: String(form.get("ref") ?? "") || null });
-  if (error) return { error: error.message, datos };
+  if (error) return { error: textoDeBase(error), datos };
   return { ok: true, nombre: datos.nombre.split(" ")[0] };
 }
 
@@ -68,6 +69,6 @@ export async function reservarPrueba(_: EstadoReservaPrueba, form: FormData): Pr
   if (!host) return { error: "No se pudo saber de qué gimnasio es esta página.", datos };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("reservar_prueba_publica", { p_host: host, p_clase_id: datos.clase, p_nombre: datos.nombre, p_dni: datos.dni, p_telefono: datos.telefono });
-  if (error) return { error: error.message, datos };
+  if (error) return { error: textoDeBase(error), datos };
   return { ok: true, nombre: datos.nombre.split(" ")[0], clase: (data as { clase: string }).clase };
 }

@@ -1,3 +1,4 @@
+import { textoDeBase } from "@/lib/errores-humanos";
 import type { Metadata } from "next";
 import { Icono } from "@/components/ui/Icono";
 import { cookies } from "next/headers";
@@ -18,7 +19,7 @@ export default async function PaginaKiosco({ searchParams }: { searchParams: Pro
   if (token && !problema) {
     const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
     const { data, error } = await supabase.rpc("kiosco_estado", { p_token: token });
-    if (error) problema = error.message;
+    if (error) problema = textoDeBase(error, "No pudimos leer el estado de la tablet.");
     else {
       // VD-48: ¿se muestra "Me voy"? Lo dice la base (si no responde, la tablet sigue sin el botón: no rompe la entrada).
       const salida = await supabase.rpc("kiosco_salida_activa", { p_token: token });

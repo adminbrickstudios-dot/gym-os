@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
 import { useVersion } from "@/components/panel/useVersion";
 import { guardarConfiguracion,guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
@@ -42,6 +42,7 @@ import { Restablecer } from "./Restablecer";
 import type { Opcion } from "./indice";
 import { Icono } from "@/components/ui/Icono";
 import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
+import { BorradorDeEstado, borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -285,6 +286,8 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
 
   // Irse con cambios sin guardar (cerrar, recargar o tocar el menú): pregunta antes.
   useCambiosSinGuardar(algoSucio);
+  const eraSucio = useRef(false);
+  useEffect(() => { if (eraSucio.current && !algoSucio) borrarBorradorDe("configuracion"); eraSucio.current = algoSucio; }, [algoSucio]);
 
   // La pestaña queda en la dirección: se puede recargar o mandar el link ("Configuración → Cobros").
   const cambiarPestana = (p: string) => {
@@ -369,8 +372,14 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
   };
   const logo = urlMarca(d.logo_path);
 
+  // FLUIDEZ 7: lo escrito y sin guardar queda en el dispositivo (sin las imágenes, que se guardan al subirlas).
+  const { logo_path: _l, favicon_path: _f, fotos: _fo, ...datosBorrador } = d;
+  void _l; void _f; void _fo;
+
   return (
     <div className="space-y-5">
+      {puedeEditar && <BorradorDeEstado clave="configuracion" valor={{ c, d: datosBorrador }}
+        aplicar={(v: { c: typeof c; d: Partial<typeof d> }) => { setC(v.c); setD((x) => ({ ...x, ...v.d })); }} />}
       {!puedeEditar && <p className="pildora"><Icono nombre="ojo" /> Solo el dueño cambia la configuración. Los mensajes y los días que cierra los podés cambiar vos.</p>}
       <BuscadorConfig visible={(o) => o.pestana !== "clases" || conClases} alElegir={irA} />
       <Pestanas pestanas={pestanas} activa={pestana} alCambiar={cambiarPestana} etiqueta="Partes de la configuración" />

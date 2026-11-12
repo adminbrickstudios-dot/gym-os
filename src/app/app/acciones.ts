@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { notificarDespues } from "@/lib/push";
 import { headers } from "next/headers";
 import { crearPreferencia } from "@/lib/mercadopago";
@@ -93,7 +94,7 @@ export async function pagarConMercadoPago(socioId: string, clave?: string, planI
       ? await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_compra_online", { p_socio_id: socioId, p_plan_id: planId, p_clave_operacion: clave ?? null })
       : await rpc<{ pago_id: string; gimnasio_id: string; monto: number; descripcion: string }>("iniciar_pago_online", { p_socio_id: socioId, p_clave_operacion: clave ?? null });
     const { data, error } = await clienteServicio().rpc("credenciales_mp", { p_gimnasio_id: p.gimnasio_id });
-    if (error) return { error: error.message };
+    if (error) return { error: textoDeBase(error, "No pudimos iniciar el pago ahora. Probá de nuevo en un rato.") };
     const c = data as { token: string; modo: string } | null;
     if (!c?.token) return { error: "El gimnasio no tiene MercadoPago conectado" };
     const h = await headers();

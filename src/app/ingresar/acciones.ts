@@ -1,4 +1,5 @@
 "use server";
+import { textoDeBase } from "@/lib/errores-humanos";
 import { headers } from "next/headers";
 import { sinDetalle } from "@/lib/errores-humanos";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
@@ -87,7 +88,7 @@ async function limiteCodigos(destino: string): Promise<string | null> {
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { error } = await clienteServicio().rpc("registrar_pedido_codigo", { p_destino: destino, p_ip: ip });
-  return error ? error.message : null;
+  return error ? textoDeBase(error, "Pediste muchos códigos. Esperá un rato y probá de nuevo.") : null;
 }
 
 export type EstadoCodigo = { error?: string; telefono?: string; enviado?: boolean; destino?: string };
