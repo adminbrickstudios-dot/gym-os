@@ -36,7 +36,13 @@ Si cargás `COPIA_CLAVE`, el loop hace los pasos 2 a 6 solo.
 - Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
 - Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
 
-## DÓNDE QUEDÉ (11/11, 12:00)
+## DÓNDE QUEDÉ (11/11, noche)
+- ✅ hoy: H1, H2/C10, H3, H6, F1.9, F1.5, F1.6, F2.x, F3.1, F7.1, F9.1, C1-C10, U5, P1-P8b. 🟡: H3b, H4, H5, H7, F3.2. ⛔: C8/H5 (COPIA_CLAVE), N0 (proyecto ensayo), F0.1 (secretos).
+- Publicación lista en `publicar/base-hoy` (prevuelo 43123213163, 11 migraciones); **no se aplica sin COPIA_CLAVE** (pasos arriba).
+- En curso (5 ayudantes con Actions en su rama): `carril/z-iconos-textos` (Z2-Z4), `carril/z-diseno-falta` (Z5-Z7), `carril/f4-f5` (DETALLES-70 y FALTANTES), `carril/h7-pruebas` (exportar con filtros, pruebas de H7/H3b, CLS en celular), `carril/f9` (F9.2-F9.8). Al terminar: mergear a base, e2e con `solo`, cerrar filas.
+- Falta después: F0.3/F0.5, F3.2, N1-N8 (apagado para Temple Gym), F8 (cierre: botones + barrido, simulación completa, humo, PRUEBA-DUENO.md).
+
+## (anterior) DÓNDE QUEDÉ (11/11, 12:00)
 - ✅ cerrados hoy: U5, P1, P4-P8b, C1-C7, F1.2, F2.1-F2.9, F7.1, F9.1. Publicado: fase P y C1/C2/aviso (PR #15). Sin publicar: migraciones 20261111120000 (recepción) y 130100-130400 (velocidad) y lo que sigan los ayudantes.
 - En curso (ayudantes en worktrees): `carril/a-filtros` (filtros_socios a menos de 300 ms), `carril/c-qr-alta` (C9), `carril/c-pasado` (C10, plata: dueño y encargado), `carril/d-f19` (F1.9: vd-6, base-7b, velocidad-a y los 15 viejos, con Actions), `carril/d-f3` (F3).
 - Rojos conocidos en Actions: `base-7b` (paso 4b), `velocidad-a` (ingreso optimista), `vd-6` (paso 6). Los trabaja `carril/d-f19`.
