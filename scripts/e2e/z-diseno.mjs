@@ -26,11 +26,11 @@ try {
   chequear(/Entrada, vencen hoy/.test(grupos[0].texto) && /Cobrar, caja, ventas/.test(grupos[2].texto), "cada sección trae su línea que explica qué es", "falta la línea de una sección");
   const maquinas = d.locator('aside a[href="/panel/maquinas"]');
   chequear(!(await maquinas.isVisible()), "Máquinas (de uso menos seguido) está adentro de «Más», cerrado", "Máquinas se ve suelta en el menú");
-  await d.locator('aside [data-mas="Hoy"] summary').click();
+  await d.locator('aside [data-mas-grupo="Hoy"] summary').click();
   chequear(await maquinas.isVisible(), "tocar «Más» muestra Incidentes y Máquinas", "«Más» no abre");
   await d.goto(`${G}/panel/maquinas`);
-  await d.locator('aside [data-mas="Hoy"]').waitFor({ timeout: 60000 });
-  chequear(await d.locator('aside [data-mas="Hoy"]').getAttribute("open") !== null, "parado en Máquinas, «Más» queda abierto solo", "«Más» queda cerrado en una pantalla que está adentro");
+  await d.locator('aside [data-mas-grupo="Hoy"]').waitFor({ timeout: 60000 });
+  chequear(await d.locator('aside [data-mas-grupo="Hoy"]').getAttribute("open") !== null, "parado en Máquinas, «Más» queda abierto solo", "«Más» queda cerrado en una pantalla que está adentro");
 
   // ── 2. Títulos de 28 px ──
   await d.goto(`${G}/panel/socios`);
@@ -67,7 +67,7 @@ try {
 
   // ── 9. Darlo de alta lleva lo escrito ──
   await d.goto(`${G}/panel/entrada`);
-  const campo = d.locator('input[aria-label*="DNI"]').first();
+  const campo = d.locator('main input[aria-label="Buscar socio"]').first();
   await campo.waitFor({ timeout: 60000 });
   await campo.fill("99999991");
   const alta = d.locator('a:has-text("Darlo de alta")').first();

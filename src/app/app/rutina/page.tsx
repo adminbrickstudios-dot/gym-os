@@ -60,7 +60,7 @@ export default async function RutinaSocio({ searchParams }: { searchParams: Prom
               <span className="block texto-suave">{x.series} × {x.repeticiones}{x.nota ? ` · ${x.nota}` : ""}</span>
               {x.ultimo && <span className="block text-sm texto-tenue" data-ultimo>Última: {x.ultimo.peso != null ? `${String(x.ultimo.peso).replace(".", ",")} kg` : ""}{x.ultimo.peso != null && x.ultimo.repeticiones ? " × " : ""}{x.ultimo.repeticiones ?? ""}{x.ultimo.repeticiones && x.ultimo.peso == null ? " reps" : ""} · {fecha(x.ultimo.momento)}</span>}
             </span>
-            {x.video_url && <a href={x.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico"><Icono nombre="derecha" /></a>}
+            {x.video_url && <a href={x.video_url} target="_blank" rel="noopener noreferrer" className="boton boton-chico" aria-label={`Ver el video de ${x.ejercicio}`}><Icono nombre="derecha" /></a>}
             <Anotar socioId={s.socio_id} ejercicioId={x.ejercicio_id} nombre={x.ejercicio} />
             <Series socioId={s.socio_id} dia={x.dia} ejercicioId={x.ejercicio_id} series={x.series}
               hechas={(seriesHoy ?? []).filter((h) => h.dia === x.dia && h.ejercicio_id === x.ejercicio_id).map((h) => h.serie)} />

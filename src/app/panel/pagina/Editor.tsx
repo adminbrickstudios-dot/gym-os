@@ -259,7 +259,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
   );
 
   const pie = (
-    <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-4 z-10 tarjeta p-4 flex flex-wrap items-center gap-3 shadow-lg"
+    <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-4 z-10 tarjeta p-4 flex flex-wrap items-center gap-3 [box-shadow:var(--sombra-flota)]"
       data-pie-pagina data-respuestas={respuesta.n}>
       <button type="button" className="boton boton-principal" disabled={!sucio || guardando} onClick={guardar}>{guardando ? "Guardando…" : "Guardar"}</button>
       <button type="button" className="boton" disabled={!puedeDeshacer(hist) && !sinConfirmar} onClick={deshacerPaso} data-deshacer><Icono nombre="deshacer" /> Deshacer</button>

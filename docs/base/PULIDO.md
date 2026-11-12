@@ -413,3 +413,59 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 | El tema por usuario solo lee la cookie | ✅ pulido-roto (dispositivo nuevo sin cookie) |
 | La hora del cierre por WhatsApp sale en la zona de la compu | 🟡 usa la zona del gimnasio; sin prueba automática (depende de la zona de la compu que corre la prueba) |
 | Soporte reconocido por el nombre "Soporte BRIK" | 🟡 permisos: no se arregló, queda en `PREGUNTAS.md` con la opción más segura |
+
+## Estado de Z5, Z6 y Z7 (11/11, rama `carril/z-diseno-falta`)
+
+La prueba de pantallas es `scripts/e2e/z-diseno.mjs` (dueña, recepción, celular y super admin) y vitest para lo que es una cuenta (`formato.test.ts`, `menu-vd11.test.ts`, `alta-url.test.ts`, `vuelto.test.ts`). ✅ = hecho y con prueba; 🟡 = hecho sin prueba automática, a medias o sin hacer, con el motivo. Todo se confirmó primero en el código actual: lo que ya estaba hecho por H7, H3b y las revisiones se anota como "ya estaba".
+
+### Z5 · [DISEÑO]
+| Punto | Estado |
+|---|---|
+| Menú en 4 secciones (Hoy, Socios, Plata, Gimnasio) con su línea; Incidentes, Máquinas, Eventos, Lockers, Profes, Horas y Resumen en «Más» de su sección (se abre solo si estás en una de esas pantallas); Rutinas pasó a Gimnasio | ✅ `z-diseno` (menú) + `menu-vd11.test.ts` |
+| Un ícono distinto por pantalla del menú | ✅ `menu-vd11.test.ts` |
+| Títulos de pantalla de 28 px (panel, super admin, app del socio) y el ícono al lado, no de 36 px arriba; la campana ya no pisa el título | ✅ `z-diseno` (mide 28 px en Socios) |
+| Número de la campana con `--sobre-acento` | 🟡 hecho; sin prueba (necesita un acento claro) |
+| Sin `grayscale` en los íconos del menú de abajo; ítem activo del menú con ícono en `--acento` | 🟡 hecho; sin prueba |
+| Esquinas: todo `rounded-xl/2xl/3xl` pasó a 10 px (`--radio`) en toda la app | 🟡 hecho con `sed` en todo `src`; sin prueba de pantalla (tsc y lint) |
+| Sin vidrio ni degradé: el ingreso (fondo y tarjeta lisos), la portada del gimnasio (barra de arriba y de abajo lisas, velo plano sobre la foto), barra del socio | ✅ `z-diseno` (portada e ingreso); 🟡 el velo negro sobre la foto de portada y los botones `white/15` encima se dejaron: es lo que hace legible el texto sobre una foto |
+| Botón flotante de la Entrada y botón grande de Inicio: `--acento`, `--sobre-acento`, `--sombra-flota` (no el verde del semáforo) | 🟡 hecho; sin prueba (pulido-roto sigue midiendo que no tape) |
+| Avisos de la puerta: 5 s verde, 8 s amarillo y azul, 12 s rojo; ✕ y Cobrar de 48 px | 🟡 hecho; sin prueba (hace falta esperar 5 a 12 s con una entrada de otra puerta). El rojo ya no queda para siempre: ver `PREGUNTAS.md` |
+| Cobrar y Vender: − y + de 48 px; ok del cupón con el color del semáforo; Vender sin `shadow-lg`; Hoja con X de 48 px | 🟡 hecho; sin prueba |
+| Landing: Actividades y «Pensado para cada gimnasio» (Base) pasaron de grilla de tarjetas iguales a lista con jerarquía; esquinas de 10 px; sin código muerto | 🟡 hecho; sin prueba de pantalla |
+| App del socio: «← Volver» de 44 px, pastillas de pedidos de 44 px, etiquetas de 13 px (no 12), `--tarjeta-alta` en lugar de `--tarjeta-2`, QR con 10 px | 🟡 hecho; sin prueba |
+| Importar con «subir» y Exportar con «descargar»; «⋯ Más» con ícono; Subir y Bajar con flechas (planes) | 🟡 hecho; `dis-3` sigue cubriendo el «Más» |
+| Ficha del socio: Cobrar, Vender, WhatsApp, Editar y Dar de baja abajo del estado (antes, después de unos diez bloques) | ✅ `z-diseno` (acciones a menos de 650 px) |
+| Pestaña Pagos mostrada a quien no la puede ver | ya estaba (se filtra por `f.pagos`) |
+| Configuración → Marca: fondos reducidos a los claros y el oscuro del sistema | 🟡 hecho a medias: se sacaron los cuatro oscuros sueltos; el violeta queda entre los acentos (el dueño lo puede querer y `cfg-9` lo usa) |
+| Control: Suspensiones y cortesías ignoran los filtros y cortan en 30 | 🟡 se dice escrito arriba de la lista; seguir los filtros es cambiar la función de la base (ver `PREGUNTAS.md`) |
+| Montos de los gráficos solo en `title` | ✅ `z-diseno`: «Mejor día» y «Ver los montos de cada día» |
+| `window.confirm` nativo en super admin (baja, restaurar textos, quitar dominio, borrar datos) y «Borrar definitivamente» sin estilo de peligro | ✅ `super-admin` y `super-f2` (usan la hoja `useConfirmar`) |
+| Super admin: la portada en 4 secciones con menú | 🟡 sin hacer: es rehacer `admin/page.tsx` (unos 16 bloques) con rutas nuevas. Estimación: medio día |
+| Fondos/íconos/emojis vacíos, «✓ ✕ ＋» de texto, íconos repetidos fuera del menú | no es de este carril: es Z2 |
+
+### Z6 · [FALTA] y detalles premium
+| Punto | Estado |
+|---|---|
+| «Darlo de alta» lleva el DNI o el nombre escrito (Entrada, ventana, Vender) | ✅ `alta-url.test.ts` + `z-diseno` (Entrada) |
+| `conPuntos` ya no le pone puntos a un celular (solo 7 u 8 cifras) | 🟡 hecho; sin prueba |
+| La lista «Hoy» y la bandeja de Mensajes avisan cuando se cortan (40 y 100) | 🟡 hecho; sin prueba |
+| Resultado: Horas pico ya no pierde las horas antes de las 6 ni después de las 22 | 🟡 hecho; sin prueba |
+| Super admin: el botón de búsqueda visible (en el celular no hay Ctrl+K) y «← Gimnasios» vuelve a la lista | ✅ `z-diseno` (botón en 390 px); el link 🟡 |
+| `aria-label` en el botón de video de la rutina | 🟡 hecho; sin prueba |
+| Rutinas en Configuración → Secciones | 🟡 hecho; sin prueba. Eventos no se puede apagar todavía (ver `PREGUNTAS.md`) |
+| Landing (sesión, «Ya soy socio», sin «Quiero ser socio» sin altas), alta online (DNI, menores, mail en minúsculas, reglamento opcional), robots, sitemap, manifest con 512/maskable/atajos | ya estaba |
+| «Quiero ser socio»: `openGraph`, `twitter` e ícono (en WhatsApp sale con imagen) | 🟡 hecho; sin prueba de la vista previa |
+| Vuelto en efectivo y billetes rápidos | 🟡 pieza hecha y probada con vitest, **sin conectar** a Cobrar: función nueva, arranca apagada (ver `PREGUNTAS.md`) |
+| Sin hacer, con estimación: reglamento y contraseña en el alta, vuelto con interruptor (1 h), transferencias con monto y comprobante en miniatura (3 h), pase diario sin socio (media jornada, cobro nuevo), foto en avisos y panel lateral (3 h), Wallet, racha y hitos para compartir (1 día), QR sin señal con token firmado (media jornada), reporte del mes en PDF (1 día), metas, vistas guardadas y acciones masivas sobre todo el filtro (1 día cada una), paginar Retención y `/admin/gimnasios` en la base (media jornada cada una), editar y borrar tareas (media jornada, necesita migración) | 🟡 grandes |
+
+### Z7 · Lo transversal
+| Punto | Estado |
+|---|---|
+| Fechas «hoy», «ayer», «lun 12/11» y celular `+54 9 …` en la hora del gimnasio: `fechaHumana`, `fechaHoraHumana` y `formatearCelular` | ✅ `formato.test.ts`. En uso: el panel lateral de la Entrada. Falta aplicarlos pantalla por pantalla (🟡 media jornada) |
+| Plata con `formatearPesos()` | ya estaba (solo quedan los CSV, que van sin símbolo a propósito) |
+| La tecla «?» con los atajos, en el panel y en `/admin` (solo los que existen) | ✅ `z-diseno` |
+| Todo vacío con botón: Clases (abre la grilla) y Caja sin cajas activas (dice qué hacer) | 🟡 hecho; sin botón en Caja (no hay una pantalla para activar cajas) |
+| `loading.tsx` con la forma real en todas las rutas | ya estaba (solo faltan `/estado` y `/gimnasio-no-encontrado`, que son estáticas) |
+| Franja «Sin conexión» en panel y app | ya estaba |
+| «Hay una versión nueva: recargar sin perder lo escrito» | 🟡 sin hacer: necesita detectar la versión desplegada. Estimación: 1 día |
+| Errores con «Volver» e «Ir al inicio» en `intentar()` | 🟡 sin hacer, para no pisar a Z2 (que cambia los emojis de las mismas líneas) |

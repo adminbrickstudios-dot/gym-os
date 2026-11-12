@@ -85,6 +85,7 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
                 })}
               </ul>
             )}
+            {bandeja.items.length >= 100 && <p className="texto-tenue text-[13px] mt-2" data-bandeja-recortada>Se ven los 100 más recientes de esta lista.</p>}
           </section>
 
           {hilo && (
