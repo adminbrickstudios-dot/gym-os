@@ -82,8 +82,8 @@ jobs:
       - name: Explain de las funciones con la base grande
         if: always()
         run: |
-          # El demo se siembra sin usuario de login: el explain corre como dueño, así que se le da uno (solo en esta base descartable).
-          psql "$(scripts/db/local.sh url)" -qc "with u as (insert into auth.users (email) values ('explain-dueno@ejemplo.invalid') returning id) update public.equipo e set usuario_id = (select id from u) where e.rol = 'dueno' and e.usuario_id is null and e.gimnasio_id = (select id from public.gimnasios where slug = 'demo')"
+          # El demo se siembra sin dueño: el explain corre como dueño, así que se le crea uno (solo en esta base descartable).
+          psql "$(scripts/db/local.sh url)" -qc "with u as (insert into auth.users (email) values ('explain-dueno@ejemplo.invalid') returning id) insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) select g.id, u.id, 'Dueño de explain', 'dueno' from public.gimnasios g, u where g.slug = 'demo'"
           mkdir -p .local
           node scripts/medir/explain.mjs --anidado --url "$(scripts/db/local.sh url)" --md .local/explain-carga.md || true
       - uses: actions/upload-artifact@v4
