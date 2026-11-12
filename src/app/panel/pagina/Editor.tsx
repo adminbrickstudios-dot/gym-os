@@ -20,6 +20,7 @@ import { guardarEstilo, guardarPagina, leerPaginaPorDefecto } from "./acciones";
 import { publicarPagina } from "../configuracion/acciones";
 import { Fotos, UnaImagen, type Imagenes, type Reglas } from "../configuracion/Imagenes";
 import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
+import { BorradorDeEstado, borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
 
 type Portada = { titulo: string; bajada: string | null; boton_texto: string; foto_portada_path: string | null; mensaje_whatsapp: string; mostrar_precios: boolean };
 type SeccionPanel = Seccion & { visible: boolean };
@@ -34,7 +35,7 @@ const ICONO_SECCION: Record<Seccion["tipo"], string> = {
 };
 /** Lo que no se edita acá, y dónde se cambia. */
 const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
-  planes: "Los planes y precios salen de Planes y precios (los que tienen “mostrar en la página”).",
+  planes: "Los planes y precios salen de Planes y servicios (los que tienen “mostrar en la página”).",
   horarios: "Los horarios salen de Configuración → Horarios. Si hay clases en la agenda, se muestran las de los próximos 7 días.",
   galeria: "Las fotos se suben acá arriba, en Imágenes.",
   ubicacion: "Las direcciones salen de Configuración → Gimnasio (sedes).",
@@ -148,6 +149,8 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
 
   const sucio = !igual(est, guardado);
   useCambiosSinGuardar(sucio);
+  const eraSucio = useRef(false);
+  useEffect(() => { if (eraSucio.current && !sucio) borrarBorradorDe("pagina"); eraSucio.current = sucio; }, [sucio]);   // guardado o vuelto a lo guardado: no queda borrador
 
   // ── Cambios: los de un toque quedan como un paso del historial; lo que se escribe, al salir del campo ──
   const ahora = useCallback((fn: (e: Estado) => Estado) => { const n = fn(est); setEst(n); setHist((h) => registrar(h, n)); }, [est]);
@@ -275,6 +278,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
       <div className="space-y-4 min-w-0">
         <Estado publicadaInicial={inicial.vista.publicada} direccion={direccion} nombre={inicial.vista.marca.nombre} puedeEditar={puedeEditar} />
         {altas}
+        {puedeEditar && <BorradorDeEstado clave="pagina" valor={est} aplicar={(v: Estado) => setEst(v)} />}
         {!puedeEditar && <p className="pildora"><Icono nombre="ojo" /> Solo el dueño cambia la página.</p>}
 
         {/* Logo y fotos: se guardan al subirlas, como en Configuración → Marca. */}

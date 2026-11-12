@@ -5,7 +5,7 @@ import { Encabezado } from "@/components/panel/Marco";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
 import { rutaDisponible } from "@/lib/panel/secciones";
-import { fechaCorta, formatearPesos } from "@/lib/formato";
+import { fechaConEl, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
@@ -15,7 +15,7 @@ import { NumerosDeRetencion, type NumerosRetencion } from "@/components/panel/Nu
 import { NumerosDelPeriodo, PERIODOS, type NumerosDelPeriodo as DatosPeriodo } from "@/components/panel/NumerosPeriodo";
 import { Icono } from "@/components/ui/Icono";
 
-export const metadata: Metadata = { title: "Retención" };
+export const metadata: Metadata = { title: "Retención y números" };
 
 type Fila = { socio_id: string; nombre: string; telefono: string | null; lista: string; texto: string; debe: number | null; monto_mensual: number | null;
   visitas_por_semana: number | null; ultimo_contacto_en: string | null; ultimo_contacto_por: string | null; ultimo_contacto_resultado: string | null; mensaje: string | null };
@@ -100,7 +100,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     const otra = LISTAS.find((l) => l.clave !== lista.clave && cuantos(l.clave) > 0);
     return (
       <>
-        <Encabezado icono="tendencia-baja" titulo="Retención" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
+        <Encabezado icono="tendencia-baja" titulo="Retención y números" bajada="Los que se están yendo, ordenados por urgencia, con el mensaje listo." />
         {tablero && resumen.plata_en_riesgo != null && <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 mb-10" data-tablero-retencion>
           <div className="flex flex-col-reverse">
             <dt className="texto-suave mt-2 text-[15px]"><Icono nombre="usuarios" /> Al día <span className="block text-sm texto-tenue">{hoyAlDia === hace4 ? "igual que hace 4 semanas" : `${hoyAlDia > hace4 ? "↑" : "↓"} ${Math.abs(hoyAlDia - hace4)} contra hace 4 semanas`}</span></dt>
@@ -167,7 +167,7 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
               <FilaContacto key={f.socio_id} socioId={f.socio_id} nombre={f.nombre} texto={f.texto} lista={f.lista}
                 detalle={venia(f.visitas_por_semana)}
                 whatsapp={linkWhatsappSocio(f.telefono, f.mensaje)}
-                ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} el ${fechaCorta(f.ultimo_contacto_en, zona)}` : null}
+                ultimo={f.ultimo_contacto_en ? `${f.ultimo_contacto_resultado === "vuelve" ? "Dijo que vuelve" : "Le escribió " + (f.ultimo_contacto_por ?? "alguien")} ${fechaConEl(f.ultimo_contacto_en, zona)}` : null}
                 puedeAnotar cobrar={puedeCobrar} tarea />
             ))}
           </ul>

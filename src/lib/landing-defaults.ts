@@ -24,28 +24,28 @@ export function tipoDeGimnasio(landing: Pick<LandingPublicada, "secciones" | "pl
 }
 
 const SOBRE: Record<TipoGimnasio, (n: string) => string> = {
-  general: (n) => `En ${n} entrenás a tu ritmo, con gente que te acompaña y un ambiente en el que dan ganas de volver. Si es tu primera vez, te explicamos todo y te ayudamos a arrancar.`,
-  funcional: (n) => `En ${n} entrenás en grupo, con clases guiadas y ejercicios que se adaptan a tu nivel. Venís a moverte, a superarte y a hacerlo con otros. Si es tu primera vez, te acompañamos desde el primer día.`,
-  mente_cuerpo: (n) => `En ${n} trabajás el cuerpo y la cabeza con clases tranquilas, bien guiadas y para todos los niveles. Venís a moverte mejor, a soltar tensión y a darte un rato para vos.`,
-  lucha: (n) => `En ${n} aprendés técnica y entrenás en serio, con profes que te corrigen y un grupo que te empuja. Podés empezar de cero: arrancás a tu ritmo y vas subiendo.`,
+  general: (n) => `${n}: abajo están los planes, los horarios y cómo llegar. Si es tu primera vez, pasá por el gimnasio y te explicamos cómo arrancar.`,
+  funcional: (n) => `${n} da clases en grupo. Abajo están los horarios y los planes. Si es tu primera vez, avisá y te explican cómo arrancar.`,
+  mente_cuerpo: (n) => `${n} da clases para moverte mejor. Abajo están los horarios y los planes. Si es tu primera vez, avisá y te explican cómo arrancar.`,
+  lucha: (n) => `${n} da clases de técnica y entrenamiento. Abajo están los horarios y los planes. Podés empezar de cero: avisá que es tu primera vez.`,
 };
 
 const BAJADA: Record<TipoGimnasio, string> = {
-  general: "Entrená con nosotros. Planes, horarios y cómo llegar, todo acá.",
-  funcional: "Clases en grupo, para todos los niveles. Mirá los horarios y probá una.",
-  mente_cuerpo: "Clases para moverte mejor, a tu ritmo. Mirá los horarios y probá una.",
-  lucha: "Técnica y entrenamiento de verdad, desde el primer día. Mirá los horarios y probá una clase.",
+  general: "Planes, horarios y cómo llegar.",
+  funcional: "Clases en grupo. Mirá los horarios y los planes.",
+  mente_cuerpo: "Clases para moverte mejor. Mirá los horarios y los planes.",
+  lucha: "Clases de técnica y entrenamiento. Mirá los horarios y los planes.",
 };
 
-const PROBAR_TEXTO = "Dejanos tu nombre y tu WhatsApp, o elegí una clase, y te esperamos para que pruebes sin compromiso.";
+const PROBAR_TEXTO = "Dejanos tu nombre y tu WhatsApp, o elegí una clase, y coordinamos tu clase de prueba.";
 
 type Pregunta = { pregunta: string; respuesta: string };
 
 function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: boolean, hayAltas = false): Pregunta[] {
   const q: Pregunta[] = [
     { pregunta: "¿Necesito experiencia previa?", respuesta: tipo === "lucha" || tipo === "funcional"
-      ? "No. Podés empezar desde cero: el profe te indica cómo hacer cada ejercicio y se adapta a tu nivel."
-      : "No. Podés empezar desde cero: te explicamos cómo hacer cada ejercicio y arrancás a tu ritmo." },
+      ? "No. Podés empezar desde cero: avisá que es tu primera vez y el profe te indica cómo hacer cada ejercicio."
+      : "No. Podés empezar desde cero: avisá que es tu primera vez y te explican cómo arrancar." },
     { pregunta: "¿Qué tengo que llevar?", respuesta: tipo === "mente_cuerpo"
       ? "Ropa cómoda, una botella de agua y ganas de moverte. Si necesitás algo más para una clase, te avisamos."
       : "Ropa cómoda, zapatillas, una toalla y agua. Si necesitás algo más para una clase, te avisamos." },
@@ -54,7 +54,7 @@ function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: 
   if (hayPlanes) q.push({ pregunta: "¿Cómo me anoto y cómo pago?", respuesta: hayAltas
       ? "Tocá “Quiero ser socio”, elegí tu plan y creá tu cuenta. Después pagás en el gimnasio o por los medios que te muestre la app, y desde ese momento entrás con tu DNI."
       : "Elegí tu plan más abajo y escribinos por WhatsApp o pasá por el gimnasio: te decimos los medios de pago y empezás ese mismo día." });
-  q.push({ pregunta: "¿Puedo ir a cualquier hora?", respuesta: "Depende de tu plan: algunos son libres y otros tienen días u horarios. Mirá abajo los planes y los horarios de apertura y de cada clase, siempre al día." });
+  q.push({ pregunta: "¿En qué días y horarios puedo ir?", respuesta: "Depende de tu plan: algunos son libres y otros tienen días u horarios. Abajo están los planes y los horarios del gimnasio y de cada clase." });
   return q;
 }
 

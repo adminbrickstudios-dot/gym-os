@@ -449,3 +449,13 @@ Decidido por defecto lo más seguro; Mateo lo cambia si quiere otra cosa.
 - **"Hoy" es el de verdad:** el "desde" no puede ser futuro (hoy del gimnasio); en una carga en el pasado la cobertura puede empezar después de la fecha del pago.
 - **Registro:** Control tiene un tipo nuevo "Fechas cambiadas" con quién las cambió, la propuesta que había y las fechas elegidas.
 Respuesta de Mateo: (vacío)
+
+## 12/11 · Z3, Z4, Z6 y Z7 segunda pasada (`carril/z-pulido-2`) · lo que quedó sin hacer y por qué
+Decidido por defecto; nada de esto toca permisos y lo de plata no se arregló.
+- **Pase diario para alguien que no es socio (Z6).** Es un cobro nuevo (plata): hay que crear la persona con nombre y DNI, venderle el pase y dejarlo entrar el mismo día, todo en una operación de la base. Estimación: media jornada con migración. Mientras tanto "Pase diario" de Inicio abre Vender vacío. ¿Se hace como alta rápida de socio + pase, o como visitante sin ficha? Por defecto: no se hizo.
+- **Paginar Retención en la base (Z3/Z6).** `retencion` devuelve todas las listas juntas y la pantalla corta en el servidor de a 50; paginar en la base pide una función nueva con `limite`/`desde` por lista y mantener los contadores de `retencion_resumen`. Estimación: media jornada con migración y prueba en la base. Con 5.000 socios la lista tarda más de lo deseable, pero hoy anda. Por defecto: no se hizo.
+- **Paginar `/admin/gimnasios` (Z3/Z6).** Misma situación con `admin_gimnasios` (la usan el layout y cuatro pantallas más). Estimación: media jornada. Con pocos gimnasios no se nota. Por defecto: no se hizo.
+- **Errores junto al campo.** Hecho en "Otra cosa" de Vender. Quedan el alta online (`hacete-socio/FormAlta.tsx`, dos campos con error de base) y las pantallas de Cobrar y del alta de socio (otro trabajo las edita). Estimación del resto: 3 h.
+- **"Vencen hoy" vs "Vencen y cobrar".** El menú dice lo segundo (lo fija `menu-vd11.test.ts`) y la pantalla y los "Volver a Vencen hoy" de Cobrar lo primero (lo fija `vd-28`). Se dejó como estaba: unificarlo toca `Cobrar.tsx` y esos dos tests.
+- **Reglas 16 a 18 de FLUIDEZ** (red y CPU lentas, nada salta al cargar, el teclado del celular no tapa el botón): son pruebas con Playwright (4G lento, CPU x4, teclado virtual) y no se pueden correr en esta compu; se escribirían como un recorrido nuevo en Actions. Estimación: 1 día. No se hizo.
+Respuesta de Mateo: (vacío)

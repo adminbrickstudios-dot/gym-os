@@ -27,7 +27,7 @@ try {
   chequear(!/Efectivo/.test(await r.locator('button[aria-pressed="true"]').first().innerText()), "sin caja abierta, Vender no arranca en efectivo", "arranca en efectivo");
   await r.locator("main button", { hasText: "Agua 500 ml" }).click();
   await r.locator('button[aria-pressed]:has-text("Efectivo")').click();
-  chequear(await carrito(r).getByText("abrí la caja").count() > 0, "elegir efectivo sin caja: “Para cobrar en efectivo abrí la caja”", "no avisa");
+  chequear(await carrito(r).getByText(/abrí tu turno|necesitás tu turno/).first().waitFor({ timeout: 20000 }).then(() => true, () => false), "elegir efectivo sin caja: “Para cobrar en efectivo abrí tu turno”", "no avisa");
 
   await r.goto(`${G}/panel/caja`);
   await r.locator('input[placeholder="$ 0"]').first().fill("1.000");

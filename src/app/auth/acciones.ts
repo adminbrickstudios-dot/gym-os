@@ -1,6 +1,6 @@
 "use server";
 import { headers } from "next/headers";
-import { sinDetalle } from "@/lib/errores-humanos";
+import { sinDetalle, textoDeBase } from "@/lib/errores-humanos";
 import { createClient } from "@supabase/supabase-js";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { requerir, supabaseAnon, supabaseUrl } from "@/lib/entorno";
@@ -65,7 +65,7 @@ export async function pedirCodigoGoogle(_: EstadoVinculo, form: FormData): Promi
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || null;
   const { clienteServicio } = await import("@/lib/supabase/servicio");
   const { error: limite } = await clienteServicio().rpc("registrar_pedido_codigo", { p_destino: destino ?? `dni:${c.gimnasioId}:${dni}`, p_ip: ip });
-  if (limite) return { error: limite.message, dni };
+  if (limite) return { error: textoDeBase(limite, "Pediste muchos códigos. Esperá un rato y probá de nuevo."), dni };
 
   if (destino) {
     const auth = clienteDeCodigo().auth;

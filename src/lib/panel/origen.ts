@@ -11,8 +11,8 @@ export const LISTAS: Record<string, { nombre: string; propia?: boolean }> = {
   "/panel/caja": { nombre: "Caja" },
   "/panel/clases": { nombre: "Clases" },
   "/panel/eventos": { nombre: "Eventos" },
-  "/panel/planes": { nombre: "Planes y precios" },
-  "/panel/tareas": { nombre: "Tareas" },
+  "/panel/planes": { nombre: "Planes y servicios" },
+  "/panel/tareas": { nombre: "Para hacer hoy" },
   "/panel/campana": { nombre: "Novedades" },
 };
 

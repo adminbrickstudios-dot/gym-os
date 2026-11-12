@@ -116,3 +116,9 @@ export function formatearCelular(telefono: string | null | undefined): string {
   const corte = resto.length - 4;
   return `+54 9 ${d.slice(0, area)} ${resto.slice(0, corte)}-${resto.slice(corte)}`;
 }
+
+/** Para frases como "Le escribió Ana ayer" o "Vino por última vez el lun 12/11": "hoy" y "ayer" solos, el resto con "el". */
+export function fechaConEl(momento: Date | string, zona = ZONA_POR_DEFECTO, ahora: Date = new Date()): string {
+  const h = fechaHumana(momento, zona, ahora);
+  return h === "hoy" || h === "ayer" ? h : `el ${h}`;
+}

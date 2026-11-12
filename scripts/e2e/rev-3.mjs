@@ -77,7 +77,7 @@ try {
   // Al rechazar, la fila dice "✕ Rechazada" y la lista se vuelve a pedir: puede irse antes de verla. Vale que ya no esté pendiente.
   await d.locator("li", { hasText: `Sofía Rev${s}` }).filter({ has: d.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
   await a.goto(`${G}/app/historial`);
-  chequear(await aparece(a.getByText(/rechazado: El monto no coincide/), 60000), "le rechazan la transferencia: en la app ve “rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
+  chequear(await aparece(a.getByText(/rechazado: El monto no coincide/i), 60000), "le rechazan la transferencia: en la app ve “rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
   await a.goto(`${G}/app`);
   const otra = a.locator("section", { hasText: "Pagar por transferencia" });
   chequear(await aparece(otra, 60000), "y la app le vuelve a ofrecer subir otro comprobante", "no puede subir otro");

@@ -31,7 +31,7 @@ describe("frenarEnvioPublico (D49)", () => {
   });
 
   it("si la base dice que se pasó del tope, devuelve su texto", async () => {
-    rpc.mockResolvedValue({ error: { message: "Ya mandaste este formulario varias veces: esperá una hora y probá de nuevo." } });
+    rpc.mockResolvedValue({ error: { code: "P0001", message: "Ya mandaste este formulario varias veces: esperá una hora y probá de nuevo." } });
     expect((await frenarEnvioPublico(formulario({ segundos: "10" }), "alta_online", "x")).error).toMatch(/varias veces/);
   });
 });

@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
 import { SinConexion } from "@/components/ui/SinConexion";
+import { VersionNueva } from "@/components/ui/VersionNueva";
 import { Suspense } from "react";
 import { crearClienteServidor, gimnasioActual } from "@/lib/supabase/servidor";
 import { rpc } from "@/lib/panel/servidor";
@@ -48,7 +49,7 @@ export default async function LayoutApp({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className={`mx-auto max-w-lg px-4 pt-6 ${pestanas ? "pb-28" : "pb-16"}`}><SinConexion quien="socio" /><FranjaMantenimiento />{ayudas && <AyudaPantalla ambito="app" inicial={ayudas} />}{children}</main>
+      <main className={`mx-auto max-w-lg px-4 pt-6 ${pestanas ? "pb-28" : "pb-16"}`}><SinConexion quien="socio" /><VersionNueva /><FranjaMantenimiento />{ayudas && <AyudaPantalla ambito="app" inicial={ayudas} />}{children}</main>
       {pestanas && <Suspense fallback={null}><NavSocio clases={pestanas.clases} rutina={pestanas.rutina} /></Suspense>}
     </div>
   );
