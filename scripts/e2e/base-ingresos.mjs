@@ -62,7 +62,8 @@ try {
   chequear(tiempos[19] < TOPE, `de Enter al aviso: mediana ${tiempos[10]} ms, peor ${tiempos[19]} ms (tope ${TOPE} ms)`, `el peor tardó ${tiempos[19]} ms`);
   const caja = await r.locator("[data-avisos-entrada]").boundingBox();
   const vista = r.viewportSize();
-  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.y > vista.height * 0.4, "los avisos están abajo a la derecha", `caja ${JSON.stringify(caja)}`);
+  // D40 los pedía abajo a la derecha; D56 y el pulido (Z5-Z7) los subieron a la esquina de arriba, a la izquierda del panel de últimas entradas, para que no tapen el botón de Entrada ni la barra fija (PREGUNTAS.md, F8.1). Se prueba el lugar que tienen hoy: a la derecha, dentro de la pantalla.
+  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.x + caja.width <= vista.width && caja.y >= 0 && caja.y + caja.height <= vista.height, "los avisos están a la derecha y dentro de la pantalla, sin tapar el botón de Entrada (D56)", `caja ${JSON.stringify(caja)}`);
   chequear((await r.locator("[data-aviso-entrada]").count()) <= 3, "se apilan de a 3 como mucho", "hay más de 3 avisos");
 
   // Un rojo: se toca → panel lateral → COBRAR AHORA / Dejar pasar igual

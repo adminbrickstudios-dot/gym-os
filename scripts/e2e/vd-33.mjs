@@ -127,7 +127,8 @@ try {
   await normal.goto(`${G}/ingresar`);
   const anim = (p) => p.evaluate(() => [getComputedStyle(document.querySelector("[data-ingreso]"), "::before").animationName, getComputedStyle(document.querySelector(".ingreso-logo")).animationName]);
   const [fondoN, logoN] = await anim(normal);
-  chequear(fondoN !== "none" && logoN !== "none", "con movimiento normal: el fondo y el logo se animan", `fondo ${fondoN}, logo ${logoN}`);
+  // El pulido (Z5-Z7: "sin vidrio ni degradé") sacó el fondo animado del ingreso; con movimiento normal se anima solo el logo.
+  chequear(logoN !== "none", "con movimiento normal: el logo se anima", `fondo ${fondoN}, logo ${logoN}`);
   const quieto = await pagina(b, COMPU, { reducedMotion: "reduce" });
   await quieto.goto(`${G}/ingresar`);
   const [fondoR, logoR] = await anim(quieto);
