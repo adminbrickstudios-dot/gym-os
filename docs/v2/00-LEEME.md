@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/00-LEEME.md en qué manda: desde el 07/11 manda docs/base/ (la lista es docs/base/RECTA-FINAL.md y el estado de cada función, docs/base/ESTADO-GENERAL.md). Esto describe lo construido de Gym OS v2; donde choque con docs/base/, gana docs/base/.
+
 # Gym OS v2 — dueño, recepción y socio
 
 Pedido de Mateo del 05/11/2026. Es la especificación de lo que se codea

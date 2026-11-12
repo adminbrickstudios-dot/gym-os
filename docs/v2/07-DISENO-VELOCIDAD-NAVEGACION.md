@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/DISENO.md (vidrio, sombras y esquinas: se sacaron), docs/base/VELOCIDAD.md y docs/base/FLUIDEZ.md (velocidad y fluidez) en lo que se contradiga; lo que no choca sigue valiendo.
+
 # 07 · Diseño, velocidad y navegación
 
 ## Diseño v2

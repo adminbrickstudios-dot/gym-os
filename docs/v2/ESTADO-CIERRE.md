@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/PROGRESO.md (el estado vigente, en "DÓNDE QUEDÉ") y docs/base/ESTADO-GENERAL.md (qué está hecho, publicado y qué falta). Esto es la memoria del cierre de v2 del 06/11, solo historia.
+
 # Estado del cierre (memoria del agente)
 
 Rama de trabajo: `cierre/2026-11-06` (sale de `origin/noche/2026-11-05`). Si se compacta la conversación: releer esto + `CIERRE.md`.

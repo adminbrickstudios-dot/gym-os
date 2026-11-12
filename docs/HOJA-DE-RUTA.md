@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/RECTA-FINAL.md en el **orden** de lo que se hace (la lista que manda) y por docs/base/ESTADO-GENERAL.md en el estado de cada función; los ítems de la COLA sin tildar se reconcilian en el ítem Q4 de RECTA-FINAL. Esta hoja sigue valiendo por las decisiones de Mateo y el detalle por panel.
+
 # Gym OS — Hoja de ruta, panel por panel
 
 Este archivo manda sobre **en qué orden** se hace. **Qué** se hace (cada panel,

@@ -1,5 +1,7 @@
 # Estado: zona dueño y super admin (revisión de todo lo viejo, 11/11)
 
+> **12/11:** las tres listas vigentes (publicado, sin publicar, falta) están en `docs/base/ESTADO-GENERAL.md`; este archivo es el detalle de la revisión del 11/11 y, donde difiera, manda `ESTADO-GENERAL.md` (se escribió antes del PR #16 y de los cierres de F4, F5 y Z).
+
 Rama `carril/rev-dueno`, salida de `base/2026-11-07`. Se revisó función por función contra `PEDIDO-ORIGINAL.md`, `AJUSTES-0911-NOCHE.md`, `docs/v2/` (03, 06, 10), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md`, `PULIDO.md`, `FLUIDEZ.md` y `DISENO.md`. Todo lo probado ejecutando fue en el gimnasio demo; nunca en Temple Gym.
 
 Cómo leer las tablas:

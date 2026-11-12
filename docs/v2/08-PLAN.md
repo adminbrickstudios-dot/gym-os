@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/RECTA-FINAL.md en el orden y el estado de los ítems (los VD-* sin tildar están reconciliados en docs/base/ESTADO-GENERAL.md, lista 3.5, ítem Q4). Esto queda como la descripción de cada VD-*.
+
 # 08 · El plan: ítems VD-* en orden
 
 Mismo formato que la COLA de `docs/HOJA-DE-RUTA.md` (bloque 20). Cada ítem:

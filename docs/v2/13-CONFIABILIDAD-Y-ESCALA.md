@@ -1,3 +1,5 @@
+> Reemplazado por docs/base/SUPER-ADMIN.md (SA-10: segundo factor obligatorio en /admin), docs/base/ESCALA.md y docs/base/COPIAS.md (escala, copias y restaurar) en lo que se contradiga; lo que no choca sigue valiendo.
+
 # 13 · Que nunca se rompa, nada pase dos veces y aguante miles
 
 Mateo: "que nada se pueda hacer dos veces, que nada se rompa, que todo se
