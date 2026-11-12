@@ -45,7 +45,7 @@ export function Editor({ id, inicial, ejercicios }: { id: string | null; inicial
     <div className="space-y-8" data-editor-rutina>
       <BorradorDeEstado clave={claveBorrador} valor={estadoBorrador} aplicar={traerBorrador} />
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="space-y-1"><span className="etiqueta">Nombre</span><input className="campo" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={80} placeholder="Fuerza 3 días" /></label>
+        <label className="space-y-1"><span className="etiqueta">Nombre</span><input className="campo" autoFocus={!id} value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={80} placeholder="Fuerza 3 días" /></label>
         <label className="space-y-1"><span className="etiqueta">Para quién o para qué (opcional)</span><input className="campo" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} maxLength={300} placeholder="Principiantes, hipertrofia…" /></label>
       </div>
       {Array.from({ length: dias }, (_, i) => i + 1).map((dia) => {

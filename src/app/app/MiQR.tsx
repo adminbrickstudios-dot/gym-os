@@ -4,7 +4,6 @@
 // Sin señal: reintenta cada pocos segundos; al volver a la app (pantalla bloqueada, otra pestaña) renueva en el momento;
 // si ya venció y no se pudo renovar, no deja a la vista un QR que no sirve y avisa qué hacer.
 import { useEffect, useRef, useState } from "react";
-import QRCode from "qrcode";
 import { codigoQR } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 
@@ -54,7 +53,8 @@ export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; soc
 
   useEffect(() => {
     let vivo = true;
-    QRCode.toString(qr.codigo, { type: "svg", margin: 1, errorCorrectionLevel: "M" }).then((s) => { if (vivo) setSvg(s); });
+    // F0.5: la librería del QR se baja aparte (no pesa en el primer JS del Inicio).
+    import("qrcode").then(({ default: QRCode }) => QRCode.toString(qr.codigo, { type: "svg", margin: 1, errorCorrectionLevel: "M" })).then((s) => { if (vivo) setSvg(s); });
     const vence = Date.parse(qr.vence_en);
     const tic = setInterval(() => setQuedan(Math.max(0, Math.ceil((vence - Date.now()) / 1000))), 500);
     setQuedan(Math.max(0, Math.ceil((vence - Date.now()) / 1000)));

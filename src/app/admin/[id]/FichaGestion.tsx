@@ -1,6 +1,5 @@
 "use client";
 import { useRouter } from "next/navigation";
-import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { useConfirmar } from "@/components/ui/useConfirmar";
@@ -11,7 +10,7 @@ const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora
 /** QR para imprimir: el de la página del gimnasio. */
 export function QrGimnasio({ url, nombre }: { url: string; nombre: string }) {
   const [svg, setSvg] = useState<string | null>(null);
-  useEffect(() => { void QRCode.toString(url, { type: "svg", margin: 1 }).then(setSvg); }, [url]);
+  useEffect(() => { void import("qrcode").then(({ default: QRCode }) => QRCode.toString(url, { type: "svg", margin: 1 })).then(setSvg); }, [url]);
   if (!svg) return null;
   return (
     <div className="tarjeta p-4 space-y-2 print:border-0" data-qr-gimnasio>

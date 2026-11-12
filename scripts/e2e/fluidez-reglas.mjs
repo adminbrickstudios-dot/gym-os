@@ -75,7 +75,6 @@ try {
   // ── Reglas 7 y 8: borrador, conservar lo escrito, error junto al campo ───────
   if (SOLO.has("borrador")) {
     const p2 = await pagina(b, COMPU);
-    p2.on("dialog", (d) => d.accept());
     await entrar(p2, "duena@ejemplo.invalid", undefined, BASE);
     const borrarBorradores = () => p2.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith("base:borrador:")) localStorage.removeItem(k); });
     const seguir = async (que) => {
@@ -177,6 +176,8 @@ try {
     await conSalida("/panel/esta-pantalla-no-existe", "una dirección del panel que no existe");
     await p4.context().close();
   }
+} catch (e) {
+  falla(`el recorrido se cortó: ${String(e.message).slice(0, 300).replace(/\s+/g, " ")}`);
 } finally {
   await b.close();
 }
