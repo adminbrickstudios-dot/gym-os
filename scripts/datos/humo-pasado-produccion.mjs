@@ -30,15 +30,15 @@ try {
   // Una caja y un turno abiertos dentro de la transacción (se revierten).
   const [caja] = await q(`insert into public.cajas (gimnasio_id, sede_id, nombre) values ($1,$2,'Humo') returning id`, [g.id, sede.id]);
   const [turno] = await q(`insert into public.turnos_caja (gimnasio_id, caja_id, abierto_por, abierto_en, monto_inicial) values ($1,$2,$3, now(), 0) returning id`, [g.id, caja.id, dueno.id]);
-  const medios = async () => (await q(`select public.cobros_de_turnos(array[$1]::uuid[]) as r`, [turno.id]))[0].r;
-  const antes = JSON.stringify(await medios());
-
-  const [{ d20 }] = await q(`select (privado.dia_local(now(), $1) - 20)::text as d20`, [g.zona_horaria]);
   const como = async (fn) => {
     await db.query("set local role authenticated");
     await q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: dueno.usuario_id, role: "authenticated" })]);
     try { return await fn(); } finally { await db.query("reset role"); }
   };
+  const medios = () => como(async () => (await q(`select public.cobros_de_turnos(array[$1]::uuid[]) as r`, [turno.id]))[0].r);
+  const antes = JSON.stringify(await medios());
+
+  const [{ d20 }] = await q(`select (privado.dia_local(now(), $1) - 20)::text as d20`, [g.zona_horaria]);
   const dni = String(90000000 + Math.floor(Math.random() * 9999999));
   const r = await como(async () => (await q(`select public.alta_socio_pasado($1, $2, $3::jsonb, $4, $5::date, $6::jsonb) as r`,
     [g.id, sede.id, JSON.stringify({ nombre: "Humo", apellido: "Pasado", dni }), plan.id, d20, JSON.stringify([{ fecha: d20, monto: "25000", medio: "transferencia" }])]))[0].r);
