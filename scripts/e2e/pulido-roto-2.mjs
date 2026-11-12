@@ -59,6 +59,9 @@ const db = new pg.Client({ connectionString: url });
 await db.connect();
 try {
   const [{ zona }] = (await db.query(`select zona_horaria as zona from public.gimnasios where slug = 'demo'`)).rows;
+  const tel = async (apellido) => (await db.query(`select regexp_replace(s.telefono, '\\D', '', 'g') as t from public.socios s join public.gimnasios g on g.id = s.gimnasio_id
+                                                   where g.slug = 'demo' and s.nombre = 'Testigo' and s.apellido = $1`, [apellido])).rows[0].t;
+  const [telPack, telCumple, telSin, telAl, telPor] = await Promise.all(["Con Pack", "Cumpleañero", "Sin Pago", "Al Día", "Por Vencer"].map(tel));
 
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
@@ -67,18 +70,19 @@ try {
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 60000 });
-  await demorar(r, (c) => c.includes("Testigo Al"), 4000);
-  await buscar.fill("Testigo Al");
+  // (se busca por el celular entero: la búsqueda por nombre es tolerante y trae a todos los “Testigo”)
+  await demorar(r, (c) => c.includes(telPack), 4000);
+  await buscar.fill(telPack);
   await r.waitForTimeout(700);                    // el pedido lento ya salió
-  await buscar.fill("Testigo Sin");
-  await r.locator("ul button.fila", { hasText: "Sin Pago" }).first().waitFor({ timeout: 30000 });
+  await buscar.fill(telCumple);
+  await r.locator("ul button.fila", { hasText: "Cumpleañero" }).first().waitFor({ timeout: 30000 });
   await r.waitForTimeout(5000);                   // y ahora llega el viejo
   let filas = (await r.locator("ul button.fila").allInnerTexts()).join(" | ");
-  chequear(/Sin Pago/.test(filas) && !/Al Día/.test(filas), "Entrada: la respuesta vieja (“Testigo Al”) llegó tarde y no pisó la lista de “Testigo Sin”", `la lista quedó: ${filas.slice(0, 160)}`);
+  chequear(/Cumpleañero/.test(filas) && !/Con Pack/.test(filas), "Entrada: la respuesta vieja (Con Pack) llegó tarde y no pisó la lista de la nueva (Cumpleañero)", `la lista quedó: ${filas.slice(0, 160)}`);
   await r.unroute(/\/panel\//);
 
   // ── 2 y 3. El veredicto: el rojo con sus íconos, y el error de anotar adentro ──
-  await buscar.fill("Testigo Sin");
+  await buscar.fill(telSin);
   await r.locator("ul button.fila", { hasText: "Sin Pago" }).first().click();
   const ver = r.locator("[data-veredicto]");
   await ver.waitFor({ timeout: 30000 });
@@ -94,7 +98,7 @@ try {
   await r.keyboard.press("Escape");
   await ver.waitFor({ state: "detached", timeout: 10000 });
 
-  await buscar.fill("Testigo Al");
+  await buscar.fill(telAl);
   await r.locator("ul button.fila", { hasText: "Al Día" }).first().click();
   await ver.waitFor({ timeout: 30000 });
   chequear(await ver.getAttribute("data-veredicto") === "verde", "Testigo Al Día da el veredicto verde", `dio ${await ver.getAttribute("data-veredicto")}`);
@@ -153,17 +157,17 @@ try {
   await campo.waitFor({ timeout: 60000 });
 
   // 1b. Vender: la búsqueda vieja no pisa a la nueva; un error de la búsqueda no se dice “No está”.
-  await demorar(k, (c) => c.includes("Testigo Al"), 4000);
-  await campo.fill("Testigo Al");
+  await demorar(k, (c) => c.includes(telPack), 4000);
+  await campo.fill(telPack);
   await k.waitForTimeout(700);
-  await campo.fill("Testigo Sin");
-  await k.locator("button.fila", { hasText: "Sin Pago" }).first().waitFor({ timeout: 30000 });
+  await campo.fill(telCumple);
+  await k.locator("button.fila", { hasText: "Cumpleañero" }).first().waitFor({ timeout: 30000 });
   await k.waitForTimeout(5000);
   filas = (await k.locator("button.fila").allInnerTexts()).join(" | ");
-  chequear(/Sin Pago/.test(filas) && !/Al Día/.test(filas), "Vender: la respuesta vieja llegó tarde y no pisó la lista", `la lista quedó: ${filas.slice(0, 160)}`);
+  chequear(/Cumpleañero/.test(filas) && !/Con Pack/.test(filas), "Vender: la respuesta vieja llegó tarde y no pisó la lista", `la lista quedó: ${filas.slice(0, 160)}`);
   await k.unroute(/\/panel\//);
   await cortar(k, () => true);
-  await campo.fill("Testigo Por");
+  await campo.fill(telPor);
   await k.locator('[role="alert"]:has-text("No se pudo buscar")').waitFor({ timeout: 30000 });
   chequear(await k.getByText("No está.").count() === 0, "Vender: si la búsqueda falla dice “No se pudo buscar…”, no “No está”", "dijo “No está” con la búsqueda caída");
   await k.unroute(/\/panel\//);
