@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Aviso } from "@/components/panel/Marco";
 import { ErrorDatos } from "@/lib/panel/servidor";
 import { Reintentar } from "@/components/ui/Reintentar";
+import { VolverOInicio } from "@/components/ui/VolverOInicio";
 import { PaginaHidratada } from "@/components/Hidratado";
 
 /**
@@ -17,10 +18,10 @@ export async function intentar(pantalla: () => Promise<ReactNode>): Promise<Reac
     return <>{await pantalla()}<PaginaHidratada /></>;
   } catch (e) {
     if (!(e instanceof ErrorDatos)) throw e;
-    if (e.codigo === "apagada") return <Aviso icono="grilla" titulo="Esta sección está apagada"><p>{e.message}</p></Aviso>;
-    if (e.codigo === "demora") return <Aviso icono="reloj-arena" titulo="La base está tardando"><p>{e.message}</p><Reintentar /></Aviso>;
+    if (e.codigo === "apagada") return <Aviso icono="grilla" titulo="Esta sección está apagada"><p>{e.message}</p><VolverOInicio /></Aviso>;
+    if (e.codigo === "demora") return <Aviso icono="reloj-arena" titulo="La base está tardando"><p>{e.message}</p><Reintentar /><VolverOInicio /></Aviso>;
     return e.sinPermiso
-      ? <Aviso icono="candado" titulo="No tenés acceso a esta pantalla"><p>{e.message}</p></Aviso>
-      : <Aviso titulo="No se pudo cargar esta pantalla"><p>{e.message}</p></Aviso>;
+      ? <Aviso icono="candado" titulo="No tenés acceso a esta pantalla"><p>{e.message}</p><VolverOInicio /></Aviso>
+      : <Aviso titulo="No se pudo cargar esta pantalla"><p>{e.message}</p><VolverOInicio /></Aviso>;
   }
 }
