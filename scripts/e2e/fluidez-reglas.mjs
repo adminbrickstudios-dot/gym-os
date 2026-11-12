@@ -25,11 +25,13 @@ const PERFILES = {
 async function limitar(p, perfil) {
   const cdp = await p.context().newCDPSession(p);
   await cdp.send("Network.enable");
+  await cdp.send("Network.setCacheDisabled", { cacheDisabled: true });   // primera visita: nada guardado de antes
   await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: perfil.latencia, downloadThroughput: perfil.bajada, uploadThroughput: perfil.subida });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: perfil.cpu });
   return async () => {
     await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    await cdp.send("Network.setCacheDisabled", { cacheDisabled: false });
   };
 }
 
@@ -169,7 +171,7 @@ try {
       await p4.goto(`${BASE}${ruta}`).catch(() => {});
       const t = await p4.locator("body").innerText();
       const volver = (await p4.getByRole("button", { name: /Volver/ }).count()) + (await p4.getByRole("link", { name: /Volver/ }).count());
-      const inicio = (await p4.getByRole("link", { name: /inicio|Entrar|Panel/i }).count());
+      const inicio = (await p4.getByRole("link", { name: /inicio|Ir a la p|Entrar|Panel/i }).count());
       chequear(volver > 0 && inicio > 0, `${que}: ofrece Volver e Ir al inicio`, `${que}: sin salida (Volver ${volver}, inicio ${inicio}): ${t.replace(/\s+/g, " ").slice(0, 140)}`);
     };
     await conSalida("/panel/rutinas/socio", "una pantalla con un dato que falta (rutinas sin ?socio)");

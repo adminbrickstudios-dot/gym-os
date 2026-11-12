@@ -4,6 +4,7 @@ import { Aviso } from "@/components/panel/Marco";
 import { traerLanding } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
 import { Icono } from "@/components/ui/Icono";
+import { VolverAtras } from "@/components/ui/VolverAtras";
 import { estiloTipografia } from "@/lib/landing-estilo";
 
 /** WEB-05 · La 404 de la dirección de un gimnasio lleva su nombre y su color, y vuelve a SU página (no a la de la plataforma). */
@@ -21,6 +22,7 @@ export default async function NoEncontrada() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/" className="boton boton-principal text-lg px-8">Ir a la página de {landing.marca.nombre}</Link>
             <a href="/ingresar?modo=socio" className="boton text-lg px-8">Soy socio</a>
+            <VolverAtras className="boton text-lg px-8" />
           </div>
         </div>
       </main>
@@ -31,6 +33,7 @@ export default async function NoEncontrada() {
       <Aviso emoji="buscar" titulo="No encontramos esta página">
         <p>La dirección no existe o ya no está.</p>
         <div className="flex flex-wrap gap-2 mt-6">
+          <VolverAtras className="boton" />
           <Link href="/" className="boton boton-principal"><Icono nombre="inicio" /> Ir al inicio</Link>
         </div>
       </Aviso>

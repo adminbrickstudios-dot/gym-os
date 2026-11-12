@@ -50,7 +50,14 @@ describe("FLUIDEZ regla 15: errores con salida", () => {
     const sin = errores.filter((p) => !/PantallaError|Volver/.test(readFileSync(p, "utf8"))).map(rel);
     expect(sin).toEqual([]);
   });
-  it("hay una página de 'no encontrado'", () => expect(existe(APP, "not-found.tsx")).toBe(true));
+  it("hay una página de 'no encontrado' con Volver", () => {
+    expect(existe(APP, "not-found.tsx")).toBe(true);
+    expect(readFileSync(join(APP, "not-found.tsx"), "utf8")).toMatch(/VolverAtras/);
+  });
+  it("los avisos de error de intentar() (sin permiso, apagada, dato inválido) traen Volver e Ir al inicio", () => {
+    const t = readFileSync(join(process.cwd(), "src", "lib", "panel", "intentar.tsx"), "utf8");
+    expect((t.match(/<SalidaError/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
 });
 
 describe("FLUIDEZ regla 8: teclado numérico en DNI, celular y monto", () => {
