@@ -4,7 +4,7 @@
 //   que abre la hoja Cobrar (no otra pantalla); #20 las notas del socio se ven en el panel lateral (con la función "más datos del panel" prendida).
 // Prende "panel_pago" para la prueba y la deja apagada al terminar (el demo vuelve a como estaba).
 //   node scripts/e2e/f45-detalles.mjs     (con scripts/local/levantar.sh corriendo)
-import { COMPU, GIMNASIO, chequear, entrar, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { COMPU, GIMNASIO, chequear, entrar, navegador, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();

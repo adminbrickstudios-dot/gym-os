@@ -142,7 +142,7 @@ toque plata se prueba con números fijos antes de publicar.
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | ❌ |
+| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | 🟡 carril/f4-f5 (12/11): lo viejo actualizado (#16, #38, #39, #40, #42, #46) y 60 de las 70 filas en ✅, cada una con su prueba y su corrida (43128173940, 43130787225, 43131873292, 43132608358). Quedan en 🟡 las filas 13, 21, 24, 25, 26, 33, 43, 58, 64 y 69 (plata, permisos, algo manual en un aparato o trabajo mediano): cada una dice por qué en `DETALLES-70.md` y en `PREGUNTAS.md` |
 
 ## Fase 5 · Lo que faltaba de todo lo que pidió Mateo
 
@@ -153,7 +153,7 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | 🟡 carril/b-super: lo de mi zona está (FA-20 `/estado` escrito, FA-24 hecho); FA-12 y FA-23 son de la app del socio; el resto de A, C y D |
+| F5.1 | Cada ítem de `FALTANTES.md` | `FALTANTES.md` | 🟡 carril/f4-f5 (12/11): las 24 filas confirmadas contra el código y marcadas con su prueba; hechos y apagados por defecto: borrador del alta (FA-17), cuándo toca pagar y notas en el panel lateral (FA-1), horarios pico (detalle 68). Grandes con estimación en `FALTANTES.md`: FA-13, FA-19, FA-6, FA-12 y FA-23 |
 
 ## Fase 6 · Lo chico de antes
 
