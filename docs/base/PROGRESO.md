@@ -36,6 +36,9 @@ Si cargás `COPIA_CLAVE`, el loop hace los pasos 2 a 6 solo.
 - Humo en producción: ⛔ falla por faltar los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (corrida 43031908841). Chequeo sin sesión: `/` 200, `/ingresar` 200, `/g/demo` 200, `/api/salud` 200. **Mateo: cargá esos dos secretos en GitHub y corré Actions → Humo producción.**
 - Falta publicar: `20261111110000_recepcion_inactividad.sql` (C6) y lo que siga.
 
+## PUBLICADO EL 12/11 (17:10, por Claude desde el chat)
+Migraciones de `publicar/base-hoy` aplicadas en producción (corrida 43295889879; **sin copia previa**, con permiso de Mateo; prevuelo y chequeos contra la base real en verde), PR #16 mergeado (164d21e) y deploy de Vercel en verde. Entró todo lo que había en `base/2026-11-07` al 12/11 01:12: H1, H2/C10, H3, H6, la fase C, el super admin, lo hecho del pulido. El e2e `n-nuevas` (fase N) no pasaba: lo de la fase N tiene que quedar apagado para Temple Gym hasta pasar. El workflow "Base de datos" tiene ahora `sin_copia` (solo con la frase "SIN COPIA"); por defecto sigue pidiendo la copia.
+
 ## DÓNDE QUEDÉ (11/11, noche)
 - ✅ hoy: H1, H2/C10, H3, H6, F1.9, F1.5, F1.6, F2.x, F3.1, F7.1, F9.1, C1-C10, U5, P1-P8b. 🟡: H3b, H4, H5, H7, F3.2. ⛔: C8/H5 (COPIA_CLAVE), N0 (proyecto ensayo), F0.1 (secretos).
 - Publicación lista en `publicar/base-hoy` (prevuelo 43123213163, 11 migraciones); **no se aplica sin COPIA_CLAVE** (pasos arriba).

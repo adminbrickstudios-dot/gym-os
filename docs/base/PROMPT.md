@@ -130,6 +130,8 @@ Las de `CLAUDE.md`, siempre. Además:
 
 ## Publicar
 
+**Nunca entre las 16 y las 22 h** (hora del gimnasio): es la hora pico de Temple Gym. Fuera de ese horario, o un arreglo urgente de algo roto.
+
 Solo si **no** existe `.claude/BASE_CON_DATOS_REALES` y Actions → Base de
 datos → `estado` no muestra ningún gimnasio real (sin `[demo]`):
 
