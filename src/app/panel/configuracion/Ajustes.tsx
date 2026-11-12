@@ -497,7 +497,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
             )}
             {msjPagina.error && <Mensaje tipo="error">{msjPagina.error}</Mensaje>}
             {msjPagina.ok && <Mensaje tipo="exito">{msjPagina.ok}</Mensaje>}
-            <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y precios.</p>
+            <p className="text-sm texto-tenue">El contacto y la dirección salen de la pestaña Gimnasio; los precios, de Planes y servicios.</p>
           </Tarjeta>
           {autoservicio && (
             <Tarjeta icono="celular" titulo="Lo que hacen los socios solos" ancla="autoservicio" ayuda="Anotarse desde tu página y cambiar de plan o comprar pases desde la app.">

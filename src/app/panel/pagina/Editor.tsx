@@ -35,7 +35,7 @@ const ICONO_SECCION: Record<Seccion["tipo"], string> = {
 };
 /** Lo que no se edita acá, y dónde se cambia. */
 const DE_OTRO_LADO: Partial<Record<Seccion["tipo"], string>> = {
-  planes: "Los planes y precios salen de Planes y precios (los que tienen “mostrar en la página”).",
+  planes: "Los planes y precios salen de Planes y servicios (los que tienen “mostrar en la página”).",
   horarios: "Los horarios salen de Configuración → Horarios. Si hay clases en la agenda, se muestran las de los próximos 7 días.",
   galeria: "Las fotos se suben acá arriba, en Imágenes.",
   ubicacion: "Las direcciones salen de Configuración → Gimnasio (sedes).",

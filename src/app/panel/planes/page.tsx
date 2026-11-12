@@ -9,7 +9,7 @@ import type { AjustesPlanes, Convenio, Servicio, Stock } from "./acciones";
 import { Convenios } from "./Convenios";
 import { Icono } from "@/components/ui/Icono";
 
-export const metadata: Metadata = { title: "Planes y precios" };
+export const metadata: Metadata = { title: "Planes y servicios" };
 
 export default async function Planes() {
   return intentar(async () => {
@@ -35,7 +35,7 @@ export default async function Planes() {
     ]) : [[], {}];
     return (
       <>
-        <Encabezado icono="etiqueta" titulo="Planes y precios"
+        <Encabezado icono="etiqueta" titulo="Planes y servicios"
           accion={<span className="flex flex-wrap gap-2">
             {planes.some((p) => p.activo && p.precio != null) && <Link href="/panel/planes/aumento" className="boton"><Icono nombre="tendencia" /> Aumento de precios</Link>}
             <Link href="/panel/cupones" className="boton" data-ir-cupones><Icono nombre="etiqueta" /> Cupones</Link>

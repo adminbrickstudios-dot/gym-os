@@ -1,7 +1,6 @@
 "use server";
-import { textoDeBase } from "@/lib/errores-humanos";
 import { headers } from "next/headers";
-import { sinDetalle } from "@/lib/errores-humanos";
+import { sinDetalle, textoDeBase } from "@/lib/errores-humanos";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
 import { armarLinkAyuda, TEXTO_CODIGO_MALO, TEXTO_DEMASIADOS_INTENTOS, TEXTO_DESACTIVADA, TEXTO_CREDENCIALES_MALAS, TEXTO_SIN_CONEXION, TEXTO_SIN_CONFIRMAR, TEXTO_SIN_GIMNASIO, demasiadosIntentos, destinoTrasEntrar, motivoDeEntrada, sinConexion } from "./destino";

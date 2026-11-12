@@ -1,7 +1,6 @@
 "use server";
-import { textoDeBase } from "@/lib/errores-humanos";
 import { headers } from "next/headers";
-import { sinDetalle } from "@/lib/errores-humanos";
+import { sinDetalle, textoDeBase } from "@/lib/errores-humanos";
 import { createClient } from "@supabase/supabase-js";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { requerir, supabaseAnon, supabaseUrl } from "@/lib/entorno";
