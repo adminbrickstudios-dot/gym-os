@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 332 funciones piden un rol del equipo con `privado.exigir_equipo`; 407 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 337 funciones piden un rol del equipo con `privado.exigir_equipo`; 409 no (las decide la propia función con la sesión, el socio o RLS); 29 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -45,6 +45,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `cajas_olvidadas` | ✓ | ✓ | ✓ | — |
 | `cajas_para_revisar` | ✓ | ✓ | — | — |
 | `calcular_devolucion_baja` | ✓ | ✓ | ✓ | — |
+| `cambios_restaurables` | ✓ | ✓ | — | — |
 | `campana` | ✓ | ✓ | ✓ | ✓ |
 | `campana_control` | ✓ | ✓ | — | — |
 | `campana_panel` | ✓ | ✓ | ✓ | ✓ |
@@ -129,6 +130,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `foto_socio` | ✓ | ✓ | ✓ | ✓ |
 | `foto_socio_permitida_gimnasio` | ✓ | ✓ | — | — |
 | `fotos_de_clase` | ✓ | ✓ | ✓ | ✓ |
+| `funciones_del_gimnasio` | ✓ | ✓ | — | — |
 | `funciones_nuevas_gimnasio` | ✓ | ✓ | ✓ | ✓ |
 | `gastos_mes` | ✓ | — | — | — |
 | `grados_panel` | ✓ | ✓ | ✓ | ✓ |
@@ -191,6 +193,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_socio` | ✓ | ✓ | ✓ | — |
 | `guardar_tarea_auto` | ✓ | ✓ | — | — |
 | `guardar_tema_usuario` | ✓ | ✓ | ✓ | ✓ |
+| `guardar_terminos` | ✓ | — | — | — |
 | `guardar_video_portada` | ✓ | — | — | — |
 | `guardar_vuelto_efectivo` | ✓ | — | — | — |
 | `habilitar_emergencia_puerta` | ✓ | — | — | — |
@@ -297,6 +300,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `remito_stock` | ✓ | ✓ | — | — |
 | `resolver_pedido_datos` | ✓ | ✓ | — | — |
 | `resolver_pedido_pausa` | ✓ | ✓ | — | — |
+| `restaurar_cambio_configuracion` | ✓ | — | — | — |
 | `restaurar_mensaje` | ✓ | ✓ | — | — |
 | `resumen_dueno` | ✓ | ✓ | — | — |
 | `retencion_numeros` | ✓ | ✓ | — | — |
@@ -321,6 +325,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `tareas_auto_config` | ✓ | ✓ | — | — |
 | `tareas_panel` | ✓ | ✓ | ✓ | ✓ |
 | `tasa_de_cobro` | ✓ | ✓ | — | — |
+| `terminos_propios` | ✓ | ✓ | — | — |
 | `ticket_movimiento` | ✓ | ✓ | — | — |
 | `tildar_checklist` | ✓ | ✓ | ✓ | — |
 | `turnos_socio` | ✓ | ✓ | ✓ | ✓ |
@@ -381,6 +386,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_exportar_gimnasio`
 - `admin_exportar_socio`
 - `admin_ficha_extra`
+- `admin_funcion_gimnasio`
 - `admin_funciones_prueba`
 - `admin_gimnasio`
 - `admin_gimnasios`
@@ -737,6 +743,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `suscripcion_push`
 - `suspender_socio`
 - `terminar_gasto_fijo`
+- `terminos_publicos (también anónimo)`
 - `tomar_asistencia`
 - `tv_estado (también anónimo)`
 - `usa_qr_pared`

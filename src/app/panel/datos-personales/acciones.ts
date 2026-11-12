@@ -9,6 +9,13 @@ export async function guardarPolitica(texto: string): Promise<{ error?: string }
   catch (e) { return { error: (e as Error).message }; }
 }
 
+/** WEB-06: los términos y condiciones del gimnasio. Se guardan sin publicar; publicar es una decisión del dueño. */
+export async function guardarTerminos(texto: string, publicado: boolean): Promise<{ error?: string }> {
+  const panel = await contextoPanel();
+  try { await rpc("guardar_terminos", { p_gimnasio_id: panel.gimnasio.id, p_texto: texto, p_publicado: publicado }); revalidatePath("/panel/datos-personales"); return {}; }
+  catch (e) { return { error: (e as Error).message }; }
+}
+
 /** Marcar un pedido del socio (ver, corregir o borrar sus datos) como resuelto, con lo que se hizo. */
 export async function resolverPedido(pedidoId: string, nota: string): Promise<{ error?: string }> {
   await contextoPanel();

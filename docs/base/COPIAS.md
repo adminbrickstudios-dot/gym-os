@@ -81,6 +81,15 @@ script revisado, a mano y con cuidado. Eso se decide en el momento, con el probl
 - Si algún día la base pesa demasiado para el límite de artefactos de GitHub, el cambio es mandar el mismo
   archivo cifrado a un bucket privado (S3 o similar) en vez del artefacto; el cifrado y la restauración no cambian.
 
+## Restaurar probado (F9.7, 12/11)
+
+Probado en una base local de prueba (Postgres 16 portable, sin Supabase) con el demo cargado (119 socios, 576 pagos, 571 coberturas, 2.512 ingresos), tratando al demo como gimnasio real para que el conteo no fuera cero:
+1. `node scripts/db/copia.mjs exportar` → un archivo cifrado de unos 650 KB, "Descifrado de prueba: ok".
+2. `scripts/db/restaurar-copia.sh` sobre una base nueva y vacía → "Esquema y datos restaurados" y los ocho conteos (socios, pagos, coberturas e ingresos de cada gimnasio) **coinciden exactos** con los de la copia.
+3. `node scripts/chequeos.mjs` sobre la base restaurada → todo en verde (incluye `socios.cubierto_hasta` guardado = recalculado).
+4. Casos que tienen que fallar y fallan: restaurar sobre una base que ya tiene tablas ("la base destino no está vacía"), con una clave equivocada ("no se pudo descifrar"), y con una dirección de Supabase o de un pooler ("parece ser de Supabase").
+**Todavía no probado** (necesita `COPIA_CLAVE` y `SUPABASE_DB_URL` en los secretos de GitHub, que carga Mateo): la corrida del workflow `copias.yml` contra la base real.
+
 ## Qué está probado y qué no
 
 Probado en una base local con datos del demo: exportar, cifrar, descifrar, restaurar en una base nueva, conteos

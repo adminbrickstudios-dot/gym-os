@@ -4,10 +4,10 @@ import { subdominiosFuncionan } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 
 /** Rutas públicas de un gimnasio que se quedan en la dirección /g/<slug>/…: se sirven con el gimnasio marcado, sin rebotar a la raíz de la plataforma. */
-export const PUBLICAS_DEL_GIMNASIO = ["/ingresar", "/hacete-socio", "/privacidad"] as const;
+export const PUBLICAS_DEL_GIMNASIO = ["/ingresar", "/hacete-socio", "/privacidad", "/terminos"] as const;
 
 /** Rutas de la plataforma que, si ya hay un gimnasio elegido (cookie), se sirven con ese gimnasio: los links relativos de su página siguen andando. */
-export const CON_GIMNASIO_ELEGIDO = ["/hacete-socio", "/privacidad"] as const;
+export const CON_GIMNASIO_ELEGIDO = ["/hacete-socio", "/privacidad", "/terminos"] as const;
 
 export type DeRuta =
   | { tipo: "gimnasio"; slug: string; resto: string | null }   // /g/<slug> o /g/<slug>/<resto>

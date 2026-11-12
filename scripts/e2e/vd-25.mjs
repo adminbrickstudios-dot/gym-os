@@ -4,7 +4,7 @@
 // vez?", planes con precio, horarios, probar y el pie con la reseña → "Quiero probar" crea un Interesado
 // que la recepción ve en Prospectos. En la compu: WhatsApp flotante.
 //   node scripts/e2e/vd-25.mjs     (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -68,6 +68,7 @@ try {
   await f.locator('input[name="nombre"]').fill(NOMBRE);
   await f.locator('input[name="telefono"]').fill(TEL);
   await f.locator('input[name="interes"]').fill("Funcional");
+  await esperarAntiRobot(v);
   await f.locator('button[type="submit"]').click();
   await v.locator("[data-probar-listo]").waitFor({ timeout: 30000 });
   ok("“Quiero probar” dejó los datos");

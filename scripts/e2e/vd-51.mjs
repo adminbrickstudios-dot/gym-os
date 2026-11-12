@@ -6,7 +6,7 @@
 //   node scripts/e2e/vd-51.mjs     (con scripts/local/levantar.sh corriendo)
 // Escrito siguiendo vd-1 y vd-48. El "al día siguiente rojo con Hacete socio" no se puede mirar sin mover el reloj: lo cubre
 // la prueba de base (supabase/pruebas/prueba-gratis.test.mjs, con momentos fijos).
-import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -57,6 +57,7 @@ try {
   await form.locator('input[name="dni"]').fill(dniReserva);
   await form.locator('input[name="telefono"]').fill(celular);
   await capturar(v, "vd51-compu-pagina");
+  await esperarAntiRobot(v);
   await form.locator("button[type=submit]").click();
   await v.locator("[data-reserva-prueba]").waitFor({ timeout: 30000 });
   ok(`el interesado reserva “${opciones[elegida]}” desde la página`);
