@@ -84,6 +84,9 @@ export type ContextoCompleto = {
   panel: PanelGimnasio;
   ver_mensajes?: boolean; fichaje_usa?: boolean;
   abono?: Abono | null; config_entrada?: ConfigEntrada | null; formas_entrada?: string[] | null;
+  /** E8: pausado / baja / demo vencida, y el WhatsApp de ayuda (dueño, encargado, recepción): antes dos viajes más en fila en el layout. */
+  estado_gimnasio?: { pausado: boolean; baja: boolean; demo_vencida: boolean; whatsapp_brik: string | null } | null;
+  contacto_plataforma?: { whatsapp: string | null; mensaje_demo?: string | null } | null;
 };
 export const contextoCompleto = cache(async (): Promise<ContextoCompleto> => {
   const g = await gimnasioActual();

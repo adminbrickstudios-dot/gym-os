@@ -66,7 +66,7 @@ if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r }
 {
   const FIRMAS = {
     "supabase-auth": /GoTrueClient|AuthApiError|AuthSessionMissingError/,
-    "supabase-realtime": /postgres_changes|phx_join|RealtimeChannel/,
+    "supabase-realtime": /phx_join|RealtimeChannel/,   // (no "postgres_changes": esa cadena también la escribe entradas-vivo.ts)
     "supabase-postgrest": /PostgrestError|PostgrestBuilder/,
     "supabase-storage": /StorageApiError|StorageUnknownError/,
     "qrcode": /QRCode|Reed-Solomon|ReedSolomon/,
@@ -90,5 +90,24 @@ if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r }
     const porFirma = {};
     for (const d of detalle) for (const k of d.firmas) porFirma[k] = (porFirma[k] ?? 0) + d.gz;
     console.log("\nKB gzip de los chunks que contienen cada librería (un chunk puede traer varias): " + JSON.stringify(Object.fromEntries(Object.entries(porFirma).map(([k, v]) => [k, +(v / 1024).toFixed(1)]))));
+
+    // Con MEDIR_MAPAS=1 en el build (next.config: productionBrowserSourceMaps) cada chunk trae su mapa: se suma el código ORIGINAL
+    // (sin minificar) que cada paquete o carpeta de la app aporta a los chunks de esta ruta. Es un orden de magnitud, no un gzip exacto.
+    const grupos = new Map();
+    let conMapa = 0;
+    for (const d of detalle) {
+      let mapa; try { mapa = JSON.parse(readFileSync(join(RAIZ, d.f + ".map"), "utf8")); } catch { continue; }
+      conMapa++;
+      (mapa.sources ?? []).forEach((s, i) => {
+        const largo = (mapa.sourcesContent?.[i] ?? "").length;
+        const pk = /node_modules\/((?:@[^/]+\/)?[^/]+)(?!.*node_modules)/.exec(s.replace(/\\/g, "/"));
+        const clave = pk ? `npm: ${pk[1]}` : "app: " + (s.replace(/\\/g, "/").replace(/^.*?\[project\]\//, "").split("/").slice(0, 4).join("/"));
+        grupos.set(clave, (grupos.get(clave) ?? 0) + largo);
+      });
+    }
+    if (conMapa) {
+      console.log(`\nCódigo original por paquete o carpeta en los ${conMapa} chunks de ${ref.ruta} con mapa (KB sin minificar)\n| Origen | KB |\n|---|---:|`);
+      for (const [k, v] of [...grupos].sort((a, b) => b[1] - a[1]).slice(0, 30)) console.log(`| ${k} | ${(v / 1024).toFixed(1)} |`);
+    } else console.log("\n(sin mapas de fuente: el build se hizo sin MEDIR_MAPAS=1)");
   }
 }

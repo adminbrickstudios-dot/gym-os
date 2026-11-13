@@ -31,9 +31,31 @@ for (const rol of ["dueno", "encargado", "recepcion", "profe"]) {
         assert.deepEqual(c.config_entrada, await solo("public.config_entrada", [t.g]));
         assert.deepEqual(c.formas_entrada, await solo("public.formas_de_entrada", [t.g]));
       } else assert.equal("config_entrada" in c, false);
+      // E8: el estado del gimnasio y el contacto vienen en la misma llamada, iguales a sus funciones.
+      assert.deepEqual(c.estado_gimnasio, await solo("public.estado_gimnasio_aviso", [t.g]));
+      if (rol === "profe") assert.equal("contacto_plataforma" in c, false);
+      else assert.deepEqual(c.contacto_plataforma, (await t.q(`select public.contacto_plataforma_publico() r`))[0].r);
     });
   });
 }
+
+test("E8: pausado, dado de baja y demo vencida salen igual que con estado_gimnasio_aviso", async () => {
+  const casos = [
+    `suspension_manual_en = now()`,
+    `suspension_manual_en = null, baja_en = now()`,
+    `baja_en = null, es_demo = true, demo_hasta = now() - interval '1 day'`,
+    `es_demo = false, demo_hasta = null`,
+  ];
+  for (const set of casos) {
+    await t.q(`update public.gimnasios set ${set} where id = $1`, [t.g]);
+    await t.comoUsuario(u.dueno, async () => {
+      const [{ r: c }] = await t.q(`select public.contexto_pantalla($1) r`, [t.g]);
+      const e = await solo("public.estado_gimnasio_aviso", [t.g]);
+      assert.deepEqual(c.estado_gimnasio, e);
+      assert.ok(e && typeof e.pausado === "boolean");
+    });
+  }
+});
 
 test("sin permiso es un error, nunca un contexto vacío; otro gimnasio también", async () => {
   const [{ id }] = await t.q(`insert into auth.users (email) values ($1) returning id`, [`nadie${Math.random()}@ejemplo.invalid`]);

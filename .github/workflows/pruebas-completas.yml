@@ -115,6 +115,7 @@ jobs:
         env:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           SOCIOS_DEMO: ${{ inputs.socios || '300' }}
+          MEDIR_MAPAS: ${{ contains(inputs.solo, 'medir-js') && '1' || '' }}   # E4: mapas de fuente solo al medir el JS
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
