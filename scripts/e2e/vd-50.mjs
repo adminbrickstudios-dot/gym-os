@@ -95,7 +95,12 @@ try {
   const socio2 = await moroso(r, nombre2);
   await abrirCobrar(r, nombre2);
   await abrirCobrar(d, nombre2);
-  await confirmar(r).click();
+  // Diagnóstico (F8.2): si el botón no se deja tocar, se dice por qué (apagado, tapado, otra hoja).
+  await confirmar(r).click({ timeout: 15000 }).catch(async (e) => {
+    const est = await r.evaluate(() => { const b = document.querySelector("[data-cobrar-confirmar]"); return b ? `botón ${b.disabled ? "apagado" : "activo"}: ${b.textContent?.trim()}` : "sin botón"; }).catch(() => "?");
+    const hoja = (await r.locator("[data-cobrar]").first().innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 300);
+    throw new Error(`confirmar(r): ${est} · hoja: ${hoja} · ${String(e.message).split(/\r?\n/)[0]}`);
+  });
   await cobrado(r).waitFor({ timeout: 30000 });
   await confirmar(d).click();
   await d.locator("[data-cobrar-doble]").waitFor({ timeout: 30000 });
