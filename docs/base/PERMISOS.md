@@ -377,12 +377,14 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_cambiar_rol_persona`
 - `admin_cambiar_slug`
 - `admin_cancelar_mantenimiento`
+- `admin_cerrar_sesiones_gimnasio`
 - `admin_clonar_configuracion`
 - `admin_confirmar_cuenta`
 - `admin_crear_demo`
 - `admin_crear_gimnasio`
 - `admin_dar_de_baja`
 - `admin_dar_rol_brik`
+- `admin_datos_fiscales`
 - `admin_demos_vencidas`
 - `admin_entrar_gimnasio`
 - `admin_errores`
@@ -400,6 +402,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_gimnasios`
 - `admin_guardar_ciudad`
 - `admin_guardar_contacto_plataforma`
+- `admin_guardar_datos_fiscales`
 - `admin_guardar_descuento`
 - `admin_guardar_limites_plan`
 - `admin_guardar_link_pago`
@@ -449,6 +452,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_salir_gimnasio`
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
+- `admin_sesiones_gimnasio`
 - `admin_soportes`
 - `admin_tablero`
 - `admin_tamano_tablas`
