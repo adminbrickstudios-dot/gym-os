@@ -30,7 +30,7 @@ import { FaltasSocio, type DetalleFaltas } from "./FaltasSocio";
 import { BotonEntradaFicha } from "./BotonEntradaFicha";
 import { ConstanciaBaja, ModeracionFicha } from "./ModeracionFicha";
 import { Suspense } from "react";
-import { VolverAEntrada } from "@/components/panel/VentanaEntrada";
+import { VolverAEntrada } from "@/components/panel/entrada/VolverAEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
 import { Icono } from "@/components/ui/Icono";

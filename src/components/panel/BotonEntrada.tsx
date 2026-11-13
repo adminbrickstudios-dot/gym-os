@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { EVENTO_ABRIR_ENTRADA } from "./VentanaEntrada";
+import { EVENTO_ABRIR_ENTRADA } from "./entrada/comun";
 import { Icono } from "@/components/ui/Icono";
 
 /**
