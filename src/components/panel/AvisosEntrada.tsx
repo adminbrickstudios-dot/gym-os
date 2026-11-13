@@ -166,7 +166,7 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
   const ocultos = avisos.length - visibles.length;
   return (
     // Abajo a la derecha en la compu (E2), encima de la barrita del DNI si está; en el celular, arriba (abajo tapan la barra y el Cobrar).
-    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 top-[calc(0.75rem+env(safe-area-inset-top))] sm:top-auto sm:bottom-[calc(1rem+var(--barrita-alto,0px))] xl:right-[19rem] flex flex-col gap-2 pointer-events-none"
+    <div className="fixed z-50 right-4 left-4 sm:left-auto sm:w-96 top-[calc(0.75rem+env(safe-area-inset-top))] sm:top-auto sm:bottom-[calc(1rem+var(--barrita-alto,0px))] sm:right-24 flex flex-col gap-2 pointer-events-none"
       data-avisos-entrada={avisos.length} data-avisos-estado={estado} role="region" aria-label="Entradas por la puerta" aria-live="polite">
       {estado === "con_demora" && (
         <p className="pointer-events-auto self-end rounded-full px-3 py-1 text-xs vidrio texto-suave" data-avisos-demora>Avisos con demora</p>
