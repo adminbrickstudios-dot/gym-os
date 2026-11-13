@@ -61,6 +61,8 @@ jobs:
       - name: Gimnasios de carga
         run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios || '200' }}"
       - name: Usuarios del demo (dueño, recepción…)
+        env:
+          APP_MODO: produccion   # E8: los viajes se cuentan con la app compilada (en dev React monta todo dos veces)
         run: |
           scripts/local/levantar.sh
           psql "$(scripts/db/local.sh url)" -c "select count(*) as socios from public.socios" -c "select count(*) as gimnasios from public.gimnasios"
