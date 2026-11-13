@@ -18,7 +18,7 @@ async function seccion(p, prendida) {
   await p.goto(`${G}/panel/configuracion?pestana=secciones`);
   await p.locator('fieldset[data-pestana-activa="secciones"]').waitFor({ timeout: 30000 });
   await p.waitForTimeout(800);
-  const sw = p.locator("fieldset[data-pestana-activa] label").filter({ hasText: /^\s*(\S+\s)?Máquinas\b/ }).locator('input[role="switch"]');
+  const sw = p.locator("fieldset[data-pestana-activa]").getByRole("switch", { name: /Máquinas/ }).first();
   if ((await sw.isChecked()) === prendida) return;
   await (prendida ? sw.check() : sw.uncheck());
   const pie = p.locator('[data-pie="secciones"]');

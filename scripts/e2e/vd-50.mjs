@@ -30,8 +30,10 @@ async function abrirCobrar(p, nombre) {
   await p.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
   await p.keyboard.press("Control+k");
   await p.locator('input[placeholder*="cobrar"]').fill(`cobrar ${nombre}`);
-  await p.locator("[data-buscador-cobrar]").first().waitFor({ timeout: 30000 });
-  await p.keyboard.press("Enter");
+  const fila = p.locator("[data-buscador-cobrar]").first();
+  await fila.waitFor({ timeout: 30000 });
+  const exacto = p.locator("div").filter({ hasText: nombre }).filter({ has: p.locator("[data-buscador-cobrar]") }).last().locator("[data-buscador-cobrar]");
+  if (await exacto.count()) await exacto.first().click(); else await p.keyboard.press("Enter");
   await p.locator("[data-cobrar] [data-cobrar-confirmar]").waitFor({ timeout: 30000 });
   await p.locator('[data-cobrar-medio="transferencia"]').click();
 }
