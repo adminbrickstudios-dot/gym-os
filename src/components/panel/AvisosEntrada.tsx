@@ -157,7 +157,12 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
 
   if (avisos.length === 0 && estado !== "con_demora") return null;
   // Se ven los últimos 3 (el más nuevo abajo del todo); el resto, en "+N entradas más" (siguen existiendo, y el rojo no se cierra solo).
-  const visibles = avisos.slice(Math.max(0, avisos.length - MAX_VISIBLES));
+  let visibles = avisos.slice(Math.max(0, avisos.length - MAX_VISIBLES));
+  // Un rojo (alguien que no pudo entrar) no se esconde detrás del contador: si hay y ninguno está entre los 3 más nuevos, el más nuevo ocupa el lugar del más viejo.
+  if (!visibles.some((v) => v.color === "rojo")) {
+    const rojo = [...avisos].reverse().find((v) => v.color === "rojo");
+    if (rojo) visibles = [rojo, ...visibles.slice(1)];
+  }
   const ocultos = avisos.length - visibles.length;
   return (
     // Abajo a la derecha en la compu (E2), encima de la barrita del DNI si está; en el celular, arriba (abajo tapan la barra y el Cobrar).

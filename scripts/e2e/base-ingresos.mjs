@@ -63,7 +63,7 @@ try {
   const caja = await r.locator("[data-avisos-entrada]").boundingBox();
   const vista = r.viewportSize();
   // Z5/H7: los avisos pasaron ARRIBA a la derecha a propósito (abajo tapaban el botón de la Entrada, la barra del celular y el Cobrar).
-  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.y + caja.height < vista.height * 0.6, "los avisos están arriba a la derecha (no tapan el botón de la Entrada ni Cobrar)", `caja ${JSON.stringify(caja)}`);
+  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.y > vista.height * 0.3 && caja.y + caja.height <= vista.height, "los avisos están abajo a la derecha (E2) y dentro de la pantalla", `caja ${JSON.stringify(caja)}`);
   chequear((await r.locator("[data-aviso-entrada]").count()) <= 3, "se apilan de a 3 como mucho", "hay más de 3 avisos");
 
   // Un rojo: se toca → panel lateral → COBRAR AHORA / Dejar pasar igual
