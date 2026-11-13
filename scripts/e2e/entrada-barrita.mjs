@@ -190,11 +190,20 @@ try {
     chequear(await B(r).count() === 0, `${etiqueta}: con la ventana abierta no hay barrita`, `${etiqueta}: la barrita aparece con la ventana abierta`);
     await cerrarTodo(r);
     // El PIN: ni la barrita ni la ventana.
+    // (la pantalla del PIN solo existe si alguien del equipo tiene PIN: se le pone uno a la recepción para esto)
+    const [ana] = (await db.query(`select id from public.equipo where gimnasio_id = $1 and rol = 'recepcion' and activo order by nombre limit 1`, [gim])).rows;
+    await db.query(`insert into privado.secretos_operador (gimnasio_id) values ($1) on conflict do nothing`, [gim]);
+    await db.query(`insert into privado.pines_equipo (equipo_id, gimnasio_id, pin_hash) values ($1, $2, extensions.crypt('4827', extensions.gen_salt('bf', 8))) on conflict (equipo_id) do update set pin_hash = excluded.pin_hash`, [ana.id, gim]);
     await r.goto(`${G}/panel/pin`);
-    await r.waitForTimeout(1500);
-    await afuera(r);
-    await r.keyboard.type("123", { delay: 60 });
-    chequear(await B(r).count() === 0 && !(await hayVentana(r)), `${etiqueta}: en la pantalla del PIN no se abre nada`, `${etiqueta}: algo se abrió en la pantalla del PIN`);
+    const hayPin = await r.locator("[data-teclado-pin]").first().waitFor({ timeout: 15000 }).then(() => true, () => false);
+    if (hayPin) {
+      await afuera(r);
+      await r.keyboard.type("123", { delay: 60 });
+      chequear(await B(r).count() === 0 && !(await hayVentana(r)), `${etiqueta}: en la pantalla del PIN no se abre nada`, `${etiqueta}: algo se abrió en la pantalla del PIN`);
+      await r.locator("[data-teclado-pin] input[name=pin]").fill("4827");
+      await r.waitForURL((u) => u.pathname === "/panel", { timeout: 30000 }).catch(() => {});
+    } else { falla(`${etiqueta}: no apareció la pantalla del PIN para probarla`); }
+    await db.query(`delete from privado.pines_equipo where equipo_id = $1`, [ana.id]);   // sin PIN otra vez: el resto de los recorridos no lo pide
 
     // 7 · Las formas en que se rompe a las 19 h.
     await r.goto(`${G}/panel/vencen`);

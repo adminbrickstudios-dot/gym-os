@@ -35,7 +35,7 @@ export default function PasoEscribir({ campo, detector, enterPendiente, texto, s
           ))}
         </div>
       )}
-      <input ref={campo} data-ventana-campo autoFocus value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
+      <input ref={campo} data-ventana-campo value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
         onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); setAnulada(null); }}
         onKeyDown={(e) => {
           detector.current.tecla(e.key, e.timeStamp);
