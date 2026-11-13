@@ -199,14 +199,14 @@ try {
     if (hayPin) {
       await afuera(r);
       await r.keyboard.type("123", { delay: 60 });
-      chequear(await B(r).count() === 0 && !(await hayVentana(r)), `${etiqueta}: en la pantalla del PIN no se abre nada`, `${etiqueta}: algo se abrió en la pantalla del PIN`);
+      chequear(await B(r).count() === 0 && !(await hayVentana(r)), `${etiqueta}: en la pantalla del PIN no se abre nada`, `${etiqueta}: algo se abrió en la pantalla del PIN (barrita: ${await B(r).count()}, ventana: ${await hayVentana(r)})`);
       await r.locator("[data-teclado-pin] input[name=pin]").fill("4827");
       await r.waitForURL((u) => u.pathname === "/panel", { timeout: 30000 }).catch(() => {});
     } else { falla(`${etiqueta}: no apareció la pantalla del PIN para probarla`); }
     await db.query(`delete from privado.pines_equipo where equipo_id = $1`, [ana.id]);   // sin PIN otra vez: el resto de los recorridos no lo pide
 
     // 7 · Las formas en que se rompe a las 19 h.
-    await r.goto(`${G}/panel/vencen`);
+    await r.goto(`${G}/panel/vencen-hoy`);
     await r.waitForFunction(() => document.documentElement.dataset.entradaLista === "si", null, { timeout: 60000 });
     //   (a) el lector que manda dos veces el mismo código: el resultado se queda y no anota dos veces.
     const dos = T["En Tolerancia"];
@@ -239,7 +239,7 @@ try {
     await cerrarTodo(r);
     //   (d) la barrita sobre el botón Cobrar de la pantalla: no se tapan.
     let tapados = 0, vistos = 0;
-    for (const ruta of ["/panel/caja", "/panel/vender", "/panel/socios", "/panel/vencen", "/panel"]) {
+    for (const ruta of ["/panel/caja", "/panel/vender", "/panel/socios", "/panel/vencen-hoy", "/panel"]) {
       await r.goto(`${G}${ruta}`);
       await r.waitForFunction(() => document.documentElement.dataset.entradaLista === "si", null, { timeout: 60000 });
       await tipear(r, T["Sin Pago"].dni); await r.keyboard.press("Enter");
