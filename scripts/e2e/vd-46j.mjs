@@ -22,7 +22,7 @@ try {
   // Tres cuotas juntas, por transferencia.
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-  const mas = d.locator('button:has-text("+")').first();
+  const mas = d.getByRole("button", { name: "Uno más" }).first();
   await mas.click(); await mas.click();
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await d.locator('button:has-text("Cobrar")').click();

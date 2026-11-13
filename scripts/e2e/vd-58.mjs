@@ -119,7 +119,7 @@ try {
   await db.query("alter table public.pt_franjas disable trigger pt_franja_inmutable");
   await db.query(`update public.pt_franjas set inicio = now() - interval '2 hours', fin = now() - interval '1 hour' where id in (select franja_id from public.sesiones_pt where estado = 'reservada' and socio_id in (select id from public.socios where apellido = 'Vence Hoy'))`);
   await db.query("alter table public.pt_franjas enable trigger pt_franja_inmutable");
-  const { rows: [uPt] } = await db.query(`select u.email from public.equipo e join auth.users u on u.id = e.usuario_id join public.gimnasios g on g.id = e.gimnasio_id where g.slug = 'demo' and e.rol = 'profe' and e.activo limit 1`);
+  const { rows: [uPt] } = await db.query(`select u.email from public.equipo e join auth.users u on u.id = e.usuario_id join public.gimnasios g on g.id = e.gimnasio_id where g.slug = 'demo' and e.rol = 'profe' and e.activo order by e.id limit 1`);
   const p = await pagina(b, COMPU);
   await entrar(p, uPt?.email ?? "profe@ejemplo.invalid");
   await p.goto(`${G}/panel/pt`);
