@@ -85,9 +85,11 @@ try {
   await c.locator("h1").first().waitFor({ timeout: 60000 });
   // La primera pantalla de la compu (1440x900) muestra el nombre y los botones principales, sin scrollear.
   const hero = await c.locator("h1").first().boundingBox();
-  const quiero = await c.locator('section a[href="/hacete-socio"]').first().boundingBox();
+  // H3b: el botón principal es “Quiero ser socio” solo con las altas online prendidas; si no, el de “Probá una clase”.
+  const principal = (await c.locator('section a[href="/hacete-socio"]').count()) ? c.locator('section a[href="/hacete-socio"]').first() : c.locator("section a.boton-principal, section button.boton-principal").first();
+  const quiero = await principal.boundingBox();
   chequear(!!hero && hero.y + hero.height <= 900, "compu: el nombre del gimnasio se ve en la primera pantalla", "compu: el nombre queda fuera de la primera pantalla");
-  chequear(!!quiero && quiero.y + quiero.height <= 900, "compu: “Quiero ser socio” se ve en la primera pantalla", "compu: “Quiero ser socio” queda fuera de la primera pantalla");
+  chequear(!!quiero && quiero.y + quiero.height <= 900, "compu: el botón principal se ve en la primera pantalla", "compu: el botón principal queda fuera de la primera pantalla");
   for (const s of ["planes", "horarios", "ubicacion"]) chequear(await c.locator(`section[aria-labelledby="${s}"]`).count() === 1, `con datos aparece el bloque ${s}`, `no aparece el bloque ${s}`);
   chequear((await c.locator('section[aria-labelledby="planes"]').innerText()).includes("Plan P8"), "el plan cargado se ve con su nombre", "el plan no se ve");
   chequear(!EMOJI.test(await c.locator("body").innerText()), "con datos, tampoco hay emojis como íconos", "con datos quedan emojis");
