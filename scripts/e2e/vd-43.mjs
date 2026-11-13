@@ -34,6 +34,8 @@ try {
   const vinc = await supabase.rpc("vincular_usuario_equipo", { p_equipo_id: dueno, p_usuario_id: data.user.id });
   if (vinc.error) throw new Error(`vincular: ${vinc.error.message}`);
   await q(`update public.configuracion_gimnasio set modo_clases = 'ninguno', medios_aceptados = '{efectivo,transferencia}', alias_transferencia = null, cbu = null where gimnasio_id = $1`, [g]);
+  // U4: un gimnasio nuevo nace con la página ya publicada (siempre hay una landing); el paso "Publicar tu página" se prueba solo si arranca oculta.
+  await q(`update public.landing_gimnasio set publicada = false where gimnasio_id = $1`, [g]);
   ok(`crea el gimnasio ${SLUG}.localhost con su dueño, sin datos`);
 
   const p = await pagina(b, COMPU);

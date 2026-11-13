@@ -12,7 +12,8 @@ const b = await navegador();
 
 async function primero(p, estado) {
   await p.goto(`${G}/panel/socios?estado=${estado}`);
-  const a = p.locator('main ul a[href^="/panel/socios/"]').first();
+  // El vencido de "Plan Full" (24 h): uno de "Plan Mañana" a la noche sale rojo por fuera de horario y la guía propone "Dejar pasar", no Cobrar.
+  const a = p.locator('main ul a[href^="/panel/socios/"]', estado === "vencidos" ? { hasText: "Plan Full" } : {}).first();
   await a.waitFor({ timeout: 30000 });
   return (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
 }

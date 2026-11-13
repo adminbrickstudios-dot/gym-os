@@ -31,7 +31,7 @@ try {
   await sec.locator('input[name="renovacion"]').nth(2).check();
   await sec.locator("[data-dia-fijo] input[type=number]").first().fill(String(X));
   await sec.locator('input[name="primera"]').nth(0).check();
-  await sec.locator('button:has-text("Guardar")').click();
+  await sec.locator('button:has-text("Guardar")').first().click();   // la regla del gimnasio es el primer Guardar (los planes tienen el suyo)
   await sec.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok(`la dueña elige día fijo (el ${X}) con primera cuota proporcional y se guarda`);
 
@@ -117,7 +117,7 @@ try {
   }
   const sec2 = d.locator("[data-reglas-vencimiento]");
   await sec2.locator('input[name="renovacion"]').nth(1).check();
-  await sec2.locator('button:has-text("Guardar")').click();
+  await sec2.locator('button:has-text("Guardar")').first().click();
   await sec2.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok("la regla del gimnasio vuelve a como estaba");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);

@@ -39,7 +39,7 @@ try {
   }
   await s.goto(`${G}/app`);
 
-  await s.getByRole("link", { name: /Reservar|Ver horarios/ }).click();
+  await s.getByRole("link", { name: /Reservar|Ver horarios/ }).first().click();   // el botón de Inicio y la recomendación llevan al mismo lugar
   await s.waitForURL(/\/app\/clases/, { timeout: 30000 });
   await s.locator("main h1").waitFor({ timeout: 60000 });
   await s.getByRole("link", { name: "Mañana" }).click();

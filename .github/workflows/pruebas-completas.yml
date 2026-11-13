@@ -24,6 +24,14 @@ on:
         description: "Cómo corre la app: dev (next dev) o produccion (next build + next start)"
         type: string
         default: "produccion"
+      socios:
+        description: "Socios del gimnasio demo (vacío = 300). F8.1 mide con 5000"
+        type: string
+        default: ""
+      tanda:
+        description: "Nombre de la tanda (t1, t2...): tandas con nombre distinto corren a la vez, cada una con su base y su app"
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -36,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     # Un push nuevo cancela la base del anterior (solo importa la última).
     concurrency:
-      group: base-${{ github.ref }}
+      group: base-${{ github.ref }}-${{ inputs.tanda }}
       cancel-in-progress: true
     timeout-minutes: 30
     services:
@@ -61,12 +69,19 @@ jobs:
         run: DB_PRUEBAS_URL="$(scripts/db/local.sh url)" npm run chequeos
       - name: El demo se siembra
         run: node scripts/datos/sembrar-demo.mjs --url "$(scripts/db/local.sh url)" --dominio localhost
+      - name: El Gimnasio Prueba Mateo [demo] se siembra (F8.4), con 30 socios, y sembrarlo de nuevo no lo rehace
+        run: |
+          URL="$(scripts/db/local.sh url)"
+          node scripts/datos/sembrar-prueba-mateo.mjs --url "$URL" --dominio localhost | tee .prueba-mateo.txt
+          grep -q "30 socios" .prueba-mateo.txt
+          node scripts/datos/sembrar-prueba-mateo.mjs --url "$URL" --dominio localhost | grep -q "ya existe"
+          test "$(psql -Atc "select count(*) from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo-mateo'" "$URL" | tr -d '\015')" = "30"
 
   pantallas:
     name: Pantallas (e2e y barrido)
     # Las pantallas no se cancelan con un push normal: hacen cola.
     concurrency:
-      group: pantallas-${{ github.ref }}
+      group: pantallas-${{ github.ref }}-${{ inputs.tanda }}
       cancel-in-progress: false
     if: (github.event_name == 'workflow_dispatch' && inputs.pantallas) || contains(github.event.head_commit.message, '[pantallas]')
     runs-on: ubuntu-latest
@@ -99,6 +114,7 @@ jobs:
       - name: Levantar la app con la imitación de Supabase
         env:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          SOCIOS_DEMO: ${{ inputs.socios || '300' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
@@ -108,6 +124,9 @@ jobs:
       - name: Pantallas (e2e, cada recorrido aunque falle otro)
         env:
           SOLO: ${{ inputs.solo }}
+          # Los recorridos calculan "hoy" con la hora de la compu (hoy.getDate()): el runner está en UTC y entre las 21 y las 24 h de Argentina
+          # ya es "mañana" para ellos pero no para el gimnasio (vd-14, vd-7, pla-1 fallaban solo a esa hora). La zona del gimnasio demo.
+          TZ: America/Argentina/Buenos_Aires
           E2E_DEPURAR: "1"
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
@@ -159,5 +178,6 @@ jobs:
             .local/caidas.txt
             .local/tiempos.md
             .local/capturas/
+            .local/humo/
           if-no-files-found: ignore
           retention-days: 7

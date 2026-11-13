@@ -10,22 +10,47 @@ una por línea, con la pantalla. El loop siguiente la toma como un ítem.
 
 ## Antes de empezar (lo deja listo el agente)
 
-- [ ] Un gimnasio de prueba en producción, "Gimnasio Prueba Mateo":
-  - Con marca, 3 planes y 30 socios ficticios en todos los estados: al día,
-    por vencer, debe, en prueba, suspendido.
-  - Con clases y una recepcionista y un profe de prueba.
-  - Marcado `[demo]`, para que no cuente como gimnasio real.
-- [ ] Los links de cada rol de ese gimnasio, escritos acá abajo.
+Estado al 12/11: **el código y las acciones están listos y probados contra la base de prueba; el gimnasio todavía NO está creado en
+producción** (el agente no corre nada contra producción). Para crearlo, 5 pasos tuyos, de a uno:
+
+1. **Secretos** en GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret (hoy solo existe `SUPABASE_DB_URL`):
+   - `CLAVE_PRUEBA_MATEO`: la contraseña de los 5 usuarios de prueba (10 o más letras; elegila vos). **Anotala en `ACCESOS.md`** (archivo
+     local, fuera del repo): no va en ningún otro lado.
+   - `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API): los usa la acción que crea los logins.
+   - `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`: tu cuenta de super admin, para el humo de `/super`.
+2. Actions → **Base de datos** → Run workflow, acción `sembrar-prueba-mateo`, dominio `gym-os-pied.vercel.app` (o `pasegym.com` si ya cambiaste
+   los dominios). Crea `[demo] Gimnasio Prueba Mateo` (slug `demo-mateo`): marca naranja y oscura, 3 planes a la venta (Full, 3 veces, Mañana)
+   más los de los casos testigo, **30 socios** en todos los estados (al día, por vencer, vence hoy, en tolerancia, debe, nunca pagó, en
+   pausa, suspendido, en prueba, con pack, con pase de hoy, dado de baja), 4 actividades con grilla de clases, productos de mostrador,
+   interesados, una recepcionista y un profe. Solo crea: si ya existe lo dice y no lo toca.
+3. Actions → **Base de datos** → `usuarios-prueba-mateo`. Crea los 5 logins con la contraseña del secreto `CLAVE_PRUEBA_MATEO`. Si falta
+   algún secreto se frena y dice cuál.
+4. Actions → **Humo producción** → Run workflow: el trabajo `puertas` abre `/super`, `/dueno`, `/recepcion`, `/profe`, `/socio` y la página del
+   gimnasio, en compu y celular, y deja las capturas (artefacto `humo-puertas`). Lo que no tenga su secreto lo marca ⛔ "sin probar".
+5. Si todo dio verde, empezá por el punto 1 de abajo.
+
+- [ ] El gimnasio `[demo] Gimnasio Prueba Mateo` creado (paso 2) y con sus usuarios (paso 3).
+- [ ] El logo: lo subís vos en Configuración → Marca (el script no sube imágenes; los colores sí vienen cargados).
 - [ ] Una compu y un celular: la prueba se hace en los dos.
 
-| Rol | Link | Usuario |
+Los links valen con la dirección de hoy; tras el cambio de dominios (`DOMINIO.md`) es la misma ruta con `pasegym.com` en vez de
+`gym-os-pied.vercel.app`. En `*.vercel.app` no hay subdominios: por eso todos llevan `/g/demo-mateo`.
+
+| Rol | Link | Usuario (contraseña: `CLAVE_PRUEBA_MATEO`, en `ACCESOS.md`) |
 |---|---|---|
-| Super admin | | |
-| Dueño | | |
-| Recepción | | |
-| Profe | | |
-| Socio al día | | |
-| Socio que debe | | |
+| Super admin | `https://gym-os-pied.vercel.app/super` | tu cuenta real de super admin (la de `BRIK_ADMIN_MAIL`) |
+| Dueño | `https://gym-os-pied.vercel.app/g/demo-mateo/dueno` | `prueba-duena@ejemplo.invalid` |
+| Recepción | `https://gym-os-pied.vercel.app/g/demo-mateo/recepcion` | `prueba-recepcion@ejemplo.invalid` |
+| Profe | `https://gym-os-pied.vercel.app/g/demo-mateo/profe` | `prueba-profe@ejemplo.invalid` |
+| Socio al día | `https://gym-os-pied.vercel.app/g/demo-mateo/socio` | `prueba-socio@ejemplo.invalid` (Testigo Al Día) |
+| Socio que debe | `https://gym-os-pied.vercel.app/g/demo-mateo/socio` | `prueba-socio-debe@ejemplo.invalid` (Testigo Vencida: debe $25.000) |
+| Página pública | `https://gym-os-pied.vercel.app/g/demo-mateo` | sin usuario |
+| Hacete socio | `https://gym-os-pied.vercel.app/g/demo-mateo/hacete-socio` | sin usuario |
+
+Qué socios de prueba hay (para no buscarlos): `Testigo Al Día` (verde), `Testigo Por Vencer` (amarillo), `Testigo Vence Hoy`,
+`Testigo En Tolerancia` (naranja), `Testigo Vencida` y `Testigo Sin Pago` (rojo, con la cuenta para regularizar), `Testigo Congelada`,
+`Testigo Suspendido`, `Testigo Pase Hoy`, `Testigo Con Pack`, `Testigo Fuera De Franja`, `Testigo Sin Plan` (gris), `Testigo Se Fue` (de baja)
+y once `… Prueba NN` comunes. Todo es ficticio: teléfonos `+54 9 000…`, mails `@ejemplo.invalid`.
 
 ## 1. Como super admin (10 min)
 

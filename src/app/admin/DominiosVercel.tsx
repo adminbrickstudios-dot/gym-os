@@ -30,7 +30,7 @@ export function DominiosVercel({ lista, faltan }: { lista: boolean; faltan: stri
       <div className="flex flex-wrap gap-2 items-end">
         <label className="space-y-1 flex-1 min-w-[14rem]"><span className="etiqueta">Dominio (por ejemplo base.com.ar, app.base.com.ar o *.base.com.ar)</span>
           <input className="campo" value={dominio} onChange={(e) => setDominio(e.target.value)} disabled={!lista} /></label>
-        <BotonAccion className="boton boton-principal" disabled={!lista || dominio.trim().length < 4} onClick={() => correr(conectarDominioVercel)}>Agregar a Vercel</BotonAccion>
+        <BotonAccion className="boton" disabled={!lista || dominio.trim().length < 4} onClick={() => correr(conectarDominioVercel)}>Agregar a Vercel</BotonAccion>
         <BotonAccion className="boton" disabled={!lista || !estado} onClick={() => correr(verificarDominioEnVercel)}>Verificar</BotonAccion>
       </div>
       {error && <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{error}</p>}

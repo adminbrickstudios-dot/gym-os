@@ -56,7 +56,7 @@ try {
 
   // Una dirección que no existe: con salida.
   await d.goto(`${G}/panel/no-existe-${s5}`);
-  chequear(await d.getByText("Ir al inicio").first().isVisible(), "pantalla que no existe: “Ir al inicio”", "sin salida");
+  chequear(await d.getByText(/Ir al inicio|Ir a la página de/).first().waitFor({ timeout: 20000 }).then(() => true, () => false), "pantalla que no existe: “Ir al inicio”", "sin salida");
 } finally {
   await b.close();
 }

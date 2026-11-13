@@ -140,6 +140,8 @@ try {
   d.setDefaultNavigationTimeout(120000);
   await entrar(d, "duena@ejemplo.invalid");
   await d.locator("h1").first().waitFor({ timeout: 60000 });
+  // Con la app compilada los bloques de Inicio llegan por partes (Suspense): se espera a que aparezca lo que se busca antes de leer.
+  await d.getByText("Testigo Sin Pago").first().waitFor({ timeout: 30000 }).catch(() => {});
   const inicio = (await d.locator("main").innerText()).replace(/\s+/g, " ");
   chequear(/Testigo Sin Pago/.test(inicio), "la dueña ve en Inicio a quién dejaron pasar hoy", "Inicio no muestra a quién dejaron pasar");
   await d.goto(`${G}/panel/caja/historial`);

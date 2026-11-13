@@ -77,7 +77,8 @@ export default async function Inicio() {
           );
         })()}
 
-        <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} />
+        <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos}
+          conPrincipal={!(rol !== "profe" && rutaDisponible("/panel/vender", rol, panel.secciones_apagadas))} />
 
         <Suspense fallback={<EsqueletoBloques />}>
           <BloquesInicio panel={panel} />

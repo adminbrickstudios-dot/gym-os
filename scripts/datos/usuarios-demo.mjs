@@ -57,7 +57,20 @@ const USUARIOS_CLON = slugClon ? [["duena", "Dueña clon", "dueno"], ["encargado
   .map(([m, nombre, rol]) => ({ email: `clon-${m}@ejemplo.invalid`, nombre, gimnasio: slugClon, rol })) : [];
 if (slugClon && !/^demo/.test(slugClon)) { console.error("--clon: el slug tiene que empezar con 'demo' (nunca un gimnasio real)."); process.exit(1); }
 
-for (const u of slugClon ? USUARIOS_CLON : USUARIOS_DEMO) {
+// F8.4: con --prueba se crean los logins del "Gimnasio Prueba Mateo" (scripts/datos/sembrar-prueba-mateo.mjs), con la contraseña que llega por
+// secreto (CLAVE_PRUEBA_MATEO): nunca está en el repo. Sin super admin: el super admin es la cuenta real de Mateo.
+const PRUEBA = process.argv.includes("--prueba");
+const USUARIOS_PRUEBA = [
+  { email: "prueba-duena@ejemplo.invalid", nombre: "Dueña Prueba", gimnasio: "demo-mateo", rol: "dueno" },
+  { email: "prueba-recepcion@ejemplo.invalid", nombre: "Ana Prueba", gimnasio: "demo-mateo", rol: "recepcion" },
+  { email: "prueba-profe@ejemplo.invalid", nombre: "Diego Prueba", gimnasio: "demo-mateo", rol: "profe" },
+  { email: "prueba-socio@ejemplo.invalid", nombre: null, gimnasio: "demo-mateo", socio: "Testigo Al Día" },
+  { email: "prueba-socio-debe@ejemplo.invalid", nombre: null, gimnasio: "demo-mateo", socio: "Testigo Vencida" },
+];
+const LISTA = PRUEBA ? USUARIOS_PRUEBA : slugClon ? USUARIOS_CLON : USUARIOS_DEMO;
+if (PRUEBA && esLocal === false && !process.env.GITHUB_ACTIONS && !process.argv.includes("--contrasena")) { console.error("--prueba contra un Supabase real necesita --contrasena."); process.exit(1); }
+
+for (const u of LISTA) {
   if (u.admin && sinAdmin) continue;
   let [existente] = await q(`select id from auth.users where lower(email) = lower($1)`, [u.email]).catch(() => []);
   let usuarioId = existente?.id;
@@ -90,4 +103,4 @@ for (const u of slugClon ? USUARIOS_CLON : USUARIOS_DEMO) {
 await db.end();
 // BASE-8a: el log de Actions es público: en el servidor de integración nunca se imprime la contraseña.
 console.log(`Usuarios demo listos (${process.env.GITHUB_ACTIONS ? "contraseña: la que escribiste al correr el workflow" : `contraseña: ${contrasena}`}):`);
-for (const u of (slugClon ? USUARIOS_CLON : USUARIOS_DEMO).filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);
+for (const u of LISTA.filter((x) => !(x.admin && sinAdmin))) console.log(`  ${u.email.padEnd(28)} ${u.admin ? "super admin" : u.socio ? `socio de ${u.gimnasio}` : `${u.rol} de ${u.gimnasio}`}`);
