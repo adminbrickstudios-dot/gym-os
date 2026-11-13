@@ -399,7 +399,7 @@ La prueba de pantallas es `scripts/e2e/pulido-roto.mjs` (y `panel-equipo.mjs` pa
 | Botón flotante de la Entrada vacío | ✅ pulido-roto (tiene su ícono) |
 | Íconos vacíos en el rojo, la salida y la caja (Puerta, Ventana, Turno, entradas y salidas de plata) | ✅ `<Icono>`; `pulido-roto-2` (corrida 43131092971): el rojo y la caja sin emojis ni botones vacíos. 🟡 la salida (`data-ventana-salida`) no se probó: marcar una salida escribe datos |
 | Emojis crudos de la base en Inicio y en los chips de la guía | 🟡 `sistema` en `<Icono>` (la migración entregada no se toca); sin prueba de pantalla propia |
-| Error de Anotar, Dejar pasar, Salida o Volvió antes debajo del veredicto | ✅ dentro del veredicto, una sola vez (se sacó un duplicado); `pulido-roto-2` corta la conexión al anotar (43131092971). 🟡 Dejar pasar, Salida y Volvió antes usan el mismo `setError`, sin prueba propia |
+| Error de Anotar, Dejar pasar, Salida o Volvió antes debajo del veredicto | ✅ dentro del veredicto, una sola vez (se sacó un duplicado); `pulido-roto-2` corta la conexión al anotar (43131092971). Dejar pasar ✅ con prueba propia (`pulido-roto-3`, 5 pasos en verde, corrida 43494563754: error dentro del veredicto, una vez, reintentable). 🟡 Salida y Volvió antes usan el mismo `setError`, sin prueba propia |
 | Atajo "S" marca la salida al tipear un nombre | ✅ pulido-roto (la S va al buscador) |
 | Búsqueda vieja pisa a la nueva (Entrada y Vender); Vender mostraba el error como "No está" | ✅ `pulido-roto-2` frena la respuesta vieja 4 s en Entrada y en Vender, y corta la búsqueda en Vender (43131092971) |
 | Cobrar se cierra mientras cobra | ✅ `pulido-roto-2` demora el cobro 6 s: Esc, X y afuera no cierran; después sí (43131092971) |
