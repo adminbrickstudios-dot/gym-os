@@ -232,7 +232,7 @@ function Tarjeta({ a, puedeCobrar, cerrar, achicar, fijar, abrirVeredicto, cobra
         </button>
         {(a.fijo || a.color === "rojo") && (
           <div className="flex flex-wrap gap-2" data-aviso-acciones>
-            <button type="button" className="boton !min-h-12 !px-4 text-[15px]" data-aviso-ficha onClick={() => abrirVeredicto(a)}><Icono nombre="usuario" /> Ver ficha</button>
+            <button type="button" className="boton !min-h-12 !px-4 text-[15px]" data-aviso-ficha onClick={() => abrirVeredicto(a)}><Icono nombre="usuarios" /> Ver ficha</button>
             {a.cobrar && puedeCobrar && <button type="button" data-aviso-cobrar onClick={() => cobrar(a)} className="boton boton-principal !min-h-12 !px-4 text-[15px]"><Icono nombre="plata" /> Cobrar</button>}
             {a.esIngreso && a.color !== "rojo" && !anulando && <button type="button" className="boton !min-h-12 !px-4 text-[15px]" data-aviso-anular onClick={() => setAnulando(true)}><Icono nombre="deshacer" /> Anular la entrada</button>}
           </div>
