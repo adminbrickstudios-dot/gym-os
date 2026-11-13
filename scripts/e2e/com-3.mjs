@@ -21,8 +21,11 @@ try {
     // (se arman al mirar la grilla) y anota a un socio en la próxima.
     const a = await pagina(b, COMPU);
     await entrar(a, "recepcion@ejemplo.invalid");
-    await a.goto(`${G}/panel/clases`);
-    await a.locator("main h1").first().waitFor({ timeout: 60000 });
+    for (let i = 0; i <= 3; i++) {   // hoy (si todavía quedan clases) y los próximos días: cada día se arma al abrirlo
+      const dia = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(Date.now() + i * 86400000));
+      await a.goto(`${G}/panel/clases?dia=${dia}`);
+      await a.locator("main h1").first().waitFor({ timeout: 60000 });
+    }
     const { rows: [prox] } = await db.query(`select c.id, c.gimnasio_id from public.clases c join public.gimnasios g on g.id = c.gimnasio_id and g.slug = 'demo'
       where c.inicio > now() and c.cancelada_en is null order by c.inicio limit 1`);
     if (!prox) throw new Error("el demo no tiene clases futuras con reservas (ni se armaron al abrir Clases)");

@@ -113,7 +113,8 @@ try {
   await dialogo(d).locator("[data-buscador-tarea-ok]").waitFor({ timeout: 30000 });
   chequear(true, "“tarea …” anota la tarea y avisa sin cerrar", "");
   await cerrar(d);
-  await d.goto(`${G}/panel/tareas`);
+  // Recién cerrado el buscador, la pantalla puede estar navegando (ERR_ABORTED): se vuelve a pedir.
+  await d.goto(`${G}/panel/tareas`).catch(async () => { await d.waitForTimeout(800); await d.goto(`${G}/panel/tareas`); });
   chequear(await d.getByText(que).first().waitFor({ timeout: 30000 }).then(() => true, () => false), "la tarea aparece en Para hacer hoy", "la tarea no está en Para hacer hoy");
 
   // ── Permisos: el dueño carga gastos; la recepción no ve esa acción ni la pantalla ──

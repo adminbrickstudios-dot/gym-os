@@ -42,6 +42,8 @@ try {
     chequear((await medidas(p)).length === 0, `${tam} · ingreso del equipo: botones de 44 px e inputs de 16 px`, `${tam} · ${(await medidas(p)).join(" | ")}`);
     if (tam !== "compu") await capturar(p, `vd61-${tam}-equipo`);
     await p.goto(`${G}/ingresar?modo=socio`);
+    // D43: lo primero es mail y contraseña; el celular está en la vía "Celular".
+    await p.getByRole("button", { name: /Celular/ }).click();
     await p.locator("input[name=telefono]").waitFor({ timeout: 30000 });
     chequear(await p.locator("[data-soy-nuevo], [data-sin-cuenta]").count() === 1, `${tam} · socio: “Soy nuevo, quiero anotarme” o “pedile a la recepción”`, `${tam} · socio: no dice qué hacer sin cuenta`);
     chequear(await sinDesborde(p), `${tam} · ingreso del socio sin desborde`, `${tam} · ingreso del socio se desborda`);
