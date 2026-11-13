@@ -156,10 +156,8 @@ export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: {
   };
 
   if (avisos.length === 0 && estado !== "con_demora") return null;
-  // Se ven los últimos 3 (el rojo y lo fijado pasan primero); el resto, en "+N entradas más".
-  const prioridad = (a: Aviso) => (a.color === "rojo" || a.fijo ? 1 : 0);
-  const ordenados = [...avisos].sort((a, b) => prioridad(a) - prioridad(b));
-  const visibles = ordenados.slice(Math.max(0, ordenados.length - MAX_VISIBLES));
+  // Se ven los últimos 3 (el más nuevo abajo del todo); el resto, en "+N entradas más" (siguen existiendo, y el rojo no se cierra solo).
+  const visibles = avisos.slice(Math.max(0, avisos.length - MAX_VISIBLES));
   const ocultos = avisos.length - visibles.length;
   return (
     // Abajo a la derecha en la compu (E2), encima de la barrita del DNI si está; en el celular, arriba (abajo tapan la barra y el Cobrar).
