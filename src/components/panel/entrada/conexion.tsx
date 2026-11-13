@@ -49,7 +49,7 @@ export function useSinInternet(): boolean {
       if (navigator.onLine === false || document.visibilityState !== "visible") return;
       try {
         const c = new AbortController(); const t = setTimeout(() => c.abort(), 5000);
-        const r = await fetch(`/favicon.ico?_=${Date.now()}`, { cache: "no-store", signal: c.signal });
+        const r = await fetch(`/api/version?_=${Date.now()}`, { cache: "no-store", signal: c.signal });
         clearTimeout(t);
         if (vivo && r.status > 0) setSin(false);
       } catch { /* sigue sin internet */ }
