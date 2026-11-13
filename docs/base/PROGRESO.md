@@ -17,7 +17,7 @@
 - **F8.2 / R3 🟡: recorridos que siguen en rojo y no tienen causa cerrada** (pasaron o fallaron según el bloque; todos de la pasada de las 21 a las 23 h, hora del gimnasio, y varios dependen de la hora del día): `vd-6` (a veces el foco no llega al campo de la Entrada al abrirla con F2: puede ser real, mirarlo primero), `vd-46j` y `vd-46k` (el profe de reemplazo: "el profe anterior sigue viendo la lista" / sin historial), `vd-50` (la hoja de doble cobro: un click que no encuentra su botón), `vd-54` (interruptor de la configuración de máquinas), `vd-58` (sesiones de personal trainer: "todavía no hay horarios cargados"). Hay que correrlos de día y mirar cada captura de `falla-*.jpg` (artefacto `pantallas` de la corrida).
 - **La cadena de punta a punta en una sola corrida** no se hizo (la de 232 recorridos se corta por memoria y por estado: se corrió en 4 bloques).
 
-**Lo que tiene que decidir Mateo:** dónde van los avisos de la puerta (`PREGUNTAS.md`, D40 vs D56).
+**Cerrado (D62, Mateo 12/11):** los avisos de la puerta van abajo a la derecha (D40/D56 cerradas en `PREGUNTAS.md`); en el código ya es así.
 
 
 ## ⚠ PUBLICADO PERO SIN DEPLOY: el PR #21 está mergeado en main y Vercel dijo "Deployment rate limited — retry in 24 hours" (13/11, 00:10)
