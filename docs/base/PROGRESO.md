@@ -20,6 +20,13 @@
 **Lo que tiene que decidir Mateo:** dónde van los avisos de la puerta (`PREGUNTAS.md`, D40 vs D56).
 
 
+## ⚠ PUBLICADO PERO SIN DEPLOY: el PR #21 está mergeado en main y Vercel dijo "Deployment rate limited — retry in 24 hours" (13/11, 00:10)
+- **Qué pasó:** el plan Hobby de Vercel tiene un tope de deploys por día y cada push a cualquier rama (carril, base, publicar) creaba una vista previa que gastaba uno. Se pasó del tope.
+- **Estado de producción:** sigue andando el código del PR #20 (el último deploy bueno), con la base ya migrada. La migración nueva (`20261112220000`, Realtime de ingresos) es aditiva: el código anterior anda con ella. Temple Gym, `/ingresar`, `/super` y `/api/salud` responden bien (probado a las 00:10).
+- **Lo que NO está en producción todavía** (en main, sin deploy): la barrita del DNI, los avisos de QR abajo a la derecha con Realtime, la franja sin internet, el acento corrido de tono (Z8), E5 y lo de F8. **Se despliega solo con el próximo deploy de main** cuando Vercel libere el cupo (24 h), o antes si Mateo pasa a **Vercel Pro** (ya estaba en su lista: el plan Hobby no permite uso comercial).
+- **Lo que hice para que no se repita:** `vercel.json` ahora desactiva los deploys de las ramas de trabajo (`carril/**`, `base/**`, `publicar/**`, `tmp/**`, `noche/**`, `dia/**`): solo `main` hace deploy. Confirmado: el push siguiente ya no generó ningún deploy. Los recorridos se prueban en Actions, no en la vista previa.
+- **Pendiente apenas se libere:** correr el humo en producción (Temple Gym solo mirando, `/super`, y el demo con `humo-pasado`) y recién ahí decir "LISTO" para estas piezas. No creo ni toco nada de Temple Gym. Si el cupo no se libera a la mañana: Mateo puede hacer "Redeploy" del último commit de main desde el panel de Vercel o pasar a Pro.
+
 ## LISTO PARA CAMBIAR LOS DOMINIOS (12/11, publicado entre las 19:50 y las 20:15 hora de Argentina, con tu autorización, sin copia)
 Mateo: ya podés seguir `docs/base/DOMINIO.md`, en orden (la variable `NEXT_PUBLIC_DOMINIOS_VIEJOS=gym-os-pied.vercel.app` es la que salva el QR impreso; la dirección propia de Temple Gym se carga en el super admin recién DESPUÉS del Redeploy).
 Publicado hoy:
