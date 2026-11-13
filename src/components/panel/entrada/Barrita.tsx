@@ -17,7 +17,7 @@ import { colorVar, PuntoEstado } from "../Estado";
 import { EVENTO_ABRIR_SOCIO } from "../AvisosEntrada";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "../cobrar/evento";
 import { conPuntos, EMOJI, ES_QR, esEditable, EVENTO_ABRIR_ENTRADA_CON, hayAlgoEncima, sinPuntos, type PedidoAbrirSocio } from "./comun";
-import { avisarFalloRed, esErrorDeRed, TEXTO_SIN_INTERNET } from "./conexion";
+import { avisarFalloRed, avisarRedOk, esErrorDeRed, TEXTO_SIN_INTERNET } from "./conexion";
 
 type Via = "recepcion" | "qr_socio" | "nfc";
 type Res = { socio: ResultadoSocio; v: Veredicto; guia: Guia | null; apto: string | null; firmar: string | null; via: Via; error?: string };
@@ -85,6 +85,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
     trabajando.current = false;
     const p = pendiente.current; pendiente.current = "";
     ultimoFase.current = f;
+    if (f.t !== "error") avisarRedOk();   // lo que salió bien prueba que hay internet
     // Lo que se tipeó mientras se buscaba es el mismo código otra vez (el lector que manda dos veces): se descarta, el resultado queda.
     const duplicado = !!p && !!ultimaLectura.current && sinPuntos(p).trim() === ultimaLectura.current.codigo && Date.now() - ultimaLectura.current.en < 2000;
     if (p && !duplicado) { ponerTexto(p); poner({ t: "escribiendo" }); return; }
@@ -144,7 +145,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
   const resolver = useCallback(async (crudo: string) => {
     const t = sinPuntos(crudo).trim();
     if (!t || trabajando.current) return;
-    if (P.current.sinInternet || (typeof navigator !== "undefined" && navigator.onLine === false)) {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
       sonarSi("rojo"); poner({ t: "error", msg: TEXTO_SIN_INTERNET, red: true }); return;
     }
     const ahora = Date.now();
@@ -289,7 +290,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
     }
     if (!soloNumeros && t.length >= 3 && !ES_QR.test(t)) {
       const id = setTimeout(async () => {
-        if (P.current.sinInternet || trabajando.current) return;
+        if (navigator.onLine === false || trabajando.current) return;
         const mia = ++busqueda.current;
         try {
           const r = await leerConReintento(() => buscarSociosRapido(t));

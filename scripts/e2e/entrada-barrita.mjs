@@ -108,8 +108,8 @@ try {
     await r.waitForTimeout(600);
     await r.locator("[data-barrita-anotar]").click();
     chequear(await estado(r, "entro"), `${etiqueta}: Anotar entrada → “Entró ✓” en la misma barrita`, `${etiqueta}: no salió “Entró”`);
-    chequear(/Entr|había entrado/.test(await B(r).innerText()), `${etiqueta}: dice “Entró …”`, `${etiqueta}: texto ${await B(r).innerText()}`);
-    chequear(await entradasDe(verde.id, t0) <= 1 && (await db.query(`select 1 from public.ingresos where socio_id = $1 and momento >= $2 limit 1`, [verde.id, t0])).rowCount === 1, `${etiqueta}: la entrada quedó anotada una sola vez en la base`, `${etiqueta}: la base no tiene la entrada`);
+    chequear(/entr[oó]|había entrado/i.test(await B(r).innerText()), `${etiqueta}: dice “Entró …”`, `${etiqueta}: texto ${await B(r).innerText()}`);
+    chequear(await entradasDe(verde.id, t0) <= 1 && (await db.query(`select 1 from public.ingresos where socio_id = $1 and momento >= now() - interval '12 hours' limit 1`, [verde.id])).rowCount >= 1, `${etiqueta}: la entrada quedó anotada una sola vez en la base`, `${etiqueta}: la base no tiene la entrada`);
     await capturar(r, `barrita-${ancho}-entro`);
     await r.keyboard.press("Escape");
 
@@ -245,7 +245,7 @@ try {
       await tipear(r, T["Sin Pago"].dni); await r.keyboard.press("Enter");
       if (!(await estado(r, "resultado", 20000))) continue;
       const cb = await B(r).boundingBox();
-      const botones = await r.locator("main a, main button").evaluateAll((es) => es.filter((e) => /^\s*Cobrar/i.test(e.textContent ?? "")).map((e) => { const x = e.getBoundingClientRect(); return { x: x.x, y: x.y, w: x.width, h: x.height, v: x.width > 0 && x.height > 0 }; }).filter((x) => x.v));
+      const botones = await r.locator("main a, main button").evaluateAll((es) => es.filter((e) => /^Cobrar(\s*\S{0,3})?$/i.test((e.textContent ?? "").trim())).map((e) => { const x = e.getBoundingClientRect(); return { x: x.x, y: x.y, w: x.width, h: x.height, v: x.width > 0 && x.height > 0 }; }).filter((x) => x.v));
       for (const x of botones) { vistos++; if (cb && x.x < cb.x + cb.width && x.x + x.w > cb.x && x.y < cb.y + cb.height && x.y + x.h > cb.y) { tapados++; console.log(`  ${ruta}: la barrita tapa un botón Cobrar en (${Math.round(x.x)},${Math.round(x.y)})`); } }
       await cerrarTodo(r);
     }

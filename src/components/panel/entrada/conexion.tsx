@@ -3,17 +3,21 @@
 // "Sin internet: anotá en papel". La cola offline real (que se sincronice al volver) es la función nueva N-B; acá NO se
 // inventa un veredicto: sin conexión no hay estado_acceso, y lo único honesto es decirlo.
 //
-// Cómo se sabe: el navegador avisa (online/offline), cualquier pedido de la Entrada que falla por la red lo avisa
-// (avisarFalloRed) y, mientras la pestaña está a la vista, un HEAD a /favicon.ico (no pasa por el proxy ni por la base)
-// confirma cada 15 s (cada 4 s si estamos sin internet, para volver apenas vuelva).
+// Cómo se sabe, sin pedidos de prueba de más (con 20 gimnasios, cada pedido cuenta):
+//   · el navegador avisa (offline / online);
+//   · un pedido de la Entrada que falla por la red lo avisa (avisarFalloRed): cubre el caso "hay wifi pero el router no tiene salida";
+//   · el siguiente pedido que sale bien lo borra (avisarRedOk), y la barrita sigue intentando aunque la franja esté puesta.
 import { useEffect, useState } from "react";
 import { Icono } from "@/components/ui/Icono";
 
 const EVENTO_FALLO_RED = "gymos:fallo-red";
+const EVENTO_RED_OK = "gymos:red-ok";
 export const TEXTO_SIN_INTERNET = "Sin internet: anotá en papel";
 
-/** Un pedido de la Entrada falló por la red: se confirma enseguida. */
+/** Un pedido de la Entrada falló por la red. */
 export const avisarFalloRed = () => { if (typeof window !== "undefined") window.dispatchEvent(new Event(EVENTO_FALLO_RED)); };
+/** Un pedido de la Entrada salió bien: hay internet. */
+export const avisarRedOk = () => { if (typeof window !== "undefined") window.dispatchEvent(new Event(EVENTO_RED_OK)); };
 
 /** ¿El error de un pedido es de la red (y no un error de la base)? */
 export const esErrorDeRed = (e: unknown) => {
@@ -21,39 +25,22 @@ export const esErrorDeRed = (e: unknown) => {
   return (typeof navigator !== "undefined" && navigator.onLine === false) || /failed to fetch|networkerror|load failed|network request failed|fetch failed/i.test(m);
 };
 
-async function hayRed(): Promise<boolean> {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) return false;
-  try {
-    const c = new AbortController();
-    const t = setTimeout(() => c.abort(), 4000);
-    const r = await fetch(`/favicon.ico?_=${Date.now()}`, { method: "HEAD", cache: "no-store", signal: c.signal });
-    clearTimeout(t);
-    return r.status > 0;
-  } catch { return false; }
-}
-
 /** true mientras la compu no tiene internet. */
 export function useSinInternet(): boolean {
   const [sin, setSin] = useState(false);
   useEffect(() => {
-    let vivo = true;
-    const confirmar = async () => { const ok = await hayRed(); if (vivo) setSin(!ok); };
     const caer = () => setSin(true);
+    const volver = () => setSin(false);
     if (navigator.onLine === false) setSin(true);
     window.addEventListener("offline", caer);
-    window.addEventListener("online", confirmar);
-    window.addEventListener(EVENTO_FALLO_RED, confirmar);
-    return () => { vivo = false; window.removeEventListener("offline", caer); window.removeEventListener("online", confirmar); window.removeEventListener(EVENTO_FALLO_RED, confirmar); };
+    window.addEventListener("online", volver);
+    window.addEventListener(EVENTO_FALLO_RED, caer);
+    window.addEventListener(EVENTO_RED_OK, volver);
+    return () => {
+      window.removeEventListener("offline", caer); window.removeEventListener("online", volver);
+      window.removeEventListener(EVENTO_FALLO_RED, caer); window.removeEventListener(EVENTO_RED_OK, volver);
+    };
   }, []);
-  useEffect(() => {
-    let vivo = true;
-    const id = setInterval(async () => {
-      if (document.visibilityState !== "visible") return;
-      const ok = await hayRed();
-      if (vivo) setSin(!ok);
-    }, sin ? 4000 : 15000);
-    return () => { vivo = false; clearInterval(id); };
-  }, [sin]);
   return sin;
 }
 
