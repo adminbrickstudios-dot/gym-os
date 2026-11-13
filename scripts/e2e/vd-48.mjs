@@ -9,8 +9,16 @@
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, esperarCobro, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan, hojaDeAlta, irAVender } from "./alta.mjs";
 
+// E1: la barrita del DNI es el modo "aviso" (el de fábrica); este recorrido prueba la ventana grande, que es el modo "ventana".
+import { execSync } from "node:child_process";
+import pg from "pg";
 const G = GIMNASIO();
 const TABLET = { width: 820, height: 1180 };
+const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() }); await db.connect();
+const [{ id: gimEntrada }] = (await db.query(`select id from public.gimnasios where slug = 'demo'`)).rows;
+const modoEntrada = (m) => db.query(`insert into public.configuracion_entrada (gimnasio_id, resultado_entrada) values ($1, $2) on conflict (gimnasio_id) do update set resultado_entrada = $2`, [gimEntrada, m]);
+const [{ previo }] = (await db.query(`select (select resultado_entrada from public.configuracion_entrada where gimnasio_id = $1) as previo`, [gimEntrada])).rows;
+await modoEntrada("ventana");
 const b = await navegador();
 const s5 = Date.now().toString().slice(-5);
 const dni = `38${s5}0`.slice(0, 8).padEnd(8, "6");   // 8 números, distinto en cada corrida
@@ -168,5 +176,7 @@ try {
   await c.context().close();
 } finally {
   await b.close();
+  await (previo ? modoEntrada(previo) : db.query(`delete from public.configuracion_entrada where gimnasio_id = $1`, [gimEntrada])).catch(() => {});
+  await db.end();
 }
 resultado();

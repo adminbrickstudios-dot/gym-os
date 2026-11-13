@@ -10,7 +10,7 @@ import { buscarPreguntas, preguntasPara, type PreguntaAyuda } from "@/lib/ayuda-
 import { Hoja } from "@/components/ui/Hoja";
 import { PuntoEstado } from "./Estado";
 import { abrirCobrar } from "./cobrar/evento";
-import { EVENTO_ABRIR_ENTRADA_CON } from "./VentanaEntrada";
+import { EVENTO_ABRIR_ENTRADA_CON } from "./entrada/comun";
 import { Icono } from "@/components/ui/Icono";
 
 /** Una fila de la lista: lo que Enter hace con ella. */

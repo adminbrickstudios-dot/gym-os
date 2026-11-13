@@ -22,7 +22,7 @@ export function Demos({ vencidas }: { vencidas: DemoVencida[] }) {
         <label className="space-y-1"><span className="etiqueta">Tipo</span>
           <select className="campo" value={tipo} onChange={(e) => setTipo(e.target.value)}>{TIPOS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select></label>
         <div className="sm:col-span-3 flex flex-wrap gap-2 items-center">
-          <BotonAccion className="boton boton-principal" ocupadoTexto="Creando…" disabled={nombre.trim().length < 2} onClick={async () => {
+          <BotonAccion className="boton" ocupadoTexto="Creando…" disabled={nombre.trim().length < 2} onClick={async () => {
             const r = await crearDemo(nombre, tipo);
             if (r.error) { setMsj({ texto: r.error }); return; }
             setMsj({ ok: true, texto: r.aviso }); setNombre(""); router.refresh();

@@ -43,8 +43,13 @@ export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: 
   }, [alCerrar]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4" role="dialog" aria-label="Leer QR con la cámara" data-camara={estado}>
-      <div className="tarjeta p-5 w-full max-w-md space-y-4">
+    <div className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4" role="dialog" aria-modal="true" aria-label="Leer QR con la cámara" data-camara={estado} onClick={alCerrar}>
+      <div className="tarjeta relative p-5 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+        {/* BASE-6: la X siempre visible, además de Esc, Cancelar y tocar afuera. */}
+        <button type="button" onClick={alCerrar} aria-label="Cerrar" data-cerrar-hoja
+          className="absolute top-2 right-2 grid place-items-center size-11 rounded-[var(--radio-campo)] texto-suave hover:text-[var(--texto)]">
+          <Icono nombre="cerrar" />
+        </button>
         <p className="titulo text-2xl"><Icono nombre="camara" /> Leer QR</p>
         {estado === "sin"
           ? <p className="texto-suave">No hay cámara disponible (o no diste permiso). Buscalo por nombre o DNI.</p>

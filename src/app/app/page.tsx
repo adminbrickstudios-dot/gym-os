@@ -133,6 +133,9 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           <p className="texto-tenue text-sm mt-4">Socio #{s.numero}</p>
         </section>
 
+        {/* VD-23b y SOCIO-FLUJO §4 ("Tenés que pagar… con el botón Pagar"): quien debe ve Pagar pegado al estado, sin bajar la pantalla. */}
+        {debePagar && bloquePago}
+
         {/* SOCIO-FLUJO §4: lo primero después del estado es cómo entra: el QR (que cambia) o, si el gimnasio no lo usa, su DNI. */}
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
         {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
@@ -154,7 +157,6 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           )}
         </nav>
 
-        {debePagar && bloquePago}
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
         {progreso && <ProgresoInicio p={progreso} />}
         <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>

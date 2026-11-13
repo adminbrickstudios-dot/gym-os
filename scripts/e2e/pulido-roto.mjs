@@ -114,7 +114,7 @@ try {
   await avisos.waitFor({ timeout: 10000 });
   const ca = await avisos.boundingBox(), cb = await boton.boundingBox();
   const choca = ca.x < cb.x + cb.width && ca.x + ca.width > cb.x && ca.y < cb.y + cb.height && ca.y + ca.height > cb.y;
-  chequear(!choca && ca.y < 200, "los avisos de la puerta salen arriba y no tapan el botón de la Entrada", `avisos en (${Math.round(ca.x)},${Math.round(ca.y)}) ${Math.round(ca.width)}x${Math.round(ca.height)}, botón en (${Math.round(cb.x)},${Math.round(cb.y)})`);
+  chequear(!choca && ca.y > 450, "los avisos de la puerta salen abajo a la derecha (E2) y no tapan el botón de la Entrada", `avisos en (${Math.round(ca.x)},${Math.round(ca.y)}) ${Math.round(ca.width)}x${Math.round(ca.height)}, botón en (${Math.round(cb.x)},${Math.round(cb.y)})`);
   const barra = r.locator("aside[data-barra-entrada]");   // (el <html> también lleva ese atributo)
   if (await barra.count() && await barra.isVisible()) {
     const bb = await barra.boundingBox();

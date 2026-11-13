@@ -27,7 +27,7 @@ try {
   const fila = asig.locator("li", { hasText: "Testigo Al Día" }).first();
   await fila.waitFor({ timeout: 30000 });
   await fila.getByRole("button", { name: "Asignar" }).click();
-  await fila.getByText("✓ Asignada").waitFor({ timeout: 30000 });
+  await fila.getByText("Asignada").waitFor({ timeout: 30000 });
   ok("el profe busca al socio y le asigna la rutina");
 
   const s = await pagina(b, CELU);

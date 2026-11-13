@@ -62,7 +62,8 @@ try {
   chequear(tiempos[19] < TOPE, `de Enter al aviso: mediana ${tiempos[10]} ms, peor ${tiempos[19]} ms (tope ${TOPE} ms)`, `el peor tardó ${tiempos[19]} ms`);
   const caja = await r.locator("[data-avisos-entrada]").boundingBox();
   const vista = r.viewportSize();
-  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.y > vista.height * 0.4, "los avisos están abajo a la derecha", `caja ${JSON.stringify(caja)}`);
+  // E2 (12/11, Mateo): los avisos de la puerta vuelven abajo a la derecha en la compu (encima de la barrita del DNI); en el celular siguen arriba.
+  chequear(!!caja && caja.x + caja.width > vista.width * 0.6 && caja.y > vista.height * 0.3 && caja.y + caja.height <= vista.height, "los avisos están abajo a la derecha (E2) y dentro de la pantalla", `caja ${JSON.stringify(caja)}`);
   chequear((await r.locator("[data-aviso-entrada]").count()) <= 3, "se apilan de a 3 como mucho", "hay más de 3 avisos");
 
   // Un rojo: se toca → panel lateral → COBRAR AHORA / Dejar pasar igual

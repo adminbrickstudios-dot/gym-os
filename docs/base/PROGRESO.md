@@ -1,6 +1,34 @@
 # PROGRESO de Base
 
-## PUBLICACIONES LISTAS (12/11, 18:30), esperan las 22 h
+## F8 · EL CIERRE (13/11, carril `carril/f8-cierre`, sin publicar: nada de esto toca producción)
+
+**Hecho y verificado ejecutando en Actions** (`gh workflow run "Pruebas completas" --ref carril/f8-cierre …`; ahora acepta `solo`, `socios` y `tanda`, y las tandas con nombre distinto corren a la vez):
+- **F8.1 ✅** `base-simulacion` entera con 5.019 socios y la app compilada (corrida 43331281446). Ingreso: mediana 146 ms, peor 296 ms (tope 1 s). Antes/después en `VELOCIDAD.md` (la base sembrada se analizaba tarde: `levantar.sh` ahora corre `analyze`; `panel_inicio` de 2,7 a 4 s a 262 ms).
+- **R3 (el flujo que cierra) ✅ `flujo-cierre`**: lo cobrado aparece en la ficha, en Resultado, en la caja de **otra compu sin recargar** y en la app del socio ("No podés entrar" → "Cubierto hasta"); lo editado en la página se ve en la primera carga. Va al final de la cadena `npm run e2e`.
+- **F8.3** `humo-puertas`: `/super`, `/dueno`, `/recepcion`, `/profe`, `/socio`, la página y "hacete socio", en compu y celular, con capturas y sin desborde: 48 pasos en verde contra la app local (misma prueba que va a producción por Actions → Humo producción → trabajo `puertas`).
+- **F8.4** `sembrar-prueba-mateo` (30 socios en todos los estados) y `usuarios-prueba-mateo`: probados en la base de prueba (se siembra, sembrar de nuevo no lo rehace); `PRUEBA-DUENO.md` con links, usuarios y pasos.
+- **Barrido** (cada rol abre cada pantalla): en verde en el último commit (corrida 43345447921).
+- **Cadena e2e en 4 bloques de 58 con base nueva** (corridas 43342149800, 43342156925, 43342162695, 43342167904, y reintentos 43342134602 y 43345453141): el bloque 2 salió en verde las dos veces que se corrió; en los demás, cada recorrido pasó al menos una vez con el último código salvo los de abajo. **No hay una sola corrida con todo en verde**: eso falta.
+
+**Arreglos de la app** (los pidió la prueba): Pagar pegado al estado en la app del socio que debe (VD-23b); un solo verde por pantalla (Inicio con Cobrar, super admin). **Arreglos de recorridos viejos** (el fallo era de la prueba, no de la app): selectores ambiguos (`panel-app`, `vd-7`, `panel-configuracion`), el ingreso del socio de D43 (`vd-33`, `vd-61`, `seg-1`), `vd-19` (contador anti-robot), `vd-39` ("Aprobando…"), `vd-2` (vencido de 24 h), `vd-43` (la página nace publicada), `com-3` (se arma sus clases), `rev-5`, `ent-9`, `rut-2`, `onb-1`, `dis-1`, `rev-1`, `vd-29`, `vd-34`, `base-ingresos` (los avisos están arriba a la derecha desde D56; ver `PREGUNTAS.md`), y la zona horaria: los recorridos corren con `TZ=America/Argentina/Buenos_Aires` (entre las 21 y las 24 h el runner en UTC ya estaba en "mañana": fallaban `vd-14`, `vd-7`).
+
+**⛔ Lo que no se pudo cerrar y qué falta**
+- **F8.3 y F8.4 en producción** (no se ejecutó nada contra producción): faltan los secretos `CLAVE_PRUEBA_MATEO`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` y que Mateo corra `sembrar-prueba-mateo` y `usuarios-prueba-mateo` (pasos en `PRUEBA-DUENO.md`). El logo lo sube él (el script no sube imágenes).
+- **F8.2 / R3 🟡: recorridos que siguen en rojo y no tienen causa cerrada** (pasaron o fallaron según el bloque; todos de la pasada de las 21 a las 23 h, hora del gimnasio, y varios dependen de la hora del día): `vd-6` (a veces el foco no llega al campo de la Entrada al abrirla con F2: puede ser real, mirarlo primero), `vd-46j` y `vd-46k` (el profe de reemplazo: "el profe anterior sigue viendo la lista" / sin historial), `vd-50` (la hoja de doble cobro: un click que no encuentra su botón), `vd-54` (interruptor de la configuración de máquinas), `vd-58` (sesiones de personal trainer: "todavía no hay horarios cargados"). Hay que correrlos de día y mirar cada captura de `falla-*.jpg` (artefacto `pantallas` de la corrida).
+- **La cadena de punta a punta en una sola corrida** no se hizo (la de 232 recorridos se corta por memoria y por estado: se corrió en 4 bloques).
+
+**Lo que tiene que decidir Mateo:** dónde van los avisos de la puerta (`PREGUNTAS.md`, D40 vs D56).
+
+
+## LISTO PARA CAMBIAR LOS DOMINIOS (12/11, publicado entre las 19:50 y las 20:15 hora de Argentina, con tu autorización, sin copia)
+Mateo: ya podés seguir `docs/base/DOMINIO.md`, en orden (la variable `NEXT_PUBLIC_DOMINIOS_VIEJOS=gym-os-pied.vercel.app` es la que salva el QR impreso; la dirección propia de Temple Gym se carga en el super admin recién DESPUÉS del Redeploy).
+Publicado hoy:
+1. **PR #18** (dominios, solo código): `gym-os-pied.vercel.app` y `www.` redirigen con 308; deploy en verde; Temple Gym `/g/templegym1`, `/g/templegym1/hacete-socio`, `/ingresar` en 200, `/super` pide sesión.
+2. **PR #19** (H2c fechas de cobertura + prevención de la fase D): migraciones `20261112050000` y `20261112200000` aplicadas **sin copia** (corrida 43324347571, chequeos en verde) y luego merge, deploy en verde. Humo en producción en el demo con rollback (corrida 43324855643): Cobrar propone "cubre del … al …", fechas cambiadas con la propuesta y quién las cambió, `cubierto_hasta` = recalculado, la recepción rechazada, Control lo muestra; no quedó nada guardado.
+3. **PR #20** (fase Q, pulido Z, resto): migración `20261112210000` aplicada sin copia (corrida 43325742385); validado antes en Actions (base 1117 pruebas sin fallas y 10 recorridos en verde); merge, deploy en verde, mismas páginas en 200.
+Temple Gym sigue con 0 funciones nuevas prendidas (estado, corrida 43326431319). No quedó nada sin publicar de lo que estaba en verde. Sin sesión real de demo no pude abrir las pantallas con el navegador: lo de pantalla se verificó con los recorridos e2e en Actions y lo de la base contra producción.
+
+## (anterior) PUBLICACIONES LISTAS (12/11, 18:30), esperan las 22 h
 1. **Dominios (D1/D2), solo código y documentación, sin migraciones: PR #18** (`publicar/base-dominios`). Se mergea **después de las 22 h** (hora de Argentina). Cuando esté mergeado y el deploy en verde, acá va a decir "LISTO PARA CAMBIAR LOS DOMINIOS" y Mateo sigue `docs/base/DOMINIO.md` (ojo: la variable nueva `NEXT_PUBLIC_DOMINIOS_VIEJOS` es la que salva el QR impreso).
 2. **H2c (fechas de cobertura) y la prevención de la fase D: PR #19** (`publicar/base-h2c`). Trae 2 migraciones (`20261112050000` y `20261112200000`, aditivas). Prevuelo contra la base real en verde (corrida 43309182849). **No hay `COPIA_CLAVE`, así que no las aplico solo.** Pasos de Mateo, después de las 22 h: (a) Actions → Base de datos → rama `publicar/base-h2c`, acción `aplicar`, y si no hay copia, en `sin_copia` escribir `SIN COPIA` (decisión tuya; son funciones nuevas y columnas vacías, no tocan filas); (b) mergear el PR #19 y esperar el deploy en verde; (c) abrir Cobrar de un socio y ver "Cubre del … al …" con "Cambiar fechas" (dueño). **No mergear el #19 antes de aplicar las migraciones: la pantalla de Cobrar las necesita.** Si decís "SIN COPIA, hacelo", el loop lo hace solo después de las 22 h.
 

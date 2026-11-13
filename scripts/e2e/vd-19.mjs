@@ -108,6 +108,8 @@ try {
     await t.locator('input[name="nombre"]').fill("Visitante Prueba");
     await t.locator('input[name="dni"]').fill(`3${s}77`);
     await t.locator('input[name="telefono"]').fill("11 0000 1234");
+    // La página pide unos segundos desde que se abre ESTE formulario (anti-robot; cada formulario tiene su contador): mandarlo antes da "muy rápido".
+    await t.locator('input[name="segundos"]').evaluate(async (el) => { for (let i = 0; i < 100 && Number(el.value) < 3; i++) await new Promise((r) => setTimeout(r, 300)); });
     await t.locator('button[type="submit"]').click();
     chequear(await aparece(v.locator("[data-anotado-pagina]"), 60000), "desde la página, quien no es socio se anota (DNI y WhatsApp)", "la página no confirmó la inscripción");
     await capturar(v, "vd19-celu-pagina");

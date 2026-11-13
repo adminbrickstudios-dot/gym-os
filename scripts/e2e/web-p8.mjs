@@ -11,6 +11,13 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, chequear, falla, navegador, pagina, resultado, PUERTO } from "./comun.mjs";
+
+// Z8 (12/11): el acento se corre de tono si se parece al semáforo: "usa el color del gimnasio" acepta el mismo color o uno corrido pocos grados.
+const usaElAcento = (html, acento) => {
+  const rgb = (h) => { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const base = rgb(acento);
+  return [...html.matchAll(/--acento:s*(#[0-9a-fA-F]{6})/g)].some((m) => Math.hypot(...rgb(m[1]).map((v, i) => v - base[i])) <= 130) || html.toLowerCase().includes(acento.toLowerCase());
+};
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -35,10 +42,10 @@ try {
   chequear((await p.locator("h1").first().innerText()).trim().length > 0, "la portada tiene un título (el nombre del gimnasio)", "la portada no tiene título");
   const tam = await p.locator("h1").first().evaluate((h) => parseFloat(getComputedStyle(h).fontSize));
   chequear(tam >= 48, `portada tipográfica fuerte: el título mide ${Math.round(tam)} px en el celular`, `el título es chico (${Math.round(tam)} px)`);
-  chequear((await p.content()).toLowerCase().includes(ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
+  chequear(usaElAcento(await p.content(), ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
   const vacias = await p.locator("section[aria-labelledby]").evaluateAll((xs) => xs.filter((s) => s.innerText.trim().length < 8).map((s) => s.getAttribute("aria-labelledby")));
   chequear(vacias.length === 0, "sin huecos: ninguna sección vacía", `secciones vacías: ${vacias.join(", ")}`);
-  chequear(await p.locator('a[href="/hacete-socio"]').count() > 0 && await p.locator('a[href="/ingresar?modo=socio"]').count() > 0, "“Quiero ser socio” y “Soy socio”", "faltan los botones de socio");
+  chequear(await p.locator('a[href="/ingresar?modo=socio"]').count() > 0, "“Soy socio” (y “Quiero ser socio” solo con altas prendidas, H3b)", "falta el botón “Soy socio”");
   chequear(await p.locator('footer a[href="/ingresar"]').count() > 0, "“Soy del equipo” chico al pie", "falta “Soy del equipo” al pie");
   const ancho = await p.evaluate(() => ({ s: document.documentElement.scrollWidth, w: window.innerWidth }));
   chequear(ancho.s <= ancho.w + 1, `celular 390 px sin desborde horizontal (${ancho.s} ≤ ${ancho.w})`, `desborde horizontal: ${ancho.s} > ${ancho.w}`);
@@ -78,9 +85,11 @@ try {
   await c.locator("h1").first().waitFor({ timeout: 60000 });
   // La primera pantalla de la compu (1440x900) muestra el nombre y los botones principales, sin scrollear.
   const hero = await c.locator("h1").first().boundingBox();
-  const quiero = await c.locator('section a[href="/hacete-socio"]').first().boundingBox();
+  // H3b: el botón principal es “Quiero ser socio” solo con las altas online prendidas; si no, el de “Probá una clase”.
+  const principal = (await c.locator('section a[href="/hacete-socio"]').count()) ? c.locator('section a[href="/hacete-socio"]').first() : c.locator("section a.boton-principal, section button.boton-principal").first();
+  const quiero = await principal.boundingBox();
   chequear(!!hero && hero.y + hero.height <= 900, "compu: el nombre del gimnasio se ve en la primera pantalla", "compu: el nombre queda fuera de la primera pantalla");
-  chequear(!!quiero && quiero.y + quiero.height <= 900, "compu: “Quiero ser socio” se ve en la primera pantalla", "compu: “Quiero ser socio” queda fuera de la primera pantalla");
+  chequear(!!quiero && quiero.y + quiero.height <= 900, "compu: el botón principal se ve en la primera pantalla", "compu: el botón principal queda fuera de la primera pantalla");
   for (const s of ["planes", "horarios", "ubicacion"]) chequear(await c.locator(`section[aria-labelledby="${s}"]`).count() === 1, `con datos aparece el bloque ${s}`, `no aparece el bloque ${s}`);
   chequear((await c.locator('section[aria-labelledby="planes"]').innerText()).includes("Plan P8"), "el plan cargado se ve con su nombre", "el plan no se ve");
   chequear(!EMOJI.test(await c.locator("body").innerText()), "con datos, tampoco hay emojis como íconos", "con datos quedan emojis");

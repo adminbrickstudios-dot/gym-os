@@ -56,6 +56,10 @@ Respuesta de Mateo: (vacío)
 | D58 | ¿Qué es lo principal del Inicio? | Recepción: el mostrador (búsqueda, números, lista en vivo). Dueño: números y Para hacer hoy. | Cada uno hace otra cosa en su primer minuto. |
 | D59 | Reseñas en la página y "+N socios" contra "nada inventado" | Reseñas solo con nombre, fecha y link a la reseña de Google; sin link no se muestran. "+N socios" sale de la base y solo aparece con 20 o más. | Así nada de la página puede ser inventado. |
 | D60 | Términos BRIK–gimnasio y contrato de encargado del tratamiento | El agente escribe un borrador, marcado "revisar con un abogado"; el dueño lo acepta al entrar y queda la fecha y la versión. | Sin texto no hay qué aceptar; la revisión legal es de Mateo. |
+| D61 | Tipear un DNI fuera de un campo en la compu | Barrita chica abajo a la derecha con lo que se escribe y el resultado ahí mismo; la ventana grande solo si se la toca (Mateo, 12/11) | No tapa lo que estás haciendo |
+| D62 | Esquina de la barrita y de los avisos | Abajo a la derecha (Mateo, 12/11) | No tapa la campana ni los botones de arriba |
+| D63 | Aviso de entrada por QR | 1,5 s grande con animación y sonido, después pastilla unos 8 s que se toca para fijarla; rojo queda hasta atenderlo (Mateo, 12/11) | Se ve y no molesta |
+| D64 | Funciones nuevas que tienen otros sistemas | Primero terminar RECTA-FINAL; después sumar lo nuevo apagado por defecto (NOCHE-1211.md §3). Avisos al instante entra ya (Mateo, 12/11) | Terminar antes de agrandar |
 
 ---
 
@@ -458,4 +462,19 @@ Decidido por defecto; nada de esto toca permisos y lo de plata no se arregló.
 - **Errores junto al campo.** Hecho en "Otra cosa" de Vender. Quedan el alta online (`hacete-socio/FormAlta.tsx`, dos campos con error de base) y las pantallas de Cobrar y del alta de socio (otro trabajo las edita). Estimación del resto: 3 h.
 - **"Vencen hoy" vs "Vencen y cobrar".** El menú dice lo segundo (lo fija `menu-vd11.test.ts`) y la pantalla y los "Volver a Vencen hoy" de Cobrar lo primero (lo fija `vd-28`). Se dejó como estaba: unificarlo toca `Cobrar.tsx` y esos dos tests.
 - **Reglas 16 a 18 de FLUIDEZ** (red y CPU lentas, nada salta al cargar, el teclado del celular no tapa el botón): son pruebas con Playwright (4G lento, CPU x4, teclado virtual) y no se pueden correr en esta compu; se escribirían como un recorrido nuevo en Actions. Estimación: 1 día. No se hizo.
+- **Dónde salen los avisos de la puerta (F8.1, decidido por defecto).** D40 los pedía abajo a la derecha; D56 y el pulido los subieron a la esquina de arriba a la derecha (a la izquierda del panel de últimas entradas) para que no tapen el botón de Entrada ni la barra fija, y así están en el código. `base-ingresos` seguía pidiendo "abajo" y fallaba por eso, no por la app: se cambió la prueba a "a la derecha y dentro de la pantalla". Si querés los avisos abajo como en D40, es cambiar `top-…` por `bottom-…` en `AvisosEntrada.tsx` y mover el botón de Entrada: decidilo vos mirándolos.
+Respuesta de Mateo: (vacío)
+
+## P-E7 · ¿Base o Pase? (12/11, Mateo compró pasegym.com)
+El dominio de la plataforma es `pasegym.com`, pero el producto se llama Base en pantalla y en los documentos (D39). Que la página diga Pase y el panel Base confunde.
+- A) Dejar Base en todo (recomendada hasta que contestes: no se toca ningún texto ni logo).
+- B) Cambiar todo a Pase: títulos, textos, el correo, los PDF, la guía. Es una pasada de textos y de la marca de la plataforma.
+Decidido por defecto: A. No se cambia ningún nombre hasta que contestes.
+Respuesta de Mateo: (vacío)
+
+## P-ALTAS · "Quiero ser socio" en un gimnasio recién creado (12/11)
+`SOCIO-FLUJO.md` §5 dice que "Quiero ser socio" y "Quiero probar" van **prendidos por defecto**. Hoy un gimnasio recién creado trae las altas online **apagadas** (`altas_online` = false) y la landing solo muestra "Quiero ser socio" con las altas prendidas (H3b). Prenderlas por defecto abre un formulario público (con anti-robot y tope) en cada gimnasio nuevo sin que el dueño lo haya decidido.
+- A) Apagadas por defecto, el dueño las prende en Configuración (recomendada: es lo seguro, y Temple Gym ya las tiene como las eligió).
+- B) Prendidas por defecto en los gimnasios NUEVOS (cambia el valor por defecto de la columna; los existentes no se tocan).
+Decidido por defecto: A. Los e2e `fase-u4` y `web-p8` ya prueban "sin altas no hay Quiero ser socio".
 Respuesta de Mateo: (vacío)

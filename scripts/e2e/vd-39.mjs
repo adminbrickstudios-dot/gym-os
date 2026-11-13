@@ -75,7 +75,7 @@ try {
   await mia.waitFor({ timeout: 60000 });
   chequear(/Cambio a/.test(await mia.innerText()), "la recepción ve qué es: “Cambio a …”", `la fila dice: ${await mia.innerText()}`);
   await mia.locator('button:has-text("Aprobar")').click();
-  await r.locator("li", { hasText: `Cambio Plan${s}` }).filter({ has: r.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
+  await r.locator("li", { hasText: `Cambio Plan${s}` }).waitFor({ state: "detached", timeout: 30000 });   // mientras aprueba, el botón dice "Aprobando…" (ya no contiene "Aprobar"): se espera a que se vaya la fila entera
   chequear(await planActual() === nuevo.nombre, `aprobado: el plan cambió a ${nuevo.nombre}`, `el plan es ${await planActual()}`);
   const cob = await q(`select origen, privado.dia_local(hasta, $2) - privado.dia_local(now(), $2) as dias from public.coberturas where socio_id = $1 and anulada_en is null order by hasta`, [socio, zona]);
   chequear(cob.some((c) => c.origen === "traspaso" && c.dias === 10) && cob.some((c) => c.origen === "pago" && c.dias > 10), "los 10 días a favor pasaron al plan nuevo y se suma lo que pagó", `coberturas: ${JSON.stringify(cob)}`);
@@ -98,7 +98,7 @@ try {
     await fp.waitFor({ timeout: 60000 });
     chequear(/Pase/.test(await fp.innerText()), "compra un pase del día: la recepción lo ve como “Pase …”", `la fila dice: ${await fp.innerText()}`);
     await fp.locator('button:has-text("Aprobar")').click();
-    await r.locator("li", { hasText: `Cambio Plan${s}` }).filter({ has: r.locator('button:has-text("Aprobar")') }).waitFor({ state: "detached", timeout: 30000 });
+    await r.locator("li", { hasText: `Cambio Plan${s}` }).waitFor({ state: "detached", timeout: 30000 });   // mientras aprueba, el botón dice "Aprobando…" (ya no contiene "Aprobar"): se espera a que se vaya la fila entera
     chequear((await q(`select count(*)::int n from public.pases_diarios where socio_id = $1`, [socio]))[0].n === 1, "aprobado: el pase del día queda cargado y el plan no cambia", "no se cargó el pase");
   } else ok("el gimnasio demo no vende pases del día: nada para comprar");
 

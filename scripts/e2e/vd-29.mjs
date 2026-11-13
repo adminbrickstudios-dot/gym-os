@@ -20,6 +20,9 @@ const accion = (p, verbo) => dialogo(p).locator(`[data-buscador-accion="${verbo}
 
 try {
   const d = await pagina(b, COMPU);
+  // Con la app compilada, un goto justo después de cerrar el buscador puede chocar con la navegación que éste dejó en vuelo (ERR_ABORTED): se vuelve a pedir una vez.
+  const irOriginal = d.goto.bind(d);
+  d.goto = async (...a) => irOriginal(...a).catch(async (e) => { if (!/ERR_ABORTED/.test(e.message)) throw e; await d.waitForTimeout(800); return irOriginal(...a); });
   await entrar(d, "duena@ejemplo.invalid");
 
   // Un socio nuevo con DNI y plan, sin pagar (para cobrarle y para la Entrada).
@@ -113,7 +116,8 @@ try {
   await dialogo(d).locator("[data-buscador-tarea-ok]").waitFor({ timeout: 30000 });
   chequear(true, "“tarea …” anota la tarea y avisa sin cerrar", "");
   await cerrar(d);
-  await d.goto(`${G}/panel/tareas`);
+  // Recién cerrado el buscador, la pantalla puede estar navegando (ERR_ABORTED): se vuelve a pedir.
+  await d.goto(`${G}/panel/tareas`).catch(async () => { await d.waitForTimeout(800); await d.goto(`${G}/panel/tareas`); });
   chequear(await d.getByText(que).first().waitFor({ timeout: 30000 }).then(() => true, () => false), "la tarea aparece en Para hacer hoy", "la tarea no está en Para hacer hoy");
 
   // ── Permisos: el dueño carga gastos; la recepción no ve esa acción ni la pantalla ──

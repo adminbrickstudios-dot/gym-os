@@ -8,6 +8,10 @@
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
 #   humo-pasado  prueba en el demo de producción (transacción que revierte): alta con fecha y pago pasados + caja por medio
 #   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
+#   sembrar-prueba-mateo  crea el "[demo] Gimnasio Prueba Mateo" (slug demo-mateo): marca, planes, 30 socios en todos los estados, clases,
+#                 recepcionista y profe. Solo crea; si ya existe no lo rehace. Datos ficticios (F8.4, docs/base/PRUEBA-DUENO.md).
+#   usuarios-prueba-mateo  crea los 5 logins de ese gimnasio con la contraseña del secreto CLAVE_PRUEBA_MATEO (nunca va en el repo ni se escribe
+#                 acá). Necesita también SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY. Sin los secretos se frena y dice cuáles faltan.
 #   usuarios-demo crea los logins del demo (dueña, encargado, recepción, profe, socio) con la
 #                 contraseña que pongas; NO crea un super admin demo. Necesita los secretos
 #                 SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY.
@@ -22,7 +26,7 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo]
+        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo, sembrar-prueba-mateo, usuarios-prueba-mateo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
@@ -130,6 +134,30 @@ jobs:
           if [ -z "$DOMINIO" ]; then echo "::error::Falta el dominio (ej: gym-os-pied.vercel.app)"; exit 1; fi
           node scripts/datos/sembrar-demo.mjs --dominio "$DOMINIO"
           node scripts/datos/estado-base.mjs
+      - name: Sembrar el Gimnasio Prueba Mateo [demo]
+        if: inputs.accion == 'sembrar-prueba-mateo'
+        env:
+          DOMINIO: ${{ inputs.dominio }}
+        run: |
+          node scripts/datos/sembrar-prueba-mateo.mjs --dominio "$DOMINIO"
+          node scripts/datos/estado-base.mjs
+      - name: Usuarios del Gimnasio Prueba Mateo (la contraseña viene del secreto CLAVE_PRUEBA_MATEO)
+        if: inputs.accion == 'usuarios-prueba-mateo'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CLAVE_PRUEBA_MATEO: ${{ secrets.CLAVE_PRUEBA_MATEO }}
+        run: |
+          faltan=""
+          [ -z "$SUPABASE_URL" ] && faltan="$faltan SUPABASE_URL"
+          [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] && faltan="$faltan SUPABASE_SERVICE_ROLE_KEY"
+          [ ${#CLAVE_PRUEBA_MATEO} -lt 10 ] && faltan="$faltan CLAVE_PRUEBA_MATEO(10 o más letras)"
+          if [ -n "$faltan" ]; then
+            echo "::error::Faltan los secretos:$faltan. Settings → Secrets and variables → Actions → Secrets → New repository secret. CLAVE_PRUEBA_MATEO es la contraseña de los 5 usuarios de prueba: elegila vos y anotala en ACCESOS.md (archivo local, fuera del repo)."
+            exit 1
+          fi
+          echo "::add-mask::$CLAVE_PRUEBA_MATEO"
+          node scripts/datos/usuarios-demo.mjs --url "$SUPABASE_DB_URL" --supabase "$SUPABASE_URL" --servicio "$SUPABASE_SERVICE_ROLE_KEY" --contrasena "$CLAVE_PRUEBA_MATEO" --sin-admin --prueba
       - name: Usuarios del demo
         if: inputs.accion == 'usuarios-demo'
         env:

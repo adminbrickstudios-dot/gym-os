@@ -43,8 +43,13 @@ export function Paleta({ gimnasios }: { gimnasios: GimnasioPaleta[] }) {
   const ir = (c: Comando | undefined) => { if (!c) return; setAbierta(false); router.push(c.destino); };
   return (
     <div className="fixed inset-0 z-50 grid place-items-start justify-center bg-black/40 p-4 pt-[15vh]" role="dialog" aria-modal="true" aria-label="Buscar o ir a" data-paleta onClick={() => setAbierta(false)}>
-      <div className="tarjeta w-full max-w-lg p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
-        <input ref={entrada} className="campo" value={q} placeholder="Un gimnasio, una acción…" aria-label="Buscar"
+      <div className="tarjeta relative w-full max-w-lg p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+        {/* BASE-6: la X siempre visible, además de Esc y de tocar afuera. */}
+        <button type="button" onClick={() => setAbierta(false)} aria-label="Cerrar" data-cerrar-hoja
+          className="absolute top-2 right-2 z-10 grid place-items-center size-11 rounded-[var(--radio-campo)] texto-suave hover:text-[var(--texto)]">
+          <Icono nombre="cerrar" />
+        </button>
+        <input ref={entrada} className="campo !pr-12" value={q} placeholder="Un gimnasio, una acción…" aria-label="Buscar"
           onChange={(e) => { setQ(e.target.value); setSel(0); }}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") { e.preventDefault(); setSel((s) => Math.min(s + 1, lista.length - 1)); }
