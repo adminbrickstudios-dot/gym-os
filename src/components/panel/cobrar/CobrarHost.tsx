@@ -3,10 +3,15 @@
 // (ficha, Vencen hoy, Retención, Entrada, Ctrl+K) y al terminar vuelve al lugar de origen.
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Cobrar } from "./Cobrar";
+import dynamic from "next/dynamic";
 import { formatearPesos } from "@/lib/formato";
 import { guardarAviso, origenPara } from "@/lib/panel/origen";
 import { EVENTO_COBRAR, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho, type PedidoCobro } from "./evento";
+
+// E4: la hoja (466 líneas + vender/compartido + cupones) no viaja con cada pantalla: se baja al montar el panel, en un rato libre
+// del navegador (no frena el primer pintado), así que al tocar Cobrar casi siempre ya está. No cambia nada de lo que hace.
+const cargarCobrar = () => import("./Cobrar").then((m) => m.Cobrar);
+const Cobrar = dynamic(cargarCobrar, { ssr: false });
 
 export function CobrarHost({ sedeId }: { sedeId: string }) {
   const [pedido, setPedido] = useState<(PedidoCobro & { n: number }) | null>(null);
@@ -17,6 +22,8 @@ export function CobrarHost({ sedeId }: { sedeId: string }) {
 
   useEffect(() => {
     document.documentElement.dataset.cobrarHoja = "si";
+    const idle = (window as Window & { requestIdleCallback?: (f: () => void) => number }).requestIdleCallback;
+    if (idle) idle(() => { void cargarCobrar(); }); else setTimeout(() => { void cargarCobrar(); }, 1500);
     const abrir = (e: Event) => { setHizoCobro(false); setPedido({ ...(e as CustomEvent<PedidoCobro>).detail, n: Date.now() }); };
     window.addEventListener(EVENTO_COBRAR, abrir);
     return () => { window.removeEventListener(EVENTO_COBRAR, abrir); delete document.documentElement.dataset.cobrarHoja; };

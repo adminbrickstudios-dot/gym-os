@@ -7,7 +7,6 @@
 // Contra una base local (localhost) no hay Realtime (la imitación local no lo tiene): ahí el pedido es cada 4 s, y lo dice el estado
 // ("periodico"). Además, al volver a la pestaña se pide enseguida: lo que pasó mientras no se miraba no se pierde.
 import { entradasDesde, type LoteEntradas } from "@/app/panel/entrada/ventana-acciones";
-import { crearClienteNavegador } from "@/lib/supabase/navegador";
 
 /** E5: se dispara en la ventana cada vez que llega una entrada nueva: las listas del panel (Últimas entradas) se renuevan al instante, sin pedidos periódicos. */
 export const EVENTO_ENTRADAS_NUEVAS = "gymos:entradas-nuevas";
@@ -33,7 +32,11 @@ let reloj: ReturnType<typeof setInterval> | null = null;
 let enVuelo = false;
 let pendiente = false;
 let canal: { unsubscribe: () => unknown } | null = null;
-let cliente: ReturnType<typeof crearClienteNavegador> | null = null;
+// E4: el cliente de Supabase (auth + realtime + postgrest + storage) NO viaja con cada pantalla del panel: se baja con import()
+// recién cuando se abre el canal. Mientras baja (o si falla) corre el pedido de plan B que arma arrancar().
+const traerCliente = async () => (await import("@/lib/supabase/navegador")).crearClienteNavegador();
+let cliente: Awaited<ReturnType<typeof traerCliente>> | null = null;
+let generacion = 0;   // cada parar() la sube: un canal que termina de bajar después de parar no se abre
 const vistos = new Set<string>();
 
 const visible = () => typeof document === "undefined" || document.visibilityState === "visible";
@@ -93,9 +96,11 @@ function pararReloj() {
   reloj = null;
 }
 
-function abrirCanal(g: string) {
+async function abrirCanal(g: string) {
+  const gen = generacion;
   try {
-    cliente ??= crearClienteNavegador();
+    cliente ??= await traerCliente();
+    if (gen !== generacion || g !== gimnasio) return;   // se paró mientras bajaba el cliente
     const filtro = `gimnasio_id=eq.${g}`;
     const c = cliente
       .channel(`entradas-${g}`)
@@ -109,6 +114,7 @@ function abrirCanal(g: string) {
       });
     canal = c;
   } catch {
+    if (gen !== generacion) return;
     poner("con_demora");
     arrancarReloj(CADA_CAIDO_MS);
   }
@@ -121,13 +127,14 @@ function arrancar() {
   if (gimnasio && hayRealtime()) {
     // Hasta que el canal confirme, se pide cada 30 s: si nunca conecta, ya está el plan B (y "con demora" lo dice el canal).
     arrancarReloj(CADA_CAIDO_MS);
-    abrirCanal(gimnasio);
+    void abrirCanal(gimnasio);
   } else {
     poner("periodico");
     arrancarReloj(CADA_MS);
   }
 }
 function parar() {
+  generacion++;
   pararReloj();
   if (canal) { void canal.unsubscribe(); canal = null; }
   cursor = null; enVuelo = false; pendiente = false; vistos.clear();
