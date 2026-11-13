@@ -1,34 +1,66 @@
 "use client";
-// VD-4 · Un solo "oído" a la puerta para todo el panel (docs/v2/01 §5).
-// Cada 4 s, y solo con la pestaña a la vista, le pregunta a la base qué entró o se rechazó desde el último cursor
-// (`entradas_desde`) y se lo avisa a quien esté suscripto: los avisos de vidrio, la barra fija y la lista "Hoy".
-// Aunque haya tres componentes escuchando, hay UN solo pedido cada 4 s. Sin Realtime por ahora: cuando se
-// quiera, solo cambia `pedir` (la imitación local no lo tiene y no hace falta).
+// VD-4 + E3 · Un solo "oído" a la puerta para todo el panel.
+// Con Supabase Realtime (un canal por gimnasio, con la sesión de quien mira, así que solo llega lo que su rol puede leer) cada entrada
+// nueva avisa al instante; el aviso en sí se arma con `entradas_desde` (la misma función de siempre, nada se calcula en TypeScript:
+// Realtime solo dice "hay algo nuevo"). Aunque haya tres componentes escuchando, hay UN solo canal.
+// Si Realtime se cae, vuelve al pedido periódico CADA 30 s y lo dice (estadoAvisos() = "con_demora"): nunca un fallback silencioso.
+// Contra una base local (localhost) no hay Realtime (la imitación local no lo tiene): ahí el pedido es cada 4 s, y lo dice el estado
+// ("periodico"). Además, al volver a la pestaña se pide enseguida: lo que pasó mientras no se miraba no se pierde.
 import { entradasDesde, type LoteEntradas } from "@/app/panel/entrada/ventana-acciones";
+import { crearClienteNavegador } from "@/lib/supabase/navegador";
 
+/** Cada cuánto se pide cuando NO hay Realtime (base local). */
 export const CADA_MS = 4000;
+/** Cada cuánto se pide cuando Realtime se cayó: lento a propósito (carga sobre la base), y se avisa en chico. */
+export const CADA_CAIDO_MS = 30_000;
 /** Se pide con un poco de solape y se descartan los ya vistos: una entrada que se confirma tarde no se pierde. */
 const SOLAPE_MS = 10_000;
+
+/** al_instante: Realtime andando · con_demora: Realtime caído, se pide cada 30 s · periodico: sin Realtime (base local), cada 4 s. */
+export type EstadoAvisos = "al_instante" | "con_demora" | "periodico";
 
 type Oyente = (lote: LoteEntradas) => void;
 
 const oyentes = new Set<Oyente>();
+const oyentesEstado = new Set<(e: EstadoAvisos) => void>();
+let estado: EstadoAvisos = "periodico";
 let gimnasio: string | null = null;
 let cursor: string | null = null;
 let reloj: ReturnType<typeof setInterval> | null = null;
 let enVuelo = false;
+let pendiente = false;
+let canal: { unsubscribe: () => unknown } | null = null;
+let cliente: ReturnType<typeof crearClienteNavegador> | null = null;
 const vistos = new Set<string>();
 
 const visible = () => typeof document === "undefined" || document.visibilityState === "visible";
+const hayRealtime = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  return !!url && !/\/\/(localhost|127\.\d+\.\d+\.\d+|\[::1\])(:|\/|$)/.test(url);
+};
+
+export const estadoAvisos = () => estado;
+/** Avisa cuando cambia el estado del oído (para decir "avisos con demora" en chico). Devuelve la función para dejar de escuchar. */
+export function escucharEstadoAvisos(f: (e: EstadoAvisos) => void): () => void {
+  oyentesEstado.add(f);
+  f(estado);
+  return () => { oyentesEstado.delete(f); };
+}
+function poner(e: EstadoAvisos) {
+  if (estado === e) return;
+  estado = e;
+  oyentesEstado.forEach((f) => f(e));
+}
 
 async function pedir() {
-  if (enVuelo || !gimnasio || !visible()) return;
+  if (!gimnasio || !visible()) return;
+  if (enVuelo) { pendiente = true; return; }   // llegó otro aviso mientras se pedía: se vuelve a pedir apenas termine
   enVuelo = true;
   const g = gimnasio;
   try {
     const desde = cursor ? new Date(Date.parse(cursor) - SOLAPE_MS).toISOString() : null;
     const r = await entradasDesde(g, desde);
-    if (g !== gimnasio || !r.lote) return;   // sin conexión o error: se reintenta en el próximo ciclo, sin avisar
+    if (g !== gimnasio || !r.lote) return;   // sin conexión o error: se reintenta en el próximo ciclo o aviso
     const nuevas = r.lote.entradas.filter((x) => !vistos.has(x.ingreso_id));
     const nuevasAlertas = r.lote.alertas.filter((x) => !vistos.has(x.alerta_id));
     for (const x of nuevas) vistos.add(x.ingreso_id);
@@ -40,20 +72,62 @@ async function pedir() {
       const lote: LoteEntradas = { ...r.lote, entradas: nuevas, alertas: nuevasAlertas };
       oyentes.forEach((o) => o(lote));
     }
-  } finally { enVuelo = false; }
+  } finally {
+    enVuelo = false;
+    if (pendiente) { pendiente = false; void pedir(); }
+  }
 }
 
 const alVolver = () => { if (visible()) void pedir(); };
 
+function arrancarReloj(ms: number) {
+  if (reloj) clearInterval(reloj);
+  reloj = setInterval(() => { void pedir(); }, ms);
+}
+function pararReloj() {
+  if (reloj) clearInterval(reloj);
+  reloj = null;
+}
+
+function abrirCanal(g: string) {
+  try {
+    cliente ??= crearClienteNavegador();
+    const filtro = `gimnasio_id=eq.${g}`;
+    const c = cliente
+      .channel(`entradas-${g}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "ingresos", filter: filtro }, () => { void pedir(); })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "ingresos", filter: filtro }, () => { void pedir(); })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "alertas_prestamo", filter: filtro }, () => { void pedir(); })
+      .subscribe((s) => {
+        if (g !== gimnasio) return;
+        if (s === "SUBSCRIBED") { pararReloj(); poner("al_instante"); void pedir(); }   // al conectar (o reconectar) se pone al día
+        else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT" || s === "CLOSED") { poner("con_demora"); arrancarReloj(CADA_CAIDO_MS); }
+      });
+    canal = c;
+  } catch {
+    poner("con_demora");
+    arrancarReloj(CADA_CAIDO_MS);
+  }
+}
+
 function arrancar() {
-  if (reloj) return;
+  if (canal || reloj) return;
   void pedir();
-  reloj = setInterval(() => { void pedir(); }, CADA_MS);
   document.addEventListener("visibilitychange", alVolver);
+  if (gimnasio && hayRealtime()) {
+    // Hasta que el canal confirme, se pide cada 30 s: si nunca conecta, ya está el plan B (y "con demora" lo dice el canal).
+    arrancarReloj(CADA_CAIDO_MS);
+    abrirCanal(gimnasio);
+  } else {
+    poner("periodico");
+    arrancarReloj(CADA_MS);
+  }
 }
 function parar() {
-  if (reloj) clearInterval(reloj);
-  reloj = null; cursor = null; enVuelo = false; vistos.clear();
+  pararReloj();
+  if (canal) { void canal.unsubscribe(); canal = null; }
+  cursor = null; enVuelo = false; pendiente = false; vistos.clear();
+  poner("periodico");
   document.removeEventListener("visibilitychange", alVolver);
 }
 

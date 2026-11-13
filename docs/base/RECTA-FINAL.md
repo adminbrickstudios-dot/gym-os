@@ -49,7 +49,7 @@ toque plata se prueba con números fijos antes de publicar.
 | E4 | Partir `VentanaEntrada.tsx` y cargar lo pesado solo al usarlo | El JS de las pantallas del panel baja (medido antes y después) | ❌ |
 | E5 | Los pedidos periódicos que quedan, a Realtime o 30 s | Ningún pedido cada menos de 30 s en el panel | ❌ |
 | E6 | Recepción sin internet: lo dice en rojo, nada parece andar cuando no anda | e2e con Playwright offline | ❌ |
-| E7 | Pregunta "¿Base o Pase?" en PREGUNTAS (Mateo compró pasegym.com); no se cambia el nombre hasta que conteste | Anotada | ❌ |
+| E7 | Pregunta "¿Base o Pase?" en PREGUNTAS (Mateo compró pasegym.com); no se cambia el nombre hasta que conteste | Anotada | ✅ anotada en PREGUNTAS (P-E7), decidido por defecto: no se toca el nombre |
 | E8 | Las pantallas con más de 2 viajes a la base, con la medición de F0.1 | Tabla antes/después en `VELOCIDAD.md` | ❌ |
 
 ## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche): **se publica apenas está en verde, esta misma noche**

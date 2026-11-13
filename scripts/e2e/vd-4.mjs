@@ -96,8 +96,24 @@ try {
   chequear(tarde < 6000, `a la recepción, en Socios, le aparece el aviso en ${(tarde / 1000).toFixed(1)} s`, `tardó ${(tarde / 1000).toFixed(1)} s (el límite es 6)`);
   chequear(/entró/.test(await verde.first().innerText()), `el aviso dice: “${(await verde.first().innerText()).replace(/\s+/g, " ").slice(0, 70)}”`, "el aviso no dice que entró");
   await capturar(r, "vd4-compu-aviso-verde");
+  // E2: nace GRANDE, abajo a la derecha; a los 1,5 s se achica a pastilla; tocarla la fija con Ver ficha / Cobrar / Anular.
+  chequear(await verde.first().getAttribute("data-aviso-fase") === "grande", "el aviso nace grande", "el aviso no nació grande");
+  const caja = await verde.first().boundingBox();
+  const vista = r.viewportSize();
+  chequear(!!caja && !!vista && caja.y > vista.height / 2 && caja.x > vista.width / 2, "y sale abajo a la derecha", `sale en x=${caja?.x} y=${caja?.y}`);
+  await r.locator('[data-aviso-entrada="verde"][data-aviso-fase="pastilla"]').first().waitFor({ timeout: 6000 });
+  ok("a los 1,5 s se achica a una pastilla");
+  await capturar(r, "vd4-compu-aviso-pastilla");
+  await r.locator('[data-aviso-entrada="verde"][data-aviso-fase="pastilla"]').first().click();
+  const fijo = r.locator('[data-aviso-entrada="verde"][data-aviso-fase="fijo"]').first();
+  await fijo.waitFor({ timeout: 5000 });
+  chequear(await fijo.locator("[data-aviso-ficha]").count() === 1 && await fijo.locator("[data-aviso-anular]").count() === 1, "tocar la pastilla la fija con Ver ficha y Anular la entrada", "el aviso fijo no tiene sus botones");
+  await r.waitForTimeout(10000);
+  chequear(await fijo.count() === 1, "el aviso fijo no se va solo", "el aviso fijo se fue solo");
+  await capturar(r, "vd4-compu-aviso-fijo");
+  await fijo.locator('[aria-label="Cerrar el aviso"]').click();
   await verde.first().waitFor({ state: "detached", timeout: 12000 });
-  ok("el aviso verde se va solo");
+  ok("el aviso se cierra");
 
   // ── Un rechazo en la tablet: el aviso queda con Cobrar ──
   await t.goto(`${G}/kiosco`);

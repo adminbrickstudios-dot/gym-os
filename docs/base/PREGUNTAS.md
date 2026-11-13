@@ -463,3 +463,10 @@ Decidido por defecto; nada de esto toca permisos y lo de plata no se arregló.
 - **"Vencen hoy" vs "Vencen y cobrar".** El menú dice lo segundo (lo fija `menu-vd11.test.ts`) y la pantalla y los "Volver a Vencen hoy" de Cobrar lo primero (lo fija `vd-28`). Se dejó como estaba: unificarlo toca `Cobrar.tsx` y esos dos tests.
 - **Reglas 16 a 18 de FLUIDEZ** (red y CPU lentas, nada salta al cargar, el teclado del celular no tapa el botón): son pruebas con Playwright (4G lento, CPU x4, teclado virtual) y no se pueden correr en esta compu; se escribirían como un recorrido nuevo en Actions. Estimación: 1 día. No se hizo.
 Respuesta de Mateo: (vacío)
+
+## P-E7 · ¿Base o Pase? (12/11, Mateo compró pasegym.com)
+El dominio de la plataforma es `pasegym.com`, pero el producto se llama Base en pantalla y en los documentos (D39). Que la página diga Pase y el panel Base confunde.
+- A) Dejar Base en todo (recomendada hasta que contestes: no se toca ningún texto ni logo).
+- B) Cambiar todo a Pase: títulos, textos, el correo, los PDF, la guía. Es una pasada de textos y de la marca de la plataforma.
+Decidido por defecto: A. No se cambia ningún nombre hasta que contestes.
+Respuesta de Mateo: (vacío)
