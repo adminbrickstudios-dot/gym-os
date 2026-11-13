@@ -26,7 +26,7 @@ try {
   await ver.waitFor({ timeout: 30000 });
   chequear(await ver.getAttribute("data-veredicto") === "rojo", "Testigo Sin Pago da el veredicto rojo", `dio ${await ver.getAttribute("data-veredicto")}`);
 
-  await ver.locator("[data-ventana-dejar]").first().click();
+  await ver.locator("button", { hasText: "Dejar pasar igual" }).first().click();
   const form = ver.locator("[data-dejar-pasar]");
   await form.waitFor({ timeout: 15000 });
   await form.locator("button.pestana").first().click();   // el primer motivo de la lista
