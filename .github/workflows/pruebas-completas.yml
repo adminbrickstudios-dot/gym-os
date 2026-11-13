@@ -124,6 +124,9 @@ jobs:
       - name: Pantallas (e2e, cada recorrido aunque falle otro)
         env:
           SOLO: ${{ inputs.solo }}
+          # Los recorridos calculan "hoy" con la hora de la compu (hoy.getDate()): el runner está en UTC y entre las 21 y las 24 h de Argentina
+          # ya es "mañana" para ellos pero no para el gimnasio (vd-14, vd-7, pla-1 fallaban solo a esa hora). La zona del gimnasio demo.
+          TZ: America/Argentina/Buenos_Aires
           E2E_DEPURAR: "1"
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
