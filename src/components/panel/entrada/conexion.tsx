@@ -41,6 +41,21 @@ export function useSinInternet(): boolean {
       window.removeEventListener(EVENTO_FALLO_RED, caer); window.removeEventListener(EVENTO_RED_OK, volver);
     };
   }, []);
+  // Ya en rojo: cada 4 s se mira si volvió (el navegador no siempre avisa "online"); solo corre mientras no hay internet.
+  useEffect(() => {
+    if (!sin) return;
+    let vivo = true;
+    const id = setInterval(async () => {
+      if (navigator.onLine === false || document.visibilityState !== "visible") return;
+      try {
+        const c = new AbortController(); const t = setTimeout(() => c.abort(), 5000);
+        const r = await fetch(`/favicon.ico?_=${Date.now()}`, { cache: "no-store", signal: c.signal });
+        clearTimeout(t);
+        if (vivo && r.status > 0) setSin(false);
+      } catch { /* sigue sin internet */ }
+    }, 4000);
+    return () => { vivo = false; clearInterval(id); };
+  }, [sin]);
   return sin;
 }
 

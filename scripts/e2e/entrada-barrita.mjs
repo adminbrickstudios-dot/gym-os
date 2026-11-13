@@ -19,6 +19,12 @@ const config = (c = {}) => db.query(
    on conflict (gimnasio_id) do update set resultado_entrada = $2, abrir_al_tipear = true, barra_fija = false, anotar_solo_en_verde = $3`,
   [gim, c.modo ?? "aviso", !!c.soloVerde]);
 
+// Lo que había: se devuelve al final, para no cambiarle el modo a los recorridos que siguen.
+const [previa] = (await db.query(`select resultado_entrada, abrir_al_tipear, barra_fija, anotar_solo_en_verde from public.configuracion_entrada where gimnasio_id = $1`, [gim])).rows;
+const devolverConfig = () => previa
+  ? db.query(`update public.configuracion_entrada set resultado_entrada = $2, abrir_al_tipear = $3, barra_fija = $4, anotar_solo_en_verde = $5 where gimnasio_id = $1`, [gim, previa.resultado_entrada, previa.abrir_al_tipear, previa.barra_fija, previa.anotar_solo_en_verde])
+  : db.query(`delete from public.configuracion_entrada where gimnasio_id = $1`, [gim]);
+
 // Los casos testigo (un socio por color). La búsqueda de la barrita es por DNI: si no tienen, se les pone uno (demo local, datos ficticios).
 const DNI = { "Al Día": "39100101", "Por Vencer": "39100102", "Sin Pago": "39100103", "En Tolerancia": "39100104" };
 const T = {};
@@ -349,7 +355,7 @@ try {
   }
 } finally {
   await db.query(`update public.socios set dni = $2, dado_de_baja_en = $3, motivo_baja = $4 where id = $1`, [relleno.id, relleno.dni, relleno.dado_de_baja_en, relleno.motivo_baja]).catch(() => {});
-  await config().catch(() => {});
+  await devolverConfig().catch(() => {});
   await b.close();
   await db.end();
 }

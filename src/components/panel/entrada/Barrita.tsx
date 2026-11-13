@@ -39,6 +39,22 @@ const PAUSA_DNI_MS = 600;
 /** Un Enter que llega apenas sale el resultado es el segundo del lector: no anota. */
 const ENTER_TARDE_MS = 500;
 
+/**
+ * Dónde se para la barrita: abajo a la derecha; si ahí taparía un botón "Cobrar" de la pantalla (Vender, Vencen hoy), abajo en el medio.
+ * Se decide una vez, al empezar a escribir: no se corre mientras se usa.
+ */
+function elegirLado(): "derecha" | "centro" {
+  const w = window.innerWidth, h = window.innerHeight;
+  const ancho = Math.min(368, w - 32), alto = 320;
+  const choca = (x0: number) => [...document.querySelectorAll<HTMLElement>("main a, main button")].some((e) => {
+    if (!/^Cobrar(\s*\S{0,3})?$/i.test((e.textContent ?? "").trim())) return false;
+    const r = e.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && r.left < x0 + ancho && r.right > x0 && r.top < h - 16 && r.bottom > h - 16 - alto;
+  });
+  if (!choca(w - 16 - ancho)) return "derecha";
+  return choca((w - ancho) / 2) ? "derecha" : "centro";
+}
+
 const iniciales = (n: string) => { const [a, b] = n.trim().split(/\s+/); return `${(a?.[0] ?? "?").toUpperCase()}${(b?.[0] ?? "").toUpperCase()}`; };
 
 export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero, esRecepcion, sinInternet, onIngreso }: {
@@ -53,6 +69,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
   const [texto, setTexto] = useState("");
   const [tic, setTic] = useState(0);
   const [cobrando, setCobrando] = useState(false);
+  const [lado, setLado] = useState<"derecha" | "centro">("derecha");
   const caja = useRef<HTMLDivElement>(null);
   const faseRef = useRef<Fase>(fase);
   const textoRef = useRef("");
@@ -225,10 +242,10 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
 
       if (f.t === "idle") {
         // Un número abre la barrita. Un código del lector que empieza con letras (QR, llavero) también: teclas de corrido.
-        if (digito) { e.preventDefault(); rafaga.current = e.key; ponerTexto(e.key); poner({ t: "escribiendo" }); return; }
+        if (digito) { e.preventDefault(); rafaga.current = e.key; setLado(elegirLado()); ponerTexto(e.key); poner({ t: "escribiendo" }); return; }
         if (imprimible) {
           rafaga.current = rapida ? rafaga.current + e.key : e.key;
-          if (rapida && rafaga.current.length >= 2 && !/^\s+$/.test(rafaga.current)) { e.preventDefault(); ponerTexto(rafaga.current); poner({ t: "escribiendo" }); }
+          if (rapida && rafaga.current.length >= 2 && !/^\s+$/.test(rafaga.current)) { e.preventDefault(); setLado(elegirLado()); ponerTexto(rafaga.current); poner({ t: "escribiendo" }); }
         }
         return;
       }
@@ -355,8 +372,8 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
     <div ref={caja} data-barrita={fase.t} data-barrita-color={fase.t === "resultado" || fase.t === "anotando" ? fase.r.v.color : fase.t === "entro" ? fase.color : undefined}
       role="status" aria-live="polite" aria-label="Entrada por DNI"
       onMouseEnter={() => { encima.current = true; }} onMouseLeave={() => { encima.current = false; }}
-      className="barrita fixed z-40 right-4 bottom-4 w-[min(23rem,calc(100vw-2rem))] rounded-[var(--radio)] bg-[var(--tarjeta)] overflow-hidden border-2"
-      style={{ borderColor: colorBorde, boxShadow: "var(--sombra-flota)" }}>
+      className="barrita fixed z-40 bottom-4 w-[min(23rem,calc(100vw-2rem))] rounded-[var(--radio)] bg-[var(--tarjeta)] overflow-hidden border-2"
+      style={{ borderColor: colorBorde, boxShadow: "var(--sombra-flota)", ...(lado === "centro" ? { left: "calc(50% - min(11.5rem, 50vw - 1rem))" } : { right: "1rem" }) }}>
       {rojoRed && (
         <p data-barrita-sin-internet className="px-4 py-2 font-bold text-white text-center bg-[color-mix(in_oklab,var(--rojo),black_38%)]"><Icono nombre="alerta" /> {TEXTO_SIN_INTERNET}</p>
       )}
