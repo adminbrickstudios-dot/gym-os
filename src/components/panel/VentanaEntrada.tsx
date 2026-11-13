@@ -1,104 +1,75 @@
 "use client";
 // VD-1 · La Entrada que está en todos lados (docs/v2/01-ENTRADA.md §1-2 y §6).
-// Una sola ventana flotante en el layout del panel: se abre al tipear un número
-// (fuera de campos de texto), con el botón (F2 / Ctrl+E) o con un lector USB, y
-// opcionalmente hay una barra fija a la derecha. Todo lo que dice y hace sale de
-// las funciones de la base de siempre (estado_acceso, registrar_ingreso, leer_qr…):
-// acá no se calcula nada.
-import { urlDarDeAlta } from "@/lib/panel/alta-url";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+// Una sola ventana flotante en el layout del panel: se abre con el botón (F2 / Ctrl+E), con "/" o con un lector USB desde
+// la ventana, y opcionalmente hay una barra fija a la derecha. Todo lo que dice y hace sale de las funciones de la base de
+// siempre (estado_acceso, registrar_ingreso, leer_qr…): acá no se calcula nada.
+//
+// E4: este archivo es el que manda (el estado y los atajos); cada paso vive en su pieza dentro de ./entrada/:
+//   Barrita (E1), PasoEscribir, PasoVeredicto, PasosFinales, BarraFija, y lo pesado con carga diferida en cargas.tsx
+//   (alta rápida, prueba gratis, "dejar pasar", comprobante del cobro, cámara del QR).
+// E1: con `resultado_entrada` = "aviso" (compu) un número tipeado fuera de un campo abre la barrita, no esta ventana.
+// E6: sin internet lo dice en rojo (conexion.tsx).
 import { useCallback, useEffect, useRef, useState, useTransition, startTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { buscarSociosRapido, type ResultadoSocio } from "@/app/panel/acciones";
-import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, entradaRapida, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type PruebaDni, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
-import { FormDejarPasar } from "./FormDejarPasar";
+import { type EventoHoy, anularEntrada, cupoDejarPasar, leerLlavero, leerQR, modoPrueba, darPruebaGratis, pruebaPorDni, entradaRapida, registrarEntrada, registrarSalida, terminarPausa, veredicto, type CupoDejarPasar, type Guia, type PromesaPago, type ResultadoIngreso, type ResultadoSalida, type Veredicto } from "@/app/panel/entrada/acciones";
 import { efectiva, EVENTO_PISADO, leerPisado, type ConfigEntrada, type PisadoEnEstaCompu } from "@/app/panel/entrada/config";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
 import { CierreInactividad } from "@/app/panel/pin/CierreInactividad";
 import { crearDetectorLector, esLecturaRepetida, LECTOR_MIN_CARACTERES, LECTOR_PAUSA_MAX_MS } from "@/app/panel/entrada/lector";
 import { leerConfigVisita, type RegistrarSalida, type UltimaEntrada } from "@/app/panel/entrada/ventana-acciones";
-import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta, type PlanParaAlta, type ProspectoOfrecido } from "@/app/panel/socios/acciones";
+import { altaRapida, planesParaAlta, prospectoPorTelefono, volverADarDeAlta } from "@/app/panel/socios/acciones";
 import { leerConReintento } from "@/lib/panel/lectura";
-import { TarjetasPlan, PrimerPago } from "./TarjetasPlan";
-import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { Hoja } from "@/components/ui/Hoja";
-import { Mensaje } from "@/components/ui/Mensaje";
-import { Tilde } from "@/components/ui/Tilde";
-import { colorVar, PuntoEstado } from "./Estado";
+import { Icono } from "@/components/ui/Icono";
 import { EVENTO_ABRIR_SOCIO, EVENTO_AVISO_LOCAL, type AvisoLocal } from "./AvisosEntrada";
-import { EventosHoyEntrada } from "./EventosHoyEntrada";
 import { CartelEmergencia, useEmergencia } from "./CartelEmergencia";
 import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
-import { MandarComprobante } from "@/app/panel/vender/compartido";
-import { formatearPesos } from "@/lib/formato";
-import { Icono } from "@/components/ui/Icono";
+import { Barrita } from "./entrada/Barrita";
+import BarraFija from "./entrada/BarraFija";
+import { AltaRapida, Camara, PruebaGratis, precargarAlta, precargarDejarPasar, precargarPrueba } from "./entrada/cargas";
+import { CLAVE_SEDE, CLAVE_VOLVER, conPuntos, EVENTO_ABRIR_ENTRADA, EVENTO_ABRIR_ENTRADA_CON, ES_QR, esEditable, hayAlgoEncima, sinPuntos, type Alta, type FormPrueba, type Hecho, type Paso, type PedidoAbrirSocio } from "./entrada/comun";
+import { SinInternet, useSinInternet } from "./entrada/conexion";
+import PasoEscribir from "./entrada/PasoEscribir";
+import { PasoAnotado, PasoSalio } from "./entrada/PasosFinales";
+import PasoVeredicto from "./entrada/PasoVeredicto";
 
-export const EVENTO_ABRIR_ENTRADA = "gymos:abrir-entrada";
-/** VD-29: abrir la ventana con un DNI, número o nombre ya escrito (detail = el texto). */
-export const EVENTO_ABRIR_ENTRADA_CON = "gymos:abrir-entrada-con";
+// Lo que otras pantallas importan de acá (siguen apuntando a este archivo).
+export { EVENTO_ABRIR_ENTRADA, EVENTO_ABRIR_ENTRADA_CON };
+export { VolverAEntrada } from "./entrada/VolverAEntrada";
 
-const ES_QR = /^GYMOS1\./;
-const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
-
-type Paso = "escribir" | "veredicto" | "anotado" | "alta" | "salio" | "prueba";
-/** VD-51: lo que se escribe para darle la prueba gratis a un DNI nuevo (o a quien reservó desde la página). */
-type FormPrueba = { dni: string; nombre: string; apellido: string; telefono: string; info: PruebaDni | null; error: string | null };
-/** VD-6 · El alta rápida dentro de la ventana: datos → plan → (cobro en la hoja) → entra. */
-type Alta = {
-  dni: string; nombre: string; apellido: string; telefono: string; plan: string;
-  paso: "datos" | "plan"; planes: PlanParaAlta[] | null; ofrecido: ProspectoOfrecido | null; vinculado: string | null; error: string | null;
-};
-const CLAVE_SEDE = "gymos.entrada.sede";
-/** VD-1b: la ficha abierta desde la ventana deja acá el socio (CLAVE_FICHA); su "Volver" lo pide de vuelta (CLAVE_VOLVER). */
-const CLAVE_FICHA = "gymos.entrada.ficha";
-const CLAVE_VOLVER = "gymos.entrada.volver";
-
-/** VD-1b · El "Volver" de la ficha abierta desde la Entrada: regresa a donde estabas y la ventana se reabre con el mismo socio. */
-export function VolverAEntrada({ socioId, nombre }: { socioId: string; nombre: string }) {
-  const router = useRouter();
-  return (
-    <button type="button" className="boton boton-principal" data-volver-entrada
-      onClick={() => {
-        let socio: ResultadoSocio = { socio_id: socioId, numero: null, nombre, color: "gris", texto: "", puede: false, dado_de_baja: false };
-        try {
-          const guardado = JSON.parse(sessionStorage.getItem(CLAVE_FICHA) ?? "null");
-          if (guardado?.socio?.socio_id === socioId) socio = guardado.socio;
-          sessionStorage.setItem(CLAVE_VOLVER, JSON.stringify({ socio, ts: Date.now() }));
-        } catch { /* sin almacenamiento: vuelve igual, sin reabrir */ }
-        if (window.history.length > 1) router.back(); else router.push("/panel");
-      }}>
-      ← Volver a la Entrada con {nombre.split(" ")[0]}
-    </button>
-  );
-}
-type Hecho = ResultadoIngreso & { nombre: string; hora: string; socioId: string };
-
-/** Un campo donde se escribe (la ventana nunca le roba el foco). */
-const esEditable = (t: EventTarget | null) => {
-  const e = t as HTMLElement | null;
-  if (!e || !e.tagName) return false;
-  return e.tagName === "INPUT" || e.tagName === "TEXTAREA" || e.tagName === "SELECT" || e.isContentEditable;
-};
-
-/** El DNI con puntos a medida que se tipea (30.123.456); si no son solo números, tal cual. */
-function conPuntos(t: string): string {
-  if (!/^[\d.]*$/.test(t)) return t;
-  const d = t.replace(/\./g, "");
-  return d.length >= 7 && d.length <= 8 ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : d;
-}
-const sinPuntos = (t: string) => (/^[\d.]*$/.test(t) ? t.replace(/\./g, "") : t);
-
-function Iniciales({ nombre }: { nombre: string }) {
-  const [a, b] = nombre.trim().split(/\s+/);
-  return <>{(a?.[0] ?? "?").toUpperCase()}{(b?.[0] ?? "").toUpperCase()}</>;
+/** La compu (y no el celular): ahí vive la barrita. En el celular la Entrada es su pantalla y no cambia nada. */
+function useEsCompu() {
+  const [si, setSi] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia("(min-width: 1024px)");
+    const leer = () => setSi(m.matches);
+    leer();
+    m.addEventListener("change", leer);
+    return () => m.removeEventListener("change", leer);
+  }, []);
+  return si;
 }
 
-export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, conQr, conLlavero, esRecepcion, sedes = [], puedeCobrar = false }: {
+type Props = {
   gimnasioId: string; sedeId: string; zona: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; esRecepcion: boolean;
   /** VD-1b: las sedes entre las que el dueño elige (vacío si no puede elegir). */
   sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean;
-}) {
+};
+
+export function VentanaEntrada(props: Props) {
+  // E6: la franja roja va en todo el panel (también en la pantalla de Entrada, donde la ventana no se mete).
+  const sin = useSinInternet();
+  return (
+    <>
+      <SinInternet sin={sin} />
+      <VentanaCuerpo {...props} sinInternet={sin} />
+    </>
+  );
+}
+
+function VentanaCuerpo({ gimnasioId, sedeId: sedeBase, zona, config, conQr, conLlavero, esRecepcion, sedes = [], puedeCobrar = false, sinInternet }: Props & { sinInternet: boolean }) {
   const ruta = usePathname();
   // VD-1b: la sede en la que se anota (la elegida en esta compu; la base valida que sea del gimnasio).
   const [sedeElegida, setSedeElegida] = useState<string | null>(null);
@@ -113,6 +84,7 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   const [pisado, setPisado] = useState<PisadoEnEstaCompu>({});
   const cfg = efectiva(config, pisado);
+  const esCompu = useEsCompu();
   const [abierta, setAbierta] = useState(false);
   // VD-46M: el cartel rojo mientras la puerta está en emergencia (se pregunta solo con la ventana abierta).
   const emergencia = useEmergencia(sedeId, abierta);
@@ -175,11 +147,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Los oyentes de teclado viven mucho: leen estas copias para no quedarse con valores viejos.
   const abiertaRef = useRef(false);
   const conBarraRef = useRef(false);
+  const barritaRef = useRef(false);
   const cfgRef = useRef(cfg);
   const formandoRef = useRef(false);
   const puedeEnterRef = useRef(false);
   const anotarRef = useRef<() => void>(() => {});
   const dejarRef = useRef<() => void>(() => {});
+  const dejarAlAbrirRef = useRef(false);
   const nadieRef = useRef<string | null>(null);
   const iniciarAltaRef = useRef<(dni: string) => void>(() => {});
   useEffect(() => { textoRef.current = texto; }, [texto]);
@@ -206,6 +180,8 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     document.documentElement.dataset.barraEntrada = conBarra ? "si" : "no";
     return () => { delete document.documentElement.dataset.barraEntrada; };
   }, [conBarra]);
+  // E1: la barrita del DNI. Compu, modo "aviso" y "abrir al tipear" prendido; con la barra fija a la derecha el DNI ya tiene su campo ahí.
+  const barritaModo = cfg.resultado_entrada === "aviso" && cfg.abrir_al_tipear && esCompu && !propia && !conBarra;
 
   // Las últimas 5 entradas de la barra: al abrir la pantalla, después de cada entrada propia y (VD-4) apenas
   // entra alguien por otra vía: el "oído" compartido avisa y acá se vuelve a leer la lista (sin otro polling).
@@ -243,6 +219,13 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
   // Sin enfocar a mano: la hoja guarda dónde estaba el foco y recién después lo lleva al campo (así Esc vuelve exacto).
   const abrir = useCallback((inicial = "") => { reiniciar(inicial, false); setAbierta(true); }, [reiniciar]);
 
+  // Los números de la pantalla se actualizan después de mostrar el resultado, sin frenar el próximo Enter.
+  // Un solo refresco, 2 s después del último ingreso: con varios seguidos no se encolan re-renders de toda la pantalla.
+  const refrescarPantalla = useCallback(() => {
+    if (refrescoRef.current) clearTimeout(refrescoRef.current);
+    refrescoRef.current = setTimeout(() => startTransition(() => router.refresh()), 2000);
+  }, [router]);
+
   // BASE-3 (D40): con "aviso", Enter anota (si corresponde) y el resultado sale abajo a la derecha; tocarlo abre el panel lateral.
   // Va fuera de la transición a propósito: si no, la ventana queda "ocupada" mientras el panel se refresca y el próximo Enter se pierde.
   const elegirAviso = useCallback(async (s: ResultadoSocio) => {
@@ -254,17 +237,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     if (r.r) {
       const color: AvisoLocal["color"] = vv.via === "prueba" ? "azul" : vv.color === "verde" ? "verde" : "amarillo";
       a = aviso(`${r.r.ingreso_id}-${Date.now()}`, color, r.r.repetido ? `${s.nombre} ya había entrado: ${r.r.texto ?? vv.texto}` : `${s.nombre} entró · ${vv.texto}`, false, true);
-      // El aviso sale ya; los números de la pantalla se actualizan después, sin frenar el próximo Enter.
-      // Un solo refresco, 2 s después del último ingreso: con varios seguidos no se encolan re-renders de toda la pantalla.
-      if (refrescoRef.current) clearTimeout(refrescoRef.current);
-      refrescoRef.current = setTimeout(() => startTransition(() => router.refresh()), 2000);
+      refrescarPantalla();
     } else {
       a = aviso(`local-${s.socio_id}-${Date.now()}`, vv.puede ? "amarillo" : "rojo", `${s.nombre}: ${vv.texto}`, !!(vv.para_regularizar || r.guia?.boton === "cobrar" || r.guia?.boton === "cobrar_pack"), vv.puede);
     }
     if (sonido) sonar(a.color === "azul" ? "verde" : a.color);
     window.dispatchEvent(new CustomEvent<AvisoLocal>(EVENTO_AVISO_LOCAL, { detail: a }));
     cerrar();
-  }, [sedeId, sonido, cerrar, router]);
+  }, [sedeId, sonido, cerrar, refrescarPantalla]);
 
   const elegir = useCallback((s: ResultadoSocio, forma: "recepcion" | "qr_socio" | "nfc" = "recepcion", ventanaGrande = false) => {
     if (cfgRef.current.resultado_entrada === "aviso" && forma === "recepcion" && !ventanaGrande) { void elegirAviso(s); return; }
@@ -578,8 +558,10 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
       }
 
       // Cerrada: un número abre la ventana con ese número; un lector (teclas a menos de 30 ms) también.
+      // E1: con la barrita (modo "aviso" en la compu) eso lo atiende la barrita: acá no se hace nada.
+      if (barritaRef.current) return;
       if (editable) { buffer.current = { t: "", cuando: 0 }; return; }
-      if (document.querySelector('[aria-modal="true"]')) return;
+      if (hayAlgoEncima()) return;
       if (e.key === "Enter") {
         const b = buffer.current; buffer.current = { t: "", cuando: 0 };
         if (b.t.length >= 4 && e.timeStamp - b.cuando < 60) { e.preventDefault(); enviar(b.t, true); }
@@ -602,12 +584,27 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   useEffect(() => {
     abiertaRef.current = abierta; conBarraRef.current = conBarra; cfgRef.current = cfg; formandoRef.current = forzando;
+    barritaRef.current = barritaModo;
     puedeEnterRef.current = puedeAnotarConEnter; anotarRef.current = () => anotar();
     nadieRef.current = nadie; iniciarAltaRef.current = iniciarAlta;
     pruebaModoRef.current = pruebaModo; iniciarPruebaRef.current = iniciarPrueba;
     salidaModoRef.current = salidaModo; salirRef.current = () => { if (elegido) marcarSalida(elegido); }; salirConDniRef.current = salirConDni;
     dejarRef.current = () => { if (v && !v.puede && !(esRecepcion && (guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue"))) { setForzando(true); void cupoDejarPasar().then(setCupo); } };
   });
+
+  // E4: lo pesado se baja un instante antes de que haga falta, así el toque no espera.
+  useEffect(() => {
+    if (!abierta) return;
+    if (nadie && /^\d{6,9}$/.test(nadie)) { precargarAlta(); precargarPrueba(); }
+    if (v && !v.puede) precargarDejarPasar();
+  }, [abierta, nadie, v]);
+
+  // E1: "Dejar pasar" desde la barrita abre la ventana con el socio y, apenas llega el veredicto, el formulario de dejar pasar.
+  useEffect(() => {
+    if (!dejarAlAbrirRef.current || !v) return;
+    dejarAlAbrirRef.current = false;
+    if (!v.puede) dejarRef.current();
+  }, [v]);
 
   // El botón grande de Inicio y cualquier otro "abrir la Entrada".
   useEffect(() => {
@@ -629,13 +626,14 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
     return () => window.removeEventListener(EVENTO_ABRIR_ENTRADA_CON, conTexto);
   }, [propia, abrir, enviar]);
 
-  // VD-4: tocar un aviso de la puerta abre el veredicto de ese socio acá.
+  // VD-4: tocar un aviso de la puerta (o la barrita) abre el veredicto de ese socio acá.
   useEffect(() => {
     if (propia) return;
     const abrirSocio = (e: Event) => {
-      const s = (e as CustomEvent<ResultadoSocio>).detail;
+      const { dejar, ...s } = (e as CustomEvent<PedidoAbrirSocio>).detail;
+      dejarAlAbrirRef.current = !!dejar;
       abrir();
-      setTimeout(() => elegir(s, "recepcion", true), 0);   // desde un aviso o el panel lateral: la ventana grande, con todos sus botones
+      setTimeout(() => elegir(s, "recepcion", true), 0);   // desde un aviso, la barrita o el panel lateral: la ventana grande, con todos sus botones
     };
     window.addEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
     return () => window.removeEventListener(EVENTO_ABRIR_SOCIO, abrirSocio);
@@ -695,35 +693,6 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
 
   if (propia) return null;
 
-  // VD-2: el botón principal (y el segundo) lo dice la base según la situación; acá solo se dibujan.
-  const bloqueadoParaRecepcion = !!v && !v.puede && esRecepcion && (!!guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue");
-  const principal = guia?.boton ?? (v?.puede ? "anotar" : "cobrar");
-  const segundo = guia?.segundo ?? null;
-  const avisosSueltos = (v?.avisos ?? []).filter((a) => !guia || !(a === "Cumple años hoy" || /^Debe .+ a cuenta$/.test(a)));
-  const boton = (clave: string, esPrincipal: boolean) => {
-    if (!v || !elegido) return null;
-    const clase = `boton ${esPrincipal ? "boton-principal text-lg px-8" : ""}`;
-    switch (clave) {
-      case "anotar":
-        // VD-46M: con la puerta en emergencia, al que no podía entrar se lo anota igual (queda marcado); un clic a propósito, sin Enter.
-        if (!v.puede && guia?.emergencia) return <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar data-anotar-emergencia><Icono nombre="alerta-circulo" /> Anotar entrada (emergencia)</button>;
-        return v.puede ? <button key={clave} type="button" disabled={ocupado} onClick={() => anotar()} className={clase} data-ventana-anotar><Icono nombre="ok" /> Anotar entrada <kbd className="text-xs opacity-70 font-sans">Enter</kbd></button> : null;
-      case "cobrar":
-      case "cobrar_pack":
-        return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar
-          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "Cobrar un pack" : "Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
-      case "dejar_pasar":
-        if (v.puede || forzando) return null;
-        return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={() => dejarRef.current()} className={clase} data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
-      case "volver_antes":
-        return v.puede ? null : <button key={clave} type="button" disabled={ocupado} onClick={volvioAntes} className={clase} data-ventana-volvio><Icono nombre="pesa" /> Volvió antes: terminar la pausa</button>;
-      case "volver_alta":
-        return <button key={clave} type="button" disabled={ocupado} onClick={volverAlta} className={clase} data-ventana-volver-alta><Icono nombre="deshacer" /> Volver a dar de alta</button>;
-      default:
-        return null;
-    }
-  };
-
   const dni = /^\d{6,9}$/.test(nadie ?? "") ? `el DNI ${conPuntos(nadie!)}` : null;
   const hayLista = paso === "escribir" && socios.length > 0 && listaPara === sinPuntos(texto).trim();
 
@@ -742,310 +711,46 @@ export function VentanaEntrada({ gimnasioId, sedeId: sedeBase, zona, config, con
         </button>
       )}
 
+      {/* E1 · La barrita del DNI. */}
+      <Barrita sedeId={sedeId} zona={zona} activa={barritaModo && !abierta && !cobrando} sonido={sonido} soloEnVerde={!!cfg.anotar_solo_en_verde}
+        conLlavero={conLlavero} esRecepcion={esRecepcion} sinInternet={sinInternet} onIngreso={refrescarPantalla} />
+
       {/* C · La barra fija (compu ≥ 1280 px): el DNI siempre a mano y las últimas 5 entradas. */}
-      {conBarra && (
-        <aside data-barra-entrada aria-label="Entrada" className="hidden xl:flex fixed right-0 top-0 bottom-0 w-72 z-20 flex-col gap-4 border-l border-[var(--borde)] bg-[var(--fondo)] p-4 pt-20">
-          <p className="titulo text-xl"><Icono nombre="puerta" /> Entrada</p>
-          <input ref={barra} data-barra-dni value={conPuntos(textoBarra)} inputMode="numeric" autoComplete="off" aria-label="DNI, número de socio o nombre"
-            onChange={(e) => setTextoBarra(sinPuntos(e.target.value))}
-            onKeyDown={(e) => {
-              detector.current.tecla(e.key, e.timeStamp);
-              // C5: lectura del lector USB en la barra fija: se toma del campo, se vacía y el foco se queda para la próxima.
-              if (e.key === "Enter" && detector.current.enter(e.timeStamp) && e.currentTarget.value.trim()) {
-                e.preventDefault(); const t = sinPuntos(e.currentTarget.value); setTextoBarra(""); enviar(t, true); return;
-              }
-              if (e.key === "Enter" && textoBarra.trim()) { e.preventDefault(); const t = textoBarra; setTextoBarra(""); enviar(t); }
-              if (e.key === "Escape") { setTextoBarra(""); barra.current?.blur(); }
-            }}
-            placeholder="DNI o nombre" className="campo !min-h-14 !text-2xl text-center" />
-          <p className="texto-tenue text-sm -mt-2">Enter para buscar · F2 enfoca acá</p>
-          <p className="titulo-grupo mt-2">Últimas entradas</p>
-          {ultimas.length === 0 ? <p className="texto-tenue text-sm">Todavía no entró nadie hoy.</p> : (
-            <ul className="space-y-2 min-w-0" data-barra-ultimas={ultimas.length}>
-              {ultimas.map((u) => (
-                <li key={u.ingreso_id} className="flex items-center gap-2 min-w-0 text-sm">
-                  <PuntoEstado color={u.color} />
-                  <span className="truncate flex-1">{u.socio}</span>
-                  <span className="texto-tenue tabular-nums">{hora(new Date(u.momento))}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
-      )}
+      {conBarra && <BarraFija barra={barra} detector={detector} textoBarra={textoBarra} setTextoBarra={setTextoBarra} enviar={enviar} ultimas={ultimas} hora={hora} />}
 
       <Hoja abierta={abierta && !cobrando} alCerrar={alCerrarHoja} etiqueta="Entrada" className="!max-w-2xl" atras={false}>
         <div data-ventana-entrada data-paso={paso} className="max-h-[88dvh] overflow-y-auto">
           {emergencia && <div className="p-4 pb-0"><CartelEmergencia e={emergencia} /></div>}
           {paso === "escribir" && (
-            <div className="p-6 sm:p-8 space-y-4">
-              <p className="titulo text-2xl text-center"><Icono nombre="puerta" /> Entrada</p>
-              {anulada && <p role="status" className="pildora pildora-verde whitespace-normal justify-center" data-ventana-anulada><Icono nombre="ok" /> {anulada}</p>}
-              {/* VD-1b: el dueño con varias sedes elige en cuál anota (queda en esta compu). */}
-              {sedes.length > 1 && (
-                <div role="group" aria-label="Sede" className="flex flex-wrap justify-center gap-2" data-ventana-sedes>
-                  {sedes.map((s) => (
-                    <button key={s.id} type="button" aria-pressed={s.id === sedeId} data-sede={s.id} onClick={() => { elegirSede(s.id); setTimeout(() => campo.current?.focus(), 0); }}
-                      className={`pestana ${s.id === sedeId ? "!bg-[var(--texto)] !text-[var(--fondo)]" : ""}`}><Icono nombre="ubicacion" /> {s.nombre}</button>
-                  ))}
-                </div>
-              )}
-              <input ref={campo} data-ventana-campo value={conPuntos(texto)} autoComplete="off" aria-label="Buscar socio: DNI, número o nombre"
-                onChange={(e) => { setTexto(sinPuntos(e.target.value)); setNadie(null); setError(null); setMarcado(0); setAnulada(null); }}
-                onKeyDown={(e) => {
-                  detector.current.tecla(e.key, e.timeStamp);
-                  // C5: tipeo de corrido terminado en Enter = lectura del lector. Se toma lo que hay en el campo (no el estado, que puede ir un render atrás).
-                  if (e.key === "Enter" && detector.current.enter(e.timeStamp)) { e.preventDefault(); leer(e.currentTarget.value); return; }
-                  if (e.code === "NumpadDecimal") { e.preventDefault(); return; }   // el punto del teclado numérico no va en un DNI
-                  if (e.key.toLowerCase() === "a" && !e.ctrlKey && !e.metaKey && !e.altKey && dni) { e.preventDefault(); iniciarAlta(nadie!); }
-                  else if (e.key.toLowerCase() === "p" && !e.ctrlKey && !e.metaKey && !e.altKey && dni && pruebaModo && pruebaModo !== "no") { e.preventDefault(); iniciarPrueba(nadie!); }
-                  else if (e.key.toLowerCase() === "s" && !e.ctrlKey && !e.metaKey && !e.altKey && salidaModo && salidaModo !== "no" && /^\d{6,9}$/.test(sinPuntos(texto).trim())) {
-                    e.preventDefault(); if (!ocupado) salirConDni(sinPuntos(texto).trim());
-                  }
-                  else if (e.key === "ArrowDown" && hayLista) { e.preventDefault(); setMarcado((m) => Math.min(m + 1, Math.min(socios.length, 3) - 1)); }
-                  else if (e.key === "ArrowUp" && hayLista) { e.preventDefault(); setMarcado((m) => Math.max(m - 1, 0)); }
-                  else if (e.key === "Enter") {
-                    e.preventDefault();
-                    // Si todavía está terminando una búsqueda, el Enter no se pierde: queda anotado y corre apenas termina.
-                    if (ocupado) { enterPendiente.current = true; return; }
-                    if (hayLista) elegir(socios[Math.min(marcado, socios.length - 1)]); else resolver(texto);
-                  }
-                }}
-                placeholder="30.123.456" className="campo !min-h-24 !text-5xl sm:!text-6xl text-center font-bold tracking-wide numero" />
-              <p className="texto-tenue text-center text-sm">Enter para buscar · Esc para cerrar · también por nombre</p>
-              {/* D50: el sonido se prende o apaga por compu (es del mostrador, no del gimnasio). */}
-              <div className="flex justify-center">
-                <button type="button" aria-pressed={sonido} data-sonido-ventana={sonido ? "si" : "no"} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60"
-                  onClick={() => { setSonido((x) => { try { localStorage.setItem(CLAVE_SONIDO, x ? "no" : "si"); } catch { /* sin almacenamiento */ } return !x; }); campo.current?.focus(); }}>
-                  <Icono nombre="campana" /> {sonido ? "Con sonido" : "Sin sonido"}
-                </button>
-              </div>
-              {conQr && <div className="flex justify-center"><button type="button" className="boton" onClick={() => setCamara(true)}><Icono nombre="camara" /> Leer QR</button></div>}
-
-              {error && <Mensaje tipo="error">{error}</Mensaje>}
-              {ocupado && !hayLista && <div className="h-16 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden />}
-
-              {hayLista && (
-                <ul className="space-y-2" aria-label="Coincidencias">
-                  {socios.slice(0, 3).map((s, i) => (
-                    <li key={s.socio_id}>
-                      <button type="button" onClick={() => elegir(s)} aria-current={i === marcado} className={`fila ${i === marcado ? "!border-[var(--acento)]" : ""}`}>
-                        <PuntoEstado color={s.color} grande />
-                        <span className="min-w-0 flex-1">
-                          <span className="block font-semibold text-lg truncate">{s.nombre} {s.numero != null && <span className="texto-tenue font-normal">#{s.numero}</span>}</span>
-                          <span className="block texto-suave truncate">{s.texto}</span>
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {nadie && !error && (
-                <div className="tarjeta p-5 space-y-3" data-ventana-nadie>
-                  <p className="text-lg font-semibold">{dni ? `No hay nadie con ${dni}` : `No encontramos a “${nadie}”`}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {dni
-                      ? <button type="button" className="boton boton-principal" data-ventana-alta onClick={() => iniciarAlta(nadie!)}><Icono nombre="mas" /> Darlo de alta <kbd className="text-xs opacity-70 font-sans">A</kbd></button>
-                      : <Link href={urlDarDeAlta(nadie)} className="boton boton-principal"><Icono nombre="mas" /> Darlo de alta</Link>}
-                    {dni && pruebaModo && pruebaModo !== "no" && (
-                      <button type="button" className="boton" data-ventana-prueba onClick={() => iniciarPrueba(nadie!)}><Icono nombre="regalo" /> Dar prueba gratis <kbd className="text-xs opacity-70 font-sans">P</kbd></button>
-                    )}
-                    {dni && <Link href={urlDarDeAlta(nadie)} className="boton" data-ventana-alta-completa>Alta completa</Link>}
-                  </div>
-                </div>
-              )}
-            </div>
+            <PasoEscribir campo={campo} detector={detector} enterPendiente={enterPendiente} texto={texto} setTexto={setTexto} setNadie={setNadie} setError={setError}
+              setMarcado={setMarcado} setAnulada={setAnulada} anulada={anulada} error={error} nadie={nadie} dni={dni} socios={socios} hayLista={hayLista} marcado={marcado}
+              ocupado={ocupado} sedes={sedes} sedeId={sedeId} elegirSede={elegirSede} sonido={sonido}
+              alternarSonido={() => setSonido((x) => { try { localStorage.setItem(CLAVE_SONIDO, x ? "no" : "si"); } catch { /* sin almacenamiento */ } return !x; })}
+              conQr={conQr} abrirCamara={() => setCamara(true)} pruebaModo={pruebaModo} salidaModo={salidaModo}
+              leer={leer} resolver={resolver} elegir={elegir} iniciarAlta={iniciarAlta} iniciarPrueba={iniciarPrueba} salirConDni={salirConDni} />
           )}
 
-          {paso === "prueba" && prueba && (
-            <form data-ventana-prueba-form className="p-6 sm:p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); if (!ocupado && !(prueba.info?.existe && prueba.info.usada)) guardarPrueba(); }}>
-              <p className="titulo text-2xl text-center"><Icono nombre="regalo" /> Prueba gratis · {conPuntos(prueba.dni)}</p>
-              {prueba.info?.existe && !prueba.info.usada && (
-                <p className="pildora pildora-azul !rounded-[var(--radio)] !px-4 !py-3 w-full" data-prueba-reservada>
-                  <Icono nombre="persona" /> Reservó desde la página{prueba.info.clase ? `: ${prueba.info.clase}` : ""}. Confirmá y lo dejás entrar.
-                </p>
-              )}
-              <label className="block space-y-1"><span className="etiqueta">Nombre</span>
-                <input data-prueba-nombre className="campo" value={prueba.nombre} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, nombre: e.target.value, error: null })} /></label>
-              {!prueba.info?.existe && (
-                <>
-                  <label className="block space-y-1"><span className="etiqueta">Apellido <span className="texto-tenue font-normal">(opcional)</span></span>
-                    <input className="campo" value={prueba.apellido} autoComplete="off" onChange={(e) => setPrueba({ ...prueba, apellido: e.target.value })} /></label>
-                  <label className="block space-y-1"><span className="etiqueta">Celular <span className="texto-tenue font-normal">(opcional)</span></span>
-                    <input className="campo" type="tel" inputMode="tel" value={prueba.telefono} placeholder="387 555 1234" autoComplete="off" onChange={(e) => setPrueba({ ...prueba, telefono: e.target.value })} /></label>
-                </>
-              )}
-              {prueba.error && <Mensaje tipo="error">{prueba.error}</Mensaje>}
-              <div className="flex flex-wrap gap-2">
-                <button type="submit" className="boton boton-principal" disabled={ocupado || !!(prueba.info?.existe && prueba.info.usada) || !prueba.nombre.trim()} data-prueba-dar><Icono nombre="regalo" /> Dejarlo entrar con la prueba</button>
-                <button type="button" className="boton-texto px-3" onClick={alCerrarHoja}>Volver</button>
-              </div>
-              <p className="text-sm texto-tenue">Es una vez por DNI. No es socio ni gasta ningún plan; queda registrado quién la dio.</p>
-            </form>
-          )}
+          {paso === "prueba" && prueba && <PruebaGratis prueba={prueba} setPrueba={setPrueba} ocupado={ocupado} onGuardar={guardarPrueba} onVolver={alCerrarHoja} />}
 
-          {paso === "alta" && alta && (
-            <form data-ventana-alta-form data-alta-paso={alta.paso} className="p-6 sm:p-8 space-y-4"
-              onSubmit={(e) => { e.preventDefault(); if (ocupado) return; if (alta.paso === "datos") { if (alta.nombre.trim()) setAlta({ ...alta, paso: "plan" }); } else guardarAlta(!!alta.plan && puedeCobrar); }}>
-              <p className="titulo text-2xl text-center"><Icono nombre="mas" /> Alta rápida</p>
-              <p className="text-center texto-suave">DNI <strong className="text-[var(--texto)] numero">{conPuntos(alta.dni)}</strong></p>
-              <ol className="flex gap-2 text-sm" aria-label="Pasos del alta rápida">
-                {["Datos", "Plan", "Cobro", "Entra"].map((n, i) => {
-                  const actual = alta.paso === "datos" ? 0 : 1;
-                  return <li key={n} className={`flex-1 min-w-0 rounded-full px-2 py-1 text-center truncate border ${i === actual ? "border-[var(--acento)] font-semibold" : "border-[var(--borde)] texto-tenue"}`}>{i < actual ? <><Icono nombre="ok" /> </> : `${i + 1} · `}{n}</li>;
-                })}
-              </ol>
-
-              {alta.paso === "datos" ? (
-                <div className="space-y-3">
-                  <label className="block space-y-1"><span className="etiqueta">Nombre</span>
-                    <input data-alta-nombre value={alta.nombre} onChange={(e) => setAlta({ ...alta, nombre: e.target.value })} autoComplete="off" required className="campo" /></label>
-                  <label className="block space-y-1"><span className="etiqueta">Apellido</span>
-                    <input data-alta-apellido value={alta.apellido} onChange={(e) => setAlta({ ...alta, apellido: e.target.value })} autoComplete="off" className="campo" /></label>
-                  <label className="block space-y-1"><span className="etiqueta">Celular (WhatsApp)</span>
-                    <input data-alta-celular type="tel" value={alta.telefono} onChange={(e) => setAlta({ ...alta, telefono: e.target.value })} onBlur={(e) => void buscarInteresado(e.target.value)}
-                      placeholder="387 555-1234" className="campo" /></label>
-                  {alta.ofrecido && !alta.vinculado && (
-                    <Mensaje tipo="info"><span data-interesado-ofrecido={alta.ofrecido.id}>¿Es {alta.ofrecido.nombre}, que preguntó el {new Date(alta.ofrecido.creado_en).toLocaleDateString("es-AR", { day: "numeric", month: "numeric" })}?</span>{" "}
-                      <button type="button" className="boton mt-2" onClick={() => setAlta({ ...alta, vinculado: alta.ofrecido!.id, nombre: alta.nombre || alta.ofrecido!.nombre.split(" ")[0], apellido: alta.apellido || alta.ofrecido!.nombre.split(" ").slice(1).join(" ") })}>Sí, es esa persona</button></Mensaje>
-                  )}
-                  {alta.vinculado && <Mensaje tipo="info">Es {alta.ofrecido?.nombre}: queda marcado como “se hizo socio”.</Mensaje>}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {alta.planes === null ? <div className="h-24 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden />
-                    : alta.planes.length === 0 ? <Mensaje tipo="info">Este gimnasio no tiene planes cargados: se da de alta sin plan y se cobra un pase o pack desde Vender.</Mensaje>
-                    : <TarjetasPlan planes={alta.planes} valor={alta.plan} alElegir={(plan) => setAlta({ ...alta, plan })} />}
-                  {alta.planes?.find((p) => p.plan_id === alta.plan) && <PrimerPago plan={alta.planes.find((p) => p.plan_id === alta.plan)!} />}
-                </div>
-              )}
-
-              {alta.error && <Mensaje tipo="error">{alta.error}</Mensaje>}
-              {alta.paso === "datos" ? (
-                <div className="flex flex-wrap gap-2">
-                  <button type="submit" disabled={!alta.nombre.trim()} className="boton boton-principal text-lg px-8" data-alta-siguiente>Siguiente: plan →</button>
-                  <button type="button" className="boton" onClick={() => guardarAlta(false)} disabled={!alta.nombre.trim() || ocupado} data-alta-solo>Solo guardar</button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {alta.plan && puedeCobrar
-                    ? <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-cobrar>{ocupado ? "Guardando…" : "Guardar y cobrar"}</button>
-                    : <button type="submit" disabled={ocupado} className="boton boton-principal text-lg px-8" data-alta-guardar>{ocupado ? "Guardando…" : "Guardar"}</button>}
-                  {alta.plan && puedeCobrar && <button type="button" className="boton" disabled={ocupado} onClick={() => guardarAlta(false)} data-alta-solo>Solo guardar</button>}
-                  <button type="button" className="boton-texto px-3" onClick={() => setAlta({ ...alta, paso: "datos" })}>← Datos</button>
-                </div>
-              )}
-              <p className="text-sm texto-tenue">Esc vuelve a la búsqueda · los datos que escribiste no se pierden si hay un error</p>
-            </form>
-          )}
+          {paso === "alta" && alta && <AltaRapida alta={alta} setAlta={setAlta} ocupado={ocupado} puedeCobrar={puedeCobrar} onGuardar={guardarAlta} onBuscarInteresado={(c) => void buscarInteresado(c)} />}
 
           {paso === "veredicto" && elegido && (
-            <div data-ventana-veredicto={v?.color ?? "cargando"} aria-live="polite">
-              {!v ? <div className="p-8"><div className="h-64 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden /></div> : (<>
-                <div className="px-6 sm:px-8 py-5" style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-                  <p className="text-2xl sm:text-3xl font-bold leading-tight"><span aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></span> {v.texto}</p>
-                </div>
-                <div className="p-6 sm:p-8 space-y-5">
-                  <div className="flex items-center gap-4">
-                    <span className="relative size-24 sm:size-32 flex-none rounded-[var(--radio)] bg-[var(--tarjeta-alta)] flex items-center justify-center text-4xl font-bold overflow-hidden">
-                      <Iniciales nombre={elegido.nombre} />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img key={elegido.socio_id} src={`/panel/socios/${elegido.socio_id}/foto`} alt={`Foto de ${elegido.nombre}`} data-foto-ventana
-                        className="absolute inset-0 size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="titular text-4xl sm:text-5xl break-words">{elegido.nombre}</p>
-                      <p className="texto-suave text-lg">{elegido.numero != null ? `Socio #${elegido.numero}` : ""}</p>
-                    </div>
-                  </div>
-
-                  {/* VD-2: lo que hay que decirle, cuánto le falta y los avisos (todo lo calcula la base). */}
-                  {guia?.falta && <p className="text-xl font-semibold" data-ventana-falta>{guia.falta}</p>}
-                  {guia?.decile && <p className="text-xl leading-snug" data-ventana-decile><Icono nombre="mensaje" /> {guia.decile}</p>}
-                  {(guia?.chips.length || avisosSueltos.length || apto || (firmar && !guia)) ? (
-                    <ul className="flex flex-wrap gap-2" data-ventana-chips>
-                      {guia?.chips.map((c) => <li key={c.clave} data-chip={c.clave} className="pildora whitespace-normal"><span aria-hidden><Icono nombre={c.emoji} sistema /></span> {c.href ? <Link href={c.href.startsWith("/panel") ? c.href : `/panel${c.href}`} className="underline">{c.texto}</Link> : c.texto}</li>)}
-                      {avisosSueltos.map((a) => <li key={a} className="pildora whitespace-normal">{a}</li>)}
-                      {apto && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-apto>{apto}</li>}
-                      {firmar && !guia && <li className="pildora pildora-amarillo whitespace-normal" data-aviso-firmar>{firmar}</li>}
-                    </ul>
-                  ) : null}
-                  <EventosHoyEntrada key={elegido.socio_id} socioId={elegido.socio_id} eventos={eventosHoy} />
-                  {v.para_regularizar ? <p className="texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
-                  {error && <Mensaje tipo="error">{error}</Mensaje>}
-                  {cobrado && (
-                    <Mensaje tipo="exito"><span data-ventana-cobrado={cobrado.total}>Cobrado {formatearPesos(cobrado.total)}.</span> <MandarComprobante ventaId={cobrado.ventaId} className="mt-2" /></Mensaje>
-                  )}
-
-                  <div className="flex flex-wrap gap-2">
-                    {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0))}
-                    {!v.puede && !forzando && principal !== "dejar_pasar" && !bloqueadoParaRecepcion && (
-                      <button type="button" onClick={() => dejarRef.current()} className="boton" data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
-                    )}
-                    {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave"><Icono nombre="candado" /> A este socio lo deja pasar el dueño o el encargado.</p>}
-                    <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}?desde=entrada`} className="boton" data-ventana-ficha
-                      onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}><Icono nombre="persona" /> Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
-                    {pruebaModo && pruebaModo !== "no" && v.motivo === "sin_plan" && (
-                      <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton" data-ventana-prueba><Icono nombre="regalo" /> Dar prueba gratis</button>
-                    )}
-                    {salidaModo && salidaModo !== "no" && (
-                      <button type="button" onClick={() => marcarSalida(elegido)} disabled={ocupado} className="boton" data-ventana-salida-boton><Icono nombre="salir" /> Salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
-                    )}
-                    <button type="button" onClick={() => reiniciar()} className="boton-texto px-3">Otro socio</button>
-                  </div>
-
-                  {forzando && (
-                    <FormDejarPasar motivo={motivo} setMotivo={setMotivo} cupo={cupo} ocupado={ocupado} porPlata={!!v.para_regularizar} alConfirmar={(p) => anotar(motivo, p)} />
-                  )}
-                  <p className="text-sm texto-tenue">{puedeAnotarConEnter ? "Enter anota · " : ""}Esc cierra · escribí un número para buscar a otro</p>
-                </div>
-              </>)}
-            </div>
+            <PasoVeredicto elegido={elegido} v={v} guia={guia} apto={apto} firmar={firmar} eventosHoy={eventosHoy} error={error} cobrado={cobrado} esRecepcion={esRecepcion}
+              ocupado={ocupado} forzando={forzando} cupo={cupo} motivo={motivo} setMotivo={setMotivo} pruebaModo={pruebaModo} salidaModo={salidaModo}
+              puedeAnotarConEnter={puedeAnotarConEnter} cobrarRef={cobrarRef} fichaRef={fichaRef} anotar={anotar} dejar={() => dejarRef.current()}
+              volvioAntes={volvioAntes} volverAlta={volverAlta} cobrarAhora={cobrarAhora} darPruebaAlSocio={darPruebaAlSocio} marcarSalida={marcarSalida} reiniciar={() => reiniciar()} />
           )}
 
           {paso === "anotado" && hecho && (
-            <div className="p-8 text-center space-y-4" data-ventana-hecho={hecho.resultado} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{hecho.resultado === "rechazado" ? <Icono nombre="prohibido" /> : hecho.alerta_prestamo ? <Icono nombre="alerta" /> : <Tilde tamano={72} />}</div>
-              <p className="titular text-4xl break-words">{hecho.nombre}</p>
-              <p className="text-xl font-semibold">
-                {hecho.repetido ? (hecho.texto ?? "Ya estaba anotado hace un momento")
-                  : hecho.resultado === "forzado" ? `Entrada anotada a las ${hecho.hora} (lo dejaste pasar)`
-                  : hecho.resultado === "rechazado" ? "Anotado que no pudo entrar"
-                  : `Entró ${hecho.hora}`}
-              </p>
-              <div className="flex justify-center"><EventosHoyEntrada key={hecho.socioId} socioId={hecho.socioId} eventos={eventosHoy} /></div>
-              {error && <Mensaje tipo="error">{error}</Mensaje>}
-              <div className="flex flex-wrap justify-center gap-2">
-                {!hecho.repetido && <button type="button" className="boton" disabled={ocupado} onClick={deshacer}><Icono nombre="deshacer" /> Deshacer</button>}
-                {hecho.repetido && hecho.puede_salir && elegido && (
-                  <button type="button" className={`boton ${hecho.avisar_salida ? "boton-principal" : ""}`} disabled={ocupado} onClick={() => marcarSalida(elegido)} data-ventana-salida-boton><Icono nombre="salir" /> Marcar salida <kbd className="text-xs opacity-70 font-sans">S</kbd></button>
-                )}
-                <button type="button" className={`boton ${hecho.avisar_salida ? "" : "boton-principal"}`} onClick={() => reiniciar()}>Siguiente</button>
-              </div>
-              <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>
-            </div>
+            <PasoAnotado hecho={hecho} eventosHoy={eventosHoy} error={error} ocupado={ocupado} elegido={elegido} cerrarSolaSeg={cfg.cerrar_sola_seg}
+              onDeshacer={deshacer} onSalida={marcarSalida} onSiguiente={() => reiniciar()} />
           )}
 
-          {paso === "salio" && salio && (
-            <div className="p-8 text-center space-y-4" data-ventana-salida={salio.registrada ? "registrada" : "sin-entrada"} role="status">
-              <div className="flex justify-center text-6xl" aria-hidden>{salio.registrada ? <Icono nombre="ok" /> : <Icono nombre="info" />}</div>
-              {salio.registrada ? <p className="titular text-4xl break-words">{salio.texto}</p> : (
-                <>
-                  <p className="titular text-4xl break-words">{salio.nombre}</p>
-                  <p className="text-xl font-semibold">{salio.texto}</p>
-                </>
-              )}
-              {error && <Mensaje tipo="error">{error}</Mensaje>}
-              <div className="flex flex-wrap justify-center gap-2">
-                <button type="button" className="boton boton-principal" onClick={() => reiniciar()}>Siguiente</button>
-              </div>
-              <p className="texto-tenue text-sm">{cfg.cerrar_sola_seg ? `Se cierra sola en ${cfg.cerrar_sola_seg} s · ` : ""}escribí un número para el próximo</p>
-            </div>
-          )}
+          {paso === "salio" && salio && <PasoSalio salio={salio} error={error} cerrarSolaSeg={cfg.cerrar_sola_seg} onSiguiente={() => reiniciar()} />}
         </div>
       </Hoja>
       {camara && <Camara alLeer={(codigo) => { setCamara(false); enviar(codigo.trim()); }} alCerrar={() => { setCamara(false); setTimeout(() => campo.current?.focus(), 0); }} />}
     </>
   );
 }
+
