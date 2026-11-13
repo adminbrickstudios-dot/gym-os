@@ -5,7 +5,7 @@
 // el evento y queda "Asistieron 1 de 1". Aparte: desde la página, alguien que no es socio
 // se anota (si la página del demo está publicada).
 //   node scripts/e2e/vd-19.mjs     (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAntiRobot, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const s = Date.now().toString().slice(-5);
@@ -108,6 +108,7 @@ try {
     await t.locator('input[name="nombre"]').fill("Visitante Prueba");
     await t.locator('input[name="dni"]').fill(`3${s}77`);
     await t.locator('input[name="telefono"]').fill("11 0000 1234");
+    await esperarAntiRobot(v);   // la página pide unos segundos desde que abre el formulario (anti-robot): mandarlo antes da "muy rápido"
     await t.locator('button[type="submit"]').click();
     chequear(await aparece(v.locator("[data-anotado-pagina]"), 60000), "desde la página, quien no es socio se anota (DNI y WhatsApp)", "la página no confirmó la inscripción");
     await capturar(v, "vd19-celu-pagina");

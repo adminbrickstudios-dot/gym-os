@@ -40,7 +40,8 @@ try {
     try {
       await entrar(d, c.mail, c.clave, G);
       await d.locator("[data-primeros-pasos]").waitFor({ timeout: 60000 });
-      const menu = (await d.locator("nav").evaluateAll((xs) => xs.map((x) => x.textContent)).catch(() => [])).join(" ");
+      // El menú se mira por sus enlaces: la palabra "Clases" también sale en los primeros pasos y en otros textos de los nav.
+      const menu = (await d.locator("nav a").evaluateAll((xs) => xs.map((x) => x.getAttribute("href"))).catch(() => [])).map((h) => (h === "/panel/clases" ? "Clases" : "")).join(" ");
       const conClases = t.modo_clases !== "ninguno";
       const w = await d.evaluate(() => document.documentElement.scrollWidth);
       await d.goto(`${G}/panel/planes`);
