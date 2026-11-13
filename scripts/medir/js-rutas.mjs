@@ -39,9 +39,10 @@ try {
 const filas = [];
 for (const m of manifiestos) {
   const texto = readFileSync(m, "utf8");
-  const i = texto.indexOf("= ");
+  // globalThis.__RSC_MANIFEST["/panel/page"]={...}  (sin espacios): se toma desde la primera llave después del "=".
+  const m0 = /__RSC_MANIFEST\[[^\]]*\]\s*=\s*/.exec(texto);
   let json;
-  try { json = JSON.parse(texto.slice(i + 2).replace(/;\s*$/, "")); } catch { continue; }
+  try { json = JSON.parse(texto.slice(m0.index + m0[0].length).trim().replace(/;\s*$/, "")); } catch { console.error(`(no se pudo leer ${m})`); continue; }
   const archivos = new Set(arranque);
   for (const lista of Object.values(json.entryJSFiles ?? {})) for (const f of lista) archivos.add(f);
   let crudo = 0, gz = 0;
