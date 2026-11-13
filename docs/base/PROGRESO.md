@@ -1,5 +1,19 @@
 # PROGRESO de Base
 
+## DÓNDE QUEDÉ (13/11, mañana) y RESUMEN PARA MATEO
+- 🟡 **Sin publicar: Vercel sigue "Deployment rate limited"** (main no despliega). No mergeé nada a main. Producción sigue con el código del PR #20. Cuando se libere el cupo (o con Vercel Pro) se despliega el PR #21 y recién ahí corresponde la prueba en producción (barrita del DNI, aviso de QR < 1 s, franja sin internet, humo con Temple Gym solo mirando).
+- 🟢 **Cerrado hoy:** D40/D56 (avisos abajo a la derecha, D62); los 6 recorridos que "fallaban según la hora" (vd-6, vd-46j, vd-46k, vd-50, vd-54, vd-58) **pasan en Actions**. La hora no era la causa de cinco de ellos: eran selectores viejos (el "+" y el emoji de Máquinas pasaron a íconos), un buscador difuso que traía otro socio, un profe distinto al cargar y al entrar, y una espera del historial. vd-6 usa `HORA_NAVEGADOR=mediodia` (reloj del navegador, Playwright `setSystemTime`).
+- 🟡 **E8** (viajes a la base por pantalla): medido con `scripts/medir/viajes.mjs` (corrida 43423578975): las 42 pantallas pasan de 2 viajes (7 a 30); tabla y qué queda en `VELOCIDAD.md` § E8; el layout del panel ya pide dos cosas en paralelo. Falta: una sola función para Configuración, Planes, Inicio y Entrada, que la campana no repita el contexto, y la tabla "después".
+- **Próximo:** E1 (confirmar la franja roja y mirar capturas), E2 (capturas 1280 y celular, e2e reduced-motion), E4 (el JS por ruta no bajó), después el resto de RECTA-FINAL en orden (H, U, P, D, Z, 0, 1 a 9, R, Q, N, 8). E3 y la prueba de producción dependen de Mateo / del deploy.
+- ⛔ **De Mateo:** Vercel Pro o esperar el cupo; `COPIA_CLAVE`; `BRIK_ADMIN_MAIL`/`BRIK_ADMIN_CLAVE`; secretos de Supabase para medir producción.
+
+## DÓNDE QUEDÉ (13/11, mañana) y RESUMEN PARA MATEO
+- 🟡 **Sin publicar: Vercel sigue "Deployment rate limited"** (main no despliega). No mergeé nada a main. Producción sigue con el código del PR #20. Cuando se libere el cupo (o con Vercel Pro) se despliega el PR #21 y recién ahí corresponde la prueba en producción (barrita del DNI, aviso de QR < 1 s, franja sin internet, humo con Temple Gym solo mirando).
+- 🟢 **Cerrado hoy:** D40/D56 (avisos abajo a la derecha, D62); los 6 recorridos que "fallaban según la hora" (vd-6, vd-46j, vd-46k, vd-50, vd-54, vd-58) **pasan en Actions**. La hora no era la causa de cinco de ellos: eran selectores viejos (el "+" y el emoji de Máquinas pasaron a íconos), un buscador difuso que traía otro socio, un profe distinto al cargar y al entrar, y una espera del historial. vd-6 usa `HORA_NAVEGADOR=mediodia` (reloj del navegador, Playwright `setSystemTime`).
+- 🟡 **E8** (viajes a la base por pantalla): medido con `scripts/medir/viajes.mjs` (corrida 43423578975): las 42 pantallas pasan de 2 viajes (7 a 30); tabla y qué queda en `VELOCIDAD.md` § E8; el layout del panel ya pide dos cosas en paralelo. Falta: una sola función para Configuración, Planes, Inicio y Entrada, que la campana no repita el contexto, y la tabla "después".
+- **Próximo:** E1 (confirmar la franja roja y mirar capturas), E2 (capturas 1280 y celular, e2e reduced-motion), E4 (el JS por ruta no bajó), después el resto de RECTA-FINAL en orden (H, U, P, D, Z, 0, 1 a 9, R, Q, N, 8). E3 y la prueba de producción dependen de Mateo / del deploy.
+- ⛔ **De Mateo:** Vercel Pro o esperar el cupo; `COPIA_CLAVE`; `BRIK_ADMIN_MAIL`/`BRIK_ADMIN_CLAVE`; secretos de Supabase para medir producción.
+
 ## F8 · EL CIERRE (13/11, carril `carril/f8-cierre`, sin publicar: nada de esto toca producción)
 
 **Hecho y verificado ejecutando en Actions** (`gh workflow run "Pruebas completas" --ref carril/f8-cierre …`; ahora acepta `solo`, `socios` y `tanda`, y las tandas con nombre distinto corren a la vez):
