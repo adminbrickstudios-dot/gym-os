@@ -8,7 +8,7 @@ import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "
 import { join, relative, sep } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const RAIZ = join(process.cwd(), ".next");
+const RAIZ = join(process.cwd(), process.env.NEXT_DIST_DIR || ".next");
 const APP = join(RAIZ, "server", "app");
 if (!existsSync(APP)) { console.error("No hay .next/server/app: corré `next build` antes."); process.exit(1); }
 

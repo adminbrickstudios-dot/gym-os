@@ -5,6 +5,6 @@ import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 mkdirSync(".local", { recursive: true });
-const salida = execSync("node scripts/medir/js-rutas.mjs --json .local/js-rutas.json", { encoding: "utf8" });
+const salida = execSync("node scripts/medir/js-rutas.mjs --json .local/js-rutas.json", { encoding: "utf8", env: { ...process.env, NEXT_DIST_DIR: process.env.NEXT_DIST_DIR || ".next-dev" } });
 writeFileSync(".local/js-rutas.md", salida);
 console.log(salida);
