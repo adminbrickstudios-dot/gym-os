@@ -20,6 +20,9 @@ const accion = (p, verbo) => dialogo(p).locator(`[data-buscador-accion="${verbo}
 
 try {
   const d = await pagina(b, COMPU);
+  // Con la app compilada, un goto justo después de cerrar el buscador puede chocar con la navegación que éste dejó en vuelo (ERR_ABORTED): se vuelve a pedir una vez.
+  const irOriginal = d.goto.bind(d);
+  d.goto = async (...a) => irOriginal(...a).catch(async (e) => { if (!/ERR_ABORTED/.test(e.message)) throw e; await d.waitForTimeout(800); return irOriginal(...a); });
   await entrar(d, "duena@ejemplo.invalid");
 
   // Un socio nuevo con DNI y plan, sin pagar (para cobrarle y para la Entrada).

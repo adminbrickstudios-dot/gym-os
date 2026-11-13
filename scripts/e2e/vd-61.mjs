@@ -100,6 +100,7 @@ try {
   let ultimo = "";
   for (let i = 0; i < 6; i++) {
     await d.goto(`${G}/ingresar?modo=socio`);
+    if (!(await d.locator("input[name=telefono]").count())) await d.getByRole("button", { name: /Celular/ }).click();   // D43
     await d.fill("input[name=telefono]", TEL);
     await d.click('button:has-text("código")');
     await d.locator('main input[name=codigo], main [role="alert"]').first().waitFor({ timeout: 30000 });
