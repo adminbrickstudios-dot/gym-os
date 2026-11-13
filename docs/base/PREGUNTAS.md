@@ -56,6 +56,10 @@ Respuesta de Mateo: (vacío)
 | D58 | ¿Qué es lo principal del Inicio? | Recepción: el mostrador (búsqueda, números, lista en vivo). Dueño: números y Para hacer hoy. | Cada uno hace otra cosa en su primer minuto. |
 | D59 | Reseñas en la página y "+N socios" contra "nada inventado" | Reseñas solo con nombre, fecha y link a la reseña de Google; sin link no se muestran. "+N socios" sale de la base y solo aparece con 20 o más. | Así nada de la página puede ser inventado. |
 | D60 | Términos BRIK–gimnasio y contrato de encargado del tratamiento | El agente escribe un borrador, marcado "revisar con un abogado"; el dueño lo acepta al entrar y queda la fecha y la versión. | Sin texto no hay qué aceptar; la revisión legal es de Mateo. |
+| D61 | Tipear un DNI fuera de un campo en la compu | Barrita chica abajo a la derecha con lo que se escribe y el resultado ahí mismo; la ventana grande solo si se la toca (Mateo, 12/11) | No tapa lo que estás haciendo |
+| D62 | Esquina de la barrita y de los avisos | Abajo a la derecha (Mateo, 12/11) | No tapa la campana ni los botones de arriba |
+| D63 | Aviso de entrada por QR | 1,5 s grande con animación y sonido, después pastilla unos 8 s que se toca para fijarla; rojo queda hasta atenderlo (Mateo, 12/11) | Se ve y no molesta |
+| D64 | Funciones nuevas que tienen otros sistemas | Primero terminar RECTA-FINAL; después sumar lo nuevo apagado por defecto (NOCHE-1211.md §3). Avisos al instante entra ya (Mateo, 12/11) | Terminar antes de agrandar |
 
 ---
 

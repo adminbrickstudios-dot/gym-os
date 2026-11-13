@@ -39,6 +39,19 @@ toque plata se prueba con números fijos antes de publicar.
 | H5 | **Copia de la base antes de cada publicación**, ahora que hay datos reales: en el workflow "Base de datos", antes de `aplicar`, un `pg_dump` cifrado con una clave que está solo en los secretos de GitHub (`COPIA_CLAVE`). **Nunca como archivo abierto** (el repo es público y los archivos de Actions se pueden bajar). Más restaurar la copia en una base de prueba para probar que sirve. Es C8 adelantado | La corrida de aplicar muestra la copia hecha y la restauración de prueba en verde; ⛔ si falta `COPIA_CLAVE`, con los pasos para Mateo | 🟡 `aplicar` ya hace copia cifrada antes y se frena sin COPIA_CLAVE; `copias.yml` probado en local; ⛔ falta el secreto COPIA_CLAVE de Mateo para verlo en verde en Actions |
 | H6 | **Canal de errores de Temple Gym**: lo que reporten (como el de las transferencias) va a `docs/base/CAMBIOS-MATEO.md` con la captura descripta, y es lo primero de cada vuelta. En el panel, el botón "¿Necesitás ayuda?" del dueño y de la recepción manda la pantalla, el usuario y el último error a BRIK por wa.me | Un reporte de prueba desde el panel llega con su contexto | ✅ `ayuda-brik` 10 pasos en verde en Actions (corridas 43123709897 y 43126983936): el botón ¿Necesitás ayuda? arma el wa.me a BRIK con pantalla, rol y último error; el reporte llega con su contexto; la recepción solo con WhatsApp; `CAMBIOS-MATEO.md` creado |
 
+## Fase E · Entrada en la esquina y avisos al instante (Mateo, 12/11 21 h, va primero después de H2c; `NOCHE-1211.md`)
+
+| # | Qué | LISTO SI | Estado |
+|---|---|---|---|
+| E1 | La barrita del DNI abajo a la derecha: tipear números fuera de un campo ya no abre la ventana grande; el resultado sale en la barrita con un botón principal; tocarla abre la ventana; Esc cancela (D61, D62) | e2e compu (Caja, Socios, Inicio) y celular sin cambios; capturas mirándolas | ❌ |
+| E2 | El aviso de "entró" por QR/tablet/llavero/molinete: 1,5 s grande con animación y sonido, después pastilla 8 s, tocar lo fija con Ver ficha / Cobrar / Anular; rojo queda; máximo 3 apilados (D63) | e2e con dos navegadores; reduced-motion probado | ❌ |
+| E3 | Al instante: Supabase Realtime por gimnasio en vez del pedido cada 4 s; si se cae, cada 30 s y lo dice | e2e: el aviso llega en menos de 1 s; la caída de Realtime se ve | ❌ |
+| E4 | Partir `VentanaEntrada.tsx` y cargar lo pesado solo al usarlo | El JS de las pantallas del panel baja (medido antes y después) | ❌ |
+| E5 | Los pedidos periódicos que quedan, a Realtime o 30 s | Ningún pedido cada menos de 30 s en el panel | ❌ |
+| E6 | Recepción sin internet: lo dice en rojo, nada parece andar cuando no anda | e2e con Playwright offline | ❌ |
+| E7 | Pregunta "¿Base o Pase?" en PREGUNTAS (Mateo compró pasegym.com); no se cambia el nombre hasta que conteste | Anotada | ❌ |
+| E8 | Las pantallas con más de 2 viajes a la base, con la medición de F0.1 | Tabla antes/después en `VELOCIDAD.md` | ❌ |
+
 ## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche): **se publica apenas está en verde, esta misma noche**
 
 | # | Qué | LISTO SI | Estado |
