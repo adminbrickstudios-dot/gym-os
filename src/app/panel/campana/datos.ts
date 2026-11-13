@@ -12,14 +12,14 @@ export type PreferenciaAviso = { tipo: string; app: boolean };
  */
 export async function traerCampana() {
   const panel = await contextoPanel();
-  const c = await rpc<{ items: ItemCampana[] }>("campana_panel", { p_gimnasio_id: panel.gimnasio.id });
+  // E8: las dos consultas salen a la vez (antes, una detrás de la otra: un viaje de más en cada pantalla).
   // VD-46A: lo que MercadoPago devolvió o contracargó (lo calcula la base, solo para dueño y encargado). No se redefine
   // campana_panel: se suma acá. Si esta consulta falla no se rompe la campana entera: se muestra lo demás.
-  let mp: ItemCampana[] = [];
-  if (panel.yo.rol === "dueno" || panel.yo.rol === "encargado") {
-    try { mp = (await rpc<{ items: Omit<ItemCampana, "tipo">[] }>("avisos_pagos_mp", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true })).items.map((i) => ({ ...i, tipo: null })); }
-    catch { mp = []; }
-  }
+  const mpP: Promise<ItemCampana[]> = (panel.yo.rol === "dueno" || panel.yo.rol === "encargado")
+    ? rpc<{ items: Omit<ItemCampana, "tipo">[] }>("avisos_pagos_mp", { p_gimnasio_id: panel.gimnasio.id }, { lectura: true }).then((r) => r.items.map((i) => ({ ...i, tipo: null })), () => [])
+    : Promise.resolve([]);
+  const c = await rpc<{ items: ItemCampana[] }>("campana_panel", { p_gimnasio_id: panel.gimnasio.id });
+  const mp = await mpP;
   const items = [...c.items, ...mp]
     .sort((a, b) => (Date.parse(b.en ?? "") || 0) - (Date.parse(a.en ?? "") || 0))
     .map((i) => ({ ...i, href: i.href === "/" ? "/panel" : `/panel${i.href}` }))

@@ -41,8 +41,8 @@ for (const rol of ["dueno", "encargado", "recepcion", "profe"]) {
 
 test("E8: pausado, dado de baja y demo vencida salen igual que con estado_gimnasio_aviso", async () => {
   const casos = [
-    `suspension_manual_en = now()`,
-    `suspension_manual_en = null, baja_en = now()`,
+    `suspension_manual_en = now(), suspension_manual_motivo = 'prueba'`,
+    `suspension_manual_en = null, suspension_manual_motivo = null, baja_en = now()`,
     `baja_en = null, es_demo = true, demo_hasta = now() - interval '1 day'`,
     `es_demo = false, demo_hasta = null`,
   ];

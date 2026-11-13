@@ -108,6 +108,9 @@ if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r }
     if (conMapa) {
       console.log(`\nCódigo original por paquete o carpeta en los ${conMapa} chunks de ${ref.ruta} con mapa (KB sin minificar)\n| Origen | KB |\n|---|---:|`);
       for (const [k, v] of [...grupos].sort((a, b) => b[1] - a[1]).slice(0, 30)) console.log(`| ${k} | ${(v / 1024).toFixed(1)} |`);
-    } else console.log("\n(sin mapas de fuente: el build se hizo sin MEDIR_MAPAS=1)");
+    } else {
+      let mapas = 0; try { mapas = readdirSync(join(RAIZ, "static", "chunks")).filter((n) => n.endsWith(".map")).length; } catch { /* sin carpeta */ }
+      console.log(`\n(sin mapas de fuente para los chunks de la ruta: .map en static/chunks = ${mapas}; MEDIR_MAPAS=${process.env.MEDIR_MAPAS ?? "(no está)"} en esta corrida; BUILD_ID existe = ${existsSync(join(RAIZ, "BUILD_ID"))})`);
+    }
   }
 }
