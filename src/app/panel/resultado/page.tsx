@@ -14,6 +14,7 @@ import { PorSede, type ResultadoPorSede } from "./PorSede";
 import { Icono } from "@/components/ui/Icono";
 import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
 import { HorariosPico, type IngresosPorHoraYDia } from "./HorariosPico";
+import { ValorDelSocio, type ValorSocio } from "./ValorDelSocio";
 
 export const metadata: Metadata = { title: "Resultado" };
 
@@ -54,8 +55,12 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     ]);
     const tasa = await rpc<TasaDeCobro>("tasa_de_cobro", { p_gimnasio_id: panel.gimnasio.id, p_mes: pedido });   // FA-10
     // Detalle 68: horarios pico por día (función nueva, apagada por defecto).
-    const pico7 = (await funcionesNuevasDe(panel.gimnasio.id)).includes("horarios_pico")
+    const nuevas = await funcionesNuevasDe(panel.gimnasio.id);
+    const pico7 = nuevas.includes("horarios_pico")
       ? await rpc<IngresosPorHoraYDia>("ingresos_por_hora_y_dia", { p_gimnasio_id: panel.gimnasio.id, p_semanas: 8 }) : null;
+    // N10: cuánto deja un socio y cuánto dura (función nueva, apagada por defecto). Es de hoy: solo se muestra en el mes en curso.
+    const valorSocio = r.en_curso && nuevas.includes("valor_del_socio")
+      ? await rpc<ValorSocio>("valor_del_socio", { p_gimnasio_id: panel.gimnasio.id }) : null;
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -99,6 +104,8 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
           ))}
         </dl>
         <p className="text-sm texto-tenue -mt-6">Recurrente: lo que entra por mes si todos los que hoy tienen la membresía al día la renuevan, al precio de hoy.</p>
+
+        {valorSocio && <ValorDelSocio v={valorSocio} />}
 
         <TasaCobro t={tasa} />
 

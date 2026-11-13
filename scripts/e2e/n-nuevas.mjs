@@ -73,7 +73,7 @@ try {
   // ═══ APAGADAS ═══
   await d.goto(`${G}/panel/configuracion?pestana=funciones`);
   await d.locator('[data-funciones-nuevas="listo"]').waitFor({ timeout: 60000 });
-  chequear(await d.locator("[data-funcion]").count() === 7, "Configuración → Funciones nuevas: las 7 funciones, en una sola pantalla", `hay ${await d.locator("[data-funcion]").count()} funciones`);
+  chequear(await d.locator("[data-funcion]").count() === 9, "Configuración → Funciones nuevas: las 9 funciones, en una sola pantalla", `hay ${await d.locator("[data-funcion]").count()} funciones`);
   chequear(await d.locator('[data-funcion][data-activa="si"]').count() === 0, "todas vienen apagadas", "alguna viene prendida");
   chequear(await d.locator("[data-sin-novedades]").count() === 1, "“Qué hay de nuevo” está vacío sin funciones prendidas", "“Qué hay de nuevo” muestra algo sin funciones prendidas");
   chequear(await d.locator("[data-apto-config], [data-debito]").count() === 0, "apagadas, no muestran su configuración", "una función apagada muestra su configuración");
