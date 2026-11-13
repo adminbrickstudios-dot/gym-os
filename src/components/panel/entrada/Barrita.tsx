@@ -162,7 +162,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
   const resolver = useCallback(async (crudo: string) => {
     const t = sinPuntos(crudo).trim();
     if (!t || trabajando.current) return;
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    if (P.current.sinInternet) {
       sonarSi("rojo"); poner({ t: "error", msg: TEXTO_SIN_INTERNET, red: true }); return;
     }
     const ahora = Date.now();
@@ -307,7 +307,7 @@ export function Barrita({ sedeId, zona, activa, sonido, soloEnVerde, conLlavero,
     }
     if (!soloNumeros && t.length >= 3 && !ES_QR.test(t)) {
       const id = setTimeout(async () => {
-        if (navigator.onLine === false || trabajando.current) return;
+        if (P.current.sinInternet || trabajando.current) return;
         const mia = ++busqueda.current;
         try {
           const r = await leerConReintento(() => buscarSociosRapido(t));

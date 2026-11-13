@@ -46,7 +46,6 @@ export function useSinInternet(): boolean {
     if (!sin) return;
     let vivo = true;
     const id = setInterval(async () => {
-      if (navigator.onLine === false) return;   // (sin mirar si la pestaña está a la vista: en un puesto con varias ventanas, la franja tiene que irse igual)
       try {
         const c = new AbortController(); const t = setTimeout(() => c.abort(), 5000);
         const r = await fetch(`/api/version?_=${Date.now()}`, { cache: "no-store", signal: c.signal });

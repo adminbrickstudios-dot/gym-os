@@ -286,6 +286,7 @@ try {
     await r.reload();
     await r.waitForFunction(() => document.documentElement.dataset.entradaLista === "si", null, { timeout: 60000 });
     const t4 = new Date(Date.now() - 1000);
+    await r.evaluate(() => { window.__redLog = []; for (const n of ["offline", "online", "gymos:fallo-red", "gymos:red-ok"]) window.addEventListener(n, () => window.__redLog.push(`${n}@${Math.round(performance.now())}`)); });
     await r.context().setOffline(true);
     chequear(await r.locator("[data-sin-internet]").first().waitFor({ timeout: 8000 }).then(() => true, () => false), `${etiqueta}: sin internet aparece la franja roja`, `${etiqueta}: no apareció el aviso de sin internet`);
     chequear((await r.locator("[data-sin-internet]").first().innerText()).includes("Sin internet: anotá en papel"), `${etiqueta}: dice “Sin internet: anotá en papel”`, `${etiqueta}: el texto no es el pedido`);
@@ -296,7 +297,9 @@ try {
     chequear(await entradasDe(verde.id, t4) === 0, `${etiqueta}: sin internet no se anotó nada`, `${etiqueta}: apareció una entrada sin internet`);
     await r.keyboard.press("Escape");
     await r.context().setOffline(false);
-    chequear(await r.locator("[data-sin-internet]").first().waitFor({ state: "detached", timeout: 20000 }).then(() => true, () => false), `${etiqueta}: al volver el internet la franja se va sola`, `${etiqueta}: la franja roja quedó después de volver el internet`);
+    const seFue = await r.locator("[data-sin-internet]").first().waitFor({ state: "detached", timeout: 20000 }).then(() => true, () => false);
+    const diag = seFue ? "" : ` · ${JSON.stringify(await r.evaluate(async () => ({ onLine: navigator.onLine, dato: document.documentElement.dataset.sinInternet, log: window.__redLog, version: await fetch("/api/version", { cache: "no-store" }).then((x) => x.status, (e) => String(e)) })))}`;
+    chequear(seFue, `${etiqueta}: al volver el internet la franja se va sola`, `${etiqueta}: la franja roja quedó después de volver el internet${diag}`);
     // La pantalla de Entrada (donde la ventana no se mete) también lo dice.
     await r.goto(`${G}/panel/entrada`);
     await r.waitForTimeout(1500);
