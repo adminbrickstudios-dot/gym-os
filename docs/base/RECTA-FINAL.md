@@ -43,12 +43,12 @@ toque plata se prueba con números fijos antes de publicar.
 
 | # | Qué | LISTO SI | Estado |
 |---|---|---|---|
-| E1 | La barrita del DNI abajo a la derecha: tipear números fuera de un campo ya no abre la ventana grande; el resultado sale en la barrita con un botón principal; tocarla abre la ventana; Esc cancela (D61, D62) | e2e compu (Caja, Socios, Inicio) y celular sin cambios; capturas mirándolas | ❌ |
+| E1 | La barrita del DNI abajo a la derecha: tipear números fuera de un campo ya no abre la ventana grande; el resultado sale en la barrita con un botón principal; tocarla abre la ventana; Esc cancela (D61, D62) | e2e compu (Caja, Socios, Inicio) y celular sin cambios; capturas mirándolas | 🟡 `entrada-barrita` (compu 1440 y 1280 + celular + reduced-motion): 107 de 109 pasos en verde, falta confirmar la recuperación de la franja roja; falta mirar las capturas de Inicio y Socios con el aviso de QR encima (E2/E3 son de otro carril); letras: solo arranca con una ráfaga de lector (ver PROGRESO) |
 | E2 | El aviso de "entró" por QR/tablet/llavero/molinete: 1,5 s grande con animación y sonido, después pastilla 8 s, tocar lo fija con Ver ficha / Cobrar / Anular; rojo queda; máximo 3 apilados (D63) | e2e con dos navegadores; reduced-motion probado | ❌ |
 | E3 | Al instante: Supabase Realtime por gimnasio en vez del pedido cada 4 s; si se cae, cada 30 s y lo dice | e2e: el aviso llega en menos de 1 s; la caída de Realtime se ve | ❌ |
-| E4 | Partir `VentanaEntrada.tsx` y cargar lo pesado solo al usarlo | El JS de las pantallas del panel baja (medido antes y después) | ❌ |
+| E4 | Partir `VentanaEntrada.tsx` y cargar lo pesado solo al usarlo | El JS de las pantallas del panel baja (medido antes y después) | 🟡 Partido en 11 piezas y lo pesado (alta rápida, prueba gratis, dejar pasar, comprobante, cámara) con import dinámico; **el JS por ruta NO bajó** (252,0 → 255,8 KB gzip promedio: lo que salió lo compensa la barrita nueva); ver VELOCIDAD.md |
 | E5 | Los pedidos periódicos que quedan, a Realtime o 30 s | Ningún pedido cada menos de 30 s en el panel | ❌ |
-| E6 | Recepción sin internet: lo dice en rojo, nada parece andar cuando no anda | e2e con Playwright offline | ❌ |
+| E6 | Recepción sin internet: lo dice en rojo, nada parece andar cuando no anda | e2e con Playwright offline | 🟡 `entrada-barrita` offline: la franja roja y la barrita en rojo andan; falta confirmar que la franja se va sola al volver (corrida en curso) |
 | E7 | Pregunta "¿Base o Pase?" en PREGUNTAS (Mateo compró pasegym.com); no se cambia el nombre hasta que conteste | Anotada | ❌ |
 | E8 | Las pantallas con más de 2 viajes a la base, con la medición de F0.1 | Tabla antes/después en `VELOCIDAD.md` | ❌ |
 

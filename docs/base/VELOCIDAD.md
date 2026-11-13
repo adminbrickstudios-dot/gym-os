@@ -47,7 +47,7 @@ Cómo se mide:
 | Consultas N+1 (una por fila) | | |
 | Índices que faltan (gimnasio, DNI, nombre con `unaccent`, fechas) | | |
 | Vigencia calculada al leer en listas (→ `cubierto_hasta`, BASE-5) | | |
-| JS por ruta (`next build`) | | |
+| JS por ruta (`next build`) | E4 (13/11): promedio de 57 rutas del panel, 252,0 KB gzip antes y 255,8 KB después; `/panel` 826,1 → 837,1 KB sin comprimir | Partir `VentanaEntrada` con carga diferida no alcanzó: lo que salió del primer JS (alta rápida, prueba gratis, dejar pasar, comprobante) es poco frente a lo que se sumó (barrita, franja sin internet). Lo que pesa de verdad es el resto del layout (~250 KB gzip por ruta). Siguiente paso: un análisis de paquetes del layout del panel (E8) |
 | Imágenes | | |
 | Re-renders que se notan | | |
 
@@ -270,3 +270,13 @@ Lighthouse móvil, app compilada, mediana de 3, contra el demo local (donde las 
 | `/ingresar` (equipo y socio) | sin medir (falla; ver F1.8) | sin medir |
 
 **No se llegó a 95 ni a LCP < 1,5 s, y la diferencia entre las dos corridas (±3 puntos, ±0,5 s) es ruido del runner**: nada de lo cambiado toca esas dos pantallas en la base local. El elemento LCP es **un texto** (el `h1` de la landing y un párrafo de `/hacete-socio`, "sin recurso"), con 2,3 a 3 s de "render delay" después de un TTFB de 0,46 s: no es una imagen. Lo que el informe señala es el JavaScript que corre antes del primer pintado (451 ms "unattributable" más dos chunks de 230 y 220 ms, con la CPU 4× más lenta) y el CSS de 15 KB que bloquea el render. Para bajar de ahí hace falta **medir el JS por ruta con un `next build` completo** (el análisis de paquetes de Turbopack) y probar sacar del primer render lo que no hace falta (`Hidratado`, los formularios de más abajo), y eso es del principal (build y `next.config`). Queda 🟡.
+
+### E4 · JS por ruta del panel, medido con `next build` en Actions (13/11)
+Se mide con `scripts/medir/js-rutas.mjs` (suma los chunks que cada ruta pide al abrir, de los manifiestos de Turbopack; Next 16 ya no imprime "First Load JS"). Se corre como recorrido de Pruebas completas: `solo=medir-js` con `app_modo=produccion` (corridas 43337908940 antes y 43346132148 después, misma rama).
+
+| | Rutas | Suma | Promedio por ruta | `/panel` | `/panel/vender` |
+|---|---|---|---|---|---|
+| Antes (VentanaEntrada de 1.051 líneas, entera en el layout) | 57 | 14.361,8 KB gzip | 252,0 KB gzip | 826,1 KB (256,5 gzip) | 811,5 KB (253,1 gzip) |
+| Después (11 piezas, 5 con carga diferida, más la barrita y la franja sin internet) | 57 | 14.583,1 KB gzip | 255,8 KB gzip | ~837 KB (260 gzip) | ~823 KB (257 gzip) |
+
+Conclusión sin adornar: el objetivo "el JS baja" **no se cumplió**. La partición deja el archivo mantenible y saca del primer JS el alta, la prueba, "dejar pasar" y el comprobante, pero la barrita (E1) y E6 suman más de lo que sale. Una segunda prueba que cargaba aparte también los pasos de la ventana grande dio 252,0 KB (igual que antes) y rompió recorridos que abren la ventana: se deshizo.
