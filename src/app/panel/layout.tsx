@@ -87,12 +87,15 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     if (soporte && !soporte.activo) redirect(`/admin?error=${encodeURIComponent("Terminó tu entrada de soporte (dura 60 minutos). Para volver a entrar, escribí el motivo otra vez.")}`);
   }
   // F2.6: pausado, dado de baja o demo vencida: una pantalla clara con el WhatsApp de BRIK. El Soporte BRIK adentro sí ve el panel (a eso entra).
-  const estadoG = soporte?.activo ? null : await rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
-  if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
+  // E8: el aviso de estado y el WhatsApp de ayuda no dependen uno del otro: van en el mismo viaje, no uno detrás del otro.
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
   // H6: el botón de ayuda por WhatsApp también para la recepción; el número sale de los datos (lo carga el super admin).
   const conWhatsappAyuda = pideAyuda || (!soporte?.activo && panel.yo.rol === "recepcion");
-  const contactoAyuda = conWhatsappAyuda ? await rpc<{ whatsapp: string | null }>("contacto_plataforma_publico").catch(() => null) : null;
+  const [estadoG, contactoAyuda] = await Promise.all([
+    soporte?.activo ? Promise.resolve(null) : rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
+    conWhatsappAyuda ? rpc<{ whatsapp: string | null }>("contacto_plataforma_publico").catch(() => null) : Promise.resolve(null),
+  ]);
+  if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
   const temaCookie = (await cookies()).get("tema")?.value ?? null;
   return (
     <>
