@@ -8,6 +8,7 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const b = await navegador();

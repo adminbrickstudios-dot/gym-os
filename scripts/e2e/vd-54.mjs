@@ -4,6 +4,7 @@
 // Y con la sección apagada, la pantalla no abre y el Inicio no muestra nada.
 //   npm run e2e:vd-54            (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const b = await navegador();
