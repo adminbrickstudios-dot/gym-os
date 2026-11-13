@@ -271,7 +271,6 @@ Lighthouse móvil, app compilada, mediana de 3, contra el demo local (donde las 
 
 **No se llegó a 95 ni a LCP < 1,5 s, y la diferencia entre las dos corridas (±3 puntos, ±0,5 s) es ruido del runner**: nada de lo cambiado toca esas dos pantallas en la base local. El elemento LCP es **un texto** (el `h1` de la landing y un párrafo de `/hacete-socio`, "sin recurso"), con 2,3 a 3 s de "render delay" después de un TTFB de 0,46 s: no es una imagen. Lo que el informe señala es el JavaScript que corre antes del primer pintado (451 ms "unattributable" más dos chunks de 230 y 220 ms, con la CPU 4× más lenta) y el CSS de 15 KB que bloquea el render. Para bajar de ahí hace falta **medir el JS por ruta con un `next build` completo** (el análisis de paquetes de Turbopack) y probar sacar del primer render lo que no hace falta (`Hidratado`, los formularios de más abajo), y eso es del principal (build y `next.config`). Queda 🟡.
 
-<<<<<<< HEAD
 
 ## F8.1 · La simulación de terminado con 5.000 socios y la app compilada (12/11, carril f8-cierre)
 
@@ -297,7 +296,7 @@ a la vez; en la base sola, con `explain analyze`, está por debajo (F0.3). Queda
 
 **Un recorrido viejo, no la app:** `base-ingresos` pedía los avisos "abajo a la derecha" (D40) y la app los tiene arriba a la derecha desde D56 / el pulido
 (a la izquierda del panel de últimas entradas, para no tapar el botón de Entrada). Se cambió la prueba a "a la derecha y dentro de la pantalla" y quedó en `PREGUNTAS.md`.
-=======
+
 ### E4 · JS por ruta del panel, medido con `next build` en Actions (13/11)
 Se mide con `scripts/medir/js-rutas.mjs` (suma los chunks que cada ruta pide al abrir, de los manifiestos de Turbopack; Next 16 ya no imprime "First Load JS"). Se corre como recorrido de Pruebas completas: `solo=medir-js` con `app_modo=produccion` (corridas 43337908940 antes y 43346132148 después, misma rama).
 
@@ -307,4 +306,3 @@ Se mide con `scripts/medir/js-rutas.mjs` (suma los chunks que cada ruta pide al 
 | Después (11 piezas, 5 con carga diferida, más la barrita y la franja sin internet) | 57 | 14.583,1 KB gzip | 255,8 KB gzip | ~837 KB (260 gzip) | ~823 KB (257 gzip) |
 
 Conclusión sin adornar: el objetivo "el JS baja" **no se cumplió**. La partición deja el archivo mantenible y saca del primer JS el alta, la prueba, "dejar pasar" y el comprobante, pero la barrita (E1) y E6 suman más de lo que sale. Una segunda prueba que cargaba aparte también los pasos de la ventana grande dio 252,0 KB (igual que antes) y rompió recorridos que abren la ventana: se deshizo.
->>>>>>> origin/carril/e-barrita
