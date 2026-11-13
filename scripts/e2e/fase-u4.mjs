@@ -11,6 +11,13 @@ import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, chequear, falla, navegador, pagina, resultado, PUERTO } from "./comun.mjs";
 
+// Z8 (12/11): el acento se corre de tono si se parece al semáforo: "usa el color del gimnasio" acepta el mismo color o uno corrido pocos grados.
+const usaElAcento = (html, acento) => {
+  const rgb = (h) => { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const base = rgb(acento);
+  return [...html.matchAll(/--acento:s*(#[0-9a-fA-F]{6})/g)].some((m) => Math.hypot(...rgb(m[1]).map((v, i) => v - base[i])) <= 130) || html.toLowerCase().includes(acento.toLowerCase());
+};
+
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
 const db = new pg.Client({ connectionString: url });
 await db.connect();
@@ -39,9 +46,10 @@ try {
   chequear(!PROHIBIDO.test(txt), "recién creado: no dice “armando” ni “en construcción”", `dice: ${txt.match(PROHIBIDO)?.[0]}`);
   chequear(await p.locator("[data-pagina-oculta]").count() === 0, "recién creado: no es la portada oculta, es la landing", "recién creado sale la portada de página oculta");
   chequear(await p.locator('a[href="/ingresar?modo=socio"]').count() > 0, "tiene “Soy socio”", "falta “Soy socio”");
-  chequear(await p.locator('a[href="/hacete-socio"]').count() > 0, "tiene “Quiero ser socio”", "falta “Quiero ser socio”");
+  // H3b: "Quiero ser socio" aparece solo con las altas online prendidas (un gimnasio recién creado las trae apagadas: P-ALTAS).
+  chequear(await p.locator('a[href="/hacete-socio"]').count() === 0, "sin altas online prendidas no hay “Quiero ser socio” (H3b)", "aparece “Quiero ser socio” con las altas apagadas");
   chequear(await p.locator('footer a[href="/ingresar"]').count() > 0, "“Soy del equipo” va chico al pie", "falta “Soy del equipo” al pie");
-  chequear((await p.content()).toLowerCase().includes(ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
+  chequear(usaElAcento(await p.content(), ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
   for (const s of ["planes", "horarios", "ubicacion"]) {
     chequear(await p.locator(`section[aria-labelledby="${s}"]`).count() === 0, `sin datos, la sección ${s} no se muestra`, `la sección ${s} aparece vacía`);
   }
@@ -71,7 +79,7 @@ try {
   await o.locator("[data-pagina-oculta]").waitFor({ timeout: 60000 });
   const to = await o.locator("body").innerText();
   chequear(to.includes(NOMBRE), "oculta: queda la portada con el nombre", "oculta: no aparece el nombre");
-  chequear(await o.locator('a[href="/ingresar?modo=socio"]').count() > 0 && await o.locator('a[href="/hacete-socio"]').count() > 0, "oculta: están “Soy socio” y “Quiero ser socio”", "oculta: faltan los botones");
+  chequear(await o.locator('a[href="/ingresar?modo=socio"]').count() > 0, "oculta: está “Soy socio” (“Quiero ser socio” solo con altas prendidas, H3b)", "oculta: falta “Soy socio”");
   chequear(await o.locator('section[aria-labelledby="planes"], section[aria-labelledby="horarios"]').count() === 0, "oculta: no se ven planes ni horarios", "oculta: se ven secciones de la página");
   chequear(!PROHIBIDO.test(to), "oculta: no dice “armando” ni “en construcción”", `oculta dice: ${to.match(PROHIBIDO)?.[0]}`);
   chequear(!PROHIBIDO.test(`${await meta(o, "og:description")} ${await meta(o, "og:title")} ${await o.title()}`), "oculta: los metadatos no dicen “armando”", "oculta: los metadatos dicen “armando”");

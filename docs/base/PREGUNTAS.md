@@ -471,3 +471,10 @@ El dominio de la plataforma es `pasegym.com`, pero el producto se llama Base en 
 - B) Cambiar todo a Pase: títulos, textos, el correo, los PDF, la guía. Es una pasada de textos y de la marca de la plataforma.
 Decidido por defecto: A. No se cambia ningún nombre hasta que contestes.
 Respuesta de Mateo: (vacío)
+
+## P-ALTAS · "Quiero ser socio" en un gimnasio recién creado (12/11)
+`SOCIO-FLUJO.md` §5 dice que "Quiero ser socio" y "Quiero probar" van **prendidos por defecto**. Hoy un gimnasio recién creado trae las altas online **apagadas** (`altas_online` = false) y la landing solo muestra "Quiero ser socio" con las altas prendidas (H3b). Prenderlas por defecto abre un formulario público (con anti-robot y tope) en cada gimnasio nuevo sin que el dueño lo haya decidido.
+- A) Apagadas por defecto, el dueño las prende en Configuración (recomendada: es lo seguro, y Temple Gym ya las tiene como las eligió).
+- B) Prendidas por defecto en los gimnasios NUEVOS (cambia el valor por defecto de la columna; los existentes no se tocan).
+Decidido por defecto: A. Los e2e `fase-u4` y `web-p8` ya prueban "sin altas no hay Quiero ser socio".
+Respuesta de Mateo: (vacío)
