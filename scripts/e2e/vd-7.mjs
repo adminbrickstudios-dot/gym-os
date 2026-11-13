@@ -117,7 +117,7 @@ try {
   }
   const sec2 = d.locator("[data-reglas-vencimiento]");
   await sec2.locator('input[name="renovacion"]').nth(1).check();
-  await sec2.locator('button:has-text("Guardar")').click();
+  await sec2.locator('button:has-text("Guardar")').first().click();
   await sec2.getByText("Guardado. Vale para los cobros nuevos").waitFor({ timeout: 30000 });
   ok("la regla del gimnasio vuelve a como estaba");
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);

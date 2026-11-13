@@ -10,7 +10,8 @@ import { Icono } from "@/components/ui/Icono";
  * del gimnasio); el resto, blancos sobre la tarjeta. Cada persona elige los
  * suyos y el orden.
  */
-export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: Acceso[]; disponibles: Acceso[]; perdidos: string[] }) {
+export function GrillaAccesos({ elegidos, disponibles, perdidos, conPrincipal = true }: { elegidos: Acceso[]; disponibles: Acceso[]; perdidos: string[]; conPrincipal?: boolean }) {
+  // DISENO: un solo verde por pantalla. Si arriba está el botón Cobrar (el principal del mostrador), el primer acceso va en blanco.
   const [editando, setEditando] = useState(false);
   const [seleccion, setSeleccion] = useState(elegidos.map((a) => a.clave));
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export function GrillaAccesos({ elegidos, disponibles, perdidos }: { elegidos: A
         <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {elegidos.map((a, i) => (
             <li key={a.clave}>
-              <Link href={a.ruta} className={`boton ${i === 0 ? "boton-principal" : ""} !flex-col !items-start !justify-between w-full aspect-[4/3] sm:aspect-[5/3] !p-4 sm:!p-5 !rounded-[var(--radio-grande)]`}>
+              <Link href={a.ruta} className={`boton ${i === 0 && conPrincipal ? "boton-principal" : ""} !flex-col !items-start !justify-between w-full aspect-[4/3] sm:aspect-[5/3] !p-4 sm:!p-5 !rounded-[var(--radio-grande)]`}>
                 <span className="text-4xl" aria-hidden><Icono nombre={a.emoji} sistema /></span>
                 <span className="titulo text-xl sm:text-2xl text-left">{a.titulo}</span>
               </Link>

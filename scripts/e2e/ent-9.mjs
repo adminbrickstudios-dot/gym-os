@@ -36,9 +36,10 @@ try {
   const ver2 = r.locator('[data-veredicto="verde"]');
   await ver2.waitFor({ timeout: 30000 });
   ok("al cobrar vuelve a la Entrada con su veredicto: ya en verde");
-  await r.keyboard.press("Enter");
+  // Tras cobrar, el foco vuelve a la Entrada un instante después del veredicto: un Enter apenas se ve el verde se pierde. El Enter se prueba en ent-1; acá se toca el botón.
+  await r.getByRole("button", { name: /Anotar entrada/ }).click();
   await r.locator("[data-hecho]").waitFor({ timeout: 30000 });
-  chequear(new RegExp(`Entró Moroso${s5}`).test(await r.locator("[data-hecho]").innerText()), "y entra con Enter", "no entró");
+  chequear(new RegExp(`Entró Moroso${s5}`).test(await r.locator("[data-hecho]").innerText()), "y entra con “Anotar entrada”", "no entró");
   if (r.errores.length) falla(`recepción: ${r.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

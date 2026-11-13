@@ -82,7 +82,7 @@ try {
   }
   const pub = await p.context().newPage();
   await pub.goto(`${G}/`);
-  chequear(await pub.locator("[data-pagina-oculta]").count() > 0 && await pub.locator("text=/armando/i").count() === 0 && await pub.locator('a[href="/hacete-socio"]').count() > 0, "oculta, la página muestra solo la portada con “Quiero ser socio” (nunca “armando”)", "la página oculta no muestra la portada con los botones");
+  chequear(await pub.locator("[data-pagina-oculta]").count() > 0 && await pub.locator("text=/armando/i").count() === 0 && await pub.locator('[data-pagina-oculta] a[href="/hacete-socio"], [data-pagina-oculta] a[href^="/ingresar"]').count() > 0,   // "Quiero ser socio" solo sale si el gimnasio tiene altas online; el acceso del equipo siempre "oculta, la página muestra solo la portada con “Quiero ser socio” (nunca “armando”)", "la página oculta no muestra la portada con los botones");
   await p.locator('[data-publicar] button:has-text("Mostrar mi página")').click();
   await p.locator(".mensaje", { hasText: "está publicada" }).waitFor({ timeout: 30000 });
   await pub.reload();

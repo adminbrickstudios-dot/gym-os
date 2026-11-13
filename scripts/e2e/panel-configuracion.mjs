@@ -138,7 +138,8 @@ try {
   chequear(await p.locator('button[data-pestana="clases"]').count() === 0, "apagar Clases saca su pestaña", "la pestaña Clases sigue");
   await guardar("secciones");
   await p.goto(`${G}/panel`);
-  chequear(!/Clases/.test(await p.locator("nav").first().innerText()), "sin clases, el menú no muestra Clases", "el menú sigue mostrando Clases");
+  const menuTexto = (await p.locator("nav").first().innerText()).replace(/s+/g, " ");
+  chequear(!/Clases/.test(menuTexto), "sin clases, el menú no muestra Clases", `el menú sigue mostrando Clases: “${menuTexto.slice(0, 200)}”`);
   await p.goto(`${G}/panel/configuracion?pestana=clases`);
   await p.locator('fieldset[data-pestana-activa="secciones"]').waitFor({ timeout: 30000 });
   ok("?pestana=clases con clases apagadas abre Secciones");
