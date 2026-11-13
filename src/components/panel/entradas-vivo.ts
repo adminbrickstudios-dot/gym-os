@@ -9,6 +9,9 @@
 import { entradasDesde, type LoteEntradas } from "@/app/panel/entrada/ventana-acciones";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
 
+/** E5: se dispara en la ventana cada vez que llega una entrada nueva: las listas del panel (Últimas entradas) se renuevan al instante, sin pedidos periódicos. */
+export const EVENTO_ENTRADAS_NUEVAS = "gymos:entradas-nuevas";
+
 /** Cada cuánto se pide cuando NO hay Realtime (base local). */
 export const CADA_MS = 4000;
 /** Cada cuánto se pide cuando Realtime se cayó: lento a propósito (carga sobre la base), y se avisa en chico. */
@@ -71,6 +74,7 @@ async function pedir() {
     if (!primera && (nuevas.length || nuevasAlertas.length)) {
       const lote: LoteEntradas = { ...r.lote, entradas: nuevas, alertas: nuevasAlertas };
       oyentes.forEach((o) => o(lote));
+      if (typeof window !== "undefined") window.dispatchEvent(new Event(EVENTO_ENTRADAS_NUEVAS));
     }
   } finally {
     enVuelo = false;

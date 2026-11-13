@@ -4,6 +4,7 @@ import { LinkPanel } from "@/components/panel/LinkPanel";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { ultimasEntradas } from "@/app/panel/inicio-acciones";
 import { Icono } from "@/components/ui/Icono";
+import { EVENTO_ENTRADAS_NUEVAS } from "@/components/panel/entradas-vivo";
 
 export type EntradaVivo = {
   ingreso_id: string; socio_id: string; socio: string; momento: string; via: string;
@@ -11,9 +12,9 @@ export type EntradaVivo = {
 };
 
 const VIA: Record<string, string> = { recepcion: "recepción", qr_socio: "QR", qr_pared: "QR de la pared", kiosco: "tablet", nfc: "llavero", molinete: "molinete" };
-const CADA_MS = 20_000;
+const CADA_MS = 60_000;   // E5: lo nuevo llega por el oído de la puerta (Realtime); esto es solo la red de seguridad
 
-/** VD-12b: las últimas entradas de hoy, en vivo (se renueva sola cada 20 s mientras la pestaña se ve). */
+/** VD-12b: las últimas entradas de hoy, en vivo (se renueva al instante cuando entra alguien —evento del oído de la puerta, Realtime— y, de red de seguridad, cada 60 s mientras la pestaña se ve). */
 export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[]; zona: string }) {
   const [lista, setLista] = useState(iniciales);
   const [falloRenovar, setFalloRenovar] = useState(false);
@@ -28,7 +29,8 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
     };
     const id = setInterval(renovar, CADA_MS);
     document.addEventListener("visibilitychange", renovar);
-    return () => { vivo = false; clearInterval(id); document.removeEventListener("visibilitychange", renovar); };
+    window.addEventListener(EVENTO_ENTRADAS_NUEVAS, renovar);
+    return () => { vivo = false; clearInterval(id); document.removeEventListener("visibilitychange", renovar); window.removeEventListener(EVENTO_ENTRADAS_NUEVAS, renovar); };
   }, []);
   const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
   return (
