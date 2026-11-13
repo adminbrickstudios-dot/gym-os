@@ -4,7 +4,7 @@
 
 **De dónde sale.** `PEDIDO-ORIGINAL.md` (los 70 detalles, los P0, los P1 y los P2), `AJUSTES-0911-NOCHE.md` (URG, PLAT, EDIT, WEB, ESC, SEG, CAL), `docs/v2/` (todos), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md` y la COLA de `docs/HOJA-DE-RUTA.md`. La tabla "Cobertura de las fuentes" del final dice dónde quedó cada una. El detalle por zona de la revisión del 11/11 sigue en `docs/base/estado/` (mostrador, dueño y super admin, socio, profe y público); **donde difiera de este archivo, manda este** (esos tres se escribieron antes del PR #16 y de los cierres de F4/F5/Z).
 
-**Publicado = está en `main`** (`git log origin/main`: PR #14 del 11/11, PR #15 del 11/11 y PR #16 del 12/11, merge `164d21e`), con las migraciones aplicadas en producción según `PROGRESO.md` ("PUBLICADO EL 12/11"). Al 12/11 el código de `main` y el de `base/2026-11-07` son el mismo salvo `scripts/datos/estado-base.mjs`, `humo-pasado-produccion.mjs`, el workflow `base-de-datos.yml` y documentos.
+**Publicado = está en `main`** (PR #14 y #15 del 11/11, #16 a #20 del 12/11; el último, `publicar/base-resto`), con las migraciones aplicadas en producción según `PROGRESO.md`. Lo hecho después (fase E, D1 a D4 y lo que `RECTA-FINAL.md` marca "sin publicar") está en `base/2026-11-07` y figura en la sección 2. Relectura del 12/11: este archivo se alineó con `RECTA-FINAL.md`, que manda cuando difieren.
 
 **Estados.** ✅ hecho y probado · 🟡 existe pero incompleto, apagado por defecto o sin prueba de punta a punta (dice qué falta) · ⛔ trabado (dice por qué y quién) · ❌ no existe.
 **Marca † en la columna Prueba:** el e2e o la prueba existe (verificado con `ls`) pero **no corrió en la revisión del 11/11**; vale lo que dijo su última corrida (ver `RECTA-FINAL.md` y `PROGRESO.md`). Sin † = corrió en verde en Actions o en la base local en esa revisión o en un cierre posterior que lo registra. Datos: solo el gimnasio demo; Temple Gym no se tocó.
@@ -31,7 +31,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Anotar entrada, deshacer, anular desde Hoy con motivo, reingreso; un ingreso repetido en pocos minutos no cuenta doble (10, 11, 12, 17) | los tres · Entrada, Hoy | `panel-entrada`, `vd-3`, `ent-8`, `reingreso-visita.test.mjs` | ✅ |
 | Dejar pasar con motivo obligatorio, topes, 3 modos, y "prometieron pagar" (8) | los tres (a un suspendido, dueño o encargado) | `ent-4`, `vd-8`, `dejar-pasar-modos.test.mjs`, `prometieron-pagar.test.mjs` | ✅ |
 | Cobrar desde la Entrada con monto sugerido (7), hoja flotante | los tres · Entrada | `ent-9`, `vd-5`, `vd-6` | ✅ |
-| Aviso flotante abajo a la derecha (verde, rojo, ámbar, azul), apilado, se va solo, sonido desactivable, y panel lateral con la ficha del socio (4, 5, 6 y 4.3) | los tres · todas las pantallas | `vd-1`, `vd-4`, `base-ingresos` (20 ingresos, mediana 199 ms) | 🟡 falta el e2e de los 4 colores y del atajo `/` (lista 3, F1.1) |
+| Aviso flotante abajo a la derecha (verde, rojo, ámbar, azul), apilado, se va solo, sonido desactivable, y panel lateral con la ficha del socio (4, 5, 6 y 4.3) | los tres · todas las pantallas | `vd-1`, `vd-4`, `base-ingresos` (20 ingresos, mediana 199 ms) | 🟡 `base-colores` 22/22 cubre los 4 colores y el atajo `/`; F1.1 sigue 🟡: falta un rojo cobrado y uno dejado pasar en el mismo recorrido y mirar las capturas |
 | Ventana F2 en todas las pantallas, barra fija, número que abre la ficha, lector de QR o tarjeta en el mismo campo (2, 3) | los tres | `vd-1`, `vd-1b`, `vd-29` | ✅ |
 | Lector USB, cambiar de persona con PIN ("Atiende: Ana"), cierre por inactividad (C5, C6) | recepción | `recepcion-lector`, `caj-3`, `pin-equipo.test.mjs` | ✅ |
 | QR del socio (app), tablet en la puerta con QR y aviso en vivo, kiosco | socio, recepción, dueño | `ent-2`, `ent-3`, `ent-6`, `vd-4`, `qr-socio.test.mjs` | ✅ |
@@ -53,7 +53,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Interesados dentro de Socios, con DNI, origen de cada alta y el invitado que queda como interesado (FA-24, N4) | los tres | `vd-15`, `vd-6`, `interesados-dni.test.mjs`, `invitado-interesado.test.mjs`, `origen-socio.test.mjs` | ✅ |
 | Turno de caja: abrir, retiro con foto y alerta, cerrar con arqueo ciego, caja olvidada, discriminada por método (36, 37) | recepción, dueño | `caj-1`, `caj-4`, `caj-5`, `vd-9`, `caja.test.mjs`, `caja-olvidada.test.mjs` | ✅ |
 | Caja por medio (efectivo, transferencia, tarjeta, MercadoPago) en turno, cierre, X y Z; Transferencias en dos pestañas con "ya la vi en el banco" (H1) | recepción, encargado, dueño | `caja-medios` (49 pasos), `caja-medios.test.mjs` | ✅ |
-| "Caja del turno" como número de la recepción, sin plata (arqueo ciego) y botones Cobrar, Alta y Pase diario en Inicio (BASE-4) | recepción, encargado, dueño · Inicio | `caja-del-turno-numero.test.mjs`, `velocidad-a` | 🟡 el e2e `velocidad-a` no corrió (lista 3, F1.3) |
+| "Caja del turno" como número de la recepción, sin plata (arqueo ciego) y botones Cobrar, Alta y Pase diario en Inicio (BASE-4) | recepción, encargado, dueño · Inicio | `caja-del-turno-numero.test.mjs`, `velocidad-a` | 🟡 `velocidad-a` corrió 17/17 en Actions (43330232719); F1.3 sigue 🟡 en `RECTA-FINAL.md` |
 | Efectivo sin turno abierto: abre el turno en la misma hoja (D32) | recepción | `vd-49`, `efectivo-sin-caja.test.mjs` | ✅ † |
 | Vender: carrito, productos con stock, cuenta corriente, convenios, cupones, anular, comprobante por WhatsApp (13, 32, 35) | los tres · Vender | `panel-vender`, `ven-1`, `ven-3` a `ven-6`, `com-9`, `vd-18` | ✅ † |
 | Doble cobro, descuentos y cortesías con motivo y tope (31) | los tres | `vd-34`, `vd-50`, `vd-46c`, `vd-46t`, `vd-46u`, `doble-cobro.test.mjs` | ✅ † |
@@ -66,7 +66,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Cumpleaños de hoy (19) | recepción · Inicio | `cumpleanos.test.mjs`, `cfg-5` | ✅ † |
 | Sin internet: mensaje claro, reintento y ningún ingreso perdido (16) | recepción | `sin-internet.test.mjs`, `src/lib/sin-internet.test.ts`, `pulido-roto` | ✅ |
 | Para hacer hoy y pendientes del menú (puntito rojo), en menos de 50 ms | los tres | `para-hacer-hoy.test.mjs`, `pendientes-panel.test.mjs`, `pendientes-vieja-vs-nueva.test.mjs` | ✅ |
-| Lo roto de PULIDO que pegaba en Temple Gym (H7): lector del kiosco, QR sin señal, avisos que tapaban, Cobrar que no se cierra solo, Abrir caja sin perder el carrito, rol con confirmación, Salir del socio, tema | todos | `pulido-roto` (18), `pulido-roto-2`, `panel-equipo` | ✅ (salida del socio y Dejar pasar/Volvió antes sin prueba: Q3) |
+| Lo roto de PULIDO que pegaba en Temple Gym (H7): lector del kiosco, QR sin señal, avisos que tapaban, Cobrar que no se cierra solo, Abrir caja sin perder el carrito, rol con confirmación, Salir del socio, tema | todos | `pulido-roto` (18), `pulido-roto-2`, `panel-equipo` | 🟡 como H7 en `RECTA-FINAL.md` (la salida del socio y Dejar pasar/Volvió antes ya tienen prueba por Q3; falta cerrar el ítem) |
 
 ### 1.2 Dueño y encargado
 
@@ -91,7 +91,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Eventos: crear, anotarse con lugares, check-in | dueño | `com-8`, `vd-19`, `eventos-completos.test.mjs` | ✅ † |
 | Lockers, máquinas, grados, documentos para firmar | dueño | `com-4`, `com-6`, `com-13`, `lockers.test.mjs`, `documentos.test.mjs` | ✅ † |
 | Ayuda y guías: globos de primera vez, Ctrl+K con preguntas, guías por rol con capturas, carteles para imprimir (C3, C4, C7) | todos | `vd-31`, `vd-63`, `guias-capturas`, `guias-carteles` (57 pasos), `ayuda-brik` | ✅ |
-| Botón "¿Necesitás ayuda?" y "Qué hay de nuevo" para el dueño (H6, N6) | dueño, recepción | `ayuda-brik`, `n-nuevas` | 🟡 (N6 con interruptor; ver 1.6) |
+| Botón "¿Necesitás ayuda?" y "Qué hay de nuevo" para el dueño (H6, N6) | dueño, recepción | `ayuda-brik`, `n-nuevas` | ✅ (H6 y N6 en `RECTA-FINAL.md`; N6 con interruptor por gimnasio) |
 | Segunda pasada: una semana entera como dueño y un gimnasio de cada tipo dado de alta | dueño, super admin | `rev-1`, `rev-2`, `rev-5`, `rev-6` | ✅ |
 | Lo que se edita se ve al toque en la página y en la app (orden de planes, horarios, clases canceladas, lo del super admin) | dueño | `lo-publico.test.ts` (33 casos), `rev-dueno-1`, `cache-prohibido.test.ts` | ✅ |
 | Tipos de gimnasio (CrossFit, funcional, solo máquinas) dados de alta con plantilla (v2/18) | super admin | `rev-5`, `plantillas-gimnasio.test.mjs` | ✅ |
@@ -105,7 +105,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Login universal con la marca del gimnasio, errores honestos con su texto, nunca cae al demo, links por rol `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super` (46, PLAT-02, 03, 07, 08) | todos | `fase-u0-login`, `fase-u02`, `panel-acceso`, `host.test.ts` | ✅ |
 | Cada cuenta entra solo a su gimnasio (U3, SEG) | todos | `fase-u3`, `base-aislamiento`, `aislamiento-gimnasios.test.mjs` | ✅ |
 | Tablero: números de hoy, "necesitan atención" con su motivo, actividad, errores (SA-1) | super admin | `super-f2`, `vd-40` | ✅ |
-| Portada del super admin en secciones | super admin | `super-f2`, `z-diseno` | ✅ |
+| Portada del super admin en secciones | super admin | `super-f2`, `z-diseno` | 🟡 como Z5: falta rehacer `admin/page.tsx` en 4 secciones |
 | Lista de gimnasios: búsqueda, filtros, favoritos, exportar; rápida con 1.000 gimnasios (SA-2, ESC-04) | super admin | `super-f2`, `super-admin`, `f9-admin-escala.test.mjs` | ✅ (paginar: lista 3) |
 | Ficha del gimnasio: datos, links por rol, equipo y claves, módulos y límites, abono, integraciones y Reprocesar, dominio, errores, registro, notas (SA-3) | super admin | `super-f2`, `super-f10`, `super-p` | ✅ |
 | Resetear contraseña, desactivar, cambiar rol, mover de gimnasio (42, EDIT-S04) | super admin | `super-p`, `super-f2` | ✅ |
@@ -168,7 +168,7 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 | Seguridad: RLS por rol, topes en "Olvidé" y formularios públicos, anti-robot, cabeceras, Ley 25.326, contraseñas demo no débiles (4.8, BASE-8, SEG-01 a 07) | todos | `base-8`, `seg-1`, `seg-2`, `seg-5`, `seg-6`, `topes-y-datos-personales.test.mjs`, `envio-publico.test.ts` | ✅ |
 | Auditoría: quién cobró, anuló, dejó pasar, creó o desactivó (44) | dueño | `actividad-equipo.test.mjs`, `vd-10`, `vd-42` | ✅ |
 | Webhook de MercadoPago idempotente, con firma verificada, fuera del proxy, con conciliación (34) | plataforma | `mp-procesar.test.ts`, `pagos-online.test.mjs`, `mercadopago-devoluciones.test.mjs` | ✅ (simulador; con credenciales reales: MP-1 a 3 ⛔) |
-| Diseño: íconos de línea (`Icono`), Barlow, tokens claro/oscuro, tema por usuario, menú en 4 secciones, títulos de 28 px, contraste (BASE-6, Z2, Z5) | todos | `barrido-tema`, `z-diseno`, `vd-11`, `dis-3`, `iconos-en-pantallas.test.ts`, `Icono.test.ts` | 🟡 faltan emojis y colores de otros carriles y los modales (F1.4) |
+| Diseño: íconos de línea (`Icono`), Barlow, tokens claro/oscuro, tema por usuario, menú en 4 secciones, títulos de 28 px, contraste (BASE-6, Z2, Z5) | todos | `barrido-tema`, `z-diseno`, `vd-11`, `dis-3`, `iconos-en-pantallas.test.ts`, `Icono.test.ts` | 🟡 el chequeo de diseño está en cero (0 colores, 0 emojis); falta el barrido de modales abiertos en claro y oscuro con capturas (F1.4) y Z8 (acento contra semáforo) |
 | Fluidez: Esc y atrás, cambios sin guardar frenan el menú, aviso a los 10 s, borrador en plan, rutina y evento, error junto al campo, red lenta (Z3, F3.2) | todos | `fluidez-reglas` (93 pasos), `fluidez-pantallas.test.ts`, `borrador.test.ts` | 🟡 lo que falta de las 21 reglas (F3.2) |
 | Cada botón de cada pantalla por rol, compu y celular: 0 hallazgos graves (F3.1) | los 6 roles | `botones.mjs`, `barrido` | ✅ |
 | Next 16.4 y React 19.3: sin acciones colgadas en "Guardando…" (VD-64) | todos | `scripts/diag/accion-colgada.mjs`, `package.json` | ✅ |
@@ -177,13 +177,14 @@ Los 70 detalles de `DETALLES-70.md` se cuentan dentro de las filas de la lista 1
 
 ## 2. Hecho sin publicar (en `base/2026-11-07`, no en `main`)
 
-Ningún código de producto: lo de producto entró todo con el PR #16. Queda en la rama esto, que se publica solo con el próximo PR:
+Hasta el PR #16 no había código de producto sin publicar. Después se publicaron los PR #18 a #20 y quedó en la rama lo de abajo, que se publica con el próximo PR (el detalle y los estados exactos están en `RECTA-FINAL.md`):
 
 | Función | Rol | Prueba | Falta publicar |
 |---|---|---|---|
 | Estado de la base: diagnóstico de por qué el alta de Temple Gym no abría y qué funciones nuevas están prendidas en gimnasios reales (solo booleanos y claves) | Mateo, agente (Actions) | `scripts/datos/estado-base.mjs`, corrida 43297648610 | `scripts/` y `base-de-datos.yml`, sin migración |
 | Acción `humo-pasado`: alta con fecha y pago pasados y caja por medio en el demo, dentro de una transacción que revierte | agente (Actions) | corrida 43300000883 (1 pago, 1 cobertura, caja del turno sin moverse, nada queda) | `scripts/datos/humo-pasado-produccion.mjs` |
 | `PREVENCION.md` (qué se puede romper y no publicar en hora pico) y la fase D de dominios en `RECTA-FINAL.md` | agente | revisión de lectura | Solo documentos |
+| Fase E (entrada en la esquina y avisos al instante: `AvisosEntrada.tsx`, `entradas-vivo.ts` con Realtime, `VentanaEntrada` partida, migración `20261112220000`), D1 a D4 (dominios viejos que redirigen, hora pico, chequeo de claves, alertas al 70 %) y los cambios de F0.4, F1.1, F1.3 y F1.4 del carril `f1-entrada` | agente | `entrada-barrita`, `vd-4`, `base-colores`, `velocidad-a`, `dominios-nuevos.test.ts`, `realtime-entradas.test.mjs` | Todo lo que `RECTA-FINAL.md` marca "sin publicar"; E3 además necesita aplicar la migración y medir menos de 1 s contra el proyecto real |
 | Esta revisión R1 y R2: `ESTADO-GENERAL.md`, fase Q en `RECTA-FINAL.md` y las marcas "Reemplazado por" en los MD viejos | agente | `ls` de cada prueba citada | Solo documentos |
 
 ---
@@ -238,17 +239,17 @@ Todas están en `PREGUNTAS.md` con la opción más segura, y **no se cambiaron**
 
 | Función | Rol | Estado | Ítem |
 |---|---|---|---|
-| E2e de los 4 colores del aviso y del atajo `/` (F1.1); `velocidad-a` escrito sin correr (F0.4, F1.3) | recepción | 🟡 | F1.1, F0.4 y F1.3 |
+| F1.1: `base-colores` y `velocidad-a` ya corrieron; falta el recorrido rojo cobrado y rojo dejado pasar juntos y mirar capturas (F1.1, F0.4, F1.3) | recepción | 🟡 | F1.1, F0.4 y F1.3 |
 | Selección múltiple con envío en tanda (FA-9), lista de anotados con foto (FA-11), recomendación del Inicio (FA-14), alertas por patrón (FA-22), invitado como interesado (FA-24), salida del socio, Dejar pasar y Volvió antes: sin e2e propio | varios | 🟡 | Q3 |
 | Las pruebas marcadas † de las listas 1.1 a 1.4: existen y su última corrida es de antes de la revisión del 11/11 | varios | 🟡 | R3 |
 | `n-nuevas`: `RECTA-FINAL.md` lo da verde (corridas 43137752579 y 43138182427) y `PROGRESO.md` del 12/11 dice que no pasaba al publicar; por eso la fase N está apagada para Temple Gym | dueño | 🟡 | N5 |
 | Celular: la ficha del socio desborda 2 px (392 > 390) en 1 de 4 corridas de `vd-15`; 12 saltos de diseño (CLS) en celular | recepción, dueño | 🟡 intermitente | R3 y H4 |
-| Realtime entre compus: campana, TV de entradas y de la sala, lo que cambia en una compu aparece en las otras | todos | ❌ | F3.2 y R3 |
+| Realtime entre compus: entradas ya (E3, sin publicar ni medido en producción); campana, TV de entradas y de la sala y lo demás todavía por pedido periódico | todos | 🟡 | E3, E5, F3.2 y R3 |
 | Reglas 4, 10, 12 y 13 de `FLUIDEZ.md` sin revisar pantalla por pantalla; regla 18 sin probar en un teléfono real | todos | 🟡 | F3.2 |
 | Botones en producción en modo mirar con la configuración real de Temple Gym | todos | 🟡 | H4 |
-| La simulación completa con 5.000 socios y tope de 1 s, la cadena e2e completa y el barrido, el humo en producción por rol, `PRUEBA-DUENO.md` y "LISTO PARA TU PASADA" | todos | ❌ | F8.1 a F8.5 y R3 |
-| Prueba de las direcciones de los QR y links ya compartidos después de cada publicación; lo de `PREVENCION.md` que es del agente | plataforma | ❌ | D3 y D4 |
-| Medir en producción (`Server-Timing`, `medir-produccion.yml`) y la meta de velocidad (LCP menor a 1,5 s, Lighthouse 95) | plataforma | ❌ (script escrito, ⛔ faltan secretos) | F0.1 y F0.5 |
+| La simulación completa con 5.000 socios (F8.1 ✅, mediana 146 ms); la cadena e2e completa (F8.2 🟡), el humo en producción por rol (F8.3 ⛔ secretos), `PRUEBA-DUENO.md` (F8.4 ⛔) y "LISTO PARA TU PASADA" (F8.5 ❌) | todos | 🟡 | F8.2 a F8.5 y R3 |
+| Direcciones de los QR y links ya compartidos (`direcciones-viejas.test.ts`) y lo de `PREVENCION.md` que es del agente: hechos, falta correrlos después de cada publicación contra producción | plataforma | 🟡 | D3 y D4 |
+| Medir en producción (`Server-Timing`, `medir-produccion.yml`) y la meta de velocidad (LCP menor a 1,5 s, Lighthouse 95) | plataforma | 🟡 (script escrito, ⛔ faltan secretos; meta sin cumplir) | F0.1 y F0.5 |
 
 ### 3.4 Lo que depende de cuentas, secretos y decisiones de Mateo (ítem Q5, y los ítems ⛔ que ya existían)
 
@@ -257,7 +258,7 @@ Todas están en `PREGUNTAS.md` con la opción más segura, y **no se cambiaron**
 | Secretos de GitHub: `COPIA_CLAVE` (copia cifrada antes de cada `aplicar`), `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (humo en producción), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA` | plataforma | ⛔ Mateo | H5, C8, U0.3, F0.1 |
 | `SUPABASE_SERVICE_ROLE_KEY` correcta en Vercel y confirmar en producción que crear un gimnasio y entrar por las 3 puertas anda | super admin | ⛔ Mateo | U1 y U0.1 |
 | `SUPABASE_REF_ESPERADO` y las claves asimétricas de Supabase | plataforma | ⛔ Mateo | P3 y F0.6 |
-| Dominio (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, DNS) y dominio propio de Temple Gym (64) | plataforma | ⛔ Mateo | P9, D1, D2 |
+| Dominio (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, DNS) y dominio propio de Temple Gym (64): comprados `pasegym.com` y `templegymsalta.com` (12/11); D1 está listo en el código sin publicar y falta el cambio de Mateo | plataforma | ⛔ Mateo | P9, D1, D2 |
 | Segundo proyecto de Supabase "ensayo" | plataforma | ⛔ Mateo | N0 |
 | Supabase Pro para restaurar copias y mirar los asesores | plataforma | ⛔ Mateo | F9.7 y F9.4 |
 | Factura electrónica ARCA, molinete o cerradura, Wellhub y TotalPass | dueño | ⛔ hardware o cuenta (🔌) | N7, N8, COM-16, COM-17, ENT-5 |
@@ -281,6 +282,23 @@ La COLA tiene unos 100 ítems todavía sin tildar (65 en esta tabla, el resto de
 
 ---
 
+### 3.6 Agregado por la relectura del 12/11 (todo lo que pidió Mateo contra el código)
+
+Ítems nuevos de `RECTA-FINAL.md`, cada uno con su LISTO SI. Salieron de pedidos que no tenían ítem y no estaban hechos (verificado con grep en `src/` y las migraciones).
+
+| Función | Rol | Estado | Ítem |
+|---|---|---|---|
+| El acento del gimnasio se corre de tono si se parece al semáforo (`DISENO.md`) | todos | ❌ | Z8 |
+| CUIT y razón social del gimnasio para la factura de BRIK en la ficha (SA-3) | super admin | ❌ | F2.10 |
+| Sesiones abiertas de un gimnasio y "Cerrar todas" (SA-10) | super admin | ❌ | F2.11 |
+| Entradas sin internet que se sincronizan al volver, con veredicto "sin confirmar" (`NOCHE-1211.md` N-B) | recepción | ❌ | N9 |
+| Cuánto deja un socio en promedio en Resultado (N-D; altas, bajas y recurrente ya están) | dueño | 🟡 | N10 |
+| Vercel Pro, Supabase Pro, región de Supabase y contestar PREGUNTAS (Base o Pase, ARCA, precios) | Mateo | ⛔ | Q5 |
+
+Fase E (entrada en la esquina, `NOCHE-1211.md`): E1, E2, E3, E4 y E6 en 🟡, E5 y E8 en ❌, E7 ✅; ver `RECTA-FINAL.md`.
+
+---
+
 ## Cobertura de las fuentes
 
 | Fuente | Dónde quedó |
@@ -292,6 +310,7 @@ La COLA tiene unos 100 ítems todavía sin tildar (65 en esta tabla, el resto de
 | `AJUSTES-0911-NOCHE.md`: URG-01 a 04, PLAT-01 a 08, EDIT-S01 a S12, EDIT-D01 a D06, WEB-01 a 06, ESC-01 a 08, SEG-01 a 07, CAL-01 a 08 | 1.3 y 1.5; lo pendiente (PLAT-05, ESC-07, CAL-07 humo en producción) en 3.4 |
 | `docs/v2/00` a `21`: entrada, cobros y caja, dueño, recepción, socio, página, diseño, plan, inspiración, super admin, ingreso, notificaciones, confiabilidad, situaciones (VD-46), rapidez, sección por sección, dominio y negocios, semana de prueba, lo que falta (VD-48, VD-49), pedidos del 07/11 (VD-61 a VD-63) | 1.1 a 1.5; `14-SITUACIONES` y `17-SECCION-POR-SECCION` en 3.5 (VD-46, VD-59) |
 | `DETALLES-70.md` | 60 en ✅ en 1.x, 10 en 🟡 en 3.x |
+| `NOCHE-1211.md`, `SOCIO-FLUJO.md`, `FLUIDEZ.md`, `DISENO.md`, `PULIDO.md` | Fase E, H3b, F3, Z1 a Z8 en `RECTA-FINAL.md`; N-A = N7, N-B = N9, N-C ya existe (Referir), N-D = N10, N-E = FA-23; lo de Mateo en Q5 |
 | `FALTANTES.md` (FA-1 a FA-24) | hechos: FA-3, 8, 9, 12, 14, 15, 16, 18, 20, 23, 24 en 1.x; a medias o grandes: FA-1, 2, 4, 5, 6, 7, 10, 13, 17, 19, 21, 22 en 3.2 y 3.4; FA-11 en 3.3 |
 | `SUPER-ADMIN.md` (SA-1 a SA-12) y `PLATAFORMA.md` (PLAT-01 a 08) | 1.3 |
 | COLA de `docs/HOJA-DE-RUTA.md` (los `[x]` en 1.x; los `[ ]` en 3.5 y 3.1) | 1.x, 3.1 y 3.5 |

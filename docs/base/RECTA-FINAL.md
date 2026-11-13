@@ -13,10 +13,10 @@ hace falta).
 - `PROGRESO.md` sigue teniendo el detalle de cada BASE-* y arriba el
   "RESUMEN PARA MATEO", que se reescribe al cerrar cada fase.
 
-Dónde quedó (09/11, mediodía):
-- Publicado: BASE-0, 2, 3, 4, 5, 7, 8 y 11 (PR #5 a #13).
-- Quedan a medias: BASE-1, 3, 6, 8, 9 y 10.
-- Desde el 08/11 a las 15:21 no se hizo nada: el loop se cortó.
+Dónde quedó (relectura del 12/11):
+- Publicado: todo hasta el PR #20 (`publicar/base-resto`, incluye H1 a H3b, H2c, Z y F).
+- Hecho sin publicar: fase E (E1 a E6 en 🟡), D1 a D4 y lo que dicen los ítems con "(sin publicar)".
+- La relectura de todo lo que pidió Mateo contra el código sumó N9, N10, Z8, F2.10 y F2.11 y completó Q5.
 
 ---
 
@@ -114,6 +114,7 @@ toque plata se prueba con números fijos antes de publicar.
 | Z4 | Todos los [TEXTO] | 🟡 hecho: textos de errores humanos, Sobran/Cobrado/Aprobada, traducción de errores crudos al socio; **12/11**: un solo nombre por pantalla (Planes y servicios, Retención y números, Clases, Para hacer hoy; el menú manda), textos por defecto de la landing que se pueden comprobar, `textoDeBase` en landing, kiosco, TV, pago y códigos (vitest); falta: "Vencen hoy" vs "Vencen y cobrar" (lo fijan `vd-28` y Cobrar), `error.message` de subida de archivos en acciones del panel, sin correr e2e (detalle en PULIDO.md y PREGUNTAS.md) |
 | Z5 | Todos los [DISEÑO] (menú en 4 secciones, títulos de 28 px, tokens, esquinas, tamaños) | 🟡 `z-diseno` 17, `vd-11` 43, `dis-3` 10 en verde (43132044748, 43134339400): menú en 4 secciones con Más, títulos de 28 px, hoja de confirmación en el super admin; falta la portada del super admin en 4 secciones (carril/z-resto en curso) |
 | Z6 | Todos los [FALTA] y los detalles premium de los tres bloques | 🟡 hecho: Darlo de alta con DNI, búsqueda visible en celular del super admin, listas, avisos, vacíos; **12/11**: comprobante en miniatura en Transferencias; falta: pase diario sin socio (cobro nuevo, plata), paginar Retención y /admin/gimnasios, y lo grande (metas, PDF, vuelto: otro carril), con estimaciones en PREGUNTAS.md |
+| Z8 | **El acento del gimnasio nunca se confunde con el semáforo** (`DISENO.md` § Tokens, relectura 12/11: no hay nada en `src/lib/marca.ts` que lo haga). **LISTO SI:** si el color del gimnasio queda a menos de una distancia fija de `--ok`, `--no`, `--atencion` o `--prueba`, el acento se corre un poco de tono (solo el acento; el semáforo no cambia nunca); vitest con un verde, un rojo, un ámbar y un azul de gimnasio, y barrido de tema con uno de esos | ❌ |
 | Z7 | Lo transversal de `PULIDO.md` (formatos, avisos, listas, vacíos, accesibilidad, atajos, sin conexión) | 🟡 hecho: fechaHumana/fechaHoraHumana/formatearCelular con vitest, tecla ? con atajos; **12/11**: `fechaHoraHumana` en Transferencias, Caja (para revisar, historial), Mensajes y Control; `fechaConEl` ("Le escribió Ana ayer") en Vencen hoy y Retención; `formatearCelular` en duplicados y lista de clase; aviso "Hay una versión nueva" (`/api/version` + `VersionNueva` en panel y app del socio); falta: las demás pantallas con fechas sueltas (Eventos, Incidentes, ficha del socio, datos personales) y probar el aviso con dos publicaciones seguidas |
 
 ## Fase 0 · Que sea rapidísimo en producción (primero: Mateo lo ve lento; objetivos en `VELOCIDAD.md`, por debajo del promedio)
@@ -154,6 +155,9 @@ toque plata se prueba con números fijos antes de publicar.
 | F2.7 | SA-11 Datos personales (Ley 25.326) | `SUPER-ADMIN.md` | ✅ e2e `super-f2` (132 pasos: ficha, soporte con rol y motivo, pausa, baja y restaurar, búsqueda con motivo, paleta Ctrl+K, seguridad, registro, novedades, mantenimiento, demos), `super-f10` (9) y `super-admin` (17) en verde en Actions (corridas 43015505501 y 43038610430) |
 | F2.8 | SA-10 Segundo factor, roles de BRIK y registro | `SUPER-ADMIN.md` | ✅ e2e `super-f2` (132 pasos: ficha, soporte con rol y motivo, pausa, baja y restaurar, búsqueda con motivo, paleta Ctrl+K, seguridad, registro, novedades, mantenimiento, demos), `super-f10` (9) y `super-admin` (17) en verde en Actions (corridas 43015505501 y 43038610430) |
 | F2.9 | SA-7, SA-8, SA-9 y SA-12 | `SUPER-ADMIN.md` | ✅ e2e `super-f2` (132 pasos: ficha, soporte con rol y motivo, pausa, baja y restaurar, búsqueda con motivo, paleta Ctrl+K, seguridad, registro, novedades, mantenimiento, demos), `super-f10` (9) y `super-admin` (17) en verde en Actions (corridas 43015505501 y 43038610430) |
+
+| F2.10 | **SA-3 Datos: CUIT y razón social** para la factura de BRIK (`SUPER-ADMIN.md`, relectura 12/11: no existen en la ficha ni en la base). **LISTO SI:** se cargan y se ven en la pestaña Datos de la ficha, con formato de CUIT validado (11 cifras, dígito verificador) y registro de quién lo cambió; prueba de base y e2e | ❌ |
+| F2.11 | **SA-10 Sesiones abiertas de un gimnasio y "Cerrar todas"** (para cuando un empleado se va mal; hoy solo se ven las sesiones propias del super admin, y la baja de un usuario corta las suyas). Toca permisos: solo el rol Principal y con motivo | Prueba de base por rol (principal sí; soporte, ventas y solo lectura error) y e2e: la ficha lista las sesiones del gimnasio, "Cerrar todas" las corta y queda en el registro | ❌ |
 
 ## Fase 3 · Fluidez: la pasada botón por botón
 
@@ -217,6 +221,8 @@ el mensaje de arranque). Lo que no estaba en ninguna lista está en
 | N6 | "Qué hay de nuevo" para el dueño en el panel, armado con cada publicación | ✅ "Qué hay de nuevo" para dueño y encargado en Novedades y en Funciones nuevas, solo con lo que prendió (corrida 43137752579 (base y n-nuevas, 48 pasos), rama `carril/n-nuevas`) |
 | N7 | Factura electrónica ARCA, opcional (🔌) | ⛔ diseño en `FACTURA-ARCA.md`; falta certificado y alta en ARCA del cliente (🔌) |
 | N8 | Molinete o cerradura por API (🔌 hardware) | ⛔ diseño en `MOLINETE-API.md`; falta el hardware (🔌) |
+| N9 | **Entradas sin internet** (`NOCHE-1211.md` N-B, relectura 12/11; E6 solo dice "anotá en papel"): la recepción sigue anotando y se sincroniza al volver, con el veredicto de la última lectura marcado "sin confirmar" y una lista para revisar; nadie entra gratis ni queda afuera. **LISTO SI:** e2e con Playwright offline: se anotan 3 entradas sin red, al volver se sincronizan una sola vez (misma clave de operación, VD-34) y las dudosas quedan en "para revisar"; apagada por defecto por gimnasio | ❌ |
+| N10 | **Cuánto deja un socio** (`NOCHE-1211.md` N-D, relectura 12/11): Resultado ya muestra altas, bajas y "recurrente por mes"; falta lo que deja un socio en promedio y cuánto dura. **LISTO SI:** dos números nuevos en Resultado calculados de lo guardado (pagos y coberturas), con prueba de base de momentos fijos y apagados por defecto | 🟡 |
 
 ## Fase R · Revisión de todo lo viejo, función por función (Mateo, 11/11)
 
@@ -236,7 +242,7 @@ El detalle de cada fila está en `docs/base/ESTADO-GENERAL.md`, lista 3.
 | Q2 | **Retención y tareas del dueño**: Retención con "Avisar a todos" (tope y registro de contacto), exportar y que Altas, Bajas, En riesgo y Socios al día lleven a su lista; Tareas con editar, borrar y cortar la repetición diaria; Mensajes con "ver más" después de los 100 | Cada una con su e2e, en compu y celular, con la base de 5.000 socios dentro del presupuesto de `VELOCIDAD.md` | 🟡 hecho y en verde en Actions (`q2-*`); falta el presupuesto de `VELOCIDAD.md` con 5.000 socios |
 | Q3 | **E2e que faltan para funciones ya hechas**: selección múltiple con envío en tanda (FA-9), lista de anotados con foto (FA-11), recomendación del Inicio del socio con "hace 10 días que no venís" (FA-14), alertas por patrón con dos sedes (FA-22), invitado como interesado (FA-24), salida del socio, Dejar pasar y Volvió antes | Un recorrido por cada una, en verde en Actions con la app compilada | 🟡 en verde: FA-9/FA-11 (`panel-d`), FA-14, FA-22, FA-24 (`q3-*`), Dejar pasar y Volvió antes (`panel-entrada`), salir del socio (`pulido-roto`); falta pasarlos a la cadena `e2e` completa con la app compilada en tanda |
 | Q4 | **Reconciliar la COLA de `docs/HOJA-DE-RUTA.md`**: los 65 ítems `[ ]` de la lista 3.5 de `ESTADO-GENERAL.md` (varios ya están hechos y con la marca vieja: VD-33D, VD-40B, VD-42B/C, VD-30B, VD-64, VD-62, VD-63) | Cada ítem verificado contra el código: si existe, se tilda con su prueba; si falta, se hace con su e2e o queda ⛔ con el motivo; la COLA sin ningún `[ ]` ni `[~]` sin explicar | ❌ |
-| Q5 | **Lo que depende de Mateo** (lista 3.4): los secretos de GitHub, `SUPABASE_REF_ESPERADO`, activar el segundo factor de su cuenta, prender `altas_online` y las funciones nuevas en Temple Gym, el texto de términos revisado por un abogado, las credenciales de MercadoPago, Google, Resend (mails), WhatsApp oficial, Sentry y Turnstile, e instalar la PWA en un celular real | Cada uno con sus pasos exactos escritos arriba de `PROGRESO.md` ("LO QUE NECESITO DE MATEO") y, hecho por Mateo, su prueba en Actions | ⛔ lo hace Mateo; los pasos ya están escritos |
+| Q5 | **Lo que depende de Mateo** (lista 3.4): los secretos de GitHub, `SUPABASE_REF_ESPERADO`, activar el segundo factor de su cuenta, prender `altas_online` y las funciones nuevas en Temple Gym, el texto de términos revisado por un abogado, las credenciales de MercadoPago, Google, Resend (mails), WhatsApp oficial, Sentry y Turnstile, e instalar la PWA en un celular real | Cada uno con sus pasos exactos escritos arriba de `PROGRESO.md` ("LO QUE NECESITO DE MATEO") y, hecho por Mateo, su prueba en Actions. Se suman (relectura 12/11): **Vercel Pro** (el plan Hobby no permite uso comercial; Temple Gym ya paga), **Supabase Pro** antes de sumar otro gimnasio, confirmar la **región de Supabase** (`vercel.json` ya fija `gru1`, que solo sirve si Supabase está en São Paulo: `VELOCIDAD.md`) y contestar `PREGUNTAS.md` (¿Base o Pase?, factura ARCA, precios) | ⛔ lo hace Mateo; los pasos ya están escritos |
 
 ## Fase 8 · El cierre
 
