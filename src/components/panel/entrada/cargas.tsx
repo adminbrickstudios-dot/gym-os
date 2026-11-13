@@ -16,3 +16,17 @@ export const precargarAlta = () => { void import("./AltaRapida"); };
 export const precargarPrueba = () => { void import("./PruebaGratis"); };
 export const precargarDejarPasar = () => { void import("../FormDejarPasar"); };
 export { Camara } from "@/app/panel/entrada/CamaraDinamica";
+
+// Los pasos de la ventana grande y la barra fija: la ventana se abre con un toque, no con cada pantalla.
+// Se bajan en un momento libre apenas carga el panel (`precargarVentana`), así al abrirla ya están.
+export const PasoEscribir = dynamic(() => import("./PasoEscribir"), { loading: hueco("h-72") });
+export const PasoVeredicto = dynamic(() => import("./PasoVeredicto"), { loading: hueco("h-72") });
+export const PasoAnotado = dynamic(() => import("./PasosFinales").then((m) => m.PasoAnotado), { loading: hueco("h-48") });
+export const PasoSalio = dynamic(() => import("./PasosFinales").then((m) => m.PasoSalio), { loading: hueco("h-48") });
+export const BarraFija = dynamic(() => import("./BarraFija"));
+
+export function precargarVentana() {
+  const bajar = () => { void import("./PasoEscribir"); void import("./PasoVeredicto"); void import("./PasosFinales"); void import("./BarraFija"); };
+  const w = window as Window & { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number };
+  if (w.requestIdleCallback) w.requestIdleCallback(bajar, { timeout: 4000 }); else setTimeout(bajar, 1500);
+}

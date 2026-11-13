@@ -27,13 +27,9 @@ import { CartelEmergencia, useEmergencia } from "./CartelEmergencia";
 import { escucharEntradas } from "./entradas-vivo";
 import { abrirCobrar, hayHojaCobrar, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho } from "./cobrar/evento";
 import { Barrita } from "./entrada/Barrita";
-import BarraFija from "./entrada/BarraFija";
-import { AltaRapida, Camara, PruebaGratis, precargarAlta, precargarDejarPasar, precargarPrueba } from "./entrada/cargas";
+import { AltaRapida, BarraFija, Camara, PasoAnotado, PasoEscribir, PasoSalio, PasoVeredicto, PruebaGratis, precargarAlta, precargarDejarPasar, precargarPrueba, precargarVentana } from "./entrada/cargas";
 import { CLAVE_SEDE, CLAVE_VOLVER, conPuntos, EVENTO_ABRIR_ENTRADA, EVENTO_ABRIR_ENTRADA_CON, ES_QR, esEditable, hayAlgoEncima, sinPuntos, type Alta, type FormPrueba, type Hecho, type Paso, type PedidoAbrirSocio } from "./entrada/comun";
 import { SinInternet, useSinInternet } from "./entrada/conexion";
-import PasoEscribir from "./entrada/PasoEscribir";
-import { PasoAnotado, PasoSalio } from "./entrada/PasosFinales";
-import PasoVeredicto from "./entrada/PasoVeredicto";
 
 // Lo que otras pantallas importan de acá (siguen apuntando a este archivo).
 export { EVENTO_ABRIR_ENTRADA, EVENTO_ABRIR_ENTRADA_CON };
@@ -169,6 +165,8 @@ function VentanaCuerpo({ gimnasioId, sedeId: sedeBase, zona, config, conQr, conL
     window.addEventListener("storage", leer);
     return () => { window.removeEventListener(EVENTO_PISADO, leer); window.removeEventListener("storage", leer); };
   }, []);
+
+  useEffect(() => { if (!propia) precargarVentana(); }, [propia]);
 
   useEffect(() => {
     document.documentElement.dataset.entradaLista = "si";

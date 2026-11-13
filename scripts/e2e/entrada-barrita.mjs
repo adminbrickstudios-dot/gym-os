@@ -30,9 +30,9 @@ for (const [apellido, dni] of Object.entries(DNI)) {
 }
 const [otro] = (await db.query(`select s.id, s.dni from public.socios s where s.gimnasio_id <> $1 and s.dni ~ '^\\d{7,8}$' and not exists (select 1 from public.socios x where x.gimnasio_id = $1 and x.dni = s.dni) limit 1`, [gim])).rows;
 // Un socio dado de baja (se baja a uno de relleno y se restaura al final).
-const [relleno] = (await db.query(`select id, dni, dado_de_baja_en from public.socios where gimnasio_id = $1 and nombre <> 'Testigo' order by numero desc limit 1`, [gim])).rows;
+const [relleno] = (await db.query(`select id, dni, dado_de_baja_en, motivo_baja from public.socios where gimnasio_id = $1 and nombre <> 'Testigo' order by numero desc limit 1`, [gim])).rows;
 const DNI_BAJA = "39100999";
-await db.query(`update public.socios set dni = $2, dado_de_baja_en = coalesce(dado_de_baja_en, now()) where id = $1`, [relleno.id, DNI_BAJA]);
+await db.query(`update public.socios set dni = $2, dado_de_baja_en = coalesce(dado_de_baja_en, now()), motivo_baja = coalesce(motivo_baja, 'otro') where id = $1`, [relleno.id, DNI_BAJA]);
 
 const entradasDe = async (socio, desde) => (await db.query(`select count(*)::int n from public.ingresos where socio_id = $1 and momento >= $2 and resultado <> 'rechazado'`, [socio, desde])).rows[0].n;
 const MEDIR_SONIDO = () => {
@@ -339,7 +339,7 @@ try {
     await r.context().close();
   }
 } finally {
-  await db.query(`update public.socios set dni = $2, dado_de_baja_en = $3 where id = $1`, [relleno.id, relleno.dni, relleno.dado_de_baja_en]).catch(() => {});
+  await db.query(`update public.socios set dni = $2, dado_de_baja_en = $3, motivo_baja = $4 where id = $1`, [relleno.id, relleno.dni, relleno.dado_de_baja_en, relleno.motivo_baja]).catch(() => {});
   await config().catch(() => {});
   await b.close();
   await db.end();
