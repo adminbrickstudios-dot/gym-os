@@ -35,7 +35,7 @@ test("N5: todas nacen apagadas; el dueño las ve y las prende; el encargado las 
   assert.equal((await t.q(`select count(*)::int n from public.funciones_nuevas_gimnasio where gimnasio_id = $1`, [t.g]))[0].n, 0, "no hay filas: apagado es la ausencia");
   await comoDueno(async () => {
     const [{ r }] = await t.q(`select public.funciones_nuevas_panel($1) r`, [t.g]);
-    assert.deepEqual(r.map((x) => x.clave), ["borrador_alta", "panel_pago", "horarios_pico", "apto_vencimiento", "origen_altas", "resumen_noche", "debito_automatico", "vuelto_efectivo"]);
+    assert.deepEqual(r.map((x) => x.clave), ["borrador_alta", "panel_pago", "horarios_pico", "apto_vencimiento", "origen_altas", "resumen_noche", "debito_automatico", "vuelto_efectivo", "valor_del_socio"]);
     assert.ok(r.every((x) => x.activa === false && x.prendida_en === null), "todas apagadas");
     assert.equal(r.find((x) => x.clave === "debito_automatico").plata, true);
     const [{ a }] = await t.q(`select public.funciones_nuevas_activas($1) a`, [t.g]);

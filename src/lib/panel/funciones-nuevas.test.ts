@@ -10,9 +10,9 @@ const sql = readFileSync(`${carpeta}/${ultimaDelCatalogo}`, "utf8");
 const catalogo = [...sql.matchAll(/jsonb_build_object\('clave', '([a-z_]+)'/g)].map((m) => m[1]);
 
 describe("funciones nuevas: un solo interruptor", () => {
-  it("el catálogo tiene las ocho claves, sin repetir", () => {
+  it("el catálogo tiene las nueve claves, sin repetir", () => {
     expect(new Set(catalogo).size).toBe(catalogo.length);
-    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "origen_altas", "panel_pago", "resumen_noche", "vuelto_efectivo"]);
+    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "origen_altas", "panel_pago", "resumen_noche", "valor_del_socio", "vuelto_efectivo"]);
   });
   it("cada una trae título, explicación y la frase de “Qué hay de nuevo”", () => {
     for (const c of catalogo) {
@@ -23,7 +23,7 @@ describe("funciones nuevas: un solo interruptor", () => {
     }
   });
   it("el código solo pregunta por claves que existen en el catálogo", () => {
-    const usos = [["src/app/panel/socios/nuevo/page.tsx", "borrador_alta"], ["src/app/panel/entrada/ventana-acciones.ts", "panel_pago"], ["src/app/panel/resultado/page.tsx", "horarios_pico"]];
+    const usos = [["src/app/panel/socios/nuevo/page.tsx", "borrador_alta"], ["src/app/panel/entrada/ventana-acciones.ts", "panel_pago"], ["src/app/panel/resultado/page.tsx", "horarios_pico"], ["src/app/panel/resultado/page.tsx", "valor_del_socio"]];
     for (const [archivo, clave] of usos) {
       expect(readFileSync(archivo, "utf8")).toContain(`"${clave}"`);
       expect(catalogo).toContain(clave);
