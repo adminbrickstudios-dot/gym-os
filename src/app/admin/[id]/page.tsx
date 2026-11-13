@@ -20,6 +20,7 @@ import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { EstadoCopias } from "../EstadoCopias";
 import { Ciudad, CicloDeVida, QrGimnasio, RestaurarTextos } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
+import { DatosFiscalesGimnasio, SesionesAbiertas, type DatosFiscales, type SesionesGimnasio } from "./FichaFiscalSesiones";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
 type Semana = { desde: string; entradas: number; ventas: number; socios_nuevos: number };
@@ -28,7 +29,7 @@ type FichaExtraDatos = {
   webhooks_fallidos: { id: string; tipo: string; recibido_en: string; intentos: number; error: string | null }[];
   registro: { accion: string; quien: string; detalle: Record<string, unknown>; cuando: string }[];
 };
-const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como soporte", cambiar_dueno: "Cambió el dueño", guardar_modulos: "Cambió los módulos", cambiar_slug: "Cambió el slug", buscar_persona: "Buscó a una persona", guardar_ciudad: "Cambió la ciudad", pausar_gimnasio: "Pausó el gimnasio", reanudar_gimnasio: "Reanudó el gimnasio", dar_de_baja: "Dio de baja el gimnasio", restaurar_baja: "Restauró el gimnasio", exportar_gimnasio: "Exportó el gimnasio", exportar_socio: "Exportó los datos de un socio", borrar_socio: "Borró los datos de un socio" };
+const ACCION: Record<string, string> = { entrar_como_soporte: "Entró como soporte", cambiar_dueno: "Cambió el dueño", guardar_modulos: "Cambió los módulos", cambiar_slug: "Cambió el slug", buscar_persona: "Buscó a una persona", guardar_ciudad: "Cambió la ciudad", pausar_gimnasio: "Pausó el gimnasio", reanudar_gimnasio: "Reanudó el gimnasio", dar_de_baja: "Dio de baja el gimnasio", restaurar_baja: "Restauró el gimnasio", exportar_gimnasio: "Exportó el gimnasio", exportar_socio: "Exportó los datos de un socio", borrar_socio: "Borró los datos de un socio", guardar_datos_fiscales: "Cambió el CUIT o la razón social", cerrar_sesiones: "Cerró las sesiones del equipo" };
 type PasoLanzamiento = { clave: string; titulo: string; falta: string; hecho: boolean };
 type ErrorPantalla = { pantalla: string; cantidad: number; ultimo: string; mensaje: string };
 type Soporte = { id: string; quien: string; motivo: string; rol?: string; entro_en: string; vence_en: string; salio_en: string | null; en_curso: boolean };
@@ -53,8 +54,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   const { id } = await params;
   let g: Detalle, cambios: Cambio[], abonos: Record<string, EstadoAbono>, planes: PlanBrik[];
   let saludTodos: Record<string, SaludFicha>, semanas: Semana[], soportes: Soporte[], notas: NotaBrik[], extra: FichaExtraDatos, lanzamiento: PasoLanzamiento[], errores: ErrorPantalla[], papelera: EnPapelera, linkPago: string | null, otros: { gimnasio_id: string; nombre: string }[];
+  let fiscales: DatosFiscales, sesiones: SesionesGimnasio | { sinPermiso: string };
   try {
-    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra, lanzamiento, errores, papelera, linkPago, otros] = await Promise.all([
+    [g, cambios, abonos, planes, saludTodos, semanas, soportes, notas, extra, lanzamiento, errores, papelera, linkPago, otros, fiscales, sesiones] = await Promise.all([
       rpc<Detalle>("admin_gimnasio", { p_gimnasio_id: id }),
       rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: id, p_limite: 20 }),
       rpc<Record<string, EstadoAbono>>("admin_abonos"),
@@ -69,6 +71,12 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
       rpc<EnPapelera>("admin_papelera", { p_gimnasio_id: id }),
       rpc<string | null>("admin_link_pago"),
       rpc<{ gimnasio_id: string; nombre: string }[]>("admin_gimnasios"),
+      rpc<DatosFiscales>("admin_datos_fiscales", { p_gimnasio_id: id }),
+      // F2.11: solo el rol Principal de BRIK. Para los demás la base da error y acá se dice con sus palabras (nunca una lista vacía).
+      rpc<SesionesGimnasio>("admin_sesiones_gimnasio", { p_gimnasio_id: id }).catch((e: unknown) => {
+        if (e instanceof ErrorDatos && e.sinPermiso) return { sinPermiso: e.message };
+        throw e;
+      }),
     ]);
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="No se pudo abrir">{e.message}</Aviso></main>;
@@ -158,6 +166,15 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <p className="texto-suave">Zona horaria: {extra.zona_horaria}. El resto de los datos del gimnasio los cambia su dueño, o BRIK entrando como soporte.</p>
         <Ciudad gimnasioId={g.gimnasio_id} ciudad={fila?.ciudad ?? null} />
         <CambiarSlug gimnasioId={g.gimnasio_id} slug={g.slug} />
+        <p className="titulo-grupo">CUIT y razón social (factura de BRIK)</p>
+        <DatosFiscalesGimnasio gimnasioId={g.gimnasio_id} datos={fiscales} cuando={fiscales.actualizado_en ? fecha(fiscales.actualizado_en) : ""} />
+      </section>
+
+      <section className="space-y-3" data-ficha-sesiones>
+        <p className="titulo-grupo">Sesiones abiertas del equipo</p>
+        {"sinPermiso" in sesiones
+          ? <p className="texto-suave" data-sesiones-sin-permiso>{sesiones.sinPermiso}. Las sesiones abiertas las ve solo el rol Principal de BRIK.</p>
+          : <SesionesAbiertas gimnasioId={g.gimnasio_id} nombre={g.nombre} datos={{ total: sesiones.total, personas: sesiones.personas.map((p) => ({ ...p, rol_nombre: NOMBRE_ROL[p.rol as Rol] ?? p.rol, ultima: fecha(p.ultima_actividad) })) }} />}
       </section>
 
       {!g.es_demo && (

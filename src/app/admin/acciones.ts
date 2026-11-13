@@ -372,6 +372,23 @@ export async function restaurarTextoGimnasio(gimnasioId: string, clave: string):
   catch (e) { return { error: (e as Error).message }; }
 }
 
+/** F2.10: CUIT y razón social para la factura de BRIK. La base valida el CUIT; acá solo se pasa y se vuelve a pintar la ficha. */
+export async function guardarDatosFiscales(gimnasioId: string, cuit: string, razonSocial: string): Promise<{ error?: string; repetido?: boolean }> {
+  try {
+    const r = await rpc<{ repetido_en_otro_gimnasio: boolean }>("admin_guardar_datos_fiscales", { p_gimnasio_id: gimnasioId, p_cuit: cuit, p_razon_social: razonSocial });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return { repetido: r.repetido_en_otro_gimnasio };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+/** F2.11: cierra todas las sesiones del equipo del gimnasio (solo el rol Principal de BRIK, con motivo; la base lo exige y lo registra). */
+export async function cerrarSesionesGimnasio(gimnasioId: string, motivo: string): Promise<{ error?: string; personas?: number; sesiones?: number }> {
+  try {
+    const r = await rpc<{ personas: number; sesiones: number }>("admin_cerrar_sesiones_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo });
+    revalidatePath(`/admin/${gimnasioId}`);
+    return { personas: r.personas, sesiones: r.sesiones };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 // ── P9 (PLAT-05): dominios desde el super admin, por la API de Vercel ──
 // (pendiente) en producción hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio). Solo el usuario principal de BRIK.
 const hablarConVercel: VercelFetch = async (url, init) => {
