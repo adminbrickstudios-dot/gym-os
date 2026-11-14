@@ -27,7 +27,7 @@ try {
   await cuit.fill("20-12345678-7");
   await razon.fill("Gimnasio Ficticio SRL");
   await guardar.click();
-  await p.locator('[role="alert"], .mensaje-error').first().waitFor({ timeout: 15000 });
+  await fis.getByText(/no es válido/).first().waitFor({ timeout: 15000 });
   chequear(/CUIT no es válido/.test(await fis.innerText()), "un CUIT con el dígito verificador mal no se guarda y dice por qué", `dijo: ${(await fis.innerText()).slice(0, 120)}`);
 
   // 2 · bueno: se guarda y queda

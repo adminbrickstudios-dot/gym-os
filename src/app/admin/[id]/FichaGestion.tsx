@@ -77,7 +77,7 @@ export function DatosFiscalesForm({ gimnasioId, datos, puedeEditar }: { gimnasio
       </div>
       <Alerta m={error} />
       {guardado && <p className="texto-suave" data-fiscales-guardado>Guardado.</p>}
-      {datos.cambiado_por && <p className="text-sm texto-tenue" data-fiscales-quien>Último cambio: {datos.cambiado_por}{datos.cambiado_en ? ` · ${new Date(datos.cambiado_en).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p>}
+      {datos.cambiado_por && <p className="text-sm texto-tenue" data-fiscales-quien>Último cambio: {datos.cambiado_por}{datos.cambiado_en ? ` · ${new Date(datos.cambiado_en).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" })}` : ""}</p>}
     </div>
   );
 }
@@ -90,7 +90,7 @@ export function SesionesEquipo({ gimnasioId, sesiones }: { gimnasioId: string; s
   const [error, setError] = useState("");
   const [cerradas, setCerradas] = useState<number | null>(null);
   const [confirmar, dialogo] = useConfirmar();
-  const cuando = (m: string) => new Date(m).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
+  const cuando = (m: string) => new Date(m).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" });
   return (
     <div className="space-y-3" data-sesiones-equipo={sesiones.length}>
       {dialogo}
