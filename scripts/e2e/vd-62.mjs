@@ -55,8 +55,8 @@ async function paginaGimnasio(vp, nombre) {
   const cuerpo = await p.locator("body").innerText();
   chequear(!/lorem|ipsum|undefined|\bnull\b/i.test(cuerpo), `${nombre}: sin textos de relleno ni valores rotos`, `${nombre}: aparece lorem/undefined/null en la página`);
 
-  // WhatsApp: el flotante (compu) o la barra de abajo (celular) abre wa.me con el número del gimnasio.
-  const wa = vp.width >= 640 ? p.locator("[data-whatsapp-flotante]") : p.locator('div.fixed a[href^="https://wa.me/"]').first();
+  // WhatsApp: el flotante (compu) o, en el celular (L1), la línea de WhatsApp del primer pantallazo: abre wa.me con el número del gimnasio.
+  const wa = vp.width >= 640 ? p.locator("[data-whatsapp-flotante]") : p.locator("[data-dato-whatsapp]");
   await wa.waitFor({ timeout: 15000 }).catch(() => falla(`${nombre}: falta el WhatsApp flotante`));
   if (await wa.count()) {
     const href = await wa.getAttribute("href");
