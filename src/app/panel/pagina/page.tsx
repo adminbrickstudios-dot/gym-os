@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, lectura, rpcLote } from "@/lib/panel/servidor";
 import { traerAgenda, traerClasesSemana } from "@/lib/landing";
 import { direccionPagina } from "@/lib/panel/direccion-pagina";
 import { Editor, type PaginaPanel, type ReglasImagenes } from "./Editor";
@@ -18,15 +18,18 @@ export default async function Pagina() {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     const host = (await headers()).get("x-gimnasio-host");
-    const [pagina, altas, agenda, clases, medicion, prueba, datos] = await Promise.all([
-      rpc<PaginaPanel>("pagina_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<AltasPanel>("altas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+    // E8: lo de la base en UN viaje (lote_lecturas); la agenda y las clases de la landing salen de su propio caché, en paralelo.
+    const [[pagina, altas, medicion, prueba, datos], agenda, clases] = await Promise.all([
+      rpcLote(
+        lectura<PaginaPanel>("pagina_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<AltasPanel>("altas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<MedicionPanel>("medicion_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<PruebaSocialPanel>("prueba_social_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        // Las reglas de las imágenes (tipos y tamaño) las decide la base; el editor las usa para subir el logo y las fotos.
+        lectura<{ reglas_imagenes: ReglasImagenes }>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      ),
       host ? traerAgenda(host) : Promise.resolve(null),
       host ? traerClasesSemana(host) : Promise.resolve([]),
-      rpc<MedicionPanel>("medicion_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<PruebaSocialPanel>("prueba_social_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      // Las reglas de las imágenes (tipos y tamaño) las decide la base; el editor las usa para subir el logo y las fotos.
-      rpc<{ reglas_imagenes: ReglasImagenes }>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
     ]);
     return (
       <>

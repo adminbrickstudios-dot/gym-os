@@ -29,7 +29,7 @@ const solo = async (f, args) => {
 const norm = (x) => JSON.parse(JSON.stringify(x));
 
 test("toda función de la lista existe en public", async () => {
-  const texto = readFileSync(new URL("../migrations/20261114110000_lote_lecturas.sql", import.meta.url), "utf8");
+  const texto = readFileSync(new URL("../migrations/20261114130000_lote_lecturas_mas_pantallas.sql", import.meta.url), "utf8");
   const bloque = texto.slice(texto.indexOf("permitidas constant"), texto.indexOf("resultados jsonb[]"));
   const nombres = [...bloque.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).filter((n) => n !== "text");
   assert.ok(nombres.length > 40, "se leyó la lista");

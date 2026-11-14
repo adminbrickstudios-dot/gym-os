@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLectura, rpcLote } from "@/lib/panel/servidor";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -60,13 +60,15 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
         </>
       );
     }
-    const [filas, etiquetas, filtros, autoaltas, nuevosInteresados] = await Promise.all([
-      rpcLectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: limite, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
-      rpcLectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<number>("autoaltas_web", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<{ estado: string }[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id }).then((l) => l.filter((p) => p.estado === "nuevo").length),
-    ]);
+    // E8: todo en UN viaje a la base (lote_lecturas).
+    const [filas, etiquetas, filtros, autoaltas, prospectosTodos] = await rpcLote(
+      lectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: limite, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
+      lectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<number>("autoaltas_web", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<{ estado: string }[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id }),
+    );
+    const nuevosInteresados = prospectosTodos.filter((p) => p.estado === "nuevo").length;
     // Un link con los filtros de ahora, cambiando uno (null lo saca).
     const con = (cambio: { etiqueta?: string | null; estado?: string | null; plan?: string | null; web?: boolean }) => {
       const v = { etiqueta, estado, plan, web, ...cambio };

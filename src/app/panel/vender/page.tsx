@@ -3,7 +3,7 @@ import { BotonPin } from "@/components/panel/BotonPin";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Ficha } from "../socios/[id]/tipos";
 import { Carrito } from "./Carrito";
@@ -19,12 +19,13 @@ export default async function Vender({ searchParams }: { searchParams: Promise<{
     exigirSeccion(panel, "vender");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
-    const [precios, miCaja, ficha, stock] = await Promise.all([
-      rpc<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: sp.socio ?? null }),
-      rpc<MiCaja>("caja_para_cobrar", { p_sede_id: sede.id }),
-      sp.socio ? rpc<Ficha>("ficha_socio", { p_socio_id: sp.socio }) : Promise.resolve(null),
-      rpc<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
-    ]);
+    // E8: todo en UN viaje a la base (lote_lecturas).
+    const [precios, miCaja, ficha, stock] = await rpcLote(
+      lectura<PreciosVenta>("precios_venta", { p_sede_id: sede.id, p_socio_id: sp.socio ?? null }),
+      lectura<MiCaja>("caja_para_cobrar", { p_sede_id: sede.id }),
+      sp.socio ? lectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }) : fijo<Ficha | null>(null),
+      lectura<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
+    );
     // VD-9 / VD-49: el efectivo cae en MI turno de esta sede (con PIN, el de esa persona); uno abierto de otro día (sin contar) no sirve.
     const turno = miCaja.turno_id;
     const socio = ficha ? { socio_id: ficha.socio.id, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(), color: ficha.acceso.color, texto: ficha.acceso.texto } : null;
