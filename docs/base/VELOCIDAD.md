@@ -348,3 +348,16 @@ Se cuentan las líneas `[rpc]` del log de la app al abrir cada pantalla (sin pre
 **Cómo se cuenta (PREGUNTAS D68):** lo que hace esperar a quien abre la pantalla es el render, y ahí son 2 viajes (contexto + una lectura) en las pantallas ya pasadas al lote. Lo de después de pintar (menú, campana, avisos) se mide aparte y no bloquea. **Falta** para decir "2 en todas": Caja (depende de `cajas_para_revisar`, que registra cajas olvidadas antes de leer), Control (parámetros con listas), Entrada (acciones con el contexto repetido) y el resto de las pantallas chicas.
 
 **E4 · JS del panel (14/11):** lo que viaja a toda pantalla del panel pasó de **148,9 KB gzip a 71,0 KB**. El cliente de Supabase (Realtime, Auth y Storage: 66,6 KB) y la hoja Cobrar ya no van con el layout. Promedio por ruta: 322,6 → 245,9 KB gzip.
+
+### E8 · Tabla final (14/11, corrida 43611836070, después de las dos tandas de lote; dueña, app compilada, 3.000 socios)
+
+| Pantalla | Antes | Final | | Pantalla | Antes | Final |
+|---|---|---|---|---|---|---|
+| Inicio | 29 | 6 | | Retención | 10 | 4 |
+| Configuración | 30 | 6 | | Socios | 18 | 4 |
+| Planes | 23 | 4 | | Tu página | 8 | 4 |
+| Entrada | 20 | 7 | | Vender | 17 | 5 |
+| Resumen, Gastos, Clases | 9 | 4 | | Caja | 19 | 9 |
+| Recepción, pantallas simples | 11 | 3 | | Control | 20 | 10 |
+
+El piso de toda pantalla son 3: `contexto_pantalla`, `panel_vivo` (menú y campana) y `entradas_desde` (avisos de la puerta; estos dos van después de pintar). Las que pasaron al lote suman 1 más (4). **Quedan por pasar al lote:** Caja (9: `cajas_para_revisar` registra cajas olvidadas antes de leer y hay una lectura por turno), Control (10: tiene parámetros que son listas, que `lote_lecturas` todavía no acepta) y Vencen hoy, Transferencias, Tareas, Mensajes, Equipo, Profes y Prospectos (5 a 9).
