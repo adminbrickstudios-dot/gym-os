@@ -13,6 +13,7 @@ const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execS
 await db.connect();
 const b = await navegador();
 let elegido = null;
+let tres = [];
 try {
   const r = await pagina(b, COMPU);
   r.setDefaultNavigationTimeout(120000);
@@ -30,6 +31,8 @@ try {
   });
   const unico = (s) => copia.socios.filter((x) => x.n === s.n).length === 1;
   elegido = copia.socios.find((x) => x.p && unico(x));
+  // N9: tres entradas anotadas sin internet (el primero es `elegido`), para comprobar que al volver se registran una sola vez cada una.
+  tres = copia.socios.filter((x) => x.p && unico(x)).slice(0, 3);
   const noPuede = copia.socios.find((x) => !x.p && unico(x));
 
   await r.context().setOffline(true);
@@ -39,6 +42,11 @@ try {
   await buscar.fill(elegido.n);
   await panel.locator(`[data-copia-socio="${elegido.n}"] button`, { hasText: "Entró" }).click();
   chequear(await aparece(panel.locator('[data-cola="1"]'), 10000), `busca a ${elegido.n} (puede): “Entró” y queda esperando a internet`, await panel.innerText());
+  for (const o of tres.slice(1)) {
+    await buscar.fill(o.n);
+    await panel.locator(`[data-copia-socio="${o.n}"] button`, { hasText: "Entró" }).click();
+  }
+  chequear(await aparece(panel.locator(`[data-cola="${tres.length}"]`), 10000), `quedan ${tres.length} entradas esperando a internet`, await panel.innerText());
   if (noPuede) {
     await buscar.fill(noPuede.n);
     const fila = panel.locator(`[data-copia-socio="${noPuede.n}"]`);
@@ -50,14 +58,18 @@ try {
   await r.context().setOffline(false);
   const listo = r.locator("[data-sincronizado]");
   chequear(await aparece(listo, 60000) && /Se registraron/.test(await listo.innerText()), "vuelve internet: “Se registraron las entradas anotadas sin internet”", await r.locator("main").innerText().then((t) => t.slice(0, 300)));
+  const ids = tres.map((x) => x.s);
+  const { rows: filas } = await db.query(`select x.id_local, count(*)::int n from public.ingresos_sin_internet x join public.ingresos i on i.id = x.ingreso_id
+    where i.socio_id = any($1::uuid[]) and i.anulado_en is null and x.sincronizado_en > now() - interval '10 minutes' group by x.id_local`, [ids]);
+  chequear(filas.length === tres.length && filas.every((x) => x.n === 1), `en la base: las ${tres.length} entradas se registraron una sola vez cada una (id de operación distinto)`, JSON.stringify(filas));
   const [fila] = (await db.query(`select i.resultado, i.via_acceso from public.ingresos_sin_internet x join public.ingresos i on i.id = x.ingreso_id
     where i.socio_id = $1 order by x.sincronizado_en desc limit 1`, [elegido.s])).rows;
   chequear(fila && fila.resultado !== "rechazado", `en la base: ${elegido.n} entró (${fila?.resultado}), registrado por la función de siempre`, JSON.stringify(fila));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 } finally {
-  if (elegido) await db.query(`select privado.anular_ingreso(x.ingreso_id, 'Prueba e2e sin internet', null, true)
-    from public.ingresos_sin_internet x join public.ingresos i on i.id = x.ingreso_id where i.socio_id = $1 and i.anulado_en is null and i.resultado <> 'rechazado'`, [elegido.s]).catch(() => {});
+  if (tres.length) await db.query(`select privado.anular_ingreso(x.ingreso_id, 'Prueba e2e sin internet', null, true)
+    from public.ingresos_sin_internet x join public.ingresos i on i.id = x.ingreso_id where i.socio_id = any($1::uuid[]) and i.anulado_en is null and i.resultado <> 'rechazado'`, [tres.map((x) => x.s)]).catch(() => {});
   await db.end();
 }
 await b.close();
