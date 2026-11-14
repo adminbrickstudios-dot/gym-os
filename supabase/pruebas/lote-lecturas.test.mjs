@@ -29,7 +29,7 @@ const solo = async (f, args) => {
 const norm = (x) => JSON.parse(JSON.stringify(x));
 
 test("toda función de la lista existe en public", async () => {
-  const texto = readFileSync(new URL("../migrations/20261114160000_lote_lecturas_tercera_tanda.sql", import.meta.url), "utf8");
+  const texto = readFileSync(new URL("../migrations/20261114170000_lote_lecturas_listas_y_control.sql", import.meta.url), "utf8");
   const bloque = texto.slice(texto.indexOf("permitidas constant"), texto.indexOf("resultados jsonb[]"));
   const nombres = [...bloque.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).filter((n) => n !== "text");
   assert.ok(nombres.length > 40, "se leyó la lista");
@@ -94,4 +94,16 @@ test("sin permiso es un error, nunca un lote vacío; la que se marca tolerante d
 test("anon no puede ejecutar lote_lecturas", async () => {
   const [{ p }] = await t.q(`select has_function_privilege('anon', 'public.lote_lecturas(jsonb)', 'execute') p`);
   assert.equal(p, false);
+});
+
+test("una lista como parámetro (p_tipos de Control) viaja como arreglo y da lo mismo que la llamada directa", async () => {
+  await t.comoUsuario(u.dueno, async () => {
+    const a = { p_gimnasio_id: t.g, p_desde: "2026-10-01", p_hasta: "2026-11-30", p_quien: null, p_limite: 20, p_cursor: null };
+    for (const tipos of [["cobro", "anulacion"], ["cobro"], [], null]) {
+      const [r] = await lote([{ f: "linea_de_control", a: { ...a, p_tipos: tipos } }]);
+      const arreglo = tipos == null ? "null" : `array[${tipos.map((x) => `'${x}'`).join(",")}]::text[]`;
+      const [{ x }] = await t.q(`select to_jsonb(public.linea_de_control('${t.g}'::uuid, '2026-10-01', '2026-11-30', ${arreglo}, null, 20, null)) x`);
+      assert.deepEqual(norm(r), norm(x), `tipos ${JSON.stringify(tipos)}`);
+    }
+  });
 });
