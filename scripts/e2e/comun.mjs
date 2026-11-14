@@ -61,6 +61,13 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   // conAyuda: true deja que salgan los globos de ayuda (VD-31); solo e2e/vd-31.mjs lo pide.
   const { conAyuda = false, ...deContexto } = opciones;
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...deContexto });
+  // F8.2: los recorridos que dependían de la hora del día (fallaban entre las 21 y las 24 h) fijan la hora del
+  // navegador a las 12:00 de hoy en Buenos Aires (el reloj sigue corriendo: es setSystemTime, no un reloj congelado).
+  // Se pide con HORA_NAVEGADOR=mediodia al principio del recorrido. La hora del servidor no cambia.
+  if (process.env.HORA_NAVEGADOR === "mediodia") {
+    const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Argentina/Buenos_Aires" });
+    await ctx.clock.setSystemTime(new Date(`${hoy}T12:00:00-03:00`));
+  }
   // VD-31: sin esto, el globo de ayuda de la primera visita empujaría el contenido de cada pantalla.
   // La app lo respeta SOLO con PERMITIR_SIN_AYUDA=1 (lo pone scripts/local/levantar.sh; nunca en producción).
   if (!conAyuda) {

@@ -459,7 +459,7 @@ function Resultado({ fase, esRecepcion, onAbrir, onAnotar }: { fase: Extract<Fas
     boton = <button type="button" disabled={trabajando} data-barrita-anotar data-anotar-emergencia className="boton boton-principal w-full" onClick={onAnotar}><Icono nombre="alerta-circulo" /> {trabajando ? "Anotando…" : "Anotar entrada (emergencia)"}</button>;
   } else if (principal === "cobrar" || principal === "cobrar_pack") {
     boton = <button type="button" data-barrita-cobrar className="boton boton-principal w-full"
-      onClick={() => { if (hayHojaCobrar()) abrirCobrar({ socioId: socio.socio_id, origen: "entrada" }); else onAbrir(false); }}>{guia?.boton_texto || (principal === "cobrar_pack" ? "Cobrar un pack" : "Cobrar")}</button>;
+      onClick={() => { if (hayHojaCobrar()) abrirCobrar({ socioId: socio.socio_id, origen: "entrada" }); else onAbrir(false); }}>{guia?.boton_texto?.replace(/^[^\p{L}\p{N}]+/u, "") || (principal === "cobrar_pack" ? "Cobrar un pack" : "Cobrar")}</button>;
   } else if (principal === "dejar_pasar" && !bloqueado) {
     boton = <button type="button" data-barrita-dejar className="boton boton-principal w-full" onClick={() => onAbrir(true)}><Icono nombre="usuarios" /> Dejar pasar</button>;
   } else {

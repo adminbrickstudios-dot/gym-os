@@ -11,7 +11,7 @@ name: Medir escala
 on:
   # Hasta que esté en main, GitHub no deja disparar a mano desde una rama: un push con [medir] en el mensaje lo corre.
   push:
-    branches: ["noche/**", "dia/**"]
+    branches: ["noche/**", "dia/**", "base/**"]
   workflow_dispatch:
     inputs:
       socios:
@@ -61,6 +61,8 @@ jobs:
       - name: Gimnasios de carga
         run: node scripts/datos/cargar-gimnasios.mjs --url "$(scripts/db/local.sh url)" --gimnasios "${{ inputs.gimnasios || '200' }}"
       - name: Usuarios del demo (dueño, recepción…)
+        env:
+          APP_MODO: produccion   # E8: los viajes se cuentan con la app compilada (en dev React monta todo dos veces)
         run: |
           scripts/local/levantar.sh
           psql "$(scripts/db/local.sh url)" -c "select count(*) as socios from public.socios" -c "select count(*) as gimnasios from public.gimnasios"
@@ -85,6 +87,13 @@ jobs:
           npx playwright install --with-deps chromium
           MEDIR_ROLES=duena,recepcion MEDIR_SOLO_COMPU=1 node scripts/medir/tiempos.mjs | tee .local/tiempos.md
           { echo; echo "## Pantallas (modo desarrollo)"; echo; cat .local/tiempos.md; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Viajes a la base por pantalla (E8)
+        if: inputs.pantallas || github.event_name == 'push'
+        continue-on-error: true
+        run: |
+          npx playwright install --with-deps chromium
+          node scripts/medir/viajes.mjs | tee .local/viajes.md
+          { echo; echo "## Viajes a la base por pantalla (tope 2)"; echo; cat .local/viajes.md; } >> "$GITHUB_STEP_SUMMARY"
       - name: Guardar la tabla
         if: always()
         uses: actions/upload-artifact@v4

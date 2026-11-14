@@ -306,3 +306,25 @@ Se mide con `scripts/medir/js-rutas.mjs` (suma los chunks que cada ruta pide al 
 | Después (11 piezas, 5 con carga diferida, más la barrita y la franja sin internet) | 57 | 14.583,1 KB gzip | 255,8 KB gzip | ~837 KB (260 gzip) | ~823 KB (257 gzip) |
 
 Conclusión sin adornar: el objetivo "el JS baja" **no se cumplió**. La partición deja el archivo mantenible y saca del primer JS el alta, la prueba, "dejar pasar" y el comprobante, pero la barrita (E1) y E6 suman más de lo que sale. Una segunda prueba que cargaba aparte también los pasos de la ventana grande dio 252,0 KB (igual que antes) y rompió recorridos que abren la ventana: se deshizo.
+
+## E8 · Viajes a la base por pantalla (13/11, `scripts/medir/viajes.mjs`, corrida 43423578975, app compilada, 3.000 socios)
+
+Se cuentan las líneas `[rpc]` del log de la app al abrir cada pantalla (sin precarga). **Las 42 pantallas pasan de 2 viajes** (el tope de E8); en el mismo viaje salen en paralelo, así que lo que importa es cuántos van en fila.
+
+| Pantalla (dueña) | Viajes antes | Qué hay |
+|---|---|---|
+| Resumen, Gastos, Clases | 9 | base común de 7 + 1 o 2 propios |
+| Socios, Vencen hoy, Transferencias, Mensajes, Equipo, Profes, Tareas | 11–13 | |
+| Retención, Control, Caja, Página | 13–15 | |
+| Planes | 23 | `lista_precios_plan` ×6 (uno por plan: candidato a una sola llamada) |
+| Configuración | 30 | ~25 funciones, una por sección |
+| Inicio | 29 | |
+| Entrada | 20 | `contexto_pantalla` ×5, `estado_emergencia_puerta` ×2 |
+| Socio (`/app`) | 22 | una por tarjeta del Inicio |
+
+**La base común de toda pantalla del panel (7 viajes, recepción en una pantalla vacía):**
+1. `contexto_pantalla` ×2: una vez al pintar y otra porque la campana (pedido del navegador al abrir) vuelve a pedir el contexto para saber el rol y las secciones apagadas.
+2. `estado_gimnasio_aviso` y `contacto_plataforma_publico`: eran en fila en el layout. **Arreglado hoy (E8): van en paralelo** (`src/app/panel/layout.tsx`).
+3. `pendientes_panel`, `entradas_desde`, `campana_panel` (+ `avisos_pagos_mp` para el dueño): pedidos del navegador al montar el menú y la campana, no del render.
+
+**Qué queda (no se tocó, por orden de lo que más rinde):** (a) Configuración, Planes, Inicio y Entrada: una sola función por pantalla, como `contexto_pantalla`; (b) que la campana no repita el contexto (una función `campana_panel` que devuelva rol y secciones); (c) `lista_precios_plan` en una llamada; (d) `/panel/prospectos` y `/panel/entrada` repiten el render (×2 a ×5): mirar por qué. **Falta la tabla "después"**: la corrida que mide el cambio de hoy (el paralelo del layout) sigue siendo la base de comparación.

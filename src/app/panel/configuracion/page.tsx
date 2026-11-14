@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { direccionPagina } from "@/lib/panel/direccion-pagina";
 import { Ajustes, type Config, type DatosGimnasio } from "./Ajustes";
 import type { CierrePanel } from "./Horarios";
@@ -22,30 +22,33 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
-    const [config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, dobleCobro, cajaConfig, autoservicio, planFamiliar, beneficios, { pestana }] = await Promise.all([
-      rpc<Config>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<DatosGimnasio>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Agenda>("horarios_apertura_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<CierrePanel[]>("cierres_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<MensajePanel[]>("mensajes_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Cambio[]>("historial_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }),
-      rpc<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<EstadoMP>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<boolean>("config_turnos_fijos", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<{ link_resena: string | null }>("encuestas_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<number>("meta_visitas_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ReglasVencimiento>("reglas_vencimiento", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ConfigDejarPasar>("config_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ConfigDobleCobro>("config_cobro", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<AutoservicioPanel>("autoservicio_panel", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<boolean>("plan_familiar_estado", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Omit<ReglasBeneficiosDatos, "gimnasio_id">>("reglas_beneficios", { p_gimnasio_id: panel.gimnasio.id }),   // VD-46U
+    // E8: todas las lecturas de la pantalla en UN viaje a la base (lote_lecturas), con la lista de cambios restaurables incluida (solo el dueño).
+    const [[config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, dobleCobro, cajaConfig, autoservicio, planFamiliar, beneficios, restaurables], { pestana }] = await Promise.all([
+      rpcLote(
+        lectura<Config>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<DatosGimnasio>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<Agenda>("horarios_apertura_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<CierrePanel[]>("cierres_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<MensajePanel[]>("mensajes_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<Cambio[]>("historial_configuracion", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }),
+        lectura<Tablet[]>("tablets_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<EstadoMP>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<boolean>("config_turnos_fijos", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<{ link_resena: string | null }>("encuestas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<ConfigEntrada>("config_entrada", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<number>("meta_visitas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<ReglasVencimiento>("reglas_vencimiento", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<ConfigDejarPasar>("config_dejar_pasar", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<ConfigDobleCobro>("config_cobro", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<AutoservicioPanel>("autoservicio_panel", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<boolean>("plan_familiar_estado", { p_gimnasio_id: panel.gimnasio.id }),
+        lectura<Omit<ReglasBeneficiosDatos, "gimnasio_id">>("reglas_beneficios", { p_gimnasio_id: panel.gimnasio.id }),   // VD-46U
+        // F9.2 (EDIT-D04): "Restaurar este valor" en Cambios. Solo el dueño y solo si la función está prendida (la base devuelve lista vacía si no).
+        panel.yo.rol === "dueno" ? lectura<{ id: string; campo: string; cuando: string }[]>("cambios_restaurables", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }) : fijo<{ id: string; campo: string; cuando: string }[]>([]),
+      ),
       searchParams,
     ]);
-    // F9.2 (EDIT-D04): "Restaurar este valor" en Cambios. Solo el dueño y solo si la función está prendida (la base devuelve lista vacía si no).
-    const restaurables = panel.yo.rol === "dueno" ? await rpc<{ id: string; campo: string; cuando: string }[]>("cambios_restaurables", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }) : [];
     const idDe = new Map(restaurables.map((r) => [`${r.campo}|${r.cuando}`, r.id]));
     const cambiosConId: Cambio[] = cambios.map((c) => ({ ...c, restaurar_id: idDe.get(`${c.campo}|${c.cuando}`) }));
     const inicial: ClavePestana = PESTANAS.find((p) => p.clave === pestana)?.clave ?? "gimnasio";

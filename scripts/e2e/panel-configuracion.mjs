@@ -73,7 +73,9 @@ try {
   await cont.locator('button[aria-label="#3b82f6"]').click(); await guardar("marca");
   await p.reload(); await p.locator('fieldset[data-pestana-activa="marca"]').waitFor();
   const acento = await p.evaluate(() => getComputedStyle(document.querySelector("[style*='--acento']") ?? document.body).getPropertyValue("--acento").trim().toLowerCase());
-  chequear(acento === "#3b82f6", "guardar azul cambia el color del panel", `el panel quedó con ${acento}`);
+  const rgb = (h) => { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const cerca = /^#[0-9a-f]{6}$/.test(acento) && Math.hypot(...rgb(acento).map((v, i) => v - rgb("#3b82f6")[i])) <= 130;   // Z8: el acento se corre de tono si se parece al semáforo
+  chequear(cerca, "guardar azul cambia el color del panel", `el panel quedó con ${acento}`);
   await cont.locator('button[aria-label="#2fbf5b"]').click(); await guardar("marca");
 
   // ── Cambios sin guardar: aviso en la pestaña y al salir ──

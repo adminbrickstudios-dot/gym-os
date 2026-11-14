@@ -4,6 +4,7 @@
 // Y con la sección apagada, la pantalla no abre y el Inicio no muestra nada.
 //   npm run e2e:vd-54            (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -17,7 +18,7 @@ async function seccion(p, prendida) {
   await p.goto(`${G}/panel/configuracion?pestana=secciones`);
   await p.locator('fieldset[data-pestana-activa="secciones"]').waitFor({ timeout: 30000 });
   await p.waitForTimeout(800);
-  const sw = p.locator("fieldset[data-pestana-activa] label").filter({ hasText: /^\S+ Máquinas/ }).locator('input[role="switch"]');
+  const sw = p.locator("fieldset[data-pestana-activa]").getByRole("switch", { name: /Máquinas/ }).first();
   if ((await sw.isChecked()) === prendida) return;
   await (prendida ? sw.check() : sw.uncheck());
   const pie = p.locator('[data-pie="secciones"]');

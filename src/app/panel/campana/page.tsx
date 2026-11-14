@@ -18,7 +18,8 @@ const JUSTIFICAN_PUSH = new Set(["comprobantes", "caja", "pedidos"]);
 /** AVI-5 / VD-37: lo que pasó y te toca ver, agrupado por día, con el link a lo que hay que hacer. Se calcula al abrirla. */
 export default async function Novedades() {
   return intentar(async () => {
-    const { panel, items, sinLeer } = await traerCampana();
+    const { panel: panelC, items, sinLeer } = await traerCampana();
+    const panel = panelC!;
     const prefs = await traerPreferencias();
     const nuevas = await cargarNuevas(panel);   // N3 / N2 / N6: solo lo que este gimnasio prendió
     const zona = panel.gimnasio.zona_horaria;

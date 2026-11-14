@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LINEA_GRUPO, type Acceso, type Grupo, type Seccion } from "@/lib/panel/secciones";
-import { traerPendientes } from "@/app/panel/pendientes-acciones";
+import { pedirVivo } from "@/lib/panel/vivo-cliente";
 import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type Pendientes } from "@/lib/panel/pendientes";
 import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
 import { Buscador } from "./Buscador";
@@ -18,6 +18,8 @@ type Props = {
   rol: string;
   /** La clave del rol (dueno, encargado…): el nombre de arriba es para mostrar. */
   rolClave?: string;
+  /** Las secciones que el gimnasio apagó: el número de la campana (que se pide junto con los del menú) no cuenta lo que lleva a una pantalla apagada. */
+  apagadas?: string[];
   secciones: Seccion[];
   grupos: Grupo[];
   principales: Acceso[];
@@ -136,7 +138,7 @@ export function Navegacion(props: Props) {
   const [pendientes, setPendientes] = useState<Pendientes | null>(null);
   useEffect(() => {
     let vivo = true;
-    const pedir = () => { void traerPendientes().then((p) => { if (vivo && p) setPendientes(p); }); };
+    const pedir = () => { void pedirVivo({ rol: props.rolClave ?? props.rol, apagadas: props.apagadas ?? [] }).then((x) => { if (vivo && x?.pendientes) setPendientes(x.pendientes); }); };
     const cuandoVuelve = () => { if (document.visibilityState === "visible") pedir(); };
     pedir();
     const cada = setInterval(cuandoVuelve, 60_000);

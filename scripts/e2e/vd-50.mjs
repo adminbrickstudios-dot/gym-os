@@ -8,6 +8,7 @@ import { execSync } from "node:child_process";
 import pg from "pg";
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -29,8 +30,10 @@ async function abrirCobrar(p, nombre) {
   await p.locator('main ul a[href^="/panel/socios/"]').first().waitFor({ timeout: 30000 });
   await p.keyboard.press("Control+k");
   await p.locator('input[placeholder*="cobrar"]').fill(`cobrar ${nombre}`);
-  await p.locator("[data-buscador-cobrar]").first().waitFor({ timeout: 30000 });
-  await p.keyboard.press("Enter");
+  const fila = p.locator("[data-buscador-cobrar]").first();
+  await fila.waitFor({ timeout: 30000 });
+  const exacto = p.locator("div").filter({ hasText: nombre }).filter({ has: p.locator("[data-buscador-cobrar]") }).last().locator("[data-buscador-cobrar]");
+  if (await exacto.count()) await exacto.first().click(); else await p.keyboard.press("Enter");
   await p.locator("[data-cobrar] [data-cobrar-confirmar]").waitFor({ timeout: 30000 });
   await p.locator('[data-cobrar-medio="transferencia"]').click();
 }
@@ -94,7 +97,12 @@ try {
   const socio2 = await moroso(r, nombre2);
   await abrirCobrar(r, nombre2);
   await abrirCobrar(d, nombre2);
-  await confirmar(r).click();
+  // Diagnóstico (F8.2): si el botón no se deja tocar, se dice por qué (apagado, tapado, otra hoja).
+  await confirmar(r).click({ timeout: 15000 }).catch(async (e) => {
+    const est = await r.evaluate(() => { const b = document.querySelector("[data-cobrar-confirmar]"); return b ? `botón ${b.disabled ? "apagado" : "activo"}: ${b.textContent?.trim()}` : "sin botón"; }).catch(() => "?");
+    const hoja = (await r.locator("[data-cobrar]").first().innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 300);
+    throw new Error(`confirmar(r): ${est} · hoja: ${hoja} · ${String(e.message).split(/\r?\n/)[0]}`);
+  });
   await cobrado(r).waitFor({ timeout: 30000 });
   await confirmar(d).click();
   await d.locator("[data-cobrar-doble]").waitFor({ timeout: 30000 });

@@ -5,6 +5,7 @@
 import { execSync } from "node:child_process";
 import pg from "pg";
 import { COMPU, GIMNASIO, chequear, entrar, falla, navegador, pagina, resultado } from "./comun.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -43,12 +44,13 @@ try {
   chequear(en === nuevoProfe, "la clase quedó con el profe nuevo", "la clase no cambió de profe");
   const [{ profe_id: enOtra }] = (await db.query(`select profe_id from public.clases where id = $1`, [otra])).rows;
   chequear(enOtra === diego, "la otra clase de Diego no cambió", "se cambió otra clase");
+  await d.locator(`[data-reemplazos] li:has-text("Diego no puede venir ${s5}")`).first().waitFor({ timeout: 20000 }).catch(() => {});   // el historial llega con la recarga que sigue al guardado
   chequear(await d.locator(`[data-reemplazos] li:has-text("Diego no puede venir ${s5}")`).count() === 1, "queda el historial con el motivo", "sin historial");
 
   // Diego ya no ve la lista de esa clase.
   await p.goto(`${G}/panel/clases/${clase}`);
-  const bloqueado = await p.getByText(/Solo podés ver la lista de tus clases/).first().waitFor({ timeout: 30000 }).then(() => true, () => false);
-  chequear(bloqueado, "el profe anterior ya no ve la lista de esa clase", "el profe anterior sigue viendo la lista");
+  const bloqueado = await p.getByText(/Solo podés ver la lista de tus clases|no tenés permiso|sin permiso/i).first().waitFor({ timeout: 30000 }).then(() => true, () => false);
+  chequear(bloqueado, "el profe anterior ya no ve la lista de esa clase", `el profe anterior sigue viendo la lista: ${(await p.locator("main").innerText().catch(() => "")).replace(/s+/g, " ").slice(0, 200)}`);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

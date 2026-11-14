@@ -86,7 +86,7 @@ try {
   // La primera pantalla de la compu (1440x900) muestra el nombre y los botones principales, sin scrollear.
   const hero = await c.locator("h1").first().boundingBox();
   // H3b: el botón principal es “Quiero ser socio” solo con las altas online prendidas; si no, el de “Probá una clase”.
-  const principal = (await c.locator('section a[href="/hacete-socio"]').count()) ? c.locator('section a[href="/hacete-socio"]').first() : c.locator("section a.boton-principal, section button.boton-principal").first();
+  const principal = (await c.locator('section a[href="/hacete-socio"]').count()) ? c.locator('section a[href="/hacete-socio"]').first() : c.locator("[data-escribinos-whatsapp], [data-ya-soy-socio], section a.boton-principal, section button.boton-principal").first();   // L1: sin altas y sin WhatsApp, lo primero que se ofrece es entrar
   const quiero = await principal.boundingBox();
   chequear(!!hero && hero.y + hero.height <= 900, "compu: el nombre del gimnasio se ve en la primera pantalla", "compu: el nombre queda fuera de la primera pantalla");
   chequear(!!quiero && quiero.y + quiero.height <= 900, "compu: el botón principal se ve en la primera pantalla", "compu: el botón principal queda fuera de la primera pantalla");

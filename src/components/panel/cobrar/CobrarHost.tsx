@@ -3,10 +3,14 @@
 // (ficha, Vencen hoy, Retención, Entrada, Ctrl+K) y al terminar vuelve al lugar de origen.
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Cobrar } from "./Cobrar";
+import dynamic from "next/dynamic";
 import { formatearPesos } from "@/lib/formato";
 import { guardarAviso, origenPara } from "@/lib/panel/origen";
 import { EVENTO_COBRAR, EVENTO_COBRAR_CERRADO, EVENTO_COBRO_HECHO, type CobroHecho, type PedidoCobro } from "./evento";
+
+// E4: la hoja Cobrar (la pantalla más pesada del layout) se baja cuando hace falta y, de todos modos, se precarga con la pantalla ya pintada.
+const cargarCobrar = () => import("./Cobrar").then((m) => m.Cobrar);
+const Cobrar = dynamic(cargarCobrar, { ssr: false });
 
 export function CobrarHost({ sedeId }: { sedeId: string }) {
   const [pedido, setPedido] = useState<(PedidoCobro & { n: number }) | null>(null);
@@ -17,9 +21,10 @@ export function CobrarHost({ sedeId }: { sedeId: string }) {
 
   useEffect(() => {
     document.documentElement.dataset.cobrarHoja = "si";
+    const idle = typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(() => { void cargarCobrar(); }, { timeout: 4000 }) : window.setTimeout(() => { void cargarCobrar(); }, 2500);
     const abrir = (e: Event) => { setHizoCobro(false); setPedido({ ...(e as CustomEvent<PedidoCobro>).detail, n: Date.now() }); };
     window.addEventListener(EVENTO_COBRAR, abrir);
-    return () => { window.removeEventListener(EVENTO_COBRAR, abrir); delete document.documentElement.dataset.cobrarHoja; };
+    return () => { if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle as number); else clearTimeout(idle as number); window.removeEventListener(EVENTO_COBRAR, abrir); delete document.documentElement.dataset.cobrarHoja; };
   }, []);
 
   const cerrar = () => {

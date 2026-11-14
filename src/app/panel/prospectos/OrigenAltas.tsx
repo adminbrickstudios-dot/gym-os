@@ -21,13 +21,14 @@ export function OrigenAltas({ datos, zona }: { datos: OrigenAltasDatos; zona: st
         <p className="texto-suave">Últimos {r.dias} días: {r.total === 0 ? "todavía no se anotó nadie por un link con origen." : `${r.total} ${r.total === 1 ? "alta" : "altas"} con origen.`}{r.sin_origen > 0 ? ` Otras ${r.sin_origen} se anotaron por un link sin origen.` : ""}</p>
       </div>
       <table className="w-full text-left" data-origen-tabla>
-        <thead><tr className="texto-tenue text-sm"><th className="py-1 font-normal">Origen</th><th className="py-1 font-normal text-right">Altas</th><th className="py-1 font-normal text-right">Pagaron</th></tr></thead>
+        <thead><tr className="texto-tenue text-sm"><th className="py-1 font-normal">Origen</th><th className="py-1 font-normal text-right">Altas</th><th className="py-1 font-normal text-right">Pagaron</th><th className="py-1 font-normal text-right">Conversión</th></tr></thead>
         <tbody>
           {r.canales.map((c) => (
             <tr key={c.canal} className="border-t" data-origen-canal={c.canal}>
               <td className="py-2">{NOMBRE_CANAL[c.canal]}</td>
               <td className="py-2 text-right numero" data-altas>{c.altas}</td>
               <td className="py-2 text-right numero" data-pagaron>{c.pagaron}</td>
+              <td className="py-2 text-right numero" data-conversion>{c.altas > 0 ? `${Math.round((c.pagaron / c.altas) * 100)} %` : "—"}</td>
             </tr>
           ))}
         </tbody>

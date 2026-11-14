@@ -28,7 +28,7 @@ try {
   const ySemaforo = await y(s.getByText("No podés entrar"));
   const yPagar = await y(s.getByText(/Pagar por transferencia|Pagar ahora|Informaste/));
   const yProgreso = await y(s.locator("[data-progreso]"));
-  chequear(yPagar != null && ySemaforo != null && yPagar > ySemaforo, "Pagar está justo después del semáforo", `orden raro: semáforo ${ySemaforo}, pagar ${yPagar}`);
+  chequear(yPagar != null && ySemaforo != null && yPagar < ySemaforo, "L3 (14/11): “pagá tu plan” va ARRIBA, antes del semáforo", `orden raro: semáforo ${ySemaforo}, pagar ${yPagar}`);
   chequear(yPagar != null && yProgreso != null && yPagar < yProgreso, "Pagar queda arriba del progreso", `Pagar (${yPagar}) no está arriba del progreso (${yProgreso})`);
   chequear(yPagar != null && yPagar < CELU.height, "Pagar se ve sin bajar la pantalla", `Pagar a ${yPagar}px: hay que bajar`);
   const ancho = await s.evaluate(() => document.documentElement.scrollWidth);

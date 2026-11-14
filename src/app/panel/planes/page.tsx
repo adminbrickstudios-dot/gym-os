@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, fijo, lectura, lecturaPorCada, rpcLote } from "@/lib/panel/servidor";
 import { Editor, type Actividad, type Matricula, type Plan, type Producto } from "./Editor";
 import type { ListaPrecios } from "./Precios";
 import type { AjustesPlanes, Convenio, Servicio, Stock } from "./acciones";
@@ -15,24 +15,22 @@ export default async function Planes() {
   return intentar(async () => {
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
-    const [planes, productos, matriculas, stock, convenios, ajustes, servicios] = await Promise.all([
-      rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Producto[]>("productos_mostrador", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Record<string, Matricula>>("matriculas_planes", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Record<string, Stock>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Convenio[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<AjustesPlanes>("ajustes_planes", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Servicio[]>("servicios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-    ]);
-    // La lista de precios de cada plan (general, por medio y por día): PLA-5.
-    const listas = Object.fromEntries(await Promise.all(planes.map(async (p) =>
-      [p.plan_id, await rpc<ListaPrecios>("lista_precios_plan", { p_plan_id: p.plan_id })] as const)));
     // Qué clases incluye cada plan (PLA-2): solo si el gimnasio usa clases.
     const conClases = !panel.secciones_apagadas.includes("clases");
-    const [actividades, incluyen] = conClases ? await Promise.all([
-      rpc<Actividad[]>("actividades_gimnasio", { p_gimnasio_id: panel.gimnasio.id }).then((l) => l.filter((a) => a.activa)),
-      rpc<Record<string, string[]>>("actividades_por_plan", { p_gimnasio_id: panel.gimnasio.id }),
-    ]) : [[], {}];
+    // E8: todo en UN viaje a la base (lote_lecturas). La lista de precios de cada plan (general, por medio y por día: PLA-5) sale en el mismo viaje, una por plan.
+    const [planes, productos, matriculas, stock, convenios, ajustes, servicios, listas, actividadesTodas, incluyen] = await rpcLote(
+      lectura<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Producto[]>("productos_mostrador", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Record<string, Matricula>>("matriculas_planes", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Record<string, Stock>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Convenio[]>("convenios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<AjustesPlanes>("ajustes_planes", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Servicio[]>("servicios_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      lecturaPorCada<ListaPrecios>("lista_precios_plan", 0, "plan_id", "p_plan_id"),
+      conClases ? lectura<Actividad[]>("actividades_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : fijo<Actividad[]>([]),
+      conClases ? lectura<Record<string, string[]>>("actividades_por_plan", { p_gimnasio_id: panel.gimnasio.id }) : fijo<Record<string, string[]>>({}),
+    );
+    const actividades = actividadesTodas.filter((a) => a.activa);
     return (
       <>
         <Encabezado icono="etiqueta" titulo="Planes y servicios"

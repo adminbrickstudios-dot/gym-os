@@ -7,7 +7,6 @@
 // Contra una base local (localhost) no hay Realtime (la imitación local no lo tiene): ahí el pedido es cada 4 s, y lo dice el estado
 // ("periodico"). Además, al volver a la pestaña se pide enseguida: lo que pasó mientras no se miraba no se pierde.
 import { entradasDesde, type LoteEntradas } from "@/app/panel/entrada/ventana-acciones";
-import { crearClienteNavegador } from "@/lib/supabase/navegador";
 
 /** E5: se dispara en la ventana cada vez que llega una entrada nueva: las listas del panel (Últimas entradas) se renuevan al instante, sin pedidos periódicos. */
 export const EVENTO_ENTRADAS_NUEVAS = "gymos:entradas-nuevas";
@@ -33,7 +32,9 @@ let reloj: ReturnType<typeof setInterval> | null = null;
 let enVuelo = false;
 let pendiente = false;
 let canal: { unsubscribe: () => unknown } | null = null;
-let cliente: ReturnType<typeof crearClienteNavegador> | null = null;
+let generacion = 0;   // sube cada vez que se deja de escuchar: un canal que se estaba bajando y ya no corresponde, no se abre
+// E4: el cliente de Supabase (Realtime + Auth + Storage, ~67 KB gzip) NO viaja con el layout: se baja recién cuando se abre el canal (después de pintar).
+let cliente: ReturnType<typeof import("@/lib/supabase/navegador").crearClienteNavegador> | null = null;
 const vistos = new Set<string>();
 
 const visible = () => typeof document === "undefined" || document.visibilityState === "visible";
@@ -93,9 +94,11 @@ function pararReloj() {
   reloj = null;
 }
 
-function abrirCanal(g: string) {
+async function abrirCanal(g: string) {
+  const gen = generacion;
   try {
-    cliente ??= crearClienteNavegador();
+    if (!cliente) { const { crearClienteNavegador } = await import("@/lib/supabase/navegador"); cliente ??= crearClienteNavegador(); }
+    if (g !== gimnasio || gen !== generacion) return;   // mientras se bajaba, se cambió de gimnasio o se dejó de escuchar
     const filtro = `gimnasio_id=eq.${g}`;
     const c = cliente
       .channel(`entradas-${g}`)
@@ -128,6 +131,7 @@ function arrancar() {
   }
 }
 function parar() {
+  generacion++;
   pararReloj();
   if (canal) { void canal.unsubscribe(); canal = null; }
   cursor = null; enVuelo = false; pendiente = false; vistos.clear();

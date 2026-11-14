@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { RefrescarAlEntrar } from "@/components/panel/RefrescarAlEntrar";
 import { Puerta } from "./Puerta";
@@ -31,18 +31,19 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const conCaja = !panel.secciones_apagadas.includes("caja");
     const equipoCompleto = panel.yo.rol !== "recepcion";
-    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias] = await Promise.all([
-      rpcLectura<Ingreso[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }),
-      rpcLectura<string[]>("formas_de_entrada", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<Invitado[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+    // E8: todas las lecturas de la pantalla en UN viaje a la base (lote_lecturas), con la ficha de ?socio= (al volver de cobrar: se abre su veredicto).
+    const g = { p_gimnasio_id: panel.gimnasio.id };
+    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias, ficha] = await rpcLote(
+      lectura<Ingreso[]>("ingresos_del_dia", { ...g, p_sede_id: sede.id }),
+      lectura<string[]>("formas_de_entrada", g),
+      lectura<Invitado[]>("invitados_de_hoy", g),
       // VD-9: mi turno de caja (se ofrece abrirlo desde acá). Si algo falla no rompe la Entrada.
-      conCaja ? rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }).catch(() => null) : Promise.resolve(null),
+      conCaja ? lectura<MiTurno | null>("mi_turno_caja", { p_sede_id: sede.id }, true) : fijo<MiTurno | null>(null),
       // VD-46M: ¿la puerta está en emergencia? Si no se puede leer, el cartel lo vuelve a preguntar solo (no rompe la Entrada).
-      rpcLectura<EstadoEmergencia>("estado_emergencia_puerta", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }).catch(() => null),
-      equipoCompleto ? rpcLectura<EmergenciaHistorial[]>("historial_emergencias_puerta", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 }).catch(() => []) : Promise.resolve([] as EmergenciaHistorial[]),
-    ]);
-    // ?socio= (al volver de cobrar): se abre su veredicto.
-    const ficha = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? await rpcLectura<Ficha>("ficha_socio", { p_socio_id: sp.socio }).catch(() => null) : null;
+      lectura<EstadoEmergencia | null>("estado_emergencia_puerta", { ...g, p_sede_id: sede.id }, true),
+      equipoCompleto ? lectura<EmergenciaHistorial[] | null>("historial_emergencias_puerta", { ...g, p_limite: 10 }, true) : fijo<EmergenciaHistorial[] | null>([]),
+      /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? lectura<Ficha | null>("ficha_socio", { p_socio_id: sp.socio }, true) : fijo<Ficha | null>(null),
+    );
     const vuelto: ResultadoSocio | null = ficha ? { socio_id: ficha.socio.id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(),
       color: ficha.acceso.color, texto: ficha.acceso.texto, puede: ficha.acceso.puede, dado_de_baja: !!ficha.socio.dado_de_baja_en } : null;
 
@@ -58,7 +59,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
             {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
             <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} textoInicial={/^[\p{L}0-9 .'-]{2,60}$/u.test(sp.q ?? "") ? (sp.q ?? "").trim() : ""} emergenciaInicial={emergencia?.activa ?? null} />
-            {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias} />}
+            {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias ?? []} />}
           </div>
           <div>
             <Hoy ingresos={hoy} zona={panel.gimnasio.zona_horaria} />

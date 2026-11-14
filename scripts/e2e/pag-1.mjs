@@ -29,7 +29,7 @@ try {
 
   // ── Vista previa en vivo ──
   await portada.locator("label", { hasText: "Título" }).locator("input").fill(TITULO);
-  await vista.locator("h1", { hasText: TITULO }).waitFor({ timeout: 10000 });
+  await vista.locator("[data-frase]", { hasText: TITULO }).waitFor({ timeout: 10000 });   // L1: el título de la portada es la frase; el h1 es el nombre
   ok("la vista previa muestra el título nuevo antes de guardar");
   chequear(await aparece(pie.locator("[data-sin-guardar]")), "avisa cambios sin guardar", "no avisa cambios sin guardar");
 
@@ -64,7 +64,7 @@ try {
   const v = await pagina(b, COMPU);
   await v.goto(`${G}/`);
   await v.locator("h1").first().waitFor({ timeout: 30000 });
-  chequear((await v.locator("h1").first().innerText()).includes(TITULO), "la página pública tiene el título nuevo", "la página pública sigue con el título viejo");
+  chequear((await v.locator("[data-frase]").first().innerText()).includes(TITULO), "la página pública tiene el título nuevo", "la página pública sigue con el título viejo");
   chequear(!(await v.locator('h2:has-text("Profes")').count()), "Profes oculta en la página pública", "Profes sigue en la página pública");
   chequear(await v.locator("summary", { hasText: "¿Hay estacionamiento?" }).count() === 1, "la pregunta nueva está en la página", "falta la pregunta nueva");
   const h2 = await v.locator("main h2").allInnerTexts();
@@ -88,7 +88,7 @@ try {
   chequear(ancho <= CELU.width, `celular: editor sin desborde (${ancho}px)`, `celular: el editor mide ${ancho}px`);
   await c.locator('[data-bloque="portada"] label', { hasText: "Título" }).locator("input").fill(`${TITULO}!`);
   await c.locator('button:has-text("Ver cómo queda")').click();
-  await c.locator('[role="dialog"] h1', { hasText: `${TITULO}!` }).waitFor({ timeout: 10000 });
+  await c.locator('[role="dialog"] [data-frase]', { hasText: `${TITULO}!` }).waitFor({ timeout: 10000 });
   ok("celular: “Ver cómo queda” muestra la página con lo escrito");
   await capturar(c, "pag1-celu-vista");
   await c.locator('button:has-text("Volver a editar")').click();

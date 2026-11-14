@@ -1,3 +1,14 @@
 {
-  "regions": ["gru1"]
+  "regions": ["gru1"],
+  "git": {
+    "deploymentEnabled": {
+      "carril/**": false,
+      "tmp/**": false,
+      "base/**": false,
+      "publicar/**": false,
+      "noche/**": false,
+      "dia/**": false,
+      "worktree-*": false
+    }
+  }
 }

@@ -4,6 +4,7 @@
 //   node scripts/e2e/vd-46j.mjs     (con scripts/local/levantar.sh corriendo)
 import { CELU, COMPU, GIMNASIO, chequear, entrar, esperarCobro, navegador, ok, pagina, resultado } from "./comun.mjs";
 import { elegirPlan } from "./alta.mjs";
+process.env.HORA_NAVEGADOR = "mediodia";   // F8.2: no depende de la hora del día
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -21,7 +22,7 @@ try {
   // Tres cuotas juntas, por transferencia.
   await d.goto(`${G}/panel/vender?socio=${id}&cuota=1`);
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
-  const mas = d.locator('button:has-text("+")').first();
+  const mas = d.getByRole("button", { name: "Uno más" }).first();
   await mas.click(); await mas.click();
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click();
   await d.locator('button:has-text("Cobrar")').click();

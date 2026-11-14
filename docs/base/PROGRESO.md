@@ -1,5 +1,65 @@
 # PROGRESO de Base
 
+## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
+
+**Dónde quedé:** velocidad (E8/E4) y fase L hechas en la rama, probadas en Actions y listas para publicar en UNA sola publicación (prevuelo de las 3 migraciones nuevas ya en verde contra la base real, corrida 43606718609). Falta: la tabla "después" final de E8 (corrida de Medir escala en curso), Lighthouse de la portada nueva (L1), la captura de Temple Gym en un clon [demo] y publicar (fuera de 16–22 h, con SIN COPIA autorizado). Lo próximo del orden: lo 🟡 de las fases H, U, P, D, Z, 0, 1 a 9, R, Q, N y F8.
+
+**Qué es nuevo hoy:**
+- 🟢 **Publicado (PR #22, 14/11):** barrita del DNI, avisos de QR abajo a la derecha con Realtime, franja sin internet, E5, F8. `/api/salud`, `/g/demo`, `/g/templegym1/hacete-socio` responden 200.
+- 🟡 **Sin publicar, en la rama:**
+  - **E4:** el JS que baja toda pantalla del panel pasó de 148,9 a 71,0 KB gzip (el cliente de Supabase y la hoja Cobrar se bajan al usarse); promedio por ruta 322,6 → 245,9 KB gzip.
+  - **E8:** menos viajes a la base (`contexto_pantalla` con estado y contacto; `lote_lecturas` para Configuración, Planes, Inicio y Entrada; `panel_vivo` para el menú y la campana). Tabla en `VELOCIDAD.md`.
+  - **L1 a L4:** la página del gimnasio en una pantalla, la cuenta gratis, "pagá tu plan" arriba y el QR bloqueado que se activa solo.
+  - Arreglos: avisos de QR pegados a la esquina, botón rojo sin emoji, recorridos viejos (F8.2), `pulido-roto-3`.
+  - **Migraciones nuevas (3, aditivas):** `20261114100000`, `20261114110000`, `20261114120000`. Se aplican ANTES de mergear (`aplicar` con `sin_copia`="SIN COPIA"). El código funciona aunque la base todavía no las tenga.
+- 🔴 **El QR de Temple Gym dice "Hoy no te podés anotar desde acá": no es un error de la app.** `altas_online` está apagado (la página está publicada y tiene 4 planes). **Lo prendés vos:** Página → "Hacerse socio desde la página" → escribir el reglamento (obligatorio) → prender "Aceptar altas online" → Guardar. El WhatsApp del gimnasio también está vacío (Configuración → Gimnasio).
+
+**Lo que pidió Mateo → estado** (🟢 publicado · 🟡 hecho sin publicar · 🔴 falta · ⛔ depende de Mateo)
+
+| Lo que pidió | Estado | Detalle |
+|---|---|---|
+| Que sea rapidísimo (fase 0, E8, E4) | 🟡 | Hecho y medido en la rama; falta publicar y la tabla "después" final. F0.1/F0.6 (medir en producción) ⛔ por los secretos |
+| Entrada en la esquina y avisos al instante (NOCHE-1211: E1, E2, E5, E6) | 🟢 | Publicado en el PR #22; los arreglos de hoy (sin emoji, esquina) 🟡 |
+| Avisos en tiempo real medidos en producción (E3) | ⛔ | Cargá `DEMO_CONTRASENA`, `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` en GitHub y corré Base de datos → `usuarios-demo` |
+| La página del gimnasio en una pantalla (L1) | 🟡 | `landing-l1` en verde; falta Lighthouse y ver Temple Gym en un clon |
+| Quiero ser socio: cuenta gratis con DNI (L2, H3b) | 🟢 | Publicado (H3b); plan obligatorio por defecto (PREGUNTAS D65) |
+| App del socio: pagá tu plan arriba y QR bloqueado (L3) | 🟡 | `flujo-cierre` en verde: se activa solo al cobrar |
+| Pagar desde la app (L4, MercadoPago) | 🟢 | Apagado por defecto: no aparece sin cobro online |
+| El QR de registro de Temple Gym (H3, C9) | 🔴 | Lo prendés vos (arriba) |
+| Fechas de cobertura visibles y editables (H2c) | 🟢 | Publicado el 12/11 |
+| Cargar socios en el pasado, importar 300 (C10, C2) | 🟢 | Publicado |
+| Caja por medio y transferencias (H1) | 🟢 | Publicado |
+| Lo roto de PULIDO que pega hoy (H7) | 🟡 | Dejar pasar con error probado; faltan Salida y Volvió antes |
+| Crear un gimnasio y su dueño en producción (U0.1, U1) | ⛔ | Cargá `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` en GitHub (y, si da "Invalid API key", la clave `service_role` en Vercel) |
+| Dominios (D1 a D3) | ⛔ | Publicado y listo; el cambio de variables y de DNS lo hacés vos con `DOMINIO.md` |
+| Copias de seguridad (H5, C8) | ⛔ | Cargá `COPIA_CLAVE` en GitHub y corré Actions → Copias |
+| Super admin completo (fase 2) | 🟢 | Falta CUIT y razón social (F2.10) y las sesiones abiertas (F2.11): 🔴 |
+| Pulido de todo el sistema (fase Z) | 🟡 | Hecho en gran parte; Z1 y el resto en la lista |
+| Los 70 detalles, faltantes, lo chico de antes (fases 4 a 6) | 🟡 | Confirmados contra el código; faltan filas por cerrar |
+| Edición en capas, escala y seguridad (fase 9) | 🟡 | En su mayoría hecho; `F9.7` espera Supabase Pro |
+| Funciones nuevas (fase N: débito, factura, entradas sin internet, etc.) | 🟡 | Apagadas por defecto; N0, N7, N8 ⛔; N9 (entradas sin internet) 🔴 |
+| Cierre (F8): todo en verde, prueba del dueño | 🟡 | `PRUEBA-DUENO.md` listo; su siembra en producción ⛔ por secretos |
+
+**⛔ Lo que tenés que hacer vos, en orden de lo que más destraba:**
+1. GitHub → Settings → Secrets and variables → Actions: `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA`, `COPIA_CLAVE`, `CLAVE_PRUEBA_MATEO`.
+2. Vercel: `SUPABASE_SERVICE_ROLE_KEY` (U0.1/U1), `SUPABASE_REF_ESPERADO` (P3), Vercel Pro.
+3. Temple Gym: prender las altas online (arriba), cargar el WhatsApp.
+4. Los dominios (`DOMINIO.md`).
+
+## DÓNDE QUEDÉ (13/11, mañana) y RESUMEN PARA MATEO
+- 🟡 **Sin publicar: Vercel sigue "Deployment rate limited"** (main no despliega). No mergeé nada a main. Producción sigue con el código del PR #20. Cuando se libere el cupo (o con Vercel Pro) se despliega el PR #21 y recién ahí corresponde la prueba en producción (barrita del DNI, aviso de QR < 1 s, franja sin internet, humo con Temple Gym solo mirando).
+- 🟢 **Cerrado hoy:** D40/D56 (avisos abajo a la derecha, D62); los 6 recorridos que "fallaban según la hora" (vd-6, vd-46j, vd-46k, vd-50, vd-54, vd-58) **pasan en Actions**. La hora no era la causa de cinco de ellos: eran selectores viejos (el "+" y el emoji de Máquinas pasaron a íconos), un buscador difuso que traía otro socio, un profe distinto al cargar y al entrar, y una espera del historial. vd-6 usa `HORA_NAVEGADOR=mediodia` (reloj del navegador, Playwright `setSystemTime`).
+- 🟡 **E8** (viajes a la base por pantalla): medido con `scripts/medir/viajes.mjs` (corrida 43423578975): las 42 pantallas pasan de 2 viajes (7 a 30); tabla y qué queda en `VELOCIDAD.md` § E8; el layout del panel ya pide dos cosas en paralelo. Falta: una sola función para Configuración, Planes, Inicio y Entrada, que la campana no repita el contexto, y la tabla "después".
+- **Próximo:** E1 (confirmar la franja roja y mirar capturas), E2 (capturas 1280 y celular, e2e reduced-motion), E4 (el JS por ruta no bajó), después el resto de RECTA-FINAL en orden (H, U, P, D, Z, 0, 1 a 9, R, Q, N, 8). E3 y la prueba de producción dependen de Mateo / del deploy.
+- ⛔ **De Mateo:** Vercel Pro o esperar el cupo; `COPIA_CLAVE`; `BRIK_ADMIN_MAIL`/`BRIK_ADMIN_CLAVE`; secretos de Supabase para medir producción.
+
+## DÓNDE QUEDÉ (13/11, mañana) y RESUMEN PARA MATEO
+- 🟡 **Sin publicar: Vercel sigue "Deployment rate limited"** (main no despliega). No mergeé nada a main. Producción sigue con el código del PR #20. Cuando se libere el cupo (o con Vercel Pro) se despliega el PR #21 y recién ahí corresponde la prueba en producción (barrita del DNI, aviso de QR < 1 s, franja sin internet, humo con Temple Gym solo mirando).
+- 🟢 **Cerrado hoy:** D40/D56 (avisos abajo a la derecha, D62); los 6 recorridos que "fallaban según la hora" (vd-6, vd-46j, vd-46k, vd-50, vd-54, vd-58) **pasan en Actions**. La hora no era la causa de cinco de ellos: eran selectores viejos (el "+" y el emoji de Máquinas pasaron a íconos), un buscador difuso que traía otro socio, un profe distinto al cargar y al entrar, y una espera del historial. vd-6 usa `HORA_NAVEGADOR=mediodia` (reloj del navegador, Playwright `setSystemTime`).
+- 🟡 **E8** (viajes a la base por pantalla): medido con `scripts/medir/viajes.mjs` (corrida 43423578975): las 42 pantallas pasan de 2 viajes (7 a 30); tabla y qué queda en `VELOCIDAD.md` § E8; el layout del panel ya pide dos cosas en paralelo. Falta: una sola función para Configuración, Planes, Inicio y Entrada, que la campana no repita el contexto, y la tabla "después".
+- **Próximo:** E1 (confirmar la franja roja y mirar capturas), E2 (capturas 1280 y celular, e2e reduced-motion), E4 (el JS por ruta no bajó), después el resto de RECTA-FINAL en orden (H, U, P, D, Z, 0, 1 a 9, R, Q, N, 8). E3 y la prueba de producción dependen de Mateo / del deploy.
+- ⛔ **De Mateo:** Vercel Pro o esperar el cupo; `COPIA_CLAVE`; `BRIK_ADMIN_MAIL`/`BRIK_ADMIN_CLAVE`; secretos de Supabase para medir producción.
+
 ## F8 · EL CIERRE (13/11, carril `carril/f8-cierre`, sin publicar: nada de esto toca producción)
 
 **Hecho y verificado ejecutando en Actions** (`gh workflow run "Pruebas completas" --ref carril/f8-cierre …`; ahora acepta `solo`, `socios` y `tanda`, y las tandas con nombre distinto corren a la vez):
@@ -17,8 +77,15 @@
 - **F8.2 / R3 🟡: recorridos que siguen en rojo y no tienen causa cerrada** (pasaron o fallaron según el bloque; todos de la pasada de las 21 a las 23 h, hora del gimnasio, y varios dependen de la hora del día): `vd-6` (a veces el foco no llega al campo de la Entrada al abrirla con F2: puede ser real, mirarlo primero), `vd-46j` y `vd-46k` (el profe de reemplazo: "el profe anterior sigue viendo la lista" / sin historial), `vd-50` (la hoja de doble cobro: un click que no encuentra su botón), `vd-54` (interruptor de la configuración de máquinas), `vd-58` (sesiones de personal trainer: "todavía no hay horarios cargados"). Hay que correrlos de día y mirar cada captura de `falla-*.jpg` (artefacto `pantallas` de la corrida).
 - **La cadena de punta a punta en una sola corrida** no se hizo (la de 232 recorridos se corta por memoria y por estado: se corrió en 4 bloques).
 
-**Lo que tiene que decidir Mateo:** dónde van los avisos de la puerta (`PREGUNTAS.md`, D40 vs D56).
+**Cerrado (D62, Mateo 12/11):** los avisos de la puerta van abajo a la derecha (D40/D56 cerradas en `PREGUNTAS.md`); en el código ya es así.
 
+
+## ⚠ PUBLICADO PERO SIN DEPLOY: el PR #21 está mergeado en main y Vercel dijo "Deployment rate limited — retry in 24 hours" (13/11, 00:10)
+- **Qué pasó:** el plan Hobby de Vercel tiene un tope de deploys por día y cada push a cualquier rama (carril, base, publicar) creaba una vista previa que gastaba uno. Se pasó del tope.
+- **Estado de producción:** sigue andando el código del PR #20 (el último deploy bueno), con la base ya migrada. La migración nueva (`20261112220000`, Realtime de ingresos) es aditiva: el código anterior anda con ella. Temple Gym, `/ingresar`, `/super` y `/api/salud` responden bien (probado a las 00:10).
+- **Lo que NO está en producción todavía** (en main, sin deploy): la barrita del DNI, los avisos de QR abajo a la derecha con Realtime, la franja sin internet, el acento corrido de tono (Z8), E5 y lo de F8. **Se despliega solo con el próximo deploy de main** cuando Vercel libere el cupo (24 h), o antes si Mateo pasa a **Vercel Pro** (ya estaba en su lista: el plan Hobby no permite uso comercial).
+- **Lo que hice para que no se repita:** `vercel.json` ahora desactiva los deploys de las ramas de trabajo (`carril/**`, `base/**`, `publicar/**`, `tmp/**`, `noche/**`, `dia/**`): solo `main` hace deploy. Confirmado: el push siguiente ya no generó ningún deploy. Los recorridos se prueban en Actions, no en la vista previa.
+- **Pendiente apenas se libere:** correr el humo en producción (Temple Gym solo mirando, `/super`, y el demo con `humo-pasado`) y recién ahí decir "LISTO" para estas piezas. No creo ni toco nada de Temple Gym. Si el cupo no se libera a la mañana: Mateo puede hacer "Redeploy" del último commit de main desde el panel de Vercel o pasar a Pro.
 
 ## LISTO PARA CAMBIAR LOS DOMINIOS (12/11, publicado entre las 19:50 y las 20:15 hora de Argentina, con tu autorización, sin copia)
 Mateo: ya podés seguir `docs/base/DOMINIO.md`, en orden (la variable `NEXT_PUBLIC_DOMINIOS_VIEJOS=gym-os-pied.vercel.app` es la que salva el QR impreso; la dirección propia de Temple Gym se carga en el super admin recién DESPUÉS del Redeploy).

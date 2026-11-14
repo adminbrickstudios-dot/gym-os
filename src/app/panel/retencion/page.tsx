@@ -7,7 +7,7 @@ import { Atenuable } from "@/components/panel/Atenuable";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { fechaConEl, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpc, rpcLote } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { TandaContactos, type ParaAvisar } from "./TandaContactos";
 import { ExSocios, MOTIVOS_EX, ANTIGUEDADES, type DatosExSocios } from "./ExSocios";
@@ -58,19 +58,20 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
     // D2 (RET-2): la recepción también, sin la plata.
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const gestion = panel.yo.rol !== "recepcion";
-    const [resumen, todas, etiquetas, conEtiqueta, tablero, riesgoTodos, numeros, delPeriodo] = await Promise.all([
-      rpc<Resumen>("retencion_resumen", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<Fila[]>("retencion", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<{ id: string; nombre: string; socios: number }[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      etiqueta ? rpc<string[]>("socios_con_etiqueta", { p_gimnasio_id: panel.gimnasio.id, p_etiqueta_id: etiqueta }) : Promise.resolve(null),
+    // E8: todo en UN viaje a la base (lote_lecturas).
+    const [resumen, todas, etiquetas, conEtiqueta, tablero, riesgoTodos, numeros, delPeriodo] = await rpcLote(
+      lectura<Resumen>("retencion_resumen", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Fila[]>("retencion", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<{ id: string; nombre: string; socios: number }[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      etiqueta ? lectura<string[] | null>("socios_con_etiqueta", { p_gimnasio_id: panel.gimnasio.id, p_etiqueta_id: etiqueta }) : fijo<string[] | null>(null),
       // RET-1: socios al día (12 semanas), altas y bajas del mes.
-      gestion ? rpc<Tablero>("tablero_retencion", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
-      rpc<Riesgo[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id }),
+      gestion ? lectura<Tablero | null>("tablero_retencion", { p_gimnasio_id: panel.gimnasio.id }) : fijo<Tablero | null>(null),
+      lectura<Riesgo[]>("riesgo_baja", { p_gimnasio_id: panel.gimnasio.id }),
       // COM-5: los números con sus nombres (dueño y encargado).
-      gestion ? rpc<NumerosRetencion>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
+      gestion ? lectura<NumerosRetencion | null>("retencion_numeros", { p_gimnasio_id: panel.gimnasio.id }) : fijo<NumerosRetencion | null>(null),
       // VD-16: los números del período elegido (cada uno lo calcula la base).
-      gestion ? rpc<DatosPeriodo>("retencion_periodo", { p_gimnasio_id: panel.gimnasio.id, p_periodo: periodo }) : Promise.resolve(null),
-    ]);
+      gestion ? lectura<DatosPeriodo | null>("retencion_periodo", { p_gimnasio_id: panel.gimnasio.id, p_periodo: periodo }) : fijo<DatosPeriodo | null>(null),
+    );
     // Q2: Al día, Altas y Bajas llevan a su lista de Socios (Altas: "Nuevos", los de los últimos 30 días; Bajas: "Dados de baja").
     const enSocios = (estado: string) => rutaDisponible("/panel/socios", panel.yo.rol, panel.secciones_apagadas) ? `/panel/socios?estado=${estado}` : "/panel/retencion";
     const hoyAlDia = tablero?.semanas.at(-1)?.al_dia ?? 0;
