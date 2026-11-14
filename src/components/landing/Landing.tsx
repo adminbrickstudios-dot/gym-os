@@ -524,6 +524,10 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             {ahora?.texto && (
               <li className="flex items-center gap-3" data-dato-horario><span aria-hidden className="icono"><Icono nombre="reloj" /></span><span>{ahora.texto}</span></li>
             )}
+            {hayProbar && (
+              <li><a href="#probar" className="flex items-center gap-3" data-probar-gratis>
+                <span aria-hidden className="icono"><Icono nombre="regalo" /></span><span className="underline underline-offset-4">Probá una clase gratis</span></a></li>
+            )}
             {whatsapp && (
               <li><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3" data-dato-whatsapp>
                 <span aria-hidden className="icono"><Icono nombre="mensaje" /></span><span className="underline underline-offset-4">Escribinos por WhatsApp</span></a></li>
