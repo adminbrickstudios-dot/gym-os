@@ -64,7 +64,7 @@ async function paginaGimnasio(vp, nombre) {
     chequear((await wa.getAttribute("target")) === "_blank" && /noopener/.test((await wa.getAttribute("rel")) ?? ""), `${nombre}: WhatsApp abre en pestaña nueva y con noopener`, `${nombre}: WhatsApp sin target/rel seguros`);
   }
   // "Soy socio" lleva al ingreso de socios.
-  const socio = p.locator('header a[href^="/ingresar"]').first();
+  const socio = p.locator("[data-ya-soy-socio]").first();
   chequear((await socio.getAttribute("href"))?.startsWith("/ingresar") ?? false, `${nombre}: “Soy socio” lleva a /ingresar`, `${nombre}: falta “Soy socio”`);
 
   await sinDesborde(p, nombre, vp.width);
