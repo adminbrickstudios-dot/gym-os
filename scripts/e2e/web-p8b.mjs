@@ -59,8 +59,8 @@ try {
   const inicioOrden = await ordenEditor(d);
 
   await d.locator('[data-bloque="portada"] input').first().fill(TITULO);
-  await d.waitForFunction((t) => document.querySelector("[data-vista-previa] h1")?.textContent?.includes(t), TITULO, { timeout: 10000 }).catch(() => {});
-  chequear((await d.locator("[data-vista-previa] h1").first().innerText()).includes(TITULO), "el título cambia en la vista previa mientras se escribe", "el título no cambió en la vista previa");
+  await d.waitForFunction((t) => document.querySelector("[data-vista-previa] [data-frase]")?.textContent?.includes(t), TITULO, { timeout: 10000 }).catch(() => {});
+  chequear((await d.locator("[data-vista-previa] [data-frase]").first().innerText()).includes(TITULO), "el título cambia en la vista previa mientras se escribe", "el título no cambió en la vista previa");
   chequear(await d.locator("[data-sin-guardar]").count() === 1, "avisa “Cambios sin guardar”", "no avisa de los cambios sin guardar");
 
   await d.locator(`[data-color-acento="${ACENTO}"]`).click();
@@ -118,7 +118,7 @@ try {
   for (let i = 0; i < 15; i++) {      // la página se guarda 60 s en caché; al guardar se invalida, pero se espera por si tarda
     await v.goto(`${G}/`);
     await v.locator("h1").first().waitFor({ timeout: 30000 });
-    publica = await v.locator("[data-pagina-gimnasio]").first().evaluate((x) => ({ h1: x.querySelector("h1").textContent, t: x.getAttribute("data-tipografia"), a: getComputedStyle(x).getPropertyValue("--acento").trim().toLowerCase() }));
+    publica = await v.locator("[data-pagina-gimnasio]").first().evaluate((x) => ({ h1: x.querySelector("[data-frase]")?.textContent ?? x.querySelector("h1").textContent, t: x.getAttribute("data-tipografia"), a: getComputedStyle(x).getPropertyValue("--acento").trim().toLowerCase() }));
     if (publica.h1.includes(TITULO)) break;
     await v.waitForTimeout(4000);
   }

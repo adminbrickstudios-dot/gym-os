@@ -80,9 +80,9 @@ try {
   const estado = v.locator("section", { hasText: /No podés entrar|Podés entrar/ }).first();
   await estado.waitFor({ timeout: 30000 });
   chequear(/No podés entrar/.test(await estado.innerText()), "sin pagar: la app dice “No podés entrar” (D26, nunca entra gratis)", `sin pagar la app dice: ${(await estado.innerText()).slice(0, 80)}`);
-  chequear(await aparece(v.locator("[data-tu-dni-inicio], [data-mi-qr], [data-qr]"), 10000), "el Inicio muestra cómo entra: su DNI o su QR", "el Inicio no muestra el DNI ni el QR");
+  chequear(await aparece(v.locator("[data-tu-dni-inicio], [data-mi-qr], [data-qr], [data-qr-bloqueado]"), 10000), "el Inicio muestra cómo entra: su DNI, o su QR bloqueado hasta pagar (L3)", "el Inicio no muestra el DNI ni el QR");
   await capturar(v, "socio-flujo-celu-inicio-sin-pagar", true);
-  const pagar = v.locator("section", { hasText: "Pagar por transferencia" });
+  const pagar = v.locator("section", { hasText: "Pagar por transferencia" }).last();   // L3: está dentro del bloque “pagá tu plan”
   await pagar.waitFor({ timeout: 60000 });
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png", buffer: PNG });
   await v.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });

@@ -512,7 +512,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
         <div className={`mx-auto w-full max-w-xl ${foto || video ? "text-white" : ""}`}>
           <div className="flex justify-center"><Logo marca={marca} grande /></div>
           <h1 className="titular text-center text-[clamp(3rem,13vw,5rem)] mt-5 break-words" data-nombre-gimnasio>{marca.nombre}</h1>
-          {frase && <p className={`mt-3 text-center text-lg sm:text-xl leading-snug ${foto || video ? "text-white/90" : "texto-suave"}`}>{frase}</p>}
+          {frase && <p data-frase className={`mt-3 text-center text-lg sm:text-xl leading-snug ${foto || video ? "text-white/90" : "texto-suave"}`}>{frase}</p>}
           <div className="mt-8 flex flex-col gap-3">
             <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo={foto || video ? "!bg-white/15 !text-white !border-white/30" : ""} sinAltasWhatsapp={whatsapp} />
           </div>
