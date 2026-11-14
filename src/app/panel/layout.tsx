@@ -91,9 +91,14 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
   const pideAyuda = !soporte?.activo && (panel.yo.rol === "dueno" || panel.yo.rol === "encargado");
   // H6: el botón de ayuda por WhatsApp también para la recepción; el número sale de los datos (lo carga el super admin).
   const conWhatsappAyuda = pideAyuda || (!soporte?.activo && panel.yo.rol === "recepcion");
+  // E8 (migración 20261114100000): ya vienen dentro de contexto_pantalla. Si la base todavía no los trae (undefined), se piden aparte como antes.
   const [estadoG, contactoAyuda] = await Promise.all([
-    soporte?.activo ? Promise.resolve(null) : rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
-    conWhatsappAyuda ? rpc<{ whatsapp: string | null }>("contacto_plataforma_publico").catch(() => null) : Promise.resolve(null),
+    soporte?.activo ? Promise.resolve(null)
+      : completo.estado_gimnasio !== undefined ? Promise.resolve(completo.estado_gimnasio as EstadoGimnasioAviso | null)
+      : rpc<EstadoGimnasioAviso>("estado_gimnasio_aviso", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null),
+    !conWhatsappAyuda ? Promise.resolve(null)
+      : completo.contacto_ayuda !== undefined ? Promise.resolve(completo.contacto_ayuda)
+      : rpc<{ whatsapp: string | null }>("contacto_plataforma_publico").catch(() => null),
   ]);
   if (estadoG && (estadoG.pausado || estadoG.baja || estadoG.demo_vencida)) return <PantallaEstadoGimnasio estado={estadoG} nombre={panel.gimnasio.nombre} />;
   const temaCookie = (await cookies()).get("tema")?.value ?? null;

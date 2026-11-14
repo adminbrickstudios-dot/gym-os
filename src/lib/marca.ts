@@ -80,7 +80,7 @@ export function acentoDistinto(acento: string): string {
   const [h, s, l] = aHsl(c);
   const [hs] = aHsl(rgb(cercano.h)!);
   // Hacia qué lado girar: alejándose del tono del semáforo (si es el mismo tono, hacia el lado de los números crecientes).
-  let dif = ((h - hs + 540) % 360) - 180;
+  const dif = ((h - hs + 540) % 360) - 180;
   const lado = dif >= 0 ? 1 : -1;
   for (let grados = 24; grados <= 72; grados += 8) {
     const nuevo = deHsl((h + lado * grados + 360) % 360, s, l);

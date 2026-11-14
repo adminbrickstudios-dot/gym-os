@@ -23,6 +23,9 @@ for (const rol of ["dueno", "encargado", "recepcion", "profe"]) {
       const panel = await solo("public.panel_gimnasio", [t.g]);
       assert.deepEqual(c.panel, panel);
       assert.deepEqual(c.abono, await solo("public.estado_abono_panel", [t.g]));
+      // E8: el estado del gimnasio y el contacto de ayuda vienen en el mismo viaje, iguales a las piezas por separado.
+      assert.deepEqual(c.estado_gimnasio, await solo("public.estado_gimnasio_aviso", [t.g]));
+      assert.deepEqual(c.contacto_ayuda, (await t.q(`select public.contacto_plataforma_publico() r`))[0].r);
       if (rol === "recepcion") assert.equal(c.ver_mensajes, await solo("public.ver_mensajes_equipo", [t.g]));
       else assert.equal("ver_mensajes" in c, false);
       if (rol !== "dueno") assert.equal(c.fichaje_usa, !!(await solo("public.config_fichaje", [t.g]))?.usa);

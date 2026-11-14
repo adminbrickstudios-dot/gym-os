@@ -84,6 +84,8 @@ export type ContextoCompleto = {
   panel: PanelGimnasio;
   ver_mensajes?: boolean; fichaje_usa?: boolean;
   abono?: Abono | null; config_entrada?: ConfigEntrada | null; formas_entrada?: string[] | null;
+  /** E8: el estado del gimnasio (pausado, baja, demo vencida) y el WhatsApp de BRIK, en el mismo viaje que el contexto. */
+  estado_gimnasio?: { pausado?: boolean; baja?: boolean; demo_vencida?: boolean; [k: string]: unknown } | null; contacto_ayuda?: { whatsapp: string | null } | null;
 };
 export const contextoCompleto = cache(async (): Promise<ContextoCompleto> => {
   const g = await gimnasioActual();

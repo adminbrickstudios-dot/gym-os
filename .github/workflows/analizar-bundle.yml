@@ -40,8 +40,8 @@ jobs:
           scripts/local/levantar.sh
       - name: Qué pesa
         run: |
-          node scripts/medir/chunks-panel.mjs | tee .local/chunks.md
-          node scripts/medir/js-rutas.mjs | tail -3 | tee -a .local/chunks.md
+          NEXT_DIST_DIR=.next-dev node scripts/medir/chunks-panel.mjs | tee .local/chunks.md
+          NEXT_DIST_DIR=.next-dev node scripts/medir/js-rutas.mjs | tail -3 | tee -a .local/chunks.md
           { echo "## Bundle del panel"; echo; cat .local/chunks.md; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
