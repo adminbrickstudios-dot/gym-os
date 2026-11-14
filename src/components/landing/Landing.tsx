@@ -455,7 +455,7 @@ export type SesionLanding = { nombre: string | null; esSocio: boolean; esEquipo:
  * SOCIO-FLUJO §1 · Los dos botones grandes de la portada: "Quiero ser socio" (solo si el dueño tiene las altas online prendidas) y
  * "Ya soy socio, entrar". Con la sesión abierta: el saludo por el nombre, "Ir a mi perfil" y "Cerrar sesión". Nunca pide entrar de nuevo.
  */
-function AccesoSocio({ altas, sesion, estilo = "" }: { altas: boolean; sesion: SesionLanding; estilo?: string }) {
+function AccesoSocio({ altas, sesion, estilo = "", sinAltasWhatsapp = null }: { altas: boolean; sesion: SesionLanding; estilo?: string; sinAltasWhatsapp?: string | null }) {
   if (sesion) {
     return (
       <>
@@ -470,7 +470,8 @@ function AccesoSocio({ altas, sesion, estilo = "" }: { altas: boolean; sesion: S
   }
   return (
     <>
-      {altas && <a href="/hacete-socio" className={`boton boton-principal text-lg px-8 w-full sm:w-auto`} data-quiero-ser-socio><Icono nombre="mas" /> Quiero ser socio</a>}
+      {altas && <a href="/hacete-socio" className={`boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16`} data-quiero-ser-socio><Icono nombre="mas" /> Quiero ser socio</a>}
+      {!altas && sinAltasWhatsapp && <a href={sinAltasWhatsapp} target="_blank" rel="noopener noreferrer" className="boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16" data-escribinos-whatsapp><Icono nombre="mensaje" /> Escribinos por WhatsApp</a>}
       <a href="/ingresar?modo=socio" className={`boton text-lg px-8 w-full sm:w-auto ${estilo}`} data-ya-soy-socio><Icono nombre="llave" /> Ya soy socio, entrar</a>
     </>
   );
@@ -489,72 +490,48 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
   // "Abierto ahora" en la portada solo con una sede (con varias, va en Horarios, por sede).
   const ahora = agenda?.sedes.length === 1 ? agenda.sedes[0] : null;
 
+  // L1: la dirección sale de la primera sede que la tenga; el link a Maps es el que cargó el dueño o una búsqueda con esa dirección.
+  const sedeConDireccion = landing.sedes?.find((x) => x.direccion) ?? null;
+  const direccion = sedeConDireccion?.direccion ?? null;
+  const mapas = sedeConDireccion?.mapa_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion ?? "")}`;
+  const frase = portada.bajada || (direccion ? `${direccion.split(",").slice(-1)[0].trim()} · Gimnasio` : "Gimnasio");
   const base = propsMarca(marca);
   return (
     <div {...base} style={{ ...base.style, ...estiloTipografia(marca.tipografia) }} className="min-h-dvh" data-pagina-gimnasio data-tipografia={marca.tipografia ?? "condensada"}>
-      <header className="sticky top-0 z-20 bg-[var(--fondo)] border-b border-[var(--borde)]">
-        <div className="mx-auto max-w-5xl px-4 h-16 flex items-center justify-between gap-4">
-          <a href="#" className="flex items-center gap-3 min-w-0">
-            <Logo marca={marca} />
-            <span className="titulo text-xl truncate">{marca.nombre}</span>
-          </a>
-          <nav className="flex gap-2 shrink-0" aria-label="Accesos">
-            {!sesion && landing.altas_online && <a href="/hacete-socio" className="hidden sm:inline-flex boton"><Icono nombre="mas" /> Quiero ser socio</a>}
-            {hayPlanes && <a href="#planes" className="hidden sm:inline-flex boton"><Icono nombre="tarjeta" /> Ver planes</a>}
-            {sesion
-              ? <a href={sesion.esSocio ? "/app" : "/panel"} className="boton"><Icono nombre="persona" /> {sesion.esSocio ? "Ir a mi perfil" : "Ir al panel"}</a>
-              : <a href="/ingresar?modo=socio" className="boton"><Icono nombre="llave" /> Ya soy socio, entrar</a>}
-          </nav>
-        </div>
-      </header>
       <AvisoCierres agenda={agenda} />
 
-      {foto || video ? (
-        <section className="px-4 pt-4 pb-6">
-          <div className="mx-auto max-w-5xl relative overflow-hidden rounded-[var(--radio-grande)] min-h-[72dvh] sm:min-h-[560px] flex items-end bg-neutral-900" data-portada={video ? "video" : "foto"}>
-            {foto && <Foto src={foto} alt="" prioridad sizes="(min-width: 1024px) 1024px, 100vw" />}
-            {/* Video mudo y en bucle sobre la foto (que hace de póster). Con "reducir movimiento" no se muestra: queda la foto. */}
-            {video && (
-              <video className="video-portada absolute inset-0 w-full h-full object-cover" src={video} poster={foto ?? undefined}
-                autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
+      {/* L1 (Mateo, 14/11): una sola pantalla, pocas cosas. Nombre, una frase, Quiero ser socio, Ya soy socio y tres datos. */}
+      <section className="relative isolate flex flex-col justify-center px-5 py-10 min-h-[100dvh]" data-primer-pantallazo data-portada={video ? "video" : foto ? "foto" : "tipografica"}>
+        {foto && <><Foto src={foto} alt="" prioridad sizes="100vw" /><div className="absolute inset-0 -z-10 bg-black/60" /></>}
+        {video && (
+          <video className="video-portada absolute inset-0 -z-10 w-full h-full object-cover" src={video} poster={foto ?? undefined}
+            autoPlay muted loop playsInline preload={foto ? "none" : "metadata"} aria-hidden tabIndex={-1} data-video-portada />
+        )}
+        <div className={`mx-auto w-full max-w-xl ${foto || video ? "text-white" : ""}`}>
+          <div className="flex justify-center"><Logo marca={marca} grande /></div>
+          <h1 className="titular text-center text-[clamp(2.75rem,12vw,5rem)] mt-5 break-words" data-nombre-gimnasio>{portada.titulo}</h1>
+          {frase && <p className={`mt-3 text-center text-lg sm:text-xl leading-snug ${foto || video ? "text-white/90" : "texto-suave"}`}>{frase}</p>}
+          <div className="mt-8 flex flex-col gap-3">
+            <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo={foto || video ? "!bg-white/15 !text-white !border-white/30" : ""} sinAltasWhatsapp={whatsapp} />
+          </div>
+          <ul className={`mt-8 space-y-3 text-base ${foto || video ? "text-white/95" : ""}`} data-datos-rapidos>
+            {direccion && (
+              <li><a href={mapas} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3" data-dato-direccion>
+                <span aria-hidden className="icono"><Icono nombre="ubicacion" /></span><span className="underline underline-offset-4">{direccion}</span></a></li>
             )}
-            <div className="absolute inset-0 bg-black/55" />
-            <div className="relative p-6 sm:p-10 text-white">
-              <h1 className="titular text-[clamp(3rem,11vw,5.75rem)] max-w-[14ch]">{portada.titulo}</h1>
-              {portada.bajada && <p className="mt-5 text-lg sm:text-2xl text-white/90 max-w-[36ch]">{portada.bajada}</p>}
-              <Senales landing={landing} ahora={ahora} />
-              <div className="mt-8 flex flex-wrap gap-3">
-                {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
-                {accion && <BotonPrincipal href={accion} className={`px-8 ${hayProbar ? "!bg-white/15 !text-white !border-white/30" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{portada.boton_texto}</BotonPrincipal>}
-                <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo="!bg-white/15 !text-white !border-white/30" />
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section className="px-4 pt-12 pb-10 sm:pt-16 sm:pb-16">
-          <div className="mx-auto max-w-5xl">
-            <h1 className="titular text-[clamp(3.25rem,13vw,6.5rem)] max-w-[14ch]">{portada.titulo}</h1>
-            {portada.bajada && <p className="mt-6 sm:mt-8 text-xl sm:text-2xl texto-suave leading-snug max-w-[34ch]">{portada.bajada}</p>}
-            <Senales landing={landing} ahora={ahora} />
-            <div className="mt-8 flex flex-wrap gap-3">
-              {/* En el celular, con WhatsApp, el botón principal es la barra fija de abajo: no se repite. */}
-              {hayProbar && <a href="#probar" className="boton boton-principal text-lg px-8 w-full sm:w-auto" data-probar-gratis><Icono nombre="regalo" /> Probá gratis</a>}
-              {accion && <BotonPrincipal href={accion} className={`px-8 w-full sm:w-auto ${hayProbar ? "!bg-transparent !text-[var(--texto)] !border-[var(--borde)]" : ""} ${whatsapp ? "hidden sm:inline-flex" : ""}`}>{portada.boton_texto}</BotonPrincipal>}
-              <AccesoSocio altas={!!landing.altas_online} sesion={sesion} />
-              {hayPlanes && accion !== "#planes" && <a href="#planes" className="boton text-lg px-8 w-full sm:w-auto"><Icono nombre="tarjeta" /> Ver planes</a>}
-            </div>
-          </div>
-        </section>
-      )}
+            {ahora?.texto && (
+              <li className="flex items-center gap-3" data-dato-horario><span aria-hidden className="icono"><Icono nombre="reloj" /></span><span>{ahora.texto}</span></li>
+            )}
+            {whatsapp && (
+              <li><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3" data-dato-whatsapp>
+                <span aria-hidden className="icono"><Icono nombre="mensaje" /></span><span className="underline underline-offset-4">Escribinos por WhatsApp</span></a></li>
+            )}
+          </ul>
+        </div>
+      </section>
 
       <main>
-        <ComoEmpezar probar={hayProbar} planes={hayPlanes} altas={!!landing.altas_online} />
         {landing.secciones.map((s) => <SeccionLanding key={s.tipo} s={s} landing={landing} agenda={agenda} clases={clases} />)}
-        {/* VD-44: si el dueño no armó la sección Equipo pero mostró a su gente, aparece igual. */}
-        {(landing.equipo_publico?.length ?? 0) > 0 && !landing.secciones.some((s) => s.tipo === "equipo") && (
-          <Equipo s={{ tipo: "equipo", titulo: "Nuestro equipo", contenido: {} }} reales={landing.equipo_publico ?? []} />
-        )}
         {eventos.length > 0 && <Eventos eventos={eventos} whatsapp={whatsapp} />}
       </main>
 
@@ -584,11 +561,6 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
         <a href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Escribinos por WhatsApp" data-whatsapp-flotante
           className="hidden sm:grid fixed right-6 bottom-6 z-30 size-14 place-items-center rounded-full text-2xl [box-shadow:var(--sombra-flota)]"
           style={{ background: "var(--acento)", color: "var(--acento-texto)" }}><Icono nombre="mensaje" /></a>
-      )}
-      {whatsapp && (
-        <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-[var(--fondo)] border-t border-[var(--borde)]">
-          <BotonPrincipal href={whatsapp} className="w-full"><Icono nombre="mensaje" /> {portada.boton_texto}</BotonPrincipal>
-        </div>
       )}
     </div>
   );
