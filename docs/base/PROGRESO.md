@@ -2,6 +2,8 @@
 
 ## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
 
+**Tercera publicación (14/11, 13:50 hora de Argentina, PR #25, commit a22a0fd):** migración `20261114160000` (amplía la lista de lecturas de `lote_lecturas`) aplicada sin copia (chequeos en verde, corrida 43617235463), deploy en verde y humo. Vencen hoy, Transferencias, Tareas, Equipo y Profes pasan a un solo viaje: el piso de toda pantalla quedó en 3 (contexto, menú y campana, avisos de la puerta) y las del lote en 4. N9 y Q4 reconciliados contra el código (pasaron de ❌ a 🟡).
+
 **Segunda publicación (14/11, 13:10 hora de Argentina, PR #24, commit 6f3a590):** migraciones `20261114140000` (CUIT y razón social, F2.10) y `20261114150000` (sesiones del equipo y "Cerrar todas", F2.11) aplicadas sin copia (autorizado; chequeos en verde, corrida 43613449697), deploy en verde y humo (`/api/salud`, páginas públicas, redirecciones de `/super`, `/panel` y `/admin`, `humo-pasado`). Trae también E8 en Retención, Socios, Vender, Tu página y las acciones de la Entrada.
 
 **Dónde quedé:** **publiqué la velocidad (E4, E8) y la fase L (L1 a L4) el 14/11 a las 12:35 hora de Argentina** (PR #23, commit a000b28): 4 migraciones aplicadas sin copia (autorizado; prevuelo y chequeos en verde), deploy en verde y humo en producción en el demo y en las páginas de Temple Gym (solo mirando). Lo que sigue: E8 hasta 2 viajes en Caja, Control y Entrada y la tabla final (medición en curso), y lo 🟡 de las fases H, U, P, D, Z, 0, 1 a 9, R, Q, N y F8.
