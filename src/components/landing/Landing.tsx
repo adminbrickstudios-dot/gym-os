@@ -472,7 +472,8 @@ function AccesoSocio({ altas, sesion, estilo = "", sinAltasWhatsapp = null }: { 
     <>
       {altas && <a href="/hacete-socio" className={`boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16`} data-quiero-ser-socio><Icono nombre="mas" /> Quiero ser socio</a>}
       {!altas && sinAltasWhatsapp && <a href={sinAltasWhatsapp} target="_blank" rel="noopener noreferrer" className="boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16" data-escribinos-whatsapp><Icono nombre="mensaje" /> Escribinos por WhatsApp</a>}
-      <a href="/ingresar?modo=socio" className={`boton text-lg px-8 w-full sm:w-auto ${estilo}`} data-ya-soy-socio><Icono nombre="llave" /> Ya soy socio, entrar</a>
+      {/* Sin "Quiero ser socio" ni WhatsApp, entrar es lo único que se ofrece: pasa a ser el botón principal. */}
+      <a href="/ingresar?modo=socio" className={`boton text-lg px-8 w-full sm:w-auto ${!altas && !sinAltasWhatsapp ? "boton-principal !min-h-16 text-xl" : estilo}`} data-ya-soy-socio><Icono nombre="llave" /> Ya soy socio, entrar</a>
     </>
   );
 }
