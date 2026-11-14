@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { Vacio } from "@/components/ui/Vacio";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import { AutomaticasHoy, ChecklistHoy, ConfigurarAutomaticas, type Automatica, type ConfigAuto, type ItemChecklist, type PersonaConfig } from "./Hoy";
 import { FilaTarea, NuevaTarea, type Persona, type Tarea } from "./Tareas";
@@ -24,14 +24,15 @@ export default async function PaginaTareas({ searchParams }: { searchParams: Pro
     const gestion = rol === "dueno" || rol === "encargado";
     const todas = gestion && sp.todas === "1";
     const socioId = /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? sp.socio! : null;
-    const [datos, ficha, auto, checklist, config] = await Promise.all([
-      rpc<{ hoy: string; tareas: Tarea[]; equipo: Persona[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id, p_todas: todas }),
-      socioId && rol !== "profe" ? rpc<{ socio: { nombre: string; apellido: string } }>("ficha_socio", { p_socio_id: socioId }) : Promise.resolve(null),
+    // E8: las lecturas en UN viaje a la base (lote_lecturas).
+    const [datos, ficha, auto, checklist, config] = await rpcLote(
+      lectura<{ hoy: string; tareas: Tarea[]; equipo: Persona[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id, p_todas: todas }),
+      socioId && rol !== "profe" ? lectura<{ socio: { nombre: string; apellido: string } } | null>("ficha_socio", { p_socio_id: socioId }) : fijo<{ socio: { nombre: string; apellido: string } } | null>(null),
       // El profe no ve la plata ni los socios de la recepción: su pantalla son solo las tareas que le dieron.
-      rol !== "profe" ? rpc<Automatica[]>("para_hacer_hoy", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve([] as Automatica[]),
-      rol !== "profe" ? rpc<{ items: ItemChecklist[] }>("checklist_hoy", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve({ items: [] as ItemChecklist[] }),
-      gestion ? rpc<{ automaticas: ConfigAuto[]; equipo: PersonaConfig[] }>("tareas_auto_config", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
-    ]);
+      rol !== "profe" ? lectura<Automatica[]>("para_hacer_hoy", { p_gimnasio_id: panel.gimnasio.id }) : fijo<Automatica[]>([]),
+      rol !== "profe" ? lectura<{ items: ItemChecklist[] }>("checklist_hoy", { p_gimnasio_id: panel.gimnasio.id }) : fijo<{ items: ItemChecklist[] }>({ items: [] }),
+      gestion ? lectura<{ automaticas: ConfigAuto[]; equipo: PersonaConfig[] } | null>("tareas_auto_config", { p_gimnasio_id: panel.gimnasio.id }) : fijo<{ automaticas: ConfigAuto[]; equipo: PersonaConfig[] } | null>(null),
+    );
     const socio = ficha && socioId ? { id: socioId, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim() } : null;
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
     const automaticas = auto.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));

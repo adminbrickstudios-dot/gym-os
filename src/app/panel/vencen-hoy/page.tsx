@@ -6,7 +6,7 @@ import { rutaDisponible } from "@/lib/panel/secciones";
 import { Encabezado } from "@/components/panel/Marco";
 import { fechaConEl, fechaCorta, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpcLectura } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, lectura, rpcLote } from "@/lib/panel/servidor";
 import { linkWhatsappSocio } from "@/lib/whatsapp";
 import { TandaAvisos } from "@/app/panel/avisos/Tanda";
 import type { Aviso } from "@/app/panel/avisos/Aviso";
@@ -33,11 +33,12 @@ export default async function VencenHoy({ searchParams }: { searchParams: Promis
     const panel = await contextoPanel();
     exigirSeccion(panel, "vencen_hoy");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const [pest, bandeja, prometieron] = await Promise.all([
-      rpcLectura<Pestanas>("vencen_pestanas", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<Prometio[]>("prometieron_pagar", { p_gimnasio_id: panel.gimnasio.id }),
-    ]);
+    // E8: las tres lecturas en UN viaje a la base (lote_lecturas).
+    const [pest, bandeja, prometieron] = await rpcLote(
+      lectura<Pestanas>("vencen_pestanas", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Aviso[]>("bandeja_avisos", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<Prometio[]>("prometieron_pagar", { p_gimnasio_id: panel.gimnasio.id }),
+    );
     const filas = pest.hoy.filas;
     // VEH-1: el "avisado ✓" es el de la bandeja (misma cuenta). Si no está en la bandeja, ya se le avisó otro día por este vencimiento.
     const avisos = new Map(bandeja.filter((b) => b.clave === "por_vencer").map((b) => [b.socio_id, b]));

@@ -2,6 +2,8 @@
 
 ## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
 
+**Segunda publicación (14/11, 13:10 hora de Argentina, PR #24, commit 6f3a590):** migraciones `20261114140000` (CUIT y razón social, F2.10) y `20261114150000` (sesiones del equipo y "Cerrar todas", F2.11) aplicadas sin copia (autorizado; chequeos en verde, corrida 43613449697), deploy en verde y humo (`/api/salud`, páginas públicas, redirecciones de `/super`, `/panel` y `/admin`, `humo-pasado`). Trae también E8 en Retención, Socios, Vender, Tu página y las acciones de la Entrada.
+
 **Dónde quedé:** **publiqué la velocidad (E4, E8) y la fase L (L1 a L4) el 14/11 a las 12:35 hora de Argentina** (PR #23, commit a000b28): 4 migraciones aplicadas sin copia (autorizado; prevuelo y chequeos en verde), deploy en verde y humo en producción en el demo y en las páginas de Temple Gym (solo mirando). Lo que sigue: E8 hasta 2 viajes en Caja, Control y Entrada y la tabla final (medición en curso), y lo 🟡 de las fases H, U, P, D, Z, 0, 1 a 9, R, Q, N y F8.
 
 **Qué es nuevo hoy:**
@@ -33,7 +35,7 @@
 | Crear un gimnasio y su dueño en producción (U0.1, U1) | ⛔ | Cargá `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` en GitHub (y, si da "Invalid API key", la clave `service_role` en Vercel) |
 | Dominios (D1 a D3) | ⛔ | Publicado y listo; el cambio de variables y de DNS lo hacés vos con `DOMINIO.md` |
 | Copias de seguridad (H5, C8) | ⛔ | Cargá `COPIA_CLAVE` en GitHub y corré Actions → Copias |
-| Super admin completo (fase 2) | 🟢 | Falta CUIT y razón social (F2.10) y las sesiones abiertas (F2.11): 🔴 |
+| Super admin completo (fase 2) | 🟢 | Publicado, con CUIT y razón social (F2.10) y las sesiones abiertas del equipo con "Cerrar todas" (F2.11) |
 | Pulido de todo el sistema (fase Z) | 🟡 | Hecho en gran parte; Z1 y el resto en la lista |
 | Los 70 detalles, faltantes, lo chico de antes (fases 4 a 6) | 🟡 | Confirmados contra el código; faltan filas por cerrar |
 | Edición en capas, escala y seguridad (fase 9) | 🟡 | En su mayoría hecho; `F9.7` espera Supabase Pro |
