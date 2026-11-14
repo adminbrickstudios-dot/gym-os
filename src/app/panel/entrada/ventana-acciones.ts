@@ -1,4 +1,5 @@
 "use server";
+import { gimnasioActual } from "@/lib/supabase/servidor";
 // VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas.
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc, rpcLectura } from "@/lib/panel/servidor";
@@ -10,9 +11,9 @@ export type UltimaEntrada = { ingreso_id: string; momento: string; socio_id: str
 /** Las últimas entradas del día en esta sede (la barra fija). Las lee la base, no se calculan acá. */
 export async function ultimasEntradas(sedeId: string): Promise<{ entradas?: UltimaEntrada[]; error?: string }> {
   try {
-    const panel = await contextoPanel();
-    const { sede } = sedeActiva(panel, sedeId);
-    const todas = await rpc<UltimaEntrada[]>("ingresos_del_dia", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id });
+    // E8: la sede viene de la propia pantalla (la eligió el servidor al pintarla) y la base verifica que sea de este gimnasio: sin pedir el contexto de nuevo.
+    const g = await gimnasioActual();
+    const todas = await rpc<UltimaEntrada[]>("ingresos_del_dia", { p_gimnasio_id: g.id, p_sede_id: sedeId });
     return { entradas: todas.filter((i) => i.resultado !== "rechazado").slice(0, 5) };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -42,8 +43,8 @@ export type ConfigVisita = { visita_horas: number; antiprestamo_minutos: number;
 
 export async function leerConfigVisita(): Promise<{ config?: ConfigVisita; error?: string }> {
   try {
-    const panel = await contextoPanel();
-    return { config: await rpc<ConfigVisita>("config_visita", { p_gimnasio_id: panel.gimnasio.id }) };
+    const g = await gimnasioActual();   // E8: sin el contexto del panel (un viaje menos); la base decide el permiso igual
+    return { config: await rpc<ConfigVisita>("config_visita", { p_gimnasio_id: g.id }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
