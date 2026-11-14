@@ -42,6 +42,7 @@ try {
   chequear(await socio.locator("[data-paga-tu-plan]").count() === 1, "L3: arriba dice “Para empezar a entrar, pagá tu plan”", "L3: falta el bloque de pagar el plan");
   chequear(await socio.locator("[data-pagar-en-recepcion]").count() === 1, "L3: ofrece pagar en la recepción con el DNI", "L3: falta pagar en la recepción");
   chequear(await socio.locator("[data-qr-bloqueado]").count() === 1 && await socio.locator("[data-mi-qr]").count() === 0, "L3: el QR está bloqueado (candado) y no hay un QR a la vista", "L3: se ve un QR sin poder entrar");
+  chequear(await socio.locator("[data-pagar-online]").count() === 0, "L4: con el cobro online apagado no aparece “Pagar desde acá”", "L4: aparece el pago online con el cobro online apagado");
   await capturar(socio, "l3-celu-qr-bloqueado");
   ok(`antes: Resultado cobrado ${cobradoAntes}`);
 

@@ -494,7 +494,9 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
   const sedeConDireccion = landing.sedes?.find((x) => x.direccion) ?? null;
   const direccion = sedeConDireccion?.direccion ?? null;
   const mapas = sedeConDireccion?.mapa_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion ?? "")}`;
-  const frase = portada.bajada || (direccion ? `${direccion.split(",").slice(-1)[0].trim()} · Gimnasio` : "Gimnasio");
+  // La frase es lo que escribió el dueño: su título si no repite el nombre, si no su bajada; sin nada, la ciudad y "Gimnasio".
+  const titulo = portada.titulo?.trim() ?? "";
+  const frase = (titulo && titulo.toLowerCase() !== marca.nombre.trim().toLowerCase() ? titulo : "") || portada.bajada || (direccion ? `${direccion.split(",").slice(-1)[0].trim()} · Gimnasio` : "Gimnasio");
   const base = propsMarca(marca);
   return (
     <div {...base} style={{ ...base.style, ...estiloTipografia(marca.tipografia) }} className="min-h-dvh" data-pagina-gimnasio data-tipografia={marca.tipografia ?? "condensada"}>
@@ -509,7 +511,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
         )}
         <div className={`mx-auto w-full max-w-xl ${foto || video ? "text-white" : ""}`}>
           <div className="flex justify-center"><Logo marca={marca} grande /></div>
-          <h1 className="titular text-center text-[clamp(3rem,13vw,5rem)] mt-5 break-words" data-nombre-gimnasio>{portada.titulo}</h1>
+          <h1 className="titular text-center text-[clamp(3rem,13vw,5rem)] mt-5 break-words" data-nombre-gimnasio>{marca.nombre}</h1>
           {frase && <p className={`mt-3 text-center text-lg sm:text-xl leading-snug ${foto || video ? "text-white/90" : "texto-suave"}`}>{frase}</p>}
           <div className="mt-8 flex flex-col gap-3">
             <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo={foto || video ? "!bg-white/15 !text-white !border-white/30" : ""} sinAltasWhatsapp={whatsapp} />
