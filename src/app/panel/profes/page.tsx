@@ -5,7 +5,7 @@ import { Mensaje } from "@/components/ui/Mensaje";
 import { nombreMes } from "@/lib/gastos";
 import { intentar } from "@/lib/panel/intentar";
 import { sedeActiva } from "@/lib/panel/sede";
-import { contextoPanel, exigirRol, rpc, rpcLectura } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import type { MiTurno } from "@/app/panel/caja/tipos";
 import { Liquidacion, type FilaProfe } from "./Liquidacion";
 
@@ -24,11 +24,12 @@ export default async function Profes({ searchParams }: { searchParams: Promise<{
     const actual = `${hoy.slice(0, 7)}-01`;
     const mes = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) && `${sp.mes}-01` <= actual ? `${sp.mes}-01` : actual;
     // Sin permiso (encargado al que el dueño no se lo dio) la base responde con error: se ve, nunca una lista vacía.
-    const [r, config, turno] = await Promise.all([
-      rpc<{ mes: string; profes: FilaProfe[] }>("liquidacion_profes", { p_gimnasio_id: panel.gimnasio.id, p_mes: mes }),
-      esDueno ? rpc<{ encargado_ve: boolean }>("config_liquidacion", { p_gimnasio_id: panel.gimnasio.id }) : Promise.resolve(null),
-      esDueno ? rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sedeActiva(panel, undefined).sede.id }).catch(() => null) : Promise.resolve(null),
-    ]);
+    // E8: las lecturas en UN viaje a la base (lote_lecturas).
+    const [r, config, turno] = await rpcLote(
+      lectura<{ mes: string; profes: FilaProfe[] }>("liquidacion_profes", { p_gimnasio_id: panel.gimnasio.id, p_mes: mes }),
+      esDueno ? lectura<{ encargado_ve: boolean } | null>("config_liquidacion", { p_gimnasio_id: panel.gimnasio.id }) : fijo<{ encargado_ve: boolean } | null>(null),
+      esDueno ? lectura<MiTurno | null>("mi_turno_caja", { p_sede_id: sedeActiva(panel, undefined).sede.id }, true) : fijo<MiTurno | null>(null),
+    );
     const anterior = moverMes(mes, -1), siguiente = moverMes(mes, 1);
     return (
       <div className="space-y-8">

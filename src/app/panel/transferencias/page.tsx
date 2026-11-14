@@ -4,7 +4,7 @@ import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { Pestanas } from "@/components/ui/Pestanas";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { Mostrador, type ListaMostrador } from "./Mostrador";
 import { Pendiente } from "./Pendiente";
 import { RevisarMP } from "./RevisarMP";
@@ -19,15 +19,16 @@ export default async function Transferencias({ searchParams }: { searchParams: P
     const panel = await contextoPanel();
     exigirSeccion(panel, "transferencias");
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
-    const [filas, mostrador] = await Promise.all([
-      rpc<Fila[]>("pagos_por_aprobar", { p_gimnasio_id: panel.gimnasio.id }),
-      rpc<ListaMostrador>("cobradas_en_mostrador", { p_gimnasio_id: panel.gimnasio.id, p_dias: 30 }),
-    ]);
-    // H1 (VD-5C): dos listas que no se mezclan. Los comprobantes que suben los socios se aprueban; lo cobrado en el mostrador ya está cobrado y se chequea contra el banco.
     const enMostrador = sp.ver === "mostrador";
     // VD-46A: el dueño y el encargado pueden revisar con MercadoPago si el gimnasio lo tiene conectado.
     const puedeRevisar = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
-    const mp = !enMostrador && puedeRevisar ? await rpc<{ conectado: boolean }>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }) : null;
+    // E8: las lecturas en UN viaje a la base (lote_lecturas).
+    const [filas, mostrador, mp] = await rpcLote(
+      lectura<Fila[]>("pagos_por_aprobar", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<ListaMostrador>("cobradas_en_mostrador", { p_gimnasio_id: panel.gimnasio.id, p_dias: 30 }),
+      !enMostrador && puedeRevisar ? lectura<{ conectado: boolean }>("estado_pagos_online", { p_gimnasio_id: panel.gimnasio.id }) : fijo<{ conectado: boolean } | null>(null),
+    );
+    // H1 (VD-5C): dos listas que no se mezclan. Los comprobantes que suben los socios se aprueban; lo cobrado en el mostrador ya está cobrado y se chequea contra el banco.
     const cuando = (m: string) => fechaHoraHumana(m, panel.gimnasio.zona_horaria);
     return (
       <>
