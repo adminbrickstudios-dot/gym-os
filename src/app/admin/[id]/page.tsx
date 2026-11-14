@@ -18,7 +18,7 @@ import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { EstadoCopias } from "../EstadoCopias";
-import { Ciudad, CicloDeVida, QrGimnasio, RestaurarTextos } from "./FichaGestion";
+import { Ciudad, CicloDeVida, DatosFiscalesForm, QrGimnasio, RestaurarTextos, type DatosFiscales } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
@@ -76,6 +76,9 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   }
   const funciones = await rpc<{ restaurar_cambios: boolean }>("funciones_del_gimnasio", { p_gimnasio_id: id });
   const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
+  // F2.10: CUIT y razón social para facturar. Los guarda solo el rol Principal o Ventas (la base lo exige; a otro rol le dice por qué no).
+  const fiscales = await rpc<DatosFiscales>("admin_datos_fiscales", { p_gimnasio_id: g.gimnasio_id }).catch(() => null);
+  const puedeEditarFiscales = true;
   const wa = fila ? whatsappDueno(fila.dueno_telefono, `Hola ${fila.dueno ?? ""}, te escribo de BRIK por ${g.nombre}.`) : null;
   const yoSoporte = g.equipo.find((p) => p.soy_yo && p.es_soporte && p.activo);
   const duenoSinCuenta = g.equipo.find((p) => p.rol === "dueno" && p.activo && !p.es_soporte && !p.tiene_cuenta);
@@ -157,6 +160,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <p className="titulo-grupo">Datos</p>
         <p className="texto-suave">Zona horaria: {extra.zona_horaria}. El resto de los datos del gimnasio los cambia su dueño, o BRIK entrando como soporte.</p>
         <Ciudad gimnasioId={g.gimnasio_id} ciudad={fila?.ciudad ?? null} />
+        {fiscales && <DatosFiscalesForm gimnasioId={g.gimnasio_id} datos={fiscales} puedeEditar={puedeEditarFiscales} />}
         <CambiarSlug gimnasioId={g.gimnasio_id} slug={g.slug} />
       </section>
 

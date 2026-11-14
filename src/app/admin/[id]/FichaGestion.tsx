@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { useConfirmar } from "@/components/ui/useConfirmar";
-import { darDeBajaGimnasio, guardarCiudad, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
+import { darDeBajaGimnasio, guardarCiudad, guardarDatosFiscales, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
 
 const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
@@ -54,6 +54,30 @@ export function Ciudad({ gimnasioId, ciudad }: { gimnasioId: string; ciudad: str
       <label className="space-y-1 flex-1 min-w-[12rem]"><span className="etiqueta">Ciudad</span><input className="campo" value={v} maxLength={80} onChange={(e) => setV(e.target.value)} /></label>
       <BotonAccion className="boton" disabled={v.trim() === (ciudad ?? "")} onClick={async () => { const r = await guardarCiudad(gimnasioId, v); if (r.error) { setError(r.error); return; } setError(""); router.refresh(); }}>Guardar</BotonAccion>
       <Alerta m={error} />
+    </div>
+  );
+}
+
+/** F2.10 · CUIT y razón social del gimnasio, para la factura de BRIK. */
+export type DatosFiscales = { cuit: string | null; razon_social: string | null; cambiado_por: string | null; cambiado_en: string | null };
+const conGuiones = (c: string | null) => (c && /^\d{11}$/.test(c) ? `${c.slice(0, 2)}-${c.slice(2, 10)}-${c.slice(10)}` : (c ?? ""));
+export function DatosFiscalesForm({ gimnasioId, datos, puedeEditar }: { gimnasioId: string; datos: DatosFiscales; puedeEditar: boolean }) {
+  const router = useRouter();
+  const [cuit, setCuit] = useState(conGuiones(datos.cuit));
+  const [razon, setRazon] = useState(datos.razon_social ?? "");
+  const [error, setError] = useState("");
+  const [guardado, setGuardado] = useState(false);
+  const sucio = cuit.replace(/\D/g, "") !== (datos.cuit ?? "") || razon.trim() !== (datos.razon_social ?? "");
+  return (
+    <div className="space-y-2" data-datos-fiscales>
+      <div className="flex flex-wrap gap-2 items-end">
+        <label className="space-y-1 min-w-[12rem]"><span className="etiqueta">CUIT</span><input className="campo numero" inputMode="numeric" placeholder="20-12345678-6" maxLength={13} value={cuit} disabled={!puedeEditar} onChange={(e) => { setCuit(e.target.value); setGuardado(false); }} data-cuit /></label>
+        <label className="space-y-1 flex-1 min-w-[14rem]"><span className="etiqueta">Razón social</span><input className="campo" maxLength={120} value={razon} disabled={!puedeEditar} onChange={(e) => { setRazon(e.target.value); setGuardado(false); }} data-razon-social /></label>
+        {puedeEditar && <BotonAccion className="boton" disabled={!sucio} onClick={async () => { const r = await guardarDatosFiscales(gimnasioId, cuit, razon); if (r.error) { setError(r.error); return; } setError(""); setGuardado(true); router.refresh(); }}>Guardar datos para facturar</BotonAccion>}
+      </div>
+      <Alerta m={error} />
+      {guardado && <p className="texto-suave" data-fiscales-guardado>Guardado.</p>}
+      {datos.cambiado_por && <p className="text-sm texto-tenue" data-fiscales-quien>Último cambio: {datos.cambiado_por}{datos.cambiado_en ? ` · ${new Date(datos.cambiado_en).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p>}
     </div>
   );
 }
