@@ -5,7 +5,7 @@ import { Vacio } from "@/components/ui/Vacio";
 import { detalleControl, enlaceControl, META_TIPO, TIPOS_CONTROL, tituloControl, type ItemControl, type PaginaControl } from "@/lib/control";
 import { formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { ErrorDatos, contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { AlertasPatron, type AlertasPatronDatos } from "./AlertasPatron";
 import { Beneficios, type BeneficiosMes } from "./Beneficios";
 import { FiltrosControl, type PersonaControl } from "./FiltrosControl";
@@ -39,27 +39,20 @@ export default async function Control({ searchParams }: { searchParams: Promise<
     const quien = UUID.test(sp.quien ?? "") ? sp.quien! : "";
     const cursor = sp.cursor && sp.cursor.includes("|") && sp.cursor.length < 200 ? sp.cursor : null;
 
-    // VD-40: cuándo entró BRIK a ayudar y por qué (solo el dueño; la base lo exige igual).
-    const soportesPedido = panel.yo.rol === "dueno"
-      ? rpc<SoporteEntrada[]>("soportes_del_gimnasio", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 })
-      : Promise.resolve<SoporteEntrada[]>([]);
-    const [pagina, equipo, soportes, moderacion, beneficios, devolucionModo] = await Promise.all([
-      rpc<PaginaControl>("linea_de_control", {
-        p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_tipos: tipos.length ? tipos : null,
-        p_quien: quien || null, p_limite: POR_PAGINA, p_cursor: cursor,
-      }),
-      rpc<(PersonaControl & { activo: boolean })[]>("equipo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
-      soportesPedido,
+    // E8: todas las lecturas de la pantalla en UN viaje a la base (lote_lecturas, que ahora acepta la lista de tipos).
+    // VD-40: cuándo entró BRIK a ayudar y por qué (solo el dueño; la base lo exige igual). FA-22: avisos por patrón (solo en la primera página).
+    const [pagina, equipo, soportes, moderacion, beneficios, devolucionModo, patrones] = await rpcLote(
+      lectura<PaginaControl>("linea_de_control", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_tipos: tipos.length ? tipos : null, p_quien: quien || null, p_limite: POR_PAGINA, p_cursor: cursor }),
+      lectura<(PersonaControl & { activo: boolean })[]>("equipo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
+      panel.yo.rol === "dueno" ? lectura<SoporteEntrada[]>("soportes_del_gimnasio", { p_gimnasio_id: panel.gimnasio.id, p_limite: 10 }) : fijo<SoporteEntrada[]>([]),
       // VD-46: suspensiones, cortesías, bajas y devoluciones del mismo período (solo en la primera página).
-      cursor ? Promise.resolve<{ items: ItemModeracion[] }>({ items: [] }) : rpc<{ items: ItemModeracion[] }>("moderacion_control", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_limite: 30 }),
+      cursor ? fijo<{ items: ItemModeracion[] }>({ items: [] }) : lectura<{ items: ItemModeracion[] }>("moderacion_control", { p_gimnasio_id: panel.gimnasio.id, p_desde: desde, p_hasta: hasta, p_limite: 30 }),
       // VD-46C: descuentos y cortesías del mes, con los topes y la lista de motivos.
-      rpc<BeneficiosMes>("beneficios_mes", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<BeneficiosMes>("beneficios_mes", { p_gimnasio_id: panel.gimnasio.id }),
       // VD-46J: la regla de devolución al dar de baja.
-      rpc<string>("devolucion_baja_config", { p_gimnasio_id: panel.gimnasio.id }),
-    ]);
-
-    // FA-22: avisos por patrón (dos sedes en pocos minutos, muchas entradas en un día). Solo en la primera página.
-    const patrones = cursor ? null : await rpc<AlertasPatronDatos>("alertas_patron_entradas", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null);
+      lectura<string>("devolucion_baja_config", { p_gimnasio_id: panel.gimnasio.id }),
+      cursor ? fijo<AlertasPatronDatos | null>(null) : lectura<AlertasPatronDatos | null>("alertas_patron_entradas", { p_gimnasio_id: panel.gimnasio.id }, true),
+    );
     const filtros = new URLSearchParams();
     tipos.forEach((t) => filtros.append("tipos", t));
     filtros.set("desde", desde); filtros.set("hasta", hasta);
