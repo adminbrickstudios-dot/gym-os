@@ -52,6 +52,15 @@ toque plata se prueba con números fijos antes de publicar.
 | E7 | Pregunta "¿Base o Pase?" en PREGUNTAS (Mateo compró pasegym.com); no se cambia el nombre hasta que conteste | Anotada | ✅ anotada en PREGUNTAS (P-E7), decidido por defecto: no se toca el nombre |
 | E8 | Las pantallas con más de 2 viajes a la base, con la medición de F0.1 | Tabla antes/después en `VELOCIDAD.md` | 🟡 13/11: medidas las 42 pantallas con `scripts/medir/viajes.mjs` (corrida 43423578975): todas pasan de 2 (de 7 a 30); tabla "antes" y qué queda en `VELOCIDAD.md` § E8; arreglado el layout (dos viajes en fila → paralelo). Falta: una sola función para Configuración, Planes, Inicio y Entrada, y la tabla "después" |
 
+## Fase L · La página del gimnasio y la app del socio, simples (Mateo, 14/11; `LANDING-SOCIO-1411.md`; va después de E8/E4)
+
+| # | Qué | LISTO SI | Estado |
+|---|---|---|---|
+| L1 | Página del gimnasio en una pantalla: nombre, una frase, Quiero ser socio (verde), Ya soy socio, dirección, horario de hoy y WhatsApp; el resto, solo si el dueño lo prende | Lighthouse celular ≥ 90; todo eso visible sin scroll en 390×844; capturas mirándolas; Temple Gym visto en un clon [demo] antes de publicar | ❌ |
+| L2 | Quiero ser socio crea la cuenta gratis, con DNI obligatorio y su aviso; sesión abierta; "socio sin pagar" | e2e del alta; reclamo por DNI y menores siguen andando | ❌ |
+| L3 | App del socio sin pagar: "pagá tu plan" arriba (recepción o desde acá si hay cobro online), QR bloqueado con candado hasta que pague y que se activa solo, y lo demás visible (horarios, planes, perfil, WhatsApp, probar una clase) | e2e cuenta nueva → QR bloqueado → recepción cobra → QR activo sin recargar → entra en verde por QR y por DNI | ❌ |
+| L4 | Pagar desde la app con MercadoPago (N1), apagado por defecto; no se prende en Temple Gym sin Mateo | Con el cobro online apagado no aparece el botón | ❌ |
+
 ## Fase U · Urgente antes de todo (Mateo, 09/11 a la noche): **se publica apenas está en verde, esta misma noche**
 
 | # | Qué | LISTO SI | Estado |
