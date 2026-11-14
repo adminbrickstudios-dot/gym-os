@@ -1,4 +1,5 @@
 "use server";
+import { gimnasioActual } from "@/lib/supabase/servidor";
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
@@ -30,8 +31,9 @@ export type ResultadoSalida = { registrada: boolean; texto: string; nombre?: str
 export type PruebaDni = { modo: "no" | "dia" | "clase"; existe: boolean; nombre?: string; telefono?: string | null; reservada?: boolean; usada?: boolean; dia?: string; clase?: string | null };
 export async function modoPrueba(): Promise<{ modo?: "no" | "dia" | "clase"; error?: string }> {
   try {
-    const panel = await contextoPanel();
-    return { modo: (await rpc<{ modo: "no" | "dia" | "clase" }>("config_prueba_gratis", { p_gimnasio_id: panel.gimnasio.id })).modo };
+    // E8: solo hace falta el id del gimnasio (lo pone el proxy): no se vuelve a pedir el contexto del panel. La base decide el permiso igual.
+    const g = await gimnasioActual();
+    return { modo: (await rpc<{ modo: "no" | "dia" | "clase" }>("config_prueba_gratis", { p_gimnasio_id: g.id })).modo };
   } catch (e) { return { error: (e as Error).message }; }
 }
 export async function pruebaPorDni(dni: string): Promise<{ p?: PruebaDni; error?: string }> {

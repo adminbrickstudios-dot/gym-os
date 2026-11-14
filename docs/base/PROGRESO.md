@@ -2,28 +2,28 @@
 
 ## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
 
-**Dónde quedé:** velocidad (E8/E4) y fase L hechas en la rama, probadas en Actions y listas para publicar en UNA sola publicación (prevuelo de las 3 migraciones nuevas ya en verde contra la base real, corrida 43606718609). Falta: la tabla "después" final de E8 (corrida de Medir escala en curso), Lighthouse de la portada nueva (L1), la captura de Temple Gym en un clon [demo] y publicar (fuera de 16–22 h, con SIN COPIA autorizado). Lo próximo del orden: lo 🟡 de las fases H, U, P, D, Z, 0, 1 a 9, R, Q, N y F8.
+**Dónde quedé:** **publiqué la velocidad (E4, E8) y la fase L (L1 a L4) el 14/11 a las 12:35 hora de Argentina** (PR #23, commit a000b28): 4 migraciones aplicadas sin copia (autorizado; prevuelo y chequeos en verde), deploy en verde y humo en producción en el demo y en las páginas de Temple Gym (solo mirando). Lo que sigue: E8 hasta 2 viajes en Caja, Control y Entrada y la tabla final (medición en curso), y lo 🟡 de las fases H, U, P, D, Z, 0, 1 a 9, R, Q, N y F8.
 
 **Qué es nuevo hoy:**
 - 🟢 **Publicado (PR #22, 14/11):** barrita del DNI, avisos de QR abajo a la derecha con Realtime, franja sin internet, E5, F8. `/api/salud`, `/g/demo`, `/g/templegym1/hacete-socio` responden 200.
-- 🟡 **Sin publicar, en la rama:**
+- 🟢 **Publicado hoy (PR #23):**
   - **E4:** el JS que baja toda pantalla del panel pasó de 148,9 a 71,0 KB gzip (el cliente de Supabase y la hoja Cobrar se bajan al usarse); promedio por ruta 322,6 → 245,9 KB gzip.
   - **E8:** menos viajes a la base (`contexto_pantalla` con estado y contacto; `lote_lecturas` para Configuración, Planes, Inicio y Entrada; `panel_vivo` para el menú y la campana). Tabla en `VELOCIDAD.md`.
   - **L1 a L4:** la página del gimnasio en una pantalla, la cuenta gratis, "pagá tu plan" arriba y el QR bloqueado que se activa solo.
   - Arreglos: avisos de QR pegados a la esquina, botón rojo sin emoji, recorridos viejos (F8.2), `pulido-roto-3`.
-  - **Migraciones nuevas (3, aditivas):** `20261114100000`, `20261114110000`, `20261114120000`. Se aplican ANTES de mergear (`aplicar` con `sin_copia`="SIN COPIA"). El código funciona aunque la base todavía no las tenga.
+  - **Migraciones nuevas (4, aditivas), ya aplicadas:** `20261114100000`, `20261114110000`, `20261114120000`, `20261114130000`.
 - 🔴 **El QR de Temple Gym dice "Hoy no te podés anotar desde acá": no es un error de la app.** `altas_online` está apagado (la página está publicada y tiene 4 planes). **Lo prendés vos:** Página → "Hacerse socio desde la página" → escribir el reglamento (obligatorio) → prender "Aceptar altas online" → Guardar. El WhatsApp del gimnasio también está vacío (Configuración → Gimnasio).
 
 **Lo que pidió Mateo → estado** (🟢 publicado · 🟡 hecho sin publicar · 🔴 falta · ⛔ depende de Mateo)
 
 | Lo que pidió | Estado | Detalle |
 |---|---|---|
-| Que sea rapidísimo (fase 0, E8, E4) | 🟡 | Hecho y medido en la rama; falta publicar y la tabla "después" final. F0.1/F0.6 (medir en producción) ⛔ por los secretos |
+| Que sea rapidísimo (fase 0, E8, E4) | 🟢 | Publicado: JS del layout 148,9 → 71,0 KB y menos viajes (Configuración 30 → 6, Inicio 29 → 6). 🟡 falta llegar a 2 en Caja, Control y Entrada. F0.1/F0.6 (medir en producción) ⛔ por los secretos |
 | Entrada en la esquina y avisos al instante (NOCHE-1211: E1, E2, E5, E6) | 🟢 | Publicado en el PR #22; los arreglos de hoy (sin emoji, esquina) 🟡 |
 | Avisos en tiempo real medidos en producción (E3) | ⛔ | Cargá `DEMO_CONTRASENA`, `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` en GitHub y corré Base de datos → `usuarios-demo` |
-| La página del gimnasio en una pantalla (L1) | 🟡 | `landing-l1` en verde; falta Lighthouse y ver Temple Gym en un clon |
+| La página del gimnasio en una pantalla (L1) | 🟢 | Publicada; Lighthouse celular 94; Temple Gym visto en un clon |
 | Quiero ser socio: cuenta gratis con DNI (L2, H3b) | 🟢 | Publicado (H3b); plan obligatorio por defecto (PREGUNTAS D65) |
-| App del socio: pagá tu plan arriba y QR bloqueado (L3) | 🟡 | `flujo-cierre` en verde: se activa solo al cobrar |
+| App del socio: pagá tu plan arriba y QR bloqueado (L3) | 🟢 | Publicada; `flujo-cierre` en verde: se activa solo al cobrar |
 | Pagar desde la app (L4, MercadoPago) | 🟢 | Apagado por defecto: no aparece sin cobro online |
 | El QR de registro de Temple Gym (H3, C9) | 🔴 | Lo prendés vos (arriba) |
 | Fechas de cobertura visibles y editables (H2c) | 🟢 | Publicado el 12/11 |

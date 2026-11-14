@@ -246,6 +246,12 @@ export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>
 
 export const guardarCiudad = async (gimnasioId: string, ciudad: string) =>
   hechoAdmin(() => rpc("admin_guardar_ciudad", { p_gimnasio_id: gimnasioId, p_ciudad: ciudad }), [`/admin/${gimnasioId}`, "/admin/gimnasios"]);
+/** F2.10 (SA-3): CUIT y razón social para la factura de BRIK. La base valida el CUIT (11 cifras y dígito verificador) y anota quién lo cambió. */
+export const guardarDatosFiscales = async (gimnasioId: string, cuit: string, razonSocial: string) =>
+  hechoAdmin(() => rpc("admin_guardar_datos_fiscales", { p_gimnasio_id: gimnasioId, p_cuit: cuit, p_razon_social: razonSocial }), [`/admin/${gimnasioId}`]);
+/** F2.11 (SA-10): cierra las sesiones abiertas del equipo de un gimnasio. Solo el rol Principal y con motivo (queda en el registro). */
+export const cerrarSesionesGimnasio = async (gimnasioId: string, motivo: string) =>
+  hechoAdmin(() => rpc("admin_cerrar_sesiones_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`]);
 export const pausarGimnasio = async (gimnasioId: string, motivo: string) =>
   hechoAdmin(() => rpc("admin_pausar_gimnasio", { p_gimnasio_id: gimnasioId, p_motivo: motivo }), [`/admin/${gimnasioId}`, "/admin/gimnasios", "/admin"]);
 export const reanudarGimnasio = async (gimnasioId: string) =>

@@ -328,3 +328,23 @@ Se cuentan las líneas `[rpc]` del log de la app al abrir cada pantalla (sin pre
 3. `pendientes_panel`, `entradas_desde`, `campana_panel` (+ `avisos_pagos_mp` para el dueño): pedidos del navegador al montar el menú y la campana, no del render.
 
 **Qué queda (no se tocó, por orden de lo que más rinde):** (a) Configuración, Planes, Inicio y Entrada: una sola función por pantalla, como `contexto_pantalla`; (b) que la campana no repita el contexto (una función `campana_panel` que devuelva rol y secciones); (c) `lista_precios_plan` en una llamada; (d) `/panel/prospectos` y `/panel/entrada` repiten el render (×2 a ×5): mirar por qué. **Falta la tabla "después"**: la corrida que mide el cambio de hoy (el paralelo del layout) sigue siendo la base de comparación.
+
+
+## E8 · Antes / después (14/11, corridas 43423578975 antes y 43605296376 después; app compilada, 3.000 socios, dueña)
+
+| Pantalla | Viajes antes | Viajes después | Qué cambió |
+|---|---|---|---|
+| Inicio | 29 | 6 | las ~20 lecturas en un lote |
+| Configuración | 30 | 6 | las ~20 lecturas en un lote |
+| Planes | 23 | 4 | un lote, con la lista de precios de cada plan en el mismo viaje |
+| Entrada | 20 | 10 | un lote; quedan acciones del navegador que repiten `contexto_pantalla` ×4 |
+| Resumen, Gastos, Clases | 9 | 4 | contexto + 1 lectura + menú/campana + avisos |
+| Socios | 18 | 8 → 4 (lote de la 2.ª tanda, a medir) | |
+| Equipo, Mensajes, Transferencias | 11 a 16 | 5 a 6 | menú y campana en uno |
+| Recepción, pantallas simples | 11 | 3 | contexto + menú/campana + avisos |
+
+**Lo que hay ahora en toda pantalla del panel:** `contexto_pantalla` (1, con el estado del gimnasio y el contacto de ayuda adentro), `panel_vivo` (el menú y la campana en UN pedido, después de pintar) y `entradas_desde` (los avisos de la puerta, después de pintar). Más las lecturas propias de la pantalla, que ahora van en un solo viaje (`lote_lecturas`) en Inicio, Configuración, Planes, Entrada, Retención, Socios, Vender y Tu página.
+
+**Cómo se cuenta (PREGUNTAS D68):** lo que hace esperar a quien abre la pantalla es el render, y ahí son 2 viajes (contexto + una lectura) en las pantallas ya pasadas al lote. Lo de después de pintar (menú, campana, avisos) se mide aparte y no bloquea. **Falta** para decir "2 en todas": Caja (depende de `cajas_para_revisar`, que registra cajas olvidadas antes de leer), Control (parámetros con listas), Entrada (acciones con el contexto repetido) y el resto de las pantallas chicas.
+
+**E4 · JS del panel (14/11):** lo que viaja a toda pantalla del panel pasó de **148,9 KB gzip a 71,0 KB**. El cliente de Supabase (Realtime, Auth y Storage: 66,6 KB) y la hoja Cobrar ya no van con el layout. Promedio por ruta: 322,6 → 245,9 KB gzip.

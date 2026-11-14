@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { useConfirmar } from "@/components/ui/useConfirmar";
-import { darDeBajaGimnasio, guardarCiudad, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
+import { darDeBajaGimnasio, cerrarSesionesGimnasio, guardarCiudad, guardarDatosFiscales, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
 
 const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
@@ -54,6 +54,71 @@ export function Ciudad({ gimnasioId, ciudad }: { gimnasioId: string; ciudad: str
       <label className="space-y-1 flex-1 min-w-[12rem]"><span className="etiqueta">Ciudad</span><input className="campo" value={v} maxLength={80} onChange={(e) => setV(e.target.value)} /></label>
       <BotonAccion className="boton" disabled={v.trim() === (ciudad ?? "")} onClick={async () => { const r = await guardarCiudad(gimnasioId, v); if (r.error) { setError(r.error); return; } setError(""); router.refresh(); }}>Guardar</BotonAccion>
       <Alerta m={error} />
+    </div>
+  );
+}
+
+/** F2.10 · CUIT y razón social del gimnasio, para la factura de BRIK. */
+export type DatosFiscales = { cuit: string | null; razon_social: string | null; cambiado_por: string | null; cambiado_en: string | null };
+const conGuiones = (c: string | null) => (c && /^\d{11}$/.test(c) ? `${c.slice(0, 2)}-${c.slice(2, 10)}-${c.slice(10)}` : (c ?? ""));
+export function DatosFiscalesForm({ gimnasioId, datos, puedeEditar }: { gimnasioId: string; datos: DatosFiscales; puedeEditar: boolean }) {
+  const router = useRouter();
+  const [cuit, setCuit] = useState(conGuiones(datos.cuit));
+  const [razon, setRazon] = useState(datos.razon_social ?? "");
+  const [error, setError] = useState("");
+  const [guardado, setGuardado] = useState(false);
+  const sucio = cuit.replace(/\D/g, "") !== (datos.cuit ?? "") || razon.trim() !== (datos.razon_social ?? "");
+  return (
+    <div className="space-y-2" data-datos-fiscales>
+      <div className="flex flex-wrap gap-2 items-end">
+        <label className="space-y-1 min-w-[12rem]"><span className="etiqueta">CUIT</span><input className="campo numero" inputMode="numeric" placeholder="20-12345678-6" maxLength={13} value={cuit} disabled={!puedeEditar} onChange={(e) => { setCuit(e.target.value); setGuardado(false); }} data-cuit /></label>
+        <label className="space-y-1 flex-1 min-w-[14rem]"><span className="etiqueta">Razón social</span><input className="campo" maxLength={120} value={razon} disabled={!puedeEditar} onChange={(e) => { setRazon(e.target.value); setGuardado(false); }} data-razon-social /></label>
+        {puedeEditar && <BotonAccion className="boton" disabled={!sucio} onClick={async () => { const r = await guardarDatosFiscales(gimnasioId, cuit, razon); if (r.error) { setError(r.error); return; } setError(""); setGuardado(true); router.refresh(); }}>Guardar datos para facturar</BotonAccion>}
+      </div>
+      <Alerta m={error} />
+      {guardado && <p className="texto-suave" data-fiscales-guardado>Guardado.</p>}
+      {datos.cambiado_por && <p className="text-sm texto-tenue" data-fiscales-quien>Último cambio: {datos.cambiado_por}{datos.cambiado_en ? ` · ${new Date(datos.cambiado_en).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" })}` : ""}</p>}
+    </div>
+  );
+}
+
+/** F2.11 · Sesiones abiertas del equipo de este gimnasio y "Cerrar todas" (solo el rol Principal; con motivo). */
+export type SesionEquipo = { sesion_id: string; equipo_id: string; nombre: string; rol: string; mail: string; creada: string; actividad: string; dispositivo: string | null; tambien_en_otros: boolean };
+export function SesionesEquipo({ gimnasioId, sesiones }: { gimnasioId: string; sesiones: SesionEquipo[] }) {
+  const router = useRouter();
+  const [motivo, setMotivo] = useState("");
+  const [error, setError] = useState("");
+  const [cerradas, setCerradas] = useState<number | null>(null);
+  const [confirmar, dialogo] = useConfirmar();
+  const cuando = (m: string) => new Date(m).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Argentina/Buenos_Aires" });
+  return (
+    <div className="space-y-3" data-sesiones-equipo={sesiones.length}>
+      {dialogo}
+      <p className="texto-suave">{sesiones.length === 0 ? "Nadie del equipo tiene una sesión abierta ahora." : `${sesiones.length} ${sesiones.length === 1 ? "sesión abierta" : "sesiones abiertas"} del equipo.`}</p>
+      {sesiones.length > 0 && (
+        <ul className="space-y-2">
+          {sesiones.map((x) => (
+            <li key={x.sesion_id} className="tarjeta p-3 text-sm" data-sesion>
+              <span className="font-semibold">{x.nombre}</span> · {x.rol} · {x.mail}
+              <span className="block texto-tenue">Última actividad {cuando(x.actividad)} · {x.dispositivo ? x.dispositivo.slice(0, 60) : "dispositivo desconocido"}{x.tambien_en_otros ? " · esta cuenta también está en otro gimnasio: tendrá que volver a entrar ahí" : ""}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {sesiones.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-end">
+          <label className="space-y-1 flex-1 min-w-[14rem]"><span className="etiqueta">Motivo (queda en el registro)</span><input className="campo" value={motivo} maxLength={200} onChange={(e) => setMotivo(e.target.value)} data-motivo-sesiones /></label>
+          <BotonAccion className="boton boton-peligro" disabled={motivo.trim().length < 10}
+            onClick={async () => {
+              if (!(await confirmar(`Cerrar las ${sesiones.length} ${sesiones.length === 1 ? "sesión abierta" : "sesiones abiertas"} del equipo: todas las personas tendrán que volver a entrar con su mail y contraseña.`, { boton: "Cerrar todas", peligro: true }))) return;
+              const r = await cerrarSesionesGimnasio(gimnasioId, motivo);
+              if (r.error) { setError(r.error); return; }
+              setError(""); setMotivo(""); setCerradas(sesiones.length); router.refresh();
+            }}>Cerrar todas</BotonAccion>
+        </div>
+      )}
+      <Alerta m={error} />
+      {cerradas != null && <p className="texto-suave" data-sesiones-cerradas>Listo: se cerraron las sesiones del equipo.</p>}
     </div>
   );
 }

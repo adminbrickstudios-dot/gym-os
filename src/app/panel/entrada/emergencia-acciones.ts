@@ -1,4 +1,5 @@
 "use server";
+import { gimnasioActual } from "@/lib/supabase/servidor";
 // VD-46M · Modo emergencia de la puerta: todo lo decide la base (emergencias_puerta); acá solo se llama.
 import { revalidatePath } from "next/cache";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
@@ -8,9 +9,8 @@ import type { EntradaEmergencia, EstadoEmergencia } from "./emergencia-tipos";
 /** Lo que dice la base de la emergencia de esta sede (la leen el cartel rojo y el panel de la Entrada). */
 export async function estadoEmergencia(sedeId: string): Promise<{ e?: EstadoEmergencia; error?: string }> {
   try {
-    const panel = await contextoPanel();
-    const { sede } = sedeActiva(panel, sedeId);
-    return { e: await rpc<EstadoEmergencia>("estado_emergencia_puerta", { p_gimnasio_id: panel.gimnasio.id, p_sede_id: sede.id }) };
+    const g = await gimnasioActual();   // E8: sin volver a pedir el contexto del panel; la base verifica la sede
+    return { e: await rpc<EstadoEmergencia>("estado_emergencia_puerta", { p_gimnasio_id: g.id, p_sede_id: sedeId }) };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
