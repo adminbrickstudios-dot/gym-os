@@ -14,7 +14,7 @@ import { NumerosInicio, type NumeroInicio } from "@/components/panel/NumerosInic
 import { ElegirNumeros } from "@/components/panel/ElegirNumeros";
 import { accesosDisponibles, accesosElegidos, rutaDisponible } from "@/lib/panel/secciones";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, rpcLectura, type PanelGimnasio } from "@/lib/panel/servidor";
+import { contextoPanel, fijo, lectura, rpcLote, type PanelGimnasio } from "@/lib/panel/servidor";
 import { FilaVenta } from "@/components/panel/Venta";
 import { AlertasCaja, type AlertaCaja } from "@/components/panel/AlertasCaja";
 import type { Venta } from "./ventas-acciones";
@@ -104,45 +104,47 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOS, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen] = await Promise.all([
-      rpcLectura<Inicio>("panel_inicio", { p_gimnasio_id: panel.gimnasio.id }),
+    // E8: las ~20 lecturas del Inicio en UN viaje a la base (lote_lecturas); lo que el rol no ve ni se pide.
+    const g = { p_gimnasio_id: panel.gimnasio.id };
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen] = await rpcLote(
+      lectura<Inicio>("panel_inicio", g),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
-      rol !== "profe" ? rpcLectura<NumerosElegidos>("numeros_inicio", { p_gimnasio_id: panel.gimnasio.id }) : null,
+      rol !== "profe" ? lectura<NumerosElegidos>("numeros_inicio", g) : fijo<NumerosElegidos | null>(null),
       // Solo el dueño arma el gimnasio: los demás roles no ven (ni piden) los primeros pasos.
-      rol === "dueno" ? rpcLectura<PrimerosPasosDatos>("primeros_pasos", { p_gimnasio_id: panel.gimnasio.id }) : null,
-      rol === "profe" ? [] : rpcLectura<Cumple[]>("cumplen_hoy", { p_gimnasio_id: panel.gimnasio.id }),
+      rol === "dueno" ? lectura<PrimerosPasosDatos>("primeros_pasos", g) : fijo<PrimerosPasosDatos | null>(null),
+      rol === "profe" ? fijo<Cumple[]>([]) : lectura<Cumple[]>("cumplen_hoy", g),
       // Las pausas que pidió la recepción esperan al dueño o al encargado.
-      rol === "dueno" || rol === "encargado" ? rpcLectura<PedidoPausa[]>("pedidos_pausa_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol === "dueno" || rol === "encargado" ? lectura<PedidoPausa[]>("pedidos_pausa_pendientes", g) : fijo<PedidoPausa[]>([]),
       // D1: cada "dejar pasar" de hoy, a la vista del dueño y del encargado.
-      rol === "dueno" || rol === "encargado" ? rpcLectura<Dejado[]>("dejados_pasar", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol === "dueno" || rol === "encargado" ? lectura<Dejado[]>("dejados_pasar", g) : fijo<Dejado[]>([]),
       // INV-1: los invitados de hoy, en el resumen del dueño.
-      rol === "dueno" || rol === "encargado" ? rpcLectura<InvitadoHoy[]>("invitados_de_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol === "dueno" || rol === "encargado" ? lectura<InvitadoHoy[]>("invitados_de_hoy", g) : fijo<InvitadoHoy[]>([]),
       // VEN-6: ventas que la recepción pidió anular.
-      rol === "dueno" || rol === "encargado" ? rpcLectura<Venta[]>("pedidos_anulacion_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol === "dueno" || rol === "encargado" ? lectura<Venta[]>("pedidos_anulacion_pendientes", g) : fijo<Venta[]>([]),
       // VEN-4: productos que llegaron a su mínimo.
-      rol === "dueno" || rol === "encargado" ? rpcLectura<Record<string, { stock: number; minimo: number | null }>>("stock_productos", { p_gimnasio_id: panel.gimnasio.id })
-        : ({} as Record<string, { stock: number; minimo: number | null }>),
-      rol === "dueno" || rol === "encargado" ? rpcLectura<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol === "dueno" || rol === "encargado" ? lectura<Record<string, { stock: number; minimo: number | null }>>("stock_productos", g) : fijo<Record<string, { stock: number; minimo: number | null }>>({}),
+      rol === "dueno" || rol === "encargado" ? lectura<{ producto_id: string; nombre: string; activo: boolean }[]>("productos_gimnasio", g) : fijo<{ producto_id: string; nombre: string; activo: boolean }[]>([]),
       // CAJ-4: lo que pasó con la plata (de otros), si hay Caja.
-      (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? rpcLectura<AlertaCaja[]>("alertas_caja", { p_gimnasio_id: panel.gimnasio.id, p_dias: 7 }) : [],
+      (rol === "dueno" || rol === "encargado") && !panel.secciones_apagadas.includes("caja") ? lectura<AlertaCaja[]>("alertas_caja", { ...g, p_dias: 7 }) : fijo<AlertaCaja[]>([]),
       // CAJ-5: cajas que quedaron abiertas (al dueño y al encargado todas; a la recepción las suyas).
-      rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? rpcLectura<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol !== "profe" && !panel.secciones_apagadas.includes("caja") ? lectura<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>("cajas_olvidadas", g) : fijo<{ turno_id: string; caja: string; abierto_en: string; abierto_por: string; mia: boolean }[]>([]),
       // AUD-14: los que pidieron la baja desde la app (APP-8).
-      rol !== "profe" ? rpcLectura<PedidoBaja[]>("pedidos_baja_pendientes", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      // ADM-6: lo que cuenta BRIK a los dueños.
-      rol === "dueno" ? rpcLectura<NovedadGymOS[]>("novedades_dueno", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []) : [],
+      rol !== "profe" ? lectura<PedidoBaja[]>("pedidos_baja_pendientes", g) : fijo<PedidoBaja[]>([]),
+      // ADM-6: lo que cuenta BRIK a los dueños (si falla, no se muestra y nada se rompe).
+      rol === "dueno" ? lectura<NovedadGymOS[] | null>("novedades_dueno", g, true) : fijo<NovedadGymOS[] | null>([]),
       // COM-4: las tareas de hoy y las atrasadas de quien mira.
-      rpcLectura<{ hoy: string; tareas: Tarea[] }>("tareas_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<{ hoy: string; tareas: Tarea[] }>("tareas_panel", g),
       // VD-12b: Para hacer hoy y las últimas entradas (el profe no las ve: su Inicio es el de sus clases).
-      rol !== "profe" ? rpcLectura<ParaHacer[]>("para_hacer_hoy", { p_gimnasio_id: panel.gimnasio.id }) : [],
-      rol !== "profe" ? rpcLectura<EntradaVivo[]>("ultimas_entradas", { p_gimnasio_id: panel.gimnasio.id, p_limite: 8 }) : [],
+      rol !== "profe" ? lectura<ParaHacer[]>("para_hacer_hoy", g) : fijo<ParaHacer[]>([]),
+      rol !== "profe" ? lectura<EntradaVivo[]>("ultimas_entradas", { ...g, p_limite: 8 }) : fijo<EntradaVivo[]>([]),
       // VD-53: el botón de fichar, solo si el gimnasio usa fichaje y esta persona ficha.
-      rutaDisponible("/panel/fichar", rol, panel.secciones_apagadas) ? rpcLectura<MiFichaje>("mi_fichaje", { p_gimnasio_id: panel.gimnasio.id }) : null,
+      rutaDisponible("/panel/fichar", rol, panel.secciones_apagadas) ? lectura<MiFichaje>("mi_fichaje", g) : fijo<MiFichaje | null>(null),
       // VD-54: las máquinas fuera de servicio hoy (dueño, encargado y recepción; la base devuelve vacío con la sección apagada).
-      rol !== "profe" && !panel.secciones_apagadas.includes("maquinas") ? rpcLectura<MaquinaFuera[]>("maquinas_fuera_de_servicio", { p_gimnasio_id: panel.gimnasio.id }) : [],
+      rol !== "profe" && !panel.secciones_apagadas.includes("maquinas") ? lectura<MaquinaFuera[]>("maquinas_fuera_de_servicio", g) : fijo<MaquinaFuera[]>([]),
       // VD-55: lockers que vencen esta semana (la base devuelve vacío con la sección apagada).
-      rol !== "profe" && !panel.secciones_apagadas.includes("lockers") ? rpcLectura<LockerVence[]>("lockers_vencen_semana", { p_gimnasio_id: panel.gimnasio.id }) : [],
-    ]);
+      rol !== "profe" && !panel.secciones_apagadas.includes("lockers") ? lectura<LockerVence[]>("lockers_vencen_semana", g) : fijo<LockerVence[]>([]),
+    );
+    const novedadesGymOS = novedadesGymOSTodas ?? [];
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
     const hacerHoy = paraHacer.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));
     const verEntradas = rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas);

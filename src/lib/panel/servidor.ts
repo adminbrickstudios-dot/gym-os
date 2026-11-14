@@ -57,6 +57,51 @@ const esDemora = (e: { message?: string; name?: string; code?: string }) =>
 /** Una lectura: si la red o la base tardan, se pide una vez más. Nunca para escrituras. */
 export const rpcLectura = <T,>(nombre: string, args?: Record<string, unknown>) => rpc<T>(nombre, args, { lectura: true });
 
+/**
+ * E8: una lectura para pedir en lote (ver `lote_lecturas`). `a` son los parámetros p_*; `tolerante` devuelve null si esa lectura falla
+ * (como un `.catch(() => null)`); sin eso un error corta el lote con el mismo mensaje de siempre.
+ */
+export type Lectura<T> = { f: string; a?: Record<string, unknown>; t?: boolean; cada?: { i: number; campo: string; arg: string }; _t?: T } | { fijo: T };
+export const lectura = <T,>(f: string, a?: Record<string, unknown>, tolerante = false): Lectura<T> => ({ f, a, ...(tolerante ? { t: true } : {}) });
+/** Lo que no hace falta pedir (por el rol o por una sección apagada) se deja fijo: no viaja, ocupa su lugar en el resultado. */
+export const fijo = <T,>(valor: T): Lectura<T> => ({ fijo: valor });
+/** Una lectura por cada elemento del resultado `i` del mismo lote: devuelve un objeto con `campo` de cada elemento como clave. */
+export const lecturaPorCada = <T,>(f: string, i: number, campo: string, arg: string): Lectura<Record<string, T>> => ({ f, cada: { i, campo, arg } });
+type Resultados<L extends readonly Lectura<unknown>[]> = { [K in keyof L]: L[K] extends Lectura<infer T> ? T : never };
+
+/** Varias lecturas del panel en UN viaje a la base. El resultado va en el mismo orden. Solo lecturas de la lista de `lote_lecturas`. */
+export async function rpcLote<const L extends readonly Lectura<unknown>[]>(...lecturas: L): Promise<Resultados<L>> {
+  const reales = lecturas.filter((l): l is Extract<Lectura<unknown>, { f: string }> => "f" in l);
+  // "cada" apunta a una posición del lote enviado: se recalcula sin las fijas.
+  const idx = new Map<number, number>();
+  let n = 0; lecturas.forEach((l, i) => { if ("f" in l) idx.set(i, n++); });
+  const enviadas = reales.map((l) => (l.cada ? { ...l, cada: { ...l.cada, i: idx.get(l.cada.i)! } } : l));
+  let dato: unknown[] = [];
+  if (enviadas.length) {
+    try {
+      dato = await rpcLectura<unknown[]>("lote_lecturas", { p_llamadas: enviadas });
+    } catch (e) {
+      // Si la base todavía no tiene la función (el código salió antes que la migración), se pide cada una por separado, como antes.
+      if (!/lote_lecturas/.test((e as Error).message ?? "")) throw e;
+      const sal: unknown[] = [];
+      const pedir = async (l: (typeof enviadas)[number]) => {
+        const hacer = (a?: Record<string, unknown>) => rpcLectura<unknown>(l.f, a);
+        const una = async () => {
+          if (!l.cada) return hacer(l.a);
+          const lista = (sal[l.cada.i] as Record<string, unknown>[] | null) ?? [];
+          return Object.fromEntries(await Promise.all(lista.map(async (x) => [String(x[l.cada!.campo]), await hacer({ [l.cada!.arg]: x[l.cada!.campo] })] as const)));
+        };
+        try { return await una(); } catch (err) { if (l.t) return null; throw err; }
+      };
+      // las independientes, en paralelo; después las que dependen de otra
+      await Promise.all(enviadas.map(async (l, k) => { if (!l.cada) sal[k] = await pedir(l); }));
+      for (let k = 0; k < enviadas.length; k++) if (enviadas[k].cada) sal[k] = await pedir(enviadas[k]);
+      dato = sal;
+    }
+  }
+  return lecturas.map((l, i) => ("f" in l ? dato[idx.get(i)!] : l.fijo)) as unknown as Resultados<L>;
+}
+
 export type PanelGimnasio = {
   gimnasio: { id: string; slug: string; nombre: string; zona_horaria: string };
   marca: { logo_path: string | null; favicon_path: string | null; color_acento: string; color_fondo: string };
