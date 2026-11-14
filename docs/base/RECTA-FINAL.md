@@ -179,7 +179,7 @@ toque plata se prueba con números fijos antes de publicar.
 
 | # | Qué | Detalle | Estado |
 |---|---|---|---|
-| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | 🟡 60 de 70 filas de DETALLES-70.md en ✅ con su prueba (corridas 43128173940, 43130787225, 43131873292, 43132608358); 10 en 🟡 con motivo (plata/permisos: 13, 24, 25, 26, 43; saldo: 21; MercadoPago: 33; celular real: 58; DNS: 64; reporte para compartir: 69) |
+| F4.1 | Cada fila de `DETALLES-70.md` en ✅ con la prueba que la cubre (columna Prueba llena), o hecha si es 🟡 o ❌. Primero se actualiza lo que quedó viejo: #16 (SEG-5), #38 (SOC-1), #39, #40, #42 y #46 (BASE-2) | `DETALLES-70.md` | ⛔ (14/11)  60 de 70 filas de DETALLES-70.md en ✅ con su prueba (corridas 43128173940, 43130787225, 43131873292, 43132608358); 10 en 🟡 con motivo (plata/permisos: 13, 24, 25, 26, 43; saldo: 21; MercadoPago: 33; celular real: 58; DNS: 64; reporte para compartir: 69) · **Paso de Mateo** (las 10 que quedan dependen de una decisión o de algo tuyo): 13, 24, 25, 26 y 43 (plata y permisos: elegí la opción de cada una en `PREGUNTAS.md`; el agente no cambia plata ni permisos solo), 21 (la vista única de cargos y pagos del socio: decidí si se hace), 33 (link de MercadoPago por socio: necesita las credenciales del gimnasio), 58 (instalar la app en un celular real: lo probás vos), 64 (el DNS: `DOMINIO.md`) y 69 (reporte del mes para mandar: se hace después de tu pasada si lo querés) |
 
 ## Fase 5 · Lo que faltaba de todo lo que pidió Mateo
 
