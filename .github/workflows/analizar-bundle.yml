@@ -1,0 +1,52 @@
+# E4 · Qué pesa en el JS compartido del panel: next build + scripts/medir/chunks-panel.mjs (y js-rutas.mjs para el promedio).
+# A mano (Actions → Analizar bundle) o con [bundle] en el mensaje de un push a base/**.
+name: Analizar bundle
+
+on:
+  push:
+    branches: ["base/**"]
+  workflow_dispatch:
+
+env:
+  PGHOST: localhost
+  PGPORT: "5432"
+  PGUSER: postgres
+
+jobs:
+  analizar:
+    name: Analizar el bundle del panel
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[bundle]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Base nueva y app compilada
+        env:
+          APP_MODO: produccion
+        run: |
+          scripts/db/local.sh nueva
+          scripts/local/levantar.sh
+      - name: Qué pesa
+        run: |
+          node scripts/medir/chunks-panel.mjs | tee .local/chunks.md
+          node scripts/medir/js-rutas.mjs | tail -3 | tee -a .local/chunks.md
+          { echo "## Bundle del panel"; echo; cat .local/chunks.md; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle
+          path: .local/chunks.md
+          if-no-files-found: ignore
+          retention-days: 30
