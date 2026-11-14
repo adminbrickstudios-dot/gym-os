@@ -160,3 +160,13 @@ export async function responderEncuesta(socioId: string, puntaje: number): Promi
 }
 /** COM-12: elegir (o soltar, con null) el lugar en la sala de una clase reservada. */
 export const elegirLugar = async (reservaId: string, lugar: number | null) => r(() => rpc("elegir_lugar", { p_reserva_id: reservaId, p_lugar: lugar }));
+
+/** L3: ¿ya puede entrar? Lo usa el QR bloqueado para activarse solo apenas la recepción cobra. La respuesta sale de `mi_socio` (calcular_acceso), no se calcula acá. */
+export async function puedoEntrar(socioId: string): Promise<boolean> {
+  try {
+    const { gimnasioActual } = await import("@/lib/supabase/servidor");
+    const g = await gimnasioActual();
+    const yo = await rpc<{ acceso?: { puede: boolean } }>("mi_socio", { p_gimnasio_id: g.id, p_socio_id: socioId });
+    return !!yo.acceso?.puede;
+  } catch { return false; }
+}

@@ -11,6 +11,14 @@ export type PreferenciaAviso = { tipo: string; app: boolean };
  * que apagó) y sin lo que lleva a una pantalla apagada o que su rol no ve. Las alertas del Control (VD-10) las
  * decide la base: solo las ve quien ve el Control.
  */
+/** Une la campana de siempre con lo de MercadoPago, la ordena por fecha y saca lo que lleva a una pantalla apagada o que el rol no ve. */
+export function armarItemsCampana(items: ItemCampana[], mp: Omit<ItemCampana, "tipo">[], rol: string, apagadas: string[]): ItemCampana[] {
+  return [...items, ...mp.map((i) => ({ ...i, tipo: null }))]
+    .sort((a, b) => (Date.parse(b.en ?? "") || 0) - (Date.parse(a.en ?? "") || 0))
+    .map((i) => ({ ...i, href: i.href === "/" ? "/panel" : `/panel${i.href}` }))
+    .filter((i) => rutaDisponible(i.href, rol as Parameters<typeof rutaDisponible>[1], apagadas));
+}
+
 /**
  * E8: con `ctx` (el rol y las secciones apagadas, que el navegador ya tiene) no se vuelve a pedir el contexto del panel: el número de la
  * campana se pide al abrir cada pantalla y ese viaje de más era uno por pantalla. `ctx` solo decide qué se muestra en el número; lo que
@@ -29,11 +37,7 @@ export async function traerCampana(ctx?: { rol: string; apagadas: string[] }) {
       ? rpc<{ items: Omit<ItemCampana, "tipo">[] }>("avisos_pagos_mp", { p_gimnasio_id: gimnasioId }, { lectura: true }).catch(() => null)
       : Promise.resolve(null),
   ]);
-  const mp: ItemCampana[] = (mpRes?.items ?? []).map((i) => ({ ...i, tipo: null }));
-  const items = [...c.items, ...mp]
-    .sort((a, b) => (Date.parse(b.en ?? "") || 0) - (Date.parse(a.en ?? "") || 0))
-    .map((i) => ({ ...i, href: i.href === "/" ? "/panel" : `/panel${i.href}` }))
-    .filter((i) => rutaDisponible(i.href, rol as Parameters<typeof rutaDisponible>[1], apagadas));
+  const items = armarItemsCampana(c.items, mpRes?.items ?? [], rol, apagadas);
   return { panel, gimnasioId, items, sinLeer: items.filter((i) => !i.leido).length };
 }
 

@@ -15,6 +15,7 @@ import { Pagar } from "./Pagar";
 import { PagarOnline } from "./PagarOnline";
 import { Instalar } from "./Instalar";
 import { MiQR } from "./MiQR";
+import { QrBloqueado } from "./QrBloqueado";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
@@ -53,6 +54,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const zona = yo.zona!;
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
+    // L3: "pagá tu plan" arriba y el QR bloqueado, solo cuando lo que falta es pagar (no cuando está congelado o suspendido).
+    const faltaPagar = !v.puede && (v.para_regularizar != null || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
     const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados, dni] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -124,6 +127,15 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         <Suspense fallback={null}><OcupacionEnVivo gimnasioId={g.id} /></Suspense>
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
+        {faltaPagar && (
+          <section className="tarjeta p-6 space-y-3 border-2" style={{ borderColor: "var(--acento)" }} data-paga-tu-plan>
+            <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Para empezar a entrar, pagá tu plan</p>
+            {yo.plan && <p className="text-xl" data-plan-a-pagar>{yo.plan.nombre}{yo.plan.precio_transferencia != null && <> · <strong className="numero">{formatearPesos(yo.plan.precio_transferencia)}</strong></>}</p>}
+            <p className="text-lg" data-pagar-en-recepcion><Icono nombre="persona" /> <strong>Pagá en la recepción:</strong> decí tu DNI{dni ? <> (<span className="numero">{formatearDni(dni)}</span>)</> : ""} y te cobran.</p>
+            {bloquePago}
+          </section>
+        )}
+
         <section className="rounded-[var(--radio-grande)] p-6 border"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 82%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
           <p className="text-5xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
@@ -134,11 +146,14 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </section>
 
         {/* VD-23b y SOCIO-FLUJO §4 ("Tenés que pagar… con el botón Pagar"): quien debe ve Pagar pegado al estado, sin bajar la pantalla. */}
-        {debePagar && bloquePago}
+        {debePagar && !faltaPagar && bloquePago}
 
         {/* SOCIO-FLUJO §4: lo primero después del estado es cómo entra: el QR (que cambia) o, si el gimnasio no lo usa, su DNI. */}
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
-        {qr && <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />}
+        {qr && (v.puede
+          ? <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />
+          : <QrBloqueado socioId={s.socio_id} titulo={faltaPagar ? "Tu QR se activa cuando pagues" : "Tu QR está bloqueado"}
+              detalle={faltaPagar ? "Apenas pagues se prende solo: no hace falta recargar." : (v.texto ?? "Hoy no podés entrar.")} />)}
         {!qr && !qrPared && dni && (
           <section className="tarjeta p-6" data-tu-dni-inicio>
             <p className="texto-suave">Tu DNI para entrar</p>

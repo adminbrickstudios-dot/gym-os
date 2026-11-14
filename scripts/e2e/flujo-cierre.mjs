@@ -38,6 +38,11 @@ try {
   const bien = socio.locator("[data-bienvenida]");
   if (await bien.count()) { await bien.locator("[data-bienvenida-saltear], [data-bienvenida-listo]").first().click(); await bien.waitFor({ state: "detached", timeout: 30000 }); }
   chequear(await socio.locator("[data-cubierto-hasta]").count() === 0, "antes: el socio ve “No podés entrar” y no tiene cobertura", "el socio ya tenía cobertura");
+  // L3: sin pagar, "pagá tu plan" va arriba y el QR está bloqueado (nunca un QR que la puerta va a rechazar).
+  chequear(await socio.locator("[data-paga-tu-plan]").count() === 1, "L3: arriba dice “Para empezar a entrar, pagá tu plan”", "L3: falta el bloque de pagar el plan");
+  chequear(await socio.locator("[data-pagar-en-recepcion]").count() === 1, "L3: ofrece pagar en la recepción con el DNI", "L3: falta pagar en la recepción");
+  chequear(await socio.locator("[data-qr-bloqueado]").count() === 1 && await socio.locator("[data-mi-qr]").count() === 0, "L3: el QR está bloqueado (candado) y no hay un QR a la vista", "L3: se ve un QR sin poder entrar");
+  await capturar(socio, "l3-celu-qr-bloqueado");
   ok(`antes: Resultado cobrado ${cobradoAntes}`);
 
   // ── La recepción cobra desde la ficha (Cobrar → Cobrar) ──
@@ -90,7 +95,11 @@ try {
   chequear(await cajaDueña.locator("[data-cobro]").count() > 0 || (await totalCaja(cajaDueña)) >= monto, "la caja, recargada, tiene el cobro del turno", "la caja recargada no tiene el cobro");
 
   // ── App del socio: al volver a la pantalla ya está al día ──
-  await socio.reload();
+  // L3: el QR se activa SOLO, sin recargar (el celular pregunta cada 8 s mientras está bloqueado).
+  const tQr = Date.now();
+  await socio.locator("[data-mi-qr]").waitFor({ timeout: 45000 }).catch(() => {});
+  chequear(await socio.locator("[data-mi-qr]").count() === 1 && await socio.locator("[data-qr-bloqueado]").count() === 0, `L3: apenas la recepción cobró, el QR se activó solo, sin recargar (${Date.now() - tQr} ms)`, "L3: el QR no se activó solo en 45 s");
+  chequear(await socio.locator("[data-paga-tu-plan]").count() === 0, "L3: ya no pide pagar el plan", "L3: sigue pidiendo pagar");
   await socio.locator("[data-cubierto-hasta]").waitFor({ timeout: 60000 });
   chequear(await socio.getByText("No podés entrar").count() === 0, `app del socio: “${(await socio.locator("[data-cubierto-hasta]").innerText()).trim()}” y ya no dice “No podés entrar”`, "el socio sigue sin poder entrar");
   await capturar(socio, "flujo-cierre-celu-socio");

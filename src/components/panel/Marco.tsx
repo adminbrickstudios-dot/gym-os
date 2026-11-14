@@ -43,6 +43,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         persona={panel.yo.nombre}
         rol={NOMBRE_ROL[rol]}
         rolClave={rol}
+        apagadas={panel.secciones_apagadas}
         secciones={secciones}
         grupos={GRUPOS}
         principales={principalesCelular(rol, panel.secciones_apagadas)}
