@@ -2,6 +2,8 @@
 
 ## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
 
+**Cuarta publicación (14/11, 14:30 hora de Argentina, PR #26, commit eab6e40):** migración `20261114170000` (el lote de lecturas acepta listas como parámetro y suma las de Control) aplicada sin copia (chequeos en verde, corrida 43621027947), deploy en verde y humo. Control pasa a un solo viaje. D1 a D3 pasaron a ⛔ (los dominios los cambia Mateo) y H7, Z1 y Q2 a ✅.
+
 **Tercera publicación (14/11, 13:50 hora de Argentina, PR #25, commit a22a0fd):** migración `20261114160000` (amplía la lista de lecturas de `lote_lecturas`) aplicada sin copia (chequeos en verde, corrida 43617235463), deploy en verde y humo. Vencen hoy, Transferencias, Tareas, Equipo y Profes pasan a un solo viaje: el piso de toda pantalla quedó en 3 (contexto, menú y campana, avisos de la puerta) y las del lote en 4. N9 y Q4 reconciliados contra el código (pasaron de ❌ a 🟡).
 
 **Segunda publicación (14/11, 13:10 hora de Argentina, PR #24, commit 6f3a590):** migraciones `20261114140000` (CUIT y razón social, F2.10) y `20261114150000` (sesiones del equipo y "Cerrar todas", F2.11) aplicadas sin copia (autorizado; chequeos en verde, corrida 43613449697), deploy en verde y humo (`/api/salud`, páginas públicas, redirecciones de `/super`, `/panel` y `/admin`, `humo-pasado`). Trae también E8 en Retención, Socios, Vender, Tu página y las acciones de la Entrada.

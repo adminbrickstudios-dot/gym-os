@@ -49,7 +49,7 @@ try {
 
   // Diego ya no ve la lista de esa clase.
   await p.goto(`${G}/panel/clases/${clase}`);
-  const bloqueado = await p.getByText(/Solo podés ver la lista de tus clases|no tenés permiso|sin permiso/i).first().waitFor({ timeout: 30000 }).then(() => true, () => false);
+  const bloqueado = await p.getByText(/Solo podés ver la lista de tus clases|no tenés permiso|sin permiso|no tenés acceso/i).first().waitFor({ timeout: 30000 }).then(() => true, () => false);
   chequear(bloqueado, "el profe anterior ya no ve la lista de esa clase", `el profe anterior sigue viendo la lista: ${(await p.locator("main").innerText().catch(() => "")).replace(/s+/g, " ").slice(0, 200)}`);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
 } catch (e) {
