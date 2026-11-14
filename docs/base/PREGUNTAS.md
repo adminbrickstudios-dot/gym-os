@@ -478,3 +478,12 @@ Respuesta de Mateo: (vacío)
 - B) Prendidas por defecto en los gimnasios NUEVOS (cambia el valor por defecto de la columna; los existentes no se tocan).
 Decidido por defecto: A. Los e2e `fase-u4` y `web-p8` ya prueban "sin altas no hay Quiero ser socio".
 Respuesta de Mateo: (vacío)
+
+## Decididas por defecto (14/11)
+
+| # | Pregunta | Por defecto | Por qué |
+|---|---|---|---|
+| D65 | L2: "Quiero ser socio" con plan opcional ("Lo elijo después") | El plan sigue siendo obligatorio en el formulario | Sin plan no hay precio que mostrar en "Para empezar a entrar, pagá tu plan" ni qué cobrar en la recepción; con "Lo elijo después" el socio quedaría "Sin plan" y hay que cambiar `alta_online` y el reclamo. Si Mateo lo quiere, se suma después. |
+| D66 | L1: ¿qué hacer con "Probá una clase gratis" en la portada de una sola pantalla? | Queda como cuarta línea de los datos si el dueño tiene la sección prendida | No estorba y no se pierde un pedido anterior (VD-25/VD-62) |
+| D67 | L3: cómo se activa el QR sin recargar | El celular pregunta cada 8 s (solo bloqueado y con la pantalla a la vista) y al volver a la app | Realtime sobre cobros exigiría publicar tablas y políticas del socio; el pedido es chico y corre solo mientras espera |
+| D68 | E8: qué cuenta como "viaje" | Los del render (contexto_pantalla + el lote de la pantalla = 2); lo que el navegador pide después de pintar (menú y campana juntos en `panel_vivo`, y los avisos de la puerta) se mide aparte | Lo primero es lo que hace esperar a quien abre la pantalla |
