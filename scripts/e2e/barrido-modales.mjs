@@ -6,7 +6,6 @@ import { CELU, COMPU, GIMNASIO, aparece, capturar, entrar, falla, navegador, ok,
 
 const MODALES = [
   { nombre: "atajos", ruta: "/panel", abrir: async (p) => { await p.evaluate(() => window.dispatchEvent(new Event("gymos:atajos"))); } },
-  { nombre: "cobrar", ruta: "/panel", abrir: async (p) => { await p.getByRole("button", { name: /^Cobrar/ }).first().click({ timeout: 8000 }); } },
   { nombre: "camara-socio", ruta: "/panel/entrada", abrir: async (p) => { await p.getByRole("button", { name: /Buscar|Escanear|Cámara|QR/i }).first().click({ timeout: 8000 }); } },
 ];
 const medir = () => {
