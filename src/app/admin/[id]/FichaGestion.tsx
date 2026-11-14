@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { useConfirmar } from "@/components/ui/useConfirmar";
-import { darDeBajaGimnasio, guardarCiudad, guardarDatosFiscales, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
+import { darDeBajaGimnasio, cerrarSesionesGimnasio, guardarCiudad, guardarDatosFiscales, pausarGimnasio, reanudarGimnasio, restaurarBaja, restaurarTextoGimnasio } from "../acciones";
 
 const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
 
@@ -78,6 +78,47 @@ export function DatosFiscalesForm({ gimnasioId, datos, puedeEditar }: { gimnasio
       <Alerta m={error} />
       {guardado && <p className="texto-suave" data-fiscales-guardado>Guardado.</p>}
       {datos.cambiado_por && <p className="text-sm texto-tenue" data-fiscales-quien>Último cambio: {datos.cambiado_por}{datos.cambiado_en ? ` · ${new Date(datos.cambiado_en).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}` : ""}</p>}
+    </div>
+  );
+}
+
+/** F2.11 · Sesiones abiertas del equipo de este gimnasio y "Cerrar todas" (solo el rol Principal; con motivo). */
+export type SesionEquipo = { sesion_id: string; equipo_id: string; nombre: string; rol: string; mail: string; creada: string; actividad: string; dispositivo: string | null; tambien_en_otros: boolean };
+export function SesionesEquipo({ gimnasioId, sesiones }: { gimnasioId: string; sesiones: SesionEquipo[] }) {
+  const router = useRouter();
+  const [motivo, setMotivo] = useState("");
+  const [error, setError] = useState("");
+  const [cerradas, setCerradas] = useState<number | null>(null);
+  const [confirmar, dialogo] = useConfirmar();
+  const cuando = (m: string) => new Date(m).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
+  return (
+    <div className="space-y-3" data-sesiones-equipo={sesiones.length}>
+      {dialogo}
+      <p className="texto-suave">{sesiones.length === 0 ? "Nadie del equipo tiene una sesión abierta ahora." : `${sesiones.length} ${sesiones.length === 1 ? "sesión abierta" : "sesiones abiertas"} del equipo.`}</p>
+      {sesiones.length > 0 && (
+        <ul className="space-y-2">
+          {sesiones.map((x) => (
+            <li key={x.sesion_id} className="tarjeta p-3 text-sm" data-sesion>
+              <span className="font-semibold">{x.nombre}</span> · {x.rol} · {x.mail}
+              <span className="block texto-tenue">Última actividad {cuando(x.actividad)} · {x.dispositivo ? x.dispositivo.slice(0, 60) : "dispositivo desconocido"}{x.tambien_en_otros ? " · esta cuenta también está en otro gimnasio: tendrá que volver a entrar ahí" : ""}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {sesiones.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-end">
+          <label className="space-y-1 flex-1 min-w-[14rem]"><span className="etiqueta">Motivo (queda en el registro)</span><input className="campo" value={motivo} maxLength={200} onChange={(e) => setMotivo(e.target.value)} data-motivo-sesiones /></label>
+          <BotonAccion className="boton boton-peligro" disabled={motivo.trim().length < 10}
+            onClick={async () => {
+              if (!(await confirmar(`Cerrar las ${sesiones.length} ${sesiones.length === 1 ? "sesión abierta" : "sesiones abiertas"} del equipo: todas las personas tendrán que volver a entrar con su mail y contraseña.`, { boton: "Cerrar todas", peligro: true }))) return;
+              const r = await cerrarSesionesGimnasio(gimnasioId, motivo);
+              if (r.error) { setError(r.error); return; }
+              setError(""); setMotivo(""); setCerradas(sesiones.length); router.refresh();
+            }}>Cerrar todas</BotonAccion>
+        </div>
+      )}
+      <Alerta m={error} />
+      {cerradas != null && <p className="texto-suave" data-sesiones-cerradas>Listo: se cerraron las sesiones del equipo.</p>}
     </div>
   );
 }

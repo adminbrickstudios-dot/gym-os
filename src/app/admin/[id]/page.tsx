@@ -18,7 +18,7 @@ import { GestionPersona } from "./GestionPersona";
 import { enlacesPorRol, whatsappDueno, type FilaGimnasio } from "@/lib/admin/lista";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { EstadoCopias } from "../EstadoCopias";
-import { Ciudad, CicloDeVida, DatosFiscalesForm, QrGimnasio, RestaurarTextos, type DatosFiscales } from "./FichaGestion";
+import { Ciudad, CicloDeVida, DatosFiscalesForm, QrGimnasio, RestaurarTextos, SesionesEquipo, type DatosFiscales, type SesionEquipo } from "./FichaGestion";
 import { AbonoExtra, BorrarDefinitivo, Clonar, Papelera, Reprocesar, type EnPapelera } from "./FichaAvanzada";
 
 type SaludFicha = { color: "rojo" | "amarillo" | "verde"; motivos: string[]; ultimo_acceso_equipo: string | null; ayudas_pendientes: number };
@@ -79,6 +79,8 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
   // F2.10: CUIT y razón social para facturar. Los guarda solo el rol Principal o Ventas (la base lo exige; a otro rol le dice por qué no).
   const fiscales = await rpc<DatosFiscales>("admin_datos_fiscales", { p_gimnasio_id: g.gimnasio_id }).catch(() => null);
   const puedeEditarFiscales = true;
+  // F2.11: las sesiones abiertas del equipo (solo el rol Principal las ve: para los demás roles la base da error y no se muestra la sección).
+  const sesiones = await rpc<SesionEquipo[]>("admin_sesiones_gimnasio", { p_gimnasio_id: g.gimnasio_id }).catch(() => null);
   const wa = fila ? whatsappDueno(fila.dueno_telefono, `Hola ${fila.dueno ?? ""}, te escribo de BRIK por ${g.nombre}.`) : null;
   const yoSoporte = g.equipo.find((p) => p.soy_yo && p.es_soporte && p.activo);
   const duenoSinCuenta = g.equipo.find((p) => p.rol === "dueno" && p.activo && !p.es_soporte && !p.tiene_cuenta);
@@ -155,6 +157,13 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
         <AgregarPersona gimnasioId={g.gimnasio_id} />
         <CambiarDueno gimnasioId={g.gimnasio_id} candidatos={g.equipo.filter((p) => p.activo && !p.es_soporte && p.rol !== "dueno").map((p) => ({ equipo_id: p.equipo_id, nombre: p.nombre }))} />
       </section>
+
+      {sesiones && (
+        <section className="space-y-3" data-ficha-sesiones>
+          <p className="titulo-grupo">Sesiones abiertas del equipo</p>
+          <SesionesEquipo gimnasioId={g.gimnasio_id} sesiones={sesiones} />
+        </section>
+      )}
 
       <section className="space-y-3" data-ficha-datos>
         <p className="titulo-grupo">Datos</p>
