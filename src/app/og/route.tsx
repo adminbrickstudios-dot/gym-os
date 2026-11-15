@@ -5,6 +5,7 @@ import { ImageResponse } from "next/og";
 import { headers } from "next/headers";
 import { traerLanding } from "@/lib/landing";
 import { textoSobre, tonoDeFondo } from "@/lib/marca";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ export async function GET() {
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host) : null;
-  const nombre = landing?.marca.nombre ?? "Base";
+  const nombre = landing?.marca.nombre ?? NOMBRE_PRODUCTO;
   const frase = landing?.publicada ? landing.portada.titulo : landing ? "Soy socio · Quiero ser socio" : "El sistema para tu gimnasio";
   const fondo = landing?.marca.color_fondo ?? "#F4F5F6";
   const acento = landing?.marca.color_acento ?? "#2fbf5b";

@@ -13,6 +13,7 @@ import { Foto } from "./Foto";
 import { LogoImagen } from "@/components/ui/LogoImagen";
 import { Icono } from "@/components/ui/Icono";
 import { agruparClases, estiloTipografia } from "@/lib/landing-estilo";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // La landing pública de un gimnasio. Todo lo que muestra sale de
 // landing_publica(): textos, orden de las secciones, planes, precios,
@@ -559,7 +560,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
           </div>
         </div>
         <div className="mx-auto max-w-5xl mt-10 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm texto-tenue">Página hecha con Base</p>
+          <p className="text-sm texto-tenue">Página hecha con {NOMBRE_PRODUCTO}</p>
           <a href="/ingresar" className="text-sm texto-suave underline underline-offset-4"><Icono nombre="escudo" /> Soy del equipo</a>
         </div>
       </footer>

@@ -3,6 +3,7 @@ import { Icono } from "@/components/ui/Icono";
 import { useEffect, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
 import { anularPagoBrik, asignarPlanBrik, guardarPlanBrik, registrarPagoBrik } from "./acciones";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type PlanBrik = { id: string; nombre: string; precio_mensual: number; activo: boolean; gimnasios: number };
 export type EstadoAbono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido"; plan?: string; precio_mensual?: number; pagado_hasta?: string; dias?: number;
@@ -27,7 +28,7 @@ export function PlanesBrik({ planes }: { planes: PlanBrik[] }) {
   const [ocupado, empezar] = useTransition();
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-planes-brik>
-      <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Planes de Base</p>
+      <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Planes de {NOMBRE_PRODUCTO}</p>
       <p className="texto-suave">Lo que paga cada gimnasio por mes. Se asigna en el detalle de cada gimnasio.</p>
       {planes.length > 0 && <ul className="space-y-1">{planes.map((p) => (
         <li key={p.id} className={`flex items-center gap-3 ${p.activo ? "" : "opacity-50"}`}>
@@ -58,7 +59,7 @@ export function AbonoGimnasio({ gimnasioId, abono, planes }: { gimnasioId: strin
   const correr = (f: () => Promise<{ error?: string }>) => empezar(async () => { const r = await f(); setError(r.error ?? null); });
   return (
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-abono-gimnasio>
-      <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Abono de Base <PildoraAbono a={abono} /></p>
+      <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Abono de {NOMBRE_PRODUCTO} <PildoraAbono a={abono} /></p>
       <label className="block space-y-1 max-w-sm"><span className="etiqueta">Plan</span>
         <select className="campo" value={abono.plan_id ?? ""} disabled={ocupado} onChange={(e) => correr(() => asignarPlanBrik(gimnasioId, e.target.value || null))}>
           <option value="">Sin abono (no paga)</option>

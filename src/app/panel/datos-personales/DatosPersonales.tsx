@@ -4,6 +4,7 @@ import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { TERMINOS_MODELO } from "@/lib/terminos-modelo";
 import { guardarPolitica, guardarTerminos, resolverPedido } from "./acciones";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type PedidoDatos = { id: string; socio_id: string; socio: string; tipo: "ver" | "corregir" | "borrar"; detalle: string | null; creado_en: string; resuelto_en: string | null; nota: string | null };
 const TIPO: Record<PedidoDatos["tipo"], string> = { ver: "Quiere ver sus datos", corregir: "Quiere corregir un dato", borrar: "Quiere que borremos sus datos" };
@@ -12,7 +13,7 @@ const dia = (iso: string) => new Date(iso).toLocaleDateString("es-AR", { day: "2
 export const POLITICA_MODELO = `Quién es el responsable: este gimnasio.
 Qué datos guardamos: tu nombre, DNI, teléfono, mail, fecha de nacimiento, tus pagos y tus entradas. No guardamos datos de salud.
 Para qué los usamos: darte acceso al gimnasio, cobrarte la cuota y avisarte de tu vencimiento.
-Con quién los compartimos: con nadie, salvo que una ley o un juez lo pida. Usamos servidores de Base (BRIK) para guardarlos.
+Con quién los compartimos: con nadie, salvo que una ley o un juez lo pida. Usamos servidores de {NOMBRE_PRODUCTO} (BRIK) para guardarlos.
 Tus derechos (Ley 25.326): podés pedir ver, corregir o borrar tus datos desde tu app o en la recepción. Lo respondemos en 10 días corridos.
 La Agencia de Acceso a la Información Pública (AAIP) es el organismo que atiende denuncias por incumplimiento de esta ley.`;
 
@@ -44,7 +45,7 @@ export function DatosPersonales({ politica, pedidos, puedeEditar, terminos }: { 
             </div>
           </>
         ) : <p className="whitespace-pre-wrap text-sm">{politica ?? POLITICA_MODELO}</p>}
-        <p className="text-sm texto-tenue">Inscribir la base de datos en la AAIP (Registro Nacional de Bases de Datos) lo hace el gimnasio como responsable: no lo hace Base por vos. El texto modelo es un borrador: revisalo con un abogado.</p>
+        <p className="text-sm texto-tenue">Inscribir la base de datos en la AAIP (Registro Nacional de Bases de Datos) lo hace el gimnasio como responsable: no lo hace {NOMBRE_PRODUCTO} por vos. El texto modelo es un borrador: revisalo con un abogado.</p>
       </section>
 
       <section className="tarjeta p-5 space-y-3" data-terminos-panel>

@@ -9,6 +9,7 @@ import { crearGimnasio, type EstadoAlta } from "./acciones";
 import { BotonEntrar } from "./BotonEntrar";
 import { ListaPrueba } from "./ListaPrueba";
 import { AccesoPersona } from "@/components/cuentas/AccesoPersona";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // ADM-1: el tipo de gimnasio prende lo que corresponde y crea planes de ejemplo (sin precio).
 const TIPOS: [string, string][] = [
@@ -142,7 +143,7 @@ export function AltaGimnasio({ dominio, planes = [] }: { dominio: string; planes
               <label className="space-y-1"><span className="etiqueta">Color de fondo</span>
                 <input name="color_fondo" type="color" className="campo !p-1 h-12" value={fondo} onChange={(e) => setFondo(e.target.value)} /></label>
               {planes.length > 0 && (
-                <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Plan de Base (opcional)</span>
+                <label className="space-y-1 sm:col-span-2"><span className="etiqueta">Plan de {NOMBRE_PRODUCTO} (opcional)</span>
                   <select name="plan_brik" className="campo" defaultValue="" data-plan-brik>
                     <option value="">Sin plan: lo asigno después</option>
                     {planes.map((pl) => <option key={pl.id} value={pl.id}>{pl.nombre}</option>)}

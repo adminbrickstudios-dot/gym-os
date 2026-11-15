@@ -1,13 +1,14 @@
 import { Aviso } from "@/components/panel/Marco";
 import { Icono } from "@/components/ui/Icono";
 import { linkWhatsapp } from "@/lib/landing-textos";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type EstadoGimnasioAviso = { pausado: boolean; baja: boolean; demo_vencida: boolean; whatsapp_brik: string | null };
 
 const TEXTOS = {
-  demo_vencida: { icono: "reloj", titulo: "Esta demo venció", cuerpo: "La prueba de este gimnasio terminó y ya no se puede abrir. Si querés seguir con Base, hablá con BRIK y la dejamos funcionando.", mensaje: "Hola, mi demo de Base venció y quiero seguir." },
-  baja: { icono: "candado", titulo: "Este gimnasio está dado de baja", cuerpo: "Sus datos están guardados pero no se puede usar. Si fue un error o querés volver, hablá con BRIK.", mensaje: "Hola, mi gimnasio figura dado de baja en Base y quiero volver." },
-  pausado: { icono: "pausa", titulo: "Este gimnasio está pausado", cuerpo: "El uso del panel está detenido por ahora y tus datos están a salvo. Hablá con BRIK para reactivarlo.", mensaje: "Hola, mi gimnasio figura pausado en Base y quiero reactivarlo." },
+  demo_vencida: { icono: "reloj", titulo: "Esta demo venció", cuerpo: `La prueba de este gimnasio terminó y ya no se puede abrir. Si querés seguir con ${NOMBRE_PRODUCTO}, hablá con BRIK y la dejamos funcionando.`, mensaje: `Hola, mi demo de ${NOMBRE_PRODUCTO} venció y quiero seguir.` },
+  baja: { icono: "candado", titulo: "Este gimnasio está dado de baja", cuerpo: "Sus datos están guardados pero no se puede usar. Si fue un error o querés volver, hablá con BRIK.", mensaje: `Hola, mi gimnasio figura dado de baja en ${NOMBRE_PRODUCTO} y quiero volver.` },
+  pausado: { icono: "pausa", titulo: "Este gimnasio está pausado", cuerpo: "El uso del panel está detenido por ahora y tus datos están a salvo. Hablá con BRIK para reactivarlo.", mensaje: `Hola, mi gimnasio figura pausado en ${NOMBRE_PRODUCTO} y quiero reactivarlo.` },
 } as const;
 
 /** F2.6: lo que se ve en lugar del panel cuando el gimnasio está pausado, dado de baja o es una demo vencida. Con el WhatsApp de BRIK si el super admin lo cargó. */

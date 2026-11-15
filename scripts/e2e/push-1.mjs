@@ -37,7 +37,7 @@ try {
   chequear(sw.ok && /showNotification/.test(sw.texto), "el service worker se sirve", `sw.js ${sw.status}`);
   const m = await bajar(s, `${G}/manifest.webmanifest`);
   const man = m.ok ? JSON.parse(m.texto) : null;
-  chequear(man?.display === "standalone" && man?.start_url === "/app" && man?.name && man.name !== "Base", `manifest con la marca: “${man?.name}”, se instala como app`, JSON.stringify(man));
+  chequear(man?.display === "standalone" && man?.start_url === "/app" && man?.name && man.name !== "Pase", `manifest con la marca: “${man?.name}”, se instala como app`, JSON.stringify(man));
   // Android ofrece "Instalar" solo con un ícono de 512; el nombre corto no corta una palabra; hay accesos directos.
   const tam512 = (man?.icons ?? []).some((i) => /512/.test(i.sizes ?? "")) || (man?.icons ?? []).some((i) => i.sizes === "any");
   chequear(tam512, "el manifest trae un ícono de 512 (o uno que sirve para cualquier tamaño)", JSON.stringify(man?.icons));

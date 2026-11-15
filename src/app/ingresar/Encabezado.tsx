@@ -6,6 +6,7 @@ import { propsMarca } from "@/lib/marca";
 import { SinInternetIngreso } from "./SinInternetIngreso";
 import "./ingreso.css";
 import { Icono } from "@/components/ui/Icono";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 /** La marca de quien entra: la del gimnasio (si la dirección es suya) o la de Gym OS. */
 export async function traerMarca() {
@@ -52,7 +53,7 @@ export function CascaraIngreso({ marca, children }: { marca: MarcaIngreso; child
           ) : (
             <span className="icono !size-12 !text-2xl" aria-hidden><Icono nombre="pesa" /></span>
           )}
-          <span className="titulo text-2xl break-words min-w-0" data-marca-ingreso>{marca?.nombre ?? "Base"}</span>
+          <span className="titulo text-2xl break-words min-w-0" data-marca-ingreso>{marca?.nombre ?? NOMBRE_PRODUCTO}</span>
         </div>
         <section className="tarjeta ingreso-tarjeta">{children}</section>
       </div>

@@ -1,5 +1,6 @@
 // N10 · "Cuánto deja un socio" (función nueva, apagada por defecto). Solo lectura: lo calcula `valor_del_socio` de lo ya guardado (pagos y coberturas).
 import { formatearPesos } from "@/lib/formato";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type ValorDelSocio = {
   socios_que_pagaron: number; cobrado_total: number | string; deja_por_socio: number | string | null;
@@ -13,7 +14,7 @@ export function ValorSocio({ datos }: { datos: ValorDelSocio }) {
   return (
     <section aria-labelledby="valor-socio" data-valor-socio>
       <h2 id="valor-socio" className="titulo text-2xl mb-1">Cuánto deja un socio</h2>
-      <p className="texto-suave mb-3">Sale de todo lo cobrado y de las coberturas guardadas, desde que el gimnasio usa Base.</p>
+      <p className="texto-suave mb-3">Sale de todo lo cobrado y de las coberturas guardadas, desde que el gimnasio usa {NOMBRE_PRODUCTO}.</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="tarjeta p-4" data-deja-por-socio>
           <p className="texto-suave">Lo que deja cada socio que pagó</p>

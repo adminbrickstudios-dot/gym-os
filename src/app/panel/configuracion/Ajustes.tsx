@@ -43,6 +43,7 @@ import type { Opcion } from "./indice";
 import { Icono } from "@/components/ui/Icono";
 import { useCambiosSinGuardar } from "@/components/ui/useCambiosSinGuardar";
 import { BorradorDeEstado, borrarBorradorDe } from "@/components/ui/BorradorDeEstado";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type Config = {
   nombre: string; color_acento: string; color_fondo: string; cobra_membresia: boolean; cobra_pase: boolean; cobra_pack: boolean;
@@ -731,7 +732,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
                 <li key={x.host} className="py-3 flex flex-wrap items-center gap-2 justify-between">
                   <span className="font-semibold break-all">{x.host}</span>
                   <span className="flex flex-wrap gap-2">
-                    <span className="pildora">{x.tipo === "propio" ? "Dominio propio" : "Dirección de Base"}</span>
+                    <span className="pildora">{x.tipo === "propio" ? "Dominio propio" : `Dirección de ${NOMBRE_PRODUCTO}`}</span>
                     {x.tipo === "propio" && (x.verificado
                       ? <span className="pildora pildora-verde"><Icono nombre="ok" /> Funcionando</span>
                       : <span className="pildora pildora-amarillo"><Icono nombre="reloj-arena" /> Esperando la configuración del dominio</span>)}

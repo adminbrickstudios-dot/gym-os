@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { traerLanding, urlMarca } from "@/lib/landing";
 import { nombreCorto } from "@/lib/nombre-corto";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // PUSH-1: para que el celular la instale como app (en iPhone, las
 // notificaciones solo llegan a la app agregada a inicio). Con la marca del gimnasio.
@@ -9,7 +10,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const host = (await headers()).get("x-gimnasio-host");
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const icono = urlMarca(landing?.marca.favicon_path ?? landing?.marca.logo_path);
-  const nombre = landing?.marca.nombre ?? "Base";
+  const nombre = landing?.marca.nombre ?? NOMBRE_PRODUCTO;
   return {
     name: nombre, short_name: nombreCorto(nombre), id: "/app", start_url: "/app", scope: "/", display: "standalone",
     description: landing ? `La app de ${nombre}: tu plan, tus pagos y las clases.` : "La app de tu gimnasio.",

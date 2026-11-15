@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { conectarMercadoPago, desconectarMercadoPago, probarMercadoPago, type EstadoMP } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 /**
  * PAY-1: conectar MercadoPago para que los socios paguen desde la app. El
@@ -31,7 +32,7 @@ export function MercadoPago({ estado, puedeEditar }: { estado: EstadoMP; puedeEd
       <div>
         <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Pagos online con MercadoPago</p>
         <p className="texto-suave">Que los socios paguen la cuota desde la app. Queda al día apenas MercadoPago avisa; la plata va a tu cuenta de MercadoPago.</p>
-        <p className="font-semibold" data-mp-plata-directa>La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por Base ni por BRIK.</p>
+        <p className="font-semibold" data-mp-plata-directa>La plata de tus socios va directo a tu cuenta de MercadoPago. Nunca pasa por {NOMBRE_PRODUCTO} ni por BRIK.</p>
       </div>
       {estado.conectado ? (
         <p className="pildora pildora-verde !text-base"><Icono nombre="ok" /> Conectado{estado.modo === "prueba" ? " en modo prueba" : ""}{estado.por ? ` por ${estado.por}` : ""}</p>
