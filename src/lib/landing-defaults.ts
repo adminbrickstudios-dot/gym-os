@@ -50,7 +50,7 @@ function preguntasPorDefecto(tipo: TipoGimnasio, hayProbar: boolean, hayPlanes: 
       ? "Ropa cómoda, una botella de agua y ganas de moverte. Si necesitás algo más para una clase, te avisamos."
       : "Ropa cómoda, zapatillas, una toalla y agua. Si necesitás algo más para una clase, te avisamos." },
   ];
-  if (hayProbar) q.push({ pregunta: "¿Puedo probar antes de anotarme?", respuesta: "Sí. Dejanos tus datos en “Probá gratis” y coordinamos tu primera clase." });
+  if (hayProbar) q.push({ pregunta: "¿Puedo probar antes de anotarme?", respuesta: "Sí. Dejanos tus datos en “Probá una clase” y coordinamos tu primera clase." });
   if (hayPlanes) q.push({ pregunta: "¿Cómo me anoto y cómo pago?", respuesta: hayAltas
       ? "Tocá “Quiero ser socio”, elegí tu plan y creá tu cuenta. Después pagás en el gimnasio o por los medios que te muestre la app, y desde ese momento entrás con tu DNI."
       : "Elegí tu plan más abajo y escribinos por WhatsApp o pasá por el gimnasio: te decimos los medios de pago y empezás ese mismo día." });

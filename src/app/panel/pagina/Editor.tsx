@@ -345,7 +345,7 @@ export function Editor({ inicial, agenda, clases = [], puedeEditar, direccion, a
             <Campo etiqueta="Frase" ayuda={`${(portada.bajada ?? "").length} de 240 · opcional. Sin frase, la página pone una según tus clases.`}>
               <textarea className="campo min-h-20" maxLength={240} value={portada.bajada ?? ""} onChange={(e) => setP("bajada", e.target.value)} onBlur={confirmar} />
             </Campo>
-            <Campo etiqueta="Texto del botón principal" ayuda="Abre el WhatsApp del gimnasio. Ej.: “Quiero empezar”, “Probá una clase gratis”.">
+            <Campo etiqueta="Texto del botón principal" ayuda="Abre el WhatsApp del gimnasio. Ej.: “Quiero empezar”, “Probá una clase”.">
               <input className="campo" maxLength={40} value={portada.boton_texto} onChange={(e) => setP("boton_texto", e.target.value)} onBlur={confirmar} />
             </Campo>
             <Campo etiqueta="Mensaje que llega por WhatsApp" ayuda="Lo que la persona ya tiene escrito al tocar el botón.">

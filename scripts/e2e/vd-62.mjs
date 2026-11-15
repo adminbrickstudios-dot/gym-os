@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // VD-62 · Páginas, segunda pasada. Recorre las dos páginas públicas, en compu y en celular (390 px):
-//   * la del gimnasio demo: portada con "Probá gratis" arriba, planes con precio, horarios, equipo, preguntas,
+//   * la del gimnasio demo: portada con "Probá una clase" arriba, planes con precio, horarios, equipo, preguntas,
 //     ubicación y WhatsApp flotante; sin desborde horizontal; con el video de portada si el dueño lo cargó;
-//     "Probá gratis" lleva al formulario y WhatsApp apunta a wa.me con el número del gimnasio;
+//     "Probá una clase" lleva al formulario y WhatsApp apunta a wa.me con el número del gimnasio;
 //   * la de Gym OS (plataforma): lo que resuelve en 3 líneas, abono de BRIK (solo con planes cargados), "Pedí una
 //     demo" por WhatsApp con el número que carga el super admin en /admin, "Ingresar" lleva a /ingresar, sin desborde.
 //   * metadatos: título, descripción, Open Graph, JSON-LD, lang es-AR, sitemap y robots de cada una.
-// Que "Probá gratis" CREA el interesado ya lo prueba vd-51.mjs (reserva) y pag-3.mjs (pedido): acá solo se verifica
+// Que "Probá una clase" CREA el interesado ya lo prueba vd-51.mjs (reserva) y pag-3.mjs (pedido): acá solo se verifica
 // que el botón y el formulario estén y se puedan usar, sin duplicar esas pruebas.
 //   node scripts/e2e/vd-62.mjs     (con scripts/local/levantar.sh corriendo)
 // ESCRITO, NO EJECUTADO por el agente que lo escribió: lo corre el orquestador.
@@ -29,12 +29,12 @@ async function paginaGimnasio(vp, nombre) {
   await p.locator("h1").first().waitFor({ timeout: 60000 });
   chequear((await p.locator("html").getAttribute("lang")) === "es-AR", `${nombre}: lang="es-AR"`, `${nombre}: lang incorrecto`);
 
-  // Portada: lo primero que se ve, sin scrollear, es "Probá gratis".
+  // Portada: lo primero que se ve, sin scrollear, es "Probá una clase".
   const probar = p.locator("[data-probar-gratis]").first();
-  await probar.waitFor({ timeout: 30000 }).catch(() => falla(`${nombre}: no está el botón “Probá gratis” en la portada (el demo tiene la sección “Probá una clase” prendida)`));
+  await probar.waitFor({ timeout: 30000 }).catch(() => falla(`${nombre}: no está el botón “Probá una clase” en la portada (el demo tiene la sección “Probá una clase” prendida)`));
   if (await probar.count()) {
     const caja = await probar.boundingBox();
-    chequear(!!caja && caja.y + caja.height <= vp.height, `${nombre}: “Probá gratis” se ve sin scrollear`, `${nombre}: “Probá gratis” queda fuera de la primera pantalla`);
+    chequear(!!caja && caja.y + caja.height <= vp.height, `${nombre}: “Probá una clase” se ve sin scrollear`, `${nombre}: “Probá una clase” queda fuera de la primera pantalla`);
   }
   // Foto o video de portada: si hay, el contenedor lo dice y la foto no pesa de más.
   const portada = await p.locator("[data-portada]").first().getAttribute("data-portada").catch(() => null);
@@ -70,12 +70,12 @@ async function paginaGimnasio(vp, nombre) {
   await sinDesborde(p, nombre, vp.width);
   await capturar(p, `vd62-gimnasio-${vp.width}`, true);
 
-  // "Probá gratis" lleva al formulario, que se muestra y se puede completar (el pedido se prueba en vd-51 y pag-3).
+  // "Probá una clase" lleva al formulario, que se muestra y se puede completar (el pedido se prueba en vd-51 y pag-3).
   await probar.click();
   const form = p.locator("[data-form-probar]");
-  await form.first().waitFor({ timeout: 30000 }).catch(() => falla(`${nombre}: “Probá gratis” no llega al formulario`));
+  await form.first().waitFor({ timeout: 30000 }).catch(() => falla(`${nombre}: “Probá una clase” no llega al formulario`));
   if (await form.count()) {
-    chequear(await form.first().isVisible(), `${nombre}: “Probá gratis” lleva al formulario`, `${nombre}: el formulario no se ve`);
+    chequear(await form.first().isVisible(), `${nombre}: “Probá una clase” lleva al formulario`, `${nombre}: el formulario no se ve`);
     chequear((await form.first().locator('input[name="nombre"]').count()) === 1, `${nombre}: el formulario pide el nombre`, `${nombre}: el formulario no tiene nombre`);
   }
   // Metadatos del gimnasio.
