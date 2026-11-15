@@ -136,7 +136,7 @@ jobs:
           : > .local/fallas.txt
           : > .local/caidas.txt
           if [ -n "$SOLO" ]; then
-            LISTA=$(echo "$SOLO" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | grep -vx barrido | sed 's#^#scripts/e2e/#; s#$#.mjs#' | tr '\n' ' ')
+            LISTA=$(echo "$SOLO" | tr ',' '\n' | sed 's/ //g' | grep -v '^$' | grep -vx barrido | grep -vx viajes | sed 's#^#scripts/e2e/#; s#$#.mjs#' | tr '\n' ' ')
           else
             LISTA=$(node -p "require('./package.json').scripts.e2e.split('&&').map((x) => x.trim().replace(/^node /, '')).join(' ')")
           fi
@@ -162,6 +162,13 @@ jobs:
       - name: Barrido (cada rol abre cada pantalla)
         if: always() && (inputs.solo == '' || contains(inputs.solo, 'barrido'))
         run: node scripts/e2e/barrido.mjs
+      - name: Viajes a la base por pantalla (tope: nunca más lento que hoy)
+        # Sin `solo` ya corre al final de la cadena (package.json); con `solo` se pide con "viajes". Falla si una pantalla pasa de su tope.
+        if: always() && contains(inputs.solo, 'viajes')
+        env:
+          APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          TZ: America/Argentina/Buenos_Aires
+        run: node scripts/medir/viajes.mjs | tee .local/viajes.md; exit ${PIPESTATUS[0]}
       - name: Tiempos (VD-47, avisa y no corta)
         if: always() && inputs.solo == ''
         continue-on-error: true
