@@ -162,7 +162,7 @@ jobs:
       - name: Barrido (cada rol abre cada pantalla)
         if: always() && (inputs.solo == '' || contains(inputs.solo, 'barrido'))
         run: node scripts/e2e/barrido.mjs
-      - name: Viajes a la base por pantalla (tope: nunca más lento que hoy)
+      - name: Viajes a la base por pantalla (tope, nunca más lento que hoy)
         # Sin `solo` ya corre al final de la cadena (package.json); con `solo` se pide con "viajes". Falla si una pantalla pasa de su tope.
         if: always() && contains(inputs.solo, 'viajes')
         env:
