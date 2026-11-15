@@ -47,7 +47,7 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
               <li key={x.ingreso_id} data-entrada-vivo={x.resultado} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
                 <span className="text-2xl" aria-hidden><Icono nombre={emoji} sistema /></span>
                 <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1" textoClassName="min-w-0 flex-1"
-                  alTocar={(ev) => { if (document.documentElement.dataset.panelSocioLateral === "si") { ev.preventDefault(); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_PANEL_SOCIO, { detail: { socioId: x.socio_id } })); } }}>
+                  alTocar={(ev) => { if (document.documentElement.dataset.panelSocioMontado === "si") { ev.preventDefault(); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_PANEL_SOCIO, { detail: { socioId: x.socio_id } })); } }}>
                   <span className="block font-semibold text-lg truncate">{x.socio}</span>
                   <span className="block texto-suave truncate"><span className="numero">{hora(x.momento)}</span> · {VIA[x.via] ?? x.via}{!bien || x.color !== "verde" ? ` · ${x.texto}` : ""}</span>
                 </LinkPanel>

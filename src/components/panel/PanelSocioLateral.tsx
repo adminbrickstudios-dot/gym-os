@@ -48,8 +48,8 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
   useEffect(() => {
     const abrir = (e: Event) => { const id = (e as CustomEvent<{ socioId: string }>).detail?.socioId; if (id) { setSocioId(id); setFicha(null); setError(null); } };
     window.addEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir);
-    document.documentElement.dataset.panelSocioLateral = "si";   // las listas (Últimas entradas) saben que pueden abrirlo en vez de navegar
-    return () => { window.removeEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir); delete document.documentElement.dataset.panelSocioLateral; };
+    document.documentElement.dataset.panelSocioMontado = "si";   // las listas (Últimas entradas) saben que pueden abrirlo en vez de navegar
+    return () => { window.removeEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir); delete document.documentElement.dataset.panelSocioMontado; };
   }, []);
 
   useEffect(() => {
