@@ -28,6 +28,7 @@ try {
   await panel.locator("[data-panel-socio-estado]").waitFor({ timeout: 30000 });
   chequear((await panel.locator("[data-panel-socio-estado]").getAttribute("data-panel-socio-estado")) === "verde", "al día: el estado va en verde (lo dice la base)", "el color no es verde");
   chequear(/quedan \d+ d/.test(await panel.innerText()) || /vigente hasta/.test(await panel.innerText()), "dice hasta cuándo está vigente", "no dice la vigencia");
+  chequear(await panel.locator("[data-panel-socio-foto]").count() === 1, "el panel lateral muestra la foto (o la inicial) para confirmar a quien está en la puerta", "el panel lateral no muestra la foto del socio");
   chequear(await panel.locator("[data-panel-socio-cobrar]").count() === 0, "al día: no ofrece COBRAR AHORA", "ofrece cobrar a quien está al día");
   await capturar(r, "base3-compu-al-dia");
   await r.keyboard.press("Escape");

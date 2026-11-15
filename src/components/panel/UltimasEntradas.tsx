@@ -5,6 +5,7 @@ import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { ultimasEntradas } from "@/app/panel/inicio-acciones";
 import { Icono } from "@/components/ui/Icono";
 import { EVENTO_ENTRADAS_NUEVAS } from "@/components/panel/entradas-vivo";
+import { EVENTO_ABRIR_PANEL_SOCIO } from "@/components/panel/PanelSocioLateral";
 
 export type EntradaVivo = {
   ingreso_id: string; socio_id: string; socio: string; momento: string; via: string;
@@ -45,7 +46,8 @@ export function UltimasEntradas({ iniciales, zona }: { iniciales: EntradaVivo[];
             return (
               <li key={x.ingreso_id} data-entrada-vivo={x.resultado} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
                 <span className="text-2xl" aria-hidden><Icono nombre={emoji} sistema /></span>
-                <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1" textoClassName="min-w-0 flex-1">
+                <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="min-w-0 flex-1" textoClassName="min-w-0 flex-1"
+                  alTocar={(ev) => { if (document.documentElement.dataset.panelSocioLateral === "si") { ev.preventDefault(); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_PANEL_SOCIO, { detail: { socioId: x.socio_id } })); } }}>
                   <span className="block font-semibold text-lg truncate">{x.socio}</span>
                   <span className="block texto-suave truncate"><span className="numero">{hora(x.momento)}</span> · {VIA[x.via] ?? x.via}{!bien || x.color !== "verde" ? ` · ${x.texto}` : ""}</span>
                 </LinkPanel>
