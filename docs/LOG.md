@@ -1,3 +1,44 @@
+## 2026-11-15 · Pase 1.0 — rama `base/2026-11-07`, primera publicación el 15/11 a las 12:42 (PR #27)
+
+```
+QUÉ HICE                        por punto, y cómo lo verifiqué
+LO QUE ENCONTRÉ SIN PEDIRTELO   lo que apareció solo
+QUÉ CORRÉS VOS                  comandos exactos, en orden
+QUÉ CONFIGURÁS VOS              variables, paneles, DNS
+SIN ARREGLAR                    lo que quedó, y por qué
+LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
+```
+
+**QUÉ HICE**
+- **Publicado (PR #27, main en `325b1e89`; para volver atrás, `eab6e40e`):** D69 (el producto se llama Pase, el nombre sale de `src/lib/producto.ts` y `producto.test.ts` falla si se escribe a mano), P2 (ninguna dirección escrita a mano: la lista de excepciones de `urls-sin-hardcode.test.ts` quedó vacía), Q1 según D70 (la matrícula se valida antes de crear el plan, `planes-matricula.test.ts`; el cierre de caja muestra el monto contado antes de confirmar), el tope de viajes a la base por pantalla (`scripts/medir/topes-viajes.json`, comparado por `viajes.mjs` y revisado en `npm run chequeos`), la hoja de Cobrar sin la X duplicada y N10 (migración `20261114180000`, aplicada sin copia con prevuelo y chequeos en verde, corrida 43731288556). Probado en producción: deploy en verde, título y manifest dicen Pase, `/api/salud`, `/g/demo`, `/g/templegym1` y `/ingresar` en 200, `humo-pasado` en verde; Temple Gym solo mirado.
+- **Pendiente de publicar (código en `base/2026-11-07`, sin migraciones):** el número del menú y de la campana ya no queda viejo al contestar o aprobar (`vivo-cliente.test.ts`), "Probá una clase" en toda la página del gimnasio (`probar-una-clase.test.ts`, D79), la foto del socio en el panel lateral y las últimas entradas que lo abren (`base-3` y `vd-12b`), `PERMISOS.md` regenerado y la prueba de importar sin depender del día.
+- **Verificado ejecutando:** vitest 445 (más las pruebas nuevas), `chequeos` en verde, `tsc` y `eslint` limpios, pruebas de base y chequeos contra la base real en Actions, el barrido de modales 12 de 12 con la hoja de Cobrar y las capturas miradas una por una, y la cadena e2e completa (250 recorridos, 13 tandas de 20 con base nueva, app compilada) en verde en Actions, con la comparación de viajes contra los topes (42 pantallas).
+- **Documentos:** `00-LEEME` como índice, `PASE-1.0` con "Para Pase 2.0" priorizada, `ESTADO-GENERAL`, `RECTA-FINAL`, `VELOCIDAD`, `PRUEBA-DUENO`, `PROGRESO` (LISTO PARA TU PASADA) y `CLAUDE.md` al día; 13 contradicciones entre documentos decididas por defecto (D71 a D82 en `PREGUNTAS.md`).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El número del menú y de la campana quedaba viejo después de una acción (un pedido "fresco" reusaba uno en vuelo): arreglado, con prueba.
+- La hoja de Cobrar tenía dos X de cerrar: arreglado.
+- `PERMISOS.md` estaba desactualizado desde N10 y la prueba que lo vigila fallaba en Actions: regenerado.
+- La prueba de importar socios fallaba según el día real de la corrida: ya no.
+- Doce recorridos e2e estaban viejos frente a L1 y L3 o dependían del orden de la cadena: adaptados y deterministas. Dos quedaron apartados con su motivo (`vd-25`, `ent-6`).
+- La lista de clases para probar de la página solo ofrece clases ya creadas (se crean al abrir cada día): anotado para Pase 2.0.
+- Los componentes de prueba social y "¿Primera vez?" siguen en el código pero la portada de una pantalla (L1) no los dibuja: anotado para la landing nueva.
+
+**QUÉ CORRÉS VOS**: nada obligatorio. Si querés repetir la prueba de punta a punta, Actions → Pruebas completas → Run workflow (con `solo` de a 20 recorridos); la comparación de viajes se pide con `solo=viajes`.
+
+**QUÉ CONFIGURÁS VOS**: los secretos de GitHub (`BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO`, `COPIA_CLAVE`) y la variable `SALUD_URL`; las altas online de Temple Gym y su WhatsApp; los mails de Supabase; los dominios (`DOMINIO.md`). El detalle, paso por paso, está arriba en `docs/base/PROGRESO.md`.
+
+**SIN ARREGLAR**
+- Lo marcado ➡️ Pase 2.0 en `docs/base/PASE-1.0.md` (plata y permisos de D70, velocidad por encima de 2 viajes, la app del socio con 22 viajes, funciones nuevas, landing nueva, escala).
+- `ent-6` (el cartel de la tablet a veces no aparece tras escanear el QR; la entrada sí se registra) y `vd-25`: apartados de la cadena.
+
+**LO QUE NO PUDE VERIFICAR**
+- La velocidad en producción (F0.1) y la región de Supabase: faltan los secretos.
+- La cámara de QR no se abre en el barrido de modales (pide permiso del navegador): se revisó por código.
+- Los cambios pendientes de publicar corrieron en Actions con la app compilada, pero no en producción: se prueban ahí al publicarlos.
+- Los mails de Supabase (invitación y recuperar contraseña) no están en el código: no se pudo ver que digan Pase.
+- Las pruebas de base completas no corrieron en la compu (sin memoria para la base y las pantallas a la vez): corrieron en Actions.
+
 ## 2026-11-08 · Base: P0 (BASE-0 a BASE-11) — rama `base/2026-11-07`, publicado por bloque
 
 ```
