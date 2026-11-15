@@ -1,4 +1,4 @@
-# La recta final de Base (09/11)
+# La recta final de Pase (antes Base; 09/11, al día el 15/11)
 
 
 **La única lista que sigue el loop desde ahora.** Al terminarla, a Mateo le
@@ -7,13 +7,15 @@ demás lo hace el agente.
 
 Cada ítem dice dónde está el detalle. El estado se marca acá: ✅ (cumple su
 LISTO SI completo y se verificó ejecutando) · 🟡 · ❌ · ⛔ (trabado: dice qué
-hace falta).
+hace falta) · ➡️ (Pase 2.0: no se hace en 1.0 y cuenta como cerrado; D70 y `PASE-1.0.md`).
 - Un 🟡 no cuenta como terminado.
 - Se publica al cerrar cada fase, o antes si un ítem grande queda listo.
 - `PROGRESO.md` sigue teniendo el detalle de cada BASE-* y arriba el
   "RESUMEN PARA MATEO", que se reescribe al cerrar cada fase.
 
-Dónde quedó (relectura del 12/11):
+**Desde el 15/11 el corte que manda es `PASE-1.0.md`** (los 11 puntos para cerrar Pase 1.0). Donde un ítem de abajo tenga una nota "Pase 1.0 (15/11)", esa nota es lo vigente y el texto que sigue es el historial.
+
+Dónde quedó (relectura del 12/11, histórico):
 - Publicado: todo hasta el PR #20 (`publicar/base-resto`, incluye H1 a H3b, H2c, Z y F).
 - Hecho sin publicar: fase E (E1 a E6 en 🟡), D1 a D4 y lo que dicen los ítems con "(sin publicar)".
 - La relectura de todo lo que pidió Mateo contra el código sumó N9, N10, Z8, F2.10 y F2.11 y completó Q5.

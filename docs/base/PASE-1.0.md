@@ -76,18 +76,57 @@ cerrar 1.0, un ➡️ cuenta como cerrado, igual que ✅ y ⛔.
 
 ## Para Pase 2.0 (no se empieza hasta que Mateo lo diga)
 
-**Movido desde `RECTA-FINAL.md`:**
-- **Pulido profundo:** Z3 a Z7, F3.2, F6.1.
-- **Velocidad fina:** F0.4, F0.5, lo que deje E8.
-- **Funciones nuevas:** entradas sin internet (N9), débito automático (N1), resumen de la noche (N3),
-  factura ARCA (N7), molinete (N8).
-- **Escala:** F9.4, F9.6.
-- **Plataforma:** ensayo antes de producción (N0), dominios desde el super admin (P9).
-- **Revisión:** la cola vieja (Q4) y la prueba de todo junto (R3).
-- **Plata y permisos:** las decisiones de Q1 que cambian plata o permisos.
+Ordenado por lo que más importa. Todo lo de acá cuenta como cerrado para Pase 1.0.
 
-**Lo que nombró Mateo:** estructura, diseño, métodos, landing, fluidez, lo que se está pasando por alto, y
-el plan de profesionalización (`docs/PLAN-PROFESIONALIZACION.md`, cuando diga "terminado oficialmente").
+### 1. Plata y permisos (D70): decide Mateo cuando quiera, con la recomendación ya escrita
 
-**Lo que el agente encuentre durante 1.0** y no sea de 1.0: una línea acá, con dónde está y por qué
-importa. No se arregla en 1.0.
+Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso el agente no las hizo solo. El detalle y el porqué de cada una están en `PREGUNTAS.md`.
+
+| Qué | Recomendación |
+|---|---|
+| Pase diario en 2 toques y para quien no es socio (detalle 13, Z6) | Alta rápida de socio con nombre y DNI + el pase, todo en una operación de la base y por el mismo camino de cobro |
+| Pagos parciales (24) | No hacerlo: el fiado con tope cubre el caso |
+| Cambio de plan prorrateado o al próximo período (26) | Dejar lo de hoy (días a favor con vista previa) y no ofrecer la opción |
+| Matriz de permisos editable (43) | Dejar los interruptores de hoy (Equipo → Permisos) |
+| Estado de cuenta único con saldo (21) | Una vista de solo lectura de cargos y pagos del socio, con los mismos permisos que la ficha |
+| Link de MercadoPago por socio (33) | Cuando el gimnasio cargue sus credenciales |
+| Aprobar una transferencia comparando el monto | Mostrar "Debe $25.000 (Mensual)", amarillo si no coincide, y Deshacer por 5 segundos |
+| Deshacer en gastos | Confirmar con el monto a la vista y Deshacer por 10 segundos (anular el hecho, no borrarlo) |
+| `equipo.es_soporte` en lugar del nombre "Soporte BRIK" | Leer la columna, no el nombre (hoy un empleado con ese nombre queda afuera de su panel) |
+| "Entrar como soporte" con rol Encargado | Solo con el permiso del dueño y con tiempo |
+| `profe_id` en `clases_del_dia` | Devolverlo (expandir) y comparar el id y no el nombre en la grilla |
+| Decisiones de la COLA: REF-2, REV-1d, COM-6b, COM-8b, COM-9b | La opción recomendada de cada una en `PREGUNTAS.md` |
+
+### 2. Velocidad (números de hoy, 15/11, app compilada, dueña; tope guardado en `scripts/medir/topes-viajes.json`)
+
+- **App del socio: `/app` hace 22 viajes y `/app/clases` 8.** Es lo más lento que queda y lo abre el socio desde el celular: un lote como el del panel.
+- **Caja 9 (recepción 8), Prospectos 9, Entrada 7, Inicio 6, Configuración 6, Mensajes 6.** El piso de toda pantalla del panel es 3. Prospectos y Configuración repiten `contexto_pantalla` (la pantalla se arma dos veces).
+- JS del layout del panel: 71,0 KB gzip; promedio por ruta 245,9 KB. Siguiente paso: partir lo que el layout baja en toda ruta.
+- Lo fino: F0.4, F0.5 y la medición en producción (F0.1, ⛔ por los secretos).
+- Cada baja se anota bajando el tope (`ACTUALIZAR_TOPES=1` solo baja).
+
+### 3. Estructura, diseño, métodos, landing y fluidez (lo que nombró Mateo)
+
+- Pulido profundo: Z3 a Z7, F3.2, F6.1.
+- La landing nueva y el rediseño de lo que se está pasando por alto.
+- El plan de profesionalización (`docs/PLAN-PROFESIONALIZACION.md`, cuando Mateo diga "terminado oficialmente").
+
+### 4. Funciones nuevas (apagadas por defecto, detrás de su llave)
+
+Entradas sin internet (N9), débito automático (N1), resumen de la noche (N3), factura ARCA (N7), molinete (N8).
+
+### 5. Escala y plataforma
+
+- Escala: F9.4, F9.6.
+- Ensayo antes de producción (N0) y dominios desde el super admin (P9).
+- Revisión: la cola vieja (Q4) y la prueba de todo junto (R3).
+
+### 6. Lo que se encontró durante 1.0 y no es de 1.0
+
+- **No hay recorrido que pruebe activar la tablet (`/kiosco/activar`) ni la TV (`/tv/activar`)**; en 1.0 esas dos rutas pasaron a armar su dirección con `origenDe` (P2) y solo las cubre la lectura del código y el tipado. Escribir `kiosco-activar` y `tv-activar`.
+- **La cámara de QR no se abre en el barrido de modales** (pide permiso del navegador): se revisó por código (X visible) pero no con captura. Hace falta un permiso simulado en Playwright.
+- **El barrido de modales falla a veces con `net::ERR_ABORTED` o un `waitFor` agotado en la compu** (navegación pisada por otra del panel); ya reintenta, pero conviene entender la causa.
+- El link de referido del socio (`Referir`) ahora sale de `urlDeHost`, que saca el puerto: en local con puerto el link queda sin puerto (en producción no cambia nada).
+- `producto.test.ts` deja pasar "Pase diario" y "Pase libre" (son planes, no el producto): si algún día el producto cambia de nombre otra vez, hay que revisar esa excepción.
+- Los mails de Supabase (invitación, recuperar contraseña) se escriben en el panel de Supabase, no en el código: revisar que digan Pase (⛔ de Mateo, ver `PRUEBA-DUENO.md`).
+- Los documentos viejos dicen "Base" a propósito (histórico); no se reescriben.

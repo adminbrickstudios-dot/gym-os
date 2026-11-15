@@ -1,4 +1,4 @@
-# La prueba de Mateo: pasada visual y prueba del dueño
+# La prueba de Mateo: pasada visual y prueba del dueño (Pase 1.0)
 
 Es lo último. Lo hace Mateo, en producción, cuando arriba de `PROGRESO.md` dice
 **"LISTO PARA TU PASADA"**. El agente completa los links y los usuarios de
@@ -8,9 +8,16 @@ preparado para que esto lleve **una hora, no un día**.
 Cada cosa que no le guste a Mateo la anota en `docs/base/CAMBIOS-MATEO.md`,
 una por línea, con la pantalla. El loop siguiente la toma como un ítem.
 
+## Qué mirar de más en Pase 1.0 (15/11)
+
+- **El nombre es Pase** en el panel, la app del socio, el super admin, los títulos y el manifest (D69). Los **mails** de Supabase (invitación, recuperar contraseña) se escriben en el panel de Supabase, no en el código: revisá que digan Pase (⛔ tuyo).
+- **La hoja de Cobrar** tenía dos X de cerrar y quedó con una; mirala en compu y celular, en claro y oscuro.
+- **Temple Gym:** las altas online están apagadas (la página del QR dice "Hoy no te podés anotar desde acá"). Para probar el QR: Página → "Hacerse socio desde la página" → reglamento → prender "Aceptar altas online"; después abrí `/g/templegym1/hacete-socio?o=qr`. El WhatsApp del gimnasio también está vacío (Configuración → Gimnasio).
+- **Lo que no está en 1.0** (pase diario para quien no es socio, pagos parciales, prorrateo, matriz de permisos, etc.) está en `PASE-1.0.md` → "Para Pase 2.0", con la recomendación de cada una.
+
 ## Antes de empezar (lo deja listo el agente)
 
-Estado al 12/11: **el código y las acciones están listos y probados contra la base de prueba; el gimnasio todavía NO está creado en
+Estado al 12/11 (sigue igual el 15/11): **el código y las acciones están listos y probados contra la base de prueba; el gimnasio todavía NO está creado en
 producción** (el agente no corre nada contra producción). Para crearlo, 5 pasos tuyos, de a uno:
 
 1. **Secretos** en GitHub → Settings → Secrets and variables → Actions → Secrets → New repository secret (hoy solo existe `SUPABASE_DB_URL`):
