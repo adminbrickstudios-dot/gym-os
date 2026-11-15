@@ -6,7 +6,16 @@ import { CELU, COMPU, GIMNASIO, aparece, capturar, entrar, falla, navegador, ok,
 
 const MODALES = [
   { nombre: "atajos", ruta: "/panel", abrir: async (p) => { await p.evaluate(() => window.dispatchEvent(new Event("gymos:atajos"))); } },
-  { nombre: "camara-socio", ruta: "/panel/entrada", abrir: async (p) => { await p.getByRole("button", { name: /Buscar|Escanear|Cámara|QR/i }).first().click({ timeout: 8000 }); } },
+  { // OJO: este es el buscador (Ctrl+K), no la cámara de QR: la cámara pide permiso del navegador y no se abre acá.
+  nombre: "buscador", ruta: "/panel/entrada", abrir: async (p) => { await p.getByRole("button", { name: /Buscar/i }).first().click({ timeout: 8000 }); } },
+  // F1.4 (Pase 1.0): la hoja de Cobrar, que el barrido nunca había abierto. Se abre con el mismo evento que usan Vencen, la ficha y la Entrada.
+  { nombre: "cobrar", ruta: "/panel/socios", abrir: async (p) => {
+      await p.locator("main ul a[href^=\"/panel/socios/\"]").first().waitFor({ timeout: 30000 });
+      await p.waitForFunction(() => document.documentElement.dataset.cobrarHoja === "si", null, { timeout: 30000 });
+      const href = await p.locator("main ul a[href^=\"/panel/socios/\"]").first().getAttribute("href");
+      await p.evaluate((socioId) => window.dispatchEvent(new CustomEvent("gymos:cobrar", { detail: { socioId, origen: "otro" } })), href.split("/").pop());
+      await p.locator("[data-cobrar]").waitFor({ timeout: 30000 });
+    } },
 ];
 const medir = () => {
   const d = document.querySelector('[role="dialog"][aria-modal="true"]');
@@ -43,7 +52,8 @@ for (const tema of ["claro", "oscuro"]) {
     for (const m of MODALES) {
       const donde = `${m.nombre} · ${tema} · ${tam}`;
       try {
-        await p.goto(`${GIMNASIO()}${m.ruta}`, { timeout: 120000 });
+        // net::ERR_ABORTED: la navegación se pisa con otra del panel (redirección o precarga); se reintenta hasta 3 veces.
+        for (let t = 1; ; t++) { try { await p.goto(`${GIMNASIO()}${m.ruta}`, { timeout: 120000 }); break; } catch (e) { if (t >= 3 || !/ERR_ABORTED/.test(String(e.message))) throw e; await p.waitForTimeout(500); } }
         await p.waitForLoadState("networkidle").catch(() => {});
         await m.abrir(p);
         if (!(await aparece(p.locator('[role="dialog"][aria-modal="true"]'), 8000))) { falla(`${donde}: no abrió`); continue; }

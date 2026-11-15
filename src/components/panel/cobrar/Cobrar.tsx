@@ -240,13 +240,12 @@ function Cuerpo({ d, origen, alCerrar, alCobrado, cobrando }: { d: DatosCobro; o
     }}>
       <div className="p-5 sm:p-7 space-y-5">
         {/* Quién, y cuánto lleva */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pr-10">
           <PuntoEstado color={socio.color} grande />
           <div className="min-w-0 flex-1">
             <p className="titulo text-2xl truncate" data-cobrar-socio>{socio.nombre} {socio.numero != null && <span className="texto-tenue font-normal text-base">#{socio.numero}</span>}</p>
             <p className="texto-suave truncate">{socio.texto}</p>
           </div>
-          <button type="button" className="boton-texto" onClick={alCerrar} aria-label="Cerrar"><Icono nombre="cerrar" /></button>
         </div>
 
         {/* Doble cobro (VD-50, D29): frena y pregunta; solo sigue con "Cobrar igual (con motivo)" */}

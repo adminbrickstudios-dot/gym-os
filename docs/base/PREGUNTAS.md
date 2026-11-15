@@ -24,7 +24,7 @@ Respuesta de Mateo: (vacío)
 | D36 | ¿Guardar la vigencia en el socio? | Guardar `cubierto_hasta` por trigger; el color se calcula comparando con hoy. |
 | D37 | ¿Fondo claro u oscuro? | Claro por defecto, oscuro elegible. |
 | D38 | ¿Emojis? | Íconos de línea propios. |
-| D39 | ¿Se llama Base? | Sí. |
+| D39 | ¿Se llama Base? | Sí. **Reemplazada por D69 (15/11): se llama Pase.** |
 
 ## Decididas por defecto (07/11, al armar `docs/base/`)
 

@@ -1,4 +1,22 @@
-# BASE: la vuelta completa (07/11/2026)
+# Pase (antes Base): índice de `docs/base/`
+
+**El producto se llama Pase (D69, 15/11; reemplaza a D39).** El repo, las carpetas y los nombres internos siguen diciendo gym-os; los documentos viejos dicen "Base" y no se reescriben.
+
+## Lo vigente (en este orden)
+
+1. `PASE-1.0.md`: **lo que manda hoy.** Los 11 puntos para cerrar Pase 1.0, lo que depende de Mateo y la lista "Para Pase 2.0".
+2. `PROGRESO.md`: arriba, "DÓNDE QUEDÉ" y el resumen para Mateo; abajo el detalle de cada BASE-*.
+3. `RECTA-FINAL.md`: la lista por ítem con su LISTO SI y su estado. ➡️ = Pase 2.0, cuenta como cerrado en 1.0.
+4. `ESTADO-GENERAL.md`: el mapa de todo lo que hay, por panel.
+5. `PREGUNTAS.md`: decisiones (D36 en adelante). Gana la más nueva: D62 cierra D40 y D56; D69 reemplaza a D39; D70 decide Q1 y F4.1.
+6. `PRUEBA-DUENO.md`: la pasada de Mateo al final.
+7. Reglas de trabajo: `CLAUDE.md` (raíz del repo).
+
+Todo lo que sigue en este archivo es **histórico (07/11)**: así estaba pensada la vuelta al arrancar. Sirve para entender por qué, no para saber qué falta.
+
+---
+
+# HISTÓRICO · BASE: la vuelta completa (07/11/2026)
 
 Pedido de Mateo del 07/11 a la noche. Mañana entra el primer gimnasio real.
 El texto del pedido, sin tocar, está en `PEDIDO-ORIGINAL.md`. Este archivo lo
@@ -31,7 +49,7 @@ Entonces esta vuelta **no rehace nada**. Por cada punto del pedido:
 | D36 | Vigencia guardada | **Se guarda solo `cubierto_hasta` en el socio** (ni estado ni deuda: la deuda crece sola con los días), por trigger, cada vez que cambia un hecho: pago, anulación, pausa, cambio de plan, regla de vencimiento, plan familiar. El color se saca comparando esa fecha con el momento: nunca queda viejo y no hay cron. Detalle en `REGLAS-NEGOCIO.md` § Vigencia. |
 | D37 | Fondo | **Claro por defecto, oscuro elegible**: el gimnasio elige el suyo en Configuración y cada usuario puede cambiarlo en Mi cuenta. Reemplaza el "modo gym oscuro" del 05/11. |
 | D38 | Íconos | **Íconos de línea propios** (set tipo Lucide, en el color del gimnasio) en lugar de emojis, en todos lados: menú, botones, app, página. |
-| D39 | Nombre | **El producto se llama Base.** Cambia todo lo que ve la gente (ingreso, página de venta, mails, super admin, títulos, manifest). El repo, el código, las tablas y las variables siguen como están. |
+| D39 | Nombre | **(Reemplazada por D69: el producto se llama Pase.)** Decía: el producto se llama Base. Cambia todo lo que ve la gente (ingreso, página de venta, mails, super admin, títulos, manifest). El repo, el código, las tablas y las variables siguen como están. |
 
 ## Lo que se decidió por defecto (Mateo lo puede cambiar)
 
@@ -39,7 +57,7 @@ Están en `PREGUNTAS.md` con el porqué. El agente trabaja con esto sin frenar.
 
 | # | Tema | Por defecto |
 |---|---|---|
-| D40 | Resultado del ingreso en recepción | **Aviso flotante abajo a la derecha + panel lateral** al tocarlo. La ventana grande del veredicto (VD-1) queda como opción en Configuración ("Mostrar el resultado: aviso en la esquina / ventana grande"). Las tres formas de abrir la Entrada de D17 siguen; se suman F2 y `/` como atajo global. |
+| D40 | Resultado del ingreso en recepción | (Cerrada por D62.) **Aviso flotante abajo a la derecha + panel lateral** al tocarlo. La ventana grande del veredicto (VD-1) queda como opción en Configuración ("Mostrar el resultado: aviso en la esquina / ventana grande"). Las tres formas de abrir la Entrada de D17 siguen; se suman F2 y `/` como atajo global. |
 | D41 | Links por rol | `/dueno`, `/recepcion`, `/profe`, `/socio`, `/super` son **puertas fijas**: muestran el ingreso con la marca del gimnasio y después llevan a las pantallas que ya existen (`/panel`, `/app`, `/admin`). No se duplican pantallas. |
 | D42 | Contraseña del dueño y del equipo | Quien crea la cuenta elige: **"la escribo yo"** (se muestra una sola vez para copiarla) o **"le mando un link"**. Al primer ingreso se le sugiere cambiarla. |
 | D43 | Cómo se entra | **Mail y contraseña** es la forma principal y visible, con "Olvidé mi contraseña". Las otras de D23 (Google, código) quedan abajo, en "Otras formas de entrar", solo si están configuradas. Al socio con mail se le manda un link para crear su contraseña cuando lo dan de alta. |
@@ -104,7 +122,10 @@ como "decidido por defecto" y se sigue.
 
 | Archivo | Qué tiene | Quién lo escribe |
 |---|---|---|
-| `00-LEEME.md` | Esto | Armado el 07/11 |
+| `00-LEEME.md` | Esto: el índice. Lo vigente arriba; el resto es histórico | Corregido el 15/11 |
+| `PASE-1.0.md` | **Vigente.** Los 11 puntos para cerrar Pase 1.0 y la lista "Para Pase 2.0" | Mateo y el agente, 15/11 |
+| `ESTADO-GENERAL.md` | Vigente: el mapa de todo lo que hay, por panel | El agente |
+| `NOCHE-1211.md`, `LANDING-SOCIO-1411.md`, `DOMINIO.md`, `COPIAS.md`, `ENSAYO.md`, `MOLINETE-API.md`, `FACTURA-ARCA.md`, `DEBITO-AUTOMATICO.md`, `ESCALA.md`, `FLUIDEZ-PANTALLAS.md`, `DIAGNOSTICO-BASE0.md` | Notas por tema: pedidos de Mateo, guías de pasos suyos y diseños de lo que es de Pase 2.0. `DIAGNOSTICO-BASE0.md` es histórico | Varios |
 | `PEDIDO-ORIGINAL.md` | El pedido de Mateo textual | Armado el 07/11 |
 | `RECTA-FINAL.md` | **Desde el 09/11, la única lista que sigue el loop**: 8 fases hasta "LISTO PARA TU PASADA" | Armado el 09/11, el agente marca el estado |
 | `PROGRESO.md` | El detalle de cada BASE-* del P0, y arriba el resumen para Mateo | El agente lo mantiene |
