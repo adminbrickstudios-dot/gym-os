@@ -61,9 +61,13 @@ try {
   const titulo = await v.title();
   const og = await v.locator('meta[property="og:title"]').getAttribute("content").catch(() => null);
   chequear(!!og && titulo.length > 0, `título “${titulo}” y vista al compartir (og:title “${og}”)`, `sin título o sin og:title (${titulo} / ${og})`);
-  await v.locator('a[href="#planes"]').first().click();
-  await v.waitForTimeout(600);
-  chequear(await v.evaluate(() => window.scrollY > 200), "“Ver planes” baja a los planes", "“Ver planes” no se mueve");
+  // Desde la portada de una sola pantalla (L1) el botón principal va a WhatsApp si hay número; "Ver planes" (#planes) solo aparece sin WhatsApp
+  // o en "¿Primera vez?". Si el link está, baja a los planes; si no, la sección de planes igual tiene que estar.
+  if (await v.locator('a[href="#planes"]').count()) {
+    await v.locator('a[href="#planes"]').first().click();
+    await v.waitForTimeout(600);
+    chequear(await v.evaluate(() => window.scrollY > 200), "“Ver planes” baja a los planes", "“Ver planes” no se mueve");
+  } else chequear(await v.locator("#planes").count() === 1, "la sección de planes está (la portada va a WhatsApp, sin “Ver planes”)", "no hay sección de planes");
   await capturar(v, "aud2-compu-publicada", true);
   if (v.errores.length) falla(`visitante compu: ${v.errores.join(" | ")}`);
   await v.context().close();
