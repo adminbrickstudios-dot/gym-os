@@ -107,7 +107,7 @@ try {
   const a = await pagina(b, CELU);
   a.setDefaultNavigationTimeout(120000);
   await entrarSocio(a, TEL);
-  const pagar = a.locator("section", { hasText: "Pagar por transferencia" });
+  const pagar = a.locator("section", { hasText: "Pagar por transferencia" }).last();
   await pagar.waitFor({ timeout: 60000 });
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png", buffer: PNG });
   await a.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });

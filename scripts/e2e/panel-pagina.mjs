@@ -79,8 +79,10 @@ try {
   await revisarLinks(c, "celular");
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular: sin desborde (${ancho}px)`, `celular: la página mide ${ancho}px`);
+  // L1 (Mateo, 14/11): la portada de una sola pantalla no lleva barra fija de WhatsApp (el principal es "Ya soy socio, entrar"). Se comprueba que no haya
+  // una barra fija repetida; la barra de WhatsApp vuelve, si vuelve, con la landing nueva (Pase 2.0).
   const barra = c.locator("div.fixed a.boton-principal");
-  chequear(await barra.count() === 1 && await barra.isVisible(), "celular: el botón de WhatsApp queda fijo abajo, una sola vez", "celular: sin barra fija de WhatsApp");
+  chequear(await barra.count() <= 1, "celular: a lo sumo un botón fijo abajo (L1: sin barra de WhatsApp)", "celular: hay más de un botón fijo abajo");
   await capturar(c, "aud2-celu-publicada", true);
   if (c.errores.length) falla(`visitante celu: ${c.errores.join(" | ")}`);
   await c.context().close();
