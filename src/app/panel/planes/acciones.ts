@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/formato";
+import { validarMatriculaNueva } from "@/lib/planes-matricula";
 import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { conflictoDe } from "@/lib/panel/version";
 
@@ -13,8 +14,8 @@ export type EstadoNuevoPlan = { error?: string; ok?: number; campo?: string; val
 export async function crearPlan(_: EstadoNuevoPlan, f: FormData): Promise<EstadoNuevoPlan> {
   const valores = Object.fromEntries([...f.entries()].filter(([, v]) => typeof v === "string")) as Record<string, string>;
   const r = await crearPlanInterno(f);
-  // Si el plan ya se creó (falló solo la matrícula) no se devuelven los campos: volver a enviar lo duplicaría.
-  return r.error && !r.error.startsWith("El plan se creó") ? { ...r, valores } : r;
+  // La matrícula se valida antes de crear: si hay error, no se creó nada y vuelven los campos.
+  return r.error ? { ...r, valores } : r;
 }
 
 async function crearPlanInterno(f: FormData): Promise<EstadoNuevoPlan> {
@@ -23,6 +24,9 @@ async function crearPlanInterno(f: FormData): Promise<EstadoNuevoPlan> {
   const precio = leerMonto(String(f.get("precio") ?? ""));
   if (Number.isNaN(precio)) return { error: MAL_MONTO, campo: "precio" };
   if (!(precio > 0)) return { error: "Poné el precio", campo: "precio" };
+  // Q1 (D70): la matrícula se valida antes de crear nada; así no queda un plan a medias.
+  const matricula = validarMatriculaNueva(tipo, String(f.get("matricula") ?? ""));
+  if (matricula.error) return { error: matricula.error, campo: "matricula" };
   try {
     const id = await rpc<string>("guardar_plan", { p_gimnasio_id: panel.gimnasio.id, p_plan_id: null, p_datos: {
       tipo, nombre: f.get("nombre"), descripcion: f.get("descripcion"),
@@ -33,12 +37,7 @@ async function crearPlanInterno(f: FormData): Promise<EstadoNuevoPlan> {
       hora_desde: f.get("hora_desde") || null, hora_hasta: f.get("hora_hasta") || null,
     } });
     await rpc("programar_precio", { p_plan_id: id, p_monto: precio });
-    const mat = String(f.get("matricula") ?? "").trim();
-    if (tipo === "membresia" && mat) {
-      const m = leerMonto(mat);
-      if (Number.isNaN(m)) return { error: `El plan se creó, pero la matrícula no: ${MAL_MONTO}. Ponela desde Editar.` };
-      await rpc("guardar_matricula_plan", { p_plan_id: id, p_monto: m, p_anual: f.get("matricula_anual") === "on" });
-    }
+    if (matricula.monto !== null) await rpc("guardar_matricula_plan", { p_plan_id: id, p_monto: matricula.monto, p_anual: f.get("matricula_anual") === "on" });
     listo();
     return { ok: Date.now() };
   } catch (e) { return { error: (e as Error).message }; }

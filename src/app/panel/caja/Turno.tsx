@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CalculadoraBilletes } from "@/components/panel/CalculadoraBilletes";
 import { linkCompartir, textoCierre } from "@/lib/caja";
-import { formatearPesos } from "@/lib/formato";
+import { formatearPesos, leerMonto } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
 import { PorMedio } from "./PorMedio";
 import type { Billetes, CobrosMedio } from "./tipos";
@@ -151,6 +151,7 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           {!pedirBilletes && <button type="button" className="boton boton-chico" aria-pressed={conBilletes} onClick={() => { setConBilletes(!conBilletes); setBilletes(null); setMonto(""); }}>{conBilletes ? "Escribir el total yo" : "Contar billetes"}</button>}
           {usaCalculadora && <CalculadoraBilletes alCambiar={(total, detalle) => { setMonto(String(total).replace(".", ",")); setBilletes(detalle); }} />}
           <input className="campo" placeholder="Nota (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+          {monto && !Number.isNaN(leerMonto(monto)) && <p className="texto-suave" data-cierre-confirmar>Vas a cerrar la caja con <strong>{formatearPesos(leerMonto(monto))}</strong> contados.</p>}
           {error && <p role="alert" className="pildora pildora-rojo"><Icono nombre="alerta" /> {error}</p>}
           <div className="flex gap-2"><button type="submit" disabled={ocupado || !monto} className="boton boton-principal">{ocupado ? "Cerrando la caja…" : <><Icono nombre="candado" /> Cerrar con este monto</>}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
