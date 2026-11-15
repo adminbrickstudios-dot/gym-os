@@ -3,9 +3,13 @@
 //   scripts/local/levantar.sh && node scripts/medir/viajes.mjs      (lee .local/app.log)
 // Sin prefetch (se abortan los pedidos de precarga: sumarían viajes de otras pantallas). Imprime una tabla
 // markdown y marca con ⚠ lo que pasa de 2 viajes. No corta: la tabla es lo que se compara antes / después.
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { COMPU, GIMNASIO, entrar, entrarSocio, navegador, pagina } from "../e2e/comun.mjs";
 
+// Pase 1.0 (F0.2/E8): "nunca más lento que hoy". scripts/medir/topes-viajes.json guarda los viajes que tiene hoy cada pantalla;
+// si una pasa de su tope, este script falla (y la cadena e2e con él). ACTUALIZAR_TOPES=1 solo BAJA los topes (o suma pantallas nuevas).
+const ARCHIVO_TOPES = "scripts/medir/topes-viajes.json";
+const topes = existsSync(ARCHIVO_TOPES) ? JSON.parse(readFileSync(ARCHIVO_TOPES, "utf8")) : {};
 const LOG = process.env.APP_LOG ?? ".local/app.log";
 const TOPE = 2;
 const PANTALLAS = ["/panel", "/panel/entrada", "/panel/socios", "/panel/vencen-hoy", "/panel/caja", "/panel/vender", "/panel/clases",
@@ -77,3 +81,25 @@ for (const f of filas) {
 }
 const pasan = filas.filter((f) => f.n > TOPE);
 console.log(`\n${pasan.length} de ${filas.length} pantallas pasan de ${TOPE} viajes.`);
+
+// ── Topes: nunca más lento que hoy ──
+// En modo desarrollo React monta todo dos veces y los números se duplican: solo se exige con la app compilada.
+const compilada = process.env.APP_MODO === "produccion";
+const clave = (f) => `${f.rol} ${f.ruta}`;
+if (process.env.ACTUALIZAR_TOPES === "1") {
+  const nuevos = { ...topes };
+  for (const f of filas) nuevos[clave(f)] = Math.min(nuevos[clave(f)] ?? Infinity, f.n);
+  writeFileSync(ARCHIVO_TOPES, JSON.stringify(Object.fromEntries(Object.entries(nuevos).sort(([a], [b]) => a.localeCompare(b))), null, 2) + "\n");
+  console.log(`Topes guardados en ${ARCHIVO_TOPES} (${Object.keys(nuevos).length} pantallas).`);
+} else if (!compilada) {
+  console.log("Topes: no se exigen en modo desarrollo (los viajes se duplican). Corré con APP_MODO=produccion.");
+} else {
+  const pasados = filas.filter((f) => f.n > (topes[clave(f)] ?? Infinity));
+  const sinTope = filas.filter((f) => !(clave(f) in topes));
+  for (const f of sinTope) console.log(`⚠ sin tope: ${clave(f)} (${f.n} viajes); corré ACTUALIZAR_TOPES=1 para fijarlo`);
+  if (pasados.length) {
+    for (const f of pasados) console.log(`✗ ${clave(f)}: ${f.n} viajes, el tope es ${topes[clave(f)]} (nunca más lento que hoy)`);
+    process.exit(1);
+  }
+  console.log(`Topes: ninguna pantalla pasa de lo que tiene hoy (${filas.length - sinTope.length} comparadas).`);
+}

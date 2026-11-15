@@ -24,7 +24,7 @@ Respuesta de Mateo: (vacío)
 | D36 | ¿Guardar la vigencia en el socio? | Guardar `cubierto_hasta` por trigger; el color se calcula comparando con hoy. |
 | D37 | ¿Fondo claro u oscuro? | Claro por defecto, oscuro elegible. |
 | D38 | ¿Emojis? | Íconos de línea propios. |
-| D39 | ¿Se llama Base? | Sí. |
+| D39 | ¿Se llama Base? | Sí. **Reemplazada por D69 (15/11): se llama Pase.** |
 
 ## Decididas por defecto (07/11, al armar `docs/base/`)
 
@@ -487,3 +487,5 @@ Respuesta de Mateo: (vacío)
 | D66 | L1: ¿qué hacer con "Probá una clase gratis" en la portada de una sola pantalla? | Queda como cuarta línea de los datos si el dueño tiene la sección prendida | No estorba y no se pierde un pedido anterior (VD-25/VD-62) |
 | D67 | L3: cómo se activa el QR sin recargar | El celular pregunta cada 8 s (solo bloqueado y con la pantalla a la vista) y al volver a la app | Realtime sobre cobros exigiría publicar tablas y políticas del socio; el pedido es chico y corre solo mientras espera |
 | D68 | E8: qué cuenta como "viaje" | Los del render (contexto_pantalla + el lote de la pantalla = 2); lo que el navegador pide después de pintar (menú y campana juntos en `panel_vivo`, y los avisos de la puerta) se mide aparte | Lo primero es lo que hace esperar a quien abre la pantalla |
+| D69 | El nombre del producto | **Pase** en todo lo que ve la gente (panel, app del socio, super admin, mails, títulos, manifest, página de la plataforma). El repo, las carpetas y los nombres internos siguen siendo gym-os/Base. Reemplaza a D39 (Mateo, 15/11) | Mateo compró pasegym.com y le dice Pase |
+| D70 | Las decisiones de plata y permisos de Q1 y F4.1 (13, 24, 25, 26, 43) | Mateo delega (15/11): el agente elige la opción recomendada **solo** en las que no cambian cuánto se cobra, a quién se le cobra ni quién ve o mueve plata; esas se hacen con su prueba de base. Las que sí lo cambian pasan a ➡️ Pase 2.0, con la recomendación escrita | Cerrar Pase 1.0 sin arriesgar la plata de Temple Gym |

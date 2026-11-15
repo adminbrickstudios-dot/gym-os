@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { guardarLimitesPlan, guardarPlanPublico } from "./acciones";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type PlanConLimites = { id: string; nombre: string; activo: boolean; publico?: boolean; max_socios: number | null; max_sedes: number | null; gimnasios: number };
 const aNumero = (s: string) => (s.trim() === "" ? null : Number(s.replace(/\./g, "")));
@@ -36,6 +37,6 @@ function Fila({ plan }: { plan: PlanConLimites }) {
 }
 
 export function LimitesPlanes({ planes }: { planes: PlanConLimites[] }) {
-  if (planes.length === 0) return <p className="texto-tenue">Todavía no hay planes de BRIK: creá uno en “Planes de Base”.</p>;
+  if (planes.length === 0) return <p className="texto-tenue">Todavía no hay planes de BRIK: creá uno en “Planes de {NOMBRE_PRODUCTO}”.</p>;
   return <ul className="space-y-2" data-limites-planes>{planes.map((p) => <Fila key={p.id} plan={p} />)}</ul>;
 }

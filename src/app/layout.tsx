@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Hidratado } from "@/components/Hidratado";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // El título y el favicon de cada gimnasio salen de sus datos, en el
 // layout de sus paneles. Este es el de la plataforma.
 export const metadata: Metadata = {
-  title: { default: "Base", template: "%s · Base" },
+  title: { default: NOMBRE_PRODUCTO, template: `%s · ${NOMBRE_PRODUCTO}` },
   description: "Sistema de gestión para gimnasios.",
 };
 

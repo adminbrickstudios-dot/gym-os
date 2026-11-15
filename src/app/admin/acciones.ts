@@ -9,6 +9,7 @@ import { agregarDominio as agregarDominioVercel, configuracionVercel, verificarD
 import { leerPago } from "@/lib/mercadopago";
 import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
 // valida con la sesión de quien pide (admin_* / *_para_*), recién después el
@@ -41,7 +42,7 @@ function direccionesDe(slug: string) {
 function bienvenida(nombre: string, dueno: string, slug: string, email: string, contrasena: string | undefined, celular: string) {
   const { web, panel } = direccionesDe(slug);
   const lineaClave = contrasena ? `Contraseña: ${contrasena}\n` : "Entrá con la contraseña que ya tenés.\n";
-  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en Base.\nTu panel: ${panel}\nMail: ${email}\n${lineaClave}Tu web: ${web}${contrasena ? "\nCambiá la contraseña apenas entres (Mi cuenta)." : ""}`;
+  const texto = `Hola ${dueno.split(" ")[0]}! Ya está listo ${nombre} en ${NOMBRE_PRODUCTO}.\nTu panel: ${panel}\nMail: ${email}\n${lineaClave}Tu web: ${web}${contrasena ? "\nCambiá la contraseña apenas entres (Mi cuenta)." : ""}`;
   const digitos = celular.replace(/\D/g, "");
   const wa = digitos.length >= 8 ? `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
   return { bienvenida: { texto, wa: digitos.length >= 8 ? wa : null }, accesos: { panel, web, email, contrasena, texto, wa } satisfies Accesos };
@@ -92,7 +93,7 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   const planBrik = String(f.get("plan_brik") ?? "");
   if (!pendiente && /^[0-9a-f-]{36}$/i.test(planBrik)) {
     try { await rpc("admin_asignar_plan_brik", { p_gimnasio_id: r.gimnasio_id, p_plan_id: planBrik }); }
-    catch (e) { avisoPlantilla += ` No se pudo asignar el plan de Base: ${(e as Error).message}.`; }
+    catch (e) { avisoPlantilla += ` No se pudo asignar el plan de ${NOMBRE_PRODUCTO}: ${(e as Error).message}.`; }
   }
   const creado = { gimnasio_id: r.gimnasio_id, slug, nombre };
   if (!email) return { ok: { ...creado, aviso: `${nombre} está creado. Para que el dueño entre, dale acceso con su mail desde el gimnasio.${avisoPlantilla}` } };

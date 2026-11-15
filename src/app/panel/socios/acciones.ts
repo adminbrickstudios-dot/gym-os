@@ -7,6 +7,7 @@ import { contextoPanel, rpc } from "@/lib/panel/servidor";
 import { errorSiHaySalud } from "@/lib/salud";
 import { sedeActiva } from "@/lib/panel/sede";
 import { conflictoDe } from "@/lib/panel/version";
+import { origenDe } from "@/lib/urls";
 
 export type EstadoForm = {
   error?: string; destino?: string; valores?: Record<string, string>; version?: string;
@@ -81,9 +82,7 @@ export async function guardarSocio(socioId: string | null, _: EstadoForm, form: 
   if (!socioId && datos.email) {
     try {
       const h = await headers();
-      const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-      const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127.|[^.]+.localhost)/.test(host) ? "http" : "https");
-      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: `${proto}://${host}`, contrasena: contrasena || undefined, gimnasioId: panel.gimnasio.id });
+      const r = await prepararLinkContrasenaSocio({ email: datos.email, nombre: datos.nombre, gimnasio: panel.gimnasio.nombre, origen: origenDe(h), contrasena: contrasena || undefined, gimnasioId: panel.gimnasio.id });
       // Antes la expresión era /D/ (la letra D) y el número quedaba con "+" y espacios: el link no abría el chat.
       linkContrasena = { ...r, wa: linkWhatsappSocio(datos.telefono, r.texto) };
     } catch (e) { avisoLink = `El socio quedó dado de alta, pero no se pudo armar su link de contraseña: ${(e as Error).message}`; }

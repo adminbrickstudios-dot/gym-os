@@ -19,6 +19,7 @@ import { sedeActiva } from "@/lib/panel/sede";
 import type { ConfigEntrada } from "@/app/panel/entrada/config";
 import { Icono } from "@/components/ui/Icono";
 import { ATAJOS_PANEL, AtajosAyuda } from "@/components/ui/AtajosAyuda";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 /** El esqueleto de todas las pantallas del panel: marca del gimnasio, menú y contenido. */
 /** ADM-2/ADM-3: el abono del gimnasio con BRIK (los montos, solo para el dueño). */
@@ -66,10 +67,10 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
           <SinConexion />
           <VersionNueva />
           {abono?.estado === "vencido" && (
-            <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura><Icono nombre="candado" /> El abono de Base está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
+            <p className="mensaje mensaje-error mb-6 pr-14" data-solo-lectura><Icono nombre="candado" /> El abono de {NOMBRE_PRODUCTO} está vencido: el panel quedó en <strong>solo lectura</strong> (no vende ni edita). La puerta, la app de los socios y la página siguen andando.{panel.yo.rol === "dueno" ? " Hablá con BRIK para regularizarlo." : " Avisale al dueño."}</p>
           )}
           {abono?.estado === "por_vencer" && panel.yo.rol === "dueno" && (
-            <p className="mensaje mensaje-aviso mb-6 pr-14" data-abono-por-vencer><Icono nombre="reloj" /> Tu abono de Base{abono.plan ? ` (${abono.plan})` : ""} vence {abono.dias === 0 ? "hoy" : abono.dias === 1 ? "mañana" : `en ${abono.dias} días`}. Si vence, el panel queda en solo lectura (la puerta sigue andando).</p>
+            <p className="mensaje mensaje-aviso mb-6 pr-14" data-abono-por-vencer><Icono nombre="reloj" /> Tu abono de {NOMBRE_PRODUCTO}{abono.plan ? ` (${abono.plan})` : ""} vence {abono.dias === 0 ? "hoy" : abono.dias === 1 ? "mañana" : `en ${abono.dias} días`}. Si vence, el panel queda en solo lectura (la puerta sigue andando).</p>
           )}
           {/* CAJ-3: en esta compu alguien puso su PIN: lo que se haga queda a su nombre. */}
           {atiende && (

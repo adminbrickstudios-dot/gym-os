@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { darAccesoPersona, nuevaClavePersona, type Resultado } from "@/app/admin/acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Icono } from "@/components/ui/Icono";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 /** La contraseña provisoria se muestra una sola vez, grande y fácil de copiar. */
 export function ContrasenaNueva({ r, telefono, onListo }: { r: Resultado & { texto?: string }; telefono?: string | null; onListo?: () => void }) {
@@ -12,7 +13,7 @@ export function ContrasenaNueva({ r, telefono, onListo }: { r: Resultado & { tex
   if (!r.aviso) return null;
   // C1: con el mensaje armado por el servidor (marca del gimnasio, su dirección, mail y clave) se manda a un toque.
   // Sin él (altas del super admin) se arma acá con la dirección actual.
-  const texto = r.texto ?? (r.contrasena ? `Tu acceso a Base: entrá en ${window.location.origin}/ingresar${r.email ? ` con ${r.email}` : ""} y la contraseña ${r.contrasena}. Después cambiala en “Mi cuenta”.` : "");
+  const texto = r.texto ?? (r.contrasena ? `Tu acceso a ${NOMBRE_PRODUCTO}: entrá en ${window.location.origin}/ingresar${r.email ? ` con ${r.email}` : ""} y la contraseña ${r.contrasena}. Después cambiala en “Mi cuenta”.` : "");
   const copiar = async (que: "clave" | "mensaje") => {
     try { await navigator.clipboard.writeText(que === "clave" ? r.contrasena ?? "" : texto); setCopiado(que); setTimeout(() => setCopiado(null), 1800); }
     catch { setCopiado(null); }

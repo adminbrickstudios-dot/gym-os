@@ -132,6 +132,12 @@ try {
   chequear(await rojo.count() > 0, "el aviso rojo se queda (no se va solo)", "el aviso rojo desapareció");
   chequear(await rojo.first().locator("[data-aviso-cobrar]").count() === 1, "el rojo trae el botón Cobrar", "el rojo no tiene Cobrar");
   await capturar(r, "vd4-compu-aviso-rojo");
+  // F1.1: Cobrar desde el aviso rojo abre la hoja de Cobrar con ESE socio (el cobro de punta a punta lo prueba flujo-cierre).
+  await rojo.first().locator("[data-aviso-cobrar]").click();
+  const hojaRojo = r.locator("[data-cobrar]");
+  await hojaRojo.waitFor({ timeout: 20000 }).catch(() => {});
+  chequear(await hojaRojo.count() === 1 && /Vencida/.test(await hojaRojo.innerText()), "Cobrar desde el aviso rojo abre la hoja con ese socio", "Cobrar desde el aviso rojo no abrió la hoja del socio");
+  await r.keyboard.press("Escape");
 
   // ── "Hoy" en la pantalla Entrada se actualiza sola ──
   await r.goto(`${G}/panel/entrada`);

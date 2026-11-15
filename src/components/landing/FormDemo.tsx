@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { pedirDemo, type EstadoDemo } from "./acciones-plataforma";
 import { Icono } from "@/components/ui/Icono";
 import { CampoAntiRobot } from "@/components/cuentas/CampoAntiRobot";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export function FormDemo() {
   const [estado, accion, enviando] = useActionState<EstadoDemo, FormData>(pedirDemo, {});
@@ -12,7 +13,7 @@ export function FormDemo() {
     return (
       <div className="tarjeta p-6 space-y-2" role="status" data-demo-listo>
         <p className="titulo text-2xl"><Icono nombre="persona" /> ¡Listo, {estado.nombre}!</p>
-        <p className="texto-suave text-lg">Recibimos tu pedido. Te escribimos para mostrarte Base con los datos de tu gimnasio.</p>
+        <p className="texto-suave text-lg">Recibimos tu pedido. Te escribimos para mostrarte {NOMBRE_PRODUCTO} con los datos de tu gimnasio.</p>
       </div>
     );
   }

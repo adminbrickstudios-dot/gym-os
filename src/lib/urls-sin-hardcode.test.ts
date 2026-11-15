@@ -24,16 +24,7 @@ const REGLAS: Regla[] = [
 
 /** Lo que existía antes de PLAT-04 y le toca a otro carril. "archivo|regla" → quién lo arregla. */
 const EXCEPCIONES: Record<string, string> = {
-  "lib/panel/direccion-pagina.ts|g-slug": "carril A/D: dirección de la página del gimnasio en Configuración",
-  "lib/panel/direccion-pagina.ts|absoluta": "carril A/D: dirección de la página del gimnasio en Configuración",
-  "app/elegir/page.tsx|g-slug": "carril C: el elegir gimnasio",
-  "proxy.ts|g-slug": "carril A: el proxy reescribe /g/<slug> (es una ruta, no un link)",
-  "app/app/Referir.tsx|absoluta": "carril C: link de referido del socio",
-  "app/app/acciones.ts|absoluta": "carril C: origen de la app del socio, armado con el host del pedido",
-  "app/panel/socios/acciones.ts|absoluta": "carril D: origen del link para crear la contraseña del socio, armado con el host del pedido",
-  "app/kiosco/activar/route.ts|absoluta": "carril A/D: redirección del kiosco con el host del pedido",
-  "app/tv/activar/route.ts|absoluta": "carril A/D: redirección de la TV con el host del pedido",
-  "lib/google.ts|absoluta": "carril C: URL de vuelta de Google con el host del pedido",
+  // P2 (Pase 1.0): vacía. Toda dirección sale de src/lib/urls.ts (urlDeHost, rutaGimnasio, origenDe).
 };
 
 function archivos(dir: string): string[] {

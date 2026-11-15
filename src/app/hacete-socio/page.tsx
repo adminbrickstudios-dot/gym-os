@@ -12,6 +12,7 @@ import type { Transferencia } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
 import { urlDeHost } from "@/lib/urls";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type DatosAlta = {
   abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { absolute: titulo },
     description: descripcion,
     icons: icono ? { icon: icono, apple: icono } : { icon: "/icono", apple: "/icono" },
-    openGraph: { type: "website", title: titulo, description: descripcion, siteName: nombre ?? "Base", locale: "es_AR", images: [{ url: imagen, alt: nombre ?? "Base" }] },
+    openGraph: { type: "website", title: titulo, description: descripcion, siteName: nombre ?? NOMBRE_PRODUCTO, locale: "es_AR", images: [{ url: imagen, alt: nombre ?? NOMBRE_PRODUCTO }] },
     twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagen] },
   };
 }

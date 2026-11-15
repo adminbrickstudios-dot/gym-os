@@ -1,3 +1,4 @@
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 // PLAT-05: conectar dominios desde el super admin con la API de Vercel. Sin `fetch` propio: recibe el cliente HTTP, así se prueba
 // con uno simulado (sin red y sin token). En producción queda ⛔ hasta que Mateo cargue VERCEL_TOKEN y VERCEL_PROJECT_ID (y compre el dominio).
 // Nunca devuelve el token: ni en los errores ni en los textos.
@@ -51,7 +52,7 @@ export function errorDeVercel(status: number, cuerpo: unknown): string {
   const e = (cuerpo as { error?: { code?: string; message?: string } } | null)?.error;
   const codigo = e?.code ?? "";
   if (status === 401 || status === 403 || codigo === "forbidden" || codigo === "invalid_token") return "Vercel rechazó el token (VERCEL_TOKEN): está vencido, es de otra cuenta o no tiene permiso sobre este proyecto. Creá uno nuevo en Vercel → Account Settings → Tokens y cargalo de nuevo.";
-  if (status === 404 || codigo === "not_found") return "Vercel no encontró el proyecto (VERCEL_PROJECT_ID) o el equipo (VERCEL_TEAM_ID). Revisá que sean los del proyecto de Base.";
+  if (status === 404 || codigo === "not_found") return `Vercel no encontró el proyecto (VERCEL_PROJECT_ID) o el equipo (VERCEL_TEAM_ID). Revisá que sean los del proyecto de ${NOMBRE_PRODUCTO}.`;
   if (codigo === "domain_already_in_use" || codigo === "domain_taken") return "Ese dominio ya está en otro proyecto de Vercel. Sacalo de ahí primero (o es de otra cuenta).";
   if (codigo === "invalid_domain" || codigo === "bad_request") return `Vercel dice que el dominio no es válido${e?.message ? `: ${e.message}` : ""}.`;
   if (status === 429) return "Vercel pide esperar un momento (demasiados pedidos). Probá de nuevo en un minuto.";

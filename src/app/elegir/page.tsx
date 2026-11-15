@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NOMBRE_ROL } from "@/lib/panel/secciones";
 import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
+import { rutaGimnasio } from "@/lib/urls";
 import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Elegí el gimnasio" };
@@ -36,7 +37,7 @@ export default async function Elegir() {
           <div className="mt-8 space-y-2" data-elegir-socio>
             <p className="texto-suave">Como socio:</p>
             {[...new Map(yo.socios.map((s) => [s.slug, s])).values()].map((s) => (
-              <a key={s.slug} href={`/g/${s.slug}/app`} className="boton w-full !justify-between text-lg"><span><Icono nombre="pesa" /> {s.gimnasio}</span><span className="texto-tenue text-sm">Mi app</span></a>
+              <a key={s.slug} href={rutaGimnasio(s.slug, "/app")} className="boton w-full !justify-between text-lg"><span><Icono nombre="pesa" /> {s.gimnasio}</span><span className="texto-tenue text-sm">Mi app</span></a>
             ))}
           </div>
         )}

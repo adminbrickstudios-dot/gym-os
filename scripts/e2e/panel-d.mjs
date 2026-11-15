@@ -163,7 +163,7 @@ try {
   await p.goto(`${G}/panel/configuracion?pestana=cobros`);
   const mp = p.locator("[data-mercadopago]");
   await mp.waitFor({ timeout: 60000 });
-  chequear(/Nunca pasa por Base ni por BRIK/.test(await mp.locator("[data-mp-plata-directa]").innerText()), "MercadoPago: dice que la plata va directo a la cuenta del gimnasio", "falta el cartel de la plata directa en MercadoPago");
+  chequear(/Nunca pasa por Pase ni por BRIK/.test(await mp.locator("[data-mp-plata-directa]").innerText()), "MercadoPago: dice que la plata va directo a la cuenta del gimnasio", "falta el cartel de la plata directa en MercadoPago");
   await capturar(p, "paneld-compu-mercadopago");
 
   // ── FA-16 · Ficha con foto nueva subida por el socio ──

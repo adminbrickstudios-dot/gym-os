@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO } from "@/lib/cookie-gimnasio";
 import type { crearClienteServidor } from "@/lib/supabase/servidor";
 import type { MiSesion } from "@/lib/panel/servidor";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // Lo que comparten el ingreso con contraseña y "olvidé mi contraseña": a dónde
 // va la persona una vez que tiene sesión. No es una acción del servidor (no se
@@ -16,7 +17,7 @@ export function destinoSeguro(siguiente: string | null, porDefecto: string) {
 /** El link de WhatsApp a BRIK con el mail de quien no puede entrar. Del número se sacan las letras y símbolos (`\D`, no la letra D). */
 export function armarLinkAyuda(whatsapp: unknown, email: string): string | undefined {
   const w = String(whatsapp ?? "").replace(/\D/g, "");
-  return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a Base con ${email}`)}` : undefined;
+  return w.length >= 8 ? `https://wa.me/${w}?text=${encodeURIComponent(`Hola, no puedo entrar a ${NOMBRE_PRODUCTO} con ${email}`)}` : undefined;
 }
 
 /** Recuerda en qué gimnasio trabaja la persona cuando entra desde la dirección de la plataforma. */

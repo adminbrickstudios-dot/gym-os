@@ -4,7 +4,7 @@ import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO as OPCIONES_COOKIE } from "@/
 import { clasificarHost, normalizarHost } from "@/lib/host";
 import { memoriaCorta } from "@/lib/rapidez/memoria";
 import { accionDeGimnasio, direccionPropia, esDelGimnasioConSesion, leerRutaGimnasio, usaGimnasioElegido } from "@/lib/proxy-rutas";
-import { urlDeHost } from "@/lib/urls";
+import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { dominiosViejos } from "@/lib/dominios";
 
 // VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
@@ -133,7 +133,7 @@ async function proxyInterno(req: NextRequest) {
       if (!elegido) {
         const destino = req.nextUrl.clone();
         destino.pathname = "/gimnasio-no-encontrado";
-        destino.search = `?host=${encodeURIComponent(`${host}/g/${g.slug}`)}`;
+        destino.search = `?host=${encodeURIComponent(`${host}${rutaGimnasio(g.slug)}`)}`;
         return NextResponse.rewrite(destino, { status: 404 });
       }
       // H3: con dominio propio (o subdominio que ya anda) la dirección vieja /g/<slug>/… redirige a la nueva, con la misma ruta.

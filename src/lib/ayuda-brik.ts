@@ -1,3 +1,4 @@
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 /**
  * H6: el link de WhatsApp a BRIK que arma el botón "¿Necesitás ayuda?" del panel.
  * Lleva la pantalla, quién escribe (nombre y rol del equipo) y el último error que vio la persona.
@@ -15,7 +16,7 @@ export function pantallaSinIds(ruta: string): string {
 
 export function textoAyuda(c: ContextoAyuda): string {
   const lineas = [
-    "Hola BRIK, necesito ayuda con Base.",
+    `Hola BRIK, necesito ayuda con ${NOMBRE_PRODUCTO}.`,
     `Gimnasio: ${c.gimnasio}`,
     `Quién: ${c.nombre} (${ETIQUETA_ROL[c.rol] ?? c.rol})`,
     `Pantalla: ${pantallaSinIds(c.pantalla)}`,

@@ -38,7 +38,7 @@ try {
   await d.goto(`${G}/panel/configuracion?pestana=cobros`);
   await d.locator('fieldset[data-pestana-activa="cobros"]').waitFor({ timeout: 60000 });
   const mp = await d.locator("[data-mp-plata-directa]").first().innerText().catch(() => "");
-  chequear(/Nunca pasa por Base ni por BRIK/.test(mp), "FA-8: la tarjeta de MercadoPago dice que la plata va directo al gimnasio", `FA-8: dice “${mp}”`);
+  chequear(/Nunca pasa por Pase ni por BRIK/.test(mp), "FA-8: la tarjeta de MercadoPago dice que la plata va directo al gimnasio", `FA-8: dice “${mp}”`);
 
   // FA-9: Socios, elegir varios.
   await d.goto(`${G}/panel/socios`);

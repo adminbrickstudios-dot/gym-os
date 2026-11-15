@@ -7,7 +7,7 @@ import { COMPU, GIMNASIO, chequear, entrar, navegador, ok, pagina, resultado } f
 
 const G = GIMNASIO();
 const b = await navegador();
-const CLAVES = ["borrador_alta", "panel_pago", "horarios_pico"];
+const CLAVES = ["borrador_alta", "panel_pago", "horarios_pico", "valor_socio"];
 
 async function abrirConfig(d) {
   await d.goto(`${G}/panel/configuracion?pestana=funciones`);
@@ -61,6 +61,7 @@ try {
   await d.goto(`${G}/panel/resultado`);
   await d.locator("#horas").waitFor({ timeout: 60000 });
   chequear(await d.locator("[data-horarios-pico]").count() === 0, "apagada: Resultado no muestra horarios pico por día", "muestra horarios pico apagada");
+  chequear(await d.locator("[data-valor-socio]").count() === 0, "apagada: Resultado no muestra cuánto deja un socio (N10)", "muestra cuánto deja un socio apagada");
 
   // ── El dueño las prende ──
   await abrirConfig(d);
@@ -111,6 +112,12 @@ try {
   const tabla = await d.locator("[data-horarios-pico] table").count();
   chequear(tabla === 1 || /Sin entradas/.test(texto), "el cuadro día × hora se dibuja cuando hay entradas", "falta el cuadro con entradas registradas");
 
+  // N10: cuánto deja un socio y cuánto dura (dos números calculados de lo guardado)
+  await d.locator("[data-valor-socio]").waitFor({ timeout: 30000 });
+  const deja = await d.locator("[data-deja-por-socio] .numero").innerText();
+  const dura = await d.locator("[data-duracion-socio] .numero").innerText();
+  chequear(/$|—/.test(deja) && (/meses/.test(dura) || dura.trim() === "—"), `cuánto deja un socio (${deja}) y cuánto dura (${dura})`, `números raros: ${deja} / ${dura}`);
+
   // La recepción ve el panel con los datos, pero no puede cambiar los interruptores
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
@@ -131,7 +138,7 @@ try {
   for (const c of CLAVES) await poner(d, c, false);
   await d.goto(`${G}/panel/resultado`);
   await d.locator("#horas").waitFor({ timeout: 60000 });
-  chequear(await d.locator("[data-horarios-pico]").count() === 0, "apagada otra vez: desaparece de Resultado", "siguió en Resultado");
+  chequear(await d.locator("[data-horarios-pico]").count() === 0 && await d.locator("[data-valor-socio]").count() === 0, "apagada otra vez: desaparece de Resultado", "siguió en Resultado");
   chequear(d.errores.length === 0, "sin errores de página ni 5xx", d.errores.join(" | "));
 } catch (e) { console.error(e); process.exitCode = 1; }
 finally { await b.close(); resultado(); }

@@ -11,6 +11,7 @@ import { sesionEnEsteGimnasio } from "@/lib/app/sesion-gimnasio";
 import { contactoPlataforma, planesBrikPublicos } from "@/lib/plataforma-venta";
 import { linkWhatsapp } from "@/lib/landing-textos";
 import capturasGymos from "@/lib/capturas-gymos.json";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 // La raíz responde distinto según el host (lo resolvió el middleware):
 //   plataforma → la página de Gym OS
@@ -32,10 +33,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
     const origen = `${h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https")}://${host}`;
-    const descripcion = "Base responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.";
-    return { title: { absolute: "Base · El sistema para tu gimnasio" }, description: descripcion,
-             openGraph: { type: "website", title: "Base", description: descripcion, siteName: "Base", locale: "es_AR", images: [{ url: `${origen}/og`, width: 1200, height: 630, alt: "Base" }] },
-             twitter: { card: "summary_large_image", title: "Base", description: descripcion, images: [`${origen}/og`] },
+    const descripcion = `${NOMBRE_PRODUCTO} responde si el socio puede entrar hoy, te deja cobrar en un toque y te muestra quién dejó de venir. Pedí una demo.`;
+    return { title: { absolute: `${NOMBRE_PRODUCTO} · El sistema para tu gimnasio` }, description: descripcion,
+             openGraph: { type: "website", title: NOMBRE_PRODUCTO, description: descripcion, siteName: NOMBRE_PRODUCTO, locale: "es_AR", images: [{ url: `${origen}/og`, width: 1200, height: 630, alt: NOMBRE_PRODUCTO }] },
+             twitter: { card: "summary_large_image", title: NOMBRE_PRODUCTO, description: descripcion, images: [`${origen}/og`] },
              alternates: { canonical: `${origen}/` } };
   }
   const { marca } = r.landing;
@@ -88,7 +89,7 @@ export default async function Inicio() {
   const [planes, contacto] = await Promise.all([planesBrikPublicos(), contactoPlataforma()]);
   // Datos para Google: el producto y, solo si BRIK cargó planes, sus precios (nunca uno inventado).
   const ld = {
-    "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Base", applicationCategory: "BusinessApplication", operatingSystem: "Web",
+    "@context": "https://schema.org", "@type": "SoftwareApplication", name: NOMBRE_PRODUCTO, applicationCategory: "BusinessApplication", operatingSystem: "Web",
     description: "Sistema de gestión para gimnasios: control de acceso, cobros y retención de socios.",
     ...(planes.length ? { offers: planes.map((p) => ({ "@type": "Offer", name: p.nombre, price: Number(p.precio_mensual), priceCurrency: "ARS" })) } : {}),
   };

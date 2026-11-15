@@ -4,6 +4,7 @@ import { ImageResponse } from "next/og";
 import { headers } from "next/headers";
 import { traerLanding } from "@/lib/landing";
 import { textoSobre } from "@/lib/marca";
+import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ export async function GET(pedido: Request) {
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host).catch(() => null) : null;
-  const nombre = landing?.marca.nombre ?? "Base";
+  const nombre = landing?.marca.nombre ?? NOMBRE_PRODUCTO;
   const acento = landing?.marca.color_acento ?? "#2fbf5b";
   const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "B";
   return new ImageResponse(

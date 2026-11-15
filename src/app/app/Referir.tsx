@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { urlDeHost } from "@/lib/urls";
 import { Icono } from "@/components/ui/Icono";
 
 export type LinkReferido = { codigo: string; host: string; invitados: number; socios: number };
@@ -7,7 +8,7 @@ export type LinkReferido = { codigo: string; host: string; invitados: number; so
 /** REF-1: el link personal para invitar a un amigo a probar una clase. */
 export function Referir({ datos }: { datos: LinkReferido }) {
   const [copiado, setCopiado] = useState(false);
-  const link = `https://${datos.host}/?ref=${datos.codigo}#probar`;
+  const link = urlDeHost(datos.host, `/?ref=${datos.codigo}#probar`);
   const texto = `¡Vení a probar una clase a mi gimnasio! Dejá tus datos acá y te escriben: ${link}`;
   const copiar = async () => {
     try { await navigator.clipboard.writeText(link); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
