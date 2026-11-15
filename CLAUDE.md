@@ -132,6 +132,41 @@ ejecutado"*.
 
 ---
 
+## Reglas permanentes de cambio (Mateo, 15/11)
+
+Valen para todo trabajo desde ahora, en Pase 1.0, 2.0 y después.
+
+**No pisar**
+- Se toca solo lo que pide el ítem. Antes de commitear, `git diff --stat`: si aparece un archivo que el
+  ítem no necesita, se saca del commit o se justifica en el mensaje.
+- Antes de cambiar una línea que no escribiste en esta vuelta, `git log -L` o `git blame` para saber por
+  qué está así. Si había una razón, se respeta o se anota.
+- Lo que no es del ítem se anota (en el "Para Pase 2.0" de `docs/base/PASE-1.0.md`, o en `docs/LOG.md`)
+  y no se toca.
+- No se crean documentos nuevos si uno existente sirve: se corrige el que está.
+
+**Que no se rompa**
+- **Prueba de caracterización primero.** Antes de cambiar algo que funciona, una prueba que fija cómo
+  funciona hoy (e2e o de base). Después se cambia, y la prueba nueva convive con la vieja.
+- **Expandir y contraer.** Toda migración es compatible con el código anterior: primero se agrega,
+  después se usa, y lo viejo se saca recién en una publicación posterior. Así un revert del código
+  nunca deja la app rota contra la base nueva.
+- **Detrás de una llave.** Lo nuevo que cambia lo que ve o hace un gimnasio entra apagado para los
+  gimnasios reales (`funciones` por gimnasio) y prendido en los `[demo]`. Se prende para el gimnasio
+  real después de la prueba en producción.
+- **Carreras con plata.** Toda función que mueve plata o cupos tiene una prueba con dos llamadas a la
+  vez sobre lo mismo (dos cobros, dos cierres de caja, dos reservas del último lugar), y el resultado es
+  uno solo. Si hace falta, `for update` o un candado consultivo.
+- **Permisos en negativo.** Toda función nueva tiene una prueba con un usuario de otro gimnasio y con un
+  rol sin permiso, y las dos dan error, nunca una lista vacía.
+- **Pruebas deterministas.** Relojes fijos (el `momento` en la base, el reloj de Playwright en las
+  pantallas). Nada de `sleep`: se espera una condición. Una prueba que falla a veces se arregla o se
+  aparta con su motivo escrito, nunca se ignora.
+- **No ser más lento que hoy.** Los viajes a la base por pantalla y el JS por ruta tienen su tope en
+  `npm run chequeos`. Un cambio que lo supera no pasa.
+- **Publicaciones chicas, con revert listo.** Cada publicación anota el commit al que se vuelve y lo que
+  se probó en producción en los 5 minutos siguientes al deploy.
+
 ## Cómo trabaja el agente
 
 - **No frena entre partes.** Si un punto no cierra, lo dice y sigue.
