@@ -189,6 +189,24 @@ chequeo("Datos de prueba sin teléfonos con pinta de reales (+549000…)", telef
   chequeo(`Diseño: sin colores sueltos ni emojis de ícono nuevos (quedan por convertir: ${suma.hex} colores, ${suma.emoji} emojis)`, d.problemas);
 }
 
+// Pase 1.0 (F0.2/E8): "nunca más lento que hoy". Los topes de viajes por pantalla (scripts/medir/topes-viajes.json) existen y están completos;
+// los compara scripts/medir/viajes.mjs contra la app compilada (último paso de la cadena e2e).
+{
+  const problemas = [];
+  const rutaTopes = join(raiz, "scripts/medir/topes-viajes.json");
+  if (!existsSync(rutaTopes)) problemas.push("Falta scripts/medir/topes-viajes.json (corré viajes.mjs con ACTUALIZAR_TOPES=1)");
+  else {
+    try {
+      const topes = JSON.parse(readFileSync(rutaTopes, "utf8"));
+      const fuente = readFileSync(join(raiz, "scripts/medir/viajes.mjs"), "utf8");
+      const rutas = [...(fuente.match(/const PANTALLAS = \[([\s\S]*?)\];/)?.[1] ?? "").matchAll(/"(\/[^"]*)"/g)].map((m) => m[1]);
+      for (const [k, v] of Object.entries(topes)) if (!Number.isInteger(v) || v < 1) problemas.push(`Tope inválido: ${k} = ${v}`);
+      for (const r of rutas) if (!("duena " + r in topes)) problemas.push(`Sin tope de viajes: duena ${r}`);
+    } catch (e) { problemas.push(`topes-viajes.json no se puede leer: ${e.message}`); }
+  }
+  chequeo("Velocidad: cada pantalla tiene su tope de viajes a la base (nunca más lento que hoy)", problemas);
+}
+
 // ── Base ─────────────────────────────────────────────────────────────
 if (!url) {
   chequeo("Conexión a la base", ["Falta DB_PRUEBAS_URL o SUPABASE_DB_URL: no se revisó la base"]);
