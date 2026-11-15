@@ -49,7 +49,7 @@ for (const tema of ["claro", "oscuro"]) {
       await entrar(p, "duena@ejemplo.invalid");
       await p.context().addCookies([{ name: "tema", value: tema, url: GIMNASIO(), sameSite: "Lax" }]);
     } catch (e) { falla(`${tema} · ${tam}: no pudo entrar (${e.message.split("\n")[0]})`); continue; }
-    for (const m of MODALES) {
+    for (const m of MODALES.filter((x) => !process.env.SOLO_MODAL || x.nombre === process.env.SOLO_MODAL)) {
       const donde = `${m.nombre} · ${tema} · ${tam}`;
       try {
         // net::ERR_ABORTED: la navegación se pisa con otra del panel (redirección o precarga); se reintenta hasta 3 veces.
@@ -68,7 +68,7 @@ for (const tema of ["claro", "oscuro"]) {
         await p.keyboard.press("Escape");
         if (await p.locator('[role="dialog"][aria-modal="true"]').first().isVisible().catch(() => false)) problemas.push("Esc no la cierra");
         problemas.length ? falla(`${donde}: ${problemas.join("; ")}`) : ok(`${donde}: abre, entra, X tocable, fondo ${tema}, Esc cierra`);
-      } catch (e) { falla(`${donde}: ${e.message.split("\n")[0]}`); }
+      } catch (e) { await capturar(p, `falla-modal-${m.nombre}-${tema}-${tam}`).catch(() => {}); falla(`${donde}: ${e.message.split("\n")[0]}`); }
     }
     await p.close().catch(() => {});
   }
