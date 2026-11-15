@@ -6,6 +6,7 @@ import { crearPreferencia } from "@/lib/mercadopago";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { revalidatePath } from "next/cache";
 import { rpc } from "@/lib/panel/servidor";
+import { origenDe } from "@/lib/urls";
 
 const r = async (f: () => Promise<unknown>) => {
   try { await f(); revalidatePath("/app"); revalidatePath("/app/clases"); return {}; }
@@ -98,9 +99,7 @@ export async function pagarConMercadoPago(socioId: string, clave?: string, planI
     const c = data as { token: string; modo: string } | null;
     if (!c?.token) return { error: "El gimnasio no tiene MercadoPago conectado" };
     const h = await headers();
-    const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-    const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127\.|[^.]+\.localhost)/.test(host) ? "http" : "https");
-    const origen = `${proto}://${host}`;
+    const origen = origenDe(h);
     const pref = await crearPreferencia(c.token, {
       pagoId: p.pago_id, titulo: p.descripcion, monto: Number(p.monto),
       volver: `${origen}/app/pago?pago=${p.pago_id}`,

@@ -65,6 +65,13 @@ export function crearUrls(env: EntornoUrls) {
   return { base, plataforma, conSubdominios, urlPlataforma, hostGimnasio, urlGimnasio, urlDeHost, rutaGimnasio, urlPanel, urlIngreso };
 }
 
+/** El origen (esquema + dirección) de quien hace el pedido: el host que está usando, para armar links de vuelta (Google, MercadoPago, claves, kiosco y TV). */
+export function origenDe(cabeceras: { get(n: string): string | null }): string {
+  const host = (cabeceras.get("x-forwarded-host") ?? cabeceras.get("host") ?? "").split(",")[0].trim();
+  const proto = cabeceras.get("x-forwarded-proto")?.split(",")[0].trim() ?? esquemaDe(host);
+  return `${proto}://${host}`;
+}
+
 /** Con el entorno real (se lee en cada uso: las variables no cambian en caliente, pero así los tests pueden cambiarlas). */
 const actual = () => crearUrls({ base: dominioBase(), plataforma: dominioPlataforma() });
 export const urlPlataforma = (r?: string) => actual().urlPlataforma(r);
