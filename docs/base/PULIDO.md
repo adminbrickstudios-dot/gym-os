@@ -95,7 +95,7 @@ Marcas:
 - [FALTA] Las 5 últimas de la barra fija no se pueden tocar (758-763). → Que abran el panel lateral.
 - [TEXTO] `conPuntos` pone puntos a un celular ("3.875.551.234") (83-87). → Solo hasta 8 cifras.
 - [ROTO] Los avisos (`fixed bottom-4 right-4 z-50`, AvisosEntrada.tsx:157) tapan el botón flotante, la barra fija y, en celular, la barra de abajo. D56 no está hecho (globals.css:386).
-- [DISEÑO] Tiempos del código: verde 6 s, amarillo y azul 12 s, rojo nunca (27-28, 96). DISENO dice 5, 8 y 12 s. → Alinear.
+- [DISEÑO] Tiempos del código: verde 6 s, amarillo y azul 12 s, rojo nunca (27-28, 96). DISENO dice 5, 8 y 12 s. → Alinear. **(15/11, D71: resuelto; el rojo queda hasta atenderlo, con tope de 10 min)**
 - [DISEÑO] Rojo y azul sin ícono en los avisos (44, 117); "✕" de texto de 32 px y Cobrar de 36 px (167-168). → 48 px.
 - [FALTA] Los rechazos que llegan de la tablet o del QR no suenan (77-99).
 
@@ -429,7 +429,7 @@ Corridas en Actions sobre la rama: **43132044748** (`z-diseno` 17 pasos, `vd-11`
 | Esquinas: todo `rounded-xl/2xl/3xl` pasó a 10 px (`--radio`) en toda la app | 🟡 hecho con `sed` en todo `src`; sin prueba de pantalla (tsc y lint) |
 | Sin vidrio ni degradé: el ingreso (fondo y tarjeta lisos), la portada del gimnasio (barra de arriba y de abajo lisas, velo plano sobre la foto), barra del socio | ✅ `z-diseno` (portada e ingreso); 🟡 el velo negro sobre la foto de portada y los botones `white/15` encima se dejaron: es lo que hace legible el texto sobre una foto |
 | Botón flotante de la Entrada y botón grande de Inicio: `--acento`, `--sobre-acento`, `--sombra-flota` (no el verde del semáforo) | 🟡 hecho; sin prueba (pulido-roto sigue midiendo que no tape) |
-| Avisos de la puerta: 5 s verde, 8 s amarillo y azul, 12 s rojo; ✕ y Cobrar de 48 px | 🟡 hecho; sin prueba (hace falta esperar 5 a 12 s con una entrada de otra puerta). El rojo ya no queda para siempre: ver `PREGUNTAS.md` |
+| (D71, 15/11: el rojo queda hasta atenderlo, tope 10 min) Avisos de la puerta: 5 s verde, 8 s amarillo y azul, 12 s rojo; ✕ y Cobrar de 48 px | 🟡 hecho; sin prueba (hace falta esperar 5 a 12 s con una entrada de otra puerta). El rojo ya no queda para siempre: ver `PREGUNTAS.md` |
 | Cobrar y Vender: − y + de 48 px; ok del cupón con el color del semáforo; Vender sin `shadow-lg`; Hoja con X de 48 px | 🟡 hecho; sin prueba |
 | Landing: Actividades y «Pensado para cada gimnasio» (Base) pasaron de grilla de tarjetas iguales a lista con jerarquía; esquinas de 10 px; sin código muerto | 🟡 hecho; sin prueba de pantalla |
 | App del socio: «← Volver» de 44 px, pastillas de pedidos de 44 px, etiquetas de 13 px (no 12), `--tarjeta-alta` en lugar de `--tarjeta-2`, QR con 10 px | 🟡 hecho; sin prueba |
@@ -440,7 +440,7 @@ Corridas en Actions sobre la rama: **43132044748** (`z-diseno` 17 pasos, `vd-11`
 | Control: Suspensiones y cortesías ignoran los filtros y cortan en 30 | 🟡 se dice escrito arriba de la lista; seguir los filtros es cambiar la función de la base (ver `PREGUNTAS.md`) |
 | Montos de los gráficos solo en `title` | ✅ `z-diseno`: «Mejor día» y «Ver los montos de cada día» |
 | `window.confirm` nativo en super admin (baja, restaurar textos, quitar dominio, borrar datos) y «Borrar definitivamente» sin estilo de peligro | ✅ `super-admin` y `super-f2` (usan la hoja `useConfirmar`) |
-| Super admin: la portada en 4 secciones con menú | 🟡 sin hacer: es rehacer `admin/page.tsx` (unos 16 bloques) con rutas nuevas. Estimación: medio día |
+| Super admin: la portada en 4 secciones con menú | ✅ existe (`src/app/admin/MenuSecciones.tsx`, D76, 15/11); queda para la pasada visual. Decía: 🟡 sin hacer: es rehacer `admin/page.tsx` (unos 16 bloques) con rutas nuevas. Estimación: medio día |
 | Fondos/íconos/emojis vacíos, «✓ ✕ ＋» de texto, íconos repetidos fuera del menú | no es de este carril: es Z2 |
 
 ### Z6 · [FALTA] y detalles premium
@@ -493,7 +493,7 @@ Pruebas: `src/components/ui/iconos-en-pantallas.test.ts` (vitest, lee todo `src/
 | Menú del celular con Esc y atrás | ✅ ya estaba hecho (Navegacion.tsx); el documento estaba viejo |
 | Esc, X y afuera no cierran Cobrar mientras cobra | ✅ ya estaba (H7); sin prueba automática |
 | Cambios sin guardar frenan también los links del menú (Configuración, Tu página, rutinas, alta de socio con Cancelar) | ✅ e2e pasos 3 y 4 en Configuración; las otras 🟡 sin prueba |
-| Borrador de formularios largos (alta de socio, rutinas) | 🟡 no hecho: solo avisa antes de perder; guardar el borrador en el navegador falta |
+| Borrador de formularios largos (alta de socio, rutinas) | ✅ hecho en el alta completa y en `/hacete-socio` (FA-17, `fluidez-reglas.mjs`, D75, 15/11); falta en la configuración de la página (➡️ Pase 2.0). Decía: 🟡 no hecho: solo avisa antes de perder; guardar el borrador en el navegador falta |
 | Panel lateral: `<Link>` en vez de recargar, "Cargando…" y Reintentar | 🟡 hecho; sin prueba |
 | "Aprobando…" / "Rechazando…" en Transferencias; Abrir / Anotar / Cerrar caja con su texto | 🟡 hecho; sin prueba |
 | Enter envía en "Para revisar" | 🟡 hecho; sin prueba |

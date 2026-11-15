@@ -130,3 +130,14 @@ Entradas sin internet (N9), débito automático (N1), resumen de la noche (N3), 
 - `producto.test.ts` deja pasar "Pase diario" y "Pase libre" (son planes, no el producto): si algún día el producto cambia de nombre otra vez, hay que revisar esa excepción.
 - Los mails de Supabase (invitación, recuperar contraseña) se escriben en el panel de Supabase, no en el código: revisar que digan Pase (⛔ de Mateo, ver `PRUEBA-DUENO.md`).
 - Los documentos viejos dicen "Base" a propósito (histórico); no se reescriben.
+- **Cuadre de Pase 1.0 (15/11, contra los 10 documentos de pedidos):** unas 245 filas revisadas contra el código: 159 ✅ con prueba, 65 🟡, 7 🔴 y 14 ➡️. Lo de uso diario que faltaba se hizo (foto en el panel lateral, últimas entradas que abren el panel, número del menú que quedaba viejo, "Probá una clase"). Lo que sigue, de menor a mayor importancia:
+  - El asistente de 9 pasos no se abre solo la primera vez (D80); hoy es una tarjeta en Inicio.
+  - Notas y "cuándo le toca pagar" detrás de una función apagada (D81): decidir cuándo prenderla por gimnasio.
+  - Caja, transferencias y mensajes se actualizan cada 30 s y no con Realtime; solo la puerta es instantánea.
+  - Listas largas (Socios, Vencen hoy, Control) sin virtualizar; la ficha del socio no se midió (el agente de la auditoría contó 22 consultas, sin verificar).
+  - `error.message` crudo en algunos mensajes al usuario (landing, tablet, super admin): pasar por `errores-humanos.ts`.
+  - "Con solo QR el DNI no deja entrar" (SF-3b) sin prueba en la puerta.
+  - La región de Supabase sin confirmar (VELOCIDAD.md) y la medición en producción (F0.1, ⛔).
+  - Interesado sin contactar en 24 h dentro de Para hacer hoy (FA-13) y la oferta con plazo de la lista de espera (FA-23).
+  - La prueba social, "¿Primera vez? Empezá acá" y la barra de WhatsApp de la portada: los componentes siguen en el código pero la portada de una pantalla (L1) no los dibuja; `vd-25` quedó apartado de la cadena e2e hasta la landing nueva.
+- **El número del menú quedaba viejo** al contestar un mensaje o aprobar (un pedido "fresco" reusaba uno en vuelo): arreglado en 1.0 (`vivo-cliente.test.ts`); si aparece algo parecido en otra pantalla, es el mismo patrón (un pedido compartido que no distingue lo anterior de lo posterior a una acción).
