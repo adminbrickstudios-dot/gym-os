@@ -12,7 +12,7 @@ export function Campana({ rol, apagadas }: { rol: string; apagadas: string[] }) 
   const [n, setN] = useState<number | null>(null);
   useEffect(() => {
     let vivo = true;
-    const pedir = () => { void pedirVivo({ rol, apagadas }).then((x) => { if (vivo) setN(x?.sinLeer ?? null); }); };
+    const pedir = (e?: unknown) => { void pedirVivo({ rol, apagadas }, e instanceof Event).then((x) => { if (vivo) setN(x?.sinLeer ?? null); }); };
     pedir();
     // Cuando algo se resuelve sin cambiar de pantalla (“Marcar todo como leído”), el número se vuelve a pedir.
     window.addEventListener(EVENTO_PENDIENTES, pedir);

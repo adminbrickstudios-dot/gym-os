@@ -138,7 +138,8 @@ export function Navegacion(props: Props) {
   const [pendientes, setPendientes] = useState<Pendientes | null>(null);
   useEffect(() => {
     let vivo = true;
-    const pedir = () => { void pedirVivo({ rol: props.rolClave ?? props.rol, apagadas: props.apagadas ?? [] }).then((x) => { if (vivo && x?.pendientes) setPendientes(x.pendientes); }); };
+    // Un evento (algo se resolvió) pide fresco: no reusa un pedido en vuelo ni una respuesta guardada. Al montar y por reloj se comparte.
+    const pedir = (e?: unknown) => { void pedirVivo({ rol: props.rolClave ?? props.rol, apagadas: props.apagadas ?? [] }, e instanceof Event).then((x) => { if (vivo && x?.pendientes) setPendientes(x.pendientes); }); };
     const cuandoVuelve = () => { if (document.visibilityState === "visible") pedir(); };
     pedir();
     const cada = setInterval(cuandoVuelve, 60_000);
