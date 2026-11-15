@@ -14,6 +14,9 @@ await db.connect();
 const [{ id: gim }] = (await db.query(`select id from public.gimnasios where slug = 'demo'`)).rows;
 const [{ id: socio, nombre }] = (await db.query(`select s.id, trim(s.nombre || ' ' || coalesce(s.apellido, '')) nombre from public.socios s join auth.users u on u.id = s.usuario_id
   where s.gimnasio_id = $1 and u.email = 'socio@ejemplo.invalid'`, [gim])).rows;
+// Las clases de cada día se crean al abrirlo: en una base recién sembrada todavía no hay ninguna. Se crean acá los próximos 7 días (antes dependía de que
+// otro recorrido hubiera abierto Clases, y fallaba si este arrancaba una tanda).
+await db.query(`select privado.materializar_dia(s.id, ((now() at time zone g.zona_horaria)::date + n)) from public.sedes s join public.gimnasios g on g.id = s.gimnasio_id, generate_series(0, 6) n where s.gimnasio_id = $1`, [gim]);
 // Una clase que viene, en la sede que muestra la app, sin reserva del socio todavía.
 const [clase] = (await db.query(`select c.id, c.sede_id, c.actividad_id, to_char((c.inicio at time zone g.zona_horaria)::date, 'YYYY-MM-DD') dia
   from public.clases c join public.gimnasios g on g.id = c.gimnasio_id

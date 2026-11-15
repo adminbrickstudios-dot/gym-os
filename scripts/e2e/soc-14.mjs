@@ -3,6 +3,7 @@
 // alta; el que se anotó desde la página (de reg-1) dice qué reglamento
 // aceptó y se puede ver el texto de esa versión.
 //   npm run e2e:soc-14           (con scripts/local/levantar.sh corriendo; después de e2e:reg-1)
+import { execFileSync } from "node:child_process";
 import { COMPU, GIMNASIO, chequear, entrar, falla, navegador, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
@@ -21,7 +22,12 @@ try {
 
   await p.goto(`${G}/panel/socios?q=Online`);
   const fila = p.locator('main ul a[href^="/panel/socios/"]').first();
-  if (!(await fila.count())) throw new Error("no hay socios anotados desde la página: corré antes e2e:reg-1");
+  if (!(await fila.count())) {
+    // Depende de los socios que anota reg-1 desde la página: si este recorrido arranca una tanda con la base nueva, lo corre acá (antes fallaba por el orden).
+    execFileSync("node", ["scripts/e2e/reg-1.mjs"], { stdio: "ignore" });
+    await p.goto(`${G}/panel/socios?q=Online`);
+  }
+  if (!(await fila.count())) throw new Error("no hay socios anotados desde la página ni siquiera después de correr reg-1");
   await fila.click();
   await p.locator('[data-origen="alta_web"]').waitFor({ timeout: 30000 });
   const t = await p.locator("[data-origen]").innerText();
