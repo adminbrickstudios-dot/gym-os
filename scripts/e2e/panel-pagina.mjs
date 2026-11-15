@@ -51,10 +51,12 @@ try {
   const textos = ls.map((l) => l.texto).join(" · ");
   chequear(/Ya soy socio/.test(textos) && /Soy del equipo/.test(textos), "tiene “Ya soy socio, entrar” y “Soy del equipo”", `faltan accesos: ${textos}`);
   const planes = await v.locator("section[aria-labelledby=\"planes\"] li.tarjeta").count();
-  const loQuiero = await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero")').count();
-  chequear(planes > 0 && loQuiero === planes, `${planes} planes, cada uno con “Lo quiero” a WhatsApp con su nombre`, `${planes} planes y ${loQuiero} “Lo quiero”`);
-  if (planes) {
-    const msj = new URL(await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero")').first().getAttribute("href")).searchParams.get("text");
+  // L1/H3b: con las altas prendidas cada plan trae “Elegir este” (y “Consultar” a WhatsApp); sin altas, “Lo quiero” a WhatsApp.
+  const loQuiero = await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero"), section[aria-labelledby=\"planes\"] a:has-text("Elegir este")').count();
+  chequear(planes > 0 && loQuiero === planes, `${planes} planes, cada uno con su botón (“Lo quiero” o “Elegir este”)`, `${planes} planes y ${loQuiero} botones`);
+  const aWsp = v.locator('section[aria-labelledby=\"planes\"] a[href*="wa.me"]');
+  if (planes && await aWsp.count()) {
+    const msj = new URL(await aWsp.first().getAttribute("href")).searchParams.get("text");
     const nombre = (await v.locator("section[aria-labelledby=\"planes\"] li.tarjeta .titulo").first().innerText()).trim();
     chequear(msj.includes(nombre), `“Lo quiero” dice el plan: “${msj}”`, `“Lo quiero” manda “${msj}” para ${nombre}`);
   }
