@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 348 funciones piden un rol del equipo con `privado.exigir_equipo`; 424 no (las decide la propia función con la sesión, el socio o RLS); 32 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 347 funciones piden un rol del equipo con `privado.exigir_equipo`; 426 no (las decide la propia función con la sesión, el socio o RLS); 33 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -104,7 +104,6 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `devolucion_baja_config` | ✓ | ✓ | — | — |
 | `diferencia_caja_por_cajero` | ✓ | ✓ | — | — |
 | `documentos_panel` | ✓ | ✓ | — | — |
-| `documentos_socio` | ✓ | ✓ | ✓ | — |
 | `editar_horario` | ✓ | ✓ | — | — |
 | `editar_tarea` | ✓ | ✓ | ✓ | ✓ |
 | `ejercicios_gimnasio` | ✓ | ✓ | — | ✓ |
@@ -358,6 +357,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `abonar_turno`
 - `abrir_caja`
 - `aceptar_oferta`
+- `aceptar_reglamento`
 - `activar_emergencia_puerta`
 - `actividad_equipo`
 - `actividades_gimnasio`
@@ -556,6 +556,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `desmarcar_dia_rutina`
 - `deuda_con_socios`
 - `devoluciones_socio`
+- `documentos_socio`
 - `elegir_lugar`
 - `encuesta_socio`
 - `entrada_stock`
@@ -792,6 +793,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `destinos_push`
 - `destinos_push_clases`
 - `destinos_push_mensajes`
+- `documentos_socio_base`
 - `entrar_con_google`
 - `ingreso_permitido`
 - `landing_publica_base`
