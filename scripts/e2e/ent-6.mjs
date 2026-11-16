@@ -1,7 +1,6 @@
-// APARTADO DE LA CADENA `e2e` (Pase 1.0, 15/11): intermitente. De 4 corridas con la app compilada (Actions y la compu) pasó 2 y falló 2 esperando `[data-kiosco-resultado]`
-// en la tablet después de que el socio escaneó su QR y la app del socio ya dijo "entró" (la entrada se registra; lo que a veces no aparece es el cartel de la tablet).
-// Es cosmético pero es la puerta: queda anotado en PASE-1.0.md § 6 para Pase 2.0. Se corre a mano con `node scripts/e2e/ent-6.mjs`.
 #!/usr/bin/env node
+// (Pase 2 · cacería, 16/11) Era intermitente por la PRUEBA, no por la app: la tablet muestra “¡Pasá, …!” 4 segundos y la prueba empezaba a esperarlo recién después
+// de sacar la captura del celular, a veces cuando el cartel ya se había ido. Ahora se anota lo que muestra la tablet desde ANTES de que el socio escanee.
 // ENT-6 · QR en la tablet: la dueña prende la tablet y "QR en la tablet"; la
 // tablet muestra un QR que cambia; el socio lo escanea con su app (una cámara
 // de prueba que lo filma) y entra; la tablet muestra "¡Pasá, …!".
@@ -53,14 +52,16 @@ try {
   const s = await pagina(b2, CELU);
   await entrar(s, "socio@ejemplo.invalid");
   await s.goto(`${G}/app`);
+  // La tablet muestra el cartel 4 s: se anota lo primero que muestre, desde antes del escaneo.
+  await t.evaluate(() => { window.__vioPasa = null; new MutationObserver(() => { const e = document.querySelector("[data-kiosco-resultado]"); if (e && !window.__vioPasa) window.__vioPasa = e.textContent; }).observe(document.body, { childList: true, subtree: true, characterData: true }); });
   await s.locator('button:has-text("Escanear el QR de la entrada")').click();
   const res = s.locator("[data-resultado-escaneo]");
   await res.waitFor({ timeout: 45000 });
   chequear(await res.getAttribute("data-resultado-escaneo") === "entro", `el socio escanea y entra: “${(await res.innerText()).replace(/\s+/g, " ").slice(0, 60)}”`, `dice: ${await res.innerText()}`);
   await capturar(s, "ent6-celu-app");
-  const pasa = t.locator("[data-kiosco-resultado]");
-  await pasa.waitFor({ timeout: 30000 });   // la tablet pregunta cada pocos segundos; con la compu cargada tarda más
-  chequear(/¡Pasá, Testigo!/.test(await pasa.innerText()), "la tablet muestra “¡Pasá, Testigo!”", `la tablet dice: ${await pasa.innerText()}`);
+  await t.waitForFunction(() => window.__vioPasa, null, { timeout: 60000 });   // la tablet pregunta cada 1,5 s
+  const dijo = await t.evaluate(() => window.__vioPasa);
+  chequear(/¡Pasá, Testigo!/.test(dijo), "la tablet muestra “¡Pasá, Testigo!”", `la tablet dice: ${dijo}`);
   if (s.errores.length) falla(`socio: ${s.errores.join(" | ")}`);
 
   // Dejar todo como estaba.

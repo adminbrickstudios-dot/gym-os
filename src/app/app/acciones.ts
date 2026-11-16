@@ -12,6 +12,8 @@ const r = async (f: () => Promise<unknown>) => {
   try { await f(); revalidatePath("/app"); revalidatePath("/app/clases"); return {}; }
   catch (e) { return { error: (e as Error).message }; }
 };
+/** Mateo 16/11: el socio acepta la versión vigente del reglamento (solo el propio socio; la base lo hace cumplir). */
+export const aceptarReglamento = async (socioId: string, version: number) => r(() => rpc("aceptar_reglamento", { p_socio_id: socioId, p_version: version }));
 /** VD-46D: el socio dice "entendido" a un aviso (queda la constancia de que lo vio). */
 export const marcarAvisoLeido = async (avisoId: string) => r(() => rpc("marcar_aviso_leido", { p_aviso_id: avisoId }));
 /** C1b: "Entendido" al aviso de clave nueva; queda guardado en la base y no vuelve hasta una entrega más nueva. */

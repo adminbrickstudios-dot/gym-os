@@ -25,6 +25,7 @@ import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
 import { Bienvenida } from "./Bienvenida";
+import { ReglamentoNuevo } from "./ReglamentoNuevo";
 import { OcupacionEnVivo } from "./OcupacionEnVivo";
 import { AvisosInicio } from "./AvisosInicio";
 import { AvisoClaveSocio } from "./AvisoClaveSocio";
@@ -77,7 +78,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       // RUT-2: si el profe le asignó una rutina.
       rpc<{ nombre: string } | null>("rutina_de_socio", { p_socio_id: s.socio_id }).catch(() => null),
       // COM-6: lo que le falta firmar (reglamento, deslinde, autorización si es menor).
-      rpc<{ pendientes: Pendiente[] }>("documentos_socio", { p_socio_id: s.socio_id }),
+      rpc<{ pendientes: Pendiente[]; reglamento_nuevo?: { version: number; texto: string } | null }>("documentos_socio", { p_socio_id: s.socio_id }),
       // COM-8: los eventos que vienen (y si ya está anotado).
       rpc<EventoApp[]>("eventos_socio", { p_socio_id: s.socio_id }),
       // COM-10: la pregunta del 0 al 10 (después de 10 entradas o del primer mes; cada 90 días).
@@ -143,6 +144,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           )}
         </header>
 
+        {documentos.reglamento_nuevo && <ReglamentoNuevo socioId={s.socio_id} version={documentos.reglamento_nuevo.version} texto={documentos.reglamento_nuevo.texto} />}
         <Suspense fallback={null}><AvisoClaveSocio socioId={s.socio_id} zona={zona} /></Suspense>
         <AvisosInicio socioId={s.socio_id} />
         <Suspense fallback={null}><OcupacionEnVivo gimnasioId={g.id} /></Suspense>
