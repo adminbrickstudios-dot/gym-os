@@ -21,6 +21,17 @@ super admin en la plataforma (Contacto): sin número, el botón de WhatsApp no a
 
 ---
 
+- 2026-11-16 · Mateo · **Cacería: lo que llama a la base de más y lo que está roto** (va después de D83 y los dos arreglos de direcciones) · ⏳
+  1. **La app del socio, Inicio (`/app`): 22 pedidos a la base** por cada apertura (`scripts/medir/topes-viajes.json`). Es la pantalla que más se abre (cada socio, cada día). Meta: 2, con una sola función de lectura como `contexto_pantalla`. Después `/app/clases` (8).
+  2. **El mostrador a la hora pico:** Caja (8 a 9), Entrada (7), Prospectos (9), Inicio del panel (6), Configuración (6), Mensajes (6), Vender (5). Meta: 3 como máximo en cada una, empezando por Entrada y Caja. El tope de `topes-viajes.json` se baja con cada mejora y no vuelve a subir.
+  3. **Los relojes que preguntan solos:** `CartelEmergencia` (cada 30 s), `UltimasEntradas`, `Navegacion` (60 s), `Campana` (60 s), `ActualizarSola`, `conexion.tsx` y el respaldo de `entradas-vivo`. Juntarlos en el canal de Realtime que ya existe (`panel_vivo`), con un único respaldo cada 60 s y solo con la pestaña visible. Medir cuántos pedidos por minuto hace una recepción quieta, antes y después.
+  4. **Lo roto que se ve:**
+     - la tabla de errores de H6 en producción (lo que les salió a Temple Gym y a los demos los últimos 7 días), uno por uno;
+     - los errores de consola del barrido (cada rol en cada pantalla, compu y celular);
+     - las pantallas que tardan más de 1 s en producción (`medir-produccion.yml`).
+     Cada error encontrado: su prueba que falla, el arreglo, y la prueba en verde.
+  5. **`ent-6`** (Entrada, apartado por intermitente el 15/11): averiguar si es la prueba o la app. Si es la app, es un error del mostrador a las 19 h: se arregla primero.
+  6. Lo que toca plata o permisos se anota en PREGUNTAS y no se arregla solo.
 - 2026-11-16 · Mateo (pasada de Pase 1.0, con captura de templegymsalta.com) · **El camino del socio, completo y re fácil** (D83 en PREGUNTAS). Todo se prueba en `[demo] Temple clon`, nunca en Temple Gym · ⏳
   1. **"Crear mi cuenta" aparece siempre** en la página del gimnasio: botón principal, verde, arriba de "Ya soy socio, entrar". Hoy no aparece porque depende de `altas_online` (apagado en Temple Gym). Desde ahora, crear la cuenta gratis NO depende de `altas_online`: esa llave decide solo si puede elegir y pagar un plan online. El dueño puede ocultar "Crear mi cuenta" con una llave nueva en Página, prendida por defecto. Migración aditiva, llave en datos, sin tocar la configuración de Temple Gym.
   2. **"Crear mi cuenta" lleva a `/hacete-socio`** (la dirección del QR impreso, no se renombra). Pide nombre, apellido, DNI obligatorio con su aviso, celular, mail y contraseña. El plan es opcional ("Lo elijo en el gimnasio"). Al terminar, sesión abierta y directo a su app.
