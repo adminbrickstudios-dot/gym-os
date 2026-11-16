@@ -6,7 +6,7 @@
 //   node scripts/e2e/vd-35.mjs     (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, llaveCrearCuenta, aparece, capturar, chequear, entrar, entrarSocio, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
@@ -43,6 +43,8 @@ try {
 
   // ── Cerrado: no aparece ──
   await poner(false);
+  await llaveCrearCuenta(d, false);   // D83: cerrado del todo = también la llave de Crear mi cuenta
+  await d.goto(`${G}/panel/configuracion?pestana=pagina`);
   const v = await pagina(b, CELU);
   v.setDefaultNavigationTimeout(120000);
   await v.goto(`${G}/ingresar?modo=socio`);
@@ -52,6 +54,8 @@ try {
   chequear(await aparece(v.locator("[data-alta-cerrada]"), 30000) && await v.locator("[data-form-alta]").count() === 0, "registro cerrado: /hacete-socio manda a WhatsApp, sin formulario", "con el registro cerrado el formulario sigue");
 
   // ── Abierto: "Soy nuevo" lleva al formulario ──
+  await llaveCrearCuenta(d, true);
+  await d.goto(`${G}/panel/configuracion?pestana=pagina`);
   await poner(true);
   await v.goto(`${G}/ingresar?modo=socio`);
   const nuevo = v.locator("[data-soy-nuevo] a");

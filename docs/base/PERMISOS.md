@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 346 funciones piden un rol del equipo con `privado.exigir_equipo`; 423 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 348 funciones piden un rol del equipo con `privado.exigir_equipo`; 424 no (las decide la propia función con la sesión, el socio o RLS); 32 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -85,6 +85,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `copiar_rutina` | ✓ | ✓ | — | ✓ |
 | `corregir_fichaje` | ✓ | — | — | — |
 | `cortesias_socio` | ✓ | ✓ | ✓ | — |
+| `crear_cuenta_panel` | ✓ | ✓ | — | — |
 | `crear_evento` | ✓ | ✓ | — | — |
 | `crear_prospecto` | ✓ | ✓ | ✓ | — |
 | `crear_tarea` | ✓ | ✓ | ✓ | ✓ |
@@ -160,6 +161,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `guardar_config_visita` | ✓ | ✓ | — | — |
 | `guardar_configuracion` | ✓ | — | — | — |
 | `guardar_convenio` | ✓ | ✓ | — | — |
+| `guardar_crear_cuenta` | ✓ | — | — | — |
 | `guardar_cupon` | ✓ | — | — | — |
 | `guardar_datos_gimnasio` | ✓ | — | — | — |
 | `guardar_doble_cobro` | ✓ | — | — | — |
@@ -763,6 +765,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `series_hechas_hoy`
 - `sesiones_dictadas_pt`
 - `sincronizar_sin_internet`
+- `slug_actual_de (también anónimo)`
 - `suscripcion_push`
 - `suspender_socio`
 - `terminar_gasto_fijo`
@@ -792,6 +795,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `entrar_con_google`
 - `ingreso_permitido`
 - `landing_publica_base`
+- `landing_publica_sin_cuenta`
 - `mail_para_ingresar`
 - `precio_cuota`
 - `registrar_envio_publico`

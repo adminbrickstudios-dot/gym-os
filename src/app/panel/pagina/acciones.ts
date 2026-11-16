@@ -22,6 +22,16 @@ export async function guardarAltas(prendidas: boolean, reglamento: string): Prom
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** D83: mostrar u ocultar "Crear mi cuenta" en la página (solo el dueño; la base lo hace cumplir). */
+export async function guardarCrearCuenta(visible: boolean): Promise<{ error?: string; visible?: boolean }> {
+  const panel = await contextoPanel();
+  try {
+    const v = await rpc<boolean>("guardar_crear_cuenta", { p_gimnasio_id: panel.gimnasio.id, p_visible: visible });
+    revalidatePath("/", "layout");
+    return { visible: v };
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 /** VD-25: "+N socios" y reseñas de la portada (la base valida el puntaje y la cantidad). */
 export async function guardarPruebaSocial(socios: boolean, puntaje: string, cantidad: string): Promise<{ error?: string; prueba?: import("./PruebaSocial").PruebaSocialPanel }> {
   const panel = await contextoPanel();

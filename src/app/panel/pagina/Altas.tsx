@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Interruptor } from "@/components/ui/Interruptor";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { guardarAltas } from "./acciones";
+import { guardarAltas, guardarCrearCuenta } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 
 export type AltasPanel = {
@@ -13,7 +13,14 @@ export type AltasPanel = {
   transferencia: { alias: string | null; cbu: string | null } | null; aceptaciones: number;
 };
 
-export function Altas({ inicial, puedeEditar }: { inicial: AltasPanel; puedeEditar: boolean }) {
+export function Altas({ inicial, crearCuenta = true, puedeEditar }: { inicial: AltasPanel; crearCuenta?: boolean; puedeEditar: boolean }) {
+  const [cuentaVisible, setCuentaVisible] = useState(crearCuenta);
+  const [cuentaError, setCuentaError] = useState("");
+  const cambiarCuenta = async (v: boolean) => {
+    setCuentaVisible(v);
+    const r = await guardarCrearCuenta(v);
+    if (r.error) { setCuentaVisible(!v); setCuentaError(r.error); } else setCuentaError("");
+  };
   const [guardado, setGuardado] = useState(inicial);
   const [prendidas, setPrendidas] = useState(inicial.altas_online);
   const [texto, setTexto] = useState(inicial.reglamento?.texto ?? "");
@@ -28,11 +35,21 @@ export function Altas({ inicial, puedeEditar }: { inicial: AltasPanel; puedeEdit
     setMsj((m) => ({ ok: a.altas_online ? "Guardado: la gente ya se puede anotar desde tu página." : "Guardado.", n: m.n + 1 }));
   });
   return (
+    <>
+    <section className="tarjeta p-5 sm:p-6" data-crear-cuenta-seccion>
+      <fieldset disabled={!puedeEditar}>
+        <div data-crear-cuenta-llave>
+          <Interruptor etiqueta="Mostrar “Crear mi cuenta” en la página" ayuda="Crear la cuenta es gratis y no depende de las altas online: la persona deja sus datos y entra a su app. Apagalo si no querés que la gente se cree la cuenta sola."
+            checked={cuentaVisible} onChange={(e) => void cambiarCuenta(e.target.checked)} />
+          {cuentaError && <Mensaje tipo="error">{cuentaError}</Mensaje>}
+        </div>
+      </fieldset>
+    </section>
     <section className="tarjeta p-5 sm:p-6 space-y-4" data-altas data-respuestas={msj.n}>
       <div><p className="titulo text-2xl"><Icono nombre="pesa" /> Hacerse socio desde la página</p>
         <p className="texto-suave">Con esto prendido, la página muestra “Hacete socio” y en cada plan “Elegir este”: la persona deja sus datos, acepta el reglamento y elige pagar por transferencia o en el gimnasio. Queda como socio sin pagar hasta que cobrás.</p></div>
       <fieldset disabled={!puedeEditar} className="space-y-4">
-        <Interruptor etiqueta="Aceptar altas online" ayuda={guardado.reglamento ? `Se anotaron ${guardado.aceptaciones} aceptando el reglamento.` : "Primero escribí el reglamento."}
+        <Interruptor etiqueta="Aceptar altas online con plan" ayuda={guardado.reglamento ? `Se anotaron ${guardado.aceptaciones} aceptando el reglamento. Prendido, además la persona puede elegir su plan y pagar desde la página.` : "Primero escribí el reglamento."}
           checked={prendidas} onChange={(e) => setPrendidas(e.target.checked)} />
         <label className="block space-y-1">
           <span className="etiqueta">Reglamento {guardado.reglamento && <span className="texto-tenue font-normal">· versión {guardado.reglamento.version}</span>}</span>
@@ -51,5 +68,6 @@ export function Altas({ inicial, puedeEditar }: { inicial: AltasPanel; puedeEdit
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && !sucio && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
     </section>
+    </>
   );
 }

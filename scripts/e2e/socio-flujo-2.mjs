@@ -81,7 +81,7 @@ try {
   const persistente = { ...guardado, cookies: guardado.cookies.filter((c) => c.expires > ahora) };
   const m = await pagina(b, CELU, { storageState: persistente });
   m.setDefaultNavigationTimeout(120000);
-  await m.goto(G);
+  await m.goto(`${G}/?pagina=1`);   // D83: sin ?pagina=1, con la sesión abierta la dirección del gimnasio va directo a su app
   chequear(await aparece(m.locator("[data-saludo-sesion]"), 60000), "al reabrir el navegador, la landing lo saluda", "la landing no lo saluda con la sesión guardada");
   chequear(await m.locator("[data-ir-a-mi-perfil]").count() > 0 && await m.locator("[data-ya-soy-socio]").count() === 0, "ofrece “Ir a mi perfil” y no le pide entrar de nuevo", "la landing le sigue pidiendo entrar");
   await m.goto(`${G}/app`);

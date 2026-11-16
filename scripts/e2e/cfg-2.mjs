@@ -134,7 +134,7 @@ try {
 
   // La página pública muestra las fotos en el orden nuevo, y el logo.
   const pub = await p.context().newPage();
-  await pub.goto(`${G}/`);
+  await pub.goto(`${G}/?pagina=1`);
   const enPagina = await pub.locator('img[alt^="Foto "]').evaluateAll((xs) => xs.map((x) => x.getAttribute("src")));
   chequear(enPagina.length === 2 && enPagina[0] === despues[0], "la página del gimnasio muestra las 2 fotos en el orden elegido", `la página muestra ${enPagina.length} fotos`);
   chequear(await pub.locator('img[alt^="Logo de"]').count() > 0, "la página muestra el logo", "la página no muestra el logo");

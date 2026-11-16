@@ -8,6 +8,7 @@ import { Aviso } from "@/components/panel/Marco";
 import { fechaCorta, formatearDni, formatearPesos } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
 import { traerAgenda } from "@/lib/landing";
+import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
 import { textoCierre } from "@/lib/horarios";
 import { intentar } from "@/lib/panel/intentar";
 import { CancelarReserva } from "./CancelarReserva";
@@ -55,7 +56,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // L3: "pagá tu plan" arriba y el QR bloqueado, solo cuando lo que falta es pagar (no cuando está congelado o suspendido).
-    const faltaPagar = !v.puede && (v.para_regularizar != null || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
+    // D83: quien creó su cuenta y todavía no tiene plan ("sin plan activo") también tiene que pagar para empezar a entrar.
+    const faltaPagar = !v.puede && (v.para_regularizar != null || v.motivo === "sin_plan" || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
     const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados, dni] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -100,6 +102,25 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
       </>
     );
+    // El WhatsApp del gimnasio vive en "Info del gimnasio" (un toque): leerlo acá sumaría un viaje a la pantalla que más se abre (tope de viajes).
+    const hayClases = yo.modo_clases !== "ninguno";
+    const raiz = await raizDelGimnasio();
+    type BotonInicio = { clave: string; href: string; icono: string; titulo: string; principal?: boolean; externo?: boolean };
+    const botonesInicio: BotonInicio[] = ((faltaPagar ? [
+      { clave: "pagar", href: "#paga-tu-plan", icono: "tarjeta", titulo: "Pagá tu plan", principal: true },
+      { clave: "qr", href: "#mi-qr", icono: "llave", titulo: "Mi QR" },
+      hayClases ? { clave: "clases", href: `/app/clases${q}`, icono: "calendario", titulo: "Clases y horarios" } : { clave: "horarios", href: `/app/info${q}`, icono: "reloj", titulo: "Horarios" },
+      { clave: "planes", href: `/app/plan${q}`, icono: "etiqueta", titulo: "Planes" },
+      { clave: "perfil", href: `/app/yo${q}`, icono: "persona", titulo: "Mi perfil" },
+      { clave: "whatsapp", href: `/app/info${q}#whatsapp`, icono: "mensaje", titulo: "WhatsApp" },
+    ] : [
+      { clave: "qr", href: "#mi-qr", icono: "llave", titulo: "Mi QR", principal: true },
+      yo.modo_clases === "reserva" ? { clave: "reservar", href: `/app/clases${q}`, icono: "calendario", titulo: "Reservar" } : hayClases ? { clave: "clases", href: `/app/clases${q}`, icono: "calendario", titulo: "Clases y horarios" } : null,
+      { clave: "pagos", href: `/app/historial${q}`, icono: "recibo", titulo: "Mis pagos" },
+      { clave: "plan", href: `/app/plan${q}`, icono: "tarjeta", titulo: "Mi plan" },
+      { clave: "perfil", href: `/app/yo${q}`, icono: "persona", titulo: "Mi perfil" },
+      { clave: "whatsapp", href: `/app/info${q}#whatsapp`, icono: "mensaje", titulo: "WhatsApp" },
+    ]) as (BotonInicio | null)[]).filter((b): b is BotonInicio => !!b).slice(0, 6);
     return (
       <div className="space-y-6">
         {progreso?.bienvenida_pendiente && <Bienvenida socioId={s.socio_id} nombre={s.nombre} qr={!!qr || qrPared} clases={(yo.modo_clases ?? "ninguno") as "reserva" | "sin_reserva" | "ninguno"} pagos={!!yo.transferencia || !!online?.disponible} />}
@@ -128,7 +149,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
         {faltaPagar && (
-          <section className="tarjeta p-6 space-y-3 border-2" style={{ borderColor: "var(--acento)" }} data-paga-tu-plan>
+          <section id="paga-tu-plan" className="tarjeta p-6 space-y-3 border-2 scroll-mt-4" style={{ borderColor: "var(--acento)" }} data-paga-tu-plan>
             <p className="titulo text-2xl"><Icono nombre="tarjeta" /> Para empezar a entrar, pagá tu plan</p>
             {yo.plan && <p className="text-xl" data-plan-a-pagar>{yo.plan.nombre}{yo.plan.precio_transferencia != null && <> · <strong className="numero">{formatearPesos(yo.plan.precio_transferencia)}</strong></>}</p>}
             <p className="text-lg" data-pagar-en-recepcion><Icono nombre="persona" /> <strong>Pagá en la recepción:</strong> decí tu DNI{dni ? <> (<span className="numero">{formatearDni(dni)}</span>)</> : ""} y te cobran.</p>
@@ -149,6 +170,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {debePagar && !faltaPagar && bloquePago}
 
         {/* SOCIO-FLUJO §4: lo primero después del estado es cómo entra: el QR (que cambia) o, si el gimnasio no lo usa, su DNI. */}
+        <div id="mi-qr" className="space-y-6 scroll-mt-4" data-bloque-qr>
         {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
         {qr && (v.puede
           ? <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />
@@ -161,15 +183,17 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
-        <nav className="grid grid-cols-2 gap-3" aria-label="Lo de todos los días" data-botones-inicio>
-          <Link href={`/app/yo${q}`} className="tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition" data-boton-mi-plan>
-            <span className="text-3xl" aria-hidden><Icono nombre="tarjeta" /></span><span className="titulo text-xl">Mi plan</span>
-          </Link>
-          {yo.modo_clases === "reserva" && (
-            <Link href={`/app/clases${q}`} className="tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition" data-boton-reservar>
-              <span className="text-3xl" aria-hidden><Icono nombre="calendario" /></span><span className="titulo text-xl">Reservar una clase</span>
+        </div>
+
+        {/* D83 · 6: pocos botones grandes, los de todos los días. Sin pagar: lo que lo lleva a entrar (pagar, su QR bloqueado, clases, planes, su perfil, el gimnasio).
+            Pagando: su QR, reservar, sus pagos, su perfil y el gimnasio. El resto (rutina, eventos, invitar…) sigue más abajo. */}
+        <nav className="grid grid-cols-2 gap-3" aria-label="Lo de todos los días" data-botones-inicio data-modo-botones={faltaPagar ? "sin-pagar" : "pagando"}>
+          {botonesInicio.map((b) => (
+            <Link key={b.clave} href={b.href} prefetch={false} {...(b.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})} data-boton-inicio={b.clave}
+              className={`tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition ${b.principal ? "border-2" : ""}`} style={b.principal ? { borderColor: "var(--acento)" } : undefined}>
+              <span className="text-3xl" aria-hidden><Icono nombre={b.icono} /></span><span className="titulo text-xl">{b.titulo}</span>
             </Link>
-          )}
+          ))}
         </nav>
 
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
@@ -191,6 +215,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
+        <Link href={`${raiz}?pagina=1`} className="boton w-full" data-ver-pagina-gimnasio prefetch={false}><Icono nombre="web" /> Ver la página del gimnasio</Link>
         <Link href={`/app/info${q}`} className="tarjeta flex items-center gap-3 px-5 py-4 min-h-[64px]" data-info-gimnasio-acceso>
           <span className="text-2xl" aria-hidden><Icono nombre="info" /></span>
           <span className="flex-1 min-w-0"><span className="block font-semibold">Info del gimnasio</span><span className="block texto-suave text-sm truncate">Horarios, reglamento, contacto y cómo llegar</span></span>
@@ -227,7 +252,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </Link>
         )}
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
-        {referido && <Referir datos={referido} />}
+        {referido && !faltaPagar && <Referir datos={referido} />}   {/* D83: quien todavía no pagó ve lo que lo lleva a entrar, nada de invitar */}
         <Instalar />
 
         {yo.modo_clases !== "ninguno" && (

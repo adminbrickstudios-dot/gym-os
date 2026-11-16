@@ -8,7 +8,9 @@ Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cob
 
 **Publicado hoy a las 12:42 (hora de Argentina), PR #27, main en `325b1e89`:** D69 (el producto se llama Pase: panel, app del socio, super admin, títulos, manifest; el nombre sale de `src/lib/producto.ts` y una prueba falla si vuelve a escribirse a mano), P2 (ninguna dirección escrita a mano, la lista de excepciones quedó vacía), Q1 según D70 (la matrícula se valida antes de crear el plan; el cierre de caja muestra el monto contado antes de confirmar), el tope de viajes a la base por pantalla, la hoja de Cobrar sin la X duplicada y N10 (migración `20261114180000` aplicada sin copia, corrida 43731288556, función apagada por defecto). Deploy en verde; en producción: título y manifest dicen Pase, `/api/salud`, `/g/demo`, `/g/templegym1` y `/ingresar` responden 200, `humo-pasado` en verde. **Temple Gym solo mirado, nada tocado.** Para volver atrás: revertir el merge (main antes de hoy: `eab6e40e`).
 
-**Sin publicar (rama `base/2026-11-07`, todo en verde en Actions; se publica a partir de las 22:00 con prevuelo, sin migraciones nuevas, volviendo a `325b1e89` si algo se rompe):**
+**Segunda publicación, 16/11 a las 10:00 (hora de Argentina), PR #28, main en `dd8cdb73`, sin migraciones (prevuelo: nada pendiente, corrida 43871472293):** deploy en verde, `/api/salud` y `/ingresar` en 200 con título Pase, `humo-pasado` en verde (corrida 43872106054). Para volver atrás: revertir el merge (main antes: `325b1e89`). **Temple Gym solo mirado.** Contenido:
+
+**⚠️ Encontrado al hacer el humo, no es de este cambio (`proxy.ts`, `dominios.ts` y `proxy-rutas.ts` no cambiaron):** `gym-os-pied.vercel.app` ya redirige a `pasegym.com`, y `/g/demo` y `/g/templegym1` (el QR impreso de Temple) redirigen con 308 a `demo.gym-os-pied.vercel.app` y `templegym1.gym-os-pied.vercel.app`, que no tienen certificado (falla el handshake SSL). Parece ser la configuración de dominios en Vercel (variables de dominio base o plataforma) que se tocó después del 15/11: **revisalo vos, primero**, porque con eso el QR de Temple no abre. No toqué variables de Vercel (regla). Pista: la rama `sonda/dominios-1511` es de esa prueba de dominios.
 - **Un bug real arreglado:** el número del menú (Mensajes, Transferencias…) y el de la campana quedaban viejos después de contestar un mensaje o aprobar una transferencia. Prueba nueva `vivo-cliente.test.ts`.
 - **"Probá una clase"** en todos lados de la página del gimnasio (antes también decía "Probá gratis"), con una prueba que falla si vuelve (D79).
 - **El panel lateral del socio muestra su foto** (o la inicial) para confirmar a quien está en la puerta, y **tocar una última entrada de Inicio abre ese panel** sin salir de la pantalla (FA-2).
@@ -23,9 +25,9 @@ Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cob
 | El producto se llama Pase (D69) | 🟢 | Publicado y probado en producción |
 | Entrar, cobrar, alta y caja del mostrador | 🟢 | Publicado; recorridos de caja, Cobrar y Entrada en verde |
 | La hoja de Cobrar sin dos X | 🟢 | Publicado |
-| Número del menú al día después de contestar o aprobar | 🟡 | Arreglado y probado; se publica a las 22:00 |
-| Foto del socio en el panel lateral y últimas entradas que lo abren | 🟡 | Hecho con prueba; se publica a las 22:00 |
-| "Probá una clase" en la página, sin "Probá gratis" | 🟡 | Hecho con prueba; se publica a las 22:00 |
+| Número del menú al día después de contestar o aprobar | 🟢 | Publicado el 16/11 (PR #28, commit dd8cdb73) |
+| Foto del socio en el panel lateral y últimas entradas que lo abren | 🟢 | Publicado el 16/11 (PR #28) |
+| "Probá una clase" en la página, sin "Probá gratis" | 🟢 | Publicado el 16/11 (PR #28) |
 | La página del gimnasio en una pantalla (L1) | 🟢 | Publicada. La prueba social y "¿Primera vez?" ➡️ con la landing nueva |
 | Quiero ser socio con la cuenta gratis y DNI (L2) | 🟢 | Publicado |
 | App del socio: pagá tu plan y QR bloqueado que se activa solo (L3) | 🟢 | Publicado |
@@ -40,6 +42,7 @@ Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cob
 | Política de privacidad real e inscripción en la AAIP | ⛔ | Con un abogado; el borrador está en la app |
 
 **⛔ Lo que tenés que hacer vos, en orden de lo que más destraba:**
+0. **Urgente, antes de nada:** abrí `https://pasegym.com/g/templegym1` (el QR impreso de Temple): hoy redirige a `templegym1.gym-os-pied.vercel.app`, que no tiene certificado. Revisá en Vercel las variables de dominio base y plataforma (y el dominio `gym-os-pied.vercel.app` redirigiendo a `pasegym.com`) que se movieron después del 15/11; no las toqué.
 1. **GitHub → Settings → Secrets and variables → Actions → New repository secret:** `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO` y `COPIA_CLAVE`; y la variable `SALUD_URL` = `https://gym-os-pied.vercel.app/api/salud`. Con eso se destraba la medición en producción, crear un gimnasio, las copias y el aviso de caídas.
 2. **Temple Gym** (el panel de Temple): Página → "Hacerse socio desde la página" → escribir el reglamento (obligatorio) → prender "Aceptar altas online" → Guardar; corregir el nombre a "Temple Gym" y cargar el WhatsApp en Configuración → Gimnasio. Recién ahí `/g/templegym1/hacete-socio?o=qr` deja anotarse (hoy dice "Hoy no te podés anotar desde acá").
 3. **Mails de Supabase** (invitación y recuperar contraseña): se escriben en el panel de Supabase, no en el código; revisá que digan Pase.
@@ -96,6 +99,7 @@ Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cob
 | Cierre (F8): todo en verde, prueba del dueño | 🟡 | `PRUEBA-DUENO.md` listo; su siembra en producción ⛔ por secretos |
 
 **⛔ Lo que tenés que hacer vos, en orden de lo que más destraba:**
+0. **Urgente, antes de nada:** abrí `https://pasegym.com/g/templegym1` (el QR impreso de Temple): hoy redirige a `templegym1.gym-os-pied.vercel.app`, que no tiene certificado. Revisá en Vercel las variables de dominio base y plataforma (y el dominio `gym-os-pied.vercel.app` redirigiendo a `pasegym.com`) que se movieron después del 15/11; no las toqué.
 1. GitHub → Settings → Secrets and variables → Actions: `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_CONTRASENA`, `COPIA_CLAVE`, `CLAVE_PRUEBA_MATEO`.
 2. Vercel: `SUPABASE_SERVICE_ROLE_KEY` (U0.1/U1), `SUPABASE_REF_ESPERADO` (P3), Vercel Pro.
 3. Temple Gym: prender las altas online (arriba), cargar el WhatsApp.

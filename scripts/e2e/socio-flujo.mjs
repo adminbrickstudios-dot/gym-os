@@ -5,14 +5,14 @@
 //   3. Sin pagar la app dice "No podés entrar"; la recepción aprueba el pago y la misma pantalla da "Podés entrar".
 //   4. Cerrar el navegador y volver a abrir la landing: la saluda y ofrece "Ir a mi perfil"; /ingresar no muestra el login.
 //      "Cerrar sesión" vuelve a la landing del gimnasio.
-//   5. Con "Quiero ser socio" apagado: el botón no aparece y el link directo dice que hoy no se puede, con el WhatsApp.
+//   5. D83: con las altas con plan apagadas, “Crear mi cuenta” sigue (sin planes); con la llave del dueño apagada, no aparece y el link directo dice que hoy no se puede.
 //   6. Un socio ya cargado (recepción) reclama su ficha con DNI y celular: ve su ficha y NO se crea otro socio; con datos que no
 //      coinciden no entra.
 //   7. Un menor: el formulario pide al adulto responsable.
 //   node scripts/e2e/socio-flujo.mjs      (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, llaveCrearCuenta, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() }); await db.connect();
@@ -128,13 +128,13 @@ try {
   await v.context().close();
   const m = await pagina(b, CELU, { storageState: guardado });
   m.setDefaultNavigationTimeout(120000);
-  await m.goto(G);
+  await m.goto(`${G}/?pagina=1`);   // D83: sin ?pagina=1, con la sesión abierta la dirección del gimnasio va directo a su app
   chequear(await aparece(m.locator("[data-saludo-sesion]"), 60000) && /Hola, Julián/.test(await m.locator("[data-saludo-sesion]").innerText()), "al volver, la landing lo saluda: “Hola, Julián”", "la landing no lo saluda");
   chequear(await m.locator("[data-ir-a-mi-perfil]").count() > 0 && await m.locator("[data-ya-soy-socio]").count() === 0, "ofrece “Ir a mi perfil” y no pide entrar de nuevo", "la landing sigue pidiendo entrar");
   await m.goto(`${G}/ingresar?modo=socio`);
   await m.waitForURL(/\/app/, { timeout: 60000 });
   chequear(await m.locator("input[type=password]").count() === 0, "con la sesión abierta, /ingresar no muestra el login: va a su perfil", "/ingresar mostró el login con la sesión abierta");
-  await m.goto(G);
+  await m.goto(`${G}/?pagina=1`);   // D83: sin ?pagina=1, con la sesión abierta la dirección del gimnasio va directo a su app
   await m.locator("[data-cerrar-sesion]").first().click();
   await m.waitForURL((u) => u.pathname === "/", { timeout: 60000 });
   chequear(await aparece(m.locator("[data-ya-soy-socio]"), 60000), "“Cerrar sesión” vuelve a la landing del gimnasio, ya sin sesión", `“Cerrar sesión” terminó en ${m.url()}`);
@@ -180,17 +180,27 @@ try {
   chequear(await aparece(f3.locator("[data-adulto-responsable]"), 10000), "menor de 18: pide nombre y celular del adulto responsable", "con un menor no pide al adulto responsable");
   await n.context().close();
 
-  // ── 5. Con "Quiero ser socio" apagado ──
+  // ── 5. D83: con las altas con plan apagadas, "Crear mi cuenta" sigue; solo el dueño lo oculta con su llave ──
   await poner(false);
   const o = await pagina(b, CELU);
   o.setDefaultNavigationTimeout(120000);
   await o.goto(G);
   await o.locator("[data-ya-soy-socio]").first().waitFor({ timeout: 60000 });
-  chequear(await o.locator("[data-quiero-ser-socio]").count() === 0, "apagado: el botón “Quiero ser socio” no aparece", "apagado: el botón sigue");
+  chequear(await o.locator("[data-crear-cuenta]").count() === 1, "altas con plan apagadas: “Crear mi cuenta” sigue en la portada (no depende de ellas)", "altas con plan apagadas: desapareció “Crear mi cuenta”");
+  await o.goto(`${G}/hacete-socio`);
+  await o.locator("[data-form-alta]").waitFor({ timeout: 60000 });
+  chequear(await o.locator("[data-plan]").count() === 0 && await o.locator("[data-crear-cuenta-enviar]").count() === 1, "el formulario no ofrece planes ni medio de pago: solo crear la cuenta", "el formulario ofrece planes con las altas apagadas");
+  await llaveCrearCuenta(d, false);   // la dueña oculta el botón desde Tu página (revalida la página del gimnasio)
+  await o.goto(G);
+  await o.locator("[data-ya-soy-socio]").first().waitFor({ timeout: 60000 });
+  const oculto = await o.locator("[data-crear-cuenta]").count() === 0;
   await o.goto(`${G}/hacete-socio`);
   const cerrada = o.locator("[data-alta-cerrada]");
-  chequear(await aparece(cerrada, 30000) && /no te podés anotar/.test(await cerrada.innerText()) && await o.locator("[data-whatsapp-gimnasio]").count() === 1, "apagado: el link directo dice que hoy no se puede y da el WhatsApp", "apagado: el link directo no lo dice");
+  chequear(oculto && await aparece(cerrada, 30000) && /no te podés anotar/.test(await cerrada.innerText()) && await o.locator("[data-whatsapp-gimnasio]").count() === 1, "con la llave del dueño apagada: sin botón, y el link directo dice que hoy no se puede, con el WhatsApp", "con la llave apagada el botón o el link directo siguen");
   await o.context().close();
+  await llaveCrearCuenta(d, true);
+  await d.goto(`${G}/panel/ayuda/carteles/anotate`);   // vuelve a la pantalla de los controles para dejar el registro como estaba
+  await controles.waitFor({ timeout: 60000 });
   await poner(true);
 
   for (const [nombre, pag] of [["dueña", d], ["celular", v], ["recepción", r]]) if (pag.errores.length) falla(`${nombre}: ${pag.errores.join(" | ")}`);

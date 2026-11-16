@@ -427,7 +427,7 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
   const pasos = [
     probar && { href: "#probar", titulo: "Probá una clase", texto: "Dejás tu WhatsApp y te escribimos para arreglar día y hora." },
     planes && { href: "#planes", titulo: "Elegí tu plan", texto: "Mirá los precios y quedate con el que te cierra." },
-    altas && { href: "/hacete-socio", titulo: "Quiero ser socio", texto: "Te anotás desde el celular y empezás." },
+    altas && { href: "/hacete-socio", titulo: "Crear mi cuenta", texto: "Es gratis: dejás tus datos y ya tenés tu perfil y tu QR." },
   ].filter(Boolean) as { href: string; titulo: string; texto: string }[];
   if (pasos.length < 2) return null;
   return (
@@ -453,7 +453,7 @@ function ComoEmpezar({ probar, planes, altas }: { probar: boolean; planes: boole
 export type SesionLanding = { nombre: string | null; esSocio: boolean; esEquipo: boolean } | null;
 
 /**
- * SOCIO-FLUJO §1 · Los dos botones grandes de la portada: "Quiero ser socio" (solo si el dueño tiene las altas online prendidas) y
+ * SOCIO-FLUJO §1 · D83 · Los dos botones grandes de la portada: "Crear mi cuenta" (siempre, salvo que el dueño lo oculte; no depende de las altas con plan) y
  * "Ya soy socio, entrar". Con la sesión abierta: el saludo por el nombre, "Ir a mi perfil" y "Cerrar sesión". Nunca pide entrar de nuevo.
  */
 function AccesoSocio({ altas, sesion, estilo = "", sinAltasWhatsapp = null }: { altas: boolean; sesion: SesionLanding; estilo?: string; sinAltasWhatsapp?: string | null }) {
@@ -471,7 +471,7 @@ function AccesoSocio({ altas, sesion, estilo = "", sinAltasWhatsapp = null }: { 
   }
   return (
     <>
-      {altas && <a href="/hacete-socio" className={`boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16`} data-quiero-ser-socio><Icono nombre="mas" /> Quiero ser socio</a>}
+      {altas && <a href="/hacete-socio" className={`boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16`} data-crear-cuenta data-quiero-ser-socio><Icono nombre="mas" /> Crear mi cuenta</a>}
       {!altas && sinAltasWhatsapp && <a href={sinAltasWhatsapp} target="_blank" rel="noopener noreferrer" className="boton boton-principal text-xl px-8 w-full sm:w-auto !min-h-16" data-escribinos-whatsapp><Icono nombre="mensaje" /> Escribinos por WhatsApp</a>}
       {/* Sin "Quiero ser socio" ni WhatsApp, entrar es lo único que se ofrece: pasa a ser el botón principal. */}
       <a href="/ingresar?modo=socio" className={`boton text-lg px-8 w-full sm:w-auto ${!altas && !sinAltasWhatsapp ? "boton-principal !min-h-16 text-xl" : estilo}`} data-ya-soy-socio><Icono nombre="llave" /> Ya soy socio, entrar</a>
@@ -516,7 +516,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
           <h1 className="titular text-center text-[clamp(3rem,13vw,5rem)] mt-5 break-words" data-nombre-gimnasio>{marca.nombre}</h1>
           {frase && <p data-frase className={`mt-3 text-center text-lg sm:text-xl leading-snug ${foto || video ? "text-white/90" : "texto-suave"}`}>{frase}</p>}
           <div className="mt-8 flex flex-col gap-3">
-            <AccesoSocio altas={!!landing.altas_online} sesion={sesion} estilo={foto || video ? "!bg-white/15 !text-white !border-white/30" : ""} sinAltasWhatsapp={whatsapp} />
+            <AccesoSocio altas={landing.crear_cuenta ?? !!landing.altas_online} sesion={sesion} estilo={foto || video ? "!bg-white/15 !text-white !border-white/30" : ""} sinAltasWhatsapp={whatsapp} />
           </div>
           <ul className={`mt-8 space-y-3 text-base ${foto || video ? "text-white/95" : ""}`} data-datos-rapidos>
             {direccion && (

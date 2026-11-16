@@ -32,7 +32,11 @@ const DATOS = { nombre: "Ana", apellido: "Online", dni: "30111222", telefono: "3
 
 test("apagado por defecto; no se prende sin reglamento; el dueño lo prende, el encargado no", async () => {
   await t.falla(() => anon(() => alta(DATOS)), /no está aceptando altas online/);
-  assert.equal((await anon(() => t.q(`select public.alta_publica($1) as a`, [HOST])))[0].a.abierta, false);
+  // D83 (16/11): con las altas online apagadas la página igual deja crear la cuenta (sin plan); lo que se apaga es elegir y pagar un plan online.
+  const apagada = (await anon(() => t.q(`select public.alta_publica($1) as a`, [HOST])))[0].a;
+  assert.equal(apagada.abierta, true);
+  assert.equal(apagada.con_plan, false);
+  assert.deepEqual(apagada.planes, []);
   await t.comoUsuario(u.dueno, async () => {
     await t.falla(() => t.q(`select public.guardar_altas($1, true, null)`, [t.g]), /Escribí el reglamento antes/);
     await t.falla(() => t.q(`select public.guardar_altas($1, false, 'corto')`, [t.g]), /muy corto/);

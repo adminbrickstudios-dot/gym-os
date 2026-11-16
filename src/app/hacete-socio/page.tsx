@@ -15,7 +15,7 @@ import { urlDeHost } from "@/lib/urls";
 import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type DatosAlta = {
-  abierta: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
+  abierta: boolean; con_plan?: boolean; marca: Marca; contacto: { whatsapp: string | null; mensaje_whatsapp?: string };
   mostrar_precios?: boolean; planes?: PlanPublico[]; plan_sugerido?: string | null; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
 };
 
@@ -53,9 +53,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
   const landing = host ? await traerLanding(host).catch(() => null) : null;
   const nombre = landing?.marca.nombre ?? null;
-  const titulo = nombre ? `Quiero ser socio · ${nombre}` : "Quiero ser socio";
+  const titulo = nombre ? `Crear mi cuenta · ${nombre}` : "Crear mi cuenta";
   // SEO: toda página pública lleva su descripción.
-  const descripcion = nombre ? `Hacete socio de ${nombre}: elegí tu plan, dejá tus datos y empezá a entrenar.` : "Hacete socio: elegí tu plan, dejá tus datos y empezá a entrenar.";
+  const descripcion = nombre ? `Creá tu cuenta gratis en ${nombre}: dejá tus datos y empezá a entrenar.` : "Creá tu cuenta gratis: dejá tus datos y empezá a entrenar.";
   // Al compartir el link por WhatsApp: la misma imagen y el mismo ícono que la página del gimnasio (la foto de portada, o /og con su nombre y sus colores).
   const origen = host ? urlDeHost(host, "/og") : "/og";
   const foto = landing?.publicada && landing.portada.foto_path ? urlMarca(landing.portada.foto_path) : null;
@@ -101,10 +101,10 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 space-y-8">
         <div>
-          <h1 className="titular text-5xl sm:text-6xl">Quiero ser socio</h1>
-          <p className="texto-suave text-lg mt-3">Elegí tu plan, dejá tus datos y creá tu cuenta. Con tu mail y tu contraseña entrás a tu perfil.</p>
+          <h1 className="titular text-5xl sm:text-6xl">Crear mi cuenta</h1>
+          <p className="texto-suave text-lg mt-3">Dejá tus datos y creá tu cuenta gratis. Con tu mail y tu contraseña entrás a tu perfil, ves tu QR y todo lo del gimnasio.</p>
         </div>
-        {d.abierta && d.planes?.length
+        {d.abierta
           ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} origen={origen} />
           : (
             // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.

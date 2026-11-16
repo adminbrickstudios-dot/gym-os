@@ -194,3 +194,17 @@ export async function esperarAntiRobot(pagina) {
   const p = typeof pagina.page === "function" ? pagina.page() : pagina;
   await p.waitForFunction(() => Number(document.querySelector("input[name=segundos]")?.value) >= 3, null, { timeout: 30000 });
 }
+
+/**
+ * D83: la llave "Mostrar Crear mi cuenta" de Tu página (la mueve la dueña, y la guarda revalidando la página del gimnasio).
+ * Con las altas con plan apagadas, "registro cerrado del todo" = esta llave apagada también. `d` es una página con la sesión de la dueña.
+ */
+export async function llaveCrearCuenta(d, visible, base = GIMNASIO()) {
+  await d.goto(`${base}/panel/pagina`);
+  const caja = d.locator("[data-crear-cuenta-llave] input[type=checkbox]");
+  await caja.waitFor({ timeout: 60000 });
+  if ((await caja.isChecked()) === visible) return;
+  const respuesta = d.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/panel/pagina"), { timeout: 30000 });
+  await (visible ? caja.check() : caja.uncheck());
+  await respuesta;
+}

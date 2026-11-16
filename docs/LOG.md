@@ -1,3 +1,8 @@
+## 2026-11-16 · Pase 1.0 — segunda publicación (PR #28, commit dd8cdb73)
+
+Publicado a las 10:00 (hora de Argentina), sin migraciones (prevuelo: nada pendiente, corrida 43871472293). Deploy en verde, `/api/salud` y `/ingresar` en 200 con título Pase, `humo-pasado` en verde (43872106054). Para volver atrás: revertir el merge (main antes: `325b1e89`). Temple Gym solo mirado.
+**Lo que encontré sin pedírtelo:** `/g/demo` y `/g/templegym1` redirigen (308) a subdominios de `gym-os-pied.vercel.app` sin certificado, y `gym-os-pied.vercel.app` ya redirige a `pasegym.com`. `proxy.ts`, `dominios.ts` y `proxy-rutas.ts` no cambiaron entre `325b1e89` y este deploy: es configuración de dominios en Vercel. No lo toqué (variables de Vercel = Mateo). **No pude verificar** "Probá una clase" en producción por ese redirect; sí está probado por `probar-una-clase.test.ts` y en la cadena e2e.
+
 ## 2026-11-15 · Pase 1.0 — rama `base/2026-11-07`, primera publicación el 15/11 a las 12:42 (PR #27)
 
 ```

@@ -59,6 +59,14 @@ test("solo el dueño elige el plan sugerido; tiene que ser un plan activo y visi
 });
 
 test("con el registro apagado el público no recibe plan ni formulario; abierto, recibe el plan sugerido", async () => {
+  // D83 (16/11): apagado el registro con plan, la página igual deja crear la cuenta (sin plan ni lista de planes).
+  const soloCuenta = await publica();
+  assert.equal(soloCuenta.abierta, true);
+  assert.equal(soloCuenta.con_plan, false);
+  assert.deepEqual(soloCuenta.planes, []);
+  assert.equal(soloCuenta.plan_sugerido, null);
+  // Y con el botón oculto por el dueño (crear_cuenta_visible = false), vuelve a estar cerrada del todo.
+  await t.q(`update public.configuracion_gimnasio set crear_cuenta_visible = false where gimnasio_id = $1`, [t.g]);
   const cerrada = await publica();
   assert.equal(cerrada.abierta, false);
   assert.equal(cerrada.plan_sugerido, undefined);

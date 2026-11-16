@@ -81,7 +81,7 @@ try {
     await p.locator(".mensaje", { hasText: "quedó oculta" }).waitFor({ timeout: 30000 });
   }
   const pub = await p.context().newPage();
-  await pub.goto(`${G}/`);
+  await pub.goto(`${G}/?pagina=1`);
   chequear(await pub.locator("[data-pagina-oculta]").count() > 0 && await pub.locator("text=/armando/i").count() === 0 && await pub.locator('[data-pagina-oculta] a[href="/hacete-socio"], [data-pagina-oculta] a[href^="/ingresar"]').count() > 0, "oculta, la página muestra solo la portada con “Quiero ser socio” (nunca “armando”)", "la página oculta no muestra la portada con los botones");
   await p.locator('[data-publicar] button:has-text("Mostrar mi página")').click();
   await p.locator(".mensaje", { hasText: "está publicada" }).waitFor({ timeout: 30000 });

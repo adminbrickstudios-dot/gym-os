@@ -9,6 +9,87 @@ La idea: **un mostrador de gimnasio, no una app de IA**. Claro, encuadrado,
 números grandes que se leen de lejos, el color del gimnasio en un solo lugar, y
 los cuatro colores del semáforo siempre iguales.
 
+## Pase 2.0 · El rediseño "Pista" (aprobado para programar, Mateo 16/11 12:34)
+
+> **Aprobado para programar (Mateo, 16/11 12:34): "que tenga las mismas páginas y que tenga las funciones, y que nada se
+> rompa. Que pruebe todo y de ahí recién se publiquen todos los cambios."** Es un cambio de aspecto sobre las mismas pantallas:
+> no se agregan ni se sacan páginas, secciones ni funciones, y no se arma el "Inicio por rol" (queda para después, si Mateo lo
+> pide). Se programa DESPUÉS de los pedidos ⏳ de `CAMBIOS-MATEO.md`. Se publica todo junto, una sola vez, cuando todo esté
+> probado. Los tokens de abajo reemplazan a los de "Tokens" cuando el gimnasio tiene el estilo Pista.
+
+**Decidido por Mateo (16/11):**
+- Estilo **A · Pista**: oscuro y deportivo, títulos grandes condensados (Big Shoulders Display) y texto en Inter, un acento
+  fuerte (naranja por defecto). Se edita con lo que Mateo vaya pasando; Claude recomienda.
+- Orden de Pase 2.0, el de Mateo: visual → estructura → detalles → funciones → agregados → seguridad. Después, la
+  profesionalización (cuando diga "terminado oficialmente").
+- Primero diseños (el lienzo), después código.
+- **Cambia cómo se ve y se mueven algunas cosas de lugar. Nada más: ninguna función se pierde.**
+- **Los colores se pueden cambiar** (por gimnasio).
+- Botones más lindos, algún que otro emoji, más organizado visualmente.
+- La página de cada gimnasio también se rediseña: diseño, dibujos, estilo y botones.
+
+**Decidido por Mateo (16/11, segunda tanda):**
+- **Claro y oscuro:** el mismo diseño Pista en las dos versiones, oscuro por defecto. Cada gimnasio (y cada compu) elige.
+  Reemplaza a "claro por defecto" de más abajo cuando Pista se apruebe.
+- **Colores del gimnasio:** su color principal (de una paleta probada, o uno propio que el sistema corrige si no se lee o si se
+  parece al semáforo) y claro u oscuro. Nada más: la paleta completa no se abre.
+- **Emojis en pocos lugares:** en los accesos rápidos, los avisos y las pantallas vacías. El menú y los botones de acción
+  siguen con íconos de línea (D38). Mateo sabe que en Windows los emojis se ven distintos.
+- **Página del gimnasio:** dibujos propios de Pase (pesas, bici, gente entrenando) en el color del gimnasio, más sus fotos cuando
+  las sube. Nunca queda vacía.
+
+**Los tokens de Pista** (los mismos nombres que la sección "Tokens"; cambian los valores):
+
+| Token | Oscuro (por defecto) | Claro |
+|---|---|---|
+| `--fondo` | `#121A22` | `#F3F5F7` |
+| `--superficie` | `#1A2530` | `#FFFFFF` |
+| `--superficie-2` (filas, chips, tarjetas dentro de tarjetas) | `#22303C` | `#EDF0F3` |
+| `--borde` | `#22303C` | `#E1E6EB` |
+| `--texto` | `#EEF2F5` | `#121A22` |
+| `--texto-2` | `#8FA0AE` | `#55626E` |
+| `--texto-3` (títulos de grupo del menú) | `#6F8190` | `#6B7884` |
+| `--acento` | color del gimnasio; sin elegir, `#FF7A3D` | el mismo, corrido a más oscuro si no da 4,5:1 sobre el fondo claro |
+| `--sobre-acento` | negro (`#121A22`) o blanco según el contraste | ídem |
+| Semáforo en oscuro | `--ok #3DDC84` · `--atencion #FFC24D` · `--no #FF5A5A` · `--prueba #4DA3FF` | los de la sección "Semáforo" |
+
+**Letra:** títulos de pantalla, de sección y números grandes en **Big Shoulders Display 800, en mayúsculas** (Google Fonts, cargada
+con `next/font`); todo lo demás en **Inter** (400/500/600/700). Los números de plata y de cantidades con cifras tabulares.
+
+**Forma:** tarjetas con radio 16 px y sin sombra (en oscuro se separan por el tono; en claro, borde de 1 px); botones con radio
+12–14 px y alto mínimo 52 px (los ítems del menú, 44 px); el botón principal de cada pantalla, lleno con el acento; el
+secundario, con borde de 2 px del acento; los demás, en `--superficie-2`. El menú lateral se queda como está (buscador con
+Ctrl K, Inicio, grupos Hoy / Socios / Plata con su título en mayúsculas chicas), con el ítem activo lleno con el acento.
+
+**Emojis (D, Mateo 16/11):** solo en los accesos rápidos de Inicio, en los avisos y en las pantallas vacías. Menú y botones de
+acción: íconos de línea (D38).
+
+**Página del gimnasio:** los mismos bloques de hoy (L1 y D83) con los tokens de Pista y el color del gimnasio; los dibujos propios
+de Pase van donde hoy no hay foto. Si los dibujos no están listos, se usa el color del gimnasio de fondo (nunca un hueco).
+
+**Cómo se ve:** el lienzo "Pase 2.0 · Estilos" de Mateo, pantallas "A · Pista — Inicio del panel" y "A · Pista — App del socio".
+
+**Para no olvidar en el rediseño (recomendado por Claude, 16/11):**
+- Todo lo que ve el socio, no solo el panel: la tablet, la TV, la app, el cartel del QR, los recibos, la imagen al compartir
+  el link, el ícono de la app.
+- Las pantallas que nadie diseña: cargando, vacía, error y sin internet.
+- El panel del dueño en el celular.
+- Un Inicio por rol (recepción, dueño, profe), con lo suyo arriba.
+- Entrada y Cobrar siempre en el mismo lugar, y "Novedades" para avisarle al equipo de Benja qué cambió.
+- El semáforo no lo cambia nadie.
+- El logo de Pase.
+
+**Cómo se programa, cuando se apruebe (para que no se rompa ni se pierda nada):**
+1. **Inventario antes:** por cada pantalla, cada botón, sección, número y acción que tiene hoy (sale de `src/lib/panel/secciones.ts`,
+   de cada `page.tsx` y de los `data-*` que usan los e2e). Una prueba nueva recorre el inventario en el estilo nuevo: si falta
+   algo, no se publica.
+2. **Solo el aspecto:** tokens, componentes y lugar en la pantalla. Ni lógica, ni base, ni plata en la fase visual.
+3. **Detrás de una llave por gimnasio** ("estilo Pista"): prendido en los `[demo]`; a Temple Gym lo prende Mateo cuando lo
+   aprueba, y se vuelve al de antes con un toque.
+4. **Las 250 pruebas e2e pasan sin cambios** (usan `data-*`, no estilos), más capturas antes y después de cada pantalla en compu y
+   celular, y comparación de capturas para que nada se mueva sin querer.
+5. Publicación fuera de 16–22 h, como siempre.
+
 ## Tokens (todo sale de acá: ningún color suelto en el código)
 
 ### Claro (por defecto)

@@ -106,7 +106,7 @@ function Estado({ publicadaInicial, direccion, nombre, puedeEditar }: { publicad
         {puedeEditar && (publicada
           ? <button type="button" className="boton" disabled={cambiando} onClick={() => cambiar(false)}>{cambiando ? "Guardando…" : "Ocultar mi página"}</button>
           : <button type="button" className="boton boton-principal" disabled={cambiando} onClick={() => cambiar(true)}>{cambiando ? "Guardando…" : "Mostrar mi página"}</button>)}
-        <a href={direccion} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="web" /> Ver</a>
+        <a href={`${direccion}${direccion.includes("?") ? "&" : "?"}pagina=1`} target="_blank" rel="noopener noreferrer" className="boton" data-ver-pagina><Icono nombre="web" /> Ver</a>
         <button type="button" className="boton" onClick={copiar}>{copiado ? "Copiado" : "Copiar link"}</button>
         <a className="boton" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Conocé ${nombre}: ${direccion}`)}`}><Icono nombre="mensaje" /> Compartir por WhatsApp</a>
       </div>

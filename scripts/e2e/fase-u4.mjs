@@ -47,7 +47,8 @@ try {
   chequear(await p.locator("[data-pagina-oculta]").count() === 0, "recién creado: no es la portada oculta, es la landing", "recién creado sale la portada de página oculta");
   chequear(await p.locator('a[href="/ingresar?modo=socio"]').count() > 0, "tiene “Soy socio”", "falta “Soy socio”");
   // H3b: "Quiero ser socio" aparece solo con las altas online prendidas (un gimnasio recién creado las trae apagadas: P-ALTAS).
-  chequear(await p.locator('a[href="/hacete-socio"]').count() === 0, "sin altas online prendidas no hay “Quiero ser socio” (H3b)", "aparece “Quiero ser socio” con las altas apagadas");
+  // D83: crear la cuenta no depende de las altas con plan: el gimnasio recién creado ya ofrece “Crear mi cuenta”.
+  chequear(await p.locator('a[href="/hacete-socio"]').count() > 0, "sin altas con plan prendidas la portada igual ofrece “Crear mi cuenta” (D83)", "falta “Crear mi cuenta” en el gimnasio recién creado");
   chequear(await p.locator('footer a[href="/ingresar"]').count() > 0, "“Soy del equipo” va chico al pie", "falta “Soy del equipo” al pie");
   chequear(usaElAcento(await p.content(), ACENTO), "usa el color del gimnasio", "no usa el color del gimnasio");
   for (const s of ["planes", "horarios", "ubicacion"]) {

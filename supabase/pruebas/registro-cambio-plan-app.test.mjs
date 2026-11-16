@@ -110,6 +110,7 @@ test("registro: sin fecha de nacimiento o siendo menor no se anota; el que se an
 test("registro: el dueño lo cierra y la página deja de ofrecerlo", async () => {
   const p = await como(u.dueno, async () => (await t.q(`select public.guardar_registro_socios($1, false) as p`, [t.g]))[0].p);
   assert.equal(p.abierto, false);
+  await t.q(`update public.configuracion_gimnasio set crear_cuenta_visible = false where gimnasio_id = $1`, [t.g]);   // D83: cerrado del todo = el dueño ocultó "Crear mi cuenta"
   assert.equal((await anon(() => t.q(`select public.alta_publica($1) as a`, [HOST])))[0].a.abierta, false);
   await t.falla(() => anon(() => alta({ ...DATOS, dni: "33444999", telefono: "387 555 4041" }, viejo)), /no está aceptando altas online/);
 });

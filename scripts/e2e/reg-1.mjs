@@ -5,7 +5,7 @@
 // la recepción lo encuentra en Entrada sin poder pasar hasta pagar, con su
 // motivo, y lo ve en Prospectos → al apagar las altas la página manda a WhatsApp.
 //   npm run e2e:reg-1            (con scripts/local/levantar.sh corriendo)
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, llaveCrearCuenta, aparece, capturar, chequear, entrar, falla, navegador, ok, pagina, resultado, esperarAntiRobot } from "./comun.mjs";
 
 const G = GIMNASIO();
 const b = await navegador();
@@ -131,6 +131,7 @@ try {
   await altas.waitFor({ timeout: 60000 });
   await llave.uncheck();
   m = await guardar();
+  await llaveCrearCuenta(d, false);   // D83: “cerrado del todo” = altas con plan apagadas Y la llave de Crear mi cuenta apagada
   const c = await pagina(b, CELU);
   await c.goto(`${G}/hacete-socio`);
   chequear(await aparece(c.locator("[data-alta-cerrada]"), 15000) && await c.locator('a:has-text("WhatsApp")').count() > 0, "apagadas: “Consultanos por WhatsApp”", "con las altas apagadas el formulario sigue");
@@ -139,6 +140,7 @@ try {
   // H3b (SOCIO-FLUJO §1, LISTO SI 5): con las altas apagadas el botón no aparece; el link directo ya dice que hoy no se puede.
   chequear(await c.locator('a[href="/hacete-socio"]').count() === 0 && await c.locator("[data-ya-soy-socio]").count() > 0, "apagadas: “Quiero ser socio” no aparece y queda “Ya soy socio, entrar”", "apagadas: “Quiero ser socio” sigue en la página");
   await c.context().close();
+  await llaveCrearCuenta(d, true);
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();
 } catch (e) {

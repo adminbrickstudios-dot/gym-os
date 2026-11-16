@@ -56,6 +56,8 @@ export type LandingPublicada = {
   mostrar_precios: boolean;
   /** Se puede hacer socio desde la página (0032). */
   altas_online?: boolean;
+  /** D83: "Crear mi cuenta" se muestra (la cuenta gratis no depende de altas_online). Sin la clave (base vieja) vale lo que diga altas_online. */
+  crear_cuenta?: boolean;
   /** VD-25: "+N socios" (si el dueño lo prende; redondeado por la base) y reseñas de Google (si las cargó). */
   prueba_social?: { socios: number | null; resena: { puntaje: number | string; cantidad: number; link: string | null } | null };
   secciones: Seccion[];

@@ -40,7 +40,10 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
   const menor = esMenorDe18(nac);
   const v = (c: string) => r.datos?.[c] ?? "";
   const conReglamento = !!datos.reglamento;
-  const PASOS: [string, string][] = [["plan", "Tu plan"], ["datos", "Tus datos"], ...(conReglamento ? [["reglamento", "Reglamento"] as [string, string]] : []), ["pago", "Cómo pagás"]];
+  // D83: crear la cuenta no pide plan. Si el gimnasio tiene las altas con plan prendidas, el plan es opcional ("Lo elijo en el gimnasio") y el medio de pago solo aparece si eligió uno.
+  const conPlanes = planes.length > 0;
+  const PASOS: [string, string][] = [...(conPlanes ? [["plan", "Tu plan"] as [string, string]] : []), ["datos", "Tus datos"], ...(conReglamento ? [["reglamento", "Reglamento"] as [string, string]] : []), ...(plan ? [["pago", "Cómo pagás"] as [string, string]] : [])];
+  const n = (id: string) => PASOS.findIndex(([x]) => x === id) + 1;
   const errorEn = (c: string) => (r.error && r.campo === c ? r.error : null);
   const invalido = (c: string) => (errorEn(c) ? { "aria-invalid": true as const, "aria-describedby": `error-${c}` } : {});
   const MensajeCampo = ({ c }: { c: string }) => (errorEn(c) ? <span id={`error-${c}`} className="block text-sm" style={{ color: "var(--rojo)" }} role="alert">{r.error}</span> : null);
@@ -60,7 +63,7 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
   if (r.listo) {
     const t = r.transferencia;
     return (
-      <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio}>
+      <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio ?? "sin-plan"}>
         <BorradorAutomatico clave="alta-socio" borrar />
         <p className="titulo text-3xl" data-alta-titulo><Icono nombre="ok" /> ¡Listo, {r.nombre}! Ya tenés tu cuenta en {datos.marca.nombre}.</p>
         <p className="text-lg">
@@ -70,7 +73,8 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
         </p>
         {r.dni && <p className="text-xl" data-tu-dni>Tu DNI para entrar: <strong className="numero">{formatearDni(r.dni)}</strong></p>}
         <p className="texto-suave text-lg">
-          {r.medio === "transferencia" && t ? "Para empezar a entrar, pagá tu plan por transferencia." : "Pasá por recepción y pagá tu plan: desde ese momento ya podés entrenar."}
+          {!r.plan ? "Cuando vengas al gimnasio, en recepción te damos tu clase de prueba o te damos el alta. Tu QR ya está en tu perfil y se activa solo cuando pagues."
+            : r.medio === "transferencia" && t ? "Para empezar a entrar, pagá tu plan por transferencia." : "Pasá por recepción y pagá tu plan: desde ese momento ya podés entrenar."}
           {r.pagoOnline ? " También podés pagar online desde tu perfil." : ""} Hasta que se pague, la puerta te va a decir que falta pagar.
         </p>
         {r.medio === "transferencia" && t && (
@@ -100,15 +104,15 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
       {/* FA-17: "¿Seguimos donde dejaste?" con lo que ya escribió (solo en este dispositivo; nunca el reglamento aceptado ni la contraseña). */}
       <BorradorAutomatico clave="alta-socio" />
       {/* VD-61: pasos cortos, cada uno con su nombre; tocar uno lleva a ese paso. */}
-      <nav aria-label="Pasos para hacerte socio" className="flex flex-wrap gap-2" data-pasos-alta>
+      <nav aria-label="Pasos para crear tu cuenta" className="flex flex-wrap gap-2" data-pasos-alta>
         {PASOS.map(([id, t], i) => <a key={id} href={"#paso-" + id} className="pildora !min-h-11 inline-flex items-center">{i + 1}. {t}</a>)}
       </nav>
       {/* React 19 vacía el formulario después de cada envío con error: los radios controlados se ven elegidos pero no viajan. Por eso el valor viaja en campos ocultos. */}
       <input type="hidden" name="plan" value={plan ?? ""} />
-      <input type="hidden" name="medio" value={medio} />
+      <input type="hidden" name="medio" value={plan ? medio : ""} />
       <input type="hidden" name="origen" value={origen} />
-      <fieldset id="paso-plan" className="space-y-3 scroll-mt-4">
-        <legend className="titulo text-2xl mb-3">1. Tu plan</legend>
+      {conPlanes && <fieldset id="paso-plan" className="space-y-3 scroll-mt-4">
+        <legend className="titulo text-2xl mb-3">{n("plan")}. Tu plan <span className="texto-suave text-base font-normal">(opcional)</span></legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">
           {planes.map((p) => (
             <label key={p.id} className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${plan === p.id ? "border-[var(--acento)]" : "border-transparent"}`} data-plan={p.nombre}>
@@ -119,11 +123,16 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
               {p.descripcion && <span className="block texto-suave text-sm mt-2">{p.descripcion}</span>}
             </label>
           ))}
+          <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${plan === null ? "border-[var(--acento)]" : "border-transparent"}`} data-plan-despues>
+            <input type="radio" value="" checked={plan === null} onChange={() => setPlan(null)} className="sr-only" />
+            <span className="block titulo text-xl">Lo elijo en el gimnasio</span>
+            <span className="block texto-suave text-sm mt-1">Creás tu cuenta ahora y el plan lo elegís cuando vengas.</span>
+          </label>
         </div>
-      </fieldset>
+      </fieldset>}
 
       <fieldset id="paso-datos" className="grid gap-4 sm:grid-cols-2 scroll-mt-4">
-        <legend className="titulo text-2xl mb-3">2. Tus datos</legend>
+        <legend className="titulo text-2xl mb-3">{n("datos")}. Tus datos</legend>
         <label className="block space-y-1"><span className="etiqueta">Nombre</span><input name="nombre" required maxLength={80} autoComplete="given-name" className="campo" defaultValue={v("nombre")} /></label>
         <label className="block space-y-1"><span className="etiqueta">Apellido</span><input name="apellido" required maxLength={80} autoComplete="family-name" className="campo" defaultValue={v("apellido")} /></label>
         <label className="block space-y-1 sm:col-span-2">
@@ -162,7 +171,7 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
 
       {conReglamento && (
         <fieldset id="paso-reglamento" className="space-y-3 scroll-mt-4">
-          <legend className="titulo text-2xl mb-3">3. Reglamento</legend>
+          <legend className="titulo text-2xl mb-3">{n("reglamento")}. Reglamento</legend>
           <div className="tarjeta p-5 max-h-64 overflow-auto whitespace-pre-line texto-suave" data-reglamento>{datos.reglamento!.texto}</div>
           <input type="hidden" name="version" value={datos.reglamento!.version} />
           <label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" name="acepto" value="si" required defaultChecked={v("acepto") === "si"} className="mt-1 size-5" />
@@ -170,8 +179,8 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
         </fieldset>
       )}
 
-      <fieldset id="paso-pago" className="space-y-3 scroll-mt-4">
-        <legend className="titulo text-2xl mb-3">{conReglamento ? "4" : "3"}. Cómo pagás</legend>
+      {plan && <fieldset id="paso-pago" className="space-y-3 scroll-mt-4">
+        <legend className="titulo text-2xl mb-3">{n("pago")}. Cómo pagás</legend>
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Cómo pagás">
           {datos.transferencia && (
             <label className={`tarjeta p-5 cursor-pointer border-2 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--acento)] ${medio === "transferencia" ? "border-[var(--acento)]" : "border-transparent"}`}>
@@ -186,13 +195,13 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
             <span className="block texto-suave text-sm mt-1">Pagás en recepción cuando vengas.</span>
           </label>
         </div>
-      </fieldset>
+      </fieldset>}
 
       <CampoAntiRobot />
       <p className="texto-suave text-sm">Ley 25.326: tus datos los guarda {datos.marca.nombre}, solo para anotarte y cobrarte. Podés pedir verlos, corregirlos o borrarlos desde “Yo” en tu app, o en recepción. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
       {r.error && !r.campo && <Mensaje tipo="error">{r.error}</Mensaje>}
-      <button type="submit" disabled={enviando || !plan} className="boton boton-principal text-lg w-full sm:w-auto px-10">
-        {enviando ? "Anotándote…" : plan ? <><Icono nombre="persona" /> Hacerme socio</> : "Elegí un plan"}
+      <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-10" data-crear-cuenta-enviar>
+        {enviando ? "Creando tu cuenta…" : <><Icono nombre="persona" /> Crear mi cuenta</>}
       </button>
     </form>
   );

@@ -26,7 +26,6 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   if (String(form.get("sitio") ?? "")) return { listo: true, nombre: datos.nombre };   // robots
   datos.dni = datos.dni.replace(/\D/g, "");
   datos.email = datos.email.toLowerCase();
-  if (!datos.plan) return falla("Elegí un plan.", "plan");
   if (!/^[0-9]{7,8}$/.test(datos.dni)) return falla("El DNI tiene que tener 7 u 8 números, sin puntos.", "dni");
   if (!datos.fecha_nacimiento) return falla("Escribí tu fecha de nacimiento.", "fecha_nacimiento");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.email)) return falla("Escribí tu mail: con él y tu contraseña entrás a tu perfil.", "email");
@@ -47,7 +46,7 @@ export async function altaOnline(_: ResultadoAlta, form: FormData): Promise<Resu
   // 2) La ficha: la base decide. Si no se puede, la cuenta recién creada se borra.
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
   const { data, error } = await supabase.rpc("alta_online", {
-    p_host: host, p_plan_id: datos.plan, p_version: Number(datos.version) || 0, p_medio: datos.medio,
+    p_host: host, p_plan_id: datos.plan || null, p_version: Number(datos.version) || 0, p_medio: datos.plan ? datos.medio : null,
     p_datos: {
       nombre: datos.nombre, apellido: datos.apellido, dni: datos.dni, telefono: datos.telefono, email: datos.email, fecha_nacimiento: datos.fecha_nacimiento,
       responsable_nombre: datos.responsable_nombre, responsable_telefono: datos.responsable_telefono,

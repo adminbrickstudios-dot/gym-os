@@ -24,7 +24,8 @@ export async function registroAbierto() {
   const h = await headers();
   const host = h.get("x-gimnasio-host");
   const landing = h.get("x-gymos-contexto") === "gimnasio" && host ? await traerLanding(host) : null;
-  return !!landing && landing.publicada && !!landing.altas_online;
+  // D83: "Soy nuevo" (crear la cuenta) sigue la llave de Crear mi cuenta, no las altas con plan.
+  return !!landing && landing.publicada && !!(landing.crear_cuenta ?? landing.altas_online);
 }
 
 export type MarcaIngreso = Awaited<ReturnType<typeof traerMarca>>;
