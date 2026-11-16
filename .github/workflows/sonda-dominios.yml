@@ -8,20 +8,7 @@ jobs:
     steps:
       - run: |
           set +e
-          curl -s -m 20 -o /tmp/h.html -w "hacete-socio %{http_code}\n" https://templegymsalta.com/hacete-socio
-          grep -oE "digest[^,]{0,60}" /tmp/h.html | head -3
-          for c in $(grep -oE '/_next/static/chunks/[^"]+\.js' /tmp/h.html | sort -u); do curl -s -m 20 "https://templegymsalta.com$c" >> /tmp/all.js; done
-          URL=$(grep -oE 'https://[a-z0-9]+\.supabase\.co' /tmp/all.js | head -1)
-          KEY=$(grep -oE 'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+' /tmp/all.js | head -1)
-          echo "url encontrada: ${URL:+si} clave encontrada: ${KEY:+si}"
-          curl -s -m 20 "$URL/rest/v1/rpc/alta_publica" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" -d '{"p_host":"templegymsalta.com"}' > /tmp/r.json
-          python3 - <<'PY'
-          import json
-          r=json.load(open('/tmp/r.json'))
-          if isinstance(r,dict) and ('message' in r or 'code' in r): print('ERROR RPC:', r)
-          else:
-            print('claves:', sorted(r.keys()) if isinstance(r,dict) else type(r))
-            print('abierta:', r.get('abierta'), 'planes:', len(r.get('planes') or []), 'plan_sugerido:', r.get('plan_sugerido'))
-            print('reglamento:', (r.get('reglamento') or {}).get('version'), 'transferencia:', bool(r.get('transferencia')))
-            for p in (r.get('planes') or [])[:6]: print('  plan', {k:p.get(k) for k in ('id','nombre','precio','matricula')})
-          PY
+          for u in "https://templegymsalta.com/hacete-socio" "https://templegymsalta.com/hacete-socio?o=qr" "https://templegymsalta.com/"; do
+            curl -s -m 20 -o /tmp/h.html -w "$u %{http_code}\n" "$u"
+            grep -oE 'data-alta-cerrada|data-paso[^ >]*|Tu plan|Tus datos|Reglamento|No se pudo cargar[^<]{0,40}|NEXT_HTTP_ERROR[^"]{0,40}|digest\\?":\\?"[0-9a-z]+' /tmp/h.html | sort | uniq -c | head -8
+          done
