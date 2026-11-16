@@ -9,6 +9,34 @@ La idea: **un mostrador de gimnasio, no una app de IA**. Claro, encuadrado,
 números grandes que se leen de lejos, el color del gimnasio en un solo lugar, y
 los cuatro colores del semáforo siempre iguales.
 
+## Pase 2.0 · El rediseño "Pista" (en diseño con Mateo, NO se programa todavía)
+
+> Hasta que Mateo apruebe los diseños del lienzo "Pase 2.0 · Estilos" (claude.ai), todo lo de abajo de esta sección sigue
+> mandando. Esta sección es el registro de lo que Mateo va decidiendo; el agente no la implementa hasta que una línea diga
+> "aprobado para programar".
+
+**Decidido por Mateo (16/11):**
+- Estilo **A · Pista**: oscuro y deportivo, títulos grandes condensados (Big Shoulders Display) y texto en Inter, un acento
+  fuerte (naranja por defecto). Se edita con lo que Mateo vaya pasando; Claude recomienda.
+- Orden de Pase 2.0, el de Mateo: visual → estructura → detalles → funciones → agregados → seguridad. Después, la
+  profesionalización (cuando diga "terminado oficialmente").
+- Primero diseños (el lienzo), después código.
+- **Cambia cómo se ve y se mueven algunas cosas de lugar. Nada más: ninguna función se pierde.**
+- **Los colores se pueden cambiar** (por gimnasio).
+- Botones más lindos, algún que otro emoji, más organizado visualmente.
+- La página de cada gimnasio también se rediseña: diseño, dibujos, estilo y botones.
+
+**Cómo se programa, cuando se apruebe (para que no se rompa ni se pierda nada):**
+1. **Inventario antes:** por cada pantalla, cada botón, sección, número y acción que tiene hoy (sale de `src/lib/panel/secciones.ts`,
+   de cada `page.tsx` y de los `data-*` que usan los e2e). Una prueba nueva recorre el inventario en el estilo nuevo: si falta
+   algo, no se publica.
+2. **Solo el aspecto:** tokens, componentes y lugar en la pantalla. Ni lógica, ni base, ni plata en la fase visual.
+3. **Detrás de una llave por gimnasio** ("estilo Pista"): prendido en los `[demo]`; a Temple Gym lo prende Mateo cuando lo
+   aprueba, y se vuelve al de antes con un toque.
+4. **Las 250 pruebas e2e pasan sin cambios** (usan `data-*`, no estilos), más capturas antes y después de cada pantalla en compu y
+   celular, y comparación de capturas para que nada se mueva sin querer.
+5. Publicación fuera de 16–22 h, como siempre.
+
 ## Tokens (todo sale de acá: ningún color suelto en el código)
 
 ### Claro (por defecto)
