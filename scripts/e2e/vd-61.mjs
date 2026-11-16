@@ -131,7 +131,10 @@ try {
     const abierta = await a.locator("[data-form-alta]").count();
     if (abierta) {
       const pasos = await a.locator("[data-pasos-alta] a").allInnerTexts();
-      chequear(pasos.length === 4 && /Tu plan/.test(pasos[0]) && /Cómo pagás/.test(pasos[3]), `${tam} · registro: cuatro pasos con nombre (${pasos.join(" / ")})`, `${tam} · registro sin pasos: ${pasos.join("|")}`);
+      // D83: con las altas con plan apagadas el formulario es solo "Tus datos" (+ reglamento si hay): crear la cuenta no pide plan ni cómo pagás.
+      const conPlan = await a.locator("#paso-plan").count() > 0;
+      if (!conPlan) chequear(pasos.length >= 1 && /Tus datos/.test(pasos[0]), `${tam} · crear la cuenta sin plan: pasos con nombre (${pasos.join(" / ")})`, `${tam} · crear la cuenta sin plan: pasos ${pasos.join(" / ")}`);
+      else chequear(pasos.length === 4 && /Tu plan/.test(pasos[0]) && /Cómo pagás/.test(pasos[3]), `${tam} · registro: cuatro pasos con nombre (${pasos.join(" / ")})`, `${tam} · registro sin pasos: ${pasos.join("|")}`);
       chequear(await sinDesborde(a), `${tam} · registro sin desborde`, `${tam} · registro se desborda`);
       if (tam === "celu") await capturar(a, "vd61-celu-registro", true);
     } else ok(`${tam} · el alta online está cerrada en el demo: se muestra “por ahora el alta se hace en el gimnasio” (sin form)`);

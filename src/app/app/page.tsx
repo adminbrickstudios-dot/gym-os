@@ -198,7 +198,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </nav>
 
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
-        {progreso && !faltaPagar && <ProgresoInicio p={progreso} />}
+        {progreso && <ProgresoInicio p={progreso} />}
         <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>
         <Suspense fallback={null}><Recomendacion socioId={s.socio_id} q={q} /></Suspense>
 
