@@ -193,6 +193,18 @@ end $$;
 revoke execute on function public.landing_publica(text) from public;
 grant execute on function public.landing_publica(text) to anon, authenticated;
 
+-- ── La llave se lee en el mismo viaje que el resto de Tu página (lote_lecturas): solo se suma un nombre a su lista cerrada ──
+do $lote$
+declare def text;
+begin
+  def := pg_get_functiondef('public.lote_lecturas(jsonb)'::regprocedure);
+  if position('''crear_cuenta_panel''' in def) = 0 then
+    def := replace(def, '''altas_panel'',', '''altas_panel'',''crear_cuenta_panel'',');
+    if position('''crear_cuenta_panel''' in def) = 0 then raise exception 'Guarda: no se pudo sumar crear_cuenta_panel a lote_lecturas'; end if;
+    execute def;
+  end if;
+end $lote$;
+
 revoke all on function public.alta_online(text, uuid, jsonb, int, text), public.alta_publica(text) from public;
 grant execute on function public.alta_online(text, uuid, jsonb, int, text), public.alta_publica(text) to anon, authenticated, service_role;
 

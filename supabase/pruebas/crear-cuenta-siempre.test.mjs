@@ -86,3 +86,12 @@ test("el dueño oculta el botón: se cierra la creación de cuentas y la portada
   assert.equal(ok.ya_socio, false);
   assert.ok(ok.plan, "con plan, igual que antes");
 });
+
+test("la llave se lee en el mismo viaje que Tu página (lote_lecturas) y solo la ve el dueño o el encargado", async () => {
+  await como(u.encargado, async () => {
+    const [{ r }] = await t.q(`select public.lote_lecturas($1::jsonb) r`, [JSON.stringify([{ f: "crear_cuenta_panel", a: { p_gimnasio_id: t.g } }])]);
+    assert.equal(typeof r[0], "boolean");
+  });
+  await como(u.recepcion, () => t.falla(() => t.q(`select public.lote_lecturas($1::jsonb) r`, [JSON.stringify([{ f: "crear_cuenta_panel", a: { p_gimnasio_id: t.g } }])]), /Sin permiso/));
+  await como(u.duenoOtro, () => t.falla(() => t.q(`select public.lote_lecturas($1::jsonb) r`, [JSON.stringify([{ f: "crear_cuenta_panel", a: { p_gimnasio_id: t.g } }])]), /Sin permiso/));
+});
