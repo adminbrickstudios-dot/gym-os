@@ -8,7 +8,6 @@ jobs:
     steps:
       - run: |
           set +e
-          for u in "https://templegymsalta.com/hacete-socio" "https://templegymsalta.com/hacete-socio?o=qr" "https://templegymsalta.com/"; do
-            curl -s -m 20 -o /tmp/h.html -w "$u %{http_code}\n" "$u"
-            grep -oE 'data-alta-cerrada|data-paso[^ >]*|Tu plan|Tus datos|Reglamento|No se pudo cargar[^<]{0,40}|NEXT_HTTP_ERROR[^"]{0,40}|digest\\?":\\?"[0-9a-z]+' /tmp/h.html | sort | uniq -c | head -8
+          for u in "https://gym-os-pied.vercel.app/g/templegym1/hacete-socio?o=qr" "https://pasegym.com/g/demo" "https://templegymsalta.com/hacete-socio"; do
+            printf "%s -> " "$u"; curl -s -L -m 20 -o /tmp/p.html -w "%{http_code} %{url_effective} " "$u"; grep -oE "<title>[^<]*</title>" /tmp/p.html | head -1; echo
           done
