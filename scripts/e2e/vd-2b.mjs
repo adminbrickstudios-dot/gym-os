@@ -13,6 +13,9 @@ const b = await navegador();
 const [{ gimnasio_id: gim, socio_id: socio }] = (await db.query(`select s.gimnasio_id, s.id as socio_id from public.socios s join public.gimnasios g on g.id = s.gimnasio_id
   where g.slug = 'demo' and s.nombre = 'Testigo' and s.apellido = 'Al Día'`)).rows;
 let clase;
+// vd-1b (u otro recorrido) puede dejar una segunda sede: con varias, la ventana pide elegir y el testigo vive en la principal.
+const principal = (await db.query(`select id from public.sedes where gimnasio_id = $1 and es_principal`, [gim])).rows[0].id;
+const enLaPrincipal = async (r) => { const sede = r.locator(`[data-ventana-sedes] [data-sede="${principal}"]`); if (await sede.count()) await sede.click(); };
 try {
   const r = await pagina(b, COMPU);
   await entrar(r, "recepcion@ejemplo.invalid");
@@ -21,6 +24,8 @@ try {
 
   // Sin reserva de hoy: no hay chip.
   await r.keyboard.press("F2");
+  await r.locator("[data-ventana-campo]").waitFor({ timeout: 30000 });
+  await enLaPrincipal(r);
   await r.locator("[data-ventana-campo]").fill("Testigo Al");
   await r.locator("button.fila", { hasText: "Al Día" }).first().click();
   await r.locator("[data-ventana-veredicto]").waitFor({ timeout: 30000 });
@@ -33,6 +38,8 @@ try {
   clase = (await db.query(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin) values ($1,$2,$3, now() - interval '5 minutes', now() + interval '55 minutes') returning id`, [gim, sede, act])).rows[0].id;
   await db.query(`insert into public.reservas (gimnasio_id, clase_id, socio_id, estado) values ($1,$2,$3,'confirmada')`, [gim, clase, socio]);
   await r.keyboard.press("F2");
+  await r.locator("[data-ventana-campo]").waitFor({ timeout: 30000 });
+  await enLaPrincipal(r);
   await r.locator("[data-ventana-campo]").fill("Testigo Al");
   await r.locator("button.fila", { hasText: "Al Día" }).first().click();
   const chip = r.locator('[data-chip="clase_hoy"]');
