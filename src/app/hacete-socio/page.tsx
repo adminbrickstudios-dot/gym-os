@@ -19,14 +19,28 @@ export type DatosAlta = {
   mostrar_precios?: boolean; planes?: PlanPublico[]; plan_sugerido?: string | null; reglamento?: { version: number; texto: string } | null; transferencia?: Transferencia | null;
 };
 
-async function datos(): Promise<DatosAlta | null> {
+/**
+ * Lo que necesita la pantalla de alta. Si la base falla (un corte, un tiempo agotado) se reintenta una vez; si sigue fallando NO se tira el error:
+ * en producción Next lo esconde como "React error 441" y la persona que escanea el QR se queda sin saber qué pasó. Se devuelve el texto
+ * y la página lo muestra (con "Probar de nuevo"); el error queda en el registro del servidor.
+ */
+async function datos(): Promise<{ d: DatosAlta | null; error?: string }> {
   const h = await headers();
   const host = h.get("x-gymos-contexto") === "gimnasio" ? h.get("x-gimnasio-host") : null;
-  if (!host) return null;
+  if (!host) return { d: null };
   const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
-  const { data, error } = await supabase.rpc("alta_publica", { p_host: host });
-  if (error) throw new Error(`No se pudo abrir el alta: ${error.message}`);
-  return data as DatosAlta | null;
+  let ultimo = "";
+  for (let intento = 0; intento < 2; intento++) {
+    try {
+      const { data, error } = await supabase.rpc("alta_publica", { p_host: host });
+      if (!error) return { d: data as DatosAlta | null };
+      ultimo = error.message;
+    } catch (e) {
+      ultimo = (e as Error).message;
+    }
+    console.error(`[hacete-socio] alta_publica falló (intento ${intento + 1}) para ${host}: ${ultimo}`);
+  }
+  return { d: null, error: ultimo || "no se pudo leer" };
 }
 
 /**
@@ -60,9 +74,22 @@ export async function generateMetadata(): Promise<Metadata> {
 const ORIGENES = ["instagram", "qr", "whatsapp", "recomendado"];
 
 export default async function HaceteSocio({ searchParams }: { searchParams: Promise<{ plan?: string; o?: string }> }) {
-  const d = await datos();
-  if (!d) notFound();
+  const { d, error: fallo } = await datos();
   const { plan, o } = await searchParams;
+  if (fallo) {
+    // La base no respondió: la página lo dice con su salida (Probar de nuevo), nunca una pantalla de error genérica.
+    return (
+      <main className="mx-auto max-w-3xl px-4 pt-16 pb-24 space-y-4" data-alta-error>
+        <h1 className="titular text-4xl">Crear mi cuenta</h1>
+        <div className="tarjeta p-6 space-y-4" role="alert">
+          <p className="text-lg">No pudimos abrir el formulario ahora. Probá de nuevo en unos segundos.</p>
+          <p className="texto-tenue text-sm">{fallo}</p>
+          <a href={plan ? `?plan=${encodeURIComponent(plan)}` : "?"} className="boton boton-principal" data-reintentar-alta><Icono nombre="repetir" /> Probar de nuevo</a>
+        </div>
+      </main>
+    );
+  }
+  if (!d) notFound();
   const origen = ORIGENES.includes(String(o ?? "").toLowerCase()) ? String(o).toLowerCase() : "";
   const raiz = await raizDelGimnasio();
   const wa = linkWhatsapp(d.contacto.whatsapp, "Hola! Quiero hacerme socio.");

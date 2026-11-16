@@ -23,6 +23,7 @@ export function PantallaError({ error, reset, inicio = "/", titulo, icono }: {
     <div data-pantalla-error>
     <Aviso icono={icono ?? (sinPermiso ? "candado" : "alerta")} titulo={titulo ?? (sinPermiso ? "No tenés acceso a esta pantalla" : "No se pudo cargar esta pantalla")}>
       {error && <p>{error.message}</p>}
+      {error?.digest && <p className="texto-tenue text-sm" data-codigo-error>Código del error: {error.digest}</p>}
       <div className="flex flex-wrap gap-2 mt-6">
         {reset && !sinPermiso && <button type="button" onClick={reset} className="boton boton-principal"><Icono nombre="repetir" /> Probar de nuevo</button>}
         <button type="button" onClick={() => router.back()} className="boton">← Volver</button>
