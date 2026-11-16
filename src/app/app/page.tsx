@@ -7,8 +7,7 @@ import { colorVar } from "@/components/panel/Estado";
 import { Aviso } from "@/components/panel/Marco";
 import { fechaCorta, formatearDni, formatearPesos } from "@/lib/formato";
 import { miSocio } from "@/lib/app/socio";
-import { traerAgenda, traerLanding } from "@/lib/landing";
-import { linkWhatsapp } from "@/lib/landing-textos";
+import { traerAgenda } from "@/lib/landing";
 import { raizDelGimnasio } from "@/lib/app/raiz-gimnasio";
 import { textoCierre } from "@/lib/horarios";
 import { intentar } from "@/lib/panel/intentar";
@@ -40,7 +39,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
   const pedido = (await searchParams).socio;
   return intentar(async () => {
     const host = (await headers()).get("x-gimnasio-host");
-    const [{ g, yo }, agenda, landing] = await Promise.all([miSocio(pedido), host ? traerAgenda(host) : null, host ? traerLanding(host).catch(() => null) : null]);
+    const [{ g, yo }, agenda] = await Promise.all([miSocio(pedido), host ? traerAgenda(host) : null]);
     if (yo.elegir) {
       return (
         <>
@@ -103,7 +102,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
       </>
     );
-    const wa = linkWhatsapp(landing?.contacto?.whatsapp ?? null, (landing?.contacto?.mensaje_whatsapp) || "Hola!");
+    // El WhatsApp del gimnasio vive en "Info del gimnasio" (un toque): leerlo acá sumaría un viaje a la pantalla que más se abre (tope de viajes).
     const hayClases = yo.modo_clases !== "ninguno";
     const raiz = await raizDelGimnasio();
     type BotonInicio = { clave: string; href: string; icono: string; titulo: string; principal?: boolean; externo?: boolean };
@@ -113,14 +112,14 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       hayClases ? { clave: "clases", href: `/app/clases${q}`, icono: "calendario", titulo: "Clases y horarios" } : { clave: "horarios", href: `/app/info${q}`, icono: "reloj", titulo: "Horarios" },
       { clave: "planes", href: `/app/plan${q}`, icono: "etiqueta", titulo: "Planes" },
       { clave: "perfil", href: `/app/yo${q}`, icono: "persona", titulo: "Mi perfil" },
-      wa ? { clave: "whatsapp", href: wa, icono: "mensaje", titulo: "WhatsApp", externo: true } : null,
+      { clave: "whatsapp", href: `/app/info${q}#whatsapp`, icono: "mensaje", titulo: "WhatsApp" },
     ] : [
       { clave: "qr", href: "#mi-qr", icono: "llave", titulo: "Mi QR", principal: true },
       yo.modo_clases === "reserva" ? { clave: "reservar", href: `/app/clases${q}`, icono: "calendario", titulo: "Reservar" } : hayClases ? { clave: "clases", href: `/app/clases${q}`, icono: "calendario", titulo: "Clases y horarios" } : null,
       { clave: "pagos", href: `/app/historial${q}`, icono: "recibo", titulo: "Mis pagos" },
       { clave: "plan", href: `/app/plan${q}`, icono: "tarjeta", titulo: "Mi plan" },
       { clave: "perfil", href: `/app/yo${q}`, icono: "persona", titulo: "Mi perfil" },
-      wa ? { clave: "whatsapp", href: wa, icono: "mensaje", titulo: "WhatsApp", externo: true } : null,
+      { clave: "whatsapp", href: `/app/info${q}#whatsapp`, icono: "mensaje", titulo: "WhatsApp" },
     ]) as (BotonInicio | null)[]).filter((b): b is BotonInicio => !!b).slice(0, 6);
     return (
       <div className="space-y-6">

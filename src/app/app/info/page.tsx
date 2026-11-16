@@ -99,7 +99,7 @@ export default async function InfoGimnasio({ searchParams }: { searchParams: Pro
           <section aria-label="Contacto" data-info-contacto>
             <Tit><Icono nombre="mensaje" /> Contacto</Tit>
             <div className="flex flex-wrap gap-2">
-              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal" data-info-whatsapp><Icono nombre="mensaje" /> WhatsApp</a>}
+              {wa && <a id="whatsapp" href={wa} target="_blank" rel="noopener noreferrer" className="boton boton-principal scroll-mt-4" data-info-whatsapp><Icono nombre="mensaje" /> WhatsApp</a>}
               {llegar.filter((x) => x.telefono).slice(0, 1).map((x) => <a key={x.nombre} href={`tel:${x.telefono}`} className="boton"><Icono nombre="telefono" /> Llamar</a>)}
               {publicada?.contacto.email && <a href={`mailto:${publicada.contacto.email}`} className="boton"><Icono nombre="mail" /> Mail</a>}
               {publicada?.contacto.instagram && <a href={`https://instagram.com/${publicada.contacto.instagram}`} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="camara" /> Instagram</a>}
