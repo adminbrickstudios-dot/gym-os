@@ -528,7 +528,7 @@ export function LandingGimnasio({ landing: landingCargada, agenda = null, evento
             )}
             {hayProbar && (
               <li><a href="#probar" className="flex items-center gap-3" data-probar-gratis>
-                <span aria-hidden className="icono"><Icono nombre="regalo" /></span><span className="underline underline-offset-4">Probá una clase gratis</span></a></li>
+                <span aria-hidden className="icono"><Icono nombre="regalo" /></span><span className="underline underline-offset-4">Probá una clase</span></a></li>
             )}
             {whatsapp && (
               <li><a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3" data-dato-whatsapp>

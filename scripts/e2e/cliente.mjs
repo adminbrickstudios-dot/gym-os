@@ -185,7 +185,7 @@ try {
 
   const s2 = await nueva(CELU);
   await entrarSocio(s2, TEL2, G);
-  const pagar = s2.locator("section", { hasText: "Pagar por transferencia" });
+  const pagar = s2.locator("section", { hasText: "Pagar por transferencia" }).last();   // L3: está dentro del bloque “pagá tu plan”
   await pagar.waitFor({ timeout: 60000 });
   chequear((await pagar.innerText()).includes(`cliente.${s}.mp`), "el otro socio ve el alias del gimnasio para transferir", await pagar.innerText());
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png",

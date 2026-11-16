@@ -1,10 +1,12 @@
-# ESTADO GENERAL de Base (R1, revisión de todo lo pedido, al 12/11)
+# ESTADO GENERAL de Pase (antes Base; R1, revisión de todo lo pedido, al 12/11; Q1 al día el 15/11)
 
 **Qué es.** La lista única de todas las funciones que pidió Mateo, con su rol o pantalla, la prueba que la cubre y su estado, en tres listas: **1. hecho y publicado**, **2. hecho sin publicar**, **3. falta**. Todo lo de la lista 3 tiene su ítem en `RECTA-FINAL.md` (columna "Ítem"); lo que no lo tenía recibió uno nuevo en la fase Q.
 
 **De dónde sale.** `PEDIDO-ORIGINAL.md` (los 70 detalles, los P0, los P1 y los P2), `AJUSTES-0911-NOCHE.md` (URG, PLAT, EDIT, WEB, ESC, SEG, CAL), `docs/v2/` (todos), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md` y la COLA de `docs/HOJA-DE-RUTA.md`. La tabla "Cobertura de las fuentes" del final dice dónde quedó cada una. El detalle por zona de la revisión del 11/11 sigue en `docs/base/estado/` (mostrador, dueño y super admin, socio, profe y público); **donde difiera de este archivo, manda este** (esos tres se escribieron antes del PR #16 y de los cierres de F4/F5/Z).
 
 **Publicado = está en `main`** (PR #14 y #15 del 11/11, #16 a #20 del 12/11; el último, `publicar/base-resto`), con las migraciones aplicadas en producción según `PROGRESO.md`. Lo hecho después (fase E, D1 a D4 y lo que `RECTA-FINAL.md` marca "sin publicar") está en `base/2026-11-07` y figura en la sección 2. Relectura del 12/11: este archivo se alineó con `RECTA-FINAL.md`, que manda cuando difieren.
+
+**Pase 1.0 (15/11): lo que manda es `RECTA-FINAL.md` y `PASE-1.0.md`.** Esta tabla es una foto del 12/11: donde una fila diga 🟡 o ❌ y su ítem de `RECTA-FINAL.md` diga ✅, ⛔ o ➡️ (Pase 2.0), vale el ítem. La sección 3.1 (plata y permisos) está al día con D70. ➡️ = Pase 2.0: no se hace en 1.0 y cuenta como cerrado.
 
 **Estados.** ✅ hecho y probado · 🟡 existe pero incompleto, apagado por defecto o sin prueba de punta a punta (dice qué falta) · ⛔ trabado (dice por qué y quién) · ❌ no existe.
 **Marca † en la columna Prueba:** el e2e o la prueba existe (verificado con `ls`) pero **no corrió en la revisión del 11/11**; vale lo que dijo su última corrida (ver `RECTA-FINAL.md` y `PROGRESO.md`). Sin † = corrió en verde en Actions o en la base local en esa revisión o en un cierre posterior que lo registra. Datos: solo el gimnasio demo; Temple Gym no se tocó.
@@ -193,23 +195,23 @@ Hasta el PR #16 no había código de producto sin publicar. Después se publicar
 
 Cada fila dice su ítem en `RECTA-FINAL.md`. Los ítems **Q1 a Q5 son nuevos** (agregados por esta revisión, con su LISTO SI); el resto ya existía.
 
-### 3.1 Plata y permisos que esperan a Mateo (ítem Q1, ⛔ decide Mateo)
+### 3.1 Plata y permisos de Q1 (D70, 15/11): lo hecho y lo que pasa a Pase 2.0
 
-Todas están en `PREGUNTAS.md` con la opción más segura, y **no se cambiaron** (regla de `CLAUDE.md`: lo que toca permisos o plata no se arregla solo).
+D70: el agente hizo solo lo que no cambia cuánto se cobra, a quién ni quién ve o mueve plata. Las demás pasan a ➡️ Pase 2.0 con la recomendación escrita en `PASE-1.0.md`.
 
 | Función | Rol | Estado | Ítem |
 |---|---|---|---|
-| Pase diario en dos toques, también para quien no es socio (detalle 13) | recepción | ⛔ cobro nuevo | Q1 |
-| Estado de cuenta único con cargos, pagos y saldo en la ficha (21) | recepción, dueño | ⛔ hay que definir qué es el saldo | Q1 |
-| Pagos parciales de una cuota (24) | recepción | ⛔ cambia cómo se cobra | Q1 |
-| Renovar en un toque (25): hoy son dos pasos porque confirmar muestra el total | recepción | ⛔ plata | Q1 |
-| Cambio de plan "desde el próximo período o prorrateado", configurable (26) | dueño | ⛔ cambia cómo se cobra | Q1 |
-| Link de MercadoPago por socio con monto exacto y vencimiento desde el panel (33) | recepción, dueño | ⛔ plata y credenciales (🔌) | Q1 |
-| Matriz de permisos editable rol × acción (43) | dueño | ⛔ permisos | Q1 |
-| Aprobar transferencia comparando con lo que debía y deshacer 5 s; cerrar caja con confirmación del monto contado | encargado, dueño, recepción | ⛔ plata | Q1 |
-| Crear un plan valida la matrícula antes; quitar un gasto con Deshacer | dueño | ⛔ plata | Q1 |
+| Pase diario en dos toques, también para quien no es socio (detalle 13) | recepción | ➡️ Pase 2.0 (cobro nuevo a quien no es socio) | Q1 |
+| Estado de cuenta único con cargos, pagos y saldo en la ficha (21) | recepción, dueño | ➡️ Pase 2.0 | Q1 |
+| Pagos parciales de una cuota (24) | recepción | ➡️ Pase 2.0 | Q1 |
+| Renovar en un toque (25): hoy son dos pasos porque confirmar muestra el total | recepción | ✅ decidido: dos pasos (D70) | Q1 |
+| Cambio de plan "desde el próximo período o prorrateado", configurable (26) | dueño | ➡️ Pase 2.0 | Q1 |
+| Link de MercadoPago por socio con monto exacto y vencimiento desde el panel (33) | recepción, dueño | ⛔ credenciales del gimnasio (Mateo) | Q1 |
+| Matriz de permisos editable rol × acción (43) | dueño | ➡️ Pase 2.0 | Q1 |
+| Aprobar transferencia comparando con lo que debía y deshacer 5 s; cerrar caja con confirmación del monto contado | encargado, dueño, recepción | 🟡 cerrar caja muestra el monto contado antes de confirmar (hecho); lo demás ➡️ Pase 2.0 | Q1 |
+| Crear un plan valida la matrícula antes; quitar un gasto con Deshacer | dueño | 🟡 la matrícula se valida antes de crear (hecho, con prueba); quitar un gasto con Deshacer ➡️ Pase 2.0 | Q1 |
 | El panel reconoce al soporte por `equipo.es_soporte` y no por el nombre; "Entrar como soporte" con rol Encargado; el profe ve una clase como ajena por `profe_id` y no por el nombre | super admin, profe | ⛔ permisos (cada una pide una migración que reemplaza una función con permisos) | Q1 |
-| Prender el vuelto en efectivo, billetes rápidos y el cupón en el alta online | recepción | ⛔ decide Mateo cuándo, por gimnasio | Q1 |
+| Prender el vuelto en efectivo, billetes rápidos y el cupón en el alta online | recepción | ✅ conectado y apagado (`vuelto_efectivo`); lo prende el dueño por gimnasio | Q1 |
 | Decisiones de la COLA marcadas "decide Mateo": REF-2 (premio del referido), REV-1d (la recepción carga mercadería), COM-6b ("falta firmar" frena la entrada), COM-8b (Vender frena un evento lleno), COM-9b (cupón sobre el tope) | dueño | ⛔ permisos y plata | Q1 |
 
 ### 3.2 Funciones del dueño y del mostrador que no existen o están a medias

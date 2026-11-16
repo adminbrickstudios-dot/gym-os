@@ -1,6 +1,6 @@
-# Base (Gym OS) — reglas para el agente
+# Pase (Gym OS) — reglas para el agente
 
-**El producto se llama Base** (D39). El repo y el código siguen diciendo gym-os.
+**El producto se llama Pase** (D69, reemplaza a D39: antes Base). El repo y el código siguen diciendo gym-os. El nombre sale de `src/lib/producto.ts`.
 
 Sistema de gestión multi-tenant para gimnasios. Línea BRIK.
 Stack: Next.js (App Router) + Supabase + Vercel.
@@ -9,7 +9,7 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 (pendiente de copiar desde el proyecto de claude.ai; si no está, avisar).
 **Ante cualquier "¿cómo se hace esto acá?": `docs/CONVENCIONES.md`.**
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
-**Lo que se está construyendo ahora: Base, `docs/base/` — empezar por `docs/base/00-LEEME.md`; la lista que manda es `docs/base/RECTA-FINAL.md` (el detalle de cada BASE-* está en `docs/base/PROGRESO.md`). Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
+**Lo que se está construyendo ahora: Pase, `docs/base/` — empezar por `docs/base/00-LEEME.md`; lo que manda es `docs/base/PASE-1.0.md` y la lista `docs/base/RECTA-FINAL.md` (el detalle de cada BASE-* está en `docs/base/PROGRESO.md`). Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
 **Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
 Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
 **Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche

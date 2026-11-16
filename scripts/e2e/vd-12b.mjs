@@ -36,6 +36,12 @@ try {
   await d.keyboard.press("Escape");
   await d.locator("[data-cobrar]").waitFor({ state: "detached", timeout: 10000 });
   await d.locator("[data-numero]").first().waitFor({ timeout: 30000 });
+  // FA-2 (Pase 1.0): tocar el nombre de una última entrada abre el panel lateral (con foto), sin salir de Inicio.
+  await vivo.getByRole("link").first().click();
+  await d.locator("[data-panel-socio-lateral] [data-panel-socio-foto]").waitFor({ timeout: 30000 });
+  chequear(new URL(d.url()).pathname === "/panel", "tocar una última entrada abre el panel lateral con foto, sin salir de Inicio", `fue a ${d.url()}`);
+  await d.keyboard.press("Escape");
+  await d.locator("[data-panel-socio-lateral]").waitFor({ state: "detached", timeout: 10000 });
 
   // Para hacer hoy con [Ver]: cada fila lleva a su lista y Volver deja en Inicio.
   const hacer = d.locator("[data-para-hacer]");

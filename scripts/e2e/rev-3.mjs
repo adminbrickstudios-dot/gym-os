@@ -61,7 +61,7 @@ try {
   // ── Entra a la app y sube el comprobante ──
   const a = await nueva(CELU);
   await entrarSocio(a, TEL);
-  const pagar = a.locator("section", { hasText: "Pagar por transferencia" });
+  const pagar = a.locator("section", { hasText: "Pagar por transferencia" }).last();
   await pagar.waitFor({ timeout: 60000 });
   await pagar.locator('input[type="file"]').setInputFiles({ name: "comprobante.png", mimeType: "image/png", buffer: PNG });
   await a.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });  // el aviso, o la app ya re-pintada con "Informaste…"
@@ -79,7 +79,7 @@ try {
   await a.goto(`${G}/app/historial`);
   chequear(await aparece(a.getByText(/rechazado: El monto no coincide/i), 60000), "le rechazan la transferencia: en la app ve “rechazado: El monto no coincide”", "el socio no ve el motivo del rechazo");
   await a.goto(`${G}/app`);
-  const otra = a.locator("section", { hasText: "Pagar por transferencia" });
+  const otra = a.locator("section", { hasText: "Pagar por transferencia" }).last();
   chequear(await aparece(otra, 60000), "y la app le vuelve a ofrecer subir otro comprobante", "no puede subir otro");
   await otra.locator('input[type="file"]').setInputFiles({ name: "comprobante2.png", mimeType: "image/png", buffer: PNG });
   await a.getByText(/el gimnasio lo (revisa|está revisando)/).first().waitFor({ timeout: 30000 });

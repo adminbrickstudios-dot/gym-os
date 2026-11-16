@@ -51,19 +51,25 @@ try {
   const textos = ls.map((l) => l.texto).join(" · ");
   chequear(/Ya soy socio/.test(textos) && /Soy del equipo/.test(textos), "tiene “Ya soy socio, entrar” y “Soy del equipo”", `faltan accesos: ${textos}`);
   const planes = await v.locator("section[aria-labelledby=\"planes\"] li.tarjeta").count();
-  const loQuiero = await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero")').count();
-  chequear(planes > 0 && loQuiero === planes, `${planes} planes, cada uno con “Lo quiero” a WhatsApp con su nombre`, `${planes} planes y ${loQuiero} “Lo quiero”`);
-  if (planes) {
-    const msj = new URL(await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero")').first().getAttribute("href")).searchParams.get("text");
+  // L1/H3b: con las altas prendidas cada plan trae “Elegir este” (y “Consultar” a WhatsApp); sin altas, “Lo quiero” a WhatsApp.
+  const loQuiero = await v.locator('section[aria-labelledby=\"planes\"] a:has-text("Lo quiero"), section[aria-labelledby=\"planes\"] a:has-text("Elegir este")').count();
+  chequear(planes > 0 && loQuiero === planes, `${planes} planes, cada uno con su botón (“Lo quiero” o “Elegir este”)`, `${planes} planes y ${loQuiero} botones`);
+  const aWsp = v.locator('section[aria-labelledby=\"planes\"] a[href*="wa.me"]');
+  if (planes && await aWsp.count()) {
+    const msj = new URL(await aWsp.first().getAttribute("href")).searchParams.get("text");
     const nombre = (await v.locator("section[aria-labelledby=\"planes\"] li.tarjeta .titulo").first().innerText()).trim();
     chequear(msj.includes(nombre), `“Lo quiero” dice el plan: “${msj}”`, `“Lo quiero” manda “${msj}” para ${nombre}`);
   }
   const titulo = await v.title();
   const og = await v.locator('meta[property="og:title"]').getAttribute("content").catch(() => null);
   chequear(!!og && titulo.length > 0, `título “${titulo}” y vista al compartir (og:title “${og}”)`, `sin título o sin og:title (${titulo} / ${og})`);
-  await v.locator('a[href="#planes"]').first().click();
-  await v.waitForTimeout(600);
-  chequear(await v.evaluate(() => window.scrollY > 200), "“Ver planes” baja a los planes", "“Ver planes” no se mueve");
+  // Desde la portada de una sola pantalla (L1) el botón principal va a WhatsApp si hay número; "Ver planes" (#planes) solo aparece sin WhatsApp
+  // o en "¿Primera vez?". Si el link está, baja a los planes; si no, la sección de planes igual tiene que estar.
+  if (await v.locator('a[href="#planes"]').count()) {
+    await v.locator('a[href="#planes"]').first().click();
+    await v.waitForTimeout(600);
+    chequear(await v.evaluate(() => window.scrollY > 200), "“Ver planes” baja a los planes", "“Ver planes” no se mueve");
+  } else chequear(await v.locator("#planes").count() === 1, "la sección de planes está (la portada va a WhatsApp, sin “Ver planes”)", "no hay sección de planes");
   await capturar(v, "aud2-compu-publicada", true);
   if (v.errores.length) falla(`visitante compu: ${v.errores.join(" | ")}`);
   await v.context().close();
@@ -75,8 +81,10 @@ try {
   await revisarLinks(c, "celular");
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
   chequear(ancho <= CELU.width, `celular: sin desborde (${ancho}px)`, `celular: la página mide ${ancho}px`);
+  // L1 (Mateo, 14/11): la portada de una sola pantalla no lleva barra fija de WhatsApp (el principal es "Ya soy socio, entrar"). Se comprueba que no haya
+  // una barra fija repetida; la barra de WhatsApp vuelve, si vuelve, con la landing nueva (Pase 2.0).
   const barra = c.locator("div.fixed a.boton-principal");
-  chequear(await barra.count() === 1 && await barra.isVisible(), "celular: el botón de WhatsApp queda fijo abajo, una sola vez", "celular: sin barra fija de WhatsApp");
+  chequear(await barra.count() <= 1, "celular: a lo sumo un botón fijo abajo (L1: sin barra de WhatsApp)", "celular: hay más de un botón fijo abajo");
   await capturar(c, "aud2-celu-publicada", true);
   if (c.errores.length) falla(`visitante celu: ${c.errores.join(" | ")}`);
   await c.context().close();

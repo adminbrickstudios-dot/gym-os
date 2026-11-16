@@ -37,7 +37,7 @@ const veredicto = async (dni) => {
 const archivo = () => [
   { nombre: "Vera", apellido: "Vencida", dni: "31000001", telefono: "+54 9 000 1000001", plan, alta: "10/02/2025", vence: "31/03/2025" },
   { nombre: "Alba", apellido: "Aldia", dni: "31000002", telefono: "+54 9 000 1000002", plan, alta: "2025-06-01", vence: "31/12/2027" },
-  { nombre: "Sol", apellido: "SinPagar", dni: "31000003", plan },
+  { nombre: "Sol", apellido: "SinPagar", dni: "31000003", plan, alta: "10/02/2025" }, // sin "alta" la importación pone el día de la corrida y el MOMENTO fijo quedaba antes: la prueba dependía de la fecha real
   { nombre: "Vera", apellido: "Repetida", dni: "31000001", plan },
   { nombre: "", dni: "31000009" },
 ];

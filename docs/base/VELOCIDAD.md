@@ -361,3 +361,35 @@ Se cuentan las líneas `[rpc]` del log de la app al abrir cada pantalla (sin pre
 | Recepción, pantallas simples | 11 | 3 | | Control | 20 | 10 |
 
 El piso de toda pantalla son 3: `contexto_pantalla`, `panel_vivo` (menú y campana) y `entradas_desde` (avisos de la puerta; estos dos van después de pintar). Las que pasaron al lote suman 1 más (4). **Quedan por pasar al lote:** Caja (9: `cajas_para_revisar` registra cajas olvidadas antes de leer y hay una lectura por turno), Control (10: tiene parámetros que son listas, que `lote_lecturas` todavía no acepta) y Vencen hoy, Transferencias, Tareas, Mensajes, Equipo, Profes y Prospectos (5 a 9).
+
+
+## Pase 1.0 (15/11) · Viajes a la base que quedan, y su tope
+
+Medido con `scripts/medir/viajes.mjs` contra la app compilada (3.000 socios, sin precarga). Es el tope de hoy: `scripts/medir/topes-viajes.json`. Si una pantalla pasa de su número, `viajes.mjs` falla (último paso de la cadena e2e y `solo=viajes` en Actions) y `npm run chequeos` falla si a una pantalla le falta su tope. **Nunca más lento que hoy**: cuando se baja un viaje, se baja el tope (`ACTUALIZAR_TOPES=1` solo baja).
+
+El piso de toda pantalla del panel son 3 (`contexto_pantalla`, `panel_vivo` y `entradas_desde`). El tope de E8 (2 viajes) no se alcanzó en: Caja, Prospectos, Entrada, Inicio, Configuración, Mensajes y toda la app del socio; **se cierra en 1.0 con estos números y lo que falta es ➡️ Pase 2.0** (el socio, `/app`, es lo más lento: 22 viajes).
+
+| Pantalla | Dueña | Recepción | Socio |
+|---|---|---|---|
+| `/panel` | 6 | 4 | · |
+| `/panel/caja` | 9 | 8 | · |
+| `/panel/clases` | 4 | 4 | · |
+| `/panel/configuracion` | 6 | 3 | · |
+| `/panel/control` | 4 | 3 | · |
+| `/panel/entrada` | 7 | 7 | · |
+| `/panel/equipo` | 4 | 3 | · |
+| `/panel/gastos` | 4 | 3 | · |
+| `/panel/mensajes` | 6 | 3 | · |
+| `/panel/pagina` | 4 | 3 | · |
+| `/panel/planes` | 4 | 3 | · |
+| `/panel/profes` | 4 | 3 | · |
+| `/panel/prospectos` | 9 | 9 | · |
+| `/panel/resumen` | 4 | 3 | · |
+| `/panel/retencion` | 4 | 4 | · |
+| `/panel/socios` | 4 | 4 | · |
+| `/panel/tareas` | 4 | 4 | · |
+| `/panel/transferencias` | 4 | 4 | · |
+| `/panel/vencen-hoy` | 4 | 4 | · |
+| `/panel/vender` | 5 | 5 | · |
+| `/app` | · | · | 22 |
+| `/app/clases` | · | · | 8 |

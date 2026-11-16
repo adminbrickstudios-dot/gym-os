@@ -23,6 +23,14 @@ const ETIQUETA_INGRESO: Record<string, string> = { entro: "Entró", entro_modo_a
 const MEDIO_ETIQUETA: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
 const nombreMedio = (m: string) => MEDIO_ETIQUETA[m] ?? m;
 
+function FotoLateral({ socioId, nombre }: { socioId: string; nombre: string }) {
+  const [sin, setSin] = useState(false);
+  const caja = "size-16 rounded-full flex-none";
+  if (sin) return <span className={`${caja} grid place-items-center bg-[var(--tarjeta)] font-semibold text-2xl`} aria-hidden data-panel-socio-foto="inicial">{nombre.trim().charAt(0).toUpperCase()}</span>;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`/panel/socios/${socioId}/foto`} alt="" className={`${caja} object-cover`} data-panel-socio-foto="foto" onError={() => setSin(true)} />;
+}
+
 export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: string }) {
   const [socioId, setSocioId] = useState<string | null>(null);
   const [ficha, setFicha] = useState<Ficha | null>(null);
@@ -40,7 +48,8 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
   useEffect(() => {
     const abrir = (e: Event) => { const id = (e as CustomEvent<{ socioId: string }>).detail?.socioId; if (id) { setSocioId(id); setFicha(null); setError(null); } };
     window.addEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir);
-    return () => window.removeEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir);
+    document.documentElement.dataset.panelSocioMontado = "si";   // las listas (Últimas entradas) saben que pueden abrirlo en vez de navegar
+    return () => { window.removeEventListener(EVENTO_ABRIR_PANEL_SOCIO, abrir); delete document.documentElement.dataset.panelSocioMontado; };
   }, []);
 
   useEffect(() => {
@@ -72,7 +81,9 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
       <button type="button" aria-label="Cerrar el panel" className="absolute inset-0 bg-black/30" onClick={cerrarPanel} tabIndex={-1} />
       <aside role="dialog" aria-modal="true" aria-label="Ficha rápida del socio"
         className="absolute right-0 top-0 h-full w-full sm:w-[26rem] overflow-y-auto vidrio aparecer p-5 space-y-4 border-l-4" style={{ borderLeftColor: a ? colorVar(a.color) : "transparent" }}>
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-3">
+          {/* La foto es el motivo de confirmar a quien está en la puerta cara a cara (pedido 4.3e); sin foto, la inicial. */}
+          {ficha && socioId && <FotoLateral socioId={socioId} nombre={ficha.socio.nombre} />}
           <h2 className="titular text-2xl flex-1 min-w-0 break-words">{ficha ? `${ficha.socio.nombre} ${ficha.socio.apellido}` : "Cargando…"}</h2>
           <button ref={cerrarBtn} type="button" onClick={cerrarPanel} aria-label="Cerrar" className="size-11 rounded-lg texto-suave active:opacity-60 grid place-items-center"><Icono nombre="cerrar" /></button>
         </div>

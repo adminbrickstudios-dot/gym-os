@@ -1,3 +1,6 @@
+// APARTADO DE LA CADENA `e2e` (Pase 1.0, 15/11): intermitente. De 4 corridas con la app compilada (Actions y la compu) pasó 2 y falló 2 esperando `[data-kiosco-resultado]`
+// en la tablet después de que el socio escaneó su QR y la app del socio ya dijo "entró" (la entrada se registra; lo que a veces no aparece es el cartel de la tablet).
+// Es cosmético pero es la puerta: queda anotado en PASE-1.0.md § 6 para Pase 2.0. Se corre a mano con `node scripts/e2e/ent-6.mjs`.
 #!/usr/bin/env node
 // ENT-6 · QR en la tablet: la dueña prende la tablet y "QR en la tablet"; la
 // tablet muestra un QR que cambia; el socio lo escanea con su app (una cámara

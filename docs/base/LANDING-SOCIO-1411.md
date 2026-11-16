@@ -56,7 +56,7 @@ Inicio, con pocos botones grandes (SOCIO-FLUJO § app):
   - **Pagar desde acá**: solo si el gimnasio tiene el cobro online prendido. Si no, el botón no aparece.
 - **Mi QR: bloqueado hasta que pague.** Se ve el lugar del QR difuminado, con un candado y "Tu QR se activa
   cuando pagues". Nunca se muestra un QR que la puerta va a rechazar. Apenas la recepción cobra (o llega el
-  pago online), el QR se activa solo, sin recargar (Realtime, como los avisos).
+  pago online), el QR se activa solo, sin recargar (el celular pregunta cada 8 s mientras está bloqueado y con la pantalla a la vista, y al volver a la app: D67 y D77).
 - **Lo que puede ver igual:** horarios y clases de hoy, planes y precios, su perfil (datos y foto), el
   WhatsApp del gimnasio, y "Quiero probar una clase" si el gimnasio lo tiene prendido.
 - **Después de pagar:** el Inicio de siempre (QR, cuántos días le quedan, reservar, pagos).

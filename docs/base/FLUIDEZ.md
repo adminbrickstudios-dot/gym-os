@@ -15,7 +15,7 @@ Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
    - Éxito: dice qué pasó, con nombre y monto ("Cobrado $25.000 a Lucía").
    - Error: dice qué pasó y qué hacer, con Reintentar.
    - A los 10 s sin respuesta avisa "está tardando más de lo normal" y deja
-     reintentar.
+     reintentar. **(D73, 15/11: en lo que cobra no hay Reintentar; solo el aviso y la espera.)**
 3. **El botón vuelve.** Después del éxito o del error, el botón queda para usar
    de nuevo, o desaparece si ya no corresponde. Nunca queda gris para siempre.
    Dos toques seguidos no hacen la acción dos veces (clave de operación,
@@ -27,7 +27,7 @@ Completa lo de `docs/v2/07` (memoria, volver al origen) y `docs/v2/16`
 5. **Siempre hay salida.**
    - Cada pantalla tiene Volver o el menú.
    - Cada hoja y cada modal se cierra con la X, con Esc y con un click afuera.
-   - En celular, el "atrás" del teléfono cierra el modal y no saca de la app.
+   - En celular, el "atrás" del teléfono cierra el modal y no saca de la app. **Excepción (D74, 15/11): en Cobrar y en la Entrada está apagado a propósito, para no perder un cobro a medias.**
 6. **El "atrás" del navegador hace lo esperado**: cierra lo que está abierto o
    vuelve a la pantalla anterior con sus filtros.
 7. **Nada se pierde.** Un formulario largo que se cierra sin querer guarda lo

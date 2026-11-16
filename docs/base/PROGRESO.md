@@ -1,6 +1,55 @@
-# PROGRESO de Base
+# PROGRESO de Pase (antes Base)
 
-## DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
+## LISTO PARA TU PASADA · Pase 1.0 (15/11)
+
+Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cobrar, dar de alta, la caja, la página del gimnasio, el socio con su cuenta y su QR, y el super admin. **Todo eso está hecho, probado y en el código.** Lo que no se hizo en 1.0 está en `PASE-1.0.md` → "Para Pase 2.0", ordenado por importancia, y lo que depende de vos está abajo con su paso exacto. La prueba que te toca es `PRUEBA-DUENO.md`.
+
+## DÓNDE QUEDÉ y RESUMEN PARA MATEO (15/11, tarde)
+
+**Publicado hoy a las 12:42 (hora de Argentina), PR #27, main en `325b1e89`:** D69 (el producto se llama Pase: panel, app del socio, super admin, títulos, manifest; el nombre sale de `src/lib/producto.ts` y una prueba falla si vuelve a escribirse a mano), P2 (ninguna dirección escrita a mano, la lista de excepciones quedó vacía), Q1 según D70 (la matrícula se valida antes de crear el plan; el cierre de caja muestra el monto contado antes de confirmar), el tope de viajes a la base por pantalla, la hoja de Cobrar sin la X duplicada y N10 (migración `20261114180000` aplicada sin copia, corrida 43731288556, función apagada por defecto). Deploy en verde; en producción: título y manifest dicen Pase, `/api/salud`, `/g/demo`, `/g/templegym1` y `/ingresar` responden 200, `humo-pasado` en verde. **Temple Gym solo mirado, nada tocado.** Para volver atrás: revertir el merge (main antes de hoy: `eab6e40e`).
+
+**Sin publicar (rama `base/2026-11-07`, todo en verde en Actions; se publica a partir de las 22:00 con prevuelo, sin migraciones nuevas, volviendo a `325b1e89` si algo se rompe):**
+- **Un bug real arreglado:** el número del menú (Mensajes, Transferencias…) y el de la campana quedaban viejos después de contestar un mensaje o aprobar una transferencia. Prueba nueva `vivo-cliente.test.ts`.
+- **"Probá una clase"** en todos lados de la página del gimnasio (antes también decía "Probá gratis"), con una prueba que falla si vuelve (D79).
+- **El panel lateral del socio muestra su foto** (o la inicial) para confirmar a quien está en la puerta, y **tocar una última entrada de Inicio abre ese panel** sin salir de la pantalla (FA-2).
+- **PERMISOS.md** regenerado (la función de N10, solo dueño y encargado) y la prueba de importar socios ya no depende del día de la corrida.
+- **Documentos en orden:** `00-LEEME.md` como índice real, 13 contradicciones entre documentos decididas por defecto (D71 a D82 en `PREGUNTAS.md`), `ESTADO-GENERAL`, `RECTA-FINAL`, `VELOCIDAD`, `PRUEBA-DUENO` y `CLAUDE.md` al día.
+- **Cadena e2e completa en Actions** (250 recorridos en tandas de 20, base nueva en cada una, app compilada): en verde. Lo que fallaba eran recorridos viejos frente a L1 y L3 (ya adaptados), tres que dependían del orden de la cadena (ya deterministas) y el bug del menú. **Apartados con su motivo:** `vd-25` (la portada de una pantalla ya no dibuja la prueba social ni "¿Primera vez?") y `ent-6` (el cartel de la tablet a veces no aparece; la entrada sí se registra).
+
+**Lo que pidió Mateo → estado** (🟢 publicado · 🟡 sin publicar · 🔴 falta · ⛔ depende de Mateo · ➡️ Pase 2.0)
+
+| Lo que pidió | Estado | Detalle |
+|---|---|---|
+| El producto se llama Pase (D69) | 🟢 | Publicado y probado en producción |
+| Entrar, cobrar, alta y caja del mostrador | 🟢 | Publicado; recorridos de caja, Cobrar y Entrada en verde |
+| La hoja de Cobrar sin dos X | 🟢 | Publicado |
+| Número del menú al día después de contestar o aprobar | 🟡 | Arreglado y probado; se publica a las 22:00 |
+| Foto del socio en el panel lateral y últimas entradas que lo abren | 🟡 | Hecho con prueba; se publica a las 22:00 |
+| "Probá una clase" en la página, sin "Probá gratis" | 🟡 | Hecho con prueba; se publica a las 22:00 |
+| La página del gimnasio en una pantalla (L1) | 🟢 | Publicada. La prueba social y "¿Primera vez?" ➡️ con la landing nueva |
+| Quiero ser socio con la cuenta gratis y DNI (L2) | 🟢 | Publicado |
+| App del socio: pagá tu plan y QR bloqueado que se activa solo (L3) | 🟢 | Publicado |
+| Cuánto deja un socio (N10) | 🟢 | Publicado, apagado por defecto |
+| Velocidad: lo que se pudo bajar y el tope de "nunca más lento" | 🟢 | Publicado; lo que queda por encima de 2 viajes ➡️ (la app del socio hace 22) |
+| Pase diario en dos toques y para quien no es socio, pagos parciales, prorrateo, matriz de permisos editable, estado de cuenta con saldo | ➡️ | D70: cambian plata o permisos; la recomendación de cada una está en `PASE-1.0.md` |
+| Pulido profundo, landing nueva, funciones nuevas (débito, factura, molinete, entradas sin internet), escala | ➡️ | Lista priorizada en `PASE-1.0.md` |
+| El QR de registro de Temple Gym | ⛔ | Ver el paso 2 de abajo |
+| Crear un gimnasio y su dueño en producción, medir la velocidad en producción, el humo de `/super` | ⛔ | Ver el paso 1 de abajo |
+| Dominios `pasegym.com` y `templegymsalta.com` | ⛔ | Ver el paso 4 de abajo |
+| Copias de seguridad cifradas | ⛔ | Ver el paso 1 de abajo |
+| Política de privacidad real e inscripción en la AAIP | ⛔ | Con un abogado; el borrador está en la app |
+
+**⛔ Lo que tenés que hacer vos, en orden de lo que más destraba:**
+1. **GitHub → Settings → Secrets and variables → Actions → New repository secret:** `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO` y `COPIA_CLAVE`; y la variable `SALUD_URL` = `https://gym-os-pied.vercel.app/api/salud`. Con eso se destraba la medición en producción, crear un gimnasio, las copias y el aviso de caídas.
+2. **Temple Gym** (el panel de Temple): Página → "Hacerse socio desde la página" → escribir el reglamento (obligatorio) → prender "Aceptar altas online" → Guardar; corregir el nombre a "Temple Gym" y cargar el WhatsApp en Configuración → Gimnasio. Recién ahí `/g/templegym1/hacete-socio?o=qr` deja anotarse (hoy dice "Hoy no te podés anotar desde acá").
+3. **Mails de Supabase** (invitación y recuperar contraseña): se escriben en el panel de Supabase, no en el código; revisá que digan Pase.
+4. **Dominios:** conectá `pasegym.com` y `templegymsalta.com` en Vercel con `DOMINIO.md`, fuera de 16 a 22 h.
+5. **Vercel Pro y Supabase Pro** para el uso comercial (D51; no se contrató nada).
+6. **Tu pasada visual y la prueba del dueño:** `PRUEBA-DUENO.md`, una hora; lo que no te guste va a `CAMBIOS-MATEO.md`.
+
+---
+
+## (histórico) DÓNDE QUEDÉ y RESUMEN PARA MATEO (14/11, tarde)
 
 **Cuarta publicación (14/11, 14:30 hora de Argentina, PR #26, commit eab6e40):** migración `20261114170000` (el lote de lecturas acepta listas como parámetro y suma las de Control) aplicada sin copia (chequeos en verde, corrida 43621027947), deploy en verde y humo. Control pasa a un solo viaje. D1 a D3 pasaron a ⛔ (los dominios los cambia Mateo) y H7, Z1 y Q2 a ✅.
 

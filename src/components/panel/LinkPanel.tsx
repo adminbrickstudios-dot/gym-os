@@ -3,7 +3,7 @@
 // prendida para este gimnasio y este rol. Así ninguna pantalla manda a una
 // apagada (un botón a la nada). Las secciones y el rol los pone el Marco.
 import Link from "next/link";
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, type MouseEvent, type ReactNode } from "react";
 import { rutaDisponible, type Rol } from "@/lib/panel/secciones";
 
 const Contexto = createContext<{ rol: Rol; apagadas: string[] } | null>(null);
@@ -22,9 +22,11 @@ export function useRutaDisponible(href: string): boolean {
  * `siNoEsta`: "nada" (por defecto, para botones: no se muestran) o "texto"
  * (para un nombre: se ve sin link).
  */
-export function LinkPanel({ href, className, children, siNoEsta = "nada", textoClassName }: {
+export function LinkPanel({ href, className, children, siNoEsta = "nada", textoClassName, alTocar }: {
   href: string; className?: string; children: ReactNode; siNoEsta?: "nada" | "texto"; textoClassName?: string;
+  /** Para abrir otra cosa en lugar de navegar (por ejemplo el panel lateral); sin `preventDefault` navega como siempre. */
+  alTocar?: (e: MouseEvent<HTMLAnchorElement>) => void;
 }) {
-  if (useRutaDisponible(href)) return <Link href={href} className={className}>{children}</Link>;
+  if (useRutaDisponible(href)) return <Link href={href} className={className} onClick={alTocar}>{children}</Link>;
   return siNoEsta === "texto" ? <span className={textoClassName}>{children}</span> : null;
 }

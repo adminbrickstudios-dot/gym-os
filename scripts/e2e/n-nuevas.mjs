@@ -143,7 +143,7 @@ try {
   }
   ok("la dueña prende las 4 funciones desde Configuración → Funciones nuevas");
   chequear(await d.locator("[data-que-hay-de-nuevo] [data-novedad-funcion]").count() === 4, "“Qué hay de nuevo” cuenta las 4 que prendió", `“Qué hay de nuevo” cuenta ${await d.locator("[data-que-hay-de-nuevo] [data-novedad-funcion]").count()}`);
-  chequear((await q(`select count(*)::int n from public.historial_configuracion where gimnasio_id = $1 and campo like 'funcion_nueva.%'`, [gim]))[0].n === 4, "los 4 cambios quedan en el historial", "el historial no tiene los 4 cambios");
+  chequear((await q(`select count(*)::int n from public.historial_configuracion where gimnasio_id = $1 and campo = any($2)`, [gim, ["origen_altas", "resumen_noche", "apto_vencimiento", "debito_automatico"].map((c) => `funcion_nueva.${c}`)]))[0].n === 4, "los 4 cambios quedan en el historial", "el historial no tiene los 4 cambios");
   await capturar(d, "n-compu-prendidas");
 
   // ═══ N4 · origen de las altas ═══

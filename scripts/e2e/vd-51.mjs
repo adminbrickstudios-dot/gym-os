@@ -6,6 +6,8 @@
 //   node scripts/e2e/vd-51.mjs     (con scripts/local/levantar.sh corriendo)
 // Escrito siguiendo vd-1 y vd-48. El "al día siguiente rojo con Hacete socio" no se puede mirar sin mover el reloj: lo cubre
 // la prueba de base (supabase/pruebas/prueba-gratis.test.mjs, con momentos fijos).
+import { execSync } from "node:child_process";
+import pg from "pg";
 import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
@@ -42,6 +44,13 @@ try {
   chequear(await d.locator("[data-prueba-gratis]").getAttribute("data-prueba-gratis") !== "cargando", "Configuración → Reglas tiene “Prueba gratis” (no / 1 día / 1 clase)", "no aparece la prueba gratis");
   await modoPrueba(d, "dia");
   chequear(await d.locator('[data-prueba-opcion="dia"]').getAttribute("aria-pressed") === "true", "la dueña la prende: 1 día", "no quedó en 1 día");
+
+  // Las clases de cada día se crean al abrirlo (materializar_dia): en una base recién sembrada todavía no hay ninguna en los próximos 7 días y la página
+  // no tiene qué ofrecer. La prueba las crea ella misma (antes dependía de que otro recorrido hubiera abierto Clases: no era determinista).
+  const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
+  await db.connect();
+  await db.query(`select privado.materializar_dia(s.id, ((now() at time zone g.zona_horaria)::date + n)) from public.sedes s join public.gimnasios g on g.id = s.gimnasio_id, generate_series(0, 6) n`);
+  await db.end();
 
   // ── La página: Probá una clase con reserva ──
   const v = await pagina(b, COMPU);

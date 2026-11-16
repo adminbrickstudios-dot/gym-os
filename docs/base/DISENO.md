@@ -173,9 +173,9 @@ Abajo a la derecha, **sin tapar nunca** el botón de Entrada ni la barra fija
   color (plan y días · motivo del rechazo · "vence el jueves" · "prueba hasta el
   12/11").
 - Se apilan hasta 3; el más nuevo abajo. El cuarto empuja al más viejo.
-- Se esconde solo: verde a los 5 s, amarillo y azul a los 8 s, rojo a los 12 s.
+- Se esconde solo: verde, amarillo y azul 1,5 s grandes y 8 s en pastilla; **el rojo no se achica: queda hasta que alguien lo atienda o lo cierre (tope de 10 min)** (D71, NOCHE-1211 E2; esto reemplaza lo que decía 5, 8 y 12 s).
   Con el mouse o el dedo encima, no se esconde.
-- Tocarlo abre el panel lateral. Tiene X.
+- Tocarlo lo fija y abre el panel lateral con la ficha rápida y la foto (D72). Tiene X.
 - Entra deslizando 160 ms; con `prefers-reduced-motion`, aparece sin moverse.
 
 ### El panel lateral
@@ -206,7 +206,7 @@ WhatsApp. El color del gimnasio solo en los botones.
 
 ## La marca Base (D39)
 
-- Nombre visible: **Base**. Donde hoy dice "Gym OS" en algo que ve la gente
+- Nombre visible: **Pase** (D69; antes Base, D39). Donde hoy dice "Gym OS" en algo que ve la gente
   (ingreso, página de venta, super admin, mails, títulos, `manifest`, imagen
   OG, pie "hecho con"), pasa a "Base".
 - El panel de cada gimnasio muestra la marca del gimnasio, no la de Base. Base

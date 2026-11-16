@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 345 funciones piden un rol del equipo con `privado.exigir_equipo`; 415 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 346 funciones piden un rol del equipo con `privado.exigir_equipo`; 423 no (las decide la propia función con la sesión, el socio o RLS); 31 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -342,6 +342,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `ultimas_entradas` | ✓ | ✓ | ✓ | — |
 | `unir_socios` | ✓ | — | — | — |
 | `validar_cupon` | ✓ | ✓ | ✓ | — |
+| `valor_del_socio` | ✓ | ✓ | — | — |
 | `vencen_hoy` | ✓ | ✓ | ✓ | — |
 | `vencen_pestanas` | ✓ | ✓ | ✓ | — |
 | `ventas_socio` | ✓ | ✓ | — | — |
@@ -363,6 +364,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_agregar_nota`
 - `admin_agregar_persona`
 - `admin_alertas`
+- `admin_almacenamiento`
 - `admin_anotar_registro`
 - `admin_anular_pago_brik`
 - `admin_aplicar_plantilla`
@@ -377,13 +379,16 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_cambiar_rol_persona`
 - `admin_cambiar_slug`
 - `admin_cancelar_mantenimiento`
+- `admin_cerrar_sesiones_gimnasio`
 - `admin_clonar_configuracion`
 - `admin_confirmar_cuenta`
 - `admin_crear_demo`
 - `admin_crear_gimnasio`
 - `admin_dar_de_baja`
 - `admin_dar_rol_brik`
+- `admin_datos_fiscales`
 - `admin_demos_vencidas`
+- `admin_dnis_repetidos`
 - `admin_entrar_gimnasio`
 - `admin_errores`
 - `admin_estado_copias`
@@ -400,6 +405,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_gimnasios`
 - `admin_guardar_ciudad`
 - `admin_guardar_contacto_plataforma`
+- `admin_guardar_datos_fiscales`
 - `admin_guardar_descuento`
 - `admin_guardar_limites_plan`
 - `admin_guardar_link_pago`
@@ -449,6 +455,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_salir_gimnasio`
 - `admin_salud_gimnasios`
 - `admin_salud_v2`
+- `admin_sesiones_gimnasio`
 - `admin_soportes`
 - `admin_tablero`
 - `admin_tamano_tablas`
@@ -632,6 +639,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `lista_clase`
 - `llavero_socio`
 - `lockers_panel`
+- `lote_lecturas`
 - `lugares_clase`
 - `mantenimiento_vigente (también anónimo)`
 - `maquinas_panel`
@@ -677,6 +685,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `pagos_por_aprobar`
 - `panel_gimnasio`
 - `panel_inicio`
+- `panel_vivo`
 - `para_hacer_hoy`
 - `pausas_socio`
 - `pedir_anulacion`
