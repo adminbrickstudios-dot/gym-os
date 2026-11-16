@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 // Cacería (Mateo, 16/11) · Los relojes que preguntan solos. Cuántos pedidos al servidor hace una recepción QUIETA (sin tocar nada) en un minuto,
-// con la pestaña a la vista y con la pestaña escondida (que no debería preguntar nada). Los números salen en la corrida; el tope es lo medido y no sube.
+// con la pestaña a la vista y con la pestaña escondida (que no debería preguntar nada). Medido en Actions con la app compilada (16/11): 17 por minuto a la vista y 0 escondida.
+// OJO: contra una base local no hay Realtime y el oído de la puerta pregunta cada 4 s (15 de los 17); en producción con Realtime son unos 4 por minuto (el estado de Campana y
+// Navegación 1, las últimas entradas 1 y el cartel de emergencia 2). El tope es lo medido y no sube.
 //   node scripts/e2e/relojes.mjs      (con scripts/local/levantar.sh corriendo; en modo compilado los números son los reales)
 import { COMPU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const MINUTO = 62000;
-const TOPE_A_LA_VISTA = Number(process.env.TOPE_RELOJES_VISTA ?? 14);   // pedidos por minuto, recepción quieta con la pestaña a la vista
-const TOPE_ESCONDIDA = Number(process.env.TOPE_RELOJES_ESCONDIDA ?? 1);   // con la pestaña escondida
+const TOPE_A_LA_VISTA = Number(process.env.TOPE_RELOJES_VISTA ?? 17);   // pedidos por minuto, recepción quieta con la pestaña a la vista
+const TOPE_ESCONDIDA = Number(process.env.TOPE_RELOJES_ESCONDIDA ?? 0);   // con la pestaña escondida
 const b = await navegador();
 try {
   const r = await pagina(b, COMPU);
