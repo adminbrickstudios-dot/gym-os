@@ -81,3 +81,12 @@ export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/
     return { ficha, puedeCobrar: panel.yo.rol !== "profe", datosDePago, notas, etiquetas };
   } catch (e) { return { error: (e as Error).message }; }
 }
+
+/** D83: "Dar el alta y cobrar" a un socio con cuenta y sin plan: se le asigna el plan elegido (queda sin cobertura hasta que se cobre). La base valida el permiso y el plan. */
+export async function asignarPlanSocio(socioId: string, planId: string): Promise<{ error?: string }> {
+  try {
+    await rpc("asignar_plan", { p_socio_id: socioId, p_plan_id: planId });
+    revalidatePath(`/panel/socios/${socioId}`);
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}

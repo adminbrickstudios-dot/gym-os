@@ -22,7 +22,8 @@ const [{ id: gim }] = (await db.query(`select id from public.gimnasios where slu
 for (const h of [hostA, hostB]) await db.query(`insert into public.dominios_gimnasio (gimnasio_id, host, tipo) values ($1, $2, 'subdominio') on conflict do nothing`, [gim, h]);
 const [{ id: sede }] = (await db.query(`select id from public.sedes where gimnasio_id = $1 order by es_principal desc limit 1`, [gim])).rows;
 await db.query(`update public.sedes set direccion = coalesce(direccion, 'Calle Ficticia 123, Salta') where id = $1`, [sede]);
-const altas = (v) => db.query(`update public.configuracion_gimnasio set altas_online = $2 where gimnasio_id = $1`, [gim, v]);
+// D83: "altas apagadas" = cerrado del todo: las altas con plan y la llave de Crear mi cuenta.
+const altas = (v) => db.query(`update public.configuracion_gimnasio set altas_online = $2, crear_cuenta_visible = $2 where gimnasio_id = $1`, [gim, v]);
 
 /** ¿El elemento está entero dentro de la primera pantalla (sin scrollear)? */
 const enPantalla = (p, sel) => p.locator(sel).first().evaluate((el, alto) => {

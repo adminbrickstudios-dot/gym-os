@@ -10,7 +10,7 @@
 //   node scripts/e2e/qr-alta.mjs      (con scripts/local/levantar.sh corriendo; sin correr todavía: escrito según la documentación)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, llaveCrearCuenta, aparece, capturar, chequear, entrar, esperarAntiRobot, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 // El registro no se prende sin reglamento: el demo de CI puede no tenerlo, se deja uno.
@@ -60,6 +60,7 @@ try {
 
   // ── Celular: abre el link del QR, el formulario llega con el plan elegido ──
   const v = await pagina(b, CELU);
+  await llaveCrearCuenta(d, false);   // D83: cerrado del todo = también la llave de Crear mi cuenta
   await v.goto(link.replace(/^https?:\/\/[^/]+/, G));   // el QR apunta al dominio real; en local el host es demo.localhost
   const form = v.locator("[data-form-alta]");
   await form.waitFor({ timeout: 60000 });
@@ -114,6 +115,7 @@ try {
   chequear(!!hrefWa && hrefWa.startsWith("https://wa.me/"), "cerrado: da el WhatsApp del gimnasio", "cerrado: no hay WhatsApp");
   await capturar(v, "qr-alta-celu-cerrado", true);
   await v.context().close();
+  await llaveCrearCuenta(d, true);
 
   if (d.errores.length) falla(`dueña: ${d.errores.join(" | ")}`);
   await d.context().close();

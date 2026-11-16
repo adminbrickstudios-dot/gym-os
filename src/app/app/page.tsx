@@ -57,7 +57,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const debePagar = !v.puede || v.color === "amarillo" || v.color === "naranja";
     // L3: "pagá tu plan" arriba y el QR bloqueado, solo cuando lo que falta es pagar (no cuando está congelado o suspendido).
-    const faltaPagar = !v.puede && (v.para_regularizar != null || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
+    // D83: quien creó su cuenta y todavía no tiene plan ("sin plan activo") también tiene que pagar para empezar a entrar.
+    const faltaPagar = !v.puede && (v.para_regularizar != null || v.motivo === "sin_plan" || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
     const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados, dni] = await Promise.all([
       rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
@@ -197,7 +198,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </nav>
 
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
-        {progreso && <ProgresoInicio p={progreso} />}
+        {progreso && !faltaPagar && <ProgresoInicio p={progreso} />}
         <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>
         <Suspense fallback={null}><Recomendacion socioId={s.socio_id} q={q} /></Suspense>
 
@@ -252,7 +253,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </Link>
         )}
         {invitados && v.puede && <Invitar gimnasioId={g.id} socioId={s.socio_id} datos={invitados} />}
-        {referido && <Referir datos={referido} />}
+        {referido && !faltaPagar && <Referir datos={referido} />}   {/* D83: quien todavía no pagó ve lo que lo lleva a entrar, nada de invitar */}
         <Instalar />
 
         {yo.modo_clases !== "ninguno" && (

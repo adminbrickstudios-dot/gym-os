@@ -737,7 +737,7 @@ function VentanaCuerpo({ gimnasioId, sedeId: sedeBase, zona, config, conQr, conL
           {paso === "veredicto" && elegido && (
             <PasoVeredicto elegido={elegido} v={v} guia={guia} apto={apto} firmar={firmar} eventosHoy={eventosHoy} error={error} cobrado={cobrado} esRecepcion={esRecepcion}
               ocupado={ocupado} forzando={forzando} cupo={cupo} motivo={motivo} setMotivo={setMotivo} pruebaModo={pruebaModo} salidaModo={salidaModo}
-              puedeAnotarConEnter={puedeAnotarConEnter} cobrarRef={cobrarRef} fichaRef={fichaRef} anotar={anotar} dejar={() => dejarRef.current()}
+              puedeAnotarConEnter={puedeAnotarConEnter} sedeId={sedeId} cobrarRef={cobrarRef} fichaRef={fichaRef} anotar={anotar} dejar={() => dejarRef.current()}
               volvioAntes={volvioAntes} volverAlta={volverAlta} cobrarAhora={cobrarAhora} darPruebaAlSocio={darPruebaAlSocio} marcarSalida={marcarSalida} reiniciar={() => reiniciar()} />
           )}
 

@@ -63,7 +63,7 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
   if (r.listo) {
     const t = r.transferencia;
     return (
-      <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio}>
+      <div className="tarjeta p-6 space-y-5" role="status" data-alta-lista={r.medio ?? "sin-plan"}>
         <BorradorAutomatico clave="alta-socio" borrar />
         <p className="titulo text-3xl" data-alta-titulo><Icono nombre="ok" /> ¡Listo, {r.nombre}! Ya tenés tu cuenta en {datos.marca.nombre}.</p>
         <p className="text-lg">
