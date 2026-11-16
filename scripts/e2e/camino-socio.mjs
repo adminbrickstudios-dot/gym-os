@@ -15,6 +15,8 @@ import { CELU, COMPU, GIMNASIO, aparece, capturar, chequear, entrar, esperarAnti
 const G = GIMNASIO();
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() }); await db.connect();
 const demo = (await db.query(`select id from public.gimnasios where slug = 'demo'`)).rows[0].id;
+// Lo que se toca de la configuración del demo se deja como estaba al terminar (otros recorridos dependen de las altas prendidas).
+const antes = (await db.query(`select c.altas_online, c.crear_cuenta_visible, c.prueba_gratis, l.publicada from public.configuracion_gimnasio c join public.landing_gimnasio l on l.gimnasio_id = c.gimnasio_id where c.gimnasio_id = $1`, [demo])).rows[0];
 // Como Temple Gym: página publicada, altas con plan apagadas, "Crear mi cuenta" prendido, clase de prueba (por día) prendida y sin reglamento cargado por el e2e.
 await db.query(`update public.landing_gimnasio set publicada = true where gimnasio_id = $1`, [demo]);
 await db.query(`update public.configuracion_gimnasio set altas_online = false, crear_cuenta_visible = true, prueba_gratis = 'dia' where gimnasio_id = $1`, [demo]);
@@ -176,6 +178,8 @@ try {
 } finally {
   try { if (prendioQr && d) await prenderQr(d, false); } catch { /* deja el QR como estaba */ }
   await db.query(`update public.configuracion_entrada set resultado_entrada = $2 where gimnasio_id = $1`, [demo, resultadoAntes]);
+  await db.query(`update public.configuracion_gimnasio set altas_online = $2, crear_cuenta_visible = $3, prueba_gratis = $4 where gimnasio_id = $1`, [demo, antes.altas_online, antes.crear_cuenta_visible, antes.prueba_gratis]);
+  await db.query(`update public.landing_gimnasio set publicada = $2 where gimnasio_id = $1`, [demo, antes.publicada]);
   await db.end();
 }
 await b.close();
