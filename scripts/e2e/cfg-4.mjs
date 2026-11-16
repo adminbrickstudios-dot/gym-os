@@ -63,7 +63,7 @@ try {
 
   // ── La página los muestra agrupados ──
   const pub = await p.context().newPage();
-  await pub.goto(`${G}/`);
+  await pub.goto(`${G}/?pagina=1`);
   const bloque = pub.locator("[data-horarios-sede]");
   await bloque.waitFor({ timeout: 30000 });
   const textoHorarios = (await bloque.innerText()).replace(/\s+/g, " ");
@@ -103,7 +103,7 @@ try {
   chequear(await c.locator("[data-cierre]", { hasText: MOTIVO }).count() === 1, "la app del socio avisa el feriado", "la app no avisa el feriado");
   await capturar(c, "cfg4-celu-app");
   const pub2 = await p.context().newPage();
-  await pub2.goto(`${G}/`);
+  await pub2.goto(`${G}/?pagina=1`);
   chequear(await pub2.locator("[data-cierre]", { hasText: MOTIVO }).count() === 1, "la página del gimnasio avisa el feriado arriba", "la página no avisa el feriado");
   await pub2.close();
 

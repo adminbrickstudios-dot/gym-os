@@ -199,6 +199,8 @@ try {
   chequear(oculto && await aparece(cerrada, 30000) && /no te podés anotar/.test(await cerrada.innerText()) && await o.locator("[data-whatsapp-gimnasio]").count() === 1, "con la llave del dueño apagada: sin botón, y el link directo dice que hoy no se puede, con el WhatsApp", "con la llave apagada el botón o el link directo siguen");
   await o.context().close();
   await llaveCrearCuenta(d, true);
+  await d.goto(`${G}/panel/ayuda/carteles/anotate`);   // vuelve a la pantalla de los controles para dejar el registro como estaba
+  await controles.waitFor({ timeout: 60000 });
   await poner(true);
 
   for (const [nombre, pag] of [["dueña", d], ["celular", v], ["recepción", r]]) if (pag.errores.length) falla(`${nombre}: ${pag.errores.join(" | ")}`);

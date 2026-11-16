@@ -35,15 +35,20 @@ export function Altas({ inicial, crearCuenta = true, puedeEditar }: { inicial: A
     setMsj((m) => ({ ok: a.altas_online ? "Guardado: la gente ya se puede anotar desde tu página." : "Guardado.", n: m.n + 1 }));
   });
   return (
-    <section className="tarjeta p-5 sm:p-6 space-y-4" data-altas data-respuestas={msj.n}>
-      <div><p className="titulo text-2xl"><Icono nombre="pesa" /> Hacerse socio desde la página</p>
-        <p className="texto-suave">Con esto prendido, la página muestra “Hacete socio” y en cada plan “Elegir este”: la persona deja sus datos, acepta el reglamento y elige pagar por transferencia o en el gimnasio. Queda como socio sin pagar hasta que cobrás.</p></div>
-      <fieldset disabled={!puedeEditar} className="space-y-4">
+    <>
+    <section className="tarjeta p-5 sm:p-6" data-crear-cuenta-seccion>
+      <fieldset disabled={!puedeEditar}>
         <div data-crear-cuenta-llave>
           <Interruptor etiqueta="Mostrar “Crear mi cuenta” en la página" ayuda="Crear la cuenta es gratis y no depende de las altas online: la persona deja sus datos y entra a su app. Apagalo si no querés que la gente se cree la cuenta sola."
             checked={cuentaVisible} onChange={(e) => void cambiarCuenta(e.target.checked)} />
           {cuentaError && <Mensaje tipo="error">{cuentaError}</Mensaje>}
         </div>
+      </fieldset>
+    </section>
+    <section className="tarjeta p-5 sm:p-6 space-y-4" data-altas data-respuestas={msj.n}>
+      <div><p className="titulo text-2xl"><Icono nombre="pesa" /> Hacerse socio desde la página</p>
+        <p className="texto-suave">Con esto prendido, la página muestra “Hacete socio” y en cada plan “Elegir este”: la persona deja sus datos, acepta el reglamento y elige pagar por transferencia o en el gimnasio. Queda como socio sin pagar hasta que cobrás.</p></div>
+      <fieldset disabled={!puedeEditar} className="space-y-4">
         <Interruptor etiqueta="Aceptar altas online con plan" ayuda={guardado.reglamento ? `Se anotaron ${guardado.aceptaciones} aceptando el reglamento. Prendido, además la persona puede elegir su plan y pagar desde la página.` : "Primero escribí el reglamento."}
           checked={prendidas} onChange={(e) => setPrendidas(e.target.checked)} />
         <label className="block space-y-1">
@@ -63,5 +68,6 @@ export function Altas({ inicial, crearCuenta = true, puedeEditar }: { inicial: A
       {msj.error && <Mensaje tipo="error">{msj.error}</Mensaje>}
       {msj.ok && !sucio && <Mensaje tipo="exito">{msj.ok}</Mensaje>}
     </section>
+    </>
   );
 }

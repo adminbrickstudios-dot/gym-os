@@ -91,8 +91,9 @@ test("asistencia: con pack 'se descuenta en la clase', descuenta una", async () 
 });
 
 test("cancelar la clase: avisa a todos, cancela las reservas y devuelve la clase del pack", async () => {
+  // El reloj de esta prueba es el de 2026-11-14: la clase del 15/11 ya empezó para el now() real. Lo que se prueba acá son los avisos y las devoluciones, no la regla de la clase empezada (esa tiene su prueba aparte), así que se permite cancelar una pasada.
   await t.db.query("savepoint cc");
-  const [{ n }] = await t.q(`select privado.cancelar_clase($1, 'Se cortó la luz', false) as n`, [clase]);
+  const [{ n }] = await t.q(`select privado.cancelar_clase($1, 'Se cortó la luz', true) as n`, [clase]);
   const avisos = await t.q(`select texto from public.avisos_pendientes where clase_id = $1 and tipo = 'clase_cancelada'`, [clase]);
   const [{ devueltos }] = await t.q(`select count(*)::int devueltos from public.consumos_pack where asistencia_id is not null and anulado_en is not null`);
   await t.db.query("rollback to savepoint cc");
