@@ -7,8 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for s in templegym1 templegym temple-gym templegymsalta temple temple-gym-salta; do
-            printf "%-18s " $s; curl -s -o /dev/null -m 20 -w "%{http_code} %{redirect_url}\n" "https://pasegym.com/g/$s"
+          for u in https://gym-os-pied.vercel.app/g/templegym1/hacete-socio?o=qr https://pasegym.com/g/templegym1 https://pasegym.com/g/demo https://pasegym.com/g/templegym https://templegymsalta.com/hacete-socio; do
+            printf "%-60s " "$u"; curl -s -L -m 20 -o /tmp/p.html -w "%{http_code} final=%{url_effective}  " "$u"; grep -oE "<title>[^<]*</title>" /tmp/p.html | head -1
           done
-          curl -s -m 20 https://templegymsalta.com/ | grep -oE '"(slug|gimnasio_slug)":"[^"]+"' | sort -u | head
-          curl -s -m 20 https://templegymsalta.com/ | grep -oE '/g/[a-z0-9-]+' | sort -u | head
