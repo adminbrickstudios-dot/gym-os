@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingOculta } from "@/components/landing/Landing";
 import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
@@ -65,11 +65,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Inicio() {
+export default async function Inicio({ searchParams }: { searchParams: Promise<{ pagina?: string }> }) {
   const r = await landingDelHost();
   if (r.tipo === "gimnasio") {
     // H3b: con la sesión abierta, la landing saluda por el nombre y ofrece "Ir a mi perfil" y "Cerrar sesión".
     const sesion = await sesionEnEsteGimnasio();
+    // D83 (memoria): con la sesión abierta en este gimnasio, la dirección del gimnasio (su dominio, el QR, /g/<slug>) lleva directo a su app
+    // (el equipo, a su panel). Para ver la portada hay "Ver la página del gimnasio" (?pagina=1). Sin sesión, la portada de siempre.
+    if (sesion && (await searchParams).pagina !== "1") redirect(sesion.esEquipo ? "/panel" : "/app");
     if (!r.landing.publicada) return <LandingOculta marca={r.landing.marca} contacto={r.landing.contacto} altas={false} sesion={sesion} />;   // el alta online pide la página publicada: oculta no hay "Quiero ser socio"
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
