@@ -8,6 +8,7 @@ import { proxy } from "@/proxy";
 const PLATAFORMA = "gym-os-pied.vercel.app";
 type Fila = { gimnasio_id: string; slug: string; host: string | null };
 let filas: Record<string, Fila> = {};
+let anteriores: Record<string, string> = {};
 
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_DOMINIO_BASE", PLATAFORMA);
@@ -15,7 +16,12 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proyecto.supabase.invalid");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-de-prueba");
   filas = {};
-  vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => {
+  anteriores = {};
+  vi.stubGlobal("fetch", vi.fn(async (url: string, init: RequestInit) => {
+    if (String(url).endsWith("/rpc/slug_actual_de")) {
+      const viejo = (JSON.parse(String(init.body)) as { p_slug?: string }).p_slug ?? "";
+      return new Response(JSON.stringify(anteriores[viejo] ?? null), { status: 200, headers: { "content-type": "application/json" } });
+    }
     const slug = (JSON.parse(String(init.body)) as { p_slug?: string }).p_slug ?? "";
     // El slug cambia en cada caso para no chocar con la memoria de 60 s del proxy.
     return new Response(JSON.stringify(filas[slug] ? [filas[slug]] : []), { status: 200, headers: { "content-type": "application/json" } });
@@ -92,4 +98,26 @@ test("un gimnasio que no existe no cae en silencio: 404 con la dirección escrit
   vi.stubGlobal("fetch", vi.fn(async () => new Response("caído", { status: 500 })));
   const caido = await abrir(PLATAFORMA, "/g/otro-que-no-esta-en-memoria/ingresar");
   expect(caido.status).toBe(503);
+});
+
+test("Mateo 16/11: el QR impreso con un slug viejo redirige 308 a la dirección actual, con la misma ruta y los mismos parámetros", async () => {
+  const actual = nuevo(null);
+  const viejo = `viejo-${actual}`;
+  anteriores[viejo] = actual;
+  for (const r of RUTAS) {
+    const res = await abrir(PLATAFORMA, `/g/${viejo}${r}?o=qr`);
+    expect(res.status, `/g/<viejo>${r}`).toBe(308);
+    expect(res.headers.get("location"), `/g/<viejo>${r}`).toBe(`https://${PLATAFORMA}/g/${actual}${r}?o=qr`);
+  }
+  // Un slug que nunca existió sigue dando "no encontrado", y el actual sigue andando sin redirigir.
+  expect((await abrir(PLATAFORMA, "/g/nadie-lo-uso/hacete-socio")).status).toBe(404);
+  expect((await abrir(PLATAFORMA, `/g/${actual}/hacete-socio`)).status).toBe(200);
+});
+
+test("Mateo 16/11: aunque el gimnasio tenga cargada una dirección de un dominio viejo, nunca se redirige ahí: /g/<slug> sigue siendo la dirección buena", async () => {
+  vi.stubEnv("NEXT_PUBLIC_DOMINIOS_VIEJOS", PLATAFORMA);
+  const slug = nuevo(`${"templegym1"}.${PLATAFORMA}`, { base: "pasegym.com", plataforma: "pasegym.com" });
+  const res = await abrir("pasegym.com", `/g/${slug}/hacete-socio`);
+  expect(res.headers.get("location")).toBeNull();
+  expect(res.status).toBe(200);
 });

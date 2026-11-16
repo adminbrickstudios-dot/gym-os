@@ -45,6 +45,11 @@ test("la dirección /g/<slug> manda a la propia solo si esa anda", () => {
   const real = { base: "base.ar", plataforma: "app.base.ar" };
   expect(direccionPropia("templegym1.base.ar", real)).toBe("templegym1.base.ar");
   expect(direccionPropia("app.base.ar", real)).toBeNull();
+  // Mateo 16/11: una dirección bajo un dominio viejo nunca es destino (templegym1.gym-os-pied.vercel.app no tiene certificado).
+  const nuevoDominio = { base: "pasegym.com", plataforma: "pasegym.com", viejos: ["gym-os-pied.vercel.app"] };
+  expect(direccionPropia("templegym1.gym-os-pied.vercel.app", nuevoDominio)).toBeNull();
+  expect(direccionPropia("gym-os-pied.vercel.app", nuevoDominio)).toBeNull();
+  expect(direccionPropia("templegymsalta.com", nuevoDominio)).toBe("templegymsalta.com");
   // En la compu: nunca.
   expect(direccionPropia("demo.localhost", { base: "localhost", plataforma: "localhost" })).toBeNull();
 });

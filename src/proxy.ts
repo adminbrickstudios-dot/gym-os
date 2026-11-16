@@ -11,6 +11,7 @@ import { dominiosViejos } from "@/lib/dominios";
 // RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
 type Resuelto = { gimnasio_id: string; slug: string; host?: string | null } | undefined;
 const gimnasios = memoriaCorta<Resuelto>(60_000);
+const slugsAnteriores = memoriaCorta<string | null>(60_000);
 
 // Encabezados que solo pone este middleware. Si vienen del navegador se
 // borran: nadie puede elegir su gimnasio mandando un header.
@@ -118,6 +119,21 @@ async function proxyInterno(req: NextRequest) {
       cabeceras.set("x-gimnasio-slug", g.slug);
       cabeceras.set("x-gimnasio-host", g.host ?? host);
     };
+    // Si la función todavía no existe en la base (publicación a medias) o falla, es como si no hubiera slug anterior: sigue dando "no encontrado".
+    const slugActualDe = (slug: string) =>
+      slugsAnteriores.obtener(slug, async () => {
+        try {
+          const r = await fetch(`${supabaseUrl}/rest/v1/rpc/slug_actual_de`, {
+            method: "POST",
+            headers: { apikey: anon, Authorization: `Bearer ${anon}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ p_slug: slug }),
+            cache: "no-store",
+          });
+          if (!r.ok) return null;
+          const v = await r.json();
+          return typeof v === "string" ? v : null;
+        } catch { return null; }
+      });
     const porSlug = async (slug: string) => (await resolver("gimnasio_por_slug", { p_slug: slug })) as Elegido | undefined;
 
     // /g/<slug>: la página de un gimnasio que todavía no tiene dirección
@@ -131,6 +147,9 @@ async function proxyInterno(req: NextRequest) {
         return new NextResponse(`No se pudo resolver el gimnasio ${g.slug}: ${(e as Error).message}`, { status: 503 });
       }
       if (!elegido) {
+        // Un slug que el gimnasio dejó (cambió de dirección): el QR impreso sigue andando, con 308 a la dirección actual y la misma ruta.
+        const actual = await slugActualDe(g.slug);
+        if (actual && actual !== g.slug) return NextResponse.redirect(urlDeHost(plataforma, rutaGimnasio(actual) + (g.resto ?? "") + req.nextUrl.search), 308);
         const destino = req.nextUrl.clone();
         destino.pathname = "/gimnasio-no-encontrado";
         destino.search = `?host=${encodeURIComponent(`${host}${rutaGimnasio(g.slug)}`)}`;
