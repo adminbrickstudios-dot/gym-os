@@ -1,6 +1,6 @@
 // H3: qué hace el proxy con un pedido a la dirección de la plataforma (sin subdominio).
 // Función pura, sin red ni cookies: se prueba con vitest (proxy-rutas.test.ts). El proxy resuelve el gimnasio y aplica lo que acá se decide.
-import { subdominiosFuncionan } from "@/lib/dominios";
+import { dominiosViejos, subdominiosFuncionan } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
 
 /** Rutas públicas de un gimnasio que se quedan en la dirección /g/<slug>/…: se sirven con el gimnasio marcado, sin rebotar a la raíz de la plataforma. */
@@ -37,9 +37,12 @@ export function accionDeGimnasio(resto: string | null): AccionGimnasio {
  * ¿La dirección /g/<slug> tiene que mandar a la dirección propia del gimnasio? Solo si esa dirección anda: un dominio propio, o un
  * subdominio cuando el dominio base tiene comodín. Si no (hoy: *.vercel.app), /g/<slug>/… es la dirección buena y SIEMPRE anda.
  */
-export function direccionPropia(host: string | null | undefined, opc: { base: string; plataforma: string }): string | null {
+export function direccionPropia(host: string | null | undefined, opc: { base: string; plataforma: string; viejos?: string[] }): string | null {
   const h = normalizarHost(host);
   if (!h || h === normalizarHost(opc.plataforma) || h === normalizarHost(opc.base)) return null;
+  // Nunca se redirige a una dirección armada con un dominio viejo (NEXT_PUBLIC_DOMINIOS_VIEJOS): ya no anda; /g/<slug> sigue siendo la dirección buena.
+  const viejos = opc.viejos ?? dominiosViejos();
+  if (viejos.some((v) => h === v || h.endsWith(`.${v}`))) return null;
   const base = normalizarHost(opc.base);
   const esSubdominio = !!base && h.endsWith(`.${base}`);
   // En la compu (localhost) los subdominios existen pero con otro puerto: ahí /g/<slug> sigue siendo la dirección.

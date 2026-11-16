@@ -218,7 +218,7 @@ de Gym OS; todavía no es cliente de ningún gimnasio),
 persona, no de un gimnasio: quien trabaja en dos no ve dos veces el mismo globo).
 
 **Excepciones a "unique por gimnasio"** (lista cerrada):
-`gimnasios.slug`, `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,
+`gimnasios.slug`, `slugs_anteriores.slug` (un QR impreso no cae en otro gimnasio), `dominios_gimnasio.host`, `dispositivos_tokens.token_hash`,
 `mp_cuentas_gimnasio.mp_user_id`,
 `eventos_webhook (origen, tipo, id_externo)`,
 `plataforma_pagos.mp_pago_id`.

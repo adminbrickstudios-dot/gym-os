@@ -38,7 +38,7 @@ export function CambiarSlug({ gimnasioId, slug }: { gimnasioId: string; slug: st
     <div className="space-y-2" data-cambiar-slug>
       <label className="space-y-1 block"><span className="etiqueta">Slug (identificador en los links)</span>
         <input className="campo" value={valor} maxLength={40} onChange={(e) => setValor(e.target.value.toLowerCase())} /></label>
-      <p className="texto-suave text-sm">Si lo cambiás, cambian los links que ya le pasaste al gimnasio (el de la página y el de los QR impresos).</p>
+      <p className="texto-suave text-sm">Si lo cambiás, el QR viejo va a seguir andando: la dirección anterior redirige siempre a la nueva, con la misma ruta. Los links nuevos que compartas usan el slug nuevo.</p>
       <BotonAccion className="boton" disabled={valor === slug || valor.length < 2} onClick={async () => {
         const r = await cambiarSlug(gimnasioId, valor);
         if (r.error) { setError(r.error); return; }
