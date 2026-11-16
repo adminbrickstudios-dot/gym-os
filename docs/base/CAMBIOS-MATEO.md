@@ -21,6 +21,12 @@ super admin en la plataforma (Contacto): sin número, el botón de WhatsApp no a
 
 ---
 
+- 2026-11-16 · Mateo · **Reglamento para aceptar, simple.** Ya existe (`reglamentos` por versión, `aceptaciones_reglamento`, se escribe en Página → "Hacerse socio desde la página"). Con D83:
+  - El reglamento se acepta también al **crear la cuenta**, con una casilla "Leí y acepto el reglamento" y el texto completo a un toque, no solo en el alta online.
+  - Si el dueño publica una **versión nueva**, el socio la acepta al abrir su app la próxima vez: una sola pantalla, con un botón "Acepto". Hasta que acepte, ve la app igual: la puerta no cambia por esto.
+  - La ficha del socio en recepción dice "Aceptó el reglamento (versión N) el DD/MM".
+  - Se puede escribir y editar desde Configuración → Página sin tener las altas online prendidas.
+  Mateo carga el texto de Temple Gym él mismo; el agente no lo escribe en Temple Gym · ⏳
 - 2026-11-16 · Mateo · **Cacería: lo que llama a la base de más y lo que está roto** (va después de D83 y los dos arreglos de direcciones) · ⏳
   1. **La app del socio, Inicio (`/app`): 22 pedidos a la base** por cada apertura (`scripts/medir/topes-viajes.json`). Es la pantalla que más se abre (cada socio, cada día). Meta: 2, con una sola función de lectura como `contexto_pantalla`. Después `/app/clases` (8).
   2. **El mostrador a la hora pico:** Caja (8 a 9), Entrada (7), Prospectos (9), Inicio del panel (6), Configuración (6), Mensajes (6), Vender (5). Meta: 3 como máximo en cada una, empezando por Entrada y Caja. El tope de `topes-viajes.json` se baja con cada mejora y no vuelve a subir.
