@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in https://pasegym.com https://pasegym.com/ingresar https://www.pasegym.com https://templegymsalta.com https://www.templegymsalta.com https://templegymsalta.com/hacete-socio https://templegym1.pasegym.com https://gym-os-pied.vercel.app/g/templegym1/hacete-socio?o=qr https://gym-os-pied.vercel.app/ingresar https://mi-gym-brik.vercel.app/g/templegym1; do
+          for u in https://pasegym.com https://pasegym.com/ingresar https://www.pasegym.com https://templegymsalta.com https://www.templegymsalta.com https://templegymsalta.com/hacete-socio https://templegym1.pasegym.com https://gym-os-pied.vercel.app/g/templegym1/hacete-socio?o=qr https://gym-os-pied.vercel.app/ingresar https://mi-gym-brik.vercel.app/g/templegym1 https://pasegym.com/g/templegym1/hacete-socio https://pasegym.com/g/demo https://demo.pasegym.com; do
             echo "=== $u"
             curl -s -L -m 20 -o /tmp/p.html -w "final=%{url_effective} code=%{http_code} saltos=%{num_redirects}\n" "$u" || echo "curl fallo"
             curl -s -I -m 20 "$u" | grep -iE "^(HTTP|location)" || true
