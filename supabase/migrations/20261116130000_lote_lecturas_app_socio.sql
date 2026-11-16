@@ -1,5 +1,5 @@
--- Cacería (Mateo, 16/11) · La app del socio (Inicio) hacía 22 pedidos a la base por cada apertura. lote_lecturas ya junta lecturas del panel en UN viaje;
--- acá solo se suman nombres a su lista cerrada: las lecturas del Inicio del socio. Misma función, misma seguridad: lote_lecturas corre con los permisos de quien
+-- Cacería (Mateo, 16/11) · La app del socio (Inicio) hacía 22 pedidos a la base por cada apertura, y Caja y Mensajes del panel 6 a 9. lote_lecturas ya junta lecturas del panel en UN viaje;
+-- acá solo se suman nombres a su lista cerrada: las lecturas del Inicio del socio, de Caja (cajas_sede) y de Mensajes (bandeja, respuestas rápidas y permisos). Misma función, misma seguridad: lote_lecturas corre con los permisos de quien
 -- pregunta y cada lectura verifica por su cuenta que la ficha sea del propio socio (permiso denegado = error, nunca una lista vacía).
 -- Compatible: el código anterior no usa estos nombres; si el código nuevo corriera contra una base sin esta migración, rpcLote cae a pedir cada una por separado.
 do $g$ begin
@@ -7,7 +7,7 @@ do $g$ begin
 end $g$;
 
 do $lote$
-declare def text; nuevos text := '''mi_qr'',''usa_qr_pared'',''mis_invitados'',''campana_socio'',''pago_online_disponible'',''progreso_inicio'',''novedades_socio'',''mi_link_referido'',''rutina_de_socio'',''documentos_socio'',''eventos_socio'',''encuesta_socio'',''grados_socio'',''mi_dni'',''registra_salida''';
+declare def text; nuevos text := '''mi_qr'',''usa_qr_pared'',''mis_invitados'',''campana_socio'',''pago_online_disponible'',''progreso_inicio'',''novedades_socio'',''mi_link_referido'',''rutina_de_socio'',''documentos_socio'',''eventos_socio'',''encuesta_socio'',''grados_socio'',''mi_dni'',''registra_salida'',''cajas_sede'',''bandeja_mensajes'',''respuestas_rapidas'',''permisos_mensajes''';
 begin
   def := pg_get_functiondef('public.lote_lecturas(jsonb)'::regprocedure);
   if position('''progreso_inicio''' in def) = 0 then
