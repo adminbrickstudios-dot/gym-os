@@ -32,8 +32,8 @@ async function como(usuario, fn) {
 
 const anon = async (fn) => { await t.q(`set local role anon`); const r = await fn(); await t.q(`reset role`); return r; };
 const DATOS = { nombre: "Cora", apellido: "Cuenta", dni: "31222333", telefono: "387 555 3131", email: "cora@ejemplo.invalid", fecha_nacimiento: "1992-03-04" };
-const alta = (datos, planId = null, medio = null) =>
-  t.q(`select public.alta_online($1, $2, $3, 0, $4) as r`, [HOST, planId, datos, medio]).then((x) => x[0].r);
+const alta = (datos, planId = null, medio = null, version = 0) =>
+  t.q(`select public.alta_online($1, $2, $3, $5, $4) as r`, [HOST, planId, datos, medio, version]).then((x) => x[0].r);
 
 test("con las altas online apagadas (como Temple Gym) la página ofrece crear la cuenta, sin plan", async () => {
   const [{ a }] = await anon(() => t.q(`select public.alta_publica($1) as a`, [HOST]));
@@ -94,4 +94,28 @@ test("la llave se lee en el mismo viaje que Tu página (lote_lecturas) y solo la
   });
   await como(u.recepcion, () => t.falla(() => t.q(`select public.lote_lecturas($1::jsonb) r`, [JSON.stringify([{ f: "crear_cuenta_panel", a: { p_gimnasio_id: t.g } }])]), /Sin permiso/));
   await como(u.duenoOtro, () => t.falla(() => t.q(`select public.lote_lecturas($1::jsonb) r`, [JSON.stringify([{ f: "crear_cuenta_panel", a: { p_gimnasio_id: t.g } }])]), /Sin permiso/));
+});
+
+test("recepción: la primera vez se ofrece la clase de prueba; desde la segunda, dar el alta y cobrar con la fecha en que la usó (la puerta no cambia)", async () => {
+  await t.q(`update public.configuracion_gimnasio set altas_online = false, crear_cuenta_visible = true, prueba_gratis = 'dia' where gimnasio_id = $1`, [t.g]);
+  const r = await anon(() => alta({ ...DATOS, dni: "31222666", telefono: "387 555 6666", email: "prueba@ejemplo.invalid" }, null, null, 1));   // el reglamento v1 ya está cargado por el test anterior
+  const guia = () => como(u.recepcion, async () => (await t.q(`select public.guia_entrada($1, $2) g`, [r.socio_id, t.sede]))[0].g);
+  const g1 = await guia();
+  assert.equal(g1.situacion, "sin_plan");
+  assert.equal(g1.prueba.disponible, true, "primera vez: la clase de prueba es lo que se ofrece");
+  assert.equal(g1.prueba.usada_en, null);
+  const acceso = async () => (await t.q(`select to_jsonb(privado.calcular_acceso($1, $2, $3)) e`, [r.socio_id, await t.en(HOY), t.sede]))[0].e;
+  const antes = await acceso();
+  await guia();   // pedir la guía no cambia nada
+  assert.deepEqual(await acceso(), antes, "ofrecer la prueba no mueve la puerta");
+  // Usó su prueba hace dos días (ya venció): la puerta (calcular_acceso) sigue diciendo lo mismo que antes de ofrecer nada.
+  await t.q(`insert into public.pruebas_gratis (gimnasio_id, dni, nombre, modo, sede_id, desde, hasta, origen, socio_id, dada_por) values ($1, '31222666', 'Cora', 'dia', $2, now() - interval '3 days', now() - interval '2 days', 'entrada', $3, (select e.id from public.equipo e where e.gimnasio_id = $1 and e.usuario_id = $4))`, [t.g, t.sede, r.socio_id, u.recepcion]);
+  const g2 = await guia();
+  assert.equal(g2.situacion, "prueba_usada");
+  assert.equal(g2.prueba.disponible, false, "segunda vez: ya no se ofrece");
+  assert.match(g2.prueba.usada_en, /^\d{2}\/\d{2}$/, "dice cuándo la usó");
+  assert.equal((await acceso()).puede, false, "sin pagar y con la prueba usada, la puerta no lo deja pasar (lo decide calcular_acceso)");
+  // Permisos en negativo: quien no es de la recepción de este gimnasio no ve la guía (error, no vacío).
+  await como(u.duenoOtro, () => t.falla(() => t.q(`select public.guia_entrada($1, $2)`, [r.socio_id, t.sede]), /Sin permiso/));
+  await t.falla(() => anon(() => t.q(`select public.guia_entrada($1, $2)`, [r.socio_id, t.sede])), /permission denied/);
 });

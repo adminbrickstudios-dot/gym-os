@@ -17,6 +17,8 @@ export type Guia = {
   chips: { clave: string; emoji: string; texto: string; href?: string }[];
   /** VD-46M: la puerta está en emergencia y a este socio se lo anota igual (queda marcado). */
   emergencia?: boolean;
+  /** D83: solo para quien no tiene plan y el gimnasio da prueba: si puede usar su clase de prueba, o cuándo la usó (DD/MM). Sin la clave (base vieja), se ofrece como antes. */
+  prueba?: { disponible: boolean; usada_en: string | null };
 };
 /** VD-3: si es un repetido, `texto` dice a qué hora entró; con `alerta_prestamo` llegó por otra vía hace pocos minutos (amarillo). */
 export type ResultadoIngreso = {

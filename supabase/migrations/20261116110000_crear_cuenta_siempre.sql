@@ -193,6 +193,38 @@ end $$;
 revoke execute on function public.landing_publica(text) from public;
 grant execute on function public.landing_publica(text) to anon, authenticated;
 
+-- ── La recepción: primera vez, "Clase de prueba"; después, "Dar el alta y cobrar" ──
+-- La guía de la puerta (guia_entrada) suma `prueba` solo para quien no tiene plan: `disponible` (nunca fue socio de pago y no usó su prueba: la misma
+-- regla que dar_prueba_gratis) y `usada_en` (DD/MM). Cambia solo qué botón se ofrece: la puerta sigue decidiendo con calcular_acceso. Mismos permisos que antes.
+create or replace function public.guia_entrada(p_socio_id uuid, p_sede_id uuid default null) returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  g uuid; r jsonb; so public.socios; modo text; zona text; pr public.pruebas_gratis; usada boolean; nunca boolean;
+begin
+  select gimnasio_id into g from public.socios where id = p_socio_id;
+  if g is null or not (privado.es_servicio() or g in (select privado.mis_gimnasios(array['dueno', 'encargado', 'recepcion']))) then
+    raise exception 'Sin permiso o socio inexistente' using errcode = '42501';
+  end if;
+  r := privado.guia_entrada(p_socio_id, now(), p_sede_id);
+  if r is null or (r ->> 'situacion') not in ('sin_plan', 'prueba_usada') then return r; end if;
+  select c.prueba_gratis into modo from public.configuracion_gimnasio c where c.gimnasio_id = g;
+  if coalesce(modo, 'no') = 'no' then return r; end if;
+  select * into so from public.socios s where s.id = p_socio_id;
+  select gi.zona_horaria into zona from public.gimnasios gi where gi.id = g;
+  select x.* into pr from public.pruebas_gratis x where x.gimnasio_id = g and x.dni = so.dni and x.anulada_en is null order by x.creado_en desc limit 1;
+  usada := pr.id is not null and (pr.socio_id is not null or pr.hasta <= now() or pr.origen <> 'pagina');
+  nunca := so.dni is not null and so.dado_de_baja_en is null
+    and not exists (select 1 from public.suscripciones x where x.socio_id = so.id)
+    and not exists (select 1 from public.packs x where x.socio_id = so.id)
+    and not exists (select 1 from public.pases_diarios x where x.socio_id = so.id)
+    and not exists (select 1 from public.ventas x where x.socio_id = so.id);
+  return r || jsonb_build_object('prueba', jsonb_build_object(
+    'disponible', nunca and not usada,
+    'usada_en', case when usada then privado.fecha_corta(pr.hasta - interval '1 minute', zona) end));
+end $$;
+revoke all on function public.guia_entrada(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.guia_entrada(uuid, uuid) to authenticated, service_role;
+
 -- ── La llave se lee en el mismo viaje que el resto de Tu página (lote_lecturas): solo se suma un nombre a su lista cerrada ──
 do $lote$
 declare def text;

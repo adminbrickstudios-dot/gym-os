@@ -32,6 +32,11 @@ export default function PasoVeredicto({ elegido, v, guia, apto, firmar, eventosH
   // VD-2: el botón principal (y el segundo) lo dice la base según la situación; acá solo se dibujan.
   const bloqueadoParaRecepcion = !!v && !v.puede && esRecepcion && (!!guia?.solo_encargado || v.motivo === "suspendido" || v.motivo === "se_fue");
   const principal = guia?.boton ?? (v?.puede ? "anotar" : "cobrar");
+  // D83: socio con cuenta y sin plan. La primera vez, "Clase de prueba" es el botón principal y "Dar el alta y cobrar" el segundo; desde la segunda,
+  // "Dar el alta y cobrar" es el principal y se dice cuándo usó la prueba. Solo cambia qué botón se ofrece: la puerta la decide la base.
+  const sinPlan = guia?.situacion === "sin_plan" || guia?.situacion === "prueba_usada";
+  const pruebaPrimero = !!(sinPlan && guia?.prueba?.disponible && pruebaModo && pruebaModo !== "no");
+  const pruebaYaUsada = sinPlan ? guia?.prueba?.usada_en ?? null : null;
   const segundo = guia?.segundo ?? null;
   const avisosSueltos = (v?.avisos ?? []).filter((a) => !guia || !(a === "Cumple años hoy" || /^Debe .+ a cuenta$/.test(a)));
   const boton = (clave: string, esPrincipal: boolean) => {
@@ -45,7 +50,7 @@ export default function PasoVeredicto({ elegido, v, guia, apto, firmar, eventosH
       case "cobrar":
       case "cobrar_pack":
         return <Link key={clave} ref={cobrarRef} href={`/panel/vender?socio=${elegido.socio_id}${v.para_regularizar ? "&cuota=1" : ""}&desde=entrada`} className={clase} data-ventana-cobrar
-          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "Cobrar un pack" : "Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
+          onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}>{guia?.boton_texto && clave === principal ? guia.boton_texto : clave === "cobrar_pack" ? "Cobrar un pack" : sinPlan ? "Dar el alta y cobrar" : "Cobrar"} <kbd className="text-xs opacity-70 font-sans">C</kbd></Link>;
       case "dejar_pasar":
         if (v.puede || forzando) return null;
         return bloqueadoParaRecepcion ? null : <button key={clave} type="button" onClick={dejar} className={clase} data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>;
@@ -91,20 +96,24 @@ export default function PasoVeredicto({ elegido, v, guia, apto, firmar, eventosH
           ) : null}
           <EventosHoyEntrada key={elegido.socio_id} socioId={elegido.socio_id} eventos={eventosHoy} />
           {v.para_regularizar ? <p className="texto-suave">Para ponerse al día: <strong className="text-[var(--texto)]">{formatearPesos(v.para_regularizar)}</strong></p> : null}
+          {pruebaYaUsada && <p className="texto-suave text-lg" data-prueba-usada>Ya usó su clase de prueba el {pruebaYaUsada}.</p>}
           {error && <Mensaje tipo="error">{error}</Mensaje>}
           {cobrado && (
             <Mensaje tipo="exito"><span data-ventana-cobrado={cobrado.total}>Cobrado {formatearPesos(cobrado.total)}.</span> <ComprobanteCobro ventaId={cobrado.ventaId} className="mt-2" /></Mensaje>
           )}
 
           <div className="flex flex-wrap gap-2">
-            {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0))}
+            {pruebaPrimero && (
+              <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton boton-principal text-lg px-8" data-ventana-prueba data-prueba-principal><Icono nombre="regalo" /> Clase de prueba</button>
+            )}
+            {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0 && !pruebaPrimero))}
             {!v.puede && !forzando && principal !== "dejar_pasar" && !bloqueadoParaRecepcion && (
               <button type="button" onClick={dejar} className="boton" data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
             )}
             {!v.puede && bloqueadoParaRecepcion && <p className="basis-full texto-suave"><Icono nombre="candado" /> A este socio lo deja pasar el dueño o el encargado.</p>}
             <Link ref={fichaRef} href={`/panel/socios/${elegido.socio_id}?desde=entrada`} className="boton" data-ventana-ficha
               onClick={() => { try { sessionStorage.setItem(CLAVE_FICHA, JSON.stringify({ socio: elegido, ts: Date.now() })); } catch { /* sin almacenamiento */ } }}><Icono nombre="persona" /> Ficha <kbd className="text-xs opacity-70 font-sans">F</kbd></Link>
-            {pruebaModo && pruebaModo !== "no" && v.motivo === "sin_plan" && (
+            {pruebaModo && pruebaModo !== "no" && v.motivo === "sin_plan" && !pruebaPrimero && !guia?.prueba && (
               <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton" data-ventana-prueba><Icono nombre="regalo" /> Dar prueba gratis</button>
             )}
             {salidaModo && salidaModo !== "no" && (
