@@ -189,7 +189,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
             Pagando: su QR, reservar, sus pagos, su perfil y el gimnasio. El resto (rutina, eventos, invitar…) sigue más abajo. */}
         <nav className="grid grid-cols-2 gap-3" aria-label="Lo de todos los días" data-botones-inicio data-modo-botones={faltaPagar ? "sin-pagar" : "pagando"}>
           {botonesInicio.map((b) => (
-            <Link key={b.clave} href={b.href} {...(b.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})} data-boton-inicio={b.clave}
+            <Link key={b.clave} href={b.href} prefetch={false} {...(b.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})} data-boton-inicio={b.clave}
               className={`tarjeta p-5 grid gap-2 min-h-[96px] content-center text-center active:scale-[0.98] transition ${b.principal ? "border-2" : ""}`} style={b.principal ? { borderColor: "var(--acento)" } : undefined}>
               <span className="text-3xl" aria-hidden><Icono nombre={b.icono} /></span><span className="titulo text-xl">{b.titulo}</span>
             </Link>
