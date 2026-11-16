@@ -15,8 +15,11 @@ export function useEmergencia(sedeId: string, activo = true, inicial: Emergencia
     let vivo = true;
     const leer = () => void estadoEmergencia(sedeId).then((r) => { if (vivo && !r.error) setE(r.e?.activa ?? null); });
     leer();
-    const i = setInterval(leer, 30000);
-    return () => { vivo = false; clearInterval(i); };
+    // Cacería (16/11): con la pestaña escondida no se pregunta; al volver se lee de nuevo.
+    const siVisible = () => { if (document.visibilityState === "visible") leer(); };
+    const i = setInterval(siVisible, 30000);
+    document.addEventListener("visibilitychange", siVisible);
+    return () => { vivo = false; clearInterval(i); document.removeEventListener("visibilitychange", siVisible); };
   }, [sedeId, activo]);
   return e;
 }
