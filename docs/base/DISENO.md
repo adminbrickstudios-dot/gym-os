@@ -26,6 +26,26 @@ los cuatro colores del semáforo siempre iguales.
 - Botones más lindos, algún que otro emoji, más organizado visualmente.
 - La página de cada gimnasio también se rediseña: diseño, dibujos, estilo y botones.
 
+**Decidido por Mateo (16/11, segunda tanda):**
+- **Claro y oscuro:** el mismo diseño Pista en las dos versiones, oscuro por defecto. Cada gimnasio (y cada compu) elige.
+  Reemplaza a "claro por defecto" de más abajo cuando Pista se apruebe.
+- **Colores del gimnasio:** su color principal (de una paleta probada, o uno propio que el sistema corrige si no se lee o si se
+  parece al semáforo) y claro u oscuro. Nada más: la paleta completa no se abre.
+- **Emojis en pocos lugares:** en los accesos rápidos, los avisos y las pantallas vacías. El menú y los botones de acción
+  siguen con íconos de línea (D38). Mateo sabe que en Windows los emojis se ven distintos.
+- **Página del gimnasio:** dibujos propios de Pase (pesas, bici, gente entrenando) en el color del gimnasio, más sus fotos cuando
+  las sube. Nunca queda vacía.
+
+**Para no olvidar en el rediseño (recomendado por Claude, 16/11):**
+- Todo lo que ve el socio, no solo el panel: la tablet, la TV, la app, el cartel del QR, los recibos, la imagen al compartir
+  el link, el ícono de la app.
+- Las pantallas que nadie diseña: cargando, vacía, error y sin internet.
+- El panel del dueño en el celular.
+- Un Inicio por rol (recepción, dueño, profe), con lo suyo arriba.
+- Entrada y Cobrar siempre en el mismo lugar, y "Novedades" para avisarle al equipo de Benja qué cambió.
+- El semáforo no lo cambia nadie.
+- El logo de Pase.
+
 **Cómo se programa, cuando se apruebe (para que no se rompa ni se pierda nada):**
 1. **Inventario antes:** por cada pantalla, cada botón, sección, número y acción que tiene hoy (sale de `src/lib/panel/secciones.ts`,
    de cada `page.tsx` y de los `data-*` que usan los e2e). Una prueba nueva recorre el inventario en el estilo nuevo: si falta
