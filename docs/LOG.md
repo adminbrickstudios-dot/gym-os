@@ -1,3 +1,24 @@
+## 2026-11-16 · Pase 1.0 — pedidos de Mateo del 16/11 (PR #29 a #32) y cacería
+
+```
+QUÉ HICE                        por punto, y cómo lo verifiqué
+LO QUE ENCONTRÉ SIN PEDIRTELO   lo que apareció solo
+QUÉ CORRÉS VOS                  comandos exactos, en orden
+QUÉ CONFIGURÁS VOS              variables, paneles, DNS
+SIN ARREGLAR                    lo que quedó, y por qué
+LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
+```
+
+**QUÉ HICE** (publicado, con prevuelo, migraciones SIN COPIA autorizadas y humo en producción; Temple Gym solo mirado). #29: React 441 en `/hacete-socio` blindado (reintento y mensaje en pantalla, e2e `hacete-socio-sesion`). #30: slugs anteriores (migración `20261116100000`, probada con `slugs-anteriores.test.mjs` y en producción con el QR de Temple) y nunca redirigir al dominio viejo. #31: el camino del socio (D83; migración `20261116110000`; `camino-socio.mjs` 32 pasos con la app compilada; `crear-cuenta-siempre.test.mjs`). #32: reglamento nuevo (migración `20261116120000`). Sin publicar: cacería (Inicio del socio 22 → 9 pedidos, Caja y Mensajes en un viaje, emergencia sin preguntar escondida, `relojes.mjs`, `ent-6` arreglado), migración `20261116130000`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** El redirect de `/g/<slug>` a un subdominio sin certificado venía de la configuración de dominios de Vercel (no del código: los archivos no cambiaron) y se cerró con el pedido de "nunca redirigir al dominio viejo". La prueba de la base "cancelar la clase" dependía de la fecha real (falló desde el 16/11 porque la clase del 15/11 ya había empezado): ahora no depende. El tope de viajes de `/app/clases` (8) estaba medido un domingo sin clases: `main` sin cambios da 10 un día con clases (D89). `ent-6` fallaba por la prueba (el cartel de la tablet dura 4 s), no por la app.
+
+**QUÉ CORRÉS VOS** Probá en tu celular `templegymsalta.com` → "Crear mi cuenta" → tu app; cargá el reglamento, el nombre y el WhatsApp de Temple Gym. Si "React #441" vuelve: ventana privada y el "Código del error".
+
+**SIN ARREGLAR** La causa exacta del React 441 (no se reprodujo). Llegar a 2 pedidos en el Inicio del socio y a 3 en el resto del mostrador; juntar los relojes en Realtime; la revisión de cada pantalla de `/app` contra FLUIDEZ.
+
+**LO QUE NO PUDE VERIFICAR** La tabla de errores de producción (H6) y las pantallas lentas en producción (sin acceso: ⛔ Mateo). El camino del socio se probó de punta a punta en el gimnasio demo local y en Actions, y la portada y el formulario de Temple Gym solo con `curl`: no creé ninguna cuenta en producción.
+
 ## 2026-11-16 · Pase 1.0 — segunda publicación (PR #28, commit dd8cdb73)
 
 Publicado a las 10:00 (hora de Argentina), sin migraciones (prevuelo: nada pendiente, corrida 43871472293). Deploy en verde, `/api/salud` y `/ingresar` en 200 con título Pase, `humo-pasado` en verde (43872106054). Para volver atrás: revertir el merge (main antes: `325b1e89`). Temple Gym solo mirado.

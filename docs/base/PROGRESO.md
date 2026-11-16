@@ -1,5 +1,41 @@
 # PROGRESO de Pase (antes Base)
 
+## DÓNDE QUEDÉ y RESUMEN PARA MATEO (16/11, tarde)
+
+**Publicado hoy (hora de Argentina, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, cada una con prevuelo y humo en producción; Temple Gym solo mirado):**
+- **PR #29 (10:40) · URGENTE React #441 en `/hacete-socio`:** no pude reproducirlo (ni sin sesión, ni con la dueña o un socio, ni desde la portada: `hacete-socio-sesion.mjs`) y no tengo acceso a los logs de Vercel de este proyecto. Se blindó lo único que en el servidor puede fallar ahí (la lectura del alta): reintenta una vez y, si la base no responde, la página lo dice con "Probar de nuevo"; el error genérico ahora muestra su "Código del error".
+- **PR #30 (11:00) · el QR impreso nunca se rompe:** los slugs anteriores de cada gimnasio se guardan (tabla `slugs_anteriores`, migración `20261116100000`) y `/g/<slug viejo>/…` redirige 308 a la dirección actual; `templegym1` quedó como anterior de `templegymsalta`. Y ninguna redirección va a una dirección del dominio viejo. Probado en producción: `pasegym.com/g/templegym1/hacete-socio?o=qr` y la dirección vieja de Vercel terminan en `templegymsalta.com/hacete-socio?o=qr` con el formulario.
+- **PR #31 (14:40) · el camino del socio (D83, los 7 puntos):** "Crear mi cuenta" siempre en la portada (llave del dueño en Tu página), cuenta sin plan, memoria (con la sesión abierta la dirección del gimnasio va a su app), la recepción ofrece "Clase de prueba" la primera vez y "Dar el alta y cobrar" desde la segunda, y la app del socio con 6 botones grandes. Migración `20261116110000`. Lo prueba `camino-socio.mjs` (32 pasos, con la app compilada).
+- **PR #32 (15:10) · reglamento nuevo:** el socio que ya aceptó una versión ve una tarjeta con el texto y "Acepto" al abrir su app (la puerta no cambia). Migración `20261116120000`. Para volver atrás: revertir el merge del PR que corresponda (main antes de cada uno: `dd8cdb73`, `06e0848f`, `8e4e251c`, `d26ce5bc`).
+
+**Sin publicar (rama `base/2026-11-07`, se publica a partir de las 22:00 con prevuelo; migración `20261116130000`, aditiva):**
+- **Cacería de pedidos de más:** el Inicio de la app del socio pasó de 22 a 9 pedidos a la base (tope nuevo 9, medido en Actions con la app compilada); Caja y Mensajes del panel piden sus lecturas en un solo viaje; el cartel de emergencia no pregunta con la pestaña escondida (medido: 0 pedidos escondida, 17 a la vista contra la base local; con Realtime en producción son unos 4 por minuto).
+- **`ent-6` (la tablet) era la prueba, no la app:** el cartel "¡Pasá, …!" dura 4 segundos y la prueba lo esperaba después de sacar una captura. Arreglada (3 corridas en verde) y de vuelta en la cadena e2e.
+- **Barrido de consola (cada rol en cada pantalla, compu y celular):** limpio, sin errores (corrida 43923691877).
+
+**Lo que pidió Mateo (16/11) → estado** (🟢 publicado · 🟡 sin publicar · 🔴 falta · ⛔ depende de Mateo · ➡️ Pase 2.0)
+
+| Lo que pidió | Estado | Detalle |
+|---|---|---|
+| URGENTE: React #441 en `/hacete-socio` | 🟢 | Blindado y publicado; causa no reproducida. ⛔ si te vuelve a salir: ventana privada y pasame el "Código del error" |
+| Cambiar el slug no rompe un QR impreso | 🟢 | PR #30, probado en producción |
+| Nunca redirigir a una dirección del dominio viejo | 🟢 | PR #30 (anotarlo en Estado de la plataforma ➡️) |
+| Camino del socio, 7 puntos (D83) | 🟢 | PR #31. La revisión de cada pantalla de la app contra las 21 reglas de FLUIDEZ ➡️ |
+| Reglamento: aceptar al crear la cuenta, versión nueva al abrir la app, ficha con la versión, editarlo sin altas | 🟢 | PR #32 (la ficha y la edición ya existían) |
+| Cacería 1: app del socio 22 → 2 pedidos | 🟡 | 22 → 9 sin publicar; llegar a 2 ➡️ (quedan el menú, el aviso de clave, la ocupación, las ofertas y los avisos, que van en componentes aparte) |
+| Cacería 2: mostrador a 3 pedidos | 🟡 | Caja y Mensajes en un viaje, sin publicar; Entrada, Prospectos, Inicio, Configuración y Vender 🔴 (siguiente vuelta) |
+| Cacería 3: los relojes en un solo canal | 🟡 | La emergencia ya no pregunta escondida y hay medición (`relojes.mjs`); juntar todo en Realtime ➡️ |
+| Cacería 4: lo roto que se ve | 🟡 | Barrido de consola 🟢 limpio. ⛔ la tabla de errores de producción: abrí `/admin` → Errores (o pasame el resultado de `select ruta, mensaje, count(*) from errores_app where creado_en > now() - interval '7 days' group by 1, 2 order by 3 desc`). ⛔ las pantallas lentas en producción: `medir-produccion.yml` necesita los secretos del paso 1 de abajo |
+| Cacería 5: `ent-6` | 🟡 | Era la prueba; arreglada y en verde, de vuelta en la cadena |
+
+**⛔ Lo que tenés que hacer vos, en orden (lo anterior sigue valiendo, ver abajo):**
+1. Probá en tu celular el camino completo de Temple Gym: `templegymsalta.com` → "Crear mi cuenta" → tu app. Cargá el texto del reglamento de Temple Gym (Tu página → "Hacerse socio desde la página"), el nombre "Temple Gym" y el WhatsApp.
+2. Si "React #441" te vuelve a salir: ventana privada y el "Código del error".
+3. Los pasos 1 a 6 de la lista del 15/11 (secretos de GitHub, mails de Supabase, dominios, planes Pro, tu pasada visual) siguen igual.
+
+---
+
+
 ## LISTO PARA TU PASADA · Pase 1.0 (15/11)
 
 Pase 1.0 es lo que un gimnasio necesita para usarlo todos los días: entrar, cobrar, dar de alta, la caja, la página del gimnasio, el socio con su cuenta y su QR, y el super admin. **Todo eso está hecho, probado y en el código.** Lo que no se hizo en 1.0 está en `PASE-1.0.md` → "Para Pase 2.0", ordenado por importancia, y lo que depende de vos está abajo con su paso exacto. La prueba que te toca es `PRUEBA-DUENO.md`.
