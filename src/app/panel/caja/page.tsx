@@ -5,7 +5,7 @@ import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc, rpcLectura } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, lectura, rpc, rpcLectura, rpcLote } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import type { Resumen } from "./acciones";
 import { ParaRevisar } from "./ParaRevisar";
@@ -28,12 +28,13 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     // VD-9 (D20): el dueño y el encargado, al mirar, registran las cajas que quedaron abiertas de otro día
     // (sin cron, al primer acceso). Va antes de leer las cajas para que no aparezcan abiertas y sin contar a la vez.
     const revisar = ve ? await rpc<ParaRevisarT[]>("cajas_para_revisar", { p_gimnasio_id: panel.gimnasio.id }) : [];
-    const [todas, olvidadas, config, mi] = await Promise.all([
-      rpcLectura<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
-      rpcLectura<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
-      rpcLectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }),
-    ]);
+    // Cacería (16/11): las cuatro lecturas de la pantalla en UN viaje (lote_lecturas).
+    const [todas, olvidadas, config, mi] = await rpcLote(
+      lectura<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
+      lectura<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
+      lectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }),
+    );
     const cajas = todas.filter((c) => c.activa);
     const sugerido = (id: string) => mi.libres.find((l) => l.caja_id === id)?.fondo_sugerido ?? 0;
     const resumenes = await Promise.all(cajas.map((c) => (c.turno_id && ve ? rpcLectura<Resumen>("resumen_caja", { p_turno_id: c.turno_id }) : Promise.resolve(null))));

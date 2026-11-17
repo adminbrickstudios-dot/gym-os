@@ -20,7 +20,7 @@ import { QrBloqueado } from "./QrBloqueado";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
-import { rpc } from "@/lib/panel/servidor";
+import { rpc, rpcLote, lectura } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
@@ -60,34 +60,26 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     // D83: quien creó su cuenta y todavía no tiene plan ("sin plan activo") también tiene que pagar para empezar a entrar.
     const faltaPagar = !v.puede && (v.para_regularizar != null || v.motivo === "sin_plan" || /sin pagar|venci|deb[eé]|deuda|pag[aá]/i.test(v.texto ?? ""));
     // El QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra).
-    const [qr, qrPared, invitados, campana, online, progreso, novedades, referido, rutina, documentos, eventos, encuesta, grados, dni] = await Promise.all([
-      rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
-      rpc<boolean>("usa_qr_pared", { p_gimnasio_id: g.id }).catch(() => false),
-      rpc<MisInvitados>("mis_invitados", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
-      // AVI-5: cuántas novedades sin ver (si falla, no se muestra un cero que no es).
-      rpc<{ sin_leer: number }>("campana_socio", { p_gimnasio_id: g.id, p_socio_id: s.socio_id }).catch(() => null),
-      // PAY-1: si el gimnasio conectó MercadoPago, cuánto sale pagar ahora.
-      rpc<{ disponible: boolean; monto?: number; descripcion?: string }>("pago_online_disponible", { p_socio_id: s.socio_id }).catch(() => null),
-      // APP-7: cuántas veces vino este mes y cuántas semanas seguidas.
-      // VD-23: la semana, la racha, la meta del mes, el hito y "entraste": todo lo calcula la base.
-      rpc<ProgresoSocio>("progreso_inicio", { p_socio_id: s.socio_id }).catch(() => null),
-      // APP-6: lo que publicó el gimnasio.
-      rpc<{ id: string; texto: string }[]>("novedades_socio", { p_socio_id: s.socio_id }).catch(() => []),
-      // REF-1: su link para invitar (null si la página no recibe pedidos).
-      rpc<LinkReferido | null>("mi_link_referido", { p_socio_id: s.socio_id }).catch(() => null),
-      // RUT-2: si el profe le asignó una rutina.
-      rpc<{ nombre: string } | null>("rutina_de_socio", { p_socio_id: s.socio_id }).catch(() => null),
-      // COM-6: lo que le falta firmar (reglamento, deslinde, autorización si es menor).
-      rpc<{ pendientes: Pendiente[]; reglamento_nuevo?: { version: number; texto: string } | null }>("documentos_socio", { p_socio_id: s.socio_id }),
-      // COM-8: los eventos que vienen (y si ya está anotado).
-      rpc<EventoApp[]>("eventos_socio", { p_socio_id: s.socio_id }),
-      // COM-10: la pregunta del 0 al 10 (después de 10 entradas o del primer mes; cada 90 días).
-      rpc<{ pendiente: boolean }>("encuesta_socio", { p_socio_id: s.socio_id }),
-      // COM-13: su grado (cinturón) en las actividades que los usan.
-      rpc<GradosSocio>("grados_socio", { p_socio_id: s.socio_id }),
-      // SOCIO-FLUJO §4: "Tu DNI para entrar" cuando el gimnasio no usa el QR (si la base no lo da, no se muestra).
-      rpc<string>("mi_dni", { p_socio_id: s.socio_id }).catch(() => null),
-    ]);
+    // Cacería (16/11): las 14 lecturas del Inicio en UN viaje (lote_lecturas, cada una con los permisos del propio socio). Las que antes tenían
+    // `.catch` van como tolerantes (si fallan, valen null y no se muestran); las demás, si fallan, rompen la pantalla como antes.
+    const pg = { p_gimnasio_id: g.id }, ps = { p_socio_id: s.socio_id };
+    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni] = await rpcLote(
+      lectura<{ codigo: string; vence_en: string } | null>("mi_qr", { ...pg, ...ps }, true),   // el QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra)
+      lectura<boolean | null>("usa_qr_pared", pg, true),
+      lectura<MisInvitados | null>("mis_invitados", { ...pg, ...ps }, true),
+      lectura<{ sin_leer: number } | null>("campana_socio", { ...pg, ...ps }, true),   // AVI-5: cuántas novedades sin ver (si falla, no se muestra un cero que no es)
+      lectura<{ disponible: boolean; monto?: number; descripcion?: string } | null>("pago_online_disponible", ps, true),   // PAY-1: si el gimnasio conectó MercadoPago
+      lectura<ProgresoSocio | null>("progreso_inicio", ps, true),   // VD-23: la semana, la racha, la meta del mes, el hito y "entraste": todo lo calcula la base
+      lectura<{ id: string; texto: string }[] | null>("novedades_socio", ps, true),   // APP-6: lo que publicó el gimnasio
+      lectura<LinkReferido | null>("mi_link_referido", ps, true),   // REF-1: su link para invitar (null si la página no recibe pedidos)
+      lectura<{ nombre: string } | null>("rutina_de_socio", ps, true),   // RUT-2: si el profe le asignó una rutina
+      lectura<{ pendientes: Pendiente[]; reglamento_nuevo?: { version: number; texto: string } | null }>("documentos_socio", ps),   // COM-6: lo que le falta firmar
+      lectura<EventoApp[]>("eventos_socio", ps),   // COM-8: los eventos que vienen (y si ya está anotado)
+      lectura<{ pendiente: boolean }>("encuesta_socio", ps),   // COM-10: la pregunta del 0 al 10
+      lectura<GradosSocio>("grados_socio", ps),   // COM-13: su grado (cinturón)
+      lectura<string | null>("mi_dni", ps, true),   // SOCIO-FLUJO §4: "Tu DNI para entrar" cuando el gimnasio no usa el QR
+    );
+    const qr = qr0 ?? null, qrPared = qrPared0 ?? false, novedades = novedades0 ?? [];
     // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
     const registraSalida = qrPared ? (await rpc<string>("registra_salida", { p_gimnasio_id: g.id }).catch(() => "no")) !== "no" : false;
     const q =yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";

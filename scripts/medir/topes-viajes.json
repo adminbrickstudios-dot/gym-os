@@ -1,13 +1,13 @@
 {
   "duena /panel": 6,
-  "duena /panel/caja": 9,
+  "duena /panel/caja": 8,
   "duena /panel/clases": 4,
   "duena /panel/configuracion": 6,
   "duena /panel/control": 4,
   "duena /panel/entrada": 7,
   "duena /panel/equipo": 4,
   "duena /panel/gastos": 4,
-  "duena /panel/mensajes": 6,
+  "duena /panel/mensajes": 4,
   "duena /panel/pagina": 4,
   "duena /panel/planes": 4,
   "duena /panel/profes": 4,
@@ -20,7 +20,7 @@
   "duena /panel/vencen-hoy": 4,
   "duena /panel/vender": 5,
   "recepcion /panel": 4,
-  "recepcion /panel/caja": 8,
+  "recepcion /panel/caja": 5,
   "recepcion /panel/clases": 4,
   "recepcion /panel/configuracion": 3,
   "recepcion /panel/control": 3,
@@ -39,6 +39,6 @@
   "recepcion /panel/transferencias": 4,
   "recepcion /panel/vencen-hoy": 4,
   "recepcion /panel/vender": 5,
-  "socio /app": 22,
+  "socio /app": 9,
   "socio /app/clases": 10
 }

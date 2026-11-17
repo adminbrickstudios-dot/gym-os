@@ -9,7 +9,7 @@ import { Vacio } from "@/components/ui/Vacio";
 import { estadoDe, motivoDe, type Bandeja, type HiloPanel, type RespuestaRapida } from "@/lib/mensajes";
 import { conFotos } from "@/lib/mensajes-servidor";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpc, rpcLote, type Lectura } from "@/lib/panel/servidor";
 import { PermisoRecepcion, Rapidas } from "./Ajustes";
 import { Respuesta } from "./Respuesta";
 import { Icono } from "@/components/ui/Icono";
@@ -35,13 +35,19 @@ export default async function Mensajes({ searchParams }: { searchParams: Promise
     const gestiona = panel.yo.rol === "dueno" || panel.yo.rol === "encargado";
 
     // La base exige el permiso en cada una: sin permiso, error (no una bandeja vacía).
-    const [paginas, rapidas, permisos, hilo] = await Promise.all([
-      Promise.all(Array.from({ length: mostrar / POR_PAGINA }, (_, i) =>
-        rpc<Bandeja>("bandeja_mensajes", { p_gimnasio_id: g, p_estado: filtro === "todos" ? null : filtro, p_limite: POR_PAGINA, p_desde: i * POR_PAGINA }))),
-      rpc<RespuestaRapida[]>("respuestas_rapidas", { p_gimnasio_id: g }),
-      gestiona ? rpc<{ recepcion_ve: boolean }>("permisos_mensajes", { p_gimnasio_id: g }) : Promise.resolve(null),
+    // Cacería (16/11): la bandeja (una o más páginas), las respuestas rápidas y los permisos en UN viaje (lote_lecturas); el hilo abierto, aparte.
+    const nPaginas = mostrar / POR_PAGINA;
+    const [leidas, hilo] = await Promise.all([
+      rpcLote(...[
+        ...Array.from({ length: nPaginas }, (_, i) => lectura<Bandeja>("bandeja_mensajes", { p_gimnasio_id: g, p_estado: filtro === "todos" ? null : filtro, p_limite: POR_PAGINA, p_desde: i * POR_PAGINA })),
+        lectura<RespuestaRapida[]>("respuestas_rapidas", { p_gimnasio_id: g }),
+        gestiona ? lectura<{ recepcion_ve: boolean }>("permisos_mensajes", { p_gimnasio_id: g }) : fijo<{ recepcion_ve: boolean } | null>(null),
+      ] as Lectura<unknown>[]) as Promise<unknown[]>,
       hiloId ? rpc<HiloPanel>("hilo_mensajes", { p_hilo_id: hiloId }) : Promise.resolve(null),
     ]);
+    const paginas = leidas.slice(0, nPaginas) as Bandeja[];
+    const rapidas = leidas[nPaginas] as RespuestaRapida[];
+    const permisos = leidas[nPaginas + 1] as { recepcion_ve: boolean } | null;
     const bandeja: Bandeja = { ...paginas[0], items: paginas.flatMap((p) => p.items) };
     const mensajes = hilo ? await conFotos(hilo.mensajes) : [];
     const zona = panel.gimnasio.zona_horaria;
