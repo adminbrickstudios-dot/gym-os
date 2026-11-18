@@ -143,7 +143,7 @@ function parar() {
   generacion++;
   pararReloj();
   if (canal) { void canal.unsubscribe(); canal = null; }
-  cursor = null; semilla = null; yaConecto = false; enVuelo = false; pendiente = false; vistos.clear();
+  cursor = null; yaConecto = false; enVuelo = false; pendiente = false; vistos.clear();
   poner("periodico");
   document.removeEventListener("visibilitychange", alVolver);
 }
@@ -155,6 +155,6 @@ export function escucharEntradas(gimnasioId: string, oyente: Oyente): () => void
   arrancar();
   return () => {
     oyentes.delete(oyente);
-    if (oyentes.size === 0) { parar(); gimnasio = null; }
+    if (oyentes.size === 0) { parar(); gimnasio = null; semilla = null; }
   };
 }
