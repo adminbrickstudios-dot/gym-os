@@ -21,6 +21,11 @@ super admin en la plataforma (Contacto): sin número, el botón de WhatsApp no a
 
 ---
 
+- 2026-11-18 · Mateo · **Cuando Pista ande, lo viejo se borra por completo y el sistema queda super liviano.** Va DESPUÉS de Pista, en una publicación aparte (expandir y contraer). Solo arranca cuando: (1) Mateo prendió Pista en Temple Gym, y (2) pasaron 7 días sin que Mateo o Benja reporten algo roto. Si no se cumple, queda ⏳ con la fecha en que se cumple · ⏳
+  1. Se borra el estilo clásico: sus tokens, clases, componentes, la llave `estilo` (todos quedan en Pista) y las fuentes que ya no se usan.
+  2. **Super liviano:** se borra el CSS, el JS, los componentes, los íconos y las imágenes que ninguna pantalla usa (con una herramienta que los encuentre, no a ojo), y las dependencias de `package.json` que nadie importa.
+  3. Se mide antes y después: el JS y el CSS por ruta, el peso de la primera carga y el Lighthouse. Los números van a `VELOCIDAD.md` y los topes de `npm run chequeos` bajan a lo nuevo.
+  4. Las 250 e2e, el inventario y el barrido siguen en verde. Una pantalla que pierde algo no se publica.
 - 2026-11-16 · Mateo · **Pase 2.0 · el estilo Pista** (va DESPUÉS de todos los demás ⏳ de esta lista). Spec en `DISENO.md` § Pase 2.0, con los tokens. **Las mismas páginas y las mismas funciones: cambia solo cómo se ve; nada se rompe; se prueba todo y se publica todo junto, una vez.** · ⏳
   1. **El inventario, antes de tocar nada:** por cada pantalla (panel de cada rol, app del socio, página del gimnasio, `hacete-socio`, ingresar, super admin, tablet, TV, cartel del QR, recibos, errores, cargando y vacías), cada botón, sección, número y acción que tiene hoy, con su `data-*`. Una prueba nueva (`inventario-pantallas`) lo recorre con el estilo viejo (en verde) y con Pista (también tiene que dar verde).
   2. **Capturas de antes** de cada pantalla, en compu y celular, claro y oscuro, guardadas como referencia.
