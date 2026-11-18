@@ -3592,3 +3592,5 @@ git log origin/main --oneline -3
 - La sintaxis de permisos de `.claude/settings*.json` está escrita
   según la documentación de Claude Code, pero no está ejecutada dentro
   de una sesión real de Claude Code.
+
+- 16/11 22:10 ART · Publicado el PR #33 (cacería: Inicio del socio 22→9, Caja y Mensajes en lote, emergencia sin preguntar escondida; migración 20261116130000). Deploy en verde, humo en pasegym.com y Temple (solo mirando) 200, humo-pasado en verde. Vuelta atrás: main 93206ce0.

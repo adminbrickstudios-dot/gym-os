@@ -22,11 +22,11 @@
 | Nunca redirigir a una dirección del dominio viejo | 🟢 | PR #30 (anotarlo en Estado de la plataforma ➡️) |
 | Camino del socio, 7 puntos (D83) | 🟢 | PR #31. La revisión de cada pantalla de la app contra las 21 reglas de FLUIDEZ ➡️ |
 | Reglamento: aceptar al crear la cuenta, versión nueva al abrir la app, ficha con la versión, editarlo sin altas | 🟢 | PR #32 (la ficha y la edición ya existían) |
-| Cacería 1: app del socio 22 → 2 pedidos | 🟡 | 22 → 9 sin publicar; llegar a 2 ➡️ (quedan el menú, el aviso de clave, la ocupación, las ofertas y los avisos, que van en componentes aparte) |
-| Cacería 2: mostrador a 3 pedidos | 🟡 | Caja y Mensajes en un viaje, sin publicar; Entrada, Prospectos, Inicio, Configuración y Vender 🔴 (siguiente vuelta) |
-| Cacería 3: los relojes en un solo canal | 🟡 | La emergencia ya no pregunta escondida y hay medición (`relojes.mjs`); juntar todo en Realtime ➡️ |
+| Cacería 1: app del socio 22 → 2 pedidos | 🟢 | 22 → 9 publicado (PR #33, 17/11 22:1x ART, commit 000770ff); llegar a 2 ➡️ (quedan el menú, el aviso de clave, la ocupación, las ofertas y los avisos, que van en componentes aparte) |
+| Cacería 2: mostrador a 3 pedidos | 🟢 | Caja y Mensajes en un viaje, publicado en el PR #33; Entrada, Prospectos, Inicio, Configuración y Vender 🔴 (siguiente vuelta) |
+| Cacería 3: los relojes en un solo canal | 🟢 | Publicado: la emergencia ya no pregunta escondida y hay medición (`relojes.mjs`); juntar todo en Realtime ➡️ |
 | Cacería 4: lo roto que se ve | 🟡 | Barrido de consola 🟢 limpio. ⛔ la tabla de errores de producción: abrí `/admin` → Errores (o pasame el resultado de `select ruta, mensaje, count(*) from errores_app where creado_en > now() - interval '7 days' group by 1, 2 order by 3 desc`). ⛔ las pantallas lentas en producción: `medir-produccion.yml` necesita los secretos del paso 1 de abajo |
-| Cacería 5: `ent-6` | 🟡 | Era la prueba; arreglada y en verde, de vuelta en la cadena |
+| Cacería 5: `ent-6` | 🟢 | Era la prueba; arreglada y en verde, de vuelta en la cadena |
 
 **⛔ Lo que tenés que hacer vos, en orden (lo anterior sigue valiendo, ver abajo):**
 1. Probá en tu celular el camino completo de Temple Gym: `templegymsalta.com` → "Crear mi cuenta" → tu app. Cargá el texto del reglamento de Temple Gym (Tu página → "Hacerse socio desde la página"), el nombre "Temple Gym" y el WhatsApp.

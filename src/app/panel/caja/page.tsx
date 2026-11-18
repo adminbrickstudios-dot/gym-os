@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BotonPin } from "@/components/panel/BotonPin";
+import { BotonPin, type OperadorActual } from "@/components/panel/BotonPin";
 import { ActualizarSola } from "@/components/ui/ActualizarSola";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
@@ -29,11 +29,12 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
     // (sin cron, al primer acceso). Va antes de leer las cajas para que no aparezcan abiertas y sin contar a la vez.
     const revisar = ve ? await rpc<ParaRevisarT[]>("cajas_para_revisar", { p_gimnasio_id: panel.gimnasio.id }) : [];
     // Cacería (16/11): las cuatro lecturas de la pantalla en UN viaje (lote_lecturas).
-    const [todas, olvidadas, config, mi] = await rpcLote(
+    const [todas, olvidadas, config, mi, operador] = await rpcLote(
       lectura<Caja[]>("cajas_sede", { p_sede_id: sede.id }),
       lectura<{ turno_id: string }[]>("cajas_olvidadas", { p_gimnasio_id: panel.gimnasio.id }),
       lectura<ConfigCaja>("config_caja", { p_gimnasio_id: panel.gimnasio.id }),
       lectura<MiTurno>("mi_turno_caja", { p_sede_id: sede.id }),
+      lectura<OperadorActual>("operador_actual", { p_gimnasio_id: panel.gimnasio.id }),
     );
     const cajas = todas.filter((c) => c.activa);
     const sugerido = (id: string) => mi.libres.find((l) => l.caja_id === id)?.fondo_sugerido ?? 0;
@@ -45,7 +46,7 @@ export default async function PaginaCaja({ searchParams }: { searchParams: Promi
       <>
         <ActualizarSola />
         <Encabezado icono="plata" titulo="Caja" bajada="Abrís con lo que hay, cobrás, y al cerrar contás la plata."
-          accion={<div className="flex flex-wrap gap-2"><BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/caja" />
+          accion={<div className="flex flex-wrap gap-2"><BotonPin gimnasioId={panel.gimnasio.id} volver="/panel/caja" operador={operador} />
             {ve && <Link href={`/panel/caja/historial${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton"><Icono nombre="grilla" /> Turnos anteriores</Link>}
             {ve && <Link href={`/panel/caja/reporte${sp.sede ? `?sede=${sp.sede}` : ""}`} className="boton" data-reporte-dia><Icono nombre="lista" /> Cierre del día</Link>}</div>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/caja" />}

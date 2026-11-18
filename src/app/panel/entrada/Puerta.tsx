@@ -40,13 +40,15 @@ const CLAVE_SONIDO = "gymos.entrada.sonido";
 /** La puerta: buscar, ver si puede entrar y por qué, y anotar la entrada. */
 const ES_QR = /^GYMOS1\./;
 
-export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null, textoInicial = "" }: {
+export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion = false, socioInicial = null, emergenciaInicial = null, emergenciaLeida = false, pruebaInicial = null, salidaInicial = null, textoInicial = "" }: {
   sedeId: string; conQr?: boolean; conLlavero?: boolean; esRecepcion?: boolean; socioInicial?: ResultadoSocio | null; emergenciaInicial?: EmergenciaActiva | null;
+  /** Cacería (18/11): lo que la página ya leyó en su lote (la emergencia, el modo de prueba gratis y si se registra la salida): la pantalla no lo vuelve a pedir al abrir. */
+  emergenciaLeida?: boolean; pruebaInicial?: "no" | "dia" | "clase" | null; salidaInicial?: RegistrarSalida | null;
   /** VD-29B: lo que llegó en ?q= (por ejemplo "entrada 12345678" desde Ctrl+K): el campo arranca con eso y busca. */
   textoInicial?: string;
 }) {
   // VD-46M: el cartel rojo mientras la puerta está en emergencia (lo pregunta a la base cada 30 s).
-  const emergencia = useEmergencia(sedeId, true, emergenciaInicial);
+  const emergencia = useEmergencia(sedeId, true, emergenciaInicial, emergenciaLeida);
   const [cupo, setCupo] = useState<CupoDejarPasar | null>(null);
   const [camara, setCamara] = useState(false);
   const [via, setVia] = useState<"recepcion" | "qr_socio" | "nfc">("recepcion");
@@ -56,13 +58,13 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
   const [v, setV] = useState<Veredicto | null>(null);
   const [hecho, setHecho] = useState<(ResultadoIngreso & { nombre: string; socioId?: string }) | null>(null);
   // VD-48: la salida (si el gimnasio la registra): DNI + S o la tecla S con el socio elegido.
-  const [salidaModo, setSalidaModo] = useState<RegistrarSalida>("no");
+  const [salidaModo, setSalidaModo] = useState<RegistrarSalida>(salidaInicial ?? "no");
   const [salio, setSalio] = useState<(ResultadoSalida & { nombre: string }) | null>(null);
   // VD-51: prueba gratis para un DNI que no existe (o que reservó desde la página).
-  const [pruebaModo, setPruebaModo] = useState<"no" | "dia" | "clase">("no");
+  const [pruebaModo, setPruebaModo] = useState<"no" | "dia" | "clase">(pruebaInicial ?? "no");
   const [prueba, setPrueba] = useState<{ nombre: string; apellido: string; telefono: string; reservada: boolean; error: string | null } | null>(null);
-  useEffect(() => { void modoPrueba().then((r) => { if (r.modo) setPruebaModo(r.modo); }); }, []);
-  useEffect(() => { void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); }); }, []);
+  useEffect(() => { if (pruebaInicial) return; void modoPrueba().then((r) => { if (r.modo) setPruebaModo(r.modo); }); }, [pruebaInicial]);
+  useEffect(() => { if (salidaInicial) return; void leerConfigVisita().then((r) => { if (r.config) setSalidaModo(r.config.registrar_salida ?? "no"); }); }, [salidaInicial]);
   const [guia, setGuia] = useState<Guia | null>(null);
   const [apto, setApto] = useState<string | null>(null);
   const [firmar, setFirmar] = useState<string | null>(null);

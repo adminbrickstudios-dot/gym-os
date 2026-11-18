@@ -5,7 +5,7 @@ import { sembrarCasos } from "../../scripts/datos/casos-testigo.mjs";
 
 export const HOY = "2026-11-14"; // sábado
 
-export async function abrir(slug) {
+export async function abrir(slug, hoy = HOY) {
   const URL = process.env.DB_PRUEBAS_URL;
   if (!URL) throw new Error("Falta DB_PRUEBAS_URL (ver scripts/db/local.sh url)");
   if (/supabase\.(co|com)/.test(URL)) throw new Error("Las pruebas no corren contra Supabase");
@@ -15,7 +15,7 @@ export async function abrir(slug) {
   const q = async (sql, params) => (await db.query(sql, params)).rows;
   const [{ id: g }] = await q(`insert into public.gimnasios (slug, nombre) values ($1, 'Gimnasio de Prueba') returning id`, [slug]);
   const [{ id: sede }] = await q(`select id from public.sedes where gimnasio_id = $1`, [g]);
-  const ctx = await sembrarCasos(db, { gimnasioId: g, sedeId: sede, hoy: HOY });
+  const ctx = await sembrarCasos(db, { gimnasioId: g, sedeId: sede, hoy });
   const en = async (dia, hora = "19:00:00") =>
     (await q(`select privado.medianoche($1::date, $2) + $3::interval as t`, [dia, ctx.zona, hora]))[0].t;
 

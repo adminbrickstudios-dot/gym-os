@@ -23,7 +23,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
     const panel = await contextoPanel();
     exigirRol(panel, ["dueno", "encargado"]);
     // E8: todas las lecturas de la pantalla en UN viaje a la base (lote_lecturas), con la lista de cambios restaurables incluida (solo el dueño).
-    const [[config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, dobleCobro, cajaConfig, autoservicio, planFamiliar, beneficios, restaurables], { pestana }] = await Promise.all([
+    const [[config, datos, agenda, cierres, mensajes, cambios, tablets, mercadopago, turnosFijos, encuestas, entrada, metaVisitas, vencimiento, dejarPasar, dobleCobro, cajaConfig, autoservicio, planFamiliar, beneficios, restaurables, version], { pestana }] = await Promise.all([
       rpcLote(
         lectura<Config>("configuracion_panel", { p_gimnasio_id: panel.gimnasio.id }),
         lectura<DatosGimnasio>("datos_gimnasio_panel", { p_gimnasio_id: panel.gimnasio.id }),
@@ -46,6 +46,8 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
         lectura<Omit<ReglasBeneficiosDatos, "gimnasio_id">>("reglas_beneficios", { p_gimnasio_id: panel.gimnasio.id }),   // VD-46U
         // F9.2 (EDIT-D04): "Restaurar este valor" en Cambios. Solo el dueño y solo si la función está prendida (la base devuelve lista vacía si no).
         panel.yo.rol === "dueno" ? lectura<{ id: string; campo: string; cuando: string }[]>("cambios_restaurables", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }) : fijo<{ id: string; campo: string; cuando: string }[]>([]),
+        // Cacería (18/11): la versión de la configuración (VD-34) venía en dos viajes más al abrir; ahora en el lote. Si falla, el formulario la pide como antes.
+        lectura<{ version: string } | null>("version_registro", { p_gimnasio_id: panel.gimnasio.id, p_tabla: "configuracion", p_id: panel.gimnasio.id }, true),
       ),
       searchParams,
     ]);
@@ -57,7 +59,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
         <Encabezado icono="ajustes" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
         <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambiosConId} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
           direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos}
-          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} />
+          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} versionInicial={version?.version ?? null} />
       </>
     );
   });

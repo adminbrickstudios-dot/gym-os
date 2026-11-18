@@ -22,7 +22,7 @@ try {
   r.on("request", (q) => {
     const u = new URL(q.url());
     if (u.origin !== new URL(G).origin) return;
-    if (/^\/_next\/(static|image)|\.(png|jpg|svg|woff2?|ico|css|js|map)$/.test(u.pathname)) return;
+    if (/^\/_next\/(static|image)|\.(png|jpg|svg|woff2?|ico|css|js|map)$/.test(u.pathname) || /^\/panel\/socios\/[0-9a-f-]{36}\/foto$/.test(u.pathname)) return;   // las fotos de las caras no son pedidos que se hacen solos
     pedidos.push(`${q.method()} ${u.pathname}${u.search.includes("_rsc") ? " (_rsc)" : ""}`);
   });
   await r.waitForTimeout(MINUTO);

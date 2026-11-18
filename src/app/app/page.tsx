@@ -20,7 +20,7 @@ import { QrBloqueado } from "./QrBloqueado";
 import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
-import { rpc, rpcLote, lectura } from "@/lib/panel/servidor";
+import { rpcLote, lectura } from "@/lib/panel/servidor";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
@@ -63,7 +63,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     // Cacería (16/11): las 14 lecturas del Inicio en UN viaje (lote_lecturas, cada una con los permisos del propio socio). Las que antes tenían
     // `.catch` van como tolerantes (si fallan, valen null y no se muestran); las demás, si fallan, rompen la pantalla como antes.
     const pg = { p_gimnasio_id: g.id }, ps = { p_socio_id: s.socio_id };
-    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni] = await rpcLote(
+    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni, salida0] = await rpcLote(
       lectura<{ codigo: string; vence_en: string } | null>("mi_qr", { ...pg, ...ps }, true),   // el QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra)
       lectura<boolean | null>("usa_qr_pared", pg, true),
       lectura<MisInvitados | null>("mis_invitados", { ...pg, ...ps }, true),
@@ -78,10 +78,11 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       lectura<{ pendiente: boolean }>("encuesta_socio", ps),   // COM-10: la pregunta del 0 al 10
       lectura<GradosSocio>("grados_socio", ps),   // COM-13: su grado (cinturón)
       lectura<string | null>("mi_dni", ps, true),   // SOCIO-FLUJO §4: "Tu DNI para entrar" cuando el gimnasio no usa el QR
+      lectura<string | null>("registra_salida", pg, true),   // VD-48: "Me voy" si el gimnasio registra la salida (antes se pedía aparte y solo con el QR de la pared: el número de viajes dependía de eso)
     );
     const qr = qr0 ?? null, qrPared = qrPared0 ?? false, novedades = novedades0 ?? [];
     // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
-    const registraSalida = qrPared ? (await rpc<string>("registra_salida", { p_gimnasio_id: g.id }).catch(() => "no")) !== "no" : false;
+    const registraSalida = qrPared ? (salida0 ?? "no") !== "no" : false;
     const q =yo.socios.length > 1 ? `?socio=${s.socio_id}` : "";
     // VD-23: vencido o por vencer, pagar va arriba de todo (pegado al semáforo); al día, más abajo.
     const bloquePago = (

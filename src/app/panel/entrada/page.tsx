@@ -12,6 +12,7 @@ import { Hoy, type Ingreso } from "./Hoy";
 import type { ResultadoSocio } from "@/app/panel/acciones";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { Invitados } from "./Invitados";
+import type { RegistrarSalida } from "./ventana-acciones";
 import { TurnoEntrada } from "./TurnoEntrada";
 import type { MiTurno } from "@/app/panel/caja/tipos";
 import type { Invitado } from "./acciones";
@@ -33,7 +34,7 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
     const equipoCompleto = panel.yo.rol !== "recepcion";
     // E8: todas las lecturas de la pantalla en UN viaje a la base (lote_lecturas), con la ficha de ?socio= (al volver de cobrar: se abre su veredicto).
     const g = { p_gimnasio_id: panel.gimnasio.id };
-    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias, ficha] = await rpcLote(
+    const [hoy, formas, invitados, miTurno, emergencia, historialEmergencias, ficha, prueba, visita] = await rpcLote(
       lectura<Ingreso[]>("ingresos_del_dia", { ...g, p_sede_id: sede.id }),
       lectura<string[]>("formas_de_entrada", g),
       lectura<Invitado[]>("invitados_de_hoy", g),
@@ -43,6 +44,9 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
       lectura<EstadoEmergencia | null>("estado_emergencia_puerta", { ...g, p_sede_id: sede.id }, true),
       equipoCompleto ? lectura<EmergenciaHistorial[] | null>("historial_emergencias_puerta", { ...g, p_limite: 10 }, true) : fijo<EmergenciaHistorial[] | null>([]),
       /^[0-9a-f-]{36}$/.test(sp.socio ?? "") ? lectura<Ficha | null>("ficha_socio", { p_socio_id: sp.socio }, true) : fijo<Ficha | null>(null),
+      // Cacería (18/11): lo que la Puerta pedía sola al abrir (modo de prueba gratis y si se registra la salida) viene en el mismo viaje. Si falla, la Puerta lo vuelve a pedir.
+      lectura<{ modo: "no" | "dia" | "clase" } | null>("config_prueba_gratis", g, true),
+      lectura<{ registrar_salida?: RegistrarSalida } | null>("config_visita", g, true),
     );
     const vuelto: ResultadoSocio | null = ficha ? { socio_id: ficha.socio.id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`.trim(),
       color: ficha.acceso.color, texto: ficha.acceso.texto, puede: ficha.acceso.puede, dado_de_baja: !!ficha.socio.dado_de_baja_en } : null;
@@ -58,7 +62,8 @@ export default async function Entrada({ searchParams }: { searchParams: Promise<
             {/* SEG-5: la copia para cuando se corta internet (se prende por compu). */}
             <SinInternet sedeId={sede.id} zona={panel.gimnasio.zona_horaria} />
             {miTurno && <TurnoEntrada inicial={miTurno} zona={panel.gimnasio.zona_horaria} />}
-            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} textoInicial={/^[\p{L}0-9 .'-]{2,60}$/u.test(sp.q ?? "") ? (sp.q ?? "").trim() : ""} emergenciaInicial={emergencia?.activa ?? null} />
+            <Puerta sedeId={sede.id} conQr={formas.includes("qr_socio")} conLlavero={formas.includes("nfc")} esRecepcion={panel.yo.rol === "recepcion"} socioInicial={vuelto} textoInicial={/^[\p{L}0-9 .'-]{2,60}$/u.test(sp.q ?? "") ? (sp.q ?? "").trim() : ""} emergenciaInicial={emergencia?.activa ?? null} emergenciaLeida={emergencia !== null}
+              pruebaInicial={prueba?.modo ?? null} salidaInicial={visita ? (visita.registrar_salida ?? "no") : null} />
             {equipoCompleto && emergencia && <PanelEmergencia sedeId={sede.id} zona={panel.gimnasio.zona_horaria} inicial={emergencia} historial={historialEmergencias ?? []} />}
           </div>
           <div>

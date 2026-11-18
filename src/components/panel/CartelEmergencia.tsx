@@ -1,6 +1,6 @@
 "use client";
 // VD-46M · El cartel rojo "EMERGENCIA activa" de la Entrada (la página y la ventana). Lo que dice sale de la base:
-// acá solo se pregunta cada 30 segundos mientras la pantalla está a la vista.
+// acá solo se pregunta cada 60 segundos mientras la pantalla está a la vista.
 import { useEffect, useState } from "react";
 import { estadoEmergencia } from "@/app/panel/entrada/emergencia-acciones";
 import type { EmergenciaActiva } from "@/app/panel/entrada/emergencia-tipos";
@@ -8,19 +8,19 @@ import { colorVar } from "./Estado";
 import { Icono } from "@/components/ui/Icono";
 
 /** La emergencia activa de la sede (o null). `inicial` evita el parpadeo cuando la página ya la trae. */
-export function useEmergencia(sedeId: string, activo = true, inicial: EmergenciaActiva | null = null) {
+export function useEmergencia(sedeId: string, activo = true, inicial: EmergenciaActiva | null = null, leida = false) {
   const [e, setE] = useState<EmergenciaActiva | null>(inicial);
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
     const leer = () => void estadoEmergencia(sedeId).then((r) => { if (vivo && !r.error) setE(r.e?.activa ?? null); });
-    leer();
+    if (!leida) leer();   // Cacería (18/11): si la página ya la leyó (en su lote), no se vuelve a preguntar al abrir
     // Cacería (16/11): con la pestaña escondida no se pregunta; al volver se lee de nuevo.
     const siVisible = () => { if (document.visibilityState === "visible") leer(); };
-    const i = setInterval(siVisible, 30000);
+    const i = setInterval(siVisible, 60000);   // Cacería (18/11): un único respaldo cada 60 s (antes 30 s)
     document.addEventListener("visibilitychange", siVisible);
     return () => { vivo = false; clearInterval(i); document.removeEventListener("visibilitychange", siVisible); };
-  }, [sedeId, activo]);
+  }, [sedeId, activo, leida]);
   return e;
 }
 

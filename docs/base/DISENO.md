@@ -53,8 +53,10 @@ los cuatro colores del semáforo siempre iguales.
 | `--sobre-acento` | negro (`#121A22`) o blanco según el contraste | ídem |
 | Semáforo en oscuro | `--ok #3DDC84` · `--atencion #FFC24D` · `--no #FF5A5A` · `--prueba #4DA3FF` | los de la sección "Semáforo" |
 
-**Letra:** títulos de pantalla, de sección y números grandes en **Big Shoulders Display 800, en mayúsculas** (Google Fonts, cargada
-con `next/font`); todo lo demás en **Inter** (400/500/600/700). Los números de plata y de cantidades con cifras tabulares.
+**Letra:** títulos de pantalla, de sección y números grandes en **Big Shoulders Display 800, en mayúsculas**; todo lo demás sigue
+en **Barlow**, que ya está cargada (en las muestras se ve Inter: se cambia por Barlow para no sumar peso). Big Shoulders va
+como un solo archivo woff2 propio en `src/app/fuentes/` (latino, solo el peso 800, con `preload` y `font-display: swap`, y una letra
+condensada del sistema de respaldo). Los números de plata y de cantidades, con cifras tabulares.
 
 **Forma:** tarjetas con radio 16 px y sin sombra (en oscuro se separan por el tono; en claro, borde de 1 px); botones con radio
 12–14 px y alto mínimo 52 px (los ítems del menú, 44 px); el botón principal de cada pantalla, lleno con el acento; el
@@ -67,7 +69,37 @@ acción: íconos de línea (D38).
 **Página del gimnasio:** los mismos bloques de hoy (L1 y D83) con los tokens de Pista y el color del gimnasio; los dibujos propios
 de Pase van donde hoy no hay foto. Si los dibujos no están listos, se usa el color del gimnasio de fondo (nunca un hueco).
 
-**Cómo se ve:** el lienzo "Pase 2.0 · Estilos" de Mateo, pantallas "A · Pista — Inicio del panel" y "A · Pista — App del socio".
+**Cómo se ve:** `docs/base/pista/inicio-panel.dc.html` y `docs/base/pista/app-socio.dc.html` (copias de las muestras que aprobó
+Mateo en su lienzo de claude.ai). Son referencia visual, no código de la app: de ahí salen los colores, tamaños, radios y la
+disposición. Las pantallas que no tienen muestra se hacen con las mismas reglas.
+
+**Los huecos que hay que cubrir sí o sí (revisión de Claude, 18/11):**
+1. **Estilo y modo son dos cosas.** `estilo` (`clasico` | `pista`) es por gimnasio. `modo` (`claro` | `oscuro`) es por gimnasio, y cada
+   usuario lo puede cambiar para sí (D37, ya existe). Los dos van como atributos en `<html>` (`data-estilo`, `data-modo`), puestos en
+   el servidor: nunca se ve un parpadeo del estilo viejo antes del nuevo.
+2. **Más rápida que hoy, no igual.** Pista es solo CSS: variables y clases, ninguna librería nueva. Se mide antes y después en
+   cada pantalla: el JS y el CSS por ruta, el LCP y el Lighthouse. Lo de después tiene que ser igual o mejor en todas, y el
+   número queda en `VELOCIDAD.md`.
+3. **Lo que se imprime sigue claro:** el cartel del QR (A4), los recibos y los comprobantes salen siempre en claro, en los dos modos
+   (`@media print`). Nunca se imprime una hoja negra.
+4. **El QR se ve siempre negro sobre blanco**, también en oscuro, con su margen blanco: si no, los lectores no lo leen.
+5. **Lo que no tiene muestra también entra:**
+   - los gráficos de Resultado (colores de las series en tokens);
+   - los campos de texto y su texto de ayuda (con contraste);
+   - el foco visible del teclado;
+   - las hojas y modales, la barrita del DNI y los avisos de QR;
+   - la tablet y la TV (se leen de lejos);
+   - el super admin;
+   - las pantallas de cargando, vacía, error y sin internet;
+   - los logos y fotos de los gimnasios sobre fondo oscuro;
+   - la imagen para compartir y el ícono (ya salen del color del gimnasio).
+6. **Nada de lo de antes se pierde:**
+   - El inventario cuenta botones, secciones y acciones por pantalla con el estilo clásico. Con Pista el número tiene que ser el
+     mismo, pantalla por pantalla.
+   - Las capturas de antes y de después se comparan de a pares y se miran.
+   - Si una pantalla de Pista no llega a estar lista, en esa pantalla manda el estilo clásico: nunca una pantalla a medio hacer.
+
+
 
 **Para no olvidar en el rediseño (recomendado por Claude, 16/11):**
 - Todo lo que ve el socio, no solo el panel: la tablet, la TV, la app, el cartel del QR, los recibos, la imagen al compartir

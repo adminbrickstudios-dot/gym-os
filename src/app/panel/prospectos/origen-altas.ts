@@ -15,8 +15,9 @@ export type OrigenAltasDatos = { reporte: ReporteOrigen; links: { canal: CanalAl
 /** El parámetro del link de cada canal (el del cartel se llama "qr"). */
 const PARAMETRO: Record<CanalAlta, string> = { instagram: "instagram", qr_cartel: "qr", whatsapp: "whatsapp", recomendado: "recomendado" };
 
-export async function cargarOrigenAltas(panel: PanelGimnasio): Promise<OrigenAltasDatos | null> {
-  const activas = await rpcLectura<string[]>("funciones_nuevas_activas", { p_gimnasio_id: panel.gimnasio.id });
+/** `activas`: las funciones prendidas, si la pantalla ya las leyó en su lote (si no, se piden acá). */
+export async function cargarOrigenAltas(panel: PanelGimnasio, activasLeidas?: string[]): Promise<OrigenAltasDatos | null> {
+  const activas = activasLeidas ?? await rpcLectura<string[]>("funciones_nuevas_activas", { p_gimnasio_id: panel.gimnasio.id });
   if (!activas.includes("origen_altas")) return null;
   const reporte = await rpcLectura<ReporteOrigen>("origen_altas_reporte", { p_gimnasio_id: panel.gimnasio.id, p_dias: 30 });
   const links = (Object.keys(PARAMETRO) as CanalAlta[]).map((canal) => ({ canal, url: urlGimnasio(panel.gimnasio.slug, `/hacete-socio?o=${PARAMETRO[canal]}`) }));

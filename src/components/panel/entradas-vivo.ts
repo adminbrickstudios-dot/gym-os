@@ -28,6 +28,9 @@ const oyentesEstado = new Set<(e: EstadoAvisos) => void>();
 let estado: EstadoAvisos = "periodico";
 let gimnasio: string | null = null;
 let cursor: string | null = null;
+// Cacería (18/11): el servidor, al pintar el panel, ya dice "ahora"; con eso el cursor no se pide a la base (un viaje menos por pantalla).
+let semilla: string | null = null;
+let yaConecto = false;
 let reloj: ReturnType<typeof setInterval> | null = null;
 let enVuelo = false;
 let pendiente = false;
@@ -44,6 +47,10 @@ const hayRealtime = () => {
 };
 
 export const estadoAvisos = () => estado;
+/** El servidor dice qué hora es al pintar el panel: es el cursor de partida (se llama al pintar, antes de que se abra el canal). */
+export function sembrarCursorEntradas(ahoraIso: string) {
+  if (semilla === null && cursor === null && !Number.isNaN(Date.parse(ahoraIso))) semilla = ahoraIso;
+}
 /** Avisa cuando cambia el estado del oído (para decir "avisos con demora" en chico). Devuelve la función para dejar de escuchar. */
 export function escucharEstadoAvisos(f: (e: EstadoAvisos) => void): () => void {
   oyentesEstado.add(f);
@@ -107,7 +114,7 @@ async function abrirCanal(g: string) {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "alertas_prestamo", filter: filtro }, () => { void pedir(); })
       .subscribe((s) => {
         if (g !== gimnasio) return;
-        if (s === "SUBSCRIBED") { pararReloj(); poner("al_instante"); void pedir(); }   // al conectar (o reconectar) se pone al día
+        if (s === "SUBSCRIBED") { pararReloj(); poner("al_instante"); if (yaConecto || semilla === null) void pedir(); yaConecto = true; }   // al conectar (o reconectar) se pone al día
         else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT" || s === "CLOSED") { poner("con_demora"); arrancarReloj(CADA_CAIDO_MS); }
       });
     canal = c;
@@ -119,7 +126,9 @@ async function abrirCanal(g: string) {
 
 function arrancar() {
   if (canal || reloj) return;
-  void pedir();
+  // Con la hora del servidor no hace falta pedir el cursor: se parte desde ahí (el solape de 10 s se resta al pedir, así que se suma acá).
+  if (cursor === null && semilla !== null) cursor = new Date(Date.parse(semilla) + SOLAPE_MS).toISOString();
+  else void pedir();
   document.addEventListener("visibilitychange", alVolver);
   if (gimnasio && hayRealtime()) {
     // Hasta que el canal confirme, se pide cada 30 s: si nunca conecta, ya está el plan B (y "con demora" lo dice el canal).
@@ -134,7 +143,7 @@ function parar() {
   generacion++;
   pararReloj();
   if (canal) { void canal.unsubscribe(); canal = null; }
-  cursor = null; enVuelo = false; pendiente = false; vistos.clear();
+  cursor = null; yaConecto = false; enVuelo = false; pendiente = false; vistos.clear();
   poner("periodico");
   document.removeEventListener("visibilitychange", alVolver);
 }
@@ -146,6 +155,6 @@ export function escucharEntradas(gimnasioId: string, oyente: Oyente): () => void
   arrancar();
   return () => {
     oyentes.delete(oyente);
-    if (oyentes.size === 0) { parar(); gimnasio = null; }
+    if (oyentes.size === 0) { parar(); gimnasio = null; semilla = null; }
   };
 }
