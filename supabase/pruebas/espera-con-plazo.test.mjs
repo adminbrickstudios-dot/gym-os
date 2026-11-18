@@ -16,7 +16,9 @@ const fila = async (socio) => (await t.q(`select * from public.reservas where cl
 const liberar = async (socio) => { await t.q(`update public.reservas set estado = 'cancelada', cancelada_en = now(), cancelada_por = 'socio' where clase_id = $1 and socio_id = $2 and estado = 'confirmada'`, [clase, socio]); await t.q(`select privado.promover_espera($1, now())`, [clase]); };
 
 before(async () => {
-  t = await abrir("prueba-espera-plazo");
+  // reservar y ofertas_socio miran el reloj real: los casos testigo se siembran con el "hoy" del gimnasio, no con el HOY fijo (si no, vencen con los días).
+  const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Argentina/Salta" });
+  t = await abrir("prueba-espera-plazo", hoy);
   await t.q(`update public.configuracion_gimnasio set modo_clases = 'reserva', reserva_dias_anticipacion = 30 where gimnasio_id = $1`, [t.g]);
   [{ id: act }] = await t.q(`insert into public.actividades (gimnasio_id, nombre, emoji) values ($1,'Funcional','F') returning id`, [t.g]);
   [{ id: clase }] = await t.q(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, cupo) values ($1,$2,$3, now() + interval '2 days', now() + interval '2 days 1 hour', 1) returning id`, [t.g, t.sede, act]);
