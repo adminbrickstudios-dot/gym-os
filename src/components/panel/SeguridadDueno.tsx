@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { rpcLectura } from "@/lib/panel/servidor";
 import { AlertasSeguridad, type AlertaSeguridad } from "./AlertasSeguridad";
 
-type Seguridad = { dos_pasos: boolean; confirmada: boolean; obligatoria: boolean; sin_ver: number; alertas: AlertaSeguridad[] };
+export type Seguridad = { dos_pasos: boolean; confirmada: boolean; obligatoria: boolean; sin_ver: number; alertas: AlertaSeguridad[] };
 
 /** VD-42, en Inicio del dueño: la verificación en dos pasos recomendada y las alertas de seguridad sin ver. */
-export async function SeguridadDueno({ gimnasioId, zona }: { gimnasioId: string; zona: string }) {
-  let s: Seguridad;
-  try {
-    s = await rpcLectura<Seguridad>("seguridad_dueno", { p_gimnasio_id: gimnasioId });
-  } catch (e) {
-    return <Mensaje tipo="error">No pudimos revisar la seguridad de tu cuenta: {(e as Error).message}</Mensaje>;
-  }
+export function SeguridadDueno({ datos: s, zona }: { datos: Seguridad | null; zona: string }) {
+  if (!s) return <Mensaje tipo="error">No pudimos revisar la seguridad de tu cuenta. Probá de nuevo.</Mensaje>;
   return (
     <>
       {!s.dos_pasos && (

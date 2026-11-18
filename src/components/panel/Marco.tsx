@@ -57,7 +57,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
       <Suspense fallback={null}><OrigenPanel /></Suspense>
       {sedeCobro && <CobrarHost sedeId={sedeCobro} />}
       <AtajosAyuda atajos={ATAJOS_PANEL} />
-      {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana />}
+      {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana ahora={new Date().toISOString()} />}
       {entrada && <PanelSocioLateral sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} />}
       {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">

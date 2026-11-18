@@ -225,7 +225,9 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null }: {
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null, versionInicial = null }: {
+  /** Cacería (18/11): la versión de la configuración, leída en el lote de la página. */
+  versionInicial?: string | null;
   beneficios?: ReglasBeneficiosDatos | null; autoservicio?: AutoservicioPanel | null; metaVisitas?: number; planFamiliar?: boolean; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; dobleCobro: ConfigDobleCobro; cajaConfig?: DatosConfigCaja | null;
   inicial: Config; datos: DatosGimnasio; agenda: Agenda; cierres: CierrePanel[]; mensajes: MensajePanel[]; cambios: Cambio[]; puedeEditar: boolean; pestanaInicial: ClavePestana; direccionPagina: string; tablets: Tablet[]; linkResena?: string | null;
   mercadopago: EstadoMP; turnosFijos: boolean; entrada: DatosConfigEntrada;
@@ -247,7 +249,7 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
     setMsjPagina({ ok: nuevo ? "Tu página está publicada: ya la puede ver cualquiera." : "Tu página quedó oculta: la gente ve solo tu portada con tu marca y los botones." });
   });
   const [, empezar] = useTransition();
-  const [version, setVersion] = useVersion("configuracion", "gimnasio");
+  const [version, setVersion] = useVersion("configuracion", "gimnasio", versionInicial);
   const conClases = c.modo_clases !== "ninguno";
   const [pestana, setPestana] = useState<ClavePestana>(pestanaInicial === "clases" && inicial.modo_clases === "ninguno" ? "secciones" : pestanaInicial);
 

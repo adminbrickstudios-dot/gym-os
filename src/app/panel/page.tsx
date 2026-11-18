@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { GrillaAccesos } from "@/components/panel/GrillaAccesos";
 import { PrimerosPasos, type PrimerosPasosDatos } from "@/components/panel/PrimerosPasos";
 import { DatosEjemploInicio } from "@/components/panel/DatosEjemploInicio";
-import { SeguridadDueno } from "@/components/panel/SeguridadDueno";
+import { SeguridadDueno, type Seguridad } from "@/components/panel/SeguridadDueno";
 import { fechaLarga, saludo } from "@/lib/formato";
 import { NumerosInicio, type NumeroInicio } from "@/components/panel/NumerosInicio";
 import { ElegirNumeros } from "@/components/panel/ElegirNumeros";
@@ -106,7 +106,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
     const zona = panel.gimnasio.zona_horaria;
     // E8: las ~20 lecturas del Inicio en UN viaje a la base (lote_lecturas); lo que el rol no ve ni se pide.
     const g = { p_gimnasio_id: panel.gimnasio.id };
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen] = await rpcLote(
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen, datosEjemplo, seguridad] = await rpcLote(
       lectura<Inicio>("panel_inicio", g),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? lectura<NumerosElegidos>("numeros_inicio", g) : fijo<NumerosElegidos | null>(null),
@@ -143,6 +143,9 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
       rol !== "profe" && !panel.secciones_apagadas.includes("maquinas") ? lectura<MaquinaFuera[]>("maquinas_fuera_de_servicio", g) : fijo<MaquinaFuera[]>([]),
       // VD-55: lockers que vencen esta semana (la base devuelve vacío con la sección apagada).
       rol !== "profe" && !panel.secciones_apagadas.includes("lockers") ? lectura<LockerVence[]>("lockers_vencen_semana", g) : fijo<LockerVence[]>([]),
+      // Cacería (18/11): los socios de ejemplo y la seguridad del dueño venían en dos viajes aparte; ahora en el mismo lote (si fallan, la tarjeta lo dice).
+      rol === "dueno" ? lectura<{ cargados: number } | null>("datos_ejemplo", g, true) : fijo<{ cargados: number } | null>(null),
+      rol === "dueno" ? lectura<Seguridad | null>("seguridad_dueno", g, true) : fijo<Seguridad | null>(null),
     );
     const novedadesGymOS = novedadesGymOSTodas ?? [];
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
@@ -188,10 +191,10 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
         {pasos && <PrimerosPasos datos={pasos} />}
         {/* VD-43: socios de ejemplo (y su aviso fijo) · VD-42: dos pasos y alertas de seguridad. Solo el dueño. */}
         {rol === "dueno" && (
-          <Suspense fallback={null}>
-            <DatosEjemploInicio gimnasioId={panel.gimnasio.id} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
-            <SeguridadDueno gimnasioId={panel.gimnasio.id} zona={zona} />
-          </Suspense>
+          <>
+            <DatosEjemploInicio datos={datosEjemplo} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
+            <SeguridadDueno datos={seguridad} zona={zona} />
+          </>
         )}
 
         {rol !== "recepcion" && numerosDeHoy}

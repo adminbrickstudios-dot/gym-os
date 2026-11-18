@@ -15,7 +15,7 @@ import { anularEntrada } from "@/app/panel/entrada/acciones";
 import { CLAVE_SONIDO, sonar } from "@/app/panel/entrada/sonido";
 import { colorVar } from "./Estado";
 import { abrirCobrar, hayHojaCobrar } from "./cobrar/evento";
-import { escucharEntradas, escucharEstadoAvisos, type EstadoAvisos } from "./entradas-vivo";
+import { escucharEntradas, escucharEstadoAvisos, sembrarCursorEntradas, type EstadoAvisos } from "./entradas-vivo";
 import { EVENTO_ABRIR_PANEL_SOCIO } from "./PanelSocioLateral";
 import { Icono } from "@/components/ui/Icono";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -80,7 +80,8 @@ function Cara({ socioId, nombre, chica }: { socioId: string; nombre: string; chi
   return <img src={`/panel/socios/${socioId}/foto`} alt="" className={`${lado} rounded-full object-cover flex-none`} onError={() => setSin(true)} />;
 }
 
-export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana }: { gimnasioId: string; sedeId: string; puedeCobrar: boolean; conVentana: boolean }) {
+export function AvisosEntrada({ gimnasioId, sedeId, puedeCobrar, conVentana, ahora }: { gimnasioId: string; sedeId: string; puedeCobrar: boolean; conVentana: boolean; ahora?: string }) {
+  if (ahora) sembrarCursorEntradas(ahora);   // antes de que cualquier componente abra el oído: el cursor sale del servidor, no de un viaje a la base
   // Los avisos viven también fuera del componente: si la pantalla se vuelve a montar (p. ej. después de anotar una entrada y refrescar
   // el panel) no se pierden.
   const [avisos, setAvisosRaw] = useState<Aviso[]>(() => memoriaAvisos);

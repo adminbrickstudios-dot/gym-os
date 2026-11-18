@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLectura, rpcLote } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -10,7 +10,7 @@ import { cargarInteresados } from "../prospectos/Interesados";
 import { Prospectos } from "../prospectos/Prospectos";
 import { MemoriaSocios } from "./MemoriaSocios";
 import { ListaSocios } from "./ListaSocios";
-import { InvitadosPorSeguir, type InvitadoSinSeguir } from "../prospectos/InvitadosPorSeguir";
+import { InvitadosPorSeguir } from "../prospectos/InvitadosPorSeguir";
 import { OrigenAltas } from "../prospectos/OrigenAltas";
 import { cargarOrigenAltas } from "../prospectos/origen-altas";
 import { Icono } from "@/components/ui/Icono";
@@ -46,10 +46,9 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     // VD-15 (D22): Socios · Interesados. Los Interesados (ex-Prospectos) viven en la segunda pestaña.
     if (interesados) {
-      const { lista, pagina } = await cargarInteresados(panel);
+      const { lista, pagina, invitados, activas } = await cargarInteresados(panel);
       const nuevos = lista.filter((p) => p.estado === "nuevo").length;
-      const invitados = await rpcLectura<InvitadoSinSeguir[]>("invitados_sin_seguimiento", { p_gimnasio_id: panel.gimnasio.id }).catch(() => []);   // FA-24
-      const origenAltas = await cargarOrigenAltas(panel);   // N4: null si el gimnasio no prendió la función
+      const origenAltas = await cargarOrigenAltas(panel, activas);   // N4: null si el gimnasio no prendió la función
       return (
         <>
           <Encabezado icono="usuarios" titulo="Socios" bajada="Los que ya son socios y los que preguntaron y todavía no." />

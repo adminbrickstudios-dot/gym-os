@@ -18,8 +18,8 @@ export default async function PaginaProspectos() {
     exigirRol(panel, ["dueno", "encargado", "recepcion"]);
     const sociosPrendido = !panel.secciones_apagadas.includes("socios");
     if (sociosPrendido) redirect("/panel/socios?vista=interesados");
-    const { lista, pagina } = await cargarInteresados(panel);
-    const origenAltas = await cargarOrigenAltas(panel);
+    const { lista, pagina, activas } = await cargarInteresados(panel);
+    const origenAltas = await cargarOrigenAltas(panel, activas);
     return (
       <>
         <Encabezado icono="hoja" titulo="Interesados" bajada="Los que quieren probar: de la página, del mostrador o recomendados. Escribiles rápido; el que prueba en la semana se queda." />

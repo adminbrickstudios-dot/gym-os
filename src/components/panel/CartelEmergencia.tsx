@@ -8,19 +8,19 @@ import { colorVar } from "./Estado";
 import { Icono } from "@/components/ui/Icono";
 
 /** La emergencia activa de la sede (o null). `inicial` evita el parpadeo cuando la página ya la trae. */
-export function useEmergencia(sedeId: string, activo = true, inicial: EmergenciaActiva | null = null) {
+export function useEmergencia(sedeId: string, activo = true, inicial: EmergenciaActiva | null = null, leida = false) {
   const [e, setE] = useState<EmergenciaActiva | null>(inicial);
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
     const leer = () => void estadoEmergencia(sedeId).then((r) => { if (vivo && !r.error) setE(r.e?.activa ?? null); });
-    leer();
+    if (!leida) leer();   // Cacería (18/11): si la página ya la leyó (en su lote), no se vuelve a preguntar al abrir
     // Cacería (16/11): con la pestaña escondida no se pregunta; al volver se lee de nuevo.
     const siVisible = () => { if (document.visibilityState === "visible") leer(); };
     const i = setInterval(siVisible, 30000);
     document.addEventListener("visibilitychange", siVisible);
     return () => { vivo = false; clearInterval(i); document.removeEventListener("visibilitychange", siVisible); };
-  }, [sedeId, activo]);
+  }, [sedeId, activo, leida]);
   return e;
 }
 
