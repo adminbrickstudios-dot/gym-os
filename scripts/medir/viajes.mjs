@@ -14,7 +14,7 @@ const LOG = process.env.APP_LOG ?? ".local/app.log";
 const TOPE = 2;
 const PANTALLAS = ["/panel", "/panel/entrada", "/panel/socios", "/panel/vencen-hoy", "/panel/caja", "/panel/vender", "/panel/clases",
   "/panel/retencion", "/panel/transferencias", "/panel/planes", "/panel/configuracion", "/panel/pagina", "/panel/resumen",
-  "/panel/tareas", "/panel/mensajes", "/panel/equipo", "/panel/control", "/panel/gastos", "/panel/profes", "/panel/prospectos"];
+  "/panel/tareas", "/panel/mensajes", "/panel/equipo", "/panel/control", "/panel/gastos", "/panel/profes", "/panel/prospectos", "/panel/socios?vista=interesados"];
 const ROLES = process.env.MEDIR_ROLES ? process.env.MEDIR_ROLES.split(",") : ["duena", "recepcion"];
 
 const tamano = () => { try { return statSync(LOG).size; } catch { return 0; } };
