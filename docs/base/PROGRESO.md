@@ -1,6 +1,22 @@
 # PROGRESO de Pase (antes Base)
 
-## DÓNDE QUEDÉ y RESUMEN PARA MATEO (16/11, tarde)
+## DÓNDE QUEDÉ y RESUMEN PARA MATEO (18/11, mediodía)
+
+**Publicado hoy (18/11, 13:50 ART, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, con prevuelo; PR #34, main 24386fe4; vuelta atrás: main antes = `000770ff`):**
+- **Cacería terminada en el panel:** cada pantalla del panel pide **3 viajes o menos** a la base (contexto, un lote de lecturas y el estado vivo). Entrada 7 → 3, Inicio de la dueña 6 → 3, Configuración 6 → 3, Vender 5 → 3, Caja de la recepción 5 → 3 (la de la dueña 8 → 4: `cajas_para_revisar` escribe y no entra en un lote), Interesados (Socios → Interesados) 3. `/panel/prospectos` (la dirección vieja) queda en 5 por el salto de redirección. Los topes de `scripts/medir/topes-viajes.json` bajaron a lo medido (nunca suben).
+- Cómo: el oído de la puerta ya no pide su cursor a la base (lo trae el servidor al pintar); la Puerta recibe en el lote de Entrada el modo de prueba, si se registra la salida y la emergencia; Interesados, el Inicio de la dueña (datos de ejemplo y seguridad), "¿Quién atiende?" y la versión de Configuración van en el mismo lote; el Inicio del socio (`/app`) pide `registra_salida` en el lote (9 viajes siempre, ya no dependía del QR de la pared). El respaldo del cartel de emergencia pasó de 30 a 60 s.
+- Migraciones `20261118100000` y `20261118110000` (aditivas, solo suman nombres a la lista cerrada de `lote_lecturas`), con `supabase/pruebas/lote-entrada.test.mjs` (misma lectura que por separado; otro gimnasio o sin permiso = error, no vacío).
+- **Prueba de la base que se rompía con los días** (`espera-con-plazo`: usaba el reloj real con socios sembrados el 14/11): arreglada.
+- Probado en Actions con la app compilada: recorridos de Entrada, Caja, Interesados, Inicio, camino del socio, barrido de cada rol y los topes de viajes: todo en verde (corrida 44349582365). Producción: `humo-pasado` verde, portada de Temple Gym, `/hacete-socio`, `pasegym.com/g/demo`, `/ingresar` y `/super` responden 200.
+- ⛔ `humo-produccion.yml` falla en su paso de puertas desde el 11/11 (no es de este cambio): busca el gimnasio `demo-mateo`, que no está en producción (hay que sembrarlo con "sembrar-prueba-mateo" desde Actions → Base de datos).
+
+**Sigue:** Pase 2.0, el estilo Pista (`DISENO.md` § Pase 2.0): inventario de pantallas, capturas de antes, la llave `estilo` por gimnasio, tokens y tipografías, probado todo y una sola publicación. Todavía no empezó (la cacería ocupó la vuelta).
+
+**Lo que queda de la cacería (no bloquea):** `/app` llegó a 9 (la meta de Mateo era 2: quedan el menú, el aviso de clave, la ocupación, las ofertas y los avisos, que van en componentes aparte); juntar los relojes en Realtime; ⛔ la tabla de errores de producción y las pantallas lentas (necesitan a Mateo, ver abajo).
+
+---
+
+## (anterior) DÓNDE QUEDÉ y RESUMEN PARA MATEO (16/11, tarde)
 
 **Publicado hoy (hora de Argentina, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, cada una con prevuelo y humo en producción; Temple Gym solo mirado):**
 - **PR #29 (10:40) · URGENTE React #441 en `/hacete-socio`:** no pude reproducirlo (ni sin sesión, ni con la dueña o un socio, ni desde la portada: `hacete-socio-sesion.mjs`) y no tengo acceso a los logs de Vercel de este proyecto. Se blindó lo único que en el servidor puede fallar ahí (la lectura del alta): reintenta una vez y, si la base no responde, la página lo dice con "Probar de nuevo"; el error genérico ahora muestra su "Código del error".
