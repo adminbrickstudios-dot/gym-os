@@ -41,6 +41,9 @@ function inventariar() {
   return { interactivos: [...interactivos], titulos: [...titulos], datos: [...datos], estilo: document.documentElement.dataset.estilo, modo: document.documentElement.dataset.modo };
 }
 
+// Lo que cambia solo entre una pasada y la otra, sin que tenga que ver con el estilo (cuántas sesiones abiertas hay, la actividad reciente de Control).
+const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|^a||(alguien|hace) /;
+
 async function recorrer(b, estilo) {
   const filas = new Map();
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
@@ -87,7 +90,7 @@ try {
     const d = despues.get(clave);
     if (!d) { falla(`${clave}: no se pudo inventariar con Pista`); continue; }
     for (const campo of ["interactivos", "titulos", "datos"]) {
-      const faltan = a[campo].filter((x) => !d[campo].includes(x));
+      const faltan = a[campo].filter((x) => !d[campo].includes(x) && !DEL_MOMENTO.test(x.split("|").slice(campo === "interactivos" ? 0 : 0).join("|")) && !DEL_MOMENTO.test(x.split("|")[2] ?? ""));
       const sobran = d[campo].filter((x) => !a[campo].includes(x));
       nuevos += sobran.length;
       if (faltan.length) { perdidos += faltan.length; falla(`${clave}: con Pista faltan ${faltan.length} ${campo}: ${faltan.slice(0, 6).join(" · ")}`); }
