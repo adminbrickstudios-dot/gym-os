@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies, headers } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Hidratado } from "@/components/Hidratado";
@@ -29,9 +30,23 @@ const barlowCondensada = localFont({
   variable: "--font-barlow-condensed", display: "swap",
 });
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+// Pase 2.0 (Pista): títulos y números grandes en Big Shoulders Display 800, un solo archivo propio (OFL, ver fuentes/LICENCIA-BigShoulders.txt). Sin preload:
+// solo lo piden las pantallas de Pista, y el estilo clásico no tiene que bajar nada de más (font-display: swap con respaldo condensado).
+const bigShoulders = localFont({
+  src: [{ path: "./fuentes/big-shoulders-display-latin-800-normal.woff2", weight: "800" }],
+  variable: "--font-big-shoulders", display: "swap", preload: false,
+});
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Pase 2.0: el estilo del gimnasio (la llave por gimnasio) lo pone el servidor en el <html>: nunca se ve el estilo viejo antes del nuevo.
+  // Sale de la dirección que ya resolvió el proxy (no es un viaje más a la base). Sin gimnasio (la plataforma) es el clásico.
+  const cab = await headers();
+  const estilo = cab.get("x-gimnasio-estilo") === "pista" ? "pista" : "clasico";
+  // El modo de Pista: lo que eligió la persona en Mi cuenta (cookie `tema`, D37) manda; si no, el del gimnasio (oscuro por defecto).
+  const tema = (await cookies()).get("tema")?.value;
+  const modo = tema === "claro" || tema === "oscuro" ? tema : cab.get("x-gimnasio-modo") === "claro" ? "claro" : "oscuro";
   return (
-    <html lang="es-AR" className={`${barlow.variable} ${barlowCondensada.variable}`}>
+    <html lang="es-AR" data-estilo={estilo} data-modo={modo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
       <body className="antialiased">{children}<Hidratado /></body>
     </html>
   );

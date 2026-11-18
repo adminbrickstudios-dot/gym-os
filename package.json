@@ -20,6 +20,7 @@
     "e2e:vd-49": "node scripts/e2e/vd-49.mjs",
     "e2e:vd-50": "node scripts/e2e/vd-50.mjs",
     "e2e:vd-62": "node scripts/e2e/vd-62.mjs",
+    "e2e:inventario": "node scripts/e2e/inventario-pantallas.mjs",
     "e2e:barrido": "node scripts/e2e/barrido.mjs",
     "e2e:app-8": "node scripts/e2e/app-8.mjs",
     "e2e:cla-9": "node scripts/e2e/cla-9.mjs",

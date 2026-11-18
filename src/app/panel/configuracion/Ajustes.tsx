@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { contraste, propsMarca, seLeePoco } from "@/lib/marca";
 import { useVersion } from "@/components/panel/useVersion";
+import { EstiloMarca, type EstiloGimnasio } from "./EstiloMarca";
 import { guardarConfiguracion,guardarDatosGimnasio, publicarPagina, sumarSede, type EstadoMP } from "./acciones";
 import { MercadoPago } from "./MercadoPago";
 import { TurnosFijosConfig } from "./TurnosFijosConfig";
@@ -225,7 +226,9 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null, versionInicial = null }: {
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null, versionInicial = null, estiloInicial = { estilo: "clasico", modo: "oscuro" } }: {
+  /** Pase 2.0: la llave de estilo del gimnasio, leída en el lote de la página. */
+  estiloInicial?: EstiloGimnasio;
   /** Cacería (18/11): la versión de la configuración, leída en el lote de la página. */
   versionInicial?: string | null;
   beneficios?: ReglasBeneficiosDatos | null; autoservicio?: AutoservicioPanel | null; metaVisitas?: number; planFamiliar?: boolean; vencimiento: DatosVencimiento; dejarPasar: ConfigDejarPasar; dobleCobro: ConfigDobleCobro; cajaConfig?: DatosConfigCaja | null;
@@ -473,6 +476,9 @@ export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, pu
               <p className="texto-suave">Así se ve.</p>
               <span className="boton boton-principal mt-3"><Icono nombre="fuego" /> Botón principal</span>
             </div>
+          </Tarjeta>
+          <Tarjeta icono="imagen" titulo="Estilo" ancla="estilo" ayuda="Cómo se ve todo: el de siempre o Pista. Cambia el aspecto, no las pantallas ni lo que se puede hacer.">
+            <EstiloMarca inicial={estiloInicial} puedeEditar={puedeEditar} />
           </Tarjeta>
           {pie("marca")}
         </>}

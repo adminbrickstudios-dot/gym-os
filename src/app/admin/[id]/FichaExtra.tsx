@@ -2,13 +2,35 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
-import { cambiarDueno, cambiarSlug, guardarFuncion, guardarModulos } from "../acciones";
+import { cambiarDueno, cambiarSlug, guardarEstiloAdmin, guardarFuncion, guardarModulos } from "../acciones";
 
 const NOMBRE_SECCION: Record<string, string> = {
   entrada: "Entrada", clases: "Clases", vencen_hoy: "Vencen hoy", socios: "Socios", retencion: "Retención", rutinas: "Rutinas",
   caja: "Caja", vender: "Vender", resultado: "Resultado", transferencias: "Transferencias", pt: "Turnos de entrenador",
 };
 const Alerta = ({ m }: { m: string }) => (m ? <p role="alert" className="pildora pildora-rojo !rounded-[var(--radio)] !px-4 !py-3">{m}</p> : null);
+
+/** Pase 2.0: la llave de estilo del gimnasio (clásico o Pista) y el modo de Pista. */
+export function EstiloGimnasioFicha({ gimnasioId, inicial }: { gimnasioId: string; inicial: { estilo: string; modo: string } }) {
+  const router = useRouter();
+  const [estilo, setEstilo] = useState(inicial.estilo), [modo, setModo] = useState(inicial.modo), [msj, setMsj] = useState("");
+  return (
+    <div className="tarjeta p-4 space-y-3" data-estilo-ficha={estilo}>
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="inline-flex items-center gap-2">Estilo
+          <select className="campo !w-auto" value={estilo} onChange={(e) => setEstilo(e.target.value)} data-estilo-select>
+            <option value="clasico">Clásico</option><option value="pista">Pista</option>
+          </select></label>
+        <label className="inline-flex items-center gap-2">Modo
+          <select className="campo !w-auto" value={modo} onChange={(e) => setModo(e.target.value)} data-modo-select>
+            <option value="oscuro">Oscuro</option><option value="claro">Claro</option>
+          </select></label>
+        <BotonAccion className="boton" onClick={async () => { const r = await guardarEstiloAdmin(gimnasioId, estilo, modo); setMsj(r.error ?? "Guardado. Se aplica en menos de un minuto."); if (!r.error) router.refresh(); }}>Guardar</BotonAccion>
+      </div>
+      {msj && <p role="status" className="texto-suave">{msj}</p>}
+    </div>
+  );
+}
 
 /** Links por rol con botón de copiar (SA-3, pestaña Links). */
 export function LinksPorRol({ links }: { links: { rol: string; nombre: string; url: string }[] }) {

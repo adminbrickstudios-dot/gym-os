@@ -416,3 +416,86 @@ html { accent-color: var(--acento); }
 .barrita-tilde { display: inline-block; animation: barrita-tilde 200ms var(--curva) both; }
 /* Mientras la barrita está a la vista ocupa el lugar del botón redondo de la Entrada: el botón se corre sin mover nada. */
 :root[data-barrita-visible="si"] [data-boton-ventana] { opacity: 0; pointer-events: none; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Pase 2.0 · estilo PISTA (docs/base/DISENO.md § Pase 2.0). Solo CSS: los mismos componentes, otros valores.
+   Se prende por gimnasio (<html data-estilo="pista">, puesto por el servidor) y tiene dos modos (<html data-modo="oscuro|claro">).
+   Sin el atributo, nada de esto se aplica: el estilo clásico queda como estaba. El semáforo no lo cambia nadie (en oscuro, sus tonos más vivos del diseño).
+   Desvío de DISENO.md a propósito: el texto apagado (--texto-3) sale un tono más claro en oscuro (#9AAAB7) y más oscuro en claro (#5E6B77) para llegar a 4,5:1
+   sobre las tarjetas (con los del diseño daba 3,4 a 3,9:1).
+   ═══════════════════════════════════════════════════════════════════ */
+html[data-estilo="pista"] {
+  --radio: 16px;
+  --radio-grande: 16px;
+  --radio-campo: 12px;
+  --alto-minimo: 52px;
+  --sombra-flota: 0 12px 32px -14px rgb(0 0 0 / 0.5);
+  /* Títulos y números grandes: Big Shoulders Display 800 (un solo archivo propio) con respaldo condensado del sistema. */
+  --fuente-titulo: var(--font-big-shoulders), "Arial Narrow", "Roboto Condensed", var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Modo oscuro (el de siempre en Pista). !important: el wrapper de cada pantalla pone su --fondo en línea (el color del gimnasio) y acá manda el diseño. */
+html[data-estilo="pista"][data-modo="oscuro"] [data-tono] {
+  --fondo: #121A22 !important;
+  --tarjeta: #1A2530; --tarjeta-alta: #22303C; --borde: #22303C;
+  --texto: #EEF2F5; --texto-suave: #8FA0AE; --texto-tenue: #9AAAB7; --texto-2: #8FA0AE;
+  --superficie: #1A2530;
+  --ok: #3DDC84; --atencion: #FFC24D; --no: #FF5A5A; --prueba: #4DA3FF;
+  --acento: var(--acento-pista-oscuro, #FF7A3D);
+  --acento-texto: var(--acento-texto-pista-oscuro, #121A22);
+  --sobre-acento: var(--acento-texto);
+  background: #121A22 !important;
+  color: var(--texto);
+  color-scheme: dark;
+}
+html[data-estilo="pista"][data-modo="claro"] [data-tono] {
+  --fondo: #F3F5F7 !important;
+  --tarjeta: #FFFFFF; --tarjeta-alta: #EDF0F3; --borde: #E1E6EB;
+  --texto: #121A22; --texto-suave: #55626E; --texto-tenue: #5E6B77; --texto-2: #55626E;
+  --superficie: #FFFFFF;
+  --ok: #1E9E5A; --atencion: #D88A0B; --no: #D6383A; --prueba: #2D6FD8;
+  --acento: var(--acento-pista-claro, #C2410C);
+  --acento-texto: var(--acento-texto-pista-claro, #FFFFFF);
+  --sobre-acento: var(--acento-texto);
+  background: #F3F5F7 !important;
+  color: var(--texto);
+  color-scheme: light;
+}
+html[data-estilo="pista"][data-modo="oscuro"], html[data-estilo="pista"][data-modo="oscuro"] body { background: #121A22; }
+html[data-estilo="pista"][data-modo="claro"], html[data-estilo="pista"][data-modo="claro"] body { background: #F3F5F7; }
+
+@layer components {
+  /* Títulos de pantalla y de sección, y números grandes: condensados, en mayúsculas. */
+  html[data-estilo="pista"] .titular, html[data-estilo="pista"] .titulo { font-weight: 800; text-transform: uppercase; letter-spacing: 0.01em; }
+  html[data-estilo="pista"] .numero { font-weight: 800; font-variant-numeric: tabular-nums; }
+  html[data-estilo="pista"] .titulo-grupo { letter-spacing: 0.1em; }
+
+  /* Tarjetas: radio 16, sin sombra; en oscuro se separan por el tono, en claro por un borde de 1 px. */
+  html[data-estilo="pista"][data-modo="oscuro"] .tarjeta { border-color: transparent; }
+  html[data-estilo="pista"] a.tarjeta:hover, html[data-estilo="pista"] button.tarjeta:hover { background: var(--tarjeta-alta); }
+
+  /* Botones: principal lleno con el acento; los demás en la superficie 2. */
+  html[data-estilo="pista"] .boton { border-radius: 14px; border-color: transparent; font-weight: 700; }
+  html[data-estilo="pista"][data-modo="claro"] .boton { border-color: var(--borde); }
+  html[data-estilo="pista"] .boton-principal { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  html[data-estilo="pista"] .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
+  html[data-estilo="pista"] .boton-chico { border-radius: 12px; }
+  html[data-estilo="pista"] .campo { border-radius: 12px; background: var(--tarjeta-alta); border-color: transparent; }
+  html[data-estilo="pista"][data-modo="claro"] .campo { background: var(--tarjeta); border-color: var(--borde); }
+  html[data-estilo="pista"] .pestana[aria-selected="true"], html[data-estilo="pista"] .pestana[aria-current="page"] { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  html[data-estilo="pista"] .pildora { font-weight: 700; }
+}
+
+/* El menú lateral: el ítem activo lleno con el acento. */
+html[data-estilo="pista"] nav a[aria-current="page"] { background: var(--acento); color: var(--acento-texto); border-radius: 12px; }
+html[data-estilo="pista"] nav a[aria-current="page"] * { color: inherit; }
+
+/* Lo que se imprime sale siempre claro, en los dos modos: nunca una hoja negra (cartel del QR, recibos, comprobantes). */
+@media print {
+  html[data-estilo="pista"] [data-tono] {
+    --fondo: #FFFFFF !important; --tarjeta: #FFFFFF; --tarjeta-alta: #FFFFFF; --borde: #D0D5DA;
+    --texto: #000000; --texto-suave: #333333; --texto-tenue: #444444; --texto-2: #333333;
+    background: #FFFFFF !important; color: #000000; color-scheme: light;
+  }
+}
+/* El QR ya va siempre sobre su cuadro blanco con margen (bg-white p-3 en MiQR, Kiosco, Tablets y los carteles): no depende del modo. */

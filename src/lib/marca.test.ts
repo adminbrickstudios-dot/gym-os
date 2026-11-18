@@ -51,3 +51,32 @@ describe("acentoDistinto (Z8)", () => {
   });
   it("un valor que no es un color se devuelve igual", () => { expect(acentoDistinto("rojo")).toBe("rojo"); });
 });
+
+import { acentoLegible, PISTA_SUPERFICIE_CLARA, PISTA_SUPERFICIE_OSCURA, CONTRASTE_TEXTO } from "./marca";
+
+describe("acentoLegible (Pase 2.0, Pista)", () => {
+  it("un acento que ya se lee se devuelve igual", () => {
+    expect(acentoLegible("#FF7A3D", PISTA_SUPERFICIE_OSCURA)).toBe("#FF7A3D");
+  });
+  it("el naranja por defecto se oscurece sobre el modo claro hasta leerse (4,5:1)", () => {
+    const n = acentoLegible("#FF7A3D", PISTA_SUPERFICIE_CLARA);
+    expect(n).not.toBe("#FF7A3D");
+    expect(contraste(n, PISTA_SUPERFICIE_CLARA)!).toBeGreaterThanOrEqual(CONTRASTE_TEXTO);
+  });
+  it("un acento oscuro se aclara sobre el modo oscuro hasta leerse", () => {
+    const n = acentoLegible("#1E3A8A", PISTA_SUPERFICIE_OSCURA);
+    expect(contraste(n, PISTA_SUPERFICIE_OSCURA)!).toBeGreaterThanOrEqual(CONTRASTE_TEXTO);
+  });
+  it("cualquier acento queda con 4,5:1 en los dos modos", () => {
+    for (const c of ["#16a34a", "#ef4444", "#facc15", "#06b6d4", "#7c3aed", "#ffffff", "#000000", "#808080"]) {
+      expect(contraste(acentoLegible(c, PISTA_SUPERFICIE_OSCURA), PISTA_SUPERFICIE_OSCURA)!, `${c} oscuro`).toBeGreaterThanOrEqual(CONTRASTE_TEXTO);
+      expect(contraste(acentoLegible(c, PISTA_SUPERFICIE_CLARA), PISTA_SUPERFICIE_CLARA)!, `${c} claro`).toBeGreaterThanOrEqual(CONTRASTE_TEXTO);
+    }
+  });
+  it("propsMarca trae las variables de Pista sin tocar las del estilo clásico", () => {
+    const p = propsMarca({ color_acento: "#FF7A3D", color_fondo: "#F4F5F6" });
+    expect(p.style["--acento" as never]).toBeTruthy();
+    expect(p.style["--acento-pista-claro" as never]).toBeTruthy();
+    expect(p.style["--acento-pista-oscuro" as never]).toBeTruthy();
+  });
+});
