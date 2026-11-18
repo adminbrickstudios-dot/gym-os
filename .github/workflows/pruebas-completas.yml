@@ -140,6 +140,7 @@ jobs:
           E2E_DEPURAR: "1"
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local
