@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pista · App del socio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF7A3D}a:hover{color:#FF9A68}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #121A22; color: #EEF2F5; font-family: Inter, sans-serif; padding: 28px 20px; display: flex; flex-direction: column; gap: 20px;">
+  <div>
+    <p style="margin: 0; color: #8FA0AE; font-size: 14px;">Gimnasio Demo</p>
+    <h1 style="margin: 4px 0 0; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 46px; line-height: 0.95; text-transform: uppercase;">Hola, Lucía</h1>
+  </div>
+  <div style="border-radius: 22px; background: {{accent}}; color: #121A22; padding: 22px; display: flex; gap: 18px; align-items: center;">
+    <div style="width: 108px; height: 108px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+      <svg width="84" height="84" viewBox="0 0 21 21" role="img" aria-label="Tu QR"><path fill="#121A22" d="M0 0h7v7H0zM2 2v3h3V2zM14 0h7v7h-7zM16 2v3h3V2zM0 14h7v7H0zM2 16v3h3v-3zM9 0h2v2H9zM9 4h2v3H9zM12 9h2v2h-2zM9 9h2v2H9zM16 9h2v2h-2zM9 12h3v2H9zM14 14h2v2h-2zM18 12h3v2h-3zM9 16h2v5H9zM12 18h3v3h-3zM18 16h3v5h-3zM0 9h3v2H0zM5 9h2v2H5z"/></svg>
+    </div>
+    <div>
+      <div style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 40px; line-height: 1;">14 DÍAS</div>
+      <div style="font-weight: 600; font-size: 15px; margin-top: 6px;">Al día hasta el 30/11</div>
+      <div style="font-size: 13px; margin-top: 4px; opacity: 0.8;">Mostralo en la puerta</div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+    <a href="#" style="height: 104px; border-radius: 18px; background: #1A2530; color: #EEF2F5; text-decoration: none; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span style="font-weight: 700; font-size: 17px;">Reservar clase</span></a>
+    <a href="#" style="height: 104px; border-radius: 18px; background: #1A2530; color: #EEF2F5; text-decoration: none; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/></svg><span style="font-weight: 700; font-size: 17px;">Mis pagos</span></a>
+    <a href="#" style="height: 104px; border-radius: 18px; background: #1A2530; color: #EEF2F5; text-decoration: none; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span style="font-weight: 700; font-size: 17px;">Mi rutina</span></a>
+    <a href="#" style="height: 104px; border-radius: 18px; background: #1A2530; color: #EEF2F5; text-decoration: none; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span style="font-weight: 700; font-size: 17px;">Mi perfil</span></a>
+  </div>
+  <div style="border-radius: 18px; background: #1A2530; padding: 16px 18px;">
+    <p style="margin: 0; font-size: 13px; color: #8FA0AE; font-weight: 600; letter-spacing: 1px;">HOY</p>
+    <p style="margin: 8px 0 0; font-weight: 700; font-size: 17px;">Funcional 19:00</p>
+    <p style="margin: 2px 0 0; color: #8FA0AE; font-size: 14px;">Quedan 4 lugares</p>
+  </div>
+  <a href="#" style="margin-top: auto; height: 52px; border-radius: 14px; border: 1px solid #2A3A47; color: #EEF2F5; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.2-4.5A9 9 0 1 1 21 12z"/></svg>Escribile al gimnasio</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FF7A3D","options":["#FF7A3D","#3DDC84","#4DA3FF","#FFC24D"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#FF7A3D' };
+  }
+}
+</script>
+</body>
+</html>
