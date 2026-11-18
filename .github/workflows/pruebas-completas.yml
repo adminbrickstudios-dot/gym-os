@@ -141,6 +141,7 @@ jobs:
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
+          E2E_SIN_MAYUSCULAS: ${{ inputs.estilo == 'pista' && '1' || '0' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local

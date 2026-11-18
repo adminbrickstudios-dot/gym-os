@@ -48,7 +48,7 @@ async function recorrer(b, estilo) {
   const filas = new Map();
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
     for (const rol of ["duena", "recepcion", "socio", "publico"]) {
-      const p = await pagina(b, viewport);
+      const p = await pagina(b, viewport, { conMayusculas: true });   // el diseño tal cual es, con sus mayúsculas
       try {
         if (rol === "duena") await entrar(p, "duena@ejemplo.invalid");
         else if (rol === "recepcion") await entrar(p, "recepcion@ejemplo.invalid");
