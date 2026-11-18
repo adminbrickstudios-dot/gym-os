@@ -20,6 +20,14 @@ on:
         description: "Performance mínima de la landing en celular (solo avisa)"
         type: string
         default: "90"
+      estilo:
+        description: "Pase 2.0: estilo de los gimnasios demo (clasico o pista)"
+        type: string
+        default: "clasico"
+      modo:
+        description: "Pase 2.0: modo de Pista (oscuro o claro)"
+        type: string
+        default: "oscuro"
       ruta_demo:
         description: "Dirección del gimnasio demo (sin barra final)"
         type: string
@@ -55,6 +63,8 @@ jobs:
       - name: Levantar la app compilada con la imitación de Supabase
         env:
           APP_MODO: produccion
+          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Chrome
