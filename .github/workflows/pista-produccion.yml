@@ -1,0 +1,56 @@
+# Pase 2.0 · Pista en PRODUCCIÓN, autorizado por Mateo (18/11). A mano, con la cuenta de super admin (secretos BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE).
+#   fase=demo      crea un gimnasio [demo], le prende Pista desde su ficha y mira las pantallas (compu y celular); lo da de baja.
+#   fase=temple    prende Pista en Temple Gym desde la ficha del super admin y solo mira su página, /hacete-socio, /ingresar y /panel (revertir=true lo vuelve a clásico).
+#   fase=novedad   deja en Novedades el aviso del diseño nuevo, dirigido por ciudad a Temple Gym (si no le llega a uno solo, la retira).
+#   gh workflow run pista-produccion.yml --ref main -f fase=demo
+name: Pista producción
+
+on:
+  workflow_dispatch:
+    inputs:
+      fase:
+        description: "demo, temple o novedad"
+        default: "demo"
+      revertir:
+        description: "Solo con fase=temple: true lo vuelve a estilo clásico"
+        default: "false"
+      url:
+        description: "Dirección de la plataforma (vacío = la variable PRODUCCION_URL)"
+        default: ""
+      temple_url:
+        description: "Dirección propia de Temple Gym"
+        default: "https://templegymsalta.com"
+
+jobs:
+  pista:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Pista en producción
+        env:
+          BASE_URL: ${{ inputs.url || vars.PRODUCCION_URL || 'https://pasegym.com' }}
+          TEMPLE_URL: ${{ inputs.temple_url }}
+          FASE: ${{ inputs.fase }}
+          REVERTIR: ${{ inputs.revertir == 'true' && '1' || '0' }}
+          BRIK_ADMIN_MAIL: ${{ secrets.BRIK_ADMIN_MAIL }}
+          BRIK_ADMIN_CLAVE: ${{ secrets.BRIK_ADMIN_CLAVE }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$BRIK_ADMIN_MAIL" ] || [ -z "$BRIK_ADMIN_CLAVE" ]; then echo "::error::Faltan los secretos BRIK_ADMIN_MAIL y BRIK_ADMIN_CLAVE"; exit 1; fi
+          echo "::add-mask::$BRIK_ADMIN_CLAVE"
+          node scripts/medir/pista-produccion.mjs
+      - name: Guardar capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pista-produccion-${{ inputs.fase }}
+          path: .local/pista-prod/
+          if-no-files-found: ignore
+          retention-days: 7
