@@ -32,7 +32,9 @@ try {
       catch (e) { if (intento >= 3) throw e; await r.waitForTimeout(500); }
     }
   };
-  let nombre = await nombreDe(1);
+  // Los candidatos se leen ahora, con la lista a la vista: después se navega a la Entrada y la lista ya no está.
+  const candidatos = []; for (let i = 1; i <= total; i++) candidatos.push(await nombreDe(i));
+  let nombre = candidatos[0];
 
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
@@ -47,7 +49,7 @@ try {
   };
   let encontrado = false;
   for (let i = 1; i <= total && !encontrado; i++) {
-    nombre = await nombreDe(i);
+    nombre = candidatos[i - 1];
     try { await anotar(i === total ? 30000 : 8000); encontrado = true; }
     catch { await r.goto(`${G}/panel/entrada`); await buscar.waitFor({ timeout: 30000 }); }
   }
