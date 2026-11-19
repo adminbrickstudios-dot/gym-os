@@ -45,6 +45,21 @@ try {
   const antes = Number(await tv.locator("[data-tv-anotados]").getAttribute("data-tv-anotados"));
   await db.query(`insert into public.reservas (gimnasio_id, clase_id, socio_id, estado) values ($1,$2,$3,'confirmada')`, [gim, clase, socio.id]);
   chequear(await aparece(tv.locator("[data-tv-anotados] li", { hasText: esperado }), 40000), `se anota alguien y aparece solo en la TV: “${esperado}” (sin tocar nada, en menos de 40 s)`, `seguía con ${antes} anotados`);
+  // Auditoría 18/11 · Vista de lejos: en la TV de 1920×1080 ningún texto de la pantalla baja de 20 px y el WOD y los nombres son grandes; en una tablet (1024×768, 820×1180) no desborda.
+  const medidas = await tv.evaluate(() => {
+    const px = (e) => parseFloat(getComputedStyle(e).fontSize);
+    const chicos = [...document.querySelectorAll("main *")].filter((e) => e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && e.getBoundingClientRect().width > 0 && px(e) < 20).map((e) => `${e.textContent.trim().slice(0, 30)} (${px(e)}px)`);
+    return { chicos, wod: px(document.querySelector("[data-tv-wod]")), nombre: px(document.querySelector("[data-tv-anotados] li")) };
+  });
+  chequear(medidas.chicos.length === 0, "TV de lejos: ningún texto baja de 20 px", `textos chicos en la TV: ${medidas.chicos.join(" | ")}`);
+  chequear(medidas.nombre >= 20 && medidas.wod >= 20, `TV de lejos: nombres ${medidas.nombre}px y WOD ${medidas.wod}px`, `nombres ${medidas.nombre}px, WOD ${medidas.wod}px`);
+  for (const [w, h] of [[1024, 768], [820, 1180]]) {
+    await tv.setViewportSize({ width: w, height: h });
+    await tv.locator("[data-tv-wod]").waitFor({ timeout: 15000 });
+    const desborda = await tv.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    chequear(desborda <= 0, `tablet ${w}×${h}: la TV no desborda`, `tablet ${w}×${h}: desborda ${desborda}px`);
+  }
+  await tv.setViewportSize({ width: 1920, height: 1080 });
   await capturar(tv, "com14-tv");
   await ctx.close();
   if (d.errores.length) falla(d.errores.join(" | "));
