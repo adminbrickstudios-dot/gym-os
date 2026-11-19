@@ -50,8 +50,8 @@ export const informarCompraApp = async (socioId: string, planId: string, path: s
 });
 
 /** El QR de entrada (ENT-2): lo arma y lo firma la base; cambia cada 30 segundos. */
-export async function codigoQR(gimnasioId: string, socioId: string): Promise<{ codigo?: string; vence_en?: string; error?: string }> {
-  try { return await rpc<{ codigo: string; vence_en: string }>("mi_qr", { p_gimnasio_id: gimnasioId, p_socio_id: socioId }); }
+export async function codigoQR(gimnasioId: string, socioId: string): Promise<{ codigo?: string; vence_en?: string; ahora?: string; error?: string }> {
+  try { return await rpc<{ codigo: string; vence_en: string; ahora?: string }>("mi_qr", { p_gimnasio_id: gimnasioId, p_socio_id: socioId }); }
   catch (e) { return { error: (e as Error).message }; }
 }
 
