@@ -7,13 +7,10 @@ let t, token;
 before(async () => {
   t = await abrir("prueba-kiosco-alta");
   await t.q(`update public.configuracion_gimnasio set accesos_activos = array_append(accesos_activos, 'kiosco') where gimnasio_id = $1 and not ('kiosco' = any (accesos_activos))`, [t.g]);
-  // Una tablet autorizada: el token se guarda hasheado, así que se usa la función que la autoriza (la misma del panel).
-  const [{ id: u }] = await t.q(`insert into auth.users (email) values ('duenok@ejemplo.invalid') returning id`);
-  await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Dueno','dueno')`, [t.g, u]);
-  await t.comoUsuario(u, async () => {
-    const r = await t.q(`select public.autorizar_tablet($1, $2, 'Tablet de prueba') r`, [t.g, t.sede]);
-    token = typeof r[0].r === "string" ? r[0].r : (r[0].r.token ?? r[0].r.link?.split("token=")[1]);
-  });
+  // Una tablet autorizada (el token se guarda hasheado; comoUsuario revierte lo que hace, así que se inserta directo como lo hace autorizar_tablet).
+  token = "token-de-prueba-" + Math.random().toString(36).slice(2);
+  const [{ id: did }] = await t.q(`insert into public.dispositivos (gimnasio_id, sede_id, nombre, tipo) values ($1,$2,'Tablet de prueba','kiosco') returning id`, [t.g, t.sede]);
+  await t.q(`insert into public.dispositivos_tokens (gimnasio_id, dispositivo_id, token_hash) values ($1,$2, encode(extensions.digest($3, 'sha256'), 'hex'))`, [t.g, did, token]);
 });
 after(async () => t && t.cerrar());
 
