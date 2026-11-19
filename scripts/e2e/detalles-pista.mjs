@@ -36,7 +36,7 @@ try {
   await d.goto(`${GIMNASIO()}/panel/entrada`, { waitUntil: "load" });
   const sw = d.locator("[data-sonido]");
   await sw.waitFor({ timeout: 60000 });
-  const info = await sw.evaluate((e) => ({ rol: e.getAttribute("role"), marcado: e.getAttribute("aria-checked"), texto: e.textContent.replace(/\s+/g, " ").trim(), pista: !!e.querySelector("[data-interruptor-pista]") }));
+  const info = await sw.evaluate((e) => ({ rol: e.getAttribute("role"), marcado: e.getAttribute("aria-checked"), texto: e.innerText.replace(/\s+/g, " ").trim(), pista: !!e.querySelector("[data-interruptor-pista]") }));
   chequear(info.rol === "switch" && (info.marcado === "true" || info.marcado === "false"), "el sonido es un interruptor (role=switch con su estado)", `no es un interruptor: rol=${info.rol} aria-checked=${info.marcado}`);
   chequear(/sonido al anotar/i.test(info.texto) && /\b(sí|no)\b/i.test(info.texto) && info.pista, `dice qué hace y cómo está: “${info.texto}”`, `no dice qué hace o no tiene interruptor: “${info.texto}”`);
   const antes = await sw.getAttribute("aria-checked");
@@ -52,14 +52,15 @@ try {
   const col = await d.evaluate(() => {
     const e = document.querySelector(".etiqueta, label .etiqueta") ?? document.querySelector("[data-tono] .etiqueta");
     if (!e) return null;
-    const num = (s) => (s.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lienzo = document.createElement("canvas"); lienzo.width = lienzo.height = 1; const cx = lienzo.getContext("2d", { willReadFrequently: true });
+    const num = (c) => { cx.clearRect(0, 0, 1, 1); cx.fillStyle = "#000"; cx.fillStyle = c; cx.fillRect(0, 0, 1, 1); return [...cx.getImageData(0, 0, 1, 1).data].slice(0, 3); };
     const t = e.closest(".tarjeta") ?? e.closest("[data-tono]");
     let f = t, bg = null;
     while (f && !bg) { const v = getComputedStyle(f).backgroundColor; if (!/rgba\(.*, 0\)|transparent/.test(v)) bg = v; f = f.parentElement; }
     return { texto: num(getComputedStyle(e).color), fondo: num(bg ?? "rgb(18,26,34)") };
   });
   if (!col) falla("no encontré ninguna etiqueta en Caja para medir");
-  else { const r = razon(col.texto, col.fondo); chequear(r >= 7, `Pista oscuro: las etiquetas de Caja tienen contraste ${r.toFixed(1)}:1`, `Pista oscuro: contraste ${r.toFixed(1)}:1 (hace falta 7:1)`); }
+  else { const r = razon(col.texto, col.fondo); chequear(r >= 7, `Pista oscuro: las etiquetas de Caja tienen contraste ${r.toFixed(1)}:1`, `Pista oscuro: contraste ${r.toFixed(1)}:1 (hace falta 7:1); texto ${col.texto}, fondo ${col.fondo}`); }
   await d.context().close();
 } catch (e) { falla(`se cortó: ${String(e.message).split("\n")[0]}`); }
 finally { await b.close(); }
