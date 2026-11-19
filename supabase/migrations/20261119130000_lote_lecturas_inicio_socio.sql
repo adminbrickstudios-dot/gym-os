@@ -11,8 +11,8 @@ declare def text;
 begin
   def := pg_get_functiondef('public.lote_lecturas(jsonb)'::regprocedure);
   if position('''avisos_app_socio''' in def) = 0 then
-    if position('''version_registro'']' in def) = 0 then raise exception 'Guarda: la lista de lote_lecturas no termina como se esperaba (falta la migración 20261118110000)'; end if;
-    def := replace(def, '''version_registro'']', '''version_registro'',''aviso_clave_socio'',''mis_avisos'',''ocupacion_en_vivo'',''ofertas_socio'',''avisos_app_socio'',''resumen_app_socio'']');
+    if position('''estilo_gimnasio'']' in def) = 0 then raise exception 'Guarda: la lista de lote_lecturas no termina como se esperaba (falta la migración 20261118120000)'; end if;
+    def := replace(def, '''estilo_gimnasio'']', '''estilo_gimnasio'',''aviso_clave_socio'',''mis_avisos'',''ocupacion_en_vivo'',''ofertas_socio'',''avisos_app_socio'',''resumen_app_socio'']');
     execute def;
   end if;
 end $lote$;
