@@ -438,7 +438,7 @@ html[data-estilo="pista"] {
 html[data-estilo="pista"][data-modo="oscuro"] [data-tono] {
   --fondo: #121A22 !important;
   --tarjeta: #1A2530; --tarjeta-alta: #22303C; --borde: #22303C;
-  --texto: #EEF2F5; --texto-suave: #8FA0AE; --texto-tenue: #9AAAB7; --texto-2: #8FA0AE;
+  --texto: #EEF2F5; --texto-suave: #BAC6D0; --texto-tenue: #9AAAB7; --texto-2: #BAC6D0;
   --superficie: #1A2530;
   --ok: #3DDC84; --atencion: #FFC24D; --no: #FF5A5A; --prueba: #4DA3FF;
   --acento: var(--acento-pista-oscuro, #FF7A3D);

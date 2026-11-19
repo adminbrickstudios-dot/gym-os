@@ -7,6 +7,7 @@ import type { DetectorLector } from "@/app/panel/entrada/lector";
 import type { RegistrarSalida } from "@/app/panel/entrada/ventana-acciones";
 import { urlDarDeAlta } from "@/lib/panel/alta-url";
 import { Icono } from "@/components/ui/Icono";
+import { InterruptorSonido } from "@/components/panel/InterruptorSonido";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { PuntoEstado } from "../Estado";
 import { conPuntos, sinPuntos } from "./comun";
@@ -60,10 +61,8 @@ export default function PasoEscribir({ campo, detector, enterPendiente, texto, s
       <p className="texto-tenue text-center text-sm">Enter para buscar · Esc para cerrar · también por nombre</p>
       {/* D50: el sonido se prende o apaga por compu (es del mostrador, no del gimnasio). */}
       <div className="flex justify-center">
-        <button type="button" aria-pressed={sonido} data-sonido-ventana={sonido ? "si" : "no"} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60"
-          onClick={() => { alternarSonido(); campo.current?.focus(); }}>
-          <Icono nombre="campana" /> {sonido ? "Con sonido" : "Sin sonido"}
-        </button>
+        <InterruptorSonido sonido={sonido} datos={{ "data-sonido-ventana": sonido ? "si" : "no" }} icono={<Icono nombre="campana" />}
+          onClick={() => { alternarSonido(); campo.current?.focus(); }} />
       </div>
       {conQr && <div className="flex justify-center"><button type="button" className="boton" onClick={abrirCamara}><Icono nombre="camara" /> Leer QR</button></div>}
 

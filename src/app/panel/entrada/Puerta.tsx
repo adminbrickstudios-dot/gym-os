@@ -17,6 +17,7 @@ import type { EmergenciaActiva } from "./emergencia-tipos";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Tilde } from "@/components/ui/Tilde";
 import { Icono } from "@/components/ui/Icono";
+import { InterruptorSonido } from "@/components/panel/InterruptorSonido";
 
 const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja: "alerta", rojo: "prohibido", gris: "ayuda" };
 
@@ -285,9 +286,7 @@ export function Puerta({ sedeId, conQr = false, conLlavero = false, esRecepcion 
       />
       <div className="flex flex-wrap items-center justify-end gap-3 -mt-3">
         {conQr && <button type="button" onClick={() => setCamara(true)} className="boton mr-auto"><Icono nombre="camara" /> Leer QR</button>}
-        <button type="button" onClick={cambiarSonido} className="min-h-11 px-3 rounded-[var(--radio)] text-sm texto-suave active:opacity-60" aria-pressed={sonido} data-sonido={sonido ? "si" : "no"}>
-          {sonido ? "Con sonido" : "Sin sonido"}
-        </button>
+        <InterruptorSonido sonido={sonido} onClick={cambiarSonido} datos={{ "data-sonido": sonido ? "si" : "no" }} />
       </div>
 
       {hecho && (

@@ -24,9 +24,10 @@ try {
     const ultima = items[items.length - 1].getBoundingClientRect();
     const boton = document.querySelector("[data-boton-ventana]").getBoundingClientRect();
     const choca = !(ultima.right <= boton.left || ultima.left >= boton.right || ultima.bottom <= boton.top || ultima.top >= boton.bottom);
-    return { choca, ultimaAbajo: Math.round(ultima.bottom), botonArriba: Math.round(boton.top), scrollable: document.documentElement.scrollHeight > innerHeight };
+    const reserva = parseFloat(getComputedStyle(document.querySelector("main")).paddingBottom); const hace = innerHeight - boton.top;
+    return { reserva, hace, choca, ultimaAbajo: Math.round(ultima.bottom), botonArriba: Math.round(boton.top), scrollable: document.documentElement.scrollHeight > innerHeight };
   });
-  chequear(m.scrollable && !m.choca, `celular: al final de Socios la última fila (${m.ultimaAbajo}) queda sobre el botón de la Entrada (${m.botonArriba})`, `celular: el botón de la Entrada tapa la última fila (fila baja a ${m.ultimaAbajo}, botón desde ${m.botonArriba})`);
+  chequear(m.scrollable && !m.choca && m.reserva >= m.hace, `celular: al final de Socios la última fila (${m.ultimaAbajo}) queda sobre el botón de la Entrada (${m.botonArriba}); el espacio de abajo (${m.reserva}px) cubre el botón (${m.hace}px)`, `celular: el botón de la Entrada tapa la última fila (fila baja a ${m.ultimaAbajo}, botón desde ${m.botonArriba}; espacio de abajo ${m.reserva}px, el botón ocupa ${m.hace}px)`);
   await c.context().close();
 
   // 2 y 3 · Compu.
