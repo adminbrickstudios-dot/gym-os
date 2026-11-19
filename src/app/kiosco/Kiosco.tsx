@@ -54,7 +54,19 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   );
 }
 
-export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean }) {
+/** Alta en el kiosco: quien llega sin estar en el sistema escanea este QR con su celular y se anota solo en "Hacete socio" (solo si el gimnasio tiene las altas online prendidas). */
+function QrAlta({ url }: { url: string }) {
+  const [svg, setSvg] = useState<string | null>(null);
+  useEffect(() => { let vivo = true; void import("qrcode").then(async (m) => { const s = await m.default.toString(url, { type: "svg", margin: 1 }); if (vivo) setSvg(s); }); return () => { vivo = false; }; }, [url]);
+  return (
+    <div className="space-y-3" data-kiosco-alta>
+      <p className="text-2xl font-semibold">¿Es tu primera vez? Escaneá y anotate vos mismo</p>
+      <div className="mx-auto w-56 aspect-square bg-white rounded-[var(--radio)] p-3" aria-hidden dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
+    </div>
+  );
+}
+
+export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, alta_url = null }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean; alta_url?: string | null }) {
   const [dni, setDni] = useState("");
   const [r, setR] = useState<Resultado | null>(null);
   const [camara, setCamara] = useState(false);
@@ -99,9 +111,9 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
   // Vuelve solo al inicio, para el que sigue.
   useEffect(() => {
     if (!r) { campo.current?.focus(); return; }
-    const t = setTimeout(() => setR(null), r.error ? 5000 : 4000);
+    const t = setTimeout(() => setR(null), r.error ? (alta_url && /No encontramos ese DNI/.test(r.error) ? 25000 : 5000) : 4000);
     return () => clearTimeout(t);
-  }, [r]);
+  }, [r, alta_url]);
 
   const conHabitual = (fin: string) => empezar(async () => {
     let x: Resultado;
@@ -139,6 +151,7 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false }:
           <p className="titular text-6xl sm:text-7xl">{r.error ? "Probá de nuevo" : entro ? `¡Pasá, ${r.nombre}!` : `${r.nombre}, hoy no podés pasar`}</p>
           <p className="text-3xl font-semibold">{r.error ?? r.texto}</p>
           {!r.error && !entro && <p className="text-2xl texto-suave">Pasá por recepción y lo resolvemos.</p>}
+          {alta_url && r.error && /No encontramos ese DNI/.test(r.error) && <QrAlta url={alta_url} />}
         </div>
       </section>
     );

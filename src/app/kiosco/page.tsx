@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { COOKIE_TABLET } from "./cookie";
 import { Kiosco } from "./Kiosco";
+import { urlGimnasio } from "@/lib/urls";
 
 export const metadata: Metadata = { title: "Entrada", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function PaginaKiosco({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const token = (await cookies()).get(COOKIE_TABLET)?.value;
   const { error: errorLink } = await searchParams;
-  let estado: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean } | null = null;
+  let estado: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean; alta_url?: string | null } | null = null;
   let problema = errorLink ? "El link para autorizar la tablet está incompleto. Copialo de nuevo desde Configuración → Reglas." : null;
   if (token && !problema) {
     const supabase = createClient(supabaseUrl(), supabaseAnon(), { auth: { persistSession: false } });
@@ -23,7 +24,9 @@ export default async function PaginaKiosco({ searchParams }: { searchParams: Pro
     else {
       // VD-48: ¿se muestra "Me voy"? Lo dice la base (si no responde, la tablet sigue sin el botón: no rompe la entrada).
       const salida = await supabase.rpc("kiosco_salida_activa", { p_token: token });
-      estado = { ...data, con_salida: salida.error ? false : !!salida.data };
+      // Alta en el kiosco: si el gimnasio tiene las altas online prendidas, quien no está en el sistema ve un QR a "Hacete socio" (si la base no responde, sin QR).
+      const alta = await supabase.rpc("kiosco_alta", { p_token: token });
+      estado = { ...data, con_salida: salida.error ? false : !!salida.data, alta_url: !alta.error && alta.data ? urlGimnasio(String(alta.data), "/hacete-socio") : null };
     }
   } else if (!problema) problema = "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas → Tablet en la puerta.";
   return (

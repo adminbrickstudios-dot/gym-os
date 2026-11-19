@@ -148,7 +148,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
 
         {documentos.reglamento_nuevo && <ReglamentoNuevo socioId={s.socio_id} version={documentos.reglamento_nuevo.version} texto={documentos.reglamento_nuevo.texto} />}
         {avisoClave && <AvisoClave socioId={s.socio_id} aviso={avisoClave} zona={zona} />}
-        <AvisosInicio socioId={s.socio_id} avisos={misAvisos} />
+        <AvisosInicio avisos={misAvisos} />
         <OcupacionEnVivo r={ocupacion} />
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
