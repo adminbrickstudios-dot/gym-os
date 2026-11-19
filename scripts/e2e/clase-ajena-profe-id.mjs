@@ -9,13 +9,12 @@ import { CELU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resulta
 const G = GIMNASIO();
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
 const db = new pg.Client({ connectionString: url }); await db.connect();
-const [{ g, sede, act, profe, otro, nombreOtro }] = (await db.query(`
+const [{ g, sede, act, profe }] = (await db.query(`
   select g.id g, (select id from public.sedes where gimnasio_id = g.id order by id limit 1) sede,
          (select id from public.actividades where gimnasio_id = g.id order by id limit 1) act,
-         (select id from public.equipo where gimnasio_id = g.id and rol = 'profe' and nombre = 'Diego') profe,
-         (select id from public.equipo where gimnasio_id = g.id and rol = 'recepcion' limit 1) otro,
-         (select nombre from public.equipo where gimnasio_id = g.id and rol = 'recepcion' limit 1) nombreOtro
+         (select id from public.equipo where gimnasio_id = g.id and rol = 'profe' and nombre = 'Diego') profe
     from public.gimnasios g where g.slug = 'demo'`)).rows;
+const [{ otro, nombreOtro }] = (await db.query(`select id otro, nombre "nombreOtro" from public.equipo where gimnasio_id = $1 and rol = 'recepcion' order by id limit 1`, [g])).rows;
 const b = await navegador();
 let propia, ajena;
 try {

@@ -7,7 +7,7 @@ import { CELU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resulta
 
 const G = GIMNASIO();
 const ROTA = /Application error|Unhandled Runtime Error|Something went wrong|No se pudo cargar esta pantalla/i;
-const RUTAS = ["resumen", "novedades", "mensajes", "locker", "pt", "rutina", "historial", "plan", "mis-datos", "info", "yo", "clases", "cuenta"];
+const RUTAS = ["resumen", "novedades", "mensajes", "locker", "pt", "rutina", "historial", "plan", "info", "yo", "clases", "cuenta"];
 const b = await navegador();
 try {
   const s = await pagina(b, CELU);
