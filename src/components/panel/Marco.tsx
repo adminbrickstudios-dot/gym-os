@@ -101,7 +101,7 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
         {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
       </div>
       {/* La campana de Novedades flota arriba a la derecha: el botón de acción se corre para no quedar debajo de ella (auditoría 18/11). */}
-      {accion && <div className="flex-none sm:mr-14">{accion}</div>}
+      {accion && <div className="min-w-0 max-w-full sm:mr-14">{accion}</div>}
     </div>
   );
 }
