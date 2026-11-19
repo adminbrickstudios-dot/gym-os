@@ -333,48 +333,54 @@ Fase E (entrada en la esquina, `historia/NOCHE-1211.md`): E1, E2, E3, E4 y E6 en
 ### Socio (celular) — día real y primer mes
 | # | Tarea | Estado | Prueba / falta |
 |---|---|---|---|
-| S1 | Llegar por el QR, crear la cuenta, aceptar el reglamento | ✅ | `hacete-socio-directo`, `socio-flujo`, `qr-alta` |
-| S2 | Ver si puede entrar hoy, por qué y qué hacer si no (inicio de `/app`) | 🟡 traba | pendiente h3-socio: Bienvenida con nombre del ícono, QR bajo 8 bloques, "te quedan 0 días", "Tu DNI para entrar" |
+| S1 | Llegar por el QR del cartel, crear la cuenta, aceptar el reglamento | ✅ | `hacete-socio-directo`, `socio-flujo`, `qr-alta` |
+| S2 | Ver si puede entrar hoy, por qué y qué hacer si no (Inicio de `/app`) | ✅ | `inicio-socio` (estado con motivo, cómo entra arriba, 4 a 6 botones, sin "te quedan 0 días", sin desborde), `panel-app` |
 | S3 | Pagar con transferencia + comprobante o link, y ver el estado | ✅ (💲 el monto) | `rev-3`, `pay-1` |
-| S4 | Tener su QR y entrar | ✅ | `ent-2`, `vd-4` |
+| S4 | Su QR, también con el reloj del celular corrido | ✅ | `ent-2`, `qr-reloj-adelantado` (reloj +2 min y −2 min: máx. 2 pedidos de QR en 10 s, sin error de hidratación), `qr-socio.test.mjs` (`mi_qr` trae `ahora`) |
 | S5 | Reservar, cancelar, lista de espera | ✅ | `vd-24`, `cla-1`, `cla-2` |
 | S6 | Ver su rutina y anotar kilos | ✅ | `rut-2`, `series-hechas.test.mjs` |
 | S7 | Historial y recibos | ✅ | `rev-socio`, `recibo-pago.test.mjs` |
-| S8 | Enterarse de avisos (cobro, clase cancelada, mensaje) | ✅ | `avisos-app-socio.test.mjs` |
-| S9 | Avisos por hora: clase en 1 h, "te quedan 3 días" | ❌ | punto 5 de la tarea (FA-12) |
+| S8 | Avisos (cobro, clase cancelada, mensaje, clase en 1 h, evento de mañana) | ✅ | `avisos-app-socio.test.mjs` |
+| S9 | "Te quedan N días" (3 o menos), calculado al abrir, sin cron | ✅ detrás de la llave `aviso_vencimiento` | `profe-id-y-aviso-vencimiento.test.mjs` (apagado no avisa, prendido avisa, otro gimnasio y otro socio dan error) |
 | S10 | Renovar | ✅ (💲) | `vd-39`, `cambio-plan.test.mjs` |
-| S11 | Insignias, resumen del año, recomendación | 🟡 | `f45-faltantes` no ejecutó la recomendación (Q3) |
-| S12 | Foto propia | 🟡 | `f45-foto-socio` |
-| S13 | Novedades, mensajes, locker, PT | 🟡 | `vd-38` (mensajes ✅); novedades, locker y PT sin e2e propio confirmado |
-| S14 | /app con 5 viajes o menos a la base | ❌ | hoy 9 |
+| S11 | Insignias, resumen del año, recomendación | ✅ | `socio-pantallas` (`/app/resumen` abre), `f45-faltantes` |
+| S12 | Foto propia | ✅ | `f45-foto-socio` |
+| S13 | Novedades, mensajes, locker, PT, rutina, historial, plan, info, perfil | ✅ | `socio-pantallas` (abren sin romperse ni desbordar), `vd-38` (mensajes) |
+| S14 | `/app` con 5 viajes o menos | ✅ | `viajes` (tope 5, antes 9; las 6 lecturas sueltas van al lote; `20261119130000`) |
 
 ### Profe y PT
 | # | Tarea | Estado | Prueba / falta |
 |---|---|---|---|
 | P1 | Sus clases de hoy, anotados, tomar presente | ✅ | `rev-4`, `panel-clases` |
-| P2 | "Clase ajena" por `profe_id` | ❌ | pide migración sobre `clases_del_dia` (PREGUNTAS, recomendada) |
+| P2 | "Clase ajena" por `profe_id` | ✅ | `clase-ajena-profe-id` (otro integrante con el mismo nombre), `profe-id-y-aviso-vencimiento.test.mjs` (el equipo recibe `profe_id`, el socio null, otro gimnasio y socio ajeno dan error) |
 | P3 | Rutinas de sus socios: crear, copiar, asignar | ✅ | `rut-1`, `rutinas-completas.test.mjs` |
-| P4 | Borrador guardado en el editor de rutinas (FA-17) | ❌ | `rut-1` |
+| P4 | Borrador guardado en el editor de rutinas | ✅ | `fluidez-reglas` (regla 7) |
 | P5 | Lista de espera, WOD, TV de su clase | ✅ | `cla-4`, `cla-9`, `tv-sala.test.mjs` |
 | P6 | Sus horas y liquidación (ver) | ✅ | `vd-52`, `liquidacion-profes.test.mjs` |
 | P7 | Reglas de cuánto se le paga | 💲 | |
-| P8 | "Clase sin anotados" avisa al profe | ❌ | punto 5 |
+| P8 | "Clase sin anotados" avisa al profe (campana, 2 h antes) | ✅ | `campana-clases-vacias.test.mjs` |
 
 ### Kiosco, TV y visitante
 | # | Tarea | Estado | Prueba / falta |
 |---|---|---|---|
-| K1 | Kiosco: DNI/QR y que diga por qué no deja pasar | 🟡 | `kiosco.test.mjs`, `ent-3` |
-| K2 | Alta en el kiosco para quien llega sin cuenta | ❌ | |
-| K3 | TV en vivo por Realtime con respaldo cada 15 s | 🟡 | hoy solo cada 15 s |
-| K4 | `vd-4` firme | 🟡 | cae a veces |
-| K5 | Página del gimnasio y `/hacete-socio` perfectas en compu y celular | 🟡 | `fase-u4`, `reg-1` |
+| K1 | Kiosco: DNI/QR y que diga por qué no deja pasar | ✅ | `ent-3` (el texto del motivo), `kiosco.test.mjs` |
+| K2 | Alta en el kiosco para quien llega sin cuenta (QR a Hacete socio si las altas online están prendidas) | ✅ | `kiosco-alta`, `kiosco-alta.test.mjs` |
+| K3 | TV en vivo por Realtime con respaldo cada 15 s | 🟡 | Hoy consulta cada 15 s y dice "Sin conexión". La TV no tiene sesión (la autoriza un token): Realtime pide un canal con broadcast desde la base, y ni Actions ni la base local tienen Realtime. No se puede probar → no se hizo. |
+| K4 | `vd-4` firme | 🟡 | No se tocó: es Realtime entre tablet y recepción, y tampoco corre acá |
+| K5 | Página del gimnasio y `/hacete-socio` en compu y celular | 🟡 | `fase-u4`, `reg-1` y el barrido; no se hizo una pasada nueva de capturas |
 
 ### Recepción, encargado y dueño
 | # | Tarea | Estado | Prueba / falta |
 |---|---|---|---|
-| R1 | Cada número que se toca abre la lista con nombres | 🟡 | `q2-retencion` cubre Retención; falta el resto |
-| R2 | "Avisar a todos los anotados" desde una clase (wa.me) | 🟡 | `avi-1`, `cla-3`; falta desde la lista de la clase |
-| R3 | Borrador guardado en alta completa, planes y página | 🟡 | `borrador.test.ts` (plan, rutina, evento) |
-| R4 | Interesado sin contactar en 24 h (FA-13), FA-1, FA-2, FA-5, FA-6, FA-10 | ❌/🟡 | F5.1 |
+| R1 | Cada número que se toca abre la lista con nombres | 🟡 | Los números de Inicio ya son enlaces (`NumerosInicio`) y Retención `q2-retencion`; sin revisión número por número |
+| R2 | "Avisar a todos los anotados" desde una clase (wa.me) | ✅ | `com-3`, `avi-1` |
+| R3 | Borrador guardado en formularios largos | ✅ plan, rutina, evento, página (`fluidez-reglas`); alta completa detrás de la llave `borrador_alta` | |
+| R4 | FA-13 (interesado sin contactar en 24 h), FA-5 (asistente que se abre solo), FA-6 (listas virtualizadas) | ❌ → Pase 2.0 | Tocan `para_hacer_hoy` (se reemplazó varias veces), la entrada de todos los e2e del dueño y las listas de Socios: riesgo alto sin poder probarlas en esta vuelta |
 | R5 | Plata: pagos parciales, estado de cuenta, prorrateos, matriz de permisos, ARCA | 💲 | `PASE-1.0.md` |
 | R6 | Fuera de esta tarea (Pase 2.0): landing de venta, débito, ARCA, Wellhub/TotalPass, importar de otro sistema, alta sola | ➡️ | |
+
+### Llaves para prender en Temple Gym (las prende Mateo; todas apagadas por defecto, prendidas en los [demo])
+- `aviso_vencimiento` (Configuración → Funciones nuevas): aviso "te quedan N días" arriba del Inicio del socio.
+- `altas_online` (ya existía): con ella prendida, el kiosco ofrece el QR de alta al que no está en el sistema. Hoy apagada en Temple Gym.
+- Sin llave, porque no cambian lo que ve el gimnasio: `profe_id` en `clases_del_dia`, el lote del Inicio (`/app` más rápido), el arreglo del QR con el reloj corrido.
+- `borrador_alta` y `vuelto_efectivo` (💲): ya existían; siguen como estaban.
