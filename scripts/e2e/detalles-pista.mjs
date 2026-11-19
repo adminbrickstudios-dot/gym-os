@@ -38,7 +38,7 @@ try {
   await sw.waitFor({ timeout: 60000 });
   const info = await sw.evaluate((e) => ({ rol: e.getAttribute("role"), marcado: e.getAttribute("aria-checked"), texto: e.innerText.replace(/\s+/g, " ").trim(), pista: !!e.querySelector("[data-interruptor-pista]") }));
   chequear(info.rol === "switch" && (info.marcado === "true" || info.marcado === "false"), "el sonido es un interruptor (role=switch con su estado)", `no es un interruptor: rol=${info.rol} aria-checked=${info.marcado}`);
-  chequear(/sonido al anotar/i.test(info.texto) && /\b(sí|no)\b/i.test(info.texto) && info.pista, `dice qué hace y cómo está: “${info.texto}”`, `no dice qué hace o no tiene interruptor: “${info.texto}”`);
+  chequear(/sonido al anotar/i.test(info.texto) && /(^|\s)(sí|no)$/i.test(info.texto) && info.pista, `dice qué hace y cómo está: “${info.texto}”`, `no dice qué hace o no tiene interruptor: “${info.texto}”`);
   const antes = await sw.getAttribute("aria-checked");
   await sw.click();
   await d.waitForFunction((a) => document.querySelector("[data-sonido]")?.getAttribute("aria-checked") !== a, antes);
