@@ -17,7 +17,7 @@ export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; soc
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fallos, setFallos] = useState(0);
-  // Lo que depende de la hora se dibuja DESPUÉS de montar: el servidor y el navegador no comparten reloj (React #418 si se calcula en los dos).
+  // Lo que depende de la hora se dibuja DESPUÉS de montar: el servidor y el navegador no comparten reloj (error de hidratación de React si se calcula en los dos).
   const [quedan, setQuedan] = useState<number | null>(null);
   const renovando = useRef(false);
   const ultimoPedido = useRef(0);
