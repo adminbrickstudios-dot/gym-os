@@ -22,7 +22,13 @@ try {
   // La lista puede repintarse mientras se lee: se vuelve a pedir la fila (por su lugar desde el final) hasta que tenga nombre.
   const nombreDe = async (i) => {
     for (let intento = 1; ; intento++) {
-      try { return (await links.nth(-i).locator(".font-semibold").first().innerText({ timeout: 10000 })).replace(/#\d+/, "").trim(); }
+      try {
+        const fila = links.nth(-i);
+        const bold = fila.locator(".font-semibold").first();
+        // El nombre va en negrita; si la fila no la trae (otra fila de la lista), se toma el primer renglón de su texto.
+        const texto = (await bold.count()) ? await bold.innerText({ timeout: 10000 }) : (await fila.innerText({ timeout: 10000 })).split("\n")[0];
+        return texto.replace(/#\d+/, "").trim();
+      }
       catch (e) { if (intento >= 3) throw e; await r.waitForTimeout(500); }
     }
   };
