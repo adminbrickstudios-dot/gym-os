@@ -14,23 +14,32 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   // Un socio al día (el último de la lista: el que menos usan las otras pruebas).
   await r.goto(`${G}/panel/socios?estado=al_dia`);
-  const a = r.locator('main ul a[href^="/panel/socios/"]').last();
-  await a.waitFor({ timeout: 30000 });
-  const nombre = (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  // Otros recorridos de la misma tanda también anotan a "el último": si ya entró hoy, la primera pasada diría "ya entró" y no habría tarjeta de hecho.
+  // En vez de apostar a uno, se prueba desde el último hacia atrás hasta encontrar un socio que todavía no entró hoy (se espera una condición, no un tiempo).
+  const links = r.locator('main ul a[href^="/panel/socios/"]');
+  await links.first().waitFor({ timeout: 30000 });
+  const total = await links.count();
+  const nombreDe = async (i) => (await links.nth(i).locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  let nombre = await nombreDe(total - 1);
 
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 30000 });
-  const anotar = async () => {
+  const anotar = async (espera = 30000) => {
     await buscar.fill(nombre);
     await r.locator("button.fila", { hasText: nombre }).first().waitFor({ timeout: 15000 });
     await buscar.press("Enter");
     await r.locator("[data-veredicto]").waitFor({ timeout: 30000 });
     await r.keyboard.press("Enter");
-    await r.locator("[data-hecho]").waitFor({ timeout: 30000 });
+    await r.locator("[data-hecho]").waitFor({ timeout: espera });
   };
-
-  await anotar();
+  let encontrado = false;
+  for (let i = 1; i <= Math.min(6, total) && !encontrado; i++) {
+    nombre = await nombreDe(total - i);
+    try { await anotar(i === Math.min(6, total) ? 30000 : 8000); encontrado = true; }
+    catch { await r.goto(`${G}/panel/entrada`); await buscar.waitFor({ timeout: 30000 }); }
+  }
+  if (!encontrado) throw new Error("ninguno de los últimos socios al día pudo anotarse hoy");
   ok(`primera pasada de ${nombre}: anotada`);
   await buscar.fill("");
   // (Antes se borraba la tarjeta vieja del DOM a mano: React la maneja y el borrado lo dejaba colgado. Ahora se espera a la tarjeta nueva por su texto.)

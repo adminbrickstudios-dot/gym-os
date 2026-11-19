@@ -50,6 +50,8 @@ for (const rol of Object.keys(PROHIBIDO)) {
       try { r = await ir().catch(async () => { await p.waitForTimeout(2000); return ir(); }); }
       catch (e) { falla(`${rol} · ${tam} · ${ruta}: no cargó (${e.message.split("\n")[0]})`); continue; }
       await p.waitForLoadState("networkidle").catch(() => {});
+      // Se lee la pantalla cuando ya pintó (hay texto y no queda ningún esqueleto de carga), no después de un tiempo fijo.
+      await p.waitForFunction(() => document.body.innerText.trim().length > 40 && !document.querySelector(".esqueleto, [aria-busy='true']"), null, { timeout: 15000 }).catch(() => {});
       const texto = await p.locator("body").innerText().catch(() => "");
       // Con la máquina cargada el navegador a veces se cae a mitad de una ruta: eso no es la pantalla.
       if (p.isClosed() || !b.isConnected()) { falla(`${rol} · ${tam} · ${ruta}: se cerró el navegador (máquina cargada)`); continue; }
