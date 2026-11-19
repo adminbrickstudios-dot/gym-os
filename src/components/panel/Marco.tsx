@@ -61,7 +61,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
       {entrada && <PanelSocioLateral sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} />}
       {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
-        <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-28 lg:pb-16">
+        <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-44 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}
           <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10"><Campana rol={panel.yo.rol} apagadas={panel.secciones_apagadas} /></div>
           <SinConexion />
@@ -101,7 +101,7 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
         {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
       </div>
       {/* La campana de Novedades flota arriba a la derecha: el botón de acción se corre para no quedar debajo de ella (auditoría 18/11). */}
-      {accion && <div className="flex-none sm:mr-14">{accion}</div>}
+      {accion && <div className="min-w-0 max-w-full sm:mr-14">{accion}</div>}
     </div>
   );
 }
