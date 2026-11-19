@@ -1,4 +1,4 @@
-> Reemplazado por docs/base/DISENO.md y docs/base/PULIDO.md en lo visual: ya no se usan emojis como íconos (salen de `Icono`), hay tema claro y oscuro elegible por usuario y las esquinas y sombras cambiaron. Donde este archivo diga otra cosa, manda docs/base/.
+> Reemplazado por docs/base/DISENO.md y docs/base/historia/PULIDO.md en lo visual: ya no se usan emojis como íconos (salen de `Icono`), hay tema claro y oscuro elegible por usuario y las esquinas y sombras cambiaron. Donde este archivo diga otra cosa, manda docs/base/.
 
 # Diseño
 
@@ -44,7 +44,7 @@ pantalla.
 
 ## Componentes (uno de cada, siempre el mismo)
 
-`docs/DISENO.md` (ítem DIS-0) los documenta con código. Lista mínima:
+`docs/base/historia/DISENO-v2.md` (ítem DIS-0) los documenta con código. Lista mínima:
 botón (principal, normal, peligro, chico, ícono) · tarjeta · fila de lista
 (con acción a la derecha y deslizable en celular) · campo con etiqueta, ayuda
 y error · selector · interruptor · pestañas · píldora de estado · aviso (éxito,

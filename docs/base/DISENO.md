@@ -1,6 +1,6 @@
 # Diseño de Base
 
-Reemplaza, donde choquen, a `docs/DISENO.md` y a `docs/v2/07-DISENO-VELOCIDAD-NAVEGACION.md`
+Reemplaza, donde choquen, a `docs/base/historia/DISENO-v2.md` y a `docs/v2/07-DISENO-VELOCIDAD-NAVEGACION.md`
 (fondo oscuro "modo gym", emojis como íconos, esquinas de 16 px). Lo demás de
 esos archivos (movimiento, esqueletos, memoria, botones de volver) sigue
 valiendo.

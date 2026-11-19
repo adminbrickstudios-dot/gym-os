@@ -1,4 +1,4 @@
-> Reemplazado por docs/base/ donde choque (gana docs/base/): el menú en 4 secciones y los íconos sin emoji están en docs/base/DISENO.md, lo pendiente de cada pantalla del dueño en docs/base/PULIDO.md y la lista que manda en docs/base/RECTA-FINAL.md.
+> Reemplazado por docs/base/ donde choque (gana docs/base/): el menú en 4 secciones y los íconos sin emoji están en docs/base/DISENO.md, lo pendiente de cada pantalla del dueño en docs/base/historia/PULIDO.md y la lista que manda en docs/base/RECTA-FINAL.md.
 
 # 03 · El dueño
 

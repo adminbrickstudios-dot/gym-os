@@ -623,9 +623,9 @@ da verde, con capturas. Recién ahí el resumen de arriba dice
 cómo crear el gimnasio y su dueño, los links por rol y qué probar primero.
 
 ### BASE-DOC · Documentación al día ✅
-Hechos (08/11): `CONTEXTO.md`, `PERMISOS.md` (generado desde la base real), `INVESTIGACION.md`, `docs/CONVENCIONES.md`, `docs/LECCIONES.md`; `CLAUDE.md` con la excepción de `cubierto_hasta`. Pendiente: `docs/SCHEMA.md` completo con lo real y marcar lo viejo de `docs/v2/` como reemplazado.
+Hechos (08/11): `historia/CONTEXTO.md`, `PERMISOS.md` (generado desde la base real), `historia/INVESTIGACION.md`, `docs/CONVENCIONES.md`, `docs/LECCIONES.md`; `CLAUDE.md` con la excepción de `cubierto_hasta`. Pendiente: `docs/SCHEMA.md` completo con lo real y marcar lo viejo de `docs/v2/` como reemplazado.
 
-(Original:) `CONTEXTO.md`, `PERMISOS.md` (desde la base real), `INVESTIGACION.md`,
+(Original:) `historia/CONTEXTO.md`, `PERMISOS.md` (desde la base real), `historia/INVESTIGACION.md`,
 `docs/SCHEMA.md` (actualizar con lo real), `docs/CONVENCIONES.md` y
 `docs/LECCIONES.md` (escribirlos, `CLAUDE.md` los pide). Lo que esté
 desactualizado o se contradiga se reescribe; lo viejo de `docs/v2/` que choque
@@ -670,7 +670,7 @@ estado acá abajo y publicado al cerrarlo.
   existe, VD-60: pulirla), más la ocupación como número. Nunca nombres de socios
   en una pantalla pública (D52).
 - Pase de invitado: ya existe (INV-1). Lo que falta, que el invitado quede como
-  interesado, está en `FALTANTES.md` FA-24.
+  interesado, está en `historia/FALTANTES.md` FA-24.
 - Ocupación en vivo para el socio ("ahora hay 23 personas").
 - El socio congela su plan solo, dentro del tope.
 - Modo "tengo que cobrar" el día 1: la recepción ve una lista de cobro rápida.

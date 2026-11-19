@@ -10,7 +10,7 @@ parás hasta que `node scripts/noche/pendientes.mjs --siguiente` diga `NADA`.
 
 1. Leé completos: `CLAUDE.md`, todo `docs/v2/` (empezando por
    `00-LEEME.md` y `08-PLAN.md`), `docs/HOJA-DE-RUTA.md`
-   (reglas, decisiones y el bloque 20), `docs/DISENO.md`, la primera entrada
+   (reglas, decisiones y el bloque 20), `docs/base/historia/DISENO-v2.md`, la primera entrada
    de `docs/LOG.md`, y `scripts/noche/PROMPT.md` (las reglas de una vuelta:
    valen todas salvo lo que este archivo cambia para Windows).
 2. Rama: `git fetch origin` y `git switch -c noche/<fecha de hoy>

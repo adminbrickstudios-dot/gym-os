@@ -115,5 +115,5 @@ qué e2e o prueba de base lo cubre. Lo que es P0 está marcado con su BASE-*.
 | 66 | Retención con wa.me | Retención | ✅ | | `retencion.test.mjs` (base, corrida 09/11). |
 | 67 | Plata en riesgo | Retención | ✅ | BASE-4 | `base4-numeros.test.mjs` (base, corrida 09/11): "plata en riesgo" = suma mensual de vencidos, por vencer, nuevos y no vienen. |
 | 68 | Horarios pico | Resultado: horas pico del mes; con la función nueva "Horarios pico por día de la semana" (apagada por defecto), un cuadro día × hora de las últimas 8 semanas | ✅ |  | `funciones-nuevas.test.mjs` (base, corrida 43130787225: cuenta por día y hora, sin rechazados; solo dueño y encargado) y `f45-funciones` (corrida 43132608358). |
-| 69 | Reporte mensual | Resumen, exportar el mes | 🟡 |  | `resultado.test.mjs` (base). Falta un reporte del mes que se pueda mandar: está en la lista Z6 de `PULIDO.md` (otro ayudante). |
+| 69 | Reporte mensual | Resumen, exportar el mes | 🟡 |  | `resultado.test.mjs` (base). Falta un reporte del mes que se pueda mandar: está en la lista Z6 de `historia/PULIDO.md` (otro ayudante). |
 | 70 | Asistente de 9 pasos | Primeros pasos (VD-43) | ✅ | BASE-7 | `asistente-pasos.test.mjs`, `primeros-pasos.test.mjs` (base) y `base-7b` 12 pasos (corrida 43128173940): los 9 pasos medidos, vista previa del logo, "Probar conexión" y el cierre. |

@@ -11,7 +11,7 @@ Stack: Next.js (App Router) + Supabase + Vercel.
 **El schema vigente y sus decisiones: `docs/SCHEMA.md`.**
 **Lo que se está construyendo ahora: Pase, `docs/base/` — empezar por `docs/base/00-LEEME.md`; lo que manda es `docs/base/PASE-1.0.md` y la lista `docs/base/RECTA-FINAL.md` (el detalle de cada BASE-* está en `docs/base/PROGRESO.md`). Donde choque con `docs/v2/` (lo construido de Gym OS v2), gana `docs/base/`.**
 **Qué se hace y en qué orden: `docs/HOJA-DE-RUTA.md`** (cola, decisiones de
-Mateo, detalle por panel). `docs/PLAN.md` es la historia de lo construido.
+Mateo, detalle por panel). `docs/base/historia/PLAN.md` es la historia de lo construido.
 **Cómo trabaja Mateo con Claude Code (de día `/panel`, de noche
 `scripts/noche/noche.sh`): `docs/CLAUDE-CODE.md`.**
 

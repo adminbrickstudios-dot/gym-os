@@ -2,7 +2,7 @@
 
 > **12/11:** las tres listas vigentes (publicado, sin publicar, falta) están en `docs/base/ESTADO-GENERAL.md`; este archivo es el detalle de la revisión del 11/11 y, donde difiera, manda `ESTADO-GENERAL.md` (se escribió antes del PR #16 y de los cierres de F4, F5 y Z).
 
-Rama `carril/rev-dueno`, salida de `base/2026-11-07`. Se revisó función por función contra `PEDIDO-ORIGINAL.md`, `AJUSTES-0911-NOCHE.md`, `docs/v2/` (03, 06, 10), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md`, `PULIDO.md`, `FLUIDEZ.md` y `DISENO.md`. Todo lo probado ejecutando fue en el gimnasio demo; nunca en Temple Gym.
+Rama `carril/rev-dueno`, salida de `base/2026-11-07`. Se revisó función por función contra `historia/PEDIDO-ORIGINAL.md`, `historia/AJUSTES-0911-NOCHE.md`, `docs/v2/` (03, 06, 10), `DETALLES-70.md`, `historia/FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md`, `historia/PULIDO.md`, `FLUIDEZ.md` y `DISENO.md`. Todo lo probado ejecutando fue en el gimnasio demo; nunca en Temple Gym.
 
 Cómo leer las tablas:
 - **Hecho y publicado**: está en `base/2026-11-07` con recorrido e2e que lo cubre. "Publicado" quiere decir "en la base de integración con su prueba"; llega a producción con el PR de Mateo después de aplicar las migraciones.
@@ -73,7 +73,7 @@ La página pública y la app del socio leen de `landing_publica` y funciones her
 
 ## 3. Falta
 
-Lo que ya estaba en `PULIDO.md` y sigue igual en el código (se verificó leyendo el archivo) más lo nuevo de esta revisión.
+Lo que ya estaba en `historia/PULIDO.md` y sigue igual en el código (se verificó leyendo el archivo) más lo nuevo de esta revisión.
 
 | Función | Rol | Por qué falta / qué hay |
 |---|---|---|
@@ -93,8 +93,8 @@ Lo que ya estaba en `PULIDO.md` y sigue igual en el código (se verificó leyend
 | `/admin/gimnasios` no pagina y "← Gimnasios" de la ficha va a `/admin` en vez de a la lista con sus filtros | Super admin | Con 200 gimnasios se nota. Mediano |
 | El tablero del super admin tiene unos 16 bloques sin menú (4 secciones) | Super admin | Diseño; no se tocó para no pisar los e2e de `super-f2` |
 | El tema claro u oscuro se guarda en la base pero el panel solo lee la cookie | Todos | Toca `panel/layout.tsx` (carril A) |
-| Detalles premium del dueño: reporte del mes para compartir, comparación con el año pasado, metas, vistas guardadas, tecla "?" con atajos | Dueño | Lista de `PULIDO.md`, Z6; no se hizo nada |
-| Super admin: ingreso mensual de BRIK y cohortes, notas por gimnasio en la lista, "ver como el dueño" de solo lectura | Super admin | Lista de `PULIDO.md`, Z6; no se hizo nada |
+| Detalles premium del dueño: reporte del mes para compartir, comparación con el año pasado, metas, vistas guardadas, tecla "?" con atajos | Dueño | Lista de `historia/PULIDO.md`, Z6; no se hizo nada |
+| Super admin: ingreso mensual de BRIK y cohortes, notas por gimnasio en la lista, "ver como el dueño" de solo lectura | Super admin | Lista de `historia/PULIDO.md`, Z6; no se hizo nada |
 | Factura electrónica (ARCA) para el abono de BRIK | Super admin | ⛔ hasta que Mateo tenga el servicio |
 | Dominios en producción | Super admin | ⛔ `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` y el dominio |
 | Segundo factor obligatorio en `/admin` en producción | Super admin | Está escrito (SA-10); falta que Mateo lo active para su cuenta |
