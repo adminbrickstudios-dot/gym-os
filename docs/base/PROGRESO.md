@@ -1,6 +1,22 @@
 # PROGRESO de Pase (antes Base)
 
-## DÓNDE QUEDÉ y RESUMEN PARA MATEO (16/11, tarde)
+## DÓNDE QUEDÉ y RESUMEN PARA MATEO (18/11, mediodía)
+
+**Publicado hoy (18/11, 13:50 ART, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, con prevuelo; PR #34, main 24386fe4; vuelta atrás: main antes = `000770ff`):**
+- **Cacería terminada en el panel:** cada pantalla del panel pide **3 viajes o menos** a la base (contexto, un lote de lecturas y el estado vivo). Entrada 7 → 3, Inicio de la dueña 6 → 3, Configuración 6 → 3, Vender 5 → 3, Caja de la recepción 5 → 3 (la de la dueña 8 → 4: `cajas_para_revisar` escribe y no entra en un lote), Interesados (Socios → Interesados) 3. `/panel/prospectos` (la dirección vieja) queda en 5 por el salto de redirección. Los topes de `scripts/medir/topes-viajes.json` bajaron a lo medido (nunca suben).
+- Cómo: el oído de la puerta ya no pide su cursor a la base (lo trae el servidor al pintar); la Puerta recibe en el lote de Entrada el modo de prueba, si se registra la salida y la emergencia; Interesados, el Inicio de la dueña (datos de ejemplo y seguridad), "¿Quién atiende?" y la versión de Configuración van en el mismo lote; el Inicio del socio (`/app`) pide `registra_salida` en el lote (9 viajes siempre, ya no dependía del QR de la pared). El respaldo del cartel de emergencia pasó de 30 a 60 s.
+- Migraciones `20261118100000` y `20261118110000` (aditivas, solo suman nombres a la lista cerrada de `lote_lecturas`), con `supabase/pruebas/lote-entrada.test.mjs` (misma lectura que por separado; otro gimnasio o sin permiso = error, no vacío).
+- **Prueba de la base que se rompía con los días** (`espera-con-plazo`: usaba el reloj real con socios sembrados el 14/11): arreglada.
+- Probado en Actions con la app compilada: recorridos de Entrada, Caja, Interesados, Inicio, camino del socio, barrido de cada rol y los topes de viajes: todo en verde (corrida 44349582365). Producción: `humo-pasado` verde, portada de Temple Gym, `/hacete-socio`, `pasegym.com/g/demo`, `/ingresar` y `/super` responden 200.
+- ⛔ `humo-produccion.yml` falla en su paso de puertas desde el 11/11 (no es de este cambio): busca el gimnasio `demo-mateo`, que no está en producción (hay que sembrarlo con "sembrar-prueba-mateo" desde Actions → Base de datos).
+
+**Pase 2.0 · Pista (18/11, en la rama, SIN publicar):** hecho y probado en Actions con la app compilada: la llave `estilo` (clasico|pista) y `modo` (oscuro|claro) por gimnasio (migración `20261118120000`, entra apagada para todos, con pruebas de la base: solo el dueño o el super admin la cambian, otro gimnasio = error); el estilo y el modo salen en el `<html>` desde el servidor (vía la dirección que ya resuelve el proxy, sin un viaje más); los tokens, el radio, los botones y la tipografía Big Shoulders 800 (14 KB, un solo archivo propio) son solo CSS al final de `globals.css`; selector en Configuración → Marca → Estilo y en la ficha del super admin; lo impreso sale siempre claro; el QR ya va sobre su cuadro blanco. **Inventario** (`inventario-pantallas.mjs`): 66 pantallas en compu y celular, clásico contra Pista, sin perder un botón, link, campo, título ni atributo (el inventario encontró y se ajustó a lo que cambia solo entre pasadas). **Las 254 recorridos e2e + los topes de viajes con Pista (oscuro)**: todos en verde (los que fallaron por las mayúsculas de los títulos se corrigieron en el arnés: con Pista el recorrido lee el texto como se escribió, `E2E_SIN_MAYUSCULAS`); **barrido de cada rol, compu y celular, en oscuro y en claro**: en verde; **Lighthouse de la página del gimnasio**: 93 con Pista (93 con el clásico), accesibilidad 100 (96 clásico). Capturas de antes y después (artefacto `pantallas`, `inv-clasico-*` e `inv-pista-*`), miradas: Inicio, Entrada, Configuración, app del socio y portada, en oscuro y claro. **Desvío a propósito de DISENO.md:** el texto apagado (`--texto-3`) sale #9AAAB7 en oscuro y #5E6B77 en claro para llegar a 4,5:1 (con los del diseño daba 3,4 a 3,9:1). Los títulos van con Big Shoulders sin `preload` (el clásico no baja nada de más). **Falta para publicar:** la pasada de las 254 en clásico (para confirmar que nada cambió con la llave apagada, en curso) y la mirada de Mateo a las capturas; al publicar: prevuelo, aplicar la migración (sin copia), prender Pista en los `[demo]` (`update configuracion_gimnasio set estilo='pista'` solo en los `[demo]`, a mano desde Actions → Base de datos) y `npm run db:types`. Temple Gym queda en clásico hasta que Mateo lo prenda (Configuración → Marca → Estilo).
+
+**Lo que queda de la cacería (no bloquea):** `/app` llegó a 9 (la meta de Mateo era 2: quedan el menú, el aviso de clave, la ocupación, las ofertas y los avisos, que van en componentes aparte); juntar los relojes en Realtime; ⛔ la tabla de errores de producción y las pantallas lentas (necesitan a Mateo, ver abajo).
+
+---
+
+## (anterior) DÓNDE QUEDÉ y RESUMEN PARA MATEO (16/11, tarde)
 
 **Publicado hoy (hora de Argentina, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, cada una con prevuelo y humo en producción; Temple Gym solo mirado):**
 - **PR #29 (10:40) · URGENTE React #441 en `/hacete-socio`:** no pude reproducirlo (ni sin sesión, ni con la dueña o un socio, ni desde la portada: `hacete-socio-sesion.mjs`) y no tengo acceso a los logs de Vercel de este proyecto. Se blindó lo único que en el servidor puede fallar ahí (la lectura del alta): reintenta una vez y, si la base no responde, la página lo dice con "Probar de nuevo"; el error genérico ahora muestra su "Código del error".
@@ -607,9 +623,9 @@ da verde, con capturas. Recién ahí el resumen de arriba dice
 cómo crear el gimnasio y su dueño, los links por rol y qué probar primero.
 
 ### BASE-DOC · Documentación al día ✅
-Hechos (08/11): `CONTEXTO.md`, `PERMISOS.md` (generado desde la base real), `INVESTIGACION.md`, `docs/CONVENCIONES.md`, `docs/LECCIONES.md`; `CLAUDE.md` con la excepción de `cubierto_hasta`. Pendiente: `docs/SCHEMA.md` completo con lo real y marcar lo viejo de `docs/v2/` como reemplazado.
+Hechos (08/11): `historia/CONTEXTO.md`, `PERMISOS.md` (generado desde la base real), `historia/INVESTIGACION.md`, `docs/CONVENCIONES.md`, `docs/LECCIONES.md`; `CLAUDE.md` con la excepción de `cubierto_hasta`. Pendiente: `docs/SCHEMA.md` completo con lo real y marcar lo viejo de `docs/v2/` como reemplazado.
 
-(Original:) `CONTEXTO.md`, `PERMISOS.md` (desde la base real), `INVESTIGACION.md`,
+(Original:) `historia/CONTEXTO.md`, `PERMISOS.md` (desde la base real), `historia/INVESTIGACION.md`,
 `docs/SCHEMA.md` (actualizar con lo real), `docs/CONVENCIONES.md` y
 `docs/LECCIONES.md` (escribirlos, `CLAUDE.md` los pide). Lo que esté
 desactualizado o se contradiga se reescribe; lo viejo de `docs/v2/` que choque
@@ -654,7 +670,7 @@ estado acá abajo y publicado al cerrarlo.
   existe, VD-60: pulirla), más la ocupación como número. Nunca nombres de socios
   en una pantalla pública (D52).
 - Pase de invitado: ya existe (INV-1). Lo que falta, que el invitado quede como
-  interesado, está en `FALTANTES.md` FA-24.
+  interesado, está en `historia/FALTANTES.md` FA-24.
 - Ocupación en vivo para el socio ("ahora hay 23 personas").
 - El socio congela su plan solo, dentro del tope.
 - Modo "tengo que cobrar" el día 1: la recepción ve una lista de cobro rápida.

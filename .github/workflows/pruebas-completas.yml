@@ -28,6 +28,14 @@ on:
         description: "Socios del gimnasio demo (vacío = 300). F8.1 mide con 5000"
         type: string
         default: ""
+      estilo:
+        description: "Pase 2.0: estilo de los gimnasios demo en la prueba (clasico o pista)"
+        type: string
+        default: "clasico"
+      modo:
+        description: "Pase 2.0: modo de Pista (oscuro o claro)"
+        type: string
+        default: "oscuro"
       tanda:
         description: "Nombre de la tanda (t1, t2...): tandas con nombre distinto corren a la vez, cada una con su base y su app"
         type: string
@@ -115,6 +123,8 @@ jobs:
         env:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           SOCIOS_DEMO: ${{ inputs.socios || '300' }}
+          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
       - name: Vigía de memoria (cada 20 s, a .local/memoria.log)
@@ -130,6 +140,8 @@ jobs:
           E2E_DEPURAR: "1"
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
+          MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
+          E2E_SIN_MAYUSCULAS: ${{ inputs.estilo == 'pista' && '1' || '0' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local

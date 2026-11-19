@@ -2,7 +2,7 @@
 
 **Qué es.** La lista única de todas las funciones que pidió Mateo, con su rol o pantalla, la prueba que la cubre y su estado, en tres listas: **1. hecho y publicado**, **2. hecho sin publicar**, **3. falta**. Todo lo de la lista 3 tiene su ítem en `RECTA-FINAL.md` (columna "Ítem"); lo que no lo tenía recibió uno nuevo en la fase Q.
 
-**De dónde sale.** `PEDIDO-ORIGINAL.md` (los 70 detalles, los P0, los P1 y los P2), `AJUSTES-0911-NOCHE.md` (URG, PLAT, EDIT, WEB, ESC, SEG, CAL), `docs/v2/` (todos), `DETALLES-70.md`, `FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md` y la COLA de `docs/HOJA-DE-RUTA.md`. La tabla "Cobertura de las fuentes" del final dice dónde quedó cada una. El detalle por zona de la revisión del 11/11 sigue en `docs/base/estado/` (mostrador, dueño y super admin, socio, profe y público); **donde difiera de este archivo, manda este** (esos tres se escribieron antes del PR #16 y de los cierres de F4/F5/Z).
+**De dónde sale.** `historia/PEDIDO-ORIGINAL.md` (los 70 detalles, los P0, los P1 y los P2), `historia/AJUSTES-0911-NOCHE.md` (URG, PLAT, EDIT, WEB, ESC, SEG, CAL), `docs/v2/` (todos), `DETALLES-70.md`, `historia/FALTANTES.md`, `SUPER-ADMIN.md`, `PLATAFORMA.md` y la COLA de `docs/HOJA-DE-RUTA.md`. La tabla "Cobertura de las fuentes" del final dice dónde quedó cada una. El detalle por zona de la revisión del 11/11 sigue en `docs/base/estado/` (mostrador, dueño y super admin, socio, profe y público); **donde difiera de este archivo, manda este** (esos tres se escribieron antes del PR #16 y de los cierres de F4/F5/Z).
 
 **Publicado = está en `main`** (PR #14 y #15 del 11/11, #16 a #20 del 12/11; el último, `publicar/base-resto`), con las migraciones aplicadas en producción según `PROGRESO.md`. Lo hecho después (fase E, D1 a D4 y lo que `RECTA-FINAL.md` marca "sin publicar") está en `base/2026-11-07` y figura en la sección 2. Relectura del 12/11: este archivo se alineó con `RECTA-FINAL.md`, que manda cuando difieren.
 
@@ -234,7 +234,7 @@ D70: el agente hizo solo lo que no cambia cuánto se cobra, a quién ni quién v
 | Tasa de cobro también en Inicio (FA-10) y diferencia por cajero también en Control (FA-21) | dueño | 🟡 | F5.1 |
 | Borrador del alta de socio prendido (hoy apagado) y borrador en la configuración de la página (FA-17) | recepción, dueño | 🟡 | F3.2 y F5.1 |
 | Vidrio, sombras grandes, degradé y esquinas de 16 px fuera (FA-4) | todos | ⛔ del pulido | Z5 |
-| Detalles de `PULIDO.md` sin hacer: [ROTO], [FLUIDEZ], [TEXTO] y [DISEÑO] restantes y lo transversal (formatos y avisos pantalla por pantalla, aviso de versión nueva) | todos | 🟡 | Z1, Z3, Z4, Z5, Z7 |
+| Detalles de `historia/PULIDO.md` sin hacer: [ROTO], [FLUIDEZ], [TEXTO] y [DISEÑO] restantes y lo transversal (formatos y avisos pantalla por pantalla, aviso de versión nueva) | todos | 🟡 | Z1, Z3, Z4, Z5, Z7 |
 | Tema claro u oscuro guardado en la base pero el panel solo lee la cookie; emojis y colores sueltos de otros carriles | todos | 🟡 | F1.4 |
 
 ### 3.3 Lo que existe sin prueba de punta a punta o sin correr
@@ -293,11 +293,11 @@ La COLA tiene unos 100 ítems todavía sin tildar (65 en esta tabla, el resto de
 | El acento del gimnasio se corre de tono si se parece al semáforo (`DISENO.md`) | todos | ❌ | Z8 |
 | CUIT y razón social del gimnasio para la factura de BRIK en la ficha (SA-3) | super admin | ❌ | F2.10 |
 | Sesiones abiertas de un gimnasio y "Cerrar todas" (SA-10) | super admin | ❌ | F2.11 |
-| Entradas sin internet que se sincronizan al volver, con veredicto "sin confirmar" (`NOCHE-1211.md` N-B) | recepción | ❌ | N9 |
+| Entradas sin internet que se sincronizan al volver, con veredicto "sin confirmar" (`historia/NOCHE-1211.md` N-B) | recepción | ❌ | N9 |
 | Cuánto deja un socio en promedio en Resultado (N-D; altas, bajas y recurrente ya están) | dueño | 🟡 | N10 |
 | Vercel Pro, Supabase Pro, región de Supabase y contestar PREGUNTAS (Base o Pase, ARCA, precios) | Mateo | ⛔ | Q5 |
 
-Fase E (entrada en la esquina, `NOCHE-1211.md`): E1, E2, E3, E4 y E6 en 🟡, E5 y E8 en ❌, E7 ✅; ver `RECTA-FINAL.md`.
+Fase E (entrada en la esquina, `historia/NOCHE-1211.md`): E1, E2, E3, E4 y E6 en 🟡, E5 y E8 en ❌, E7 ✅; ver `RECTA-FINAL.md`.
 
 ---
 
@@ -305,15 +305,15 @@ Fase E (entrada en la esquina, `NOCHE-1211.md`): E1, E2, E3, E4 y E6 en 🟡, E5
 
 | Fuente | Dónde quedó |
 |---|---|
-| `PEDIDO-ORIGINAL.md` §4.1 a 4.9 (velocidad, usuarios, ingreso rápido, lo que se ve siempre, landing, panel del socio, asistente, seguridad) | 1.1, 1.2, 1.3, 1.4 y 1.5 (cada fila nombra su apartado) |
-| `PEDIDO-ORIGINAL.md` §5 (diseño) y §8 (simulación completa) | 1.5 y 3.3 (F8.1) |
-| `PEDIDO-ORIGINAL.md` §6, los 70 detalles | `DETALLES-70.md` fila por fila; en este archivo, los números entre paréntesis de las listas 1.1 a 1.4; los 10 en 🟡 en 3.1, 3.4 y 3.2 |
-| `PEDIDO-ORIGINAL.md` §7 (P2: TV, invitado, ocupación, congelar solo, modo "tengo que cobrar", kiosco) | 1.1 (Invitados, Vencen hoy), 1.4 (Ocupación, Pedir pausa, Kiosco, TV) |
-| `AJUSTES-0911-NOCHE.md`: URG-01 a 04, PLAT-01 a 08, EDIT-S01 a S12, EDIT-D01 a D06, WEB-01 a 06, ESC-01 a 08, SEG-01 a 07, CAL-01 a 08 | 1.3 y 1.5; lo pendiente (PLAT-05, ESC-07, CAL-07 humo en producción) en 3.4 |
+| `historia/PEDIDO-ORIGINAL.md` §4.1 a 4.9 (velocidad, usuarios, ingreso rápido, lo que se ve siempre, landing, panel del socio, asistente, seguridad) | 1.1, 1.2, 1.3, 1.4 y 1.5 (cada fila nombra su apartado) |
+| `historia/PEDIDO-ORIGINAL.md` §5 (diseño) y §8 (simulación completa) | 1.5 y 3.3 (F8.1) |
+| `historia/PEDIDO-ORIGINAL.md` §6, los 70 detalles | `DETALLES-70.md` fila por fila; en este archivo, los números entre paréntesis de las listas 1.1 a 1.4; los 10 en 🟡 en 3.1, 3.4 y 3.2 |
+| `historia/PEDIDO-ORIGINAL.md` §7 (P2: TV, invitado, ocupación, congelar solo, modo "tengo que cobrar", kiosco) | 1.1 (Invitados, Vencen hoy), 1.4 (Ocupación, Pedir pausa, Kiosco, TV) |
+| `historia/AJUSTES-0911-NOCHE.md`: URG-01 a 04, PLAT-01 a 08, EDIT-S01 a S12, EDIT-D01 a D06, WEB-01 a 06, ESC-01 a 08, SEG-01 a 07, CAL-01 a 08 | 1.3 y 1.5; lo pendiente (PLAT-05, ESC-07, CAL-07 humo en producción) en 3.4 |
 | `docs/v2/00` a `21`: entrada, cobros y caja, dueño, recepción, socio, página, diseño, plan, inspiración, super admin, ingreso, notificaciones, confiabilidad, situaciones (VD-46), rapidez, sección por sección, dominio y negocios, semana de prueba, lo que falta (VD-48, VD-49), pedidos del 07/11 (VD-61 a VD-63) | 1.1 a 1.5; `14-SITUACIONES` y `17-SECCION-POR-SECCION` en 3.5 (VD-46, VD-59) |
 | `DETALLES-70.md` | 60 en ✅ en 1.x, 10 en 🟡 en 3.x |
-| `NOCHE-1211.md`, `SOCIO-FLUJO.md`, `FLUIDEZ.md`, `DISENO.md`, `PULIDO.md` | Fase E, H3b, F3, Z1 a Z8 en `RECTA-FINAL.md`; N-A = N7, N-B = N9, N-C ya existe (Referir), N-D = N10, N-E = FA-23; lo de Mateo en Q5 |
-| `FALTANTES.md` (FA-1 a FA-24) | hechos: FA-3, 8, 9, 12, 14, 15, 16, 18, 20, 23, 24 en 1.x; a medias o grandes: FA-1, 2, 4, 5, 6, 7, 10, 13, 17, 19, 21, 22 en 3.2 y 3.4; FA-11 en 3.3 |
+| `historia/NOCHE-1211.md`, `SOCIO-FLUJO.md`, `FLUIDEZ.md`, `DISENO.md`, `historia/PULIDO.md` | Fase E, H3b, F3, Z1 a Z8 en `RECTA-FINAL.md`; N-A = N7, N-B = N9, N-C ya existe (Referir), N-D = N10, N-E = FA-23; lo de Mateo en Q5 |
+| `historia/FALTANTES.md` (FA-1 a FA-24) | hechos: FA-3, 8, 9, 12, 14, 15, 16, 18, 20, 23, 24 en 1.x; a medias o grandes: FA-1, 2, 4, 5, 6, 7, 10, 13, 17, 19, 21, 22 en 3.2 y 3.4; FA-11 en 3.3 |
 | `SUPER-ADMIN.md` (SA-1 a SA-12) y `PLATAFORMA.md` (PLAT-01 a 08) | 1.3 |
 | COLA de `docs/HOJA-DE-RUTA.md` (los `[x]` en 1.x; los `[ ]` en 3.5 y 3.1) | 1.x, 3.1 y 3.5 |
 

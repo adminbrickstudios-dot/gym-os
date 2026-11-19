@@ -240,6 +240,9 @@ export const guardarModulos = async (gimnasioId: string, apagadas: string[]) =>
 /** F9.2: prende o apaga una función nueva en un gimnasio (arrancan apagadas; solo BRIK principal). */
 export const guardarFuncion = async (gimnasioId: string, clave: string, activa: boolean) =>
   hechoAdmin(() => rpc("admin_funcion_gimnasio", { p_gimnasio_id: gimnasioId, p_clave: clave, p_activa: activa }), [`/admin/${gimnasioId}`]);
+/** Pase 2.0: el estilo (clásico o Pista) y el modo de Pista de un gimnasio, desde la ficha. */
+export const guardarEstiloAdmin = async (gimnasioId: string, estilo: string, modo: string) =>
+  hechoAdmin(() => rpc("admin_guardar_estilo", { p_gimnasio_id: gimnasioId, p_estilo: estilo, p_modo: modo }), [`/admin/${gimnasioId}`]);
 export const cambiarSlug = async (gimnasioId: string, slug: string) =>
   hechoAdmin(() => rpc("admin_cambiar_slug", { p_gimnasio_id: gimnasioId, p_slug: slug }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
 export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>

@@ -14,23 +14,46 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   // Un socio al día (el último de la lista: el que menos usan las otras pruebas).
   await r.goto(`${G}/panel/socios?estado=al_dia`);
-  const a = r.locator('main ul a[href^="/panel/socios/"]').last();
-  await a.waitFor({ timeout: 30000 });
-  const nombre = (await a.locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
+  // Otros recorridos de la misma tanda también anotan a "el último": si ya entró hoy, la primera pasada diría "ya entró" y no habría tarjeta de hecho.
+  // En vez de apostar a uno, se prueba desde el último hacia atrás hasta encontrar un socio que todavía no entró hoy (se espera una condición, no un tiempo).
+  const links = r.locator('main ul a[href^="/panel/socios/"]');
+  await links.first().waitFor({ timeout: 30000 });
+  const total = Math.max(1, Math.min(6, await links.count()));
+  // La lista puede repintarse mientras se lee: se vuelve a pedir la fila (por su lugar desde el final) hasta que tenga nombre.
+  const nombreDe = async (i) => {
+    for (let intento = 1; ; intento++) {
+      try {
+        const fila = links.nth(-i);
+        const bold = fila.locator(".font-semibold").first();
+        // El nombre va en negrita; si la fila no la trae (otra fila de la lista), se toma el primer renglón de su texto.
+        const texto = (await bold.count()) ? await bold.innerText({ timeout: 10000 }) : (await fila.innerText({ timeout: 10000 })).split("\n")[0];
+        return texto.replace(/#\d+/, "").trim();
+      }
+      catch (e) { if (intento >= 3) throw e; await r.waitForTimeout(500); }
+    }
+  };
+  // Los candidatos se leen ahora, con la lista a la vista: después se navega a la Entrada y la lista ya no está.
+  const candidatos = []; for (let i = 1; i <= total; i++) candidatos.push(await nombreDe(i));
+  let nombre = candidatos[0];
 
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
   await buscar.waitFor({ timeout: 30000 });
-  const anotar = async () => {
+  const anotar = async (espera = 30000) => {
     await buscar.fill(nombre);
     await r.locator("button.fila", { hasText: nombre }).first().waitFor({ timeout: 15000 });
     await buscar.press("Enter");
     await r.locator("[data-veredicto]").waitFor({ timeout: 30000 });
     await r.keyboard.press("Enter");
-    await r.locator("[data-hecho]").waitFor({ timeout: 30000 });
+    await r.locator("[data-hecho]").waitFor({ timeout: espera });
   };
-
-  await anotar();
+  let encontrado = false;
+  for (let i = 1; i <= total && !encontrado; i++) {
+    nombre = candidatos[i - 1];
+    try { await anotar(i === total ? 30000 : 8000); encontrado = true; }
+    catch { await r.goto(`${G}/panel/entrada`); await buscar.waitFor({ timeout: 30000 }); }
+  }
+  if (!encontrado) throw new Error("ninguno de los últimos socios al día pudo anotarse hoy");
   ok(`primera pasada de ${nombre}: anotada`);
   await buscar.fill("");
   // (Antes se borraba la tarjeta vieja del DOM a mano: React la maneja y el borrado lo dejaba colgado. Ahora se espera a la tarjeta nueva por su texto.)

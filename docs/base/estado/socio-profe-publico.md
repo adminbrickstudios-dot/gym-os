@@ -78,4 +78,4 @@ Regla de lectura: "Publicado" = está en `base/2026-11-07`; lo de esta rama qued
 | `vd-4` (aviso rojo de la tablet en la recepción) cayó en la corrida 43119348925 | recepción / kiosco | Falló dos veces seguidas en la 43120402709. Hay que correrlo sobre `base/2026-11-07` para saber si es de antes; es Realtime entre la tablet y la recepción (regla 20) |
 | Lector USB, QR sin señal y "Salir" del socio | kiosco / socio | Lo arregla `carril/h7-roto` (aún sin integrar al terminar esta revisión) |
 | Inicio de la app del socio: Bienvenida con nombre de ícono, QR bajo 8 bloques, "te quedan 0 días", "Tu DNI para entrar" | socio | Lo rehace `carril/h3-socio`; no se tocó |
-| `FALTANTES.md` tiene FA-14, FA-15, FA-16 y FA-18 en ❌ aunque el código existe | docs | Lo consolida quien integre; este archivo manda sobre esas filas |
+| `historia/FALTANTES.md` tiene FA-14, FA-15, FA-16 y FA-18 en ❌ aunque el código existe | docs | Lo consolida quien integre; este archivo manda sobre esas filas |

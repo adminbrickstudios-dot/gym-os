@@ -46,12 +46,12 @@ le queda solo su pasada visual y la prueba del dueño (`PRUEBA-DUENO.md`).
    - `SUPER-ADMIN.md`.
    - `FLUIDEZ.md`.
    - `DETALLES-70.md`.
-   - `FALTANTES.md`.
+   - `historia/FALTANTES.md`.
    - `DISENO.md`.
    - `REGLAS-NEGOCIO.md`.
    - `docs/v2/`.
 
-   El primer pedido de Mateo, textual, está en `PEDIDO-ORIGINAL.md`: ante la
+   El primer pedido de Mateo, textual, está en `historia/PEDIDO-ORIGINAL.md`: ante la
    duda de qué quiso decir, se lee ahí.
 3. Leé **"DÓNDE QUEDÉ"** arriba de `PROGRESO.md` y arrancá exactamente de
    ahí. Si lo que estaba a medias ya está en ✅, tomá el próximo ítem.

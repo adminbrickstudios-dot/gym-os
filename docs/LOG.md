@@ -374,7 +374,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 **QUÉ HICE**
 - Migración 6900: globo de ayuda corto la primera vez que cada persona abre cada pantalla importante, con "Entendido" y un "?" fijo para volver a verlo; la segunda vez no sale. "Ya lo vio" se guarda en la base por usuario (`ayudas_usuario`, RLS, sin escritura directa; `ayudas_vistas`, `marcar_ayuda`, `apagar_ayudas`, `reiniciar_ayudas`; sin sesión dan error), así que sigue entre dispositivos. Panel: Inicio, Entrada, Socios, Vencen y cobrar, Caja, Productos y cobros (la hoja Cobrar no es ruta: su ayuda está en `/panel/vender`), Para hacer hoy, Planes, Configuración y Control; app del socio: Inicio, Clases, Rutina y Yo. Textos por rol en `src/lib/ayuda.ts` (la recepción ve el suyo). El globo va en el flujo de la página: no tapa la ventana de Entrada ni la hoja Cobrar, no intercepta clics, no sale en pantallas de error y no se mueve con reduced-motion. En Mi cuenta: interruptor para apagar las ayudas y "Volver a ver todas".
-- Para los e2e viejos: `levantar.sh` arranca la app con `PERMITIR_SIN_AYUDA=1` y `pagina()` de `comun.mjs` pone la cookie `gymos_sin_ayuda=1`; solo `vd-31.mjs` pide los globos (`{ conAyuda: true }`). Documentado en `docs/DISENO.md`; `ayudas_usuario` va como excepción a `gimnasio_id` en `docs/SCHEMA.md`. `PERMITIR_SIN_AYUDA` no se define en Vercel.
+- Para los e2e viejos: `levantar.sh` arranca la app con `PERMITIR_SIN_AYUDA=1` y `pagina()` de `comun.mjs` pone la cookie `gymos_sin_ayuda=1`; solo `vd-31.mjs` pide los globos (`{ conAyuda: true }`). Documentado en `docs/base/historia/DISENO-v2.md`; `ayudas_usuario` va como excepción a `gimnasio_id` en `docs/SCHEMA.md`. `PERMITIR_SIN_AYUDA` no se define en Vercel.
 - Verificado: lint, typecheck, 128 pruebas, build y base/chequeos/demo en verde en GitHub (`ayuda-pantalla`).
 
 **SIN ARREGLAR**: VD-31B (apagar las ayudas desde Yo en la app del socio; tour de la hoja Cobrar).
@@ -746,7 +746,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 
 **QUÉ HICE**
 - `globals.css`: variables de movimiento y clases `.aparecer .hoja .lista-entra .tilde .pulso .brillo .esqueleto`, `:active` 0,97, tarjetas de vidrio sutil con los tokens del gimnasio, foco y selección con su acento, `prefers-reduced-motion` sin animaciones.
-- Componentes nuevos `Hoja` (Esc, foco atrapado, sube desde abajo en celular), `Tilde`, `Brillo`; aplicados en Mensaje, Ctrl+K, menú móvil, avisos/tareas, cobro, entrada (el veredicto aparece al instante, el pulso solo acompaña) y los 54 `loading.tsx`. Documentado en `docs/DISENO.md`.
+- Componentes nuevos `Hoja` (Esc, foco atrapado, sube desde abajo en celular), `Tilde`, `Brillo`; aplicados en Mensaje, Ctrl+K, menú móvil, avisos/tareas, cobro, entrada (el veredicto aparece al instante, el pulso solo acompaña) y los 54 `loading.tsx`. Documentado en `docs/base/historia/DISENO-v2.md`.
 - Verificado: lint, typecheck, 79 pruebas, build y base en verde en GitHub.
 
 **SIN ARREGLAR**: `.lista-entra` anima la entrada pero no el achicarse al salir.
@@ -3136,7 +3136,7 @@ LO QUE NO PUDE VERIFICAR        obligatorio, sin adornar
 - Todos los errores y resultados hechos a mano (16) pasan a `Mensaje`; los botones chicos y de texto, a sus clases; las filas para elegir socio, a `.fila`.
 - Estados vacíos con acción en Socios (y en la búsqueda sin resultados), Transferencias, Clases del día y la lista de una clase.
 - Los 4 números de Inicio llevan a su detalle (si la sección está prendida).
-- `docs/DISENO.md`: con qué se arma cada pantalla.
+- `docs/base/historia/DISENO-v2.md`: con qué se arma cada pantalla.
 - Verificado: `scripts/e2e/dis-0.mjs` (14 pasos en compu y celu: vacíos con su acción, números que llevan a su detalle, error de ingreso con el componente común), `npm run e2e:admin` (17 pasos), barrido de las 15 pantallas con los 4 roles en compu y celu (120 pasos), `npm run verificar` en verde (171 pruebas de base, 40 unitarias, chequeos, lint, tipos, build). Capturas mirándolas.
 
 **LO QUE ENCONTRÉ SIN PEDIRTELO**
@@ -3557,7 +3557,7 @@ git log origin/main --oneline -3
   reporte.
 - `docs/SCHEMA.md`: schema completo propuesto, modelo de las tres vías
   de acceso, RLS, índices y preguntas abiertas.
-- `docs/PLAN.md` como marcador: `7-PLAN.md` no estaba adjunto.
+- `docs/base/historia/PLAN.md` como marcador: `7-PLAN.md` no estaba adjunto.
 - `docs/requisitos.md`, `.env.local.example`, `.vercelignore`.
 - `.claude/settings.json` (hook compartido + denegaciones),
   `.claude/settings.local.json` (permisos de este equipo),
@@ -3582,7 +3582,7 @@ git log origin/main --oneline -3
   archivos.
 
 **SIN ARREGLAR**
-- `docs/PLAN.md` vacío hasta tener `7-PLAN.md`.
+- `docs/base/historia/PLAN.md` vacío hasta tener `7-PLAN.md`.
 - `npm run chequeos`, `db:types`, `typecheck` todavía no existen: son
   parte de la primera sección de código.
 

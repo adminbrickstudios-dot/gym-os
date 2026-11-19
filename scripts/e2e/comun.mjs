@@ -59,8 +59,17 @@ export async function navegador({ camara = false, video = null } = {}) {
 export async function pagina(b, viewport = COMPU, opciones = {}) {
   // opciones: más del contexto (por ejemplo el userAgent de un iPhone).
   // conAyuda: true deja que salgan los globos de ayuda (VD-31); solo e2e/vd-31.mjs lo pide.
-  const { conAyuda = false, ...deContexto } = opciones;
+  const { conAyuda = false, conMayusculas = false, ...deContexto } = opciones;
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...deContexto });
+  // Pase 2.0 (Pista): los títulos salen en mayúsculas por CSS (text-transform) y el innerText de Playwright las devuelve ya transformadas. Los recorridos comprueban
+  // el contenido, no el estilo: con E2E_SIN_MAYUSCULAS=1 (lo pone la corrida con Pista) leen el texto como se escribió. Las capturas y el inventario piden conMayusculas: true
+  // para ver el diseño de verdad.
+  if (process.env.E2E_SIN_MAYUSCULAS === "1" && !conMayusculas) {
+    await ctx.addInitScript(() => {
+      const poner = () => { const s = document.createElement("style"); s.setAttribute("data-e2e-sin-mayusculas", ""); s.textContent = "*, *::before, *::after { text-transform: none !important; }"; document.head.appendChild(s); };
+      if (document.head) poner(); else document.addEventListener("DOMContentLoaded", poner, { once: true });
+    });
+  }
   // F8.2: los recorridos que dependían de la hora del día (fallaban entre las 21 y las 24 h) fijan la hora del
   // navegador a las 12:00 de hoy en Buenos Aires (el reloj sigue corriendo: es setSystemTime, no un reloj congelado).
   // Se pide con HORA_NAVEGADOR=mediodia al principio del recorrido. La hora del servidor no cambia.

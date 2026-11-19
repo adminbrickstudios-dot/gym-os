@@ -10,7 +10,7 @@ admin (`10`), Configuración, el resto. Afinar, no reinventar: lo que
 funciona se queda.
 
 Base: el tema oscuro "modo gym" que decidió Mateo (grafito + verde,
-`globals.css`, `docs/DISENO.md`). Se mantiene el esqueleto (saludo, accesos
+`globals.css`, `docs/base/historia/DISENO-v2.md`). Se mantiene el esqueleto (saludo, accesos
 grandes, 4 números, "ahora y lo que sigue", menú agrupado). Se sube el
 nivel:
 

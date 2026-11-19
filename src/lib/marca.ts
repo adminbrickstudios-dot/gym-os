@@ -89,7 +89,40 @@ export function acentoDistinto(acento: string): string {
   return acento;
 }
 
+/** Pase 2.0 (Pista): las superficies más claras sobre las que cae el acento, en oscuro y en claro (DISENO.md § Pase 2.0). */
+export const PISTA_SUPERFICIE_OSCURA = "#22303C", PISTA_SUPERFICIE_CLARA = "#EDF0F3";
+export const CONTRASTE_TEXTO = 4.5;
+
+/**
+ * El acento corrido lo justo (hacia negro si el fondo es claro, hacia blanco si es oscuro) hasta que se lee con 4,5:1 sobre ese fondo.
+ * Un acento que ya se lee se devuelve igual. Solo lo usa Pista; el semáforo no pasa por acá.
+ */
+export function acentoLegible(acento: string, fondo: string, minimo = CONTRASTE_TEXTO): string {
+  const c = rgb(acento), f = rgb(fondo);
+  if (!c || !f) return acento;
+  if ((contraste(acento, fondo) ?? 0) >= minimo) return acento;
+  const haciaNegro = tonoDeFondo(fondo) === "claro";
+  const meta = haciaNegro ? [0, 0, 0] : [255, 255, 255];
+  let mejor = acento;
+  for (let paso = 1; paso <= 24; paso++) {
+    const t = paso * 0.04;
+    const mezcla = c.map((v, i) => Math.round(v + (meta[i] - v) * t)) as [number, number, number];
+    const hex = "#" + mezcla.map((v) => v.toString(16).padStart(2, "0")).join("");
+    mejor = hex;
+    if ((contraste(hex, fondo) ?? 0) >= minimo) return hex.toUpperCase();
+  }
+  return mejor.toUpperCase();
+}
+
 export type ColoresMarca = { color_acento: string; color_fondo: string };
+
+function variablesPista(acento: string): Record<string, string> {
+  const oscuro = acentoLegible(acento, PISTA_SUPERFICIE_OSCURA), claro = acentoLegible(acento, PISTA_SUPERFICIE_CLARA);
+  return {
+    "--acento-pista-oscuro": oscuro, "--acento-texto-pista-oscuro": textoSobre(oscuro),
+    "--acento-pista-claro": claro, "--acento-texto-pista-claro": textoSobre(claro),
+  };
+}
 
 /** Variables CSS y atributo de tono para el wrapper de una pantalla del gimnasio. */
 export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
@@ -102,6 +135,8 @@ export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSP
     style: {
       ["--acento" as string]: acentoDistinto(m.color_acento),
       ["--acento-texto" as string]: textoSobre(acentoDistinto(m.color_acento)),
+      // Pista: el acento ya corrido para leerse (4,5:1) sobre cada modo, y el texto que va encima. El estilo clásico no los usa.
+      ...variablesPista(acentoDistinto(m.color_acento)),
       ["--fondo" as string]: fondo,
       background: fondo,
     },

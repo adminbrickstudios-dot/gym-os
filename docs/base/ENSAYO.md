@@ -35,7 +35,7 @@ El agente **no** crea proyectos de Supabase ni carga secretos.
 1. El agente escribe la migración y corre el pre-vuelo en la base local de Actions.
 2. **Ensayo → aplicar** (rama del día/noche). Si falla, se arregla antes de tocar producción.
 3. Se prueba la pantalla con la vista previa de Vercel apuntando al ensayo, y con el recorrido en modo mirar
-   (`docs/base/RECOMENDACIONES.md`, punto 7: el workflow **Botones Temple**).
+   (`docs/base/historia/RECOMENDACIONES.md`, punto 7: el workflow **Botones Temple**).
 4. **Base de datos → aplicar** en producción: copia cifrada, pre-vuelo, aplicar, chequeos. Recién entonces se mergea el PR.
 
 ## Lo que el ensayo no cubre

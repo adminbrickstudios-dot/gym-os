@@ -1,4 +1,4 @@
-> **11/11: reemplazado por `docs/base/SOCIO-FLUJO.md`** en el alta, el ingreso y lo que ve el socio (DNI obligatorio y en grande, cuenta sin mails, el socio ya cargado reclama su ficha, menores con adulto responsable, cómo se entra: DNI, QR o los dos) y por `docs/base/PULIDO.md` (bloque Socio y página) en el detalle de cada pantalla. El resto de este archivo sigue vigente.
+> **11/11: reemplazado por `docs/base/SOCIO-FLUJO.md`** en el alta, el ingreso y lo que ve el socio (DNI obligatorio y en grande, cuenta sin mails, el socio ya cargado reclama su ficha, menores con adulto responsable, cómo se entra: DNI, QR o los dos) y por `docs/base/historia/PULIDO.md` (bloque Socio y página) en el detalle de cada pantalla. El resto de este archivo sigue vigente.
 
 # 05 · La app del socio
 

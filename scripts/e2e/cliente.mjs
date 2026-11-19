@@ -194,9 +194,16 @@ try {
   ok("sube el comprobante: “el gimnasio lo revisa y te habilita”");
 
   // ── 6. El dueño aprueba y ve la plata ──
-  await d.goto(`${G}/panel/transferencias`);
-  await d.locator('button:has-text("Aprobar")').first().click();
-  await d.getByText("Aprobada").first().waitFor({ timeout: 30000 });
+  // El comprobante recién subido puede tardar en aparecer en la lista: se espera la condición (un botón Aprobar y después "Aprobada") y, si la lista llegó vieja, se recarga y se repite.
+  for (let intento = 1; ; intento++) {
+    await d.goto(`${G}/panel/transferencias`);
+    try {
+      await d.locator('button:has-text("Aprobar")').first().waitFor({ timeout: 20000 });
+      await d.locator('button:has-text("Aprobar")').first().click();
+      await d.getByText("Aprobada").first().waitFor({ timeout: 20000 });
+      break;
+    } catch (e) { if (intento >= 3) throw e; }
+  }
   await d.goto(`${G}/panel/entrada?socio=${dos}`);
   await d.locator('[data-veredicto="verde"]').waitFor({ timeout: 60000 });
   ok("el dueño aprueba la transferencia y el socio queda al día");

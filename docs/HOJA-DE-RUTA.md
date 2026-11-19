@@ -5,7 +5,7 @@
 Este archivo manda sobre **en qué orden** se hace. **Qué** se hace (cada panel,
 cada botón, cada regla) está en `docs/producto/`: leerlo antes de tocar algo. Lo leen Mateo, las
 sesiones de Claude Code de día y el loop de la noche (`scripts/noche/noche.sh`).
-`docs/PLAN.md` queda como historia de lo ya construido.
+`docs/base/historia/PLAN.md` queda como historia de lo ya construido.
 
 ---
 
@@ -286,7 +286,7 @@ primer `[ ]` que pueda hacer (🟢, o 🟡 con ✅).
 - [~] VD-63 · 🟢 · Información y ayuda: centro de ayuda por rol, "Info del gimnasio" en la app del socio, y los textos de ayuda de cada pantalla revisados — código y base en verde; el e2e no pasó del todo en el cierre (ver LOG)
 
 ### 0 · Base
-- [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/DISENO.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
+- [x] DIS-0 · 🟢 · Sistema visual común: botones, tarjetas, campos, pestañas, avisos, estados vacíos (`docs/base/historia/DISENO-v2.md`) — verificado: e2e:dis-0 (14 pasos, compu y celu), barrido 120 pasos, verificar en verde
 - [x] AUD-0 · 🟢 · Mapa de pantallas, funciones y conexiones (`docs/paneles/README.md`) — verificado: npm run mapa contra la base local (31 rutas, 65 funciones usadas, 0 faltantes), verificar en verde
 
 ### 1 · Configuración y primeros pasos
@@ -780,8 +780,8 @@ compu y celular.
 ### DIS · Diseño (todas las pantallas)
 
 **DIS-0 · Sistema visual común.** Revisar `src/app/globals.css` y `src/components/panel/*`.
-Que existan y se usen siempre los mismos: botón (normal, principal, peligro, chico), tarjeta, campo con etiqueta y ayuda, pestañas, píldoras de estado, aviso (éxito, error, info), estado vacío (emoji + frase + acción), cabecera de sección (emoji, título, una línea de qué es), fila de lista. Escribir `docs/DISENO.md` con cada uno, cuándo se usa y un ejemplo.
-LISTO SI: ninguna pantalla define un botón o una tarjeta a mano (grep), `docs/DISENO.md` existe, y el barrido en celular no da desbordes.
+Que existan y se usen siempre los mismos: botón (normal, principal, peligro, chico), tarjeta, campo con etiqueta y ayuda, pestañas, píldoras de estado, aviso (éxito, error, info), estado vacío (emoji + frase + acción), cabecera de sección (emoji, título, una línea de qué es), fila de lista. Escribir `docs/base/historia/DISENO-v2.md` con cada uno, cuándo se usa y un ejemplo.
+LISTO SI: ninguna pantalla define un botón o una tarjeta a mano (grep), `docs/base/historia/DISENO-v2.md` existe, y el barrido en celular no da desbordes.
 
 **DIS-1 … DIS-15 · Pulido de cada pantalla.** Para la pantalla del ítem:
 abrirla con cada rol que la ve, en compu y celular, con datos y vacía; sacar capturas antes y después.
