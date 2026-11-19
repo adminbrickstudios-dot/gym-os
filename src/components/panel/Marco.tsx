@@ -100,7 +100,8 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
         </h1>
         {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
       </div>
-      {accion}
+      {/* La campana de Novedades flota arriba a la derecha: el botón de acción se corre para no quedar debajo de ella (auditoría 18/11). */}
+      {accion && <div className="flex-none sm:mr-14">{accion}</div>}
     </div>
   );
 }
