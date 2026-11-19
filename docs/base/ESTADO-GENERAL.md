@@ -323,3 +323,58 @@ Fase E (entrada en la esquina, `historia/NOCHE-1211.md`): E1, E2, E3, E4 y E6 en
 - **La COLA de la HOJA-DE-RUTA no se reconcilió ítem por ítem**: es el trabajo del ítem Q4.
 - **Producción:** lo de "en producción" es lo que dice `PROGRESO.md` del 12/11 (migraciones aplicadas con la corrida 43295889879, funciones nuevas apagadas en Temple Gym, corrida 43297648610); no se consultó la base real desde esta revisión.
 - Las capturas de compu y celular de lo nuevo no se miraron en esta revisión.
+
+---
+
+## Paneles completos (19/11 · tarea de Mateo "paneles completos antes de terminado oficialmente")
+
+**Cómo leerlo.** Por rol, lo que hace en un día real y en el primer mes de un socio nuevo. ✅ anda de punta a punta con prueba (nombre de la prueba) · 🟡 existe sin prueba o a medias · ❌ falta · 💲 es de plata (decide Mateo; va a `PASE-1.0.md` § "Plata y permisos"). Orden de cada lista: primero lo que **traba**, después lo que **confunde**, después lo que **falta**. Armado el 19/11 desde las secciones 3.2, 3.3, 3.5 y 3.6 de arriba, `estado/socio-profe-publico.md` § Falta y la lectura de `src/app/app/`. **Todavía no se abrió cada pantalla con sesión real en esta vuelta**: las filas 🟡 se verifican al trabajarlas y cada una pasa a ✅ solo con el nombre de su prueba.
+
+### Socio (celular) — día real y primer mes
+| # | Tarea | Estado | Prueba / falta |
+|---|---|---|---|
+| S1 | Llegar por el QR, crear la cuenta, aceptar el reglamento | ✅ | `hacete-socio-directo`, `socio-flujo`, `qr-alta` |
+| S2 | Ver si puede entrar hoy, por qué y qué hacer si no (inicio de `/app`) | 🟡 traba | pendiente h3-socio: Bienvenida con nombre del ícono, QR bajo 8 bloques, "te quedan 0 días", "Tu DNI para entrar" |
+| S3 | Pagar con transferencia + comprobante o link, y ver el estado | ✅ (💲 el monto) | `rev-3`, `pay-1` |
+| S4 | Tener su QR y entrar | ✅ | `ent-2`, `vd-4` |
+| S5 | Reservar, cancelar, lista de espera | ✅ | `vd-24`, `cla-1`, `cla-2` |
+| S6 | Ver su rutina y anotar kilos | ✅ | `rut-2`, `series-hechas.test.mjs` |
+| S7 | Historial y recibos | ✅ | `rev-socio`, `recibo-pago.test.mjs` |
+| S8 | Enterarse de avisos (cobro, clase cancelada, mensaje) | ✅ | `avisos-app-socio.test.mjs` |
+| S9 | Avisos por hora: clase en 1 h, "te quedan 3 días" | ❌ | punto 5 de la tarea (FA-12) |
+| S10 | Renovar | ✅ (💲) | `vd-39`, `cambio-plan.test.mjs` |
+| S11 | Insignias, resumen del año, recomendación | 🟡 | `f45-faltantes` no ejecutó la recomendación (Q3) |
+| S12 | Foto propia | 🟡 | `f45-foto-socio` |
+| S13 | Novedades, mensajes, locker, PT | 🟡 | `vd-38` (mensajes ✅); novedades, locker y PT sin e2e propio confirmado |
+| S14 | /app con 5 viajes o menos a la base | ❌ | hoy 9 |
+
+### Profe y PT
+| # | Tarea | Estado | Prueba / falta |
+|---|---|---|---|
+| P1 | Sus clases de hoy, anotados, tomar presente | ✅ | `rev-4`, `panel-clases` |
+| P2 | "Clase ajena" por `profe_id` | ❌ | pide migración sobre `clases_del_dia` (PREGUNTAS, recomendada) |
+| P3 | Rutinas de sus socios: crear, copiar, asignar | ✅ | `rut-1`, `rutinas-completas.test.mjs` |
+| P4 | Borrador guardado en el editor de rutinas (FA-17) | ❌ | `rut-1` |
+| P5 | Lista de espera, WOD, TV de su clase | ✅ | `cla-4`, `cla-9`, `tv-sala.test.mjs` |
+| P6 | Sus horas y liquidación (ver) | ✅ | `vd-52`, `liquidacion-profes.test.mjs` |
+| P7 | Reglas de cuánto se le paga | 💲 | |
+| P8 | "Clase sin anotados" avisa al profe | ❌ | punto 5 |
+
+### Kiosco, TV y visitante
+| # | Tarea | Estado | Prueba / falta |
+|---|---|---|---|
+| K1 | Kiosco: DNI/QR y que diga por qué no deja pasar | 🟡 | `kiosco.test.mjs`, `ent-3` |
+| K2 | Alta en el kiosco para quien llega sin cuenta | ❌ | |
+| K3 | TV en vivo por Realtime con respaldo cada 15 s | 🟡 | hoy solo cada 15 s |
+| K4 | `vd-4` firme | 🟡 | cae a veces |
+| K5 | Página del gimnasio y `/hacete-socio` perfectas en compu y celular | 🟡 | `fase-u4`, `reg-1` |
+
+### Recepción, encargado y dueño
+| # | Tarea | Estado | Prueba / falta |
+|---|---|---|---|
+| R1 | Cada número que se toca abre la lista con nombres | 🟡 | `q2-retencion` cubre Retención; falta el resto |
+| R2 | "Avisar a todos los anotados" desde una clase (wa.me) | 🟡 | `avi-1`, `cla-3`; falta desde la lista de la clase |
+| R3 | Borrador guardado en alta completa, planes y página | 🟡 | `borrador.test.ts` (plan, rutina, evento) |
+| R4 | Interesado sin contactar en 24 h (FA-13), FA-1, FA-2, FA-5, FA-6, FA-10 | ❌/🟡 | F5.1 |
+| R5 | Plata: pagos parciales, estado de cuenta, prorrateos, matriz de permisos, ARCA | 💲 | `PASE-1.0.md` |
+| R6 | Fuera de esta tarea (Pase 2.0): landing de venta, débito, ARCA, Wellhub/TotalPass, importar de otro sistema, alta sola | ➡️ | |
