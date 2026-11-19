@@ -1,7 +1,7 @@
 import { rpc } from "@/lib/panel/servidor";
 import { OfertasLugar, type OfertaLugarDatos } from "./OfertasLugar";
 
-type AvisoApp = { tipo: "clase_pronto" | "evento_manana"; texto: string };
+type AvisoApp = { tipo: "clase_pronto" | "evento_manana" | "vence_pronto"; texto: string };
 
 /**
  * Arriba del Inicio: lo que hay que mirar ahora. Las ofertas de lugar (FA-23) y los avisos de la clase que viene y del evento de mañana
