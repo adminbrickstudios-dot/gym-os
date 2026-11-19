@@ -1,5 +1,20 @@
 # PROGRESO de Pase (antes Base)
 
+## ⛔ PRIMERO PARA MATEO (19/11, 01:20 ART): Pista está publicada pero APAGADA en Temple Gym y en los demos
+
+**Lo único que falta es tuyo:** los secretos de GitHub `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE` (la cuenta de super admin de producción) no están cargados (Settings → Secrets and variables → Actions). Sin ellos el workflow `pista-produccion` no puede entrar a la ficha del super admin y **no prendí Pista en Temple Gym ni en un [demo] de producción, ni dejé el aviso de Novedades**; tampoco corrió el humo de producción (falla igual desde el 11/11).
+**A mano, un minuto:** `pasegym.com/super` → Temple Gym → Ficha → "Estilo": Pista, modo Oscuro → Guardar (tarda hasta un minuto en verse). **Volver atrás, un paso:** la misma ficha con Estilo: Clásico, o Configuración → Marca → Estilo (el dueño). Con los secretos cargados: `gh workflow run pista-produccion.yml --ref main -f fase=demo` (mira un [demo]), `-f fase=temple` (prende Temple Gym) y `-f fase=novedad` (aviso dirigido); `-f fase=temple -f revertir=true` lo vuelve a clásico.
+
+**Publicado (19/11, 01:05 ART, fuera de 16–22 h, SIN COPIA, con prevuelo; PR #35, main df6bebb2; vuelta atrás: revertir ese merge, main antes = `24386fe4`):** la migración `20261118120000_estilo_gimnasio` (columnas `estilo` y `modo`, entran en clásico/oscuro para todos; las funciones `guardar_estilo_gimnasio`, `admin_guardar_estilo`, `estilo_gimnasio`; `gimnasio_por_host/slug` traen el estilo), Pista (solo CSS, detrás de la llave), el selector en Configuración → Marca y en la ficha del super admin, la campana que ya no tapa el botón del encabezado, las pruebas firmes y los documentos ordenados (`docs/base/historia/`, `00-LEEME.md` de una pantalla). Verificado en producción: Vercel verde, `humo-pasado` verde, `templegymsalta.com`, `/hacete-socio`, `pasegym.com/g/demo`, `/ingresar` y `/super` responden 200, y el `<html>` de Temple Gym sale con `data-estilo="clasico"` (todo igual que antes). **Después de correr `npm run db:types`** (lo hace Mateo: necesita su proyecto de Supabase).
+
+**Lo que encontró la auditoría (en las capturas de Pista y clásico, compu y celular; no pude mirar producción con sesión por lo de arriba):**
+- ✅ Arreglado: en la compu la campana tapaba el último botón del encabezado (Caja: "Cierre del día"; Entrada: "Control de la puerta"), en clásico y en Pista. Recorrido `encabezado-campana` (verde en las dos llaves).
+- Anotado (no arreglado): en el celular el botón flotante verde de Entrada tapa la fila de abajo de las listas (Socios) hasta que se hace scroll; el texto apagado de las etiquetas del formulario de Caja se ve flojo en Pista oscuro (cumple 4,5:1, pero cuesta); "Con sonido" en Entrada no dice que es un botón.
+- No se pudo mirar en esta pasada: la tablet y la TV de lejos, el profe, "sin internet", el contador cerrando el mes y las pantallas con otro rol u otro gimnasio en producción (las pruebas de permisos de la base ya cubren que den error y no vacío). Quedan para tu pasada y para cuando estén los secretos.
+- Pruebas inestables arregladas: `vd-3` (comparte el socio con otros recorridos de la tanda: ahora busca uno que no haya entrado hoy), `cliente` (espera la lista de transferencias y reintenta) y el barrido (lee la pantalla cuando pintó, no tras un tiempo). Tres corridas seguidas en verde cada una.
+
+---
+
 ## DÓNDE QUEDÉ y RESUMEN PARA MATEO (18/11, mediodía)
 
 **Publicado hoy (18/11, 13:50 ART, fuera de 16 a 22 h, migraciones SIN COPIA autorizadas, con prevuelo; PR #34, main 24386fe4; vuelta atrás: main antes = `000770ff`):**
