@@ -33,8 +33,9 @@ try {
     const nombre = (await fila.locator("span.font-semibold").innerText()).trim();
     await fila.getByRole("button", { name: "Presente" }).click();
     // O queda ✅, o la base dice por qué no (fuera del horario de la clase, no puede tomarla, ya estaba).
-    const presente = r.locator("main ul li", { hasText: nombre }).getByText("Presente").first();
-    const aviso = r.locator('main [role="alert"]').first();
+    // El botón también dice "Presente": lo que prueba que se tomó es el botón de deshacer. De madrugada la primera clase de hoy empieza en más de una hora y la base rechaza el presente con su motivo (la prueba dependía de la hora a la que corría).
+    const presente = r.locator("main ul li", { hasText: nombre }).getByRole("button", { name: /Deshacer el presente/ }).first();
+    const aviso = r.locator("main").getByText(/una hora antes|No puede tomar la clase|Ya tiene el presente/).first();
     await presente.or(aviso).waitFor({ timeout: 30000 });
     if (await presente.isVisible()) {
       ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
