@@ -18,9 +18,15 @@ try {
   // En vez de apostar a uno, se prueba desde el último hacia atrás hasta encontrar un socio que todavía no entró hoy (se espera una condición, no un tiempo).
   const links = r.locator('main ul a[href^="/panel/socios/"]');
   await links.first().waitFor({ timeout: 30000 });
-  const total = await links.count();
-  const nombreDe = async (i) => (await links.nth(i).locator(".font-semibold").first().innerText()).replace(/#\d+/, "").trim();
-  let nombre = await nombreDe(total - 1);
+  const total = Math.max(1, Math.min(6, await links.count()));
+  // La lista puede repintarse mientras se lee: se vuelve a pedir la fila (por su lugar desde el final) hasta que tenga nombre.
+  const nombreDe = async (i) => {
+    for (let intento = 1; ; intento++) {
+      try { return (await links.nth(-i).locator(".font-semibold").first().innerText({ timeout: 10000 })).replace(/#\d+/, "").trim(); }
+      catch (e) { if (intento >= 3) throw e; await r.waitForTimeout(500); }
+    }
+  };
+  let nombre = await nombreDe(1);
 
   await r.goto(`${G}/panel/entrada`);
   const buscar = r.locator('input[aria-label="Buscar socio"]');
@@ -34,9 +40,9 @@ try {
     await r.locator("[data-hecho]").waitFor({ timeout: espera });
   };
   let encontrado = false;
-  for (let i = 1; i <= Math.min(6, total) && !encontrado; i++) {
-    nombre = await nombreDe(total - i);
-    try { await anotar(i === Math.min(6, total) ? 30000 : 8000); encontrado = true; }
+  for (let i = 1; i <= total && !encontrado; i++) {
+    nombre = await nombreDe(i);
+    try { await anotar(i === total ? 30000 : 8000); encontrado = true; }
     catch { await r.goto(`${G}/panel/entrada`); await buscar.waitFor({ timeout: 30000 }); }
   }
   if (!encontrado) throw new Error("ninguno de los últimos socios al día pudo anotarse hoy");
