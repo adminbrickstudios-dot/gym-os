@@ -37,6 +37,8 @@ try {
     const presente = r.locator("main ul li", { hasText: nombre }).getByRole("button", { name: /Deshacer el presente/ }).first();
     const aviso = r.locator("main").getByText(/una hora antes|No puede tomar la clase|Ya tiene el presente/).first();
     await presente.or(aviso).waitFor({ timeout: 30000 });
+    // La pantalla muestra el presente al toque y la base confirma o rechaza después (si lo rechaza, lo saca y dice por qué): se espera a que termine el pedido antes de mirar.
+    await r.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
     if (!(await aviso.isVisible()) && await presente.isVisible()) {
       ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
       // CLA-7: deshacerlo, con motivo.
