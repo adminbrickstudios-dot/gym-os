@@ -49,10 +49,15 @@ test("el equipo recibe profe_id y dos profes con el mismo nombre se distinguen p
 });
 
 test("el socio no recibe el profe_id (null)", async () => {
+  // Un socio solo ve de ayer a unos días adelante: la clase se arma dentro de una hora, respecto de ahora.
+  const [{ id: act }] = await t.q(`select id from public.actividades where gimnasio_id = $1 limit 1`, [t.g]);
+  const [{ id: c2, dia }] = await t.q(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, profe_id, cupo)
+    values ($1,$2,$3, now() + interval '1 hour', now() + interval '2 hours', $4, 10) returning id, privado.dia_local(now() + interval '1 hour', $5)::text as dia`, [t.g, t.sede, act, profeA, t.ctx.zona]);
   await t.comoUsuario(socioU, async () => {
-    const [c] = await t.q(`select * from public.clases_del_dia($1, $2::date, $3)`, [t.sede, HOY, S().al_dia]);
+    const c = (await t.q(`select * from public.clases_del_dia($1, $2::date, $3)`, [t.sede, dia, S().al_dia])).find((x) => x.clase_id === c2);
     assert.ok(c, "el socio ve la clase");
     assert.equal(c.profe_id, null);
+    assert.equal(c.profe, "Ana Profe");
   });
 });
 

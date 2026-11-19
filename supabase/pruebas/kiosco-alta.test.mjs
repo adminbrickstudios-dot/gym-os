@@ -6,6 +6,7 @@ import { abrir } from "./_comun.mjs";
 let t, token;
 before(async () => {
   t = await abrir("prueba-kiosco-alta");
+  await t.q(`update public.configuracion_gimnasio set accesos_activos = array_append(accesos_activos, 'kiosco') where gimnasio_id = $1 and not ('kiosco' = any (accesos_activos))`, [t.g]);
   // Una tablet autorizada: el token se guarda hasheado, así que se usa la función que la autoriza (la misma del panel).
   const [{ id: u }] = await t.q(`insert into auth.users (email) values ('duenok@ejemplo.invalid') returning id`);
   await t.q(`insert into public.equipo (gimnasio_id, usuario_id, nombre, rol) values ($1,$2,'Dueno','dueno')`, [t.g, u]);
