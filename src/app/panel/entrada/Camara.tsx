@@ -31,7 +31,7 @@ export function Camara({ alLeer, alCerrar, frente = false }: { alLeer: (codigo: 
     if (!navigator.mediaDevices?.getUserMedia) { setEstado("sin"); return; }
     navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? "user" : "environment" }, audio: false })
       .then((s) => { flujo = s; if (!vivo) { s.getTracks().forEach((t) => t.stop()); return; }
-        if (video.current) { video.current.srcObject = s; void video.current.play(); } setEstado("leyendo"); cuadro = requestAnimationFrame(mirar); })
+        if (video.current) { video.current.srcObject = s; video.current.play().catch(() => { /* se cerró la cámara antes de empezar: no es un error */ }); } setEstado("leyendo"); cuadro = requestAnimationFrame(mirar); })
       .catch(() => setEstado("sin"));
     return () => { vivo = false; cancelAnimationFrame(cuadro); flujo?.getTracks().forEach((t) => t.stop()); };
   }, [alLeer, frente]);

@@ -42,7 +42,7 @@ export function Foto({ socioId, iniciales, version, color, subidaPorSocio = fals
     setCamara("pidiendo");
     if (!navigator.mediaDevices?.getUserMedia) { setCamara("sin"); return; }
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 960 } }, audio: false })
-      .then((s) => { flujo.current = s; if (video.current) { video.current.srcObject = s; void video.current.play(); } setCamara("lista"); })
+      .then((s) => { flujo.current = s; if (video.current) { video.current.srcObject = s; video.current.play().catch(() => { /* se cerró la cámara antes de empezar: no es un error */ }); } setCamara("lista"); })
       .catch(() => setCamara("sin"));
   }, [abierta]);
 
