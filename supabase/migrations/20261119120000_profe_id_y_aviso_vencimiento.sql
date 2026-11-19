@@ -141,7 +141,7 @@ begin
     end if;
   end if;
   return res;
-end $;
+end $$;
 revoke all on function public.avisos_app_socio(uuid, timestamptz) from public, anon, authenticated;
 grant execute on function public.avisos_app_socio(uuid, timestamptz) to authenticated, service_role;
 
