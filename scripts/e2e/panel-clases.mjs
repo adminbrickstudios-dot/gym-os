@@ -37,7 +37,7 @@ try {
     const presente = r.locator("main ul li", { hasText: nombre }).getByRole("button", { name: /Deshacer el presente/ }).first();
     const aviso = r.locator("main").getByText(/una hora antes|No puede tomar la clase|Ya tiene el presente/).first();
     await presente.or(aviso).waitFor({ timeout: 30000 });
-    if (await presente.isVisible()) {
+    if (!(await aviso.isVisible()) && await presente.isVisible()) {
       ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
       // CLA-7: deshacerlo, con motivo.
       const filaLista = r.locator("main ul li", { hasText: nombre }).first();
