@@ -39,6 +39,7 @@ try {
     await presente.or(aviso).waitFor({ timeout: 30000 });
     // La pantalla muestra el presente al toque y la base confirma o rechaza después (si lo rechaza, lo saca y dice por qué): se espera a que termine el pedido antes de mirar.
     await r.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
+    await aviso.waitFor({ timeout: 8000 }).catch(() => {});   // si la base rechaza, el motivo aparece enseguida; si lo acepta, no aparece nada
     if (!(await aviso.isVisible()) && await presente.isVisible()) {
       ok(`buscar “Agustina” → Presente: ${nombre} queda ✅ en la lista`);
       // CLA-7: deshacerlo, con motivo.
