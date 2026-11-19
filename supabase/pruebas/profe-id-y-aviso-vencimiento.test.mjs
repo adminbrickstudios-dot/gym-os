@@ -18,6 +18,7 @@ before(async () => {
     if (clave === "profeA") profeA = eid;
     if (clave === "profeB") profeB = eid;
   }
+  await t.q(`update public.configuracion_gimnasio set modo_clases = 'reserva' where gimnasio_id = $1`, [t.g]);
   // Dos profes con el MISMO nombre: el caso que el nombre no distinguía.
   const [{ id: act }] = await t.q(`insert into public.actividades (gimnasio_id, nombre) values ($1,'Funcional') returning id`, [t.g]);
   const m = await t.en(HOY, "10:00:00");
