@@ -1,7 +1,7 @@
+#!/usr/bin/env node
 // APARTADO DE LA CADENA `e2e` (Pase 1.0, 15/11): L1 (Mateo, 14/11) dejó la portada en una pantalla y ya no dibuja la prueba social (abierto ahora,
 // reseñas, +N socios) ni “¿Primera vez? Empezá acá”: los componentes `Senales` y `ComoEmpezar` siguen en Landing.tsx y el editor guarda sus datos, pero nadie
 // los muestra. Vuelven con la landing nueva (Pase 2.0, PASE-1.0.md § 3). Se corre a mano con `npm run e2e:vd-25` cuando vuelvan.
-#!/usr/bin/env node
 // VD-25 · Página del gimnasio rediseñada: la dueña prende "+N socios" y carga las reseñas → el visitante,
 // en el celular (390 px, sin desbordes), ve la prueba social arriba, "abierto ahora" coherente, "¿Primera
 // vez?", planes con precio, horarios, probar y el pie con la reseña → "Quiero probar" crea un Interesado
