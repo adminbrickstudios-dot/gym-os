@@ -78,6 +78,17 @@ cerrar 1.0, un ➡️ cuenta como cerrado, igual que ✅ y ⛔.
 
 Ordenado por lo que más importa. Todo lo de acá cuenta como cerrado para Pase 1.0.
 
+### 0. Lo que sigue después de Pista (orden de Mateo, 18/11; NO se empieza antes de la fecha)
+
+**(1) Borrar el estilo clásico y dejar todo super liviano. Arranca el 26/11 si Temple Gym no volvió a clásico.** Va en **dos publicaciones** (expandir y contraer):
+- *Publicación A (solo código; la base no cambia):* Pista pasa a ser el único estilo. Archivos: `src/app/globals.css` (los tokens y los componentes clásicos: Pista sube a base y desaparece el bloque `html[data-estilo="pista"]`; los `!important` sobre el `--fondo` en línea ya no hacen falta), `src/lib/marca.ts` (`propsMarca` sin las variables del clásico), `src/app/layout.tsx` (sin `data-estilo`; el `data-modo` se queda), `src/proxy.ts` (sin la cabecera `x-gimnasio-estilo`), `src/app/panel/configuracion/EstiloMarca.tsx` + `estilo-acciones.ts` (queda solo el modo), `src/app/admin/[id]/FichaExtra.tsx` (`EstiloGimnasioFicha` queda solo con el modo), `scripts/e2e/comun.mjs` (`E2E_SIN_MAYUSCULAS` pasa a ser siempre), `scripts/e2e/inventario-pantallas.mjs`, `scripts/local/levantar.sh` y los workflows (`ESTILO_DEMO`, `estilo`), `scripts/medir/pista-produccion.mjs` y `.github/workflows/pista-produccion.yml`, y las fuentes que el estilo clásico usaba y Pista no (revisar `src/app/fuentes/`).
+- *Publicación B (una semana después, migración nueva; la anterior no se edita):* sacar la columna `configuracion_gimnasio.estilo`, las funciones `guardar_estilo_gimnasio`, `admin_guardar_estilo` y `estilo_gimnasio`, y la columna `estilo` de `gimnasio_por_host` y `gimnasio_por_slug` (la vieja se borra en la misma migración); `modo` se queda. Con su vuelta atrás y `npm run db:types`.
+- *La prueba de antes (se guarda antes de tocar nada):* las capturas `inv-pista-*` del inventario (compu y celular, oscuro y claro), el inventario clásico-contra-Pista en verde, las 254 e2e en las dos llaves, `scripts/medir/js-rutas.mjs` y `chunks-panel.mjs` (el JS y el CSS por ruta de hoy), el tope de viajes, y Lighthouse de la página del gimnasio (93). Después de cada publicación: lo mismo, y el CSS y el JS por ruta tienen que ser **menores** que antes (el objetivo es más liviano, no igual).
+
+**(2) Seguridad.** Un inventario de lo que hay que revisar, sin tocar permisos ni plata hasta que Mateo decida: lo que salga de la auditoría del 18/11 (ver "Lo que encontró la auditoría" en `PROGRESO.md`), los permisos de `PERMISOS.md` contra lo que ve cada rol en pantalla, los logs públicos de Actions (que no impriman nombres de gimnasios ni mails), las claves y secretos de Actions, y las funciones que ve `anon`.
+
+**(3) Profesionalización** (en este orden, y no se empieza nada de esto sin que Mateo lo diga): landing de venta, débito automático (`DEBITO-AUTOMATICO.md`), alta del gimnasio sola, y Resend y Sentry al final.
+
 ### 1. Plata y permisos (D70): decide Mateo cuando quiera, con la recomendación ya escrita
 
 Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso el agente no las hizo solo. El detalle y el porqué de cada una están en `PREGUNTAS.md`.
