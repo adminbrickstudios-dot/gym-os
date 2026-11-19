@@ -49,7 +49,7 @@ try {
   const medidas = await tv.evaluate(() => {
     const px = (e) => parseFloat(getComputedStyle(e).fontSize);
     const chicos = [...document.querySelectorAll("main *")].filter((e) => e.childNodes.length && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && e.getBoundingClientRect().width > 0 && px(e) < 20).map((e) => `${e.textContent.trim().slice(0, 30)} (${px(e)}px)`);
-    return { chicos, wod: px(document.querySelector("[data-tv-wod]")), nombre: px(document.querySelector("[data-tv-anotados] li")) };
+    return { chicos, wod: px([...document.querySelectorAll("[data-tv-wod] *")].find((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) ?? document.querySelector("[data-tv-wod]")), nombre: px(document.querySelector("[data-tv-anotados] li")) };
   });
   chequear(medidas.chicos.length === 0, "TV de lejos: ningún texto baja de 20 px", `textos chicos en la TV: ${medidas.chicos.join(" | ")}`);
   chequear(medidas.nombre >= 20 && medidas.wod >= 20, `TV de lejos: nombres ${medidas.nombre}px y WOD ${medidas.wod}px`, `nombres ${medidas.nombre}px, WOD ${medidas.wod}px`);
