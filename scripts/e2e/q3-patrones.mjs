@@ -23,9 +23,10 @@ const ing = (socio, sede, minutosAtras) => q(
   `insert into public.ingresos (gimnasio_id, sede_id, socio_id, momento, via_acceso, resultado, color, motivo, texto)
    values ($1,$2,$3, now() - ($4 || ' minutes')::interval, 'recepcion', 'entro', 'verde', 'al_dia', 'Pasá')`, [gim, sede, socio, String(minutosAtras)]);
 const limpiar = async () => {
-  for (const id of [doble, muchas]) if (id) await q(`delete from public.ingresos where socio_id = $1`, [id]);
-  for (const id of [doble, muchas]) if (id) await q(`delete from public.socios where id = $1`, [id]);
-  if (sede2) await q(`delete from public.sedes where id = $1`, [sede2]);
+  // Las entradas no se borran (se anulan), así que la sede de prueba no se puede borrar: queda inactiva. Si quedaba activa,
+  // el demo tenía dos sedes y la página pública dejaba de mostrar el horario de hoy (landing-l1, más adelante en la cadena).
+  if (sede2) await q(`update public.sedes set activa = false where id = $1`, [sede2]);
+  for (const id of [doble, muchas]) if (id) await q(`update public.ingresos set anulado_en = now(), anulado_motivo = 'prueba e2e q3-patrones' where socio_id = $1 and anulado_en is null`, [id]);
 };
 const b = await navegador();
 try {
