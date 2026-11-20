@@ -365,14 +365,14 @@ Fase E (entrada en la esquina, `historia/NOCHE-1211.md`): E1, E2, E3, E4 y E6 en
 |---|---|---|---|
 | K1 | Kiosco: DNI/QR y que diga por qué no deja pasar | ✅ | `ent-3` (el texto del motivo), `kiosco.test.mjs` |
 | K2 | Alta en el kiosco para quien llega sin cuenta (QR a Hacete socio si las altas online están prendidas) | ✅ | `kiosco-alta`, `kiosco-alta.test.mjs` |
-| K3 | TV en vivo por Realtime con respaldo cada 15 s | 🟡 | Hoy consulta cada 15 s y dice "Sin conexión". La TV no tiene sesión (la autoriza un token): Realtime pide un canal con broadcast desde la base, y ni Actions ni la base local tienen Realtime. No se puede probar → no se hizo. |
-| K4 | `vd-4` firme | 🟡 | No se tocó: es Realtime entre tablet y recepción, y tampoco corre acá |
-| K5 | Página del gimnasio y `/hacete-socio` en compu y celular | 🟡 | `fase-u4`, `reg-1` y el barrido; no se hizo una pasada nueva de capturas |
+| K3 | TV en vivo por Realtime con respaldo cada 15 s | 🟡 (no se puede probar en Actions) | Hoy consulta cada 15 s y dice "Sin conexión". La TV no tiene sesión (la autoriza un token): Realtime pide un canal con broadcast desde la base, y ni Actions ni la base local tienen Realtime. No se puede probar → no se hizo. |
+| K4 | `vd-4` firme | 🟡 (no se puede probar en Actions) | No se tocó: es Realtime entre tablet y recepción; ni Actions ni la base local tienen Realtime, así que no hay cómo dejarlo firme con prueba |
+| K5 | Página del gimnasio y `/hacete-socio` en compu y celular | ✅ | `k5-publico` (compu y celu, clásico y Pista: abre, sin errores, sin desborde, pasos del alta con nombre, captura entera), `fase-u4`, `reg-1`, `landing-l1` |
 
 ### Recepción, encargado y dueño
 | # | Tarea | Estado | Prueba / falta |
 |---|---|---|---|
-| R1 | Cada número que se toca abre la lista con nombres | 🟡 | Los números de Inicio ya son enlaces (`NumerosInicio`) y Retención `q2-retencion`; sin revisión número por número |
+| R1 | Cada número que se toca abre la lista con nombres | ✅ | `r1-numeros` (la dueña elige todos los números en tandas de 4 y toca cada uno: la lista abre filtrada y con nombres). Arreglado: Al día, Altas y Bajas del mes abrían todos los socios; Deben, Por vencer y A cobrar abrían siempre Vencen hoy; Cobrado hoy abría la caja cerrada (ahora el Cierre del día). Retención: `q2-retencion` |
 | R2 | "Avisar a todos los anotados" desde una clase (wa.me) | ✅ | `com-3`, `avi-1` |
 | R3 | Borrador guardado en formularios largos | ✅ plan, rutina, evento, página (`fluidez-reglas`); alta completa detrás de la llave `borrador_alta` | |
 | R4 | FA-13 (interesado sin contactar en 24 h), FA-5 (asistente que se abre solo), FA-6 (listas virtualizadas) | ❌ → Pase 2.0 | Tocan `para_hacer_hoy` (se reemplazó varias veces), la entrada de todos los e2e del dueño y las listas de Socios: riesgo alto sin poder probarlas en esta vuelta |

@@ -1,3 +1,15 @@
+## 2026-11-19 · Paneles completos — regresión de pruebas-completas, R1, K5 y publicación (rama `dia/2026-11-19`)
+
+**QUÉ HICE**
+- Regresión (fallaba igual en main 975e9f6, no era el diff): prueba de base 8 de cierres contra el reloj real (el trigger usa `now()`); vd-8 empieza sin las entradas que deja ent-4 (dentro de la visita de 5 h la segunda era "ya entró"); cada recorrido arranca con `pedidos_codigo` en cero (todos piden códigos desde la misma IP y pasaban el tope de 20/h: vd-22, vd-33, vd-39, vd-55, vd-58); Retención en el celu desbordaba con "$2.858.500,50" (vd-46o, q2-retencion, barrido); la Entrada abierta con F2 dejaba el foco en la X (vd-6, 3 de 3: la Hoja ahora prefiere `data-autofoco`); q3-patrones dejaba una segunda sede activa en el demo y la página perdía el horario de hoy (landing-l1).
+- R1: cada número de Inicio abre su lista filtrada (Al día, Altas, Bajas, Deben, Por vencer, A cobrar, En riesgo; Cobrado hoy → Cierre del día). e2e `r1-numeros`.
+- K5: e2e `k5-publico` (página y /hacete-socio, compu y celu, por estilo).
+- Verificado: corrida aislada de los 14 que fallaban; pruebas-completas en tandas (15 clásico + 15 Pista, cada una con su base) y las tandas tocadas vueltas a correr sobre el commit final; prevuelo de las 4 migraciones en producción.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** — la cadena entera en una sola base no da verde desde hace días (fugas de estado entre recorridos); se corre en tandas, como en las publicaciones anteriores. El paso de ffmpeg del runner "pasa" aunque apt se cuelgue (continue-on-error): ent-2 falla con ENOENT y se resuelve corriendo de nuevo.
+**SIN ARREGLAR** — K3 (TV por Realtime) y K4 (vd-4): no se pueden probar en Actions. Los 💲 en PASE-1.0 § Plata y permisos.
+**LO QUE NO PUDE VERIFICAR** — lint y typecheck locales sí; Postgres y pantallas solo en Actions (esta máquina no tiene Postgres).
+
 ## 2026-11-16 · Pase 1.0 — pedidos de Mateo del 16/11 (PR #29 a #32) y cacería
 
 ```
