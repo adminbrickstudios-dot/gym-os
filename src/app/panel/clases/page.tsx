@@ -9,7 +9,7 @@ import { Vacio } from "@/components/ui/Vacio";
 import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Clases" };
-type Clase = { clase_id: string; actividad: string; emoji: string | null; color: string | null; inicio: string; fin: string; profe: string | null;
+type Clase = { clase_id: string; actividad: string; emoji: string | null; color: string | null; inicio: string; fin: string; profe: string | null; profe_id?: string | null;
   cupo: number | null; confirmadas: number; en_espera: number; cancelada: boolean; cancelada_motivo: string | null };
 
 function diaLocal(zona: string, sumar = 0) {
@@ -53,7 +53,8 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
               const pasada = new Date(c.fin).getTime() < ahora;
               // REV-4: el profe ve toda la grilla del día, pero solo abre la lista de sus clases (la base no le deja ver las otras).
-              const ajena = panel.yo.rol === "profe" && c.profe !== panel.yo.nombre;
+              // Por id (la base se lo devuelve al equipo). Con una base sin la migración nueva (profe_id undefined) cae al nombre, como antes.
+              const ajena = panel.yo.rol === "profe" && (c.profe_id !== undefined ? c.profe_id !== panel.yo.equipo_id : c.profe !== panel.yo.nombre);
               const estilo = `tarjeta flex items-center gap-4 px-4 py-4 ${ajena ? "" : "hover:bg-[var(--tarjeta-alta)]"} ${c.cancelada || pasada || ajena ? "opacity-55" : ""}`;
               const contenido = (
                 <>

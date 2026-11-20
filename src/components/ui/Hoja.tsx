@@ -32,7 +32,8 @@ export function Hoja({ abierta, alCerrar, etiqueta, children, className = "", al
     if (!abierta) return;
     const antes = document.activeElement as HTMLElement | null;
     const p = panel.current;
-    if (p && !p.contains(document.activeElement)) (p.querySelector<HTMLElement>(ENFOCABLES) ?? p).focus();
+    // Lo que la pantalla marca con data-autofoco (el campo del DNI de la Entrada) va primero; si no, el primer enfocable (que suele ser la X).
+    if (p && !p.contains(document.activeElement)) (p.querySelector<HTMLElement>("[data-autofoco]") ?? p.querySelector<HTMLElement>(ENFOCABLES) ?? p).focus();
     const tecla = (e: KeyboardEvent) => {
       if (e.key === "Escape") { pedir.current(); return; }
       if (e.key !== "Tab" || !p) return;

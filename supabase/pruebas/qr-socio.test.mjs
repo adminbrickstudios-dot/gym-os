@@ -57,3 +57,14 @@ test("vale una vez, en su ventana y la anterior; viejo, falso o ajeno no", async
   // Otro usuario no saca el QR de este socio.
   await t.comoUsuario(u.recepcion, () => t.falla(() => t.q(`select public.mi_qr($1, $2, $3)`, [t.g, t.ctx.socios.al_dia, M]), /Sin permiso/));
 });
+
+test("mi_qr devuelve también 'ahora' (la hora de la base) para que el navegador mida su desfase", async () => {
+  await t.q(`update public.configuracion_gimnasio set accesos_activos = array_append(accesos_activos, 'qr_socio') where gimnasio_id = $1 and not ('qr_socio' = any (accesos_activos))`, [t.g]);
+  await t.q(`set local role authenticated`);
+  await t.q(`select set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: socioUsuario, role: "authenticated" })]);
+  try {
+    const q = (await t.q(`select public.mi_qr($1, $2, $3) as q`, [t.g, t.ctx.socios.al_dia, M]))[0].q;
+    assert.equal(Date.parse(q.ahora), Date.parse(M));
+    assert.ok(Date.parse(q.vence_en) > Date.parse(q.ahora));
+  } finally { await t.q(`reset role`); }
+});

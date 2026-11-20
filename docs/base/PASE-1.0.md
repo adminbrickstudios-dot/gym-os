@@ -105,8 +105,19 @@ Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso e
 | Deshacer en gastos | Confirmar con el monto a la vista y Deshacer por 10 segundos (anular el hecho, no borrarlo) |
 | `equipo.es_soporte` en lugar del nombre "Soporte BRIK" | Leer la columna, no el nombre (hoy un empleado con ese nombre queda afuera de su panel) |
 | "Entrar como soporte" con rol Encargado | Solo con el permiso del dueño y con tiempo |
-| `profe_id` en `clases_del_dia` | Devolverlo (expandir) y comparar el id y no el nombre en la grilla |
+| `profe_id` en `clases_del_dia` | ✅ Hecho el 19/11 (paneles completos): se devuelve solo al equipo y la grilla compara el id (`clase-ajena-profe-id`) |
 | Decisiones de la COLA: REF-2, REV-1d, COM-6b, COM-8b, COM-9b | La opción recomendada de cada una en `PREGUNTAS.md` |
+
+**Los 💲 de "Paneles completos" (19/11, inventario en `ESTADO-GENERAL.md` § Paneles completos).** Andan y tienen prueba; lo que queda es de plata y no se tocó:
+
+| # | Qué | Recomendación |
+|---|---|---|
+| S3 | El monto que ve el socio al pagar por transferencia o link (hoy: el precio del plan, o el de transferencia si el plan lo tiene) | Dejarlo así para 1.0; con deuda de varios meses, mostrar "Debe $X" con el mismo cálculo de la puerta (`calcular_acceso`), nunca otro cálculo en TypeScript |
+| S10 | Renovar desde la app (hoy renueva el mismo plan al precio vigente) | Dejarlo así; el cambio de plan con prorrateo sigue como dice la fila "Cambio de plan" de arriba |
+| P7 | Reglas de cuánto se le paga al profe (hoy: por hora o por clase, fijo) | No sumar porcentajes ni bonos en 1.0; la liquidación de hoy (`vd-52`) alcanza para Temple Gym |
+| R5 | Pagos parciales, estado de cuenta, prorrateos, matriz de permisos, ARCA | Las filas de arriba; ARCA a Pase 2.0 |
+| R3b | `borrador_alta` (borrador del alta completa) | Prenderla en Temple Gym después de probarla un día en producción: guarda lo escrito, no mueve plata |
+| — | `vuelto_efectivo` (cuánto devolver en la hoja Cobrar) | Prenderla: solo muestra una resta, el cobro queda igual; probar antes un cierre de caja con ella prendida |
 
 ### 2. Velocidad (números de hoy, 15/11, app compilada, dueña; tope guardado en `scripts/medir/topes-viajes.json`)
 

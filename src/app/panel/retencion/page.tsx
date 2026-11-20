@@ -114,7 +114,8 @@ export default async function Retencion({ searchParams }: { searchParams: Promis
           </div>
           <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="hoja" /> Altas del mes <span className="block text-sm texto-tenue">{tablero.altas_mes_anterior} el mes pasado</span></dt><dd><Link href={enSocios("nuevos")} className="numero text-5xl hover:underline" data-tablero-link="altas">{tablero.altas_mes}</Link></dd></div>
           <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="salir" /> Bajas del mes <span className="block text-sm texto-tenue">{tablero.bajas_mes_anterior} el mes pasado</span></dt><dd><Link href={enSocios("bajas")} className="numero text-5xl hover:underline" data-tablero-link="bajas">{tablero.bajas_mes}</Link></dd></div>
-          <div className="flex flex-col-reverse"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="plata" /> Por mes en riesgo</dt><dd><Link href={url("riesgo", etiqueta)} className="numero text-4xl sm:text-5xl hover:underline" data-tablero-link="riesgo">{formatearPesos(resumen.plata_en_riesgo)}</Link></dd></div>
+          {/* En el celu la plata va a lo ancho: con millones ("$2.858.500,50") no entra en media columna de 390 px. */}
+          <div className="flex flex-col-reverse col-span-2 lg:col-span-1 min-w-0"><dt className="texto-suave mt-2 text-[15px]"><Icono nombre="plata" /> Por mes en riesgo</dt><dd><Link href={url("riesgo", etiqueta)} className="numero text-4xl sm:text-5xl hover:underline" data-tablero-link="riesgo">{formatearPesos(resumen.plata_en_riesgo)}</Link></dd></div>
         </dl>}
         {numeros && <NumerosDeRetencion n={numeros} />}
         {delPeriodo && <NumerosDelPeriodo n={delPeriodo}

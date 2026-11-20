@@ -1,8 +1,11 @@
-import { Suspense } from "react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Recomendacion } from "./Recomendacion";
-import { AvisosDelDia } from "./AvisosDelDia";
+import { AvisosDelDia, type AvisoDelDia } from "./AvisosDelDia";
+import { AvisoClave, type AvisoClaveDatos } from "./AvisoClave";
+import type { OfertaLugarDatos } from "./OfertasLugar";
+import type { AvisoApp } from "./AvisosSocio";
+import type { ResumenApp } from "@/lib/app/resumen";
 import { colorVar } from "@/components/panel/Estado";
 import { Aviso } from "@/components/panel/Marco";
 import { fechaCorta, formatearDni, formatearPesos } from "@/lib/formato";
@@ -28,7 +31,6 @@ import { Bienvenida } from "./Bienvenida";
 import { ReglamentoNuevo } from "./ReglamentoNuevo";
 import { OcupacionEnVivo } from "./OcupacionEnVivo";
 import { AvisosInicio } from "./AvisosInicio";
-import { AvisoClaveSocio } from "./AvisoClaveSocio";
 import { Entraste } from "./Entraste";
 import { ProgresoInicio, type ProgresoSocio } from "./ProgresoInicio";
 import { textoRequisitos, type GradosSocio } from "@/lib/clases/grados";
@@ -63,7 +65,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     // Cacería (16/11): las 14 lecturas del Inicio en UN viaje (lote_lecturas, cada una con los permisos del propio socio). Las que antes tenían
     // `.catch` van como tolerantes (si fallan, valen null y no se muestran); las demás, si fallan, rompen la pantalla como antes.
     const pg = { p_gimnasio_id: g.id }, ps = { p_socio_id: s.socio_id };
-    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni, salida0] = await rpcLote(
+    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni, salida0, avisoClave, misAvisos, ocupacion, ofertas, avisosDelDia, resumen] = await rpcLote(
       lectura<{ codigo: string; vence_en: string } | null>("mi_qr", { ...pg, ...ps }, true),   // el QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra)
       lectura<boolean | null>("usa_qr_pared", pg, true),
       lectura<MisInvitados | null>("mis_invitados", { ...pg, ...ps }, true),
@@ -79,6 +81,13 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       lectura<GradosSocio>("grados_socio", ps),   // COM-13: su grado (cinturón)
       lectura<string | null>("mi_dni", ps, true),   // SOCIO-FLUJO §4: "Tu DNI para entrar" cuando el gimnasio no usa el QR
       lectura<string | null>("registra_salida", pg, true),   // VD-48: "Me voy" si el gimnasio registra la salida (antes se pedía aparte y solo con el QR de la pared: el número de viajes dependía de eso)
+      // Paneles completos (19/11): lo que antes se pedía aparte dentro de <Suspense> (5 viajes más) va en este mismo viaje. Todas tolerantes: si fallan valen null y no se muestran.
+      lectura<AvisoClaveDatos | null>("aviso_clave_socio", ps, true),
+      lectura<AvisoApp[] | null>("mis_avisos", ps, true),
+      lectura<{ visible: boolean; personas?: number } | null>("ocupacion_en_vivo", pg, true),
+      lectura<OfertaLugarDatos[] | null>("ofertas_socio", ps, true),
+      lectura<AvisoDelDia[] | null>("avisos_app_socio", ps, true),
+      lectura<ResumenApp | null>("resumen_app_socio", ps, true),
     );
     const qr = qr0 ?? null, qrPared = qrPared0 ?? false, novedades = novedades0 ?? [];
     // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
@@ -138,9 +147,9 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         </header>
 
         {documentos.reglamento_nuevo && <ReglamentoNuevo socioId={s.socio_id} version={documentos.reglamento_nuevo.version} texto={documentos.reglamento_nuevo.texto} />}
-        <Suspense fallback={null}><AvisoClaveSocio socioId={s.socio_id} zona={zona} /></Suspense>
-        <AvisosInicio socioId={s.socio_id} />
-        <Suspense fallback={null}><OcupacionEnVivo gimnasioId={g.id} /></Suspense>
+        {avisoClave && <AvisoClave socioId={s.socio_id} aviso={avisoClave} zona={zona} />}
+        <AvisosInicio avisos={misAvisos} />
+        <OcupacionEnVivo r={ocupacion} />
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
         {faltaPagar && (
@@ -193,8 +202,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
 
         {progreso?.entro_hoy && <Entraste momento={progreso.entro_hoy} zona={zona} delMes={progreso.entradas_mes} racha={progreso.semanas_seguidas} hito={progreso.hito} />}
         {progreso && <ProgresoInicio p={progreso} />}
-        <Suspense fallback={null}><AvisosDelDia socioId={s.socio_id} zona={yo.zona!} /></Suspense>
-        <Suspense fallback={null}><Recomendacion socioId={s.socio_id} q={q} /></Suspense>
+        <AvisosDelDia zona={yo.zona!} ofertas={ofertas} avisos={avisosDelDia} />
+        <Recomendacion resumen={resumen} q={q} />
 
         {agenda && (agenda.cierres.length > 0 || agenda.sedes.some((x) => x.texto)) && (
           <section className="space-y-2" aria-label="Horarios del gimnasio" data-agenda-app>

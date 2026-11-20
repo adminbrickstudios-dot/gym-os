@@ -4,22 +4,22 @@ import { formatearNumero, formatearPesos } from "@/lib/formato";
 
 export type NumeroInicio = { clave: string; emoji: string; etiqueta: string; valor: number; formato?: "pesos" | "porcentaje"; serie?: number[] };
 
-/** Cada número lleva a la lista que lo forma (si esa sección está prendida). */
+/** Cada número lleva a la lista que lo forma, ya filtrada (R1: la pestaña o el filtro de esa cuenta; si esa sección está prendida). */
 export const LISTA_DEL_NUMERO: Record<string, { ruta: string; seccion: string }> = {
   adentro: { ruta: "/panel/entrada", seccion: "entrada" },
   entraron: { ruta: "/panel/entrada", seccion: "entrada" },
-  cobrado: { ruta: "/panel/caja", seccion: "caja" },
+  cobrado: { ruta: "/panel/caja/reporte", seccion: "caja" },
   caja_turno: { ruta: "/panel/caja", seccion: "caja" },
-  a_cobrar: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
+  a_cobrar: { ruta: "/panel/vencen-hoy?pestana=cobrar", seccion: "vencen_hoy" },
   vencen: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
-  deben: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
-  por_vencer: { ruta: "/panel/vencen-hoy", seccion: "vencen_hoy" },
-  plata_riesgo: { ruta: "/panel/retencion", seccion: "retencion" },
+  deben: { ruta: "/panel/vencen-hoy?pestana=vencidos", seccion: "vencen_hoy" },
+  por_vencer: { ruta: "/panel/vencen-hoy?pestana=por_vencer", seccion: "vencen_hoy" },
+  plata_riesgo: { ruta: "/panel/retencion?lista=riesgo", seccion: "retencion" },
   activos: { ruta: "/panel/socios", seccion: "socios" },
-  altas_mes: { ruta: "/panel/socios", seccion: "socios" },
-  bajas_mes: { ruta: "/panel/socios", seccion: "socios" },
+  altas_mes: { ruta: "/panel/socios?estado=nuevos", seccion: "socios" },
+  bajas_mes: { ruta: "/panel/socios?estado=bajas", seccion: "socios" },
   ocupacion: { ruta: "/panel/clases", seccion: "clases" },
-  al_dia: { ruta: "/panel/socios", seccion: "socios" },
+  al_dia: { ruta: "/panel/socios?estado=al_dia", seccion: "socios" },
   por_aprobar: { ruta: "/panel/transferencias", seccion: "transferencias" },
   mis_clases: { ruta: "/panel/clases", seccion: "clases" },
   anotados: { ruta: "/panel/clases", seccion: "clases" },

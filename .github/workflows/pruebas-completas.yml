@@ -161,6 +161,10 @@ jobs:
               scripts/local/levantar.sh || true
             fi
             echo "::group::$s"
+            # Todos los recorridos piden códigos desde la misma IP: con más de 20 en una hora el límite de SEG-1
+            # ("Hay muchos pedidos desde esta conexión") cortaba a los que venían después. Cada recorrido empieza en cero;
+            # el límite en sí lo prueban la base (limite-codigos) y los recorridos que lo cruzan adentro.
+            psql -qAtc "delete from public.pedidos_codigo" "$(scripts/db/local.sh url)" > /dev/null || true
             if ! node "$s"; then
               echo "✗ $s" >> .local/fallas.txt
               echo "::warning::falló $s; últimos 200 renglones de .local/app.log:"

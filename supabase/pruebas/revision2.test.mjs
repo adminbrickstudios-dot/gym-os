@@ -232,11 +232,16 @@ test("4: el profe no cancela una clase que ya pasó; el dueño sí", async () =>
 });
 
 test("8: un cierre cargado después cancela las clases ya creadas; anularlo las devuelve", async () => {
-  const c = await clase(spinning, D(5));
-  await reservar(t.ctx.socios.al_dia, c);
-  // El cierre tiene que ser futuro respecto de now(): la prueba usa fechas de 2026-11.
-  const [{ id: ci }] = await t.q(`insert into public.cierres (gimnasio_id, desde, hasta, motivo) values ($1,$2,$3,'Pintura') returning id`,
-    [t.g, await t.en(D(5), "00:00:00"), await t.en(D(6), "00:00:00")]);
+  // El trigger de cierres compara contra now() (no recibe un momento): la clase y el cierre van a 30 días
+  // del reloj real, así la prueba no depende de HOY ni vence con el calendario. La reserva va directo a la
+  // tabla: la ventana de 7 días de reservar() se mide contra el momento fijo y no es lo que se prueba acá.
+  const [{ id: c }] = await t.q(`insert into public.clases (gimnasio_id, sede_id, actividad_id, inicio, fin, cupo)
+      values ($1,$2,$3, date_trunc('day', now()) + interval '30 days 19 hours',
+              date_trunc('day', now()) + interval '30 days 19 hours 50 minutes', 10) returning id`, [t.g, t.sede, spinning]);
+  await t.q(`insert into public.reservas (gimnasio_id, clase_id, socio_id, estado) values ($1,$2,$3,'confirmada')`,
+    [t.g, c, t.ctx.socios.al_dia]);
+  const [{ id: ci }] = await t.q(`insert into public.cierres (gimnasio_id, desde, hasta, motivo)
+      values ($1, date_trunc('day', now()) + interval '29 days', date_trunc('day', now()) + interval '32 days', 'Pintura') returning id`, [t.g]);
   let [k] = await t.q(`select cancelada_motivo, cierre_id from public.clases where id = $1`, [c]);
   assert.equal(k.cancelada_motivo, "Gimnasio cerrado: Pintura");
   const [{ n }] = await t.q(`select count(*)::int n from public.avisos_pendientes where clase_id = $1 and tipo = 'clase_cancelada'`, [c]);

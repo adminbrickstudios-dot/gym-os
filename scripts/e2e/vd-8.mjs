@@ -14,7 +14,14 @@ const b = await navegador();
 const PIN = "7391";
 // Cada corrida prueba un PIN equivocado: se borran los intentos de corridas anteriores (si no, a la sexta bloquea 10 minutos).
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
-await db.connect(); await db.query("delete from privado.intentos_pin"); await db.end();
+await db.connect(); await db.query("delete from privado.intentos_pin");
+// Otro recorrido (ent-4) deja pasar a los mismos testigos minutos antes: dentro de la visita (5 h) una segunda entrada
+// es "ya entró" y no queda ni el forzado ni la promesa. Se anulan sus entradas de las últimas horas para empezar limpio.
+await db.query(`update public.ingresos i set anulado_en = now(), anulado_motivo = 'prueba e2e vd-8: empieza sin entradas'
+                  from public.socios s
+                 where s.id = i.socio_id and s.nombre = 'Testigo' and s.apellido in ('Vencida', 'Sin Pago')
+                   and i.anulado_en is null and i.momento > now() - interval '6 hours'`);
+await db.end();
 
 async function tope(d, n) {
   await d.goto(`${G}/panel/configuracion?pestana=reglas`);
