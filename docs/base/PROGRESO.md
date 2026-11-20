@@ -1,5 +1,14 @@
 # PROGRESO de Pase (antes Base)
 
+## ✅ Paneles completos publicados (19/11, 23:40 ART, PR #38, merge `f0c9accd`; vuelta atrás: revertir ese merge, main antes = `975e9f65`)
+
+- **Regresión de pruebas-completas arreglada** (fallaba igual en main, no era el diff): prueba de base 8 contra el reloj real; vd-8 sin las entradas de ent-4; límite de códigos en cero por recorrido (vd-22/33/39/55/58); Retención en el celu a lo ancho (vd-46o, q2-retencion, barrido); foco de la Entrada en el campo del DNI (vd-6); q3-patrones deja inactiva su sede (landing-l1).
+- **R1** (`r1-numeros`): cada número de Inicio abre su lista filtrada con nombres. **K5** (`k5-publico`): página y /hacete-socio en compu y celu, clásico y Pista. K3 y K4 quedan 🟡: Realtime no se puede probar en Actions.
+- **Pruebas:** pruebas-completas en 15 tandas clásico + 15 Pista (cada una con su base) sobre `c0da84f`, y las tandas tocadas (1, 2, 8, 13, 14) de nuevo sobre `a33d966`: todo verde. Verificar verde en `e6230f3`.
+- **Migraciones en producción:** `20261119120000` a `20261119150000`, prevuelo 44657964232 OK y aplicadas SIN COPIA (44661388327) con permiso de Mateo, chequeos de la base en verde.
+- **Producción, 5 minutos después del deploy, solo mirando (02:34 UTC):** Vercel verde en `f0c9acc`; `/api/salud` → ok, base 83 ms, commit f0c9acc; pasegym.com, /ingresar, templegymsalta.com, /hacete-socio e /ingresar responden 200 (0,4 a 1,4 s). No se tocó ningún dato de Temple Gym ni se corrió el humo (crea un gimnasio de prueba).
+- **Llaves para prender en Temple Gym** (apagadas ahí, prendidas en los [demo]): `aviso_vencimiento`; `altas_online` si quieren el QR de alta en el kiosco. Sin llave: `profe_id`, el lote del Inicio, el QR con el reloj corrido, los números de Inicio filtrados.
+
 ## ⛔ PRIMERO PARA MATEO (19/11, 04:30 ART): Temple Gym sigue saliendo en CLÁSICO desde afuera
 
 Pediste confirmar que Temple Gym salía con `data-estilo="pista"`. A las 02:50, 03:05 y 04:30 ART miré `templegymsalta.com`, `/hacete-socio` y `/ingresar` (200 las tres, sin caché: `Cache-Control: no-store`, `X-Vercel-Cache: MISS`) y las tres salen `data-estilo="clasico" data-modo="oscuro"`. El proxy guarda el estilo 60 s, así que no es la espera. O el guardado en `/super` no llegó a la base, o se guardó en otro gimnasio. Qué mirar: `pasegym.com/super` → Temple Gym → Ficha → Estilo; que diga Pista y que "Guardar" haya dado el mensaje de guardado. No pude mirar la base (la cuenta de Supabase de esta sesión no tiene el proyecto de Pase). Si lo prendés y no se ve en un minuto, avisame con la captura. Vuelta atrás de Pista: la misma ficha → Estilo: Clásico (o `pista-produccion` fase=temple revertir=true cuando estén los secretos).
