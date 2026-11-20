@@ -232,11 +232,11 @@ test("4: el profe no cancela una clase que ya pasó; el dueño sí", async () =>
 });
 
 test("8: un cierre cargado después cancela las clases ya creadas; anularlo las devuelve", async () => {
-  const c = await clase(spinning, D(5));
+  const c = await clase(spinning, D(60));
   await reservar(t.ctx.socios.al_dia, c);
-  // El cierre tiene que ser futuro respecto de now(): la prueba usa fechas de 2026-11.
+  // El cierre tiene que ser futuro respecto de now(): se usa una fecha lejos de HOY (con D(5) el cierre quedó en el pasado el 19/11).
   const [{ id: ci }] = await t.q(`insert into public.cierres (gimnasio_id, desde, hasta, motivo) values ($1,$2,$3,'Pintura') returning id`,
-    [t.g, await t.en(D(5), "00:00:00"), await t.en(D(6), "00:00:00")]);
+    [t.g, await t.en(D(60), "00:00:00"), await t.en(D(61), "00:00:00")]);
   let [k] = await t.q(`select cancelada_motivo, cierre_id from public.clases where id = $1`, [c]);
   assert.equal(k.cancelada_motivo, "Gimnasio cerrado: Pintura");
   const [{ n }] = await t.q(`select count(*)::int n from public.avisos_pendientes where clase_id = $1 and tipo = 'clase_cancelada'`, [c]);
