@@ -153,14 +153,14 @@ end $$;
 
 -- La lista del super admin (Escala → planes) suma descripción y módulos, para editarlos ahí mismo.
 create or replace function public.admin_planes_con_limites() returns jsonb
-language plpgsql stable security definer set search_path = '' as $
+language plpgsql stable security definer set search_path = '' as $$
 begin
   perform privado.exigir_brik(array['principal', 'soporte', 'ventas', 'lectura']);
   return coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'nombre', p.nombre, 'activo', p.activo, 'publico', p.publico, 'max_socios', p.max_socios, 'max_sedes', p.max_sedes,
             'descripcion', p.descripcion, 'modulos', to_jsonb(p.modulos),
             'gimnasios', (select count(*)::int from public.gimnasios g where g.plataforma_plan_id = p.id)) order by p.activo desc, p.precio_mensual)
     from public.plataforma_planes p), '[]'::jsonb);
-end $;
+end $$;
 
 revoke all on function public.admin_landing_venta(), public.admin_guardar_landing_venta(boolean), public.admin_guardar_detalle_plan_brik(uuid, text, text[]) from public, anon;
 grant execute on function public.admin_landing_venta(), public.admin_guardar_landing_venta(boolean), public.admin_guardar_detalle_plan_brik(uuid, text, text[]) to authenticated, service_role;
