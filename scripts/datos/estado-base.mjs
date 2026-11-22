@@ -48,4 +48,30 @@ if (col.length) {
     } catch (e) { console.log(`Como anon: ERROR ${e.message}`); } finally { await db.query("rollback").catch(() => {}); }
   }
 } else console.log("Funciones nuevas: la columna todavía no existe en producción");
+// Pase 2.0: el estilo y el modo guardados (solo lectura), y lo que devuelve gimnasio_por_host como anon (lo que lee el proxy).
+const est = await q(`select 1 from information_schema.columns where table_schema = 'public' and table_name = 'configuracion_gimnasio' and column_name = 'estilo'`);
+if (est.length) {
+  const filas = await q(`select g.slug = 'templegym1' as es_temple, g.es_demo, c.estilo, c.modo,
+      (select d.host from public.dominios_gimnasio d where d.gimnasio_id = g.id order by (d.tipo = 'propio') desc, d.creado_en limit 1) as host
+      from public.gimnasios g left join public.configuracion_gimnasio c on c.gimnasio_id = g.id order by g.creado_en`);
+  const t = filas.find((f) => f.es_temple);
+  console.log(`Estilo Temple Gym: guardado=${t?.estilo ?? "sin fila"} modo=${t?.modo ?? "?"}`);
+  const demos = filas.filter((f) => f.es_demo);
+  console.log(`Estilo demos: ${demos.map((f) => `${f.estilo ?? "sin fila"}/${f.modo ?? "?"}`).join(", ")}`);
+  if (t?.host) {
+    try {
+      await db.query("begin"); await db.query("set local role anon");
+      const { rows } = await db.query(`select estilo, modo from public.gimnasio_por_host($1)`, [t.host]);
+      console.log(`Temple Gym por su host como anon: ${rows.length ? `estilo=${rows[0].estilo} modo=${rows[0].modo}` : "NO RESUELVE"}`);
+      const { rows: w } = await db.query(`select estilo from public.gimnasio_por_host($1)`, [`www.${t.host}`]);
+      console.log(`  con www: ${w.length ? `estilo=${w[0].estilo}` : "no resuelve (va con 308 al sin www)"}`);
+    } catch (e) { console.log(`gimnasio_por_host como anon: ERROR ${e.message}`); } finally { await db.query("rollback").catch(() => {}); }
+  }
+  const [ev] = await q(`select count(*)::int as n from information_schema.tables where table_schema = 'public' and table_name = 'eventos'`);
+  if (ev.n) {
+    const cambios = await q(`select e.creado_en from public.eventos e join public.gimnasios g on g.id = e.gimnasio_id
+       where g.slug = 'templegym1' and e.tipo ilike '%estilo%' order by e.creado_en desc limit 3`).catch(() => []);
+    console.log(`Eventos de estilo en Temple Gym: ${cambios.length ? cambios.map((c) => c.creado_en.toISOString()).join(", ") : "ninguno"}`);
+  }
+}
 await db.end();
