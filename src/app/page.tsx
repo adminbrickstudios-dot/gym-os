@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingOculta } from "@/components/landing/Landing";
+import { LandingNueva } from "@/components/landing/LandingNueva";
 import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
@@ -82,7 +83,10 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<{
       <>
         {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
-        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} sesion={sesion} />
+        {/* Vuelta final: la página nueva solo con la llave landing_nueva del gimnasio (apagada en los reales). */}
+        {r.landing.landing_nueva
+          ? <LandingNueva landing={r.landing} agenda={r.agenda} clases={r.clases} sesion={sesion} />
+          : <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} sesion={sesion} />}
         <Medicion medicion={r.medicion} />
       </>
     );

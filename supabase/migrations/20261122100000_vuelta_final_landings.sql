@@ -23,7 +23,7 @@ end $g$;
 
 -- ── 1. La llave de la landing del gimnasio ─────────────────────────
 create or replace function privado.funciones_nuevas_catalogo() returns jsonb
-language sql immutable set search_path = '' as $
+language sql immutable set search_path = '' as $$
   select jsonb_build_array(
     jsonb_build_object('clave', 'borrador_alta', 'titulo', 'Borrador del alta de socio', 'plata', false,
       'explicacion', 'Si se corta el alta a la mitad, al volver pregunta “¿Seguimos donde dejaste?”. Se guarda solo en esa computadora, por 7 días.',
@@ -59,7 +59,7 @@ language sql immutable set search_path = '' as $
       'explicacion', 'La página pública del gimnasio pasa al diseño nuevo: arriba el nombre y “Hacete socio”, después planes y precios, clases de la semana, cómo llegar, horarios y WhatsApp, y al final el reglamento y “Ya soy socio”. Con ilustraciones pintadas con el color del gimnasio. Lo que no cargaste no se muestra.',
       'novedad', 'La página del gimnasio tiene un diseño nuevo, con ilustraciones en el color del gimnasio y los planes arriba.')
   )
-$;
+$$;
 revoke all on function privado.funciones_nuevas_catalogo() from public, anon, authenticated;
 
 -- La misma landing_publica de hoy (crear_cuenta) más la llave. Una lectura más dentro del mismo viaje.

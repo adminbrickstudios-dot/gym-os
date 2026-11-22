@@ -32,7 +32,7 @@ const EMOJI_SECCION: Record<Seccion["tipo"], string> = {
   probar: "regalo",
 };
 
-function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
+export function Logo({ marca, grande = false }: { marca: Marca; grande?: boolean }) {
   const url = urlMarca(marca.logo_path);
   const tam = grande ? "size-20 text-3xl rounded-[var(--radio)]" : "size-10 text-base rounded-[var(--radio-campo)]";
   if (url) {
@@ -99,7 +99,7 @@ function Actividades({ s }: { s: Extract<Seccion, { tipo: "actividades" }> }) {
   );
 }
 
-function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean; altas: boolean }) {
+export function TarjetaPlan({ p, whatsapp, mostrarPrecio, altas }: { p: PlanPublico; whatsapp: string | null; mostrarPrecio: boolean; altas: boolean }) {
   const condiciones = condicionesPlan(p);
   const variantes = mostrarPrecio ? variantesPlan(p) : [];
   const link = linkWhatsapp(whatsapp, `Hola! Me interesa el plan ${p.nombre}.`);
@@ -145,7 +145,7 @@ function Planes({ s, landing }: { s: Extract<Seccion, { tipo: "planes" }>; landi
 }
 
 /** "Abierto · cierra 22:00": la misma cuenta que la app y el panel (privado.agenda). */
-function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolean }) {
+export function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolean }) {
   if (!texto) return null;
   return (
     <span className={`pildora ${abierto ? "pildora-verde" : ""}`} data-abierto={abierto}>
@@ -156,7 +156,7 @@ function EstadoAhora({ texto, abierto }: { texto: string | null; abierto: boolea
 }
 
 /** P8: las clases de los próximos 7 días, por día. Salen de la agenda del gimnasio; sin clases no se muestra nada. */
-function ClasesSemana({ clases }: { clases: ClaseSemana[] }) {
+export function ClasesSemana({ clases }: { clases: ClaseSemana[] }) {
   const dias = agruparClases(clases);
   if (!dias.length) return null;
   const variasSedes = new Set(clases.map((c) => c.sede)).size > 1;
@@ -225,7 +225,7 @@ function Horarios({ s, agenda, clases = [] }: { s: Extract<Seccion, { tipo: "hor
 }
 
 /** Los próximos cierres, arriba de todo: que nadie viaje al gimnasio cerrado. */
-function AvisoCierres({ agenda }: { agenda: Agenda | null }) {
+export function AvisoCierres({ agenda }: { agenda: Agenda | null }) {
   const cierres = agenda?.cierres ?? [];
   if (!cierres.length) return null;
   return (
