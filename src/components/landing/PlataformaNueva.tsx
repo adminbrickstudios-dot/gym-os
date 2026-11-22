@@ -75,7 +75,7 @@ export function PlataformaNueva({ planes, linkWhatsapp = null, capturas = [], vi
   return (
     <main className="overflow-x-clip" data-plataforma data-plataforma-nueva>
       {vistaPrevia && (
-        <p className="bg-[var(--amarillo)] text-[#121A22] text-center font-semibold px-4 py-2" data-vista-previa>
+        <p className="bg-[var(--atencion-suave)] text-[var(--texto)] border-b border-[var(--atencion)] text-center font-semibold px-4 py-2" data-vista-previa>
           Vista previa: el público todavía ve la página de siempre.
         </p>
       )}

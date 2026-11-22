@@ -137,7 +137,7 @@ Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso e
 ### 3. Estructura, diseño, métodos, landing y fluidez (lo que nombró Mateo)
 
 - Pulido profundo: Z3 a Z7, F3.2, F6.1.
-- La landing nueva y el rediseño de lo que se está pasando por alto.
+- La landing nueva: ✅ armada el 22/11 (las dos, detrás de su llave; ver Lo de Mateo). Lo que sigue: el rediseño de lo que se está pasando por alto.
 - El plan de profesionalización (`docs/PLAN-PROFESIONALIZACION.md`, cuando Mateo diga "terminado oficialmente").
 
 ### 4. Funciones nuevas (apagadas por defecto, detrás de su llave)

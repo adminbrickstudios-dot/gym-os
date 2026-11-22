@@ -512,3 +512,32 @@ Respuesta de Mateo: (vacío)
 ## Decididas por Mateo el 19/11 (tarea "Paneles completos")
 - **Avisos por hora (FA-12): sin cron, se calculan al abrir.** La app del socio muestra "tu clase es en 1 h" (ya existía, `avisos_app_socio`, con interruptor del socio) y "te quedan N días" (llave nueva `aviso_vencimiento`, apagada por defecto, 3 días o menos). El panel del profe, el encargado y el dueño ya ven "clase sin anotados" en la campana (`campana`). Ningún aviso decide acceso ni plata; si no sale, nadie entra gratis y nadie queda afuera. El push a la hora exacta sigue ⛔ (necesita un cron). Reemplaza lo "por defecto" de las filas del 11/11 sobre FA-12.
 - **"Clase ajena" del profe se decide por `profe_id`, no por el nombre.** `clases_del_dia` devuelve `profe_id` solo al equipo (al socio, null). Migración aditiva `20261119120000`; con prueba en negativo (otro gimnasio y un socio ajeno dan error). Reemplaza lo "por defecto" de las filas del 11/11 sobre "clase ajena".
+
+## Vuelta final (22/11): errores, seguridad, las dos landings y los documentos
+
+## P-VF1 · ¿Qué más lleva la página nueva del gimnasio? (22/11)
+La página nueva (`landing_nueva`) sigue el orden que pidió Mateo y deja afuera lo que la vieja tiene más abajo: eventos públicos, "Probá una clase", galería, equipo y preguntas.
+- A) Sumar eventos y "Probá una clase" debajo de las clases de la semana, antes de prenderla en Temple Gym (recomendada: son las dos que traen gente nueva; galería y equipo son fotos y la página nueva es sin fotos).
+- B) Dejarla así, corta.
+Decidido por defecto: B mientras esté apagada en Temple Gym (no cambia nada para nadie real). Dónde se nota: la página del gimnasio con la llave prendida.
+Respuesta de Mateo: (vacío)
+
+## P-VF2 · ¿Los [demo] nuevos nacen con la página nueva? (22/11)
+La migración prende `landing_nueva` en los [demo] que ya existen; los que se siembren después nacen con la de siempre (así la prueba `landing-l1` sigue fijando la vieja).
+- A) Dejarlo así hasta que Temple Gym use la nueva; ese día, que el sembrado la prenda (recomendada: no se pierde la prueba de la vieja mientras alguien real la use).
+- B) Prenderla ya en el sembrado.
+Decidido por defecto: A. Dónde se nota: `sembrar-demo` y `sembrar-prueba-mateo`.
+Respuesta de Mateo: (vacío)
+
+## P-VF3 · Términos del servicio de Pase (22/11, borrador)
+El borrador de la página de venta dice: abono mensual por gimnasio, el gimnasio es dueño de sus datos y los exporta cuando quiere, vencido el abono el panel queda en solo lectura (la puerta sigue), baja con 30 días de aviso y borrado de copias "en un plazo razonable".
+- A) Que lo revise un abogado y fije el plazo de borrado (recomendada: 90 días, el tiempo que guardan las copias de Supabase Pro).
+- B) Publicarlo así.
+Decidido por defecto: A (la página de venta sigue sin publicar). Dónde se nota: /super → Vista previa de la landing → Términos y privacidad.
+Respuesta de Mateo: (vacío)
+
+## P-VF4 · ¿Precios en la página de venta o "consultanos"? (22/11)
+- A) Mostrar los planes que cargues en /super con su precio, límites y módulos (recomendada: el dueño de barrio quiere saber cuánto sale antes de escribir; si no cargás planes, la sección no aparece).
+- B) Sin precios: solo "Hablemos por WhatsApp".
+Decidido por defecto: A (la sección se esconde sola si no hay planes). Dónde se nota: la página de venta.
+Respuesta de Mateo: (vacío)
