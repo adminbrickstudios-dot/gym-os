@@ -19,6 +19,8 @@ export default function ErrorRaiz({ error, reset }: { error: Error & { digest?: 
           {error?.digest && <p className="texto-tenue text-sm mt-3">Código del error: {error.digest}</p>}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={reset} className="boton boton-principal text-lg px-8">Probar de nuevo</button>
+            {/* Recarga entera a propósito: lo que falló es el layout, una navegación del cliente lo reusaría. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a href="/" className="boton text-lg px-8">Ir al inicio</a>
           </div>
         </main>
