@@ -1,0 +1,8 @@
+# Vuelta final (22/11): gitleaks sobre toda la historia (workflow Seguridad). Lo único que encontró son los tokens de prueba
+# de Mercado Pago de supabase/pruebas/*.test.mjs ("TEST-1234567890123456-…"): falsos, armados a mano. Cualquier otro hallazgo es real.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Tokens de prueba falsos de las pruebas de la base"
+regexes = ['''TEST-1234567890123456-abcdefABCDEF-1234567890''']
