@@ -1,0 +1,91 @@
+# Vuelta final (22/11) · Seguridad: el repo es público. Corre en cada push a una rama dia/ o noche/ y a mano.
+#   1. gitleaks sobre TODA la historia de git (si aparece una clave real NO se reescribe la historia: se rota; ver PASE-1.0.md § Lo de Mateo).
+#   2. npm audit (solo lo alto y crítico hace fallar).
+#   3. build y búsqueda de secretos en el JS que se publica (.next/static): la service_role y cualquier JWT que no sea el anon.
+#   4. Cabeceras de seguridad de producción con curl (CSP, HSTS, frame-ancestors, Referrer-Policy, Permissions-Policy) y cookies.
+# No usa ningún secreto: no puede filtrar nada en el log.
+name: Seguridad
+
+on:
+  push:
+    branches: ["dia/**", "noche/**"]
+  workflow_dispatch:
+
+jobs:
+  secretos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: gitleaks sobre toda la historia
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar xz gitleaks
+          # Solo el tipo de hallazgo, el archivo, la línea y el commit: el valor va enmascarado (--redact) porque el log es público.
+          ./gitleaks git . --redact --no-banner --report-format json --report-path gitleaks.json --exit-code 0 -v | tail -n 5 || true
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("gitleaks.json","utf8"));
+            console.log("Hallazgos de gitleaks:", r.length);
+            for (const x of r) console.log(`- ${x.RuleID} · ${x.File}:${x.StartLine} · commit ${x.Commit.slice(0,8)} (${x.Date.slice(0,10)})`);
+          '
+      - name: Guardar el informe (enmascarado)
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks
+          path: gitleaks.json
+          retention-days: 7
+
+  dependencias-y-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: clave-de-build
+      NEXT_PUBLIC_DOMINIO_BASE: ejemplo.com
+      NEXT_PUBLIC_DOMINIO_PLATAFORMA: app.ejemplo.com
+      # Un valor marcador: si aparece en el JS del navegador, la clave de servicio se está filtrando al cliente.
+      SUPABASE_SERVICE_ROLE_KEY: MARCADOR-SERVICE-ROLE-NO-DEBE-SALIR
+      MP_ACCESS_TOKEN: MARCADOR-MP-NO-DEBE-SALIR
+      MP_WEBHOOK_SECRET: MARCADOR-MPWH-NO-DEBE-SALIR
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: npm audit
+        run: |
+          npm audit --omit=dev || true
+          npm audit --omit=dev --audit-level=high
+      - name: Versión de Next
+        run: node -e 'console.log("next", require("next/package.json").version)'
+      - run: npm run build
+      - name: Ningún secreto en el JS del navegador
+        run: |
+          set -e
+          if grep -rl "MARCADOR-" .next/static; then echo "::error::Un secreto del servidor llegó al JS del navegador"; exit 1; fi
+          if grep -rlE "service_role|SERVICE_ROLE" .next/static; then echo "::error::Aparece service_role en el JS del navegador"; exit 1; fi
+          # Un JWT de Supabase con rol de servicio empieza con eyJ y lleva "service_role" en base64 (c2VydmljZV9yb2xl).
+          if grep -rl "c2VydmljZV9yb2xl" .next/static; then echo "::error::Un JWT con service_role en el JS del navegador"; exit 1; fi
+          echo "Limpio: ni la clave de servicio ni los tokens de Mercado Pago están en .next/static"
+
+  cabeceras:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cabeceras de producción
+        run: |
+          falta=0
+          for url in https://pasegym.com/ https://templegymsalta.com/ https://templegymsalta.com/ingresar; do
+            echo "== $url"
+            h=$(curl -sSI --max-time 20 "$url" | tr -d '\r')
+            for c in content-security-policy strict-transport-security referrer-policy permissions-policy x-content-type-options; do
+              v=$(echo "$h" | grep -i "^$c:" | head -1)
+              if [ -n "$v" ]; then echo "  ok  $v" | cut -c1-160; else echo "  FALTA $c"; falta=1; fi
+            done
+            echo "$h" | grep -i "^content-security-policy:" | grep -q "frame-ancestors" && echo "  ok  frame-ancestors" || { echo "  FALTA frame-ancestors"; falta=1; }
+            echo "$h" | grep -i "^set-cookie:" | sed 's/=[^;]*/=…/' | sed 's/^/  cookie /' || true
+          done
+          exit $falta
