@@ -16,7 +16,8 @@ do $g$ begin
   end if;
   if to_regprocedure('public.landing_publica_sin_cuenta(text)') is null then raise exception 'Guarda: falta landing_publica_sin_cuenta'; end if;
   if to_regclass('public.plataforma_ajustes') is null or to_regclass('public.plataforma_planes') is null then raise exception 'Guarda: faltan las tablas de la plataforma'; end if;
-  if to_regprocedure('privado.soy_admin_plataforma()') is null then raise exception 'Guarda: falta privado.soy_admin_plataforma'; end if;
+  if to_regprocedure('privado.exigir_brik(text[])') is null then raise exception 'Guarda: falta privado.exigir_brik'; end if;
+  if to_regprocedure('public.admin_planes_con_limites()') is null then raise exception 'Guarda: falta admin_planes_con_limites'; end if;
   if to_regclass('public.terminos_gimnasio') is null then raise exception 'Guarda: falta terminos_gimnasio'; end if;
   if to_regclass('public.funciones_nuevas_gimnasio') is null then raise exception 'Guarda: falta funciones_nuevas_gimnasio'; end if;
 end $g$;
@@ -99,7 +100,7 @@ grant execute on function public.contacto_plataforma_publico() to anon, authenti
 create or replace function public.admin_landing_venta() returns boolean
 language plpgsql stable security definer set search_path = '' as $$
 begin
-  if not privado.soy_admin_plataforma() then raise exception 'Solo para administradores de la plataforma' using errcode = '42501'; end if;
+  perform privado.exigir_brik(array['principal', 'soporte', 'ventas', 'lectura']);
   return coalesce((select a.valor = 'true'::jsonb from public.plataforma_ajustes a where a.clave = 'landing_venta_nueva'), false);
 end $$;
 
@@ -107,7 +108,7 @@ create or replace function public.admin_guardar_landing_venta(p_activa boolean) 
 language plpgsql security definer set search_path = '' as $$
 declare n int;
 begin
-  if not privado.soy_admin_plataforma() then raise exception 'Solo para administradores de la plataforma' using errcode = '42501'; end if;
+  perform privado.exigir_brik(array['principal']);
   if p_activa is null then raise exception 'Elegí prendida o apagada' using errcode = '22023'; end if;
   insert into public.plataforma_ajustes (clave, valor) values ('landing_venta_nueva', to_jsonb(p_activa))
     on conflict (clave) do update set valor = excluded.valor;
@@ -140,7 +141,7 @@ language plpgsql security definer set search_path = '' as $$
 declare n int; d text := nullif(trim(coalesce(p_descripcion, '')), '');
   m text[] := coalesce((select array_agg(distinct trim(x)) from unnest(coalesce(p_modulos, '{}'::text[])) x where trim(x) <> ''), '{}'::text[]);
 begin
-  if not privado.soy_admin_plataforma() then raise exception 'Solo para administradores de la plataforma' using errcode = '42501'; end if;
+  perform privado.exigir_brik(array['principal', 'ventas']);
   if d is not null and length(d) > 200 then raise exception 'La descripción: hasta 200 letras' using errcode = '22023'; end if;
   if cardinality(m) > 20 then raise exception 'Hasta 20 módulos por plan' using errcode = '22023'; end if;
   if exists (select 1 from unnest(m) x where length(x) > 60) then raise exception 'Cada módulo: hasta 60 letras' using errcode = '22023'; end if;
@@ -149,6 +150,17 @@ begin
   if n <> 1 then raise exception 'Ese plan no existe' using errcode = 'P0002'; end if;
   return p_id;
 end $$;
+
+-- La lista del super admin (Escala → planes) suma descripción y módulos, para editarlos ahí mismo.
+create or replace function public.admin_planes_con_limites() returns jsonb
+language plpgsql stable security definer set search_path = '' as $
+begin
+  perform privado.exigir_brik(array['principal', 'soporte', 'ventas', 'lectura']);
+  return coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'nombre', p.nombre, 'activo', p.activo, 'publico', p.publico, 'max_socios', p.max_socios, 'max_sedes', p.max_sedes,
+            'descripcion', p.descripcion, 'modulos', to_jsonb(p.modulos),
+            'gimnasios', (select count(*)::int from public.gimnasios g where g.plataforma_plan_id = p.id)) order by p.activo desc, p.precio_mensual)
+    from public.plataforma_planes p), '[]'::jsonb);
+end $;
 
 revoke all on function public.admin_landing_venta(), public.admin_guardar_landing_venta(boolean), public.admin_guardar_detalle_plan_brik(uuid, text, text[]) from public, anon;
 grant execute on function public.admin_landing_venta(), public.admin_guardar_landing_venta(boolean), public.admin_guardar_detalle_plan_brik(uuid, text, text[]) to authenticated, service_role;

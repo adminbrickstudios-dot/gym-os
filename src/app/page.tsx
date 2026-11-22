@@ -8,6 +8,7 @@ import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedici
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 import { PlataformaLanding } from "@/components/landing/Plataforma";
+import { PlataformaNueva } from "@/components/landing/PlataformaNueva";
 import { sesionEnEsteGimnasio } from "@/lib/app/sesion-gimnasio";
 import { contactoPlataforma, planesBrikPublicos } from "@/lib/plataforma-venta";
 import { linkWhatsapp } from "@/lib/landing-textos";
@@ -103,7 +104,10 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<{
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <PlataformaLanding planes={planes} linkDemo={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />
+      {/* Vuelta final: la página de venta nueva solo con la llave de plataforma landing_venta_nueva (apagada); el super admin la ve en /admin/vista-landing. */}
+      {contacto.landing_nueva
+        ? <PlataformaNueva planes={planes} linkWhatsapp={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />
+        : <PlataformaLanding planes={planes} linkDemo={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />}
     </>
   );
 }

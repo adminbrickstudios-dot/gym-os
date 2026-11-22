@@ -358,6 +358,10 @@ export const moverPersona = async (equipoId: string, gimnasioId: string, destino
 export const guardarLimitesPlan = async (planId: string, maxSocios: number | null, maxSedes: number | null) =>
   hechoAdmin(() => rpc("admin_guardar_limites_plan", { p_plan_id: planId, p_max_socios: maxSocios, p_max_sedes: maxSedes }), ["/admin"]);
 
+/** Vuelta final (22/11): la descripción y los módulos de un plan de Pase (los muestra la página de venta). */
+export const guardarDetallePlan = async (planId: string, descripcion: string, modulos: string[]) =>
+  hechoAdmin(() => rpc("admin_guardar_detalle_plan_brik", { p_id: planId, p_descripcion: descripcion, p_modulos: modulos }), ["/admin", "/admin/vista-landing", "/"]);
+
 /** VD-26B: si el plan se muestra en la web de Base. */
 export const guardarPlanPublico = async (planId: string, publico: boolean) => {
   const r = await hechoAdmin(() => rpc("admin_plan_publico", { p_plan_id: planId, p_publico: publico }), ["/admin"]);

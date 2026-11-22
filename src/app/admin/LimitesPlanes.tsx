@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
-import { guardarLimitesPlan, guardarPlanPublico } from "./acciones";
+import { guardarDetallePlan, guardarLimitesPlan, guardarPlanPublico } from "./acciones";
 import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
-export type PlanConLimites = { id: string; nombre: string; activo: boolean; publico?: boolean; max_socios: number | null; max_sedes: number | null; gimnasios: number };
+export type PlanConLimites = { id: string; nombre: string; activo: boolean; publico?: boolean; max_socios: number | null; max_sedes: number | null; gimnasios: number; descripcion?: string | null; modulos?: string[] | null };
 const aNumero = (s: string) => (s.trim() === "" ? null : Number(s.replace(/\./g, "")));
 
 function Fila({ plan }: { plan: PlanConLimites }) {
@@ -14,6 +14,8 @@ function Fila({ plan }: { plan: PlanConLimites }) {
   const [sedes, setSedes] = useState(plan.max_sedes == null ? "" : String(plan.max_sedes));
   const [error, setError] = useState("");
   const [publico, setPublico] = useState(plan.publico !== false);
+  const [descripcion, setDescripcion] = useState(plan.descripcion ?? "");
+  const [modulos, setModulos] = useState((plan.modulos ?? []).join(", "));
   return (
     <li className="tarjeta p-3 flex flex-wrap items-end gap-3" data-plan-limites={plan.id}>
       <span className="min-w-[10rem] flex-1"><span className="font-semibold">{plan.nombre}</span> <span className="texto-tenue text-sm">({plan.gimnasios} {plan.gimnasios === 1 ? "gimnasio" : "gimnasios"})</span></span>
@@ -24,11 +26,15 @@ function Fila({ plan }: { plan: PlanConLimites }) {
         const r = await guardarPlanPublico(plan.id, v);
         if (r.error) { setError(r.error); setPublico(!v); } else setError("");
       }} /><span className="etiqueta">Se muestra en la web</span></label>
+      <label className="space-y-1 basis-full sm:basis-auto sm:flex-1"><span className="etiqueta">Descripción (la ve la página de venta)</span><input className="campo" maxLength={200} value={descripcion} placeholder="Para un gimnasio de barrio" data-plan-descripcion onChange={(e) => setDescripcion(e.target.value)} /></label>
+      <label className="space-y-1 basis-full"><span className="etiqueta">Qué incluye, separado por comas</span><input className="campo" value={modulos} placeholder="Recepción, App del socio, Clases" data-plan-modulos onChange={(e) => setModulos(e.target.value)} /></label>
       <BotonAccion className="boton" data-guardar-limites onClick={async () => {
         const a = aNumero(socios), b = aNumero(sedes);
         if ((a !== null && !Number.isFinite(a)) || (b !== null && !Number.isFinite(b))) { setError("Escribí solo números"); return; }
         const r = await guardarLimitesPlan(plan.id, a, b);
         if (r.error) { setError(r.error); return; }
+        const d = await guardarDetallePlan(plan.id, descripcion, modulos.split(",").map((m) => m.trim()).filter(Boolean));
+        if (d.error) { setError(d.error); return; }
         setError(""); router.refresh();
       }}>Guardar</BotonAccion>
       {error && <span role="alert" className="pildora pildora-rojo basis-full">{error}</span>}

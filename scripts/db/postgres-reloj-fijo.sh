@@ -21,3 +21,7 @@ sudo sed -i -E 's/(scram-sha-256|md5|peer)$/trust/' "${CONF}/pg_hba.conf"
 sudo pg_ctlcluster "${VERSION}" main start
 for _ in $(seq 1 30); do pg_isready -h localhost -p 5432 -q && break; sleep 1; done
 echo "Postgres ${VERSION} con reloj fijo: $(psql -h localhost -U postgres -d postgres -Atc 'select now()')"
+# Node (las pruebas comparan "ahora" de JS con el de la base) corre con el mismo reloj en los pasos que siguen.
+if [ -n "${GITHUB_ENV:-}" ]; then
+  { echo "LD_PRELOAD=${LIB}"; echo "FAKETIME=-${corrimiento}"; echo "FAKETIME_DONT_FAKE_MONOTONIC=1"; } >> "$GITHUB_ENV"
+fi

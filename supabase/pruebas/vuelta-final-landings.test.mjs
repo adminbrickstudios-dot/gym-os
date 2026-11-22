@@ -62,12 +62,15 @@ test("planes de Pase: descripción y módulos solo del super admin; la página p
   const [{ id: plan }] = await como(admin, () => t.q(`select public.admin_guardar_plan_brik(null, 'Barrio', 45000) id`));
   const [{ id }] = await t.q(`insert into public.plataforma_planes (nombre, precio_mensual, max_socios) values ('Barrio prueba', 45000, 300) returning id`);
   await como(uDueno, () => t.falla(() => t.q(`select public.admin_guardar_detalle_plan_brik($1, 'x', '{a}')`, [id]), /administradores/));
-  await como(admin, async () => {
+  // El como() revierte al salir: la escritura y la lectura van dentro de la misma vuelta.
+  const publicos = await como(admin, async () => {
     await t.q(`select public.admin_guardar_detalle_plan_brik($1, $2, $3)`, [id, "Para arrancar", ["Recepción", "App del socio", " Recepción ", ""]]);
     await t.falla(() => t.q(`select public.admin_guardar_detalle_plan_brik($1, $2, null)`, [id, "x".repeat(201)]), /200/);
     await t.falla(() => t.q(`select public.admin_guardar_detalle_plan_brik(gen_random_uuid(), null, null)`), /no existe/);
+    const lista = (await t.q(`select public.admin_planes_con_limites() l`))[0].l;
+    assert.equal(lista.find((x) => x.id === id)?.descripcion, "Para arrancar", "el super admin ve la descripción en su lista");
+    return (await t.q(`select public.planes_brik_publicos() p`))[0].p;
   });
-  const publicos = await como(null, async () => (await t.q(`select public.planes_brik_publicos() p`))[0].p, "anon");
   const p = publicos.find((x) => x.nombre === "Barrio prueba");
   assert.equal(p.descripcion, "Para arrancar");
   assert.deepEqual([...p.modulos].sort(), ["App del socio", "Recepción"]);

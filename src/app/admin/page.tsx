@@ -104,6 +104,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <Link href="/admin/seguridad" className="boton">Seguridad</Link>
         <Link href="/admin/registro" className="boton">Registro</Link>
         <Link href="/admin/plantillas" className="boton">Plantillas de textos</Link>
+        <Link href="/admin/vista-landing" className="boton" data-vista-landing>Vista previa de la landing</Link>
       </nav>
       <MenuSecciones secciones={SECCIONES} />
 
