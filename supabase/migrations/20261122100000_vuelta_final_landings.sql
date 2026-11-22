@@ -17,6 +17,7 @@ do $g$ begin
   if to_regprocedure('public.landing_publica_sin_cuenta(text)') is null then raise exception 'Guarda: falta landing_publica_sin_cuenta'; end if;
   if to_regclass('public.plataforma_ajustes') is null or to_regclass('public.plataforma_planes') is null then raise exception 'Guarda: faltan las tablas de la plataforma'; end if;
   if to_regprocedure('privado.soy_admin_plataforma()') is null then raise exception 'Guarda: falta privado.soy_admin_plataforma'; end if;
+  if to_regclass('public.terminos_gimnasio') is null then raise exception 'Guarda: falta terminos_gimnasio'; end if;
   if to_regclass('public.funciones_nuevas_gimnasio') is null then raise exception 'Guarda: falta funciones_nuevas_gimnasio'; end if;
 end $g$;
 
@@ -71,7 +72,9 @@ begin
   select coalesce(c.crear_cuenta_visible, true), c.gimnasio_id into v, g from public.dominios_gimnasio d
     join public.configuracion_gimnasio c on c.gimnasio_id = d.gimnasio_id where d.host = lower(p_host);
   return r || jsonb_build_object('crear_cuenta', coalesce(v, true),
-    'landing_nueva', coalesce((select f.activa from public.funciones_nuevas_gimnasio f where f.gimnasio_id = g and f.clave = 'landing_nueva'), false));
+    'landing_nueva', coalesce((select f.activa from public.funciones_nuevas_gimnasio f where f.gimnasio_id = g and f.clave = 'landing_nueva'), false),
+    -- La página nueva muestra "Reglamento" solo si el dueño publicó sus términos (nunca un link a una página que no existe).
+    'tiene_terminos', exists (select 1 from public.terminos_gimnasio t where t.gimnasio_id = g and t.publicado and t.texto is not null));
 end $$;
 revoke execute on function public.landing_publica(text) from public;
 grant execute on function public.landing_publica(text) to anon, authenticated;

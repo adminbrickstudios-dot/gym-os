@@ -35,6 +35,7 @@ test("landing_nueva: apagada en un gimnasio real; prendida por el dueño, la pá
   const l = await landing();
   assert.equal(l.publicada, true);
   assert.equal(l.landing_nueva, false, "apagada por defecto");
+  assert.equal(l.tiene_terminos, false, "sin términos publicados");
   await como(uRec, () => t.falla(() => t.q(`select public.cambiar_funcion_nueva($1, 'landing_nueva', true)`, [t.g])));
   await t.q(`insert into public.funciones_nuevas_gimnasio (gimnasio_id, clave, activa, prendida_en, cambiada_en) values ($1, 'landing_nueva', true, now(), now())
              on conflict (gimnasio_id, clave) do update set activa = true`, [t.g]);
