@@ -62,7 +62,8 @@ export function IlustracionRetencion() {
         <div key={i} className="flex items-center gap-3 rounded-[var(--radio)] border border-[var(--borde)] p-3">
           <span className="size-9 shrink-0 rounded-full bg-[var(--borde)]" aria-hidden />
           <span className="min-w-0 flex-1 space-y-1.5" aria-hidden><span className="block h-3 w-3/5 rounded bg-[var(--borde)]" /><span className="block h-2.5 w-2/5 rounded bg-[var(--borde)] opacity-60" /></span>
-          <span className="pildora pildora-amarillo shrink-0">Hace tiempo que no viene</span>
+          {/* Más oscura que la píldora del panel: sobre el fondo claro del marco daba 3,9:1 (Lighthouse, vuelta final 22/11). */}
+          <span className="pildora pildora-amarillo shrink-0" style={{ color: "color-mix(in oklab, var(--amarillo), var(--texto) 65%)" }}>Hace tiempo que no viene</span>
         </div>
       ))}
       <p className="text-sm texto-suave pt-1">Con un toque le escribís por WhatsApp.</p>
