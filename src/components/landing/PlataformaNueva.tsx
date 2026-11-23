@@ -50,7 +50,7 @@ function Pantalla({ captura, children }: { captura?: CapturaGymOS; children: Rea
 }
 
 const TERMINOS = [
-  "Pase es un servicio de BRIK para administrar gimnasios: socios, entradas, cobros, clases y la página del gimnasio. Se paga con un abono mensual por gimnasio, según el plan elegido.",
+  `${NOMBRE_PRODUCTO} es un servicio de BRIK para administrar gimnasios: socios, entradas, cobros, clases y la página del gimnasio. Se paga con un abono mensual por gimnasio, según el plan elegido.`,
   "El gimnasio es dueño de sus datos y de los de sus socios. BRIK los guarda y los procesa solo para dar el servicio, y el gimnasio los puede exportar cuando quiera.",
   "El gimnasio decide quién de su equipo entra y con qué permisos, y es responsable de lo que se carga con sus cuentas.",
   "Si el abono vence, el panel queda en solo lectura hasta que se pague: la puerta y la app de los socios siguen andando.",
