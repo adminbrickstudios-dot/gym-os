@@ -59,7 +59,8 @@ try {
   chequear(dibujos.length >= 4 && dibujos.every((a) => a === "true"), `${dibujos.length} dibujos en SVG, todos decorativos (aria-hidden)`, `dibujos: ${JSON.stringify(dibujos)}`);
   const imagenes = await v.locator("[data-landing-nueva] img:not([alt*='Logo'])").count();
   chequear(imagenes === 0, "Sin fotos: solo dibujos (el logo aparte)", `hay ${imagenes} imágenes que no son el logo`);
-  const planes = await v.locator("[data-seccion=planes] [class*=numero]").allInnerTexts();
+  // Solo los precios de las tarjetas de plan: la misma sección trae las clases de la semana, con sus horarios (que también son «numero»).
+  const planes = await v.locator("[data-seccion=planes] li.tarjeta [class*=numero]").allInnerTexts();
   chequear(planes.length === 0 || planes.every((t) => /^\$\s?\d/.test(t.trim())), `Planes con precio en pesos (${planes.slice(0, 3).join(" · ") || "sin precios mostrados"})`, `precios mal formateados: ${planes.join(" | ")}`);
   const mapa = await v.locator("[data-link-mapa]").first().getAttribute("href").catch(() => null);
   chequear(!(await v.locator("[data-sede-direccion]").count()) || /^https:\/\/(www\.)?google\.[a-z.]+\/maps|^https:\/\/maps\./.test(mapa ?? ""), "Cómo llegar: link al mapa", `link al mapa: ${mapa}`);
