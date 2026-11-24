@@ -30,7 +30,7 @@ export function EntradaInicio({ puedeCobrar, puedeAlta, pase, ultima, chico = fa
         <span aria-hidden className="entrada-inicio-lupa"><Icono nombre="buscar" linea /></span>
         <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder={corto ? "DNI o QR" : "Tipeá el DNI o escaneá el QR"}
           aria-label="DNI o QR del socio" autoComplete="off" inputMode="text" data-entrada-inicio-campo />
-        <button type="submit" className="entrada-inicio-ver">{corto ? "Ver" : "Ver si pasa"}</button>
+        <button type="submit" className="entrada-inicio-ver" data-boton-entrada>{corto ? "Ver" : "Ver si pasa"}</button>
       </form>
       {(puedeCobrar || puedeAlta) && (
         <nav className="entrada-inicio-acciones" aria-label="Acciones del mostrador" data-acciones-mostrador>

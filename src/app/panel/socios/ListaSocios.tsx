@@ -126,19 +126,21 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
               return (
                 <li key={s.socio_id} className={`socios-semaforo-fila ${i % 2 === 0 ? "par" : ""} ${s.dado_de_baja ? "opacity-60" : ""}`}>
                   {varios && <input type="checkbox" className="size-5 flex-none" aria-label={`Elegir a ${s.nombre}`} checked={elegidos.has(s.socio_id)} onChange={() => alternar(s.socio_id)} data-elegir={s.socio_id} />}
-                  <Link href={`/panel/socios/${s.socio_id}`} className="socios-semaforo-socio">
-                    <span className="socios-semaforo-avatar" aria-hidden>{iniciales(s.nombre)}</span>
-                    <span className="min-w-0">
-                      <span className="block font-bold truncate">{s.nombre} {ver("numero") && <span className="texto-suave font-normal">#{s.numero}</span>}</span>
-                      <span className="block texto-suave text-sm truncate">{[s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>
+                  <Link href={`/panel/socios/${s.socio_id}`} className="socios-semaforo-link">
+                    <span className="socios-semaforo-socio">
+                      <span className="socios-semaforo-avatar" aria-hidden>{iniciales(s.nombre)}</span>
+                      <span className="min-w-0">
+                        <span className="block font-semibold truncate">{s.nombre} {ver("numero") && <span className="texto-suave font-normal">#{s.numero}</span>}</span>
+                        <span className="block texto-suave text-sm truncate">{[s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>
+                      </span>
                     </span>
+                    <span className="socios-semaforo-plan truncate">{s.plan ?? "—"}</span>
+                    <span className="socios-semaforo-estado">
+                      <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
+                      {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
+                    </span>
+                    <span className={`boton boton-chico ${s.color === "rojo" && !s.dado_de_baja ? "boton-claro" : ""}`} aria-hidden>Ver</span>
                   </Link>
-                  <span className="socios-semaforo-plan truncate">{s.plan ?? "—"}</span>
-                  <span className="socios-semaforo-estado">
-                    <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
-                    {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
-                  </span>
-                  <Link href={`/panel/socios/${s.socio_id}`} className={`boton boton-chico ${s.color === "rojo" && !s.dado_de_baja ? "boton-claro" : ""}`} aria-label={`Ver a ${s.nombre}`}>Ver</Link>
                 </li>
               );
             })}

@@ -364,12 +364,13 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               )}
             </section>
           )}
-          <section aria-labelledby="hoy-numeros" className="inicio-semaforo-bloque" data-numeros-semaforo>
+          <section aria-label="Números de hoy" className="inicio-semaforo-bloque" data-numeros-semaforo>
             <div className="inicio-semaforo-cabecera">
               <h2 id="hoy-numeros" className="titulo">Hoy en números</h2>
               {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
             </div>
             <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+            {(rol === "dueno" || rol === "encargado") && <p><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>}
           </section>
           <section aria-labelledby="accesos" className="inicio-semaforo-bloque" data-accesos-semaforo>
             <h2 id="accesos" className="titulo">Accesos rápidos</h2>

@@ -135,7 +135,6 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             {s.dado_de_baja_en ? <span className="pildora"><Icono nombre="salir" /> Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : semaforo
                 ? <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(v.color) ? v.color : "gris") as ColorPuerta} puede={v.puede} nombre={f.membresia?.plan} detalle={v.texto} data-ficha-puerta={v.color}>
-                    {(!v.puede || v.color === "amarillo") && panel.yo.rol !== "profe" && <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">Cobrar{v.para_regularizar ? ` · ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>}
                   </ResultadoPuerta>
                 : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}

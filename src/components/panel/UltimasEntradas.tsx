@@ -53,6 +53,7 @@ export function UltimasEntradas({ iniciales, zona, semaforo = false }: { inicial
                   <span className="texto-suave text-sm">{VIA[x.via] ?? x.via}</span>
                   <span className={`pildora ${etiqueta[0]} max-w-[11rem] truncate`}>{etiqueta[1]}</span>
                   <span className="texto-suave text-sm numero w-11 text-right">{hora(x.momento)}</span>
+                  {x.cobrar && <BotonCobrar socioId={x.socio_id} origen="otro" cuota className="boton boton-chico boton-claro">Cobrar</BotonCobrar>}
                 </li>
               );
             })}

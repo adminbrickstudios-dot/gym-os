@@ -572,6 +572,14 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
   html[data-semaforo="si"] .boton:disabled { opacity: 0.45; }
   html[data-semaforo="si"] .boton-texto { border-radius: 999px; }
 
+  /* Celular: nada se sale a lo ancho y todo se toca con el dedo (44 o más, FLUIDEZ); el 40 de las filas es de la compu. */
+  html[data-semaforo="si"] .boton, html[data-semaforo="si"] .pestana { max-width: 100%; }
+  @media (max-width: 1023px) {
+    html[data-semaforo="si"] .boton { padding: 0 16px; font-size: 16px; }
+    html[data-semaforo="si"] .boton-chico { min-height: 44px; }
+    html[data-semaforo="si"] .pestana { white-space: normal; text-align: left; }
+  }
+
   /* Campo y búsqueda: píldora de 54, borde de 2. */
   html[data-semaforo="si"] .campo { border-radius: 27px; min-height: 54px; padding: 0 20px; background: var(--tarjeta); border: 2px solid var(--borde-campo); font-size: 17px; font-weight: 500; }
   html[data-semaforo="si"] textarea.campo { border-radius: 24px; padding: 14px 20px; }
@@ -774,6 +782,10 @@ html[data-semaforo="si"] .inicio-semaforo-chip { min-height: 40px; padding: 0 16
     gap: 12px; padding: 0 18px !important; border-radius: 18px !important; background: var(--tarjeta); border: 0; }
   .inicio-semaforo [data-accesos-semaforo] ul a.boton > span:first-child { font-size: 26px; }
   .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { font-family: var(--fuente); font-size: 16px; font-weight: 700; text-transform: none; text-align: left; }
+  .inicio-semaforo [data-accesos-semaforo] ul > li { min-width: 0; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton { min-width: 0; overflow: hidden; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { min-width: 0; overflow-wrap: anywhere; line-height: 1.1; }
+  @media (max-width: 1023px) { .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { font-size: 14px; } .inicio-semaforo [data-accesos-semaforo] ul a.boton > span:first-child { font-size: 20px; } }
 }
 .inicio-semaforo [data-mini-grafico] { display: none; }
 html[data-semaforo="si"] .linea-grupo { display: none; }
