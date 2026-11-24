@@ -705,7 +705,7 @@ html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
 
 /* Clases de hoy Semáforo (clases-de-hoy.png): tres por fila; la que está pasando, con borde del acento. */
 .clases-semaforo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
-.clases-semaforo-item { padding: 36px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
+.clases-semaforo-item { padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
 .clases-semaforo-item.es-ahora { border-color: var(--acento); }
 .clases-semaforo-arriba { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .clases-semaforo-hora { font-size: 52px; }
@@ -715,7 +715,8 @@ html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
 .clases-semaforo-barra { flex: 1; height: 14px; border-radius: 7px; background: var(--fondo); overflow: hidden; }
 .clases-semaforo-barra > span { display: block; height: 100%; border-radius: 7px; background: var(--acento); }
 .clases-semaforo-barra > span.casi { background: var(--vence); }
-.clases-semaforo-botones { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-top: 8px; }
+.clases-semaforo-botones { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+.clases-semaforo-botones .boton { white-space: nowrap; padding: 0 14px; font-size: 16px; }
 @media (max-width: 1100px) { .clases-semaforo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
 @media (max-width: 700px) { .clases-semaforo { grid-template-columns: minmax(0, 1fr); } .clases-semaforo-item { padding: 20px; } .clases-semaforo-hora { font-size: 40px; } .clases-semaforo-actividad { font-size: 24px; } }
 
