@@ -32,6 +32,8 @@ export function MiQR({ gimnasioId, socioId, inicial }: { gimnasioId: string; soc
     let vivo = true;
     const renovar = async () => {
       if (renovando.current) return;
+      // Parte 3 (24/11): con la pestaña oculta no se pide nada; al volver (alVolver) se renueva si hace falta.
+      if (document.visibilityState === "hidden") return;
       renovando.current = true; ultimoPedido.current = Date.now();
       try {
         const r = await codigoQR(gimnasioId, socioId);

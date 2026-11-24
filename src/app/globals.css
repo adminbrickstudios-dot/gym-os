@@ -546,7 +546,7 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
 
 @layer components {
   /* Títulos de página y de sección: Big Shoulders, mayúscula. */
-  html[data-semaforo="si"] .titular { font-weight: 900; text-transform: uppercase; }
+  html[data-semaforo="si"] .titular { font-weight: 800; text-transform: uppercase; }
   html[data-semaforo="si"] .titulo { font-weight: 800; text-transform: uppercase; letter-spacing: 0; }
   html[data-semaforo="si"] .numero { font-weight: 800; }
 
@@ -626,7 +626,7 @@ html[data-semaforo="si"] .puerta-amarillo { background: var(--vence); color: var
 html[data-semaforo="si"] .puerta-rojo { background: var(--nopasa); color: var(--nopasa-texto); --p-fondo: var(--nopasa); --p-texto: var(--nopasa-texto); --p-boton: var(--nopasa-boton); }
 html[data-semaforo="si"] .puerta-gris { background: var(--tarjeta-alta); color: var(--texto); --p-fondo: var(--tarjeta-alta); --p-texto: var(--texto); --p-boton: var(--tarjeta-alta); }
 html[data-semaforo="si"] .puerta-emoji { font-size: 40px; line-height: 1; }
-html[data-semaforo="si"] .puerta-palabra { font-weight: 900; font-size: 56px; text-transform: uppercase; }
+html[data-semaforo="si"] .puerta-palabra { font-weight: 800; font-size: 56px; text-transform: uppercase; }
 html[data-semaforo="si"] .puerta-nombre { font-size: 24px; font-weight: 700; }
 html[data-semaforo="si"] .puerta-detalle { font-size: 17px; font-weight: 500; }
 html[data-semaforo="si"] .puerta-arriba { font-size: 17px; }
@@ -647,7 +647,7 @@ html[data-semaforo="si"] .puerta-kiosco .puerta-arriba { font-size: 20px; }
 html[data-semaforo="si"] [data-ventana-veredicto="verde"] > div:first-child { background: var(--pasa) !important; color: var(--pasa-texto); }
 html[data-semaforo="si"] [data-ventana-veredicto="amarillo"] > div:first-child { background: var(--vence) !important; color: var(--vence-texto); }
 html[data-semaforo="si"] [data-ventana-veredicto="rojo"] > div:first-child { background: var(--nopasa) !important; color: var(--nopasa-texto); }
-html[data-semaforo="si"] [data-ventana-veredicto] > div:first-child p { font-family: var(--fuente-titulo); font-weight: 900; text-transform: uppercase; font-size: 40px; line-height: 0.95; }
+html[data-semaforo="si"] [data-ventana-veredicto] > div:first-child p { font-family: var(--fuente-titulo); font-weight: 800; text-transform: uppercase; font-size: 40px; line-height: 0.95; }
 
 /* El kiosco Semáforo (kiosco.png, 1280×800): resultado a la izquierda, teclado de 460 a la derecha. En vertical, uno arriba del otro. */
 .kiosco-semaforo { display: flex; min-height: 100dvh; background: var(--fondo); color: var(--texto); }
@@ -674,7 +674,7 @@ html[data-semaforo="si"] [data-ventana-veredicto] > div:first-child p { font-fam
 html[data-semaforo="si"] .etq-mas { display: inline; }
 html[data-semaforo="si"] .etq-menu { display: none; }
 html[data-semaforo="si"] aside { background: var(--menu); border-right-color: transparent; }
-html[data-semaforo="si"] aside > p.titulo { font-weight: 900; font-size: 30px; letter-spacing: 0.5px; }
+html[data-semaforo="si"] aside > p.titulo { font-weight: 800; font-size: 30px; letter-spacing: 0.5px; }
 html[data-semaforo="si"] aside nav a { min-height: 46px; border-radius: 12px; font-weight: 600; font-size: 16px; gap: 12px; }
 html[data-semaforo="si"] aside nav a .icono-e { font-size: 20px; width: 24px; text-align: center; }
 html[data-semaforo="si"] aside nav a[aria-current="page"] { min-height: 50px; border-radius: 14px; font-weight: 700; font-size: 17px; }

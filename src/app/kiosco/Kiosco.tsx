@@ -31,6 +31,8 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   useEffect(() => {
     let vivo = true, t: ReturnType<typeof setTimeout>;
     const traer = async () => {
+      // Parte 3 (24/11): con la pantalla apagada u oculta no se pide; se mira de nuevo en 5 s.
+      if (document.visibilityState === "hidden") { t = setTimeout(traer, 5000); return; }
       const r = await qrDeLaTablet();
       if (!vivo) return;
       if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await (await import("qrcode")).default.toString(r.codigo, { type: "svg", margin: 1 })); }
@@ -42,6 +44,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   // Cada segundo y medio: ¿entró alguien escaneando?
   useEffect(() => {
     const i = setInterval(async () => {
+      if (document.visibilityState === "hidden") return;
       const u = await ultimoDeLaTablet(desde.current);
       if (u && "momento" in u) { desde.current = (u as Resultado & { momento: string }).momento; alEntrar(u); }
     }, 1500);
