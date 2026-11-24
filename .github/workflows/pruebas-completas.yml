@@ -144,6 +144,8 @@ jobs:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           E2E_SIN_MAYUSCULAS: ${{ inputs.estilo == 'pista' && '1' || '0' }}
+          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local

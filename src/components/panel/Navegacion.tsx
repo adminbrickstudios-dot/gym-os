@@ -199,7 +199,7 @@ export function Navegacion(props: Props) {
               <span className="relative text-2xl" aria-hidden>
                 <Icono nombre="menu" />
                 {hayAlgo(pendientes) && <span data-menu-punto={hayRojo(pendientes) ? "rojo" : "neutro"} className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: hayRojo(pendientes) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
-              </span>Menú
+              </span><span className="etq-menu">Menú</span><span className="etq-mas">Más</span>
             </button>
           </li>
         </ul>

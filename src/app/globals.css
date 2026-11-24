@@ -662,6 +662,20 @@ html[data-semaforo="si"] .puerta-kiosco .puerta-arriba { font-size: 20px; }
 .kiosco-tecla-entrar { background: var(--acento); color: var(--acento-texto); font-family: var(--fuente); font-size: 22px; }
 @media (max-width: 900px) { .kiosco-semaforo { flex-direction: column; } .kiosco-der { width: 100%; } .kiosco-hola-titulo { font-size: 72px; } }
 
+/* El menú Semáforo: la barra lateral en su tono (más oscuro que el fondo), ítems de 46 con el emoji, el activo lleno con el acento;
+   en el celular, la barra de abajo (Inicio, Entrada, Socios, Caja y Más) con el activo en el acento. */
+.etq-mas { display: none; }
+html[data-semaforo="si"] .etq-mas { display: inline; }
+html[data-semaforo="si"] .etq-menu { display: none; }
+html[data-semaforo="si"] aside { background: var(--menu); border-right-color: transparent; }
+html[data-semaforo="si"] aside > p.titulo { font-weight: 900; font-size: 30px; letter-spacing: 0.5px; }
+html[data-semaforo="si"] aside nav a { min-height: 46px; border-radius: 12px; font-weight: 600; font-size: 16px; gap: 12px; }
+html[data-semaforo="si"] aside nav a .icono-e { font-size: 20px; width: 24px; text-align: center; }
+html[data-semaforo="si"] aside nav a[aria-current="page"] { min-height: 50px; border-radius: 14px; font-weight: 700; font-size: 17px; }
+html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu); border-top-color: transparent; }
+html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
+html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
+
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
 .inicio-semaforo { display: flex; flex-direction: column; gap: 26px; }
 .inicio-semaforo-fecha { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
