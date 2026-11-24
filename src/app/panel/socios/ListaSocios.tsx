@@ -128,7 +128,7 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                   {varios && <input type="checkbox" className="size-5 flex-none" aria-label={`Elegir a ${s.nombre}`} checked={elegidos.has(s.socio_id)} onChange={() => alternar(s.socio_id)} data-elegir={s.socio_id} />}
                   <Link href={`/panel/socios/${s.socio_id}`} className="socios-semaforo-link">
                     <span className="socios-semaforo-socio">
-                      <span className="socios-semaforo-avatar" aria-hidden>{iniciales(s.nombre)}</span>
+                      <span className="socios-semaforo-avatar" data-iniciales={iniciales(s.nombre)} aria-hidden />
                       <span className="min-w-0">
                         <span className="block font-semibold truncate">{s.nombre} {ver("numero") && <span className="texto-suave font-normal">#{s.numero}</span>}</span>
                         <span className="block texto-suave text-sm truncate">{[s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>

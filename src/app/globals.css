@@ -723,6 +723,8 @@ html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
 .socios-semaforo-fila { min-height: 84px; padding: 0 20px; border-radius: 18px; }
 .socios-semaforo-fila.par { background: var(--fondo); }
 .socios-semaforo-socio { display: flex; align-items: center; gap: 16px; min-width: 0; }
+/* Las iniciales van en CSS: el texto de la fila sigue siendo el nombre (lo leen la búsqueda y las pruebas). */
+.socios-semaforo-avatar::before { content: attr(data-iniciales); }
 .socios-semaforo-avatar { width: 52px; height: 52px; flex: none; border-radius: 26px; background: var(--tarjeta-alta); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; }
 .socios-semaforo-estado { display: flex; gap: 6px; min-width: 0; }
 @media (max-width: 767px) {
