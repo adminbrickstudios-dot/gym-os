@@ -138,11 +138,15 @@ try {
   const barra = await c.locator("nav[aria-label='Principales'] li").allInnerTexts();
   chequear(barra.length === 5 && /Más/.test(barra[4]), `Celular: la barra de abajo con 5 (${barra.map((x) => x.trim()).join(" · ")})`, `la barra de abajo dice: ${barra.join(" · ")}`);
   await c.setViewportSize({ width: 360, height: 780 });
-  for (const ruta of ["/panel", "/panel/socios", "/panel/caja", "/panel/clases", `/panel/socios/${socio}`]) {
+  for (const ruta of ["/panel", "/panel/socios", "/panel/caja", "/panel/clases", `/panel/socios/${socio}`, "/panel/configuracion", "/panel/configuracion?pestana=reglas", "/panel/configuracion?pestana=cobros", "/panel/pagina"]) {
     await c.goto(`${G}${ruta}`);
     await c.locator("main").first().waitFor({ timeout: 30000 });
     const sale = await desborde(c);
-    chequear(sale <= 1, `360: ${ruta} sin nada que se salga`, `360: ${ruta} se sale ${sale} px a lo ancho`);
+    // Si algo se sale, se nombra lo que se sale (el más ancho que pasa el borde), para arreglarlo sin adivinar.
+    const quien = sale > 1 ? await c.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+      .sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right).slice(0, 3)
+      .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).replace(/s+/g, ".").slice(0, 80)} (${Math.round(e.getBoundingClientRect().right)})`).join(" · ")) : "";
+    chequear(sale <= 1, `360: ${ruta} sin nada que se salga`, `360: ${ruta} se sale ${sale} px a lo ancho: ${quien}`);
   }
 
   // ── La app del socio (390): al día y debe ──

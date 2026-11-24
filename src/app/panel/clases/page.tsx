@@ -76,7 +76,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
                   {!ajena && !c.cancelada && (
                     <div className="clases-semaforo-botones">
                       <Link href={`/panel/clases/${c.clase_id}`} className={`boton ${enCurso ? "boton-principal" : ""}`}>Tomar presente</Link>
-                      <Link href={`/panel/clases/${c.clase_id}`} className="boton boton-suave">Anotados</Link>
+                      <Link href={`/panel/clases/${c.clase_id}?ver=anotados`} className="boton boton-suave">Anotados</Link>
                     </div>
                   )}
                 </li>

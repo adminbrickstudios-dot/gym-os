@@ -134,7 +134,7 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                         <span className="block texto-suave text-sm truncate">{[s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>
                       </span>
                     </span>
-                    <span className="socios-semaforo-plan truncate">{s.plan ?? "—"}</span>
+                    <span className="socios-semaforo-plan truncate" data-plan-fila>{s.plan ?? "—"}</span>
                     <span className="socios-semaforo-estado">
                       <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
                       {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
@@ -159,7 +159,7 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                 {(ver("dni") || ver("telefono")) && <span className="block texto-tenue text-sm truncate">{[ver("dni") && s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>}
               </span>
               {s.autoalta && <span className={`pildora flex-none ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined} title="Se registró solo desde la página">Web{s.puede === false && " A cobrar"}<span className="hidden sm:inline">{s.puede !== false ? " · se anotó por la web" : " · se anotó por la web"}</span></span>}
-              {ver("plan") && s.plan && <span className="hidden sm:inline pildora">{s.plan}</span>}
+              {ver("plan") && s.plan && <span className="hidden sm:inline pildora" data-plan-fila>{s.plan}</span>}
             </Link>
           </li>
         ))}

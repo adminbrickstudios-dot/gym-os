@@ -37,7 +37,7 @@ try {
     await planes.first().click();
     await p.waitForURL(/plan=.*estado=al_dia|estado=al_dia.*plan=/);
     await p.locator("main").waitFor();
-    const pl = await filas(p).locator(".pildora").allInnerTexts();
+    const pl = await filas(p).locator("[data-plan-fila]").allInnerTexts();
     chequear(pl.length > 0 && pl.every((x) => x.trim() === nombre), `al día + plan “${nombre}”: ${pl.length} socios, todos de ese plan`, `planes: ${[...new Set(pl)].join(", ")}`);
     await p.locator('[data-filtro-estados] a[data-estado="al_dia"]').click();      // tocar de nuevo lo saca
     await p.waitForURL((u) => !/estado=/.test(u.search) && /plan=/.test(u.search));
