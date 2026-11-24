@@ -123,7 +123,7 @@ try {
     const cs = await coloresSueltos(d);
     chequear(cs.length === 0, `${pantalla}: ningún color fuera de los tokens`, `${pantalla}: colores sueltos: ${cs.join(" · ")}`);
   }
-  const [{ id: socio }] = await q(`select s.id from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo' and s.nombre like 'Testigo Vencida%' limit 1`);
+  const [{ id: socio }] = await q(`select s.id from public.socios s join public.gimnasios g on g.id = s.gimnasio_id where g.slug = 'demo' and s.nombre = 'Testigo' and s.apellido = 'Vencida' limit 1`);
   await d.goto(`${G}/panel/socios/${socio}`);
   await d.locator("main").first().waitFor({ timeout: 30000 });
   await lado(d, "ficha-socio");
@@ -171,7 +171,7 @@ try {
     const hay = await k.locator(".kiosco-semaforo").first().waitFor({ timeout: 30000 }).then(() => true, () => false);
     chequear(hay, "Kiosco: el diseño de dos paneles (resultado y teclado)", "el kiosco no sale con el diseño Semáforo");
     if (hay) {
-      const [{ dni }] = await q(`select s.dni from public.socios s where s.gimnasio_id = $1 and s.nombre like 'Testigo Al Día%' limit 1`, [gim]);
+      const [{ dni }] = await q(`select s.dni from public.socios s where s.gimnasio_id = $1 and s.nombre = 'Testigo' and s.apellido = 'Al Día' limit 1`, [gim]);
       for (const n of String(dni)) await k.getByRole("button", { name: n, exact: true }).click();
       await k.getByRole("button", { name: "Entrar" }).click();
       const res = k.locator("[data-kiosco-resultado]");

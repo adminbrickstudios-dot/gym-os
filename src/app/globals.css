@@ -571,6 +571,8 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
   html[data-semaforo="si"] .boton-chico.boton-claro { background: var(--texto); }
   html[data-semaforo="si"] .boton:disabled { opacity: 0.45; }
   html[data-semaforo="si"] .boton-texto { border-radius: 999px; }
+  /* Un botón elegido dentro de una barra (el día en Clases) sigue siendo píldora: Pista le ponía 12. */
+  html[data-semaforo="si"] .boton[aria-current="page"] { border-radius: 999px; }
 
   /* Campo y búsqueda: píldora de 54, borde de 2. */
   html[data-semaforo="si"] .campo { border-radius: 27px; min-height: 54px; padding: 0 20px; background: var(--tarjeta); border: 2px solid var(--borde-campo); font-size: 17px; font-weight: 500; }
@@ -701,11 +703,11 @@ html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si
 }
 
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
-.inicio-semaforo { display: flex; flex-direction: column; gap: 26px; }
+.inicio-semaforo { display: flex; flex-direction: column; gap: 22px; }
 .inicio-semaforo-fecha { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
 .inicio-semaforo-saludo { font-size: 52px; line-height: 0.95; letter-spacing: 0.5px; padding-right: 3.5rem; }
 .inicio-semaforo-entrada { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
-.inicio-semaforo-entrada-izq { padding: 28px; }
+.inicio-semaforo-entrada-izq { padding: 24px 28px; }
 .inicio-semaforo-entrada .puerta { padding: 28px; gap: 10px; min-height: 0; }
 .inicio-semaforo-entrada .puerta-palabra { font-size: 76px; }
 .inicio-semaforo-entrada .puerta-emoji { display: none; }
