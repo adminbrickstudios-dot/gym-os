@@ -1,4 +1,6 @@
 import { headers } from "next/headers";
+import { conSemaforo } from "@/lib/semaforo";
+import { ResultadoPuerta, type ColorPuerta } from "@/components/ResultadoPuerta";
 import Link from "next/link";
 import { Recomendacion } from "./Recomendacion";
 import { AvisosDelDia, type AvisoDelDia } from "./AvisosDelDia";
@@ -41,6 +43,7 @@ const EMOJI: Record<string, string> = { verde: "ok", amarillo: "alerta", naranja
 export default async function AppSocio({ searchParams }: { searchParams: Promise<{ socio?: string }> }) {
   const pedido = (await searchParams).socio;
   return intentar(async () => {
+    const semaforo = await conSemaforo();
     const host = (await headers()).get("x-gimnasio-host");
     const [{ g, yo }, agenda] = await Promise.all([miSocio(pedido), host ? traerAgenda(host) : null]);
     if (yo.elegir) {
@@ -161,6 +164,23 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
           </section>
         )}
 
+        {semaforo ? (
+          // Pista Semáforo (app-socio.png / app-socio-debe.png): el estado lleno del color, con el QR (o el DNI) adentro. El texto sale de la base.
+          <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(v.color) ? v.color : "gris") as ColorPuerta} puede={v.puede}
+            titulo={v.puede ? "Podés entrar" : "No podés entrar"} data-estado-app={v.color}
+            detalle={<>{v.texto}{v.vence_en && v.puede && <span className="block" data-cubierto-hasta>Cubierto hasta el {fechaCorta(new Date(new Date(v.vence_en).getTime() - 1), zona)}{(() => { const n = Math.ceil((new Date(v.vence_en).getTime() - Date.now()) / 86400000); return n === 0 ? " · vence hoy" : n > 0 ? ` · te ${n === 1 ? "queda 1 día" : `quedan ${n} días`}` : ""; })()}</span>}</>}>
+            <div id="mi-qr" className="space-y-4 scroll-mt-4" data-bloque-qr>
+              {qrPared && <EscanearEntrada gimnasioId={g.id} socioId={s.socio_id} principal={!debePagar} conSalida={registraSalida} />}
+              {qr && (v.puede
+                ? <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />
+                : <QrBloqueado socioId={s.socio_id} titulo={faltaPagar ? "Tu QR se activa cuando pagues" : "Tu QR está bloqueado"}
+                    detalle={faltaPagar ? "Apenas pagues se prende solo: no hace falta recargar." : (v.texto ?? "Hoy no podés entrar.")} />)}
+              {!qr && !qrPared && dni && <p className="numero text-5xl" data-tu-dni-inicio>{formatearDni(dni)}</p>}
+            </div>
+          </ResultadoPuerta>
+          ) : null}
+        {semaforo && debePagar && !faltaPagar && bloquePago}
+        {semaforo ? null : (<>
         <section className="rounded-[var(--radio-grande)] p-6 border"
           style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 82%)`, borderColor: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
           <p className="text-5xl" aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></p>
@@ -188,6 +208,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         )}
 
         </div>
+        </>)}
 
         {/* D83 · 6: pocos botones grandes, los de todos los días. Sin pagar: lo que lo lleva a entrar (pagar, su QR bloqueado, clases, planes, su perfil, el gimnasio).
             Pagando: su QR, reservar, sus pagos, su perfil y el gimnasio. El resto (rutina, eventos, invitar…) sigue más abajo. */}
