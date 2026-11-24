@@ -4,7 +4,7 @@
 // Si la ventana no está montada (sin sede activa), va a la pantalla de Entrada de siempre con lo escrito.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icono } from "@/components/ui/Icono";
 import { EVENTO_ABRIR_ENTRADA_CON } from "./entrada/comun";
 
@@ -13,6 +13,9 @@ export function EntradaInicio({ puedeCobrar, puedeAlta, pase, ultima, chico = fa
 }) {
   const [texto, setTexto] = useState("");
   const router = useRouter();
+  // En el celular, los textos cortos del diseño (inicio-celular.png): "DNI o QR", "Ver", "Alta" y "Pase".
+  const [corto, setCorto] = useState(chico);
+  useEffect(() => { if (chico) return; const m = window.matchMedia("(max-width: 1023px)"); const ver = () => setCorto(m.matches); ver(); m.addEventListener("change", ver); return () => m.removeEventListener("change", ver); }, [chico]);
   const ver = () => {
     const t = texto.trim();
     if (document.documentElement.dataset.entradaLista === "si") {
@@ -25,15 +28,15 @@ export function EntradaInicio({ puedeCobrar, puedeAlta, pase, ultima, chico = fa
       {!chico && <h2 className="titulo entrada-inicio-titulo">Entrada</h2>}
       <form className="entrada-inicio-campo" onSubmit={(e) => { e.preventDefault(); ver(); }} role="search">
         <span aria-hidden className="entrada-inicio-lupa"><Icono nombre="buscar" linea /></span>
-        <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder={chico ? "DNI o QR" : "Tipeá el DNI o escaneá el QR"}
+        <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder={corto ? "DNI o QR" : "Tipeá el DNI o escaneá el QR"}
           aria-label="DNI o QR del socio" autoComplete="off" inputMode="text" data-entrada-inicio-campo />
-        <button type="submit" className="entrada-inicio-ver">{chico ? "Ver" : "Ver si pasa"}</button>
+        <button type="submit" className="entrada-inicio-ver">{corto ? "Ver" : "Ver si pasa"}</button>
       </form>
       {(puedeCobrar || puedeAlta) && (
         <nav className="entrada-inicio-acciones" aria-label="Acciones del mostrador" data-acciones-mostrador>
           {puedeCobrar && <Link href="/panel/vender" className="boton boton-claro" data-accion-rapida="cobrar"><Icono nombre="plata" linea />{" "}Cobrar</Link>}
-          {puedeAlta && <Link href="/panel/socios/nuevo" className="boton" data-accion-rapida="alta"><Icono nombre="mas" linea />{" "}{chico ? "Alta" : "Alta de socio"}</Link>}
-          {puedeCobrar && pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" linea />{" "}{chico ? "Pase" : "Pase diario"}</Link>}
+          {puedeAlta && <Link href="/panel/socios/nuevo" className="boton" data-accion-rapida="alta"><Icono nombre="mas" linea />{" "}{corto ? "Alta" : "Alta de socio"}</Link>}
+          {puedeCobrar && pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" linea />{" "}{corto ? "Pase" : "Pase diario"}</Link>}
         </nav>
       )}
       {!chico && <p className="texto-suave entrada-inicio-pie">{ultima ? `Última entrada: ${ultima} · ` : ""}F2 vuelve acá desde cualquier pantalla</p>}

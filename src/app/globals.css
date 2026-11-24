@@ -806,7 +806,8 @@ html[data-semaforo="si"] aside .titulo-grupo { font-size: 13px; font-weight: 700
   .inicio-semaforo-entrada .puerta-palabra { font-size: 56px; }
   .inicio-semaforo-entrada .puerta-emoji { display: inline; }
   .inicio-semaforo [data-numeros-semaforo] dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .inicio-semaforo [data-numero] dd { font-size: 48px; }
+  .inicio-semaforo [data-numero] dd { font-size: clamp(30px, 10vw, 48px); }
+  .inicio-semaforo [data-numero] { padding: 16px 18px; }
   .inicio-semaforo [data-accesos-semaforo] ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inicio-semaforo [data-accesos-semaforo] ul a.boton { height: 56px; min-height: 56px; border-radius: 28px !important; padding: 0 14px !important; }
   .inicio-semaforo-ahora { grid-template-columns: repeat(2, minmax(0, 1fr)); }
