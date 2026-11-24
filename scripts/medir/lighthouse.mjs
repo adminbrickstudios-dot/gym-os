@@ -24,11 +24,32 @@ const PAGINAS = [
   ["Ingresar (socio)", "/ingresar?modo=socio", false],
   ["Quiero ser socio", "/hacete-socio", false],
 ];
+// Parte 3 (24/11): con --sesion si, también las pantallas con sesión (la dueña del demo y el socio al día), con su cookie.
+const SESION = arg("sesion", "no") === "si";
+const COOKIES = {};
+if (SESION) {
+  const { chromium } = await import("playwright");
+  const nav = await chromium.launch();
+  for (const [quien, mail] of [["duena", "duena@ejemplo.invalid"], ["socio", "socio@ejemplo.invalid"]]) {
+    const ctx = await nav.newContext();
+    const pg = await ctx.newPage();
+    await pg.goto(`${BASE}/ingresar`);
+    await pg.fill("input[type=email]", mail);
+    await pg.fill("input[type=password]", "demo-gymos");
+    await pg.click("button[type=submit]");
+    await pg.waitForURL((u) => !u.pathname.startsWith("/ingresar"), { timeout: 60000 });
+    COOKIES[quien] = (await ctx.cookies(BASE)).map((c) => `${c.name}=${c.value}`).join("; ");
+    await ctx.close();
+  }
+  await nav.close();
+  PAGINAS.push(["Inicio (dueña)", "/panel", false, "duena"], ["Entrada", "/panel/entrada", false, "duena"], ["Socios", "/panel/socios", false, "duena"], ["App del socio", "/app", false, "socio"]);
+}
 mkdirSync(SALIDA, { recursive: true });
 
 const errores = [];   // las últimas líneas de lo que dijo Lighthouse cuando falló, para el resumen
-function correr(url, archivo) {
+function correr(url, archivo, quien) {
   const r = spawnSync("npx", ["--yes", `lighthouse@${VERSION}`, url, "--quiet", "--output=json", `--output-path=${archivo}`,
+    ...(quien && COOKIES[quien] ? [`--extra-headers=${JSON.stringify({ Cookie: COOKIES[quien] })}`] : []),
     "--only-categories=performance,accessibility,best-practices,seo", "--form-factor=mobile", "--screenEmulation.mobile=true",
     "--chrome-flags=--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage"], { encoding: "utf8", timeout: 240000, maxBuffer: 64 * 1024 * 1024 });
   if (r.status !== 0) {
@@ -75,11 +96,11 @@ const num = (r, k) => r.audits[k]?.numericValue;
 
 const filas = [];
 let avisos = 0;
-for (const [nombre, ruta, principal] of PAGINAS) {
+for (const [nombre, ruta, principal, quien] of PAGINAS) {
   const url = ruta.startsWith("http") ? ruta : `${BASE}${ruta}`;
   const corridas = [];
   for (let i = 0; i < VECES; i++) {
-    try { corridas.push(correr(url, join(SALIDA, `${nombre.replace(/\W+/g, "-").toLowerCase()}-${i + 1}.json`))); }
+    try { corridas.push(correr(url, join(SALIDA, `${nombre.replace(/\W+/g, "-").toLowerCase()}-${i + 1}.json`), quien)); }
     catch (e) { console.error(`Lighthouse falló en ${url} (corrida ${i + 1}): ${String(e.message).split("\n")[0]}`); }
   }
   if (!corridas.length) { filas.push(`| ${nombre} | \`${ruta}\` | sin medir | | | | | | |`); continue; }
