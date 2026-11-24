@@ -684,6 +684,22 @@ html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu)
 html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
 html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
 
+/* Clases de hoy Semáforo (clases-de-hoy.png): tres por fila; la que está pasando, con borde del acento. */
+.clases-semaforo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+.clases-semaforo-item { padding: 36px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
+.clases-semaforo-item.es-ahora { border-color: var(--acento); }
+.clases-semaforo-arriba { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.clases-semaforo-hora { font-size: 52px; }
+.clases-semaforo-ahora { color: var(--acento); font-weight: 700; font-size: 18px; text-transform: uppercase; }
+.clases-semaforo-actividad { font-weight: 700; font-size: 30px; }
+.clases-semaforo-cupo { display: flex; align-items: center; gap: 16px; font-size: 20px; }
+.clases-semaforo-barra { flex: 1; height: 14px; border-radius: 7px; background: var(--fondo); overflow: hidden; }
+.clases-semaforo-barra > span { display: block; height: 100%; border-radius: 7px; background: var(--acento); }
+.clases-semaforo-barra > span.casi { background: var(--vence); }
+.clases-semaforo-botones { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-top: 8px; }
+@media (max-width: 1100px) { .clases-semaforo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+@media (max-width: 700px) { .clases-semaforo { grid-template-columns: minmax(0, 1fr); } .clases-semaforo-item { padding: 20px; } .clases-semaforo-hora { font-size: 40px; } .clases-semaforo-actividad { font-size: 24px; } }
+
 /* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
 .socios-semaforo { padding: 24px; }
 .socios-semaforo-cabeza, .socios-semaforo-fila { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
