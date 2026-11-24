@@ -171,7 +171,8 @@ try {
     const hay = await k.locator(".kiosco-semaforo").first().waitFor({ timeout: 30000 }).then(() => true, () => false);
     chequear(hay, "Kiosco: el diseño de dos paneles (resultado y teclado)", "el kiosco no sale con el diseño Semáforo");
     if (hay) {
-      const [{ dni }] = await q(`select s.dni from public.socios s where s.gimnasio_id = $1 and s.nombre = 'Testigo' and s.apellido = 'Al Día' limit 1`, [gim]);
+      // El testigo al día puede no tener DNI en el demo: se le pone uno (solo en la base local), como hace ent-3 desde la ficha.
+      const [{ dni }] = await q(`update public.socios s set dni = coalesce(s.dni, '39876543') where s.gimnasio_id = $1 and s.nombre = 'Testigo' and s.apellido = 'Al Día' returning s.dni`, [gim]);
       for (const n of String(dni)) await k.getByRole("button", { name: n, exact: true }).click();
       await k.getByRole("button", { name: "Entrar" }).click();
       const res = k.locator("[data-kiosco-resultado]");

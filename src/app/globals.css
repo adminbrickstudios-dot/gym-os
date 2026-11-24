@@ -571,8 +571,6 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
   html[data-semaforo="si"] .boton-chico.boton-claro { background: var(--texto); }
   html[data-semaforo="si"] .boton:disabled { opacity: 0.45; }
   html[data-semaforo="si"] .boton-texto { border-radius: 999px; }
-  /* Un botón elegido dentro de una barra (el día en Clases) sigue siendo píldora: Pista le ponía 12. */
-  html[data-semaforo="si"] .boton[aria-current="page"] { border-radius: 999px; }
 
   /* Campo y búsqueda: píldora de 54, borde de 2. */
   html[data-semaforo="si"] .campo { border-radius: 27px; min-height: 54px; padding: 0 20px; background: var(--tarjeta); border: 2px solid var(--borde-campo); font-size: 17px; font-weight: 500; }
@@ -680,6 +678,8 @@ html[data-semaforo="si"] aside nav a .icono-e { font-size: 20px; width: 24px; te
 html[data-semaforo="si"] aside nav a[aria-current="page"] { min-height: 50px; border-radius: 14px; font-weight: 700; font-size: 17px; }
 /* Salir lejos del nombre: Cerrar sesión con aire arriba. */
 html[data-semaforo="si"] aside form[action="/salir"] { margin-top: 28px; }
+/* Un botón elegido dentro de una barra (el día en Clases) sigue siendo píldora: la regla de Pista del menú (fuera de capas) le ponía 12. */
+html[data-semaforo="si"] nav a.boton[aria-current="page"] { border-radius: 999px; }
 html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu); border-top-color: transparent; }
 html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
 html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
