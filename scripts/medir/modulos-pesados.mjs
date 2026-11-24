@@ -10,6 +10,9 @@ import { SourceMapConsumer } from "source-map-js";
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
 const TOP = Number(arg("top", "15"));
+// --topes scripts/medir/topes-js.json: falla si una pantalla clave baja más JS (gzip) que su tope. Los topes solo bajan.
+const TOPES = arg("topes") ? JSON.parse(readFileSync(arg("topes"), "utf8")) : null;
+const pasados = [];
 const RAIZ = process.env.NEXT_DIST_DIR || ".next";
 const stats = JSON.parse(readFileSync(join(RAIZ, "diagnostics", "route-bundle-stats.json"), "utf8"));
 const norm = (p) => p.replaceAll("\\", "/");
@@ -90,7 +93,10 @@ import("node:zlib").then(({ gzipSync }) => {
     if (!r) { console.log(`| ${ruta} | — | — | — |`); continue; }
     const gz = r.firstLoadChunkPaths.map(norm).reduce((a, c) => a + (existsSync(c) ? gzipSync(readFileSync(c)).length : 0), 0);
     console.log(`| ${ruta} | ${(r.firstLoadUncompressedJsBytes / 1024).toFixed(1)} | ${(gz / 1024).toFixed(1)} | ${r.firstLoadChunkPaths.length} |`);
+    if (TOPES && TOPES[ruta] != null && gz / 1024 > TOPES[ruta]) pasados.push(`${ruta}: ${(gz / 1024).toFixed(1)} KB gzip (tope ${TOPES[ruta]})`);
   }
+  if (pasados.length) { console.log(`
+::error::JS de primera carga por encima del tope (scripts/medir/topes-js.json): ${pasados.join(" · ")}`); process.exitCode = 1; }
 });
 const j = arg("json");
 if (j) writeFileSync(j, JSON.stringify(filas, null, 2));
