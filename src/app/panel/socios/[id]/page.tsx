@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { conSemaforo } from "@/lib/semaforo";
+import { ResultadoPuerta, type ColorPuerta } from "@/components/ResultadoPuerta";
 import { LinkPanel } from "@/components/panel/LinkPanel";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import Link from "next/link";
@@ -112,6 +114,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const wa = celular ? `https://wa.me/${celular.replace(/\D/g, "")}` : null;
     const membresias = planes.filter((p) => p.tipo === "membresia" && p.activo);
 
+    // Pista Semáforo (ficha-socio.png): el estado con el resultado de la puerta, el mismo componente que el Inicio, la Entrada y el kiosco.
+    const semaforo = await conSemaforo();
     return (
       <div className="space-y-10">
         {sp.sin_plan && !f.membresia && <p role="alert" className="pildora pildora-amarillo whitespace-normal"><Icono nombre="alerta" /> Quedó dado de alta, pero el plan no se pudo asignar: asignalo con “<Icono nombre="etiqueta" /> Asignar plan”.</p>}
@@ -129,7 +133,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
           </div>
           <div className="mt-6">
             {s.dado_de_baja_en ? <span className="pildora"><Icono nombre="salir" /> Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
-              : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
+              : semaforo
+                ? <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(v.color) ? v.color : "gris") as ColorPuerta} puede={v.puede} nombre={f.membresia?.plan} detalle={v.texto} data-ficha-puerta={v.color}>
+                    {(!v.puede || v.color === "amarillo") && panel.yo.rol !== "profe" && <BotonCobrar socioId={s.id} origen="ficha" className="boton boton-principal">Cobrar{v.para_regularizar ? ` · ${formatearPesos(v.para_regularizar)}` : ""}</BotonCobrar>}
+                  </ResultadoPuerta>
+                : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
           </div>
           {/* DISENO: las acciones (Cobrar, Vender, Editar…) van arriba, abajo del estado; no después de diez bloques. */}
