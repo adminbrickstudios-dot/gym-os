@@ -580,6 +580,7 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
     html[data-semaforo="si"] .boton { padding: 0 16px; font-size: 16px; }
     html[data-semaforo="si"] .boton-chico { min-height: 44px; }
     html[data-semaforo="si"] .pestana { white-space: normal; text-align: left; }
+    html[data-semaforo="si"] .campo { padding: 0 14px; max-width: 100%; }
   }
 
   /* Campo y búsqueda: píldora de 54, borde de 2. */
