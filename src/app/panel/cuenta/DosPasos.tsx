@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
-import { crearClienteNavegador } from "@/lib/supabase/navegador";
+// Parte 3 (24/11): el cliente de Supabase baja cuando se usa (import dinámico), no en la primera carga de Mi cuenta.
+const cliente = async () => (await import("@/lib/supabase/navegador")).crearClienteNavegador();
 import { Icono } from "@/components/ui/Icono";
 import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
@@ -23,7 +24,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
 
   const cargar = useCallback(async () => {
     try {
-      const sb = crearClienteNavegador();
+      const sb = await cliente();
       const [{ data: f, error: e1 }, { data: a, error: e2 }] = await Promise.all([sb.auth.mfa.listFactors(), sb.auth.mfa.getAuthenticatorAssuranceLevel()]);
       if (e1 || e2) throw new Error((e1 ?? e2)!.message);
       const verificado = f?.totp?.[0];
@@ -37,7 +38,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
 
   const activar = async () => {
     setMsj({});
-    const sb = crearClienteNavegador();
+    const sb = await cliente();
     // Un intento anterior sin terminar deja un factor sin verificar: se limpia para empezar de cero.
     const { data: todos } = await sb.auth.mfa.listFactors();
     for (const f of todos?.all ?? []) if (f.status === "unverified") await sb.auth.mfa.unenroll({ factorId: f.id });
@@ -49,7 +50,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
 
   const verificar = async (factorId: string, alTerminar: string) => {
     setMsj({});
-    const sb = crearClienteNavegador();
+    const sb = await cliente();
     const { error } = await sb.auth.mfa.challengeAndVerify({ factorId, code: codigo.replace(/\s/g, "") });
     if (error) { setMsj({ texto: /invalid|inv[aá]lid/i.test(error.message) ? "Ese código no es correcto. Mirá el que muestra tu app ahora." : `No se pudo verificar: ${error.message}` }); return; }
     setCodigo("");
@@ -60,7 +61,7 @@ export function DosPasos({ recomendada }: { recomendada: boolean }) {
 
   const desactivar = async (factorId: string) => {
     setMsj({});
-    const sb = crearClienteNavegador();
+    const sb = await cliente();
     const { error } = await sb.auth.mfa.unenroll({ factorId });
     if (error) { setMsj({ texto: /aal2/i.test(error.message) ? "Para desactivarla, primero confirmá tu código de ahora." : `No se pudo desactivar: ${error.message}` }); return; }
     setMsj({ ok: true, texto: "Verificación en dos pasos desactivada." });

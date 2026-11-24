@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
-import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { informarPago } from "./acciones";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { Icono } from "@/components/ui/Icono";
@@ -23,6 +22,8 @@ export function Pagar({ gimnasioId, socioId, monto, datos, secundario = false }:
     if (f.size > 5 * 1024 * 1024) { setEstado({ texto: "El archivo pesa más de 5 MB" }); return; }
     const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase();
     const path = `${gimnasioId}/${socioId}/${crypto.randomUUID()}.${ext}`;
+    // Parte 3 (24/11): el cliente de Supabase (auth, realtime, storage: ~180 KB) baja recién al subir el comprobante, no con la app.
+    const { crearClienteNavegador } = await import("@/lib/supabase/navegador");
     const { error } = await crearClienteNavegador().storage.from("comprobantes").upload(path, f, { contentType: f.type });
     if (error) { console.error("comprobante: no se pudo subir", error); setEstado({ texto: "No se pudo subir el comprobante. Revisá tu conexión y probá de nuevo; si sigue igual, mostralo en la recepción." }); return; }
     const r = await informarPago(socioId, path, clave.current);
