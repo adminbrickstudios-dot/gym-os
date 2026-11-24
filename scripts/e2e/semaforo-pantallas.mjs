@@ -138,9 +138,11 @@ try {
   const barra = await c.locator("nav[aria-label='Principales'] li").allInnerTexts();
   chequear(barra.length === 5 && /Más/.test(barra[4]), `Celular: la barra de abajo con 5 (${barra.map((x) => x.trim()).join(" · ")})`, `la barra de abajo dice: ${barra.join(" · ")}`);
   await c.setViewportSize({ width: 360, height: 780 });
+  // (también a 390, el celular de la mayoría de las pruebas: la Página se medía ahí)
   for (const ruta of ["/panel", "/panel/socios", "/panel/caja", "/panel/clases", `/panel/socios/${socio}`, "/panel/configuracion", "/panel/configuracion?pestana=reglas", "/panel/configuracion?pestana=cobros", "/panel/pagina"]) {
     await c.goto(`${G}${ruta}`);
     await c.locator("main").first().waitFor({ timeout: 30000 });
+    if (ruta === "/panel/pagina") await c.locator('[data-editor-pagina][data-listo="true"]').waitFor({ timeout: 60000 });
     const sale = await desborde(c);
     // Si algo se sale, se nombra lo que se sale (el más ancho que pasa el borde), para arreglarlo sin adivinar.
     const quien = sale > 1 ? await c.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
