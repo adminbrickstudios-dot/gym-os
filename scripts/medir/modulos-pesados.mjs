@@ -5,7 +5,7 @@
 // en .next/diagnostics/route-bundle-stats.json.
 //   MAPAS_JS=1 npx next build && node scripts/medir/modulos-pesados.mjs [--top 15] [--json salida.json]
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { SourceMapConsumer } from "source-map-js";
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i >= 0 ? process.argv[i + 1] : d; };
@@ -31,8 +31,10 @@ const porChunk = new Map();
 function repartir(chunk) {
   if (porChunk.has(chunk)) return porChunk.get(chunk);
   const reparto = new Map();
-  const mapa = `${chunk}.map`;
   const codigo = existsSync(chunk) ? readFileSync(chunk, "utf8") : "";
+  // El mapa de cada chunk: el que nombra su sourceMappingURL (Turbopack no siempre lo llama <chunk>.map).
+  const url = codigo.match(/\/\/# sourceMappingURL=(\S+)\s*$/)?.[1];
+  const mapa = url && !url.startsWith("data:") ? join(dirname(chunk), decodeURIComponent(url)) : `${chunk}.map`;
   if (!existsSync(mapa)) { reparto.set("(sin mapa)", Buffer.byteLength(codigo)); porChunk.set(chunk, reparto); return reparto; }
   const crudo = JSON.parse(readFileSync(mapa, "utf8"));
   const secciones = crudo.sections ? crudo.sections.map((s) => ({ ...s.map, offset: s.offset })) : [{ ...crudo, offset: { line: 0, column: 0 } }];
