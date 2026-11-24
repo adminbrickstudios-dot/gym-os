@@ -76,7 +76,7 @@ function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: s
         return (
           <div key={g} data-grupo={g}>
             <p className="titulo-grupo px-3">{g}</p>
-            <p className="px-3 mb-1.5 text-[13px] texto-tenue leading-snug">{LINEA_GRUPO[g]}</p>
+            <p className="px-3 mb-1.5 text-[13px] texto-tenue leading-snug linea-grupo">{LINEA_GRUPO[g]}</p>
             <div className="space-y-0.5">{principales.map((s) => <Item key={s.clave} s={{ ...s, descripcion: undefined }} actual={actual} alElegir={alElegir} n={numeroDe(pendientes, s.clave)} />)}</div>
             {mas.length > 0 && (
               <details key={masAbierto ? "abierto" : "cerrado"} open={masAbierto} className="mt-0.5" data-mas-grupo={g}>

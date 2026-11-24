@@ -71,7 +71,7 @@ const desborde = (p) => p.evaluate(() => document.documentElement.scrollWidth - 
 const b = await navegador();
 try {
   // ── El dueño: Inicio en la compu ──
-  const d = await pagina(b, { width: 1440, height: 900 });
+  const d = await pagina(b, { width: 1440, height: 900 }, { conMayusculas: true });
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel`);
   await d.locator("main").first().waitFor({ timeout: 60000 });
@@ -130,7 +130,7 @@ try {
   chequear((await noPildoras(d)).length === 0, "ficha-socio: todos los botones son píldora", `ficha-socio: no son píldora: ${(await noPildoras(d)).join(" · ")}`);
 
   // ── El celular: Inicio a 390 y nada se sale en 360 ──
-  const c = await pagina(b, { width: 390, height: 844 });
+  const c = await pagina(b, { width: 390, height: 844 }, { conMayusculas: true });
   await entrar(c, "duena@ejemplo.invalid");
   await c.goto(`${G}/panel`);
   await c.locator("[data-entrada-inicio]").waitFor({ timeout: 30000 });
@@ -147,7 +147,7 @@ try {
 
   // ── La app del socio (390): al día y debe ──
   for (const [pantalla, mail] of [["app-socio", "socio@ejemplo.invalid"], ["app-socio-debe", "socio-vencido@ejemplo.invalid"]]) {
-    const s = await pagina(b, { width: 390, height: 844 });
+    const s = await pagina(b, { width: 390, height: 844 }, { conMayusculas: true });
     await entrar(s, mail);
     await s.goto(`${G}/app`);
     await s.locator("main").first().waitFor({ timeout: 30000 });
@@ -165,7 +165,7 @@ try {
   const [{ id: disp }] = await q(`insert into public.dispositivos (gimnasio_id, sede_id, nombre, tipo) values ($1, $2, 'Tablet semáforo', 'kiosco') returning id`, [gim, sede]);
   await q(`insert into public.dispositivos_tokens (gimnasio_id, dispositivo_id, token_hash) values ($1, $2, encode(extensions.digest($3, 'sha256'), 'hex'))`, [gim, disp, TOKEN]);
   try {
-    const k = await pagina(b, { width: 1280, height: 800 });
+    const k = await pagina(b, { width: 1280, height: 800 }, { conMayusculas: true });
     await k.context().addCookies([{ name: "gymos_tablet", value: TOKEN, url: G }]);
     await k.goto(`${G}/kiosco`);
     const hay = await k.locator(".kiosco-semaforo").first().waitFor({ timeout: 30000 }).then(() => true, () => false);
