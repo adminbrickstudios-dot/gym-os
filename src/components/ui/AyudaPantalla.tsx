@@ -2,7 +2,7 @@
 import { Icono } from "@/components/ui/Icono";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { marcarAyuda } from "@/app/ayuda-acciones";
 import { claveDeRuta, textoAyuda } from "@/lib/ayuda";
@@ -26,7 +26,10 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
   const clave = claveDeRuta(ruta, ambito);
   const [vistas, setVistas] = useState(() => new Set(inicial.vistas));
   const [apagadas, setApagadas] = useState(inicial.apagadas);
-  const [abierta, setAbierta] = useState(false);
+  // Parte 3 (24/11): si corresponde, el globo sale abierto desde el primer pintado (en el flujo, como siempre). Antes aparecía medio segundo
+  // después y empujaba toda la pantalla: era el corrimiento (CLS 0,2) que medía Lighthouse en Inicio, Entrada, Socios y la app.
+  const [abierta, setAbierta] = useState(() => !!clave && !inicial.apagadas && !inicial.vistas.includes(clave));
+  const primera = useRef(true);
   const [conError, setConError] = useState(false);
   const [lugar, setLugar] = useState<HTMLElement | null>(null);
 
@@ -46,6 +49,13 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
   // salir sobre una pantalla de error, que se pinta en su lugar).
   const yaVista = !!clave && vistas.has(clave);
   useEffect(() => {
+    // Al llegar: el globo ya está (o no) desde el servidor; solo se esconde si la pantalla resultó ser un error.
+    if (primera.current) {
+      primera.current = false;
+      if (!clave) return;
+      const t0 = setTimeout(() => { if (document.querySelector("[data-pantalla-error]")) { setConError(true); setAbierta(false); } }, 500);
+      return () => clearTimeout(t0);
+    }
     setAbierta(false);
     setConError(false);
     if (!clave) return;
@@ -83,9 +93,7 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
       {ambito === "app" ? (lugar ? createPortal(boton, lugar) : null) : boton}
       {abierta && (
         <section data-ayuda-globo={clave} aria-label="Ayuda de esta pantalla"
-          // Parte 3 (24/11): en el panel flota debajo de su botón (vidrio) en vez de empujar la pantalla medio segundo después de cargar
-          // (era el corrimiento de 0,22 que medía Lighthouse en Inicio, Entrada y Socios). Lo que dice y hace es lo mismo.
-          className={`aparecer flex items-start gap-3 ${ambito === "panel" ? "vidrio rounded-[var(--radio)] p-4 absolute z-30 right-4 sm:right-8 top-16 sm:top-[5.5rem] w-[min(28rem,calc(100%-2rem))]" : "vidrio rounded-[var(--radio)] p-4 fixed z-40 left-4 right-4 top-20 mx-auto max-w-md"}`}>
+          className={`aparecer tarjeta p-4 mb-6 flex items-start gap-3 ${ambito === "panel" ? "pr-[7rem] sm:pr-[8.5rem]" : ""}`}>
           <span className="text-2xl flex-none" aria-hidden><Icono nombre={texto.emoji} sistema /></span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{texto.titulo}</p>
