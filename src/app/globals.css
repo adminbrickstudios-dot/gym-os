@@ -712,6 +712,11 @@ html[data-semaforo="si"] .enc-icono { order: 2; color: inherit; }
 html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
 @media (max-width: 767px) { html[data-semaforo="si"] [data-encabezado] h1 { font-size: 44px; } }
 
+/* La app del socio Semáforo (app-socio.png): el saludo grande en mayúscula y los botones con el emoji arriba y el texto a la izquierda. */
+html[data-semaforo="si"] [data-hola] { font-family: var(--fuente-titulo); font-weight: 800; font-size: 44px; line-height: 0.95; text-transform: uppercase; color: var(--texto); }
+html[data-semaforo="si"] [data-botones-inicio] a { text-align: left; justify-items: start; border-radius: 24px; padding: 22px; }
+html[data-semaforo="si"] [data-botones-inicio] a .titulo { font-family: var(--fuente); font-weight: 700; font-size: 20px; text-transform: none; }
+
 /* Caja Semáforo (caja.png): lo cobrado por medio en tarjetas de a 4 con el número grande. */
 html[data-semaforo="si"] div.grid:has(> [data-medio]) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 html[data-semaforo="si"] [data-medio] { background: var(--fondo); border-radius: 20px; padding: 20px 22px; }
