@@ -581,6 +581,9 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
     html[data-semaforo="si"] .boton-chico { min-height: 44px; }
     html[data-semaforo="si"] .pestana { white-space: normal; text-align: left; }
     html[data-semaforo="si"] .campo { padding: 0 14px; max-width: 100%; }
+    /* Las filas chicas de botones (mover y quitar una foto, el descuento del carrito) pasan de renglón en vez de salirse. */
+    html[data-semaforo="si"] .flex:has(> .boton-texto.ml-auto) { flex-wrap: wrap; min-width: 0; }
+    html[data-semaforo="si"] .boton-texto { max-width: 100%; }
   }
 
   /* Campo y búsqueda: píldora de 54, borde de 2. */
