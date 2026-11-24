@@ -648,6 +648,10 @@ html[data-semaforo="si"] .puerta-arriba { font-size: 17px; }
 html[data-semaforo="si"] .puerta .boton { width: 100%; min-height: 50px; border: 2px solid var(--p-texto); background: transparent; color: var(--p-texto); font-size: 16px; }
 html[data-semaforo="si"] .puerta .boton-principal, html[data-semaforo="si"] .puerta .puerta-acciones > .boton:first-child { min-height: 56px; border: 0; background: var(--p-texto); color: var(--p-boton); font-weight: 800; font-size: 17px; }
 html[data-semaforo="si"] .puerta .boton-texto, html[data-semaforo="si"] .puerta .texto-suave, html[data-semaforo="si"] .puerta .texto-tenue { color: var(--p-texto); }
+/* Una tarjeta adentro de la puerta (el QR de la app) conserva sus colores: el texto oscuro del verde sobre la tarjeta daba 1,07:1. */
+html[data-semaforo="si"] .puerta .tarjeta { color: var(--texto); }
+html[data-semaforo="si"] .puerta .tarjeta .texto-suave, html[data-semaforo="si"] .puerta .tarjeta .texto-tenue { color: var(--texto-suave); }
+html[data-semaforo="si"] .puerta .tarjeta .boton { border-color: var(--borde); color: var(--texto); }
 /* El kiosco: la palabra enorme. */
 html[data-semaforo="si"] .puerta-kiosco { border-radius: 0; padding: 44px; gap: 14px; min-height: 100%; }
 html[data-semaforo="si"] .puerta-kiosco .puerta-titulo { margin-top: 70px; gap: 18px; }
