@@ -85,7 +85,10 @@ try {
   await entrar(c, "duena@ejemplo.invalid");
   await abrir(c);
   const ancho = await c.evaluate(() => document.documentElement.scrollWidth);
-  chequear(ancho <= CELU.width, `celular: editor sin desborde (${ancho}px)`, `celular: el editor mide ${ancho}px`);
+  const quien = ancho > CELU.width ? await c.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+    .filter((e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) if (/auto|hidden|scroll|clip/.test(getComputedStyle(a).overflowX)) return false; return true; })
+    .slice(-3).map((e) => `${e.tagName.toLowerCase()}.${String(e.className).replace(/s+/g, ".").slice(0, 70)} (${Math.round(e.getBoundingClientRect().right)})`).join(" · ")) : "";
+  chequear(ancho <= CELU.width, `celular: editor sin desborde (${ancho}px)`, `celular: el editor mide ${ancho}px: ${quien}`);
   await c.locator('[data-bloque="portada"] label', { hasText: "Título" }).locator("input").fill(`${TITULO}!`);
   await c.locator('button:has-text("Ver cómo queda")').click();
   await c.locator('[role="dialog"] [data-frase]', { hasText: `${TITULO}!` }).waitFor({ timeout: 10000 });
