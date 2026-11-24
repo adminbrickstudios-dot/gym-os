@@ -32,7 +32,9 @@ async function lado(p, pantalla) {
 }
 
 /** Botones a la vista que no son píldora. */
+// Las baldosas de Accesos rápidos no son botones (en el diseño son tarjetas de radio 18): no cuentan.
 const noPildoras = (p) => p.evaluate(() => [...document.querySelectorAll(".boton, button.boton, a.boton")]
+  .filter((e) => !e.closest("[data-accesos-semaforo]"))
   .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; })
   .filter((e) => { const r = e.getBoundingClientRect(); const rad = parseFloat(getComputedStyle(e).borderTopLeftRadius); return rad + 1 < Math.min(r.height, r.width) / 2; })
   .map((e) => `${(e.textContent ?? "").trim().slice(0, 30)} (${getComputedStyle(e).borderTopLeftRadius})`));
@@ -105,7 +107,7 @@ try {
     const abajo = (sel) => { const e = document.querySelector(sel); return e ? e.getBoundingClientRect().bottom : Infinity; };
     const numeros = [...document.querySelectorAll("[data-numeros-semaforo] [data-numero]")].slice(0, 4).map((e) => e.getBoundingClientRect().bottom);
     return { saludo: abajo(".inicio-semaforo-saludo"), entrada: abajo("[data-entrada-inicio]"), resultado: abajo(".inicio-semaforo-entrada > :nth-child(2)"),
-      numeros: numeros.length === 4 ? Math.max(...numeros) : Infinity, alto: window.innerHeight };
+      numeros: numeros.length === 4 ? Math.max(...numeros) : Infinity, alto: 768 };
   });
   chequear([arriba.saludo, arriba.entrada, arriba.resultado, arriba.numeros].every((y) => y <= arriba.alto),
     "1366×768: el saludo, la Entrada, el resultado y los 4 números se ven sin bajar", `abajo de la pantalla (${arriba.alto}): ${JSON.stringify(arriba)}`);

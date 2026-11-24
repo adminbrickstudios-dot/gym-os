@@ -364,15 +364,6 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               )}
             </section>
           )}
-          {fichaje?.usa && fichaje.puede && <BotonFichar nombre={fichaje.nombre} enTurno={fichaje.en_turno} entradaEn={fichaje.entrada_en} sinSalidaDesde={fichaje.sin_salida_desde} zona={zona} />}
-          <NovedadesGymOS novedades={novedadesGymOS} />
-          {pasos && <PrimerosPasos datos={pasos} />}
-          {rol === "dueno" && (
-            <>
-              <DatosEjemploInicio datos={datosEjemplo} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
-              <SeguridadDueno datos={seguridad} zona={zona} />
-            </>
-          )}
           <section aria-labelledby="hoy-numeros" className="inicio-semaforo-bloque" data-numeros-semaforo>
             <div className="inicio-semaforo-cabecera">
               <h2 id="hoy-numeros" className="titulo">Hoy en números</h2>
@@ -434,6 +425,16 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               </ul>
             )}
           </section>
+          {/* Lo del dueño (novedades, primeros pasos, ejemplo y seguridad) y el fichaje, abajo: arriba manda lo del diseño (entrada, resultado y números sin bajar). */}
+          {fichaje?.usa && fichaje.puede && <BotonFichar nombre={fichaje.nombre} enTurno={fichaje.en_turno} entradaEn={fichaje.entrada_en} sinSalidaDesde={fichaje.sin_salida_desde} zona={zona} />}
+          <NovedadesGymOS novedades={novedadesGymOS} />
+          {pasos && <PrimerosPasos datos={pasos} />}
+          {rol === "dueno" && (
+            <>
+              <DatosEjemploInicio datos={datosEjemplo} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
+              <SeguridadDueno datos={seguridad} zona={zona} />
+            </>
+          )}
           <LockersVencen items={lockersVencen} />
           {resto}
         </>

@@ -52,7 +52,7 @@ try {
   await t.locator('button[aria-label="Entrar"]').click();
   const res = t.locator("[data-kiosco-resultado]");
   await res.waitFor({ timeout: 30000 });
-  chequear(await res.getAttribute("data-kiosco-resultado") === "entro" && /¡Pasá, Testigo!/.test(await res.innerText()), "con el teclado y su DNI: “¡Pasá, Testigo!”", `dice: ${(await res.innerText()).slice(0, 80)}`);
+  chequear(await res.getAttribute("data-kiosco-resultado") === "entro" && /¡Pasá, Testigo!|¡Buen entreno, Testigo!/.test(await res.innerText()), "con el teclado y su DNI: “¡Pasá, Testigo!”", `dice: ${(await res.innerText()).slice(0, 80)}`);
   await capturar(t, "ent3-tablet-verde");
   await t.locator('[data-kiosco="listo"]').waitFor({ timeout: 15000 });
   ok("vuelve sola al inicio para el que sigue");

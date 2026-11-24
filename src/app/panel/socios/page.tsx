@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { conSemaforo } from "@/lib/semaforo";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
@@ -156,7 +157,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="subir" /> Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
-          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} />
+          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} semaforo={await conSemaforo()} />
         )}
         </div>
         {filas.length >= limite && (

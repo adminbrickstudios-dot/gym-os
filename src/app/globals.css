@@ -610,8 +610,6 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
   html[data-semaforo="si"] .icono-e { display: inline-block; font-style: normal; line-height: 1; vertical-align: -0.1em; }
 }
 
-/* El menú: el ítem activo, píldora llena con el acento. */
-html[data-semaforo="si"] nav a[aria-current="page"] { border-radius: 18px; }
 
 /* El resultado de la puerta (src/components/ResultadoPuerta.tsx): tarjeta llena del color del semáforo, la palabra grande,
    el nombre, el porqué y los botones del color del texto. Sin la llave es una tarjeta del color del resultado. */
@@ -672,9 +670,29 @@ html[data-semaforo="si"] aside > p.titulo { font-weight: 900; font-size: 30px; l
 html[data-semaforo="si"] aside nav a { min-height: 46px; border-radius: 12px; font-weight: 600; font-size: 16px; gap: 12px; }
 html[data-semaforo="si"] aside nav a .icono-e { font-size: 20px; width: 24px; text-align: center; }
 html[data-semaforo="si"] aside nav a[aria-current="page"] { min-height: 50px; border-radius: 14px; font-weight: 700; font-size: 17px; }
+/* Salir lejos del nombre: Cerrar sesión con aire arriba. */
+html[data-semaforo="si"] aside form[action="/salir"] { margin-top: 28px; }
 html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu); border-top-color: transparent; }
 html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
 html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
+
+/* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
+.socios-semaforo { padding: 24px; }
+.socios-semaforo-cabeza, .socios-semaforo-fila { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
+.socios-semaforo-cabeza { padding: 0 20px 14px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-suave); }
+.socios-semaforo-fila { min-height: 84px; padding: 0 20px; border-radius: 18px; }
+.socios-semaforo-fila.par { background: var(--fondo); }
+.socios-semaforo-socio { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.socios-semaforo-avatar { width: 52px; height: 52px; flex: none; border-radius: 26px; background: var(--tarjeta-alta); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; }
+.socios-semaforo-estado { display: flex; gap: 6px; min-width: 0; }
+@media (max-width: 767px) {
+  .socios-semaforo { padding: 10px; }
+  .socios-semaforo-cabeza { display: none; }
+  .socios-semaforo-fila { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; padding: 12px 14px; }
+  .socios-semaforo-plan { display: none; }
+  .socios-semaforo-estado { grid-column: 1; }
+  .socios-semaforo-fila > .boton { grid-row: 1 / span 2; grid-column: 2; }
+}
 
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
 .inicio-semaforo { display: flex; flex-direction: column; gap: 26px; }
