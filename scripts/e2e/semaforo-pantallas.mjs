@@ -144,6 +144,7 @@ try {
     const sale = await desborde(c);
     // Si algo se sale, se nombra lo que se sale (el más ancho que pasa el borde), para arreglarlo sin adivinar.
     const quien = sale > 1 ? await c.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+      .filter((e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { if (/auto|hidden|scroll|clip/.test(getComputedStyle(a).overflowX)) return false; } return true; })
       .sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right).slice(0, 3)
       .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).replace(/s+/g, ".").slice(0, 80)} (${Math.round(e.getBoundingClientRect().right)})`).join(" · ")) : "";
     chequear(sale <= 1, `360: ${ruta} sin nada que se salga`, `360: ${ruta} se sale ${sale} px a lo ancho: ${quien}`);

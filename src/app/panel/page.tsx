@@ -422,7 +422,7 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               <ul className="inicio-semaforo-chips">
                 {dejados.length > 0 && <li className="pildora pildora-rojo inicio-semaforo-chip"><Icono nombre="puerta" /> Dejados pasar hoy: {dejados.length} · {dejados.slice(0, 3).map((x) => x.socio).join(", ")}</li>}
                 {reponer.length > 0 && <li className="pildora pildora-amarillo inicio-semaforo-chip"><Icono nombre="caja" /> Por reponer: {reponer.map((p) => `${p.nombre} · ${stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`}`).join(", ")}</li>}
-                {fuera && <li className="pildora inicio-semaforo-chip"><Icono nombre="ajustes" /> Fuera de servicio: {fuera}</li>}
+                {fuera && <li className="pildora inicio-semaforo-chip" data-maquina-fuera><Icono nombre="ajustes" /> Fuera de servicio: {fuera}</li>}
               </ul>
             )}
           </section>
