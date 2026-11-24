@@ -635,6 +635,11 @@ html[data-semaforo="si"] .puerta-amarillo { background: var(--vence); color: var
 html[data-semaforo="si"] .puerta-rojo { background: var(--nopasa); color: var(--nopasa-texto); --p-fondo: var(--nopasa); --p-texto: var(--nopasa-texto); --p-boton: var(--nopasa-boton); }
 html[data-semaforo="si"] .puerta-gris { background: var(--tarjeta-alta); color: var(--texto); --p-fondo: var(--tarjeta-alta); --p-texto: var(--texto); --p-boton: var(--tarjeta-alta); }
 html[data-semaforo="si"] .puerta-emoji { font-size: 40px; line-height: 1; }
+/* Sin botones adentro (la ficha), la tarjeta mide lo que dice. */
+html[data-semaforo="si"] .puerta:not(:has(.puerta-acciones)) { min-height: 0; }
+/* La ficha: el nombre del socio grande, como un título de pantalla (ficha-socio.png). */
+html[data-semaforo="si"] main header h1.titular:not(.inicio-semaforo-saludo) { font-size: 64px; line-height: 0.95; }
+@media (max-width: 767px) { html[data-semaforo="si"] main header h1.titular:not(.inicio-semaforo-saludo) { font-size: 40px; } }
 html[data-semaforo="si"] .puerta-palabra { font-weight: 800; font-size: 56px; text-transform: uppercase; }
 html[data-semaforo="si"] .puerta-nombre { font-size: 24px; font-weight: 700; }
 html[data-semaforo="si"] .puerta-detalle { font-size: 17px; font-weight: 500; }
