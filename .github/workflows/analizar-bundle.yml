@@ -1,52 +1,67 @@
-# E4 · Qué pesa en el JS compartido del panel: next build + scripts/medir/chunks-panel.mjs (y js-rutas.mjs para el promedio).
-# A mano (Actions → Analizar bundle) o con [bundle] en el mensaje de un push a base/**.
+# E4 · Qué pesa en el JS que baja el navegador. Parte 3 (24/11): next build con mapas (MAPAS_JS=1, solo acá), la primera carga de cada ruta
+# (la que escribe Next en .next/diagnostics/route-bundle-stats.json), los 15 módulos más pesados y en qué rutas caen (modulos-pesados.mjs),
+# el JS compartido del panel (chunks-panel.mjs) y lo que consulta solo cada X segundos en el código (setInterval / setTimeout repetidos).
+# Con `medir_ref` se mide OTRA versión de la app (src, public, supabase y dependencias de esa rama o commit) con los scripts de esta: así
+# el "antes" y el "después" salen de la misma medición.
+#   gh workflow run analizar-bundle.yml --ref <rama> -f medir_ref=<rama o commit>
 name: Analizar bundle
 
 on:
   push:
     branches: ["base/**"]
   workflow_dispatch:
-
-env:
-  PGHOST: localhost
-  PGPORT: "5432"
-  PGUSER: postgres
+    inputs:
+      medir_ref:
+        description: "Rama o commit de la app a medir (vacío = esta misma)"
+        type: string
+        default: ""
 
 jobs:
   analizar:
-    name: Analizar el bundle del panel
+    name: Analizar el bundle
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[bundle]')
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: La app de otra versión (los scripts de medir quedan los de esta)
+        if: inputs.medir_ref != ''
+        run: |
+          git fetch -q origin "${{ inputs.medir_ref }}" || true
+          git checkout "${{ inputs.medir_ref }}" -- src public supabase package.json package-lock.json 2>/dev/null || git checkout FETCH_HEAD -- src public supabase package.json package-lock.json
+          echo "Midiendo la app de ${{ inputs.medir_ref }} ($(git rev-parse --short FETCH_HEAD 2>/dev/null || echo ref))"
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Base nueva y app compilada
+      - name: next build con mapas
         env:
-          APP_MODO: produccion
-        run: |
-          scripts/db/local.sh nueva
-          scripts/local/levantar.sh
+          MAPAS_JS: "1"
+          NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "medir"
+        run: npx next build > .next-build.log 2>&1 || (tail -60 .next-build.log; exit 1)
       - name: Qué pesa
         run: |
-          NEXT_DIST_DIR=.next-dev node scripts/medir/chunks-panel.mjs | tee .local/chunks.md
-          NEXT_DIST_DIR=.next-dev node scripts/medir/js-rutas.mjs | tail -3 | tee -a .local/chunks.md
-          { echo "## Bundle del panel"; echo; cat .local/chunks.md; } >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p .local
+          node scripts/medir/modulos-pesados.mjs --top 15 --json .local/modulos.json | tee .local/peso.md
+          node scripts/medir/js-rutas.mjs --json .local/js-rutas.json | tail -3 | tee -a .local/peso.md
+          node scripts/medir/chunks-panel.mjs | tee -a .local/peso.md
+          echo "" >> .local/peso.md
+          echo "## Lo que consulta solo (setInterval y setTimeout que se vuelven a programar)" >> .local/peso.md
+          grep -rn "setInterval(" src --include=*.tsx --include=*.ts | grep -v "\.test\." | sed 's/^/- /' | cut -c1-220 >> .local/peso.md || true
+          { echo "## Peso"; echo; cat .local/peso.md; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: bundle
-          path: .local/chunks.md
+          path: |
+            .local/peso.md
+            .local/modulos.json
+            .local/js-rutas.json
+            .next/diagnostics/route-bundle-stats.json
+            .next-build.log
           if-no-files-found: ignore
           retention-days: 30

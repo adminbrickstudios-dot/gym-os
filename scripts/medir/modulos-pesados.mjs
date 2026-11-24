@@ -77,5 +77,18 @@ console.log(`## Los ${TOP} módulos más pesados de la primera carga (sin compri
 console.log("| # | Módulo | KB | Rutas |");
 console.log("|---:|---|---:|---|");
 filas.forEach((f, i) => console.log(`| ${i + 1} | \`${f.modulo}\` | ${f.kb} | ${f.donde} |`));
+// La primera carga de las pantallas que se miden (lo que dice Next, sin comprimir, y comprimido con gzip).
+import("node:zlib").then(({ gzipSync }) => {
+  const CLAVE = ["/panel", "/panel/entrada", "/panel/socios", "/panel/socios/[id]", "/panel/caja", "/panel/clases", "/app", "/", "/kiosco", "/hacete-socio"];
+  console.log("\n## Primera carga de JS por pantalla\n");
+  console.log("| Ruta | JS (KB) | JS gzip (KB) | Chunks |");
+  console.log("|---|---:|---:|---:|");
+  for (const ruta of CLAVE) {
+    const r = stats.find((x) => x.route === ruta);
+    if (!r) { console.log(`| ${ruta} | — | — | — |`); continue; }
+    const gz = r.firstLoadChunkPaths.map(norm).reduce((a, c) => a + (existsSync(c) ? gzipSync(readFileSync(c)).length : 0), 0);
+    console.log(`| ${ruta} | ${(r.firstLoadUncompressedJsBytes / 1024).toFixed(1)} | ${(gz / 1024).toFixed(1)} | ${r.firstLoadChunkPaths.length} |`);
+  }
+});
 const j = arg("json");
 if (j) writeFileSync(j, JSON.stringify(filas, null, 2));
