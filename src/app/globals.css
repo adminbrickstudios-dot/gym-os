@@ -742,9 +742,12 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
 
 /* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
 .socios-semaforo { padding: 24px; }
-.socios-semaforo-cabeza, .socios-semaforo-fila { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
+.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
+.socios-semaforo-fila { display: flex; align-items: center; gap: 12px; }
+.socios-semaforo-link { flex: 1; min-width: 0; min-height: 84px; }
 .socios-semaforo-cabeza { padding: 0 20px 14px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-suave); }
-.socios-semaforo-fila { min-height: 84px; padding: 0 20px; border-radius: 18px; }
+.socios-semaforo-fila { padding: 0 20px; border-radius: 18px; }
+.socios-semaforo-fila:hover { background: var(--tarjeta-alta); }
 .socios-semaforo-fila.par { background: var(--fondo); }
 .socios-semaforo-socio { display: flex; align-items: center; gap: 16px; min-width: 0; }
 /* Las iniciales van en CSS: el texto de la fila sigue siendo el nombre (lo leen la búsqueda y las pruebas). */
@@ -754,10 +757,11 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
 @media (max-width: 767px) {
   .socios-semaforo { padding: 10px; }
   .socios-semaforo-cabeza { display: none; }
-  .socios-semaforo-fila { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; padding: 12px 14px; }
+  .socios-semaforo-fila { padding: 10px 14px; }
+  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; min-height: 64px; }
   .socios-semaforo-plan { display: none; }
   .socios-semaforo-estado { grid-column: 1; }
-  .socios-semaforo-fila > .boton { grid-row: 1 / span 2; grid-column: 2; }
+  .socios-semaforo-link > .boton { grid-row: 1 / span 2; grid-column: 2; }
 }
 
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
