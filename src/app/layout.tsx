@@ -45,8 +45,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   // El modo de Pista: lo que eligió la persona en Mi cuenta (cookie `tema`, D37) manda; si no, el del gimnasio (oscuro por defecto).
   const tema = (await cookies()).get("tema")?.value;
   const modo = tema === "claro" || tema === "oscuro" ? tema : cab.get("x-gimnasio-modo") === "claro" ? "claro" : "oscuro";
+  // Pista Semáforo (24/11): solo con el estilo Pista y la llave pista_semaforo del gimnasio. Sin el atributo, Pista queda como estaba.
+  const semaforo = estilo === "pista" && cab.get("x-gimnasio-semaforo") === "si" ? "si" : undefined;
   return (
-    <html lang="es-AR" data-estilo={estilo} data-modo={modo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
+    <html lang="es-AR" data-estilo={estilo} data-modo={modo} data-semaforo={semaforo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
       <body className="antialiased">{children}<Hidratado /></body>
     </html>
   );

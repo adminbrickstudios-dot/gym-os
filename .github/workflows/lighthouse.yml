@@ -28,6 +28,10 @@ on:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
+      semaforo:
+        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no; solo se ve con estilo=pista)"
+        type: string
+        default: "si"
       landings:
         description: "Vuelta final: vieja (las de siempre) o nueva (prende landing_nueva en el demo y landing_venta_nueva en la base de esta corrida, y mide también la venta de Pase)"
         type: string
@@ -68,6 +72,7 @@ jobs:
         env:
           APP_MODO: produccion
           ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
