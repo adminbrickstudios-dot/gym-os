@@ -30,6 +30,8 @@ jobs:
         if: inputs.medir_ref != ''
         run: |
           git fetch -q origin "${{ inputs.medir_ref }}" || true
+          # Se borran antes: el checkout de una carpeta no saca los archivos que la otra versión no tiene.
+          git rm -rq --cached src public supabase > /dev/null && find src public supabase -type f -delete
           git checkout "${{ inputs.medir_ref }}" -- src public supabase package.json package-lock.json 2>/dev/null || git checkout FETCH_HEAD -- src public supabase package.json package-lock.json
           echo "Midiendo la app de ${{ inputs.medir_ref }} ($(git rev-parse --short FETCH_HEAD 2>/dev/null || echo ref))"
       - uses: actions/setup-node@v5
