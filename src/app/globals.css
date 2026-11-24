@@ -661,3 +661,84 @@ html[data-semaforo="si"] .puerta-kiosco .puerta-arriba { font-size: 20px; }
 .kiosco-tecla-borrar { background: var(--tarjeta-alta); font-size: 34px; }
 .kiosco-tecla-entrar { background: var(--acento); color: var(--acento-texto); font-family: var(--fuente); font-size: 22px; }
 @media (max-width: 900px) { .kiosco-semaforo { flex-direction: column; } .kiosco-der { width: 100%; } .kiosco-hola-titulo { font-size: 72px; } }
+
+/* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
+.inicio-semaforo { display: flex; flex-direction: column; gap: 26px; }
+.inicio-semaforo-fecha { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+.inicio-semaforo-saludo { font-size: 52px; line-height: 0.95; letter-spacing: 0.5px; padding-right: 3.5rem; }
+.inicio-semaforo-entrada { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
+.inicio-semaforo-entrada-izq { padding: 28px; }
+.inicio-semaforo-entrada .puerta { padding: 28px; gap: 10px; min-height: 0; }
+.inicio-semaforo-entrada .puerta-palabra { font-size: 76px; }
+.inicio-semaforo-entrada .puerta-emoji { display: none; }
+.inicio-semaforo-entrada .puerta-arriba { font-size: 15px; font-weight: 600; }
+.inicio-semaforo-entrada .puerta-nombre { font-size: 26px; }
+.inicio-semaforo-entrada .puerta-detalle { font-size: 18px; }
+.inicio-semaforo-bloque { display: flex; flex-direction: column; gap: 12px; }
+.inicio-semaforo-bloque > h2, .inicio-semaforo-cabecera h2, .inicio-semaforo-caja > h2 { font-size: 24px; letter-spacing: 0.5px; }
+.inicio-semaforo-cabecera { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.inicio-semaforo-cuenta { color: var(--vence); }
+.inicio-semaforo-dos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.inicio-semaforo-caja { padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.inicio-semaforo-caja > h2 { margin-bottom: 6px; }
+.inicio-semaforo-filas { display: flex; flex-direction: column; gap: 10px; }
+.inicio-semaforo-fila { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 6px 0 14px; border-radius: 14px; background: var(--fondo); font-size: 16px; }
+.inicio-semaforo-vivo { display: flex; align-items: center; gap: 12px; }
+.inicio-semaforo-envivo { font-family: var(--fuente); font-size: 14px; font-weight: 700; text-transform: none; color: var(--et-aldia-texto, var(--verde)); display: inline-flex; align-items: center; gap: 6px; }
+.inicio-semaforo-punto { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
+.inicio-semaforo-ahora { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.inicio-semaforo-ahora-item { display: flex; flex-direction: column; border-radius: 18px; background: var(--tarjeta); padding: 18px 20px; height: 100%; border: 2px solid transparent; }
+.inicio-semaforo-ahora-item.es-ahora { border-color: var(--acento); padding: 16px 18px; }
+.inicio-semaforo-ahora-hora { font-weight: 700; font-size: 14px; color: var(--texto-suave); text-transform: uppercase; }
+.es-ahora .inicio-semaforo-ahora-hora { color: var(--acento); }
+.inicio-semaforo-ahora-titulo { font-weight: 700; font-size: 19px; margin-top: 4px; }
+.inicio-semaforo-ahora-detalle { font-size: 14px; }
+.inicio-semaforo-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+html[data-semaforo="si"] .inicio-semaforo-chip { min-height: 40px; padding: 0 16px; border-radius: 20px; font-size: 15px; font-weight: 600; text-transform: none; }
+/* Hoy en números: tarjetas de 20 con el número de 62. */
+.inicio-semaforo [data-numeros-semaforo] dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.inicio-semaforo [data-numero] { border-radius: 20px; background: var(--tarjeta); padding: 20px 22px; margin: 0; gap: 4px; }
+.inicio-semaforo [data-numero] dd { font-size: 62px; line-height: 1; }
+.inicio-semaforo [data-numero] dt { font-size: 16px; font-weight: 600; color: var(--texto); margin: 0; }
+.inicio-semaforo [data-numero="vencen"] dd, .inicio-semaforo [data-numero="por_vencer"] dd, .inicio-semaforo [data-numero="a_cobrar"] dd { color: var(--vence); }
+.inicio-semaforo [data-numero="cobrado"] dd, .inicio-semaforo [data-numero="caja_turno"] dd { color: var(--acento); }
+.inicio-semaforo [data-numero="plata_riesgo"] dd, .inicio-semaforo [data-numero="deben"] dd { color: var(--et-debe-texto); }
+/* Accesos rápidos: 6 por fila, de 72 de alto, emoji y nombre al lado. */
+.inicio-semaforo [data-accesos-semaforo] ul { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.inicio-semaforo [data-accesos-semaforo] ul a.boton { aspect-ratio: auto !important; height: 72px; min-height: 72px; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important;
+  gap: 12px; padding: 0 18px !important; border-radius: 18px !important; background: var(--tarjeta); border: 0; }
+.inicio-semaforo [data-accesos-semaforo] ul a.boton > span:first-child { font-size: 26px; }
+.inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { font-family: var(--fuente); font-size: 16px; font-weight: 700; text-transform: none; }
+/* La tarjeta ENTRADA (EntradaInicio). */
+.entrada-inicio { display: flex; flex-direction: column; gap: 18px; }
+.entrada-inicio-titulo { font-size: 30px; letter-spacing: 0.5px; }
+.entrada-inicio-campo { display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 12px 0 24px; border-radius: 38px; background: var(--fondo); border: 2px solid var(--acento); }
+.entrada-inicio-lupa { color: var(--acento); font-size: 22px; }
+.entrada-inicio-campo input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--texto); font: 600 24px var(--fuente); outline: none; }
+.entrada-inicio-campo input::placeholder { color: var(--texto-suave); }
+.entrada-inicio-ver { height: 52px; padding: 0 22px; border-radius: 26px; background: var(--acento); color: var(--acento-texto); font-weight: 700; font-size: 18px; border: 0; cursor: pointer; white-space: nowrap; }
+.entrada-inicio-ver:active { transform: scale(0.97); }
+.entrada-inicio-acciones { display: flex; gap: 12px; }
+.entrada-inicio-acciones .boton { flex: 1; min-height: 60px; font-size: 18px; }
+.entrada-inicio-pie { font-size: 15px; }
+@media (max-width: 1023px) {
+  .inicio-semaforo { gap: 22px; }
+  .inicio-semaforo-saludo { font-size: 40px; }
+  .inicio-semaforo-fecha { font-size: 15px; }
+  .inicio-semaforo-entrada, .inicio-semaforo-dos { grid-template-columns: minmax(0, 1fr); }
+  .inicio-semaforo-entrada-izq { padding: 16px; }
+  .entrada-inicio-titulo, .entrada-inicio-pie { display: none; }
+  .entrada-inicio { gap: 12px; }
+  .entrada-inicio-campo { height: 64px; padding: 0 10px 0 20px; }
+  .entrada-inicio-campo input { font-size: 20px; }
+  .entrada-inicio-ver { height: 44px; padding: 0 18px; }
+  .entrada-inicio-acciones .boton { min-height: 50px; padding: 0 10px; font-size: 16px; }
+  .entrada-inicio-acciones .icono-svg { display: none; }
+  .inicio-semaforo-entrada .puerta-palabra { font-size: 56px; }
+  .inicio-semaforo-entrada .puerta-emoji { display: inline; }
+  .inicio-semaforo [data-numeros-semaforo] dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .inicio-semaforo [data-numero] dd { font-size: 48px; }
+  .inicio-semaforo [data-accesos-semaforo] ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton { height: 56px; min-height: 56px; border-radius: 28px !important; padding: 0 14px !important; }
+  .inicio-semaforo-ahora { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
