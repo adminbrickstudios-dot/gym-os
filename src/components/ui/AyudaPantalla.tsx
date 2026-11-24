@@ -83,7 +83,9 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
       {ambito === "app" ? (lugar ? createPortal(boton, lugar) : null) : boton}
       {abierta && (
         <section data-ayuda-globo={clave} aria-label="Ayuda de esta pantalla"
-          className={`aparecer tarjeta p-4 mb-6 flex items-start gap-3 ${ambito === "panel" ? "pr-[7rem] sm:pr-[8.5rem]" : ""}`}>
+          // Parte 3 (24/11): en el panel flota debajo de su botón (vidrio) en vez de empujar la pantalla medio segundo después de cargar
+          // (era el corrimiento de 0,22 que medía Lighthouse en Inicio, Entrada y Socios). Lo que dice y hace es lo mismo.
+          className={`aparecer flex items-start gap-3 ${ambito === "panel" ? "vidrio rounded-[var(--radio)] p-4 absolute z-30 right-4 sm:right-8 top-16 sm:top-[5.5rem] w-[min(28rem,calc(100%-2rem))]" : "tarjeta p-4 mb-6"}`}>
           <span className="text-2xl flex-none" aria-hidden><Icono nombre={texto.emoji} sistema /></span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{texto.titulo}</p>
