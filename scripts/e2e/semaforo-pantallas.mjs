@@ -27,6 +27,7 @@ const q = async (sql, p) => (await db.query(sql, p)).rows;
 /** Guarda la captura del sistema y copia la del diseño al lado: <pantalla>.sistema.png y <pantalla>.diseno.png. */
 async function lado(p, pantalla) {
   await p.waitForLoadState("networkidle").catch(() => {});
+  await p.mouse.move(0, 0);   // sin nada en hover: se compara el estado quieto (y los colores de hover no cuentan como sueltos)
   await p.screenshot({ path: join(DIR, `${pantalla}.sistema.png`), fullPage: true });
   copyFileSync(join(DISENO, `${pantalla}.png`), join(DIR, `${pantalla}.diseno.png`));
 }
