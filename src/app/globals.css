@@ -612,3 +612,52 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
 
 /* El menú: el ítem activo, píldora llena con el acento. */
 html[data-semaforo="si"] nav a[aria-current="page"] { border-radius: 18px; }
+
+/* El resultado de la puerta (src/components/ResultadoPuerta.tsx): tarjeta llena del color del semáforo, la palabra grande,
+   el nombre, el porqué y los botones del color del texto. Sin la llave es una tarjeta del color del resultado. */
+.puerta { border-radius: var(--radio); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--tarjeta); }
+.puerta-titulo { display: flex; align-items: center; gap: 0.75rem; }
+.puerta-palabra { font-family: var(--fuente-titulo); font-weight: 800; font-size: 2.5rem; line-height: 0.9; }
+.puerta-acciones { margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.5rem; }
+.puerta-arriba { display: flex; justify-content: space-between; font-weight: 700; }
+html[data-semaforo="si"] .puerta { min-height: 300px; padding: 24px; gap: 8px; }
+html[data-semaforo="si"] .puerta-verde { background: var(--pasa); color: var(--pasa-texto); --p-fondo: var(--pasa); --p-texto: var(--pasa-texto); --p-boton: var(--pasa); }
+html[data-semaforo="si"] .puerta-amarillo { background: var(--vence); color: var(--vence-texto); --p-fondo: var(--vence); --p-texto: var(--vence-texto); --p-boton: var(--vence); }
+html[data-semaforo="si"] .puerta-rojo { background: var(--nopasa); color: var(--nopasa-texto); --p-fondo: var(--nopasa); --p-texto: var(--nopasa-texto); --p-boton: var(--nopasa-boton); }
+html[data-semaforo="si"] .puerta-gris { background: var(--tarjeta-alta); color: var(--texto); --p-fondo: var(--tarjeta-alta); --p-texto: var(--texto); --p-boton: var(--tarjeta-alta); }
+html[data-semaforo="si"] .puerta-emoji { font-size: 40px; line-height: 1; }
+html[data-semaforo="si"] .puerta-palabra { font-weight: 900; font-size: 56px; text-transform: uppercase; }
+html[data-semaforo="si"] .puerta-nombre { font-size: 24px; font-weight: 700; }
+html[data-semaforo="si"] .puerta-detalle { font-size: 17px; font-weight: 500; }
+html[data-semaforo="si"] .puerta-arriba { font-size: 17px; }
+/* Los botones adentro: el principal lleno con el color del texto, el segundo con borde. */
+html[data-semaforo="si"] .puerta .boton { width: 100%; min-height: 50px; border: 2px solid var(--p-texto); background: transparent; color: var(--p-texto); font-size: 16px; }
+html[data-semaforo="si"] .puerta .boton-principal, html[data-semaforo="si"] .puerta .puerta-acciones > .boton:first-child { min-height: 56px; border: 0; background: var(--p-texto); color: var(--p-boton); font-weight: 800; font-size: 17px; }
+html[data-semaforo="si"] .puerta .boton-texto, html[data-semaforo="si"] .puerta .texto-suave, html[data-semaforo="si"] .puerta .texto-tenue { color: var(--p-texto); }
+/* El kiosco: la palabra enorme. */
+html[data-semaforo="si"] .puerta-kiosco { border-radius: 0; padding: 44px; gap: 14px; min-height: 100%; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-titulo { margin-top: 70px; gap: 18px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-emoji { font-size: 76px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-palabra { font-size: 150px; line-height: 0.85; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-nombre { font-size: 40px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-detalle { font-size: 24px; font-weight: 600; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-arriba { font-size: 20px; }
+
+/* El kiosco Semáforo (kiosco.png, 1280×800): resultado a la izquierda, teclado de 460 a la derecha. En vertical, uno arriba del otro. */
+.kiosco-semaforo { display: flex; min-height: 100dvh; background: var(--fondo); color: var(--texto); }
+.kiosco-izq { flex: 1; min-width: 0; display: flex; }
+.kiosco-izq > * { flex: 1; }
+.kiosco-hola { padding: 44px; display: flex; flex-direction: column; gap: 14px; background: var(--tarjeta); }
+.kiosco-hola-titulo { font-size: 120px; line-height: 0.85; margin-top: 40px; }
+.kiosco-vuelve { margin-top: auto; font-size: 18px; font-weight: 600; }
+.kiosco-der { width: 460px; flex: none; padding: 36px; display: flex; flex-direction: column; gap: 14px; }
+.kiosco-der-titulo { font-size: 34px; }
+.kiosco-campo { width: 100%; height: 80px; border-radius: 40px; background: var(--tarjeta); border: 2px solid var(--acento); padding: 0 28px;
+  font-weight: 700; font-size: 34px; letter-spacing: 2px; color: var(--texto); font-variant-numeric: tabular-nums; }
+.kiosco-campo:focus { outline: none; }
+.kiosco-tecla { height: 96px; border-radius: 24px; border: 0; background: var(--tarjeta); color: var(--texto); font-family: var(--fuente-titulo); font-weight: 800; font-size: 44px; cursor: pointer; }
+.kiosco-tecla:active { transform: scale(0.97); }
+.kiosco-tecla:disabled { opacity: 0.5; }
+.kiosco-tecla-borrar { background: var(--tarjeta-alta); font-size: 34px; }
+.kiosco-tecla-entrar { background: var(--acento); color: var(--acento-texto); font-family: var(--fuente); font-size: 22px; }
+@media (max-width: 900px) { .kiosco-semaforo { flex-direction: column; } .kiosco-der { width: 100%; } .kiosco-hola-titulo { font-size: 72px; } }
