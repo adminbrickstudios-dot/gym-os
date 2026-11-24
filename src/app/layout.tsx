@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { reglasEmojis } from "@/lib/emojis";
 import { cookies, headers } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -49,6 +50,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const semaforo = estilo === "pista" && cab.get("x-gimnasio-semaforo") === "si" ? "si" : undefined;
   return (
     <html lang="es-AR" data-estilo={estilo} data-modo={modo} data-semaforo={semaforo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
+      {/* Pista Semáforo: los emojis del mapa único, solo con la llave (sin ella no baja ni un byte). */}
+      {semaforo && <head><style dangerouslySetInnerHTML={{ __html: reglasEmojis() }} /></head>}
       <body className="antialiased">{children}<Hidratado /></body>
     </html>
   );

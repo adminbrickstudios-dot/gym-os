@@ -18,6 +18,7 @@ const SIN_EMOJI_PROPIO = new Set([
   "src/lib/caja.ts",               // texto de WhatsApp del cierre de caja
   "src/lib/recibo.ts",             // texto de WhatsApp del recibo
   "src/app/push-acciones.ts",      // título de la notificación push de prueba
+  "src/lib/emojis.ts",             // Pista Semáforo: EL mapa de emojis del diseño (el único lugar con ellos)
 ]);
 // El formulario de "Nueva actividad" guarda lo que escribe el dueño en un campo `emoji` (dato suyo, vacío al empezar).
 const CAMPO_DEL_DUENO = new Set(["src/app/panel/clases/grilla/Grilla.tsx"]);

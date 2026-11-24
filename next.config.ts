@@ -45,6 +45,8 @@ const nextConfig: NextConfig = {
   // La app local para probar (scripts/local/levantar.sh) compila en .next-dev:
   // así `npm run build` (que usa .next) nunca le pisa los archivos mientras corre.
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  // Parte 3 (24/11): solo para medir qué pesa (scripts/medir/modulos-pesados.mjs). Nunca en el despliegue: MAPAS_JS no está en Vercel.
+  productionBrowserSourceMaps: process.env.MAPAS_JS === "1",
   // Logos y fotos se suben por una acción del servidor: hasta 2 MB por archivo
   // (lo decide la base) más lo que agrega el formulario.
   // F0.4: volver a una pantalla ya vista no hace viajes (30 s de memoria en el navegador).

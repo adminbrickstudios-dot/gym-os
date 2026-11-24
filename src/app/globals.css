@@ -499,3 +499,116 @@ html[data-estilo="pista"] nav a[aria-current="page"] * { color: inherit; }
   }
 }
 /* El QR ya va siempre sobre su cuadro blanco con margen (bg-white p-3 en MiQR, Kiosco, Tablets y los carteles): no depende del modo. */
+
+/* ═══════════════════════════════════════════════════════════════════
+   Pista Semáforo (Mateo, 24/11 · docs/base/pista/semaforo, DISENO.md § Pista Semáforo). Solo con <html data-estilo="pista" data-semaforo="si">
+   (la llave pista_semaforo del gimnasio): sin el atributo, Pista y el clásico quedan como estaban. Todos los colores son tokens de acá;
+   las pantallas usan var(--…), nunca un color suelto. El acento sale de cada gimnasio (el mismo de Pista).
+   ═══════════════════════════════════════════════════════════════════ */
+html[data-estilo="pista"][data-semaforo="si"] {
+  --radio: 24px;
+  --radio-grande: 24px;
+  --radio-campo: 999px;
+  --radio-fila: 18px;
+  --alto-minimo: 50px;
+  --alto-accion: 60px;
+  --alto-fila: 40px;
+}
+html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"] [data-tono] {
+  --fondo: #0E151C !important;
+  --menu: #0A1016;
+  --tarjeta: #18222C; --tarjeta-alta: #2A3845; --borde: #3A4A58; --borde-campo: #2A3845;
+  --texto: #EEF2F5; --texto-suave: #9AAAB8; --texto-tenue: #9AAAB8; --texto-2: #9AAAB8;
+  --superficie: #18222C;
+  --sobre-claro: #0B1117;
+  /* El semáforo de la puerta: fondo y texto de cada resultado. */
+  --pasa: #16A34A; --pasa-texto: #052E14;
+  --vence: #FBBF24; --vence-texto: #1F1300;
+  --nopasa: #DC2626; --nopasa-texto: #FFFFFF; --nopasa-boton: #B91C1C;
+  --ok: #16A34A; --atencion: #FBBF24; --no: #DC2626; --prueba: #93C5FD;
+  /* Etiquetas de estado: fondo y texto. */
+  --et-aldia: #123B23; --et-aldia-texto: #4ADE80;
+  --et-vence: #3D2E0A; --et-vence-texto: #FBBF24;
+  --et-debe: #3F1515; --et-debe-texto: #F87171;
+  --et-congelado: #13294B; --et-congelado-texto: #93C5FD;
+  --et-baja: #2A3845; --et-baja-texto: #C9D3DB;
+  --et-prueba: #2E1F4D; --et-prueba-texto: #C4B5FD;
+  background: #0E151C !important;
+}
+html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"], html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"] body { background: #0E151C; }
+/* En claro: las mismas piezas (píldoras, radios, alturas) sobre los colores de Pista claro; las etiquetas, con sus tonos claros. */
+html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
+  --menu: #FFFFFF; --borde-campo: #D5DCE2; --sobre-claro: #0B1117;
+  --pasa: #16A34A; --pasa-texto: #052E14; --vence: #FBBF24; --vence-texto: #1F1300; --nopasa: #DC2626; --nopasa-texto: #FFFFFF; --nopasa-boton: #B91C1C;
+  --et-aldia: #DCFCE7; --et-aldia-texto: #14532D; --et-vence: #FEF3C7; --et-vence-texto: #713F12; --et-debe: #FEE2E2; --et-debe-texto: #7F1D1D;
+  --et-congelado: #DBEAFE; --et-congelado-texto: #1E3A8A; --et-baja: #E2E8F0; --et-baja-texto: #334155; --et-prueba: #EDE9FE; --et-prueba-texto: #4C1D95;
+}
+
+@layer components {
+  /* Títulos de página y de sección: Big Shoulders, mayúscula. */
+  html[data-semaforo="si"] .titular { font-weight: 900; text-transform: uppercase; }
+  html[data-semaforo="si"] .titulo { font-weight: 800; text-transform: uppercase; letter-spacing: 0; }
+  html[data-semaforo="si"] .numero { font-weight: 800; }
+
+  /* Tarjeta: radio 24, sin borde (se separa por el tono). */
+  html[data-semaforo="si"] .tarjeta, html[data-semaforo="si"] .vidrio { border-radius: var(--radio); border-color: transparent; }
+  html[data-semaforo="si"][data-modo="claro"] .tarjeta { border-color: var(--borde); }
+
+  /* Botón: siempre píldora. 50 de alto por defecto (tarjetas), 60 la acción de la pantalla (principal), 40 dentro de filas (chico). */
+  html[data-semaforo="si"] .boton {
+    border-radius: 999px; min-height: var(--alto-minimo); padding: 0 22px; font-weight: 700; font-size: 17px;
+    background: transparent; color: var(--texto); border: 2px solid var(--borde);
+  }
+  html[data-semaforo="si"] .boton:hover { background: var(--tarjeta-alta); }
+  html[data-semaforo="si"] .boton-principal { min-height: var(--alto-accion); background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
+  html[data-semaforo="si"] .boton-claro { background: var(--texto); color: var(--sobre-claro); border-color: transparent; }
+  html[data-semaforo="si"] .boton-claro:hover { background: color-mix(in oklab, var(--texto), black 6%); }
+  html[data-semaforo="si"] .boton-peligro { background: var(--nopasa); color: var(--nopasa-texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-suave { background: var(--tarjeta-alta); color: var(--texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-chico { min-height: var(--alto-fila); padding: 0 16px; font-size: 15px; border-radius: 999px; background: var(--tarjeta-alta); border-color: transparent; }
+  html[data-semaforo="si"] .boton-chico.boton-principal { background: var(--acento); }
+  html[data-semaforo="si"] .boton-chico.boton-claro { background: var(--texto); }
+  html[data-semaforo="si"] .boton:disabled { opacity: 0.45; }
+  html[data-semaforo="si"] .boton-texto { border-radius: 999px; }
+
+  /* Campo y búsqueda: píldora de 54, borde de 2. */
+  html[data-semaforo="si"] .campo { border-radius: 27px; min-height: 54px; padding: 0 20px; background: var(--tarjeta); border: 2px solid var(--borde-campo); font-size: 17px; font-weight: 500; }
+  html[data-semaforo="si"] textarea.campo { border-radius: 24px; padding: 14px 20px; }
+  html[data-semaforo="si"] .campo[aria-invalid="true"] { border-color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .campo:focus { outline: 2px solid var(--acento); border-color: transparent; }
+
+  /* Etiqueta de estado y píldoras: 30 de alto, mayúscula, con su par de colores. */
+  html[data-semaforo="si"] .pildora { min-height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 700; text-transform: uppercase; background: var(--et-baja); color: var(--et-baja-texto); }
+  html[data-semaforo="si"] .pildora-verde { background: var(--et-aldia); color: var(--et-aldia-texto); }
+  html[data-semaforo="si"] .pildora-amarillo, html[data-semaforo="si"] .pildora-naranja { background: var(--et-vence); color: var(--et-vence-texto); }
+  html[data-semaforo="si"] .pildora-rojo { background: var(--et-debe); color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .pildora-azul { background: var(--et-congelado); color: var(--et-congelado-texto); }
+
+  /* Filtros (pestañas): píldora de 44; la elegida, llena con el acento. */
+  html[data-semaforo="si"] .pestana { min-height: 44px; padding: 0 18px; border-radius: 22px; background: var(--tarjeta); border-color: transparent; color: var(--texto); font-weight: 600; }
+  html[data-semaforo="si"] .pestana[aria-selected="true"], html[data-semaforo="si"] .pestana[aria-current="page"], html[data-semaforo="si"] .pestana[aria-pressed="true"] { background: var(--acento); color: var(--acento-texto); font-weight: 700; }
+
+  /* Aviso: píldora de 56 con su emoji. */
+  html[data-semaforo="si"] .mensaje { border-radius: 28px; min-height: 56px; padding: 0 20px; align-items: center; border: 0; font-weight: 600; background: var(--et-congelado); color: var(--et-congelado-texto); }
+  html[data-semaforo="si"] .mensaje-exito { background: var(--et-aldia); color: var(--et-aldia-texto); }
+  html[data-semaforo="si"] .mensaje-error { background: var(--et-debe); color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .mensaje-aviso { background: var(--et-vence); color: var(--et-vence-texto); }
+
+  /* Fila de lista: 64 de alto, radio 18. */
+  html[data-semaforo="si"] .fila { border-radius: var(--radio-fila); border: 0; min-height: 64px; padding: 0 14px; gap: 14px; background: var(--fondo); }
+  html[data-semaforo="si"] .fila:hover { background: var(--tarjeta-alta); }
+
+  /* Ícono en su cuadrado: redondo. */
+  html[data-semaforo="si"] .icono { border-radius: 999px; }
+
+  /* Pantalla vacía: tarjeta con emoji grande, título y botón. */
+  html[data-semaforo="si"] .vacio { background: var(--tarjeta); border-radius: var(--radio); padding: 30px; gap: 10px; }
+
+  /* Los emojis del diseño: un solo mapa (src/lib/emojis.ts), que el layout pone en reglas solo con la llave. Sin la llave, nada. */
+  .icono-e { display: none; }
+  html[data-semaforo="si"] .icono-e { display: inline-block; font-style: normal; line-height: 1; vertical-align: -0.1em; }
+}
+
+/* El menú: el ítem activo, píldora llena con el acento. */
+html[data-semaforo="si"] nav a[aria-current="page"] { border-radius: 18px; }
