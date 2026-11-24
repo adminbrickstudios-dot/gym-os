@@ -684,6 +684,14 @@ html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu)
 html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
 html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
 
+/* El encabezado de cada pantalla (socios.png, caja.png, clases-de-hoy.png): la bajada arriba, el título de 64 en mayúscula y el emoji después. */
+html[data-semaforo="si"] .enc-texto { display: flex; flex-direction: column; }
+html[data-semaforo="si"] .enc-bajada { order: -1; margin: 0 0 6px; font-size: 16px; }
+html[data-semaforo="si"] [data-encabezado] h1 { font-size: 64px; line-height: 0.95; }
+html[data-semaforo="si"] .enc-icono { order: 2; color: inherit; }
+html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
+@media (max-width: 767px) { html[data-semaforo="si"] [data-encabezado] h1 { font-size: 44px; } }
+
 /* Clases de hoy Semáforo (clases-de-hoy.png): tres por fila; la que está pasando, con borde del acento. */
 .clases-semaforo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
 .clases-semaforo-item { padding: 36px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
