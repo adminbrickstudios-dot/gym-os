@@ -117,6 +117,11 @@ try {
   for (const [pantalla, ruta, espera] of [["socios", "/panel/socios", "main"], ["caja", "/panel/caja", "main"], ["clases-de-hoy", "/panel/clases", "main"]]) {
     await d.goto(`${G}${ruta}`);
     await d.locator(espera).first().waitFor({ timeout: 30000 });
+    // La caja del diseño está abierta: si el demo la tiene cerrada, se abre con $0 (solo en la base local) para comparar lo mismo.
+    if (pantalla === "caja" && await d.getByRole("button", { name: /Abrir caja/ }).count()) {
+      await d.getByRole("button", { name: /Abrir caja/ }).first().click();
+      await d.getByRole("button", { name: /Abrir caja/ }).first().waitFor({ state: "detached", timeout: 30000 }).catch(() => {});
+    }
     await lado(d, pantalla);
     const np = await noPildoras(d);
     chequear(np.length === 0, `${pantalla}: todos los botones son píldora`, `${pantalla}: no son píldora: ${np.join(" · ")}`);
