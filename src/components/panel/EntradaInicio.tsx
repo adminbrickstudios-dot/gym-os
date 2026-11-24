@@ -15,7 +15,7 @@ export function EntradaInicio({ puedeCobrar, puedeAlta, pase, ultima, chico = fa
   const router = useRouter();
   // En el celular, los textos cortos del diseño (inicio-celular.png): "DNI o QR", "Ver", "Alta" y "Pase".
   const [corto, setCorto] = useState(chico);
-  useEffect(() => { if (chico) return; const m = window.matchMedia("(max-width: 1023px)"); const ver = () => setCorto(m.matches); ver(); m.addEventListener("change", ver); return () => m.removeEventListener("change", ver); }, [chico]);
+  useEffect(() => { if (chico) return; const m = window.matchMedia("(max-width: 1023px)"); const mirar = () => setCorto(m.matches); mirar(); m.addEventListener("change", mirar); return () => m.removeEventListener("change", mirar); }, [chico]);
   const ver = () => {
     const t = texto.trim();
     if (document.documentElement.dataset.entradaLista === "si") {
