@@ -708,6 +708,12 @@ html[data-semaforo="si"] .enc-icono { order: 2; color: inherit; }
 html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
 @media (max-width: 767px) { html[data-semaforo="si"] [data-encabezado] h1 { font-size: 44px; } }
 
+/* Caja Semáforo (caja.png): lo cobrado por medio en tarjetas de a 4 con el número grande. */
+html[data-semaforo="si"] div.grid:has(> [data-medio]) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+html[data-semaforo="si"] [data-medio] { background: var(--fondo); border-radius: 20px; padding: 20px 22px; }
+html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
+@media (max-width: 1023px) { html[data-semaforo="si"] div.grid:has(> [data-medio]) { grid-template-columns: repeat(2, minmax(0, 1fr)); } html[data-semaforo="si"] [data-medio] .numero { font-size: 32px; } }
+
 /* Clases de hoy Semáforo (clases-de-hoy.png): tres por fila; la que está pasando, con borde del acento. */
 .clases-semaforo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
 .clases-semaforo-item { padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
