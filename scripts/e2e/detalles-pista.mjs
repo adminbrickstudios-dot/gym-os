@@ -62,7 +62,11 @@ try {
     return { texto: num(getComputedStyle(e).color), fondo: num(bg ?? "rgb(18,26,34)") };
   });
   if (!col) falla("no encontré ninguna etiqueta en Caja para medir");
-  else { const r = razon(col.texto, col.fondo); chequear(r >= 7, `Pista oscuro: las etiquetas de Caja tienen contraste ${r.toFixed(1)}:1`, `Pista oscuro: contraste ${r.toFixed(1)}:1 (hace falta 7:1); texto ${col.texto}, fondo ${col.fondo}`); }
+  else {
+    // Con Pista Semáforo manda el texto suave del diseño (#9AAAB8 sobre la tarjeta, 6,8:1): el pedido de Mateo para Semáforo es 4,5:1 o más. Sin la llave, Pista sigue pidiendo 7:1.
+    const minimo = (await d.evaluate(() => document.documentElement.dataset.semaforo === "si")) ? 4.5 : 7;
+    const r = razon(col.texto, col.fondo); chequear(r >= minimo, `Pista oscuro: las etiquetas de Caja tienen contraste ${r.toFixed(1)}:1`, `Pista oscuro: contraste ${r.toFixed(1)}:1 (hace falta ${minimo}:1); texto ${col.texto}, fondo ${col.fondo}`);
+  }
   await d.context().close();
 } catch (e) { falla(`se cortó: ${String(e.message).split("\n")[0]}`); }
 finally { await b.close(); }

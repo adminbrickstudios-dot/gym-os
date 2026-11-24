@@ -175,7 +175,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
                 ? <MiQR gimnasioId={g.id} socioId={s.socio_id} inicial={qr} />
                 : <QrBloqueado socioId={s.socio_id} titulo={faltaPagar ? "Tu QR se activa cuando pagues" : "Tu QR está bloqueado"}
                     detalle={faltaPagar ? "Apenas pagues se prende solo: no hace falta recargar." : (v.texto ?? "Hoy no podés entrar.")} />)}
-              {!qr && !qrPared && dni && <p className="numero text-5xl" data-tu-dni-inicio>{formatearDni(dni)}</p>}
+              {!qr && !qrPared && dni && <div data-tu-dni-inicio><p className="font-semibold">Tu DNI para entrar</p><p className="numero text-5xl mt-1">{formatearDni(dni)}</p></div>}
             </div>
           </ResultadoPuerta>
           ) : null}
