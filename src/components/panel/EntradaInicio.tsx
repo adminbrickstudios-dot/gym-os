@@ -36,7 +36,7 @@ export function EntradaInicio({ puedeCobrar, puedeAlta, pase, ultima, chico = fa
         <nav className="entrada-inicio-acciones" aria-label="Acciones del mostrador" data-acciones-mostrador>
           {puedeCobrar && <Link href="/panel/vender" className="boton boton-claro" data-accion-rapida="cobrar"><Icono nombre="plata" linea />{" "}Cobrar</Link>}
           {puedeAlta && <Link href="/panel/socios/nuevo" className="boton" data-accion-rapida="alta"><Icono nombre="mas" linea />{" "}{corto ? "Alta" : "Alta de socio"}</Link>}
-          {puedeCobrar && pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" linea />{" "}{corto ? <>Pase</> : <>Pase diario</>}</Link>}
+          {puedeCobrar && pase && <Link href="/panel/vender" className="boton" data-accion-rapida="pase"><Icono nombre="ticket" linea />{" "}Pase diario</Link>}
         </nav>
       )}
       {!chico && <p className="texto-suave entrada-inicio-pie">{ultima ? `Última entrada: ${ultima} · ` : ""}F2 vuelve acá desde cualquier pantalla</p>}

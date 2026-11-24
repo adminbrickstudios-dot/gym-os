@@ -818,7 +818,7 @@ html[data-semaforo="si"] aside .titulo-grupo { font-size: 13px; font-weight: 700
   .entrada-inicio-campo { height: 64px; padding: 0 10px 0 20px; }
   .entrada-inicio-campo input { font-size: 20px; }
   .entrada-inicio-ver { height: 44px; padding: 0 18px; }
-  .entrada-inicio-acciones .boton { min-height: 50px; padding: 0 10px; font-size: 16px; }
+  .entrada-inicio-acciones .boton { min-height: 50px; padding: 0 10px; font-size: 15px; line-height: 1.1; }
   .entrada-inicio-acciones .icono-svg { display: none; }
   .inicio-semaforo-entrada .puerta-palabra { font-size: 56px; }
   .inicio-semaforo-entrada .puerta-emoji { display: inline; }
