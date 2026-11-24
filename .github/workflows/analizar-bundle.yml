@@ -48,6 +48,10 @@ jobs:
       - name: Qué pesa
         run: |
           mkdir -p .local
+          echo "Mapas: $(find .next -name '*.js.map' | wc -l) · ejemplo: $(find .next -name '*.js.map' | head -2 | tr '
+' ' ')"
+          echo "Chunks: $(ls .next/static/chunks | head -3 | tr '
+' ' ')"
           node scripts/medir/modulos-pesados.mjs --top 15 --json .local/modulos.json | tee .local/peso.md
           node scripts/medir/js-rutas.mjs --json .local/js-rutas.json | tail -3 | tee -a .local/peso.md
           node scripts/medir/chunks-panel.mjs | tee -a .local/peso.md
