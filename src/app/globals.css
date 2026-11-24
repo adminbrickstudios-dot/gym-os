@@ -574,6 +574,8 @@ html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
 
   /* Celular: nada se sale a lo ancho y todo se toca con el dedo (44 o más, FLUIDEZ); el 40 de las filas es de la compu. */
   html[data-semaforo="si"] .boton, html[data-semaforo="si"] .pestana { max-width: 100%; }
+  /* Un fieldset mide por defecto lo que su contenido más ancho: con las piezas Semáforo se pasaba 9 px en el celular (Configuración → Cobros). */
+  html[data-semaforo="si"] fieldset { min-width: 0; }
   @media (max-width: 1023px) {
     html[data-semaforo="si"] .boton { padding: 0 16px; font-size: 16px; }
     html[data-semaforo="si"] .boton-chico { min-height: 44px; }
