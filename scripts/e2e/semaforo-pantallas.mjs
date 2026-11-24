@@ -121,7 +121,7 @@ try {
     // La caja del diseño está abierta: si el demo la tiene cerrada, se abre con $0 (solo en la base local) para comparar lo mismo.
     if (pantalla === "caja" && await d.getByRole("button", { name: /Abrir caja/ }).count()) {
       await d.getByRole("button", { name: /Abrir caja/ }).first().click();
-      await d.getByRole("button", { name: /Abrir caja/ }).first().waitFor({ state: "detached", timeout: 30000 }).catch(() => {});
+      await d.waitForFunction(() => ![...document.querySelectorAll("main button")].some((b) => /Abrir caja|Abriendo/.test(b.textContent ?? "")), null, { timeout: 30000 }).catch(() => {});
     }
     await lado(d, pantalla);
     const np = await noPildoras(d);
