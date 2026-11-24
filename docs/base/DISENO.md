@@ -9,6 +9,32 @@ La idea: **un mostrador de gimnasio, no una app de IA**. Claro, encuadrado,
 números grandes que se leen de lejos, el color del gimnasio en un solo lugar, y
 los cuatro colores del semáforo siempre iguales.
 
+## Pista Semáforo (Mateo, 24/11)
+
+El diseño que manda está en `docs/base/pista/semaforo/`: 10 pantallas, cada una con su `.html` (colores, tamaños y radios
+exactos) y su `.png` (cómo tiene que verse): componentes, inicio-panel, inicio-celular, socios, ficha-socio, caja,
+clases-de-hoy, kiosco, app-socio y app-socio-debe. Las que no están dibujadas se arman solo con las piezas de `componentes.png`.
+
+- **Llave:** `pista_semaforo` (funciones nuevas, por gimnasio; migración `20261124100000`). Apagada en los gimnasios reales,
+  prendida en los `[demo]`. Viaja con la dirección (`gimnasio_por_host/slug`, sin un viaje más) y el `<html>` lleva
+  `data-semaforo="si"` solo con el estilo Pista. Sin el atributo, Pista y el clásico quedan como estaban.
+- **Tokens** (bloque "Pista Semáforo" al final de `globals.css`; ninguna pantalla escribe un color): fondo `#0E151C`, menú
+  `#0A1016`, tarjeta `#18222C`, tarjeta alta `#2A3845`, borde `#3A4A58`, texto `#EEF2F5`, texto suave `#9AAAB8`.
+  Puerta: pasa `#16A34A`/`#052E14`, vence `#FBBF24`/`#1F1300`, no pasa `#DC2626`/blanco (botón `#B91C1C`).
+  Etiquetas: al día `#123B23`/`#4ADE80`, vence `#3D2E0A`/`#FBBF24`, debe `#3F1515`/`#F87171`, congelado `#13294B`/`#93C5FD`,
+  de baja `#2A3845`/`#C9D3DB`, prueba `#2E1F4D`/`#C4B5FD`. El acento es el de cada gimnasio.
+- **Piezas únicas:** botón siempre píldora (`.boton` 50, `.boton-principal` 60, `.boton-chico` 40 dentro de filas; variantes
+  `.boton-claro`, `.boton-peligro`, `.boton-suave` y la de borde por defecto); campo y búsqueda píldora de 54; etiqueta de
+  estado de 30 en mayúscula (`.pildora-*`); filtros de 44 (`.pestana`); aviso píldora de 56 (`.mensaje-*`); fila de 64;
+  tarjeta de radio 24; vacío con emoji, título y botón; títulos en Big Shoulders mayúscula.
+- **El resultado de la puerta:** `src/components/ResultadoPuerta.tsx`, el mismo en el Inicio, la ficha, el kiosco y la app
+  del socio (la Entrada pinta su franja con los mismos tokens). PASA / NO PASA sale de `puede`; el texto, de `calcular_acceso`.
+- **Emojis:** un solo mapa (`src/lib/emojis.ts`). Con la llave, el layout lo convierte en CSS y cada `<Icono>` muestra el emoji
+  (aria-hidden); los íconos de control (cerrar, más, buscar, flechas) y los que pasan `linea` siguen de línea.
+- **Celular:** una columna a 360/390, la barra de abajo con lo principal del rol y **Más**.
+- **Cómo se prueba:** `scripts/e2e/semaforo-pantallas.mjs` (captura al lado del `.png` en el artefacto `pantallas`, más
+  1366×768 sin bajar, accesos sin repetir, Salir lejos del nombre, botones píldora, colores solo de tokens, 360 sin desborde).
+
 ## Pase 2.0 · El rediseño "Pista" (aprobado para programar, Mateo 16/11 12:34)
 
 > **Aprobado para programar (Mateo, 16/11 12:34): "que tenga las mismas páginas y que tenga las funciones, y que nada se
