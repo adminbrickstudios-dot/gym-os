@@ -119,14 +119,15 @@ try {
     await d.goto(`${G}${ruta}`);
     await d.locator(espera).first().waitFor({ timeout: 30000 });
     // La caja del diseño está abierta: si el demo la tiene cerrada, se abre con $0 (solo en la base local) para comparar lo mismo.
-    const desdeCaja = new Date().toISOString();
+    // La base de prueba tiene el reloj fijo: el turno que abre el recorrido se reconoce por id (los abiertos que no estaban antes).
+    const abiertosAntes = (await q(`select id from public.turnos_caja where cerrado_en is null`)).map((x) => x.id);
     if (pantalla === "caja" && await d.getByRole("button", { name: /Abrir caja/ }).count()) {
       await d.getByRole("button", { name: /Abrir caja/ }).first().click();
       await d.waitForFunction(() => ![...document.querySelectorAll("main button")].some((b) => /Abrir caja|Abriendo/.test(b.textContent ?? "")), null, { timeout: 30000 }).catch(() => {});
     }
     await lado(d, pantalla);
     // Lo que abrió el recorrido se cierra (base local): la medición de viajes que viene después espera la caja como estaba.
-    if (pantalla === "caja") await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial where cerrado_en is null and abierto_en >= $1`, [desdeCaja])
+    if (pantalla === "caja") await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [abiertosAntes])
       .catch((e) => console.log(`· no se pudo cerrar el turno de prueba: ${e.message}`));
     const np = await noPildoras(d);
     chequear(np.length === 0, `${pantalla}: todos los botones son píldora`, `${pantalla}: no son píldora: ${np.join(" · ")}`);
