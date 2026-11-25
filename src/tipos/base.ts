@@ -2319,14 +2319,14 @@ isOneToOne: false
                   ]
                 },"gimnasios": {
                   Row: {
-                    "baja_en": string | null,"baja_motivo": string | null,"borrado_en": string | null,"creado_en": string,"demo_hasta": string | null,"demo_para": string | null,"es_demo": boolean,"id": string,"moneda": string,"nombre": string,"plataforma_desde": string | null,"plataforma_plan_id": string | null,"prueba_dias": number,"slug": string,"suspension_manual_en": string | null,"suspension_manual_motivo": string | null,"tipo_plantilla": string | null,"zona_horaria": string
+                    "baja_en": string | null,"baja_motivo": string | null,"borrado_en": string | null,"creado_en": string,"demo_hasta": string | null,"demo_para": string | null,"es_demo": boolean,"id": string,"moneda": string,"nombre": string,"origen": string,"plataforma_desde": string | null,"plataforma_plan_id": string | null,"prueba_dias": number,"slug": string,"suspension_manual_en": string | null,"suspension_manual_motivo": string | null,"tipo_plantilla": string | null,"zona_horaria": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "baja_en"?: string | null,"baja_motivo"?: string | null,"borrado_en"?: string | null,"creado_en"?: string,"demo_hasta"?: string | null,"demo_para"?: string | null,"es_demo"?: boolean,"id"?: string,"moneda"?: string,"nombre": string,"plataforma_desde"?: string | null,"plataforma_plan_id"?: string | null,"prueba_dias"?: number,"slug": string,"suspension_manual_en"?: string | null,"suspension_manual_motivo"?: string | null,"tipo_plantilla"?: string | null,"zona_horaria"?: string
+                    "baja_en"?: string | null,"baja_motivo"?: string | null,"borrado_en"?: string | null,"creado_en"?: string,"demo_hasta"?: string | null,"demo_para"?: string | null,"es_demo"?: boolean,"id"?: string,"moneda"?: string,"nombre": string,"origen"?: string,"plataforma_desde"?: string | null,"plataforma_plan_id"?: string | null,"prueba_dias"?: number,"slug": string,"suspension_manual_en"?: string | null,"suspension_manual_motivo"?: string | null,"tipo_plantilla"?: string | null,"zona_horaria"?: string
                   }
                   Update: {
-                    "baja_en"?: string | null,"baja_motivo"?: string | null,"borrado_en"?: string | null,"creado_en"?: string,"demo_hasta"?: string | null,"demo_para"?: string | null,"es_demo"?: boolean,"id"?: string,"moneda"?: string,"nombre"?: string,"plataforma_desde"?: string | null,"plataforma_plan_id"?: string | null,"prueba_dias"?: number,"slug"?: string,"suspension_manual_en"?: string | null,"suspension_manual_motivo"?: string | null,"tipo_plantilla"?: string | null,"zona_horaria"?: string
+                    "baja_en"?: string | null,"baja_motivo"?: string | null,"borrado_en"?: string | null,"creado_en"?: string,"demo_hasta"?: string | null,"demo_para"?: string | null,"es_demo"?: boolean,"id"?: string,"moneda"?: string,"nombre"?: string,"origen"?: string,"plataforma_desde"?: string | null,"plataforma_plan_id"?: string | null,"prueba_dias"?: number,"slug"?: string,"suspension_manual_en"?: string | null,"suspension_manual_motivo"?: string | null,"tipo_plantilla"?: string | null,"zona_horaria"?: string
                   }
                   Relationships: [
                     {
@@ -5520,6 +5520,9 @@ isOneToOne: false
                            },
 "admin_almacenamiento":
 { Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_alta_gimnasio":
+{ Args: { "p_acento"?: string,"p_dominio_base": string,"p_dueno_nombre": string,"p_fondo"?: string,"p_nombre": string,"p_plan_brik"?: string,"p_slug": string,"p_tipo"?: string }; Returns: Json
                            },
 "admin_anotar_registro":
 { Args: { "p_accion": string,"p_detalle"?: Json,"p_gimnasio_id": string }; Returns: undefined
