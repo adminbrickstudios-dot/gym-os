@@ -70,7 +70,7 @@ begin
   if veces <> 1 then raise exception 'telefono_normalizado: el trozo aparece % veces (tiene que ser 1)', veces; end if;
   execute replace(def, de, de || '
     -- +54 y sin el 9 (así lo exportan muchos sistemas): el celular argentino lleva el 9 adelante de la característica.
-    if d ~ ''^\+54[1-8][0-9]{9}$'' then d := ''+549'' || substr(d, 4); end if;');
+    if d ~ ''^\+54[0-8][0-9]{9}$'' then d := ''+549'' || substr(d, 4); end if;');
 end $m$;
 revoke all on function privado.telefono_normalizado(text, text) from public, anon, authenticated;
 
@@ -96,6 +96,7 @@ begin
   if privado.telefono_normalizado('+54 387 412-3456', 'Celular') <> '+5493874123456' then raise exception 'Verificación: +54 sin el 9 no se normaliza'; end if;
   if privado.telefono_normalizado('+54 9 387 412-3456', 'Celular') <> '+5493874123456' then raise exception 'Verificación: +54 9 cambió'; end if;
   if privado.telefono_normalizado('387 15 412-3456', 'Celular') <> '+5493874123456' then raise exception 'Verificación: 387 15 cambió'; end if;
+  if privado.telefono_normalizado('+54 000 400 1111', 'Celular') <> '+5490004001111' then raise exception 'Verificación: el celular ficticio (000) sin el 9 no se normaliza'; end if;
   if privado.telefono_normalizado('+1 415 555 0100', 'Celular') <> '+14155550100' then raise exception 'Verificación: un celular de afuera cambió'; end if;
   if privado.fecha_importada('01/02/90') <> date '1990-02-01' or privado.fecha_importada('05-11-26') <> date '2026-11-05'
      or privado.fecha_importada('5/11/2026') <> date '2026-11-05' then raise exception 'Verificación: las fechas importadas cambiaron'; end if;

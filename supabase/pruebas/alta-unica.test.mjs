@@ -55,6 +55,7 @@ test("el celular con +54 y sin el 9 se entiende; los que ya se entendían no cam
   const norm = async (x) => (await uno(`select privado.telefono_normalizado($1, 'Celular') v`, [x])).v;
   assert.equal(await norm("+54 387 412-3456"), "+5493874123456");
   assert.equal(await norm("+54 11 1234 5678"), "+5491112345678");
+  assert.equal(await norm("+54 000 400 1111"), "+5490004001111");   // el ficticio del demo
   // Caracterización: lo que ya andaba.
   assert.equal(await norm("+54 9 387 412-3456"), "+5493874123456");
   assert.equal(await norm("387 15 412-3456"), "+5493874123456");
