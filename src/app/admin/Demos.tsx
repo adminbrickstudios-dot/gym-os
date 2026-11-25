@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { borrarDemosVencidas, crearDemoProspecto } from "./acciones";
 import { ACENTOS } from "@/lib/landing-estilo";
+import { urlDeHost } from "@/lib/urls";
 
 export type DemoVencida = { gimnasio_id: string; nombre: string; vencio: string };
 /** Cierre para vender (25/11): las demos para prospectos (admin_demos_prospectos). El vencimiento lo calcula la base al pedir la lista. */
@@ -53,7 +54,7 @@ export function Demos({ vencidas, prospectos = [] }: { vencidas: DemoVencida[]; 
               <li key={d.gimnasio_id} className="flex flex-wrap items-center gap-2" data-demo-prospecto-fila={d.vencida ? "vencida" : "activa"}>
                 <span className="font-semibold">{d.nombre}</span>
                 <span className={`pildora ${d.vencida ? "pildora-rojo" : d.dias <= 3 ? "pildora-amarillo" : ""}`}>{d.vencida ? `Venció el ${dia(d.vence)}` : `Vence en ${d.dias} ${d.dias === 1 ? "día" : "días"} (${dia(d.vence)})`}</span>
-                {d.host && <a href={`https://${d.host}`} target="_blank" rel="noopener noreferrer" className="texto-suave underline">{d.host}</a>}
+                {d.host && <a href={urlDeHost(d.host)} target="_blank" rel="noopener noreferrer" className="texto-suave underline">{d.host}</a>}
                 <a href={`/admin/${d.gimnasio_id}`} className="texto-suave underline">Ficha</a>
               </li>
             ))}
