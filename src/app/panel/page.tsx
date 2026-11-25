@@ -371,7 +371,7 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
       const detalles: Record<string, string> = {};
       if (extraSemaforo) {
         const x = extraSemaforo;
-        detalles.entraron = `${x.adentro_exacto ? "" : "Unos "}${x.adentro} adentro ahora`;
+        detalles.entraron = x.adentro === 0 ? "Nadie adentro ahora" : `${x.adentro_exacto ? "" : "Unos "}${x.adentro} adentro ahora`;
         const caja = x.caja_desde ? `Caja abierta desde las ${hora(x.caja_desde)}` : "La caja está cerrada";
         detalles.cobrado = caja; detalles.caja_turno = caja;
         detalles.no_vienen = `Más de ${x.dias_ausencia} días sin entrar`;
