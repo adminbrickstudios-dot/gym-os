@@ -1,5 +1,11 @@
 # PROGRESO de Pase (antes Base)
 
+## Cierre para vender (25/11, Mateo): igual al diseño, alta de cero, demo para prospectos
+
+Mateo autorizó publicar el 25/11 aunque fuera entre las 16 y las 22 h (urgente=URGENTE, SIN COPIA; vale solo para esta publicación).
+
+**A · partes 1 y 2 publicadas (25/11, 16:23 ART, PR #43, merge `840b0bf6`; vuelta atrás: revertir ese merge, main antes = `1f375386`).** Antes: pruebas completas en 14 tandas clásico y 14 Pista sobre `f4ebdd95` (la última, clásico 14, 45676162752). Migración `20261125100000_cierre_igual_al_diseno`: prevuelo 45683233626 OK, aplicada SIN COPIA (45683448515, chequeos contra la base real en verde); tipos regenerados (45684429293). **Producción, 5 minutos después del deploy (16:24 a 16:31 ART), solo mirando:** Vercel verde; `/api/salud` ok; `templegymsalta.com`, `/ingresar` y `/hacete-socio` en 200 con `data-estilo="pista"` (un pedido de la home de Temple tardó más de 20 s a las 16:29; los siguientes, menos de 1 s); `pasegym.com/g/demo` en Pista con Semáforo. **Temple Gym sale con `data-semaforo="si"`:** su llave `pista_semaforo` (y `landing_nueva`, `aviso_vencimiento`, `vuelto_efectivo`, `panel_pago`) se prendieron una por una desde el panel a las 15:50 ART, antes de aplicar la migración (16:16) y del merge; la migración solo toca los [demo]. Ningún dato de Temple Gym lo tocó esta publicación.
+
 ## ✅ Vuelta final publicada + Pista Semáforo en todo el sistema + más liviano (24/11, Mateo)
 
 **Parte 1 · vuelta final publicada (24/11, 22:04 ART, PR #40, merge `9fed244f`; vuelta atrás: revertir ese merge, main antes = `948426c`).**
