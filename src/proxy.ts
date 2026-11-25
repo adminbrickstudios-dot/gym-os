@@ -10,13 +10,13 @@ import { dominiosViejos } from "@/lib/dominios";
 
 // VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
 // RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
-type Resuelto = { gimnasio_id: string; slug: string; host?: string | null; estilo?: string | null; modo?: string | null } | undefined;
+type Resuelto = { gimnasio_id: string; slug: string; host?: string | null; estilo?: string | null; modo?: string | null; semaforo?: boolean | null } | undefined;
 const gimnasios = memoriaCorta<Resuelto>(60_000);
 const slugsAnteriores = memoriaCorta<string | null>(60_000);
 
 // Encabezados que solo pone este middleware. Si vienen del navegador se
 // borran: nadie puede elegir su gimnasio mandando un header.
-const CABECERAS = ["x-gymos-contexto", "x-gimnasio-id", "x-gimnasio-slug", "x-gimnasio-host", "x-gimnasio-estilo", "x-gimnasio-modo"] as const;
+const CABECERAS = ["x-gymos-contexto", "x-gimnasio-id", "x-gimnasio-slug", "x-gimnasio-host", "x-gimnasio-estilo", "x-gimnasio-modo", "x-gimnasio-semaforo"] as const;
 /** Pase 2.0: el estilo del gimnasio ("pista" o el de siempre). Cualquier otra cosa es el clásico: nunca un valor raro en el <html>. */
 const estiloDe = (e?: string | null) => (e === "pista" ? "pista" : "clasico");
 
@@ -114,7 +114,7 @@ async function proxyInterno(req: NextRequest) {
   const clase = clasificarHost(host, base, plataforma);
   if (clase.tipo === "plataforma") {
     const ruta = req.nextUrl.pathname;
-    type Elegido = { gimnasio_id: string; slug: string; host: string | null; estilo?: string | null; modo?: string | null };
+    type Elegido = { gimnasio_id: string; slug: string; host: string | null; estilo?: string | null; modo?: string | null; semaforo?: boolean | null };
     const marcarGimnasio = (g: Elegido) => {
       // El host del gimnasio (no el de la plataforma): con él se busca su
       // página y su marca. Los permisos los valida cada función de la base.
@@ -124,6 +124,7 @@ async function proxyInterno(req: NextRequest) {
       cabeceras.set("x-gimnasio-host", g.host ?? host);
       cabeceras.set("x-gimnasio-estilo", estiloDe(g.estilo));
       cabeceras.set("x-gimnasio-modo", g.modo === "claro" ? "claro" : "oscuro");
+      cabeceras.set("x-gimnasio-semaforo", g.semaforo === true ? "si" : "no");
     };
     // Si la función todavía no existe en la base (publicación a medias) o falla, es como si no hubiera slug anterior: sigue dando "no encontrado".
     const slugActualDe = (slug: string) =>
@@ -229,7 +230,7 @@ async function proxyInterno(req: NextRequest) {
     return NextResponse.next({ request: { headers: cabeceras } });
   }
 
-  let gimnasio: { gimnasio_id: string; slug: string; estilo?: string | null; modo?: string | null } | undefined;
+  let gimnasio: { gimnasio_id: string; slug: string; estilo?: string | null; modo?: string | null; semaforo?: boolean | null } | undefined;
   try {
     gimnasio = await resolver("gimnasio_por_host", { p_host: host });
   } catch (e) {
@@ -261,6 +262,8 @@ async function proxyInterno(req: NextRequest) {
   cabeceras.set("x-gimnasio-host", host);
   cabeceras.set("x-gimnasio-estilo", estiloDe(gimnasio.estilo));
   cabeceras.set("x-gimnasio-modo", gimnasio.modo === "claro" ? "claro" : "oscuro");
+  // Pista Semáforo (24/11): la llave por gimnasio viaja con la dirección (sin un viaje más). Sin la columna (base vieja) es "no".
+  cabeceras.set("x-gimnasio-semaforo", gimnasio.semaforo === true ? "si" : "no");
   return conSesion(req, cabeceras, supabaseUrl, anon);
 }
 

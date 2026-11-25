@@ -72,6 +72,13 @@ if [[ "${ESTILO_DEMO:-clasico}" == "pista" ]]; then
   psql -qc "update public.configuracion_gimnasio set estilo = 'pista', modo = '${MODO_DEMO:-oscuro}'" "$URL"
   echo "Estilo Pista prendido en los gimnasios de la base local (modo ${MODO_DEMO:-oscuro})."
 fi
+# Pista Semáforo (24/11): como en producción, la llave pista_semaforo prendida en los [demo] (el seed corre después de la migración que la prende).
+# SEMAFORO_DEMO=no la deja apagada: Pista como la tiene hoy un gimnasio real.
+if [[ "${SEMAFORO_DEMO:-si}" == "si" ]]; then
+  psql -qc "insert into public.funciones_nuevas_gimnasio (gimnasio_id, clave, activa, prendida_en, cambiada_en) select id, 'pista_semaforo', true, now(), now() from public.gimnasios where es_demo on conflict (gimnasio_id, clave) do update set activa = true" "$URL"
+else
+  psql -qc "update public.funciones_nuevas_gimnasio set activa = false where clave = 'pista_semaforo'" "$URL"
+fi
 # F8.1: con una base recién sembrada (5.000 socios) el planificador no tiene estadísticas hasta que autovacuum pasa (a los minutos): sin esto,
 # las primeras pantallas medidas tardan segundos por un plan viejo y no por la app. En producción lo hace autovacuum solo.
 psql -qc "analyze" "$URL" >/dev/null 2>&1 || true

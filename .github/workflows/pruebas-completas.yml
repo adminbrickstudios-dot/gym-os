@@ -36,6 +36,10 @@ on:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
+      semaforo:
+        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no; solo se ve con estilo=pista)"
+        type: string
+        default: "si"
       tanda:
         description: "Nombre de la tanda (t1, t2...): tandas con nombre distinto corren a la vez, cada una con su base y su app"
         type: string
@@ -121,6 +125,7 @@ jobs:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           SOCIOS_DEMO: ${{ inputs.socios || '300' }}
           ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
@@ -139,6 +144,8 @@ jobs:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           E2E_SIN_MAYUSCULAS: ${{ inputs.estilo == 'pista' && '1' || '0' }}
+          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local

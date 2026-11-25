@@ -2,7 +2,7 @@
 import { Icono } from "@/components/ui/Icono";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { marcarAyuda } from "@/app/ayuda-acciones";
 import { claveDeRuta, textoAyuda } from "@/lib/ayuda";
@@ -26,7 +26,10 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
   const clave = claveDeRuta(ruta, ambito);
   const [vistas, setVistas] = useState(() => new Set(inicial.vistas));
   const [apagadas, setApagadas] = useState(inicial.apagadas);
-  const [abierta, setAbierta] = useState(false);
+  // Parte 3 (24/11): si corresponde, el globo sale abierto desde el primer pintado (en el flujo, como siempre). Antes aparecía medio segundo
+  // después y empujaba toda la pantalla: era el corrimiento (CLS 0,2) que medía Lighthouse en Inicio, Entrada, Socios y la app.
+  const [abierta, setAbierta] = useState(() => !!clave && !inicial.apagadas && !inicial.vistas.includes(clave));
+  const primera = useRef(true);
   const [conError, setConError] = useState(false);
   const [lugar, setLugar] = useState<HTMLElement | null>(null);
 
@@ -46,6 +49,13 @@ export function AyudaPantalla({ ambito, rol, inicial }: { ambito: "panel" | "app
   // salir sobre una pantalla de error, que se pinta en su lugar).
   const yaVista = !!clave && vistas.has(clave);
   useEffect(() => {
+    // Al llegar: el globo ya está (o no) desde el servidor; solo se esconde si la pantalla resultó ser un error.
+    if (primera.current) {
+      primera.current = false;
+      if (!clave) return;
+      const t0 = setTimeout(() => { if (document.querySelector("[data-pantalla-error]")) { setConError(true); setAbierta(false); } }, 500);
+      return () => clearTimeout(t0);
+    }
     setAbierta(false);
     setConError(false);
     if (!clave) return;

@@ -58,7 +58,7 @@ try {
   for (const n of DNI.slice(-3)) await t.locator(`[aria-label="Teclado"] button:has-text("${n}")`).first().click();
   await t.locator('button[aria-label="Entrar"]').click();
   await res.waitFor({ timeout: 30000 });
-  chequear(await res.getAttribute("data-kiosco-resultado") === "entro" && /¡Pasá, Habitual!/.test(await res.innerText()), "toca su nombre y los últimos 3 del DNI: “¡Pasá, Habitual!”", `dio: ${await res.innerText()}`);
+  chequear(await res.getAttribute("data-kiosco-resultado") === "entro" && /¡Pasá, Habitual!|¡Buen entreno, Habitual!/.test(await res.innerText()), "toca su nombre y los últimos 3 del DNI: “¡Pasá, Habitual!”", `dio: ${await res.innerText()}`);
   for (const p of [d, t]) if (p.errores.length) falla(p.errores.join(" | "));
 } catch (e) {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);

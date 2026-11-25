@@ -88,17 +88,17 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
 /** `volver`: el link para subir un nivel (“← Socios”), arriba de todo. `volverAlOrigen` (VD-28): si se llegó desde una lista, ese link pasa a “← Volver a <esa lista>” con su búsqueda y scroll. */
 export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volverAlOrigen = false }: { icono?: string; /** Antes: un emoji. Lo siguen pasando pantallas de otros carriles; se muestra igual. */ emoji?: string; titulo: string; bajada?: ReactNode; accion?: ReactNode; volver?: { href: string; texto: string }; volverAlOrigen?: boolean }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-      <div className="min-w-0 pr-14 lg:pr-0">
+    <div className="flex flex-wrap items-end justify-between gap-4 mb-6" data-encabezado>
+      <div className="min-w-0 pr-14 lg:pr-0 enc-texto">
         {volver && (volverAlOrigen
           ? <VolverAlOrigen href={volver.href} texto={volver.texto} />
           : <Link href={volver.href} className="inline-block texto-suave hover:text-[var(--texto)] mb-4">← {volver.texto}</Link>)}
         {/* DISENO: título de pantalla de 28 px; el ícono va al lado, del tamaño del título y en el acento (no 36 px arriba). */}
         <h1 className="titular text-[28px] flex items-center gap-2.5">
-          {(icono ?? emoji) && <span className="text-[var(--acento)] flex-none" aria-hidden><Icono nombre={icono ?? emoji} sistema /></span>}
+          {(icono ?? emoji) && <span className="text-[var(--acento)] flex-none enc-icono" aria-hidden><Icono nombre={icono ?? emoji} sistema /></span>}
           <span className="min-w-0">{titulo}</span>
         </h1>
-        {bajada && <p className="texto-suave text-[15px] mt-1.5">{bajada}</p>}
+        {bajada && <p className="texto-suave text-[15px] mt-1.5 enc-bajada">{bajada}</p>}
       </div>
       {/* La campana de Novedades flota arriba a la derecha: el botón de acción se corre para no quedar debajo de ella (auditoría 18/11). */}
       {accion && <div className="min-w-0 max-w-full sm:mr-14">{accion}</div>}

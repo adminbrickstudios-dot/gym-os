@@ -7,6 +7,7 @@ import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
 import { COOKIE_TABLET } from "./cookie";
 import { Kiosco } from "./Kiosco";
 import { urlGimnasio } from "@/lib/urls";
+import { conSemaforo } from "@/lib/semaforo";
 
 export const metadata: Metadata = { title: "Entrada", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -29,6 +30,10 @@ export default async function PaginaKiosco({ searchParams }: { searchParams: Pro
       estado = { ...data, con_salida: salida.error ? false : !!salida.data, alta_url: !alta.error && alta.data ? urlGimnasio(String(alta.data), "/hacete-socio") : null };
     }
   } else if (!problema) problema = "Esta tablet no está autorizada. El dueño la autoriza desde Configuración → Reglas → Tablet en la puerta.";
+  // Pista Semáforo: la tablet con el resultado a la izquierda y el teclado a la derecha (kiosco.png), en oscuro.
+  if (estado && await conSemaforo()) {
+    return <main className="min-h-dvh" data-tono="oscuro"><Kiosco {...estado} semaforo /></main>;
+  }
   return (
     <main className="min-h-dvh grid place-items-center p-6">
       {estado ? <Kiosco {...estado} /> : (

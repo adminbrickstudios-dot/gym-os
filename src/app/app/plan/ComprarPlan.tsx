@@ -4,7 +4,6 @@
 // un doble toque es un solo pago.
 import { useRef, useState, useTransition } from "react";
 import { formatearPesos } from "@/lib/formato";
-import { crearClienteNavegador } from "@/lib/supabase/navegador";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { informarCompraApp, pagarConMercadoPago, vistaCompraApp, type VistaCompra } from "../acciones";
@@ -65,6 +64,8 @@ export function ComprarPlan({ socioId, gimnasioId, opciones }: { socioId: string
       if (f.size > 5 * 1024 * 1024) { setError("El archivo pesa más de 5 MB"); return; }
       const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase();
       const path = `${gimnasioId}/${socioId}/${crypto.randomUUID()}.${ext}`;
+      // Parte 3 (24/11): el cliente de Supabase baja recién al subir el comprobante.
+      const { crearClienteNavegador } = await import("@/lib/supabase/navegador");
       const { error: e } = await crearClienteNavegador().storage.from("comprobantes").upload(path, f, { contentType: f.type });
       if (e) { setError("No se pudo subir el comprobante. Revisá tu conexión y probá de nuevo."); return; }
       const r = await informarCompraApp(socioId, vista.plan_id, path, claveDe(vista.plan_id, "transferencia"));

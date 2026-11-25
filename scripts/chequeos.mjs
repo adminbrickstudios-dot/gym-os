@@ -207,6 +207,21 @@ chequeo("Datos de prueba sin teléfonos con pinta de reales (+549000…)", telef
   chequeo("Velocidad: cada pantalla tiene su tope de viajes a la base (nunca más lento que hoy)", problemas);
 }
 
+// Parte 3 (24/11): el JS de la primera carga de cada pantalla clave (KB gzip) tiene su tope en scripts/medir/topes-js.json; lo compara
+// scripts/medir/modulos-pesados.mjs --topes después de next build (workflow Analizar bundle). Acá: que exista y esté completo.
+{
+  const problemas = [];
+  const ruta = join(raiz, "scripts/medir/topes-js.json");
+  if (!existsSync(ruta)) problemas.push("Falta scripts/medir/topes-js.json");
+  else {
+    try {
+      const topes = JSON.parse(readFileSync(ruta, "utf8"));
+      for (const r of ["/panel", "/panel/entrada", "/panel/socios", "/app", "/"]) if (!Number.isInteger(topes[r]) || topes[r] < 1) problemas.push(`Sin tope de JS: ${r}`);
+    } catch (e) { problemas.push(`topes-js.json no se puede leer: ${e.message}`); }
+  }
+  chequeo("Peso: cada pantalla clave tiene su tope de JS de primera carga (nunca más pesada que hoy)", problemas);
+}
+
 // ── Base ─────────────────────────────────────────────────────────────
 if (!url) {
   chequeo("Conexión a la base", ["Falta DB_PRUEBAS_URL o SUPABASE_DB_URL: no se revisó la base"]);

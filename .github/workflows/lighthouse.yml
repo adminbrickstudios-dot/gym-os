@@ -28,6 +28,18 @@ on:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
+      semaforo:
+        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no; solo se ve con estilo=pista)"
+        type: string
+        default: "si"
+      sesion:
+        description: "Parte 3: también Inicio, Entrada y Socios (la dueña) y la app del socio, con su sesión (si o no)"
+        type: string
+        default: "no"
+      medir_ref:
+        description: "Rama o commit de la app a medir con los scripts de esta (vacío = esta misma): el antes y el después con la misma medición"
+        type: string
+        default: ""
       landings:
         description: "Vuelta final: vieja (las de siempre) o nueva (prende landing_nueva en el demo y landing_venta_nueva en la base de esta corrida, y mide también la venta de Pase)"
         type: string
@@ -57,6 +69,14 @@ jobs:
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: La app de otra versión (los scripts de medir quedan los de esta)
+        if: inputs.medir_ref != ''
+        run: |
+          git fetch -q origin "${{ inputs.medir_ref }}"
+          git rm -rq --cached src public supabase > /dev/null && find src public supabase -type f -delete
+          git checkout FETCH_HEAD -- src public supabase package.json package-lock.json
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -68,9 +88,13 @@ jobs:
         env:
           APP_MODO: produccion
           ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
+          SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
+      - name: Navegador para entrar con sesión
+        if: inputs.sesion == 'si'
+        run: npx playwright install chromium
       - name: Chrome
         run: |
           echo "CHROME_PATH=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)" >> "$GITHUB_ENV"
@@ -92,7 +116,7 @@ jobs:
       - name: Lighthouse en celular
         env:
           LIGHTHOUSE_VERSION: "12.6.1"
-        run: node scripts/medir/lighthouse.mjs --base "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}" --veces "${{ inputs.veces || '3' }}" --umbral "${{ inputs.umbral || '90' }}" ${{ inputs.landings == 'nueva' && '--plataforma http://localhost:3123' || '' }}
+        run: node scripts/medir/lighthouse.mjs --base "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}" --veces "${{ inputs.veces || '3' }}" --umbral "${{ inputs.umbral || '90' }}" ${{ inputs.landings == 'nueva' && '--plataforma http://localhost:3123' || '' }} --sesion "${{ inputs.sesion || 'no' }}"
       - name: Guardar la tabla
         if: always()
         uses: actions/upload-artifact@v4

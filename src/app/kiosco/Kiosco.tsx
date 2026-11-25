@@ -8,6 +8,7 @@ import { Camara } from "@/app/panel/entrada/CamaraDinamica";
 import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTablet, qrDeLaTablet, salirEnKiosco, ultimoDeLaTablet, type Resultado } from "./acciones";
 import { Icono } from "@/components/ui/Icono";
 import { SIN_CONEXION, valorDelCampo } from "./campo";
+import { ResultadoPuerta } from "@/components/ResultadoPuerta";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "entrar"];
 
@@ -30,6 +31,8 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   useEffect(() => {
     let vivo = true, t: ReturnType<typeof setTimeout>;
     const traer = async () => {
+      // Parte 3 (24/11): con la pantalla apagada u oculta no se pide; se mira de nuevo en 5 s.
+      if (document.visibilityState === "hidden") { t = setTimeout(traer, 5000); return; }
       const r = await qrDeLaTablet();
       if (!vivo) return;
       if (r.codigo) { setQr({ codigo: r.codigo, vence_en: r.vence_en! }); setSvg(await (await import("qrcode")).default.toString(r.codigo, { type: "svg", margin: 1 })); }
@@ -41,6 +44,7 @@ function QrPared({ alEntrar }: { alEntrar: (r: Resultado) => void }) {
   // Cada segundo y medio: ¿entró alguien escaneando?
   useEffect(() => {
     const i = setInterval(async () => {
+      if (document.visibilityState === "hidden") return;
       const u = await ultimoDeLaTablet(desde.current);
       if (u && "momento" in u) { desde.current = (u as Resultado & { momento: string }).momento; alEntrar(u); }
     }, 1500);
@@ -66,7 +70,7 @@ function QrAlta({ url }: { url: string }) {
   );
 }
 
-export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, alta_url = null }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean; alta_url?: string | null }) {
+export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, alta_url = null, semaforo = false }: { tablet: string; sede: string; gimnasio: string; con_qr: boolean; qr_pared: boolean; con_salida?: boolean; alta_url?: string | null; semaforo?: boolean }) {
   const [dni, setDni] = useState("");
   const [r, setR] = useState<Resultado | null>(null);
   const [camara, setCamara] = useState(false);
@@ -127,6 +131,73 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, a
     else if (k === "entrar") { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6) mandar(dni); }
     else setDni((d) => (d.length < largo ? d + k : d));
   };
+
+  // Pista Semáforo (kiosco.png): el resultado a la izquierda y el teclado siempre a la derecha. Lo mismo que abajo, otra forma.
+  if (semaforo) {
+    const entro = !!r && !r.error && (r.resultado === "entro" || r.resultado === "entro_modo_aviso");
+    const hora = new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
+    const arriba = <><span className="uppercase">{gimnasio}{sede ? ` · ${sede}` : ""}</span><span>{hora}</span></>;
+    const enviar = () => { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6 || /^GYMOS1./.test(dni)) mandar(dni); };
+    return (
+      <div className="kiosco-semaforo" data-kiosco={r ? "resultado" : "listo"}>
+        <div className="kiosco-izq" onClick={() => r && setR(null)}>
+          {r?.salida ? (
+            <ResultadoPuerta tamano="kiosco" color={r.error ? "gris" : r.registrada ? "verde" : "amarillo"} puede={!!r.registrada} arriba={arriba}
+              titulo={r.error ? "Probá de nuevo" : r.registrada ? "¡Hasta pronto!" : "Listo"} detalle={r.error ?? r.texto}
+              data-kiosco-resultado={r.error ? "error" : r.registrada ? "salio" : "sin-entrada"} />
+          ) : r ? (
+            <ResultadoPuerta tamano="kiosco" color={r.error ? "gris" : entro ? ((r.color as "verde" | "amarillo") ?? "verde") : "rojo"} puede={entro} arriba={arriba}
+              titulo={r.error ? "Probá de nuevo" : entro ? "Pasá" : undefined}
+              nombre={r.error ? undefined : entro ? `¡Buen entreno, ${r.nombre}!` : r.nombre}
+              detalle={r.error ?? (entro ? r.texto : <>{r.texto}<br />Pasá por recepción y lo resolvemos.</>)}
+              data-kiosco-resultado={r.error ? "error" : entro ? "entro" : "no"}>
+              {alta_url && r.error && /No encontramos ese DNI/.test(r.error) ? <QrAlta url={alta_url} /> : <p className="kiosco-vuelve">En {r.error ? 5 : 4} segundos vuelve a pedir el DNI</p>}
+            </ResultadoPuerta>
+          ) : (
+            <section className="kiosco-hola">
+              <div className="puerta-arriba">{arriba}</div>
+              {emergencia && (
+                <div role="alert" data-kiosco-emergencia className="mensaje mensaje-error text-2xl"><Icono nombre="alerta" /> Emergencia: pasá por la puerta, la recepción te abre</div>
+              )}
+              <h1 className="titular kiosco-hola-titulo">{elegido ? `¡Hola, ${elegido.nombre}!` : "¡Hola!"}</h1>
+              <p className="text-2xl font-semibold">{elegido ? "Los últimos 3 números de tu DNI" : `Escribí tu DNI${con_qr ? " o mostrá tu QR" : ""}${habituales.length ? ", o tocá tu nombre" : ""}`}</p>
+              {!elegido && habituales.length > 0 && (
+                <div className="grid grid-cols-2 gap-3" data-habituales={habituales.length} aria-label="Los que suelen venir a esta hora">
+                  {habituales.map((h) => <button key={h.socio_id} type="button" className="boton boton-suave !min-h-16 text-xl" onClick={() => { setElegido(h); setDni(""); }}>{h.nombre}</button>)}
+                </div>
+              )}
+              {elegido && <button type="button" className="boton-texto texto-suave" onClick={() => { setElegido(null); setDni(""); }}>← No soy {elegido.nombre}</button>}
+              {qr_pared && <QrPared alEntrar={mostrar} />}
+            </section>
+          )}
+        </div>
+        <section aria-label="Teclado" className="kiosco-der">
+          <h2 className="titulo kiosco-der-titulo">Tu DNI o tu QR</h2>
+          <form onSubmit={(e) => { e.preventDefault(); enviar(); }}>
+            <input ref={campo} value={dni} onChange={(e) => setDni(valorDelCampo(e.target.value, !!elegido, largo))}
+              inputMode="numeric" autoComplete="off" aria-label={elegido ? "Últimos 3 números de tu DNI" : "Tu DNI"} placeholder={elegido ? "···" : "Tu DNI"}
+              className="kiosco-campo" />
+          </form>
+          {ocupado && <p className="texto-suave text-xl" role="status" data-kiosco-buscando>Buscando…</p>}
+          <div className="grid grid-cols-3 gap-3" aria-label="Teclado">
+            {TECLAS.map((k) => (
+              <button key={k} type="button" onClick={() => tecla(k)} disabled={ocupado || (k === "entrar" && (elegido ? dni.length !== 3 : dni.length < 6))}
+                className={`kiosco-tecla ${k === "entrar" ? "kiosco-tecla-entrar" : k === "borrar" ? "kiosco-tecla-borrar" : ""}`} aria-label={k === "borrar" ? "Borrar" : k === "entrar" ? "Entrar" : k}>
+                {k === "borrar" ? <Icono nombre="izquierda" linea /> : k === "entrar" ? "Entrar" : k}
+              </button>
+            ))}
+          </div>
+          {!elegido && con_qr && <button type="button" className="boton w-full" onClick={() => setCamara(true)}><Icono nombre="camara" /> Mostrar mi QR</button>}
+          {!elegido && con_salida && (
+            <button type="button" className="boton w-full" data-kiosco-me-voy disabled={ocupado || !(dni.length >= 6 || /^GYMOS1./.test(dni))} onClick={() => irme(dni)}>
+              <Icono nombre="salir" /> Me voy <span className="texto-tenue text-base font-normal">(escribí tu DNI y tocá acá)</span>
+            </button>
+          )}
+        </section>
+        {camara && <Camara frente alLeer={mandar} alCerrar={() => setCamara(false)} />}
+      </div>
+    );
+  }
 
   if (r?.salida) {
     return (

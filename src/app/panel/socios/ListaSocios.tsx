@@ -15,7 +15,18 @@ const CLAVE = "base.socios.columnas";
 const POR_DEFECTO: Columna[] = ["numero", "plan"];
 const soloDigitos = (t: string) => t.replace(/\D/g, "");
 
-export function ListaSocios({ filas, etiquetas, puedeEtiquetar }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean }) {
+/** La etiqueta de estado de Pista Semáforo: la palabra del color (Al día, Congelado, De baja) o el texto que ya dice la base. */
+function etiquetaEstado(s: FilaSocio): [string, string] {
+  if (s.dado_de_baja) return ["", "De baja"];
+  if (s.color === "verde") return ["pildora-verde", "Al día"];
+  if (s.color === "azul") return ["pildora-azul", s.texto];
+  if (s.color === "rojo") return ["pildora-rojo", s.texto];
+  if (s.color === "amarillo") return ["pildora-amarillo", s.texto];
+  return ["", s.texto];
+}
+const iniciales = (n: string) => n.trim().split(/s+/).slice(0, 2).map((x) => x[0]?.toUpperCase() ?? "").join("");
+
+export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean; semaforo?: boolean }) {
   const [varios, setVarios] = useState(false);
   const [elegidos, setElegidos] = useState<Set<string>>(new Set());
   const [columnas, setColumnas] = useState<Columna[]>(POR_DEFECTO);
@@ -105,6 +116,37 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar }: { filas: FilaS
         </div>
       )}
 
+      {semaforo ? (
+        // Pista Semáforo (socios.png): la lista en su tarjeta, con socio, plan, estado y el botón. Vence y Última vez no vienen en esta lista: no se muestran.
+        <div className="tarjeta socios-semaforo" data-socios-semaforo>
+          <div className="socios-semaforo-cabeza" aria-hidden><span>Socio</span><span>Plan</span><span>Estado</span><span /></div>
+          <ul>
+            {filas.map((s, i) => {
+              const [clase, texto] = etiquetaEstado(s);
+              return (
+                <li key={s.socio_id} className={`socios-semaforo-fila ${i % 2 === 0 ? "par" : ""} ${s.dado_de_baja ? "opacity-60" : ""}`}>
+                  {varios && <input type="checkbox" className="size-5 flex-none" aria-label={`Elegir a ${s.nombre}`} checked={elegidos.has(s.socio_id)} onChange={() => alternar(s.socio_id)} data-elegir={s.socio_id} />}
+                  <Link href={`/panel/socios/${s.socio_id}`} className="socios-semaforo-link">
+                    <span className="socios-semaforo-socio">
+                      <span className="socios-semaforo-avatar" data-iniciales={iniciales(s.nombre)} aria-hidden />
+                      <span className="min-w-0">
+                        <span className="block font-semibold truncate">{s.nombre} {ver("numero") && <span className="texto-suave font-normal">#{s.numero}</span>}</span>
+                        <span className="block texto-suave text-sm truncate">{[s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>
+                      </span>
+                    </span>
+                    <span className="socios-semaforo-plan truncate" data-plan-fila>{s.plan ?? "—"}</span>
+                    <span className="socios-semaforo-estado">
+                      <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
+                      {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
+                    </span>
+                    <span className={`boton boton-chico ${s.color === "rojo" && !s.dado_de_baja ? "boton-claro" : ""}`} aria-hidden>Ver</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : (
       <ul className="space-y-2">
         {filas.map((s) => (
           <li key={s.socio_id} className="flex items-center gap-2">
@@ -117,11 +159,12 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar }: { filas: FilaS
                 {(ver("dni") || ver("telefono")) && <span className="block texto-tenue text-sm truncate">{[ver("dni") && s.dni ? `DNI ${s.dni}` : null, ver("telefono") ? s.telefono : null].filter(Boolean).join(" · ")}</span>}
               </span>
               {s.autoalta && <span className={`pildora flex-none ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined} title="Se registró solo desde la página">Web{s.puede === false && " A cobrar"}<span className="hidden sm:inline">{s.puede !== false ? " · se anotó por la web" : " · se anotó por la web"}</span></span>}
-              {ver("plan") && s.plan && <span className="hidden sm:inline pildora">{s.plan}</span>}
+              {ver("plan") && s.plan && <span className="hidden sm:inline pildora" data-plan-fila>{s.plan}</span>}
             </Link>
           </li>
         ))}
       </ul>
+      )}
     </div>
   );
 }

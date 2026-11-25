@@ -1,3 +1,16 @@
+## 2026-11-24 · Vuelta final publicada, Pista Semáforo en todo el sistema y más liviano (ramas `dia/2026-11-22` y `dia/2026-11-24`)
+
+**QUÉ HICE**
+- Publiqué la vuelta final: migración `20261122100000` SIN COPIA (45522651169), PR #40 (merge `9fed244f`, main antes `948426c`), Vercel verde, producción mirada (salud ok, Temple Gym en Pista y con la página de siempre).
+- Pista Semáforo detrás de `pista_semaforo` (migración `20261124100000`, prueba de la base en negativo): tokens, piezas únicas, ResultadoPuerta, mapa único de emojis, Inicio (compu y celular), Socios, ficha, Clases de hoy, kiosco, app del socio, menú y barra de abajo; el resto con las piezas. Recorrido `semaforo-pantallas` con las capturas al lado del diseño.
+- Peso: /app 302 → 235 KB gzip; Lighthouse Inicio 80 → 95, Entrada 79 → 89, Socios 76 → 90, app 81 → 88 (CLS 0,2 → 0). Topes nuevos de JS por pantalla. Detalle y tablas en `docs/base/PROGRESO.md`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** — El `node_modules` de esta compu pierde carpetas `dist` (next, vitest, supabase-js) solas: todo se verificó en Actions. El reloj de Git Bash lee UTC con `TZ=America/Argentina/Buenos_Aires`: el guardia de hora pico frenó el primer intento a las 19 h (bien). No había tope de JS por ruta en `chequeos` (solo el de viajes): lo sumé. La ayuda de pantalla movía toda la pantalla al abrirse (CLS 0,2).
+
+**SIN ARREGLAR** — Lo distinto al diseño, por pantalla, en PROGRESO (datos que la base no trae o acciones nuevas). `Icono` entero en todas las rutas; el `<dl>` del Inicio y el `role` de las pestañas de Socios (accesibilidad 93-94, de antes).
+
+**LO QUE NO PUDE VERIFICAR** — Pista Semáforo en producción con sesión (queda apagada en Temple Gym; los [demo] de producción la tienen prendida por la migración, pero no entré con sesión). Realtime (Últimas entradas en vivo) en Actions. Mirar las capturas en un celular real.
+
 ## 2026-11-19 · Paneles completos — regresión de pruebas-completas, R1, K5 y publicación (rama `dia/2026-11-19`)
 
 **QUÉ HICE**

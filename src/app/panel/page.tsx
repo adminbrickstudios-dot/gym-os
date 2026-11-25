@@ -23,6 +23,10 @@ import { UltimasEntradas, type EntradaVivo } from "@/components/panel/UltimasEnt
 import { FueraDeServicio, type MaquinaFuera } from "@/components/panel/FueraDeServicio";
 import { LockersVencen, type LockerVence } from "@/components/panel/LockersVencen";
 import { Icono } from "@/components/ui/Icono";
+import { conSemaforo } from "@/lib/semaforo";
+import { EntradaInicio } from "@/components/panel/EntradaInicio";
+import { ResultadoPuerta, type ColorPuerta } from "@/components/ResultadoPuerta";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 
 // VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
 type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
@@ -51,6 +55,20 @@ export default async function Inicio() {
     const { rol } = panel.yo;
     const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
     const zona = panel.gimnasio.zona_horaria;
+    // Pista Semáforo (inicio-panel.png / inicio-celular.png): las mismas piezas y los mismos datos, en otro orden y otra forma.
+    if (await conSemaforo()) {
+      return (
+        <div className="inicio-semaforo" data-inicio-semaforo>
+          <header className="inicio-semaforo-cabeza">
+            <p className="texto-suave inicio-semaforo-fecha first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
+            <h1 className="titular inicio-semaforo-saludo">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
+          </header>
+          <Suspense fallback={<EsqueletoBloques />}>
+            <BloquesInicio panel={panel} semaforo />
+          </Suspense>
+        </div>
+      );
+    }
     return (
       <div className="space-y-10 sm:space-y-12">
         <header>
@@ -100,7 +118,7 @@ function EsqueletoBloques() {
   );
 }
 
-async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
+async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio; semaforo?: boolean }) {
   return intentar(async () => {
     const { rol } = panel.yo;
     const zona = panel.gimnasio.zona_horaria;
@@ -171,6 +189,258 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
             )}
           </section>
     );
+
+    // La cola del Inicio (tareas, dejados pasar, invitados, cajas, reponer, anulaciones, bajas, pausas, cumples): la misma en las dos formas.
+    const resto = (
+      <>
+          {(() => {
+            const mias = tareas.tareas.filter((t) => t.mia && !t.hecha_en && t.dia <= tareas.hoy);
+            return mias.length > 0 && (
+              <section aria-labelledby="tareas-hoy" data-tareas-inicio={mias.length}>
+                <h2 id="tareas-hoy" className="titulo text-3xl mb-1"><Icono nombre="chincheta" /> Tus tareas de hoy</h2>
+                <p className="texto-suave mb-4">Las de hoy y las que quedaron atrasadas. <LinkPanel href="/panel/tareas" siNoEsta="texto" className="underline">Ver todas</LinkPanel></p>
+                <ul className="space-y-2">{mias.map((t) => <FilaTarea key={t.id} t={t} hoy={tareas.hoy} />)}</ul>
+              </section>
+            );
+          })()}
+
+          {dejados.length > 0 && (
+            <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>
+              <h2 id="dejados" className="titulo text-3xl mb-1"><Icono nombre="puerta" /> Dejados pasar hoy</h2>
+              <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué. <LinkPanel href="/panel/entrada/control" siNoEsta="texto" className="underline">Ver la semana</LinkPanel></p>
+              <ul className="space-y-2">
+                {dejados.map((x) => (
+                  <li key={x.ingreso_id}>
+                    <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="numero text-lg texto-suave w-12 flex-none">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.momento))}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-lg truncate">{x.socio}</span>
+                        <span className="block texto-suave truncate">{x.por ?? "El equipo"}{x.autorizo && x.autorizo !== x.por ? ` (autorizó ${x.autorizo})` : ""}: “{x.motivo}” · {x.porque_no}{x.promete_el ? ` · promete pagar el ${x.promete_el.split("-").reverse().slice(0, 2).join("/")}` : ""}</span>
+                      </span>
+                    </LinkPanel>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {invitados.length > 0 && (
+            <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
+              <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
+              <ul className="space-y-1">
+                {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? <Icono nombre="ok" /> : null} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
+              </ul>
+            </section>
+          )}
+
+          {olvidadas.length > 0 && (
+            <section aria-labelledby="cajas-olvidadas" data-cajas-olvidadas={olvidadas.length}>
+              <h2 id="cajas-olvidadas" className="titulo text-3xl mb-4"><Icono nombre="reloj" /> Caja abierta</h2>
+              <ul className="space-y-2">
+                {olvidadas.map((o) => (
+                  <li key={o.turno_id}>
+                    <LinkPanel href="/panel/caja" siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-lg">{o.caja} quedó abierta</span>
+                        <span className="block texto-suave">Desde el {new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(o.abierto_en))}{o.mia ? " · la abriste vos" : ` · la abrió ${o.abierto_por}`}</span>
+                      </span>
+                      <span className="texto-suave">Cerrarla</span>
+                    </LinkPanel>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {alertasCaja.length > 0 && <AlertasCaja alertas={alertasCaja} zona={zona} />}
+
+          {reponer.length > 0 && rutaDisponible("/panel/planes", rol, panel.secciones_apagadas) && (
+            <section aria-labelledby="reponer" data-reponer={reponer.length}>
+              <h2 id="reponer" className="titulo text-3xl mb-4"><Icono nombre="caja" /> Por reponer</h2>
+              <ul className="flex flex-wrap gap-2">
+                {reponer.map((p) => (
+                  <li key={p.producto_id}>
+                    <LinkPanel href="/panel/planes" siNoEsta="texto" className="pildora pildora-amarillo !text-base !px-4 !py-2">{p.nombre}: {stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`}</LinkPanel>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {anular.length > 0 && (
+            <section aria-labelledby="pedidos-anulacion" data-pedidos-anulacion={anular.length}>
+              <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4"><Icono nombre="deshacer" /> Ventas para anular</h2>
+              <ul className="space-y-2">{anular.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} conSocio />)}</ul>
+            </section>
+          )}
+
+          {pedidosBaja.length > 0 && (
+            <section aria-labelledby="pedidos-baja" data-pedidos-baja-inicio={pedidosBaja.length}>
+              <h2 id="pedidos-baja" className="titulo text-3xl mb-1"><Icono nombre="salir" /> Pidieron la baja</h2>
+              <p className="texto-suave mb-4">Desde la app. Hablales antes: a veces una pausa o un cambio de plan alcanza.</p>
+              <ul className="space-y-2">
+                {pedidosBaja.map((x) => (
+                  <li key={x.pedido_id}>
+                    <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-lg truncate">{x.nombre}</span>
+                        <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}{x.codigo ? ` · ${x.codigo}` : ""}</span>
+                        {x.tarde && <span className="block font-semibold text-sm" data-baja-tarde><Icono nombre="reloj-arena" /> Hace más de 24 h que espera respuesta</span>}
+                      </span>
+                      <span className="texto-suave">Resolver</span>
+                    </LinkPanel>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {pedidosPausa.length > 0 && (
+            <section aria-labelledby="pedidos-pausa" data-pedidos-pausa={pedidosPausa.length}>
+              <h2 id="pedidos-pausa" className="titulo text-3xl mb-4"><Icono nombre="pausa" /> Pausas para aprobar</h2>
+              <ul className="space-y-2">
+                {pedidosPausa.map((x) => (
+                  <li key={x.id}>
+                    <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-lg truncate">{x.nombre}</span>
+                        <span className="block texto-suave">Del {diaCorto(x.desde)}, vuelve el {diaCorto(x.vuelve)} · {x.categoria}</span>
+                      </span>
+                      <span className="texto-suave">Revisar</span>
+                    </LinkPanel>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {cumples.length > 0 && (
+            <section aria-labelledby="cumples" data-cumplen-hoy={cumples.length}>
+              <h2 id="cumples" className="titulo text-3xl mb-4"><Icono nombre="calendario" /> Cumplen hoy</h2>
+              <ul className="space-y-2">
+                {cumples.map((c) => {
+                  const wa = linkWhatsappSocio(c.telefono, c.mensaje);
+                  return (
+                    <li key={c.socio_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
+                      <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
+                      <span className="min-w-0 flex-1">
+                        <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
+                        <span className="block texto-suave">Cumple {c.cumple} años</span>
+                      </span>
+                      {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+      </>
+    );
+
+    if (semaforo) {
+      const { elegidos, perdidos } = accesosElegidos(rol, panel.secciones_apagadas, panel.yo.accesos);
+      const verEntrada = rol !== "profe" && rutaDisponible("/panel/entrada", rol, panel.secciones_apagadas);
+      const puedeCobrar = rol !== "profe" && rutaDisponible("/panel/vender", rol, panel.secciones_apagadas);
+      const puedeAlta = rol !== "profe" && rutaDisponible("/panel/socios/nuevo", rol, panel.secciones_apagadas);
+      const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
+      const ultima = entradasVivo[0];
+      const fuera = maquinasFuera.length ? maquinasFuera.map((m) => m.nombre).join(", ") : null;
+      return (
+        <>
+          {verEntrada && (
+            <section aria-label="Entrada" className="inicio-semaforo-entrada">
+              <div className="tarjeta inicio-semaforo-entrada-izq">
+                <EntradaInicio puedeCobrar={puedeCobrar} puedeAlta={puedeAlta} pase={panel.cobra.pase} ultima={ultima ? `${ultima.socio}, ${hora(ultima.momento)}` : null} />
+              </div>
+              {ultima ? (
+                <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(ultima.color) ? ultima.color : "gris") as ColorPuerta}
+                  puede={ultima.resultado === "entro" || ultima.resultado === "entro_modo_aviso" || ultima.resultado === "forzado"}
+                  arriba={<><span>Última entrada</span><span className="numero">{hora(ultima.momento)}</span></>} nombre={ultima.socio} detalle={ultima.texto} data-ultimo-resultado={ultima.resultado}>
+                  {ultima.cobrar && <BotonCobrar socioId={ultima.socio_id} origen="otro" cuota className="boton boton-principal">Cobrar</BotonCobrar>}
+                  <LinkPanel href={`/panel/socios/${ultima.socio_id}`} siNoEsta="texto" className="boton">Ver su ficha</LinkPanel>
+                </ResultadoPuerta>
+              ) : (
+                <div className="vacio"><span className="text-5xl" aria-hidden><Icono nombre="puerta" /></span><p className="titulo text-2xl">Todavía no entró nadie</p><p className="texto-suave">Cuando alguien entre, el resultado aparece acá.</p></div>
+              )}
+            </section>
+          )}
+          <section aria-label="Números de hoy" className="inicio-semaforo-bloque" data-numeros-semaforo>
+            <div className="inicio-semaforo-cabecera">
+              <h2 id="hoy-numeros" className="titulo">Hoy en números</h2>
+              {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
+            </div>
+            <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+            {(rol === "dueno" || rol === "encargado") && <p><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>}
+          </section>
+          <section aria-labelledby="accesos" className="inicio-semaforo-bloque" data-accesos-semaforo>
+            <h2 id="accesos" className="titulo">Accesos rápidos</h2>
+            <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} conPrincipal={false} />
+          </section>
+          {rol !== "profe" && (
+            <div className="inicio-semaforo-dos">
+              <section aria-labelledby="para-hacer" data-para-hacer={hacerHoy.length} className="tarjeta inicio-semaforo-caja">
+                <h2 id="para-hacer" className="titulo">Para hacer hoy{hacerHoy.length > 0 && <> <span className="inicio-semaforo-cuenta">{hacerHoy.length}</span></>}</h2>
+                {hacerHoy.length === 0 ? <p className="texto-suave text-lg">Nada para hacer por ahora: todo al día. <Icono nombre="estrella" /></p> : (
+                  <ul className="inicio-semaforo-filas">
+                    {hacerHoy.map((x) => (
+                      <li key={x.clave} data-hacer={x.clave} className="inicio-semaforo-fila">
+                        <span aria-hidden><Icono nombre={x.emoji} sistema /></span>
+                        <span className="min-w-0 flex-1">{x.texto}</span>
+                        <Link href={`/panel${x.href}`} className="boton boton-chico" aria-label={`Ver: ${x.texto}`}>Ver</Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+              {verEntradas && (
+                <section aria-labelledby="ultimas-entradas" className="tarjeta inicio-semaforo-caja">
+                  <h2 id="ultimas-entradas" className="titulo inicio-semaforo-vivo">Últimas entradas <span className="inicio-semaforo-envivo"><span aria-hidden className="inicio-semaforo-punto" />en vivo</span></h2>
+                  <UltimasEntradas iniciales={entradasVivo} zona={zona} semaforo />
+                </section>
+              )}
+            </div>
+          )}
+          <section aria-labelledby="ahora" className="inicio-semaforo-bloque">
+            <h2 id="ahora" className="titulo">Ahora y lo que sigue</h2>
+            {ahora.length === 0 ? <p className="texto-suave text-lg">Nada pendiente por ahora. <Icono nombre="estrella" /></p> : (
+              <ul className="inicio-semaforo-ahora">
+                {ahora.map((a, i) => {
+                  const contenido = (
+                    <>
+                      <span className="inicio-semaforo-ahora-hora">{i === 0 && a.hora ? `Ahora · ${a.hora}` : a.hora ?? ""}</span>
+                      <span className="inicio-semaforo-ahora-titulo"><span aria-hidden><Icono nombre={a.emoji} sistema /></span> {a.titulo}</span>
+                      {a.detalle && <span className="texto-suave inicio-semaforo-ahora-detalle">{a.detalle}</span>}
+                    </>
+                  );
+                  const href = enPanel(a.href);
+                  const clase = `inicio-semaforo-ahora-item ${i === 0 ? "es-ahora" : ""}`;
+                  return <li key={`${a.tipo}-${i}`}>{href ? <Link href={href} className={clase}>{contenido}</Link> : <div className={clase}>{contenido}</div>}</li>;
+                })}
+              </ul>
+            )}
+            {(dejados.length > 0 || reponer.length > 0 || fuera) && (
+              <ul className="inicio-semaforo-chips">
+                {dejados.length > 0 && <li className="pildora pildora-rojo inicio-semaforo-chip"><Icono nombre="puerta" /> Dejados pasar hoy: {dejados.length} · {dejados.slice(0, 3).map((x) => x.socio).join(", ")}</li>}
+                {reponer.length > 0 && <li className="pildora pildora-amarillo inicio-semaforo-chip"><Icono nombre="caja" /> Por reponer: {reponer.map((p) => `${p.nombre} · ${stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`}`).join(", ")}</li>}
+                {fuera && <li className="pildora inicio-semaforo-chip" data-maquina-fuera><Icono nombre="ajustes" /> Fuera de servicio: {fuera}</li>}
+              </ul>
+            )}
+          </section>
+          {/* Lo del dueño (novedades, primeros pasos, ejemplo y seguridad) y el fichaje, abajo: arriba manda lo del diseño (entrada, resultado y números sin bajar). */}
+          {fichaje?.usa && fichaje.puede && <BotonFichar nombre={fichaje.nombre} enTurno={fichaje.en_turno} entradaEn={fichaje.entrada_en} sinSalidaDesde={fichaje.sin_salida_desde} zona={zona} />}
+          <NovedadesGymOS novedades={novedadesGymOS} />
+          {pasos && <PrimerosPasos datos={pasos} />}
+          {rol === "dueno" && (
+            <>
+              <DatosEjemploInicio datos={datosEjemplo} sinSociosReales={!!pasos && !pasos.pasos.find((p) => p.clave === "socios")?.hecho} />
+              <SeguridadDueno datos={seguridad} zona={zona} />
+            </>
+          )}
+          <LockersVencen items={lockersVencen} />
+          {resto}
+        </>
+      );
+    }
 
     return (
       <>
@@ -256,147 +526,7 @@ async function BloquesInicio({ panel }: { panel: PanelGimnasio }) {
           )}
         </section>
 
-        {(() => {
-          const mias = tareas.tareas.filter((t) => t.mia && !t.hecha_en && t.dia <= tareas.hoy);
-          return mias.length > 0 && (
-            <section aria-labelledby="tareas-hoy" data-tareas-inicio={mias.length}>
-              <h2 id="tareas-hoy" className="titulo text-3xl mb-1"><Icono nombre="chincheta" /> Tus tareas de hoy</h2>
-              <p className="texto-suave mb-4">Las de hoy y las que quedaron atrasadas. <LinkPanel href="/panel/tareas" siNoEsta="texto" className="underline">Ver todas</LinkPanel></p>
-              <ul className="space-y-2">{mias.map((t) => <FilaTarea key={t.id} t={t} hoy={tareas.hoy} />)}</ul>
-            </section>
-          );
-        })()}
-
-        {dejados.length > 0 && (
-          <section aria-labelledby="dejados" data-dejados-pasar={dejados.length}>
-            <h2 id="dejados" className="titulo text-3xl mb-1"><Icono nombre="puerta" /> Dejados pasar hoy</h2>
-            <p className="texto-suave mb-4">Entraron sin poder: quién los dejó y por qué. <LinkPanel href="/panel/entrada/control" siNoEsta="texto" className="underline">Ver la semana</LinkPanel></p>
-            <ul className="space-y-2">
-              {dejados.map((x) => (
-                <li key={x.ingreso_id}>
-                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="numero text-lg texto-suave w-12 flex-none">{new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(x.momento))}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-semibold text-lg truncate">{x.socio}</span>
-                      <span className="block texto-suave truncate">{x.por ?? "El equipo"}{x.autorizo && x.autorizo !== x.por ? ` (autorizó ${x.autorizo})` : ""}: “{x.motivo}” · {x.porque_no}{x.promete_el ? ` · promete pagar el ${x.promete_el.split("-").reverse().slice(0, 2).join("/")}` : ""}</span>
-                    </span>
-                  </LinkPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {invitados.length > 0 && (
-          <section aria-labelledby="invitados-hoy" data-invitados-hoy={invitados.length}>
-            <h2 id="invitados-hoy" className="titulo text-3xl mb-4"><Icono nombre="usuarios" /> Invitados hoy</h2>
-            <ul className="space-y-1">
-              {invitados.map((i) => <li key={i.id} className="texto-suave">{i.entro_en ? <Icono nombre="ok" /> : null} <span className="text-[var(--texto)] font-semibold">{i.nombre}</span>, invitado por {i.socio}</li>)}
-            </ul>
-          </section>
-        )}
-
-        {olvidadas.length > 0 && (
-          <section aria-labelledby="cajas-olvidadas" data-cajas-olvidadas={olvidadas.length}>
-            <h2 id="cajas-olvidadas" className="titulo text-3xl mb-4"><Icono nombre="reloj" /> Caja abierta</h2>
-            <ul className="space-y-2">
-              {olvidadas.map((o) => (
-                <li key={o.turno_id}>
-                  <LinkPanel href="/panel/caja" siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-semibold text-lg">{o.caja} quedó abierta</span>
-                      <span className="block texto-suave">Desde el {new Intl.DateTimeFormat("es-AR", { timeZone: zona, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(o.abierto_en))}{o.mia ? " · la abriste vos" : ` · la abrió ${o.abierto_por}`}</span>
-                    </span>
-                    <span className="texto-suave">Cerrarla</span>
-                  </LinkPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {alertasCaja.length > 0 && <AlertasCaja alertas={alertasCaja} zona={zona} />}
-
-        {reponer.length > 0 && rutaDisponible("/panel/planes", rol, panel.secciones_apagadas) && (
-          <section aria-labelledby="reponer" data-reponer={reponer.length}>
-            <h2 id="reponer" className="titulo text-3xl mb-4"><Icono nombre="caja" /> Por reponer</h2>
-            <ul className="flex flex-wrap gap-2">
-              {reponer.map((p) => (
-                <li key={p.producto_id}>
-                  <LinkPanel href="/panel/planes" siNoEsta="texto" className="pildora pildora-amarillo !text-base !px-4 !py-2">{p.nombre}: {stock[p.producto_id].stock <= 0 ? "sin stock" : `quedan ${stock[p.producto_id].stock}`}</LinkPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {anular.length > 0 && (
-          <section aria-labelledby="pedidos-anulacion" data-pedidos-anulacion={anular.length}>
-            <h2 id="pedidos-anulacion" className="titulo text-3xl mb-4"><Icono nombre="deshacer" /> Ventas para anular</h2>
-            <ul className="space-y-2">{anular.map((v) => <FilaVenta key={v.venta_id} v={v} zona={zona} conSocio />)}</ul>
-          </section>
-        )}
-
-        {pedidosBaja.length > 0 && (
-          <section aria-labelledby="pedidos-baja" data-pedidos-baja-inicio={pedidosBaja.length}>
-            <h2 id="pedidos-baja" className="titulo text-3xl mb-1"><Icono nombre="salir" /> Pidieron la baja</h2>
-            <p className="texto-suave mb-4">Desde la app. Hablales antes: a veces una pausa o un cambio de plan alcanza.</p>
-            <ul className="space-y-2">
-              {pedidosBaja.map((x) => (
-                <li key={x.pedido_id}>
-                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-semibold text-lg truncate">{x.nombre}</span>
-                      <span className="block texto-suave truncate">Por {MOTIVO_BAJA[x.motivo] ?? x.motivo}{x.nota ? `: “${x.nota}”` : ""}{x.codigo ? ` · ${x.codigo}` : ""}</span>
-                      {x.tarde && <span className="block font-semibold text-sm" data-baja-tarde><Icono nombre="reloj-arena" /> Hace más de 24 h que espera respuesta</span>}
-                    </span>
-                    <span className="texto-suave">Resolver</span>
-                  </LinkPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {pedidosPausa.length > 0 && (
-          <section aria-labelledby="pedidos-pausa" data-pedidos-pausa={pedidosPausa.length}>
-            <h2 id="pedidos-pausa" className="titulo text-3xl mb-4"><Icono nombre="pausa" /> Pausas para aprobar</h2>
-            <ul className="space-y-2">
-              {pedidosPausa.map((x) => (
-                <li key={x.id}>
-                  <LinkPanel href={`/panel/socios/${x.socio_id}`} siNoEsta="texto" className="tarjeta fila flex items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-semibold text-lg truncate">{x.nombre}</span>
-                      <span className="block texto-suave">Del {diaCorto(x.desde)}, vuelve el {diaCorto(x.vuelve)} · {x.categoria}</span>
-                    </span>
-                    <span className="texto-suave">Revisar</span>
-                  </LinkPanel>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {cumples.length > 0 && (
-          <section aria-labelledby="cumples" data-cumplen-hoy={cumples.length}>
-            <h2 id="cumples" className="titulo text-3xl mb-4"><Icono nombre="calendario" /> Cumplen hoy</h2>
-            <ul className="space-y-2">
-              {cumples.map((c) => {
-                const wa = linkWhatsappSocio(c.telefono, c.mensaje);
-                return (
-                  <li key={c.socio_id} className="tarjeta flex flex-wrap items-center gap-3 px-4 py-3 min-h-[68px]">
-                    <span className="text-2xl" aria-hidden><Icono nombre="estrella" /></span>
-                    <span className="min-w-0 flex-1">
-                      <LinkPanel href={`/panel/socios/${c.socio_id}`} siNoEsta="texto" className="block font-semibold text-lg truncate">{c.nombre}</LinkPanel>
-                      <span className="block texto-suave">Cumple {c.cumple} años</span>
-                    </span>
-                    {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="boton"><Icono nombre="mensaje" /> Saludar</a>}
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        )}
+        {resto}
       </>
     );
   });

@@ -28,7 +28,8 @@ try {
   const vivo = d.locator('[data-entrada-vivo="rechazado"]', { hasText: "Testigo Vencida" }).first();
   await vivo.waitFor({ timeout: 30000 });
   const t = (await vivo.innerText()).replace(/\s+/g, " ");
-  chequear(await vivo.locator("svg").count() > 0 && /\d{2}:\d{2}/.test(t) && t.includes("QR"), `última entrada: “${t.slice(0, 80)}” (con su ícono)`, `la entrada no tiene ícono, hora y vía: ${t}`);
+  // Con Pista Semáforo el ícono es la etiqueta del resultado ("No pasó"), como en inicio-panel.png.
+  chequear((await vivo.locator("svg").count() > 0 || await vivo.locator(".pildora").count() > 0) && /\d{2}:\d{2}/.test(t) && t.includes("QR"), `última entrada: “${t.slice(0, 80)}” (con su ícono)`, `la entrada no tiene ícono, hora y vía: ${t}`);
   await capturar(d, "vd12b-compu-duena");
   await vivo.getByRole("link", { name: /Cobrar/ }).click();
   await d.locator("[data-cobrar]").waitFor({ timeout: 30000 });

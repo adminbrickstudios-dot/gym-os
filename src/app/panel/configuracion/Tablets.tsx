@@ -2,7 +2,7 @@
 // Las tablets autorizadas para la puerta (ENT-3). Autorizar da un link que se
 // abre una vez en la tablet (o se escanea su QR); revocar la apaga al instante.
 import { useEffect, useState, useTransition } from "react";
-import QRCode from "qrcode";
+// Parte 3 (24/11): la librería del QR baja solo cuando hay un link que dibujar (import dinámico, como en el kiosco y la app).
 import { autorizarTablet, revocarTablet, type Tablet } from "./acciones";
 import { fechaCorta } from "@/lib/formato";
 import { Icono } from "@/components/ui/Icono";
@@ -15,7 +15,7 @@ export function Tablets({ inicial, sedes, esDueno, zona }: { inicial: Tablet[]; 
   const [qr, setQr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ocupado, empezar] = useTransition();
-  useEffect(() => { if (link) void QRCode.toString(link, { type: "svg", margin: 1 }).then(setQr); else setQr(null); }, [link]);
+  useEffect(() => { if (link) void import("qrcode").then(({ default: QRCode }) => QRCode.toString(link, { type: "svg", margin: 1 })).then(setQr); else setQr(null); }, [link]);
   const activas = tablets.filter((t) => !t.revocado);
 
   return (

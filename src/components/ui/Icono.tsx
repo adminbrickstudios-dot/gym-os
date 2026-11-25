@@ -123,7 +123,9 @@ export function esIcono(nombre: string): boolean {
   return nombre in ICONOS || nombre in PUNTOS;
 }
 
-export function Icono({ nombre: pedido, titulo, className, style, sistema = false }: { nombre: string | null | undefined; titulo?: string; className?: string; style?: CSSProperties; sistema?: boolean }): ReactNode {
+/** Con `linea` queda siempre el dibujo de línea (los botones redondos del encabezado en Pista Semáforo); sin `linea`, con la llave
+ *  pista_semaforo se ve el emoji del mapa único (src/lib/emojis.ts) y sin la llave, el dibujo de línea. */
+export function Icono({ nombre: pedido, titulo, className, style, sistema = false, linea = false }: { nombre: string | null | undefined; titulo?: string; className?: string; style?: CSSProperties; sistema?: boolean; linea?: boolean }): ReactNode {
   if (!pedido) return null;
   const nombre = sistema && !esIcono(pedido) ? (iconoDeEmoji(pedido) ?? pedido) : pedido;
   const aria = titulo ? { role: "img" as const, "aria-label": titulo } : { "aria-hidden": true as const };
@@ -135,10 +137,13 @@ export function Icono({ nombre: pedido, titulo, className, style, sistema = fals
     );
   }
   if (!(nombre in ICONOS)) return <span className={className} style={style} {...aria}>{nombre}</span>;   // un emoji escrito por el dueño en un dato suyo
-  return (
+  const svg = (
     <svg viewBox="0 0 24 24" width="1.15em" height="1.15em" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
       className={`icono-svg ${className ?? ""}`} style={style} {...aria}>
       {ICONOS[nombre as NombreIcono].map((d, i) => <path key={i} d={d} />)}
     </svg>
   );
+  // Pista Semáforo: un lugar vacío para el emoji (lo llena el CSS que pone el layout solo con la llave). Sin la llave no se ve ni ocupa lugar.
+  if (linea || titulo) return svg;
+  return <><span className={`icono-e ${className ?? ""}`} data-e={nombre} aria-hidden="true" />{svg}</>;
 }

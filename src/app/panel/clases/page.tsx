@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { conSemaforo } from "@/lib/semaforo";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
@@ -22,6 +23,7 @@ function diaLocal(zona: string, sumar = 0) {
 export default async function Clases({ searchParams }: { searchParams: Promise<{ dia?: string; sede?: string }> }) {
   const sp = await searchParams;
   return intentar(async () => {
+    const semaforo = await conSemaforo();
     const panel = await contextoPanel();
     exigirSeccion(panel, "clases");
     const zona = panel.gimnasio.zona_horaria;
@@ -48,6 +50,40 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
           ))}
         </nav>
         {clases.length === 0 ? <Vacio icono="calendario" titulo="No hay clases este día" acciones={panel.yo.rol === "dueno" || panel.yo.rol === "encargado" ? <Link href="/panel/clases/grilla" className="boton boton-principal" data-vacio-grilla><Icono nombre="grilla" /> Abrir la grilla</Link> : undefined}>Las clases salen de la grilla de la semana. Si hoy tendría que haber, revisá la grilla.</Vacio> : (
+          semaforo ? (
+          // Pista Semáforo (clases-de-hoy.png): una tarjeta por clase, con la hora grande, el cupo en una barra y los dos botones.
+          <ul className="clases-semaforo" data-clases-semaforo>
+            {clases.map((c) => {
+              const lleno = c.cupo != null && c.confirmadas >= c.cupo;
+              const pasada = new Date(c.fin).getTime() < ahora;
+              const enCurso = !pasada && new Date(c.inicio).getTime() <= ahora;
+              const ajena = panel.yo.rol === "profe" && (c.profe_id !== undefined ? c.profe_id !== panel.yo.equipo_id : c.profe !== panel.yo.nombre);
+              const lleva = c.cupo ? Math.min(100, Math.round((c.confirmadas / c.cupo) * 100)) : 0;
+              return (
+                <li key={c.clase_id} className={`tarjeta clases-semaforo-item ${enCurso ? "es-ahora" : ""} ${c.cancelada || pasada || ajena ? "opacity-55" : ""}`} data-clase={c.clase_id} data-clase-ajena={ajena ? "" : undefined}>
+                  <div className="clases-semaforo-arriba">
+                    <span className="numero clases-semaforo-hora">{hora(c.inicio)}</span>
+                    {c.cancelada ? <span className="pildora">Cancelada</span> : lleno ? <span className="pildora pildora-rojo">Lleno{c.en_espera ? ` · ${c.en_espera} en espera` : ""}</span> : enCurso ? <span className="clases-semaforo-ahora">Ahora</span> : null}
+                  </div>
+                  <p className="clases-semaforo-actividad"><span aria-hidden><Icono nombre={c.emoji ?? "calendario"} /></span> {c.actividad}</p>
+                  <p className="texto-suave">{c.cancelada ? `Cancelada · ${c.cancelada_motivo ?? ""}` : c.profe ? `Prof. ${c.profe}` : "Sin profe asignado"}</p>
+                  {!c.cancelada && (
+                    <div className="clases-semaforo-cupo">
+                      {c.cupo != null && <span className="clases-semaforo-barra" aria-hidden><span style={{ width: `${lleva}%` }} className={lleva >= 80 ? "casi" : ""} /></span>}
+                      <span className="font-bold">{c.confirmadas}{c.cupo != null ? ` de ${c.cupo}` : " anotados"}</span>
+                    </div>
+                  )}
+                  {!ajena && !c.cancelada && (
+                    <div className="clases-semaforo-botones">
+                      <Link href={`/panel/clases/${c.clase_id}`} className={`boton ${enCurso ? "boton-principal" : ""}`}>Tomar presente</Link>
+                      <Link href={`/panel/clases/${c.clase_id}?ver=anotados`} className="boton boton-suave">Anotados</Link>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          ) : (
           <ul className="space-y-2">
             {clases.map((c) => {
               const lleno = c.cupo != null && c.confirmadas >= c.cupo;
@@ -80,6 +116,7 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               );
             })}
           </ul>
+          )
         )}
       </>
     );

@@ -499,3 +499,361 @@ html[data-estilo="pista"] nav a[aria-current="page"] * { color: inherit; }
   }
 }
 /* El QR ya va siempre sobre su cuadro blanco con margen (bg-white p-3 en MiQR, Kiosco, Tablets y los carteles): no depende del modo. */
+
+/* ═══════════════════════════════════════════════════════════════════
+   Pista Semáforo (Mateo, 24/11 · docs/base/pista/semaforo, DISENO.md § Pista Semáforo). Solo con <html data-estilo="pista" data-semaforo="si">
+   (la llave pista_semaforo del gimnasio): sin el atributo, Pista y el clásico quedan como estaban. Todos los colores son tokens de acá;
+   las pantallas usan var(--…), nunca un color suelto. El acento sale de cada gimnasio (el mismo de Pista).
+   ═══════════════════════════════════════════════════════════════════ */
+html[data-estilo="pista"][data-semaforo="si"] {
+  --radio: 24px;
+  --radio-grande: 24px;
+  --radio-campo: 999px;
+  --radio-fila: 18px;
+  --alto-minimo: 50px;
+  --alto-accion: 60px;
+  --alto-fila: 40px;
+}
+html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"] [data-tono] {
+  --fondo: #0E151C !important;
+  --menu: #0A1016;
+  --tarjeta: #18222C; --tarjeta-alta: #2A3845; --borde: #3A4A58; --borde-campo: #2A3845;
+  --texto: #EEF2F5; --texto-suave: #9AAAB8; --texto-tenue: #9AAAB8; --texto-2: #9AAAB8;
+  --superficie: #18222C;
+  --sobre-claro: #0B1117;
+  /* El semáforo de la puerta: fondo y texto de cada resultado. */
+  --pasa: #16A34A; --pasa-texto: #052E14;
+  --vence: #FBBF24; --vence-texto: #1F1300;
+  --nopasa: #DC2626; --nopasa-texto: #FFFFFF; --nopasa-boton: #B91C1C;
+  --ok: #16A34A; --atencion: #FBBF24; --no: #DC2626; --prueba: #93C5FD;
+  /* Etiquetas de estado: fondo y texto. */
+  --et-aldia: #123B23; --et-aldia-texto: #4ADE80;
+  --et-vence: #3D2E0A; --et-vence-texto: #FBBF24;
+  --et-debe: #3F1515; --et-debe-texto: #F87171;
+  --et-congelado: #13294B; --et-congelado-texto: #93C5FD;
+  --et-baja: #2A3845; --et-baja-texto: #C9D3DB;
+  --et-prueba: #2E1F4D; --et-prueba-texto: #C4B5FD;
+  background: #0E151C !important;
+}
+html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"], html[data-estilo="pista"][data-semaforo="si"][data-modo="oscuro"] body { background: #0E151C; }
+/* En claro: las mismas piezas (píldoras, radios, alturas) sobre los colores de Pista claro; las etiquetas, con sus tonos claros. */
+html[data-estilo="pista"][data-semaforo="si"][data-modo="claro"] [data-tono] {
+  --menu: #FFFFFF; --borde-campo: #D5DCE2; --sobre-claro: #0B1117;
+  --pasa: #16A34A; --pasa-texto: #052E14; --vence: #FBBF24; --vence-texto: #1F1300; --nopasa: #DC2626; --nopasa-texto: #FFFFFF; --nopasa-boton: #B91C1C;
+  --et-aldia: #DCFCE7; --et-aldia-texto: #14532D; --et-vence: #FEF3C7; --et-vence-texto: #713F12; --et-debe: #FEE2E2; --et-debe-texto: #7F1D1D;
+  --et-congelado: #DBEAFE; --et-congelado-texto: #1E3A8A; --et-baja: #E2E8F0; --et-baja-texto: #334155; --et-prueba: #EDE9FE; --et-prueba-texto: #4C1D95;
+}
+
+@layer components {
+  /* Títulos de página y de sección: Big Shoulders, mayúscula. */
+  html[data-semaforo="si"] .titular { font-weight: 800; text-transform: uppercase; }
+  html[data-semaforo="si"] .titulo { font-weight: 800; text-transform: uppercase; letter-spacing: 0; }
+  html[data-semaforo="si"] .numero { font-weight: 800; }
+
+  /* Tarjeta: radio 24, sin borde (se separa por el tono). */
+  html[data-semaforo="si"] .tarjeta, html[data-semaforo="si"] .vidrio { border-radius: var(--radio); border-color: transparent; }
+  html[data-semaforo="si"][data-modo="claro"] .tarjeta { border-color: var(--borde); }
+
+  /* Botón: siempre píldora. 50 de alto por defecto (tarjetas), 60 la acción de la pantalla (principal), 40 dentro de filas (chico). */
+  html[data-semaforo="si"] .boton {
+    border-radius: 999px; min-height: var(--alto-minimo); padding: 0 22px; font-weight: 700; font-size: 17px;
+    background: transparent; color: var(--texto); border: 2px solid var(--borde);
+  }
+  html[data-semaforo="si"] .boton:hover { background: var(--tarjeta-alta); }
+  html[data-semaforo="si"] .boton-principal { min-height: var(--alto-accion); background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-principal:hover { background: color-mix(in oklab, var(--acento), white 8%); }
+  html[data-semaforo="si"] .boton-claro { background: var(--texto); color: var(--sobre-claro); border-color: transparent; }
+  html[data-semaforo="si"] .boton-claro:hover { background: color-mix(in oklab, var(--texto), black 6%); }
+  html[data-semaforo="si"] .boton-peligro { background: var(--nopasa); color: var(--nopasa-texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-suave { background: var(--tarjeta-alta); color: var(--texto); border-color: transparent; }
+  html[data-semaforo="si"] .boton-chico { min-height: var(--alto-fila); padding: 0 16px; font-size: 15px; border-radius: 999px; background: var(--tarjeta-alta); border-color: transparent; }
+  html[data-semaforo="si"] .boton-chico.boton-principal { background: var(--acento); }
+  html[data-semaforo="si"] .boton-chico.boton-claro { background: var(--texto); }
+  html[data-semaforo="si"] .boton:disabled { opacity: 0.45; }
+  html[data-semaforo="si"] .boton-texto { border-radius: 999px; }
+
+  /* Celular: nada se sale a lo ancho y todo se toca con el dedo (44 o más, FLUIDEZ); el 40 de las filas es de la compu. */
+  html[data-semaforo="si"] .boton, html[data-semaforo="si"] .pestana { max-width: 100%; }
+  /* Un fieldset mide por defecto lo que su contenido más ancho: con las piezas Semáforo se pasaba 9 px en el celular (Configuración → Cobros). */
+  html[data-semaforo="si"] fieldset { min-width: 0; }
+  @media (max-width: 1023px) {
+    html[data-semaforo="si"] .boton { padding: 0 16px; font-size: 16px; }
+    html[data-semaforo="si"] .boton-chico { min-height: 44px; }
+    html[data-semaforo="si"] .pestana { white-space: normal; text-align: left; }
+    html[data-semaforo="si"] .campo { padding: 0 14px; max-width: 100%; }
+    /* Las filas chicas de botones (mover y quitar una foto, el descuento del carrito) pasan de renglón en vez de salirse. */
+    html[data-semaforo="si"] .flex:has(> .boton-texto.ml-auto) { flex-wrap: wrap; min-width: 0; }
+    html[data-semaforo="si"] .boton-texto { max-width: 100%; }
+  }
+
+  /* Campo y búsqueda: píldora de 54, borde de 2. */
+  html[data-semaforo="si"] .campo { border-radius: 27px; min-height: 54px; padding: 0 20px; background: var(--tarjeta); border: 2px solid var(--borde-campo); font-size: 17px; font-weight: 500; }
+  html[data-semaforo="si"] textarea.campo { border-radius: 24px; padding: 14px 20px; }
+  html[data-semaforo="si"] .campo[aria-invalid="true"] { border-color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .campo:focus { outline: 2px solid var(--acento); border-color: transparent; }
+
+  /* Etiqueta de estado y píldoras: 30 de alto, mayúscula, con su par de colores. */
+  html[data-semaforo="si"] .pildora { min-height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 700; text-transform: uppercase; background: var(--et-baja); color: var(--et-baja-texto); }
+  html[data-semaforo="si"] .pildora-verde { background: var(--et-aldia); color: var(--et-aldia-texto); }
+  html[data-semaforo="si"] .pildora-amarillo, html[data-semaforo="si"] .pildora-naranja { background: var(--et-vence); color: var(--et-vence-texto); }
+  html[data-semaforo="si"] .pildora-rojo { background: var(--et-debe); color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .pildora-azul { background: var(--et-congelado); color: var(--et-congelado-texto); }
+
+  /* Filtros (pestañas): píldora de 44; la elegida, llena con el acento. */
+  html[data-semaforo="si"] .pestana { min-height: 44px; padding: 0 18px; border-radius: 22px; background: var(--tarjeta); border-color: transparent; color: var(--texto); font-weight: 600; }
+  html[data-semaforo="si"] .pestana[aria-selected="true"], html[data-semaforo="si"] .pestana[aria-current="page"], html[data-semaforo="si"] .pestana[aria-pressed="true"] { background: var(--acento); color: var(--acento-texto); font-weight: 700; }
+
+  /* Aviso: píldora de 56 con su emoji. */
+  html[data-semaforo="si"] .mensaje { border-radius: 28px; min-height: 56px; padding: 0 20px; align-items: center; border: 0; font-weight: 600; background: var(--et-congelado); color: var(--et-congelado-texto); }
+  html[data-semaforo="si"] .mensaje-exito { background: var(--et-aldia); color: var(--et-aldia-texto); }
+  html[data-semaforo="si"] .mensaje-error { background: var(--et-debe); color: var(--et-debe-texto); }
+  html[data-semaforo="si"] .mensaje-aviso { background: var(--et-vence); color: var(--et-vence-texto); }
+
+  /* Fila de lista: 64 de alto, radio 18. */
+  html[data-semaforo="si"] .fila { border-radius: var(--radio-fila); border: 0; min-height: 64px; padding: 0 14px; gap: 14px; background: var(--fondo); }
+  html[data-semaforo="si"] .fila:hover { background: var(--tarjeta-alta); }
+
+  /* Ícono en su cuadrado: redondo. */
+  html[data-semaforo="si"] .icono { border-radius: 999px; }
+
+  /* Pantalla vacía: tarjeta con emoji grande, título y botón. */
+  html[data-semaforo="si"] .vacio { background: var(--tarjeta); border-radius: var(--radio); padding: 30px; gap: 10px; }
+
+  /* Los emojis del diseño: un solo mapa (src/lib/emojis.ts), que el layout pone en reglas solo con la llave. Sin la llave, nada. */
+  .icono-e { display: none; }
+  html[data-semaforo="si"] .icono-e { display: inline-block; font-style: normal; line-height: 1; vertical-align: -0.1em; }
+}
+
+
+/* El resultado de la puerta (src/components/ResultadoPuerta.tsx): tarjeta llena del color del semáforo, la palabra grande,
+   el nombre, el porqué y los botones del color del texto. Sin la llave es una tarjeta del color del resultado. */
+.puerta { border-radius: var(--radio); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--tarjeta); }
+.puerta-titulo { display: flex; align-items: center; gap: 0.75rem; }
+.puerta-palabra { font-family: var(--fuente-titulo); font-weight: 800; font-size: 2.5rem; line-height: 0.9; }
+.puerta-acciones { margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.5rem; }
+.puerta-arriba { display: flex; justify-content: space-between; font-weight: 700; }
+html[data-semaforo="si"] .puerta { min-height: 300px; padding: 24px; gap: 8px; }
+html[data-semaforo="si"] .puerta-verde { background: var(--pasa); color: var(--pasa-texto); --p-fondo: var(--pasa); --p-texto: var(--pasa-texto); --p-boton: var(--pasa); }
+html[data-semaforo="si"] .puerta-amarillo { background: var(--vence); color: var(--vence-texto); --p-fondo: var(--vence); --p-texto: var(--vence-texto); --p-boton: var(--vence); }
+html[data-semaforo="si"] .puerta-rojo { background: var(--nopasa); color: var(--nopasa-texto); --p-fondo: var(--nopasa); --p-texto: var(--nopasa-texto); --p-boton: var(--nopasa-boton); }
+html[data-semaforo="si"] .puerta-gris { background: var(--tarjeta-alta); color: var(--texto); --p-fondo: var(--tarjeta-alta); --p-texto: var(--texto); --p-boton: var(--tarjeta-alta); }
+html[data-semaforo="si"] .puerta-emoji { font-size: 40px; line-height: 1; }
+/* Sin botones adentro (la ficha), la tarjeta mide lo que dice. */
+html[data-semaforo="si"] .puerta:not(:has(.puerta-acciones)) { min-height: 0; }
+/* La ficha: el nombre del socio grande, como un título de pantalla (ficha-socio.png). */
+html[data-semaforo="si"] main header h1.titular:not(.inicio-semaforo-saludo) { font-size: 64px; line-height: 0.95; }
+@media (max-width: 767px) { html[data-semaforo="si"] main header h1.titular:not(.inicio-semaforo-saludo) { font-size: 40px; } }
+html[data-semaforo="si"] .puerta-palabra { font-weight: 800; font-size: 56px; text-transform: uppercase; }
+html[data-semaforo="si"] .puerta-nombre { font-size: 24px; font-weight: 700; }
+html[data-semaforo="si"] .puerta-detalle { font-size: 17px; font-weight: 500; }
+html[data-semaforo="si"] .puerta-arriba { font-size: 17px; }
+/* Los botones adentro: el principal lleno con el color del texto, el segundo con borde. */
+html[data-semaforo="si"] .puerta .boton { width: 100%; min-height: 50px; border: 2px solid var(--p-texto); background: transparent; color: var(--p-texto); font-size: 16px; }
+html[data-semaforo="si"] .puerta .boton-principal, html[data-semaforo="si"] .puerta .puerta-acciones > .boton:first-child { min-height: 56px; border: 0; background: var(--p-texto); color: var(--p-boton); font-weight: 800; font-size: 17px; }
+html[data-semaforo="si"] .puerta .boton-texto, html[data-semaforo="si"] .puerta .texto-suave, html[data-semaforo="si"] .puerta .texto-tenue { color: var(--p-texto); }
+/* Una tarjeta adentro de la puerta (el QR de la app) conserva sus colores: el texto oscuro del verde sobre la tarjeta daba 1,07:1. */
+html[data-semaforo="si"] .puerta .tarjeta { color: var(--texto); }
+html[data-semaforo="si"] .puerta .tarjeta .texto-suave, html[data-semaforo="si"] .puerta .tarjeta .texto-tenue { color: var(--texto-suave); }
+html[data-semaforo="si"] .puerta .tarjeta .boton { border-color: var(--borde); color: var(--texto); }
+/* El kiosco: la palabra enorme. */
+html[data-semaforo="si"] .puerta-kiosco { border-radius: 0; padding: 44px; gap: 14px; min-height: 100%; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-titulo { margin-top: 70px; gap: 18px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-emoji { font-size: 76px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-palabra { font-size: 150px; line-height: 0.85; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-nombre { font-size: 40px; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-detalle { font-size: 24px; font-weight: 600; }
+html[data-semaforo="si"] .puerta-kiosco .puerta-arriba { font-size: 20px; }
+
+/* La ventana de Entrada: la franja del veredicto llena del color del semáforo, con su par de texto (lo mismo que .puerta). */
+html[data-semaforo="si"] [data-ventana-veredicto="verde"] > div:first-child { background: var(--pasa) !important; color: var(--pasa-texto); }
+html[data-semaforo="si"] [data-ventana-veredicto="amarillo"] > div:first-child { background: var(--vence) !important; color: var(--vence-texto); }
+html[data-semaforo="si"] [data-ventana-veredicto="rojo"] > div:first-child { background: var(--nopasa) !important; color: var(--nopasa-texto); }
+html[data-semaforo="si"] [data-ventana-veredicto] > div:first-child p { font-family: var(--fuente-titulo); font-weight: 800; text-transform: uppercase; font-size: 40px; line-height: 0.95; }
+
+/* El kiosco Semáforo (kiosco.png, 1280×800): resultado a la izquierda, teclado de 460 a la derecha. En vertical, uno arriba del otro. */
+.kiosco-semaforo { display: flex; min-height: 100dvh; background: var(--fondo); color: var(--texto); }
+.kiosco-izq { flex: 1; min-width: 0; display: flex; }
+.kiosco-izq > * { flex: 1; }
+.kiosco-hola { padding: 44px; display: flex; flex-direction: column; gap: 14px; background: var(--tarjeta); }
+.kiosco-hola-titulo { font-size: 120px; line-height: 0.85; margin-top: 40px; }
+.kiosco-vuelve { margin-top: auto; font-size: 18px; font-weight: 600; }
+.kiosco-der { width: 460px; flex: none; padding: 36px; display: flex; flex-direction: column; gap: 14px; }
+.kiosco-der-titulo { font-size: 34px; }
+.kiosco-campo { width: 100%; height: 80px; border-radius: 40px; background: var(--tarjeta); border: 2px solid var(--acento); padding: 0 28px;
+  font-weight: 700; font-size: 34px; letter-spacing: 2px; color: var(--texto); font-variant-numeric: tabular-nums; }
+.kiosco-campo:focus { outline: none; }
+.kiosco-tecla { height: 96px; border-radius: 24px; border: 0; background: var(--tarjeta); color: var(--texto); font-family: var(--fuente-titulo); font-weight: 800; font-size: 44px; cursor: pointer; }
+.kiosco-tecla:active { transform: scale(0.97); }
+.kiosco-tecla:disabled { opacity: 0.5; }
+.kiosco-tecla-borrar { background: var(--tarjeta-alta); font-size: 34px; }
+.kiosco-tecla-entrar { background: var(--acento); color: var(--acento-texto); font-family: var(--fuente); font-size: 22px; }
+@media (max-width: 900px) { .kiosco-semaforo { flex-direction: column; } .kiosco-der { width: 100%; } .kiosco-hola-titulo { font-size: 72px; } }
+
+/* El menú Semáforo: la barra lateral en su tono (más oscuro que el fondo), ítems de 46 con el emoji, el activo lleno con el acento;
+   en el celular, la barra de abajo (Inicio, Entrada, Socios, Caja y Más) con el activo en el acento. */
+.etq-mas { display: none; }
+html[data-semaforo="si"] .etq-mas { display: inline; }
+html[data-semaforo="si"] .etq-menu { display: none; }
+html[data-semaforo="si"] aside { background: var(--menu); border-right-color: transparent; }
+html[data-semaforo="si"] aside > p.titulo { font-weight: 800; font-size: 30px; letter-spacing: 0.5px; }
+html[data-semaforo="si"] aside nav a { min-height: 46px; border-radius: 12px; font-weight: 600; font-size: 16px; gap: 12px; }
+html[data-semaforo="si"] aside nav a .icono-e { font-size: 20px; width: 24px; text-align: center; }
+html[data-semaforo="si"] aside nav a[aria-current="page"] { min-height: 50px; border-radius: 14px; font-weight: 700; font-size: 17px; }
+/* Salir lejos del nombre: Cerrar sesión con aire arriba. */
+html[data-semaforo="si"] aside form[action="/salir"] { margin-top: 28px; }
+/* Un botón elegido dentro de una barra (el día en Clases) sigue siendo píldora: la regla de Pista del menú (fuera de capas) le ponía 12. */
+html[data-semaforo="si"] nav a.boton[aria-current="page"] { border-radius: 999px; }
+html[data-semaforo="si"] nav[aria-label="Principales"] { background: var(--menu); border-top-color: transparent; }
+html[data-semaforo="si"] nav[aria-label="Principales"] a[aria-current="page"] { background: transparent; color: var(--acento); }
+html[data-semaforo="si"] nav[aria-label="Principales"] a, html[data-semaforo="si"] nav[aria-label="Principales"] button { font-size: 13px; font-weight: 700; }
+
+/* El encabezado de cada pantalla (socios.png, caja.png, clases-de-hoy.png): la bajada arriba, el título de 64 en mayúscula y el emoji después. */
+html[data-semaforo="si"] .enc-texto { display: flex; flex-direction: column; }
+html[data-semaforo="si"] .enc-bajada { order: -1; margin: 0 0 6px; font-size: 16px; }
+html[data-semaforo="si"] [data-encabezado] h1 { font-size: 64px; line-height: 0.95; }
+html[data-semaforo="si"] .enc-icono { order: 2; color: inherit; }
+html[data-semaforo="si"] [data-encabezado] h1 > .min-w-0 { order: 1; }
+@media (max-width: 767px) { html[data-semaforo="si"] [data-encabezado] h1 { font-size: 44px; } }
+
+/* La app del socio Semáforo (app-socio.png): el saludo grande en mayúscula y los botones con el emoji arriba y el texto a la izquierda. */
+html[data-semaforo="si"] [data-hola] { font-family: var(--fuente-titulo); font-weight: 800; font-size: 44px; line-height: 0.95; text-transform: uppercase; color: var(--texto); }
+html[data-semaforo="si"] [data-botones-inicio] a { text-align: left; justify-items: start; border-radius: 24px; padding: 22px; }
+html[data-semaforo="si"] [data-botones-inicio] a .titulo { font-family: var(--fuente); font-weight: 700; font-size: 20px; text-transform: none; }
+
+/* Caja Semáforo (caja.png): lo cobrado por medio en tarjetas de a 4 con el número grande. */
+html[data-semaforo="si"] div.grid:has(> [data-medio]) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+html[data-semaforo="si"] [data-medio] { background: var(--fondo); border-radius: 20px; padding: 20px 22px; }
+html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
+@media (max-width: 1023px) { html[data-semaforo="si"] div.grid:has(> [data-medio]) { grid-template-columns: repeat(2, minmax(0, 1fr)); } html[data-semaforo="si"] [data-medio] .numero { font-size: 32px; } }
+
+/* Clases de hoy Semáforo (clases-de-hoy.png): tres por fila; la que está pasando, con borde del acento. */
+.clases-semaforo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+.clases-semaforo-item { padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; border: 2px solid transparent; }
+.clases-semaforo-item.es-ahora { border-color: var(--acento); }
+.clases-semaforo-arriba { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.clases-semaforo-hora { font-size: 52px; }
+.clases-semaforo-ahora { color: var(--acento); font-weight: 700; font-size: 18px; text-transform: uppercase; }
+.clases-semaforo-actividad { font-weight: 700; font-size: 30px; }
+.clases-semaforo-cupo { display: flex; align-items: center; gap: 16px; font-size: 20px; }
+.clases-semaforo-barra { flex: 1; height: 14px; border-radius: 7px; background: var(--fondo); overflow: hidden; }
+.clases-semaforo-barra > span { display: block; height: 100%; border-radius: 7px; background: var(--acento); }
+.clases-semaforo-barra > span.casi { background: var(--vence); }
+.clases-semaforo-botones { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+.clases-semaforo-botones .boton { white-space: nowrap; padding: 0 14px; font-size: 16px; }
+@media (max-width: 1100px) { .clases-semaforo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+@media (max-width: 700px) { .clases-semaforo { grid-template-columns: minmax(0, 1fr); } .clases-semaforo-item { padding: 20px; } .clases-semaforo-hora { font-size: 40px; } .clases-semaforo-actividad { font-size: 24px; } }
+
+/* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
+.socios-semaforo { padding: 24px; }
+.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
+.socios-semaforo-fila { display: flex; align-items: center; gap: 12px; }
+.socios-semaforo-link { flex: 1; min-width: 0; min-height: 84px; }
+.socios-semaforo-cabeza { padding: 0 20px 14px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-suave); }
+.socios-semaforo-fila { padding: 0 20px; border-radius: 18px; }
+.socios-semaforo-fila:hover { background: var(--tarjeta-alta); }
+.socios-semaforo-fila.par { background: var(--fondo); }
+.socios-semaforo-socio { display: flex; align-items: center; gap: 16px; min-width: 0; }
+/* Las iniciales van en CSS: el texto de la fila sigue siendo el nombre (lo leen la búsqueda y las pruebas). */
+.socios-semaforo-avatar::before { content: attr(data-iniciales); }
+.socios-semaforo-avatar { width: 52px; height: 52px; flex: none; border-radius: 26px; background: var(--tarjeta-alta); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; }
+.socios-semaforo-estado { display: flex; gap: 6px; min-width: 0; }
+@media (max-width: 767px) {
+  .socios-semaforo { padding: 10px; }
+  .socios-semaforo-cabeza { display: none; }
+  .socios-semaforo-fila { padding: 10px 14px; }
+  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; min-height: 64px; }
+  .socios-semaforo-plan { display: none; }
+  .socios-semaforo-estado { grid-column: 1; }
+  .socios-semaforo-link > .boton { grid-row: 1 / span 2; grid-column: 2; }
+}
+
+/* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
+.inicio-semaforo { display: flex; flex-direction: column; gap: 22px; }
+.inicio-semaforo-fecha { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+.inicio-semaforo-saludo { font-size: 52px; line-height: 0.95; letter-spacing: 0.5px; padding-right: 3.5rem; }
+.inicio-semaforo-entrada { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
+.inicio-semaforo-entrada-izq { padding: 24px 28px; }
+.inicio-semaforo-entrada .puerta { padding: 28px; gap: 10px; min-height: 0; }
+.inicio-semaforo-entrada .puerta-palabra { font-size: 76px; }
+.inicio-semaforo-entrada .puerta-emoji { display: none; }
+.inicio-semaforo-entrada .puerta-arriba { font-size: 15px; font-weight: 600; }
+.inicio-semaforo-entrada .puerta-nombre { font-size: 26px; }
+.inicio-semaforo-entrada .puerta-detalle { font-size: 18px; }
+.inicio-semaforo-bloque { display: flex; flex-direction: column; gap: 12px; }
+.inicio-semaforo-bloque > h2, .inicio-semaforo-cabecera h2, .inicio-semaforo-caja > h2 { font-size: 24px; letter-spacing: 0.5px; }
+.inicio-semaforo-cabecera { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.inicio-semaforo-cuenta { color: var(--vence); }
+.inicio-semaforo-dos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.inicio-semaforo-caja { padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.inicio-semaforo-caja > h2 { margin-bottom: 6px; }
+.inicio-semaforo-filas { display: flex; flex-direction: column; gap: 10px; }
+.inicio-semaforo-fila { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 6px 0 14px; border-radius: 14px; background: var(--fondo); font-size: 16px; }
+.inicio-semaforo-vivo { display: flex; align-items: center; gap: 12px; }
+.inicio-semaforo-envivo { font-family: var(--fuente); font-size: 14px; font-weight: 700; text-transform: none; color: var(--et-aldia-texto, var(--verde)); display: inline-flex; align-items: center; gap: 6px; }
+.inicio-semaforo-punto { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
+.inicio-semaforo-ahora { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.inicio-semaforo-ahora-item { display: flex; flex-direction: column; border-radius: 18px; background: var(--tarjeta); padding: 18px 20px; height: 100%; border: 2px solid transparent; }
+.inicio-semaforo-ahora-item.es-ahora { border-color: var(--acento); padding: 16px 18px; }
+.inicio-semaforo-ahora-hora { font-weight: 700; font-size: 14px; color: var(--texto-suave); text-transform: uppercase; }
+.es-ahora .inicio-semaforo-ahora-hora { color: var(--acento); }
+.inicio-semaforo-ahora-titulo { font-weight: 700; font-size: 19px; margin-top: 4px; }
+.inicio-semaforo-ahora-detalle { font-size: 14px; }
+.inicio-semaforo-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+html[data-semaforo="si"] .inicio-semaforo-chip { min-height: 40px; padding: 0 16px; border-radius: 20px; font-size: 15px; font-weight: 600; text-transform: none; }
+/* Hoy en números: tarjetas de 20 con el número de 62. */
+.inicio-semaforo [data-numeros-semaforo] dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.inicio-semaforo [data-numero] { border-radius: 20px; background: var(--tarjeta); padding: 20px 22px; margin: 0; gap: 4px; }
+.inicio-semaforo [data-numero] dd { font-size: clamp(40px, 3.4vw, 62px); line-height: 1; white-space: nowrap; }
+.inicio-semaforo [data-numero] dt { font-size: 16px; font-weight: 600; color: var(--texto); margin: 0; }
+.inicio-semaforo [data-numero="vencen"] dd, .inicio-semaforo [data-numero="por_vencer"] dd, .inicio-semaforo [data-numero="a_cobrar"] dd { color: var(--vence); }
+.inicio-semaforo [data-numero="cobrado"] dd, .inicio-semaforo [data-numero="caja_turno"] dd { color: var(--acento); }
+.inicio-semaforo [data-numero="plata_riesgo"] dd, .inicio-semaforo [data-numero="deben"] dd { color: var(--et-debe-texto); }
+/* Accesos rápidos: 6 por fila, de 72 de alto, emoji y nombre al lado. En la capa de componentes: sus !important les ganan a los de las utilidades (!flex-col). */
+@layer components {
+  .inicio-semaforo [data-accesos-semaforo] ul { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton { aspect-ratio: auto !important; height: 72px; min-height: 72px; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important;
+    gap: 12px; padding: 0 18px !important; border-radius: 18px !important; background: var(--tarjeta); border: 0; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton > span:first-child { font-size: 26px; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { font-family: var(--fuente); font-size: 16px; font-weight: 700; text-transform: none; text-align: left; }
+  .inicio-semaforo [data-accesos-semaforo] ul > li { min-width: 0; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton { min-width: 0; overflow: hidden; }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { min-width: 0; overflow-wrap: anywhere; line-height: 1.1; }
+  @media (max-width: 1023px) { .inicio-semaforo [data-accesos-semaforo] ul a.boton .titulo { font-size: 14px; } .inicio-semaforo [data-accesos-semaforo] ul a.boton > span:first-child { font-size: 20px; } }
+}
+.inicio-semaforo [data-mini-grafico] { display: none; }
+html[data-semaforo="si"] .linea-grupo { display: none; }
+html[data-semaforo="si"] aside .titulo-grupo { font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-top: 20px; }
+/* La tarjeta ENTRADA (EntradaInicio). */
+.entrada-inicio { display: flex; flex-direction: column; gap: 18px; }
+.entrada-inicio-titulo { font-size: 30px; letter-spacing: 0.5px; }
+.entrada-inicio-campo { display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 12px 0 24px; border-radius: 38px; background: var(--fondo); border: 2px solid var(--acento); }
+.entrada-inicio-lupa { color: var(--acento); font-size: 22px; }
+.entrada-inicio-campo input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--texto); font: 600 24px var(--fuente); outline: none; }
+.entrada-inicio-campo input::placeholder { color: var(--texto-suave); }
+.entrada-inicio-ver { height: 52px; padding: 0 22px; border-radius: 26px; background: var(--acento); color: var(--acento-texto); font-weight: 700; font-size: 18px; border: 0; cursor: pointer; white-space: nowrap; }
+.entrada-inicio-ver:active { transform: scale(0.97); }
+.entrada-inicio-acciones { display: flex; gap: 12px; }
+.entrada-inicio-acciones .boton { flex: 1; min-height: 60px; font-size: 18px; }
+.entrada-inicio-pie { font-size: 15px; }
+@media (max-width: 1023px) {
+  .inicio-semaforo { gap: 22px; }
+  .inicio-semaforo-saludo { font-size: 40px; }
+  .inicio-semaforo-fecha { font-size: 15px; }
+  .inicio-semaforo-entrada, .inicio-semaforo-dos { grid-template-columns: minmax(0, 1fr); }
+  .inicio-semaforo-entrada-izq { padding: 16px; }
+  .entrada-inicio-titulo, .entrada-inicio-pie { display: none; }
+  .entrada-inicio { gap: 12px; }
+  .entrada-inicio-campo { height: 64px; padding: 0 10px 0 20px; }
+  .entrada-inicio-campo input { font-size: 20px; }
+  .entrada-inicio-ver { height: 44px; padding: 0 18px; }
+  .entrada-inicio-acciones .boton { min-height: 50px; padding: 0 10px; font-size: 15px; line-height: 1.1; }
+  .entrada-inicio-acciones .icono-svg { display: none; }
+  .inicio-semaforo-entrada .puerta-palabra { font-size: 56px; }
+  .inicio-semaforo-entrada .puerta-emoji { display: inline; }
+  .inicio-semaforo [data-numeros-semaforo] dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .inicio-semaforo [data-numero] dd { font-size: clamp(30px, 10vw, 48px); }
+  .inicio-semaforo [data-numero] { padding: 16px 18px; }
+  .inicio-semaforo [data-accesos-semaforo] ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .inicio-semaforo [data-accesos-semaforo] ul a.boton { height: 56px; min-height: 56px; border-radius: 28px !important; padding: 0 14px !important; }
+  .inicio-semaforo-ahora { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

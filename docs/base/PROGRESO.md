@@ -1,5 +1,55 @@
 # PROGRESO de Pase (antes Base)
 
+## ✅ Vuelta final publicada + Pista Semáforo en todo el sistema + más liviano (24/11, Mateo)
+
+**Parte 1 · vuelta final publicada (24/11, 22:04 ART, PR #40, merge `9fed244f`; vuelta atrás: revertir ese merge, main antes = `948426c`).**
+- Antes de publicar, sobre el último commit de `dia/2026-11-22`: pruebas-completas en 15 tandas clásico + 15 Pista (23/11) y las tandas tocadas de nuevo sobre `eaa23ca` (clásico 45463567218 y Pista 45464582426), Verificar en verde (45244866823), Lighthouse de las dos landings (gimnasio 92, venta 95, accesibilidad 100: 45115875083).
+- Migración `20261122100000_vuelta_final_landings`: prevuelo 45243546646 OK, aplicada SIN COPIA (45522651169). La primera vez el guardia de hora pico la frenó (19 h en Argentina: el reloj de Git Bash en esta compu leía UTC); no se aplicó nada hasta las 22.
+- **Producción, 3 minutos después del deploy, solo mirando (01:04 UTC):** Vercel verde en `9fed244f`; `/api/salud` → ok, base 40 ms, commit 9fed244; `pasegym.com/ingresar`, `templegymsalta.com`, `/hacete-socio` e `/ingresar` responden 200 (0,4 a 1,7 s); Temple Gym sale `data-estilo="pista"` y con la página de siempre (`landing_nueva` apagada). No se tocó ningún dato de Temple Gym.
+
+**Parte 2 · Pista Semáforo (rama `dia/2026-11-24`, PR #41).** El diseño de `docs/base/pista/semaforo` detrás de la llave `pista_semaforo` (migración `20261124100000`, apagada en Temple Gym, prendida en los [demo]), solo con el estilo Pista. Tokens, piezas, ResultadoPuerta y mapa de emojis: `DISENO.md` § Pista Semáforo.
+- Cada pantalla dibujada tiene su captura al lado del `.png` en el artefacto `pantallas` del recorrido `semaforo-pantallas` (carpeta `capturas/semaforo/`, `<pantalla>.sistema.png` y `<pantalla>.diseno.png`).
+- Qué quedó distinto al diseño y por qué (no se inventó nada que no esté en los datos):
+  - **Inicio:** arriba a la derecha queda la campana de siempre; no se agregó el botón de ayuda redondo ni la píldora de la cuenta con Salir (Salir sigue en el menú). "Para hacer hoy" no tiene casillas de "Hecho" (no existe marcar una tarea del día como hecha: sería una función nueva). Los números no traen la línea de abajo ("23 adentro ahora", "Caja abierta desde…"): la base no la devuelve. El último resultado sale de la última entrada de hoy (no hay un "hace 5 s" de la recepción). Los accesos y los números son los que eligió cada persona.
+  - **Celular:** arriba sigue la barra con el nombre del gimnasio y la búsqueda; "Pase diario" no se acorta a "Pase" (la prueba D69 lo lee como el nombre de la marca). La barra de abajo muestra lo principal de cada rol (para la dueña del demo: Productos en vez de Caja) y **Más**.
+  - **Socios:** sin las columnas Vence y Última vez (la lista no las trae); el botón es "Ver" en todas las filas (Cobrar y WhatsApp por fila serían acciones nuevas en la lista).
+  - **Ficha:** el estado sale con ResultadoPuerta y el nombre grande; el resto es la ficha de siempre (las pestañas y bloques, con las piezas). No están "Veces este mes", "Semanas seguidas" ni la tabla de pagos al costado: la ficha no lee esos datos hoy.
+  - **Caja:** la de siempre con las piezas (lo cobrado por medio en tarjetas de a 4, el cajón y los botones). No está la lista de movimientos del turno con filtros ni "Para aprobar" al costado: no son de esta pantalla hoy.
+  - **Clases de hoy:** igual, salvo "Casi lleno" (sería un umbral inventado: solo se marca Lleno) y los días como botones (no Ayer).
+  - **Kiosco:** igual (resultado a la izquierda, teclado de 460 a la derecha); el texto del resultado es el de la base ("Al día · Plan Full · vence el 04/12"), no el armado del diseño.
+  - **App del socio:** el estado lleno con el QR adentro y el saludo grande; los botones de todos los días son los 6 de siempre (no solo Mis pagos y Mi rutina) y siguen la bienvenida, la encuesta y el resto.
+  - **Kiosco y resultado de la puerta:** la palabra es PASA / NO PASA según `puede`; "PASA · VENCE MAÑANA" no se arma (el porqué va abajo, como lo dice la base).
+- Pruebas: `semaforo-pantallas` (1366×768 sin bajar, accesos sin repetir, Salir lejos del nombre, botones píldora, colores solo de tokens, 360 sin desborde, kiosco); pruebas-completas 15 tandas clásico (todo verde; vd-2b intermitente, pasó al repetir) y 15 Pista con la llave (todo verde con lo arreglado); barrido de cada rol e inventario en las dos llaves dentro de las tandas; Verificar verde; prueba de la base de la llave en negativo (`pista-semaforo.test.mjs`).
+
+**Parte 3 · que no pese. Antes = la app de `dia/2026-11-22` (lo publicado), después = `dia/2026-11-24`, medidos con los mismos scripts en Actions.**
+
+| JS primera carga (KB · gzip) | Antes | Después |
+|---|---:|---:|
+| /panel | 703,0 · 214,9 | 706,9 · 215,9 |
+| /panel/entrada | 714,7 · 219,2 | 715,2 · 219,3 |
+| /panel/socios | 688,0 · 211,1 | 690,7 · 211,6 |
+| /panel/socios/[id] | 753,4 · 228,1 | 753,9 · 228,2 |
+| /panel/caja | 690,8 · 210,9 | 691,3 · 211,0 |
+| /panel/clases | 667,1 · 204,6 | 667,5 · 204,8 |
+| **/app** | **1014,1 · 302,0** | **756,8 · 235,4** |
+| / (página del gimnasio) | 696,7 · 214,1 | 697,1 · 214,2 |
+| /kiosco | 678,4 · 207,9 | 683,7 · 208,8 |
+
+| Lighthouse celular (Pista) | Antes | Después (con la llave) |
+|---|---:|---:|
+| Inicio (dueña) | 80 · CLS 0,225 | **95** · CLS 0,002 |
+| Entrada | 79 · CLS 0,211 | **89** · CLS 0 |
+| Socios | 76 · CLS 0,226 | **90** · CLS 0 |
+| App del socio | 81 · CLS 0,191 | **88** · CLS 0,001 |
+| Página del gimnasio | 90 | 92 |
+
+- Lo que se sacó: el cliente de Supabase del navegador (auth, realtime y storage, ~180 KB) baja recién al subir un comprobante (app del socio) y en los dos pasos de Mi cuenta; la librería del QR de Configuración → Tablets con import dinámico (22 KB); la ayuda de pantalla sale abierta desde el primer pintado en vez de empujar la pantalla medio segundo después (era el CLS de 0,2); el QR de la app y el QR de la pared del kiosco no consultan con la pestaña oculta.
+- Lo que ya estaba bien y no se tocó: el contexto del panel con `cache()` (un viaje por pantalla), el proxy guarda la dirección 60 s, las fuentes son solo los pesos que se usan (Big Shoulders 800; Semáforo usa 800, no 900, para no bajar un archivo más), Campana, Navegación, Últimas entradas, el cartel de emergencia y "en vivo" ya paraban con la pestaña oculta.
+- Los 15 módulos más pesados (antes, primera carga sin comprimir; reparto aproximado por mapas): next 618,8 KB (todas), Icono 123,5 (todas), @supabase/auth-js 104,8 (/app, /app/plan, Mi cuenta), Ajustes 44,7 (Configuración), SalidaError 35 y Reintentar 20,3 (81 rutas: el reparto les asigna código del runtime), @supabase/realtime-js 31,6, @supabase/phoenix 25,9, Editor de la página 23,5, qrcode 22,1 (Configuración), @supabase/storage-js 20,9, Landing 20,4, VentanaEntrada 20,2 (todas), Carrito 19,9, indice de Configuración 18,8. Después ya no están los de Supabase ni qrcode.
+- Viajes a la base: sin cambios (el Inicio Semáforo usa el mismo lote); los topes de `topes-viajes.json` no se tocaron y la medición dio dentro del tope.
+- Topes nuevos: `scripts/medir/topes-js.json` (KB gzip de la primera carga de cada pantalla clave, los números de "después"); Analizar bundle falla si una pantalla lo pasa y `chequeos` verifica que estén.
+- Para pesar menos que esto (anotado, no hecho): `Icono` baja entero en todas las rutas; el `<dl>` del Inicio y el `role` de las pestañas de Socios bajan la accesibilidad (93-94) desde antes de Semáforo.
+
 ## ✅ Paneles completos publicados (19/11, 23:40 ART, PR #38, merge `f0c9accd`; vuelta atrás: revertir ese merge, main antes = `975e9f65`)
 
 - **Regresión de pruebas-completas arreglada** (fallaba igual en main, no era el diff): prueba de base 8 contra el reloj real; vd-8 sin las entradas de ent-4; límite de códigos en cero por recorrido (vd-22/33/39/55/58); Retención en el celu a lo ancho (vd-46o, q2-retencion, barrido); foco de la Entrada en el campo del DNI (vd-6); q3-patrones deja inactiva su sede (landing-l1).
