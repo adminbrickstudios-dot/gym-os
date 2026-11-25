@@ -899,7 +899,7 @@ html[data-semaforo="si"] [data-ventana-veredicto] .franja-texto { display: block
 .ficha-semaforo-numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
 .ficha-semaforo-numeros > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; border-radius: 20px; background: var(--tarjeta); padding: 18px 20px; }
 .ficha-semaforo-numeros dt { font-size: 15px; font-weight: 600; color: var(--texto-suave); }
-.ficha-semaforo-numeros dd { margin: 0; font-size: clamp(30px, 3vw, 44px); line-height: 1; }
+.ficha-semaforo-numeros dd { margin: 0; font-size: clamp(26px, 2.4vw, 38px); line-height: 1; white-space: nowrap; }
 .ficha-semaforo-pagos { padding: 18px 20px; }
 .ficha-semaforo-pagos table { margin-top: 10px; border-collapse: collapse; }
 .ficha-semaforo-pagos td { padding: 10px 6px; border-top: 1px solid var(--borde); vertical-align: middle; }
