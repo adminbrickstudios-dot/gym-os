@@ -26,8 +26,9 @@ function etiquetaEstado(s: FilaSocio): [string, string] {
   if (s.dado_de_baja) return ["", "De baja"];
   if (s.color === "verde") return ["pildora-verde", "Al día"];
   if (s.color === "azul") return ["pildora-azul", s.texto];
-  if (s.color === "rojo") return ["pildora-rojo", s.texto];
-  if (s.color === "amarillo") return ["pildora-amarillo", s.texto];
+  // socios.png: la palabra corta (DEBE, VENCE MAÑANA); el texto entero de la base queda en el title.
+  if (s.color === "rojo") return ["pildora-rojo", /^Venci[óo]/.test(s.texto) ? "Debe" : s.texto];
+  if (s.color === "amarillo") return ["pildora-amarillo", venceDe(s.color, s.texto) ?? s.texto];
   return ["", s.texto];
 }
 const iniciales = (n: string) => n.trim().split(/s+/).slice(0, 2).map((x) => x[0]?.toUpperCase() ?? "").join("");
@@ -150,7 +151,7 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                     </span>
                     <span className="socios-semaforo-plan truncate" data-plan-fila>{s.plan ?? "—"}</span>
                     <span className="socios-semaforo-estado">
-                      <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
+                      <span className={`pildora ${clase} max-w-full truncate`} title={s.texto}>{texto}</span>
                       {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
                     </span>
                     <span className="socios-semaforo-vence numero" data-vence-fila>{s.vence && !s.dado_de_baja ? ultimoDia(s.vence, zona) : "—"}</span>

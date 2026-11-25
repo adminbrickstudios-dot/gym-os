@@ -9,6 +9,7 @@
 --   numeros_inicio · clave 'no_vienen'              "Dejaron de venir" (la lista no_viene de Retención, la misma regla)
 --   buscar_socios · vence, ultima_vez, dejo_de_venir  Vence (socios.cubierto_hasta), Última vez (la última entrada, índice ingresos_socio) y
 --                                                   si dejó de venir (la regla de la lista no_viene de Retención, con los días del gimnasio)
+--                                                   y el límite pasa de 100 a 600: "Ver 60 más" de Socios pedía 120 y la base lo rechazaba
 --   ficha_socio · racha                             veces este mes y semanas seguidas (racha_socio, lo mismo que las insignias de la app)
 --   movimientos_turno(turno)                        los cobros del turno (cobros_de_turnos) y los ingresos y retiros de la caja, con el mismo permiso
 --   config_clases_panel(gimnasio)                   el umbral de Casi lleno para la pantalla de Clases
@@ -160,7 +161,7 @@ declare e public.equipo; t text := privado.sin_acentos(lower(trim(coalesce(p_tex
 begin
   e := privado.exigir_equipo(p_gimnasio_id, array['dueno', 'encargado', 'recepcion']);
   select c.retencion_dias_ausencia into ausencia from public.configuracion_gimnasio c where c.gimnasio_id = p_gimnasio_id;
-  if p_limite is null or p_limite < 1 or p_limite > 100 then raise exception 'El límite va de 1 a 100'; end if;
+  if p_limite is null or p_limite < 1 or p_limite > 600 then raise exception 'El límite va de 1 a 600'; end if;
   if p_estado is not null and not por_estado and p_estado not in ('nuevos', 'bajas') then raise exception 'Filtro desconocido: %', p_estado; end if;
   if p_origen is not null and p_origen <> 'web' then raise exception 'Filtro desconocido: %', p_origen; end if;
   digitos := regexp_replace(t, '\D', '', 'g');

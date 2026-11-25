@@ -127,3 +127,11 @@ test("todo gimnasio nuevo de /super nace en Pista con Semáforo; un gimnasio rea
   assert.equal(despues, antes);
   await t.comoUsuario(u.dueno, () => t.falla(() => t.q(`select public.admin_crear_gimnasio('otro-intento', 'X', 'ejemplo.invalid', 'Y')`)));
 });
+
+test("buscar_socios acepta hasta 600 (Ver 60 más de Socios pide 120) y rechaza más", async () => {
+  await t.comoUsuario(u.recepcion, async () => {
+    const filas = await t.q(`select * from public.buscar_socios($1, '', 120)`, [t.g]);
+    assert.ok(filas.length > 0);
+    await t.falla(() => t.q(`select * from public.buscar_socios($1, '', 601)`, [t.g]), /de 1 a 600/);
+  });
+});
