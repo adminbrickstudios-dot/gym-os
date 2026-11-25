@@ -23,6 +23,8 @@ const DISENO = join(process.cwd(), "docs", "base", "pista", "semaforo");
 const db = new pg.Client({ connectionString: process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim() });
 await db.connect();
 const q = async (sql, p) => (await db.query(sql, p)).rows;
+// Los turnos de caja abiertos al empezar: al terminar se cierran los que abrió este recorrido (la medición de viajes de después los espera así).
+const turnosInicio = (await q(`select id from public.turnos_caja where cerrado_en is null`)).map((x) => x.id);
 
 /** Guarda la captura del sistema y copia la del diseño al lado: <pantalla>.sistema.png y <pantalla>.diseno.png. */
 async function lado(p, pantalla) {
@@ -203,6 +205,8 @@ try {
   }
 } finally {
   await b.close();
+  await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [turnosInicio])
+    .catch((e) => console.log(`· no se pudo cerrar el turno de prueba: ${e.message}`));
   await db.end();
 }
 resultado();
