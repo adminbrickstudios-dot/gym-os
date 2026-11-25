@@ -745,10 +745,12 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
 
 /* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
 .socios-semaforo { padding: 24px; }
-.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.6fr) minmax(0, 0.9fr); align-items: center; gap: 16px; }
-/* La cabecera lleva una columna más: la de la acción de la fila (que va fuera del link: un botón no va adentro de otro link). */
-.socios-semaforo-cabeza { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.6fr) minmax(0, 0.9fr) 112px; }
+.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.6fr) minmax(0, 0.9fr) 112px; align-items: center; gap: 16px; }
 .socios-semaforo-accion { flex: none; width: 112px; justify-content: center; }
+/* Cobrar y WhatsApp van fuera del link de la fila, encima de su celda (la última columna). */
+.socios-semaforo-fila { position: relative; }
+.socios-semaforo-accion-fuera { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+.socios-semaforo-accion-fuera:active { transform: translateY(-50%) scale(0.97); }
 .socios-semaforo-ultima { color: var(--texto-suave); font-size: 15px; }
 .socios-semaforo-fila { display: flex; align-items: center; gap: 12px; }
 .socios-semaforo-link { flex: 1; min-width: 0; min-height: 84px; }
@@ -765,10 +767,13 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
   .socios-semaforo { padding: 10px; }
   .socios-semaforo-cabeza { display: none; }
   .socios-semaforo-fila { padding: 10px 14px; }
-  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr); row-gap: 6px; min-height: 64px; }
+  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr) 96px; row-gap: 6px; min-height: 64px; }
   .socios-semaforo-plan, .socios-semaforo-vence { display: none; }
-  .socios-semaforo-ultima { font-size: 13px; }
-  .socios-semaforo-accion { width: auto; min-width: 72px; }
+  .socios-semaforo-ultima { font-size: 13px; grid-column: 1; }
+  .socios-semaforo-estado { grid-column: 1; }
+  .socios-semaforo-link > .socios-semaforo-accion { grid-row: 1 / span 3; grid-column: 2; }
+  .socios-semaforo-accion { width: 96px; }
+  .socios-semaforo-accion-fuera { right: 14px; }
 }
 
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
