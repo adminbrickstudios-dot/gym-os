@@ -137,6 +137,7 @@ export function Importador({ anteriores, zona }: { anteriores: Importacion[]; zo
           <button type="button" className="boton boton-principal" disabled={ocupado || revision.validas === 0} onClick={hacerImportacion}>
             {ocupado ? "Importando…" : `Importar ${revision.validas} socios`}
           </button>
+          {conError.length > 0 && <p className="text-sm texto-suave" data-no-entran={conError.length}><Icono nombre="alerta" /> Los {conError.length} de arriba con algo para corregir no entran: corregilos en el archivo y volvé a subirlo (los que ya entraron se reconocen por el DNI y no se repiten).</p>}
         </section>
       )}
 

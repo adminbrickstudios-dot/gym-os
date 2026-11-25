@@ -64,18 +64,32 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
   // dirección termina ESE gimnasio: no crea otro ni dice "ya existe".
   const pendiente = await altaPendiente(slug);
   let r: { gimnasio_id: string; equipo_id: string; host: string };
+  const tipoElegido = String(f.get("tipo") ?? "");
+  const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
+  const planBrik = String(f.get("plan_brik") ?? "");
+  const conColores = COLOR.test(acento) && COLOR.test(fondo), conPlan = /^[0-9a-f-]{36}$/i.test(planBrik);
+  // Cierre para vender (25/11): EL alta va en una sola función de la base (admin_alta_gimnasio): gimnasio, dueño, plantilla, tipo, marca
+  // y plan de Pase en una transacción; si algo falla no queda nada a medias. Contra una base sin la función, el camino de antes.
+  let unica = false;
   if (pendiente) {
     r = { ...pendiente, host: "" };
   } else {
     try {
-      r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
+      r = await rpc("admin_alta_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno, p_tipo: tipoElegido || null,
+        p_acento: conColores ? acento : null, p_fondo: conColores ? fondo : null, p_plan_brik: conPlan ? planBrik : null });
+      unica = true;
     } catch (e) {
-      return { error: (e as Error).message };
+      if (!/admin_alta_gimnasio/.test((e as Error).message)) return { error: (e as Error).message };
+      try {
+        r = await rpc("admin_crear_gimnasio", { p_slug: slug, p_nombre: nombre, p_dominio_base: base, p_dueno_nombre: dueno });
+      } catch (e2) {
+        return { error: (e2 as Error).message };
+      }
     }
   }
   revalidatePath("/admin");
-  // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde).
-  const tipo = pendiente ? "" : String(f.get("tipo") ?? "");
+  // ADM-1: la plantilla del tipo (si falla, el gimnasio ya está creado: se dice, no se esconde). Con el alta única ya está hecha.
+  const tipo = pendiente || unica ? "" : tipoElegido;
   let avisoPlantilla = "";
   if (tipo) {
     try { await rpc("admin_aplicar_plantilla", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); }
@@ -84,14 +98,12 @@ export async function crearGimnasio(_: EstadoAlta, f: FormData): Promise<EstadoA
     try { await rpc("admin_guardar_tipo_gimnasio", { p_gimnasio_id: r.gimnasio_id, p_tipo: tipo }); } catch { /* el tipo es una mejora: el alta ya quedó hecha */ }
   }
   // VD-40: la marca del paso 2 (colores). Si falla, el gimnasio ya está creado: se dice.
-  const acento = String(f.get("color_acento") ?? ""), fondo = String(f.get("color_fondo") ?? "");
-  if (!pendiente && COLOR.test(acento) && COLOR.test(fondo)) {
+  if (!pendiente && !unica && conColores) {
     try { await rpc("admin_guardar_marca", { p_gimnasio_id: r.gimnasio_id, p_acento: acento, p_fondo: fondo }); }
     catch (e) { avisoPlantilla += ` No se pudieron guardar los colores: ${(e as Error).message}.`; }
   }
   // P4: el plan de Base elegido en el alta (si falla, el gimnasio ya está creado y se dice).
-  const planBrik = String(f.get("plan_brik") ?? "");
-  if (!pendiente && /^[0-9a-f-]{36}$/i.test(planBrik)) {
+  if (!pendiente && !unica && conPlan) {
     try { await rpc("admin_asignar_plan_brik", { p_gimnasio_id: r.gimnasio_id, p_plan_id: planBrik }); }
     catch (e) { avisoPlantilla += ` No se pudo asignar el plan de ${NOMBRE_PRODUCTO}: ${(e as Error).message}.`; }
   }
