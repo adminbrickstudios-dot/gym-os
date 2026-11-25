@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { supabaseAnon, supabaseUrl } from "@/lib/entorno";
+import { opcionesCookieSesion } from "@/lib/supabase/cookies";
 
 export const COOKIE_OPERADOR = "gymos_operador";
 
@@ -27,6 +28,7 @@ export async function crearClienteServidor(operadorPuntual?: string) {
   // un "dejar pasar"); le gana a la cookie de esta compu y no se guarda en ningún lado.
   const operador = operadorPuntual ? encabezadoOperador(operadorPuntual) : encabezadoOperador(almacen.get(COOKIE_OPERADOR)?.value);
   return createServerClient(supabaseUrl(), supabaseAnon(), {
+    cookieOptions: opcionesCookieSesion(supabaseUrl()),
     global: { headers: { ...operador, ...(agente ? { "User-Agent": agente } : {}) } },
     cookies: {
       getAll: () => almacen.getAll(),

@@ -28,6 +28,10 @@ on:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
+      landings:
+        description: "Vuelta final: vieja (las de siempre) o nueva (prende landing_nueva en el demo y landing_venta_nueva en la base de esta corrida, y mide también la venta de Pase)"
+        type: string
+        default: "vieja"
       ruta_demo:
         description: "Dirección del gimnasio demo (sin barra final)"
         type: string
@@ -71,10 +75,24 @@ jobs:
         run: |
           echo "CHROME_PATH=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)" >> "$GITHUB_ENV"
           "$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)" --version
+      - name: Prender las landings nuevas (solo en la base de esta corrida)
+        if: inputs.landings == 'nueva'
+        run: |
+          U="$(scripts/db/local.sh url)"
+          psql "$U" -v ON_ERROR_STOP=1 -c "insert into public.funciones_nuevas_gimnasio (gimnasio_id, clave, activa, prendida_en, cambiada_en) select id, 'landing_nueva', true, now(), now() from public.gimnasios where slug = 'demo' on conflict (gimnasio_id, clave) do update set activa = true, cambiada_en = now()"
+          psql "$U" -v ON_ERROR_STOP=1 -c "update public.plataforma_ajustes set valor = 'true' where clave = 'landing_venta_nueva'"
+          # La caché del proxy y de la página dura hasta 60 s: se espera a que las dos salgan nuevas (una condición, no un tiempo fijo).
+          for i in $(seq 1 40); do
+            g=$(curl -s "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}/" | grep -c 'data-landing-nueva' || true)
+            p=$(curl -s "http://localhost:3123/" | grep -c 'data-plataforma-nueva' || true)
+            if [ "$g" -gt 0 ] && [ "$p" -gt 0 ]; then echo "las dos landings nuevas a la vista"; exit 0; fi
+            sleep 3
+          done
+          echo "::error::las landings nuevas no aparecieron (gimnasio=$g plataforma=$p)"; exit 1
       - name: Lighthouse en celular
         env:
           LIGHTHOUSE_VERSION: "12.6.1"
-        run: node scripts/medir/lighthouse.mjs --base "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}" --veces "${{ inputs.veces || '3' }}" --umbral "${{ inputs.umbral || '90' }}"
+        run: node scripts/medir/lighthouse.mjs --base "${{ inputs.ruta_demo || 'http://demo.localhost:3123' }}" --veces "${{ inputs.veces || '3' }}" --umbral "${{ inputs.umbral || '90' }}" ${{ inputs.landings == 'nueva' && '--plataforma http://localhost:3123' || '' }}
       - name: Guardar la tabla
         if: always()
         uses: actions/upload-artifact@v4

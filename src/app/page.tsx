@@ -3,10 +3,12 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { LandingGimnasio, LandingOculta } from "@/components/landing/Landing";
+import { LandingNueva } from "@/components/landing/LandingNueva";
 import { traerAgenda, traerClasesSemana, traerEventos, traerLanding, traerMedicion, urlMarca } from "@/lib/landing";
 import { Medicion } from "@/components/landing/Medicion";
 import { datosEstructurados } from "@/lib/datos-estructurados";
 import { PlataformaLanding } from "@/components/landing/Plataforma";
+import { PlataformaNueva } from "@/components/landing/PlataformaNueva";
 import { sesionEnEsteGimnasio } from "@/lib/app/sesion-gimnasio";
 import { contactoPlataforma, planesBrikPublicos } from "@/lib/plataforma-venta";
 import { linkWhatsapp } from "@/lib/landing-textos";
@@ -82,7 +84,10 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<{
       <>
         {/* Para Google: nombre, dirección, teléfono y horarios del gimnasio. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld.length === 1 ? ld[0] : ld).replace(/</g, "\\u003c") }} />
-        <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} sesion={sesion} />
+        {/* Vuelta final: la página nueva solo con la llave landing_nueva del gimnasio (apagada en los reales). */}
+        {r.landing.landing_nueva
+          ? <LandingNueva landing={r.landing} agenda={r.agenda} clases={r.clases} sesion={sesion} />
+          : <LandingGimnasio landing={r.landing} agenda={r.agenda} eventos={r.eventos} clases={r.clases} sesion={sesion} />}
         <Medicion medicion={r.medicion} />
       </>
     );
@@ -99,7 +104,10 @@ export default async function Inicio({ searchParams }: { searchParams: Promise<{
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
-      <PlataformaLanding planes={planes} linkDemo={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />
+      {/* Vuelta final: la página de venta nueva solo con la llave de plataforma landing_venta_nueva (apagada); el super admin la ve en /admin/vista-landing. */}
+      {contacto.landing_nueva
+        ? <PlataformaNueva planes={planes} linkWhatsapp={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />
+        : <PlataformaLanding planes={planes} linkDemo={linkWhatsapp(contacto.whatsapp, contacto.mensaje_demo)} capturas={capturasGymos} />}
     </>
   );
 }

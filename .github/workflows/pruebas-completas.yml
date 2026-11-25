@@ -55,13 +55,8 @@ jobs:
       group: base-${{ github.ref }}-${{ inputs.tanda }}
       cancel-in-progress: true
     timeout-minutes: 30
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    # Vuelta final (22/11): el Postgres del runner con el reloj fijo (scripts/db/postgres-reloj-fijo.sh), no un contenedor:
+    # las pruebas siembran con HOY = 2026-11-14 y con el reloj real se rompían por la fecha.
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -69,6 +64,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Postgres con el reloj fijo
+        run: scripts/db/postgres-reloj-fijo.sh
       - name: Base nueva con todas las migraciones
         run: scripts/db/local.sh nueva
       - name: Pruebas de la base

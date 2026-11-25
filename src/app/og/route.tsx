@@ -18,17 +18,29 @@ export async function GET() {
   const fondo = landing?.marca.color_fondo ?? "#F4F5F6";
   const acento = landing?.marca.color_acento ?? "#2fbf5b";
   const texto = tonoDeFondo(fondo) === "oscuro" ? "#f5f5f4" : "#1c1917";
+  const nueva = !!(landing?.publicada && landing.landing_nueva);
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: fondo, color: texto, padding: 72 }}>
+      <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", background: fondo, color: texto, padding: 72 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           <div style={{ width: 88, height: 88, borderRadius: 24, background: acento, color: textoSobre(acento), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, fontWeight: 800 }}>
             {nombre.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("")}
           </div>
           <div style={{ fontSize: 48, fontWeight: 800 }}>{nombre}</div>
         </div>
-        <div style={{ fontSize: frase.length > 40 ? 76 : 96, fontWeight: 900, lineHeight: 1, letterSpacing: -2, maxWidth: 1000 }}>{frase}</div>
+        <div style={{ fontSize: frase.length > 40 ? 76 : 96, fontWeight: 900, lineHeight: 1, letterSpacing: -2, maxWidth: nueva ? 760 : 1000 }}>{frase}</div>
         <div style={{ display: "flex", height: 16, width: 240, borderRadius: 8, background: acento }} />
+        {/* Vuelta final: con la página nueva (llave landing_nueva), la barra con discos de los dibujos de Pase, en su color. */}
+        {nueva && (
+          <svg width="420" height="168" viewBox="0 0 200 80" style={{ position: "absolute", right: 64, bottom: 56 }} fill="none" stroke={texto} strokeWidth="2.25" strokeLinecap="round">
+            <path d="M6 40h188" />
+            <rect x="30" y="10" width="14" height="60" rx="4" fill={acento} stroke="none" />
+            <rect x="156" y="10" width="14" height="60" rx="4" fill={acento} stroke="none" />
+            <rect x="46" y="20" width="9" height="40" rx="3" />
+            <rect x="145" y="20" width="9" height="40" rx="3" />
+            <path d="M60 33v14M140 33v14" />
+          </svg>
+        )}
       </div>
     ),
     { width: 1200, height: 630 },

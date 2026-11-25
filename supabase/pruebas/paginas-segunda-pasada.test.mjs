@@ -54,7 +54,7 @@ test("el WhatsApp de la plataforma: cualquiera lo lee, solo el super admin lo ca
   const [{ c }] = await como("authenticated", admin, () => t.q(`select public.admin_guardar_contacto_plataforma('+54 9 387 555-0000', 'Quiero la demo') c`));
   assert.equal(c.whatsapp, "+5493875550000");
   const [{ c: leido }] = await como("anon", null, () => t.q(`select public.contacto_plataforma_publico() c`));
-  assert.deepEqual(leido, { whatsapp: "+5493875550000", mensaje_demo: "Quiero la demo" });
+  assert.deepEqual(leido, { whatsapp: "+5493875550000", mensaje_demo: "Quiero la demo", landing_nueva: false });
   const [{ c: vacio }] = await como("authenticated", admin, () => t.q(`select public.admin_guardar_contacto_plataforma('', '') c`));
   assert.equal(vacio.whatsapp, null, "se puede quitar el número: la página no muestra el botón");
   assert.equal((await t.q(`select count(*)::int n from public.plataforma_contacto`))[0].n, 1);

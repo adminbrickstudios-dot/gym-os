@@ -15,8 +15,11 @@ const VECES = Number(arg("veces", "3"));
 const SALIDA = arg("salida", ".local/lighthouse");
 const UMBRAL = Number(arg("umbral", "90"));
 const VERSION = process.env.LIGHTHOUSE_VERSION ?? "12.6.1";
+// --plataforma http://localhost:3123 suma la página de venta de Pase (la de la plataforma, sin cuenta).
+const PLATAFORMA = arg("plataforma", "").replace(/\/$/, "");
 const PAGINAS = [
   ["Landing del gimnasio", "/", true],
+  ...(PLATAFORMA ? [["Venta de Pase", `${PLATAFORMA}/`, false]] : []),
   ["Ingresar (equipo)", "/ingresar", false],
   ["Ingresar (socio)", "/ingresar?modo=socio", false],
   ["Quiero ser socio", "/hacete-socio", false],
@@ -73,7 +76,7 @@ const num = (r, k) => r.audits[k]?.numericValue;
 const filas = [];
 let avisos = 0;
 for (const [nombre, ruta, principal] of PAGINAS) {
-  const url = `${BASE}${ruta}`;
+  const url = ruta.startsWith("http") ? ruta : `${BASE}${ruta}`;
   const corridas = [];
   for (let i = 0; i < VECES; i++) {
     try { corridas.push(correr(url, join(SALIDA, `${nombre.replace(/\W+/g, "-").toLowerCase()}-${i + 1}.json`))); }

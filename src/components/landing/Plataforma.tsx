@@ -9,7 +9,7 @@ import { NOMBRE_PRODUCTO } from "@/lib/producto";
 
 export type PlanBrikPublico = { nombre: string; precio_mensual: number | string };
 
-const PREGUNTAS: [string, string][] = [
+export const PREGUNTAS: [string, string][] = [
   ["¿Tengo que cambiar todo de golpe?", "No. Cargás tus socios (o los importás de una planilla), tus planes y tus horarios, y empezás a usarlo en recepción. Te acompañamos en el arranque."],
   ["¿Qué pasa si se corta internet en la puerta?", "La entrada sigue andando: la recepción trabaja con una copia calculada por la base y, cuando vuelve la conexión, todo se registra."],
   ["¿Mis socios tienen que instalar algo?", "No. Entran con un código QR o con su número, y si quieren ven su estado y reservan desde el celular, sin descargar nada."],
@@ -19,7 +19,7 @@ const PREGUNTAS: [string, string][] = [
 ];
 
 /** El semáforo de la puerta: lo que ve la recepción al tipear un número. */
-function IlustracionEntrada() {
+export function IlustracionEntrada() {
   const filas: [string, string, string][] = [
     ["var(--verde)", "Puede entrar", "Cuota al día"],
     ["var(--amarillo)", "Entra, pero avisale", "La cuota vence pronto"],
@@ -38,7 +38,7 @@ function IlustracionEntrada() {
 }
 
 /** Cobrar: una venta con el total y un solo botón. */
-function IlustracionCobro() {
+export function IlustracionCobro() {
   return (
     <div className="tarjeta p-4 space-y-3" role="img" aria-label="Ejemplo: la pantalla de cobro muestra el plan, el medio de pago y un botón grande de cobrar">
       <div className="flex items-center justify-between gap-3 rounded-[var(--radio)] border border-[var(--borde)] p-3">
@@ -55,14 +55,15 @@ function IlustracionCobro() {
 }
 
 /** Retención: la lista de quién dejó de venir, con un botón para escribirle. */
-function IlustracionRetencion() {
+export function IlustracionRetencion() {
   return (
     <div className="tarjeta p-4 space-y-2" role="img" aria-label="Ejemplo: la lista de socios que dejaron de venir, con un botón para escribirles por WhatsApp">
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex items-center gap-3 rounded-[var(--radio)] border border-[var(--borde)] p-3">
           <span className="size-9 shrink-0 rounded-full bg-[var(--borde)]" aria-hidden />
           <span className="min-w-0 flex-1 space-y-1.5" aria-hidden><span className="block h-3 w-3/5 rounded bg-[var(--borde)]" /><span className="block h-2.5 w-2/5 rounded bg-[var(--borde)] opacity-60" /></span>
-          <span className="pildora pildora-amarillo shrink-0">Hace tiempo que no viene</span>
+          {/* Más oscura que la píldora del panel: sobre el fondo claro del marco daba 3,9:1 (Lighthouse, vuelta final 22/11). */}
+          <span className="pildora pildora-amarillo shrink-0" style={{ color: "color-mix(in oklab, var(--amarillo), var(--texto) 65%)" }}>Hace tiempo que no viene</span>
         </div>
       ))}
       <p className="text-sm texto-suave pt-1">Con un toque le escribís por WhatsApp.</p>

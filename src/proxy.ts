@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { opcionesCookieSesion } from "@/lib/supabase/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_GIMNASIO, OPCIONES_COOKIE_GIMNASIO as OPCIONES_COOKIE } from "@/lib/cookie-gimnasio";
 import { clasificarHost, normalizarHost } from "@/lib/host";
@@ -38,6 +39,7 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
   if (!esProtegida(ruta) && !req.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return respuesta;
 
   const supabase = createServerClient(supabaseUrl, anon, {
+    cookieOptions: opcionesCookieSesion(supabaseUrl),
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (lista) => {

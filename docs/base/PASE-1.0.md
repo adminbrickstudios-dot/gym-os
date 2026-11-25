@@ -22,7 +22,7 @@ cerrar 1.0, un ➡️ cuenta como cerrado, igual que ✅ y ⛔.
 - **La barrita del DNI y los avisos de QR** (E1, E2).
 - **La velocidad, primera parte** (E8): Configuración de 30 viajes a 6, Inicio de 29 a 6, Planes de 23 a 4.
 
-## Lo que falta para cerrar Pase 1.0 (el agente, en este orden)
+## Lo que faltaba para cerrar Pase 1.0 (cerrado: queda de registro; el estado de cada punto, en `PROGRESO.md`)
 
 1. **Publicar lo que está en la rama**, fuera de 16–22 h: N10 (migración 20261114180000) y lo que se
    cierre en esta vuelta.
@@ -62,17 +62,24 @@ cerrar 1.0, un ➡️ cuenta como cerrado, igual que ✅ y ⛔.
     - La entrada final en `docs/LOG.md`.
     - La última línea: `TERMINADO`.
 
-## Lo que depende de Mateo (los ⛔ de 1.0)
+## Lo de Mateo (una sola lista, la más urgente arriba · vuelta final 22/11)
 
-| Qué | Destraba |
-|---|---|
-| Conectar `templegymsalta.com` y `pasegym.com` en Vercel con `DOMINIO.md` (fuera de 16–22 h) | D1, D2, D3 y el QR con dominio propio |
-| Prender las altas online de Temple Gym y corregir su nombre a "Temple Gym" | El QR de registro |
-| Secretos de GitHub: `BRIK_ADMIN_MAIL`, `BRIK_ADMIN_CLAVE`, `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO` | U0.1, U0.3, U1, H4, E3, F0.1, F8.3, F8.4, P3 |
-| Variable `SALUD_URL` = `https://gym-os-pied.vercel.app/api/salud` | El aviso de caídas |
-| `COPIA_CLAVE` o Supabase Pro | H5, C8, F9.7 |
-| Vercel Pro | El uso comercial |
-| Su pasada visual y la prueba del dueño | Cerrar 1.0 |
+Cada punto con lo que el agente recomienda. Lo que no es de Mateo lo hace el agente; esto necesita su cuenta, su plata o su decisión.
+
+1. **`COPIA_CLAVE` (urgente: no hay copia de la base desde el 18/11).** El workflow *Copias* falla todas las noches (20, 21 y 22/11) porque falta ese secreto. *Recomendación:* generá 32 caracteres al azar en tu gestor de contraseñas, guardalos ahí y cargalos en GitHub → Settings → Secrets and variables → Actions → Secrets → `COPIA_CLAVE`. Después corré *Copias* a mano: el mismo workflow cifra la copia, la **restaura en una base de prueba y compara** lo restaurado (si no coincide, falla). Pasos en `COPIAS.md`. Sin esta clave, si se rompe la base no hay de dónde volver.
+2. **Los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`.** Sin ellos no corren `pista-produccion` ni las pruebas con sesión de super admin en producción. *Recomendación:* una cuenta de super admin solo para Actions (no la tuya), con rol `lectura` si alcanza.
+3. **Pista en Temple Gym: ✅ ya prendida** (verificado el 22/11 en la base y en la web: `estilo=pista, modo=oscuro`). Lo que sigue es tuyo: mirarla un día con Benja y, si no hay quejas, el 26/11 arranca el borrado del clásico (§ 0 de abajo). Los dos `[demo]` de producción siguen en clásico: prendéselos desde /super → ficha → Estilo si querés mostrarlos en Pista.
+4. **Las llaves para prender (todas apagadas en Temple Gym, prendidas en los [demo]):**
+   - `landing_nueva` (la página del gimnasio con ilustraciones, vuelta final 22/11). *Recomendación:* mirala en un `[demo]`; si te gusta, prendela en Temple Gym desde Configuración → Funciones nuevas (o /super → ficha). Se apaga igual de fácil.
+   - `landing_venta_nueva` (la página de venta de Pase, de plataforma). *Recomendación:* mirala en /super → **Vista previa de la landing**; cargá antes los planes con descripción y módulos (Escala → planes) y el WhatsApp de BRIK (Contacto). Cuando esté bien, tocá **Publicar esta página** ahí mismo.
+   - `borrador_alta` y `vuelto_efectivo`: ver la tabla de los 💲 (§ 1).
+5. **Lo 💲 (plata y permisos):** la tabla de § 1 de abajo, con la recomendación de cada uno. Nada de eso se tocó.
+6. **Supabase Pro y Vercel Pro.** *Recomendación:* Supabase Pro antes del segundo gimnasio pago (copias automáticas con restauración a un punto del tiempo, sin pausa por inactividad); Vercel Pro antes de cobrarle a alguien (el plan Hobby no permite uso comercial).
+7. **Variable `SALUD_URL`** = `https://pasegym.com/api/salud`: prende el aviso por mail si la plataforma se cae (*Chequeo de salud*, cada 15 min).
+8. **Los otros secretos de GitHub que siguen faltando:** `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO`, `SUPABASE_PROJECT_ID` (este último destraba `npm run db:types` contra el proyecto real).
+9. **Términos y privacidad.** La página de venta nueva trae un **borrador** de términos del servicio y de política de privacidad (Ley 25.326) para los gimnasios; los socios ya tienen la política de cada gimnasio (`/privacidad`, con un modelo si el dueño no escribió la suya). *Recomendación:* que los lea un abogado antes de publicar la página de venta; el texto está en `src/components/landing/PlataformaNueva.tsx` (TERMINOS y PRIVACIDAD).
+10. **El mail desde el dominio (SPF, DKIM):** solo anotado; va con Resend en la profesionalización (los mails de hoy salen de Supabase y dicen Pase: revisarlos en su panel).
+11. **Tu pasada visual y la prueba del dueño** (`PRUEBA-DUENO.md`).
 
 ## Para Pase 2.0 (no se empieza hasta que Mateo lo diga)
 
@@ -85,9 +92,9 @@ Ordenado por lo que más importa. Todo lo de acá cuenta como cerrado para Pase 
 - *Publicación B (una semana después, migración nueva; la anterior no se edita):* sacar la columna `configuracion_gimnasio.estilo`, las funciones `guardar_estilo_gimnasio`, `admin_guardar_estilo` y `estilo_gimnasio`, y la columna `estilo` de `gimnasio_por_host` y `gimnasio_por_slug` (la vieja se borra en la misma migración); `modo` se queda. Con su vuelta atrás y `npm run db:types`.
 - *La prueba de antes (se guarda antes de tocar nada):* las capturas `inv-pista-*` del inventario (compu y celular, oscuro y claro), el inventario clásico-contra-Pista en verde, las 254 e2e en las dos llaves, `scripts/medir/js-rutas.mjs` y `chunks-panel.mjs` (el JS y el CSS por ruta de hoy), el tope de viajes, y Lighthouse de la página del gimnasio (93). Después de cada publicación: lo mismo, y el CSS y el JS por ruta tienen que ser **menores** que antes (el objetivo es más liviano, no igual).
 
-**(2) Seguridad.** Un inventario de lo que hay que revisar, sin tocar permisos ni plata hasta que Mateo decida: lo que salga de la auditoría del 18/11 (ver "Lo que encontró la auditoría" en `PROGRESO.md`), los permisos de `PERMISOS.md` contra lo que ve cada rol en pantalla, los logs públicos de Actions (que no impriman nombres de gimnasios ni mails), las claves y secretos de Actions, y las funciones que ve `anon`.
+**(2) Seguridad.** ✅ Primera vuelta hecha el 22/11 (vuelta final: gitleaks sobre toda la historia, secretos en el JS publicado, cabeceras, cookies, webhook, grants a anon; el detalle en `PROGRESO.md` arriba). Lo que quedó: un inventario de lo que hay que revisar, sin tocar permisos ni plata hasta que Mateo decida: lo que salga de la auditoría del 18/11 (ver "Lo que encontró la auditoría" en `PROGRESO.md`), los permisos de `PERMISOS.md` contra lo que ve cada rol en pantalla, los logs públicos de Actions (que no impriman nombres de gimnasios ni mails), las claves y secretos de Actions, y las funciones que ve `anon`.
 
-**(3) Profesionalización** (en este orden, y no se empieza nada de esto sin que Mateo lo diga): landing de venta, débito automático (`DEBITO-AUTOMATICO.md`), alta del gimnasio sola, y Resend y Sentry al final.
+**(3) Profesionalización** (en este orden, y no se empieza nada de esto sin que Mateo lo diga): landing de venta (✅ armada el 22/11 detrás de `landing_venta_nueva`; cuando existan, sumarle débito automático, factura ARCA, Wellhub/TotalPass e importar desde otro sistema: hoy NO se nombran porque no existen), débito automático (`DEBITO-AUTOMATICO.md`), alta del gimnasio sola, y Resend y Sentry al final.
 
 ### 1. Plata y permisos (D70): decide Mateo cuando quiera, con la recomendación ya escrita
 
@@ -130,7 +137,7 @@ Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso e
 ### 3. Estructura, diseño, métodos, landing y fluidez (lo que nombró Mateo)
 
 - Pulido profundo: Z3 a Z7, F3.2, F6.1.
-- La landing nueva y el rediseño de lo que se está pasando por alto.
+- La landing nueva: ✅ armada el 22/11 (las dos, detrás de su llave; ver Lo de Mateo). Lo que sigue: el rediseño de lo que se está pasando por alto.
 - El plan de profesionalización (`docs/PLAN-PROFESIONALIZACION.md`, cuando Mateo diga "terminado oficialmente").
 
 ### 4. Funciones nuevas (apagadas por defecto, detrás de su llave)

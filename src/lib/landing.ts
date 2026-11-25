@@ -64,6 +64,9 @@ export type LandingPublicada = {
   planes: PlanPublico[];
   sedes: Sede[];
   equipo_publico?: EquipoPublico[];
+  /** Vuelta final (22/11): la llave de la página nueva (funciones nuevas: landing_nueva) y si el dueño publicó sus términos. Sin la clave (base vieja), la de siempre. */
+  landing_nueva?: boolean;
+  tiene_terminos?: boolean;
 };
 
 /** Sin publicar: la marca y el WhatsApp (0029), para el "Próximamente". */
