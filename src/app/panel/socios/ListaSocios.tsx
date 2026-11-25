@@ -155,13 +155,12 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                     </span>
                     <span className="socios-semaforo-vence numero" data-vence-fila>{s.vence && !s.dado_de_baja ? ultimoDia(s.vence, zona) : "—"}</span>
                     <span className="socios-semaforo-ultima" data-ultima-vez>{ultimaVez(s.ultima_vez, zona)}</span>
+                    {/* La celda de la acción: "Ver" es el mismo link de la fila; Cobrar y WhatsApp van encima de la celda, fuera del link
+                        (un botón no va adentro de otro link, y la fila sigue siendo un solo link al socio). */}
+                    {accionFila(s) === "ver" ? <span className="boton boton-chico socios-semaforo-accion" aria-hidden data-accion-fila="ver">Ver</span> : <span className="socios-semaforo-accion" aria-hidden />}
                   </Link>
-                  {(() => {
-                    const a = accionFila(s);
-                    if (a === "cobrar") return <BotonCobrar socioId={s.socio_id} origen="otro" cuota className="boton boton-chico boton-claro socios-semaforo-accion" data-accion-fila="cobrar">Cobrar</BotonCobrar>;
-                    if (a === "whatsapp") return <a href={linkWhatsappSocio(s.telefono)!} target="_blank" rel="noopener noreferrer" className="boton boton-chico socios-semaforo-accion" data-accion-fila="whatsapp" aria-label={`WhatsApp a ${s.nombre}`}>WhatsApp</a>;
-                    return <Link href={`/panel/socios/${s.socio_id}`} className="boton boton-chico socios-semaforo-accion" data-accion-fila="ver" aria-label={`Ver a ${s.nombre}`} tabIndex={-1}>Ver</Link>;
-                  })()}
+                  {accionFila(s) === "cobrar" && <BotonCobrar socioId={s.socio_id} origen="otro" cuota className="boton boton-chico boton-claro socios-semaforo-accion socios-semaforo-accion-fuera" data-accion-fila="cobrar">Cobrar</BotonCobrar>}
+                  {accionFila(s) === "whatsapp" && <a href={linkWhatsappSocio(s.telefono)!} target="_blank" rel="noopener noreferrer" className="boton boton-chico socios-semaforo-accion socios-semaforo-accion-fuera" data-accion-fila="whatsapp" aria-label={`WhatsApp a ${s.nombre}`}>WhatsApp</a>}
                 </li>
               );
             })}
