@@ -41,7 +41,7 @@ try {
 
   // Por dentro: los socios de ejemplo, ficticios, en Pista Semáforo.
   await a.goto(`${B}/admin?q=${encodeURIComponent(NOMBRE)}`);
-  await entrarSoporte(a.locator("li", { hasText: NOMBRE }).first(), "e2e: mirar la demo del prospecto");
+  await entrarSoporte(a.locator("li[data-gimnasio-color]", { hasText: NOMBRE }).first(), "e2e: mirar la demo del prospecto");
   await a.waitForURL(/\/panel/, { timeout: 60000 });
   chequear(await a.locator("html").getAttribute("data-semaforo") === "si", "el panel de la demo sale en Pista Semáforo", "el panel de la demo no tiene Semáforo");
   await a.goto(`${new URL(a.url()).origin}/panel/socios`);

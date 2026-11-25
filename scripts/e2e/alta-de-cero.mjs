@@ -162,6 +162,9 @@ try {
   const form = c.locator("[data-form-alta]");
   chequear(await aparece(form, 60000), "5. el QR del cartel abre el formulario en el celular", "el QR no abre el formulario");
   const dniNuevo = `43${s}9`;
+  // Sin plan sugerido en el cartel, el socio elige el suyo (el primero).
+  const planes = form.locator("[data-plan] input");
+  if (await planes.count() && !(await planes.first().isChecked())) { await planes.first().check(); clic(); }
   await form.locator('input[name="nombre"]').fill("Nueva"); tipear("Nueva");
   await form.locator('input[name="apellido"]').fill(`Qr${s}`); tipear(`Qr${s}`);
   await form.locator('input[name="dni"]').fill(dniNuevo); tipear(dniNuevo);
