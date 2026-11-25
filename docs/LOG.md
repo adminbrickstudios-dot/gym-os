@@ -1,3 +1,17 @@
+## 2026-11-25 · Cierre para vender: igual al diseño, alta de cero, demo para prospectos (PR #43, #44 y #45)
+
+**QUÉ HICE**
+- A (partes 1 y 2, PR #43, merge `840b0bf6`, se vuelve a `1f375386`): Pista Semáforo igual al diseño (Inicio, puerta amarilla desde `calcular_acceso`, Socios con Vence/Última vez/acción, ficha, caja, clases), accesibilidad 100, íconos en sprite (JS más liviano en todas las pantallas clave), tipos de la base desde Actions (acción `tipos`). Migración `20261125100000`.
+- B (parte 3, PR #44, merge `b111491b`, se vuelve a `840b0bf6`): `admin_alta_gimnasio` (el alta en una transacción), `gimnasios.origen`, importador con el archivo típico; e2e `alta-de-cero` (48 pasos, ~5,3 min humanos). Alta de prueba en producción dentro de una transacción que se revierte: nace en Pista Semáforo. Migración `20261125110000`.
+- C (parte 4, PR #45, merge `d31c7385`, se vuelve a `b111491b`): "Demo para un prospecto" en /super, vence a los 14 días sin cron. Migración `20261125120000`.
+- Cada una: 14 tandas clásico + 14 Pista en verde, prevuelo → aplicar SIN COPIA con URGENTE (permiso de Mateo solo para el 25/11) → tipos → PR → merge → Vercel verde → 5 min mirando producción. Detalle, corridas, peso y diferencias con el diseño en `docs/base/PROGRESO.md`.
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO** — Temple Gym tiene `pista_semaforo`, `landing_nueva`, `aviso_vencimiento`, `vuelto_efectivo` y `panel_pago` prendidas desde las 15:50 del 25/11 (desde el panel, antes de cualquier publicación de hoy). Intermitentes de Caja en clásico: `caj-4` se cuelga después de abrir el ticket (dos veces) y `vd-9` una vez. `buscar_socios` cortaba en 100 y la pantalla pedía 120 (arreglado: hasta 600).
+
+**SIN ARREGLAR** — 💲 "Cobrado hoy" cuenta cobros sin turno que el Cierre del día no lista. 🔐 El alta de gimnasios pide super admin y no mira el rol de BRIK (`lectura` podría dar de alta). `casi_lleno_pct` sin pantalla. `inicio-panel.png` sin regenerar. Todo en PASE-1.0 § Para Pase 2.0 § 6.
+
+**LO QUE NO PUDE VERIFICAR** — Las pantallas de producción con sesión real (miré solo sin sesión: salud, Temple Gym, /ingresar, /hacete-socio, /g/demo, /super). No creé una demo para un prospecto en producción ni probé su logo contra el Storage real (solo en la imitación local). Lighthouse con una pasada, no la mediana de tres. Clases, kiosco, app del socio, celular y los otros roles: cubiertos por las pruebas, sin revisión ojo a ojo contra cada png.
+
 ## 2026-11-24 · Vuelta final publicada, Pista Semáforo en todo el sistema y más liviano (ramas `dia/2026-11-22` y `dia/2026-11-24`)
 
 **QUÉ HICE**

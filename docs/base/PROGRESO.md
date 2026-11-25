@@ -8,6 +8,29 @@ Mateo autorizó publicar el 25/11 aunque fuera entre las 16 y las 22 h (urgente=
 
 **B · parte 3, alta de cero, publicada (25/11, 18:24 ART, PR #44, merge `b111491b`; vuelta atrás: revertir ese merge, main antes = `840b0bf6`).** Antes: pruebas completas en 14 tandas clásico y 14 Pista sobre la rama (dos intermitentes vueltas a correr y en verde: vd-9 esperando "Faltaban $50" y caj-4 colgado después de abrir el ticket, las dos de Caja, que B no toca). Migración `20261125110000_alta_unica`: prevuelo 45702663102 OK, aplicada SIN COPIA (45702851814); tipos regenerados (45703106858). **Un alta de prueba en producción** con `admin_alta_gimnasio` dentro de una transacción que se revierte (45704060652): nace con origen `alta_super`, estilo `pista`, `pista_semaforo` prendida, 2 planes de la plantilla y un dueño; después no quedó ningún gimnasio de prueba. **Producción, 5 minutos después del deploy (18:25 a 18:31 ART), solo mirando:** Vercel verde; `/api/salud` ok (base 57 ms, commit b111491); Temple Gym, `/ingresar`, `/hacete-socio` y `pasegym.com/g/demo` en 200 y con los mismos bytes que después de A.
 
+**C · parte 4, demo para un prospecto, publicada (25/11, 20:43 ART, PR #45, merge `d31c7385`; vuelta atrás: revertir ese merge, main antes = `b111491b`).** Antes: pruebas completas en 14 tandas clásico y 14 Pista; aparecieron dos fallas reales y se arreglaron con su prueba en verde: el botón de la demo era un segundo verde en /admin (`dis-15`) y el link a la demo era una dirección a mano (PLAT-04: ahora `urlDeHost`); caj-4 se colgó otra vez en clásico y pasó al volver a correr. Migración `20261125120000_demo_prospecto`: prevuelo 45721487972 OK, aplicada SIN COPIA (45721684825); tipos regenerados (45721890370). **Producción, 5 minutos después del deploy (20:44 a 20:49 ART), solo mirando:** Vercel verde; `/api/salud` ok (base 67 ms, commit d31c738); Temple Gym, `/ingresar`, `/hacete-socio` y `pasegym.com/g/demo` en 200 y con los mismos bytes que después de A; `/super` responde (307 a ingresar sin sesión). No se creó ninguna demo en producción.
+
+**Peso (JS de primera carga, KB crudo · gzip; Analizar bundle sobre main 45635628652 contra la rama 45637064424):**
+
+| Pantalla | Antes | Después |
+|---|---|---|
+| /panel | 706,9 · 215,8 | 701,4 · 213,6 |
+| /panel/entrada | 715,2 · 219,3 | 709,3 · 216,9 |
+| /panel/socios | 690,7 · 211,6 | 686,4 · 209,7 |
+| /panel/socios/[id] | 753,9 · 228,2 | 748,1 · 225,8 |
+| /panel/caja | 691,3 · 211,0 | 691,6 · 210,1 |
+| /panel/clases | 667,5 · 204,8 | 661,6 · 202,3 |
+| /app | 756,8 · 235,4 | 744,5 · 230,4 |
+| / | 697,1 · 214,2 | 684,5 · 209,1 |
+| /kiosco | 683,7 · 208,7 | 670,8 · 203,8 |
+| /hacete-socio | 697,2 · 214,2 | 684,6 · 209,0 |
+
+`Icono` en el reparto: 125,1 → 33,5 KB (los dibujos pasan al sprite `public/iconos.svg`). Topes nuevos en `scripts/medir/topes-js.json`. Lighthouse con sesión en Pista (45643651432, una pasada): accesibilidad 100 en landing, ingresar, hacete socio, Inicio, Entrada, Socios y app.
+
+**Alta de cero (`scripts/e2e/alta-de-cero.mjs`):** de /super al primer socio que se hace la cuenta con el QR del cartel, en Pista Semáforo: 48 pasos de una persona, unos 5,3 minutos humanos (la prueba corre en 1,5 min).
+
+**Distinto al diseño, y por qué:** `inicio-panel.png` todavía muestra la casilla de "Para hacer hoy" (el HTML ya no; la captura no se regeneró); "Casi lleno" usa el umbral del gimnasio (85 %), que no tiene pantalla para cambiarse. Se revisaron con capturas Inicio, Socios, Caja y ficha (compu); Clases, kiosco, la app del socio, el celular y los otros roles quedaron cubiertos por las pruebas, sin una revisión ojo a ojo contra cada png.
+
 ## ✅ Vuelta final publicada + Pista Semáforo en todo el sistema + más liviano (24/11, Mateo)
 
 **Parte 1 · vuelta final publicada (24/11, 22:04 ART, PR #40, merge `9fed244f`; vuelta atrás: revertir ese merge, main antes = `948426c`).**
