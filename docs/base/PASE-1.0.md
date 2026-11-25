@@ -62,24 +62,12 @@ cerrar 1.0, un ➡️ cuenta como cerrado, igual que ✅ y ⛔.
     - La entrada final en `docs/LOG.md`.
     - La última línea: `TERMINADO`.
 
-## Lo de Mateo (una sola lista, la más urgente arriba · vuelta final 22/11)
+## Lo de Mateo (solo esto · cierre para vender, 25/11)
 
-Cada punto con lo que el agente recomienda. Lo que no es de Mateo lo hace el agente; esto necesita su cuenta, su plata o su decisión.
-
-1. **`COPIA_CLAVE` (urgente: no hay copia de la base desde el 18/11).** El workflow *Copias* falla todas las noches (20, 21 y 22/11) porque falta ese secreto. *Recomendación:* generá 32 caracteres al azar en tu gestor de contraseñas, guardalos ahí y cargalos en GitHub → Settings → Secrets and variables → Actions → Secrets → `COPIA_CLAVE`. Después corré *Copias* a mano: el mismo workflow cifra la copia, la **restaura en una base de prueba y compara** lo restaurado (si no coincide, falla). Pasos en `COPIAS.md`. Sin esta clave, si se rompe la base no hay de dónde volver.
-2. **Los secretos `BRIK_ADMIN_MAIL` y `BRIK_ADMIN_CLAVE`.** Sin ellos no corren `pista-produccion` ni las pruebas con sesión de super admin en producción. *Recomendación:* una cuenta de super admin solo para Actions (no la tuya), con rol `lectura` si alcanza.
-3. **Pista en Temple Gym: ✅ ya prendida** (verificado el 22/11 en la base y en la web: `estilo=pista, modo=oscuro`). Lo que sigue es tuyo: mirarla un día con Benja y, si no hay quejas, el 26/11 arranca el borrado del clásico (§ 0 de abajo). Los dos `[demo]` de producción siguen en clásico: prendéselos desde /super → ficha → Estilo si querés mostrarlos en Pista.
-4. **Las llaves para prender (todas apagadas en Temple Gym, prendidas en los [demo]):**
-   - `landing_nueva` (la página del gimnasio con ilustraciones, vuelta final 22/11). *Recomendación:* mirala en un `[demo]`; si te gusta, prendela en Temple Gym desde Configuración → Funciones nuevas (o /super → ficha). Se apaga igual de fácil.
-   - `landing_venta_nueva` (la página de venta de Pase, de plataforma). *Recomendación:* mirala en /super → **Vista previa de la landing**; cargá antes los planes con descripción y módulos (Escala → planes) y el WhatsApp de BRIK (Contacto). Cuando esté bien, tocá **Publicar esta página** ahí mismo.
-   - `borrador_alta` y `vuelto_efectivo`: ver la tabla de los 💲 (§ 1).
-5. **Lo 💲 (plata y permisos):** la tabla de § 1 de abajo, con la recomendación de cada uno. Nada de eso se tocó.
-6. **Supabase Pro y Vercel Pro.** *Recomendación:* Supabase Pro antes del segundo gimnasio pago (copias automáticas con restauración a un punto del tiempo, sin pausa por inactividad); Vercel Pro antes de cobrarle a alguien (el plan Hobby no permite uso comercial).
-7. **Variable `SALUD_URL`** = `https://pasegym.com/api/salud`: prende el aviso por mail si la plataforma se cae (*Chequeo de salud*, cada 15 min).
-8. **Los otros secretos de GitHub que siguen faltando:** `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO`, `SUPABASE_REF_ESPERADO`, `SUPABASE_PROJECT_ID` (este último destraba `npm run db:types` contra el proyecto real).
-9. **Términos y privacidad.** La página de venta nueva trae un **borrador** de términos del servicio y de política de privacidad (Ley 25.326) para los gimnasios; los socios ya tienen la política de cada gimnasio (`/privacidad`, con un modelo si el dueño no escribió la suya). *Recomendación:* que los lea un abogado antes de publicar la página de venta; el texto está en `src/components/landing/PlataformaNueva.tsx` (TERMINOS y PRIVACIDAD).
-10. **El mail desde el dominio (SPF, DKIM):** solo anotado; va con Resend en la profesionalización (los mails de hoy salen de Supabase y dicen Pase: revisarlos en su panel).
-11. **Tu pasada visual y la prueba del dueño** (`PRUEBA-DUENO.md`).
+1. **`COPIA_CLAVE` (urgente: no hay copia de la base desde el 18/11).** El workflow *Copias* falla todas las noches porque falta ese secreto. *Recomendación:* generá 32 caracteres al azar en tu gestor de contraseñas, guardalos ahí y cargalos en GitHub → Settings → Secrets and variables → Actions → Secrets → `COPIA_CLAVE`. Después corré *Copias* a mano: cifra la copia, la restaura en una base de prueba y compara. Pasos en `COPIAS.md`. Las tres publicaciones del 25/11 se aplicaron SIN COPIA con tu permiso.
+2. **Pista Semáforo en Temple Gym.** La llave `pista_semaforo` de Temple Gym figura prendida desde el 25/11 a las 15:50 ART (junto con `landing_nueva`, `aviso_vencimiento`, `vuelto_efectivo` y `panel_pago`, una por una desde el panel); el agente no la tocó. *Recomendación:* si fuiste vos, miralo un día con Benja en la recepción y en la tablet; si no fuiste vos, apagala desde Configuración → Funciones nuevas (o /super → ficha) y avisá: se vuelve a ver como antes al instante.
+3. **Supabase Pro y Vercel Pro.** *Recomendación:* Supabase Pro antes del segundo gimnasio pago (copias automáticas con restauración a un punto del tiempo, sin pausa por inactividad); Vercel Pro antes de cobrarle a alguien (el plan Hobby no permite uso comercial).
+4. **Términos y privacidad.** La página de venta trae un **borrador** de términos del servicio y de política de privacidad (Ley 25.326). *Recomendación:* que los lea un abogado antes de publicar la página de venta; el texto está en `src/components/landing/PlataformaNueva.tsx` (TERMINOS y PRIVACIDAD).
 
 ## Para Pase 2.0 (no se empieza hasta que Mateo lo diga)
 
@@ -155,6 +143,14 @@ Entradas sin internet (N9), débito automático (N1), resumen de la noche (N3), 
 
 ### 6. Lo que se encontró durante 1.0 y no es de 1.0
 
+- **Lo que salió de "Lo de Mateo" el 25/11** (Mateo pidió dejar solo cuatro): los secretos `BRIK_ADMIN_MAIL`/`BRIK_ADMIN_CLAVE` (sesión de super admin para Actions), `DEMO_CONTRASENA`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLAVE_PRUEBA_MATEO` y `SUPABASE_REF_ESPERADO` (los tipos de la base ya salen sin `SUPABASE_PROJECT_ID`: acción `tipos` de *Base de datos*); la variable `SALUD_URL`; `landing_venta_nueva` desde /super; SPF/DKIM con Resend; la pasada visual y `PRUEBA-DUENO.md`.
+- **Cierre para vender (25/11), lo que quedó afuera:**
+  - `casi_lleno_pct` (el umbral de "Casi lleno" de Clases) vive en datos con 85 por defecto, pero no tiene pantalla para cambiarlo.
+  - 💲 "Cobrado hoy" del Inicio suma los cobros sin turno de caja y el Cierre del día no los lista (toca plata: no se arregló; `r1-numeros` lo aparta con su motivo).
+  - 🔐 `admin_crear_gimnasio` y `admin_alta_gimnasio` piden super admin (`soy_admin_plataforma`) y no miran el rol de BRIK: alguien de BRIK con rol `lectura` podría dar de alta (toca permisos: no se arregló).
+  - `docs/base/pista/semaforo/inicio-panel.png` sigue mostrando la casilla de "Para hacer hoy" (el HTML ya no la tiene; la captura no se pudo regenerar en esta compu).
+  - El importador le pone el 9 a todo `+54` de 10 cifras: un teléfono fijo escrito con `+54` queda como celular.
+  - Intermitentes de Caja en el clásico: `vd-9` (espera "Faltaban $50") y `caj-4` (se colgó 50 min después de abrir el ticket); las dos pasaron al volver a correr.
 - **No hay recorrido que pruebe activar la tablet (`/kiosco/activar`) ni la TV (`/tv/activar`)**; en 1.0 esas dos rutas pasaron a armar su dirección con `origenDe` (P2) y solo las cubre la lectura del código y el tipado. Escribir `kiosco-activar` y `tv-activar`.
 - **La cámara de QR no se abre en el barrido de modales** (pide permiso del navegador): se revisó por código (X visible) pero no con captura. Hace falta un permiso simulado en Playwright.
 - **El barrido de modales falla a veces con `net::ERR_ABORTED` o un `waitFor` agotado en la compu** (navegación pisada por otra del panel); ya reintenta, pero conviene entender la causa.
