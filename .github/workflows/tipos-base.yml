@@ -1,0 +1,58 @@
+# Tipos de la base: genera src/tipos/base.ts desde la base de producción (secreto SUPABASE_DB_URL, solo lee el schema) y, si cambió,
+# lo commitea en la rama elegida. Nunca en main: la rama se mergea con su PR.
+#   Actions → "Tipos de la base" → Run workflow (en la rama de trabajo, después de aplicar sus migraciones).
+name: Tipos de la base
+
+on:
+  workflow_dispatch:
+    inputs:
+      commitear:
+        description: "Commitear el diff en esta rama (si no, solo dice si hay diferencias)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tipos-base-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tipos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Nunca en main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "::error::Correlo en la rama de trabajo, no en main."
+          exit 1
+      - name: Falta el secreto
+        if: env.SUPABASE_DB_URL == ''
+        run: |
+          echo "::error::Falta el secreto SUPABASE_DB_URL."
+          exit 1
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Generar los tipos (supabase gen types --db-url)
+        run: node scripts/db/tipos.mjs
+      - name: ¿Cambió algo?
+        id: diff
+        run: |
+          git add -N src/tipos/base.ts
+          if git diff --quiet -- src/tipos/base.ts; then echo "cambio=no" >> "$GITHUB_OUTPUT"; echo "Sin diferencias."; else echo "cambio=si" >> "$GITHUB_OUTPUT"; git diff --stat -- src/tipos/base.ts; fi
+      - name: Commitear en la rama
+        if: steps.diff.outputs.cambio == 'si' && inputs.commitear
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/tipos/base.ts
+          git commit -m "Tipos de la base al día con producción (generados con supabase gen types --db-url)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Verificar que queda sin diferencias
+        run: node scripts/db/tipos.mjs --verificar
