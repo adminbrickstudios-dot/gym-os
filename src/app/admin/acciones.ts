@@ -10,6 +10,8 @@ import { leerPago } from "@/lib/mercadopago";
 import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { NOMBRE_PRODUCTO } from "@/lib/producto";
+import { svgSeguro, tipoReal } from "@/lib/imagenes";
+import { achicarFoto } from "@/lib/imagenes-servidor";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
 // valida con la sesión de quien pide (admin_* / *_para_*), recién después el
@@ -287,6 +289,39 @@ export async function crearDemo(interesado: string, tipo: string): Promise<{ err
     revalidatePath("/admin");
     return { aviso: `Demo lista en ${r.host}. Vence en 7 días.`, gimnasioId: r.gimnasio_id };
   } catch (e) { return { error: (e as Error).message }; }
+}
+/**
+ * Cierre para vender (25/11) · "Demo para un prospecto": un gimnasio [demo] con el nombre del gimnasio del prospecto, su color, su logo (opcional),
+ * su dirección propia y los datos de ejemplo. Lo arma la base con la función de alta única (admin_crear_demo_prospecto); vence a los 14 días
+ * (se compara al abrir, sin cron). El logo se sube después: si falla, la demo ya está y se dice.
+ */
+export async function crearDemoProspecto(f: FormData): Promise<{ error?: string; aviso?: string; gimnasioId?: string; web?: string; panel?: string }> {
+  const nombre = String(f.get("nombre") ?? "").trim();
+  const acento = String(f.get("acento") ?? ""), fondo = String(f.get("fondo") ?? "#0e151c");
+  const base = dominioBase();
+  if (!base) return { error: "Falta NEXT_PUBLIC_DOMINIO_BASE en Vercel (Settings → Environment Variables) y redeployar." };
+  let r: { gimnasio_id: string; slug: string; vence: string };
+  try {
+    r = await rpc("admin_crear_demo_prospecto", { p_nombre: nombre, p_dominio_base: base, p_acento: COLOR.test(acento) ? acento : null, p_fondo: COLOR.test(acento) && COLOR.test(fondo) ? fondo : null });
+  } catch (e) { return { error: (e as Error).message }; }
+  revalidatePath("/admin");
+  const { web, panel } = direccionesDe(r.slug);
+  let aviso = `Demo lista: ${web}. Vence en 14 días.`;
+  const logo = f.get("logo");
+  if (logo instanceof File && logo.size > 0) {
+    try {
+      let bytes: Uint8Array = new Uint8Array(await logo.arrayBuffer());
+      let mime = tipoReal(bytes);
+      if (!mime) throw new Error(`“${logo.name}” no es una imagen que podamos usar (PNG, JPG, WEBP o SVG).`);
+      if (mime === "image/svg+xml" && !svgSeguro(new TextDecoder().decode(bytes))) throw new Error("Ese SVG trae código o links adentro. Exportalo como PNG.");
+      if (mime !== "image/svg+xml") { const a = await achicarFoto(bytes, mime); bytes = a.bytes; mime = a.mime; }
+      const ruta = await rpc<string>("admin_preparar_logo_demo", { p_gimnasio_id: r.gimnasio_id, p_tipo_mime: mime, p_bytes: bytes.length });
+      const { error } = await clienteServicio().storage.from("marcas").upload(ruta, Buffer.from(bytes), { contentType: mime, upsert: false, cacheControl: "31536000" });
+      if (error) throw new Error(`No se pudo subir el logo: ${error.message}`);
+      await rpc("admin_confirmar_logo_demo", { p_gimnasio_id: r.gimnasio_id, p_ruta: ruta });
+    } catch (e) { aviso += ` El logo no se pudo poner (${(e as Error).message}): subilo desde la ficha de la demo.`; }
+  }
+  return { aviso, gimnasioId: r.gimnasio_id, web, panel };
 }
 export const borrarDemosVencidas = async () => hechoAdmin(() => rpc("admin_borrar_demos_vencidas"), ["/admin"]);
 

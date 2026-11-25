@@ -26,13 +26,13 @@ const G = GIMNASIO(SLUG);
 const PRECIO = "25.000";
 
 // 50 socios como los exporta otro sistema: columnas en otro orden, DNI con puntos, celulares sin el 9, fechas dd/mm/aaaa.
-// Los primeros 40 pagaron hasta dentro de 20 días (al día); los últimos 10, hasta hace 5 días (deben). Todo ficticio (000, @ejemplo.invalid).
+// Los primeros 40 pagaron hasta dentro de 20 días (al día); los últimos 10, hasta hace 20 días (deben: fuera de la tolerancia). Todo ficticio (000, @ejemplo.invalid).
 const dia = (n) => { const d = new Date(Date.now() + n * 864e5); return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`; };
 const dniDe = (i) => `4${s}${String(i).padStart(2, "0")}`.slice(0, 8);
 const conPuntos = (d) => d.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const filasCsv = Array.from({ length: 50 }, (_, i) => [
   `+54 000 ${String(4000000 + Number(s) * 50 + i).slice(-7)}`,         // celular con +54 y sin el 9
-  `Socio${i} Importado${s}`, conPuntos(dniDe(i)), "Mensual libre", i < 40 ? dia(20) : dia(-5), dia(-60),
+  `Socio${i} Importado${s}`, conPuntos(dniDe(i)), "Mensual libre", i < 40 ? dia(20) : dia(-20), dia(-60),
 ]);
 const CSV = ["Celular;Nombre y apellido;Documento;Plan;Vence;Fecha de alta", ...filasCsv.map((f) => f.join(";"))].join("\r\n");
 const AL_DIA = dniDe(0), DEBE = dniDe(45);

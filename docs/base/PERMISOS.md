@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 351 funciones piden un rol del equipo con `privado.exigir_equipo`; 429 no (las decide la propia función con la sesión, el socio o RLS); 33 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 351 funciones piden un rol del equipo con `privado.exigir_equipo`; 433 no (las decide la propia función con la sesión, el socio o RLS); 33 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -389,11 +389,14 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_cerrar_sesiones_gimnasio`
 - `admin_clonar_configuracion`
 - `admin_confirmar_cuenta`
+- `admin_confirmar_logo_demo`
 - `admin_crear_demo`
+- `admin_crear_demo_prospecto`
 - `admin_crear_gimnasio`
 - `admin_dar_de_baja`
 - `admin_dar_rol_brik`
 - `admin_datos_fiscales`
+- `admin_demos_prospectos`
 - `admin_demos_vencidas`
 - `admin_dnis_repetidos`
 - `admin_entrar_gimnasio`
@@ -442,6 +445,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `admin_plantillas_texto`
 - `admin_plataforma_estado`
 - `admin_prender_funcion`
+- `admin_preparar_logo_demo`
 - `admin_probar_acceso`
 - `admin_probar_acceso_gimnasio`
 - `admin_programar_mantenimiento`

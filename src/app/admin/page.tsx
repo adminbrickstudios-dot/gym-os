@@ -11,7 +11,7 @@ import { ErrorDatos, rpc, type MiSesion } from "@/lib/panel/servidor";
 import { CambiarContrasena } from "@/app/panel/cuenta/CambiarContrasena";
 import { AltaGimnasio } from "./AltaGimnasio";
 import { Tablero } from "./Tablero";
-import { Demos, type DemoVencida } from "./Demos";
+import { Demos, type DemoProspecto, type DemoVencida } from "./Demos";
 import { ErroresPlataforma } from "./ErroresPlataforma";
 import { PlataformaDatos } from "./PlataformaDatos";
 import { EscalaDatos } from "./EscalaDatos";
@@ -56,6 +56,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   let ayudas: PedidoAyuda[];
   let pedidosDemo: PedidoDemo[] = [];
   let demosVencidas: DemoVencida[] = [];
+  let prospectos: DemoProspecto[] = [];
   let contactoPlataforma: ContactoPlataforma = { whatsapp: null, mensaje_demo: "" };
   let novedades: NovedadPlataforma[] = [];
   let abonos: Record<string, EstadoAbono> = {};
@@ -68,7 +69,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       rpc<NovedadPlataforma[]>("admin_novedades"), rpc<Record<string, EstadoAbono>>("admin_abonos"), rpc<PlanBrik[]>("admin_planes_brik"),
       rpc<Record<string, SaludV2>>("admin_salud_v2"), rpc<MetricasPlataforma>("admin_metricas"), rpc<PedidoAyuda[]>("admin_ayudas", { p_pendientes: true })]);
     pedidosDemo = await rpc<PedidoDemo[]>("admin_pedidos_demo", { p_pendientes: true });
-    demosVencidas = await rpc<DemoVencida[]>("admin_demos_vencidas").catch(() => []);
+    [demosVencidas, prospectos] = await Promise.all([rpc<DemoVencida[]>("admin_demos_vencidas").catch(() => []),
+      rpc<DemoProspecto[]>("admin_demos_prospectos").catch(() => [])]);
     contactoPlataforma = await rpc<ContactoPlataforma>("contacto_plataforma_publico");
   } catch (e) {
     if (e instanceof ErrorDatos) return <main className="min-h-dvh grid place-items-center px-4"><Aviso icono="candado" titulo="Sin acceso">{e.message}<span className="block mt-2"><Link href="/admin/seguridad" className="underline">Confirmar mi código de dos pasos</Link></span></Aviso></main>;
@@ -128,7 +130,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       <section id="gimnasios" className="space-y-10 scroll-mt-16" aria-labelledby="t-gimnasios">
         <h2 id="t-gimnasios" className="titular text-[22px]">Gimnasios</h2>
         <div id="alta"><AltaGimnasio dominio={dominioBase()} planes={planesBrik.filter((x) => x.activo).map((x) => ({ id: x.id, nombre: x.nombre }))} /></div>
-        <Demos vencidas={demosVencidas} />
+        <Demos vencidas={demosVencidas} prospectos={prospectos} />
 
       <section className="space-y-3">
         <p className="titulo-grupo">Todos los gimnasios</p>
