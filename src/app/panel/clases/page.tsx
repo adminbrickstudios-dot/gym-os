@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { SelectorSede } from "@/components/panel/SelectorSede";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { sedeActiva } from "@/lib/panel/sede";
 import { Vacio } from "@/components/ui/Vacio";
 import { Icono } from "@/components/ui/Icono";
@@ -29,8 +29,16 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
     const zona = panel.gimnasio.zona_horaria;
     const { sede, puedeCambiar } = sedeActiva(panel, sp.sede);
     const dias = Array.from({ length: 7 }, (_, i) => diaLocal(zona, i));
-    const dia = dias.includes(sp.dia ?? "") ? sp.dia! : dias[0];
-    const clases = await rpc<Clase[]>("clases_del_dia", { p_sede_id: sede.id, p_dia: dia });
+    // clases-de-hoy.png: "Ayer", de solo lectura (con Semáforo).
+    const ayer = diaLocal(zona, -1);
+    const dia = dias.includes(sp.dia ?? "") || (semaforo && sp.dia === ayer) ? sp.dia! : dias[0];
+    const esAyer = dia === ayer;
+    // Las clases y el umbral de "Casi lleno" del gimnasio (configuración, 85 % por defecto) en UN viaje.
+    const [clases, cfg] = await rpcLote(
+      lectura<Clase[]>("clases_del_dia", { p_sede_id: sede.id, p_dia: dia }),
+      semaforo ? lectura<{ casi_lleno_pct: number } | null>("config_clases_panel", { p_gimnasio_id: panel.gimnasio.id }, true) : fijo<{ casi_lleno_pct: number } | null>(null),
+    );
+    const umbral = cfg?.casi_lleno_pct ?? 85;
     const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
     const nombreDia = (d: string, i: number) => (i === 0 ? "Hoy" : i === 1 ? "Mañana" : new Intl.DateTimeFormat("es-AR", { weekday: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`)));
     const ahora = Date.now();
@@ -44,6 +52,10 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
           </span>} />
         {puedeCambiar && <SelectorSede sedes={panel.sedes} actual={sede.id} ruta="/panel/clases" />}
         <nav aria-label="Día" className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4">
+          {semaforo && (
+            <Link href={`/panel/clases?dia=${ayer}${sp.sede ? `&sede=${sp.sede}` : ""}`} aria-current={esAyer ? "page" : undefined} data-dia-ayer
+              className={`boton !min-h-12 whitespace-nowrap ${esAyer ? "!border-[var(--acento)]" : "opacity-75"}`}>Ayer</Link>
+          )}
           {dias.map((d, i) => (
             <Link key={d} href={`/panel/clases?dia=${d}${sp.sede ? `&sede=${sp.sede}` : ""}`} aria-current={d === dia ? "page" : undefined}
               className={`boton !min-h-12 whitespace-nowrap first-letter:uppercase ${d === dia ? "!border-[var(--acento)]" : "opacity-75"}`}>{nombreDia(d, i)}</Link>
@@ -59,21 +71,26 @@ export default async function Clases({ searchParams }: { searchParams: Promise<{
               const enCurso = !pasada && new Date(c.inicio).getTime() <= ahora;
               const ajena = panel.yo.rol === "profe" && (c.profe_id !== undefined ? c.profe_id !== panel.yo.equipo_id : c.profe !== panel.yo.nombre);
               const lleva = c.cupo ? Math.min(100, Math.round((c.confirmadas / c.cupo) * 100)) : 0;
+              // "Casi lleno": el umbral del gimnasio (configuracion_gimnasio.casi_lleno_pct), sin estar lleno.
+              const casi = !lleno && c.cupo != null && c.cupo > 0 && lleva >= umbral;
               return (
                 <li key={c.clase_id} className={`tarjeta clases-semaforo-item ${enCurso ? "es-ahora" : ""} ${c.cancelada || pasada || ajena ? "opacity-55" : ""}`} data-clase={c.clase_id} data-clase-ajena={ajena ? "" : undefined}>
                   <div className="clases-semaforo-arriba">
                     <span className="numero clases-semaforo-hora">{hora(c.inicio)}</span>
-                    {c.cancelada ? <span className="pildora">Cancelada</span> : lleno ? <span className="pildora pildora-rojo">Lleno{c.en_espera ? ` · ${c.en_espera} en espera` : ""}</span> : enCurso ? <span className="clases-semaforo-ahora">Ahora</span> : null}
+                    {c.cancelada ? <span className="pildora">Cancelada</span> : lleno ? <span className="pildora pildora-rojo">Lleno{c.en_espera ? ` · ${c.en_espera} en espera` : ""}</span>
+                      : casi ? <span className="pildora pildora-amarillo" data-casi-lleno>Casi lleno</span> : enCurso ? <span className="clases-semaforo-ahora">Ahora</span> : null}
                   </div>
                   <p className="clases-semaforo-actividad"><span aria-hidden><Icono nombre={c.emoji ?? "calendario"} /></span> {c.actividad}</p>
                   <p className="texto-suave">{c.cancelada ? `Cancelada · ${c.cancelada_motivo ?? ""}` : c.profe ? `Prof. ${c.profe}` : "Sin profe asignado"}</p>
                   {!c.cancelada && (
                     <div className="clases-semaforo-cupo">
-                      {c.cupo != null && <span className="clases-semaforo-barra" aria-hidden><span style={{ width: `${lleva}%` }} className={lleva >= 80 ? "casi" : ""} /></span>}
+                      {c.cupo != null && <span className="clases-semaforo-barra" aria-hidden><span style={{ width: `${lleva}%` }} className={lleva >= umbral ? "casi" : ""} /></span>}
                       <span className="font-bold">{c.confirmadas}{c.cupo != null ? ` de ${c.cupo}` : " anotados"}</span>
                     </div>
                   )}
-                  {!ajena && !c.cancelada && (
+                  {/* Ayer: solo lectura (se ve quién vino; para corregir un presente, la clase de siempre). */}
+                  {esAyer && !ajena && !c.cancelada && <Link href={`/panel/clases/${c.clase_id}?ver=anotados`} className="boton boton-suave" data-clase-ayer>Ver quiénes vinieron</Link>}
+                  {!esAyer && !ajena && !c.cancelada && (
                     <div className="clases-semaforo-botones">
                       <Link href={`/panel/clases/${c.clase_id}`} className={`boton ${enCurso ? "boton-principal" : ""}`}>Tomar presente</Link>
                       <Link href={`/panel/clases/${c.clase_id}?ver=anotados`} className="boton boton-suave">Anotados</Link>

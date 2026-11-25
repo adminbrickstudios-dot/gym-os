@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { CalculadoraBilletes } from "@/components/panel/CalculadoraBilletes";
 import { linkCompartir, textoCierre } from "@/lib/caja";
 import { formatearPesos, leerMonto } from "@/lib/formato";
 import { abrirCaja, cerrarCaja, moverCaja, type Resumen } from "./acciones";
 import { PorMedio } from "./PorMedio";
-import type { Billetes, CobrosMedio } from "./tipos";
+import type { Billetes, CobrosMedio, MovimientosTurno as MovimientosTurnoT } from "./tipos";
+import { MovimientosTurno } from "./MovimientosTurno";
 import { Icono } from "@/components/ui/Icono";
 
 const MEDIO: Record<string, string> = { transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "MercadoPago", cuenta_corriente: "A cuenta" };
@@ -35,8 +36,10 @@ export function AbrirCaja({ cajaId, nombre, fondoSugerido = 0 }: { cajaId: strin
   );
 }
 
-export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, abrirCierre = false, zona }: {
+export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros = null, olvidada = false, vencida = false, pedirBilletes = false, abrirCierre = false, zona, movimientos = null, costado = null }: {
   turnoId: string; cajaId: string; nombre: string; desde: string; resumen: Resumen | null; cobros?: CobrosMedio[] | null; olvidada?: boolean; vencida?: boolean; pedirBilletes?: boolean;
+  /** Cierre para vender (25/11, solo con Pista Semáforo): los movimientos del turno (movimientos_turno) y lo que va al costado (Para aprobar). */
+  movimientos?: MovimientosTurnoT | null; costado?: ReactNode;
   /** VD-29C: llegó con ?accion=cerrar (Ctrl+K "cerrar turno"): el formulario del cierre ya está abierto y enfocado. */
   abrirCierre?: boolean;
   /** La zona horaria del gimnasio: la hora del cierre que se manda por WhatsApp sale en ella, no en la de la compu. */
@@ -105,7 +108,26 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
           <div className="flex gap-2"><button type="submit" disabled={ocupado} className="boton boton-principal">{ocupado ? "Abriendo…" : "Abrir mi turno"}</button><button type="button" className="boton" onClick={reiniciar}>Cancelar</button></div>
         </form>
       )}
-      {resumen && cobros ? (
+      {resumen && cobros && movimientos ? (
+        // caja.png: lo cobrado por medio, los movimientos con filtros, y al costado lo que tiene que haber en el cajón (la cuenta es de la base: resumen_turno).
+        <div className="caja-semaforo" data-caja-semaforo>
+          <div className="space-y-5 min-w-0">
+            <PorMedio medios={cobros} zona={zona} />
+            <MovimientosTurno datos={movimientos} zona={zona} />
+          </div>
+          <div className="caja-semaforo-costado">
+            {costado}
+            <section className="tarjeta caja-cajon" aria-labelledby={`cajon-${turnoId}`} data-cajon-tiene-que-haber>
+              <h2 id={`cajon-${turnoId}`} className="titulo">En el cajón tiene que haber</h2>
+              <p className="numero caja-cajon-monto">{formatearPesos(resumen.esperado)}</p>
+              <p className="texto-suave mt-2" data-tiene-que-haber>Efectivo de entradas menos salidas:
+                {" "}{formatearPesos(resumen.monto_inicial)} con los que se abrió +{formatearPesos(resumen.efectivo)} cobrados en efectivo
+                {resumen.ingresos > 0 ? ` + ${formatearPesos(resumen.ingresos)} que entraron` : ""}{resumen.retiros > 0 ? ` − ${formatearPesos(resumen.retiros)} que salieron` : ""}.
+                Es solo plata del cajón: la transferencia y la tarjeta no están ahí.</p>
+            </section>
+          </div>
+        </div>
+      ) : resumen && cobros ? (
         <PorMedio medios={cobros} zona={zona} cajon={{ esperado: resumen.esperado, inicial: resumen.monto_inicial, efectivo: resumen.efectivo, ingresos: resumen.ingresos, retiros: resumen.retiros }} />
       ) : resumen ? (
         <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">

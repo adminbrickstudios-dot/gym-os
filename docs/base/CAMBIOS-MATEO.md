@@ -21,12 +21,15 @@ super admin en la plataforma (Contacto): sin número, el botón de WhatsApp no a
 
 ---
 
+🔧 Cierre para vender (25/11) — en curso: igual al diseño, alta de cero probada, demo para prospectos
+
 ✅ Pista Semáforo en todo el sistema + más liviano — prendida en los demo; Mateo la prende en Temple Gym desde /super
 
 ✅ Vuelta final publicada
 
 ✅ Paneles completos — lo 💲 espera a Mateo en PASE-1.0.md · listo para terminado oficialmente
 
+- 2026-11-25 · Mateo · **Pase · cierre para vender** (va primero, antes que todo lo demás de esta lista y de RECTA-FINAL). Parte 1: que quede igual al diseño de `docs/base/pista/semaforo` con los datos que faltaban (Inicio, puerta amarilla, Socios, ficha, caja, clases). Parte 2: QA de producto con sesión real, accesibilidad a 100, Icono sin bajar entero, tipos de la base desde Actions. Parte 3: e2e alta-de-cero y el importador con el archivo típico. Parte 4: demo para un prospecto en /super. Decisiones de Mateo en `PREGUNTAS.md` (25/11) · 🔧
 - 2026-11-24 · Mateo · **Publicar la vuelta final, Pista Semáforo en TODO el sistema igual al diseño, y sacarle peso** (va primero, antes que todo lo demás de esta lista). Parte 1: publicar la rama `dia/2026-11-22` (prevuelo, aplicar SIN COPIA `20261122100000`, PR #40, merge, Vercel; main antes = `948426c`). Parte 2: Pista Semáforo (`docs/base/pista/semaforo`, 10 pantallas dibujadas) en todos los paneles, solo con `data-estilo="pista"` y detrás de la llave `pista_semaforo` (apagada en Temple Gym, prendida en los [demo]); el resto de las pantallas con las piezas de `componentes.png`. Parte 3: medir antes, sacar peso (client→server, librerías, fuentes, imágenes, `cache()`, lo que consulta solo, el proxy), medir después y bajar los topes. Diseño y tokens en `DISENO.md` § Pista Semáforo; mediciones en `PROGRESO.md` · ✅ vuelta final publicada 24/11 22:04 ART (PR #40, merge `9fed244f`, migración `20261122100000` SIN COPIA, corrida 45522651169); Pista Semáforo y el peso: PR #41, ver PROGRESO
 - 2026-11-22 · Mateo · **La vuelta final antes de vender: errores, seguridad, las dos landings y los documentos** (va primero, antes que todo lo demás de esta lista y de RECTA-FINAL). Fase 0: Pista en Temple Gym. Fase 1: caza de errores. Fase 2: seguridad. Fase 3: landing del gimnasio (llave `landing_nueva`). Fase 4: landing de venta de Pase (armada, sin publicar). Fase 5: documentos. · ✅ publicada 24/11 (PR #40, `9fed244f`)
   - Fase 0 (22/11): la base de producción dice `estilo=pista, modo=oscuro` para Temple Gym, `gimnasio_por_host` como anon devuelve lo mismo, y `templegymsalta.com`, `/hacete-socio` e `/ingresar` salen `data-estilo="pista"` (curl sin caché). El guardado llegó: no hay bug en el proxy ni en la ficha. Los dos `[demo]` de producción siguen en clásico (no se escribe en producción). Diagnóstico: `Base de datos → estado`.

@@ -7,8 +7,14 @@ import { PuntoEstado } from "@/components/panel/Estado";
 import { Mensaje } from "@/components/ui/Mensaje";
 import { aCsv } from "@/lib/csv";
 import { etiquetarVarios, sociosSinMensajes } from "./acciones";
+import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { ultimaVez, ultimoDia } from "@/lib/formato";
+import { venceDe } from "@/lib/puerta";
+import { linkWhatsappSocio } from "@/lib/whatsapp";
 
-export type FilaSocio = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; puede?: boolean; autoalta?: boolean };
+export type FilaSocio = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; puede?: boolean; autoalta?: boolean;
+  /** Cierre para vender (25/11): socios.cubierto_hasta, la última entrada y la regla de "dejó de venir" de Retención (todo de buscar_socios). */
+  vence?: string | null; ultima_vez?: string | null; dejo_de_venir?: boolean };
 type Columna = "numero" | "plan" | "dni" | "telefono";
 const COLUMNAS: [Columna, string][] = [["numero", "Número"], ["plan", "Plan"], ["dni", "DNI"], ["telefono", "Teléfono"]];
 const CLAVE = "base.socios.columnas";
@@ -20,13 +26,22 @@ function etiquetaEstado(s: FilaSocio): [string, string] {
   if (s.dado_de_baja) return ["", "De baja"];
   if (s.color === "verde") return ["pildora-verde", "Al día"];
   if (s.color === "azul") return ["pildora-azul", s.texto];
-  if (s.color === "rojo") return ["pildora-rojo", s.texto];
-  if (s.color === "amarillo") return ["pildora-amarillo", s.texto];
+  // socios.png: la palabra corta (DEBE, VENCE MAÑANA); el texto entero de la base queda en el title.
+  if (s.color === "rojo") return ["pildora-rojo", /^Venci[óo]/.test(s.texto) ? "Debe" : s.texto];
+  if (s.color === "amarillo") return ["pildora-amarillo", venceDe(s.color, s.texto) ?? s.texto];
   return ["", s.texto];
 }
 const iniciales = (n: string) => n.trim().split(/s+/).slice(0, 2).map((x) => x[0]?.toUpperCase() ?? "").join("");
 
-export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean; semaforo?: boolean }) {
+/** La acción de cada fila (socios.png): Cobrar si debe o vence pronto, WhatsApp si dejó de venir, Ver en los demás. Todo sale de lo que dijo la base. */
+function accionFila(s: FilaSocio): "cobrar" | "whatsapp" | "ver" {
+  if (s.dado_de_baja) return "ver";
+  if (s.color === "rojo" || venceDe(s.color, s.texto)) return "cobrar";
+  if (s.dejo_de_venir && linkWhatsappSocio(s.telefono)) return "whatsapp";
+  return "ver";
+}
+
+export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false, zona }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean; semaforo?: boolean; zona?: string }) {
   const [varios, setVarios] = useState(false);
   const [elegidos, setElegidos] = useState<Set<string>>(new Set());
   const [columnas, setColumnas] = useState<Columna[]>(POR_DEFECTO);
@@ -117,9 +132,9 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
       )}
 
       {semaforo ? (
-        // Pista Semáforo (socios.png): la lista en su tarjeta, con socio, plan, estado y el botón. Vence y Última vez no vienen en esta lista: no se muestran.
+        // Pista Semáforo (socios.png): la lista en su tarjeta, con socio, plan, estado, vence, última vez y la acción de la fila.
         <div className="tarjeta socios-semaforo" data-socios-semaforo>
-          <div className="socios-semaforo-cabeza" aria-hidden><span>Socio</span><span>Plan</span><span>Estado</span><span /></div>
+          <div className="socios-semaforo-cabeza" aria-hidden><span>Socio</span><span>Plan</span><span>Estado</span><span>Vence</span><span>Última vez</span><span /></div>
           <ul>
             {filas.map((s, i) => {
               const [clase, texto] = etiquetaEstado(s);
@@ -136,11 +151,17 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                     </span>
                     <span className="socios-semaforo-plan truncate" data-plan-fila>{s.plan ?? "—"}</span>
                     <span className="socios-semaforo-estado">
-                      <span className={`pildora ${clase} max-w-full truncate`}>{texto}</span>
+                      <span className={`pildora ${clase} max-w-full truncate`} title={s.texto}>{texto}</span>
                       {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
                     </span>
-                    <span className={`boton boton-chico ${s.color === "rojo" && !s.dado_de_baja ? "boton-claro" : ""}`} aria-hidden>Ver</span>
+                    <span className="socios-semaforo-vence numero" data-vence-fila>{s.vence && !s.dado_de_baja ? ultimoDia(s.vence, zona) : "—"}</span>
+                    <span className="socios-semaforo-ultima" data-ultima-vez>{ultimaVez(s.ultima_vez, zona)}</span>
+                    {/* La celda de la acción: "Ver" es el mismo link de la fila; Cobrar y WhatsApp van encima de la celda, fuera del link
+                        (un botón no va adentro de otro link, y la fila sigue siendo un solo link al socio). */}
+                    {accionFila(s) === "ver" ? <span className="boton boton-chico socios-semaforo-accion" aria-hidden data-accion-fila="ver">Ver</span> : <span className="socios-semaforo-accion" aria-hidden />}
                   </Link>
+                  {accionFila(s) === "cobrar" && <BotonCobrar socioId={s.socio_id} origen="otro" cuota className="boton boton-chico boton-claro socios-semaforo-accion socios-semaforo-accion-fuera" data-accion-fila="cobrar">Cobrar</BotonCobrar>}
+                  {accionFila(s) === "whatsapp" && <a href={linkWhatsappSocio(s.telefono)!} target="_blank" rel="noopener noreferrer" className="boton boton-chico socios-semaforo-accion socios-semaforo-accion-fuera" data-accion-fila="whatsapp" aria-label={`WhatsApp a ${s.nombre}`}>WhatsApp</a>}
                 </li>
               );
             })}

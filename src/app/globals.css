@@ -745,7 +745,13 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
 
 /* La lista de Socios Semáforo (socios.png): tarjeta con cabecera en mayúscula y filas de 92 que alternan el tono. */
 .socios-semaforo { padding: 24px; }
-.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 16px; }
+.socios-semaforo-cabeza, .socios-semaforo-link { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.6fr) minmax(0, 0.9fr) 112px; align-items: center; gap: 16px; }
+.socios-semaforo-accion { flex: none; width: 112px; justify-content: center; }
+/* Cobrar y WhatsApp van fuera del link de la fila, encima de su celda (la última columna). */
+.socios-semaforo-fila { position: relative; }
+.socios-semaforo-accion-fuera { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+.socios-semaforo-accion-fuera:active { transform: translateY(-50%) scale(0.97); }
+.socios-semaforo-ultima { color: var(--texto-suave); font-size: 15px; }
 .socios-semaforo-fila { display: flex; align-items: center; gap: 12px; }
 .socios-semaforo-link { flex: 1; min-width: 0; min-height: 84px; }
 .socios-semaforo-cabeza { padding: 0 20px 14px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto-suave); }
@@ -761,16 +767,29 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
   .socios-semaforo { padding: 10px; }
   .socios-semaforo-cabeza { display: none; }
   .socios-semaforo-fila { padding: 10px 14px; }
-  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr) auto; row-gap: 6px; min-height: 64px; }
-  .socios-semaforo-plan { display: none; }
+  .socios-semaforo-link { grid-template-columns: minmax(0, 1fr) 96px; row-gap: 6px; min-height: 64px; }
+  .socios-semaforo-plan, .socios-semaforo-vence { display: none; }
+  .socios-semaforo-ultima { font-size: 13px; grid-column: 1; }
   .socios-semaforo-estado { grid-column: 1; }
-  .socios-semaforo-link > .boton { grid-row: 1 / span 2; grid-column: 2; }
+  .socios-semaforo-link > .socios-semaforo-accion { grid-row: 1 / span 3; grid-column: 2; }
+  .socios-semaforo-accion { width: 96px; }
+  .socios-semaforo-accion-fuera { right: 14px; }
 }
 
 /* El Inicio Semáforo (inicio-panel.png a 1440; inicio-celular.png a 390). Una columna en el celular. */
 .inicio-semaforo { display: flex; flex-direction: column; gap: 22px; }
 .inicio-semaforo-fecha { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
-.inicio-semaforo-saludo { font-size: 52px; line-height: 0.95; letter-spacing: 0.5px; padding-right: 3.5rem; }
+.inicio-semaforo-saludo { font-size: 52px; line-height: 0.95; letter-spacing: 0.5px; }
+.inicio-semaforo-cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-right: 3.5rem; }
+.inicio-semaforo-cuenta { display: none; align-items: center; gap: 10px; flex: none; }
+@media (min-width: 1024px) { .inicio-semaforo-cuenta { display: flex; } }
+.inicio-semaforo-ayuda { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; border: 1px solid var(--borde); background: var(--tarjeta); color: var(--texto); font-weight: 800; font-size: 20px; }
+.inicio-semaforo-ayuda:active, .inicio-semaforo-pildora summary:active { transform: scale(0.96); }
+.inicio-semaforo-pildora { position: relative; }
+.inicio-semaforo-pildora summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 4px 18px 4px 4px; border-radius: 999px; border: 1px solid var(--borde); background: var(--tarjeta); font-weight: 700; }
+.inicio-semaforo-pildora summary::-webkit-details-marker { display: none; }
+.inicio-semaforo-iniciales { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: var(--acento); color: var(--sobre-acento); font-size: 15px; font-weight: 800; }
+.inicio-semaforo-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; display: flex; flex-direction: column; gap: 8px; padding: 12px; min-width: 220px; }
 .inicio-semaforo-entrada { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
 .inicio-semaforo-entrada-izq { padding: 24px 28px; }
 .inicio-semaforo-entrada .puerta { padding: 28px; gap: 10px; min-height: 0; }
@@ -802,12 +821,14 @@ html[data-semaforo="si"] [data-medio] .numero { font-size: 48px; }
 html[data-semaforo="si"] .inicio-semaforo-chip { min-height: 40px; padding: 0 16px; border-radius: 20px; font-size: 15px; font-weight: 600; text-transform: none; }
 /* Hoy en números: tarjetas de 20 con el número de 62. */
 .inicio-semaforo [data-numeros-semaforo] dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.inicio-semaforo [data-numero] { border-radius: 20px; background: var(--tarjeta); padding: 20px 22px; margin: 0; gap: 4px; }
-.inicio-semaforo [data-numero] dd { font-size: clamp(40px, 3.4vw, 62px); line-height: 1; white-space: nowrap; }
-.inicio-semaforo [data-numero] dt { font-size: 16px; font-weight: 600; color: var(--texto); margin: 0; }
-.inicio-semaforo [data-numero="vencen"] dd, .inicio-semaforo [data-numero="por_vencer"] dd, .inicio-semaforo [data-numero="a_cobrar"] dd { color: var(--vence); }
-.inicio-semaforo [data-numero="cobrado"] dd, .inicio-semaforo [data-numero="caja_turno"] dd { color: var(--acento); }
-.inicio-semaforo [data-numero="plata_riesgo"] dd, .inicio-semaforo [data-numero="deben"] dd { color: var(--et-debe-texto); }
+.inicio-semaforo [data-numero-item] { border-radius: 20px; background: var(--tarjeta); padding: 20px 22px; margin: 0; gap: 4px; }
+.inicio-semaforo [data-numero-item] dd { font-size: clamp(40px, 3.4vw, 62px); line-height: 1; white-space: nowrap; }
+.inicio-semaforo [data-numero-item] dt { font-size: 16px; font-weight: 600; color: var(--texto); margin: 0; }
+.inicio-semaforo [data-numero-item="vencen"] dd, .inicio-semaforo [data-numero-item="por_vencer"] dd, .inicio-semaforo [data-numero-item="a_cobrar"] dd { color: var(--vence); }
+.inicio-semaforo [data-numero-item="cobrado"] dd, .inicio-semaforo [data-numero-item="caja_turno"] dd { color: var(--acento); }
+.inicio-semaforo [data-numero-item="plata_riesgo"] dd, .inicio-semaforo [data-numero-item="deben"] dd { color: var(--et-debe-texto); }
+.inicio-semaforo [data-numero-item="no_vienen"] dd { color: var(--texto-suave); }
+.inicio-semaforo .numero-inicio-detalle { font-size: 14px; font-weight: 500; color: var(--texto-suave); margin-top: 4px; }
 /* Accesos rápidos: 6 por fila, de 72 de alto, emoji y nombre al lado. En la capa de componentes: sus !important les ganan a los de las utilidades (!flex-col). */
 @layer components {
   .inicio-semaforo [data-accesos-semaforo] ul { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
@@ -851,9 +872,51 @@ html[data-semaforo="si"] aside .titulo-grupo { font-size: 13px; font-weight: 700
   .inicio-semaforo-entrada .puerta-palabra { font-size: 56px; }
   .inicio-semaforo-entrada .puerta-emoji { display: inline; }
   .inicio-semaforo [data-numeros-semaforo] dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .inicio-semaforo [data-numero] dd { font-size: clamp(30px, 10vw, 48px); }
-  .inicio-semaforo [data-numero] { padding: 16px 18px; }
+  .inicio-semaforo [data-numero-item] dd { font-size: clamp(30px, 10vw, 48px); }
+  .inicio-semaforo [data-numero-item] { padding: 16px 18px; }
   .inicio-semaforo [data-accesos-semaforo] ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inicio-semaforo [data-accesos-semaforo] ul a.boton { height: 56px; min-height: 56px; border-radius: 28px !important; padding: 0 14px !important; }
   .inicio-semaforo-ahora { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Cierre para vender (25/11) · Números del Inicio: el <dl> tiene solo <div> con su <dt> y su <dd> (accesibilidad); el link del valor cubre la tarjeta. */
+.numero-inicio-link { position: relative; }
+.numero-inicio-link:active { transform: scale(0.98); }
+.numero-inicio-a { color: inherit; }
+.numero-inicio-a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.numero-inicio-a:focus-visible { outline: none; }
+.numero-inicio-link:has(.numero-inicio-a:focus-visible) { outline: 2px solid var(--acento); outline-offset: 2px; }
+.numero-inicio-detalle { font-size: 13px; }
+
+/* La franja de la Entrada: con Semáforo la palabra grande (PASA · VENCE MAÑANA) y abajo el texto de la base; sin Semáforo, el texto como siempre. */
+.franja-palabra { display: none; }
+html[data-semaforo="si"] [data-ventana-veredicto] .franja-palabra { display: block; }
+html[data-semaforo="si"] [data-ventana-veredicto] .franja-texto { display: block; margin-top: 6px; font-family: var(--fuente); font-weight: 600; text-transform: none; font-size: 20px; line-height: 1.25; }
+
+/* Ficha Semáforo (ficha-socio.png): veces este mes, semanas seguidas y último pago; los pagos al costado. */
+.ficha-semaforo-datos { display: grid; gap: 16px; margin-top: 20px; }
+@media (min-width: 1024px) { .ficha-semaforo-datos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.ficha-semaforo-numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.ficha-semaforo-numeros > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; border-radius: 20px; background: var(--tarjeta); padding: 18px 20px; }
+.ficha-semaforo-numeros dt { font-size: 15px; font-weight: 600; color: var(--texto-suave); }
+.ficha-semaforo-numeros dd { margin: 0; font-size: clamp(26px, 2.4vw, 38px); line-height: 1; white-space: nowrap; }
+.ficha-semaforo-pagos { padding: 18px 20px; }
+.ficha-semaforo-pagos table { margin-top: 10px; border-collapse: collapse; }
+.ficha-semaforo-pagos td { padding: 10px 6px; border-top: 1px solid var(--borde); vertical-align: middle; }
+@media (max-width: 480px) { .ficha-semaforo-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ficha-semaforo-pagos td:nth-child(3) { display: none; } }
+html[data-semaforo="si"] .puerta-kiosco[data-larga="si"] .puerta-palabra { font-size: clamp(56px, 7vw, 96px); line-height: 0.9; }
+
+/* Caja Semáforo (caja.png): los movimientos del turno con filtros, y al costado "Para aprobar" y lo que tiene que haber en el cajón. */
+.caja-semaforo { display: grid; gap: 20px; }
+@media (min-width: 1100px) { .caja-semaforo { grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); align-items: start; } }
+.caja-semaforo-costado { display: flex; flex-direction: column; gap: 16px; }
+.caja-movimientos { padding: 22px 24px; }
+.caja-movimientos-cabeza { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.caja-movimientos-lista { display: flex; flex-direction: column; }
+.caja-movimientos-fila { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; min-height: 64px; border-top: 1px solid var(--borde); }
+.caja-movimientos-monto { font-size: 20px; text-align: right; min-width: 96px; }
+.caja-movimientos-monto.entra { color: var(--et-aldia-texto, var(--pasa)); }
+.caja-movimientos-monto.sale { color: var(--et-debe-texto, var(--nopasa)); }
+.caja-cajon { padding: 22px 24px; }
+.caja-cajon-monto { font-size: 44px; line-height: 1; color: var(--acento); margin-top: 6px; }
+@media (max-width: 560px) { .caja-movimientos-fila { grid-template-columns: 48px minmax(0, 1fr) auto; } .caja-movimientos-fila .pildora { display: none; } }

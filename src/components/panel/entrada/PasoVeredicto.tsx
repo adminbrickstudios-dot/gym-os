@@ -15,6 +15,7 @@ import { hayHojaCobrar } from "../cobrar/evento";
 import { ComprobanteCobro, FormDejarPasar } from "./cargas";
 import ElegirPlanSocio from "./ElegirPlanSocio";
 import { CLAVE_FICHA, EMOJI } from "./comun";
+import { palabraPuerta, venceDe } from "@/lib/puerta";
 
 function Iniciales({ nombre }: { nombre: string }) {
   const [a, b] = nombre.trim().split(/\s+/);
@@ -70,7 +71,7 @@ export default function PasoVeredicto({ elegido, v, guia, apto, firmar, eventosH
     <div data-ventana-veredicto={v?.color ?? "cargando"} aria-live="polite">
       {!v ? <div className="p-8"><div className="h-64 rounded-[var(--radio)] bg-[var(--tarjeta)] esqueleto" aria-hidden /></div> : (<>
         <div className="px-6 sm:px-8 py-5" style={{ background: `color-mix(in oklab, ${colorVar(v.color)}, var(--fondo) 55%)` }}>
-          <p className="text-2xl sm:text-3xl font-bold leading-tight"><span aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></span> {v.texto}</p>
+          <p className="text-2xl sm:text-3xl font-bold leading-tight"><span aria-hidden><Icono nombre={EMOJI[v.color] ?? "ayuda"} /></span> <span className="franja-palabra" data-franja-palabra>{palabraPuerta(v.puede, v.color, v.texto)}</span><span className="franja-texto">{v.texto}</span></p>
         </div>
         <div className="p-6 sm:p-8 space-y-5">
           <div className="flex items-center gap-4">
@@ -113,6 +114,11 @@ export default function PasoVeredicto({ elegido, v, guia, apto, firmar, eventosH
               <button type="button" onClick={() => darPruebaAlSocio(elegido)} disabled={ocupado} className="boton boton-principal text-lg px-8" data-ventana-prueba data-prueba-principal><Icono nombre="regalo" /> Clase de prueba</button>
             )}
             {[principal, segundo].map((clave, i) => clave && boton(clave, i === 0 && !pruebaPrimero))}
+            {/* Cierre para vender (25/11): amarillo por vencer (lo dijo la base) → cobrarle ya el mes que viene, con la misma hoja Cobrar. */}
+            {v.puede && venceDe(v.color, v.texto) && principal !== "cobrar" && segundo !== "cobrar" && (
+              <Link href={`/panel/vender?socio=${elegido.socio_id}&cuota=1&desde=entrada`} className="boton" data-ventana-cobrar-proximo
+                onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return; e.preventDefault(); cobrarAhora(); }}><Icono nombre="plata" /> Cobrar el próximo mes</Link>
+            )}
             {!v.puede && !forzando && principal !== "dejar_pasar" && !bloqueadoParaRecepcion && (
               <button type="button" onClick={dejar} className="boton" data-ventana-dejar><Icono nombre="usuarios" /> Dejar pasar <kbd className="text-xs opacity-70 font-sans">D</kbd></button>
             )}

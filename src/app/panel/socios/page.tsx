@@ -18,7 +18,7 @@ import { Icono } from "@/components/ui/Icono";
 
 export const metadata: Metadata = { title: "Socios" };
 
-type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; puede?: boolean; autoalta?: boolean };
+type Fila = { socio_id: string; numero: number; nombre: string; telefono: string | null; dni: string | null; plan: string | null; color: string; texto: string; dado_de_baja: boolean; puede?: boolean; autoalta?: boolean; vence?: string | null; ultima_vez?: string | null; dejo_de_venir?: boolean };
 
 type Etiqueta = { id: string; nombre: string; socios: number };
 type Filtros = Record<"todos" | "al_dia" | "por_vencer" | "vencidos" | "en_pausa" | "sin_plan" | "nuevos" | "bajas", number> & { planes: { plan_id: string; nombre: string; socios: number }[] };
@@ -157,7 +157,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="subir" /> Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
-          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} semaforo={await conSemaforo()} />
+          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} semaforo={await conSemaforo()} zona={panel.gimnasio.zona_horaria} />
         )}
         </div>
         {filas.length >= limite && (

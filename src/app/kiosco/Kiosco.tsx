@@ -9,6 +9,7 @@ import { emergenciaDeLaTablet, entrarEnKiosco, entrarHabitual, habitualesDeLaTab
 import { Icono } from "@/components/ui/Icono";
 import { SIN_CONEXION, valorDelCampo } from "./campo";
 import { ResultadoPuerta } from "@/components/ResultadoPuerta";
+import { venceDe } from "@/lib/puerta";
 
 const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "borrar", "0", "entrar"];
 
@@ -135,6 +136,9 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, a
   // Pista Semáforo (kiosco.png): el resultado a la izquierda y el teclado siempre a la derecha. Lo mismo que abajo, otra forma.
   if (semaforo) {
     const entro = !!r && !r.error && (r.resultado === "entro" || r.resultado === "entro_modo_aviso");
+    // Cierre para vender (25/11): amarillo por vencer (lo dijo la base) → "PASÁ · VENCE MAÑANA". El "· avisale" del texto es para la recepción, no para el socio.
+    const vence = entro && r?.color ? venceDe(r.color, r.texto) : null;
+    const textoSocio = r?.texto?.replace(/ · avisale$/, "");
     const hora = new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
     const arriba = <><span className="uppercase">{gimnasio}{sede ? ` · ${sede}` : ""}</span><span>{hora}</span></>;
     const enviar = () => { if (elegido) { if (dni.length === 3) conHabitual(dni); } else if (dni.length >= 6 || /^GYMOS1./.test(dni)) mandar(dni); };
@@ -147,9 +151,9 @@ export function Kiosco({ gimnasio, sede, con_qr, qr_pared, con_salida = false, a
               data-kiosco-resultado={r.error ? "error" : r.registrada ? "salio" : "sin-entrada"} />
           ) : r ? (
             <ResultadoPuerta tamano="kiosco" color={r.error ? "gris" : entro ? ((r.color as "verde" | "amarillo") ?? "verde") : "rojo"} puede={entro} arriba={arriba}
-              titulo={r.error ? "Probá de nuevo" : entro ? "Pasá" : undefined}
+              titulo={r.error ? "Probá de nuevo" : entro ? (vence ? `Pasá · ${vence}` : "Pasá") : undefined} data-larga={vence ? "si" : undefined}
               nombre={r.error ? undefined : entro ? `¡Buen entreno, ${r.nombre}!` : r.nombre}
-              detalle={r.error ?? (entro ? r.texto : <>{r.texto}<br />Pasá por recepción y lo resolvemos.</>)}
+              detalle={r.error ?? (entro ? (vence ? <>{textoSocio}<br />Podés renovar en la recepción.</> : r.texto) : <>{r.texto}<br />Pasá por recepción y lo resolvemos.</>)}
               data-kiosco-resultado={r.error ? "error" : entro ? "entro" : "no"}>
               {alta_url && r.error && /No encontramos ese DNI/.test(r.error) ? <QrAlta url={alta_url} /> : <p className="kiosco-vuelve">En {r.error ? 5 : 4} segundos vuelve a pedir el DNI</p>}
             </ResultadoPuerta>

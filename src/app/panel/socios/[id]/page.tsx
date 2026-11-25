@@ -36,10 +36,12 @@ import { VolverAEntrada } from "@/components/panel/entrada/VolverAEntrada";
 import type { GradosSocio } from "@/lib/clases/grados";
 import { estadoDe, motivoDe, type FilaHistorial } from "@/lib/mensajes";
 import { Icono } from "@/components/ui/Icono";
+import { venceDe } from "@/lib/puerta";
 
 export const metadata: Metadata = { title: "Ficha del socio" };
 
 const RESULTADO: Record<string, string> = { entro: "Entró", entro_modo_aviso: "Entró con aviso", forzado: "Lo dejaron pasar", rechazado: "No pudo entrar" };
+const MEDIO_PAGO: Record<string, string> = { efectivo: "Efectivo", transferencia: "Transferencia", debito: "Débito", credito: "Crédito", mercadopago: "Mercado Pago", cuenta_corriente: "A cuenta" };
 type Plan = { plan_id: string; tipo: string; nombre: string; activo: boolean; precio: number | null };
 
 function Dato({ etiqueta, valor }: { etiqueta: string; valor?: React.ReactNode }) {
@@ -135,6 +137,8 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             {s.dado_de_baja_en ? <span className="pildora"><Icono nombre="salir" /> Dado de baja el {fechaCorta(s.dado_de_baja_en, zona)}</span>
               : semaforo
                 ? <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(v.color) ? v.color : "gris") as ColorPuerta} puede={v.puede} nombre={f.membresia?.plan} detalle={v.texto} data-ficha-puerta={v.color}>
+                    {/* Cierre para vender (25/11): amarillo por vencer (lo dijo la base) → cobrarle el mes que viene desde acá. */}
+                    {v.puede && venceDe(v.color, v.texto) && <BotonCobrar socioId={s.id} origen="ficha" cuota className="boton boton-principal" data-cobrar-proximo>Cobrar el próximo mes</BotonCobrar>}
                   </ResultadoPuerta>
                 : <PildoraEstado color={v.color}>{v.texto}</PildoraEstado>}
             {!s.dado_de_baja_en && v.vence_en && <div className="mt-3"><BarraVigencia venceEn={v.vence_en} color={v.color} /></div>}
@@ -155,6 +159,37 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               <CambiarPlan socioId={s.id} actual={f.membresia?.plan_id ?? null} planes={membresias} />
               <DarDeBaja socioId={s.id} ofrecePausa={!!f.membresia && !!pausas.suscripcion_id} />
             </div>
+          )}
+          {/* ficha-socio.png: veces este mes, semanas seguidas y el último pago, con los pagos al costado. Solo lectura, del mismo viaje de la ficha. */}
+          {semaforo && f.racha && pestana === "resumen" && (
+            <section className="ficha-semaforo-datos" data-ficha-semaforo-datos>
+              <dl className="ficha-semaforo-numeros">
+                <div data-ficha-veces><dt><span aria-hidden><Icono nombre="pesa" sistema /></span> Veces este mes</dt><dd className="numero">{f.racha.entradas_mes}</dd></div>
+                <div data-ficha-semanas><dt><span aria-hidden><Icono nombre="fuego" sistema /></span> Semanas seguidas</dt><dd className="numero">{f.racha.semanas_seguidas}</dd></div>
+                {f.pagos?.find((x) => x.estado === "aprobado") && (() => { const u = f.pagos!.find((x) => x.estado === "aprobado")!; return (
+                  <div data-ficha-ultimo-pago><dt><span aria-hidden><Icono nombre="plata" sistema /></span> Último pago, {fechaCorta(u.fecha, zona).slice(0, 5)}</dt><dd className="numero">{formatearPesos(u.monto)}</dd></div>
+                ); })()}
+              </dl>
+              {f.pagos && f.pagos.length > 0 && (
+                <section className="tarjeta ficha-semaforo-pagos" aria-labelledby="ficha-pagos" data-ficha-pagos-costado>
+                  <div className="flex items-center justify-between gap-3"><h2 id="ficha-pagos" className="titulo">Pagos</h2><Link href={`/panel/socios/${s.id}?pestana=pagos`} className="texto-suave underline">Ver todos</Link></div>
+                  <table className="w-full">
+                    <caption className="sr-only">Los últimos pagos</caption>
+                    <thead className="sr-only"><tr><th scope="col">Fecha</th><th scope="col">Qué pagó</th><th scope="col">Medio</th><th scope="col">Monto</th></tr></thead>
+                    <tbody>
+                      {f.pagos.slice(0, 4).map((x) => (
+                        <tr key={x.id}>
+                          <td className="numero texto-suave">{fechaCorta(x.fecha, zona).slice(0, 5)}</td>
+                          <td className="min-w-0">{x.detalle ?? "Pago"}{x.estado !== "aprobado" ? <span className="texto-suave"> · {x.estado === "pendiente" ? "por aprobar" : x.estado}</span> : null}</td>
+                          <td><span className="pildora">{MEDIO_PAGO[x.medio] ?? x.medio}</span></td>
+                          <td className="numero text-right">{formatearPesos(x.monto)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              )}
+            </section>
           )}
           {!s.dado_de_baja_en && <div className="mt-4"><AptoFisico socioId={s.id} datos={apto} /></div>}
           {!s.dado_de_baja_en && documentos && (documentos.pendientes.length > 0 || documentos.firmados.length > 0) && (

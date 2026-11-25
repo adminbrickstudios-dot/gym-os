@@ -541,3 +541,25 @@ Respuesta de Mateo: (vacío)
 - B) Sin precios: solo "Hablemos por WhatsApp".
 Decidido por defecto: A (la sección se esconde sola si no hay planes). Dónde se nota: la página de venta.
 Respuesta de Mateo: (vacío)
+
+## Decididas por Mateo el 25/11 (tarea "Cierre para vender")
+
+Mateo delegó todas las decisiones de esta tarea: valen las recomendadas de este documento y de `PASE-1.0.md`, más estas tres, textuales.
+- **Lo 💲 de `PASE-1.0.md`: van las recomendaciones.** Todo queda como está para la 1.0, sin bonos ni porcentajes de profes (P7), y la
+  factura ARCA pasa a Pase 2.0 (R5). No se programa nada de plata. Las filas de la tabla 💲 quedan decididas así (ver `PASE-1.0.md` § 1).
+- **"Para hacer hoy" no lleva casilla.** Cada tarea sale de los hechos y desaparece sola cuando se resuelve; se sacó la casilla del diseño
+  (`docs/base/pista/semaforo/inicio-panel.html`) y queda el emoji. Reemplaza lo que el diseño del 24/11 dibujaba.
+- **Los `[demo]` van en Pista con `pista_semaforo` prendida, y todo gimnasio nuevo de /super también**, por la función de alta única
+  (`admin_crear_gimnasio`, que usa `admin_alta_gimnasio`), no por código suelto (migración `20261125100000`). Temple Gym no se toca: Mateo la prende él.
+
+Decididas por defecto en la tarea (la opción recomendada; avisame si no):
+- **"Dejó de venir" en Socios** sale de la misma regla de la lista `no_viene` de Retención (puede entrar y no vino en los días de ausencia del
+  gimnasio), calculado en la base (`buscar_socios.dejo_de_venir`), no en TypeScript.
+- **El umbral de "Casi lleno"** es un dato por gimnasio (`configuracion_gimnasio.casi_lleno_pct`, 85 % por defecto, entre 50 y 100). Todavía no
+  tiene pantalla para cambiarlo: se cambia desde la base (anotado en Para Pase 2.0).
+- **El celular con +54 y sin el 9** (`+54 387 412 3456`) se guarda con el 9, como ya pasaba sin el `+`. Y un año de dos cifras en un archivo
+  importado: hasta 50 es 20xx, de 51 en adelante 19xx (`1/2/90` es 1990).
+- **El nombre de la demo para un prospecto es el de su gimnasio, sin `[demo]` adelante** (el prospecto ve su nombre); lo que la marca como demo es
+  `es_demo` (y la etiqueta "demo" en /super). Vence a los 14 días.
+- **El alta única no cambia quién puede dar de alta:** usa los permisos de las funciones de siempre. Ver "Lo que encontré" en `PROGRESO.md`
+  (la cuenta `lectura` de BRIK puede llamar a `admin_crear_gimnasio`): toca permisos, no se cambió.

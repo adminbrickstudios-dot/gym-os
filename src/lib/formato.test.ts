@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
-import { fechaConEl, fechaCorta, fechaHoraHumana, fechaHumana, fechaLarga, formatearCelular, formatearNumero, formatearPesos, leerMonto, saludo, ultimoDia } from "./formato";
+import { describe, expect, it, test } from "vitest";
+import { fechaConEl, fechaCorta, fechaHoraHumana, fechaHumana, fechaLarga, formatearCelular, formatearNumero, formatearPesos, haceRato, leerMonto, saludo, ultimaVez, ultimoDia } from "./formato";
 
 describe("formatearPesos", () => {
   test.each([
@@ -99,4 +99,27 @@ describe("formatearCelular", () => {
     expect(formatearCelular("12345")).toBe("12345");
     expect(formatearCelular(null)).toBe("");
   });
+});
+
+describe("haceRato (25/11)", () => {
+  const ahora = new Date("2026-11-25T19:42:10Z");
+  it("segundos, minutos, horas y días", () => {
+    expect(haceRato("2026-11-25T19:42:05Z", ahora)).toBe("hace 5 s");
+    expect(haceRato("2026-11-25T19:39:10Z", ahora)).toBe("hace 3 min");
+    expect(haceRato("2026-11-25T17:40:00Z", ahora)).toBe("hace 2 h");
+    expect(haceRato("2026-11-23T19:00:00Z", ahora)).toBe("hace 2 días");
+  });
+  it("un reloj adelantado no da negativo", () => expect(haceRato("2026-11-25T19:43:00Z", ahora)).toBe("hace 0 s"));
+});
+
+describe("ultimaVez (25/11, Socios)", () => {
+  const z = "America/Argentina/Buenos_Aires";
+  const ahora = new Date("2026-11-25T22:50:00Z"); // 19:50 en Argentina
+  it("hoy con la hora, ayer, hace N días, nunca", () => {
+    expect(ultimaVez("2026-11-25T22:42:00Z", z, ahora)).toBe("Hoy 19:42");
+    expect(ultimaVez("2026-11-24T12:00:00Z", z, ahora)).toBe("Ayer");
+    expect(ultimaVez("2026-11-22T12:00:00Z", z, ahora)).toBe("Hace 3 días");
+    expect(ultimaVez(null, z, ahora)).toBe("Nunca");
+  });
+  it("las 23:30 de ayer en Argentina ya es 'Ayer' aunque en UTC sea hoy", () => expect(ultimaVez("2026-11-25T02:30:00Z", z, ahora)).toBe("Ayer"));
 });

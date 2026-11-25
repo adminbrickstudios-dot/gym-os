@@ -4,6 +4,8 @@
 #   prevuelo   corre las migraciones pendientes en una transacción que se revierte
 #   aplicar    prevuelo + aplica + chequeos del proyecto contra la base real
 #   chequeos   solo los chequeos (RLS, permisos, search_path…)
+#   tipos      genera src/tipos/base.ts desde la base (supabase gen types --db-url, solo lee el schema) y commitea el diff
+#              en la rama desde la que se corre (nunca en main). Se corre después de aplicar las migraciones de esa rama.
 #   hacer-admin  da super admin a la cuenta del mail indicado
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
 #   humo-pasado  prueba en el demo de producción (transacción que revierte): alta con fecha y pago pasados + caja por medio
@@ -26,7 +28,7 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo, sembrar-prueba-mateo, usuarios-prueba-mateo]
+        options: [prevuelo, aplicar, chequeos, tipos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo, sembrar-prueba-mateo, usuarios-prueba-mateo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
@@ -51,7 +53,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # La única acción que escribe en el repo (commitea src/tipos/base.ts en la rama): job aparte, con su permiso, para que el resto siga de solo lectura.
+  tipos:
+    if: inputs.accion == 'tipos'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Falta el secreto
+        if: env.SUPABASE_DB_URL == ''
+        run: |
+          echo "::error::Falta el secreto SUPABASE_DB_URL."
+          exit 1
+      - name: Tipos de la base (nunca en main)
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then echo "::error::Corré tipos en la rama de trabajo, no en main."; exit 1; fi
+          node scripts/db/tipos.mjs
+          git add -N src/tipos/base.ts
+          if git diff --quiet -- src/tipos/base.ts; then echo "Sin diferencias: src/tipos/base.ts ya estaba al día."; else
+            git diff --stat -- src/tipos/base.ts
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/tipos/base.ts
+            git commit -m "Tipos de la base al día con producción (supabase gen types --db-url)"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
+          node scripts/db/tipos.mjs --verificar
+
   base:
+    if: inputs.accion != 'tipos'
     runs-on: ubuntu-latest
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

@@ -1,6 +1,6 @@
 # Permisos por rol (sacado de la base real)
 
-Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 349 funciones piden un rol del equipo con `privado.exigir_equipo`; 427 no (las decide la propia función con la sesión, el socio o RLS); 33 son solo del servidor.
+Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada función en la base (`pg_proc`). 351 funciones piden un rol del equipo con `privado.exigir_equipo`; 428 no (las decide la propia función con la sesión, el socio o RLS); 33 son solo del servidor.
 **Un permiso denegado es un error, nunca una lista vacía.** Lo prueba `supabase/pruebas/permisos-equipo.test.mjs` y el chequeo de RLS de `npm run chequeos`.
 
 | Función | dueno | encargado | recepcion | profe |
@@ -63,6 +63,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `comprobante_venta` | ✓ | ✓ | ✓ | — |
 | `config_aumento` | ✓ | ✓ | — | — |
 | `config_caja` | ✓ | ✓ | ✓ | — |
+| `config_clases_panel` | ✓ | ✓ | ✓ | ✓ |
 | `config_cobro` | ✓ | ✓ | ✓ | — |
 | `config_dejar_pasar` | ✓ | ✓ | — | — |
 | `config_entrada` | ✓ | ✓ | ✓ | ✓ |
@@ -213,6 +214,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 | `importar_socios` | ✓ | ✓ | — | — |
 | `ingresos_del_dia` | ✓ | ✓ | ✓ | — |
 | `ingresos_por_hora_y_dia` | ✓ | ✓ | — | — |
+| `inicio_semaforo` | ✓ | ✓ | ✓ | — |
 | `invitado_a_interesado` | ✓ | ✓ | ✓ | — |
 | `invitados_de_hoy` | ✓ | ✓ | ✓ | — |
 | `invitados_sin_seguimiento` | ✓ | ✓ | ✓ | — |
@@ -677,6 +679,7 @@ Generado con `node scripts/datos/permisos-md.mjs` leyendo el cuerpo de cada func
 - `moderacion_control`
 - `motivo_reserva`
 - `movimiento_caja`
+- `movimientos_turno`
 - `notas_y_etiquetas`
 - `novedades_socio`
 - `ocupacion_en_vivo`
