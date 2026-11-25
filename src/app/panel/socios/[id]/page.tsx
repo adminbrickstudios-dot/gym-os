@@ -161,7 +161,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </div>
           )}
           {/* ficha-socio.png: veces este mes, semanas seguidas y el último pago, con los pagos al costado. Solo lectura, del mismo viaje de la ficha. */}
-          {semaforo && f.racha && (
+          {semaforo && f.racha && pestana === "resumen" && (
             <section className="ficha-semaforo-datos" data-ficha-semaforo-datos>
               <dl className="ficha-semaforo-numeros">
                 <div data-ficha-veces><dt><span aria-hidden><Icono nombre="pesa" sistema /></span> Veces este mes</dt><dd className="numero">{f.racha.entradas_mes}</dd></div>
@@ -172,7 +172,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
               </dl>
               {f.pagos && f.pagos.length > 0 && (
                 <section className="tarjeta ficha-semaforo-pagos" aria-labelledby="ficha-pagos" data-ficha-pagos-costado>
-                  <div className="flex items-center justify-between gap-3"><h2 id="ficha-pagos" className="titulo">Últimos pagos</h2><Link href={`/panel/socios/${s.id}?pestana=pagos`} className="texto-suave underline">Ver todos</Link></div>
+                  <div className="flex items-center justify-between gap-3"><h2 id="ficha-pagos" className="titulo">Pagos</h2><Link href={`/panel/socios/${s.id}?pestana=pagos`} className="texto-suave underline">Ver todos</Link></div>
                   <table className="w-full">
                     <caption className="sr-only">Los últimos pagos</caption>
                     <thead className="sr-only"><tr><th scope="col">Fecha</th><th scope="col">Qué pagó</th><th scope="col">Medio</th><th scope="col">Monto</th></tr></thead>
