@@ -168,7 +168,7 @@ try {
   await form.locator('input[name="nombre"]').fill("Nueva"); tipear("Nueva");
   await form.locator('input[name="apellido"]').fill(`Qr${s}`); tipear(`Qr${s}`);
   await form.locator('input[name="dni"]').fill(dniNuevo); tipear(dniNuevo);
-  await form.locator('input[name="telefono"]').fill(`000 ${s}7`); tipear(`000 ${s}7`);
+  await form.locator('input[name="telefono"]').fill(`000 ${s}17`); tipear(`000 ${s}17`);
   if (await form.locator('input[name="fecha_nacimiento"]').count()) { await form.locator('input[name="fecha_nacimiento"]').fill("1995-04-10"); tipear("10/04/1995"); }
   await form.locator('input[name="email"]').fill(`nueva${s}@ejemplo.invalid`); tipear(`nueva${s}@ejemplo.invalid`);
   await form.locator('input[name="contrasena"]').fill("clave-de-prueba-1"); tipear("clave-de-prueba-1");
