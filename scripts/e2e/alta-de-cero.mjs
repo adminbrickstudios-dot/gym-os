@@ -164,7 +164,7 @@ try {
   const dniNuevo = `43${s}9`;
   // Sin plan sugerido en el cartel, el socio elige el suyo (el primero).
   const planes = form.locator("[data-plan] input");
-  if (await planes.count() && !(await planes.first().isChecked())) { await planes.first().check(); clic(); }
+  if (await planes.count() && !(await planes.first().isChecked())) { await form.locator("[data-plan]").first().click(); clic(); }
   await form.locator('input[name="nombre"]').fill("Nueva"); tipear("Nueva");
   await form.locator('input[name="apellido"]').fill(`Qr${s}`); tipear(`Qr${s}`);
   await form.locator('input[name="dni"]').fill(dniNuevo); tipear(dniNuevo);
