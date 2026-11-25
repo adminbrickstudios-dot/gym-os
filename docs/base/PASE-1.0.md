@@ -96,7 +96,10 @@ Ordenado por lo que más importa. Todo lo de acá cuenta como cerrado para Pase 
 
 **(3) Profesionalización** (en este orden, y no se empieza nada de esto sin que Mateo lo diga): landing de venta (✅ armada el 22/11 detrás de `landing_venta_nueva`; cuando existan, sumarle débito automático, factura ARCA, Wellhub/TotalPass e importar desde otro sistema: hoy NO se nombran porque no existen), débito automático (`DEBITO-AUTOMATICO.md`), alta del gimnasio sola, y Resend y Sentry al final.
 
-### 1. Plata y permisos (D70): decide Mateo cuando quiera, con la recomendación ya escrita
+### 1. Plata y permisos (D70): ✅ decidido por Mateo el 25/11: van las recomendaciones de abajo
+
+**Decisión de Mateo (25/11, tarea "Cierre para vender"):** cada fila de estas dos tablas queda como dice su recomendación. Para la 1.0 todo queda como está: sin bonos ni porcentajes de profes (P7) y la factura ARCA pasa a Pase 2.0 (R5). No se programa nada de plata en la 1.0. Lo que una recomendación dice "hacerlo" (por ejemplo, el estado de cuenta de solo lectura o la aprobación comparando el monto) queda para Pase 2.0 con esa recomendación como diseño. Detalle en `PREGUNTAS.md` (25/11).
+
 
 Cada una cambia cuánto se cobra, a quién, o quién ve o mueve plata; por eso el agente no las hizo solo. El detalle y el porqué de cada una están en `PREGUNTAS.md`.
 
