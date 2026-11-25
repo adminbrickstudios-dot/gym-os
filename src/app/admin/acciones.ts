@@ -11,6 +11,7 @@ import { procesarPagoMP } from "@/lib/mp-procesar";
 import { clienteServicio } from "@/lib/supabase/servicio";
 import { NOMBRE_PRODUCTO } from "@/lib/producto";
 import { svgSeguro, tipoReal } from "@/lib/imagenes";
+import { FONDOS } from "@/lib/landing-estilo";
 import { achicarFoto } from "@/lib/imagenes-servidor";
 
 // Todas las acciones del super admin siguen el mismo orden: primero la base
@@ -297,7 +298,7 @@ export async function crearDemo(interesado: string, tipo: string): Promise<{ err
  */
 export async function crearDemoProspecto(f: FormData): Promise<{ error?: string; aviso?: string; gimnasioId?: string; web?: string; panel?: string }> {
   const nombre = String(f.get("nombre") ?? "").trim();
-  const acento = String(f.get("acento") ?? ""), fondo = String(f.get("fondo") ?? "#0e151c");
+  const acento = String(f.get("acento") ?? ""), fondo = String(f.get("fondo") ?? FONDOS[FONDOS.length - 1]);   // el fondo oscuro de la paleta
   const base = dominioBase();
   if (!base) return { error: "Falta NEXT_PUBLIC_DOMINIO_BASE en Vercel (Settings → Environment Variables) y redeployar." };
   let r: { gimnasio_id: string; slug: string; vence: string };

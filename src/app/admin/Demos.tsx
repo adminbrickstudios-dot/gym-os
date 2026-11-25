@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BotonAccion } from "@/components/ui/BotonAccion";
 import { borrarDemosVencidas, crearDemoProspecto } from "./acciones";
+import { ACENTOS } from "@/lib/landing-estilo";
 
 export type DemoVencida = { gimnasio_id: string; nombre: string; vencio: string };
 /** Cierre para vender (25/11): las demos para prospectos (admin_demos_prospectos). El vencimiento lo calcula la base al pedir la lista. */
@@ -16,7 +17,7 @@ const dia = (iso: string) => new Intl.DateTimeFormat("es-AR", { day: "2-digit", 
 export function Demos({ vencidas, prospectos = [] }: { vencidas: DemoVencida[]; prospectos?: DemoProspecto[] }) {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
-  const [acento, setAcento] = useState("#16a34a");
+  const [acento, setAcento] = useState(ACENTOS[0]);
   const [msj, setMsj] = useState<{ ok?: boolean; texto?: string; web?: string }>({});
   return (
     <section className="space-y-3" id="demos" data-demos>

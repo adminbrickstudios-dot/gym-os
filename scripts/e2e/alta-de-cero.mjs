@@ -130,7 +130,12 @@ try {
   await d.getByText(/^Cuota /).first().waitFor({ timeout: 30000 });
   await d.locator('button[aria-pressed]:has-text("Transferencia")').click(); clic();
   await d.locator('button:has-text("Cobrar")').last().click(); clic();
-  await esperarCobro(d);
+  // Cobrado desde la puerta: la hoja Cobrar dice "Cobrado $…" y el veredicto pasa a verde (en Vender, esperarCobro).
+  const cobrado = await Promise.race([
+    d.getByText(/Cobrado $/).first().waitFor({ timeout: 30000 }).then(() => true),
+    d.waitForFunction(() => document.querySelector("[data-veredicto], [data-ventana-veredicto]")?.matches("[data-veredicto=verde], [data-ventana-veredicto=verde]"), null, { timeout: 30000 }).then(() => true),
+  ]).catch(() => false);
+  if (!cobrado) await esperarCobro(d);
   ok(`el primer cobro: la cuota de $${PRECIO} al que debía`);
   leer(5);
   // El al día: verde, PASA, y se anota.
