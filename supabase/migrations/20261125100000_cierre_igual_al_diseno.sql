@@ -7,7 +7,8 @@
 --   inicio_semaforo(gimnasio, sede)                 la línea chica de cada número del Inicio: adentro ahora, desde cuándo está la caja abierta,
 --                                                   los días de ausencia de la regla de retención del gimnasio
 --   numeros_inicio · clave 'no_vienen'              "Dejaron de venir" (la lista no_viene de Retención, la misma regla)
---   buscar_socios · vence, ultima_vez               Vence (socios.cubierto_hasta) y Última vez (la última entrada, índice ingresos_socio)
+--   buscar_socios · vence, ultima_vez, dejo_de_venir  Vence (socios.cubierto_hasta), Última vez (la última entrada, índice ingresos_socio) y
+--                                                   si dejó de venir (la regla de la lista no_viene de Retención, con los días del gimnasio)
 --   ficha_socio · racha                             veces este mes y semanas seguidas (racha_socio, lo mismo que las insignias de la app)
 --   movimientos_turno(turno)                        los cobros del turno (cobros_de_turnos) y los ingresos y retiros de la caja, con el mismo permiso
 --   config_clases_panel(gimnasio)                   el umbral de Casi lleno para la pantalla de Clases
@@ -151,12 +152,14 @@ drop function if exists public.buscar_socios(uuid, text, integer, uuid, text, uu
 create function public.buscar_socios(p_gimnasio_id uuid, p_texto text, p_limite integer default 30, p_etiqueta uuid default null,
                                      p_estado text default null, p_plan uuid default null, p_origen text default null)
 returns table (socio_id uuid, numero integer, nombre text, telefono text, dni text, plan text, color text, texto text, puede boolean,
-               dado_de_baja boolean, autoalta boolean, vence timestamptz, ultima_vez timestamptz)
+               dado_de_baja boolean, autoalta boolean, vence timestamptz, ultima_vez timestamptz, dejo_de_venir boolean)
 language plpgsql security definer set search_path = '' as $function$
 declare e public.equipo; t text := privado.sin_acentos(lower(trim(coalesce(p_texto, '')))); digitos text;
         por_estado boolean := coalesce(p_estado in ('al_dia', 'por_vencer', 'vencidos', 'en_pausa', 'sin_plan'), false);
+        ausencia int;
 begin
   e := privado.exigir_equipo(p_gimnasio_id, array['dueno', 'encargado', 'recepcion']);
+  select c.retencion_dias_ausencia into ausencia from public.configuracion_gimnasio c where c.gimnasio_id = p_gimnasio_id;
   if p_limite is null or p_limite < 1 or p_limite > 100 then raise exception 'El límite va de 1 a 100'; end if;
   if p_estado is not null and not por_estado and p_estado not in ('nuevos', 'bajas') then raise exception 'Filtro desconocido: %', p_estado; end if;
   if p_origen is not null and p_origen <> 'web' then raise exception 'Filtro desconocido: %', p_origen; end if;
@@ -181,7 +184,7 @@ begin
      order by (s.dado_de_baja_en is not null), s.nombre, s.apellido
      limit case when por_estado then null else p_limite end
   ), elegidos as (
-    select s.id, s.numero, s.nombre, s.apellido, s.telefono, s.dni, s.baja, s.origen, s.cubierto_hasta, v.color, v.texto, v.puede
+    select s.id, s.numero, s.nombre, s.apellido, s.telefono, s.dni, s.baja, s.origen, s.cubierto_hasta, s.creado_en, v.color, v.texto, v.puede
       from (select c.* from candidatos c order by c.baja, c.nombre, c.apellido) s
       cross join lateral privado.calcular_acceso(s.id, now(), e.sede_id) v
      where not por_estado or privado.grupo_estado(v.color, v.motivo) = p_estado
@@ -191,11 +194,13 @@ begin
   select s.id, s.numero, trim(s.nombre || ' ' || s.apellido), s.telefono, s.dni,
          (select pl.nombre from public.suscripciones su join public.planes pl on pl.id = su.plan_id
            where su.socio_id = s.id and su.baja_en is null order by su.inicio desc limit 1),
-         s.color, s.texto, s.puede, s.baja, (s.origen = 'alta_web'), s.cubierto_hasta,
-         (select i.momento from public.ingresos i
-           where i.gimnasio_id = p_gimnasio_id and i.socio_id = s.id and i.anulado_en is null and i.resultado <> 'rechazado'
-           order by i.momento desc limit 1)
+         s.color, s.texto, s.puede, s.baja, (s.origen = 'alta_web'), s.cubierto_hasta, u.momento,
+         -- "Dejó de venir": la misma regla que la lista no_viene de Retención (puede entrar y no vino en los días de ausencia del gimnasio).
+         (not s.baja and s.puede and coalesce(u.momento, s.creado_en) <= now() - make_interval(days => coalesce(ausencia, 14)))
     from elegidos s
+    left join lateral (select i.momento from public.ingresos i
+           where i.gimnasio_id = p_gimnasio_id and i.socio_id = s.id and i.anulado_en is null and i.resultado <> 'rechazado'
+           order by i.momento desc limit 1) u on true
    order by s.baja, s.nombre, s.apellido;
 end $function$;
 revoke all on function public.buscar_socios(uuid, text, integer, uuid, text, uuid, text) from public, anon, authenticated;

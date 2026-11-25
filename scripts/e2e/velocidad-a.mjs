@@ -42,7 +42,7 @@ try {
   await r.goto(`${G}/panel`);
   await r.locator("[data-numero]").first().waitFor({ timeout: 30000 });
   chequear((await r.locator("[data-acciones-mostrador] a").count()) >= 2, "la recepción ve sus botones rápidos", "la recepción no ve botones rápidos");
-  const caja = r.locator('dl [data-numero="caja_turno"]');
+  const caja = r.locator('dl [data-numero-item="caja_turno"]');   // (25/11) la tarjeta entera: el link va adentro del <dd>
   chequear((await caja.count()) === 1, "la recepción ve 'Caja del turno' como número", "falta Caja del turno en la recepción");
   if (await caja.count()) {
     const txt = (await caja.innerText()).replace(/\s+/g, " ");

@@ -81,8 +81,9 @@ export async function rpcLote<const L extends readonly Lectura<unknown>[]>(...le
     try {
       dato = await rpcLectura<unknown[]>("lote_lecturas", { p_llamadas: enviadas });
     } catch (e) {
-      // Si la base todavía no tiene la función (el código salió antes que la migración), se pide cada una por separado, como antes.
-      if (!/lote_lecturas/.test((e as Error).message ?? "")) throw e;
+      // Si la base todavía no tiene la función, o no conoce todavía un nombre nuevo de la lista (el código salió antes que la migración),
+      // se pide cada una por separado, como antes (una lectura nueva tolerante da null).
+      if (!/lote_lecturas|no se puede pedir en lote/.test((e as Error).message ?? "")) throw e;
       const sal: unknown[] = [];
       const pedir = async (l: (typeof enviadas)[number]) => {
         const hacer = (a?: Record<string, unknown>) => rpcLectura<unknown>(l.f, a);

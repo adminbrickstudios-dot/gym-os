@@ -17,6 +17,7 @@ const ESPERADO = {
   deben: { ruta: "/panel/vencen-hoy?pestana=vencidos", marcado: '[data-pestana="vencidos"][aria-current="page"]' },
   por_vencer: { ruta: "/panel/vencen-hoy?pestana=por_vencer", marcado: '[data-pestana="por_vencer"][aria-current="page"]' },
   plata_riesgo: { ruta: "/panel/retencion?lista=riesgo" },
+  no_vienen: { ruta: "/panel/retencion?lista=no_viene" },
   al_dia: { ruta: "/panel/socios?estado=al_dia", marcado: '[data-filtro-estados] [aria-current="page"]' },
   altas_mes: { ruta: "/panel/socios?estado=nuevos", marcado: '[data-filtro-estados] [aria-current="page"]' },
   bajas_mes: { ruta: "/panel/socios?estado=bajas", marcado: '[data-filtro-estados] [aria-current="page"]' },
@@ -53,8 +54,9 @@ try {
   for (let i = 0; i < todas.length; i += 4) {
     await elegir(todas.slice(i, i + 4).map((x) => x.etiqueta));
     const enlaces = await d.locator('section[aria-label="Números de hoy"] a[data-numero]').evaluateAll((l) => l.map((a) => ({
-      clave: a.getAttribute("data-numero"), href: a.getAttribute("href"), valor: a.querySelector("dd")?.firstChild?.textContent ?? "",
-      etiqueta: a.querySelector("dt")?.textContent?.trim() ?? "" })));
+      // (25/11) el link vive adentro del <dd> y la etiqueta en el <dt> de la misma tarjeta (el <dl> válido para la accesibilidad).
+      clave: a.getAttribute("data-numero"), href: a.getAttribute("href"), valor: a.firstChild?.textContent ?? "",
+      etiqueta: a.closest("[data-numero-item]")?.querySelector("[data-numero-etiqueta]")?.textContent?.trim() ?? "" })));
     for (const n of enlaces) {
       if (vistos.has(n.clave)) continue;
       vistos.add(n.clave);

@@ -27,6 +27,8 @@ import { conSemaforo } from "@/lib/semaforo";
 import { EntradaInicio } from "@/components/panel/EntradaInicio";
 import { ResultadoPuerta, type ColorPuerta } from "@/components/ResultadoPuerta";
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
+import { Hace } from "@/components/ui/Hace";
+import { venceDe } from "@/lib/puerta";
 
 // VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
 type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
@@ -34,6 +36,8 @@ type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number
 type Ahora = { tipo: string; emoji: string; titulo: string; detalle?: string; hora?: string; href?: string; tono?: string };
 type Inicio = { hoy: string; numeros: NumeroInicio[]; ahora: Ahora[] };
 type MiFichaje = { usa: boolean; nombre: string; puede: boolean; en_turno: boolean; entrada_en: string | null; sin_salida_desde: string | null };
+/** Cierre para vender (25/11): los hechos de la línea chica de cada número (inicio_semaforo). */
+type ExtraSemaforo = { adentro: number; adentro_exacto: boolean; caja_desde: string | null; dias_ausencia: number };
 type NumerosElegidos = { numeros: NumeroInicio[]; elegidos: string[]; disponibles: { clave: string; emoji: string; etiqueta: string }[] };
 
 // Las rutas que devuelve la base son relativas al panel.
@@ -45,6 +49,7 @@ type Dejado = { ingreso_id: string; momento: string; socio_id: string; socio: st
 type PedidoPausa = { id: string; socio_id: string; nombre: string; desde: string; vuelve: string; categoria: string };
 type PedidoBaja = { pedido_id: string; socio_id: string; nombre: string; motivo: string; nota: string | null; pedido_en: string; codigo?: string; tarde?: boolean };
 const MOTIVO_BAJA: Record<string, string> = { precio: "el precio", horario: "los horarios", mudanza: "se muda", otro_gimnasio: "otro gimnasio", sin_tiempo: "no tiene tiempo", insatisfecho: "no le gustó", otro: "otra cosa" };
+const iniciales = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((x) => x[0]?.toUpperCase() ?? "").join("");
 const diaCorto = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
 // VD-47: primero la estructura (saludo y accesos, que salen del contexto), después los números y las
@@ -60,8 +65,21 @@ export default async function Inicio() {
       return (
         <div className="inicio-semaforo" data-inicio-semaforo>
           <header className="inicio-semaforo-cabeza">
-            <p className="texto-suave inicio-semaforo-fecha first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
-            <h1 className="titular inicio-semaforo-saludo">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
+            <div className="min-w-0">
+              <p className="texto-suave inicio-semaforo-fecha first-letter:uppercase">{fechaLarga(new Date(), zona)} · {panel.gimnasio.nombre}</p>
+              <h1 className="titular inicio-semaforo-saludo">{saludo(new Date(), zona)}, {panel.yo.nombre} <Icono nombre="salir" /></h1>
+            </div>
+            {/* inicio-panel.png: la ayuda redonda y la píldora de la cuenta (Salir adentro, lejos del nombre). La campana sigue flotando a la derecha. */}
+            <div className="inicio-semaforo-cuenta" data-cuenta-semaforo>
+              <Link href="/panel/ayuda" className="inicio-semaforo-ayuda" aria-label="Ayuda" data-ayuda-redonda>?</Link>
+              <details className="inicio-semaforo-pildora">
+                <summary aria-label={`Tu cuenta: ${panel.yo.nombre}`}><span className="inicio-semaforo-iniciales" aria-hidden>{iniciales(panel.yo.nombre)}</span> {panel.yo.nombre.split(" ")[0]}</summary>
+                <div className="inicio-semaforo-menu tarjeta">
+                  <Link href="/panel/cuenta" className="boton boton-suave"><Icono nombre="persona" /> Mi cuenta</Link>
+                  <form action="/salir" method="post"><button type="submit" className="boton boton-suave w-full" data-salir-cuenta><Icono nombre="puerta" /> Cerrar sesión</button></form>
+                </div>
+              </details>
+            </div>
           </header>
           <Suspense fallback={<EsqueletoBloques />}>
             <BloquesInicio panel={panel} semaforo />
@@ -124,7 +142,7 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
     const zona = panel.gimnasio.zona_horaria;
     // E8: las ~20 lecturas del Inicio en UN viaje a la base (lote_lecturas); lo que el rol no ve ni se pide.
     const g = { p_gimnasio_id: panel.gimnasio.id };
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen, datosEjemplo, seguridad] = await rpcLote(
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen, datosEjemplo, seguridad, extraSemaforo] = await rpcLote(
       lectura<Inicio>("panel_inicio", g),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? lectura<NumerosElegidos>("numeros_inicio", g) : fijo<NumerosElegidos | null>(null),
@@ -164,6 +182,8 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
       // Cacería (18/11): los socios de ejemplo y la seguridad del dueño venían en dos viajes aparte; ahora en el mismo lote (si fallan, la tarjeta lo dice).
       rol === "dueno" ? lectura<{ cargados: number } | null>("datos_ejemplo", g, true) : fijo<{ cargados: number } | null>(null),
       rol === "dueno" ? lectura<Seguridad | null>("seguridad_dueno", g, true) : fijo<Seguridad | null>(null),
+      // Cierre para vender (25/11): la línea chica de cada número, en el mismo viaje (si falla, los números se ven sin ella).
+      semaforo && rol !== "profe" ? lectura<ExtraSemaforo | null>("inicio_semaforo", g, true) : fijo<ExtraSemaforo | null>(null),
     );
     const novedadesGymOS = novedadesGymOSTodas ?? [];
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
@@ -345,6 +365,19 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
       const hora = (m: string) => new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(m));
       const ultima = entradasVivo[0];
       const fuera = maquinasFuera.length ? maquinasFuera.map((m) => m.nombre).join(", ") : null;
+      // La línea chica de abajo de cada número (inicio-panel.png): redacta hechos de la base, no calcula nada.
+      const numerosVistos = numerosElegidos?.numeros ?? datos.numeros;
+      const valorDe = (k: string) => Number(numerosVistos.find((n) => n.clave === k)?.valor ?? 0);
+      const detalles: Record<string, string> = {};
+      if (extraSemaforo) {
+        const x = extraSemaforo;
+        detalles.entraron = `${x.adentro_exacto ? "" : "Unos "}${x.adentro} adentro ahora`;
+        const caja = x.caja_desde ? `Caja abierta desde las ${hora(x.caja_desde)}` : "La caja está cerrada";
+        detalles.cobrado = caja; detalles.caja_turno = caja;
+        detalles.no_vienen = `Más de ${x.dias_ausencia} días sin entrar`;
+      }
+      for (const k of ["a_cobrar", "deben"]) if (valorDe(k) > 0 && rutaDisponible("/panel/vender", rol, panel.secciones_apagadas)) detalles[k] = "Tocá para cobrarles";
+      if (valorDe("por_vencer") > 0) detalles.por_vencer = "Tocá para avisarles";
       return (
         <>
           {verEntrada && (
@@ -355,8 +388,9 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               {ultima ? (
                 <ResultadoPuerta color={(["verde", "amarillo", "rojo"].includes(ultima.color) ? ultima.color : "gris") as ColorPuerta}
                   puede={ultima.resultado === "entro" || ultima.resultado === "entro_modo_aviso" || ultima.resultado === "forzado"}
-                  arriba={<><span>Última entrada</span><span className="numero">{hora(ultima.momento)}</span></>} nombre={ultima.socio} detalle={ultima.texto} data-ultimo-resultado={ultima.resultado}>
+                  arriba={<><span>Última entrada · {hora(ultima.momento)}</span><span className="numero"><Hace desde={ultima.momento} /></span></>} nombre={ultima.socio} detalle={ultima.texto} data-ultimo-resultado={ultima.resultado}>
                   {ultima.cobrar && <BotonCobrar socioId={ultima.socio_id} origen="otro" cuota className="boton boton-principal">Cobrar</BotonCobrar>}
+                  {!ultima.cobrar && venceDe(ultima.color, ultima.texto) && <BotonCobrar socioId={ultima.socio_id} origen="otro" cuota className="boton boton-principal" data-cobrar-proximo>Cobrar el próximo mes</BotonCobrar>}
                   <LinkPanel href={`/panel/socios/${ultima.socio_id}`} siNoEsta="texto" className="boton">Ver su ficha</LinkPanel>
                 </ResultadoPuerta>
               ) : (
@@ -369,7 +403,7 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               <h2 id="hoy-numeros" className="titulo">Hoy en números</h2>
               {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
             </div>
-            <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+            <NumerosInicio numeros={numerosVistos} apagadas={panel.secciones_apagadas} detalles={detalles} />
             {(rol === "dueno" || rol === "encargado") && <p><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>}
           </section>
           <section aria-labelledby="accesos" className="inicio-semaforo-bloque" data-accesos-semaforo>

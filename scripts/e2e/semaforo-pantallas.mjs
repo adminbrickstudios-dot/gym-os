@@ -108,7 +108,7 @@ try {
   await d.locator("[data-entrada-inicio]").waitFor({ timeout: 30000 });
   const arriba = await d.evaluate(() => {
     const abajo = (sel) => { const e = document.querySelector(sel); return e ? e.getBoundingClientRect().bottom : Infinity; };
-    const numeros = [...document.querySelectorAll("[data-numeros-semaforo] [data-numero]")].slice(0, 4).map((e) => e.getBoundingClientRect().bottom);
+    const numeros = [...document.querySelectorAll("[data-numeros-semaforo] [data-numero-item]")].slice(0, 4).map((e) => e.getBoundingClientRect().bottom);
     return { saludo: abajo(".inicio-semaforo-saludo"), entrada: abajo("[data-entrada-inicio]"), resultado: abajo(".inicio-semaforo-entrada > :nth-child(2)"),
       numeros: numeros.length === 4 ? Math.max(...numeros) : Infinity, alto: 768 };
   });

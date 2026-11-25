@@ -15,6 +15,7 @@ export const LISTA_DEL_NUMERO: Record<string, { ruta: string; seccion: string }>
   deben: { ruta: "/panel/vencen-hoy?pestana=vencidos", seccion: "vencen_hoy" },
   por_vencer: { ruta: "/panel/vencen-hoy?pestana=por_vencer", seccion: "vencen_hoy" },
   plata_riesgo: { ruta: "/panel/retencion?lista=riesgo", seccion: "retencion" },
+  no_vienen: { ruta: "/panel/retencion?lista=no_viene", seccion: "retencion" },
   activos: { ruta: "/panel/socios", seccion: "socios" },
   altas_mes: { ruta: "/panel/socios?estado=nuevos", seccion: "socios" },
   bajas_mes: { ruta: "/panel/socios?estado=bajas", seccion: "socios" },
@@ -41,21 +42,25 @@ function MiniGrafico({ serie, pesos }: { serie: number[]; pesos: boolean }) {
   );
 }
 
-export function NumerosInicio({ numeros, apagadas }: { numeros: NumeroInicio[]; apagadas: string[] }) {
+/** Cierre para vender (25/11): la línea chica de abajo de cada número (inicio-panel.png). Solo la redacta: los hechos los trae la base. */
+export function NumerosInicio({ numeros, apagadas, detalles = {} }: { numeros: NumeroInicio[]; apagadas: string[]; detalles?: Record<string, string> }) {
+  // Accesibilidad (Lighthouse): el <dl> solo tiene <div> con su <dt> y su <dd>; el link va adentro del <dd> y cubre toda la tarjeta con CSS.
   return (
     <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
       {numeros.map((n) => {
         const valor = n.formato === "pesos" ? formatearPesos(n.valor) : n.formato === "porcentaje" ? `${formatearNumero(n.valor)} %` : formatearNumero(n.valor);
-        const cuerpo = (
-          <>
-            <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} sistema /></span> {n.etiqueta}</dt>
-            <dd className="numero text-5xl sm:text-6xl min-w-0 break-words">{valor}{n.serie && n.serie.length > 1 && <MiniGrafico serie={n.serie} pesos={n.formato === "pesos"} />}</dd>
-          </>
-        );
         const lista = LISTA_DEL_NUMERO[n.clave];
-        return lista && !apagadas.includes(lista.seccion)
-          ? <Link key={n.clave} href={lista.ruta} data-numero={n.clave} className="flex flex-col-reverse justify-end rounded-[var(--radio)] p-2 -m-2 hover:bg-[var(--tarjeta)] active:scale-[0.98] transition">{cuerpo}</Link>
-          : <div key={n.clave} data-numero={n.clave} className="flex flex-col-reverse justify-end">{cuerpo}</div>;
+        const conLink = !!lista && !apagadas.includes(lista.seccion);
+        const detalle = detalles[n.clave];
+        const cuerpo = <>{valor}{n.serie && n.serie.length > 1 && <MiniGrafico serie={n.serie} pesos={n.formato === "pesos"} />}</>;
+        return (
+          <div key={n.clave} data-numero-item={n.clave} className={`numero-inicio flex flex-col-reverse justify-end ${conLink ? "numero-inicio-link rounded-[var(--radio)] p-2 -m-2 hover:bg-[var(--tarjeta)] transition" : ""}`}>
+            <dt className="texto-suave mt-2 text-[15px]"><span aria-hidden><Icono nombre={n.emoji} sistema /></span> <span data-numero-etiqueta>{n.etiqueta}</span>{detalle && <span className="numero-inicio-detalle block" data-numero-detalle={n.clave}>{detalle}</span>}</dt>
+            <dd className="numero text-5xl sm:text-6xl min-w-0 break-words">
+              {conLink ? <Link href={lista.ruta} data-numero={n.clave} className="numero-inicio-a">{cuerpo}</Link> : <span data-numero={n.clave}>{cuerpo}</span>}
+            </dd>
+          </div>
+        );
       })}
     </dl>
   );

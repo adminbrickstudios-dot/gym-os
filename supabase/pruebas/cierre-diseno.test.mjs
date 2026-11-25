@@ -25,7 +25,7 @@ after(async () => t && t.cerrar());
 test("buscar_socios: las columnas de siempre siguen, y suma Vence (cubierto_hasta) y Última vez", async () => {
   const filas = await t.comoUsuario(u.recepcion, () => t.q(`select * from public.buscar_socios($1, '', 100)`, [t.g]));
   assert.ok(filas.length > 0);
-  for (const k of ["socio_id", "numero", "nombre", "telefono", "dni", "plan", "color", "texto", "puede", "dado_de_baja", "autoalta", "vence", "ultima_vez"]) {
+  for (const k of ["socio_id", "numero", "nombre", "telefono", "dni", "plan", "color", "texto", "puede", "dado_de_baja", "autoalta", "vence", "ultima_vez", "dejo_de_venir"]) {
     assert.ok(k in filas[0], `falta la columna ${k}`);
   }
   const s = filas[0];
@@ -67,13 +67,13 @@ test("inicio_semaforo: con la caja abierta dice desde cuándo", async () => {
 });
 
 test("numeros_inicio: 'Dejaron de venir' se elige y se calcula", async () => {
+  const [{ c }] = await t.q(`select count(*)::int c from privado.retencion($1, now()) where lista = 'no_viene'`, [t.g]);
   await t.comoUsuario(u.dueno, async () => {
     await t.q(`select public.guardar_numeros_inicio($1, array['no_vienen','entraron'])`, [t.g]);
     const r = (await t.q(`select public.numeros_inicio($1) r`, [t.g]))[0].r;
     const n = r.numeros.find((x) => x.clave === "no_vienen");
     assert.ok(n, "falta no_vienen");
     assert.equal(n.etiqueta, "Dejaron de venir");
-    const [{ c }] = await t.q(`select count(*)::int c from privado.retencion($1, now()) where lista = 'no_viene'`, [t.g]);
     assert.equal(Number(n.valor), c);
   });
 });
@@ -114,11 +114,15 @@ test("el lote acepta las lecturas nuevas (un viaje) y sigue rechazando lo que no
 
 test("todo gimnasio nuevo de /super nace en Pista con Semáforo; un gimnasio real que ya existía no cambia", async () => {
   const [{ antes }] = await t.q(`select estilo antes from public.configuracion_gimnasio where gimnasio_id = $1`, [g2]);
-  const r = (await t.comoUsuario(admin, () => t.q(`select public.admin_crear_gimnasio($1, 'Nuevo', 'ejemplo.invalid', 'Dueño') r`, [`nuevo-${Date.now()}`])))[0].r;
-  const [c] = await t.q(`select estilo from public.configuracion_gimnasio where gimnasio_id = $1`, [r.gimnasio_id]);
-  assert.equal(c.estilo, "pista");
-  const [f] = await t.q(`select activa from public.funciones_nuevas_gimnasio where gimnasio_id = $1 and clave = 'pista_semaforo'`, [r.gimnasio_id]);
-  assert.equal(f.activa, true);
+  // Lo que crea el super admin se mira antes de que comoUsuario revierta (con el rol de la base, que lee sin RLS).
+  await t.comoUsuario(admin, async () => {
+    const [{ r }] = await t.q(`select public.admin_crear_gimnasio($1, 'Nuevo', 'ejemplo.invalid', 'Dueño') r`, [`nuevo-${Date.now()}`]);
+    await t.db.query("reset role");
+    const [c] = await t.q(`select estilo from public.configuracion_gimnasio where gimnasio_id = $1`, [r.gimnasio_id]);
+    assert.equal(c.estilo, "pista");
+    const [f] = await t.q(`select activa from public.funciones_nuevas_gimnasio where gimnasio_id = $1 and clave = 'pista_semaforo'`, [r.gimnasio_id]);
+    assert.equal(f.activa, true);
+  });
   const [{ despues }] = await t.q(`select estilo despues from public.configuracion_gimnasio where gimnasio_id = $1`, [g2]);
   assert.equal(despues, antes);
   await t.comoUsuario(u.dueno, () => t.falla(() => t.q(`select public.admin_crear_gimnasio('otro-intento', 'X', 'ejemplo.invalid', 'Y')`)));

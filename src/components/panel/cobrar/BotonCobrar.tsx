@@ -7,15 +7,15 @@ import type { ReactNode } from "react";
 import { useRutaDisponible } from "@/components/panel/LinkPanel";
 import { abrirCobrar, hayHojaCobrar, type OrigenCobro } from "./evento";
 
-export function BotonCobrar({ socioId, origen, cuota = false, className = "boton", children }: {
+export function BotonCobrar({ socioId, origen, cuota = false, className = "boton", children, ...datos }: {
   socioId: string; origen: OrigenCobro;
   /** Para armar el link de respaldo con la cuota cargada. */
   cuota?: boolean; className?: string; children: ReactNode;
-}) {
+} & Record<`data-${string}`, string | boolean | undefined>) {
   const disponible = useRutaDisponible("/panel/vender");
   if (!disponible) return null;
   return (
-    <Link href={`/panel/vender?socio=${socioId}${cuota ? "&cuota=1" : ""}${origen === "entrada" ? "&desde=entrada" : ""}`} className={className} data-cobrar-abrir
+    <Link href={`/panel/vender?socio=${socioId}${cuota ? "&cuota=1" : ""}${origen === "entrada" ? "&desde=entrada" : ""}`} className={className} data-cobrar-abrir {...datos}
       onClick={(e) => {
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !hayHojaCobrar()) return;
         e.preventDefault();

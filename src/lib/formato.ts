@@ -122,3 +122,22 @@ export function fechaConEl(momento: Date | string, zona = ZONA_POR_DEFECTO, ahor
   const h = fechaHumana(momento, zona, ahora);
   return h === "hoy" || h === "ayer" ? h : `el ${h}`;
 }
+
+/** "hace 5 s", "hace 3 min", "hace 2 h" (Pista Semáforo: desde la última entrada del Inicio). */
+export function haceRato(momento: Date | string, ahora: Date = new Date()): string {
+  const s = Math.max(0, Math.round((ahora.getTime() - new Date(momento).getTime()) / 1000));
+  if (s < 60) return `hace ${s} s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `hace ${m} min`;
+  const h = Math.floor(m / 60);
+  return h < 24 ? `hace ${h} h` : `hace ${Math.floor(h / 24)} días`;
+}
+
+/** "Hoy 19:42", "Ayer", "Hace 3 días" o "Nunca": la última entrada de un socio, en los días del gimnasio (Socios de Pista Semáforo). */
+export function ultimaVez(momento: Date | string | null | undefined, zona = ZONA_POR_DEFECTO, ahora: Date = new Date()): string {
+  if (!momento) return "Nunca";
+  const m = new Date(momento);
+  const dias = Math.round((Date.parse(`${diaEn(ahora, zona)}T12:00:00Z`) - Date.parse(`${diaEn(m, zona)}T12:00:00Z`)) / 86_400_000);
+  if (dias <= 0) return `Hoy ${new Intl.DateTimeFormat("es-AR", { timeZone: zona, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(m)}`;
+  return dias === 1 ? "Ayer" : `Hace ${dias} días`;
+}

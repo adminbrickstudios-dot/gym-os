@@ -35,3 +35,7 @@ export type MiTurno = {
   libres: { caja_id: string; nombre: string; fondo_sugerido: number; con_vencida: boolean }[];
   modo: ConfigCaja["modo"]; pedir_billetes: boolean;
 };
+
+// Cierre para vender (25/11) · public.movimientos_turno: los cobros (cobros_de_turnos), qué se vendió en cada uno y los ingresos y retiros.
+export type MovimientoCaja = { id: string; tipo: "ingreso" | "retiro"; monto: number; motivo: string; en: string; por: string | null };
+export type MovimientosTurno = { cobros: CobrosMedio[]; detalle: { pago_id: string; detalle: string | null }[]; movimientos: MovimientoCaja[] };

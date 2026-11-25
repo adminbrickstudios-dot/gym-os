@@ -12,4 +12,6 @@ export type Ficha = {
   ingresos: { id: string; momento: string; resultado: string; color: string; texto: string; via_acceso: string }[];
   pagos: { id: string; fecha: string; monto: number; medio: string; estado: string; detalle: string | null }[] | null;
   packs: { id: string; plan: string; cantidad: number; usadas: number; vence_en: string | null }[];
+  /** Cierre para vender (25/11): lo mismo que las insignias de la app (racha_socio). Opcional: una base sin la migración no lo trae. */
+  racha?: { semanas_seguidas: number; entradas_mes: number; entradas_mes_anterior: number; vino_esta_semana: boolean };
 };
