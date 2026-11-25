@@ -1,12 +1,12 @@
 {
-  "/panel": 216,
-  "/panel/entrada": 220,
-  "/panel/socios": 212,
-  "/panel/socios/[id]": 229,
-  "/panel/caja": 212,
-  "/panel/clases": 205,
-  "/app": 236,
-  "/": 215,
-  "/kiosco": 210,
-  "/hacete-socio": 215
+  "/panel": 214,
+  "/panel/entrada": 217,
+  "/panel/socios": 210,
+  "/panel/socios/[id]": 226,
+  "/panel/caja": 211,
+  "/panel/clases": 203,
+  "/app": 231,
+  "/": 210,
+  "/kiosco": 204,
+  "/hacete-socio": 209
 }
