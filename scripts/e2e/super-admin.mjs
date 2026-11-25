@@ -26,7 +26,7 @@ try {
   await entrarSoporte(p.locator("[data-alta-gimnasio]"));
   await p.waitForURL(/\/panel/, { timeout: 60000 });
   const saludo = await p.locator("h1").first().innerText();
-  chequear(/Soporte BRIK/.test(saludo), `panel del gimnasio nuevo: "${saludo}"`, `no saluda a Soporte BRIK: ${saludo}`);
+  chequear(/Soporte BRIK/i.test(saludo), `panel del gimnasio nuevo: "${saludo}"`, `no saluda a Soporte BRIK: ${saludo}`);
 
   await p.goto(`${B}/admin`);
   await fila(`Olympo ${s}`).locator('a:has-text("Equipo, claves")').click();
