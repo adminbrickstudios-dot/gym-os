@@ -32,7 +32,7 @@ export function Demos({ vencidas, prospectos = [] }: { vencidas: DemoVencida[]; 
         <label className="space-y-1 sm:col-span-3"><span className="etiqueta">Su logo (opcional)</span>
           <input type="file" name="logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="campo" aria-label="Su logo (opcional)" data-demo-logo /></label>
         <div className="sm:col-span-3 flex flex-wrap gap-2 items-center">
-          <BotonAccion className="boton boton-principal" ocupadoTexto="Creando la demo…" disabled={nombre.trim().length < 2} data-crear-demo onClick={async (e) => {
+          <BotonAccion className="boton" ocupadoTexto="Creando la demo…" disabled={nombre.trim().length < 2} data-crear-demo onClick={async (e) => {
             const form = (e?.currentTarget as HTMLElement | undefined)?.closest("form") ?? document.querySelector<HTMLFormElement>("[data-demo-prospecto]");
             const datos = new FormData(form ?? undefined);
             datos.set("nombre", nombre); datos.set("acento", acento);
