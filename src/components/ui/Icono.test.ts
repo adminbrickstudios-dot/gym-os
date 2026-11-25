@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { ICONOS, esIcono, iconoDeEmoji } from "./Icono";
+import { esIcono, iconoDeEmoji } from "./Icono";
+import ICONOS from "./iconos.json";
+import { NOMBRES_ICONO } from "./iconos-nombres";
+import { armar } from "../../../scripts/datos/iconos-sprite.mjs";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 describe("Icono (BASE-6)", () => {
+  it("el sprite y la lista de nombres están al día con iconos.json (si falla: node scripts/datos/iconos-sprite.mjs)", () => {
+    const { sprite, nombres } = armar();
+    expect(readFileSync(join(__dirname, "..", "..", "..", "public", "iconos.svg"), "utf8")).toBe(sprite);
+    expect(readFileSync(join(__dirname, "iconos-nombres.ts"), "utf8")).toBe(nombres);
+    expect([...NOMBRES_ICONO].sort()).toEqual(Object.keys(ICONOS).sort());
+  });
   it("cada ícono tiene al menos un trazo y ninguno repite nombre de punto", () => {
     for (const [nombre, trazos] of Object.entries(ICONOS)) {
       expect(trazos.length, nombre).toBeGreaterThan(0);
