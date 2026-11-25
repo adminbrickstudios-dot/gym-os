@@ -79,10 +79,13 @@ try {
   await d.goto(`${G}/panel/caja`);
   await d.locator("[data-por-medio]").first().waitFor({ timeout: 30000 });
   await verificar(d, "Caja (turno abierto)", ESPERADO);
-  const cajon = await d.locator("[data-tiene-que-haber]").first().innerText();
-  chequear(cajon.includes("17.500") && /Tiene que haber en el cajón/.test(cajon) && /no están ahí/.test(cajon),
+  // (25/11) Con Pista Semáforo el cajón va al costado (caja.png, "En el cajón tiene que haber"); sin la llave, en la tarjeta del efectivo.
+  const semaforo = (await d.locator("[data-caja-semaforo]").count()) > 0;
+  const cajon = semaforo ? await d.locator("[data-cajon-tiene-que-haber]").first().innerText() : await d.locator("[data-tiene-que-haber]").first().innerText();
+  chequear(cajon.includes("17.500") && /Tiene que haber en el cajón|tiene que haber/i.test(cajon) && /no están ahí/.test(cajon),
     "“Tiene que haber en el cajón” es $17.500 (10.000 + 7.500): solo el efectivo, y lo explica", `cajón: ${cajon.replace(/\s+/g, " ")}`);
-  chequear(await d.locator("[data-medio=efectivo] [data-tiene-que-haber]").count() === 1, "…y está al lado del efectivo", "el cajón no está en la tarjeta del efectivo");
+  chequear(await d.locator(semaforo ? "[data-cajon-tiene-que-haber] [data-tiene-que-haber]" : "[data-medio=efectivo] [data-tiene-que-haber]").count() === 1,
+    semaforo ? "…y está al costado, en su tarjeta" : "…y está al lado del efectivo", "el cajón no está en su lugar");
   chequear(await d.getByText("Tiene que haber").count() === 1, "aparece una sola vez (la pantalla no se repite)", "“Tiene que haber” aparece más de una vez");
   await d.locator('[data-ver-cobros="transferencia"]').first().click();
   const lista = await d.locator('[data-medio="transferencia"] [data-cobro]').allInnerTexts();

@@ -14,7 +14,7 @@ try {
   const buscar = async (texto) => {
     await p.goto(`${G}/panel/socios${texto ? `?q=${encodeURIComponent(texto)}` : ""}`);
     await p.locator("main").waitFor();
-    return p.locator('main ul a[href^="/panel/socios/"]');
+    return p.locator('main ul a[href^="/panel/socios/"]:not([data-accion-fila])');   // (25/11) el Ver de la fila de Semáforo es el mismo socio
   };
 
   // ── Lista y búsqueda ──

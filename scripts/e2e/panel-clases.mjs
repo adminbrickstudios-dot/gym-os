@@ -14,7 +14,7 @@ try {
   await entrar(r, "recepcion@ejemplo.invalid");
   await r.goto(`${G}/panel/clases`);
   await r.locator("main h1").waitFor({ timeout: 60000 });
-  const dias = r.locator('nav[aria-label="Día"] a');
+  const dias = r.locator('nav[aria-label="Día"] a:not([data-dia-ayer])');   // (25/11) con Semáforo se suma "Ayer", de solo lectura
   chequear(await dias.count() === 7, "7 días para elegir, desde hoy", `${await dias.count()} días`);
   await dias.nth(1).click();
   await r.waitForURL(/dia=\d{4}-\d{2}-\d{2}/, { timeout: 30000 });

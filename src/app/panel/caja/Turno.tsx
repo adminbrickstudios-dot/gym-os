@@ -120,7 +120,10 @@ export function TurnoAbierto({ turnoId, cajaId, nombre, desde, resumen, cobros =
             <section className="tarjeta caja-cajon" aria-labelledby={`cajon-${turnoId}`} data-cajon-tiene-que-haber>
               <h2 id={`cajon-${turnoId}`} className="titulo">En el cajón tiene que haber</h2>
               <p className="numero caja-cajon-monto">{formatearPesos(resumen.esperado)}</p>
-              <p className="texto-suave mt-2">Efectivo de entradas menos salidas, con {formatearPesos(resumen.monto_inicial)} de inicio.</p>
+              <p className="texto-suave mt-2" data-tiene-que-haber>Efectivo de entradas menos salidas, con {formatearPesos(resumen.monto_inicial)} de inicio:
+                {" "}{formatearPesos(resumen.monto_inicial)} con los que se abrió +{formatearPesos(resumen.efectivo)} cobrados en efectivo
+                {resumen.ingresos > 0 ? ` + ${formatearPesos(resumen.ingresos)} que entraron` : ""}{resumen.retiros > 0 ? ` − ${formatearPesos(resumen.retiros)} que salieron` : ""}.
+                Es solo plata del cajón: la transferencia y la tarjeta no están ahí.</p>
             </section>
           </div>
         </div>
