@@ -5575,8 +5575,14 @@ isOneToOne: false
 "admin_confirmar_cuenta":
 { Args: { "p_equipo_id": string }; Returns: undefined
                            },
+"admin_confirmar_logo_demo":
+{ Args: { "p_gimnasio_id": string,"p_ruta": string }; Returns: undefined
+                           },
 "admin_crear_demo":
 { Args: { "p_dominio_base": string,"p_interesado": string,"p_tipo": string }; Returns: Json
+                           },
+"admin_crear_demo_prospecto":
+{ Args: { "p_acento"?: string,"p_dominio_base": string,"p_fondo"?: string,"p_nombre": string }; Returns: Json
                            },
 "admin_crear_gimnasio":
 { Args: { "p_dominio_base": string,"p_dueno_nombre": string,"p_nombre": string,"p_slug": string }; Returns: Json
@@ -5589,6 +5595,9 @@ isOneToOne: false
                            },
 "admin_datos_fiscales":
 { Args: { "p_gimnasio_id": string }; Returns: Json
+                           },
+"admin_demos_prospectos":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "admin_demos_vencidas":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -5744,6 +5753,9 @@ isOneToOne: false
                            },
 "admin_prender_funcion":
 { Args: { "p_clave": string,"p_gimnasio_id": string,"p_prendida": boolean }; Returns: undefined
+                           },
+"admin_preparar_logo_demo":
+{ Args: { "p_bytes": number,"p_gimnasio_id": string,"p_tipo_mime": string }; Returns: string
                            },
 "admin_probar_acceso":
 { Args: { "p_equipo_id": string }; Returns: Json
