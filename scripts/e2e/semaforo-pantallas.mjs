@@ -129,7 +129,7 @@ try {
     }
     await lado(d, pantalla);
     // Lo que abrió el recorrido se cierra (base local): la medición de viajes que viene después espera la caja como estaba.
-    if (pantalla === "caja") await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [abiertosAntes])
+    if (pantalla === "caja") await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial, monto_esperado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [abiertosAntes])
       .catch((e) => console.log(`· no se pudo cerrar el turno de prueba: ${e.message}`));
     const np = await noPildoras(d);
     chequear(np.length === 0, `${pantalla}: todos los botones son píldora`, `${pantalla}: no son píldora: ${np.join(" · ")}`);
@@ -205,7 +205,7 @@ try {
   }
 } finally {
   await b.close();
-  await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [turnosInicio])
+  await q(`update public.turnos_caja set cerrado_en = now(), cerrado_por = abierto_por, monto_contado = monto_inicial, monto_esperado = monto_inicial where cerrado_en is null and not (id = any($1::uuid[]))`, [turnosInicio])
     .catch((e) => console.log(`· no se pudo cerrar el turno de prueba: ${e.message}`));
   await db.end();
 }
