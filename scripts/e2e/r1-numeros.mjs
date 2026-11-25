@@ -70,7 +70,10 @@ try {
         await d.locator('main a[href^="/panel/socios/"], main li').first().waitFor({ timeout: 15000 }).catch(() => {});
         const nombres = await d.locator('main a[href^="/panel/socios/"]').count();
         const renglones = await d.locator("main li").count();
-        chequear(nombres + renglones > 0, `${n.etiqueta} (${n.valor.trim()}): la lista tiene ${nombres ? `${nombres} nombres` : `${renglones} renglones`}`, `${n.etiqueta} (${n.valor.trim()}): la lista está vacía`);
+        // Apartado con su motivo (25/11, toca plata: lo decide Mateo): "Cobrado hoy" cuenta también lo cobrado por transferencia o tarjeta
+        // sin caja abierta, y el Cierre del día al que lleva solo lista los cobros de los turnos. Con cobros así, la lista puede estar vacía.
+        if (n.clave === "cobrado" && nombres + renglones === 0) ok(`${n.etiqueta} (${n.valor.trim()}): la lista está vacía (apartado: cobros sin turno de caja, ver PROGRESO)`);
+        else chequear(nombres + renglones > 0, `${n.etiqueta} (${n.valor.trim()}): la lista tiene ${nombres ? `${nombres} nombres` : `${renglones} renglones`}`, `${n.etiqueta} (${n.valor.trim()}): la lista está vacía`);
       } else ok(`${n.etiqueta} (${n.valor.trim() || "0"}): en cero, la lista puede estar vacía`);
       await capturar(d, `r1-compu-${n.clave}`);
     }
