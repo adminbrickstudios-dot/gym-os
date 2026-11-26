@@ -12,7 +12,7 @@
 // ESCRITO, NO EJECUTADO por quien lo escribió.
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, chequear, entrar, falla, navegador, ok, pagina, resultado, esElAcento } from "./comun.mjs";
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const G = GIMNASIO();
@@ -65,7 +65,7 @@ try {
 
   await d.locator(`[data-color-acento="${ACENTO}"]`).click();
   const acentoVista = await d.locator("[data-vista-previa] [data-pagina-gimnasio]").first().evaluate((x) => getComputedStyle(x).getPropertyValue("--acento").trim().toLowerCase());
-  chequear(acentoVista === ACENTO, `el color principal se ve en la vista previa (${acentoVista})`, `el color en la vista previa es ${acentoVista}`);
+  chequear(esElAcento(acentoVista, ACENTO), `el color principal se ve en la vista previa (${acentoVista})`, `el color en la vista previa es ${acentoVista}`);
 
   await d.locator('[data-tipografia-opcion="clasica"]').click();
   const letra = await d.locator("[data-vista-previa] [data-pagina-gimnasio]").first().evaluate((x) => ({ t: x.getAttribute("data-tipografia"), f: getComputedStyle(x.querySelector("h1")).fontFamily }));
@@ -122,7 +122,7 @@ try {
     if (publica.h1.includes(TITULO)) break;
     await v.waitForTimeout(4000);
   }
-  chequear(publica?.h1.includes(TITULO) && publica.t === "clasica" && publica.a === ACENTO, "la página pública muestra el título, la letra y el color guardados", `la página pública no cambió: ${JSON.stringify(publica)}`);
+  chequear(publica?.h1.includes(TITULO) && publica.t === "clasica" && esElAcento(publica.a, ACENTO), "la página pública muestra el título, la letra y el color guardados", `la página pública no cambió: ${JSON.stringify(publica)}`);
   await v.context().close();
 
   // ── 5 · Restaurar por defecto ──

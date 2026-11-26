@@ -165,6 +165,21 @@ export async function capturar(p, nombre, completa = false) {
 }
 
 /** true si el elemento aparece dentro de unos segundos (React puede tardar un instante en pintar). */
+/**
+ * ¿El color que se ve es el del gimnasio? Desde el 26/11 Pista pinta el acento corrido para leerse (4,5:1, hacia blanco o negro: mismo tono)
+ * y, desde Z8, corrido unos grados si se parece al semáforo. Vale el mismo color, uno cercano (≤ 130) o uno del mismo tono (≤ 30°).
+ * Acepta #rrggbb o rgb(r, g, b).
+ */
+export function esElAcento(visto, acento) {
+  const aRgb = (c) => { c = String(c ?? "").trim().toLowerCase(); const m = c.match(/^#?([0-9a-f]{6})$/); if (m) { const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; } const r = c.match(/rgba?\(([^)]+)\)/); return r ? r[1].split(/[ ,/]+/).filter(Boolean).slice(0, 3).map(Number) : null; };
+  const tono = ([r, g, b]) => { [r, g, b] = [r / 255, g / 255, b / 255]; const max = Math.max(r, g, b), d = max - Math.min(r, g, b); if (d < 0.08) return null; const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4; return (h * 60 + 360) % 360; };
+  const a = aRgb(visto), b = aRgb(acento);
+  if (!a || !b) return false;
+  if (Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) <= 130) return true;
+  const ta = tono(a), tb = tono(b);
+  return ta != null && tb != null && Math.min(Math.abs(ta - tb), 360 - Math.abs(ta - tb)) <= 30;
+}
+
 export const aparece = (loc, ms = 5000) => loc.first().waitFor({ timeout: ms }).then(() => true, () => false);
 
 /** Texto que delata una pantalla rota (error de Next o boundary). */
