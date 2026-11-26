@@ -41,7 +41,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
         <>
           <Encabezado icono="lista" titulo={r.estado === "abierto" ? "Reporte del turno (en vivo)" : "Reporte del turno"} volver={{ href: "/panel/caja", texto: "Caja" }} volverAlOrigen
             bajada={`${r.caja} · ${cuando(r.abierto_en)}${r.cerrado_en ? ` a ${hora(r.cerrado_en)}` : ""} · abrió ${r.abierto_por ?? "—"}${r.cerrado_por ? ` · contó ${r.cerrado_por}` : ""}`} />
-          <section className="tarjeta p-6 sm:p-8 space-y-6" data-reporte-turno={r.estado} data-veredicto={v.clave} aria-live="polite">
+          <section className="recibo-hoja tarjeta p-6 sm:p-8 space-y-6" data-reporte-turno={r.estado} data-veredicto={v.clave} aria-live="polite">
             <div className="flex flex-wrap items-center gap-3">
               <span className="pildora">{ESTADO[r.estado] ?? r.estado}</span>
               {r.contado_en && r.estado === "contada_despues" && <span className="texto-suave text-sm">La contó {r.cerrado_por ?? "—"} el {cuando(r.contado_en)}</span>}
@@ -110,7 +110,7 @@ export default async function Reporte({ searchParams }: { searchParams: Promise<
           {manana <= hoyLocal && <Link className="boton boton-chico" href={`/panel/caja/reporte?dia=${manana}${sedeQ}`}>Día siguiente →</Link>}
         </nav>
         {z.turnos.length === 0 ? <Vacio icono="lista" titulo="Ese día no se abrió ninguna caja">Cuando se abra un turno, el cierre del día aparece acá.</Vacio> : (
-          <section className="tarjeta p-6 sm:p-8 space-y-6" data-reporte-dia={z.turnos.length} data-veredicto={v.clave}>
+          <section className="recibo-hoja tarjeta p-6 sm:p-8 space-y-6" data-reporte-dia={z.turnos.length} data-veredicto={v.clave}>
             <p className={`titular text-4xl sm:text-5xl ${v.clave === "falta" ? "text-rojo" : ""}`} data-sobra-falta>{v.clave === "sin_contar" ? "Todavía sin contar" : v.texto}</p>
             <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div><dt className="texto-tenue text-sm">Vendido</dt><dd className="numero text-2xl">{formatearPesos(z.ventas.total)}</dd></div>

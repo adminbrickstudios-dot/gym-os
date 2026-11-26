@@ -89,8 +89,9 @@ export function acentoDistinto(acento: string): string {
   return acento;
 }
 
-/** Pase 2.0 (Pista): las superficies más claras sobre las que cae el acento, en oscuro y en claro (DISENO.md § Pase 2.0). */
-export const PISTA_SUPERFICIE_OSCURA = "#22303C", PISTA_SUPERFICIE_CLARA = "#EDF0F3";
+/** Pase 2.0 (Pista): las superficies más claras sobre las que cae el acento, en oscuro y en claro (DISENO.md § Pase 2.0). En oscuro, la tarjeta alta de
+ * Pista Semáforo (#2A3845, la más clara de las dos variantes; hasta el 26/11 era la de Pista, #22303C, y con el semáforo quedaba debajo de 4,5:1). */
+export const PISTA_SUPERFICIE_OSCURA = "#2A3845", PISTA_SUPERFICIE_CLARA = "#EDF0F3";
 export const CONTRASTE_TEXTO = 4.5;
 
 /**
@@ -128,18 +129,15 @@ export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
 /** El acento con el que arranca un gimnasio nuevo en el alta (el super admin lo cambia en el formulario). */
 export const ACENTO_POR_DEFECTO = "#16a34a";
 /**
- * Variables CSS y atributo de tono para el envoltorio de una pantalla del gimnasio: el acento del gimnasio (y el ya corrido para leerse en cada modo de Pista).
+ * Variables CSS y atributo de tono para el envoltorio de una pantalla del gimnasio: el acento del gimnasio ya corrido para leerse en cada modo de Pista.
  * El fondo no va en línea desde que Pista es el único estilo (26/11): lo pone el modo (globals.css, con la elección de Mi cuenta en el <html>).
  * `data-tono` solo marca el envoltorio (el CSS mira que esté, no su valor).
  */
 export function propsMarca(m: ColoresMarca): { style: CSSProperties; "data-tono": "pista" } {
   return {
-    style: {
-      ["--acento" as string]: acentoDistinto(m.color_acento),
-      ["--acento-texto" as string]: textoSobre(acentoDistinto(m.color_acento)),
-      // Pista: el acento ya corrido para leerse (4,5:1) sobre cada modo, y el texto que va encima.
-      ...variablesPista(acentoDistinto(m.color_acento)),
-    },
+    // Solo el acento de Pista ya corrido para leerse (4,5:1) en cada modo, y el texto que va encima: el --acento lo arma el modo (globals.css)
+    // con estas variables. Hasta el 26/11 también iba --acento en línea con el color crudo y le ganaba al del modo: el legible nunca llegaba.
+    style: variablesPista(acentoDistinto(m.color_acento)) as CSSProperties,
     "data-tono": "pista",
   };
 }

@@ -460,14 +460,7 @@ html:root[data-modo="claro"], html:root[data-modo="claro"] body { background: #F
 html:root nav a[aria-current="page"] { background: var(--acento); color: var(--acento-texto); border-radius: 12px; }
 html:root nav a[aria-current="page"] * { color: inherit; }
 
-/* Lo que se imprime sale siempre claro, en los dos modos: nunca una hoja negra (cartel del QR, recibos, comprobantes). */
-@media print {
-  html:root [data-tono] {
-    --fondo: #FFFFFF; --tarjeta: #FFFFFF; --tarjeta-alta: #FFFFFF; --borde: #D0D5DA;
-    --texto: #000000; --texto-suave: #333333; --texto-tenue: #444444; --texto-2: #333333;
-    background: #FFFFFF; color: #000000; color-scheme: light;
-  }
-}
+/* Lo que se imprime: al final del archivo (tiene que pesar más que el modo y que Pista Semáforo). */
 /* El QR ya va siempre sobre su cuadro blanco con margen (bg-white p-3 en MiQR, Kiosco, Tablets y los carteles): no depende del modo. */
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -890,3 +883,21 @@ html[data-semaforo="si"] .puerta-kiosco[data-larga="si"] .puerta-palabra { font-
 .caja-cajon { padding: 22px 24px; }
 .caja-cajon-monto { font-size: 44px; line-height: 1; color: var(--acento); margin-top: 6px; }
 @media (max-width: 560px) { .caja-movimientos-fila { grid-template-columns: 48px minmax(0, 1fr) auto; } .caja-movimientos-fila .pildora { display: none; } }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Lo que se imprime sale siempre claro, en los dos modos y con o sin Pista Semáforo: nunca una hoja negra (carteles del QR, guías, recibos,
+   el reporte del cierre de caja). Va al final y con [data-modo] / [data-semaforo] en el selector para pesar lo mismo que el modo y el semáforo
+   y ganarles por venir después (hasta el 26/11 estaba antes y pesaba menos: nunca se aplicaba). Prueba: scripts/e2e/impresion-clara.mjs.
+   ═══════════════════════════════════════════════════════════════════ */
+@media print {
+  html:root[data-modo] [data-tono], html:root[data-modo][data-semaforo] [data-tono] {
+    --fondo: #FFFFFF; --tarjeta: #FFFFFF; --tarjeta-alta: #FFFFFF; --borde: #D0D5DA; --superficie: #FFFFFF; --menu: #FFFFFF; --borde-campo: #D0D5DA;
+    --texto: #000000; --texto-suave: #333333; --texto-tenue: #444444; --texto-2: #333333; --sobre-claro: #0B1117;
+    --ok: #1E9E5A; --atencion: #D88A0B; --no: #D6383A; --prueba: #2D6FD8;
+    --acento: var(--acento-pista-claro, #C2410C); --acento-texto: var(--acento-texto-pista-claro, #FFFFFF); --sobre-acento: var(--acento-texto);
+    --et-aldia: #DCFCE7; --et-aldia-texto: #14532D; --et-vence: #FEF3C7; --et-vence-texto: #713F12; --et-debe: #FEE2E2; --et-debe-texto: #7F1D1D;
+    --et-congelado: #DBEAFE; --et-congelado-texto: #1E3A8A; --et-baja: #E2E8F0; --et-baja-texto: #334155; --et-prueba: #EDE9FE; --et-prueba-texto: #4C1D95;
+    background: #FFFFFF; color: #000000; color-scheme: light;
+  }
+  html:root[data-modo], html:root[data-modo] body, html:root[data-modo][data-semaforo], html:root[data-modo][data-semaforo] body { background: #FFFFFF; }
+}
