@@ -69,6 +69,8 @@ try {
       await p.goto(`${G}${ruta}`, { waitUntil: "load", timeout: 90000 });
       await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
       chequear(await p.evaluate(() => document.documentElement.dataset.modo) === modo, `${ruta} abre en modo ${modo}`, `${ruta} no abrió en modo ${modo}`);
+      // Al imprimir, la hoja se dibuja de cero; en pantalla, la tarjeta tiene transición de fondo y al cambiar a "print" se mediría a mitad de camino.
+      await p.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
       await p.emulateMedia({ media: "print" });
       const { textos, malos } = await p.evaluate(medir);
       if (!textos) falla(`${ruta} (${modo}): al imprimir no queda ningún texto a la vista`);
