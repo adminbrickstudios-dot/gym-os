@@ -195,8 +195,7 @@ test("columnas de Socios y Su historia: llave, permisos en negativo y lo que mue
     await como(quien, () => t.falla(() => t.q(`select public.historia_socio($1, $2)`, [t.g, s])));
   }
   await como(uOtro, () => t.falla(() => t.q(`select public.historia_socio($1, $2)`, [otro, s]), /no es de este gimnasio/));
-  // Lo que muestran (con la hora de la transacción: las entradas de ayer y anteayer, en la zona del gimnasio).
-  await t.q(`update public.ingresos set momento = now() - interval '1 day' where socio_id = $1 and momento = (select max(momento) from public.ingresos where socio_id = $1)`, [s]);
+  // Lo que muestran (las entradas son inmutables: las del socio de prueba, de hace días; numeros_fila_socio mira la hora real).
   const [{ r }] = await como(u.recepcion, () => t.q(`select public.numeros_fila_socio($1) r`, [s]));
   assert.ok(r.ultima_vez, "tiene última vez");
   assert.ok(Number(r.veces_mes) >= 0);
