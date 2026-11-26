@@ -8,6 +8,7 @@
 #              en la rama desde la que se corre (nunca en main). Se corre después de aplicar las migraciones de esa rama.
 #   hacer-admin  da super admin a la cuenta del mail indicado
 #   estado     qué gimnasios hay, sus direcciones y si el dueño tiene acceso (sin datos personales)
+#   marcar-demo  marca como demo los 2 gimnasios de prueba que seguían en clásico (Mateo, 26/11; guarda: exactamente 2, nunca Temple Gym)
 #   humo-pasado  prueba en el demo de producción (transacción que revierte): alta con fecha y pago pasados + caja por medio
 #   sembrar-demo  crea el "Gimnasio Demo" con datos ficticios (300 socios) para mostrar el sistema
 #   sembrar-prueba-mateo  crea el "[demo] Gimnasio Prueba Mateo" (slug demo-mateo): marca, planes, 30 socios en todos los estados, clases,
@@ -28,7 +29,7 @@ on:
       accion:
         description: "Qué hacer"
         type: choice
-        options: [prevuelo, aplicar, chequeos, tipos, hacer-admin, estado, humo-pasado, sembrar-demo, usuarios-demo, sembrar-prueba-mateo, usuarios-prueba-mateo]
+        options: [prevuelo, aplicar, chequeos, tipos, hacer-admin, estado, marcar-demo, humo-pasado, sembrar-demo, usuarios-demo, sembrar-prueba-mateo, usuarios-prueba-mateo]
         default: prevuelo
       email:
         description: "Mail (solo para hacer-admin)"
@@ -157,6 +158,11 @@ jobs:
         env:
           EMAIL: ${{ inputs.email }}
         run: node scripts/datos/hacer-admin.mjs --email "$EMAIL"
+      - name: Marcar como demo los gimnasios de prueba en clásico
+        if: inputs.accion == 'marcar-demo'
+        run: |
+          node scripts/datos/marcar-demo.mjs
+          node scripts/datos/estado-base.mjs
       - name: Estado de la base
         if: inputs.accion == 'estado'
         run: node scripts/datos/estado-base.mjs
