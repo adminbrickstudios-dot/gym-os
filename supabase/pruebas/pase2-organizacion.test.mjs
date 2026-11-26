@@ -41,8 +41,8 @@ before(async () => {
 after(async () => t && t.cerrar());
 
 const LECTURAS = [
-  ["asistencia_socio", () => [`select public.asistencia_socio($1, $2, $3) r`, [t.g, t.ctx.socios.al_dia, momento]]],
-  ["asistencia_socios", () => [`select * from public.asistencia_socios($1, $2::uuid[], $3)`, [t.g, [t.ctx.socios.al_dia], momento]]],
+  ["numeros_socio", () => [`select public.numeros_socio($1, $2, $3) r`, [t.g, t.ctx.socios.al_dia, momento]]],
+  ["numeros_socios", () => [`select * from public.numeros_socios($1, $2::uuid[], $3)`, [t.g, [t.ctx.socios.al_dia], momento]]],
   ["volvieron_mes", () => [`select public.volvieron_mes($1, $2) r`, [t.g, momento]]],
   ["plata_en_juego", () => [`select public.plata_en_juego($1, $2) r`, [t.g, momento]]],
   ["transferencias_a_revisar", () => [`select public.transferencias_a_revisar($1) r`, [t.g]]],
@@ -73,8 +73,8 @@ test("permisos en negativo: el dueño de otro gimnasio y el profe reciben error 
     await como(quien, () => t.falla(() => t.q(`select public.deshacer_ultimo_hecho($1)`, [t.g])));
   }
   // Un socio de este gimnasio pedido desde el otro: error, no "sin datos".
-  await como(uOtro, () => t.falla(() => t.q(`select public.asistencia_socio($1, $2, $3)`, [otro, t.ctx.socios.al_dia, momento]), /no es de este gimnasio/));
-  await como(uOtro, () => t.falla(() => t.q(`select * from public.asistencia_socios($1, $2::uuid[], $3)`, [otro, [t.ctx.socios.al_dia], momento]), /no son de este gimnasio/));
+  await como(uOtro, () => t.falla(() => t.q(`select public.numeros_socio($1, $2, $3)`, [otro, t.ctx.socios.al_dia, momento]), /no es de este gimnasio/));
+  await como(uOtro, () => t.falla(() => t.q(`select * from public.numeros_socios($1, $2::uuid[], $3)`, [otro, [t.ctx.socios.al_dia], momento]), /no son de este gimnasio/));
   // La ocupación es del socio con sesión: el equipo no la pide por él.
   await como(u.dueno, () => t.falla(() => t.q(`select public.ocupacion_por_hora($1, $2, $3)`, [t.g, t.ctx.socios.al_dia, momento]), /Sin permiso/));
 });
@@ -83,7 +83,7 @@ test("asistencia: última vez, veces este mes, semanas seguidas, mejor racha y c
   // HOY es sábado 14/11. Viene esta semana (lun 9), las 3 anteriores, falta una y antes había 5 seguidas.
   const dias = [-5, -3, -12, -19, -26, -40, -47, -54, -61, -68];
   const s = await socioCon("Racha", dias);
-  const [{ r }] = await como(u.recepcion, () => t.q(`select public.asistencia_socio($1, $2, $3) r`, [t.g, s, momento]));
+  const [{ r }] = await como(u.recepcion, () => t.q(`select public.numeros_socio($1, $2, $3) r`, [t.g, s, momento]));
   assert.equal(r.veces_mes, 3, "noviembre: el 2, el 9 y el 11 (días distintos del mes)");
   assert.equal(r.semanas_seguidas, 4);
   assert.equal(r.mejor_racha, 5);
@@ -92,9 +92,9 @@ test("asistencia: última vez, veces este mes, semanas seguidas, mejor racha y c
   assert.ok(Array.isArray(r.cuando_viene) && r.cuando_viene.length > 0);
   // La semana en curso sin entradas todavía no corta la racha.
   const s2 = await socioCon("SinEstaSemana", [-7, -14]);
-  const [{ r: r2 }] = await como(u.recepcion, () => t.q(`select public.asistencia_socio($1, $2, $3) r`, [t.g, s2, momento]));
+  const [{ r: r2 }] = await como(u.recepcion, () => t.q(`select public.numeros_socio($1, $2, $3) r`, [t.g, s2, momento]));
   assert.equal(r2.semanas_seguidas, 2);
-  const filas = await como(u.recepcion, () => t.q(`select * from public.asistencia_socios($1, $2::uuid[], $3)`, [t.g, [s, s2], momento]));
+  const filas = await como(u.recepcion, () => t.q(`select * from public.numeros_socios($1, $2::uuid[], $3)`, [t.g, [s, s2], momento]));
   assert.equal(filas.find((f) => f.socio_id === s).veces_mes, 3);
   assert.equal(filas.length, 2);
 });
