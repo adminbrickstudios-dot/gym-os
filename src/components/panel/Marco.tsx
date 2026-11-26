@@ -35,7 +35,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
   // Pase 2.0 · organización (llave pase_2_organizacion): el menú en bloques y la barra Inicio · Entrada · Hoy · Socios · Más. Sin la llave, lo de siempre.
   const bloques = organizacion ? menuBloques(secciones) : undefined;
   const principales: Acceso[] = organizacion ? barraCelular(secciones).map((b) => ({ ...b, roles: [rol] })) : principalesCelular(rol, panel.secciones_apagadas);
-  // Fichar sale del menú: queda el botón ⏱️ Fichar arriba, junto a la campana (solo para quien ficha).
+  // Fichar sale del menú: queda el botón Fichar arriba, junto a la campana (solo para quien ficha).
   const fichar = organizacion && secciones.some((s) => s.clave === "fichar");
   // VD-5: la hoja Cobrar vive acá una sola vez; solo donde Vender está prendido y la persona cobra.
   let sedeCobro: string | null = null;

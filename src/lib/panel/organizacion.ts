@@ -23,7 +23,7 @@ export const BLOQUES: Bloque[] = [
   // HOY
   { clave: "entrada", grupo: "Hoy", emoji: "puerta", titulo: "Entrada", linea: "Quién entra, y si no puede, por qué", pestanas: [{ seccion: "entrada", titulo: "Entrada" }] },
   { clave: "hoy", grupo: "Hoy", emoji: "ok", titulo: "Para hacer hoy", linea: "Cobrar, avisar, aprobar, contestar",
-    pestanas: [{ seccion: "tareas", titulo: "Para hacer hoy" }, { seccion: "avisos", titulo: "Avisos de hoy" }, { seccion: "vencen_hoy", titulo: "Vencen y cobrar" },
+    pestanas: [{ seccion: "hoy", titulo: "Para hacer hoy" }, { seccion: "tareas", titulo: "Tareas" }, { seccion: "avisos", titulo: "Avisos de hoy" }, { seccion: "vencen_hoy", titulo: "Vencen y cobrar" },
       { seccion: "transferencias", titulo: "Transferencias" }, { seccion: "prospectos", titulo: "Interesados" }] },
   { clave: "clases", grupo: "Hoy", emoji: "calendario", titulo: "Clases", linea: "Cupos, reservas y presentes", pestanas: [{ seccion: "clases", titulo: "Clases" }] },
   // SOCIOS
@@ -64,7 +64,8 @@ export const REDIRECCION_BLOQUE: Record<string, string> = Object.fromEntries(
 /** Las pestañas que esta persona ve (mismo criterio que el menú de siempre: su rol y lo que el gimnasio apagó). */
 export function pestanasPara(b: Bloque, secciones: Pick<Seccion, "clave">[]): Pestana[] {
   const visibles = new Set(secciones.map((s) => s.clave));
-  return b.pestanas.filter((p) => visibles.has(p.seccion));
+  // La lista única de Para hacer hoy la ve quien ve Para hacer hoy (la sección "tareas").
+  return b.pestanas.filter((p) => visibles.has(p.seccion) || (p.seccion === "hoy" && visibles.has("tareas")));
 }
 
 /** Los bloques que esta persona ve: un bloque sin pestañas visibles no aparece (DISENO.md, regla 4). */

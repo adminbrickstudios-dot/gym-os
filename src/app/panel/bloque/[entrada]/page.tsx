@@ -14,7 +14,7 @@ import { contextoPanel } from "@/lib/panel/servidor";
 
 type Pagina = ComponentType<{ searchParams: Promise<Record<string, string | undefined>>; params: Promise<Record<string, string>> }>;
 const PANTALLAS: Partial<Record<keyof typeof DESTINO, () => Promise<{ default: unknown }>>> = {
-  tareas: () => import("../../tareas/page"), avisos: () => import("../../avisos/page"), vencen_hoy: () => import("../../vencen-hoy/page"),
+  hoy: () => import("../../hoy/lista"), tareas: () => import("../../tareas/page"), avisos: () => import("../../avisos/page"), vencen_hoy: () => import("../../vencen-hoy/page"),
   transferencias: () => import("../../transferencias/page"), prospectos: () => import("../../prospectos/page"), socios: () => import("../../socios/page"),
   retencion: () => import("../../retencion/page"), pt: () => import("../../pt/page"), lockers: () => import("../../lockers/page"), eventos: () => import("../../eventos/page"),
   caja: () => import("../../caja/page"), vender: () => import("../../vender/page"), resultado: () => import("../../resultado/page"), gastos: () => import("../../gastos/page"),
@@ -40,10 +40,14 @@ export default async function PaginaBloque({ params, searchParams }: { params: P
   if (!visibles.length) redirect("/panel");
   // ?pestana= es la de este bloque; si no lo es (una pantalla que usa ?pestana= para lo suyo, como Configuración), va a la primera y se le pasa tal cual.
   const elegida = visibles.find((p) => p.seccion === sp.pestana);
-  const activa = elegida ?? visibles[0];
+  // Socios con la vista de interesados es la pestaña Interesados (los links de siempre llevan a /panel/socios?vista=interesados).
+  const activa = (!elegida || elegida.seccion === "socios") && sp.vista === "interesados" ? (visibles.find((p) => p.seccion === "prospectos") ?? elegida ?? visibles[0]) : (elegida ?? visibles[0]);
   const { pestana, sub, ...resto } = sp;
   const suyos = { ...resto, ...(elegida ? (sub ? { pestana: sub } : {}) : (pestana ? { pestana } : {})) };
-  const cargar = PANTALLAS[activa.seccion];
+  // Interesados vive dentro de Socios desde VD-15 (/panel/prospectos lleva a Socios con la vista de interesados): la pestaña dibuja eso mismo.
+  const enSocios = activa.seccion === "prospectos" && !panel.secciones_apagadas.includes("socios");
+  if (enSocios) Object.assign(suyos, { vista: "interesados" });
+  const cargar = PANTALLAS[enSocios ? "socios" : activa.seccion];
   if (!cargar) notFound();
   const Pantalla = (await cargar()).default as Pagina;
   return (

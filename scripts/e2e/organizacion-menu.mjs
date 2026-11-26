@@ -38,6 +38,7 @@ try {
     // Pestañas en la dirección, y Atrás vuelve a la anterior.
     await menu.locator('[data-bloque-menu="hoy"]').click();
     await d.waitForURL(/\/panel\/bloque\/hoy/, { timeout: 30000 });
+    await d.locator("[data-pestanas-bloque]").waitFor({ timeout: 30000 });
     const pestanas = d.locator("[data-pestanas-bloque] [data-pestana-bloque]");
     chequear(await pestanas.count() >= 4, `Para hacer hoy junta sus pestañas (${await pestanas.count()})`, "Para hacer hoy sin pestañas");
     await d.locator('[data-pestana-bloque="avisos"]').click();
