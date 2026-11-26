@@ -3,7 +3,7 @@ import { Suspense, type ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
 import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara, type Acceso } from "@/lib/panel/secciones";
-import { barraCelular, menuBloques } from "@/lib/panel/organizacion";
+import type { BloqueMenu } from "@/lib/panel/organizacion";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
@@ -30,12 +30,14 @@ export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido";
 /** VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas (null = este rol o este gimnasio no la usa). */
 export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean };
 
-export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null, organizacion = false }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null; organizacion?: boolean }) {
+/** Pase 2.0 · organización: el menú en bloques ya armado (lo arma el layout del panel, en el servidor: así organizacion.ts no viaja al navegador). */
+export type MenuOrganizacion = { bloques: BloqueMenu[]; barra: Omit<Acceso, "roles">[] };
+export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null, organizacion = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null; organizacion?: MenuOrganizacion | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
   // Pase 2.0 · organización (llave pase_2_organizacion): el menú en bloques y la barra Inicio · Entrada · Hoy · Socios · Más. Sin la llave, lo de siempre.
-  const bloques = organizacion ? menuBloques(secciones) : undefined;
-  const principales: Acceso[] = organizacion ? barraCelular(secciones).map((b) => ({ ...b, roles: [rol] })) : principalesCelular(rol, panel.secciones_apagadas);
+  const bloques = organizacion?.bloques;
+  const principales: Acceso[] = organizacion ? organizacion.barra.map((b) => ({ ...b, roles: [rol] })) : principalesCelular(rol, panel.secciones_apagadas);
   // Fichar sale del menú: queda el botón Fichar arriba, junto a la campana (solo para quien ficha).
   const fichar = organizacion && secciones.some((s) => s.clave === "fichar");
   // VD-5: la hoja Cobrar vive acá una sola vez; solo donde Vender está prendido y la persona cobra.

@@ -15,7 +15,15 @@ import { PantallaEstadoGimnasio, type EstadoGimnasioAviso } from "@/components/p
 type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?: string };
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
 import { CONFIG_ENTRADA_POR_DEFECTO } from "./entrada/config";
-import { rutaDisponible } from "@/lib/panel/secciones";
+import { rutaDisponible, seccionesPara } from "@/lib/panel/secciones";
+import { barraCelular, menuBloques } from "@/lib/panel/organizacion";
+import type { PanelGimnasio } from "@/lib/panel/servidor";
+
+/** Pase 2.0 · organización: el menú en bloques y la barra del celular, armados acá (servidor) para que organizacion.ts no viaje al navegador. */
+function menuOrganizacion(panel: PanelGimnasio) {
+  const secciones = seccionesPara(panel.yo.rol, panel.secciones_apagadas);
+  return { bloques: menuBloques(secciones), barra: barraCelular(secciones) };
+}
 import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
 import { normalizarHost } from "@/lib/host";
@@ -107,7 +115,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
       <RegistrarSesion />
       {!temaCookie && <SincronizarTema />}
       {/* Pase 2.0 · organización: la llave viaja con la dirección (el proxy la resolvió con el gimnasio): no es un viaje más. */}
-      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada} organizacion={(await headers()).get("x-gimnasio-organizacion") === "si"}>
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada} organizacion={(await headers()).get("x-gimnasio-organizacion") === "si" ? menuOrganizacion(panel) : null}>
         <FranjaMantenimiento />
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
