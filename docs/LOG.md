@@ -1,3 +1,36 @@
+## 2026-11-26 · Pase 2.0, ítem 1: borrar el estilo clásico, publicación A (PR #47)
+
+**QUÉ HICE**
+- Precondición desde Actions (`estado`, solo lectura): 2 gimnasios no demo en clásico → frené y avisé. Mateo: "son de prueba, marcalos como demo". Acción nueva `marcar-demo` en *Base de datos* (exactamente 2, nunca Temple Gym, filas verificadas, una transacción): 45753173848. Después: 0 reales en clásico.
+- Prueba de antes sobre `0cdeb8e7` (app = main): inventario en 4 combinaciones (foto guardada en `scripts/e2e/inventario/`), pantallas completas oscuro y claro, bundle (JS y ahora también CSS por ruta), Lighthouse.
+- El cambio (`77443807`, `29d2c997`): Pista es la base del CSS (`html:root`, el mismo peso que `html[data-estilo="pista"]`: la cascada no cambia); se van las superficies del clásico, el fondo en línea y sus `!important`, `data-estilo`, `x-gimnasio-estilo`, el selector de estilo (queda el modo) en Configuración y en la ficha del super admin, `ESTILO_DEMO`/`E2E_SIN_MAYUSCULAS`/la entrada `estilo` de los workflows, y `pista-produccion` (script y workflow). La plataforma sin gimnasio va siempre en claro.
+- Después, sobre `29d2c997`: inventario sin faltantes en las 4; capturas iguales píxel a píxel salvo datos del momento; mismas fallas de la cadena larga que antes y ninguna nueva; viajes iguales; Lighthouse 90 → 93 y 89 → 92; CSS menor en las 97 rutas. Tabla en `docs/base/PROGRESO.md`.
+- Publicado a las 04:33 (fuera de 16 a 22 h): PR #47, merge `126694a3`, Vercel verde 04:35, producción mirada 3 veces en 5 minutos (Temple Gym, /ingresar, /hacete-socio, /g/demo y la venta, compu y celular). **Se vuelve a `9f8f73d3`** (revertir el merge).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- El inventario de pantallas nunca podía fallar: `DEL_MOMENTO` tenía `^a||` (la alternativa vacía coincide con todo). Arreglado al reescribirlo (era parte del ítem).
+- La regla de impresión de Pista (`@media print`, hoja siempre clara) nunca se aplica: el modo pesa más. No se tocó; lo que se imprime sale con los colores del modo, como hasta hoy.
+- El acento "legible" de Pista (`--acento-pista-*`) no llega a los envoltorios: el `--acento` en línea de `propsMarca` le gana a la regla del modo. Hoy se ve el acento del gimnasio tal cual. No se tocó.
+- `semaforo-pantallas` falla en la cadena larga porque un recorrido anterior deja apagada la llave `pista_semaforo` (suelto da verde). Ya pasaba antes.
+- *Analizar bundle* falla en main desde antes: `/hacete-socio` 209,1 KB contra un tope de 209 (ahora 209,0, sigue 0,04 arriba).
+- La publicación B tal como está escrita rompería guardar el modo: el código usa `guardar_estilo_gimnasio`, `admin_guardar_estilo` y `estilo_gimnasio`. Anotado en `PASE-1.0.md`: primero funciones solo de modo y el código pasado a ellas, después borrar.
+- La página de venta (pasegym.com), /super y /admin pasan de clásico a Pista claro (títulos en mayúscula con Big Shoulders, radios de 16): es el borrado del clásico, pero se ve distinto.
+
+**QUÉ CORRÉS VOS** — Nada. Si algo se ve mal: `git revert -m 1 126694a3` en una rama, PR y merge.
+
+**QUÉ CONFIGURÁS VOS** — Nada.
+
+**SIN ARREGLAR**
+- El JS por ruta no bajó en cada ruta (sí el CSS): el clásico no estaba en el JS del navegador. Los topes de `topes-js.json` quedan como estaban (ya son lo medido redondeado para arriba). `/hacete-socio` 0,04 KB arriba de su tope (de antes).
+- Las 7 fallas de la cadena larga de pantallas (de antes; se corre en tandas para publicar).
+- La publicación B (en 7 días o más, otra vuelta).
+
+**LO QUE NO PUDE VERIFICAR**
+- Producción con sesión (miré solo sin sesión). /super y /admin no los abrí ni en producción ni en Actions (el inventario no los incluye): ahí cambian el selector de estilo (queda el modo) y el diseño, que pasa a Pista claro.
+- La cadena de pantallas completas en tandas (como en las publicaciones anteriores): corrí la cadena entera en una base, antes y después, y comparé las fallas.
+
+✅ Clásico borrado (A)
+
 ## 2026-11-25 · Cierre para vender: igual al diseño, alta de cero, demo para prospectos (PR #43, #44 y #45)
 
 **QUÉ HICE**
