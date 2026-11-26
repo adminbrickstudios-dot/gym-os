@@ -1,5 +1,16 @@
 # PROGRESO de Pase (antes Base)
 
+## ⏳ Pase 2.0 · organización (26/11): Parte 1 mergeada sin publicar, Parte 2 en la base, Partes 3 a 6 en la rama
+
+| Publicación | Estado | Merge / migración | Se vuelve a | Lo mirado en producción |
+|---|---|---|---|---|
+| Parte 1 · impresión clara, acento legible, plataforma en el inventario, /hacete-socio bajo su tope | mergeada, **Vercel no la publicó** | PR #49, `58de2cc3` | `2a1639ca` | 14:43 ART, 12 direcciones (compu y celular) en 200, pero con el código viejo (`2a1639c`) |
+| Parte 2 · base (llave, funciones de ver sin entrar, `hechos_para_hacer`) | **aplicada** SIN COPIA (autorizada) | `20261126100000_pase_2_organizacion` | aditiva: el código viejo no la usa | chequeos contra producción en verde, tipos al día |
+| Partes 3 a 6 · menú en bloques, pestañas, Para hacer hoy, ver sin entrar, ficha, Resultado, app | en `dia/2026-11-26-pase2`, **sin publicar** | migraciones `20261126120000` y `20261126130000` sin aplicar | — | — |
+
+- Llave apagada: inventario igual a la foto de antes (84 pantallas, oscuro y claro). Llave prendida: e2e organizacion-menu 26/26 y organizacion-hoy 18/18.
+- **Bloqueo**: con la Parte 3 el JS de primera carga sube ~1,5 KB gzip en todas las rutas (/hacete-socio 210,5 contra tope 209). Causa de fondo: PantallaError importa `Aviso` de `Marco` y el marco del panel viaja en todas las rutas (detalle en LOG 26/11).
+
 ## ✅ Clásico borrado, publicación A (26/11, Pase 2.0 ítem 1): Pista es el único estilo
 
 **Publicada (26/11, 04:33 ART, PR #47, merge `126694a3`; vuelta atrás: revertir ese merge, main antes = `9f8f73d3`).** Solo código, sin migración: la base sigue teniendo `configuracion_gimnasio.estilo` (la saca la publicación B, en 7 días o más; ver lo que tiene que expandir antes en `PASE-1.0.md`).
