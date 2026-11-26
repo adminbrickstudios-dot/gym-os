@@ -105,7 +105,8 @@ export default async function HaceteSocio({ searchParams }: { searchParams: Prom
           <p className="texto-suave text-lg mt-3">Dejá tus datos y creá tu cuenta gratis. Con tu mail y tu contraseña entrás a tu perfil, ves tu QR y todo lo del gimnasio.</p>
         </div>
         {d.abierta
-          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} origen={origen} />
+          ? <FormAlta datos={d} planInicial={plan ?? d.plan_sugerido ?? null} origen={origen}
+              avisoDatos={<p className="texto-suave text-sm">Ley 25.326: tus datos los guarda {d.marca.nombre}, solo para anotarte y cobrarte. Podés pedir verlos, corregirlos o borrarlos desde “Yo” en tu app, o en recepción. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>} />
           : (
             // C9: lo que ve quien escanea el QR o abre el link con el registro apagado: dice que hoy no se puede y da el WhatsApp.
             <div className="tarjeta p-6 space-y-4" data-alta-cerrada>

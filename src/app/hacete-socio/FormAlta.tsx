@@ -2,7 +2,7 @@
 // Alta online en un solo formulario: plan → datos → reglamento (si el gimnasio tiene) → cómo paga.
 // Al terminar la cuenta queda creada y con la sesión abierta, sin pagar (D26): dice qué sigue y lleva al perfil.
 // La base decide todo lo demás (DNI sin duplicar, plan válido, reglamento vigente).
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { formatearDni, formatearPesos } from "@/lib/formato";
 import { unidadPlan, variantesPlan } from "@/lib/landing-textos";
 import { Mensaje } from "@/components/ui/Mensaje";
@@ -27,7 +27,8 @@ const hoyLocal = (anos = 0) => { const d = new Date(); return `${d.getFullYear()
 /** ¿Tiene menos de 18 hoy? (nació después de hoy hace 18 años, y no en el futuro). La base lo vuelve a decidir con la zona del gimnasio. */
 const esMenorDe18 = (nac: string) => /^\d{4}-\d{2}-\d{2}$/.test(nac) && nac > hoyLocal(18) && nac <= hoyLocal();
 
-export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta; planInicial: string | null; origen?: string }) {
+/** `avisoDatos`: el aviso de la ley 25.326, armado en el servidor (es texto fijo: así no viaja en el JS de la página, que tiene tope). */
+export function FormAlta({ datos, planInicial, origen = "", avisoDatos }: { datos: DatosAlta; planInicial: string | null; origen?: string; avisoDatos?: ReactNode }) {
   const [r, accion, enviando] = useActionState<ResultadoAlta, FormData>(altaOnline, {});
   const planes = datos.planes ?? [];
   const [plan, setPlan] = useState(planes.some((p) => p.id === planInicial) ? planInicial : null);
@@ -192,7 +193,7 @@ export function FormAlta({ datos, planInicial, origen = "" }: { datos: DatosAlta
       </fieldset>}
 
       <CampoAntiRobot />
-      <p className="texto-suave text-sm">Ley 25.326: tus datos los guarda {datos.marca.nombre}, solo para anotarte y cobrarte. Podés pedir verlos, corregirlos o borrarlos desde “Yo” en tu app, o en recepción. Leé la <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="underline" data-politica>política de privacidad</a>.</p>
+      {avisoDatos}
       {r.error && !r.campo && <Mensaje tipo="error">{r.error}</Mensaje>}
       <button type="submit" disabled={enviando} className="boton boton-principal text-lg w-full sm:w-auto px-10" data-crear-cuenta-enviar>
         {enviando ? "Creando tu cuenta…" : <><Icono nombre="persona" /> Crear mi cuenta</>}
