@@ -13,8 +13,13 @@ const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").to
 const db = new pg.Client({ connectionString: url }); await db.connect();
 const [venta] = (await db.query(`select v.id from public.ventas v join public.gimnasios g on g.id = v.gimnasio_id
   where g.slug = 'demo' and v.estado = 'confirmada' order by v.confirmada_en desc nulls last limit 1`)).rows;
-const [turno] = (await db.query(`select t.id from public.turnos_caja t join public.gimnasios g on g.id = t.gimnasio_id
-  where g.slug = 'demo' order by t.abierto_en desc limit 1`)).rows;
+// Un cierre de caja ya contado (el demo arranca sin turnos): el de la recepción, de hace un rato.
+const [d] = (await db.query(`select g.id g, (select id from public.sedes where gimnasio_id = g.id and es_principal) sede,
+  (select id from public.equipo where gimnasio_id = g.id and rol = 'recepcion' and activo limit 1) rec from public.gimnasios g where g.slug = 'demo'`)).rows;
+let [caja] = (await db.query(`select id from public.cajas where gimnasio_id = $1 and sede_id = $2 limit 1`, [d.g, d.sede])).rows;
+if (!caja) caja = (await db.query(`insert into public.cajas (gimnasio_id, sede_id, nombre) values ($1,$2,'Caja') returning id`, [d.g, d.sede])).rows[0];
+const [turno] = (await db.query(`insert into public.turnos_caja (gimnasio_id, caja_id, abierto_por, abierto_en, monto_inicial, cerrado_en, cerrado_por, monto_contado, monto_esperado)
+  values ($1,$2,$3, now() - interval '6 hours', 0, now() - interval '2 hours', $3, 1000, 1000) returning id`, [d.g, caja.id, d.rec])).rows;
 await db.end();
 
 const HOJAS = ["/panel/ayuda/carteles/puerta", "/panel/ayuda/carteles/app", "/panel/ayuda/carteles/anotate", "/panel/ayuda/guias/dueno",
@@ -22,7 +27,8 @@ const HOJAS = ["/panel/ayuda/carteles/puerta", "/panel/ayuda/carteles/app", "/pa
 if (!venta) falla("el demo no tiene ninguna venta para mirar el recibo");
 if (!turno) falla("el demo no tiene ningún turno de caja para mirar el cierre");
 
-/** Cada texto a la vista al imprimir, con su color y el fondo que tiene detrás (el primer fondo no transparente hacia arriba; si no hay, el de la hoja). */
+/** La hoja que sale (lo que queda a la vista al imprimir es .recibo-hoja) tiene que ser clara, y cada texto suyo tiene que leerse contra el fondo que tiene
+ *  detrás (el primer fondo no transparente hacia arriba; si no hay, el papel). Las franjas de color del gimnasio (el cartel) valen si se leen. */
 function medir() {
   const rgb = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r, g, b, a }; };
   const lum = ({ r, g, b }) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
@@ -33,6 +39,10 @@ function medir() {
   };
   const malos = [];
   let textos = 0;
+  for (const h of document.querySelectorAll(".recibo-hoja")) {
+    const f = rgb(getComputedStyle(h).backgroundColor);
+    if (f && f.a > 0.5 && lum(f) < 0.8) malos.push(`la hoja sale con fondo ${getComputedStyle(h).backgroundColor}`);
+  }
   for (const e of document.querySelectorAll("body *")) {
     const s = getComputedStyle(e);
     if (s.visibility !== "visible" || s.display === "none" || e.closest("[data-no-imprimir]")) continue;
@@ -44,7 +54,7 @@ function medir() {
     const color = rgb(s.color), fondo = fondoDe(e);
     if (!color) continue;
     const k = contraste(color, fondo);
-    if (lum(fondo) < 0.5 || k < 4.5) malos.push(`"${e.textContent.trim().slice(0, 30)}" (${s.color} sobre rgb(${fondo.r}, ${fondo.g}, ${fondo.b}), ${k.toFixed(1)}:1)`);
+    if (k < 4.5) malos.push(`"${e.textContent.trim().slice(0, 30)}" (${s.color} sobre rgb(${fondo.r}, ${fondo.g}, ${fondo.b}), ${k.toFixed(1)}:1)`);
   }
   return { textos, malos };
 }
