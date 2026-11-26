@@ -1,5 +1,33 @@
 # PROGRESO de Pase (antes Base)
 
+## ✅ Clásico borrado, publicación A (26/11, Pase 2.0 ítem 1): Pista es el único estilo
+
+**Publicada (26/11, 04:33 ART, PR #47, merge `126694a3`; vuelta atrás: revertir ese merge, main antes = `9f8f73d3`).** Solo código, sin migración: la base sigue teniendo `configuracion_gimnasio.estilo` (la saca la publicación B, en 7 días o más; ver lo que tiene que expandir antes en `PASE-1.0.md`).
+
+**Precondición** (`Base de datos → estado`, solo lectura): había 2 gimnasios no demo en clásico; Mateo dijo que eran de prueba y se marcaron demo con la acción nueva `marcar-demo` (45753173848: exactamente 2, nunca Temple Gym, filas verificadas). Después: 1 real (Temple Gym, Pista oscuro), 0 reales en clásico.
+
+**Prueba de antes** (app = main, commit `0cdeb8e7`, rama `dia/2026-11-26-antes`) **y después** (`29d2c997`), en Actions:
+
+| Qué | Antes | Después |
+|---|---|---|
+| Inventario (oscuro/claro × semáforo sí/no, 66 pantallas cada uno) | foto en `scripts/e2e/inventario/` | 0 faltantes en las 4 (lo nuevo: la actividad de Control y el link a la próxima clase, que cambian con la hora) |
+| Capturas `inv-pista-*` píxel a píxel | — | 61 a 63 de 66 iguales; las otras solo por datos del momento (hora de la sesión en Cuenta, QR de la app, actividad de Control) |
+| semaforo-pantallas + detalles-pista + k5-publico, sueltos | verdes (oscuro y claro) | verdes, capturas iguales |
+| Pantallas completas, cadena entera en una base | claro: 7 en rojo (flujo-cierre, semaforo-pantallas, vd-13, vd-28, vd-58, vd-61, velocidad-a) | claro: los mismos 7; oscuro: 6 de esos. Ninguna falla nueva (son las fugas de estado de la cadena larga, ya anotadas) |
+| Viajes a la base por pantalla | 35 de 44 pasan de 2 | iguales pantalla por pantalla |
+| Lighthouse móvil (sin sesión, semáforo apagado) | página del gimnasio 90 · /hacete-socio 89 | 93 · 92 |
+| CSS por ruta (`js-rutas.mjs`, ahora con CSS) | 106,8 KB (19,9 gzip) | 105,1 KB (19,7 gzip), en las 97 rutas |
+| JS de primera carga, 10 pantallas clave (`modulos-pesados`) | ver tabla del 25/11 | idéntico en bytes crudos; gzip ±0,1 de ruido entre compilaciones |
+| JS por ruta (`js-rutas.mjs`) | — | /panel/configuracion −0,3 KB, otras 18 −0,1; ninguna sube |
+
+**Lo que no se cumplió del pedido:** el JS no bajó en cada ruta. El clásico vivía en el CSS y en el servidor (layout, proxy), no en el JS del navegador; no se recortó JS de otras cosas para cumplir el número. Los topes de `topes-js.json` no se bajaron: ya están en el valor medido redondeado para arriba y lo medido no cambió. `/hacete-socio` sigue 0,04 KB por encima de su tope de 209 (en main estaba 0,1 por encima): *Analizar bundle* sigue en rojo por eso, como antes.
+
+**Producción mirada** (04:35, 04:36 y 04:41, compu y celular, sin sesión): templegymsalta.com, /ingresar, /hacete-socio y pasegym.com/g/demo responden 200, sin `data-estilo`, modo oscuro, Pista Semáforo, sin errores en la consola; pasegym.com (la venta) en Pista claro.
+
+El reporte (QUÉ HICE … LO QUE NO PUDE VERIFICAR) está en `docs/LOG.md` (26/11).
+
+✅ Clásico borrado (A)
+
 ## Cierre para vender (25/11, Mateo): igual al diseño, alta de cero, demo para prospectos
 
 Mateo autorizó publicar el 25/11 aunque fuera entre las 16 y las 22 h (urgente=URGENTE, SIN COPIA; vale solo para esta publicación).
