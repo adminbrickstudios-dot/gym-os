@@ -29,6 +29,8 @@ import { ResultadoPuerta, type ColorPuerta } from "@/components/ResultadoPuerta"
 import { BotonCobrar } from "@/components/panel/cobrar/BotonCobrar";
 import { Hace } from "@/components/ui/Hace";
 import { venceDe } from "@/lib/puerta";
+import { headers } from "next/headers";
+import { PlataEnJuego, VolvieronMes, type PlataEnJuegoDatos } from "@/components/panel/organizacion/PlataEnJuego";
 
 // VD-12b: lo que hay para hacer hoy, calculado por la base (nada se guarda).
 type ParaHacer = { clave: string; emoji: string; texto: string; cantidad: number; href: string };
@@ -142,7 +144,9 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
     const zona = panel.gimnasio.zona_horaria;
     // E8: las ~20 lecturas del Inicio en UN viaje a la base (lote_lecturas); lo que el rol no ve ni se pide.
     const g = { p_gimnasio_id: panel.gimnasio.id };
-    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen, datosEjemplo, seguridad, extraSemaforo] = await rpcLote(
+    // Pase 2.0 · organización (26/11): con la llave, "Plata en juego hoy" y "Volvieron este mes", en el mismo viaje (la llave viene con la dirección).
+    const organizacion = (await headers()).get("x-gimnasio-organizacion") === "si" && rol !== "profe";
+    const [datos, numerosElegidos, pasos, cumples, pedidosPausa, dejados, invitados, anular, stock, productos, alertasCaja, olvidadas, pedidosBaja, novedadesGymOSTodas, tareas, paraHacer, entradasVivo, fichaje, maquinasFuera, lockersVencen, datosEjemplo, seguridad, extraSemaforo, plataEnJuego, volvieron] = await rpcLote(
       lectura<Inicio>("panel_inicio", g),
       // VD-12: los 4 números elegidos, en un solo viaje (el profe conserva los suyos de panel_inicio).
       rol !== "profe" ? lectura<NumerosElegidos>("numeros_inicio", g) : fijo<NumerosElegidos | null>(null),
@@ -184,7 +188,11 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
       rol === "dueno" ? lectura<Seguridad | null>("seguridad_dueno", g, true) : fijo<Seguridad | null>(null),
       // Cierre para vender (25/11): la línea chica de cada número, en el mismo viaje (si falla, los números se ven sin ella).
       semaforo && rol !== "profe" ? lectura<ExtraSemaforo | null>("inicio_semaforo", g, true) : fijo<ExtraSemaforo | null>(null),
+      organizacion ? lectura<PlataEnJuegoDatos | null>("plata_en_juego", g, true) : fijo<PlataEnJuegoDatos | null>(null),
+      organizacion ? lectura<{ cantidad: number } | null>("volvieron_mes", g, true) : fijo<{ cantidad: number } | null>(null),
     );
+    const plata = <PlataEnJuego datos={plataEnJuego} />;
+    const volvieronEsteMes = organizacion ? <VolvieronMes cantidad={volvieron?.cantidad ?? null} /> : null;
     const novedadesGymOS = novedadesGymOSTodas ?? [];
     // Lo que lleva a una pantalla apagada (o que el rol no ve) no se muestra: no hay a dónde ir.
     const hacerHoy = paraHacer.filter((x) => rutaDisponible(`/panel${x.href}`, rol, panel.secciones_apagadas));
@@ -201,7 +209,9 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
 
     const numerosDeHoy = (
           <section aria-label="Números de hoy" {...(rol === "recepcion" ? { "data-franja-mostrador": "", className: "lg:sticky lg:top-0 z-20 bg-[var(--fondo)] py-2 -mx-1 px-1" } : {})}>
+            {plata}
             <NumerosInicio numeros={numerosElegidos?.numeros ?? datos.numeros} apagadas={panel.secciones_apagadas} />
+            {volvieronEsteMes && <div className="mt-3 max-w-xs">{volvieronEsteMes}</div>}
             {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
             {/* AVI-6: el detalle del día (quién cobró, caja, altas y bajas) y la semana. */}
             {(rol === "dueno" || rol === "encargado") && (
@@ -378,6 +388,12 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
       }
       for (const k of ["a_cobrar", "deben"]) if (valorDe(k) > 0 && rutaDisponible("/panel/vender", rol, panel.secciones_apagadas)) detalles[k] = "Tocá para cobrarles";
       if (valorDe("por_vencer") > 0) detalles.por_vencer = "Tocá para avisarles";
+      const accesos = (
+          <section aria-labelledby="accesos" className="inicio-semaforo-bloque" data-accesos-semaforo>
+            <h2 id="accesos" className="titulo">Accesos rápidos</h2>
+            <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} conPrincipal={false} />
+          </section>
+      );
       return (
         <>
           {verEntrada && (
@@ -398,18 +414,17 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
               )}
             </section>
           )}
+          {plata}
           <section aria-label="Números de hoy" className="inicio-semaforo-bloque" data-numeros-semaforo>
             <div className="inicio-semaforo-cabecera">
               <h2 id="hoy-numeros" className="titulo">Hoy en números</h2>
               {rol === "dueno" && numerosElegidos && <ElegirNumeros disponibles={numerosElegidos.disponibles} elegidos={numerosElegidos.elegidos} />}
             </div>
             <NumerosInicio numeros={numerosVistos} apagadas={panel.secciones_apagadas} detalles={detalles} />
+            {volvieronEsteMes && <div className="max-w-xs">{volvieronEsteMes}</div>}
             {(rol === "dueno" || rol === "encargado") && <p><Link href="/panel/resumen" className="texto-suave underline"><Icono nombre="grafico" /> Resumen de hoy: quién cobró, la caja, altas y bajas</Link></p>}
           </section>
-          <section aria-labelledby="accesos" className="inicio-semaforo-bloque" data-accesos-semaforo>
-            <h2 id="accesos" className="titulo">Accesos rápidos</h2>
-            <GrillaAccesos elegidos={elegidos} disponibles={accesosDisponibles(rol, panel.secciones_apagadas)} perdidos={perdidos} conPrincipal={false} />
-          </section>
+          {!organizacion && accesos}
           {rol !== "profe" && (
             <div className="inicio-semaforo-dos">
               <section aria-labelledby="para-hacer" data-para-hacer={hacerHoy.length} className="tarjeta inicio-semaforo-caja">
@@ -472,6 +487,8 @@ async function BloquesInicio({ panel, semaforo = false }: { panel: PanelGimnasio
           )}
           <LockersVencen items={lockersVencen} />
           {resto}
+          {/* Pase 2.0 · organización: los accesos rápidos, abajo (organizacion/inicio.png). */}
+          {organizacion && accesos}
         </>
       );
     }
