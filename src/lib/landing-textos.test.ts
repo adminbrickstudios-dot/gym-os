@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
-import { condicionesPlan, iniciales, linkWhatsapp, textoSobre, unidadPlan, variantesPlan } from "./landing-textos";
+import { condicionesPlan, iniciales, linkWhatsapp, unidadPlan, variantesPlan } from "./landing-textos";
+import { textoSobre } from "./marca";
 
 test("link de WhatsApp con el mensaje codificado", () => {
   expect(linkWhatsapp("+54 9 000 111-222", "Hola! Quiero info")).toBe("https://wa.me/549000111222?text=Hola!%20Quiero%20info");

@@ -14,7 +14,7 @@ import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
-import { CAPTURAS, CELU, COMPU, GIMNASIO, PANTALLA_ROTA, chequear, entrar, falla, navegador, pagina, resultado } from "./comun.mjs";
+import { CAPTURAS, CELU, COMPU, GIMNASIO, PANTALLA_ROTA, chequear, entrar, falla, navegador, pagina, resultado, esElAcento } from "./comun.mjs";
 process.on("unhandledRejection", (e) => { console.log(`✗ se cortó (sin atrapar): ${String(e?.message ?? e).split("\n").slice(0, 3).join(" | ")}`); process.exit(1); });
 
 const BASE = GIMNASIO("demo");
@@ -130,7 +130,7 @@ try {
   await abrir(d, "/panel/ayuda/carteles/puerta");
   const franja = await d.locator(".cartel-franja").evaluate((e) => getComputedStyle(e).backgroundColor);
   const acento = await d.locator("main").first().evaluate((e) => getComputedStyle(e).getPropertyValue("--acento"));
-  chequear(!rgb(acento) || franja === rgb(acento), "la franja del cartel lleva el color del gimnasio", `la franja es ${franja} y el color del gimnasio ${acento}`);
+  chequear(!rgb(acento) || franja === rgb(acento) || esElAcento(franja, acento), "la franja del cartel lleva el color del gimnasio", `la franja es ${franja} y el color del gimnasio ${acento}`);
   await d.emulateMedia({ media: "print" });
   chequear(await d.locator("[data-cartel]").isVisible() && !(await d.locator("[data-imprimir]").isVisible().catch(() => false)), "en papel queda solo el cartel", "en papel se ven los botones o falta el cartel");
   let pdf = await d.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true });

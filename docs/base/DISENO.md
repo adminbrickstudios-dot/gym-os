@@ -9,6 +9,136 @@ La idea: **un mostrador de gimnasio, no una app de IA**. Claro, encuadrado,
 números grandes que se leen de lejos, el color del gimnasio en un solo lugar, y
 los cuatro colores del semáforo siempre iguales.
 
+## Pase 2.0 · Organización: ver sin entrar (Mateo, 26/11)
+
+Aprobado por Mateo el 26/11. Las pantallas dibujadas están en `docs/base/pista/organizacion/` (un `.html` y su
+`.png` por pantalla, con las fuentes reales) y en el tablero "Pase 2.0 · Estilos", fila "Pase 2.0 · organización".
+Lo marcado **NUEVO** en violeta es función nueva; lo demás es lo de hoy reordenado. Lo que manda, en este orden:
+este texto, después los `.png`. Donde el dibujo muestre un dato que la base no tiene, se agrega el dato (con su
+función SQL); no se inventa ni se saca del dibujo.
+
+**El problema (Mateo):** para ver algo hay que apretar un botón que te lleva a otro panel, y muchas cosas están
+sueltas o agrupadas de más. Es una fiaca.
+
+### Las seis reglas
+
+1. **Ver sin entrar.** Lo que una pantalla resume se abre ahí mismo:
+   - Un número del Inicio despliega su lista debajo, en el lugar, con la acción en cada fila. "Ver todo" lleva a
+     la pantalla completa.
+   - Un socio en cualquier lista (Socios, Para hacer hoy, Últimas entradas, Retención, Clases, Caja, la búsqueda)
+     abre el **panel lateral** (`PanelSocioLateral`, § El panel lateral), no la ficha. La ficha completa queda
+     para editar.
+2. **Hacer sin entrar.** Cada fila trae su acción principal: Cobrar, Avisar, Aprobar, Contestar o Escribir.
+   Cobrar abre siempre la hoja Cobrar encima de lo que estás mirando y vuelve al mismo lugar. Nunca navega.
+3. **Menos menú.** El menú baja de 29 entradas a 12, en cuatro bloques de tres (`organizacion/menu-en-bloques.png`).
+   Lo que se usa junto va en una pantalla con **pestañas arriba**. La pestaña queda en la dirección
+   (`?pestana=`), así funcionan Atrás y los links. Cada dirección vieja redirige a su pestaña.
+4. **Nada se pierde.** Cada pantalla de hoy sigue existiendo como pestaña. El buscador (Ctrl K) la encuentra por el
+   nombre viejo (`tambien`). Los permisos por rol y las secciones apagadas por gimnasio siguen igual: un bloque
+   que queda sin pestañas no aparece.
+5. **Lo vacío no se muestra.** Un bloque sin nada (0 cumpleaños, 0 transferencias) no ocupa lugar en el Inicio.
+6. **Dos toques para lo de todos los días:** entrar, cobrar, avisar, aprobar, contestar.
+
+### El menú nuevo
+
+| Bloque | Entrada del menú | Qué junta (las pantallas de hoy pasan a ser pestañas) |
+|---|---|---|
+| HOY | 🚪 Entrada | igual |
+| | ✅ Para hacer hoy | Avisos de hoy · Vencen y cobrar · Transferencias · Interesados para escribir · Tareas |
+| | 🗓️ Clases | igual |
+| SOCIOS | 👥 Socios | Todos · Vencen esta semana · Deben · Dejaron de venir (Retención) · Interesados · Congelados · Cumplen este mes |
+| | 💬 Mensajes | igual |
+| | 🎯 Extras | Personal trainer · Lockers · Eventos |
+| PLATA | 💵 Caja y ventas | Caja · Vender (Productos) · Stock |
+| | 📈 Resultado del mes | Resultado · Gastos · Resumen del día |
+| | 🧾 Equipo y sueldos | Horas del equipo · Liquidación de profes |
+| GIMNASIO | 🏷️ Planes y precios | igual |
+| | 🏋️ Sala y rutinas | Rutinas · Máquinas · Incidentes |
+| | ⚙️ Ajustes | Marca y reglas (Configuración) · Tu página · Equipo y permisos · Control |
+
+- **Fichar y mis horas** sale del menú: queda el botón ⏱️ Fichar arriba, junto a la campana (`BotonFichar`).
+- Cada entrada del menú lleva su línea chica que explica qué es.
+- En el celular, la barra de abajo es Inicio · Entrada · Hoy · Socios · Más. **Más** muestra los cuatro bloques
+  en grilla de botones grandes (`organizacion/celular-mas.png`).
+- El profe sigue viendo solo lo suyo (Clases, Sala y rutinas, Fichar).
+
+### Pantalla por pantalla
+
+- **Inicio** (`inicio.png`):
+  - Entrada y el último resultado, como hoy.
+  - **NUEVO "Plata en juego hoy"**: vencen hoy + deben + transferencias por aprobar + interesados de ayer, con
+    "Resolver ahora" (lleva a Para hacer hoy).
+  - Hoy en números, con **NUEVO "Volvieron este mes"**.
+  - Para hacer hoy (las 3 primeras, con acción en la fila) y Últimas entradas.
+  - Ahora y lo que sigue.
+  - **NUEVO Cumpleaños hoy**, con "Saludar" por wa.me.
+  - Accesos rápidos, abajo.
+- **Para hacer hoy** (`para-hacer-hoy.png`):
+  - Una sola lista, ordenada por plata en juego, con filtros arriba con su número. Cada fila trae su acción.
+  - **NUEVO** tildar como hecho, "Hecho hoy" al costado con quién y a qué hora, "Deshacer el último" y la barra de
+    lo resuelto.
+  - Lo que sale de un hecho (cobrado, aprobado, avisado, contestado) se tilda solo cuando ese hecho existe. A mano
+    se tildan solo las tareas y lo que no tiene un hecho.
+  - "Avisar a los 7" abre los wa.me de a uno, con el mensaje listo. Nunca un envío automático.
+  - En la transferencia, "Debe $X (plan)" y amarillo si el monto no coincide (decisión de Mateo del 25/11).
+- **Socios** (`socios.png` y `ver-sin-entrar.png`):
+  - Las pestañas de arriba, con su número.
+  - **NUEVO** las columnas "Última vez" y "Este mes" (veces que vino).
+  - La acción de cada fila según el estado.
+  - **NUEVO** elegir varios: WhatsApp de a uno con el mensaje listo, o exportar.
+  - Tocar el nombre abre el panel lateral.
+- **Panel lateral** (`ver-sin-entrar.png`):
+  - El resultado a todo color y "Cobrar $X" grande.
+  - WhatsApp y Congelar.
+  - **NUEVO** tres números: este mes, última vez, semanas seguidas.
+  - Último pago, si lo dejaron pasar, el teléfono, y "Abrir la ficha completa".
+- **Ficha** (`ficha-socio.png`):
+  - El resultado arriba con nombre y plan, y las acciones al costado (Renovar, WhatsApp, Cambiar plan, Congelar,
+    Editar).
+  - **NUEVO** cuatro números: veces este mes con el promedio del gimnasio, semanas seguidas con la mejor racha,
+    última vez con el horario en que suele venir, y cuánto debe.
+  - **NUEVO "Su historia"**, una línea de tiempo con pagos, entradas, avisos, reservas y congelamientos.
+  - **NUEVO "Cuándo viene"**, por día de la semana.
+  - Los datos de contacto.
+  - Sin pestañas: todo en una página, lo importante arriba.
+- **Resultado del mes** (`resultado-del-mes.png`):
+  - Pestañas Resultado · Gastos · Resumen del día.
+  - Entró, gastos y ganancia.
+  - **NUEVO "Si cobrás lo que falta"**: proyección de solo lectura, con lo que vence hasta fin de mes y lo que se
+    debe.
+  - Lo cobrado día por día, de dónde viene la plata, y altas, bajas y volvieron.
+  - "Para el contador" exporta lo de siempre.
+- **App del socio** (`app-socio.png`):
+  - El estado con el QR, y el aviso de vencimiento con Renovar.
+  - **NUEVO** la racha de semanas seguidas.
+  - **NUEVO "¿Hay mucha gente?"**: las últimas 4 semanas por hora, con la hora actual marcada.
+  - Sus clases, y los accesos de siempre.
+
+### Datos: de dónde sale cada cosa nueva
+
+Todo se calcula y nada se guarda (regla central). Una función SQL por dato, en el lote de la pantalla, con `set
+search_path = ''`, `revoke` y su prueba en negativo (otro gimnasio y un rol sin permiso dan error, nunca vacío):
+
+- **Última vez, veces este mes, semanas seguidas y cuándo viene:** de las entradas que ya se guardan.
+- **Volvieron este mes:** socios que estuvieron 14 días o más sin entrar, o con la cobertura vencida, y que este mes
+  volvieron a pagar. Sale de los pagos y las entradas, y de `avisos_enviados` si se les escribió.
+- **Plata en juego y "Si cobrás lo que falta":** de las mismas funciones que hoy dan Vencen hoy, Deben y
+  Transferencias. El monto sale de `calcular_acceso` y del precio vigente del plan. **Prohibido calcular plata en
+  TypeScript.** Solo muestran números: no mueven plata.
+- **Cumpleaños:** `socios.fecha_nacimiento`, en el día local del gimnasio. Si falta la fecha, no aparece.
+- **¿Hay mucha gente?:** de las entradas de las últimas 4 semanas, por hora local, sin nombres (lo ve el socio).
+- **Tildar hecho:** primero se deriva del hecho (pago, aprobación, `avisos_enviados`, mensaje contestado). Para lo
+  que no tiene un hecho (tareas, "ya lo llamé"), una tabla nueva de hechos con quién y cuándo, y "deshacer" =
+  anular, no borrar. RLS en la misma migración.
+
+### Cómo entra
+
+- **Llave `pase_2_organizacion`** (Funciones nuevas: "Pase 2.0: menú en bloques y ver sin entrar"): prendida en
+  los `[demo]`, apagada en Temple Gym hasta que Mateo la prenda.
+- Con la llave apagada, todo se ve exactamente como hoy (inventario de pantallas en verde contra la foto de antes).
+- Las funciones nuevas de la base son aditivas (expandir), así el código anterior sigue andando contra la base nueva.
+- Lo viejo se saca recién después de 7 días con la llave prendida en Temple Gym, en otra publicación (contraer).
+
 ## Pista Semáforo (Mateo, 24/11)
 
 El diseño que manda está en `docs/base/pista/semaforo/`: 10 pantallas, cada una con su `.html` (colores, tamaños y radios

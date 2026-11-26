@@ -9,13 +9,14 @@
 // El gimnasio se crea directo en la base (la página, el color y las secciones salen de datos): nace con el trigger de siempre.
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { CELU, COMPU, chequear, falla, navegador, pagina, resultado, PUERTO } from "./comun.mjs";
+import { CELU, COMPU, chequear, falla, navegador, pagina, resultado, PUERTO, esElAcento } from "./comun.mjs";
 
 // Z8 (12/11): el acento se corre de tono si se parece al semáforo: "usa el color del gimnasio" acepta el mismo color o uno corrido pocos grados.
 const usaElAcento = (html, acento) => {
   const rgb = (h) => { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
   const base = rgb(acento);
-  return [...html.matchAll(/--acento:s*(#[0-9a-fA-F]{6})/g)].some((m) => Math.hypot(...rgb(m[1]).map((v, i) => v - base[i])) <= 130) || html.toLowerCase().includes(acento.toLowerCase());
+  // Desde el 26/11 el acento va como --acento-pista-oscuro/claro (ya corrido para leerse), no como --acento crudo.
+  return [...html.matchAll(/--acento(?:-pista-(?:oscuro|claro))?:\s*(#[0-9a-fA-F]{6})/g)].some((m) => Math.hypot(...rgb(m[1]).map((v, i) => v - base[i])) <= 130 || esElAcento(m[1], acento)) || html.toLowerCase().includes(acento.toLowerCase());
 };
 
 const url = process.env.DB_PRUEBAS_URL || execSync("scripts/db/local.sh url").toString().trim();
