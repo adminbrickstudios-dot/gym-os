@@ -56,6 +56,9 @@ if (est.length) {
       from public.gimnasios g left join public.configuracion_gimnasio c on c.gimnasio_id = g.id order by g.creado_en`);
   const t = filas.find((f) => f.es_temple);
   console.log(`Estilo Temple Gym: guardado=${t?.estilo ?? "sin fila"} modo=${t?.modo ?? "?"}`);
+  // Pase 2.0 · borrar el clásico: cuántos gimnasios reales (no demo) siguen en clásico. Solo números.
+  const realesEst = filas.filter((f) => !f.es_demo);
+  console.log(`Estilo reales: ${realesEst.filter((f) => f.estilo !== "pista").length} en clásico (o sin fila), ${realesEst.filter((f) => f.estilo === "pista").length} en pista`);
   const demos = filas.filter((f) => f.es_demo);
   console.log(`Estilo demos: ${demos.map((f) => `${f.estilo ?? "sin fila"}/${f.modo ?? "?"}`).join(", ")}`);
   if (t?.host) {
