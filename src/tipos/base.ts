@@ -2433,6 +2433,38 @@ isOneToOne: false
       referencedColumns: ["gimnasio_id","id"]
     }
                   ]
+                },"hechos_para_hacer": {
+                  Row: {
+                    "anulado_en": string | null,"anulado_por": string | null,"dia": string,"gimnasio_id": string,"hecho_en": string,"hecho_por": string,"id": string,"referencia": string,"texto": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "anulado_en"?: string | null,"anulado_por"?: string | null,"dia": string,"gimnasio_id": string,"hecho_en"?: string,"hecho_por": string,"id"?: string,"referencia": string,"texto": string
+                  }
+                  Update: {
+                    "anulado_en"?: string | null,"anulado_por"?: string | null,"dia"?: string,"gimnasio_id"?: string,"hecho_en"?: string,"hecho_por"?: string,"id"?: string,"referencia"?: string,"texto"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "hechos_para_hacer_gimnasio_id_anulado_por_fkey"
+      columns: ["gimnasio_id","anulado_por"]
+isOneToOne: false
+      referencedRelation: "equipo"
+      referencedColumns: ["gimnasio_id","id"]
+    },{
+      foreignKeyName: "hechos_para_hacer_gimnasio_id_fkey"
+      columns: ["gimnasio_id"]
+isOneToOne: false
+      referencedRelation: "gimnasios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "hechos_para_hacer_gimnasio_id_hecho_por_fkey"
+      columns: ["gimnasio_id","hecho_por"]
+isOneToOne: false
+      referencedRelation: "equipo"
+      referencedColumns: ["gimnasio_id","id"]
+    }
+                  ]
                 },"hilos_socio": {
                   Row: {
                     "creado_en": string,"estado": string,"gimnasio_id": string,"id": string,"motivo": string,"resuelto_en": string | null,"resuelto_por": string | null,"socio_id": string,"socio_leyo_en": string | null,"ultimo_autor": string,"ultimo_en": string
@@ -6418,6 +6450,9 @@ isOneToOne: false
 "deshacer_importacion":
 { Args: { "p_gimnasio_id": string,"p_importacion_id": string }; Returns: number
                            },
+"deshacer_ultimo_hecho":
+{ Args: { "p_gimnasio_id": string }; Returns: string
+                           },
 "desmarcar_dia_rutina":
 { Args: { "p_dia": number,"p_socio_id": string }; Returns: undefined
                            },
@@ -6923,6 +6958,9 @@ isOneToOne: false
 "habilitar_emergencia_puerta":
 { Args: { "p_gimnasio_id": string,"p_habilitada": boolean }; Returns: boolean
                            },
+"hecho_hoy":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string }; Returns: Json
+                           },
 "hilo_mensajes":
 { Args: { "p_hilo_id": string }; Returns: Json
                            },
@@ -7271,6 +7309,14 @@ isOneToOne: false
 "numeros_inicio":
 { Args: { "p_gimnasio_id": string,"p_sede_id"?: string }; Returns: Json
                            },
+"numeros_socio":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string,"p_socio_id": string }; Returns: Json
+                           },
+"numeros_socios":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string,"p_socio_ids": (string)[] }; Returns: {
+              "socio_id": string,"ultima_vez": string,"veces_mes": number
+            }[]
+                           },
 "ocultar_primeros_pasos":
 { Args: { "p_gimnasio_id": string,"p_ocultar": boolean }; Returns: undefined
                            },
@@ -7279,6 +7325,9 @@ isOneToOne: false
                            },
 "ocupacion_horarios":
 { Args: { "p_gimnasio_id": string,"p_semanas"?: number }; Returns: Json
+                           },
+"ocupacion_por_hora":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string,"p_socio_id": string }; Returns: Json
                            },
 "ofertas_socio":
 { Args: { "p_socio_id": string }; Returns: Json
@@ -7427,6 +7476,9 @@ isOneToOne: false
                            },
 "planes_para_alta":
 { Args: { "p_sede_id": string }; Returns: Json
+                           },
+"plata_en_juego":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string }; Returns: Json
                            },
 "politica_privacidad_propia":
 { Args: { "p_gimnasio_id": string }; Returns: Json
@@ -7813,6 +7865,9 @@ isOneToOne: false
 "sesiones_dictadas_pt":
 { Args: { "p_desde": string,"p_gimnasio_id": string,"p_hasta": string }; Returns: Json
                            },
+"si_cobras_lo_que_falta":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string }; Returns: Json
+                           },
 "simular_cuota":
 { Args: { "p_dia": string,"p_gimnasio_id": string,"p_plan_id": string }; Returns: Json
                            },
@@ -7882,8 +7937,14 @@ isOneToOne: false
 "tildar_checklist":
 { Args: { "p_hecha": boolean,"p_item_id": string }; Returns: undefined
                            },
+"tildar_hecho":
+{ Args: { "p_gimnasio_id": string,"p_referencia": string,"p_texto": string }; Returns: string
+                           },
 "tomar_asistencia":
 { Args: { "p_clase_id": string,"p_socio_id": string }; Returns: Json
+                           },
+"transferencias_a_revisar":
+{ Args: { "p_gimnasio_id": string }; Returns: Json
                            },
 "turnos_socio":
 { Args: { "p_socio_id": string }; Returns: Json
@@ -7967,6 +8028,9 @@ isOneToOne: false
                            },
 "volver_a_dar_de_alta":
 { Args: { "p_socio_id": string }; Returns: undefined
+                           },
+"volvieron_mes":
+{ Args: { "p_gimnasio_id": string,"p_momento"?: string }; Returns: Json
                            },
 "wods_socio":
 { Args: { "p_socio_id": string }; Returns: Json
