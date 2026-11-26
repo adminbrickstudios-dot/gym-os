@@ -3,6 +3,7 @@
 // Next 16 con Turbopack ya no imprime "First Load JS": se suma a mano desde los manifiestos de cada ruta
 // (`entryJSFiles` de page_client-reference-manifest.js = los chunks que se piden al abrir la ruta) más los del arranque
 // (`rootMainFiles` de build-manifest.json). Lo que se carga con import dinámico al usarlo NO está en esta suma: justamente eso es lo que se mide.
+// También el CSS de cada ruta (`entryCSSFiles`), para el "más liviano" de borrar el estilo clásico (26/11).
 //   node scripts/medir/js-rutas.mjs [--json salida.json]
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -47,16 +48,26 @@ for (const m of manifiestos) {
   for (const lista of Object.values(json.entryJSFiles ?? {})) for (const f of lista) archivos.add(f);
   let crudo = 0, gz = 0;
   for (const f of archivos) { const x = pesoDe(f); crudo += x.crudo; gz += x.gz; }
+  const css = new Set();
+  for (const lista of Object.values(json.entryCSSFiles ?? {})) for (const f of lista) css.add(typeof f === "string" ? f : f.path);
+  let cssCrudo = 0, cssGz = 0;
+  for (const f of css) { const x = pesoDe(f); cssCrudo += x.crudo; cssGz += x.gz; }
   const ruta = "/" + relative(APP, m).split(sep).slice(0, -1).join("/");
-  filas.push({ ruta, archivos: archivos.size, crudoKB: +(crudo / 1024).toFixed(1), gzKB: +(gz / 1024).toFixed(1) });
+  filas.push({ ruta, archivos: archivos.size, crudoKB: +(crudo / 1024).toFixed(1), gzKB: +(gz / 1024).toFixed(1),
+    cssCrudoKB: +(cssCrudo / 1024).toFixed(1), cssGzKB: +(cssGz / 1024).toFixed(1) });
 }
 filas.sort((a, b) => a.ruta.localeCompare(b.ruta));
 
 const panel = filas.filter((f) => f.ruta.includes("/panel"));
-const resumen = (l) => ({ rutas: l.length, gzKB: +l.reduce((s, f) => s + f.gzKB, 0).toFixed(1), crudoKB: +l.reduce((s, f) => s + f.crudoKB, 0).toFixed(1) });
-console.log("| Ruta | Chunks | JS (KB) | JS gzip (KB) |\n|---|---|---|---|");
-for (const f of panel) console.log(`| ${f.ruta} | ${f.archivos} | ${f.crudoKB} | ${f.gzKB} |`);
-const r = resumen(panel);
-console.log(`\nRutas del panel: ${r.rutas} · suma ${r.crudoKB} KB (${r.gzKB} KB gzip) · promedio por ruta ${(r.gzKB / Math.max(1, r.rutas)).toFixed(1)} KB gzip`);
+const suma = (l, k) => +l.reduce((t, f) => t + f[k], 0).toFixed(1);
+const resumen = (l) => ({ rutas: l.length, gzKB: suma(l, "gzKB"), crudoKB: suma(l, "crudoKB"), cssGzKB: suma(l, "cssGzKB"), cssCrudoKB: suma(l, "cssCrudoKB") });
+console.log("| Ruta | Chunks | JS (KB) | JS gzip (KB) | CSS (KB) | CSS gzip (KB) |");
+console.log("|---|---|---|---|---|---|");
+for (const f of panel) console.log(`| ${f.ruta} | ${f.archivos} | ${f.crudoKB} | ${f.gzKB} | ${f.cssCrudoKB} | ${f.cssGzKB} |`);
+const r = resumen(panel), todas = resumen(filas);
+console.log(`
+Rutas del panel: ${r.rutas} · suma ${r.crudoKB} KB (${r.gzKB} KB gzip) · promedio por ruta ${(r.gzKB / Math.max(1, r.rutas)).toFixed(1)} KB gzip`);
+console.log(`CSS de las rutas del panel: suma ${r.cssCrudoKB} KB (${r.cssGzKB} KB gzip) · promedio por ruta ${(r.cssGzKB / Math.max(1, r.rutas)).toFixed(1)} KB gzip`);
+console.log(`Todas las rutas: ${todas.rutas} · JS ${todas.gzKB} KB gzip · CSS ${todas.cssGzKB} KB gzip`);
 const j = process.argv.indexOf("--json");
-if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r }, null, 2));
+if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r, todas }, null, 2));

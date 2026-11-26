@@ -124,22 +124,22 @@ function variablesPista(acento: string): Record<string, string> {
   };
 }
 
-/** Variables CSS y atributo de tono para el wrapper de una pantalla del gimnasio. */
 export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
 /** El acento con el que arranca un gimnasio nuevo en el alta (el super admin lo cambia en el formulario). */
 export const ACENTO_POR_DEFECTO = "#16a34a";
-/** `tema`: lo que eligió la persona en Mi cuenta (cookie `tema`, D37). Si elige claro u oscuro manda sobre el fondo del gimnasio (el acento sigue siendo el del gimnasio). */
-export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSProperties; "data-tono": "oscuro" | "claro" } {
-  const fondo = tema === "oscuro" ? FONDO_OSCURO : tema === "claro" ? FONDO_CLARO : m.color_fondo;
+/**
+ * Variables CSS y atributo de tono para el envoltorio de una pantalla del gimnasio: el acento del gimnasio (y el ya corrido para leerse en cada modo de Pista).
+ * El fondo no va en línea desde que Pista es el único estilo (26/11): lo pone el modo (globals.css, con la elección de Mi cuenta en el <html>).
+ * `data-tono` solo marca el envoltorio (el CSS mira que esté, no su valor).
+ */
+export function propsMarca(m: ColoresMarca): { style: CSSProperties; "data-tono": "pista" } {
   return {
     style: {
       ["--acento" as string]: acentoDistinto(m.color_acento),
       ["--acento-texto" as string]: textoSobre(acentoDistinto(m.color_acento)),
-      // Pista: el acento ya corrido para leerse (4,5:1) sobre cada modo, y el texto que va encima. El estilo clásico no los usa.
+      // Pista: el acento ya corrido para leerse (4,5:1) sobre cada modo, y el texto que va encima.
       ...variablesPista(acentoDistinto(m.color_acento)),
-      ["--fondo" as string]: fondo,
-      background: fondo,
     },
-    "data-tono": tonoDeFondo(fondo),
+    "data-tono": "pista",
   };
 }

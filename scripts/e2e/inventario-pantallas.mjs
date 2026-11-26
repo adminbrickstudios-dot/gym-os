@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-// Pase 2.0 · INVENTARIO DE PANTALLAS (docs/base/CAMBIOS-MATEO.md, Pista, puntos 1 y 2).
-// Nada de lo que tiene una pantalla hoy se pierde con Pista: por cada pantalla (panel de la dueña y de la recepción, app del socio, página del gimnasio,
-// hacete-socio e ingresar), en compu y en celular, se anota cada botón, link, campo, título y atributo data-* que hay a la vista con el estilo clásico, se
-// prende Pista en el gimnasio (el dato `estilo`, como lo hace el dueño) y se vuelve a anotar. Lo que existía y ya no está = falla. Lo que apareció = aviso.
-// También guarda una captura de cada pantalla en cada estilo (.local/capturas/inv-*) para compararlas de a pares y mirarlas.
-//   node scripts/e2e/inventario-pantallas.mjs      (con scripts/local/levantar.sh corriendo y la base en clásico; usa PGHOST/PGPORT/PGUSER o DB_PRUEBAS_URL)
-import pg from "pg";
+// Pase 2.0 · INVENTARIO DE PANTALLAS (docs/base/CAMBIOS-MATEO.md, Pista, puntos 1 y 2; desde el 26/11, sin el estilo clásico).
+// Nada de lo que tiene una pantalla hoy se pierde: por cada pantalla (panel de la dueña y de la recepción, app del socio, página del gimnasio,
+// hacete-socio e ingresar), en compu y en celular, se anota cada botón, link, campo, título y atributo data-* que hay a la vista y se compara con
+// la foto guardada (scripts/e2e/inventario/<modo>-semaforo-<si|no>.json, sacada antes del cambio). Lo que estaba y ya no está = falla. Lo que apareció = aviso.
+// Guarda la foto nueva en .local/inventario-<modo>-semaforo-<si|no>.json (para renovar la de referencia, se copia esa) y una captura de cada pantalla
+// (.local/capturas/inv-pista-*) para mirarlas de a pares con las de antes.
+//   node scripts/e2e/inventario-pantallas.mjs      (con scripts/local/levantar.sh corriendo; MODO_DEMO y SEMAFORO_DEMO dicen qué foto es)
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { CELU, COMPU, GIMNASIO, capturar, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
-const URL_DB = process.env.DB_PRUEBAS_URL ?? `postgres://${process.env.PGUSER ?? "postgres"}@${process.env.PGHOST ?? "localhost"}:${process.env.PGPORT ?? "5432"}/gymos_pruebas`;
-const ESPERA_CACHE_MS = 62000;   // el proxy recuerda 60 s qué gimnasio es cada dirección (y con él su estilo)
 const MODO = process.env.MODO_DEMO ?? "oscuro";
+const SEMAFORO = process.env.SEMAFORO_DEMO ?? "si";
+const FOTO = `${MODO}-semaforo-${SEMAFORO}.json`;
+const REFERENCIA = new URL(`./inventario/${FOTO}`, import.meta.url);
 const G = GIMNASIO();
 
 const PANEL = ["/panel", "/panel/entrada", "/panel/socios", "/panel/socios?vista=interesados", "/panel/vencen-hoy", "/panel/vender", "/panel/caja", "/panel/clases", "/panel/retencion",
@@ -38,13 +40,18 @@ function inventariar() {
     if (!visible(e)) continue;
     for (const a of e.getAttributeNames()) if (a.startsWith("data-") && !/^data-(estilo|modo|tono|con-barra|nextjs|dpl|rsc|n-|radix|state|slot|orientation|index|sentry)/.test(a)) datos.add(a);
   }
-  return { interactivos: [...interactivos], titulos: [...titulos], datos: [...datos], estilo: document.documentElement.dataset.estilo, modo: document.documentElement.dataset.modo };
+  return { interactivos: [...interactivos].sort(), titulos: [...titulos].sort(), datos: [...datos].sort(), modo: document.documentElement.dataset.modo };
 }
 
 // Lo que cambia solo entre una pasada y la otra, sin que tenga que ver con el estilo (cuántas sesiones abiertas hay, la actividad reciente de Control).
-const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|^a||(alguien|hace) /;
+// (Hasta el 26/11 decía `^a||`: la alternativa vacía coincidía con todo y el inventario nunca podía fallar.)
+const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|(alguien|hace) /;
+// Lo que se sacó a propósito (con su motivo). Solo entra acá lo que pide un ítem; se dice en la salida cada vez que aparece.
+const QUITADOS_A_PROPOSITO = new Map([
+  ["input|radio|estilo-gimnasio|", "borrar el estilo clásico (26/11): en Configuración → Marca queda solo el modo"],
+]);
 
-async function recorrer(b, estilo) {
+async function recorrer(b) {
   const filas = new Map();
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
     for (const rol of ["duena", "recepcion", "socio", "publico"]) {
@@ -58,12 +65,12 @@ async function recorrer(b, estilo) {
           await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
           await p.waitForTimeout(700);
           const inv = await p.evaluate(inventariar);
-          if (inv.estilo !== estilo) falla(`${rol} ${ruta} (${tam}): el <html> dice estilo "${inv.estilo}" y se esperaba "${estilo}"`);
+          if (inv.modo !== MODO) falla(`${rol} ${ruta} (${tam}): el <html> dice modo "${inv.modo}" y se esperaba "${MODO}"`);
           filas.set(`${rol} ${ruta} ${tam}`, inv);
-          await capturar(p, `inv-${estilo}-${rol}-${ruta.replace(/[^a-z0-9]+/gi, "_")}-${tam}`).catch(() => {});
+          await capturar(p, `inv-pista-${MODO}-semaforo-${SEMAFORO}-${rol}-${ruta.replace(/[^a-z0-9]+/gi, "_")}-${tam}`).catch(() => {});
         }
       } catch (e) {
-        falla(`${rol} (${tam}, ${estilo}): ${String(e.message).split("\n")[0]}`);
+        falla(`${rol} (${tam}): ${String(e.message).split("\n")[0]}`);
       }
       await p.context().close();
     }
@@ -71,35 +78,33 @@ async function recorrer(b, estilo) {
   return filas;
 }
 
-async function ponerEstilo(estilo) {
-  const c = new pg.Client({ connectionString: URL_DB });
-  await c.connect();
-  try { await c.query(`update public.configuracion_gimnasio set estilo = $1, modo = $2`, [estilo, MODO]); } finally { await c.end(); }
-}
-
 const b = await navegador();
 try {
-  const antes = await recorrer(b, "clasico");
-  ok(`inventario con el estilo clásico: ${antes.size} pantallas (compu y celular)`);
-  await ponerEstilo("pista");
-  await new Promise((r) => setTimeout(r, ESPERA_CACHE_MS));
-  const despues = await recorrer(b, "pista");
-  ok(`inventario con Pista (modo ${MODO}): ${despues.size} pantallas`);
-  let perdidos = 0, nuevos = 0;
-  for (const [clave, a] of antes) {
-    const d = despues.get(clave);
-    if (!d) { falla(`${clave}: no se pudo inventariar con Pista`); continue; }
-    for (const campo of ["interactivos", "titulos", "datos"]) {
-      const faltan = a[campo].filter((x) => !d[campo].includes(x) && !DEL_MOMENTO.test(x.split("|").slice(campo === "interactivos" ? 0 : 0).join("|")) && !DEL_MOMENTO.test(x.split("|")[2] ?? ""));
-      const sobran = d[campo].filter((x) => !a[campo].includes(x));
-      nuevos += sobran.length;
-      if (faltan.length) { perdidos += faltan.length; falla(`${clave}: con Pista faltan ${faltan.length} ${campo}: ${faltan.slice(0, 6).join(" · ")}`); }
+  const ahora = await recorrer(b);
+  ok(`inventario de Pista (modo ${MODO}, semáforo ${SEMAFORO}): ${ahora.size} pantallas (compu y celular)`);
+  mkdirSync(".local", { recursive: true });
+  writeFileSync(`.local/inventario-${FOTO}`, JSON.stringify(Object.fromEntries(ahora), null, 1));
+  if (!existsSync(REFERENCIA)) {
+    console.log(`(aviso: no hay foto de referencia scripts/e2e/inventario/${FOTO}; se guardó la de ahora en .local/inventario-${FOTO})`);
+  } else {
+    const antes = new Map(Object.entries(JSON.parse(readFileSync(REFERENCIA, "utf8"))));
+    let perdidos = 0, nuevos = 0;
+    for (const [clave, a] of antes) {
+      const d = ahora.get(clave);
+      if (!d) { falla(`${clave}: no se pudo inventariar`); continue; }
+      for (const campo of ["interactivos", "titulos", "datos"]) {
+        const faltanTodos = a[campo].filter((x) => !d[campo].includes(x) && !DEL_MOMENTO.test(x) && !DEL_MOMENTO.test(x.split("|")[2] ?? ""));
+        for (const x of faltanTodos.filter((y) => QUITADOS_A_PROPOSITO.has(y))) console.log(`· ${clave}: falta ${x} a propósito (${QUITADOS_A_PROPOSITO.get(x)})`);
+        const faltan = faltanTodos.filter((y) => !QUITADOS_A_PROPOSITO.has(y));
+        const sobran = d[campo].filter((x) => !a[campo].includes(x));
+        nuevos += sobran.length;
+        if (faltan.length) { perdidos += faltan.length; falla(`${clave}: faltan ${faltan.length} ${campo} de la foto de antes: ${faltan.slice(0, 6).join(" · ")}`); }
+      }
     }
+    if (!perdidos) ok(`no falta ningún botón, link, campo, título ni atributo de la foto de antes (${antes.size} pantallas)`);
+    if (nuevos) console.log(`(aviso: aparecieron ${nuevos} elementos que en la foto de antes no estaban; revisar)`);
   }
-  if (!perdidos) ok(`con Pista no falta ningún botón, link, campo, título ni atributo de lo que había (${antes.size} pantallas)`);
-  if (nuevos) console.log(`(aviso: con Pista aparecieron ${nuevos} elementos que antes no estaban; no se esperan, revisar)`);
 } finally {
-  await ponerEstilo("clasico").catch(() => {});
   await b.close();
 }
 resultado();

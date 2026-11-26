@@ -28,16 +28,12 @@ on:
         description: "Socios del gimnasio demo (vacío = 300). F8.1 mide con 5000"
         type: string
         default: ""
-      estilo:
-        description: "Pase 2.0: estilo de los gimnasios demo en la prueba (clasico o pista)"
-        type: string
-        default: "clasico"
       modo:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
       semaforo:
-        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no; solo se ve con estilo=pista)"
+        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no)"
         type: string
         default: "si"
       tanda:
@@ -124,7 +120,6 @@ jobs:
         env:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           SOCIOS_DEMO: ${{ inputs.socios || '300' }}
-          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
           SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
@@ -143,8 +138,6 @@ jobs:
           E2E_CONSOLA: "1"
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
-          E2E_SIN_MAYUSCULAS: ${{ inputs.estilo == 'pista' && '1' || '0' }}
-          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
           SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
@@ -205,6 +198,7 @@ jobs:
             .local/caidas.txt
             .local/tiempos.md
             .local/capturas/
+            .local/inventario-*.json
             .local/humo/
           if-no-files-found: ignore
           retention-days: 7

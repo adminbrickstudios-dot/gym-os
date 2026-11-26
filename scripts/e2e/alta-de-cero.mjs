@@ -71,7 +71,7 @@ try {
   tipear(MAIL); tipear(clave); clic();
   await d.waitForURL(/\/panel/, { timeout: 60000 });
   const html = d.locator("html");
-  chequear(await html.getAttribute("data-estilo") === "pista" && await html.getAttribute("data-semaforo") === "si", "2. el dueño entra a su panel, en Pista Semáforo", `el panel salió con estilo=${await html.getAttribute("data-estilo")} semaforo=${await html.getAttribute("data-semaforo")}`);
+  chequear(await html.getAttribute("data-semaforo") === "si", "2. el dueño entra a su panel, en Pista Semáforo", `el panel salió con semaforo=${await html.getAttribute("data-semaforo")}`);
   const base = new URL(d.url()).origin;
   await capturar(d, "alta-cero-2-panel", true);
 

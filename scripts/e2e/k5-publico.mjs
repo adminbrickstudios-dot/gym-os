@@ -8,7 +8,7 @@ import { CELU, COMPU, GIMNASIO, PANTALLA_ROTA, capturar, chequear, falla, navega
 
 const G = GIMNASIO();
 const b = await navegador();
-const estilo = process.env.E2E_SIN_MAYUSCULAS === "1" ? "pista" : "clasico";
+const estilo = "pista";   // el único estilo desde el 26/11
 
 try {
   for (const [tam, vista] of [["compu", COMPU], ["celu", CELU]]) {

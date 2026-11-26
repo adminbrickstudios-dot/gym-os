@@ -256,8 +256,9 @@ export const guardarModulos = async (gimnasioId: string, apagadas: string[]) =>
 export const guardarFuncion = async (gimnasioId: string, clave: string, activa: boolean) =>
   hechoAdmin(() => rpc("admin_funcion_gimnasio", { p_gimnasio_id: gimnasioId, p_clave: clave, p_activa: activa }), [`/admin/${gimnasioId}`]);
 /** Pase 2.0: el estilo (clásico o Pista) y el modo de Pista de un gimnasio, desde la ficha. */
-export const guardarEstiloAdmin = async (gimnasioId: string, estilo: string, modo: string) =>
-  hechoAdmin(() => rpc("admin_guardar_estilo", { p_gimnasio_id: gimnasioId, p_estilo: estilo, p_modo: modo }), [`/admin/${gimnasioId}`]);
+/** Pase 2.0: el modo de Pista del gimnasio. Pista es el único estilo desde el 26/11: el estilo va siempre "pista" hasta que la base saque la columna (publicación B). */
+export const guardarModoAdmin = async (gimnasioId: string, modo: string) =>
+  hechoAdmin(() => rpc("admin_guardar_estilo", { p_gimnasio_id: gimnasioId, p_estilo: "pista", p_modo: modo }), [`/admin/${gimnasioId}`]);
 export const cambiarSlug = async (gimnasioId: string, slug: string) =>
   hechoAdmin(() => rpc("admin_cambiar_slug", { p_gimnasio_id: gimnasioId, p_slug: slug }), [`/admin/${gimnasioId}`, "/admin", "/admin/gimnasios"]);
 export const marcarFavorito = async (gimnasioId: string, favorito: boolean) =>

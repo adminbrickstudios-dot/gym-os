@@ -9,7 +9,7 @@
 //   5. Todos los botones a la vista son píldora (radio ≥ la mitad del alto).
 //   6. Ningún color fuera de los tokens (los de [data-tono] + el acento del gimnasio + blanco y transparente).
 //   7. Nada se sale a lo ancho en 360.
-//   node scripts/e2e/semaforo-pantallas.mjs     (con scripts/local/levantar.sh corriendo con ESTILO_DEMO=pista y SEMAFORO_DEMO=si)
+//   node scripts/e2e/semaforo-pantallas.mjs     (con scripts/local/levantar.sh corriendo con SEMAFORO_DEMO=si)
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
@@ -78,13 +78,13 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await d.goto(`${G}/panel`);
   await d.locator("main").first().waitFor({ timeout: 60000 });
-  const html = await d.evaluate(() => ({ estilo: document.documentElement.dataset.estilo, semaforo: document.documentElement.dataset.semaforo }));
-  // En la cadena clásica (ESTILO_DEMO=clasico) o con SEMAFORO_DEMO=no no hay nada que comparar: se dice y se sale en verde.
-  if (process.env.ESTILO_DEMO !== "pista" || process.env.SEMAFORO_DEMO === "no") {
-    chequear(html.semaforo !== "si", `Sin la llave (estilo ${html.estilo}): el <html> no lleva data-semaforo; nada que comparar`, "sin la llave el <html> lleva data-semaforo");
+  const html = await d.evaluate(() => ({ semaforo: document.documentElement.dataset.semaforo }));
+  // Con SEMAFORO_DEMO=no no hay nada que comparar: se dice y se sale en verde.
+  if (process.env.SEMAFORO_DEMO === "no") {
+    chequear(html.semaforo !== "si", "Sin la llave: el <html> no lleva data-semaforo; nada que comparar", "sin la llave el <html> lleva data-semaforo");
     await b.close(); await db.end(); resultado(); process.exit(0);
   }
-  chequear(html.estilo === "pista" && html.semaforo === "si", "El panel del demo sale con Pista y la llave pista_semaforo", `el <html> dice estilo=${html.estilo} semaforo=${html.semaforo}`);
+  chequear(html.semaforo === "si", "El panel del demo sale con la llave pista_semaforo", `el <html> dice semaforo=${html.semaforo}`);
   await d.locator("[data-entrada-inicio]").waitFor({ timeout: 30000 });
   await lado(d, "inicio-panel");
   chequear((await noPildoras(d)).length === 0, "Inicio: todos los botones son píldora", `no son píldora: ${(await noPildoras(d)).join(" · ")}`);

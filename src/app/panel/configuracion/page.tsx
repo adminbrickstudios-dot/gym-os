@@ -48,8 +48,8 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
         panel.yo.rol === "dueno" ? lectura<{ id: string; campo: string; cuando: string }[]>("cambios_restaurables", { p_gimnasio_id: panel.gimnasio.id, p_limite: 100 }) : fijo<{ id: string; campo: string; cuando: string }[]>([]),
         // Cacería (18/11): la versión de la configuración (VD-34) venía en dos viajes más al abrir; ahora en el lote. Si falla, el formulario la pide como antes.
         lectura<{ version: string } | null>("version_registro", { p_gimnasio_id: panel.gimnasio.id, p_tabla: "configuracion", p_id: panel.gimnasio.id }, true),
-        // Pase 2.0: la llave de estilo (si la base todavía no la trae, se ve como clásico).
-        lectura<{ estilo: "clasico" | "pista"; modo: "claro" | "oscuro" } | null>("estilo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }, true),
+        // Pase 2.0: el modo de Pista (Pista es el único estilo desde el 26/11; si la base no lo trae, oscuro).
+        lectura<{ modo: "claro" | "oscuro" } | null>("estilo_gimnasio", { p_gimnasio_id: panel.gimnasio.id }, true),
       ),
       searchParams,
     ]);
@@ -61,7 +61,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
         <Encabezado icono="ajustes" titulo="Configuración" bajada="Los datos de tu gimnasio, tu marca, cómo cobrás y qué secciones usás." />
         <Ajustes inicial={config} datos={datos} agenda={agenda} cierres={cierres} mensajes={mensajes} cambios={cambiosConId} puedeEditar={panel.yo.rol === "dueno"} pestanaInicial={inicial}
           direccionPagina={await direccionPagina(datos.slug)} tablets={tablets} mercadopago={mercadopago} turnosFijos={turnosFijos}
-          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} versionInicial={version?.version ?? null} estiloInicial={estilo ?? { estilo: "clasico", modo: "oscuro" }} />
+          linkResena={encuestas.link_resena} entrada={entrada} metaVisitas={metaVisitas} planFamiliar={planFamiliar} vencimiento={vencimiento} dejarPasar={dejarPasar} dobleCobro={dobleCobro} cajaConfig={cajaConfig} autoservicio={autoservicio} beneficios={{ ...beneficios, gimnasio_id: panel.gimnasio.id }} versionInicial={version?.version ?? null} estiloInicial={{ modo: estilo?.modo === "claro" ? "claro" : "oscuro" }} />
       </>
     );
   });

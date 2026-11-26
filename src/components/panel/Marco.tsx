@@ -28,7 +28,7 @@ export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido";
 /** VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas (null = este rol o este gimnasio no la usa). */
 export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean };
 
-export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null, tema = null }: { panel: PanelGimnasio; children: ReactNode; tema?: string | null; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
+export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
   // VD-5: la hoja Cobrar vive acá una sola vez; solo donde Vender está prendido y la persona cobra.
@@ -37,7 +37,7 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
     try { sedeCobro = sedeActiva(panel).sede.id; } catch { sedeCobro = null; }
   }
   return (
-    <div {...propsMarca(panel.marca, tema)} className="min-h-dvh con-barra">
+    <div {...propsMarca(panel.marca)} className="min-h-dvh con-barra">
       <Navegacion
         gimnasio={panel.gimnasio.nombre}
         logo={urlMarca(panel.marca.logo_path)}

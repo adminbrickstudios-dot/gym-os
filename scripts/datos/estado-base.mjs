@@ -51,11 +51,14 @@ if (col.length) {
 // Pase 2.0: el estilo y el modo guardados (solo lectura), y lo que devuelve gimnasio_por_host como anon (lo que lee el proxy).
 const est = await q(`select 1 from information_schema.columns where table_schema = 'public' and table_name = 'configuracion_gimnasio' and column_name = 'estilo'`);
 if (est.length) {
-  const filas = await q(`select exists (select 1 from public.dominios_gimnasio d where d.gimnasio_id = g.id and d.host = 'templegymsalta.com') as es_temple, g.es_demo, c.estilo, c.modo,
+  const filas = await q(`select exists (select 1 from public.dominios_gimnasio d where d.gimnasio_id = g.id and d.host = 'templegymsalta.com') as es_temple, g.es_demo, g.nombre ilike '[demo]%' as nombre_demo, c.estilo, c.modo,
       (select d.host from public.dominios_gimnasio d where d.gimnasio_id = g.id order by (d.tipo = 'propio') desc, d.creado_en limit 1) as host
       from public.gimnasios g left join public.configuracion_gimnasio c on c.gimnasio_id = g.id order by g.creado_en`);
   const t = filas.find((f) => f.es_temple);
   console.log(`Estilo Temple Gym: guardado=${t?.estilo ?? "sin fila"} modo=${t?.modo ?? "?"}`);
+  // Pase 2.0 · borrar el clásico: cuántos gimnasios reales (no demo) siguen en clásico. Solo números.
+  const realesEst = filas.filter((f) => !f.es_demo);
+  console.log(`Estilo reales: ${realesEst.filter((f) => f.estilo !== "pista").length} en clásico (o sin fila), ${realesEst.filter((f) => f.estilo === "pista").length} en pista · de los que están en clásico, con nombre "[demo]…": ${realesEst.filter((f) => f.estilo !== "pista" && f.nombre_demo).length}`);
   const demos = filas.filter((f) => f.es_demo);
   console.log(`Estilo demos: ${demos.map((f) => `${f.estilo ?? "sin fila"}/${f.modo ?? "?"}`).join(", ")}`);
   if (t?.host) {
