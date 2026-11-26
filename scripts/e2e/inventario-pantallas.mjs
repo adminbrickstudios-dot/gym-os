@@ -47,7 +47,8 @@ function inventariar() {
 
 // Lo que cambia solo entre una pasada y la otra, sin que tenga que ver con el estilo (cuántas sesiones abiertas hay, la actividad reciente de Control).
 // (Hasta el 26/11 decía `^a||`: la alternativa vacía coincidía con todo y el inventario nunca podía fallar.)
-const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|(alguien|hace) /;
+// Desde el 26/11 también el saludo según la hora ("buenas noches, sofía") y las filas de socios de una lista (su nombre y su wa.me cambian con el día).
+const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|(alguien|hace) |^buen(os|as) (d[ií]as|tardes|noches)|^a\|\|[^|]*\|(\/panel\/socios\/id|https:\/\/wa\.me\/.*)$/;
 // Lo que se sacó a propósito (con su motivo). Solo entra acá lo que pide un ítem; se dice en la salida cada vez que aparece.
 const QUITADOS_A_PROPOSITO = new Map([
   ["input|radio|estilo-gimnasio|", "borrar el estilo clásico (26/11): en Configuración → Marca queda solo el modo"],
