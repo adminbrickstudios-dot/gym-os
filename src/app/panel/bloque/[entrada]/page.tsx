@@ -7,20 +7,41 @@ import { BLOQUES, pestanasPara } from "@/lib/panel/organizacion";
 import { DESTINO } from "@/lib/panel/rutas";
 import { seccionesPara } from "@/lib/panel/secciones";
 import { contextoPanel } from "@/lib/panel/servidor";
+import P_hoy from "../../hoy/lista";
+import P_tareas from "../../tareas/page";
+import P_avisos from "../../avisos/page";
+import P_vencen_hoy from "../../vencen-hoy/page";
+import P_transferencias from "../../transferencias/page";
+import P_prospectos from "../../prospectos/page";
+import P_socios from "../../socios/page";
+import P_retencion from "../../retencion/page";
+import P_pt from "../../pt/page";
+import P_lockers from "../../lockers/page";
+import P_eventos from "../../eventos/page";
+import P_caja from "../../caja/page";
+import P_vender from "../../vender/page";
+import P_resultado from "../../resultado/page";
+import P_gastos from "../../gastos/page";
+import P_resumen from "../../resumen/page";
+import P_horas from "../../horas/page";
+import P_profes from "../../profes/page";
+import P_rutinas from "../../rutinas/page";
+import P_maquinas from "../../maquinas/page";
+import P_incidentes from "../../incidentes/page";
+import P_configuracion from "../../configuracion/page";
+import P_pagina from "../../pagina/page";
+import P_equipo from "../../equipo/page";
+import P_control from "../../control/page";
 
 // Pase 2.0 · organización (26/11): una entrada del menú con varias pantallas de hoy como PESTAÑAS arriba (?pestana=). Cada pestaña dibuja la
 // pantalla de siempre, con sus permisos y sus datos: nada se reescribe. La dirección vieja de cada una llega acá por el proxy (con la llave).
 // Sin la llave, esta dirección no existe para el gimnasio: lleva a la pantalla de siempre.
 
 type Pagina = ComponentType<{ searchParams: Promise<Record<string, string | undefined>>; params: Promise<Record<string, string>> }>;
-const PANTALLAS: Partial<Record<keyof typeof DESTINO, () => Promise<{ default: unknown }>>> = {
-  hoy: () => import("../../hoy/lista"), tareas: () => import("../../tareas/page"), avisos: () => import("../../avisos/page"), vencen_hoy: () => import("../../vencen-hoy/page"),
-  transferencias: () => import("../../transferencias/page"), prospectos: () => import("../../prospectos/page"), socios: () => import("../../socios/page"),
-  retencion: () => import("../../retencion/page"), pt: () => import("../../pt/page"), lockers: () => import("../../lockers/page"), eventos: () => import("../../eventos/page"),
-  caja: () => import("../../caja/page"), vender: () => import("../../vender/page"), resultado: () => import("../../resultado/page"), gastos: () => import("../../gastos/page"),
-  resumen: () => import("../../resumen/page"), horas: () => import("../../horas/page"), profes: () => import("../../profes/page"), rutinas: () => import("../../rutinas/page"),
-  maquinas: () => import("../../maquinas/page"), incidentes: () => import("../../incidentes/page"), configuracion: () => import("../../configuracion/page"),
-  pagina: () => import("../../pagina/page"), equipo: () => import("../../equipo/page"), control: () => import("../../control/page"),
+// Importaciones fijas (no import() dinámico): con import() Turbopack juntaba el JS de cliente de estas pantallas en un pedazo compartido y
+// todas las rutas (hasta /hacete-socio) pesaban ~3 KB más. Así el JS de cada pestaña queda solo en esta ruta.
+const PANTALLAS: Partial<Record<keyof typeof DESTINO, unknown>> = {
+  hoy: P_hoy, tareas: P_tareas, avisos: P_avisos, vencen_hoy: P_vencen_hoy, transferencias: P_transferencias, prospectos: P_prospectos, socios: P_socios, retencion: P_retencion, pt: P_pt, lockers: P_lockers, eventos: P_eventos, caja: P_caja, vender: P_vender, resultado: P_resultado, gastos: P_gastos, resumen: P_resumen, horas: P_horas, profes: P_profes, rutinas: P_rutinas, maquinas: P_maquinas, incidentes: P_incidentes, configuracion: P_configuracion, pagina: P_pagina, equipo: P_equipo, control: P_control,
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ entrada: string }> }): Promise<Metadata> {
@@ -47,9 +68,8 @@ export default async function PaginaBloque({ params, searchParams }: { params: P
   // Interesados vive dentro de Socios desde VD-15 (/panel/prospectos lleva a Socios con la vista de interesados): la pestaña dibuja eso mismo.
   const enSocios = activa.seccion === "prospectos" && !panel.secciones_apagadas.includes("socios");
   if (enSocios) Object.assign(suyos, { vista: "interesados" });
-  const cargar = PANTALLAS[enSocios ? "socios" : activa.seccion];
-  if (!cargar) notFound();
-  const Pantalla = (await cargar()).default as Pagina;
+  const Pantalla = PANTALLAS[enSocios ? "socios" : activa.seccion] as Pagina | undefined;
+  if (!Pantalla) notFound();
   return (
     <div className="space-y-5" data-bloque={bloque.clave} data-pestana-activa={activa.seccion}>
       {visibles.length > 1 && (
