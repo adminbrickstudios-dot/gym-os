@@ -3,7 +3,8 @@ import { conSemaforo } from "@/lib/semaforo";
 import Link from "next/link";
 import { Encabezado } from "@/components/panel/Marco";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, fijo, lectura, lecturaPorCada, rpcLote } from "@/lib/panel/servidor";
+import { headers } from "next/headers";
 import { Vacio } from "@/components/ui/Vacio";
 import { Atenuable } from "@/components/panel/Atenuable";
 import { Pestanas } from "@/components/ui/Pestanas";
@@ -61,12 +62,15 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
       );
     }
     // E8: todo en UN viaje a la base (lote_lecturas).
-    const [filas, etiquetas, filtros, autoaltas, prospectosTodos] = await rpcLote(
+    // Pase 2.0 · organización: con la llave, "Este mes" de cada fila (una lectura por fila, en el MISMO viaje; tolerante: si falla, no se muestra).
+    const organizacion = (await headers()).get("x-gimnasio-organizacion") === "si" && panel.yo.rol !== "profe";
+    const [filas, etiquetas, filtros, autoaltas, prospectosTodos, esteMes] = await rpcLote(
       lectura<Fila[]>("buscar_socios", { p_gimnasio_id: panel.gimnasio.id, p_texto: q, p_limite: limite, p_etiqueta: etiqueta, p_estado: estado, p_plan: plan, p_origen: web ? "web" : null }),
       lectura<Etiqueta[]>("etiquetas_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
       lectura<Filtros>("filtros_socios", { p_gimnasio_id: panel.gimnasio.id }),
       lectura<number>("autoaltas_web", { p_gimnasio_id: panel.gimnasio.id }),
       lectura<{ estado: string }[]>("prospectos_panel", { p_gimnasio_id: panel.gimnasio.id }),
+      organizacion ? { ...lecturaPorCada<{ veces_mes: number } | null>("numeros_fila_socio", 0, "socio_id", "p_socio_id"), t: true } : fijo<Record<string, { veces_mes: number } | null> | null>(null),
     );
     const nuevosInteresados = prospectosTodos.filter((p) => p.estado === "nuevo").length;
     // Un link con los filtros de ahora, cambiando uno (null lo saca).
@@ -157,7 +161,7 @@ export default async function Socios({ searchParams }: { searchParams: Promise<{
                 {panel.yo.rol !== "recepcion" && <Link href="/panel/socios/importar" className="boton"><Icono nombre="subir" /> Importar de un Excel</Link>}
               </>}>Cuando cargues socios, acá vas a ver cada uno con su estado: al día, por vencer o vencido.</Vacio>
         ) : (
-          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} semaforo={await conSemaforo()} zona={panel.gimnasio.zona_horaria} />
+          <ListaSocios filas={filas} etiquetas={etiquetas.map((e) => ({ id: e.id, nombre: e.nombre }))} puedeEtiquetar={panel.yo.rol !== "profe"} semaforo={await conSemaforo()} zona={panel.gimnasio.zona_horaria} esteMes={esteMes} />
         )}
         </div>
         {filas.length >= limite && (

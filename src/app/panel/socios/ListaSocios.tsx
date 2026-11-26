@@ -41,7 +41,8 @@ function accionFila(s: FilaSocio): "cobrar" | "whatsapp" | "ver" {
   return "ver";
 }
 
-export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false, zona }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean; semaforo?: boolean; zona?: string }) {
+/** `esteMes`: Pase 2.0 · organización (socios.png), las veces que vino este mes cada socio (numeros_fila_socio, en el mismo viaje). Sin la llave, no viene. */
+export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false, zona, esteMes }: { filas: FilaSocio[]; etiquetas: { id: string; nombre: string }[]; puedeEtiquetar: boolean; semaforo?: boolean; zona?: string; esteMes?: Record<string, { veces_mes: number } | null> | null }) {
   const [varios, setVarios] = useState(false);
   const [elegidos, setElegidos] = useState<Set<string>>(new Set());
   const [columnas, setColumnas] = useState<Columna[]>(POR_DEFECTO);
@@ -155,7 +156,8 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
                       {s.autoalta && <span className={`pildora ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined}>Web{s.puede === false && " A cobrar"}</span>}
                     </span>
                     <span className="socios-semaforo-vence numero" data-vence-fila>{s.vence && !s.dado_de_baja ? ultimoDia(s.vence, zona) : "—"}</span>
-                    <span className="socios-semaforo-ultima" data-ultima-vez>{ultimaVez(s.ultima_vez, zona)}</span>
+                    <span className="socios-semaforo-ultima" data-ultima-vez>{ultimaVez(s.ultima_vez, zona)}
+                      {esteMes?.[s.socio_id] && <span className="block texto-suave text-sm" data-este-mes={esteMes[s.socio_id]!.veces_mes}>{esteMes[s.socio_id]!.veces_mes} este mes</span>}</span>
                     {/* La celda de la acción: "Ver" es el mismo link de la fila; Cobrar y WhatsApp van encima de la celda, fuera del link
                         (un botón no va adentro de otro link, y la fila sigue siendo un solo link al socio). */}
                     {accionFila(s) === "ver" ? <span className="boton boton-chico socios-semaforo-accion" aria-hidden data-accion-fila="ver">Ver</span> : <span className="socios-semaforo-accion" aria-hidden />}
@@ -181,6 +183,7 @@ export function ListaSocios({ filas, etiquetas, puedeEtiquetar, semaforo = false
               </span>
               {s.autoalta && <span className={`pildora flex-none ${s.puede !== false ? "" : "pildora-amarillo"}`} data-autoalta data-a-cobrar={s.puede === false ? "1" : undefined} title="Se registró solo desde la página">Web{s.puede === false && " A cobrar"}<span className="hidden sm:inline">{s.puede !== false ? " · se anotó por la web" : " · se anotó por la web"}</span></span>}
               {ver("plan") && s.plan && <span className="hidden sm:inline pildora" data-plan-fila>{s.plan}</span>}
+              {esteMes?.[s.socio_id] && <span className="flex-none texto-suave text-sm text-right" data-este-mes={esteMes[s.socio_id]!.veces_mes}>{esteMes[s.socio_id]!.veces_mes} este mes</span>}
             </Link>
           </li>
         ))}

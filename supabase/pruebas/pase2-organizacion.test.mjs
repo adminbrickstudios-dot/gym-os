@@ -181,3 +181,32 @@ test("la tabla nueva: RLS prendida y nadie escribe directo", async () => {
   await como(u.recepcion, () => t.falla(() => t.q(`insert into public.hechos_para_hacer (gimnasio_id, dia, referencia, texto, hecho_por) values ($1, $2, 'llamar', 'xx', $3)`, [t.g, HOY, e])));
 });
 
+
+test("columnas de Socios y Su historia: llave, permisos en negativo y lo que muestran", async () => {
+  const s = await socioCon("Fila", [-1, -2]);
+  // Con la llave apagada, error (nunca vacío).
+  await llave(t.g, false);
+  await como(u.recepcion, () => t.falla(() => t.q(`select public.numeros_fila_socio($1)`, [s]), /no está prendida/));
+  await como(u.recepcion, () => t.falla(() => t.q(`select public.historia_socio($1, $2)`, [t.g, s]), /no está prendida/));
+  await llave(t.g, true);
+  // Otro gimnasio y el profe: error.
+  for (const quien of [uOtro, u.profe]) {
+    await como(quien, () => t.falla(() => t.q(`select public.numeros_fila_socio($1)`, [s])));
+    await como(quien, () => t.falla(() => t.q(`select public.historia_socio($1, $2)`, [t.g, s])));
+  }
+  await como(uOtro, () => t.falla(() => t.q(`select public.historia_socio($1, $2)`, [otro, s]), /no es de este gimnasio/));
+  // Lo que muestran (con la hora de la transacción: las entradas de ayer y anteayer, en la zona del gimnasio).
+  await t.q(`update public.ingresos set momento = now() - interval '1 day' where socio_id = $1 and momento = (select max(momento) from public.ingresos where socio_id = $1)`, [s]);
+  const [{ r }] = await como(u.recepcion, () => t.q(`select public.numeros_fila_socio($1) r`, [s]));
+  assert.ok(r.ultima_vez, "tiene última vez");
+  assert.ok(Number(r.veces_mes) >= 0);
+  const [{ h }] = await como(u.recepcion, () => t.q(`select public.historia_socio($1, $2) h`, [t.g, s]));
+  assert.ok(h.some((x) => x.tipo === "entrada"), "la historia trae las entradas");
+  assert.ok(h.every((x, i) => i === 0 || new Date(h[i - 1].en) >= new Date(x.en)), "de la más nueva a la más vieja");
+  // En el lote: una por cada fila de una lectura anterior, en el mismo viaje.
+  const [{ l }] = await como(u.recepcion, () => t.q(`select public.lote_lecturas($1::jsonb) l`, [JSON.stringify([
+    { f: "buscar_socios", a: { p_gimnasio_id: t.g, p_texto: "Fila", p_limite: 5 } },
+    { f: "numeros_fila_socio", cada: { i: 0, campo: "socio_id", arg: "p_socio_id" }, t: true },
+  ])]));
+  assert.ok(l[1] && l[1][s], "el lote trae los números de cada fila");
+});

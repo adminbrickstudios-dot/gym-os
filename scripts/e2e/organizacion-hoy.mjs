@@ -20,6 +20,9 @@ try {
   await entrar(d, "duena@ejemplo.invalid");
   await ir(d, "/panel");
   if (!LLAVE) {
+    await ir(d, "/panel/socios");
+    chequear(await d.locator("[data-este-mes]").count() === 0, "llave apagada: Socios sin la columna Este mes", "llave apagada: apareció Este mes");
+    await ir(d, "/panel");
     chequear(await d.locator("[data-plata-en-juego]").count() === 0 && await d.locator("[data-volvieron-mes]").count() === 0,
       "llave apagada: el Inicio sin Plata en juego ni Volvieron", "llave apagada: apareció algo nuevo en el Inicio");
   } else {
@@ -71,6 +74,12 @@ try {
     await d.locator("[data-panel-socio-numeros]").waitFor({ timeout: 30000 }).then(() => ok("el panel lateral muestra este mes, última vez y semanas seguidas"), () => chequear(false, "", "el panel lateral sin los tres números"));
     await capturar(d, "org-compu-ver-sin-entrar", true);
     await d.keyboard.press("Escape");
+    // Socios: la columna "Este mes"; la ficha completa: los números, Cuándo viene y Su historia.
+    chequear(await d.locator("[data-este-mes]").count() > 0, "Socios: cada fila con las veces que vino este mes", "Socios: falta \"Este mes\"");
+    await ir(d, ficha);
+    await d.locator("[data-ficha-organizacion]").waitFor({ timeout: 30000 }).then(() => ok("ficha: veces con el promedio, racha con la mejor, última vez con su hora"), () => chequear(false, "", "ficha: faltan los números nuevos"));
+    chequear(await d.locator("[data-su-historia]").count() === 1, "ficha: Su historia", "ficha: falta Su historia");
+    await capturar(d, "org-compu-ficha", true);
 
     // La dirección vieja de Para hacer hoy lleva a la lista.
     await ir(d, "/panel/hoy");
