@@ -59,9 +59,14 @@ try {
     // Ver sin entrar: tocar un socio en la lista de Socios abre el panel lateral (con sus tres números) y no sale de la lista.
     await ir(d, "/panel/bloque/socios?pestana=socios");
     const enLista = d.url();
-    const link = d.locator('main a[href^="/panel/socios/"]').filter({ hasNotText: /nuevo|importar|duplicados/i }).first();
-    await link.click();
-    await d.locator("[data-panel-socio-lateral]").waitFor({ timeout: 30000 });
+    // El primer link a una ficha (/panel/socios/<id>, sin sub-pantalla ni parámetros).
+    const hrefs = await d.locator('main a[href^="/panel/socios/"]').evaluateAll((xs) => xs.map((x) => x.getAttribute("href")));
+    const ficha = hrefs.find((h) => /^\/panel\/socios\/[0-9a-f-]{36}$/.test(h ?? ""));
+    chequear(!!ficha, `la lista tiene links a fichas (${hrefs.length} links)`, `la lista no tiene links a una ficha: ${hrefs.slice(0, 5).join(" · ")}`);
+    const montado = await d.evaluate(() => document.documentElement.dataset.panelSocioMontado ?? "no");
+    chequear(montado === "si", "el panel lateral está montado para la dueña", `el panel lateral no está montado (${montado})`);
+    await d.locator(`main a[href="${ficha}"]`).first().click();
+    await d.locator("[data-panel-socio-lateral]").waitFor({ timeout: 30000 }).catch(() => {});
     chequear(d.url() === enLista, "tocar un socio abre el panel lateral sin salir de la lista", `tocar un socio llevó a ${d.url()}`);
     await d.locator("[data-panel-socio-numeros]").waitFor({ timeout: 30000 }).then(() => ok("el panel lateral muestra este mes, última vez y semanas seguidas"), () => chequear(false, "", "el panel lateral sin los tres números"));
     await capturar(d, "org-compu-ver-sin-entrar", true);
