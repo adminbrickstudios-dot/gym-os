@@ -129,11 +129,10 @@ export const FONDO_CLARO = "#F4F5F6", FONDO_OSCURO = "#111315";
 export const ACENTO_POR_DEFECTO = "#16a34a";
 /**
  * Variables CSS y atributo de tono para el envoltorio de una pantalla del gimnasio: el acento del gimnasio (y el ya corrido para leerse en cada modo de Pista).
- * El fondo no va en línea desde que Pista es el único estilo (26/11): lo pone el modo (globals.css). `data-tono` marca el envoltorio.
- * `tema`: lo que eligió la persona en Mi cuenta (cookie `tema`, D37).
+ * El fondo no va en línea desde que Pista es el único estilo (26/11): lo pone el modo (globals.css, con la elección de Mi cuenta en el <html>).
+ * `data-tono` solo marca el envoltorio (el CSS mira que esté, no su valor).
  */
-export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSProperties; "data-tono": "oscuro" | "claro" } {
-  const fondo = tema === "oscuro" ? FONDO_OSCURO : tema === "claro" ? FONDO_CLARO : m.color_fondo;
+export function propsMarca(m: ColoresMarca): { style: CSSProperties; "data-tono": "pista" } {
   return {
     style: {
       ["--acento" as string]: acentoDistinto(m.color_acento),
@@ -141,6 +140,6 @@ export function propsMarca(m: ColoresMarca, tema?: string | null): { style: CSSP
       // Pista: el acento ya corrido para leerse (4,5:1) sobre cada modo, y el texto que va encima.
       ...variablesPista(acentoDistinto(m.color_acento)),
     },
-    "data-tono": tonoDeFondo(fondo),
+    "data-tono": "pista",
   };
 }

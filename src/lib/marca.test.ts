@@ -17,7 +17,7 @@ test("texto sobre el acento: verde vivo y amarillo en negro, violeta en blanco",
 
 test("propsMarca pone las variables y el tono; el fondo no va en línea (lo pone el modo de Pista, 26/11)", () => {
   const p = propsMarca({ color_acento: "#7c3aed", color_fondo: "#faf7f0" });
-  expect(p["data-tono"]).toBe("claro");
+  expect(p["data-tono"]).toBe("pista");
   expect(p.style).toMatchObject({ "--acento": "#7c3aed", "--acento-texto": "#ffffff" });
   expect(p.style).not.toHaveProperty("--fondo");
   expect(p.style).not.toHaveProperty("background");

@@ -106,7 +106,7 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     <>
       <RegistrarSesion />
       {!temaCookie && <SincronizarTema />}
-      <Marco panel={panel} tema={temaCookie} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
         <FranjaMantenimiento />
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}
