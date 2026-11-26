@@ -29,7 +29,7 @@ try {
     const [{ socio }] = (await db.query(`select id socio from public.socios where gimnasio_id = $1 and dado_de_baja_en is null and telefono is not null order by creado_en limit 1`, [g])).rows;
     const [{ id: venta }] = (await db.query(`insert into public.ventas (gimnasio_id, sede_id, socio_id, origen, estado) values ($1,$2,$3,'app','pendiente') returning id`, [g, sede, socio])).rows;
     await db.query(`insert into public.venta_items (gimnasio_id, venta_id, tipo, descripcion, cantidad, precio_unitario) values ($1,$2,'otro','Plan e2e',1,25000)`, [g, venta]);
-    await db.query(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, comprobante_path) values ($1,$2,'transferencia',20000,'pendiente', $1 || '/comprobantes/e2e.jpg')`, [g, venta]);
+    await db.query(`insert into public.pagos (gimnasio_id, venta_id, medio, monto, estado, comprobante_path) values ($1,$2,'transferencia',20000,'pendiente', $3)`, [g, venta, `${g}/comprobantes/e2e.jpg`]);
 
     await ir(d, "/panel");
     chequear(await d.locator("[data-plata-en-juego]").count() === 1, "Inicio: Plata en juego hoy", "Inicio: falta Plata en juego hoy");
