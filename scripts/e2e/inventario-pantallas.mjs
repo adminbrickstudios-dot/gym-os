@@ -46,6 +46,10 @@ function inventariar() {
 // Lo que cambia solo entre una pasada y la otra, sin que tenga que ver con el estilo (cuántas sesiones abiertas hay, la actividad reciente de Control).
 // (Hasta el 26/11 decía `^a||`: la alternativa vacía coincidía con todo y el inventario nunca podía fallar.)
 const DEL_MOMENTO = /cerrar la otra sesi|^data-sin-otras$|(alguien|hace) /;
+// Lo que se sacó a propósito (con su motivo). Solo entra acá lo que pide un ítem; se dice en la salida cada vez que aparece.
+const QUITADOS_A_PROPOSITO = new Map([
+  ["input|radio|estilo-gimnasio|", "borrar el estilo clásico (26/11): en Configuración → Marca queda solo el modo"],
+]);
 
 async function recorrer(b) {
   const filas = new Map();
@@ -89,7 +93,9 @@ try {
       const d = ahora.get(clave);
       if (!d) { falla(`${clave}: no se pudo inventariar`); continue; }
       for (const campo of ["interactivos", "titulos", "datos"]) {
-        const faltan = a[campo].filter((x) => !d[campo].includes(x) && !DEL_MOMENTO.test(x) && !DEL_MOMENTO.test(x.split("|")[2] ?? ""));
+        const faltanTodos = a[campo].filter((x) => !d[campo].includes(x) && !DEL_MOMENTO.test(x) && !DEL_MOMENTO.test(x.split("|")[2] ?? ""));
+        for (const x of faltanTodos.filter((y) => QUITADOS_A_PROPOSITO.has(y))) console.log(`· ${clave}: falta ${x} a propósito (${QUITADOS_A_PROPOSITO.get(x)})`);
+        const faltan = faltanTodos.filter((y) => !QUITADOS_A_PROPOSITO.has(y));
         const sobran = d[campo].filter((x) => !a[campo].includes(x));
         nuevos += sobran.length;
         if (faltan.length) { perdidos += faltan.length; falla(`${clave}: faltan ${faltan.length} ${campo} de la foto de antes: ${faltan.slice(0, 6).join(" · ")}`); }

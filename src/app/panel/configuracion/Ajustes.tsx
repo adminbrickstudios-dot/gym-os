@@ -226,7 +226,7 @@ function Campo({ etiqueta, ayuda, children }: { etiqueta: string; ayuda?: string
   );
 }
 
-export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null, versionInicial = null, estiloInicial = { estilo: "clasico", modo: "oscuro" } }: {
+export function Ajustes({ inicial, datos, agenda, cierres, mensajes, cambios, puedeEditar, pestanaInicial, direccionPagina, tablets, mercadopago, turnosFijos, linkResena = null, entrada, metaVisitas = 12, planFamiliar = false, vencimiento, dejarPasar, dobleCobro, cajaConfig = null, autoservicio = null, beneficios = null, versionInicial = null, estiloInicial = { modo: "oscuro" } }: {
   /** Pase 2.0: la llave de estilo del gimnasio, leída en el lote de la página. */
   estiloInicial?: EstiloGimnasio;
   /** Cacería (18/11): la versión de la configuración, leída en el lote de la página. */

@@ -67,11 +67,10 @@ if [[ "$(psql -Atc "select count(*) from public.gimnasios where slug = 'demo'" "
   node scripts/datos/sembrar-demo.mjs --url "$URL" --dominio localhost --socios "${SOCIOS_DEMO:-300}"
 fi
 node scripts/datos/usuarios-demo.mjs --url "$URL" --supabase "http://127.0.0.1:$PUERTO_SUPABASE" --servicio "$SUPABASE_SERVICE_ROLE_KEY"
-# Pase 2.0: ESTILO_DEMO=pista prende el estilo Pista en todos los gimnasios de la base local (las pruebas corren con las dos llaves; sin esto, clásico).
-if [[ "${ESTILO_DEMO:-clasico}" == "pista" ]]; then
-  psql -qc "update public.configuracion_gimnasio set estilo = 'pista', modo = '${MODO_DEMO:-oscuro}'" "$URL"
-  echo "Estilo Pista prendido en los gimnasios de la base local (modo ${MODO_DEMO:-oscuro})."
-fi
+# Pase 2.0: Pista es el único estilo (26/11). MODO_DEMO elige el modo de todos los gimnasios de la base local (oscuro por defecto). La columna
+# estilo queda en 'pista' como en producción hasta que la publicación B la saque.
+psql -qc "update public.configuracion_gimnasio set estilo = 'pista', modo = '${MODO_DEMO:-oscuro}'" "$URL"
+echo "Gimnasios de la base local en modo ${MODO_DEMO:-oscuro}."
 # Pista Semáforo (24/11): como en producción, la llave pista_semaforo prendida en los [demo] (el seed corre después de la migración que la prende).
 # SEMAFORO_DEMO=no la deja apagada: Pista como la tiene hoy un gimnasio real.
 if [[ "${SEMAFORO_DEMO:-si}" == "si" ]]; then

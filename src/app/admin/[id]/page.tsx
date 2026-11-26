@@ -76,7 +76,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
     throw e;
   }
   const funciones = await rpc<{ restaurar_cambios: boolean }>("funciones_del_gimnasio", { p_gimnasio_id: id });
-  const estiloGim = await rpc<{ estilo: string; modo: string }>("estilo_gimnasio", { p_gimnasio_id: id }).catch(() => ({ estilo: "clasico", modo: "oscuro" }));
+  const estiloGim = await rpc<{ modo: string }>("estilo_gimnasio", { p_gimnasio_id: id }).catch(() => ({ modo: "oscuro" }));
   const fila = (await rpc<FilaGimnasio[]>("admin_lista_gimnasios", { p_q: g.slug, p_con_bajas: true }).catch(() => [] as FilaGimnasio[])).find((x) => x.gimnasio_id === g.gimnasio_id);
   // F2.10: CUIT y razón social para facturar. Los guarda solo el rol Principal o Ventas (la base lo exige; a otro rol le dice por qué no).
   const fiscales = await rpc<DatosFiscales>("admin_datos_fiscales", { p_gimnasio_id: g.gimnasio_id }).catch(() => null);
@@ -245,7 +245,7 @@ export default async function GimnasioAdmin({ params }: { params: Promise<{ id: 
 
       <section className="space-y-3" data-ficha-estilo>
         <p className="titulo-grupo">Estilo</p>
-        <EstiloGimnasioFicha key={`${estiloGim.estilo}-${estiloGim.modo}`} gimnasioId={g.gimnasio_id} inicial={estiloGim} />
+        <EstiloGimnasioFicha key={estiloGim.modo} gimnasioId={g.gimnasio_id} inicial={{ modo: estiloGim.modo }} />
       </section>
 
       <section className="space-y-3" data-ficha-funciones>

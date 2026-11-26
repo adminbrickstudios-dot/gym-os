@@ -31,25 +31,26 @@ const barlowCondensada = localFont({
   variable: "--font-barlow-condensed", display: "swap",
 });
 
-// Pase 2.0 (Pista): títulos y números grandes en Big Shoulders Display 800, un solo archivo propio (OFL, ver fuentes/LICENCIA-BigShoulders.txt). Sin preload:
-// solo lo piden las pantallas de Pista, y el estilo clásico no tiene que bajar nada de más (font-display: swap con respaldo condensado).
+// Pista: títulos y números grandes en Big Shoulders Display 800, un solo archivo propio (OFL, ver fuentes/LICENCIA-BigShoulders.txt).
+// Sin preload, como cuando convivía con el clásico: el cambio de las fuentes se mide aparte (font-display: swap con respaldo condensado).
 const bigShoulders = localFont({
   src: [{ path: "./fuentes/big-shoulders-display-latin-800-normal.woff2", weight: "800" }],
   variable: "--font-big-shoulders", display: "swap", preload: false,
 });
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // Pase 2.0: el estilo del gimnasio (la llave por gimnasio) lo pone el servidor en el <html>: nunca se ve el estilo viejo antes del nuevo.
-  // Sale de la dirección que ya resolvió el proxy (no es un viaje más a la base). Sin gimnasio (la plataforma) es el clásico.
+  // Pista es el único estilo (26/11). El modo lo pone el servidor en el <html>: lo que eligió la persona en Mi cuenta (cookie `tema`, D37) manda;
+  // si no, el del gimnasio que ya resolvió el proxy con la dirección (no es un viaje más a la base), oscuro por defecto.
   const cab = await headers();
-  const estilo = cab.get("x-gimnasio-estilo") === "pista" ? "pista" : "clasico";
-  // El modo de Pista: lo que eligió la persona en Mi cuenta (cookie `tema`, D37) manda; si no, el del gimnasio (oscuro por defecto).
+  // Sin gimnasio (la plataforma: /super, /admin, la página de venta, "gimnasio no encontrado") es siempre claro: esas pantallas no tienen envoltorio
+  // [data-tono] y eran claras con el clásico; con un fondo oscuro de Pista y sus textos claros de la base quedarían oscuro sobre oscuro.
   const tema = (await cookies()).get("tema")?.value;
-  const modo = tema === "claro" || tema === "oscuro" ? tema : cab.get("x-gimnasio-modo") === "claro" ? "claro" : "oscuro";
-  // Pista Semáforo (24/11): solo con el estilo Pista y la llave pista_semaforo del gimnasio. Sin el atributo, Pista queda como estaba.
-  const semaforo = estilo === "pista" && cab.get("x-gimnasio-semaforo") === "si" ? "si" : undefined;
+  const modo = cab.get("x-gymos-contexto") !== "gimnasio" ? "claro"
+    : tema === "claro" || tema === "oscuro" ? tema : cab.get("x-gimnasio-modo") === "claro" ? "claro" : "oscuro";
+  // Pista Semáforo (24/11): solo con la llave pista_semaforo del gimnasio. Sin el atributo, Pista queda como estaba.
+  const semaforo = cab.get("x-gimnasio-semaforo") === "si" ? "si" : undefined;
   return (
-    <html lang="es-AR" data-estilo={estilo} data-modo={modo} data-semaforo={semaforo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
+    <html lang="es-AR" data-modo={modo} data-semaforo={semaforo} className={`${barlow.variable} ${barlowCondensada.variable} ${bigShoulders.variable}`}>
       {/* Pista Semáforo: los emojis del mapa único, solo con la llave (sin ella no baja ni un byte). */}
       {semaforo && <head><style dangerouslySetInnerHTML={{ __html: reglasEmojis() }} /></head>}
       <body className="antialiased">{children}<Hidratado /></body>

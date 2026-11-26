@@ -20,16 +20,12 @@ on:
         description: "Performance mínima de la landing en celular (solo avisa)"
         type: string
         default: "90"
-      estilo:
-        description: "Pase 2.0: estilo de los gimnasios demo (clasico o pista)"
-        type: string
-        default: "clasico"
       modo:
         description: "Pase 2.0: modo de Pista (oscuro o claro)"
         type: string
         default: "oscuro"
       semaforo:
-        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no; solo se ve con estilo=pista)"
+        description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no)"
         type: string
         default: "si"
       sesion:
@@ -87,7 +83,6 @@ jobs:
       - name: Levantar la app compilada con la imitación de Supabase
         env:
           APP_MODO: produccion
-          ESTILO_DEMO: ${{ inputs.estilo || 'clasico' }}
           SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096

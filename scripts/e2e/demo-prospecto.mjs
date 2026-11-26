@@ -35,7 +35,7 @@ try {
   await w.locator("body").waitFor();
   const html = w.locator("html");
   chequear(new RegExp(NOMBRE).test(await w.locator("body").innerText()), "la página de la demo dice el nombre del gimnasio del prospecto", "la página no dice el nombre");
-  chequear(await html.getAttribute("data-estilo") === "pista", "la página sale en Pista", `la página sale en ${await html.getAttribute("data-estilo")}`);
+  chequear(await html.getAttribute("data-estilo") === null && ["oscuro", "claro"].includes(await html.getAttribute("data-modo")), "la página sale en Pista (el único estilo)", `la página sale con data-estilo=${await html.getAttribute("data-estilo")} data-modo=${await html.getAttribute("data-modo")}`);
   await capturar(w, "demo-prospecto-pagina", true);
   await w.context().close();
 

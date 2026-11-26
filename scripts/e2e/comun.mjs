@@ -62,9 +62,9 @@ export async function pagina(b, viewport = COMPU, opciones = {}) {
   const { conAyuda = false, conMayusculas = false, ...deContexto } = opciones;
   const ctx = await b.newContext({ viewport, deviceScaleFactor: 1, ...deContexto });
   // Pase 2.0 (Pista): los títulos salen en mayúsculas por CSS (text-transform) y el innerText de Playwright las devuelve ya transformadas. Los recorridos comprueban
-  // el contenido, no el estilo: con E2E_SIN_MAYUSCULAS=1 (lo pone la corrida con Pista) leen el texto como se escribió. Las capturas y el inventario piden conMayusculas: true
-  // para ver el diseño de verdad.
-  if (process.env.E2E_SIN_MAYUSCULAS === "1" && !conMayusculas) {
+  // el contenido, no el estilo: siempre leen el texto como se escribió (desde el 26/11 Pista es el único estilo). Las capturas y el inventario piden
+  // conMayusculas: true para ver el diseño de verdad.
+  if (!conMayusculas) {
     await ctx.addInitScript(() => {
       const poner = () => { const s = document.createElement("style"); s.setAttribute("data-e2e-sin-mayusculas", ""); s.textContent = "*, *::before, *::after { text-transform: none !important; }"; document.head.appendChild(s); };
       if (document.head) poner(); else document.addEventListener("DOMContentLoaded", poner, { once: true });

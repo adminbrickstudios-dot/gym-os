@@ -49,7 +49,7 @@ try {
   await d.goto(`${GIMNASIO()}/panel/caja`, { waitUntil: "load" });
   await d.locator("h1").first().waitFor({ timeout: 60000 });
   // Solo se mide donde de verdad hay Pista oscuro (el servidor pone los tokens del tema; falsear el atributo en la página deja los del wrapper claro).
-  const enPistaOscuro = await d.evaluate(() => document.documentElement.dataset.estilo === "pista" && document.documentElement.dataset.modo === "oscuro" && !document.cookie.includes("tema=claro"));
+  const enPistaOscuro = await d.evaluate(() => document.documentElement.dataset.modo === "oscuro" && !document.cookie.includes("tema=claro"));
   if (!enPistaOscuro) { ok2("contraste de etiquetas: se mide en la corrida de Pista oscuro (esta no lo es)"); await d.context().close(); await b.close(); resultado(); process.exit(process.exitCode ?? 0); }
   const col = await d.evaluate(() => {
     const e = document.querySelector(".etiqueta, label .etiqueta") ?? document.querySelector("[data-tono] .etiqueta");

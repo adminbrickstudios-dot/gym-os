@@ -15,10 +15,12 @@ test("texto sobre el acento: verde vivo y amarillo en negro, violeta en blanco",
   expect(textoSobre("#7c3aed")).toBe("#ffffff");
 });
 
-test("propsMarca pone las variables y el tono", () => {
+test("propsMarca pone las variables y el tono; el fondo no va en línea (lo pone el modo de Pista, 26/11)", () => {
   const p = propsMarca({ color_acento: "#7c3aed", color_fondo: "#faf7f0" });
   expect(p["data-tono"]).toBe("claro");
-  expect(p.style).toMatchObject({ "--acento": "#7c3aed", "--acento-texto": "#ffffff", "--fondo": "#faf7f0" });
+  expect(p.style).toMatchObject({ "--acento": "#7c3aed", "--acento-texto": "#ffffff" });
+  expect(p.style).not.toHaveProperty("--fondo");
+  expect(p.style).not.toHaveProperty("background");
 });
 
 test("contraste: blanco y negro dan 21, un color consigo mismo da 1, inválido da null", () => {
@@ -73,7 +75,7 @@ describe("acentoLegible (Pase 2.0, Pista)", () => {
       expect(contraste(acentoLegible(c, PISTA_SUPERFICIE_CLARA), PISTA_SUPERFICIE_CLARA)!, `${c} claro`).toBeGreaterThanOrEqual(CONTRASTE_TEXTO);
     }
   });
-  it("propsMarca trae las variables de Pista sin tocar las del estilo clásico", () => {
+  it("propsMarca trae las variables de Pista", () => {
     const p = propsMarca({ color_acento: "#FF7A3D", color_fondo: "#F4F5F6" });
     expect(p.style["--acento" as never]).toBeTruthy();
     expect(p.style["--acento-pista-claro" as never]).toBeTruthy();
