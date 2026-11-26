@@ -125,5 +125,12 @@ export function Encabezado({ icono, emoji, titulo, bajada, accion, volver, volve
 }
 
 /** Cuando algo falla o no hay permiso: se dice qué pasó, nunca una pantalla vacía. */
-// El cartel vive en ./Aviso (sin el marco): se re-exporta para las pantallas que lo importan de acá.
-export { Aviso } from "./Aviso";
+export function Aviso({ icono, emoji, titulo, children }: { icono?: string; emoji?: string; titulo: string; children?: ReactNode }) {
+  return (
+    <div className="tarjeta p-6 sm:p-8 max-w-xl">
+      <p className="text-4xl mb-4" aria-hidden><Icono nombre={icono ?? emoji ?? "alerta"} sistema /></p>
+      <p className="titulo text-3xl">{titulo}</p>
+      {children && <div className="texto-suave text-lg mt-2">{children}</div>}
+    </div>
+  );
+}
