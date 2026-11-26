@@ -16,6 +16,8 @@ import { funcionesNuevasDe } from "@/lib/panel/funciones-nuevas";
 import { HorariosPico, type IngresosPorHoraYDia } from "./HorariosPico";
 import { ValorSocio, type ValorDelSocio } from "./ValorSocio";
 
+type SiCobras = { total: number | string; vence_hasta_fin_de_mes: { cantidad: number; monto: number | string }; se_debe: { cantidad: number; monto: number | string } };
+
 export const metadata: Metadata = { title: "Resultado" };
 
 type Resultado = {
@@ -61,6 +63,9 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
     // N10: cuánto deja un socio y cuánto dura (función nueva, apagada por defecto).
     const valorSocio = nuevas.includes("valor_socio")
       ? await rpc<ValorDelSocio>("valor_del_socio", { p_gimnasio_id: panel.gimnasio.id }) : null;
+    // Pase 2.0 · organización (resultado-del-mes.png): "Si cobrás lo que falta", proyección de solo lectura, solo en el mes en curso.
+    const falta = nuevas.includes("pase_2_organizacion") && r.en_curso
+      ? await rpc<SiCobras>("si_cobras_lo_que_falta", { p_gimnasio_id: panel.gimnasio.id }).catch(() => null) : null;
     const anterior = moverMes(r.mes, -1);
     const base = Number(r.anterior_mismo_periodo);
     const cambio = base ? Math.round(((Number(r.cobrado) - base) / base) * 100) : null;
@@ -106,6 +111,13 @@ export default async function ResultadoMes({ searchParams }: { searchParams: Pro
         <p className="text-sm texto-tenue -mt-6">Recurrente: lo que entra por mes si todos los que hoy tienen la membresía al día la renuevan, al precio de hoy.</p>
 
         <TasaCobro t={tasa} />
+        {falta && Number(falta.total) > 0 && (
+          <section aria-labelledby="si-cobras" className="tarjeta p-5 space-y-2" data-si-cobras={String(falta.total)}>
+            <h2 id="si-cobras" className="titulo text-2xl">Si cobrás lo que falta</h2>
+            <p className="numero text-4xl" style={{ color: "var(--ok)" }}>+{formatearPesos(falta.total)}</p>
+            <p className="texto-suave">Además de lo cobrado: {formatearPesos(falta.vence_hasta_fin_de_mes.monto)} de {falta.vence_hasta_fin_de_mes.cantidad} que vencen hasta fin de mes y {formatearPesos(falta.se_debe.monto)} de {falta.se_debe.cantidad} que deben. Es una cuenta: no cobra nada.</p>
+          </section>
+        )}
 
         <section aria-labelledby="dias">
           <h2 id="dias" className="titulo text-2xl mb-3">Día por día</h2>

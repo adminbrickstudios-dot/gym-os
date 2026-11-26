@@ -66,19 +66,24 @@ export async function guardarConfigEntrada(datos: Partial<ConfigEntrada>): Promi
 }
 
 /** BASE-3: la ficha rápida del panel lateral. Todo sale de `ficha_socio` (el veredicto lo calcula la base; acá no se recalcula nada). */
-export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/app/panel/socios/[id]/tipos").Ficha; puedeCobrar?: boolean; datosDePago?: boolean; notas?: string[]; etiquetas?: string[]; error?: string }> {
+export type NumerosSocio = { ultima_vez: string | null; veces_mes: number; promedio_gimnasio_mes: number; semanas_seguidas: number; mejor_racha: number; cuando_viene: { dia: number; veces: number }[]; hora_habitual: number | null };
+export async function fichaRapida(socioId: string): Promise<{ ficha?: import("@/app/panel/socios/[id]/tipos").Ficha; puedeCobrar?: boolean; datosDePago?: boolean; notas?: string[]; etiquetas?: string[]; numeros?: NumerosSocio | null; error?: string }> {
   try {
     const panel = await contextoPanel();
     const ficha = await rpc<import("@/app/panel/socios/[id]/tipos").Ficha>("ficha_socio", { p_socio_id: socioId });
     // FA-1: "cuándo le toca pagar" es una función nueva, apagada por defecto (interruptor del gimnasio).
-    const datosDePago = (await rpc<string[]>("funciones_nuevas_activas", { p_gimnasio_id: panel.gimnasio.id })).includes("panel_pago");
+    const activas = await rpc<string[]>("funciones_nuevas_activas", { p_gimnasio_id: panel.gimnasio.id });
+    const datosDePago = activas.includes("panel_pago");
+    // Pase 2.0 · organización: con la llave, los tres números de ver sin entrar (este mes, última vez, semanas seguidas). Si fallan, no se muestran.
+    const numeros = activas.includes("pase_2_organizacion") && panel.yo.rol !== "profe"
+      ? await rpc<NumerosSocio>("numeros_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: socioId }).catch(() => null) : null;
     // Detalle 20: con la función prendida, el panel también muestra las notas y etiquetas del socio (la profe no las ve: la base no se las da).
     let notas: string[] | undefined, etiquetas: string[] | undefined;
     if (datosDePago && panel.yo.rol !== "profe") {
       const ne = await rpc<{ notas: { texto: string }[]; etiquetas: { nombre: string }[] }>("notas_y_etiquetas", { p_socio_id: socioId }).catch(() => null);
       notas = ne?.notas.slice(0, 3).map((n) => n.texto); etiquetas = ne?.etiquetas.map((x) => x.nombre);
     }
-    return { ficha, puedeCobrar: panel.yo.rol !== "profe", datosDePago, notas, etiquetas };
+    return { ficha, puedeCobrar: panel.yo.rol !== "profe", datosDePago, notas, etiquetas, numeros };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

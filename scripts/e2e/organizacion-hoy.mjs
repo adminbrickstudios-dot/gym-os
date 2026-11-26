@@ -5,7 +5,7 @@
 //   node scripts/e2e/organizacion-hoy.mjs      (con scripts/local/levantar.sh corriendo)
 import { execSync } from "node:child_process";
 import pg from "pg";
-import { COMPU, GIMNASIO, capturar, chequear, entrar, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, capturar, chequear, entrar, entrarSocio, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const G = GIMNASIO();
 const LLAVE = (process.env.ORGANIZACION_DEMO ?? "no") === "si";
@@ -56,11 +56,31 @@ try {
     const [{ n }] = (await db.query(`select count(*)::int n from public.hechos_para_hacer where gimnasio_id = $1 and texto like $2 and anulado_en is not null`, [g, `%Interesada ${sello}%`])).rows;
     chequear(n === 1, "deshacer anula (queda en la base, no se borra)", `deshacer dejó ${n} anulados`);
 
+    // Ver sin entrar: tocar un socio en la lista de Socios abre el panel lateral (con sus tres números) y no sale de la lista.
+    await ir(d, "/panel/bloque/socios?pestana=socios");
+    const enLista = d.url();
+    const link = d.locator('main a[href^="/panel/socios/"]').filter({ hasNotText: /nuevo|importar|duplicados/i }).first();
+    await link.click();
+    await d.locator("[data-panel-socio-lateral]").waitFor({ timeout: 30000 });
+    chequear(d.url() === enLista, "tocar un socio abre el panel lateral sin salir de la lista", `tocar un socio llevó a ${d.url()}`);
+    await d.locator("[data-panel-socio-numeros]").waitFor({ timeout: 30000 }).then(() => ok("el panel lateral muestra este mes, última vez y semanas seguidas"), () => chequear(false, "", "el panel lateral sin los tres números"));
+    await capturar(d, "org-compu-ver-sin-entrar", true);
+    await d.keyboard.press("Escape");
+
     // La dirección vieja de Para hacer hoy lleva a la lista.
     await ir(d, "/panel/hoy");
     chequear(/\/panel\/bloque\/hoy\?pestana=hoy/.test(d.url()), "/panel/hoy lleva a la lista de Para hacer hoy", `/panel/hoy terminó en ${d.url()}`);
   }
   await d.context().close();
+  // App del socio: "¿Hay mucha gente?" solo con la llave.
+  const so = await pagina(b, CELU);
+  await entrarSocio(so, "+5490000100002");
+  await so.goto(`${G}/app`, { waitUntil: "load", timeout: 90000 });
+  await so.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  const hay = await so.locator("[data-hay-mucha-gente]").count();
+  chequear(LLAVE ? hay === 1 : hay === 0, LLAVE ? "app: ¿Hay mucha gente? con la hora de ahora marcada" : "llave apagada: la app sin ¿Hay mucha gente?", LLAVE ? "app: falta ¿Hay mucha gente?" : "llave apagada: apareció ¿Hay mucha gente?");
+  if (LLAVE) await capturar(so, "org-celu-app-socio", true);
+  await so.context().close();
 } finally {
   await b.close();
   await db.end();

@@ -12,6 +12,7 @@ import { SinConexion } from "@/components/ui/SinConexion";
 import { VersionNueva } from "@/components/ui/VersionNueva";
 import { VentanaEntrada } from "./VentanaEntrada";
 import { PanelSocioLateral } from "./PanelSocioLateral";
+import { AbrirEnLateral } from "./organizacion/AbrirEnLateral";
 import { AvisosEntrada } from "./AvisosEntrada";
 import { OrigenPanel } from "./OrigenPanel";
 import { VolverAlOrigen } from "./VolverAlOrigen";
@@ -66,6 +67,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
       <AtajosAyuda atajos={ATAJOS_PANEL} />
       {entrada && <AvisosEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} puedeCobrar={entrada.puedeCobrar ?? false} conVentana ahora={new Date().toISOString()} />}
       {entrada && <PanelSocioLateral sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} />}
+      {/* Pase 2.0 · organización: tocar un socio en cualquier lista abre el panel lateral (ver sin entrar). */}
+      {entrada && organizacion && <AbrirEnLateral />}
       {entrada && <VentanaEntrada gimnasioId={panel.gimnasio.id} sedeId={entrada.sedeId} zona={panel.gimnasio.zona_horaria} config={entrada.config} conQr={entrada.conQr} conLlavero={entrada.conLlavero} sedes={entrada.sedes ?? []} puedeCobrar={entrada.puedeCobrar ?? false} esRecepcion={rol === "recepcion"} />}
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-44 lg:pb-16">

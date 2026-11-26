@@ -26,6 +26,7 @@ import { EscanearEntrada } from "./EscanearEntrada";
 import { Invitar, type MisInvitados } from "./Invitar";
 import { Referir, type LinkReferido } from "./Referir";
 import { rpcLote, lectura } from "@/lib/panel/servidor";
+import { HayMuchaGente, RachaSemanas, type OcupacionPorHora } from "@/components/app/HayMuchaGente";
 import { Firmar, type Pendiente } from "@/app/panel/documentos/Documentos";
 import { EventosApp, type EventoApp } from "./EventosApp";
 import { Encuesta } from "./Encuesta";
@@ -68,7 +69,7 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
     // Cacería (16/11): las 14 lecturas del Inicio en UN viaje (lote_lecturas, cada una con los permisos del propio socio). Las que antes tenían
     // `.catch` van como tolerantes (si fallan, valen null y no se muestran); las demás, si fallan, rompen la pantalla como antes.
     const pg = { p_gimnasio_id: g.id }, ps = { p_socio_id: s.socio_id };
-    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni, salida0, avisoClave, misAvisos, ocupacion, ofertas, avisosDelDia, resumen] = await rpcLote(
+    const [qr0, qrPared0, invitados, campana, online, progreso, novedades0, referido, rutina, documentos, eventos, encuesta, grados, dni, salida0, avisoClave, misAvisos, ocupacion, ofertas, avisosDelDia, resumen, porHora] = await rpcLote(
       lectura<{ codigo: string; vence_en: string } | null>("mi_qr", { ...pg, ...ps }, true),   // el QR solo si el gimnasio lo usa (si no, la base dice que no y no se muestra)
       lectura<boolean | null>("usa_qr_pared", pg, true),
       lectura<MisInvitados | null>("mis_invitados", { ...pg, ...ps }, true),
@@ -91,6 +92,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
       lectura<OfertaLugarDatos[] | null>("ofertas_socio", ps, true),
       lectura<AvisoDelDia[] | null>("avisos_app_socio", ps, true),
       lectura<ResumenApp | null>("resumen_app_socio", ps, true),
+      // Pase 2.0 · organización: "¿Hay mucha gente?" y la racha (con la llave; apagada, la base da error y vale null: no se muestra).
+      lectura<OcupacionPorHora | null>("ocupacion_por_hora", { ...pg, ...ps }, true),
     );
     const qr = qr0 ?? null, qrPared = qrPared0 ?? false, novedades = novedades0 ?? [];
     // VD-48: "Me voy" solo si el gimnasio registra la salida (si la pregunta falla, no se muestra).
@@ -153,6 +156,8 @@ export default async function AppSocio({ searchParams }: { searchParams: Promise
         {avisoClave && <AvisoClave socioId={s.socio_id} aviso={avisoClave} zona={zona} />}
         <AvisosInicio avisos={misAvisos} />
         <OcupacionEnVivo r={ocupacion} />
+        <RachaSemanas datos={porHora} />
+        <HayMuchaGente datos={porHora} />
         {novedades.map((n) => <p key={n.id} className="mensaje mensaje-info" data-novedad-app><Icono nombre="campana" /> {n.texto}</p>)}
 
         {faltaPagar && (
