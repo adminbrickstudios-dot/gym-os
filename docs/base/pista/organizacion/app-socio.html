@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Propuesta · App del socio</title>
+</head>
+<body>
+<style>
+/* Fuentes: Big Shoulders Display 700-900 y Barlow 400-800 (las mismas de la app) */
+body{margin:0}
+a{color:#35AE32}a:hover{color:#4ADE80}
+.r{box-sizing:border-box;background:#0E151C;color:#EEF2F5;font-family:Barlow,sans-serif}
+.t{font-family:'Big Shoulders Display',sans-serif;font-weight:800;letter-spacing:.5px;margin:0;text-transform:uppercase}
+.c{border-radius:24px;background:#18222C;padding:24px;box-sizing:border-box}
+.m{color:#9AAAB8}
+.nav{width:264px;flex:none;box-sizing:border-box;padding:28px 18px;background:#0A1016;display:flex;flex-direction:column;gap:4px}
+.ni{display:flex;align-items:center;gap:12px;min-height:48px;padding:4px 14px;border-radius:12px;color:#EEF2F5;text-decoration:none;font-weight:600;font-size:16px;box-sizing:border-box}
+.ni .e{font-size:20px;width:24px;text-align:center;flex:none}
+.ni small{display:block;font-size:12px;font-weight:500;color:#9AAAB8;line-height:1.2}
+.ni.on{background:#35AE32;color:#0B1117}.ni.on small{color:#0B1117}
+.gr{margin:18px 14px 6px;font-size:13px;font-weight:700;color:#9AAAB8;letter-spacing:1px}
+.n{margin-left:auto;min-width:26px;height:26px;border-radius:13px;background:#2A3845;color:#EEF2F5;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.n.am{background:#FBBF24;color:#1F1300}.n.ro{background:#DC2626;color:#fff}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:22px;border:0;font:700 15px Barlow,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap;box-sizing:border-box}
+.b1{background:#35AE32;color:#0B1117}.b2{background:#2A3845;color:#EEF2F5}.b3{background:transparent;border:2px solid #3A4A58;color:#EEF2F5}.bw{background:#EEF2F5;color:#0B1117}
+.tg{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:14px;font-size:13px;font-weight:700;white-space:nowrap}
+.ok{background:#123B23;color:#4ADE80}.av{background:#3D2E0A;color:#FBBF24}.ma{background:#3F1515;color:#F87171}.co{background:#13294B;color:#93C5FD}.ba{background:#2A3845;color:#C9D3DB}.pr{background:#2E1F4D;color:#C4B5FD}
+.nu{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:11px;background:#2E1F4D;color:#C4B5FD;font:800 11px Barlow,sans-serif;letter-spacing:.6px;vertical-align:middle;white-space:nowrap}
+.row{display:flex;align-items:center;gap:12px;min-height:58px;padding:6px 8px 6px 14px;border-radius:14px;background:#0E151C;box-sizing:border-box}
+.big{font-family:'Big Shoulders Display',sans-serif;font-weight:800;line-height:1}
+.tab{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:22px;background:#18222C;color:#EEF2F5;text-decoration:none;font-weight:700;font-size:15px;white-space:nowrap}
+.tab.on{background:#EEF2F5;color:#0B1117}
+.tab span{font-weight:600;color:#9AAAB8}.tab.on span{color:#3A4A58}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-size:13px;font-weight:700;color:#9AAAB8;letter-spacing:.5px;padding:0 10px 10px;text-transform:uppercase}
+td{padding:10px;border-top:1px solid #243140;font-size:15px;vertical-align:middle}
+</style>
+<div class="r" style="width:390px;height:1180px;padding:20px 16px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="t" style="font-weight:900;font-size:22px">TEMPLE GYM</span><button type="button" class="b b2" aria-label="Avisos" style="width:44px;padding:0">🔔</button></div>
+<h1 class="t" style="font-weight:900;font-size:40px;line-height:.95">HOLA, MARTÍN <span aria-hidden="true">💪</span></h1>
+<section style="border-radius:24px;background:#16A34A;color:#052E14;padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px">
+<div class="big" style="font-weight:900;font-size:44px">PASÁS</div>
+<div style="width:190px;height:190px;border-radius:16px;background:#FFFFFF;display:flex;align-items:center;justify-content:center" role="img" aria-label="Tu QR para entrar"><svg width="150" height="150" viewBox="0 0 10 10" aria-hidden="true"><path fill="#0B1117" d="M0 0h3v3H0zM7 0h3v3H7zM0 7h3v3H0zM4 0h1v1H4zM5 2h1v2H5zM4 4h2v1H4zM7 4h1v2H7zM9 5h1v1H9zM4 6h1v2H4zM6 7h2v1H6zM8 8h2v2H8zM5 9h2v1H5zM1 4h2v1H1z"/></svg></div>
+<div style="font-weight:700;font-size:16px">Plan Full · hasta el 27/11</div>
+</section>
+<section class="c" style="padding:18px;display:flex;align-items:center;gap:14px;border:2px solid #FBBF24">
+<span aria-hidden="true" style="font-size:30px">⏳</span><div style="flex:1"><div style="font-weight:700;font-size:16px">Vence mañana</div><div class="m" style="font-size:14px">Renová ahora y no perdés la racha</div></div><a href="#" class="b b1">Renovar</a>
+</section>
+<section class="c" style="padding:18px;display:flex;align-items:center;gap:14px">
+<span class="big" style="font-size:56px;color:#FB923C">6</span><div style="flex:1"><div style="font-weight:700;font-size:17px">🔥 semanas seguidas <span class="nu">NUEVO</span></div><div class="m" style="font-size:14px">Tu mejor racha: 11. Esta semana: 3 de 3</div></div>
+</section>
+<section class="c" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="t" style="font-size:20px">¿HAY MUCHA GENTE? <span class="nu">NUEVO</span></h2><span style="font-weight:700;color:#4ADE80;font-size:14px">Ahora: poca</span></div>
+<div role="img" aria-label="Más gente de 18 a 20 h; ahora hay poca" style="display:flex;gap:5px;align-items:end;height:90px"><span style="flex:1;height:10%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:25%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:55%;border-radius:5px 5px 2px 2px;background:#3A4A58"></span><span style="flex:1;height:40%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:20%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:15%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:18%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:30%;border-radius:5px 5px 2px 2px;background:#35AE32"></span><span style="flex:1;height:60%;border-radius:5px 5px 2px 2px;background:#3A4A58"></span><span style="flex:1;height:95%;border-radius:5px 5px 2px 2px;background:#FBBF24"></span><span style="flex:1;height:85%;border-radius:5px 5px 2px 2px;background:#3A4A58"></span><span style="flex:1;height:45%;border-radius:5px 5px 2px 2px;background:#35AE32"></span></div>
+<div class="m" style="display:flex;justify-content:space-between;font-size:12px;font-weight:700"><span>8 h</span><span>13 h</span><span>18 h</span><span>22 h</span></div>
+</section>
+<section class="c" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+<h2 class="t" style="font-size:20px">TUS CLASES</h2>
+<div class="row"><div style="flex:1"><div style="font-weight:700">🔥 Cross · vie 19:00</div><div class="m" style="font-size:13px">Reservada · quedan 2 lugares</div></div><span class="tg ok">ADENTRO</span></div>
+<a href="#" class="b b2" style="height:46px">🗓️ Reservar otra</a>
+</section>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<a href="#" class="c" style="padding:16px;border-radius:18px;text-decoration:none;color:#EEF2F5;font-weight:700">💪 Mi rutina</a>
+<a href="#" class="c" style="padding:16px;border-radius:18px;text-decoration:none;color:#EEF2F5;font-weight:700">🧾 Mis pagos</a>
+<a href="#" class="c" style="padding:16px;border-radius:18px;text-decoration:none;color:#EEF2F5;font-weight:700">🎁 Traé un amigo</a>
+<a href="#" class="c" style="padding:16px;border-radius:18px;text-decoration:none;color:#EEF2F5;font-weight:700">💬 Escribir al gym</a>
+</div>
+</div>
+</body>
+</html>
