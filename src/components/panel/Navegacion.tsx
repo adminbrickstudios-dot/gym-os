@@ -10,6 +10,12 @@ import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
 import { Buscador } from "./Buscador";
 import { Icono } from "@/components/ui/Icono";
 import { LogoImagen } from "@/components/ui/LogoImagen";
+import dynamic from "next/dynamic";
+
+// Pase 2.0 · organización: el menú en bloques y "Más" en grilla viven aparte y se bajan solo con la llave prendida (así el menú de
+// siempre pesa lo mismo que antes y no cambia cómo se arman los pedazos de JS compartidos por todas las rutas).
+const MenuBloques = dynamic(() => import("./organizacion/MenuBloques").then((m) => m.MenuBloques));
+const MasEnBloques = dynamic(() => import("./organizacion/MenuBloques").then((m) => m.MasEnBloques));
 
 type Props = {
   gimnasio: string;
@@ -38,7 +44,7 @@ type Props = {
 const activa = (actual: string, ruta: string) => (ruta === "/panel" ? actual === "/panel" : actual === ruta || actual.startsWith(`${ruta}/`));
 
 /** VD-37: el número de una sección. Rojo solo si algo se pierde si no se actúa hoy; el resto, neutro. */
-function Numero({ clave, n }: { clave: string; n: number }) {
+export function Numero({ clave, n }: { clave: string; n: number }) {
   if (n <= 0) return null;
   const rojo = ROJOS.has(clave);
   return (
@@ -50,7 +56,7 @@ function Numero({ clave, n }: { clave: string; n: number }) {
   );
 }
 
-function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji" | "titulo"> & { descripcion?: string; clave?: string }; actual: string; alElegir?: () => void; n?: number }) {
+export function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji" | "titulo"> & { descripcion?: string; clave?: string }; actual: string; alElegir?: () => void; n?: number }) {
   const on = activa(actual, s.ruta);
   return (
     <Link href={s.ruta} onClick={alElegir} aria-current={on ? "page" : undefined}
@@ -66,71 +72,9 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
 }
 
 /** Pase 2.0 · organización: el número de un bloque es la suma de los de sus pestañas; rojo si alguna es roja. */
-const numeroBloque = (p: Pendientes | null, b: BloqueMenu) => b.secciones.reduce((n, c) => n + numeroDe(p, c), 0);
-const claveNumero = (p: Pendientes | null, b: BloqueMenu) => b.secciones.find((c) => ROJOS.has(c) && numeroDe(p, c) > 0) ?? b.clave;
-const bloqueActivo = (actual: string, b: BloqueMenu) => b.rutas.some((r) => activa(actual, r));
-
-function MenuBloques({ bloques, grupos, actual, alElegir, pendientes }: { bloques: BloqueMenu[]; grupos: Grupo[]; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
-  return (
-    <nav aria-label="Secciones" className="space-y-6" data-menu-bloques>
-      <Item s={{ ruta: "/panel", emoji: "inicio", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
-      {grupos.map((g) => {
-        const items = bloques.filter((b) => b.grupo === g);
-        if (!items.length) return null;
-        return (
-          <div key={g} data-grupo={g}>
-            <p className="titulo-grupo px-3 mb-1.5">{g}</p>
-            <div className="space-y-0.5">
-              {items.map((b) => {
-                const on = bloqueActivo(actual, b);
-                const n = numeroBloque(pendientes, b);
-                return (
-                  <Link key={b.clave} href={b.ruta} onClick={alElegir} aria-current={on ? "page" : undefined} data-bloque-menu={b.clave}
-                    className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-12 py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
-                    <span className={`text-xl w-7 text-center ${on ? "text-[var(--acento)]" : "texto-suave"}`} aria-hidden><Icono nombre={b.emoji} sistema /></span>
-                    <span className="min-w-0">
-                      <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{b.titulo}</span>
-                      <span className="block text-[13px] texto-tenue leading-snug" data-linea-bloque>{b.linea}</span>
-                    </span>
-                    <Numero clave={claveNumero(pendientes, b)} n={n} />
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-      <div className="space-y-0.5"><Item s={{ ruta: "/panel/ayuda", emoji: "ayuda", titulo: "Ayuda", descripcion: "Preguntas cortas y cómo se hace" }} actual={actual} alElegir={alElegir} /></div>
-    </nav>
-  );
-}
-
-/** Pase 2.0 · organización: "Más" en el celular, los cuatro bloques en grilla de botones grandes (organizacion/celular-mas.png). */
-function MasEnBloques({ bloques, grupos, alElegir, pendientes }: { bloques: BloqueMenu[]; grupos: Grupo[]; alElegir: () => void; pendientes: Pendientes | null }) {
-  return (
-    <nav aria-label="Más" className="space-y-5" data-mas-bloques>
-      {grupos.map((g) => {
-        const items = bloques.filter((b) => b.grupo === g);
-        if (!items.length) return null;
-        return (
-          <div key={g} data-grupo={g}>
-            <p className="titulo-grupo mb-2">{g}</p>
-            <div className="grid grid-cols-3 gap-2.5">
-              {items.map((b) => (
-                <Link key={b.clave} href={b.ruta} onClick={alElegir} data-bloque-mas={b.clave}
-                  className="tarjeta relative flex flex-col items-center justify-center gap-1.5 min-h-24 px-2 py-3 text-center font-semibold leading-tight">
-                  <span className="text-3xl" aria-hidden><Icono nombre={b.emoji} sistema /></span>
-                  <span className="text-[15px]">{b.corto ?? b.titulo}</span>
-                  {numeroBloque(pendientes, b) > 0 && <span className="absolute top-2 right-2"><Numero clave={claveNumero(pendientes, b)} n={numeroBloque(pendientes, b)} /></span>}
-                </Link>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </nav>
-  );
-}
+export const numeroBloque = (p: Pendientes | null, b: BloqueMenu) => b.secciones.reduce((n, c) => n + numeroDe(p, c), 0);
+export const claveNumero = (p: Pendientes | null, b: BloqueMenu) => b.secciones.find((c) => ROJOS.has(c) && numeroDe(p, c) > 0) ?? b.clave;
+export const bloqueActivo = (actual: string, b: BloqueMenu) => b.rutas.some((r) => activa(actual, r));
 
 function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
   if (props.bloques) return <MenuBloques bloques={props.bloques} grupos={props.grupos} actual={actual} alElegir={alElegir} pendientes={pendientes} />;
