@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
-import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara } from "@/lib/panel/secciones";
+import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara, type Acceso } from "@/lib/panel/secciones";
+import { barraCelular, menuBloques } from "@/lib/panel/organizacion";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
@@ -28,9 +29,14 @@ export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido";
 /** VD-1: lo que necesita la ventana de Entrada que vive en todas las pantallas (null = este rol o este gimnasio no la usa). */
 export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean };
 
-export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null }) {
+export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null, organizacion = false }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null; organizacion?: boolean }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
+  // Pase 2.0 · organización (llave pase_2_organizacion): el menú en bloques y la barra Inicio · Entrada · Hoy · Socios · Más. Sin la llave, lo de siempre.
+  const bloques = organizacion ? menuBloques(secciones) : undefined;
+  const principales: Acceso[] = organizacion ? barraCelular(secciones).map((b) => ({ ...b, roles: [rol] })) : principalesCelular(rol, panel.secciones_apagadas);
+  // Fichar sale del menú: queda el botón ⏱️ Fichar arriba, junto a la campana (solo para quien ficha).
+  const fichar = organizacion && secciones.some((s) => s.clave === "fichar");
   // VD-5: la hoja Cobrar vive acá una sola vez; solo donde Vender está prendido y la persona cobra.
   let sedeCobro: string | null = null;
   if (rutaDisponible("/panel/vender", rol, panel.secciones_apagadas)) {
@@ -47,11 +53,12 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
         apagadas={panel.secciones_apagadas}
         secciones={secciones}
         grupos={GRUPOS}
-        principales={principalesCelular(rol, panel.secciones_apagadas)}
+        principales={principales}
         buscaSocios={!panel.secciones_apagadas.includes("socios")}
         soloVerSocios={rol === "profe"}
         puedeCobrar={!!sedeCobro && !panel.secciones_apagadas.includes("socios")}
         cambiarGimnasio={enPlataforma}
+        bloques={bloques}
       />
       {/* VD-28: el origen (de qué lista venís) y la memoria de scroll de las listas. */}
       <Suspense fallback={null}><OrigenPanel /></Suspense>
@@ -63,7 +70,10 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
       <div className="lg:pl-72">
         <main className="relative mx-auto max-w-5xl px-4 sm:px-8 pt-6 sm:pt-10 pb-44 lg:pb-16">
           {/* AVI-5: la campana, arriba a la derecha en todas las pantallas. */}
-          <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10"><Campana rol={panel.yo.rol} apagadas={panel.secciones_apagadas} /></div>
+          <div className="absolute right-4 sm:right-8 top-4 sm:top-8 z-10 flex items-center gap-2">
+            {fichar && <Link href="/panel/fichar" className="boton boton-chico" data-boton-fichar-arriba><Icono nombre="reloj" /> Fichar</Link>}
+            <Campana rol={panel.yo.rol} apagadas={panel.secciones_apagadas} />
+          </div>
           <SinConexion />
           <VersionNueva />
           {abono?.estado === "vencido" && (

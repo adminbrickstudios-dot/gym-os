@@ -106,7 +106,8 @@ export default async function LayoutPanel({ children }: { children: ReactNode })
     <>
       <RegistrarSesion />
       {!temaCookie && <SincronizarTema />}
-      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada}>
+      {/* Pase 2.0 · organización: la llave viaja con la dirección (el proxy la resolvió con el gimnasio): no es un viaje más. */}
+      <Marco panel={panel} enPlataforma={enPlataforma} atiende={atiende ?? null} abono={abono} entrada={entrada} organizacion={(await headers()).get("x-gimnasio-organizacion") === "si"}>
         <FranjaMantenimiento />
         {soporte?.activo && <BannerSoporte gimnasioId={panel.gimnasio.id} gimnasio={panel.gimnasio.nombre} rol={soporte.rol} motivo={soporte.motivo ?? ""} minutos={soporte.minutos ?? 0} />}
         {ayudas && !soporte?.activo && <AyudaPantalla ambito="panel" rol={panel.yo.rol} inicial={ayudas} />}

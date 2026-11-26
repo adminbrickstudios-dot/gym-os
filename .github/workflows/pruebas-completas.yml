@@ -36,6 +36,10 @@ on:
         description: "Pista Semáforo: la llave pista_semaforo en los demo (si o no)"
         type: string
         default: "si"
+      organizacion:
+        description: "Pase 2.0 organización: la llave pase_2_organizacion en los demo (si o no; no = como Temple Gym hoy)"
+        type: string
+        default: "no"
       tanda:
         description: "Nombre de la tanda (t1, t2...): tandas con nombre distinto corren a la vez, cada una con su base y su app"
         type: string
@@ -121,6 +125,7 @@ jobs:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           SOCIOS_DEMO: ${{ inputs.socios || '300' }}
           SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
+          ORGANIZACION_DEMO: ${{ inputs.organizacion || 'no' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: scripts/local/levantar.sh
@@ -139,6 +144,7 @@ jobs:
           APP_MODO: ${{ inputs.app_modo || 'produccion' }}
           MODO_DEMO: ${{ inputs.modo || 'oscuro' }}
           SEMAFORO_DEMO: ${{ inputs.semaforo || 'si' }}
+          ORGANIZACION_DEMO: ${{ inputs.organizacion || 'no' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           mkdir -p .local
