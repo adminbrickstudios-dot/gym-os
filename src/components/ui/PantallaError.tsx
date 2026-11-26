@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Aviso } from "@/components/panel/Marco";
+import { Aviso } from "@/components/panel/Aviso";
 import { anotarErrorPantalla } from "@/lib/errores-acciones";
 import { Icono } from "@/components/ui/Icono";
 
