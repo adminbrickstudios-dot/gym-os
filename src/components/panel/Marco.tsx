@@ -4,6 +4,7 @@ import { propsMarca } from "@/lib/marca";
 import { urlMarca } from "@/lib/url-marca";
 import { GRUPOS, NOMBRE_ROL, principalesCelular, rutaDisponible, seccionesPara, type Acceso } from "@/lib/panel/secciones";
 import type { BloqueMenu } from "@/lib/panel/organizacion";
+import { PestanasBloque, type PestanasDeBloque } from "./organizacion/PestanasBloque";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 import { Navegacion } from "./Navegacion";
 import { Campana } from "./Campana";
@@ -31,7 +32,7 @@ export type Abono = { estado: "sin_abono" | "al_dia" | "por_vencer" | "vencido";
 export type DatosEntrada = { sedeId: string; config: ConfigEntrada; conQr: boolean; conLlavero: boolean; sedes?: { id: string; nombre: string }[]; puedeCobrar?: boolean };
 
 /** Pase 2.0 · organización: el menú en bloques ya armado (lo arma el layout del panel, en el servidor: así organizacion.ts no viaja al navegador). */
-export type MenuOrganizacion = { bloques: BloqueMenu[]; barra: Omit<Acceso, "roles">[] };
+export type MenuOrganizacion = { bloques: BloqueMenu[]; barra: Omit<Acceso, "roles">[]; pestanas: PestanasDeBloque[] };
 export function Marco({ panel, children, enPlataforma = false, atiende = null, abono = null, entrada = null, organizacion = null }: { panel: PanelGimnasio; children: ReactNode; enPlataforma?: boolean; atiende?: string | null; abono?: Abono | null; entrada?: DatosEntrada | null; organizacion?: MenuOrganizacion | null }) {
   const { rol } = panel.yo;
   const secciones = seccionesPara(rol, panel.secciones_apagadas);
@@ -92,6 +93,8 @@ export function Marco({ panel, children, enPlataforma = false, atiende = null, a
             // VD-61: fija arriba mientras se scrollea: cambiar de persona (con el PIN, sin cerrar sesión) siempre a un toque.
             <p className="pildora mb-6 !text-base sticky top-2 z-30 !pr-1" data-atiende={atiende}><Icono nombre="persona" /> Atiende {atiende} · <Link href="/panel/pin" className="underline inline-flex items-center min-h-11 px-3" data-cambiar-persona>Cambiar</Link></p>
           )}
+          {/* Pase 2.0 · organización: la fila de pestañas de una entrada que junta varias pantallas (la pantalla es la de siempre). */}
+          {organizacion && <Suspense fallback={null}><PestanasBloque bloques={organizacion.pestanas} /></Suspense>}
           <ProveedorSecciones rol={rol} apagadas={panel.secciones_apagadas}>{children}</ProveedorSecciones>
         </main>
       </div>

@@ -8,7 +8,7 @@ import { intentar } from "@/lib/panel/intentar";
 import { contextoPanel, fijo, lectura, rpcLote } from "@/lib/panel/servidor";
 import { rutaDisponible } from "@/lib/panel/secciones";
 import type { PlataEnJuegoDatos } from "@/components/panel/organizacion/PlataEnJuego";
-import { ListaHoy, type FilaHoy, type HechoHoy } from "./ListaHoy";
+import { ListaHoy, type FilaHoy, type HechoHoy } from "../ListaHoy";
 
 type Socio = { socio_id: string; nombre: string; telefono: string | null; que: "vence" | "debe"; monto: number | string; plan: string | null };
 type Transferencia = { pago_id: string; socio_id: string; nombre: string; comprobante: number | string; debe: number | string; plan: string | null; coincide: boolean };

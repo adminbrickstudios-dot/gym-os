@@ -7,7 +7,8 @@ import { memoriaCorta } from "@/lib/rapidez/memoria";
 import { accionDeGimnasio, direccionPropia, esDelGimnasioConSesion, leerRutaGimnasio, usaGimnasioElegido } from "@/lib/proxy-rutas";
 import { rutaGimnasio, urlDeHost } from "@/lib/urls";
 import { dominiosViejos } from "@/lib/dominios";
-import { REDIRECCION_BLOQUE } from "@/lib/panel/organizacion";
+import { BLOQUES, REDIRECCION_BLOQUE } from "@/lib/panel/organizacion";
+import { DESTINO } from "@/lib/panel/rutas";
 
 // VD-47: qué gimnasio es cada dirección se recuerda 60 s en este servidor: la
 // RPC se hace una vez por minuto, no en cada pedido. Un alta nueva aparece en <= 1 minuto.
@@ -44,6 +45,37 @@ function aSuPestana(req: NextRequest, organizacion: boolean | null | undefined):
   return NextResponse.redirect(url, 307);
 }
 
+/**
+ * Pase 2.0 · organización: /panel/bloque/<entrada>?pestana=<sección> se REESCRIBE por dentro a la pantalla de siempre de esa pestaña (la
+ * dirección del navegador queda como pestaña). Así ninguna página junta el JS de todas las pantallas. Sin la llave, lleva (307) a la de siempre.
+ * La ?sub= vuelve a ser la ?pestana= propia de la pantalla; una ?pestana= que no es del bloque (Configuración usa la suya) va tal cual a la primera.
+ */
+function pestanaDelBloque(req: NextRequest, organizacion: boolean | null | undefined): { ir?: NextResponse; reescribir?: URL } | null {
+  const clave = /^\/panel\/bloque\/([a-z]+)$/.exec(req.nextUrl.pathname)?.[1];
+  const bloque = clave ? BLOQUES.find((b) => b.clave === clave && b.pestanas.length > 1) : undefined;
+  if (!bloque) return null;
+  const destino = (seccion: string) => (seccion === "hoy" ? "/panel/hoy/lista" : seccion === "prospectos" ? "/panel/socios" : DESTINO[seccion as keyof typeof DESTINO]);
+  const viejos = new URLSearchParams(req.nextUrl.search);
+  if (organizacion !== true) {
+    const url = req.nextUrl.clone();
+    url.pathname = bloque.pestanas[0].seccion === "hoy" ? DESTINO.tareas : destino(bloque.pestanas[0].seccion);
+    url.search = "";
+    return { ir: NextResponse.redirect(url, 307) };
+  }
+  const pedida = viejos.get("pestana"), sub = viejos.get("sub");
+  const elegida = bloque.pestanas.find((p) => p.seccion === pedida);
+  const activa = elegida ?? (viejos.get("vista") === "interesados" ? bloque.pestanas.find((p) => p.seccion === "prospectos") : undefined) ?? bloque.pestanas[0];
+  const nuevos = new URLSearchParams();
+  viejos.forEach((v, k) => { if (k !== "pestana" && k !== "sub") nuevos.append(k, v); });
+  if (sub) nuevos.set("pestana", sub);
+  else if (pedida && !elegida) nuevos.set("pestana", pedida);
+  if (activa.seccion === "prospectos") nuevos.set("vista", "interesados");
+  const url = req.nextUrl.clone();
+  url.pathname = destino(activa.seccion);
+  url.search = nuevos.toString() ? `?${nuevos}` : "";
+  return { reescribir: url };
+}
+
 // Rutas que piden sesión. El resto (landing, ingresar) es público.
 const PROTEGIDAS = ["/panel", "/app", "/admin"];
 const esProtegida = (ruta: string) => PROTEGIDAS.some((p) => ruta === p || ruta.startsWith(`${p}/`));
@@ -53,9 +85,11 @@ const esProtegida = (ruta: string) => PROTEGIDAS.some((p) => ruta === p || ruta.
  * a /ingresar si no hay usuario. Patrón de @supabase/ssr: la respuesta lleva
  * las cookies nuevas y el pedido también, para que el servidor las vea.
  */
-async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: string, anon: string) {
+async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: string, anon: string, reescribir?: URL) {
   const ruta = req.nextUrl.pathname;
-  let respuesta = NextResponse.next({ request: { headers: cabeceras } });
+  // Pase 2.0 · organización: una pestaña se sirve reescribiendo por dentro a la pantalla de siempre (con la sesión renovada igual).
+  const seguir = () => (reescribir ? NextResponse.rewrite(reescribir, { request: { headers: cabeceras } }) : NextResponse.next({ request: { headers: cabeceras } }));
+  let respuesta = seguir();
   if (!esProtegida(ruta) && ruta !== "/ingresar") return respuesta;
   // ESC-02: la landing y el ingreso de alguien sin sesión no verifican nada (ahorra un getClaims por cada visita anónima).
   if (!esProtegida(ruta) && !req.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return respuesta;
@@ -67,7 +101,7 @@ async function conSesion(req: NextRequest, cabeceras: Headers, supabaseUrl: stri
       setAll: (lista) => {
         lista.forEach(({ name, value }) => req.cookies.set(name, value));
         cabeceras.set("cookie", req.headers.get("cookie") ?? "");
-        respuesta = NextResponse.next({ request: { headers: cabeceras } });
+        respuesta = seguir();
         lista.forEach(({ name, value, options }) => respuesta.cookies.set(name, value, options));
       },
     },
@@ -244,7 +278,9 @@ async function proxyInterno(req: NextRequest) {
       marcarGimnasio(elegido);
       const aPestana = aSuPestana(req, elegido.organizacion);
       if (aPestana) return aPestana;
-      return conSesion(req, cabeceras, supabaseUrl, anon);
+      const pb = pestanaDelBloque(req, elegido.organizacion);
+      if (pb?.ir) return pb.ir;
+      return conSesion(req, cabeceras, supabaseUrl, anon, pb?.reescribir);
     }
     cabeceras.set("x-gymos-contexto", "plataforma");
     return conSesion(req, cabeceras, supabaseUrl, anon);
@@ -291,7 +327,9 @@ async function proxyInterno(req: NextRequest) {
   cabeceras.set("x-gimnasio-organizacion", gimnasio.organizacion === true ? "si" : "no");
   const aPestana = aSuPestana(req, gimnasio.organizacion);
   if (aPestana) return aPestana;
-  return conSesion(req, cabeceras, supabaseUrl, anon);
+  const pb = pestanaDelBloque(req, gimnasio.organizacion);
+  if (pb?.ir) return pb.ir;
+  return conSesion(req, cabeceras, supabaseUrl, anon, pb?.reescribir);
 }
 
 export const config = {

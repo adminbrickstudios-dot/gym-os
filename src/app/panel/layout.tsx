@@ -16,13 +16,14 @@ type EstadoSoporte = { activo: boolean; motivo?: string; minutos?: number; rol?:
 import { RegistrarSesion } from "@/components/panel/RegistrarSesion";
 import { CONFIG_ENTRADA_POR_DEFECTO } from "./entrada/config";
 import { rutaDisponible, seccionesPara } from "@/lib/panel/secciones";
-import { barraCelular, menuBloques } from "@/lib/panel/organizacion";
+import { barraCelular, bloquesPara, menuBloques } from "@/lib/panel/organizacion";
 import type { PanelGimnasio } from "@/lib/panel/servidor";
 
 /** Pase 2.0 · organización: el menú en bloques y la barra del celular, armados acá (servidor) para que organizacion.ts no viaje al navegador. */
 function menuOrganizacion(panel: PanelGimnasio) {
   const secciones = seccionesPara(panel.yo.rol, panel.secciones_apagadas);
-  return { bloques: menuBloques(secciones), barra: barraCelular(secciones) };
+  const pestanas = bloquesPara(secciones).map((b) => ({ clave: b.clave, titulo: b.titulo, pestanas: b.visibles.map((p) => ({ seccion: p.seccion, titulo: p.titulo })) }));
+  return { bloques: menuBloques(secciones), barra: barraCelular(secciones), pestanas };
 }
 import { sedeActiva } from "@/lib/panel/sede";
 import { dominioPlataforma } from "@/lib/dominios";
