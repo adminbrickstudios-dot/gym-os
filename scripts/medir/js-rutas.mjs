@@ -3,6 +3,7 @@
 // Next 16 con Turbopack ya no imprime "First Load JS": se suma a mano desde los manifiestos de cada ruta
 // (`entryJSFiles` de page_client-reference-manifest.js = los chunks que se piden al abrir la ruta) más los del arranque
 // (`rootMainFiles` de build-manifest.json). Lo que se carga con import dinámico al usarlo NO está en esta suma: justamente eso es lo que se mide.
+// También el CSS de cada ruta (`entryCSSFiles`), para el "más liviano" de borrar el estilo clásico (26/11).
 //   node scripts/medir/js-rutas.mjs [--json salida.json]
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -47,8 +48,13 @@ for (const m of manifiestos) {
   for (const lista of Object.values(json.entryJSFiles ?? {})) for (const f of lista) archivos.add(f);
   let crudo = 0, gz = 0;
   for (const f of archivos) { const x = pesoDe(f); crudo += x.crudo; gz += x.gz; }
+  const css = new Set();
+  for (const lista of Object.values(json.entryCSSFiles ?? {})) for (const f of lista) css.add(typeof f === "string" ? f : f.path);
+  let cssCrudo = 0, cssGz = 0;
+  for (const f of css) { const x = pesoDe(f); cssCrudo += x.crudo; cssGz += x.gz; }
   const ruta = "/" + relative(APP, m).split(sep).slice(0, -1).join("/");
-  filas.push({ ruta, archivos: archivos.size, crudoKB: +(crudo / 1024).toFixed(1), gzKB: +(gz / 1024).toFixed(1) });
+  filas.push({ ruta, archivos: archivos.size, crudoKB: +(crudo / 1024).toFixed(1), gzKB: +(gz / 1024).toFixed(1),
+    cssCrudoKB: +(cssCrudo / 1024).toFixed(1), cssGzKB: +(cssGz / 1024).toFixed(1) });
 }
 filas.sort((a, b) => a.ruta.localeCompare(b.ruta));
 
@@ -59,4 +65,4 @@ for (const f of panel) console.log(`| ${f.ruta} | ${f.archivos} | ${f.crudoKB} |
 const r = resumen(panel);
 console.log(`\nRutas del panel: ${r.rutas} · suma ${r.crudoKB} KB (${r.gzKB} KB gzip) · promedio por ruta ${(r.gzKB / Math.max(1, r.rutas)).toFixed(1)} KB gzip`);
 const j = process.argv.indexOf("--json");
-if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r }, null, 2));
+if (j > 0) writeFileSync(process.argv[j + 1], JSON.stringify({ filas, panel: r, todas: resumen(filas) }, null, 2));
