@@ -7,7 +7,7 @@
 // (.local/capturas/inv-pista-*) para mirarlas de a pares con las de antes.
 //   node scripts/e2e/inventario-pantallas.mjs      (con scripts/local/levantar.sh corriendo; MODO_DEMO y SEMAFORO_DEMO dicen qué foto es)
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { CELU, COMPU, GIMNASIO, capturar, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
+import { CELU, COMPU, GIMNASIO, PLATAFORMA, capturar, entrar, entrarSocio, falla, navegador, ok, pagina, resultado } from "./comun.mjs";
 
 const MODO = process.env.MODO_DEMO ?? "oscuro";
 const SEMAFORO = process.env.SEMAFORO_DEMO ?? "si";
@@ -22,6 +22,8 @@ const PANTALLAS = [
   ...["/panel", "/panel/entrada", "/panel/socios", "/panel/vender", "/panel/caja", "/panel/clases", "/panel/mensajes", "/panel/cuenta"].map((ruta) => ({ rol: "recepcion", ruta })),
   ...["/app", "/app/clases"].map((ruta) => ({ rol: "socio", ruta })),
   ...["/", "/hacete-socio", "/ingresar"].map((ruta) => ({ rol: "publico", ruta })),
+  // La plataforma (26/11, después de borrar el clásico): /super, el super admin y la página de venta, siempre en claro. "/admin/gimnasio" es la ficha del primer gimnasio de la lista.
+  ...["/super", "/admin", "/admin/gimnasio", "/admin/gimnasios", "/admin/buscar", "/admin/plantillas", "/admin/registro", "/admin/seguridad", "/"].map((ruta) => ({ rol: "plataforma", ruta })),
 ];
 
 /** Lo que se ve en la página, sin depender de cómo se dibuja: se anota qué es, no cómo se ve. */
@@ -54,18 +56,26 @@ const QUITADOS_A_PROPOSITO = new Map([
 async function recorrer(b) {
   const filas = new Map();
   for (const [tam, viewport] of [["compu", COMPU], ["celu", CELU]]) {
-    for (const rol of ["duena", "recepcion", "socio", "publico"]) {
+    for (const rol of ["duena", "recepcion", "socio", "publico", "plataforma"]) {
       const p = await pagina(b, viewport, { conMayusculas: true });   // el diseño tal cual es, con sus mayúsculas
       try {
         if (rol === "duena") await entrar(p, "duena@ejemplo.invalid");
         else if (rol === "recepcion") await entrar(p, "recepcion@ejemplo.invalid");
         else if (rol === "socio") await entrarSocio(p, "+5490000100002");
+        else if (rol === "plataforma") await entrar(p, "admin@ejemplo.invalid", undefined, PLATAFORMA);
+        const base = rol === "plataforma" ? PLATAFORMA : G;
+        let ficha = null;
         for (const { ruta } of PANTALLAS.filter((x) => x.rol === rol)) {
-          await p.goto(`${G}${ruta}`, { waitUntil: "load", timeout: 90000 }).catch(() => null);
+          if (ruta === "/admin/gimnasio") {
+            ficha ??= await p.goto(`${base}/admin`, { waitUntil: "load", timeout: 90000 }).then(() => p.locator('a[href^="/admin/"]').evaluateAll((as) => as.map((a) => a.getAttribute("href")).find((h) => /^\/admin\/[0-9a-f-]{36}$/.test(h)) ?? null)).catch(() => null);
+            if (!ficha) { falla(`plataforma (${tam}): no se encontró la ficha de un gimnasio en /admin`); continue; }
+          }
+          await p.goto(`${base}${ruta === "/admin/gimnasio" ? ficha : ruta}`, { waitUntil: "load", timeout: 90000 }).catch(() => null);
           await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
           await p.waitForTimeout(700);
           const inv = await p.evaluate(inventariar);
-          if (inv.modo !== MODO) falla(`${rol} ${ruta} (${tam}): el <html> dice modo "${inv.modo}" y se esperaba "${MODO}"`);
+          const esperado = rol === "plataforma" ? "claro" : MODO;   // sin gimnasio, siempre claro
+          if (inv.modo !== esperado) falla(`${rol} ${ruta} (${tam}): el <html> dice modo "${inv.modo}" y se esperaba "${esperado}"`);
           filas.set(`${rol} ${ruta} ${tam}`, inv);
           await capturar(p, `inv-pista-${MODO}-semaforo-${SEMAFORO}-${rol}-${ruta.replace(/[^a-z0-9]+/gi, "_")}-${tam}`).catch(() => {});
         }
