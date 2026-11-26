@@ -180,3 +180,12 @@ test("la tabla nueva: RLS prendida y nadie escribe directo", async () => {
   const [{ e }] = await t.q(`select id e from public.equipo where usuario_id = $1`, [u.recepcion]);
   await como(u.recepcion, () => t.falla(() => t.q(`insert into public.hechos_para_hacer (gimnasio_id, dia, referencia, texto, hecho_por) values ($1, $2, 'llamar', 'xx', $3)`, [t.g, HOY, e])));
 });
+
+test("contexto_pantalla (el viaje de siempre) dice si la llave está prendida, sin un viaje más", async () => {
+  await llave(t.g, false);
+  const [{ r: apagada }] = await como(u.recepcion, () => t.q(`select public.contexto_pantalla($1) r`, [t.g]));
+  assert.equal(apagada.organizacion, false);
+  await llave(t.g, true);
+  const [{ r: prendida }] = await como(u.recepcion, () => t.q(`select public.contexto_pantalla($1) r`, [t.g]));
+  assert.equal(prendida.organizacion, true);
+});
