@@ -7,6 +7,19 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { guardarLista, leerLista, restaurarScroll } from "@/lib/panel/origen";
 
+// 27/11 (Interesados no anda): el último link que tocó la persona, anotado desde que este módulo carga (lo carga el marco del panel).
+// Una lista puede terminar de llegar DESPUÉS de que la persona ya tocó otra cosa (las pestañas del bloque se ven antes que la lista): si al
+// llegar se volviera a los filtros guardados, esa navegación sería la más nueva y le ganaría al toque. Así no se vuelve.
+let ultimoToque: { href: string; t: number } | null = null;
+if (typeof document !== "undefined") {
+  document.addEventListener("click", (e) => {
+    const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+    if (a) ultimoToque = { href: a.href, t: Date.now() };
+  }, true);
+}
+/** La persona tocó, hace poco, un link a otra dirección que la de ahora: ya se está yendo. */
+const yendoseAOtraParte = () => !!ultimoToque && Date.now() - ultimoToque.t < 10_000 && ultimoToque.href !== window.location.href;
+
 /** `ruta` es la pantalla (/panel/socios); `actual`, su query de ahora con "?" (o "" sin filtros). */
 export function useMemoriaLista(ruta: string, actual: string, filtros = false) {
   const router = useRouter();
@@ -21,7 +34,7 @@ export function useMemoriaLista(ruta: string, actual: string, filtros = false) {
     primera.current = false;
     const g = leerLista(ruta);
     if (!g) return;
-    if (filtros && actual === "" && g.q !== "") { scrollPendiente.current = g.y; router.replace(`${ruta}${g.q}`); return; }
+    if (filtros && actual === "" && g.q !== "") { if (yendoseAOtraParte()) return; scrollPendiente.current = g.y; router.replace(`${ruta}${g.q}`); return; }
     if (actual === g.q) scrollPendiente.current = g.y;
   }, [actual, filtros, ruta, router]);
 
