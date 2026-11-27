@@ -1,15 +1,16 @@
 # PROGRESO de Pase (antes Base)
 
-## ⏳ Pase 2.0 · organización (26/11): Parte 1 mergeada sin publicar, Parte 2 en la base, Partes 3 a 6 en la rama
+## ⏳ Pase 2.0 · organización (26/11 y 27/11): Parte 1 mergeada sin publicar, Parte 2 en la base, Partes 3 a 6 listas en el PR (sin aplicar ni mergear)
 
 | Publicación | Estado | Merge / migración | Se vuelve a | Lo mirado en producción |
 |---|---|---|---|---|
 | Parte 1 · impresión clara, acento legible, plataforma en el inventario, /hacete-socio bajo su tope | mergeada, **Vercel no la publicó** | PR #49, `58de2cc3` | `2a1639ca` | 14:43 ART, 12 direcciones (compu y celular) en 200, pero con el código viejo (`2a1639c`) |
 | Parte 2 · base (llave, funciones de ver sin entrar, `hechos_para_hacer`) | **aplicada** SIN COPIA (autorizada) | `20261126100000_pase_2_organizacion` | aditiva: el código viejo no la usa | chequeos contra producción en verde, tipos al día |
-| Partes 3 a 6 · menú en bloques, pestañas, Para hacer hoy, ver sin entrar, ficha, Resultado, app | en `dia/2026-11-26-pase2`, **sin publicar** | migraciones `20261126120000` y `20261126130000` sin aplicar | — | — |
+| Partes 3 a 6 · menú en bloques, pestañas, Para hacer hoy, ver sin entrar, ficha, Resultado, app | PR a main desde `dia/2026-11-26-pase2`, **sin mergear** | `20261126120000` y `20261126130000`: prevuelo contra producción en verde (27/11), sin aplicar | `58de2cc3` (main) | — |
 
 - Llave apagada: inventario igual a la foto de antes (84 pantallas, oscuro y claro). Llave prendida: e2e organizacion-menu 26/26 y organizacion-hoy 18/18.
-- **Bloqueo**: con la Parte 3 el JS de primera carga sube ~1,5 KB gzip en todas las rutas (/hacete-socio 210,5 contra tope 209). Causa de fondo: PantallaError importa `Aviso` de `Marco` y el marco del panel viaja en todas las rutas (detalle en LOG 26/11).
+- ~~Bloqueo del JS~~ (27/11): el marco del panel entraba en todas las rutas por la 404 raíz y por PantallaError. Cortado: /hacete-socio 210,5 → 152,8 KB, / 210,7 → 151,4, /kiosco 205,3 → 146,1, /app 232,0 → 216,5. El panel queda +1,3 sobre la rama (+2,9 sobre main): tope subido a lo medido, autorizado por Mateo para esta tarea (LOG 27/11).
+- 27/11: Interesados no anda (Menú → Socios → Interesados volvía a Socios con la llave prendida): arreglado en la memoria de la lista, e2e interesados-menu.
 
 ## ✅ Clásico borrado, publicación A (26/11, Pase 2.0 ítem 1): Pista es el único estilo
 
