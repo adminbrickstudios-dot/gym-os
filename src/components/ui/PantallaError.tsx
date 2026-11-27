@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Aviso } from "@/components/panel/Marco";
+import { Aviso } from "@/components/panel/Aviso";
 import { anotarErrorPantalla } from "@/lib/errores-acciones";
 import { Icono } from "@/components/ui/Icono";
 
@@ -27,7 +26,7 @@ export function PantallaError({ error, reset, inicio = "/", titulo, icono }: {
       <div className="flex flex-wrap gap-2 mt-6">
         {reset && !sinPermiso && <button type="button" onClick={reset} className="boton boton-principal"><Icono nombre="repetir" /> Probar de nuevo</button>}
         <button type="button" onClick={() => router.back()} className="boton">← Volver</button>
-        <Link href={inicio} className="boton"><Icono nombre="inicio" /> Ir al inicio</Link>
+        <a href={inicio} className="boton"><Icono nombre="inicio" /> Ir al inicio</a>
       </div>
     </Aviso>
     </div>

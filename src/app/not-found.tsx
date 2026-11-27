@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { headers } from "next/headers";
-import { Aviso } from "@/components/panel/Marco";
+import { Aviso } from "@/components/panel/Aviso";
 import { traerLanding } from "@/lib/landing";
 import { propsMarca } from "@/lib/marca";
 import { Icono } from "@/components/ui/Icono";
@@ -20,7 +19,9 @@ export default async function NoEncontrada() {
           <h1 className="titular text-5xl sm:text-6xl mt-4">No encontramos esta página</h1>
           <p className="texto-suave text-lg mt-4">La dirección no existe o ya no está.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/" className="boton boton-principal text-lg px-8">Ir a la página de {landing.marca.nombre}</Link>
+            {/* <a> y no <Link> (27/11): esta 404 está en el árbol de todas las rutas y next/link se copiaba en su pedazo propio. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a href="/" className="boton boton-principal text-lg px-8">Ir a la página de {landing.marca.nombre}</a>
             <a href="/ingresar?modo=socio" className="boton text-lg px-8">Soy socio</a>
             <VolverAtras className="boton text-lg px-8" />
           </div>
@@ -34,7 +35,8 @@ export default async function NoEncontrada() {
         <p>La dirección no existe o ya no está.</p>
         <div className="flex flex-wrap gap-2 mt-6">
           <VolverAtras className="boton" />
-          <Link href="/" className="boton boton-principal"><Icono nombre="inicio" /> Ir al inicio</Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/" className="boton boton-principal"><Icono nombre="inicio" /> Ir al inicio</a>
         </div>
       </Aviso>
     </main>
