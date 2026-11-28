@@ -134,7 +134,14 @@ try {
       // D83: con las altas con plan apagadas el formulario es solo "Tus datos" (+ reglamento si hay): crear la cuenta no pide plan ni cómo pagás.
       const conPlan = await a.locator("#paso-plan").count() > 0;
       if (!conPlan) chequear(pasos.length >= 1 && /Tus datos/.test(pasos[0]), `${tam} · crear la cuenta sin plan: pasos con nombre (${pasos.join(" / ")})`, `${tam} · crear la cuenta sin plan: pasos ${pasos.join(" / ")}`);
-      else chequear(pasos.length === 4 && /Tu plan/.test(pasos[0]) && /Cómo pagás/.test(pasos[3]), `${tam} · registro: cuatro pasos con nombre (${pasos.join(" / ")})`, `${tam} · registro sin pasos: ${pasos.join("|")}`);
+      else {
+        // D83: sin plan elegido no hay "Cómo pagás" (se paga en el gimnasio); al elegir un plan aparece como último paso.
+        chequear(/Tu plan/.test(pasos[0]) && !pasos.some((t) => /Cómo pagás/.test(t)), `${tam} · registro sin plan elegido: pasos con nombre, sin “Cómo pagás” (${pasos.join(" / ")})`, `${tam} · registro sin plan elegido: ${pasos.join("|")}`);
+        await a.locator('#paso-plan input[type="radio"]:not([value=""])').first().check({ force: true });
+        await a.locator("[data-pasos-alta] a", { hasText: "Cómo pagás" }).first().waitFor({ timeout: 10000 }).catch(() => {});
+        const conPago = await a.locator("[data-pasos-alta] a").allInnerTexts();
+        chequear(conPago.length === pasos.length + 1 && /Tu plan/.test(conPago[0]) && /Cómo pagás/.test(conPago.at(-1)), `${tam} · registro con plan: suma “Cómo pagás” al final (${conPago.join(" / ")})`, `${tam} · registro con plan sin “Cómo pagás”: ${conPago.join("|")}`);
+      }
       chequear(await sinDesborde(a), `${tam} · registro sin desborde`, `${tam} · registro se desborda`);
       if (tam === "celu") await capturar(a, "vd61-celu-registro", true);
     } else ok(`${tam} · el alta online está cerrada en el demo: se muestra “por ahora el alta se hace en el gimnasio” (sin form)`);

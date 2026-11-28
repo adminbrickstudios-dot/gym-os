@@ -71,9 +71,14 @@ try {
   await s.goto(`${G}/app`);
   const qr = s.locator("[data-mi-qr]");
   await qr.waitFor({ timeout: 30000 });
-  chequear(await qr.getAttribute("data-vencido") === "no", "Mi QR: recién abierto está vigente", "arrancó vencido");
+  // 28/11: el QR vale por ventanas de 30 s (mi_qr). Si la app abre en los últimos segundos de una, arranca vencido y se renueva a los 5 s
+  // (MINIMO_MS, a propósito: d9f3cdbb). Se espera esa condición en vez de leer en el instante (fallaba según el segundo en que abría).
+  const vigente = await s.waitForFunction(() => document.querySelector("[data-mi-qr]")?.getAttribute("data-vencido") === "no" && /se renueva en/.test(document.querySelector("[data-mi-qr]")?.textContent ?? ""), null, { timeout: 10000 }).then(() => true, () => false);
+  chequear(vigente, "Mi QR: recién abierto está vigente (o se renueva solo en segundos)", "arrancó vencido y no se renovó");
   await s.context().setOffline(true);
   await s.waitForFunction(() => document.querySelector("[data-mi-qr]")?.getAttribute("data-vencido") === "si", null, { timeout: 60000 });
+  // Sin señal, el pedido de renovación falla y recién ahí dice "Sin señal" (si venció justo, antes dice "Renovando…" hasta el reintento).
+  await s.waitForFunction(() => /Sin señal/.test(document.querySelector("[data-mi-qr]")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
   const aviso = (await qr.innerText()).replace(/\s+/g, " ");
   chequear(/Sin señal: decí tu DNI en la recepción/.test(aviso), "Mi QR sin señal: el QR vencido no queda a la vista y dice “Sin señal: decí tu DNI en la recepción”", `dice: ${aviso}`);
   await s.context().setOffline(false);

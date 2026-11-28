@@ -32,6 +32,9 @@ const limpiar = async () => {
   await q(`delete from public.funciones_nuevas_gimnasio where gimnasio_id = $1`, [gim]);
   await q(`update public.configuracion_gimnasio set pide_apto = false, apto_en_entrada = 'nada', apto_aviso_dias = 15 where gimnasio_id = $1`, [gim]);
 };
+// 28/11: las llaves del demo (pista_semaforo, pase_2_organizacion…) se guardan antes y se devuelven al final: si no, los recorridos que vienen
+// después en la misma tanda (semaforo-pantallas, organizacion-*) veían el demo con todo apagado.
+const llavesAntes = await q(`select clave, activa, prendida_en, cambiada_en from public.funciones_nuevas_gimnasio where gimnasio_id = $1`, [gim]);
 await limpiar();
 await q(`insert into public.reglamentos (gimnasio_id, version, texto) select g.id, 1, 'Reglamento de prueba del gimnasio demo para el e2e de la fase N.' from public.gimnasios g where g.id = $1 and not exists (select 1 from public.reglamentos r where r.gimnasio_id = g.id)`, [gim]);
 await q(`update public.configuracion_gimnasio set altas_online = true where gimnasio_id = $1`, [gim]);
@@ -258,6 +261,9 @@ try {
   falla(`se cortó: ${process.env.E2E_DEPURAR ? e.message : e.message.split("\n")[0]}`);
 } finally {
   await limpiar().catch(() => {});
+  for (const l of llavesAntes) {
+    await q(`insert into public.funciones_nuevas_gimnasio (gimnasio_id, clave, activa, prendida_en, cambiada_en) values ($1, $2, $3, $4, $5) on conflict (gimnasio_id, clave) do update set activa = excluded.activa`, [gim, l.clave, l.activa, l.prendida_en, l.cambiada_en]).catch((e) => console.log(`✗ no se pudo devolver la llave ${l.clave}: ${e.message}`));
+  }
   await db.end();
 }
 await b.close();

@@ -61,6 +61,18 @@ try {
     await d.waitForTimeout(4000);
     await enInteresados(d, `${rol} compu (pestaña, con la base lenta)`);
     await d.unroute(/estado=al_dia/);
+    // 28/11 (menú viejo, producción): TODO viaje al servidor tarda (Supabase lejos). Menú → Socios con memoria: la lista llega y pide volver
+    // al filtro de antes (un viaje lento); la persona ve las pestañas y toca Interesados antes de que vuelva. Tiene que quedar en Interesados.
+    await d.goto(`${G}/panel`);
+    await menu.waitFor({ timeout: 30000 });
+    await d.route(/_rsc=|\/panel\/socios/, async (r) => { await new Promise((ok) => setTimeout(ok, 1500)); await r.continue().catch(() => {}); });
+    await menu.locator('a[href^="/panel/bloque/socios"], a[href="/panel/socios"]').first().click();
+    const pestanaLenta = d.locator('[data-pestanas-bloque] a, [data-pestanas-socios] a', { hasText: "Interesados" }).first();
+    await pestanaLenta.waitFor({ timeout: 30000 });
+    await pestanaLenta.click();
+    await d.waitForTimeout(6000);
+    await enInteresados(d, `${rol} compu (Menú → Socios → Interesados, todo lento)`);
+    await d.unroute(/_rsc=|\/panel\/socios/);
     // La dirección vieja.
     await d.goto(`${G}/panel/prospectos`);
     await enInteresados(d, `${rol} compu (/panel/prospectos)`);
