@@ -1,3 +1,88 @@
+## 2026-11-27 · Pase 2.0 · organización: Interesados, el tope de JS y el cierre de las Partes 3 a 6 (rama `dia/2026-11-26-pase2`, PR a main sin mergear)
+
+**QUÉ HICE**
+- **Interesados no anda (Mateo).** Reproducido con sesión real (WSL: `levantar.sh`, base local) como dueña y como recepción, en compu y celular. **Con la llave prendida** (rama): Menú → Socios → Interesados terminaba en `?pestana=socios&estado=al_dia` (4 de 4 rojas). Causa: las pestañas del bloque están en el marco y se ven antes que la lista; la persona toca Interesados, la lista de Socios llega después y su memoria (VD-15/VD-28: al entrar sin filtros vuelve a los de antes) pide un `router.replace` más nuevo que el toque, y gana (secuencia medida: toque a 910 ms, la memoria pide los filtros a 1554 ms). **Con la llave apagada no se reproduce**: ni en la rama (dev) ni en `main` 58de2cc con `next start` (14/14), tampoco con la base lenta a propósito (3 s de demora en la vuelta a los filtros). Arreglo en `useMemoriaLista`: anota el último link tocado y no vuelve a los filtros si hace menos de 10 s se tocó un link a otra dirección. Prueba primero roja: `scripts/e2e/interesados-menu.mjs` (en `npm run e2e`), con un paso que fija lo de antes ("Menú → Socios vuelve al filtro de antes"). No toca permisos ni plata. Commit `027d604b`.
+- **Tope de JS, causa de fondo (con los mapas del build, pedazo por pedazo).** `/hacete-socio` cargaba un pedazo de 150 KB con el marco entero del panel (Navegacion, VentanaEntrada, PanelSocioLateral, CobrarHost, PestanasBloque…). Lo traían dos caminos: `src/app/not-found.tsx` (la 404 raíz, en el árbol de todas las rutas) y `PantallaError` (error.tsx raíz) importaban `Aviso` desde `Marco`. El intento del 26/11 cortó solo PantallaError: el marco seguía entrando por la 404 y Turbopack copiaba `next/link` e `Icono` aparte (+9 KB). Ahora `Aviso` vive en su archivo (Marco lo re-exporta) y la 404 raíz y PantallaError usan `<a>` en vez de `<Link>` (si no, `next/link` se copiaba en el pedazo de cada una). Commit `4f628718`.
+- **Medido (KB gzip, primera carga; Analizar bundle en Actions, run 46064323701 en verde):**
+
+  | Ruta | main | rama antes | ahora | tope antes → ahora |
+  |---|---:|---:|---:|---|
+  | /hacete-socio | 208,9 | 210,5 | 152,8 | 209 → 152,8 |
+  | / | 209,1 | 210,7 | 151,4 | 210 → 151,4 |
+  | /kiosco | 203,8 | 205,3 | 146,1 | 204 → 146,1 |
+  | /app | 230,4 | 232,0 | 216,5 | 231 → 216,5 |
+  | /panel | 213,6 | 215,2 | 216,5 | 214 → **216,5** |
+  | /panel/entrada | 216,9 | 218,5 | 219,9 | 217 → **219,9** |
+  | /panel/socios | 209,7 | 211,4 | 212,7 | 210 → **212,7** |
+  | /panel/socios/[id] | 225,8 | 227,4 | 228,7 | 226 → **228,7** |
+  | /panel/caja | 210,2 | 211,7 | 213,1 | 211 → **213,1** |
+  | /panel/clases | 202,4 | 203,9 | 205,3 | 203 → **205,3** |
+
+  En 45 minutos el panel no bajó: **subí sus seis topes exactamente a lo medido en Actions** (autorizado por Mateo para esta tarea). Lo que suma: la Parte 3 (menú en bloques en Navegacion +2,8 KB sin comprimir, PestanasBloque, AbrirEnLateral, el panel lateral con sus números, fechas.ts) y una copia de `Icono` que Turbopack repite en el pedazo del error raíz. Los cuatro públicos bajan a lo nuevo. El control compara con un decimal (como imprime; antes "216,5 (tope 216,5)" fallaba por el valor sin redondear) y `chequeos` acepta topes con decimales. Commits `4bad843b`, `2a3b21f5`.
+- **Partes 3 a 6**: el código ya estaba completo (26/11); lo verifiqué contra DISENO.md § "Pase 2.0 · Organización" (menú, pestañas, Inicio con Plata en juego, Volvieron y Cumpleaños, Para hacer hoy, panel lateral, Socios con Este mes, ficha, Resultado, app). Lo único que faltaba era la cuenta de `n-nuevas` (13 funciones con `pase_2_organizacion`, esperaba 12): commit `1d46568b`, en verde (run 46077458291).
+- **Verificación**: lint, typecheck, vitest 482/482, mapa de pantallas (137 rutas) y `next build` en verde (local, WSL). Pruebas de la base 1220/1220 y chequeos "Todo en verde" en Actions (base nueva, reloj fijo; run 46060499810). Permisos en negativo de `numeros_fila_socio` y `historia_socio` (llave apagada, profe y otro gimnasio dan error) y carrera de tildar/deshacer en `pase2-organizacion*.test.mjs`, dentro de esas 1220.
+- **Pantallas en Actions** (commit `4bad843b`): **llave apagada, tanda completa** (run 46060510710): fallan 8. De esas, `pulido-roto`, `semaforo-pantallas`, `vd-28` y `vd-61` fallan igual en `main` (run 46076651309); `flujo-cierre`, `vd-13` y `velocidad-a` pasan repetidas solas (run 46076654009, inestables en la tanda larga); `n-nuevas`, arreglada (arriba). Barrido en verde. **Llave prendida, tanda limpia** (run 46076702522): organizacion-menu 26/26, organizacion-hoy 18/18, interesados-menu 14/14, barrido 248/248 (cada rol, cada pantalla, compu y celular). `vd-11` y `vd-15` fallan con la llave porque prueban el menú viejo y que la fila abra la ficha (con la llave abre el panel lateral, por diseño); `vd-28` falla igual en main.
+- **Prevuelo** de `20261126120000_direccion_organizacion` y `20261126130000_socios_ficha_organizacion` contra producción (base-de-datos.yml, prevuelo, run 46060530518): las dos OK, todo revertido. **No se aplicaron.**
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- La tanda completa con `organizacion=si` no prueba la llave: algún recorrido anterior apaga las funciones nuevas del demo y, cuando llegan `organizacion-menu`/`organizacion-hoy` (al final), la pantalla está con el menú viejo (run 46060507107: 51 rojas, casi todas por eso). La llave prendida se prueba en tanda aparte (`solo`), como hice. No lo toqué.
+- `SalidaError.tsx` pesa 35,6 KB (sin comprimir) y cae en 82 de 106 rutas (Analizar bundle): candidato para bajar el panel. No lo toqué.
+- En producción la Parte 2 ya está aplicada: la pantalla Funciones nuevas de Temple Gym, con el código de hoy, ya lista la llave nueva (13). Prenderla hoy no hace nada (el código viejo no la lee), pero conviene no tocarla hasta publicar.
+- `pulido-roto` ("Renovando tu QR…"), `semaforo-pantallas` (`semaforo=undefined`), `vd-28` (clic en la lista en el celular) y `vd-61` (pasos del registro) fallan en main: viejas, sin tocar.
+- La base local de WSL usada por e2e deja usuarios: `db:pruebas` local da 27 rojas por `users_email_unico` y el reloj sin fijar. En Actions (base nueva, reloj fijo) 1220/1220.
+
+**QUÉ CORRÉS VOS** (después de las 22 h)
+1. Actions → Base de datos → Run workflow, rama `dia/2026-11-26-pase2`, acción `prevuelo`. Tiene que decir "Pre-vuelo OK (2 migraciones)".
+2. Mismo workflow, acción `aplicar` (con la copia; si Copias sigue sin `COPIA_CLAVE`, solo con tu SIN COPIA). Después, acción `chequeos`.
+3. Acción `tipos` en la misma rama, si el paso 2 dejó diff.
+4. Mergear el PR de `dia/2026-11-26-pase2` a main.
+5. Vercel tiene que publicar main (hoy no lo hace): si no aparece el deploy, Redeploy de main a mano.
+6. Abrir `/api/salud` y comprobar que el commit es el del merge. En los 5 minutos: con la llave apagada en Temple, /panel, /panel/socios, Menú → Socios → Interesados, /hacete-socio y /app en 200, y el menú de siempre.
+- Se vuelve a: `58de2cc3` (main de hoy). Las dos migraciones son aditivas: el código de 58de2cc sigue andando con ellas.
+
+**QUÉ CONFIGURÁS VOS**
+- Vercel: el proyecto de Pase conectado a GitHub con rama de producción `main` (lo del 26/11, sigue sin publicar).
+- `COPIA_CLAVE` en Actions.
+
+**SIN ARREGLAR**
+- El panel pesa +2,9 KB gzip sobre main (tope subido, autorizado). Para bajarlo: la copia de `Icono` en el pedazo del error raíz y `SalidaError`.
+- Las pruebas viejas que fallan en main (arriba).
+
+**LO QUE NO PUDE VERIFICAR**
+- Interesados en producción (Temple Gym, código `2a1639c`): no tengo acceso a esa base ni a sus logs, y con la llave apagada no se reproduce acá. Si Mateo lo vio con la llave apagada, el arreglo de hoy no lo cubre y hace falta saber qué toca exactamente y qué ve.
+- Nada está publicado: ni la Parte 1 (Vercel) ni las Partes 3 a 6 (sin aplicar ni mergear).
+- Lighthouse y los viajes por pantalla con la llave prendida (no los corrí).
+
+## 2026-11-26 · Pase 2.0 · organización: ver sin entrar, menú de 29 a 12 y las pantallas nuevas (rama `dia/2026-11-26-pase2`)
+
+**QUÉ HICE**
+- **Parte 1 (vuelta chica post-clásico), mergeada (PR #49, merge `58de2cc3`; se vuelve a `2a1639ca`) pero NO publicada: Vercel no tomó el merge** (ningún estado de Vercel en el commit; la CLI de esta compu está logueada en otra cuenta, `bolterusr`, sin el proyecto de Pase). Producción sigue en `2a1639c`. Lo que trae, probado en Actions: /super y /admin en el inventario (18 pantallas, claro, super-admin/alta-de-cero/demo-prospecto en verde); impresión siempre clara (prueba `impresion-clara` primero roja, después verde; el reporte del cierre de caja se imprime); acento legible de Pista que ahora llega a las pantallas (prueba `acento-legible`, Temple #1AA316 y #FBBF24, 4,5:1 en oscuro y claro); /hacete-socio 208,9 KB (tope 209, Analizar bundle verde).
+- **Parte 2 (base, expandir), APLICADA en producción** SIN COPIA (autorizado para esta tarea; Copias falla por COPIA_CLAVE): `20261126100000_pase_2_organizacion` (prevuelo y aplicar en Actions, chequeos verdes contra producción, tipos al día). Llave `pase_2_organizacion` (13 claves en el catálogo; prendida en los [demo], apagada en Temple Gym), funciones calculadas: numeros_socio(s), volvieron_mes, plata_en_juego, si_cobras_lo_que_falta, transferencias_a_revisar, ocupacion_por_hora, hecho_hoy, tildar_hecho, deshacer_ultimo_hecho; tabla `hechos_para_hacer` (RLS, deshacer = anular). Pruebas de la base: llave apagada = error, otro gimnasio y rol sin permiso = error, reloj fijo, carreras de tildar/deshacer con dos conexiones (1219 en verde).
+- **Partes 3 a 6 escritas y probadas en la rama, sin aplicar ni publicar** (migraciones `20261126120000_direccion_organizacion` y `20261126130000_socios_ficha_organizacion` todavía NO aplicadas): menú de 12 en 4 bloques con su línea chica, pestañas `/panel/bloque/<entrada>?pestana=` (el proxy reescribe por dentro a la pantalla de siempre), cada dirección vieja a su pestaña, Fichar arriba, celular Inicio · Entrada · Hoy · Socios · Más (en grilla); Inicio con Plata en juego hoy y Volvieron este mes; Para hacer hoy en una lista (filtros, acción por fila, Debe $X y amarillo si no coincide, Hecho hoy, Deshacer el último, Avisar a los N de a uno por wa.me); panel lateral desde toda lista (con sus tres números); Socios con "Este mes"; ficha con números, Cuándo viene y Su historia; Resultado con Si cobrás lo que falta; app con la racha y ¿Hay mucha gente?.
+- Pruebas en Actions: **llave apagada** = inventario sin perder nada (84 pantallas, oscuro y claro), menú y Para hacer hoy de siempre, semaforo-pantallas 29 en verde; **llave prendida** = e2e `organizacion-menu` 26/26 y `organizacion-hoy` 18/18 (pestañas, Atrás, direcciones viejas, Ctrl K, roles, celular, Plata en juego, Debe $X, tildar, Hecho hoy, deshacer que anula, panel lateral, Este mes, ficha, ¿Hay mucha gente?).
+
+**LO QUE ENCONTRÉ SIN PEDIRTELO**
+- **PantallaError (la pantalla de error de TODAS las rutas) importa `Aviso` desde `Marco`**: el marco entero del panel (menú, ventana de Entrada, Cobrar) viaja en el JS de cada ruta, hasta /hacete-socio. Separarlo cambió cómo Turbopack arma los pedazos y empeoró (+9 KB): se revirtió. Hay que mirarlo con el detalle de pedazos (no con el top 15).
+- Una migración mía (`contexto_pantalla` + `organizacion`) llamaba a `privado.funcion_activa` sin permiso y rompía el panel entero: la vio la e2e con la llave apagada; nunca se aplicó en producción y se sacó.
+- `funciones_nuevas_gimnasio.clave` no aceptaba dígitos: se amplió el check (solo amplía).
+- super-f2 (strict mode en `[data-demos] input`) y vd-61 fallan igual en main; la medición de 5000 socios en la base a veces se pasa de presupuesto.
+
+**QUÉ CORRÉS VOS**
+1. Publicar la Parte 1: Vercel → proyecto de Pase → Deployments → Redeploy de `main` (`58de2cc3`). Después mirar /api/salud (commit `58de2cc`).
+2. Nada más hasta resolver el peso (abajo).
+
+**QUÉ CONFIGURÁS VOS**
+- Vercel → Pase → Settings → Git: que `adminbrickstudios-dot/gym-os` siga conectado y la rama de producción sea `main` (si se desconectó: Connect Git Repository → GitHub → el repo → Production Branch `main`). No lo pude ver: la cuenta de la CLI no tiene el proyecto.
+- El secreto `COPIA_CLAVE` en Actions (Copias falla sin él).
+
+**SIN ARREGLAR**
+- **Peso del JS: con la Parte 3 todas las rutas suben ~1,5 KB gzip y pasan su tope** (medido commit por commit: antes 208,9 KB /hacete-socio; con la Parte 3, 211,2; con las pestañas por reescritura, 210,5). Por la regla "topes sin subir" las Partes 3 a 6 NO se publican hasta bajarlo. La causa de fondo es PantallaError → Marco (arriba).
+- No hechos: elegir varios en Socios ya existía (Pista Semáforo); Lighthouse con la llave prendida; pruebas-completas en todas las tandas con la llave prendida; viajes con la llave (corrida cancelada); fotos al lado de cada PNG.
+
+**LO QUE NO PUDE VERIFICAR**
+- Nada de las Partes 1 a 6 está en producción (Parte 1 esperando Vercel; 3 a 6 bloqueadas por el peso). La Parte 2 está en la base de producción sin código que la use (expandir).
+- Los viajes por pantalla con la llave prendida (la medición se canceló al reiniciar las corridas): el código suma las lecturas nuevas a los lotes existentes, salvo la ficha (un viaje más) y Resultado (uno más).
+
 ## 2026-11-26 · Pase 2.0, ítem 1: borrar el estilo clásico, publicación A (PR #47)
 
 **QUÉ HICE**

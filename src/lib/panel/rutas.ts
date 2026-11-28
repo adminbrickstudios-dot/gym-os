@@ -14,6 +14,7 @@ export const DESTINO = {
   clases: "/panel/clases",
   avisos: "/panel/avisos",
   tareas: "/panel/tareas",              // VD-13: "Para hacer hoy"
+  hoy: "/panel/hoy",                    // Pase 2.0 · organización: la lista única de Para hacer hoy (con la llave; sin ella lleva a tareas)
   vencen_hoy: "/panel/vencen-hoy",      // "Vencen y cobrar"
   socios: "/panel/socios",
   retencion: "/panel/retencion",        // "Retención y números"

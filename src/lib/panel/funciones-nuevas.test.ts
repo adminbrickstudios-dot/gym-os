@@ -7,12 +7,12 @@ const carpeta = "supabase/migrations";
 const ultimaDelCatalogo = readdirSync(carpeta).filter((f) => f.endsWith(".sql")).sort().reverse()
   .find((f) => readFileSync(`${carpeta}/${f}`, "utf8").includes("create or replace function privado.funciones_nuevas_catalogo"))!;
 const sql = readFileSync(`${carpeta}/${ultimaDelCatalogo}`, "utf8");
-const catalogo = [...sql.matchAll(/jsonb_build_object\('clave', '([a-z_]+)'/g)].map((m) => m[1]);
+const catalogo = [...sql.matchAll(/jsonb_build_object\('clave', '([a-z0-9_]+)'/g)].map((m) => m[1]);
 
 describe("funciones nuevas: un solo interruptor", () => {
-  it("el catálogo tiene las doce claves, sin repetir", () => {
+  it("el catálogo tiene las trece claves, sin repetir", () => {
     expect(new Set(catalogo).size).toBe(catalogo.length);
-    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "aviso_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "landing_nueva", "origen_altas", "panel_pago", "pista_semaforo", "resumen_noche", "valor_socio", "vuelto_efectivo"]);
+    expect([...catalogo].sort()).toEqual(["apto_vencimiento", "aviso_vencimiento", "borrador_alta", "debito_automatico", "horarios_pico", "landing_nueva", "origen_altas", "panel_pago", "pase_2_organizacion", "pista_semaforo", "resumen_noche", "valor_socio", "vuelto_efectivo"]);
   });
   it("cada una trae título, explicación y la frase de “Qué hay de nuevo”", () => {
     for (const c of catalogo) {

@@ -78,6 +78,14 @@ if [[ "${SEMAFORO_DEMO:-si}" == "si" ]]; then
 else
   psql -qc "update public.funciones_nuevas_gimnasio set activa = false where clave = 'pista_semaforo'" "$URL"
 fi
+# Pase 2.0 · organización (26/11): ORGANIZACION_DEMO=si prende la llave pase_2_organizacion en los [demo] (menú en bloques y ver sin entrar).
+# Por defecto "no": la llave apagada, como la tiene hoy Temple Gym (las pantallas de siempre).
+if [[ "${ORGANIZACION_DEMO:-no}" == "si" ]]; then
+  psql -qc "insert into public.funciones_nuevas_gimnasio (gimnasio_id, clave, activa, prendida_en, cambiada_en) select id, 'pase_2_organizacion', true, now(), now() from public.gimnasios where es_demo on conflict (gimnasio_id, clave) do update set activa = true" "$URL"
+else
+  psql -qc "update public.funciones_nuevas_gimnasio set activa = false where clave = 'pase_2_organizacion'" "$URL"
+fi
+echo "Llave pase_2_organizacion en los demo: ${ORGANIZACION_DEMO:-no}."
 # F8.1: con una base recién sembrada (5.000 socios) el planificador no tiene estadísticas hasta que autovacuum pasa (a los minutos): sin esto,
 # las primeras pantallas medidas tardan segundos por un plan viejo y no por la app. En producción lo hace autovacuum solo.
 psql -qc "analyze" "$URL" >/dev/null 2>&1 || true

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LINEA_GRUPO, type Acceso, type Grupo, type Seccion } from "@/lib/panel/secciones";
+import type { BloqueMenu } from "@/lib/panel/organizacion";
 import { pedirVivo } from "@/lib/panel/vivo-cliente";
 import { EVENTO_PENDIENTES, ROJOS, hayAlgo, hayRojo, numeroDe, textoNumero, type Pendientes } from "@/lib/panel/pendientes";
 import { EVENTO_COBRO_HECHO } from "./cobrar/evento";
@@ -30,6 +31,8 @@ type Props = {
   puedeCobrar?: boolean;
   /** Desde la dirección de la plataforma: volver a elegir gimnasio (y al super admin). */
   cambiarGimnasio?: boolean;
+  /** Pase 2.0 · organización (llave pase_2_organizacion): el menú en bloques. Sin esto, el menú de siempre. */
+  bloques?: BloqueMenu[];
 };
 
 const activa = (actual: string, ruta: string) => (ruta === "/panel" ? actual === "/panel" : actual === ruta || actual.startsWith(`${ruta}/`));
@@ -62,7 +65,75 @@ function Item({ s, actual, alElegir, n = 0 }: { s: Pick<Seccion, "ruta" | "emoji
   );
 }
 
+/** Pase 2.0 · organización: el número de un bloque es la suma de los de sus pestañas; rojo si alguna es roja. */
+const numeroBloque = (p: Pendientes | null, b: BloqueMenu) => b.secciones.reduce((n, c) => n + numeroDe(p, c), 0);
+const claveNumero = (p: Pendientes | null, b: BloqueMenu) => b.secciones.find((c) => ROJOS.has(c) && numeroDe(p, c) > 0) ?? b.clave;
+const bloqueActivo = (actual: string, b: BloqueMenu) => b.rutas.some((r) => activa(actual, r));
+
+function MenuBloques({ bloques, grupos, actual, alElegir, pendientes }: { bloques: BloqueMenu[]; grupos: Grupo[]; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
+  return (
+    <nav aria-label="Secciones" className="space-y-6" data-menu-bloques>
+      <Item s={{ ruta: "/panel", emoji: "inicio", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
+      {grupos.map((g) => {
+        const items = bloques.filter((b) => b.grupo === g);
+        if (!items.length) return null;
+        return (
+          <div key={g} data-grupo={g}>
+            <p className="titulo-grupo px-3 mb-1.5">{g}</p>
+            <div className="space-y-0.5">
+              {items.map((b) => {
+                const on = bloqueActivo(actual, b);
+                const n = numeroBloque(pendientes, b);
+                return (
+                  <Link key={b.clave} href={b.ruta} onClick={alElegir} aria-current={on ? "page" : undefined} data-bloque-menu={b.clave}
+                    className={`flex items-center gap-3 rounded-[var(--radio)] px-3 min-h-12 py-2 transition-colors ${on ? "bg-[var(--tarjeta-alta)]" : "hover:bg-[var(--tarjeta)]"}`}>
+                    <span className={`text-xl w-7 text-center ${on ? "text-[var(--acento)]" : "texto-suave"}`} aria-hidden><Icono nombre={b.emoji} sistema /></span>
+                    <span className="min-w-0">
+                      <span className={`block font-semibold leading-tight ${on ? "" : "text-[var(--texto)]"}`}>{b.titulo}</span>
+                      <span className="block text-[13px] texto-tenue leading-snug" data-linea-bloque>{b.linea}</span>
+                    </span>
+                    <Numero clave={claveNumero(pendientes, b)} n={n} />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+      <div className="space-y-0.5"><Item s={{ ruta: "/panel/ayuda", emoji: "ayuda", titulo: "Ayuda", descripcion: "Preguntas cortas y cómo se hace" }} actual={actual} alElegir={alElegir} /></div>
+    </nav>
+  );
+}
+
+/** Pase 2.0 · organización: "Más" en el celular, los cuatro bloques en grilla de botones grandes (organizacion/celular-mas.png). */
+function MasEnBloques({ bloques, grupos, alElegir, pendientes }: { bloques: BloqueMenu[]; grupos: Grupo[]; alElegir: () => void; pendientes: Pendientes | null }) {
+  return (
+    <nav aria-label="Más" className="space-y-5" data-mas-bloques>
+      {grupos.map((g) => {
+        const items = bloques.filter((b) => b.grupo === g);
+        if (!items.length) return null;
+        return (
+          <div key={g} data-grupo={g}>
+            <p className="titulo-grupo mb-2">{g}</p>
+            <div className="grid grid-cols-3 gap-2.5">
+              {items.map((b) => (
+                <Link key={b.clave} href={b.ruta} onClick={alElegir} data-bloque-mas={b.clave}
+                  className="tarjeta relative flex flex-col items-center justify-center gap-1.5 min-h-24 px-2 py-3 text-center font-semibold leading-tight">
+                  <span className="text-3xl" aria-hidden><Icono nombre={b.emoji} sistema /></span>
+                  <span className="text-[15px]">{b.corto ?? b.titulo}</span>
+                  {numeroBloque(pendientes, b) > 0 && <span className="absolute top-2 right-2"><Numero clave={claveNumero(pendientes, b)} n={numeroBloque(pendientes, b)} /></span>}
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
 function Menu({ props, actual, alElegir, pendientes }: { props: Props; actual: string; alElegir?: () => void; pendientes: Pendientes | null }) {
+  if (props.bloques) return <MenuBloques bloques={props.bloques} grupos={props.grupos} actual={actual} alElegir={alElegir} pendientes={pendientes} />;
   return (
     <nav aria-label="Secciones" className="space-y-6">
       <Item s={{ ruta: "/panel", emoji: "inicio", titulo: "Inicio" }} actual={actual} alElegir={alElegir} />
@@ -180,14 +251,17 @@ export function Navegacion(props: Props) {
       <nav aria-label="Principales" className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[var(--borde)] bg-[var(--fondo)] pb-[env(safe-area-inset-bottom)]">
         <ul className="grid grid-cols-5">
           {props.principales.map((a) => {
-            const on = activa(actual, a.ruta);
+            const delBloque = props.bloques?.find((b) => b.ruta === a.ruta);
+            const on = delBloque ? bloqueActivo(actual, delBloque) : activa(actual, a.ruta);
+            const punto = delBloque ? numeroBloque(pendientes, delBloque) > 0 : numeroDe(pendientes, a.clave) > 0;
+            const rojo = delBloque ? claveNumero(pendientes, delBloque) !== delBloque.clave : ROJOS.has(a.clave);
             return (
               <li key={a.clave}>
                 <Link href={a.ruta} aria-current={on ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-0.5 h-16 text-[12px] font-semibold ${on ? "" : "texto-tenue"}`}>
                   <span className={`relative text-2xl ${on ? "" : "opacity-80"}`} aria-hidden>
                     <Icono nombre={a.emoji} sistema />
-                    {numeroDe(pendientes, a.clave) > 0 && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: ROJOS.has(a.clave) ? "var(--rojo)" : "var(--texto-tenue)" }} />}
+                    {punto && <span className="absolute -top-1 -right-2 size-2.5 rounded-full" style={{ background: rojo ? "var(--rojo)" : "var(--texto-tenue)" }} />}
                   </span>
                   {a.corto ?? a.titulo}
                 </Link>
@@ -208,10 +282,12 @@ export function Navegacion(props: Props) {
       {abierto && (
         <div className="hoja lg:hidden fixed inset-0 z-40 bg-[var(--fondo)] overflow-y-auto px-4 pt-4 pb-24" role="dialog" aria-modal="true" aria-label="Menú">
           <div className="flex items-center justify-between mb-6">
-            <p className="titulo text-2xl">Menú</p>
+            <p className="titulo text-2xl">{props.bloques ? "Más" : "Menú"}</p>
             <button type="button" onClick={() => setAbierto(false)} className="boton !min-h-11 !px-4" aria-label="Cerrar menú"><Icono nombre="cerrar" /></button>
           </div>
-          <Menu props={props} actual={actual} alElegir={() => { porEnlace.current = true; setAbierto(false); }} pendientes={pendientes} />
+          {props.bloques
+            ? <MasEnBloques bloques={props.bloques} grupos={props.grupos} alElegir={() => { porEnlace.current = true; setAbierto(false); }} pendientes={pendientes} />
+            : <Menu props={props} actual={actual} alElegir={() => { porEnlace.current = true; setAbierto(false); }} pendientes={pendientes} />}
           <div className="mt-8 space-y-3">
             <Link href="/panel/cuenta" onClick={() => { porEnlace.current = true; setAbierto(false); }} className="block px-3 text-sm hover:underline"><Icono nombre="persona" /> <span className="font-semibold">{props.persona}</span> <span className="texto-tenue">· {props.rol}</span></Link>
             {props.cambiarGimnasio && <Link href="/elegir" className="boton w-full !justify-start text-[15px]"><Icono nombre="repetir" /> Cambiar de gimnasio</Link>}

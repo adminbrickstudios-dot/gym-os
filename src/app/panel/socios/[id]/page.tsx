@@ -8,7 +8,9 @@ import { VolverAlOrigen } from "@/components/panel/VolverAlOrigen";
 import { colorVar, PildoraEstado, PuntoEstado } from "@/components/panel/Estado";
 import { fechaCorta, formatearCelular, formatearPesos } from "@/lib/formato";
 import { intentar } from "@/lib/panel/intentar";
-import { contextoPanel, exigirRol, exigirSeccion, rpc } from "@/lib/panel/servidor";
+import { contextoPanel, exigirRol, exigirSeccion, lectura, rpc, rpcLote } from "@/lib/panel/servidor";
+import { headers } from "next/headers";
+import { FichaNumeros, type Historia, type NumerosFicha } from "@/components/panel/organizacion/FichaNumeros";
 import { BorrarDatos, CambiarPlan, DarDeBaja, PedidoBaja, VolverADarDeAlta } from "./Acciones";
 import { FilaVenta } from "@/components/panel/Venta";
 import type { Venta } from "@/app/panel/ventas-acciones";
@@ -73,6 +75,11 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
     const pPlanFamiliar: Promise<PlanFamiliar | null> = panel.yo.rol !== "profe" ? rpc<PlanFamiliar>("plan_familiar_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
     // N4: el canal por el que se anotó (solo si el gimnasio prendió la función; si no, la base devuelve null).
     const pCanal: Promise<string | null> = panel.yo.rol !== "profe" ? rpc<string | null>("origen_alta_socio", { p_socio_id: id }).catch(() => null) : Promise.resolve(null);
+    // Pase 2.0 · organización (ficha-socio.png): con la llave, los números, Cuándo viene y Su historia, en UN viaje aparte (tolerante: si falla, no se muestra).
+    const conOrganizacion = (await headers()).get("x-gimnasio-organizacion") === "si" && pestana === "resumen" && panel.yo.rol !== "profe";
+    const pOrganizacion = conOrganizacion
+      ? rpcLote(lectura<NumerosFicha | null>("numeros_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }, true), lectura<Historia | null>("historia_socio", { p_gimnasio_id: panel.gimnasio.id, p_socio_id: id }, true)).catch(() => [null, null] as const)
+      : Promise.resolve([null, null] as const);
     const [f, planes, asistencia, ne, foto, fotoEstado, familia, pausas, apto, origen, llavero, ventas, convenio, convenios, faltas, turnos, horariosTurno, pedidoBaja, riesgo, primerMes, documentos, grados] = await Promise.all([
       rpc<Ficha>("ficha_socio", { p_socio_id: id }),
       rpc<Plan[]>("planes_gimnasio", { p_gimnasio_id: panel.gimnasio.id }),
@@ -107,6 +114,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
       pestana === "resumen" && !panel.secciones_apagadas.includes("clases") ? rpc<GradosSocio>("grados_socio", { p_socio_id: id }) : Promise.resolve([] as GradosSocio),
     ]);
     const mensajesFicha = await pMensajes;
+    const [numerosOrg, historiaOrg] = await pOrganizacion;
     const planFamiliar = await pPlanFamiliar;
     const zona = panel.gimnasio.zona_horaria;
     const { socio: s, acceso: v } = f;
@@ -239,6 +247,7 @@ export default async function FichaSocio({ params, searchParams }: { params: Pro
             </p>
           )}
         </header>
+        {conOrganizacion && <FichaNumeros n={numerosOrg} historia={historiaOrg} zona={zona} />}
 
         <Pestanas etiqueta="Partes de la ficha" activa={pestana}
           pestanas={PESTANAS.filter((p) => p.clave !== "pagos" || f.pagos).map((p) => ({ ...p, href: `/panel/socios/${s.id}?pestana=${p.clave}` }))} />

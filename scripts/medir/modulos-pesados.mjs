@@ -93,7 +93,7 @@ import("node:zlib").then(({ gzipSync }) => {
     if (!r) { console.log(`| ${ruta} | — | — | — |`); continue; }
     const gz = r.firstLoadChunkPaths.map(norm).reduce((a, c) => a + (existsSync(c) ? gzipSync(readFileSync(c)).length : 0), 0);
     console.log(`| ${ruta} | ${(r.firstLoadUncompressedJsBytes / 1024).toFixed(1)} | ${(gz / 1024).toFixed(1)} | ${r.firstLoadChunkPaths.length} |`);
-    if (TOPES && TOPES[ruta] != null && gz / 1024 > TOPES[ruta]) pasados.push(`${ruta}: ${(gz / 1024).toFixed(1)} KB gzip (tope ${TOPES[ruta]})`);
+    if (TOPES && TOPES[ruta] != null && +(gz / 1024).toFixed(1) > TOPES[ruta]) pasados.push(`${ruta}: ${(gz / 1024).toFixed(1)} KB gzip (tope ${TOPES[ruta]})`);
   }
   if (pasados.length) { console.log(`
 ::error::JS de primera carga por encima del tope (scripts/medir/topes-js.json): ${pasados.join(" · ")}`); process.exitCode = 1; }

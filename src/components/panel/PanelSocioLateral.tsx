@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAtrasCierra } from "@/components/ui/useAtrasCierra";
-import { fichaRapida } from "@/app/panel/entrada/ventana-acciones";
+import { fichaRapida, type NumerosSocio } from "@/app/panel/entrada/ventana-acciones";
+import { fechaHumanaCorta } from "./organizacion/fechas";
 import type { Ficha } from "@/app/panel/socios/[id]/tipos";
 import { fechaHoraHumana, formatearPesos } from "@/lib/formato";
 import { colorVar } from "./Estado";
@@ -38,6 +39,7 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
   const [datosDePago, setDatosDePago] = useState(false);
   const [notas, setNotas] = useState<string[]>([]);
   const [etiquetas, setEtiquetas] = useState<string[]>([]);
+  const [numeros, setNumeros] = useState<NumerosSocio | null>(null);
   const [error, setError] = useState<string | null>(null);
   const cerrarBtn = useRef<HTMLButtonElement>(null);
   const router = useRouter();
@@ -55,7 +57,7 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
   useEffect(() => {
     if (!socioId) return;
     let vivo = true;
-    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); setDatosDePago(!!r.datosDePago); setNotas(r.notas ?? []); setEtiquetas(r.etiquetas ?? []); } });
+    fichaRapida(socioId).then((r) => { if (!vivo) return; if (r.error || !r.ficha) setError(r.error ?? "No se pudo traer la ficha."); else { setFicha(r.ficha); setPuedeCobrar(!!r.puedeCobrar); setDatosDePago(!!r.datosDePago); setNotas(r.notas ?? []); setEtiquetas(r.etiquetas ?? []); setNumeros(r.numeros ?? null); } });
     cerrarBtn.current?.focus();
     const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") { setSocioId(null); setTimeout(soltar, 80); } };
     window.addEventListener("keydown", tecla);
@@ -127,6 +129,14 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
             {puedeCobrar && !vigente && (
               <button type="button" data-panel-socio-dejar-pasar className="boton w-full" onClick={() => { const id = socioId; setSocioId(null); window.dispatchEvent(new CustomEvent(EVENTO_ABRIR_SOCIO, { detail: { socio_id: id, numero: ficha.socio.numero, nombre: `${ficha.socio.nombre} ${ficha.socio.apellido}`, color: a.color, texto: a.texto, puede: a.puede, dado_de_baja: false } })); }}>Dejar pasar igual…</button>
             )}
+            {numeros && (
+              // Pase 2.0 · organización (ver-sin-entrar.png): este mes, última vez y semanas seguidas.
+              <dl className="grid grid-cols-3 gap-2" data-panel-socio-numeros>
+                <div className="tarjeta p-3"><dd className="numero text-3xl">{numeros.veces_mes}</dd><dt className="texto-suave text-sm">este mes</dt></div>
+                <div className="tarjeta p-3"><dd className="numero text-3xl">{fechaHumanaCorta(numeros.ultima_vez, zona)}</dd><dt className="texto-suave text-sm">última vez</dt></div>
+                <div className="tarjeta p-3"><dd className="numero text-3xl">{numeros.semanas_seguidas}</dd><dt className="texto-suave text-sm">semanas seguidas</dt></div>
+              </dl>
+            )}
             <section aria-label="Último pago">
               <h3 className="titulo text-lg">Último pago</h3>
               {ultimo ? <p data-panel-socio-ultimo-pago>{dia(ultimo.fecha)} · {formatearPesos(ultimo.monto)} · {nombreMedio(ultimo.medio)}</p> : <p className="texto-tenue">{ficha.pagos == null ? "No tenés permiso para ver los pagos." : "Todavía no pagó."}</p>}
@@ -145,7 +155,7 @@ export function PanelSocioLateral({ sedeId, zona }: { sedeId: string; zona?: str
               )}
             </section>
             <div className="flex flex-wrap gap-2">
-              <Link className="boton" href={`/panel/socios/${ficha.socio.id}`} onClick={() => setSocioId(null)}>Ver la ficha completa</Link>
+              <Link className="boton" href={`/panel/socios/${ficha.socio.id}`} onClick={() => setSocioId(null)} data-ficha-completa>Ver la ficha completa</Link>
               {tel && <a className="boton" href={`https://wa.me/${tel}`} target="_blank" rel="noreferrer">WhatsApp</a>}
             </div>
           </>
