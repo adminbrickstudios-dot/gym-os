@@ -6686,12 +6686,12 @@ isOneToOne: false
                            },
 "gimnasio_por_host":
 { Args: { "p_host": string }; Returns: {
-              "color_acento": string,"color_fondo": string,"estilo": string,"favicon_path": string,"gimnasio_id": string,"logo_path": string,"modo": string,"nombre": string,"semaforo": boolean,"slug": string,"zona_horaria": string
+              "color_acento": string,"color_fondo": string,"estilo": string,"favicon_path": string,"gimnasio_id": string,"logo_path": string,"modo": string,"nombre": string,"organizacion": boolean,"semaforo": boolean,"slug": string,"zona_horaria": string
             }[]
                            },
 "gimnasio_por_slug":
 { Args: { "p_slug": string }; Returns: {
-              "color_acento": string,"color_fondo": string,"estilo": string,"favicon_path": string,"gimnasio_id": string,"host": string,"logo_path": string,"modo": string,"nombre": string,"semaforo": boolean,"slug": string,"zona_horaria": string
+              "color_acento": string,"color_fondo": string,"estilo": string,"favicon_path": string,"gimnasio_id": string,"host": string,"logo_path": string,"modo": string,"nombre": string,"organizacion": boolean,"semaforo": boolean,"slug": string,"zona_horaria": string
             }[]
                            },
 "grados_panel":
@@ -6963,6 +6963,9 @@ isOneToOne: false
                            },
 "hilo_mensajes":
 { Args: { "p_hilo_id": string }; Returns: Json
+                           },
+"historia_socio":
+{ Args: { "p_gimnasio_id": string,"p_limite"?: number,"p_socio_id": string }; Returns: Json
                            },
 "historial_caja":
 { Args: { "p_limite"?: number,"p_sede_id": string }; Returns: Json
@@ -7304,6 +7307,9 @@ isOneToOne: false
 { Args: { "p_gimnasio_id": string }; Returns: Json
                            },
 "novedades_socio":
+{ Args: { "p_socio_id": string }; Returns: Json
+                           },
+"numeros_fila_socio":
 { Args: { "p_socio_id": string }; Returns: Json
                            },
 "numeros_inicio":
